@@ -1946,4 +1946,67 @@ public class CalciteSelectQueryTest extends BaseCalciteQueryTest
                 .build()),
         ImmutableList.of(new Object[] {0L}));
   }
+
+  @Test
+  public void test81a ()
+  {
+    cannotVectorize();
+    testQuery(
+//        "select * from druid.foo where (dim2 = 10.1 and dim3='a')  is true\n"
+//        "select * from druid.foo where (dim2 = 10.1 and dim3='a')  is not false\n"
+//        "select * from druid.foo where (dim2 != 10.1 and dim3!='a')  is not false\n"
+         "select dim2,dim3 from druid.foo limit 10\n"
+//        + ""
+//        "select * from druid.foo where dim3 is null and dim2 is null \n"
+//        + "select * from foo1 where (dim1 = 10.1 and dim2='a')  is not false\n"
+        + "",
+        ImmutableList.of(
+            Druids.newTimeseriesQueryBuilder()
+                .dataSource(InlineDataSource.fromIterable(
+                    ImmutableList.of(),
+                    RowSignature.builder().add("$f1", ColumnType.LONG).build()))
+                .intervals(querySegmentSpec(Filtration.eternity()))
+                .granularity(Granularities.ALL)
+                .aggregators(aggregators(
+                    new FilteredAggregatorFactory(
+                        new CountAggregatorFactory("a0"), expressionFilter("\"$f1\""))))
+                .context(QUERY_CONTEXT_DEFAULT)
+                .build()),
+        ImmutableList.of(new Object[] {0L}));
+  }
+  @Test
+  public void test81 ()
+  {
+    cannotVectorize();
+    testQuery(
+        "SELECT\n"
+        + "*\n"
+        + "FROM druid.foo AS t\n"
+        + "WHERE "
+        + ""
+        + " MV_OVERLAP(\n"
+        + "        CAST(\n"
+        + "            COALESCE(LOOKUP(dim3,'lookyloo'),'_other') AS VARCHAR\n"
+        + "        ),\n"
+        + "        ARRAY['_other','Arts and Entertainment',\n"
+        + "        'Food and Beverage>Recipes','Arts and Entertainment>Celebrities',\n"
+        + "        'Travel','Home and Garden'])\n"
+        + "\n"
+//        + "group by 1 limit 10\n"
+        + "\n"
+        + "",
+        ImmutableList.of(
+            Druids.newTimeseriesQueryBuilder()
+                .dataSource(InlineDataSource.fromIterable(
+                    ImmutableList.of(),
+                    RowSignature.builder().add("$f1", ColumnType.LONG).build()))
+                .intervals(querySegmentSpec(Filtration.eternity()))
+                .granularity(Granularities.ALL)
+                .aggregators(aggregators(
+                    new FilteredAggregatorFactory(
+                        new CountAggregatorFactory("a0"), expressionFilter("\"$f1\""))))
+                .context(QUERY_CONTEXT_DEFAULT)
+                .build()),
+        ImmutableList.of(new Object[] {0L}));
+  }
 }
