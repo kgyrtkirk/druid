@@ -158,6 +158,17 @@ SqlNode DruidJoinTable(SqlNode e) :
             null);
     }
 |
+    <COMMA> { joinType = JoinType.COMMA.symbol(getPos()); }
+    e2 = UnNestRef() {
+        return new SqlJoin(joinType.getParserPosition(),
+            e,
+            SqlLiteral.createBoolean(false, joinType.getParserPosition()),
+            joinType,
+            e2,
+            JoinConditionType.NONE.symbol(SqlParserPos.ZERO),
+            null);
+    }
+|
     <OUTER> { joinType = JoinType.LEFT.symbol(getPos()); } <APPLY>
     e2 = DruidTableRef2(true) {
         if (!this.conformance.isApplyAllowed()) {
@@ -204,6 +215,25 @@ SqlNode DruidTableRef2(boolean lateral) :
     e = DruidTableRef3(ExprContext.ACCEPT_QUERY, lateral) { return e; }
 }
 
+SqlNode UnNestRef() :
+{
+    final Span s;
+    SqlNodeList args;
+    SqlUnnestOperator unnestOp = SqlStdOperatorTable.UNNEST;
+}
+{
+        <UNNEST> { s = span(); }
+        args = ParenthesizedQueryOrCommaList(ExprContext.ACCEPT_SUB_QUERY)
+        [
+            <WITH> <ORDINALITY> {
+                unnestOp = SqlStdOperatorTable.UNNEST_WITH_ORDINALITY;
+            }
+        ]
+        {
+            return unnestOp.createCall(s.end(this), (List<SqlNode>) args);
+        }
+}
+
 SqlNode DruidTableRef3(ExprContext exprContext, boolean lateral) :
 {
     final SqlIdentifier tableName;
@@ -240,16 +270,7 @@ SqlNode DruidTableRef3(ExprContext exprContext, boolean lateral) :
         tableRef = addLateral(tableRef, lateral)
         [ tableRef = MatchRecognize(tableRef) ]
     |
-        <UNNEST> { s = span(); }
-        args = ParenthesizedQueryOrCommaList(ExprContext.ACCEPT_SUB_QUERY)
-        [
-            <WITH> <ORDINALITY> {
-                unnestOp = SqlStdOperatorTable.UNNEST_WITH_ORDINALITY;
-            }
-        ]
-        {
-            tableRef = unnestOp.createCall(s.end(this), (List<SqlNode>) args);
-        }
+    	tableRef = UnNestRef()
     |
         [ <LATERAL> { lateral = true; } ]
         tableRef = TableFunctionCall()
