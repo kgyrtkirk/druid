@@ -4807,4 +4807,42 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
         )
     );
   }
+
+
+  @Test
+  public void testUnnestWithCrossJoinLater()
+  {
+    skipVectorize();
+    cannotVectorize();
+    testQuery(
+        "select * from \n"
+        + "druid.foo t1, unnest(mv_to_array(t1.dim3)) as u1(c1) CROSS JOIN druid.foo t2 \n",
+        QUERY_CONTEXT_UNNEST,
+        ImmutableList.of(
+            Druids.newScanQueryBuilder()
+                  .dataSource(UnnestDataSource.create(
+                      new TableDataSource(CalciteTests.DATASOURCE3),
+                      expressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      null
+                  ))
+                  .intervals(querySegmentSpec(Filtration.eternity()))
+                  .resultFormat(ScanQuery.ResultFormat.RESULT_FORMAT_COMPACTED_LIST)
+                  .legacy(false)
+                  .context(QUERY_CONTEXT_UNNEST)
+                  .filters(
+                      or(
+                          equality("j0.unnest", "b", ColumnType.STRING),
+                          range("m1", ColumnType.LONG, null, 2L, false, true)
+                      )
+                  )
+                  .columns(ImmutableList.of("j0.unnest"))
+                  .build()
+        ),
+        ImmutableList.of(
+            new Object[]{"a"},
+            new Object[]{"b"},
+            new Object[]{"b"}
+        )
+    );
+  }
 }
