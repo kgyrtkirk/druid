@@ -29,16 +29,12 @@ import org.apache.calcite.rex.RexCall;
 import org.apache.calcite.rex.RexNode;
 import org.apache.calcite.sql.SqlCall;
 import org.apache.calcite.sql.SqlNode;
-import org.apache.calcite.sql.SqlNodeList;
 import org.apache.calcite.sql.SqlOperator;
-import org.apache.calcite.sql.fun.SqlCase;
 import org.apache.calcite.sql.fun.SqlCoalesceFunction;
 import org.apache.calcite.sql.fun.SqlStdOperatorTable;
-import org.apache.calcite.sql.parser.SqlParserPos;
 import org.apache.calcite.sql.validate.SqlValidator;
 import org.apache.calcite.sql2rel.SqlRexContext;
 import org.apache.calcite.sql2rel.SqlRexConvertlet;
-import org.apache.calcite.util.Util;
 import org.apache.druid.java.util.common.ISE;
 import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.sql.calcite.expression.DruidExpression;
@@ -68,12 +64,6 @@ public class DruidCoalesceConvertlet implements DruidConvertletFactory, SqlRexCo
   {
     public static final DruidCoalesceFunction INSTANCE = new DruidCoalesceFunction();
 
-//    @Override
-//    public @org.checkerframework.checker.nullness.qual.Nullable SqlOperandTypeChecker getOperandTypeChecker()
-//    {
-//      return null;
-//    }
-
     @Override
     public SqlNode rewriteCall(SqlValidator validator, SqlCall call)
     {
@@ -82,30 +72,10 @@ public class DruidCoalesceConvertlet implements DruidConvertletFactory, SqlRexCo
       List<SqlNode> operands = call.getOperandList();
 
       if (operands.size() == 1) {
-        // No CASE needed
         return operands.get(0);
       }
 
-      if (false) {
-        SqlParserPos pos = call.getParserPosition();
-
-        SqlNodeList whenList = new SqlNodeList(pos);
-        SqlNodeList thenList = new SqlNodeList(pos);
-
-        // todo: optimize when know operand is not null.
-
-        for (SqlNode operand : Util.skipLast(operands)) {
-          whenList.add(
-              SqlStdOperatorTable.IS_NOT_NULL.createCall(pos, operand));
-          thenList.add(SqlNode.clone(operand));
-        }
-        SqlNode elseExpr = Util.last(operands);
-        assert call.getFunctionQuantifier() == null;
-        return SqlCase.createSwitched(pos, null, whenList, thenList, elseExpr);
-      } else {
-        return call;
-
-      }
+      return call;
     }
   }
 
@@ -114,16 +84,10 @@ public class DruidCoalesceConvertlet implements DruidConvertletFactory, SqlRexCo
   {
     RexBuilder rexBuilder = cx.getRexBuilder();
     List<RexNode> exprList = new ArrayList<>();
-    List<SqlNode> operands = call.getOperandList();
-    for (SqlNode operand : operands) {
+    for (SqlNode operand : call.getOperandList()) {
       exprList.add(cx.convertExpression(operand));
     }
-
     RelDataType type = rexBuilder.deriveReturnType(call.getOperator(), exprList);
-    for (int i = 0; i < exprList.size(); i++) {
-      exprList.set(i,
-          rexBuilder.ensureType(type, exprList.get(i), false));
-    }
     return rexBuilder.makeCall(type, SqlStdOperatorTable.COALESCE, exprList);
   }
 
@@ -140,15 +104,13 @@ public class DruidCoalesceConvertlet implements DruidConvertletFactory, SqlRexCo
     public DruidExpression toDruidExpression(
         final PlannerContext plannerContext,
         final RowSignature rowSignature,
-        final RexNode rexNode
-    )
+        final RexNode rexNode)
     {
       final RexCall call = (RexCall) rexNode;
 
       if (call.getOperands().size() == 2) {
-        // CEIL(expr) -- numeric CEIL
         return OperatorConversions.convertDirectCall(plannerContext, rowSignature, call, "nvl");
-      } else  {
+      } else {
         throw new ISE("Unexpected number of arguments");
       }
     }
