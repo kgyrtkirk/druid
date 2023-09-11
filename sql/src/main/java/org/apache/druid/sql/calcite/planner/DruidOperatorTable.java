@@ -25,6 +25,7 @@ import com.google.inject.Inject;
 import org.apache.calcite.sql.SqlAggFunction;
 import org.apache.calcite.sql.SqlFunctionCategory;
 import org.apache.calcite.sql.SqlIdentifier;
+import org.apache.calcite.sql.SqlKind;
 import org.apache.calcite.sql.SqlOperator;
 import org.apache.calcite.sql.SqlOperatorTable;
 import org.apache.calcite.sql.SqlSyntax;
@@ -124,6 +125,7 @@ import org.apache.druid.sql.calcite.expression.builtin.TimeShiftOperatorConversi
 import org.apache.druid.sql.calcite.expression.builtin.TimestampToMillisOperatorConversion;
 import org.apache.druid.sql.calcite.expression.builtin.TrimOperatorConversion;
 import org.apache.druid.sql.calcite.expression.builtin.TruncateOperatorConversion;
+import org.apache.druid.sql.calcite.planner.convertlet.DruidCoalesceConvertlet;
 import org.apache.druid.sql.calcite.planner.convertlet.DruidConvertletTable;
 
 import javax.annotation.Nullable;
@@ -343,7 +345,7 @@ public class DruidOperatorTable implements SqlOperatorTable
       ImmutableList.<SqlOperatorConversion>builder()
                    .add(new DirectOperatorConversion(SqlStdOperatorTable.ABS, "abs"))
                    .add(new CaseOperatorConversion())
-//                   .add(new DruidCoalesceConvertlet.CoalesceOperatorConversion())
+                   .add(new DruidCoalesceConvertlet.CoalesceOperatorConversion())
                    .add(new DirectOperatorConversion(SqlStdOperatorTable.CHAR_LENGTH, "strlen"))
                    .add(CHARACTER_LENGTH_CONVERSION)
                    .add(new AliasedOperatorConversion(CHARACTER_LENGTH_CONVERSION, "LENGTH"))
@@ -503,7 +505,9 @@ public class DruidOperatorTable implements SqlOperatorTable
 
     final SqlOperatorConversion operatorConversion = operatorConversions.get(operatorKey);
     if (operatorConversion != null) {
-      operatorList.add(operatorConversion.calciteOperator());
+      if(operatorConversion.calciteOperator().kind != SqlKind.COALESCE) {
+        operatorList.add(operatorConversion.calciteOperator());
+      }
     }
 
     final SqlOperator convertletOperator = CONVERTLET_OPERATORS.get(operatorKey);

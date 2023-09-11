@@ -132,7 +132,7 @@ public class DruidCoalesceConvertlet implements DruidConvertletFactory, SqlRexCo
     @Override
     public SqlOperator calciteOperator()
     {
-      return DruidCoalesceFunction.INSTANCE;
+      return SqlStdOperatorTable.COALESCE;
     }
 
     @Override
