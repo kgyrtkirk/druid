@@ -20,6 +20,7 @@
 package org.apache.druid.sql.calcite.planner.convertlet;
 
 import com.google.common.collect.ImmutableList;
+
 import org.apache.calcite.sql.SqlCall;
 import org.apache.calcite.sql.SqlKind;
 import org.apache.calcite.sql.SqlOperator;
@@ -46,6 +47,7 @@ public class DruidConvertletTable implements SqlRexConvertletTable
                    .add(CurrentTimestampAndFriendsConvertletFactory.INSTANCE)
                    .add(TimeInIntervalConvertletFactory.INSTANCE)
                    .add(NestedDataOperatorConversions.DRUID_JSON_VALUE_CONVERTLET_FACTORY_INSTANCE)
+                   .add(DruidCoalesceConvertlet.CONVERTLET_INSTANCE)
                    .build();
 
   // Operators we don't have standard conversions for, but which can be converted into ones that do by
@@ -65,7 +67,9 @@ public class DruidConvertletTable implements SqlRexConvertletTable
                    .add(SqlStdOperatorTable.UNION)
                    .add(SqlStdOperatorTable.UNION_ALL)
                    .add(SqlStdOperatorTable.NULLIF)
-                   .add(SqlStdOperatorTable.COALESCE)
+//                   .add(DruidCoalesceFunction.INSTANCE)
+//                   .add(SqlStdOperatorTable.COALESCE)
+//                   .add(SqlLibraryOperators.NVL.withName("COALESCE"))
                    .add(SqlLibraryOperators.NVL)
                    .build();
 
@@ -114,4 +118,6 @@ public class DruidConvertletTable implements SqlRexConvertletTable
 
     return table;
   }
+
+
 }
