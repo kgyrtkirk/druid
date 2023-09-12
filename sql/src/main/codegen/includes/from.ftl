@@ -158,9 +158,8 @@ SqlNode DruidJoinTable(SqlNode e) :
             null);
     }
 |
-    LOOKAHEAD( <COMMA> <UNNEST> )
     <COMMA> { joinType = JoinType.COMMA.symbol(getPos()); }
-    e2 = TableRef3(ExprContext.ACCEPT_QUERY, true) {
+	e2 = UnNestTableRef() {
         return new SqlJoin(joinType.getParserPosition(),
             e,
             SqlLiteral.createBoolean(false, joinType.getParserPosition()),
@@ -235,6 +234,68 @@ SqlNode UnNestRef() :
         }
 }
 
+SqlNode UnNestTableRef() : 
+{
+    SqlNode tableRef;
+}
+{
+	tableRef = UnNestRef()
+	tableRef = TableRefDecor(tableRef)
+	{ return tableRef; }
+}
+
+
+SqlNode TableRefDecor(SqlNode tableRef) :
+{
+    final SqlIdentifier tableName;
+    SqlNode tableRef1;
+    List<SqlNode> paramList;
+    final SqlIdentifier alias;
+    final Span s;
+    SqlNodeList args;
+    final SqlNodeList columnAliasList;
+    SqlUnnestOperator unnestOp = SqlStdOperatorTable.UNNEST;
+    SqlNodeList extendList = null;
+}
+{
+    [
+        LOOKAHEAD(2)
+        tableRef = Pivot(tableRef)
+    ]
+    [
+        LOOKAHEAD(2)
+        tableRef = Unpivot(tableRef)
+    ]
+    [
+        [ <AS> ] alias = SimpleIdentifier()
+        (
+            columnAliasList = ParenthesizedSimpleIdentifierList()
+        |   { columnAliasList = null; }
+        )
+        {
+            // Standard SQL (and Postgres) allow applying "AS alias" to a JOIN,
+            // e.g. "FROM (a CROSS JOIN b) AS c". The new alias obscures the
+            // internal aliases, and columns cannot be referenced if they are
+            // not unique. TODO: Support this behavior; see
+            // [CALCITE-5168] Allow AS after parenthesized JOIN
+            checkNotJoin(tableRef);
+            if (columnAliasList == null) {
+                tableRef = SqlStdOperatorTable.AS.createCall(
+                    Span.of(tableRef).end(this), tableRef, alias);
+            } else {
+                List<SqlNode> idList = new ArrayList<SqlNode>();
+                idList.add(tableRef);
+                idList.add(alias);
+                idList.addAll(columnAliasList.getList());
+                tableRef = SqlStdOperatorTable.AS.createCall(
+                    Span.of(tableRef).end(this), idList);
+            }
+        }
+    ]
+    [ tableRef = Tablesample(tableRef) ]
+    { return tableRef; }
+}
+
 SqlNode DruidTableRef3(ExprContext exprContext, boolean lateral) :
 {
     final SqlIdentifier tableName;
@@ -289,41 +350,7 @@ SqlNode DruidTableRef3(ExprContext exprContext, boolean lateral) :
     |
         tableRef = ExtendedTableRef()
     )
-    [
-        LOOKAHEAD(2)
-        tableRef = Pivot(tableRef)
-    ]
-    [
-        LOOKAHEAD(2)
-        tableRef = Unpivot(tableRef)
-    ]
-    [
-        [ <AS> ] alias = SimpleIdentifier()
-        (
-            columnAliasList = ParenthesizedSimpleIdentifierList()
-        |   { columnAliasList = null; }
-        )
-        {
-            // Standard SQL (and Postgres) allow applying "AS alias" to a JOIN,
-            // e.g. "FROM (a CROSS JOIN b) AS c". The new alias obscures the
-            // internal aliases, and columns cannot be referenced if they are
-            // not unique. TODO: Support this behavior; see
-            // [CALCITE-5168] Allow AS after parenthesized JOIN
-            checkNotJoin(tableRef);
-            if (columnAliasList == null) {
-                tableRef = SqlStdOperatorTable.AS.createCall(
-                    Span.of(tableRef).end(this), tableRef, alias);
-            } else {
-                List<SqlNode> idList = new ArrayList<SqlNode>();
-                idList.add(tableRef);
-                idList.add(alias);
-                idList.addAll(columnAliasList.getList());
-                tableRef = SqlStdOperatorTable.AS.createCall(
-                    Span.of(tableRef).end(this), idList);
-            }
-        }
-    ]
-    [ tableRef = Tablesample(tableRef) ]
+    tableRef = TableRefDecor(tableRef)
     { return tableRef; }
 }
 
