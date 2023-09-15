@@ -311,19 +311,19 @@ public class DecoupledPlanningCalciteQueryTest extends CalciteQueryTest
 
   }
 
-  @Override
-  @Ignore
-  public void testNestedGroupBy()
-  {
-
-  }
-
-  @Override
-  @Ignore
-  public void testQueryWithSelectProjectAndIdentityProjectDoesNotRename()
-  {
-
-  }
+//  @Override
+//  @Ignore
+//  public void testNestedGroupBy()
+//  {
+//
+//  }
+//
+//  @Override
+//  @Ignore
+//  public void testQueryWithSelectProjectAndIdentityProjectDoesNotRename()
+//  {
+//
+//  }
 
   @Override
   @Ignore
