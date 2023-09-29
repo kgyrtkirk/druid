@@ -142,7 +142,7 @@ public class ScalarLongColumnAndIndexSupplier implements Supplier<NestedCommonFo
         throw new RE(ex, "Failed to deserialize V%s column.", version);
       }
     } else {
-      throw new RE("Unknown version " + version);
+      throw new RE("Unknown version V%s", version);
     }
   }
 

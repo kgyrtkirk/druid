@@ -311,7 +311,7 @@ public class SuperSorter
     activeProcessors -= 1;
 
     if (log.isDebugEnabled()) {
-      log.debug(stateString());
+      log.debug("%s", stateString());
     }
 
     runWorkersIfPossible();
@@ -343,7 +343,7 @@ public class SuperSorter
         activeProcessors += 1;
 
         if (log.isDebugEnabled()) {
-          log.debug(stateString());
+          log.debug("%s", stateString());
         }
       }
 
@@ -801,7 +801,7 @@ public class SuperSorter
     }
 
     if (log.isDebugEnabled()) {
-      log.debug(stateString());
+      log.debug("%s", stateString());
     }
 
     outputsReadyByLevel.clear();

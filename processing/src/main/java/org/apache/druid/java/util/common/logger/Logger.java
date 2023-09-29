@@ -21,6 +21,8 @@ package org.apache.druid.java.util.common.logger;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import com.google.errorprone.annotations.FormatMethod;
+import com.google.errorprone.annotations.FormatString;
 import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.timeline.DataSegment;
 import org.apache.druid.timeline.SegmentId;
@@ -28,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.Marker;
 
 import javax.annotation.Nullable;
+
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.function.BiConsumer;
@@ -111,55 +114,63 @@ public class Logger
     return noStackTraceLogger;
   }
 
-  public void trace(String message, Object... formatArgs)
+  @FormatMethod
+  public void trace(@FormatString final String message, Object... formatArgs)
   {
     if (log.isTraceEnabled()) {
       log.trace(StringUtils.nonStrictFormat(message, formatArgs));
     }
   }
 
-  public void trace(Marker marker, String message, Object... formatArgs)
+  @FormatMethod
+  public void trace(Marker marker, @FormatString final String message, Object... formatArgs)
   {
     if (log.isTraceEnabled()) {
       log.trace(marker, StringUtils.nonStrictFormat(message, formatArgs));
     }
   }
 
-  public void debug(String message, Object... formatArgs)
+  @FormatMethod
+  public void debug(@FormatString final String message, Object... formatArgs)
   {
     if (log.isDebugEnabled()) {
       log.debug(StringUtils.nonStrictFormat(message, formatArgs));
     }
   }
 
-  public void debug(Marker marker, String message, Object... formatArgs)
+  @FormatMethod
+  public void debug(Marker marker, @FormatString final String message, Object... formatArgs)
   {
     if (log.isDebugEnabled()) {
       log.debug(marker, StringUtils.nonStrictFormat(message, formatArgs));
     }
   }
-  public void debug(Throwable t, String message, Object... formatArgs)
+  @FormatMethod
+  public void debug(Throwable t, @FormatString final String message, Object... formatArgs)
   {
     if (log.isDebugEnabled()) {
       logException(log::debug, t, StringUtils.nonStrictFormat(message, formatArgs));
     }
   }
 
-  public void info(String message, Object... formatArgs)
+  @FormatMethod
+  public void info(@FormatString final String message, Object... formatArgs)
   {
     if (log.isInfoEnabled()) {
       log.info(StringUtils.nonStrictFormat(message, formatArgs));
     }
   }
 
-  public void info(Marker marker, String message, Object... formatArgs)
+  @FormatMethod
+  public void info(Marker marker, @FormatString final String message, Object... formatArgs)
   {
     if (log.isInfoEnabled()) {
       log.info(marker, StringUtils.nonStrictFormat(message, formatArgs));
     }
   }
 
-  public void info(Throwable t, String message, Object... formatArgs)
+  @FormatMethod
+  public void info(Throwable t, @FormatString final String message, Object... formatArgs)
   {
     if (log.isInfoEnabled()) {
       logException(log::info, t, StringUtils.nonStrictFormat(message, formatArgs));
@@ -178,27 +189,32 @@ public class Logger
     warn(t, message);
   }
 
-  public void warn(String message, Object... formatArgs)
+  @FormatMethod
+  public void warn(@FormatString final String message, Object... formatArgs)
   {
     log.warn(StringUtils.nonStrictFormat(message, formatArgs));
   }
 
-  public void warn(Marker marker, String message, Object... formatArgs)
+  @FormatMethod
+  public void warn(Marker marker, @FormatString final String message, Object... formatArgs)
   {
     log.warn(marker, StringUtils.nonStrictFormat(message, formatArgs));
   }
 
-  public void warn(Throwable t, String message, Object... formatArgs)
+  @FormatMethod
+  public void warn(Throwable t, @FormatString final String message, Object... formatArgs)
   {
     logException(log::warn, t, StringUtils.nonStrictFormat(message, formatArgs));
   }
 
-  public void error(String message, Object... formatArgs)
+  @FormatMethod
+  public void error(@FormatString final String message, Object... formatArgs)
   {
     log.error(StringUtils.nonStrictFormat(message, formatArgs));
   }
 
-  public void error(Marker marker, String message, Object... formatArgs)
+  @FormatMethod
+  public void error(Marker marker, @FormatString final String message, Object... formatArgs)
   {
     log.error(marker, StringUtils.nonStrictFormat(message, formatArgs));
   }
@@ -215,12 +231,14 @@ public class Logger
     error(t, message);
   }
 
-  public void error(Throwable t, String message, Object... formatArgs)
+  @FormatMethod
+  public void error(Throwable t, @FormatString final String message, Object... formatArgs)
   {
     logException(log::error, t, StringUtils.nonStrictFormat(message, formatArgs));
   }
 
-  public void assertionError(String message, Object... formatArgs)
+  @FormatMethod
+  public void assertionError(@FormatString final String message, Object... formatArgs)
   {
     log.error("ASSERTION_ERROR: " + message, formatArgs);
   }
@@ -359,6 +377,7 @@ public class Logger
   @FunctionalInterface
   public interface LogFunction
   {
-    void log(String msg, Object... format);
+    @FormatMethod
+    void log(@FormatString String msg, Object... format);
   }
 }

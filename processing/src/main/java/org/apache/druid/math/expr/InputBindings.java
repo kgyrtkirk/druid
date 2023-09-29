@@ -70,7 +70,7 @@ public class InputBindings
       public Object get(String name)
       {
         // Sanity check. Bindings should not be used for a constant expression so explode if something tried
-        throw new UOE("Expression " + expr.stringify() + " has non-constant inputs.");
+        throw new UOE("Expression %s has non-constant inputs.", expr.stringify());
       }
 
       @Nullable
@@ -78,7 +78,7 @@ public class InputBindings
       public ExpressionType getType(String name)
       {
         // Sanity check. Bindings should not be used for a constant expression so explode if something tried
-        throw new UOE("Expression " + expr.stringify() + " has non-constant inputs.");
+        throw new UOE("Expression %s has non-constant inputs.", expr.stringify());
       }
     };
   }

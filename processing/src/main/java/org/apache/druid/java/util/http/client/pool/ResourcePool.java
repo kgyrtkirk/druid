@@ -95,7 +95,7 @@ public class ResourcePool<K, V> implements Closeable
   public ResourceContainer<V> take(final K key)
   {
     if (closed.get()) {
-      log.error(StringUtils.format("take(%s) called even though I'm closed.", key));
+      log.error("take(%s) called even though I'm closed.", key);
       return null;
     }
 

@@ -19,16 +19,22 @@
 
 package org.apache.druid.java.util.common;
 
+import com.google.errorprone.annotations.FormatMethod;
+import com.google.errorprone.annotations.FormatString;
+
 /**
  */
 public class RE extends RuntimeException
 {
-  public RE(String formatText, Object... arguments)
+
+  @FormatMethod
+  public RE(@FormatString String formatText, Object... arguments)
   {
     super(StringUtils.nonStrictFormat(formatText, arguments));
   }
 
-  public RE(Throwable cause, String formatText, Object... arguments)
+  @FormatMethod
+  public RE(Throwable cause, @FormatString String formatText, Object... arguments)
   {
     super(StringUtils.nonStrictFormat(formatText, arguments), cause);
   }

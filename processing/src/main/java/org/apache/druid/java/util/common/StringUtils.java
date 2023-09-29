@@ -20,6 +20,8 @@
 package org.apache.druid.java.util.common;
 
 import com.google.common.base.Strings;
+import com.google.errorprone.annotations.FormatMethod;
+import com.google.errorprone.annotations.FormatString;
 import it.unimi.dsi.fastutil.bytes.ByteArrayList;
 import org.apache.commons.io.IOUtils;
 
@@ -358,7 +360,8 @@ public class StringUtils
   /**
    * Equivalent of String.format(Locale.ENGLISH, message, formatArgs).
    */
-  public static String format(String message, Object... formatArgs)
+  @FormatMethod
+  public static String format(@FormatString String message, Object... formatArgs)
   {
     return String.format(Locale.ENGLISH, message, formatArgs);
   }
@@ -368,7 +371,8 @@ public class StringUtils
    * concatenated format string and format arguments. Should be used for unimportant formatting like logging,
    * exception messages, typically not directly.
    */
-  public static String nonStrictFormat(String message, Object... formatArgs)
+  @FormatMethod
+  public static String nonStrictFormat(@FormatString String message, Object... formatArgs)
   {
     if (formatArgs == null || formatArgs.length == 0) {
       return message;

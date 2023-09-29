@@ -52,10 +52,10 @@ public class BitmapOffset extends Offset
     String stopString = System.getProperty("bitmapFullnessFactorizationStops", DEFAULT_FULLNESS_FACTORIZATION_STOPS);
     String[] stopsArray = stopString.split(",");
     if (stopsArray.length == 0) {
-      throw new RE("Empty bitmapFullnessFactorizationStops: " + stopString);
+      throw new RE("Empty bitmapFullnessFactorizationStops: %s", stopString);
     }
     if (new HashSet<>(Arrays.asList(stopsArray)).size() != stopsArray.length) {
-      throw new RE("Non unique bitmapFullnessFactorizationStops: " + stopString);
+      throw new RE("Non unique bitmapFullnessFactorizationStops: %s", stopString);
     }
 
     BITMAP_FULLNESS_FACTORIZATION_STOPS = new double[stopsArray.length];
@@ -68,11 +68,11 @@ public class BitmapOffset extends Offset
 
     double firstStop = BITMAP_FULLNESS_FACTORIZATION_STOPS[0];
     if (Double.isNaN(firstStop) || firstStop <= 0.0) {
-      throw new RE("First bitmapFullnessFactorizationStop[%d] should be > 0", firstStop);
+      throw new RE("First bitmapFullnessFactorizationStop[%f] should be > 0", firstStop);
     }
     double lastStop = BITMAP_FULLNESS_FACTORIZATION_STOPS[stopsArray.length - 1];
     if (Double.isNaN(lastStop) || lastStop >= 1) {
-      throw new RE("Last bitmapFullnessFactorizationStop[%d] should be < 1", lastStop);
+      throw new RE("Last bitmapFullnessFactorizationStop[%f] should be < 1", lastStop);
     }
 
     String prevStop = "0";

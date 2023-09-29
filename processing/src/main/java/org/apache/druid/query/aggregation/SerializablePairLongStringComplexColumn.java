@@ -84,7 +84,7 @@ public class SerializablePairLongStringComplexColumn implements ComplexColumn
       closer.close();
     }
     catch (IOException e) {
-      throw new RE(e, "error closing " + getClass().getName());
+      throw new RE(e, "error closing %s", getClass().getName());
     }
   }
 

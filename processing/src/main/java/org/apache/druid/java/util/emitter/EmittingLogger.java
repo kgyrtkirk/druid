@@ -22,6 +22,8 @@ package org.apache.druid.java.util.emitter;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Maps;
+import com.google.errorprone.annotations.FormatMethod;
+import com.google.errorprone.annotations.FormatString;
 import org.apache.druid.java.util.common.ISE;
 import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.java.util.common.logger.Logger;
@@ -44,7 +46,7 @@ public class EmittingLogger extends Logger
     EmittingLogger.emitter = emitter;
   }
 
-  public EmittingLogger(Class clazz)
+  public EmittingLogger(Class<?> clazz)
   {
     super(clazz);
     this.className = clazz.getName();
@@ -62,12 +64,14 @@ public class EmittingLogger extends Logger
     return new EmittingLogger(getSlf4jLogger(), false);
   }
 
-  public AlertBuilder makeAlert(String message, Object... objects)
+  @FormatMethod
+  public AlertBuilder makeAlert(@FormatString final String message, Object... objects)
   {
     return makeAlert(null, message, objects);
   }
 
-  public AlertBuilder makeAlert(@Nullable Throwable t, String message, Object... objects)
+  @FormatMethod
+  public AlertBuilder makeAlert(@Nullable Throwable t, @FormatString final String message, Object... objects)
   {
     if (emitter == null) {
       final String errorMessage = StringUtils.format(

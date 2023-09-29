@@ -20,6 +20,8 @@
 package org.apache.druid.java.util.common;
 
 import com.google.common.base.Strings;
+import com.google.errorprone.annotations.FormatMethod;
+import com.google.errorprone.annotations.FormatString;
 import org.apache.druid.common.exception.SanitizableException;
 
 import java.util.function.Function;
@@ -28,7 +30,8 @@ import java.util.function.Function;
  */
 public class UOE extends UnsupportedOperationException implements SanitizableException
 {
-  public UOE(String formatText, Object... arguments)
+  @FormatMethod
+  public UOE(@FormatString final String formatText, Object... arguments)
   {
     super(StringUtils.nonStrictFormat(formatText, arguments));
   }

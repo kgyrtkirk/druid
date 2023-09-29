@@ -26,7 +26,7 @@ import java.net.URISyntaxException;
 
 public class FeedUriExtractor implements UriExtractor
 {
-  private String uriPattern;
+  private final String uriPattern;
 
   public FeedUriExtractor(String uriPattern)
   {

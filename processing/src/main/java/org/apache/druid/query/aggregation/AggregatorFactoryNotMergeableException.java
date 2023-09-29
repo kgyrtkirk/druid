@@ -19,6 +19,8 @@
 
 package org.apache.druid.query.aggregation;
 
+import com.google.errorprone.annotations.FormatMethod;
+import com.google.errorprone.annotations.FormatString;
 import org.apache.druid.java.util.common.StringUtils;
 
 /**
@@ -26,7 +28,8 @@ import org.apache.druid.java.util.common.StringUtils;
 public class AggregatorFactoryNotMergeableException extends Exception
 {
 
-  public AggregatorFactoryNotMergeableException(String formatText, Object... arguments)
+  @FormatMethod
+  public AggregatorFactoryNotMergeableException(@FormatString String formatText, Object... arguments)
   {
     super(StringUtils.nonStrictFormat(formatText, arguments));
   }

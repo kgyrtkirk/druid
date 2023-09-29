@@ -156,7 +156,7 @@ public class StringUtilsTest
     }
   }
 
-  @SuppressWarnings("MalformedFormatString")
+  @SuppressWarnings("MalformedFormatString,FormatStringAnnotation")
   @Test
   public void testNonStrictFormat()
   {
@@ -387,6 +387,7 @@ public class StringUtilsTest
     }
   }
 
+  @SuppressWarnings("FormatStringAnnotation")
   @Test(expected = NullPointerException.class)
   public void testNonStrictFormatWithNullMessage()
   {

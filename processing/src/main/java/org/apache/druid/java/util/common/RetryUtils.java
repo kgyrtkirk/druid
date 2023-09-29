@@ -198,9 +198,9 @@ public class RetryUtils
     }
 
     if (quiet) {
-      log.debug(e, fullMessage);
+      log.debug(e, "%s", fullMessage);
     } else {
-      log.warn(e, fullMessage);
+      log.warn(e, "%s", fullMessage);
     }
 
     Thread.sleep(sleepMillis);

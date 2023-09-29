@@ -21,9 +21,12 @@ package org.apache.druid.error;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.base.Preconditions;
+import com.google.errorprone.annotations.FormatMethod;
+import com.google.errorprone.annotations.FormatString;
 import org.apache.druid.java.util.common.StringUtils;
 
 import javax.annotation.concurrent.NotThreadSafe;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -171,7 +174,8 @@ public class DruidException extends RuntimeException
    *
    * @return A builder for a defensive exception.
    */
-  public static DruidException defensive(String format, Object... args)
+  @FormatMethod
+  public static DruidException defensive(@FormatString final String format, Object... args)
   {
     return defensive().build(format, args);
   }
@@ -275,7 +279,8 @@ public class DruidException extends RuntimeException
    * @param args Arguments to be passed to the message if it is a Java format string
    * @return a new DruidException with prepended-message
    */
-  public DruidException prependAndBuild(String msg, Object... args)
+  @FormatMethod
+  public DruidException prependAndBuild(@FormatString final String msg, Object... args)
   {
     return new DruidException(
         this,
@@ -445,12 +450,14 @@ public class DruidException extends RuntimeException
       return this;
     }
 
-    public DruidException build(String formatMe, Object... vals)
+    @FormatMethod
+    public DruidException build(@FormatString final String formatMe, Object... vals)
     {
       return build(null, formatMe, vals);
     }
 
-    public DruidException build(Throwable cause, String formatMe, Object... vals)
+    @FormatMethod
+    public DruidException build(Throwable cause, @FormatString final String formatMe, Object... vals)
     {
       return new DruidException(
           cause,

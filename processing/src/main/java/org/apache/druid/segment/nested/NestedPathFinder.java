@@ -19,10 +19,13 @@
 
 package org.apache.druid.segment.nested;
 
+import com.google.errorprone.annotations.FormatMethod;
+import com.google.errorprone.annotations.FormatString;
 import org.apache.druid.error.InvalidInput;
 import org.apache.druid.java.util.common.StringUtils;
 
 import javax.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -335,12 +338,14 @@ public class NestedPathFinder
     return path.substring(start, end);
   }
 
-  private static void badFormat(String path, String message, Object... args)
+  @FormatMethod
+  private static void badFormat(String path, @FormatString String message, Object... args)
   {
     throw InvalidInput.exception("jq path [%s] is invalid, %s", path, StringUtils.format(message, args));
   }
 
-  private static void badFormatJsonPath(String path, String message, Object... args)
+  @FormatMethod
+  private static void badFormatJsonPath(String path, @FormatString String message, Object... args)
   {
     throw InvalidInput.exception("JSONPath [%s] is invalid, %s", path, StringUtils.format(message, args));
   }

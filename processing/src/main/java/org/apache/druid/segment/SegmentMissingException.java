@@ -19,17 +19,21 @@
 
 package org.apache.druid.segment;
 
+import com.google.errorprone.annotations.FormatMethod;
+import com.google.errorprone.annotations.FormatString;
 import org.apache.druid.java.util.common.ISE;
 import org.apache.druid.java.util.common.StringUtils;
 
 public class SegmentMissingException extends ISE
 {
-  public SegmentMissingException(String formatText, Object... arguments)
+  @FormatMethod
+  public SegmentMissingException(@FormatString final String formatText, Object... arguments)
   {
     super(StringUtils.nonStrictFormat(formatText, arguments));
   }
 
-  public SegmentMissingException(Throwable cause, String formatText, Object... arguments)
+  @FormatMethod
+  public SegmentMissingException(Throwable cause, @FormatString final String formatText, Object... arguments)
   {
     super(cause, formatText, arguments);
   }
