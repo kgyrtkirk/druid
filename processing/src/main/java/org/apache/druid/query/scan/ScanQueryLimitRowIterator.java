@@ -94,7 +94,7 @@ public class ScanQueryLimitRowIterator implements CloseableIterator<ScanResultVa
   public ScanResultValue next()
   {
     if (ScanQuery.ResultFormat.RESULT_FORMAT_VALUE_VECTOR.equals(resultFormat)) {
-      throw new UOE(ScanQuery.ResultFormat.RESULT_FORMAT_VALUE_VECTOR + " is not supported yet");
+      throw new UOE("%s is not supported yet", ScanQuery.ResultFormat.RESULT_FORMAT_VALUE_VECTOR);
     }
 
     // We want to perform multi-event ScanResultValue limiting if we are not time-ordering or are at the

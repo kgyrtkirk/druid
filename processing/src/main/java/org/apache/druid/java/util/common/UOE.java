@@ -43,7 +43,7 @@ public class UOE extends UnsupportedOperationException implements SanitizableExc
     if (Strings.isNullOrEmpty(transformedErrorMessage)) {
       return new UOE("");
     } else {
-      return new UOE(transformedErrorMessage);
+      return new UOE("%s", transformedErrorMessage);
     }
   }
 }

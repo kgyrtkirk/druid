@@ -35,7 +35,7 @@ public final class IntIteratorUtils
   public static int skip(IntIterator it, int n)
   {
     if (n < 0) {
-      throw new IAE("n: " + n);
+      throw new IAE("n: %d", n);
     }
     int skipped = 0;
     while (skipped < n && it.hasNext()) {

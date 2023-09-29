@@ -19,15 +19,19 @@
 
 package org.apache.druid.error;
 
+import com.google.errorprone.annotations.FormatMethod;
+import com.google.errorprone.annotations.FormatString;
+
 public class NotFound extends DruidException.Failure
 {
-
-  public static DruidException exception(String msg, Object... args)
+  @FormatMethod
+  public static DruidException exception(@FormatString final String msg, Object... args)
   {
     return exception(null, msg, args);
   }
 
-  public static DruidException exception(Throwable t, String msg, Object... args)
+  @FormatMethod
+  public static DruidException exception(Throwable t, @FormatString final String msg, Object... args)
   {
     return DruidException.fromFailure(new NotFound(t, msg, args));
   }
@@ -36,9 +40,10 @@ public class NotFound extends DruidException.Failure
   private final String msg;
   private final Object[] args;
 
+  @FormatMethod
   public NotFound(
       Throwable t,
-      String msg,
+      @FormatString final String msg,
       Object... args
   )
   {
@@ -49,6 +54,7 @@ public class NotFound extends DruidException.Failure
   }
 
 
+  @SuppressWarnings("FormatStringAnnotation")
   @Override
   public DruidException makeException(DruidException.DruidExceptionBuilder bob)
   {
