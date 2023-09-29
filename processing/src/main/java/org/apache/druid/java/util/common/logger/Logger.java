@@ -186,7 +186,7 @@ public class Logger
   @Deprecated
   public void warn(String message, Throwable t)
   {
-    warn(t, message);
+    warn(t, "%s", message);
   }
 
   @FormatMethod
@@ -228,7 +228,7 @@ public class Logger
   @Deprecated
   public void error(String message, Throwable t)
   {
-    error(t, message);
+    error(t, "%s", message);
   }
 
   @FormatMethod
@@ -345,8 +345,6 @@ public class Logger
     if (!iterator.hasNext()) {
       return;
     }
-    final String logFormat = preamble + ": %s";
-
     int counter = 0;
     StringBuilder sb = null;
     while (iterator.hasNext()) {
@@ -363,14 +361,14 @@ public class Logger
       if (counter == 0) {
         // flush
         sb.append("]");
-        logger.log(logFormat, sb.toString());
+        logger.log("%s: %s", preamble, sb.toString());
       }
     }
 
     // check for stragglers
     if (counter > 0) {
       sb.append("]");
-      logger.log(logFormat, sb.toString());
+      logger.log("%s: %s", preamble, sb.toString());
     }
   }
 

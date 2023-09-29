@@ -440,7 +440,7 @@ public enum CompressionStrategy
    */
   private static void logLZ4State()
   {
-    LOG.debug("java.library.path: " + System.getProperty("java.library.path"));
+    LOG.debug("java.library.path: %s", System.getProperty("java.library.path"));
     LZ4Factory fastestInstance = LZ4Factory.fastestInstance();
     try {
       //noinspection ObjectEquality
