@@ -654,7 +654,7 @@ public class HyperLogLogCollectorTest
 
     int valsToCheckIndex = 0;
     HyperLogLogCollector collector = HyperLogLogCollector.makeCollector(
-        ByteBuffer.allocate(10000)
+        (ByteBuffer) ByteBuffer.allocate(10000)
                                .position(0)
                                .limit(HyperLogLogCollector.getLatestNumBytesForDenseStorage())
     );
