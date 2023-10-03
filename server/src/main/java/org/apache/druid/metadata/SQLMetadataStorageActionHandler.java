@@ -482,10 +482,10 @@ public abstract class SQLMetadataStorageActionHandler<EntryType, StatusType, Log
         + "  status_payload "
         + "FROM "
         + "  %s "
-        + "WHERE "
-        + getWhereClauseForInactiveStatusesSinceQuery(dataSource)
+        + "WHERE %s"
         + "ORDER BY created_date DESC",
-        getEntryTable()
+        getEntryTable(),
+        getWhereClauseForInactiveStatusesSinceQuery(dataSource)
     );
 
     if (maxNumStatuses != null) {
@@ -529,10 +529,10 @@ public abstract class SQLMetadataStorageActionHandler<EntryType, StatusType, Log
         + "  payload "
         + "FROM "
         + "  %s "
-        + "WHERE "
-        + getWhereClauseForInactiveStatusesSinceQuery(dataSource)
+        + "WHERE %s"
         + "ORDER BY created_date DESC",
-        getEntryTable()
+        getEntryTable(),
+        getWhereClauseForInactiveStatusesSinceQuery(dataSource)
     );
 
     if (maxNumStatuses != null) {
@@ -583,10 +583,10 @@ public abstract class SQLMetadataStorageActionHandler<EntryType, StatusType, Log
         + "  created_date "
         + "FROM "
         + "  %s "
-        + "WHERE "
-        + getWhereClauseForActiveStatusesQuery(dataSource)
+        + "WHERE %s"
         + "ORDER BY created_date",
-        entryTable
+        entryTable,
+        getWhereClauseForActiveStatusesQuery(dataSource)
     );
 
     Query<Map<String, Object>> query = handle.createQuery(sql)
@@ -617,10 +617,10 @@ public abstract class SQLMetadataStorageActionHandler<EntryType, StatusType, Log
         + "  created_date "
         + "FROM "
         + "  %s "
-        + "WHERE "
-        + getWhereClauseForActiveStatusesQuery(dataSource)
+        + "WHERE %s"
         + "ORDER BY created_date",
-        entryTable
+        entryTable,
+        getWhereClauseForActiveStatusesQuery(dataSource)
     );
 
     Query<Map<String, Object>> query = handle.createQuery(sql)

@@ -26,6 +26,8 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.google.errorprone.annotations.FormatMethod;
+import com.google.errorprone.annotations.FormatString;
 import com.google.inject.Inject;
 import org.apache.calcite.avatica.AvaticaSeverity;
 import org.apache.calcite.avatica.MetaImpl;
@@ -82,7 +84,8 @@ public class DruidMeta extends MetaImpl
    * @param <T>     any type that extends throwable
    * @return the original Throwable
    */
-  public static <T extends Throwable> T logFailure(T error, String message, Object... format)
+  @FormatMethod
+  public static <T extends Throwable> T logFailure(T error, @FormatString final String message, Object... format)
   {
     LOG.error(error, message, format);
     return error;
@@ -109,7 +112,7 @@ public class DruidMeta extends MetaImpl
           ex.getStatementHandle().id
       );
     } else {
-      logFailure(error, error.getMessage());
+      logFailure(error, "%s", error.getMessage());
     }
     return error;
   }

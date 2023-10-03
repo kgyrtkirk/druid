@@ -19,6 +19,8 @@
 
 package org.apache.druid.rpc;
 
+import com.google.errorprone.annotations.FormatMethod;
+import com.google.errorprone.annotations.FormatString;
 import org.apache.druid.java.util.common.StringUtils;
 
 import java.io.IOException;
@@ -28,12 +30,14 @@ import java.io.IOException;
  */
 public class RpcException extends IOException
 {
-  public RpcException(String formatText, Object... arguments)
+  @FormatMethod
+  public RpcException(@FormatString final String formatText, Object... arguments)
   {
     super(StringUtils.nonStrictFormat(formatText, arguments));
   }
 
-  public RpcException(Throwable cause, String formatText, Object... arguments)
+  @FormatMethod
+  public RpcException(Throwable cause, @FormatString final String formatText, Object... arguments)
   {
     super(StringUtils.nonStrictFormat(formatText, arguments), cause);
   }

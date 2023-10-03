@@ -29,7 +29,6 @@ import org.apache.calcite.runtime.Hook;
 import org.apache.calcite.util.Pair;
 import org.apache.druid.java.util.common.ISE;
 import org.apache.druid.java.util.common.Intervals;
-import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.java.util.common.UOE;
 import org.apache.druid.java.util.common.guava.Sequence;
 import org.apache.druid.java.util.common.guava.Sequences;
@@ -113,12 +112,12 @@ public class NativeQueryMaker implements QueryMaker
             if (StringComparators.NUMERIC.equals(bound.getOrdering())) {
               numBoundFilters++;
               if (numBoundFilters > numFilters) {
-                throw new UOE(StringUtils.format(
+                throw new UOE(
                     "The number of values in the IN clause for [%s] in query exceeds configured maxNumericFilter limit of [%s] for INs. Cast [%s] values of IN clause to String",
                     bound.getDimension(),
                     numFilters,
                     orDimFilter.getFields().size()
-                ));
+                );
               }
             }
           }

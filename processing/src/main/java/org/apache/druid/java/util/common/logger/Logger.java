@@ -153,11 +153,25 @@ public class Logger
     }
   }
 
+  public void debug(Throwable t, final String message)
+  {
+    if (log.isDebugEnabled()) {
+      logException(log::debug, t, message);
+    }
+  }
+
   @FormatMethod
   public void debug(Throwable t, @FormatString final String message, Object... formatArgs)
   {
     if (log.isDebugEnabled()) {
       logException(log::debug, t, StringUtils.nonStrictFormat(message, formatArgs));
+    }
+  }
+
+  public void info(final String message)
+  {
+    if (log.isInfoEnabled()) {
+      log.info(message);
     }
   }
 
@@ -174,6 +188,13 @@ public class Logger
   {
     if (log.isInfoEnabled()) {
       log.info(marker, StringUtils.nonStrictFormat(message, formatArgs));
+    }
+  }
+
+  public void info(Throwable t, final String message)
+  {
+    if (log.isInfoEnabled()) {
+      logException(log::info, t, message);
     }
   }
 
@@ -197,6 +218,11 @@ public class Logger
     warn(t, "%s", message);
   }
 
+  public void warn(final String message)
+  {
+    log.warn(message);
+  }
+
   @FormatMethod
   public void warn(@FormatString final String message, Object... formatArgs)
   {
@@ -213,6 +239,11 @@ public class Logger
   public void warn(Throwable t, @FormatString final String message, Object... formatArgs)
   {
     logException(log::warn, t, StringUtils.nonStrictFormat(message, formatArgs));
+  }
+
+  public void error(final String message)
+  {
+    log.error(message);
   }
 
   @FormatMethod

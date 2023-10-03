@@ -19,6 +19,8 @@
 
 package org.apache.druid.sql.calcite.planner;
 
+import com.google.errorprone.annotations.FormatMethod;
+import com.google.errorprone.annotations.FormatString;
 import org.apache.calcite.plan.RelOptPlanner;
 import org.apache.druid.java.util.common.StringUtils;
 
@@ -31,7 +33,8 @@ import org.apache.druid.java.util.common.StringUtils;
  */
 public class UnsupportedSQLQueryException extends RelOptPlanner.CannotPlanException
 {
-  public UnsupportedSQLQueryException(String formatText, Object... arguments)
+  @FormatMethod
+  public UnsupportedSQLQueryException(@FormatString final String formatText, Object... arguments)
   {
     super(StringUtils.nonStrictFormat(formatText, arguments));
   }

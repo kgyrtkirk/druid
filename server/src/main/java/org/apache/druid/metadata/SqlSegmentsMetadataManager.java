@@ -387,7 +387,7 @@ public class SqlSegmentsMetadataManager implements SegmentsMetadataManager
               public Void withHandle(Handle handle)
               {
                 Batch updateBatch = handle.createBatch();
-                String sql = "UPDATE %1$s SET used_status_last_updated = '%2$s' WHERE id = '%3$s'";
+                final String sql = "UPDATE %1$s SET used_status_last_updated = '%2$s' WHERE id = '%3$s'";
                 String now = DateTimes.nowUtc().toString();
                 for (String id : segmentsToUpdate) {
                   updateBatch.add(StringUtils.format(sql, segmentsTable, now, id));

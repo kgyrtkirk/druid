@@ -250,6 +250,7 @@ public class CalciteIngestionDmlTest extends BaseCalciteQueryTest
       return this;
     }
 
+    @SuppressWarnings("FormatStringAnnotation")
     protected IngestionDmlTester sql(final String sqlPattern, final Object arg, final Object... otherArgs)
     {
       final Object[] args = new Object[otherArgs.length + 1];

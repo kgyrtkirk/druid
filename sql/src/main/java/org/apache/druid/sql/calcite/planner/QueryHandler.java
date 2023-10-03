@@ -550,12 +550,12 @@ public abstract class QueryHandler extends SqlStatementHandler.BaseStatementHand
       );
       DruidQueryGenerator shuttle = new DruidQueryGenerator(plannerContext);
       newRoot.accept(shuttle);
-      log.info("PartialDruidQuery : " + shuttle.getPartialDruidQuery());
+      log.info("PartialDruidQuery : %s", shuttle.getPartialDruidQuery());
       shuttle.getQueryList().add(shuttle.getPartialDruidQuery()); // add topmost query to the list
       shuttle.getQueryTables().add(shuttle.getCurrentTable());
       assert !shuttle.getQueryList().isEmpty();
-      log.info("query list size " + shuttle.getQueryList().size());
-      log.info("query tables size " + shuttle.getQueryTables().size());
+      log.info("query list size %d", shuttle.getQueryList().size());
+      log.info("query tables size %d", shuttle.getQueryTables().size());
       // build bottom-most query
       DruidQuery baseQuery = shuttle.getQueryList().get(0).build(
           shuttle.getQueryTables().get(0).getDataSource(),
@@ -576,7 +576,7 @@ public abstract class QueryHandler extends SqlStatementHandler.BaseStatementHand
         );
       }
       try {
-        log.info("final query : " +
+        log.info("final query : %s",
                  new DefaultObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(baseQuery.getQuery()));
       }
       catch (JsonProcessingException e) {

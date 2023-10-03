@@ -23,6 +23,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
+import com.google.errorprone.annotations.FormatMethod;
+import com.google.errorprone.annotations.FormatString;
 import org.apache.calcite.DataContext;
 import org.apache.calcite.adapter.java.JavaTypeFactory;
 import org.apache.calcite.avatica.remote.TypedValue;
@@ -384,7 +386,8 @@ public class PlannerContext
    * be very different from SQL that user has written. So again, the error should be phrased to indicate this gap
    * clearly.
    */
-  public void setPlanningError(String formatText, Object... arguments)
+  @FormatMethod
+  public void setPlanningError(@FormatString final String formatText, Object... arguments)
   {
     planningError = StringUtils.nonStrictFormat(formatText, arguments);
   }

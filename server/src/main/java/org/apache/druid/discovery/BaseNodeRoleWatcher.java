@@ -21,6 +21,8 @@ package org.apache.druid.discovery;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.google.errorprone.annotations.FormatMethod;
+import com.google.errorprone.annotations.FormatString;
 import com.google.errorprone.annotations.concurrent.GuardedBy;
 import org.apache.druid.java.util.common.logger.Logger;
 
@@ -80,7 +82,7 @@ public class BaseNodeRoleWatcher
   {
     boolean nodeViewInitialized;
     try {
-      nodeViewInitialized = cacheInitialized.await((long) 30, TimeUnit.SECONDS);
+      nodeViewInitialized = cacheInitialized.await(30, TimeUnit.SECONDS);
     }
     catch (InterruptedException ex) {
       Thread.currentThread().interrupt();
@@ -290,7 +292,8 @@ public class BaseNodeRoleWatcher
     }
   }
 
-  private void safeSchedule(Runnable runnable, String errMsgFormat, Object... args)
+  @FormatMethod
+  private void safeSchedule(Runnable runnable, @FormatString final String errMsgFormat, Object... args)
   {
     listenerExecutor.submit(() -> {
       try {

@@ -31,6 +31,8 @@ import com.google.common.collect.Lists;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
 import com.google.common.io.BaseEncoding;
+import com.google.errorprone.annotations.FormatMethod;
+import com.google.errorprone.annotations.FormatString;
 import com.google.inject.Inject;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.druid.indexing.overlord.DataSourceMetadata;
@@ -174,7 +176,7 @@ public class IndexerSQLMetadataStorageCoordinator implements IndexerMetadataStor
   @Override
   public List<Pair<DataSegment, String>> retrieveUsedSegmentsAndCreatedDates(String dataSource)
   {
-    String rawQueryString = "SELECT created_date, payload FROM %1$s WHERE dataSource = :dataSource AND used = true";
+    final String rawQueryString = "SELECT created_date, payload FROM %1$s WHERE dataSource = :dataSource AND used = true";
     final String queryString = StringUtils.format(rawQueryString, dbTables.getSegmentsTable());
     return connector.retryWithHandle(
         handle -> {
@@ -2388,12 +2390,12 @@ public class IndexerSQLMetadataStorageCoordinator implements IndexerMetadataStor
 
     public static final DataStoreMetadataUpdateResult SUCCESS = new DataStoreMetadataUpdateResult(false, false, null);
 
-    DataStoreMetadataUpdateResult(boolean failed, boolean canRetry, @Nullable String errorMsg, Object... errorFormatArgs)
+    @FormatMethod
+    DataStoreMetadataUpdateResult(boolean failed, boolean canRetry, @FormatString final String errorMsg, Object... errorFormatArgs)
     {
       this.failed = failed;
       this.canRetry = canRetry;
       this.errorMsg = null == errorMsg ? null : StringUtils.format(errorMsg, errorFormatArgs);
-
     }
 
     public boolean isFailed()

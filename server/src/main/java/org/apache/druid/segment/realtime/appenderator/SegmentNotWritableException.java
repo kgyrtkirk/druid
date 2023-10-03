@@ -19,11 +19,14 @@
 
 package org.apache.druid.segment.realtime.appenderator;
 
+import com.google.errorprone.annotations.FormatMethod;
+import com.google.errorprone.annotations.FormatString;
 import org.apache.druid.java.util.common.StringUtils;
 
 public class SegmentNotWritableException extends Exception
 {
-  public SegmentNotWritableException(String message, Object... messageArgs)
+  @FormatMethod
+  public SegmentNotWritableException(@FormatString final String message, Object... messageArgs)
   {
     super(StringUtils.nonStrictFormat(message, messageArgs));
   }

@@ -100,7 +100,7 @@ public class HyperLogLogCollectorTest
    *
    * It compares adding all the values to one HLL vs.
    * splitting up values into HLLs of 100 values each, and folding those HLLs into a single main HLL.
-   * 
+   *
    * When reaching very large cardinalities (>> 50,000,000), offsets are mismatched between the main HLL and the ones
    * with 100 values, requiring  a floating max as described in
    * https://druid.apache.org/blog/2014/02/18/hyperloglog-optimizations-for-real-world-systems.html
@@ -132,9 +132,9 @@ public class HyperLogLogCollectorTest
 
     int n = count;
 
-    log.info("True cardinality " + n);
-    log.info("Rolling buffer cardinality " + rolling.estimateCardinality());
-    log.info("Simple  buffer cardinality " + simple.estimateCardinality());
+    log.info("True cardinality %d", n);
+    log.info("Rolling buffer cardinality %lf", rolling.estimateCardinality());
+    log.info("Simple  buffer cardinality %lf", simple.estimateCardinality());
     log.info("Rolling cardinality estimate off by %4.1f%%", 100 * (1 - rolling.estimateCardinality() / n));
 
     Assert.assertEquals(n, simple.estimateCardinality(), n * 0.05);
@@ -158,8 +158,8 @@ public class HyperLogLogCollectorTest
 
     int n = count;
 
-    log.info("True cardinality " + n);
-    log.info("Rolling buffer cardinality " + rolling.estimateCardinality());
+    log.info("True cardinality %d", n);
+    log.info("Rolling buffer cardinality %lf", rolling.estimateCardinality());
     log.info("Rolling cardinality estimate off by %4.1f%%", 100 * (1 - rolling.estimateCardinality() / n));
 
     Assert.assertEquals(n, rolling.estimateCardinality(), n * 0.05);
@@ -654,7 +654,7 @@ public class HyperLogLogCollectorTest
 
     int valsToCheckIndex = 0;
     HyperLogLogCollector collector = HyperLogLogCollector.makeCollector(
-        (ByteBuffer) ByteBuffer.allocate(10000)
+        ByteBuffer.allocate(10000)
                                .position(0)
                                .limit(HyperLogLogCollector.getLatestNumBytesForDenseStorage())
     );
@@ -919,7 +919,7 @@ public class HyperLogLogCollectorTest
   private double computeError(double error, int count, int numThings, long startTime, HyperLogLogCollector collector)
   {
     final double estimatedValue = collector.estimateCardinality();
-    final double errorThisTime = Math.abs((double) numThings - estimatedValue) / numThings;
+    final double errorThisTime = Math.abs(numThings - estimatedValue) / numThings;
 
     error += errorThisTime;
 
