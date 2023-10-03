@@ -40,7 +40,7 @@ public class LoggerTest
 {
   private final Logger log = new Logger(LoggerTest.class);
 
-  @SuppressWarnings("MalformedFormatString")
+  @SuppressWarnings({"MalformedFormatString", "FormatStringAnnotation"})
   @Test
   public void testLogWithCrazyMessages()
   {
@@ -109,6 +109,7 @@ public class LoggerTest
   }
 
 
+  @SuppressWarnings("FormatStringAnnotation")
   @Test
   public void testLogSegmentsMany()
   {
@@ -135,6 +136,7 @@ public class LoggerTest
     Assert.assertEquals(expected, log.getName());
   }
 
+  @SuppressWarnings({"FormatStringAnnotation"})
   private Logger.LogFunction getLogToListFunction(List<String> messages)
   {
     return (msg, format) -> messages.add(StringUtils.format(msg, format));

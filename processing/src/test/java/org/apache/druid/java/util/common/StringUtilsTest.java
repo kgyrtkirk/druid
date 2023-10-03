@@ -156,7 +156,7 @@ public class StringUtilsTest
     }
   }
 
-  @SuppressWarnings("MalformedFormatString,FormatStringAnnotation")
+  @SuppressWarnings({"MalformedFormatString", "FormatStringAnnotation"})
   @Test
   public void testNonStrictFormat()
   {
