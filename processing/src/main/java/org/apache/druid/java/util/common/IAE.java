@@ -26,6 +26,11 @@ import com.google.errorprone.annotations.FormatString;
  */
 public class IAE extends IllegalArgumentException
 {
+  public IAE(String message)
+  {
+    super(message);
+  }
+
   @FormatMethod
   public IAE(@FormatString final String formatText, Object... arguments)
   {

@@ -450,6 +450,11 @@ public class DruidException extends RuntimeException
       return this;
     }
 
+    public DruidException build(final String message)
+    {
+      return build("%s", message);
+    }
+
     @FormatMethod
     public DruidException build(@FormatString final String formatMe, Object... vals)
     {

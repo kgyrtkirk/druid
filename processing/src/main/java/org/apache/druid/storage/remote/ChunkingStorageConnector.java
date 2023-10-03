@@ -193,7 +193,7 @@ public abstract class ChunkingStorageConnector<T> implements StorageConnector
               };
             }
             catch (FileNotFoundException e) {
-              throw new RE(e, StringUtils.format("Unable to find temp file [%s]", outFile));
+              throw new RE(e, "Unable to find temp file [%s]", outFile);
             }
           }
         }

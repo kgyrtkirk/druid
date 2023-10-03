@@ -31,6 +31,7 @@ import org.asynchttpclient.Response;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.nio.charset.StandardCharsets;
@@ -99,6 +100,44 @@ public class ParametrizedUriEmitterTest
           public ListenableFuture<Response> go(Request request) throws JsonProcessingException
           {
             Assert.assertEquals("http://example.com/test", request.getUrl());
+            Assert.assertEquals(
+                StringUtils.format(
+                    "[%s,%s]\n",
+                    JSON_MAPPER.writeValueAsString(events.get(0)),
+                    JSON_MAPPER.writeValueAsString(events.get(1))
+                ),
+                StandardCharsets.UTF_8.decode(request.getByteBufferData().slice()).toString()
+            );
+
+            return GoHandlers.immediateFuture(EmitterTest.okResponse());
+          }
+        }.times(1)
+    );
+
+    for (UnitEvent event : events) {
+      emitter.emit(event);
+    }
+    emitter.flush();
+    Assert.assertTrue(httpClient.succeeded());
+  }
+
+  @Test
+  @Ignore("multiple {feed} occurances should not cause exceptions")
+  public void testEmitterWithFeedUriExtractorMultiple() throws Exception
+  {
+    Emitter emitter = parametrizedEmmiter("http://example.com/{feed}/{feed}");
+    final List<UnitEvent> events = Arrays.asList(
+        new UnitEvent("test", 1),
+        new UnitEvent("test", 2)
+    );
+
+    httpClient.setGoHandler(
+        new GoHandler()
+        {
+          @Override
+          public ListenableFuture<Response> go(Request request) throws JsonProcessingException
+          {
+            Assert.assertEquals("http://example.com/test/test", request.getUrl());
             Assert.assertEquals(
                 StringUtils.format(
                     "[%s,%s]\n",

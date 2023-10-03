@@ -20,6 +20,8 @@
 package org.apache.druid.common.utils;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.errorprone.annotations.FormatMethod;
+import com.google.errorprone.annotations.FormatString;
 import org.apache.druid.java.util.common.StringUtils;
 
 import javax.annotation.Nullable;
@@ -45,7 +47,8 @@ public class ServletResourceUtils
   /**
    * Converts String errorMsg into a Map so that it produces valid json on serialization into response.
    */
-  public static Map<String, String> jsonize(String msgFormat, Object... args)
+  @FormatMethod
+  public static Map<String, String> jsonize(@FormatString String msgFormat, Object... args)
   {
     return ImmutableMap.of("error", StringUtils.nonStrictFormat(msgFormat, args));
   }

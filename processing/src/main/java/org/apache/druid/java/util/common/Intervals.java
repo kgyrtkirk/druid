@@ -20,6 +20,8 @@
 package org.apache.druid.java.util.common;
 
 import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.FormatMethod;
+import com.google.errorprone.annotations.FormatString;
 import org.apache.druid.java.util.common.guava.Comparators;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
@@ -42,7 +44,8 @@ public final class Intervals
     return new Interval(interval, ISOChronology.getInstanceUTC());
   }
 
-  public static Interval of(String format, Object... formatArgs)
+  @FormatMethod
+  public static Interval of(@FormatString String format, Object... formatArgs)
   {
     return of(StringUtils.format(format, formatArgs));
   }

@@ -138,6 +138,13 @@ public class Logger
     }
   }
 
+  public void debug(Marker marker, final String message)
+  {
+    if (log.isDebugEnabled()) {
+      log.debug(marker, message);
+    }
+  }
+
   @FormatMethod
   public void debug(Marker marker, @FormatString final String message, Object... formatArgs)
   {
@@ -145,6 +152,7 @@ public class Logger
       log.debug(marker, StringUtils.nonStrictFormat(message, formatArgs));
     }
   }
+
   @FormatMethod
   public void debug(Throwable t, @FormatString final String message, Object... formatArgs)
   {

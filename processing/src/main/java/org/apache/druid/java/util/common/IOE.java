@@ -19,18 +19,28 @@
 
 package org.apache.druid.java.util.common;
 
+import com.google.errorprone.annotations.FormatMethod;
+import com.google.errorprone.annotations.FormatString;
+
 import java.io.IOException;
 
 /**
  */
 public class IOE extends IOException
 {
-  public IOE(String formatText, Object... arguments)
+  public IOE(String formatText)
+  {
+    super(formatText);
+  }
+
+  @FormatMethod
+  public IOE(@FormatString String formatText, Object... arguments)
   {
     super(StringUtils.nonStrictFormat(formatText, arguments));
   }
 
-  public IOE(Throwable cause, String formatText, Object... arguments)
+  @FormatMethod
+  public IOE(Throwable cause, @FormatString String formatText, Object... arguments)
   {
     super(StringUtils.nonStrictFormat(formatText, arguments), cause);
   }

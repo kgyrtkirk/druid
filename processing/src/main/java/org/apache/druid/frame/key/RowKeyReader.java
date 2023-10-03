@@ -138,7 +138,7 @@ public class RowKeyReader
     final RowSignature.Builder newSignature = RowSignature.builder();
 
     if (trimmedFieldCount > signature.size()) {
-      throw new IAE("Cannot trim to [%,d] fields, only have [%,d] fields", trimmedFieldCount, signature);
+      throw new IAE("Cannot trim to [%d] fields, only have [%d] fields", trimmedFieldCount, signature.size());
     }
 
     for (int i = 0; i < trimmedFieldCount; i++) {
@@ -163,7 +163,7 @@ public class RowKeyReader
       return key;
     } else {
       if (trimmedFieldCount > rowReader.fieldCount()) {
-        throw new IAE("Cannot trim to [%,d] fields, only have [%,d] fields", trimmedFieldCount, rowReader.fieldCount());
+        throw new IAE("Cannot trim to [%d] fields, only have [%d] fields", trimmedFieldCount, rowReader.fieldCount());
       }
 
       final byte[] keyBytes = key.array();
