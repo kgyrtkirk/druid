@@ -133,8 +133,8 @@ public class HyperLogLogCollectorTest
     int n = count;
 
     log.info("True cardinality %d", n);
-    log.info("Rolling buffer cardinality %lf", rolling.estimateCardinality());
-    log.info("Simple  buffer cardinality %lf", simple.estimateCardinality());
+    log.info("Rolling buffer cardinality %f", rolling.estimateCardinality());
+    log.info("Simple  buffer cardinality %f", simple.estimateCardinality());
     log.info("Rolling cardinality estimate off by %4.1f%%", 100 * (1 - rolling.estimateCardinality() / n));
 
     Assert.assertEquals(n, simple.estimateCardinality(), n * 0.05);
@@ -159,7 +159,7 @@ public class HyperLogLogCollectorTest
     int n = count;
 
     log.info("True cardinality %d", n);
-    log.info("Rolling buffer cardinality %lf", rolling.estimateCardinality());
+    log.info("Rolling buffer cardinality %f", rolling.estimateCardinality());
     log.info("Rolling cardinality estimate off by %4.1f%%", 100 * (1 - rolling.estimateCardinality() / n));
 
     Assert.assertEquals(n, rolling.estimateCardinality(), n * 0.05);
