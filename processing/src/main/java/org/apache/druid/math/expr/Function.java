@@ -2641,6 +2641,7 @@ public interface Function extends NamedFunction
     }
 
     @Override
+    @SuppressWarnings("FormatStringAnnotation")
     public ExprEval apply(List<Expr> args, Expr.ObjectBinding bindings)
     {
       final String formatString = NullHandling.nullToEmptyIfNeeded(args.get(0).eval(bindings).asString());

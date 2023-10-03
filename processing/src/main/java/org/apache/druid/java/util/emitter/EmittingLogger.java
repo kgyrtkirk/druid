@@ -111,7 +111,7 @@ public class EmittingLogger extends Logger
     @Override
     public void emit()
     {
-      logIt("%s: %s");
+      logIt("");
 
       emitted = true;
 
@@ -122,20 +122,21 @@ public class EmittingLogger extends Logger
     protected void finalize()
     {
       if (!emitted) {
-        logIt("Alert not emitted, emitting. %s: %s");
+        logIt("Alert not emitted, emitting. ");
         super.emit();
       }
     }
 
-    private void logIt(String format)
+    private void logIt(String prefix)
     {
       if (t == null) {
-        error(format, description, dataMap);
+        error("%s%s: %s", prefix, description, dataMap);
       } else {
         // Filter out the stack trace from the message, because it should be in the logline already if it's wanted.
         error(
             t,
-            format,
+            "%s%s: %s",
+            prefix,
             description,
             Maps.filterKeys(dataMap, Predicates.not(Predicates.equalTo("exceptionStackTrace")))
         );

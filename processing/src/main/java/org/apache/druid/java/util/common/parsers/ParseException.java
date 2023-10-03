@@ -19,6 +19,8 @@
 
 package org.apache.druid.java.util.common.parsers;
 
+import com.google.errorprone.annotations.FormatMethod;
+import com.google.errorprone.annotations.FormatString;
 import org.apache.druid.java.util.common.StringUtils;
 
 import javax.annotation.Nullable;
@@ -55,22 +57,29 @@ public class ParseException extends RuntimeException
    */
   private final String input;
 
-  public ParseException(@Nullable String input, String formatText, Object... arguments)
+  @FormatMethod
+  public ParseException(@Nullable String input, @FormatString final String formatText, Object... arguments)
   {
     this(input, false, formatText, arguments);
   }
 
-  public ParseException(@Nullable String input, boolean fromPartiallyValidRow, String formatText, Object... arguments)
+  @FormatMethod
+  public ParseException(@Nullable String input, boolean fromPartiallyValidRow, @FormatString final String formatText,
+      Object... arguments)
   {
     this(input, fromPartiallyValidRow, null, formatText, arguments);
   }
 
-  public ParseException(@Nullable String input, Throwable cause, String formatText, Object... arguments)
+  @FormatMethod
+  public ParseException(@Nullable String input, Throwable cause, @FormatString final String formatText,
+      Object... arguments)
   {
     this(input, false, cause, formatText, arguments);
   }
 
-  public ParseException(@Nullable String input, boolean fromPartiallyValidRow, Throwable cause, String formatText, Object... arguments)
+  @FormatMethod
+  public ParseException(@Nullable String input, boolean fromPartiallyValidRow, Throwable cause,
+      @FormatString final String formatText, Object... arguments)
   {
     super(StringUtils.nonStrictFormat(formatText, arguments), cause);
     this.input = input;

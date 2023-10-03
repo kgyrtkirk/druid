@@ -45,6 +45,7 @@ import java.util.function.Supplier;
  * this is not a replacement for correctness tests, but will ensure that vectorized and non-vectorized expression
  * evaluation is at least self-consistent...
  */
+@SuppressWarnings("FormatStringAnnotation")
 public class VectorExprSanityTest extends InitializedNullHandlingTest
 {
   private static final Logger log = new Logger(VectorExprSanityTest.class);

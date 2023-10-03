@@ -168,7 +168,7 @@ public abstract class ChunkingStorageConnector<T> implements StorageConnector
               );
             }
             catch (IOException e) {
-              throw new RE(e, StringUtils.format("Unable to copy [%s] to [%s]", params.getCloudStoragePath(), outFile));
+              throw new RE(e, "Unable to copy [%s] to [%s]", params.getCloudStoragePath(), outFile);
             }
 
             try {

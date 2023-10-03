@@ -29,7 +29,7 @@ public class AggregatorFactoryNotMergeableException extends Exception
 {
 
   @FormatMethod
-  public AggregatorFactoryNotMergeableException(@FormatString String formatText, Object... arguments)
+  public AggregatorFactoryNotMergeableException(@FormatString final String formatText, Object... arguments)
   {
     super(StringUtils.nonStrictFormat(formatText, arguments));
   }

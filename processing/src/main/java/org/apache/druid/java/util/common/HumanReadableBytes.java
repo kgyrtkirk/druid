@@ -21,6 +21,7 @@ package org.apache.druid.java.util.common;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+@SuppressWarnings("FormatStringAnnotation")
 @JsonSerialize(using = HumanReadableBytesSerializer.class)
 public class HumanReadableBytes
 {

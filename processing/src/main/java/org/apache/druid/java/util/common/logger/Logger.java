@@ -239,6 +239,11 @@ public class Logger
     error(t, "%s", message);
   }
 
+  public void error(Throwable t, String message)
+  {
+    logException(log::error, t, message);
+  }
+
   @FormatMethod
   public void error(Throwable t, @FormatString final String message, Object... formatArgs)
   {

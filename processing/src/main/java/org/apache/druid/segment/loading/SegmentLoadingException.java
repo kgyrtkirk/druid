@@ -19,6 +19,8 @@
 
 package org.apache.druid.segment.loading;
 
+import com.google.errorprone.annotations.FormatMethod;
+import com.google.errorprone.annotations.FormatString;
 import org.apache.druid.guice.annotations.PublicApi;
 import org.apache.druid.java.util.common.StringUtils;
 
@@ -27,17 +29,19 @@ import org.apache.druid.java.util.common.StringUtils;
 @PublicApi
 public class SegmentLoadingException extends Exception
 {
+  @FormatMethod
   public SegmentLoadingException(
-      String formatString,
+      @FormatString final String formatString,
       Object... objs
   )
   {
     super(StringUtils.nonStrictFormat(formatString, objs));
   }
 
+  @FormatMethod
   public SegmentLoadingException(
       Throwable cause,
-      String formatString,
+      @FormatString final String formatString,
       Object... objs
   )
   {

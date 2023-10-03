@@ -27,6 +27,11 @@ import com.google.errorprone.annotations.FormatString;
 public class RE extends RuntimeException
 {
 
+  public RE(String message)
+  {
+    super(message);
+  }
+
   @FormatMethod
   public RE(@FormatString String formatText, Object... arguments)
   {

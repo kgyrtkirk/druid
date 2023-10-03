@@ -19,14 +19,16 @@
 
 package org.apache.druid.segment.incremental;
 
+import com.google.errorprone.annotations.FormatMethod;
+import com.google.errorprone.annotations.FormatString;
 import org.apache.druid.java.util.common.StringUtils;
 
 import java.io.IOException;
 
 public class IndexSizeExceededException extends IOException
 {
-
-  public IndexSizeExceededException(String formatText, Object... arguments)
+  @FormatMethod
+  public IndexSizeExceededException(@FormatString final String formatText, Object... arguments)
   {
     super(StringUtils.nonStrictFormat(formatText, arguments));
   }

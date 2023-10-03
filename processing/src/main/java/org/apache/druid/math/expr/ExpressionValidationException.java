@@ -19,17 +19,21 @@
 
 package org.apache.druid.math.expr;
 
+import com.google.errorprone.annotations.FormatMethod;
+import com.google.errorprone.annotations.FormatString;
 import org.apache.druid.java.util.common.IAE;
 import org.apache.druid.java.util.common.StringUtils;
 
 public class ExpressionValidationException extends IAE
 {
-  public ExpressionValidationException(NamedFunction fn, String msg, Object... formatArgs)
+  @FormatMethod
+  public ExpressionValidationException(NamedFunction fn, @FormatString final String msg, Object... formatArgs)
   {
     super("Function[%s] %s", fn.name(), StringUtils.format(msg, formatArgs));
   }
 
-  public ExpressionValidationException(NamedFunction fn, Throwable e, String msg, Object... formatArgs)
+  @FormatMethod
+  public ExpressionValidationException(NamedFunction fn, Throwable e, @FormatString final String msg, Object... formatArgs)
   {
     super(e, "Function[%s] %s", fn.name(), StringUtils.format(msg, formatArgs));
   }
