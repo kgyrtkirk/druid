@@ -201,7 +201,7 @@ public class ServiceClientImpl implements ServiceClient
                         retVal.setException(new HttpResponseException(errorHolder));
                       } else {
                         // Nonretryable null result from the HTTP client.
-                        retVal.setException(new RpcException(buildErrorMessage(request, null, -1, nextAttemptNumber)));
+                        retVal.setException(new RpcException("%s", buildErrorMessage(request, null, -1, nextAttemptNumber)));
                       }
                     }
                   }
@@ -228,7 +228,7 @@ public class ServiceClientImpl implements ServiceClient
                           TimeUnit.MILLISECONDS
                       );
                     } else {
-                      retVal.setException(new RpcException(t, buildErrorMessage(request, null, -1, nextAttemptNumber)));
+                      retVal.setException(new RpcException(t, "%s", buildErrorMessage(request, null, -1, nextAttemptNumber)));
                     }
                   }
                   catch (Throwable t2) {

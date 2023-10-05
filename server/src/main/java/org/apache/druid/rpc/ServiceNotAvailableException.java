@@ -19,6 +19,8 @@
 
 package org.apache.druid.rpc;
 
+import com.google.errorprone.annotations.FormatMethod;
+import com.google.errorprone.annotations.FormatString;
 import org.apache.druid.java.util.common.StringUtils;
 
 /**
@@ -26,7 +28,8 @@ import org.apache.druid.java.util.common.StringUtils;
  */
 public class ServiceNotAvailableException extends RpcException
 {
-  public ServiceNotAvailableException(final String serviceName, final String reason, final Object... reasonArgs)
+  @FormatMethod
+  public ServiceNotAvailableException(final String serviceName, @FormatString final String reason, final Object... reasonArgs)
   {
     super("Service [%s] %s", serviceName, StringUtils.format(reason, reasonArgs));
   }

@@ -410,7 +410,7 @@ public class AppenderatorImpl implements Appenderator
               + "reaching this condition.",
               alertMessage
           );
-          log.makeAlert(alertMessage)
+          log.makeAlert("%s", alertMessage)
              .addData("dataSource", schema.getDataSource())
              .emit();
           throw new RuntimeException(errorMessage);
