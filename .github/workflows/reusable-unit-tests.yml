@@ -111,6 +111,15 @@ jobs:
           MAVEN_PROJECTS: ${{ inputs.maven_projects }}
         run: ./.github/scripts/unit_tests_script.sh
 
+      - name: Test Report
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Maven Tests
+          path: **/target/**/surefire-reports/TEST-*.xml
+          reporter: java-junit
+          fail-on-error: true
+
       - name: set outputs on failure
         id: set_outputs
         if: ${{ failure() }}

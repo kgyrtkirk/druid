@@ -20,7 +20,7 @@ set -e
 unset _JAVA_OPTIONS
 
 # Set MAVEN_OPTS for Surefire launcher.
-MAVEN_OPTS='-Xmx2500m' ${MVN} test -pl ${MAVEN_PROJECTS} \
+MAVEN_OPTS='-Xmx2500m' ${MVN} test -B -pl ${MAVEN_PROJECTS} -Dmaven.test.failure.ignore=true \
 ${MAVEN_SKIP} -Ddruid.generic.useDefaultValueForNull=${DRUID_USE_DEFAULT_VALUE_FOR_NULL} \
 -DjfrProfilerArgLine="${JFR_PROFILER_ARG_LINE}"
 sh -c "dmesg | egrep -i '(oom|out of memory|kill process|killed).*' -C 1 || exit 0"
