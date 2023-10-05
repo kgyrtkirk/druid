@@ -92,7 +92,7 @@ public class CalciteSelectQueryTest extends BaseCalciteQueryTest
                 .build()
         ),
         ImmutableList.of(
-            new Object[]{"f"}
+            new Object[]{"farmer"}
         )
     );
   }
@@ -101,7 +101,7 @@ public class CalciteSelectQueryTest extends BaseCalciteQueryTest
   public void testExpressionContainingNull()
   {
     testQuery(
-        "SELECT ARRAY ['Hello', NULL]",
+        "SELECT ARRAY ['Helloka', NULL]",
         ImmutableList.of(
             Druids.newScanQueryBuilder()
                 .dataSource(
