@@ -496,13 +496,11 @@ public class IndexerSQLMetadataStorageCoordinatorTest
     derbyConnector.retryWithHandle(
         handle -> {
           PreparedBatch preparedBatch = handle.prepareBatch(
-              StringUtils.format(
-                  StringUtils.format(
-                      "INSERT INTO %1$s (task_id, segment_id, lock_version) "
-                      + "VALUES (:task_id, :segment_id, :lock_version)",
-                      table
-                  )
-              )
+                StringUtils.format(
+                    "INSERT INTO %1$s (task_id, segment_id, lock_version) "
+                    + "VALUES (:task_id, :segment_id, :lock_version)",
+                    table
+                )
           );
           for (Map.Entry<DataSegment, ReplaceTaskLock> entry : segmentToTaskLockMap.entrySet()) {
             final DataSegment segment = entry.getKey();

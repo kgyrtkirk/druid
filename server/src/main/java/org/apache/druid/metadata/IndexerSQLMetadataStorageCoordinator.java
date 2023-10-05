@@ -2070,12 +2070,12 @@ public class IndexerSQLMetadataStorageCoordinator implements IndexerMetadataStor
 
     if (!startMetadataMatchesExisting) {
       // Not in the desired start state.
-      return new DataStoreMetadataUpdateResult(true, false, StringUtils.format(
+      return new DataStoreMetadataUpdateResult(true, false,
           "Inconsistent metadata state. This can happen if you update input topic in a spec without changing " +
               "the supervisor name. Stored state: [%s], Target state: [%s].",
           oldCommitMetadataFromDb,
           startMetadata
-      ));
+      );
     }
 
     // Only endOffsets should be stored in metadata store
@@ -2393,9 +2393,14 @@ public class IndexerSQLMetadataStorageCoordinator implements IndexerMetadataStor
     @FormatMethod
     DataStoreMetadataUpdateResult(boolean failed, boolean canRetry, @FormatString final String errorMsg, Object... errorFormatArgs)
     {
+      this(failed,canRetry, StringUtils.format(errorMsg, errorFormatArgs));
+    }
+
+    DataStoreMetadataUpdateResult(boolean failed, boolean canRetry, String errorMsg)
+    {
       this.failed = failed;
       this.canRetry = canRetry;
-      this.errorMsg = null == errorMsg ? null : StringUtils.format(errorMsg, errorFormatArgs);
+      this.errorMsg = errorMsg;
     }
 
     public boolean isFailed()

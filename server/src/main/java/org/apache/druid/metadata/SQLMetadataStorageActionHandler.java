@@ -989,7 +989,7 @@ public abstract class SQLMetadataStorageActionHandler<EntryType, StatusType, Log
                                    );
                                  }
                                  catch (IOException e) {
-                                   log.makeAlert(e, "Failed to deserialize " + lockType.getType())
+                                   log.makeAlert(e, "Failed to deserialize %s", lockType.getType())
                                       .addData("id", r.getLong("id"))
                                       .addData(
                                           "lockPayload", StringUtils.fromUtf8(r.getBytes("lock_payload"))
