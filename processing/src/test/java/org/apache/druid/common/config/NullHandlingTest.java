@@ -36,7 +36,7 @@ public final class NullHandlingTest extends InitializedNullHandlingTest
   public void test_defaultValueForClass_float()
   {
     assertEquals(
-        replaceWithDefault() ? 1f : 2f,
+        replaceWithDefault() ? null : 2f,
         NullHandling.defaultValueForClass(Float.class)
     );
   }
@@ -45,7 +45,7 @@ public final class NullHandlingTest extends InitializedNullHandlingTest
   public void test_defaultValueForClass_double()
   {
     assertEquals(
-        replaceWithDefault() ? 1d : 2d,
+        replaceWithDefault() ? null : 2d,
         NullHandling.defaultValueForClass(Double.class)
     );
   }
