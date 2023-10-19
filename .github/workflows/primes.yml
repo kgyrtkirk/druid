@@ -13,8 +13,10 @@ jobs:
       id: cache-primes
       uses: actions/cache@v3
       with:
-        path: prime-numbers
-        key: ${{ runner.os }}-primes
+        path: |
+          prime-numbers
+          !**/b/**
+        key: ${{ runner.os }}-primes1
 
     - name: Generate Prime Numbers
       run: |
@@ -28,5 +30,5 @@ jobs:
     - name: Generate Prime Numbers
       run: |
         mkdir -p prime-numbers
-        find .
+        find prime-numbers
         echo "end"
