@@ -22,7 +22,7 @@ jobs:
       run: |
         mkdir -p prime-numbers
         find prime-numbers
-        echo "end"
+        echo "end1"
 
     - name: Generate Prime Numbers
       run: mkdir -p prime-numbers/{a..f}/{a..f}
