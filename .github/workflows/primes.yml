@@ -17,8 +17,16 @@ jobs:
         key: ${{ runner.os }}-primes
 
     - name: Generate Prime Numbers
-      if: steps.cache-primes.outputs.cache-hit != 'true'
-      run: /generate-primes.sh -d prime-numbers
+      run: |
+        mkdir -p prime-numbers
+        find .
+        echo "end"
 
-    - name: Use Prime Numbers
-      run: /primes.sh -d prime-numbers
+    - name: Generate Prime Numbers
+      run: mkdir -p prime-numbers/{a..f}/{a..f}
+
+    - name: Generate Prime Numbers
+      run: |
+        mkdir -p prime-numbers
+        find .
+        echo "end"
