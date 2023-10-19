@@ -49,7 +49,14 @@ public class WindowOperatorQueryTest
   @Before
   public void setUp()
   {
-    query = new WindowOperatorQuery(InlineDataSource.fromIterable(new ArrayList<>(), RowSignature.empty()), new LegacySegmentSpec(Intervals.ETERNITY), ImmutableMap.of("sally", "sue"), RowSignature.empty(), new ArrayList<>(), null);
+    query = new WindowOperatorQuery(
+        InlineDataSource.fromIterable(new ArrayList<>(), RowSignature.empty()),
+        new LegacySegmentSpec(Intervals.ETERNITY),
+        ImmutableMap.of("sally", "sue"),
+        RowSignature.empty(),
+        new ArrayList<>(),
+        null
+    );
   }
 
   @Test
