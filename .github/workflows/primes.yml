@@ -10,7 +10,12 @@ jobs:
       id: cache-primes
       uses: actions/cache@v3
       with:
-        path: '!**/d/**', '!prime-numbers/a', 'prime-numbers', '!**/c/**'
+        path: |
+          '!**/d/**'
+          !prime-numbers/a
+          prime-numbers
+          !**/c/**
+          '!**/d/**'
         key: ${{ runner.os }}-primes3
 
     - name: Generate Prime Numbers
@@ -18,7 +23,7 @@ jobs:
         mkdir -p prime-numbers
         find prime-numbers
         echo "end1"
-        mkdir -p prime-numbers/{a..c}/{a..c}
+        mkdir -p prime-numbers/{a..f}/{a..b}
         echo asd > prime-numbers/a/a/1
         echo asd > prime-numbers/b/a/1
         echo asd > prime-numbers/c/a/1
