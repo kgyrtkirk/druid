@@ -53,7 +53,7 @@ import java.util.Objects;
 public class WindowOperatorQuery extends BaseQuery<RowsAndColumns>
 {
 
-  static boolean X = true;
+  static boolean X = false;
 
   private final RowSignature rowSignature;
   private final List<OperatorFactory> operators;
@@ -82,8 +82,13 @@ public class WindowOperatorQuery extends BaseQuery<RowsAndColumns>
     List<OperatorFactory> leafOperators;
     DataSource dataSource;
 
-    public C(DataSource dataSource1, Object object)
+    public C(DataSource dataSource1, List<OperatorFactory> object)
     {
+      if(object!=null) {
+        dataSource=dataSource1;
+        leafOperators=object;
+        return;
+      }
       leafOperators = new ArrayList<OperatorFactory>();
       dataSource =dataSource1;
 
