@@ -32,7 +32,6 @@ import org.apache.druid.query.filter.DimFilter;
 import org.apache.druid.query.rowsandcols.RowsAndColumns;
 import org.apache.druid.query.scan.ScanQuery;
 import org.apache.druid.query.spec.QuerySegmentSpec;
-import org.apache.druid.segment.VirtualColumn;
 import org.apache.druid.segment.VirtualColumns;
 import org.apache.druid.segment.column.RowSignature;
 
@@ -93,11 +92,6 @@ public class WindowOperatorQuery extends BaseQuery<RowsAndColumns>
                 (int) scan.getScanRowsLimit(),
                 scan.getColumns(),
                 scan.getVirtualColumns(),
-//                ImmutableList.<String> builder()
-//                .addAll(scan.getColumns())
-//                .addAll(virtualColumns.getColumnNames())
-//                .build(),
-//                vc_union(scan.getVirtualColumns(), virtualColumns),
                 ordering));
       }
     } else if (dataSource instanceof InlineDataSource) {
@@ -119,26 +113,6 @@ public class WindowOperatorQuery extends BaseQuery<RowsAndColumns>
     }
 
     return new WindowOperatorQuery(dataSource, intervals, context, rowSignature, operators, leafOperators);
-  }
-
-  private static VirtualColumns vc_union(VirtualColumns virtualColumns, VirtualColumns virtualColumns2)
-  {
-    if (virtualColumns2.isEmpty()) {
-      return virtualColumns;
-    }
-
-    VirtualColumn[] aa = virtualColumns.getVirtualColumns();
-    VirtualColumn[] aa2 = virtualColumns2.getVirtualColumns();
-    List<VirtualColumn> vcs = new ArrayList<VirtualColumn>();
-    for (VirtualColumn virtualColumn : aa) {
-      vcs.add(virtualColumn);
-
-    }
-    for (VirtualColumn virtualColumn : aa2) {
-      vcs.add(virtualColumn);
-
-    }
-    return VirtualColumns.create(vcs);
   }
 
   @JsonCreator
