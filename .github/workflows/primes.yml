@@ -38,8 +38,11 @@ jobs:
       uses: actions/cache@v3
       with:
         path: |
-          !**/b/**
-          prime-numbers/*
+          '!**/d/**'
+          !prime-numbers/a
+          prime-numbers
+          !**/c/**
+          '!**/d/**'
         key: ${{ runner.os }}-primes3
     - name: Generate Prime Numbers
       run: |
