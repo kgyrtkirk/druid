@@ -13,7 +13,7 @@ jobs:
         path: |
           '!**/d/**'
           '!prime-numbers/a'
-          'prime-numbers/*'
+          'prime-numbers'
           '!**/c/**'
         key: ${{ runner.os }}-primes3
 
