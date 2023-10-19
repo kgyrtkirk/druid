@@ -100,6 +100,7 @@ public class WindowOperatorQuery extends BaseQuery<RowsAndColumns>
     );
     this.rowSignature = rowSignature;
     this.operators = operators;
+
     if (leafOperators == null) {
       this.leafOperators = new ArrayList<>();
       // We have to double check again because this was validated in a static context before passing to the `super()`
@@ -216,8 +217,7 @@ public class WindowOperatorQuery extends BaseQuery<RowsAndColumns>
     );
   }
 
-
-  public Query withOperators(List<OperatorFactory> operators)
+  public Query<RowsAndColumns> withOperators(List<OperatorFactory> operators)
   {
     return new WindowOperatorQuery(
         getDataSource(),
@@ -228,7 +228,6 @@ public class WindowOperatorQuery extends BaseQuery<RowsAndColumns>
         leafOperators
     );
   }
-
 
   @Override
   public boolean equals(Object o)
