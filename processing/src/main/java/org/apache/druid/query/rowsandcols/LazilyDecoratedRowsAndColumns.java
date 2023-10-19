@@ -19,6 +19,7 @@
 
 package org.apache.druid.query.rowsandcols;
 
+import com.google.common.collect.ImmutableList;
 import org.apache.druid.frame.Frame;
 import org.apache.druid.frame.FrameType;
 import org.apache.druid.frame.allocation.ArenaMemoryAllocatorFactory;
@@ -30,6 +31,7 @@ import org.apache.druid.frame.write.FrameWriters;
 import org.apache.druid.java.util.common.ISE;
 import org.apache.druid.java.util.common.Intervals;
 import org.apache.druid.java.util.common.Pair;
+import org.apache.druid.java.util.common.UOE;
 import org.apache.druid.java.util.common.granularity.Granularities;
 import org.apache.druid.java.util.common.guava.Sequence;
 import org.apache.druid.query.filter.Filter;
@@ -184,7 +186,6 @@ public class LazilyDecoratedRowsAndColumns implements RowsAndColumns
     } else {
       return materializeStorageAdapter(as);
     }
-
   }
 
   private void reset(RowsAndColumns rac)
@@ -210,7 +211,12 @@ public class LazilyDecoratedRowsAndColumns implements RowsAndColumns
         null
     );
 
-    Collection<String> cols = viewableColumns == null ? base.getColumnNames() : viewableColumns;
+ImmutableList<String> defColumns = ImmutableList.<String> builder()
+  .addAll(base.getColumnNames())
+  .addAll(virtualColumns.getColumnNames())
+  .build();
+
+    Collection<String> cols = viewableColumns == null ? defColumns : viewableColumns;
     AtomicReference<RowSignature> siggy = new AtomicReference<>(null);
 
     FrameWriter writer = cursors.accumulate(null, (accumulated, in) -> {
@@ -327,6 +333,11 @@ public class LazilyDecoratedRowsAndColumns implements RowsAndColumns
         }
       }
     }
+
+
+        if (virtualColumns != null) {
+          throw new UOE("Cannot apply virtual columns [%s] with naive apply.", virtualColumns);
+        }
 
 
     ArrayList<String> columnsToGenerate = new ArrayList<>();

@@ -106,13 +106,16 @@ public class WindowOperatorQuery extends BaseQuery<RowsAndColumns>
       throw new IAE("WindowOperatorQuery must run on top of a query or inline data source, got [%s]", dataSource);
     }
     if(!virtualColumns.isEmpty()) {
-      leafOperators.add(new ScanOperatorFactory(
+      List<OperatorFactory> n = new ArrayList<>();
+      n.add(new ScanOperatorFactory(
           null,
           null,
           null,
           null,
           virtualColumns,
           null));
+      n.addAll(operators);
+      operators=n;
     }
 
     return new WindowOperatorQuery(dataSource, intervals, context, rowSignature, operators, leafOperators);
