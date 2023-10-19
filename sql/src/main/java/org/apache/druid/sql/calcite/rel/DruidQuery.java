@@ -67,6 +67,8 @@ import org.apache.druid.query.groupby.GroupByQuery;
 import org.apache.druid.query.groupby.having.DimFilterHavingSpec;
 import org.apache.druid.query.groupby.orderby.DefaultLimitSpec;
 import org.apache.druid.query.groupby.orderby.OrderByColumnSpec;
+import org.apache.druid.query.operator.OperatorFactory;
+import org.apache.druid.query.operator.ScanOperatorFactory;
 import org.apache.druid.query.operator.WindowOperatorQuery;
 import org.apache.druid.query.ordering.StringComparator;
 import org.apache.druid.query.scan.ScanQuery;
@@ -1444,14 +1446,29 @@ public class DruidQuery
     }
 
     // all virtual cols are needed - these columns are only referenced from the aggregates
-    VirtualColumns vcs = virtualColumnRegistry.build(Collections.emptySet());
+    VirtualColumns virtualColumns = virtualColumnRegistry.build(Collections.emptySet());
+    final List<OperatorFactory> operators;
+
+    if (!virtualColumns.isEmpty()) {
+      operators = ImmutableList.<OperatorFactory> builder()
+          .add(new ScanOperatorFactory(
+              null,
+              null,
+              null,
+              null,
+              virtualColumns,
+              null))
+          .addAll(windowing.getOperators())
+          .build();
+    } else {
+      operators = windowing.getOperators();
+    }
     return WindowOperatorQuery.build(
         dataSource,
         new LegacySegmentSpec(Intervals.ETERNITY),
         plannerContext.queryContextMap(),
         windowing.getSignature(),
-        windowing.getOperators(),
-        vcs
+        operators
     );
   }
 

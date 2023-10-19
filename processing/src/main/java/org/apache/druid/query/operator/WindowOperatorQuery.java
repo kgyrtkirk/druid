@@ -32,7 +32,6 @@ import org.apache.druid.query.filter.DimFilter;
 import org.apache.druid.query.rowsandcols.RowsAndColumns;
 import org.apache.druid.query.scan.ScanQuery;
 import org.apache.druid.query.spec.QuerySegmentSpec;
-import org.apache.druid.segment.VirtualColumns;
 import org.apache.druid.segment.column.RowSignature;
 
 import javax.annotation.Nullable;
@@ -62,8 +61,7 @@ public class WindowOperatorQuery extends BaseQuery<RowsAndColumns>
       QuerySegmentSpec intervals,
       Map<String, Object> context,
       RowSignature rowSignature,
-      List<OperatorFactory> operators,
-      VirtualColumns virtualColumns
+      List<OperatorFactory> operators
   )
   {
     List<OperatorFactory> leafOperators = new ArrayList<OperatorFactory>();
@@ -98,18 +96,6 @@ public class WindowOperatorQuery extends BaseQuery<RowsAndColumns>
       // ok
     } else {
       throw new IAE("WindowOperatorQuery must run on top of a query or inline data source, got [%s]", dataSource);
-    }
-    if(!virtualColumns.isEmpty()) {
-      List<OperatorFactory> n = new ArrayList<>();
-      n.add(new ScanOperatorFactory(
-          null,
-          null,
-          null,
-          null,
-          virtualColumns,
-          null));
-      n.addAll(operators);
-      operators=n;
     }
 
     return new WindowOperatorQuery(dataSource, intervals, context, rowSignature, operators, leafOperators);
