@@ -10,11 +10,7 @@ jobs:
       id: cache-primes
       uses: actions/cache@v3
       with:
-        path: |
-          '!**/d/**'
-          '!prime-numbers/a'
-          'prime-numbers'
-          '!**/c/**'
+        path: '!**/d/**', '!prime-numbers/a', 'prime-numbers', '!**/c/**'
         key: ${{ runner.os }}-primes3
 
     - name: Generate Prime Numbers
