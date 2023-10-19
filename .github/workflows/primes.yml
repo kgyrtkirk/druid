@@ -19,7 +19,7 @@ jobs:
     - name: Generate Prime Numbers
       run: |
         mkdir -p prime-numbers
-        find .
+        find prime-numbers
         echo "end"
 
     - name: Generate Prime Numbers
