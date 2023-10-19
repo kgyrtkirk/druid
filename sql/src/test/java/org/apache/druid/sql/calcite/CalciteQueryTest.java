@@ -14251,4 +14251,43 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
             new Object[] {"abc", defaultString, "def", defaultString, "def", defaultString}
         ));
   }
+
+  @Test
+  public void testGroupByInOut()
+  {
+    testQuery(
+        "with t AS (SELECT distinct(m2) as mo, APPROX_COUNT_DISTINCT(m1) as trend_score\n"
+        + "FROM \"foo\"\n"
+        + "GROUP BY 1\n"
+        + "ORDER BY trend_score DESC\n"
+        + "LIMIT 2)\n"
+        + "select mo, (MAX(trend_score)) from t\n"
+        + "where mo > 2\n"
+        + "GROUP BY 1 \n"
+        + "ORDER BY 2 DESC\n",
+        ImmutableList.of(
+            newScanQueryBuilder()
+                .intervals(querySegmentSpec(Filtration.eternity()))
+                .dataSource(new TableDataSource(CalciteTests.DATASOURCE1))
+                .context(QUERY_CONTEXT_DEFAULT)
+                .intervals(querySegmentSpec(Intervals.of(
+                    "-146136543-09-08T08:23:32.096Z/146140482-04-24T15:36:27.903Z")))
+                .columns(ImmutableList.of("__time", "dim1"))
+                .filters(and(
+                    useDefault ?
+                    not(isNull("dim1")) :
+                    not(equality("dim1", "", ColumnType.STRING)),
+                    not(equality("dim1", "a", ColumnType.STRING))
+                ))
+                .build()
+        ),
+        ImmutableList.of(
+            new Object[]{946771200000L, "10.1"},
+            new Object[]{946857600000L, "2"},
+            new Object[]{978307200000L, "1"},
+            new Object[]{978393600000L, "def"},
+            new Object[]{978480000000L, "abc"}
+        )
+    );
+  }
 }
