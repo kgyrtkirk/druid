@@ -239,6 +239,20 @@ public class WindowOperatorQuery extends BaseQuery<RowsAndColumns>
     );
   }
 
+
+  public Query withOperators(List<OperatorFactory> operators)
+  {
+    return new WindowOperatorQuery(
+        getDataSource(),
+        getQuerySegmentSpec(),
+        getContext(),
+        rowSignature,
+        operators,
+        leafOperators
+    );
+  }
+
+
   @Override
   public boolean equals(Object o)
   {
