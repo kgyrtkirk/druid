@@ -52,6 +52,9 @@ import java.util.Objects;
  */
 public class WindowOperatorQuery extends BaseQuery<RowsAndColumns>
 {
+
+  static boolean X = true;
+
   private final RowSignature rowSignature;
   private final List<OperatorFactory> operators;
   private final List<OperatorFactory> leafOperators;
@@ -64,41 +67,60 @@ public class WindowOperatorQuery extends BaseQuery<RowsAndColumns>
       List<OperatorFactory> operators
   )
   {
-    List<OperatorFactory> leafOperators = new ArrayList<OperatorFactory>();
+    if(X) {
+      C c = new C(dataSource,null);
 
-    if (dataSource instanceof QueryDataSource) {
-      final Query<?> subQuery = ((QueryDataSource) dataSource).getQuery();
-      if (subQuery instanceof ScanQuery) {
-        // transform the scan query into a leaf operator
-        ScanQuery scan = (ScanQuery) subQuery;
-        dataSource = subQuery.getDataSource();
-
-        ArrayList<ColumnWithDirection> ordering = new ArrayList<>();
-        for (ScanQuery.OrderBy orderBy : scan.getOrderBys()) {
-          ordering.add(
-              new ColumnWithDirection(
-                  orderBy.getColumnName(),
-                  ScanQuery.Order.DESCENDING == orderBy.getOrder()
-                      ? ColumnWithDirection.Direction.DESC
-                      : ColumnWithDirection.Direction.ASC));
-        }
-
-        leafOperators.add(
-            new ScanOperatorFactory(
-                null,
-                scan.getFilter(),
-                (int) scan.getScanRowsLimit(),
-                scan.getColumns(),
-                scan.getVirtualColumns(),
-                ordering));
-      }
-    } else if (dataSource instanceof InlineDataSource) {
-      // ok
+      return new WindowOperatorQuery(c.dataSource, intervals, context, rowSignature, operators, c.leafOperators);
     } else {
-      throw new IAE("WindowOperatorQuery must run on top of a query or inline data source, got [%s]", dataSource);
+
+      return new WindowOperatorQuery(dataSource, intervals, context, rowSignature, operators, null);
+    }
+  }
+
+  static class C {
+
+    List<OperatorFactory> leafOperators;
+    DataSource dataSource;
+
+    public C(DataSource dataSource1, Object object)
+    {
+      leafOperators = new ArrayList<OperatorFactory>();
+      dataSource =dataSource1;
+
+      if (dataSource instanceof QueryDataSource) {
+        final Query<?> subQuery = ((QueryDataSource) dataSource).getQuery();
+        if (subQuery instanceof ScanQuery) {
+          // transform the scan query into a leaf operator
+          ScanQuery scan = (ScanQuery) subQuery;
+          dataSource = subQuery.getDataSource();
+
+          ArrayList<ColumnWithDirection> ordering = new ArrayList<>();
+          for (ScanQuery.OrderBy orderBy : scan.getOrderBys()) {
+            ordering.add(
+                new ColumnWithDirection(
+                    orderBy.getColumnName(),
+                    ScanQuery.Order.DESCENDING == orderBy.getOrder()
+                        ? ColumnWithDirection.Direction.DESC
+                        : ColumnWithDirection.Direction.ASC));
+          }
+
+          leafOperators.add(
+              new ScanOperatorFactory(
+                  null,
+                  scan.getFilter(),
+                  (int) scan.getScanRowsLimit(),
+                  scan.getColumns(),
+                  scan.getVirtualColumns(),
+                  ordering));
+        }
+      } else if (dataSource instanceof InlineDataSource) {
+        // ok
+      } else {
+        throw new IAE("WindowOperatorQuery must run on top of a query or inline data source, got [%s]", dataSource);
+      }
+
     }
 
-    return new WindowOperatorQuery(dataSource, intervals, context, rowSignature, operators, leafOperators);
   }
 
   @JsonCreator
@@ -112,14 +134,17 @@ public class WindowOperatorQuery extends BaseQuery<RowsAndColumns>
   )
   {
     super(
-        dataSource,
+        X ? dataSource : new C(dataSource,leafOperators).dataSource,
         intervals,
         false,
         context
     );
     this.rowSignature = rowSignature;
     this.operators = operators;
-    this.leafOperators = Preconditions.checkNotNull(leafOperators, "leafOperators may not be null at this point!");
+    this.leafOperators =
+        X ? Preconditions.checkNotNull(leafOperators, "leafOperators may not be null at this point!")
+            : new C(dataSource,leafOperators).leafOperators;
+;
   }
 
   @JsonProperty("operatorDefinition")
