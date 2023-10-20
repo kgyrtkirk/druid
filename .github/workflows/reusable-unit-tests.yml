@@ -48,14 +48,17 @@ jobs:
         with:
           key: main-cache-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
           path: |
-            ~/.m2/repository/org/apache/*
-            ~/.m2/*
-            !~/.m2/repository/org/apache/druid
+            ~/.m2/
       - name: Echo something2
         run: |
           mkdir -p ~/.m2/repository/org/apache/{druid,asd}
           echo x > ~/.m2/repository/org/apache/druid/1
           echo x > ~/.m2/repository/org/apache/asd/2
+      - name: wipe druid artifacts
+        if: ${{ always() }}
+        run: |
+          rm -rf ~/.m2/repository/org/apache/druid
+
 
   check:
     needs: main
@@ -66,9 +69,7 @@ jobs:
         with:
           key: main-cache-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
           path: |
-            ~/.m2/repository/org/apache/*
-            ~/.m2/*
-            !~/.m2/repository/org/apache/druid
+            ~/.m2/
       - name: Echo something2
         id: set_outputs2
         run: |
