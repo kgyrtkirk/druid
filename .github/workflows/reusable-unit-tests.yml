@@ -20,7 +20,7 @@ on:
       jdk:
         required: false
         type: string
-        default: 8
+        default: 11
         description: 'JDK version'
     #   maven_args:
     #     required: true
