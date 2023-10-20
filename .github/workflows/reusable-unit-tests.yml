@@ -16,11 +16,12 @@
 name: "Unit Tests shared workflow"
 on:
   workflow_call:
-    # inputs:
-    #   jdk:
-    #     required: true
-    #     type: string
-    #     description: 'JDK version used to test Druid'
+    inputs:
+      jdk:
+        required: false
+        type: string
+        default: 8
+        description: 'JDK version'
     #   maven_args:
     #     required: true
     #     type: string
@@ -43,18 +44,30 @@ jobs:
     # outputs:
     #   coverage_failure: ${{ steps.set_outputs.outputs.coverage_failure }}
     steps:
-      - name: setup cache
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: ${{ inputs.jdk }}
+
+      - name: checkout branch
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup caches
         uses: actions/cache@v3
         with:
           key: main-cache-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
           path: |
             ~/.m2/
+
       - name: Echo something2
         run: |
           mkdir -p ~/.m2/repository/org/apache/{druid,asd}
           echo x > ~/.m2/repository/org/apache/druid/1
           echo x > ~/.m2/repository/org/apache/asd/2
-      - name: wipe druid artifacts
+
+      - name: Cleanup (for proper caching)
         if: ${{ always() }}
         run: |
           rm -rf ~/.m2/repository/org/apache/druid
@@ -64,12 +77,13 @@ jobs:
     needs: main
     runs-on: ubuntu-latest
     steps:
-      - name: setup cache
+      - name: Setup caches
         uses: actions/cache@v3
         with:
           key: main-cache-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
           path: |
             ~/.m2/
+
       - name: Echo something2
         id: set_outputs2
         run: |
