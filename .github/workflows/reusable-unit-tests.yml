@@ -58,6 +58,7 @@ jobs:
 
   check:
     needs: main
+    runs-on: ubuntu-latest
     steps:
       - name: setup cache
         uses: actions/cache@v3
