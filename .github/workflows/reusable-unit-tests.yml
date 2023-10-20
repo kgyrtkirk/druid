@@ -45,8 +45,8 @@ jobs:
     steps:
       - name: setup cache
         uses: actions/cache@v3
-        key: main-cache-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
         with:
+          key: main-cache-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
           path: |
             !~/.m2/repository/org/apache/druid
             ~/.m2/
@@ -61,8 +61,8 @@ jobs:
     steps:
       - name: setup cache
         uses: actions/cache@v3
-        key: main-cache-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
         with:
+          key: main-cache-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
           path: |
             !~/.m2/repository/org/apache/druid
             ~/.m2/
