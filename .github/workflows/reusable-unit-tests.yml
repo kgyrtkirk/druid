@@ -48,8 +48,9 @@ jobs:
         with:
           key: main-cache-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
           path: |
-            !~/.m2/repository/org/apache/druid
             ~/.m2/
+            ~/.m2/repository/*/*/*
+            !~/.m2/repository/org/apache/druid
       - name: Echo something2
         run: |
           mkdir -p ~/.m2/repository/org/apache/{druid,asd}
@@ -65,8 +66,9 @@ jobs:
         with:
           key: main-cache-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
           path: |
-            !~/.m2/repository/org/apache/druid
             ~/.m2/
+            ~/.m2/repository/*/*/*
+            !~/.m2/repository/org/apache/druid
       - name: Echo something2
         id: set_outputs2
         run: |
