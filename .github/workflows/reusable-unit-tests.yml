@@ -49,6 +49,7 @@ jobs:
           key: main-cache-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
           path: |
             ~/.m2/repository/org/apache/*
+            ~/.m2/*
             !~/.m2/repository/org/apache/druid
       - name: Echo something2
         run: |
@@ -66,6 +67,7 @@ jobs:
           key: main-cache-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
           path: |
             ~/.m2/repository/org/apache/*
+            ~/.m2/*
             !~/.m2/repository/org/apache/druid
       - name: Echo something2
         id: set_outputs2
