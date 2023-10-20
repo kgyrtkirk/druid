@@ -47,7 +47,7 @@ jobs:
         id: set_outputs
         run: echo "SomethingX!"
       - name: Echo something2
-        id: set_outputs
+        id: set_outputs2
         run: echo "SomethingX2!"
 
       # - name: checkout branch
