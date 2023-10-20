@@ -42,10 +42,11 @@ jobs:
       # matrix:
       #   java: [ '8', '11', '17', '21' ]
     runs-on: ubuntu-latest
-    steps:
-      - name: checkout branch
-        uses: actions/checkout@v3
-      - name: setup
-        uses: ./.github/workflows/reusable-unit-tests.yml
-      - name: setup
-        uses: ./.github/workflows/reusable-unit-tests.yml
+    uses: ./.github/workflows/reusable-unit-tests.yml
+
+    # steps:
+    #   - name: checkout branch
+    #     uses: actions/checkout@v3
+    #   - name: setup
+    #   - name: setup
+    #     uses: ./.github/workflows/reusable-unit-tests.yml
