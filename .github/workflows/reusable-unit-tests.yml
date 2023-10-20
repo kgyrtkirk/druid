@@ -37,30 +37,43 @@ env:
   SEGMENT_DOWNLOAD_TIMEOUT_MINS: 5
 
 jobs:
-  unit-tests:
+  main:
     name:  inputs.module  modules test
     runs-on: ubuntu-latest
     # outputs:
     #   coverage_failure: ${{ steps.set_outputs.outputs.coverage_failure }}
     steps:
-      - name: Echo something
-        id: set_outputs
-        run: echo "SomethingX!"
+      - name: setup cache
+        uses: actions/cache@v3
+        key: main-cache-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
+        with:
+          path: |
+            !~/.m2/repository/org/apache/druid
+            ~/.m2/
       - name: Echo something2
-        id: set_outputs2
-        run: echo "SomethingX2!"
-  unit-tests2:
-    name:  inputs.module2  modules test
-    runs-on: ubuntu-latest
-    # outputs:
-    #   coverage_failure: ${{ steps.set_outputs.outputs.coverage_failure }}
+        run: |
+          mkdir -p ~/.m2/repository/org/apache/{druid,asd}
+          echo x > ~/.m2/repository/org/apache/druid
+          echo x > ~/.m2/repository/org/apache/asd
+
+  check:
+    needs: main
     steps:
-      - name: Echo something
-        id: set_outputs
-        run: echo "SomethingX!"
+      - name: setup cache
+        uses: actions/cache@v3
+        key: main-cache-${{ runner.os }}-${{ hashFiles('**/pom.xml') }}
+        with:
+          path: |
+            !~/.m2/repository/org/apache/druid
+            ~/.m2/
       - name: Echo something2
         id: set_outputs2
-        run: echo "SomethingX2!"
+        run: |
+          find ~/.m2
+          ls -ld ~/.m2
+          
+
+
 
       # - name: checkout branch
       #   uses: actions/checkout@v3
