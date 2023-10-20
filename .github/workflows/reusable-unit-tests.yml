@@ -63,7 +63,10 @@ jobs:
 
       - name: Build
         run: |
-          mvn -B install -Dsurefire.failIfNoSpecifiedTests=false -Dtest=nonexistent -pl processing -am
+          MVN_ARGS="-B "
+          MVN_ARGS+=" -Dsurefire.failIfNoSpecifiedTests=false"
+
+          mvn $MVN_ARGS -B install -Dtest=nonexistent -pl processing -am
 
       - name: Cleanup (for proper caching)
         if: ${{ always() }}
