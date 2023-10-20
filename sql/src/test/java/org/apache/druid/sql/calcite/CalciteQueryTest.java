@@ -14256,7 +14256,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
   public void testGroupByInOut()
   {
     testQuery(
-        "with t AS (SELECT distinct(m2) as mo, APPROX_COUNT_DISTINCT(m1) as trend_score\n"
+        "with t AS (SELECT distinct(m2) as mo, APPROX_COUNT_DISTINCT(m1) / ( TIMESTAMPDIFF(DAY,min( __time ), CURRENT_TIMESTAMP  ) + 0.0000000001) as trend_score\n"
         + "FROM \"foo\"\n"
         + "GROUP BY 1\n"
         + "ORDER BY trend_score DESC\n"
@@ -14264,7 +14264,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
         + "select mo, (MAX(trend_score)) from t\n"
         + "where mo > 2\n"
         + "GROUP BY 1 \n"
-        + "ORDER BY 2 DESC\n",
+        + "ORDER BY 2 DESC",
         ImmutableList.of(
             newScanQueryBuilder()
                 .intervals(querySegmentSpec(Filtration.eternity()))
@@ -14282,11 +14282,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
                 .build()
         ),
         ImmutableList.of(
-            new Object[]{946771200000L, "10.1"},
-            new Object[]{946857600000L, "2"},
-            new Object[]{978307200000L, "1"},
-            new Object[]{978393600000L, "def"},
-            new Object[]{978480000000L, "abc"}
+            new Object[]{6.0D, -0.0027173913043485646D}
         )
     );
   }

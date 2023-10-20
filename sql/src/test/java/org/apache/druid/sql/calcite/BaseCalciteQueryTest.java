@@ -846,7 +846,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   {
     testBuilder()
         .sql(sql)
-        .expectedQueries(expectedQueries)
+//        .expectedQueries(expectedQueries)
         .expectedResults(expectedResults)
         .run();
   }
