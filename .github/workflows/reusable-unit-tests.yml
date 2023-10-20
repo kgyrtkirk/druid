@@ -49,6 +49,18 @@ jobs:
       - name: Echo something2
         id: set_outputs2
         run: echo "SomethingX2!"
+  unit-tests2:
+    name:  inputs.module2  modules test
+    runs-on: ubuntu-latest
+    # outputs:
+    #   coverage_failure: ${{ steps.set_outputs.outputs.coverage_failure }}
+    steps:
+      - name: Echo something
+        id: set_outputs
+        run: echo "SomethingX!"
+      - name: Echo something2
+        id: set_outputs2
+        run: echo "SomethingX2!"
 
       # - name: checkout branch
       #   uses: actions/checkout@v3
