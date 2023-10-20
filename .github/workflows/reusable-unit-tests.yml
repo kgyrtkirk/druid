@@ -20,12 +20,12 @@ on:
       jdk:
         required: false
         type: string
-        default: 11
+        default: 8
         description: 'JDK version'
-    #   maven_args:
-    #     required: true
-    #     type: string
-    #     description: 'arguments to pass to maven'
+      maven_args:
+        required: true
+        type: string
+        description: 'arguments to pass to maven'
     # outputs:
     #   coverage_failure:
     #     description: 'Indicates if test failed by coverage issues'
@@ -63,10 +63,10 @@ jobs:
 
       - name: Build
         run: |
-          MVN_ARGS="-B "
+          MVN_ARGS=" -B "
           MVN_ARGS+=" -Dsurefire.failIfNoSpecifiedTests=false"
 
-          mvn $MVN_ARGS -B install -Dtest=nonexistent -pl processing -am
+          mvn $MVN_ARGS ${{ inputs.maven_args }}
 
       - name: Cleanup (for proper caching)
         if: ${{ always() }}

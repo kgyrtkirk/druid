@@ -37,11 +37,13 @@ concurrency:
 
 jobs:
   static-checks:
-    strategy:
-      fail-fast: false
+    # strategy:
+      # fail-fast: false
       # matrix:
       #   java: [ '8', '11', '17', '21' ]
     uses: ./.github/workflows/reusable-unit-tests.yml
+    with:
+      maven_args: install -Dtest=nonexistent -pl processing -am
 
     # steps:
     #   - name: checkout branch
