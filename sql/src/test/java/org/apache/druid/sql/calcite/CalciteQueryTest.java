@@ -14292,20 +14292,23 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
   {
     String defaultString = useDefault ? "" : null;
     cannotVectorize();
-    testQuery(
-        "with t AS (SELECT m2, COUNT(m1) as trend_score\n"
-        + "FROM \"foo\"\n"
-        + "GROUP BY 1 \n"
-        + "LIMIT 10\n"
-        + ")\n"
-        + "select m2, (MAX(trend_score)) from t\n"
-        + "where m2 > 2\n"
-        + "GROUP BY 1 \n"
-        + "ORDER BY 2 DESC",
-        ImmutableList.of(),
-        ImmutableList.of(
-            new Object[] {"abc", defaultString, "def", defaultString, "def", defaultString}
-        ));
+
+    testBuilder()
+        .queryContext(ImmutableMap.of(QueryContexts.ENABLE_DEBUG, true))
+        .sql("with t AS (SELECT m2, COUNT(m1) as trend_score\n"
+            + "FROM \"foo\"\n"
+            + "GROUP BY 1 \n"
+            + "LIMIT 11\n"
+            + ")\n"
+            + "select m2 , (MAX(trend_score)) from t\n"
+            + "where m2 > 2\n"
+            + "GROUP BY 1 \n"
+            + "ORDER BY 2 DESC\n"
+//            + "LIMIT 33\n"
+            )
+        .expectedResults(ImmutableList.of(
+            new Object[] {"abc", defaultString, "def", defaultString, "def", defaultString}))
+        .run();
   }
-  
+
 }

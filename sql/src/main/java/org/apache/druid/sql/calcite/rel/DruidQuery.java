@@ -296,18 +296,60 @@ public class DruidQuery
       windowing = null;
     }
 
-    return new DruidQuery(
-        dataSource,
-        plannerContext,
-        filter,
-        selectProjection,
-        grouping,
-        sorting,
-        windowing,
-        sourceRowSignature,
-        outputRowType,
-        virtualColumnRegistry
-    );
+    try {
+      return new DruidQuery(
+          dataSource,
+          plannerContext,
+          filter,
+          selectProjection,
+          grouping,
+          sorting,
+          windowing,
+          sourceRowSignature,
+          outputRowType,
+          virtualColumnRegistry
+      );
+    } catch (CannotBuildQueryException e) {
+
+      if (/* some feature flag maybe? */ true) {
+        Grouping subGrouping = getSubGrouping(dataSource);
+        if (grouping == null && subGrouping != null) {
+          try {
+            return new DruidQuery(
+                dataSource,
+                plannerContext,
+                filter,
+                selectProjection,
+                subGrouping,
+                sorting,
+                windowing,
+                sourceRowSignature,
+                outputRowType,
+                virtualColumnRegistry);
+          } catch (CannotBuildQueryException e0) {
+            // throw the orig exception instead
+            throw e;
+          }
+        }
+      }
+      throw e;
+    }
+
+  }
+
+  private static Grouping getSubGrouping(DataSource ds)
+  {
+    if (ds instanceof QueryDataSource) {
+      QueryDataSource queryDataSource = (QueryDataSource) ds;
+      Query query1 = queryDataSource.getQuery();
+      if (query1 instanceof GroupByQuery) {
+        GroupByQuery groupByQuery = (GroupByQuery) query1;
+        
+//        Grouping g=Grouping.create(null, null, null, null, null)
+        return null;
+      }
+    }
+    return null;
   }
 
   @Nonnull
