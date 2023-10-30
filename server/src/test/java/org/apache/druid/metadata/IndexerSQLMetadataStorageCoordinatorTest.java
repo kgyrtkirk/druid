@@ -537,11 +537,9 @@ public class IndexerSQLMetadataStorageCoordinatorTest
         handle -> {
           PreparedBatch preparedBatch = handle.prepareBatch(
               StringUtils.format(
-                  StringUtils.format(
-                      "INSERT INTO %1$s (task_id, segment_id, lock_version) "
+                  "INSERT INTO %1$s (task_id, segment_id, lock_version) "
                       + "VALUES (:task_id, :segment_id, :lock_version)",
-                      table
-                  )
+                  table
               )
           );
           for (Map.Entry<DataSegment, ReplaceTaskLock> entry : segmentToTaskLockMap.entrySet()) {
