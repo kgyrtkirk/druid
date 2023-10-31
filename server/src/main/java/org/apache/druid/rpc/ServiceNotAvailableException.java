@@ -19,16 +19,18 @@
 
 package org.apache.druid.rpc;
 
-import org.apache.druid.java.util.common.StringUtils;
+import com.google.errorprone.annotations.FormatMethod;
+import com.google.errorprone.annotations.FormatString;
 
 /**
  * Returned by {@link ServiceClient#asyncRequest} when a request has failed because the service is not available.
  */
 public class ServiceNotAvailableException extends RpcException
 {
-  public ServiceNotAvailableException(final String serviceName, final String reason, final Object... reasonArgs)
+  @FormatMethod
+  public ServiceNotAvailableException(final String serviceName, @FormatString final String reason, final Object... reasonArgs)
   {
-    super("Service [%s] %s", serviceName, StringUtils.format(reason, reasonArgs));
+    super("Service [%s] %s", serviceName, reason, reasonArgs);
   }
 
   public ServiceNotAvailableException(final String serviceName)

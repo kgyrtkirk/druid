@@ -21,7 +21,6 @@ package org.apache.druid.client.indexing;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.java.util.common.UOE;
 import org.apache.druid.server.security.ResourceAction;
 
@@ -56,9 +55,9 @@ public interface SamplerSpec
   @Nonnull
   default Set<ResourceAction> getInputSourceResources() throws UOE
   {
-    throw new UOE(StringUtils.format(
+    throw new UOE(
         "SamplerSpec type [%s], does not support input source based security",
         getType()
-    ));
+    );
   }
 }

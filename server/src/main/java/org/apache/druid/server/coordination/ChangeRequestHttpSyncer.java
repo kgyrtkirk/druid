@@ -424,11 +424,12 @@ public class ChangeRequestHttpSyncer<T>
 
     // Alert if unstable alert timeout has been exceeded
     if (sinceUnstable.hasElapsed(maxUnstableDuration)) {
-      String alertMessage = StringUtils.format(
+      log.noStackTrace().makeAlert(
+          throwable,
           "%s. Try restarting the Druid process on server[%s].",
-          message, baseServerURL
-      );
-      log.noStackTrace().makeAlert(throwable, alertMessage).emit();
+          message,
+          baseServerURL
+      ).emit();
     } else if (log.isDebugEnabled()) {
       log.debug(throwable, message);
     } else {

@@ -191,9 +191,9 @@ public class KillUnusedSegments implements CoordinatorDuty
     if (0 < availableKillTaskSlots && !CollectionUtils.isNullOrEmpty(dataSourcesToKill)) {
       for (String dataSource : dataSourcesToKill) {
         if (submittedTasks >= availableKillTaskSlots) {
-          log.debug(StringUtils.format(
+          log.debug(
               "Submitted [%d] kill tasks and reached kill task slot limit [%d]. Will resume "
-              + "on the next coordinator cycle.", submittedTasks, availableKillTaskSlots));
+              + "on the next coordinator cycle.", submittedTasks, availableKillTaskSlots);
           break;
         }
         final Interval intervalToKill = findIntervalForKill(dataSource);

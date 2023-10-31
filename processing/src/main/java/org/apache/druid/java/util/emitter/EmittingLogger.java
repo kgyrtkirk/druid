@@ -70,15 +70,25 @@ public class EmittingLogger extends Logger
     return makeAlert(null, message, objects);
   }
 
+  public AlertBuilder makeAlert(final String message)
+  {
+    return makeAlert(null, message);
+  }
+
   @FormatMethod
   public AlertBuilder makeAlert(@Nullable Throwable t, @FormatString final String message, Object... objects)
+  {
+    return makeAlert(t, StringUtils.format(message, objects));
+  }
+
+  public AlertBuilder makeAlert(@Nullable Throwable t, final String message)
   {
     if (emitter == null) {
       final String errorMessage = StringUtils.format(
           "Emitter not initialized!  Cannot alert.  Please make sure to call %s.registerEmitter()\n"
           + "Message: %s",
           this.getClass(),
-          StringUtils.nonStrictFormat(message, objects)
+          message
       );
 
       ISE e = new ISE(errorMessage);
@@ -91,7 +101,7 @@ public class EmittingLogger extends Logger
       throw e;
     }
 
-    return new EmittingAlertBuilder(t, StringUtils.format(message, objects), emitter)
+    return new EmittingAlertBuilder(t, message, emitter)
         .addData("class", className);
   }
 

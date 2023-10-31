@@ -179,7 +179,10 @@ public class IndexerSQLMetadataStorageCoordinator implements IndexerMetadataStor
   public List<Pair<DataSegment, String>> retrieveUsedSegmentsAndCreatedDates(String dataSource, Interval interval)
   {
     StringBuilder queryBuilder = new StringBuilder(
-        "SELECT created_date, payload FROM %1$s WHERE dataSource = :dataSource AND used = true"
+        StringUtils.format(
+            "SELECT created_date, payload FROM %1$s WHERE dataSource = :dataSource AND used = true",
+            dbTables.getSegmentsTable()
+        )
     );
 
     final List<Interval> intervals = new ArrayList<>();
@@ -195,7 +198,7 @@ public class IndexerSQLMetadataStorageCoordinator implements IndexerMetadataStor
         connector
     );
 
-    final String queryString = StringUtils.format(queryBuilder.toString(), dbTables.getSegmentsTable());
+    final String queryString = queryBuilder.toString();
     return connector.retryWithHandle(
         handle -> {
           Query<Map<String, Object>> query = handle
@@ -2331,12 +2334,12 @@ public class IndexerSQLMetadataStorageCoordinator implements IndexerMetadataStor
 
     if (!startMetadataMatchesExisting) {
       // Not in the desired start state.
-      return new DataStoreMetadataUpdateResult(true, false, StringUtils.format(
+      return new DataStoreMetadataUpdateResult(true, false,
           "Inconsistent metadata state. This can happen if you update input topic in a spec without changing " +
           "the supervisor name. Stored state: [%s], Target state: [%s].",
           oldCommitMetadataFromDb,
           startMetadata
-      ));
+      );
     }
 
     // Only endOffsets should be stored in metadata store
@@ -2654,9 +2657,14 @@ public class IndexerSQLMetadataStorageCoordinator implements IndexerMetadataStor
     @FormatMethod
     DataStoreMetadataUpdateResult(boolean failed, boolean canRetry, @FormatString final String errorMsg, Object... errorFormatArgs)
     {
+      this(failed,canRetry, StringUtils.format(errorMsg, errorFormatArgs));
+    }
+
+    DataStoreMetadataUpdateResult(boolean failed, boolean canRetry, final String errorMsg)
+    {
       this.failed = failed;
       this.canRetry = canRetry;
-      this.errorMsg = null == errorMsg ? null : StringUtils.format(errorMsg, errorFormatArgs);
+      this.errorMsg = errorMsg;
     }
 
     public boolean isFailed()
