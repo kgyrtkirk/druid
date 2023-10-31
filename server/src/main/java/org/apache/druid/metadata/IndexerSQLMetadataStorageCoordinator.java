@@ -2657,7 +2657,7 @@ public class IndexerSQLMetadataStorageCoordinator implements IndexerMetadataStor
     @FormatMethod
     DataStoreMetadataUpdateResult(boolean failed, boolean canRetry, @FormatString final String errorMsg, Object... errorFormatArgs)
     {
-      this(failed,canRetry, StringUtils.format(errorMsg, errorFormatArgs));
+      this(failed, canRetry, StringUtils.format(errorMsg, errorFormatArgs));
     }
 
     DataStoreMetadataUpdateResult(boolean failed, boolean canRetry, final String errorMsg)
