@@ -2655,8 +2655,8 @@ public class IndexerSQLMetadataStorageCoordinatorTest
   {
     insertUsedSegments(ImmutableSet.of(defaultSegment));
 
-    List<Pair<DataSegment, String>> resultForIntervalOnTheLeft =
-        coordinator.retrieveUsedSegmentsAndCreatedDates(defaultSegment.getDataSource(), Intervals.of("2000/2001"));
+    List<Pair<DataSegment, String>> resultForIntervalOnTheLeft = coordinator
+        .retrieveUsedSegmentsAndCreatedDates(defaultSegment.getDataSource(), Intervals.of("2000/2001"));
     Assert.assertTrue(resultForIntervalOnTheLeft.isEmpty());
 
     List<Pair<DataSegment, String>> resultForIntervalOnTheRight =
