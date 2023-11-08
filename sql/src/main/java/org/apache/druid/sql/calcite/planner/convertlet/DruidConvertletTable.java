@@ -71,6 +71,9 @@ public class DruidConvertletTable implements SqlRexConvertletTable
 //                   .add(SqlStdOperatorTable.COALESCE)
 //                   .add(SqlLibraryOperators.NVL.withName("COALESCE"))
                    .add(SqlLibraryOperators.NVL)
+                   .add(SqlStdOperatorTable.DESC)
+                   .add(SqlStdOperatorTable.NULLS_FIRST)
+                   .add(SqlStdOperatorTable.NULLS_LAST)
                    .build();
 
   private final Map<SqlOperator, SqlRexConvertlet> table;
