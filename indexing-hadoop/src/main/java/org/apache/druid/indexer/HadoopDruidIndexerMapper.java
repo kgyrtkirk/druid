@@ -26,7 +26,6 @@ import org.apache.druid.data.input.impl.StringInputRowParser;
 import org.apache.druid.java.util.common.DateTimes;
 import org.apache.druid.java.util.common.Intervals;
 import org.apache.druid.java.util.common.RE;
-import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.java.util.common.collect.Utils;
 import org.apache.druid.java.util.common.logger.Logger;
 import org.apache.druid.java.util.common.parsers.ParseException;
@@ -76,11 +75,10 @@ public abstract class HadoopDruidIndexerMapper<KEYOUT, VALUEOUT> extends Mapper<
           }
 
           if (!Intervals.ETERNITY.contains(inputRow.getTimestamp())) {
-            final String errorMsg = StringUtils.format(
+            throw new ParseException(null,
                 "Encountered row with timestamp that cannot be represented as a long: [%s]",
                 inputRow
             );
-            throw new ParseException(null, errorMsg);
           }
 
           if (granularitySpec.inputIntervals().isEmpty()

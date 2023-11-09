@@ -349,14 +349,15 @@ public class SqlSegmentsMetadataQuery
     final boolean compareAsString = intervals.stream().allMatch(Intervals::canCompareEndpointsAsStrings);
 
     final StringBuilder sb = new StringBuilder();
-    sb.append("SELECT payload FROM %s WHERE used = :used AND dataSource = :dataSource");
+    sb.append(StringUtils.format("SELECT payload FROM %s WHERE used = :used AND dataSource = :dataSource",
+        dbTables.getSegmentsTable()));
 
     if (compareAsString) {
       appendConditionForIntervalsAndMatchMode(sb, intervals, matchMode, connector);
     }
 
     final Query<Map<String, Object>> sql = handle
-        .createQuery(StringUtils.format(sb.toString(), dbTables.getSegmentsTable()))
+        .createQuery(sb.toString())
         .setFetchSize(connector.getStreamingFetchSize())
         .bind("used", used)
         .bind("dataSource", dataSource);

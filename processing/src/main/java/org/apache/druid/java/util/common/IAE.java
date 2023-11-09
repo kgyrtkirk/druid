@@ -43,3 +43,4 @@ public class IAE extends IllegalArgumentException
     super(StringUtils.nonStrictFormat(formatText, arguments), cause);
   }
 }
+

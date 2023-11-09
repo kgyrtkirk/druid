@@ -21,6 +21,8 @@ package org.apache.druid.server.coordinator.compact;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
+import com.google.errorprone.annotations.FormatMethod;
+import com.google.errorprone.annotations.FormatString;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.druid.client.indexing.ClientCompactionTaskGranularitySpec;
 import org.apache.druid.client.indexing.ClientCompactionTaskQueryTuningConfig;
@@ -87,7 +89,8 @@ public class CompactionStatus
     return reasonToCompact;
   }
 
-  private static CompactionStatus incomplete(String reasonFormat, Object... args)
+  @FormatMethod
+  private static CompactionStatus incomplete(@FormatString final String reasonFormat, Object... args)
   {
     return new CompactionStatus(false, StringUtils.format(reasonFormat, args));
   }

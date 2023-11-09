@@ -148,7 +148,7 @@ public class PreResponseAuthorizationCheckFilter implements Filter
   )
   {
     // Send out an alert so there's a centralized collection point for seeing errors of this nature
-    AlertBuilder builder = log.makeAlert(errorMsg)
+    AlertBuilder builder = log.makeAlert("%s", errorMsg)
         .addData("uri", servletRequest.getRequestURI())
         .addData("method", servletRequest.getMethod())
         .addData("remoteAddr", servletRequest.getRemoteAddr());
