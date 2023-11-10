@@ -21,6 +21,8 @@ package org.apache.druid.query;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.errorprone.annotations.FormatMethod;
+import com.google.errorprone.annotations.FormatString;
 import org.apache.druid.java.util.common.StringUtils;
 
 /**
@@ -33,9 +35,9 @@ import org.apache.druid.java.util.common.StringUtils;
  */
 public class ResourceLimitExceededException extends BadQueryException
 {
-  public static ResourceLimitExceededException withMessage(String message, Object... arguments)
+  @FormatMethod
+  public static ResourceLimitExceededException withMessage(@FormatString final String message, Object... arguments)
   {
-// FIXME::[38,73] error: [FormatStringAnnotation] Format strings must be compile time constants or parameters annotated @FormatString: message
     return new ResourceLimitExceededException(StringUtils.nonStrictFormat(message, arguments));
   }
 

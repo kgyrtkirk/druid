@@ -452,7 +452,7 @@ public class DruidException extends RuntimeException
 
     public DruidException build(final String message)
     {
-      return build("%s", message);
+      return build(null, message);
     }
 
     @FormatMethod
@@ -464,12 +464,17 @@ public class DruidException extends RuntimeException
     @FormatMethod
     public DruidException build(Throwable cause, @FormatString final String formatMe, Object... vals)
     {
+      return build(cause, StringUtils.nonStrictFormat(formatMe, vals));
+    }
+
+    public DruidException build(Throwable cause, final String message)
+    {
       return new DruidException(
           cause,
           errorCode,
           targetPersona,
           category,
-          StringUtils.nonStrictFormat(formatMe, vals),
+          message,
           deserialized
       );
     }

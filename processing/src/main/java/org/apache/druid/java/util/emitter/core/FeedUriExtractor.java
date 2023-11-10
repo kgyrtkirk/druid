@@ -36,7 +36,6 @@ public class FeedUriExtractor implements UriExtractor
   @Override
   public URI apply(Event event) throws URISyntaxException
   {
-// FIXME::[39,37] error: [FormatStringAnnotation] Variables used as format strings that are not local variables must be compile time constants.
     return new URI(StringUtils.format(uriPattern, event.getFeed()));
   }
 

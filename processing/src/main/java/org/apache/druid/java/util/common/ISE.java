@@ -20,6 +20,8 @@
 package org.apache.druid.java.util.common;
 
 import com.google.common.base.Strings;
+import com.google.errorprone.annotations.FormatMethod;
+import com.google.errorprone.annotations.FormatString;
 import org.apache.druid.common.exception.SanitizableException;
 
 import java.util.function.Function;
@@ -29,15 +31,15 @@ import java.util.function.Function;
 @SuppressWarnings("serial")
 public class ISE extends IllegalStateException implements SanitizableException
 {
-  public ISE(String formatText, Object... arguments)
+  @FormatMethod
+  public ISE(@FormatString final String formatText, Object... arguments)
   {
-// FIXME::[34,37] error: [FormatStringAnnotation] All variables passed as @FormatString must be final or effectively final
     super(StringUtils.nonStrictFormat(formatText, arguments));
   }
 
-  public ISE(Throwable cause, String formatText, Object... arguments)
+  @FormatMethod
+  public ISE(Throwable cause, @FormatString final String formatText, Object... arguments)
   {
-// FIXME::[39,37] error: [FormatStringAnnotation] All variables passed as @FormatString must be final or effectively final
     super(StringUtils.nonStrictFormat(formatText, arguments), cause);
   }
 

@@ -341,14 +341,12 @@ public class NestedPathFinder
   @FormatMethod
   private static void badFormat(String path, @FormatString final String message, Object... args)
   {
-// FIXME::[344,88] error: [FormatStringAnnotation] All variables passed as @FormatString must be final or effectively final
     throw InvalidInput.exception("jq path [%s] is invalid, %s", path, StringUtils.format(message, args));
   }
 
   @FormatMethod
   private static void badFormatJsonPath(String path, @FormatString final String message, Object... args)
   {
-// FIXME::[350,89] error: [FormatStringAnnotation] All variables passed as @FormatString must be final or effectively final
     throw InvalidInput.exception("JSONPath [%s] is invalid, %s", path, StringUtils.format(message, args));
   }
 }
