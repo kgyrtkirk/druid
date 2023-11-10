@@ -33,6 +33,7 @@ public class TruncatedResponseContextException extends RuntimeException
 {
   public TruncatedResponseContextException(String message, Object... arguments)
   {
+// FIXME::[36,37] error: [FormatStringAnnotation] All variables passed as @FormatString must be final or effectively final
     super(StringUtils.nonStrictFormat(message, arguments));
   }
 }

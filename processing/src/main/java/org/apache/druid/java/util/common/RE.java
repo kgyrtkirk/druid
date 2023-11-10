@@ -35,12 +35,14 @@ public class RE extends RuntimeException
   @FormatMethod
   public RE(@FormatString String formatText, Object... arguments)
   {
+// FIXME::[38,37] error: [FormatStringAnnotation] All variables passed as @FormatString must be final or effectively final
     super(StringUtils.nonStrictFormat(formatText, arguments));
   }
 
   @FormatMethod
   public RE(Throwable cause, @FormatString String formatText, Object... arguments)
   {
+// FIXME::[44,37] error: [FormatStringAnnotation] All variables passed as @FormatString must be final or effectively final
     super(StringUtils.nonStrictFormat(formatText, arguments), cause);
   }
 

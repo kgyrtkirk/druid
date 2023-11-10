@@ -33,6 +33,7 @@ public class Jerseys
 
   public static void addResource(Binder binder, Class<?> resourceClazz)
   {
+// FIXME::[36,13] error: [FormatStringAnnotation] Format strings must be either literals or variables. Other expressions are not valid.
     LOG.debug("Adding Jersey resource: " + resourceClazz.getName());
     Multibinder.newSetBinder(binder, new TypeLiteral<Class<?>>() {}, JSR311Resource.class)
                .addBinding()

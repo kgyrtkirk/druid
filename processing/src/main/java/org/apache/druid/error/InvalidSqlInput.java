@@ -37,6 +37,7 @@ public class InvalidSqlInput extends InvalidInput
       Object... args
   )
   {
+// FIXME::[40,9] error: [FormatStringAnnotation] All variables passed as @FormatString must be final or effectively final
     super(t, msg, args);
   }
 

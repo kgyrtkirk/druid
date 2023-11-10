@@ -107,6 +107,7 @@ public class StringFormatExtractionFn extends DimExtractionFn
         value = "";
       }
     }
+// FIXME::[110,93] error: [FormatStringAnnotation] Variables used as format strings that are not local variables must be compile time constants.
     return org.apache.druid.common.config.NullHandling.emptyToNullIfNeeded(StringUtils.format(format, value));
   }
 

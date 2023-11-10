@@ -312,21 +312,17 @@ public class ResourcePool<K, V> implements Closeable
           if (holderListContains(object)) {
             log.warn(
                 new Exception("Exception for stacktrace"),
-                StringUtils.format(
-                    "Returning object[%s] at key[%s] that has already been returned!? Skipping",
-                    object,
-                    key
-                )
+                "Returning object[%s] at key[%s] that has already been returned!? Skipping",
+                object,
+                key
             );
           } else {
             log.warn(
                 new Exception("Exception for stacktrace"),
-                StringUtils.format(
-                    "Returning object[%s] at key[%s] even though we already have all that we can hold[%s]!? Skipping",
-                    object,
-                    key,
-                    resourceHolderList
-                )
+                "Returning object[%s] at key[%s] even though we already have all that we can hold[%s]!? Skipping",
+                object,
+                key,
+                resourceHolderList
             );
           }
           return;

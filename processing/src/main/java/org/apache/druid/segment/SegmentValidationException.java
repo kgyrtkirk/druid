@@ -19,6 +19,8 @@
 
 package org.apache.druid.segment;
 
+import com.google.errorprone.annotations.FormatMethod;
+import com.google.errorprone.annotations.FormatString;
 import org.apache.druid.java.util.common.StringUtils;
 
 /**
@@ -26,12 +28,14 @@ import org.apache.druid.java.util.common.StringUtils;
  */
 public class SegmentValidationException extends RuntimeException
 {
-  public SegmentValidationException(String formatText, Object... arguments)
+  @FormatMethod
+  public SegmentValidationException(@FormatString final String formatText, Object... arguments)
   {
-    super(StringUtils.nonStrictFormat(formatText, arguments));
+    this(null, formatText, arguments);
   }
 
-  public SegmentValidationException(Throwable cause, String formatText, Object... arguments)
+  @FormatMethod
+  public SegmentValidationException(Throwable cause, @FormatString final String formatText, Object... arguments)
   {
     super(StringUtils.nonStrictFormat(formatText, arguments), cause);
   }

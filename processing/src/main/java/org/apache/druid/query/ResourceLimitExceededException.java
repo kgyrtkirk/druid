@@ -35,6 +35,7 @@ public class ResourceLimitExceededException extends BadQueryException
 {
   public static ResourceLimitExceededException withMessage(String message, Object... arguments)
   {
+// FIXME::[38,73] error: [FormatStringAnnotation] Format strings must be compile time constants or parameters annotated @FormatString: message
     return new ResourceLimitExceededException(StringUtils.nonStrictFormat(message, arguments));
   }
 

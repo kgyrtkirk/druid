@@ -43,16 +43,19 @@ public interface NamedFunction
    */
   default ExpressionValidationException validationFailed(String reasonFormat, Object... args)
   {
+// FIXME::[46,10] error: [FormatStringAnnotation] All variables passed as @FormatString must be final or effectively final
     throw new ExpressionValidationException(this, reasonFormat, args);
   }
 
   default ExpressionValidationException validationFailed(Throwable e, String reasonFormat, Object... args)
   {
+// FIXME::[51,10] error: [FormatStringAnnotation] All variables passed as @FormatString must be final or effectively final
     throw new ExpressionValidationException(this, e, reasonFormat, args);
   }
 
   default ExpressionProcessingException processingFailed(Throwable e, String reasonFormat, Object... args)
   {
+// FIXME::[56,10] error: [FormatStringAnnotation] All variables passed as @FormatString must be final or effectively final
     throw new ExpressionProcessingException(this, e, reasonFormat, args);
   }
 

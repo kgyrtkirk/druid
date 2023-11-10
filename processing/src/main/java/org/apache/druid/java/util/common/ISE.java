@@ -31,11 +31,13 @@ public class ISE extends IllegalStateException implements SanitizableException
 {
   public ISE(String formatText, Object... arguments)
   {
+// FIXME::[34,37] error: [FormatStringAnnotation] All variables passed as @FormatString must be final or effectively final
     super(StringUtils.nonStrictFormat(formatText, arguments));
   }
 
   public ISE(Throwable cause, String formatText, Object... arguments)
   {
+// FIXME::[39,37] error: [FormatStringAnnotation] All variables passed as @FormatString must be final or effectively final
     super(StringUtils.nonStrictFormat(formatText, arguments), cause);
   }
 

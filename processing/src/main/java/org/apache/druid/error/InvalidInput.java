@@ -61,8 +61,10 @@ public class InvalidInput extends DruidException.Failure
              .ofCategory(DruidException.Category.INVALID_INPUT);
 
     if (t == null) {
+// FIXME::[64,22] error: [FormatStringAnnotation] Variables used as format strings that are not local variables must be compile time constants.
       return bob.build(msg, args);
     } else {
+// FIXME::[66,22] error: [FormatStringAnnotation] Variables used as format strings that are not local variables must be compile time constants.
       return bob.build(t, msg, args);
     }
   }

@@ -21,6 +21,8 @@ package org.apache.druid.java.util.emitter.service;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import com.google.errorprone.annotations.FormatMethod;
+import com.google.errorprone.annotations.FormatString;
 import org.apache.druid.java.util.common.DateTimes;
 import org.apache.druid.java.util.common.StringUtils;
 
@@ -44,12 +46,14 @@ public class AlertBuilder extends ServiceEventBuilder<AlertEvent>
 
   protected AlertEvent.Severity severity = AlertEvent.Severity.DEFAULT;
 
-  public static AlertBuilder create(String descriptionFormat, Object... objects)
+  @FormatMethod
+  public static AlertBuilder create(@FormatString final String descriptionFormat, Object... objects)
   {
     return AlertBuilder.createEmittable(null, descriptionFormat, objects);
   }
 
-  public static AlertBuilder createEmittable(ServiceEmitter emitter, String descriptionFormat, Object... objects)
+  @FormatMethod
+  public static AlertBuilder createEmittable(ServiceEmitter emitter, @FormatString final String descriptionFormat, Object... objects)
   {
     return new AlertBuilder(StringUtils.format(descriptionFormat, objects), emitter);
   }

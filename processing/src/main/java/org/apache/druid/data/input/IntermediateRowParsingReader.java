@@ -73,6 +73,7 @@ public abstract class IntermediateRowParsingReader<T> implements InputEntityRead
           }
           catch (IOException e) {
             final Map<String, Object> metadata = intermediateRowIteratorWithMetadata.currentMetadata();
+// FIXME::[76,49] error: [FormatStringAnnotation] Format strings must be either literals or variables. Other expressions are not valid.
             rows = new ExceptionThrowingIterator(new ParseException(
                 String.valueOf(row),
                 e,
@@ -88,6 +89,7 @@ public abstract class IntermediateRowParsingReader<T> implements InputEntityRead
             final Map<String, Object> metadata = intermediateRowIteratorWithMetadata.currentMetadata();
             // Replace the message of the ParseException e
             rows = new ExceptionThrowingIterator(
+// FIXME::[91,16] error: [FormatStringAnnotation] Format strings must be either literals or variables. Other expressions are not valid.
                 new ParseException(
                     e.getInput(),
                     e.isFromPartiallyValidRow(),

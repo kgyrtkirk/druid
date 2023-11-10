@@ -33,6 +33,9 @@ import java.io.IOException;
  */
 public class StringFormatExtractionFnTest
 {
+  static {
+    NullHandling.initializeForTests();
+  }
 
   @Test
   public void testApply()
@@ -49,6 +52,13 @@ public class StringFormatExtractionFnTest
     Assert.assertEquals("[null]", format("[%s]", "nullString").apply(test));
     Assert.assertEquals("[]", format("[%s]", "emptyString").apply(test));
     Assert.assertNull(format("[%s]", "returnNull").apply(test));
+  }
+
+  @Test
+  public void testFormatInvalidInput()
+  {
+    String test = "someString";
+    Assert.assertEquals("[null]", format("[%d]", "nullString").apply(test));
   }
 
   @Test

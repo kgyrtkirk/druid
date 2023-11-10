@@ -36,12 +36,14 @@ public class IOE extends IOException
   @FormatMethod
   public IOE(@FormatString String formatText, Object... arguments)
   {
+// FIXME::[39,37] error: [FormatStringAnnotation] All variables passed as @FormatString must be final or effectively final
     super(StringUtils.nonStrictFormat(formatText, arguments));
   }
 
   @FormatMethod
   public IOE(Throwable cause, @FormatString String formatText, Object... arguments)
   {
+// FIXME::[45,37] error: [FormatStringAnnotation] All variables passed as @FormatString must be final or effectively final
     super(StringUtils.nonStrictFormat(formatText, arguments), cause);
   }
 }

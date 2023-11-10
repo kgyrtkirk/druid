@@ -130,6 +130,13 @@ public class Logger
     }
   }
 
+  public void trace(Marker marker, final String message)
+  {
+    if (log.isTraceEnabled()) {
+      log.trace(marker, message);
+    }
+  }
+
   @FormatMethod
   public void debug(@FormatString final String message, Object... formatArgs)
   {
@@ -191,6 +198,13 @@ public class Logger
     }
   }
 
+  public void info(Marker marker, final String message)
+  {
+    if (log.isInfoEnabled()) {
+      log.info(marker, message);
+    }
+  }
+
   public void info(Throwable t, final String message)
   {
     if (log.isInfoEnabled()) {
@@ -235,6 +249,11 @@ public class Logger
     log.warn(marker, StringUtils.nonStrictFormat(message, formatArgs));
   }
 
+  public void warn(Marker marker, final String message)
+  {
+    log.warn(marker, message);
+  }
+
   @FormatMethod
   public void warn(Throwable t, @FormatString final String message, Object... formatArgs)
   {
@@ -256,6 +275,11 @@ public class Logger
   public void error(Marker marker, @FormatString final String message, Object... formatArgs)
   {
     log.error(marker, StringUtils.nonStrictFormat(message, formatArgs));
+  }
+
+  public void error(Marker marker, final String message)
+  {
+    log.error(marker, message);
   }
 
   /**

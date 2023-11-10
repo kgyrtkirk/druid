@@ -39,6 +39,7 @@ public class UnparseableColumnsParseException extends ParseException
       Object... arguments
   )
   {
+// FIXME::[42,9] error: [FormatStringAnnotation] All variables passed as @FormatString must be final or effectively final
     super(event, fromPartiallyValidRow, formatText, arguments);
     this.columnExceptionMessages = details;
   }

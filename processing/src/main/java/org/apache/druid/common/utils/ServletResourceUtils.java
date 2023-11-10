@@ -50,6 +50,7 @@ public class ServletResourceUtils
   @FormatMethod
   public static Map<String, String> jsonize(@FormatString String msgFormat, Object... args)
   {
+// FIXME::[53,63] error: [FormatStringAnnotation] All variables passed as @FormatString must be final or effectively final
     return ImmutableMap.of("error", StringUtils.nonStrictFormat(msgFormat, args));
   }
 }

@@ -47,6 +47,7 @@ public final class Intervals
   @FormatMethod
   public static Interval of(@FormatString String format, Object... formatArgs)
   {
+// FIXME::[50,32] error: [FormatStringAnnotation] All variables passed as @FormatString must be final or effectively final
     return of(StringUtils.format(format, formatArgs));
   }
 

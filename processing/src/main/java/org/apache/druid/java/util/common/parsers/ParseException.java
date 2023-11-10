@@ -63,6 +63,11 @@ public class ParseException extends RuntimeException
     this(input, false, formatText, arguments);
   }
 
+  public ParseException(@Nullable String input, final String message)
+  {
+    this(input, false, null, message);
+  }
+
   @FormatMethod
   public ParseException(@Nullable String input, boolean fromPartiallyValidRow, @FormatString final String formatText,
       Object... arguments)
@@ -77,11 +82,22 @@ public class ParseException extends RuntimeException
     this(input, false, cause, formatText, arguments);
   }
 
+  public ParseException(@Nullable String input, Throwable cause, final String message)
+  {
+    this(input, false, cause, message);
+  }
+
   @FormatMethod
   public ParseException(@Nullable String input, boolean fromPartiallyValidRow, Throwable cause,
       @FormatString final String formatText, Object... arguments)
   {
-    super(StringUtils.nonStrictFormat(formatText, arguments), cause);
+    this(input, fromPartiallyValidRow, cause, StringUtils.nonStrictFormat(formatText, arguments));
+  }
+
+  public ParseException(@Nullable String input, boolean fromPartiallyValidRow, Throwable cause,
+      final String message)
+  {
+    super(message, cause);
     this.input = input;
     this.fromPartiallyValidRow = fromPartiallyValidRow;
     this.timeOfExceptionMillis = System.currentTimeMillis();

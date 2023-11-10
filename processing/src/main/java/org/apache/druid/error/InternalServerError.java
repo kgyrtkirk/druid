@@ -54,8 +54,10 @@ public class InternalServerError extends DruidException.Failure
         .ofCategory(DruidException.Category.RUNTIME_FAILURE);
 
     if (t == null) {
+// FIXME::[57,22] error: [FormatStringAnnotation] Variables used as format strings that are not local variables must be compile time constants.
       return bob.build(msg, args);
     } else {
+// FIXME::[59,22] error: [FormatStringAnnotation] Variables used as format strings that are not local variables must be compile time constants.
       return bob.build(t, msg, args);
     }
   }
