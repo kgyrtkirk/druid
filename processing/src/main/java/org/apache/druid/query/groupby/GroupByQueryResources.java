@@ -28,7 +28,6 @@ import org.apache.druid.query.Query;
 import org.apache.druid.query.QueryDataSource;
 import org.apache.druid.query.dimension.DimensionSpec;
 
-import javax.annotation.Nullable;
 import java.io.Closeable;
 import java.nio.ByteBuffer;
 import java.util.ArrayDeque;
@@ -96,23 +95,24 @@ public class GroupByQueryResources implements Closeable
     return countRequiredMergeBufferNumWithoutSubtotal(query, 1) + numMergeBuffersNeededForSubtotalsSpec(query);
   }
 
-  @Nullable
-  private final List<ResourceHolder<ByteBuffer>> mergeBufferHolders;
-  private final Deque<ByteBuffer> mergeBuffers;
+//  @Nullable
+//  private final List<ResourceHolder<ByteBuffer>> mergeBufferHolders;
+//  private final Deque<ByteBuffer> mergeBuffers;
 
   private Deque<ResourceHolder<ByteBuffer>> mergeBufferHolders2;
 
   public GroupByQueryResources()
   {
-    this.mergeBufferHolders = null;
-    this.mergeBuffers = new ArrayDeque<>();
+//    this.mergeBufferHolders = null;
+//    this.mergeBuffers = new ArrayDeque<>();
+    this.mergeBufferHolders2 = new ArrayDeque<>();
   }
 
   public GroupByQueryResources(List<ResourceHolder<ByteBuffer>> mergeBufferHolders)
   {
-    this.mergeBufferHolders = mergeBufferHolders;
+//    this.mergeBufferHolders = mergeBufferHolders;
     this.mergeBufferHolders2 = new ArrayDeque<>(mergeBufferHolders);
-    this.mergeBuffers = new ArrayDeque<>(mergeBufferHolders.size());
+//    this.mergeBuffers = new ArrayDeque<>(mergeBufferHolders.size());
 //    mergeBufferHolders.forEach(holder -> mergeBuffers.add(holder.get()));
   }
 
@@ -153,11 +153,12 @@ public class GroupByQueryResources implements Closeable
   @Override
   public void close()
   {
-    if (mergeBufferHolders != null) {
-      if (mergeBuffers.size() != mergeBufferHolders.size()) {
-        log.warn("%d resources are not returned yet", mergeBufferHolders.size() - mergeBuffers.size());
-      }
-      mergeBufferHolders.forEach(ResourceHolder::close);
+    if (mergeBufferHolders2 != null) {
+      //FIXME
+//      if (mergeBuffers.size() != mergeBufferHolders2.size()) {
+//        log.warn("%d resources are not returned yet", mergeBufferHolders.size() - mergeBuffers.size());
+//      }
+      mergeBufferHolders2.forEach(ResourceHolder::close);
     }
   }
 }
