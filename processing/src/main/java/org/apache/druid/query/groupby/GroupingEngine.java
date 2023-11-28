@@ -28,7 +28,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import org.apache.druid.collections.BlockingPool;
 import org.apache.druid.collections.NonBlockingPool;
-import org.apache.druid.collections.ReferenceCountingResourceHolder;
 import org.apache.druid.collections.ResourceHolder;
 import org.apache.druid.guice.annotations.Global;
 import org.apache.druid.guice.annotations.Json;
@@ -481,7 +480,8 @@ public class GroupingEngine
       GroupByQuery query,
       GroupByQueryResources resource,
       Sequence<ResultRow> subqueryResult,
-      boolean wasQueryPushedDown
+      boolean wasQueryPushedDown,
+      ResponseContext context
   )
   {
     // Keep a reference to resultSupplier outside the "try" so we can close it if something goes wrong
@@ -508,7 +508,8 @@ public class GroupingEngine
           resource,
           spillMapper,
           processingConfig.getTmpDir(),
-          processingConfig.intermediateComputeSizeBytes()
+          processingConfig.intermediateComputeSizeBytes(),
+          context
       );
 
       final GroupByRowProcessor.ResultSupplier finalResultSupplier = resultSupplier;
@@ -532,13 +533,14 @@ public class GroupingEngine
    * @param query       query that has a "subtotalsSpec"
    * @param resource    resources returned by {@link #prepareResource(GroupByQuery)}
    * @param queryResult result rows from the main query
+   * @param context
    *
    * @return results for each list of subtotals in the query, concatenated together
    */
   public Sequence<ResultRow> processSubtotalsSpec(
       GroupByQuery query,
       GroupByQueryResources resource,
-      Sequence<ResultRow> queryResult
+      Sequence<ResultRow> queryResult, ResponseContext context
   )
   {
     // How it works?
@@ -589,7 +591,8 @@ public class GroupingEngine
           resource,
           spillMapper,
           processingConfig.getTmpDir(),
-          processingConfig.intermediateComputeSizeBytes()
+          processingConfig.intermediateComputeSizeBytes(),
+          context
       );
 
       List<String> queryDimNames = baseSubtotalQuery.getDimensions().stream().map(DimensionSpec::getOutputName)
@@ -652,7 +655,8 @@ public class GroupingEngine
               resource,
               spillMapper,
               processingConfig.getTmpDir(),
-              processingConfig.intermediateComputeSizeBytes()
+              processingConfig.intermediateComputeSizeBytes(),
+              context
           );
 
           subtotalsResults.add(

@@ -566,6 +566,7 @@ public abstract class ResponseContext
 
   private static final Comparator<Map.Entry<String, JsonNode>> VALUE_LENGTH_REVERSED_COMPARATOR =
       Comparator.comparing((Map.Entry<String, JsonNode> e) -> e.getValue().toString().length()).reversed();
+  private BlockingPool<ByteBuffer> mergeBufferPool;
 
   /**
    * Create an empty DefaultResponseContext instance
@@ -896,12 +897,11 @@ public abstract class ResponseContext
   }
 
   public BlockingPool<ByteBuffer> getQueryMergeBuffers() {
-    throw new  RuntimeException("unimpl");
+    return mergeBufferPool;
   }
 
   public void setQueryMergeBuffers(BlockingPool<ByteBuffer> mergeBufferPool)
   {
-    throw new RuntimeException("Unimplemented!");
-
+    this.mergeBufferPool = mergeBufferPool;
   }
 }

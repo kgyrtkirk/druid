@@ -230,7 +230,8 @@ public class GroupByQueryQueryToolChest extends QueryToolChest<ResultRow, GroupB
         return groupingEngine.processSubtotalsSpec(
             query,
             resource,
-            groupingEngine.processSubqueryResult(subquery, query, resource, finalizingResults, false)
+            groupingEngine.processSubqueryResult(subquery, query, resource, finalizingResults, false, context),
+            context
         );
       } else {
         return groupingEngine.applyPostProcessing(
@@ -239,7 +240,8 @@ public class GroupByQueryQueryToolChest extends QueryToolChest<ResultRow, GroupB
                 query,
                 resource,
                 finalizingResults,
-                false
+                false,
+                context
             ),
             query
         );
@@ -250,7 +252,8 @@ public class GroupByQueryQueryToolChest extends QueryToolChest<ResultRow, GroupB
         return groupingEngine.processSubtotalsSpec(
             query,
             resource,
-            groupingEngine.mergeResults(runner, query.withSubtotalsSpec(null), context)
+            groupingEngine.mergeResults(runner, query.withSubtotalsSpec(null), context),
+            context
         );
       } else {
         return groupingEngine.applyPostProcessing(groupingEngine.mergeResults(runner, query, context), query);
@@ -274,7 +277,8 @@ public class GroupByQueryQueryToolChest extends QueryToolChest<ResultRow, GroupB
             rewrittenQuery,
             resource,
             finalizedResults,
-            true
+            true,
+            context
         ),
         query
     );

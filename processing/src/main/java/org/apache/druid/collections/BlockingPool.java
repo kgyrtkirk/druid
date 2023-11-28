@@ -56,8 +56,18 @@ public interface BlockingPool<T>
     return new BlockingPool<T>()
     {
 
-      private List<ResourceHolder<T>> holders;
+      private List<ResourceHolder<T>> holders = new ArrayList<ResourceHolder<T>>();
+      private boolean locked;
+      private List<ResourceHolder<T>> realHolders;
 
+
+      public void lockSubPool() {
+        if (locked) {
+          return;
+        }
+        realHolders = BlockingPool.this.takeBatch(holders.size());
+        locked = true;
+      }
 
       @Override
       public int maxSize()
@@ -75,6 +85,9 @@ public interface BlockingPool<T>
       @Override
       public List<ResourceHolder<T>> takeBatch(int elementNum)
       {
+        if(locked) {
+          throw new RuntimeException("invalid usage pattern!");
+        }
         return createLazyHolders(elementNum);
       }
 
@@ -83,7 +96,7 @@ public interface BlockingPool<T>
 
         List<ResourceHolder<T>> ret=new ArrayList<>();
         for (int i=0;i<elementNum;i++) {
-          LazyHolder<T> lh = new LazyHolder<>();
+          LazyHolder<T> lh = new LazyHolder<>(holders.size());
           holders.add(lh);
           ret.add(lh);
         }
@@ -92,23 +105,44 @@ public interface BlockingPool<T>
 
       class LazyHolder<T> implements ResourceHolder<T>{
 
+        private int idx;
+
+        LazyHolder(int idx)
+        {
+          this.idx = idx;
+        }
+
         @Override
         public T get()
         {
-          throw new RuntimeException("Unimplemented!");
+          lockSubPool();
+          ResourceHolder<?> realHolder = realHolders.get(idx);
+          return          (T) realHolder.get();
         }
 
         @Override
         public void close()
         {
-          throw new RuntimeException("Unimplemented!");
+          // accept NPE on second call?!
+          if (locked) {
+            realHolders.get(idx).close();
+          }
+        }
+        @Override
+        public ResourceHolder<T> newReference()
+        {
+          return (ResourceHolder<T>) realHolders.get(idx).newReference();
         }
       }
 
       @Override
       public long getPendingRequests()
       {
-        return holders.size();
+        if(locked) {
+          return 0;
+        } else {
+          return holders.size();
+        }
       }
     };
 

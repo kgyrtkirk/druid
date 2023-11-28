@@ -22,7 +22,6 @@ package org.apache.druid.query.groupby.epinephelinae;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Function;
 import com.google.common.base.Predicates;
-import com.google.common.base.Suppliers;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -31,6 +30,7 @@ import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import org.apache.druid.collections.BlockingPool;
+import org.apache.druid.collections.ReferenceCountingResourceHolder;
 import org.apache.druid.collections.ResourceHolder;
 import org.apache.druid.common.guava.GuavaUtils;
 import org.apache.druid.java.util.common.ISE;
@@ -203,7 +203,7 @@ public class GroupByMergingQueryRunnerV2 implements QueryRunner<ResultRow>
                       null,
                       config,
                       processingConfig,
-                      Suppliers.ofInstance(mergeBufferHolder.get()),
+                      () -> mergeBufferHolder.get(),
                       combineBufferHolder,
                       concurrencyHint,
                       temporaryStorage,
@@ -218,8 +218,8 @@ public class GroupByMergingQueryRunnerV2 implements QueryRunner<ResultRow>
               final Accumulator<AggregateResult, ResultRow> accumulator = pair.rhs;
               grouper.init();
 
-              final ResourceHolder<Grouper<RowBasedKey>> grouperHolder =
-                  ResourceHolder.fromCloseable(grouper);
+              final ReferenceCountingResourceHolder<Grouper<RowBasedKey>> grouperHolder =
+                  ReferenceCountingResourceHolder.fromCloseable(grouper);
               resources.register(grouperHolder);
 
               List<ListenableFuture<AggregateResult>> futures = Lists.newArrayList(
