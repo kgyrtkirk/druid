@@ -126,7 +126,28 @@ public class GroupByQueryResources implements Closeable
    */
   public ResourceHolder<ByteBuffer> getMergeBuffer()
   {
-    return mergeBufferHolders2.pop();
+    ResourceHolder<ByteBuffer> holder = mergeBufferHolders2.pop();
+    return
+        new ResourceHolder<ByteBuffer> () {
+
+          @Override
+          public ByteBuffer get()
+          {
+            return holder.get();
+          }
+
+          @Override
+          public void close()
+          {
+            mergeBufferHolders2.add(holder);
+          }
+
+          @Override
+          public ResourceHolder<ByteBuffer> newReference()
+          {
+            return holder.newReference();
+          }
+    };
   }
 
   @Override

@@ -508,8 +508,7 @@ public class GroupingEngine
           resource,
           spillMapper,
           processingConfig.getTmpDir(),
-          processingConfig.intermediateComputeSizeBytes(),
-          context
+          processingConfig.intermediateComputeSizeBytes()
       );
 
       final GroupByRowProcessor.ResultSupplier finalResultSupplier = resultSupplier;
@@ -540,7 +539,7 @@ public class GroupingEngine
   public Sequence<ResultRow> processSubtotalsSpec(
       GroupByQuery query,
       GroupByQueryResources resource,
-      Sequence<ResultRow> queryResult, ResponseContext context
+      Sequence<ResultRow> queryResult
   )
   {
     // How it works?
@@ -591,8 +590,7 @@ public class GroupingEngine
           resource,
           spillMapper,
           processingConfig.getTmpDir(),
-          processingConfig.intermediateComputeSizeBytes(),
-          context
+          processingConfig.intermediateComputeSizeBytes()
       );
 
       List<String> queryDimNames = baseSubtotalQuery.getDimensions().stream().map(DimensionSpec::getOutputName)
@@ -655,8 +653,7 @@ public class GroupingEngine
               resource,
               spillMapper,
               processingConfig.getTmpDir(),
-              processingConfig.intermediateComputeSizeBytes(),
-              context
+              processingConfig.intermediateComputeSizeBytes()
           );
 
           subtotalsResults.add(

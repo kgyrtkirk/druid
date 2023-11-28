@@ -30,7 +30,6 @@ import org.apache.druid.java.util.common.guava.Sequence;
 import org.apache.druid.java.util.common.io.Closer;
 import org.apache.druid.query.DruidProcessingConfig;
 import org.apache.druid.query.ResourceLimitExceededException;
-import org.apache.druid.query.context.ResponseContext;
 import org.apache.druid.query.dimension.DimensionSpec;
 import org.apache.druid.query.groupby.GroupByQuery;
 import org.apache.druid.query.groupby.GroupByQueryConfig;
@@ -95,7 +94,7 @@ public class GroupByRowProcessor
       final GroupByQueryResources resource,
       final ObjectMapper spillMapper,
       final String processingTmpDir,
-      final int mergeBufferSize, ResponseContext context
+      final int mergeBufferSize
   )
   {
     final Closer closeOnExit = Closer.create();
@@ -111,7 +110,6 @@ public class GroupByRowProcessor
         querySpecificConfig.getMaxOnDiskStorage().getBytes()
     );
 
-    ResourceHolder<ByteBuffer> myMergeBuffer = context.getQueryMergeBuffers().takeBatch(1).get(0);
     closeOnExit.register(temporaryStorage);
 
     Pair<Grouper<RowBasedKey>, Accumulator<AggregateResult, ResultRow>> pair = RowBasedGrouperHelper.createGrouperAccumulatorPair(
@@ -124,7 +122,7 @@ public class GroupByRowProcessor
           @Override
           public ByteBuffer get()
           {
-            final ResourceHolder<ByteBuffer> mergeBufferHolder = myMergeBuffer;
+            final ResourceHolder<ByteBuffer> mergeBufferHolder = resource.getMergeBuffer();
             closeOnExit.register(mergeBufferHolder);
             return mergeBufferHolder.get();
           }
