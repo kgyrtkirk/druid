@@ -29,6 +29,7 @@ import com.google.inject.Inject;
 import org.apache.druid.collections.BlockingPool;
 import org.apache.druid.collections.NonBlockingPool;
 import org.apache.druid.collections.ReferenceCountingResourceHolder;
+import org.apache.druid.collections.ResourceHolder;
 import org.apache.druid.guice.annotations.Global;
 import org.apache.druid.guice.annotations.Json;
 import org.apache.druid.guice.annotations.Merging;
@@ -92,7 +93,7 @@ public class GroupingEngine
   private final DruidProcessingConfig processingConfig;
   private final Supplier<GroupByQueryConfig> configSupplier;
   private final NonBlockingPool<ByteBuffer> bufferPool;
-  private final BlockingPool<ByteBuffer> mergeBufferPool;
+  private final BlockingPool<ByteBuffer> rootMergeBufferPool;
   private final ObjectMapper jsonMapper;
   private final ObjectMapper spillMapper;
   private final QueryWatcher queryWatcher;
@@ -111,7 +112,7 @@ public class GroupingEngine
     this.processingConfig = processingConfig;
     this.configSupplier = configSupplier;
     this.bufferPool = bufferPool;
-    this.mergeBufferPool = mergeBufferPool;
+    this.rootMergeBufferPool = mergeBufferPool;
     this.jsonMapper = jsonMapper;
     this.spillMapper = spillMapper;
     this.queryWatcher = queryWatcher;
@@ -124,11 +125,15 @@ public class GroupingEngine
    * Used by {@link GroupByQueryQueryToolChest#mergeResults(QueryRunner)}.
    *
    * @param query a groupBy query to be processed
+   * @param context2
    *
    * @return broker resource
    */
-  public GroupByQueryResources prepareResource(GroupByQuery query)
+  public GroupByQueryResources prepareResource(GroupByQuery query, ResponseContext context2)
   {
+    BlockingPool<ByteBuffer> mergeBufferPool = rootMergeBufferPool.newSubPool();
+    context2.setQueryMergeBuffers(mergeBufferPool);
+
     final int requiredMergeBufferNum = GroupByQueryResources.countRequiredMergeBufferNum(query);
 
     if (requiredMergeBufferNum > mergeBufferPool.maxSize()) {
@@ -139,7 +144,7 @@ public class GroupingEngine
     } else if (requiredMergeBufferNum == 0) {
       return new GroupByQueryResources();
     } else {
-      final List<ReferenceCountingResourceHolder<ByteBuffer>> mergeBufferHolders;
+      final List<ResourceHolder<ByteBuffer>> mergeBufferHolders;
       final QueryContext context = query.context();
       if (context.hasTimeout()) {
         mergeBufferHolders = mergeBufferPool.takeBatch(requiredMergeBufferNum, context.getTimeout());
@@ -405,7 +410,6 @@ public class GroupingEngine
         queryWatcher,
         queryRunners,
         processingConfig.getNumThreads(),
-        mergeBufferPool,
         processingConfig.intermediateComputeSizeBytes(),
         spillMapper,
         processingConfig.getTmpDir()

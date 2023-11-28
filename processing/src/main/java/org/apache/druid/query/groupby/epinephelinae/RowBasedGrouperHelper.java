@@ -30,6 +30,7 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 import it.unimi.dsi.fastutil.ints.IntArrays;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import org.apache.druid.collections.ReferenceCountingResourceHolder;
+import org.apache.druid.collections.ResourceHolder;
 import org.apache.druid.common.config.NullHandling;
 import org.apache.druid.common.guava.SettableSupplier;
 import org.apache.druid.common.utils.IntArrayUtils;
@@ -180,7 +181,7 @@ public class RowBasedGrouperHelper
       final GroupByQueryConfig config,
       final DruidProcessingConfig processingConfig,
       final Supplier<ByteBuffer> bufferSupplier,
-      @Nullable final ReferenceCountingResourceHolder<ByteBuffer> combineBufferHolder,
+      @Nullable final ResourceHolder<ByteBuffer> combineBufferHolder,
       final int concurrencyHint,
       final LimitedTemporaryStorage temporaryStorage,
       final ObjectMapper spillMapper,

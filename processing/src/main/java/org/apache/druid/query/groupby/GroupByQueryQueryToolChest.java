@@ -152,7 +152,7 @@ public class GroupByQueryQueryToolChest extends QueryToolChest<ResultRow, GroupB
       ResponseContext context
   )
   {
-    final GroupByQueryResources resource = groupingEngine.prepareResource(query);
+    final GroupByQueryResources resource = groupingEngine.prepareResource(query, context);
     try {
       final Sequence<ResultRow> mergedSequence = mergeGroupByResults(
           query,

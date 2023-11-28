@@ -76,6 +76,12 @@ public class ReferenceCountingResourceHolder<T> implements ResourceHolder<T>
     return object;
   }
 
+  @Override
+  public ResourceHolder<T> newReference()
+  {
+    return increment();
+  }
+
   /**
    * Increments the reference count by 1 and returns a {@link ResourceHolder} representing the new references.
    * The returned {@link ResourceHolder} "close" method decrements the reference count when the caller no longer
@@ -84,7 +90,7 @@ public class ReferenceCountingResourceHolder<T> implements ResourceHolder<T>
    * Returned {@link ResourceHolder} are not thread-safe. If multiple threads need references to the same resource, they
    * should each call this method on the original object.
    */
-  public ResourceHolder<T> increment()
+  private ResourceHolder<T> increment()
   {
     while (true) {
       int count = this.refCount.get();

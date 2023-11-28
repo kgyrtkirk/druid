@@ -41,11 +41,11 @@ public class ReferenceCountingResourceHolderTest
   private void runIdiomaticUsage()
   {
     final AtomicBoolean released = new AtomicBoolean(false);
-    final ReferenceCountingResourceHolder<Closeable> resourceHolder = makeReleasingHandler(released);
+    final ResourceHolder<Closeable> resourceHolder = makeReleasingHandler(released);
     List<Thread> threads = new ArrayList<>();
     for (int i = 0; i < 100; i++) {
       Thread thread = new Thread(() -> {
-        try (ResourceHolder<Closeable> r = resourceHolder.increment()) {
+        try (ResourceHolder<Closeable> r = resourceHolder.newReference()) {
           try {
             Thread.sleep(1);
           }
@@ -106,7 +106,7 @@ public class ReferenceCountingResourceHolderTest
   private void createDanglingReleaser(AtomicBoolean released)
   {
     try (ReferenceCountingResourceHolder<Closeable> handler = makeReleasingHandler(released)) {
-      handler.increment(); // Releaser not close, the object leaked
+      handler.newReference();
     }
   }
 

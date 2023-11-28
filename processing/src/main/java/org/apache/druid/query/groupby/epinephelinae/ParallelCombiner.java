@@ -27,7 +27,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import org.apache.druid.collections.ReferenceCountingResourceHolder;
+import org.apache.druid.collections.ResourceHolder;
 import org.apache.druid.java.util.common.CloseableIterators;
 import org.apache.druid.java.util.common.ISE;
 import org.apache.druid.java.util.common.Pair;
@@ -85,7 +85,7 @@ public class ParallelCombiner<KeyType>
   // details.
   private static final int MINIMUM_LEAF_COMBINE_DEGREE = 2;
 
-  private final ReferenceCountingResourceHolder<ByteBuffer> combineBufferHolder;
+  private final ResourceHolder<ByteBuffer> combineBufferHolder;
   private final AggregatorFactory[] combiningFactories;
   private final KeySerdeFactory<KeyType> combineKeySerdeFactory;
   private final ListeningExecutorService executor;
@@ -99,7 +99,7 @@ public class ParallelCombiner<KeyType>
   private final int intermediateCombineDegree;
 
   public ParallelCombiner(
-      ReferenceCountingResourceHolder<ByteBuffer> combineBufferHolder,
+      ResourceHolder<ByteBuffer> combineBufferHolder,
       AggregatorFactory[] combiningFactories,
       KeySerdeFactory<KeyType> combineKeySerdeFactory,
       ListeningExecutorService executor,
@@ -408,7 +408,7 @@ public class ParallelCombiner<KeyType>
                 );
                 // This variable is used to close releaser automatically.
                 @SuppressWarnings("unused")
-                final Closeable releaser = combineBufferHolder.increment()
+                final Closeable releaser = combineBufferHolder.newReference()
             ) {
               while (mergedIterator.hasNext()) {
                 final Entry<KeyType> next = mergedIterator.next();

@@ -81,7 +81,7 @@ public class DefaultBlockingPool<T> implements BlockingPool<T>
   }
 
   @Nullable
-  private ReferenceCountingResourceHolder<T> wrapObject(T theObject)
+  private ResourceHolder<T> wrapObject(T theObject)
   {
     return theObject == null ? null : new ReferenceCountingResourceHolder<>(
         theObject,
@@ -90,7 +90,7 @@ public class DefaultBlockingPool<T> implements BlockingPool<T>
   }
 
   @Override
-  public List<ReferenceCountingResourceHolder<T>> takeBatch(final int elementNum, final long timeoutMs)
+  public List<ResourceHolder<T>> takeBatch(final int elementNum, final long timeoutMs)
   {
     Preconditions.checkArgument(timeoutMs >= 0, "timeoutMs must be a non-negative value, but was [%s]", timeoutMs);
     checkInitialized();
@@ -108,7 +108,7 @@ public class DefaultBlockingPool<T> implements BlockingPool<T>
   }
 
   @Override
-  public List<ReferenceCountingResourceHolder<T>> takeBatch(final int elementNum)
+  public List<ResourceHolder<T>> takeBatch(final int elementNum)
   {
     checkInitialized();
     try {

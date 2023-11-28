@@ -35,4 +35,9 @@ public interface ResourceHolder<T> extends Closeable
   {
     return new CloseableResourceHolder<>(resource);
   }
+
+  default ResourceHolder<T> newReference()
+  {
+    throw new RuntimeException();
+  }
 }

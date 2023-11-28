@@ -31,7 +31,7 @@ import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import org.apache.druid.collections.BlockingPool;
-import org.apache.druid.collections.ReferenceCountingResourceHolder;
+import org.apache.druid.collections.ResourceHolder;
 import org.apache.druid.common.guava.GuavaUtils;
 import org.apache.druid.java.util.common.ISE;
 import org.apache.druid.java.util.common.Pair;
@@ -93,7 +93,6 @@ public class GroupByMergingQueryRunnerV2 implements QueryRunner<ResultRow>
   private final QueryProcessingPool queryProcessingPool;
   private final QueryWatcher queryWatcher;
   private final int concurrencyHint;
-  private final BlockingPool<ByteBuffer> mergeBufferPool;
   private final ObjectMapper spillMapper;
   private final String processingTmpDir;
   private final int mergeBufferSize;
@@ -105,7 +104,6 @@ public class GroupByMergingQueryRunnerV2 implements QueryRunner<ResultRow>
       QueryWatcher queryWatcher,
       Iterable<QueryRunner<ResultRow>> queryables,
       int concurrencyHint,
-      BlockingPool<ByteBuffer> mergeBufferPool,
       int mergeBufferSize,
       ObjectMapper spillMapper,
       String processingTmpDir
@@ -117,7 +115,6 @@ public class GroupByMergingQueryRunnerV2 implements QueryRunner<ResultRow>
     this.queryWatcher = queryWatcher;
     this.queryables = Iterables.unmodifiableIterable(Iterables.filter(queryables, Predicates.notNull()));
     this.concurrencyHint = concurrencyHint;
-    this.mergeBufferPool = mergeBufferPool;
     this.spillMapper = spillMapper;
     this.processingTmpDir = processingTmpDir;
     this.mergeBufferSize = mergeBufferSize;
@@ -165,6 +162,16 @@ public class GroupByMergingQueryRunnerV2 implements QueryRunner<ResultRow>
     final boolean hasTimeout = queryContext.hasTimeout();
     final long timeoutAt = System.currentTimeMillis() + queryTimeout;
 
+    // If parallelCombine is enabled, we need two merge buffers for parallel aggregating and parallel combining
+    final int numMergeBuffers = querySpecificConfig.getNumParallelCombineThreads() > 1 ? 2 : 1;
+
+    final List<ResourceHolder<ByteBuffer>> mergeBufferHolders = getMergeBuffersHolder(
+        numMergeBuffers,
+        hasTimeout,
+        timeoutAt,
+        responseContext.getQueryMergeBuffers()
+    );
+
     return new BaseSequence<>(
         new BaseSequence.IteratorMaker<ResultRow, CloseableGrouperIterator<RowBasedKey, ResultRow>>()
         {
@@ -178,22 +185,15 @@ public class GroupByMergingQueryRunnerV2 implements QueryRunner<ResultRow>
                   temporaryStorageDirectory,
                   querySpecificConfig.getMaxOnDiskStorage().getBytes()
               );
-              final ReferenceCountingResourceHolder<LimitedTemporaryStorage> temporaryStorageHolder =
-                  ReferenceCountingResourceHolder.fromCloseable(temporaryStorage);
+              final ResourceHolder<LimitedTemporaryStorage> temporaryStorageHolder =
+                  ResourceHolder.fromCloseable(temporaryStorage);
               resources.register(temporaryStorageHolder);
 
-              // If parallelCombine is enabled, we need two merge buffers for parallel aggregating and parallel combining
-              final int numMergeBuffers = querySpecificConfig.getNumParallelCombineThreads() > 1 ? 2 : 1;
 
-              final List<ReferenceCountingResourceHolder<ByteBuffer>> mergeBufferHolders = getMergeBuffersHolder(
-                  numMergeBuffers,
-                  hasTimeout,
-                  timeoutAt
-              );
               resources.registerAll(mergeBufferHolders);
 
-              final ReferenceCountingResourceHolder<ByteBuffer> mergeBufferHolder = mergeBufferHolders.get(0);
-              final ReferenceCountingResourceHolder<ByteBuffer> combineBufferHolder = numMergeBuffers == 2 ?
+              final ResourceHolder<ByteBuffer> mergeBufferHolder = mergeBufferHolders.get(0);
+              final ResourceHolder<ByteBuffer> combineBufferHolder = numMergeBuffers == 2 ?
                                                                                       mergeBufferHolders.get(1) :
                                                                                       null;
 
@@ -218,8 +218,8 @@ public class GroupByMergingQueryRunnerV2 implements QueryRunner<ResultRow>
               final Accumulator<AggregateResult, ResultRow> accumulator = pair.rhs;
               grouper.init();
 
-              final ReferenceCountingResourceHolder<Grouper<RowBasedKey>> grouperHolder =
-                  ReferenceCountingResourceHolder.fromCloseable(grouper);
+              final ResourceHolder<Grouper<RowBasedKey>> grouperHolder =
+                  ResourceHolder.fromCloseable(grouper);
               resources.register(grouperHolder);
 
               List<ListenableFuture<AggregateResult>> futures = Lists.newArrayList(
@@ -243,9 +243,9 @@ public class GroupByMergingQueryRunnerV2 implements QueryRunner<ResultRow>
                                       try (
                                           // These variables are used to close releasers automatically.
                                           @SuppressWarnings("unused")
-                                          Closeable bufferReleaser = mergeBufferHolder.increment();
+                                          Closeable bufferReleaser = mergeBufferHolder.newReference();
                                           @SuppressWarnings("unused")
-                                          Closeable grouperReleaser = grouperHolder.increment()
+                                          Closeable grouperReleaser = grouperHolder.newReference()
                                       ) {
                                         // Return true if OK, false if resources were exhausted.
                                         return input.run(queryPlusForRunners, responseContext)
@@ -309,10 +309,11 @@ public class GroupByMergingQueryRunnerV2 implements QueryRunner<ResultRow>
     );
   }
 
-  private List<ReferenceCountingResourceHolder<ByteBuffer>> getMergeBuffersHolder(
+  private List<ResourceHolder<ByteBuffer>> getMergeBuffersHolder(
       int numBuffers,
       boolean hasTimeout,
-      long timeoutAt
+      long timeoutAt,
+      BlockingPool<ByteBuffer> mergeBufferPool
   )
   {
     try {
@@ -323,7 +324,7 @@ public class GroupByMergingQueryRunnerV2 implements QueryRunner<ResultRow>
             + "Try raising druid.processing.numMergeBuffers."
         );
       }
-      final List<ReferenceCountingResourceHolder<ByteBuffer>> mergeBufferHolder;
+      final List<ResourceHolder<ByteBuffer>> mergeBufferHolder;
       // This will potentially block if there are no merge buffers left in the pool.
       if (hasTimeout) {
         final long timeout = timeoutAt - System.currentTimeMillis();

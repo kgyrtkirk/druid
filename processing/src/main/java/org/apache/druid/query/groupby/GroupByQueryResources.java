@@ -20,7 +20,6 @@
 package org.apache.druid.query.groupby;
 
 import com.google.common.annotations.VisibleForTesting;
-import org.apache.druid.collections.ReferenceCountingResourceHolder;
 import org.apache.druid.collections.ResourceHolder;
 import org.apache.druid.java.util.common.collect.Utils;
 import org.apache.druid.java.util.common.logger.Logger;
@@ -98,8 +97,10 @@ public class GroupByQueryResources implements Closeable
   }
 
   @Nullable
-  private final List<ReferenceCountingResourceHolder<ByteBuffer>> mergeBufferHolders;
+  private final List<ResourceHolder<ByteBuffer>> mergeBufferHolders;
   private final Deque<ByteBuffer> mergeBuffers;
+
+  private Deque<ResourceHolder<ByteBuffer>> mergeBufferHolders2;
 
   public GroupByQueryResources()
   {
@@ -107,11 +108,12 @@ public class GroupByQueryResources implements Closeable
     this.mergeBuffers = new ArrayDeque<>();
   }
 
-  public GroupByQueryResources(List<ReferenceCountingResourceHolder<ByteBuffer>> mergeBufferHolders)
+  public GroupByQueryResources(List<ResourceHolder<ByteBuffer>> mergeBufferHolders)
   {
     this.mergeBufferHolders = mergeBufferHolders;
+    this.mergeBufferHolders2 = new ArrayDeque<>(mergeBufferHolders);
     this.mergeBuffers = new ArrayDeque<>(mergeBufferHolders.size());
-    mergeBufferHolders.forEach(holder -> mergeBuffers.add(holder.get()));
+//    mergeBufferHolders.forEach(holder -> mergeBuffers.add(holder.get()));
   }
 
   /**
@@ -124,21 +126,7 @@ public class GroupByQueryResources implements Closeable
    */
   public ResourceHolder<ByteBuffer> getMergeBuffer()
   {
-    final ByteBuffer buffer = mergeBuffers.pop();
-    return new ResourceHolder<ByteBuffer>()
-    {
-      @Override
-      public ByteBuffer get()
-      {
-        return buffer;
-      }
-
-      @Override
-      public void close()
-      {
-        mergeBuffers.add(buffer);
-      }
-    };
+    return mergeBufferHolders2.pop();
   }
 
   @Override
@@ -148,7 +136,7 @@ public class GroupByQueryResources implements Closeable
       if (mergeBuffers.size() != mergeBufferHolders.size()) {
         log.warn("%d resources are not returned yet", mergeBufferHolders.size() - mergeBuffers.size());
       }
-      mergeBufferHolders.forEach(ReferenceCountingResourceHolder::close);
+      mergeBufferHolders.forEach(ResourceHolder::close);
     }
   }
 }

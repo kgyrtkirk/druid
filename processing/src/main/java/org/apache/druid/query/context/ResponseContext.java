@@ -29,6 +29,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.Lists;
+import org.apache.druid.collections.BlockingPool;
 import org.apache.druid.guice.annotations.ExtensionPoint;
 import org.apache.druid.guice.annotations.PublicApi;
 import org.apache.druid.java.util.common.IAE;
@@ -40,6 +41,7 @@ import org.joda.time.Interval;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -891,5 +893,15 @@ public abstract class ResponseContext
     {
       return truncatedResult != null;
     }
+  }
+
+  public BlockingPool<ByteBuffer> getQueryMergeBuffers() {
+    throw new  RuntimeException("unimpl");
+  }
+
+  public void setQueryMergeBuffers(BlockingPool<ByteBuffer> mergeBufferPool)
+  {
+    throw new RuntimeException("Unimplemented!");
+
   }
 }

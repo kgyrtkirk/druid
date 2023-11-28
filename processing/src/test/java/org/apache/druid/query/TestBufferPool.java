@@ -86,7 +86,7 @@ public class TestBufferPool implements NonBlockingPool<ByteBuffer>, BlockingPool
   @Override
   public ResourceHolder<ByteBuffer> take()
   {
-    final List<ReferenceCountingResourceHolder<ByteBuffer>> holders = takeBatch(1);
+    final List<ResourceHolder<ByteBuffer>> holders = takeBatch(1);
 
     if (holders.isEmpty()) {
       throw new ISE("Too many objects outstanding");
@@ -96,17 +96,17 @@ public class TestBufferPool implements NonBlockingPool<ByteBuffer>, BlockingPool
   }
 
   @Override
-  public List<ReferenceCountingResourceHolder<ByteBuffer>> takeBatch(int elementNum, long timeoutMs)
+  public List<ResourceHolder<ByteBuffer>> takeBatch(int elementNum, long timeoutMs)
   {
     return takeBatch(elementNum);
   }
 
   @Override
-  public List<ReferenceCountingResourceHolder<ByteBuffer>> takeBatch(int elementNum)
+  public List<ResourceHolder<ByteBuffer>> takeBatch(int elementNum)
   {
     synchronized (this) {
       if (takenFromMap.size() + elementNum <= maxCount) {
-        final List<ReferenceCountingResourceHolder<ByteBuffer>> retVal = new ArrayList<>();
+        final List<ResourceHolder<ByteBuffer>> retVal = new ArrayList<>();
 
         try {
           for (int i = 0; i < elementNum; i++) {

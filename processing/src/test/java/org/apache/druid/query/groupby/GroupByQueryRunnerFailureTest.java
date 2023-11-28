@@ -26,7 +26,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.apache.druid.collections.CloseableDefaultBlockingPool;
 import org.apache.druid.collections.CloseableStupidPool;
-import org.apache.druid.collections.ReferenceCountingResourceHolder;
+import org.apache.druid.collections.ResourceHolder;
 import org.apache.druid.java.util.common.concurrent.Execs;
 import org.apache.druid.java.util.common.granularity.Granularities;
 import org.apache.druid.java.util.common.guava.Sequences;
@@ -236,7 +236,7 @@ public class GroupByQueryRunnerFailureTest
         .setContext(ImmutableMap.of(QueryContexts.TIMEOUT_KEY, 500))
         .build();
 
-    List<ReferenceCountingResourceHolder<ByteBuffer>> holder = null;
+    List<ResourceHolder<ByteBuffer>> holder = null;
     try {
       holder = MERGE_BUFFER_POOL.takeBatch(1, 10);
       expectedException.expect(QueryCapacityExceededException.class);
@@ -245,7 +245,7 @@ public class GroupByQueryRunnerFailureTest
     }
     finally {
       if (holder != null) {
-        holder.forEach(ReferenceCountingResourceHolder::close);
+        holder.forEach(ResourceHolder::close);
       }
     }
   }

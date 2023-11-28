@@ -27,7 +27,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import org.apache.druid.collections.CloseableDefaultBlockingPool;
 import org.apache.druid.collections.CloseableStupidPool;
-import org.apache.druid.collections.ReferenceCountingResourceHolder;
+import org.apache.druid.collections.ResourceHolder;
 import org.apache.druid.java.util.common.concurrent.Execs;
 import org.apache.druid.java.util.common.granularity.Granularities;
 import org.apache.druid.query.DruidProcessingConfig;
@@ -70,9 +70,9 @@ public class GroupByQueryMergeBufferTest extends InitializedNullHandlingTest
     }
 
     @Override
-    public List<ReferenceCountingResourceHolder<ByteBuffer>> takeBatch(final int maxElements, final long timeout)
+    public List<ResourceHolder<ByteBuffer>> takeBatch(final int maxElements, final long timeout)
     {
-      final List<ReferenceCountingResourceHolder<ByteBuffer>> holder = super.takeBatch(maxElements, timeout);
+      final List<ResourceHolder<ByteBuffer>> holder = super.takeBatch(maxElements, timeout);
       final int poolSize = getPoolSize();
       if (minRemainBufferNum > poolSize) {
         minRemainBufferNum = poolSize;
