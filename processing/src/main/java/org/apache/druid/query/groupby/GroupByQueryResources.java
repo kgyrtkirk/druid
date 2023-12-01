@@ -31,6 +31,7 @@ import org.apache.druid.query.dimension.DimensionSpec;
 import java.io.Closeable;
 import java.nio.ByteBuffer;
 import java.util.ArrayDeque;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -101,16 +102,19 @@ public class GroupByQueryResources implements Closeable
 
   private Deque<ResourceHolder<ByteBuffer>> mergeBufferHolders2;
 
+  private List<ResourceHolder<ByteBuffer>> mergeBufferHolders;
+
   public GroupByQueryResources()
   {
+    this(Collections.emptyList());
 //    this.mergeBufferHolders = null;
-//    this.mergeBuffers = new ArrayDeque<>();
-    this.mergeBufferHolders2 = new ArrayDeque<>();
+////    this.mergeBuffers = new ArrayDeque<>();
+//    this.mergeBufferHolders2 = new ArrayDeque<>();
   }
 
   public GroupByQueryResources(List<ResourceHolder<ByteBuffer>> mergeBufferHolders)
   {
-//    this.mergeBufferHolders = mergeBufferHolders;
+    this.mergeBufferHolders = mergeBufferHolders;
     this.mergeBufferHolders2 = new ArrayDeque<>(mergeBufferHolders);
 //    this.mergeBuffers = new ArrayDeque<>(mergeBufferHolders.size());
 //    mergeBufferHolders.forEach(holder -> mergeBuffers.add(holder.get()));
@@ -155,10 +159,10 @@ public class GroupByQueryResources implements Closeable
   {
     if (mergeBufferHolders2 != null) {
       //FIXME
-//      if (mergeBuffers.size() != mergeBufferHolders2.size()) {
-//        log.warn("%d resources are not returned yet", mergeBufferHolders.size() - mergeBuffers.size());
-//      }
-      mergeBufferHolders2.forEach(ResourceHolder::close);
+      if (mergeBufferHolders.size() != mergeBufferHolders2.size()) {
+        log.warn("%d resources are not returned yet", mergeBufferHolders.size() - mergeBufferHolders2.size());
+      }
+      mergeBufferHolders.forEach(ResourceHolder::close);
     }
   }
 }

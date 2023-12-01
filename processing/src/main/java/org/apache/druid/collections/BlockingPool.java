@@ -66,6 +66,9 @@ public interface BlockingPool<T>
           return;
         }
         realHolders = BlockingPool.this.takeBatch(holders.size());
+        if(realHolders == null || realHolders.size() != holders.size()) {
+          throw new RuntimeException("failed to acquire");
+        }
         locked = true;
       }
 
@@ -125,6 +128,9 @@ public interface BlockingPool<T>
         {
           // accept NPE on second call?!
           if (locked) {
+            if(realHolders==null || realHolders.size()==0) {
+              throw new RuntimeException();
+            }
             realHolders.get(idx).close();
           }
         }
