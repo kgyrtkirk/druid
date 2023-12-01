@@ -2510,10 +2510,8 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
                                 .intervals(querySegmentSpec(Filtration.eternity()))
                                 .granularity(Granularities.ALL)
                                 .aggregators(aggregators(new LongSumAggregatorFactory("a0", "cnt")))
-                                .context(QUERY_CONTEXT_DEFAULT)
                                 .build()
                         ),
-
                         new QueryDataSource(
                             GroupByQuery.builder()
                                 .setDataSource(
@@ -2556,7 +2554,6 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
                                         )
                                     )
                                 )
-                                .setContext(QUERY_CONTEXT_DEFAULT)
                                 .build()
                         ),
                         "j0.",
