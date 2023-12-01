@@ -36,7 +36,6 @@ import org.apache.calcite.rel.core.RelFactories;
 import org.apache.calcite.rel.metadata.DefaultRelMetadataProvider;
 import org.apache.calcite.rel.metadata.RelMetadataProvider;
 import org.apache.calcite.rel.rules.AggregateExpandDistinctAggregatesRule;
-import org.apache.calcite.rel.rules.AggregateExpandDistinctAggregatesRule2;
 import org.apache.calcite.rel.rules.CoreRules;
 import org.apache.calcite.rel.rules.DateRangeRules;
 import org.apache.calcite.rel.rules.JoinPushThroughJoinRule;
@@ -49,6 +48,7 @@ import org.apache.calcite.tools.Program;
 import org.apache.calcite.tools.Programs;
 import org.apache.calcite.tools.RelBuilder;
 import org.apache.druid.java.util.common.logger.Logger;
+import org.apache.druid.sql.calcite.AggregateExpandDistinctAggregatesRule2;
 import org.apache.druid.sql.calcite.external.ExternalTableScanRule;
 import org.apache.druid.sql.calcite.rule.DruidLogicalValuesRule;
 import org.apache.druid.sql.calcite.rule.DruidRelToDruidRule;
@@ -66,6 +66,8 @@ import java.util.Set;
 
 public class CalciteRulesManager
 {
+  private static final boolean ENABLE_LOCAL_AGGEXPAND_RULE = true;
+
   private static final Logger log = new Logger(CalciteRulesManager.class);
 
   public static final int DRUID_CONVENTION_RULES = 0;
@@ -359,14 +361,14 @@ public class CalciteRulesManager
           && plannerContext.featureAvailable(EngineFeature.GROUPING_SETS)) {
         rules.add(CoreRules.AGGREGATE_EXPAND_DISTINCT_AGGREGATES);
       } else {
-        if(true) {
+        if (ENABLE_LOCAL_AGGEXPAND_RULE) {
           RelOptRule r = new AggregateExpandDistinctAggregatesRule2(
               AggregateExpandDistinctAggregatesRule.Config.JOIN
           );
           rules.add(r);
 
         } else {
-         rules.add(CoreRules.AGGREGATE_EXPAND_DISTINCT_AGGREGATES_TO_JOIN);
+          rules.add(CoreRules.AGGREGATE_EXPAND_DISTINCT_AGGREGATES_TO_JOIN);
         }
       }
     }
