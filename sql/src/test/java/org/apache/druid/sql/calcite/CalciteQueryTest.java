@@ -2499,6 +2499,87 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
         )
         .sql(sqlQuery)
         .authResult(CalciteTests.REGULAR_USER_AUTH_RESULT)
+        .expectedQuery(
+
+            Druids.newScanQueryBuilder()
+                .dataSource(
+                    JoinDataSource.create(
+                        new QueryDataSource(
+                            Druids.newTimeseriesQueryBuilder()
+                                .dataSource(CalciteTests.DATASOURCE1)
+                                .intervals(querySegmentSpec(Filtration.eternity()))
+                                .granularity(Granularities.ALL)
+                                .aggregators(aggregators(new LongSumAggregatorFactory("a0", "cnt")))
+                                .context(QUERY_CONTEXT_DEFAULT)
+                                .build()
+                        ),
+
+                        new QueryDataSource(
+                            GroupByQuery.builder()
+                                .setDataSource(
+                                    new QueryDataSource(
+                                        GroupByQuery.builder()
+                                            .setDataSource(CalciteTests.DATASOURCE1)
+                                            .setInterval(querySegmentSpec(Filtration.eternity()))
+                                            .setGranularity(Granularities.ALL)
+                                            .setVirtualColumns(
+                                                expressionVirtualColumn(
+                                                    "v0",
+                                                    "case_searched((\"cnt\" == 1),\"dim1\",null)",
+                                                    ColumnType.STRING
+                                                ),
+                                                expressionVirtualColumn(
+                                                    "v1",
+                                                    "1",
+                                                    ColumnType.LONG
+                                                )
+                                            )
+                                            .setDimensions(
+                                                dimensions(
+                                                    new DefaultDimensionSpec("v0", "d0", ColumnType.STRING),
+                                                    new DefaultDimensionSpec("v1", "d1", ColumnType.LONG)
+                                                )
+                                            )
+                                            .build()
+                                    )
+                                )
+                                .setInterval(querySegmentSpec(Filtration.eternity()))
+                                .setGranularity(Granularities.ALL)
+                                .setAggregatorSpecs(
+                                    aggregators(
+                                        new FilteredAggregatorFactory(
+                                            new CountAggregatorFactory("a0"),
+                                            and(
+                                                notNull("d0"),
+                                                expressionFilter("\"d1\"")
+                                            )
+                                        )
+                                    )
+                                )
+                                .setContext(QUERY_CONTEXT_DEFAULT)
+                                .build()
+                        ),
+                        "j0.",
+                        "1",
+                        JoinType.INNER,
+                        null,
+                        ExprMacroTable.nil(),
+                        CalciteTests.createJoinableFactoryWrapper()
+                    )
+
+                )
+                .intervals(querySegmentSpec(Filtration.eternity()))
+                .columns("a0", "j0.a0")
+                .resultFormat(ResultFormat.RESULT_FORMAT_COMPACTED_LIST)
+                .legacy(false)
+                .build()
+
+        )
+        .expectedResults(
+            ImmutableList.of(
+                new Object[] {NullHandling.replaceWithDefault() ? 5L : 6L, 6L}
+            )
+        )
         .run();
   }
 
