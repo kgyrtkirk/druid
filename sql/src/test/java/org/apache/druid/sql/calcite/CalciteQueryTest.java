@@ -2480,6 +2480,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @NotYetSupported(Modes.NOT_ENOUGH_RULES)
   @Test
   public void testExactCountDistinctWithFilter()
   {
@@ -2500,7 +2501,6 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
         .sql(sqlQuery)
         .authResult(CalciteTests.REGULAR_USER_AUTH_RESULT)
         .expectedQuery(
-
             Druids.newScanQueryBuilder()
                 .dataSource(
                     JoinDataSource.create(
