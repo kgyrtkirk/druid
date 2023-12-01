@@ -2487,18 +2487,18 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     msqIncompatible();
     final String sqlQuery = "SELECT COUNT(DISTINCT foo.dim1) FILTER(WHERE foo.cnt = 1), SUM(foo.cnt) FROM druid.foo";
 
-    testQuery(
-        PLANNER_CONFIG_NO_HLL.withOverrides(
-            ImmutableMap.of(
-                PlannerConfig.CTX_KEY_USE_GROUPING_SET_FOR_EXACT_DISTINCT, "false",
-                PlannerConfig.CTX_KEY_USE_APPROXIMATE_COUNT_DISTINCT, false
+    testBuilder()
+        .plannerConfig(
+            PLANNER_CONFIG_NO_HLL.withOverrides(
+                ImmutableMap.of(
+                    PlannerConfig.CTX_KEY_USE_GROUPING_SET_FOR_EXACT_DISTINCT, false,
+                    PlannerConfig.CTX_KEY_USE_APPROXIMATE_COUNT_DISTINCT, false
+                )
             )
-        ), // Enable exact count distinct
-        sqlQuery,
-        CalciteTests.REGULAR_USER_AUTH_RESULT,
-        ImmutableList.of(),
-        ImmutableList.of()
-    );
+        )
+        .sql(sqlQuery)
+        .authResult(CalciteTests.REGULAR_USER_AUTH_RESULT)
+        .run();
   }
 
   @Test
