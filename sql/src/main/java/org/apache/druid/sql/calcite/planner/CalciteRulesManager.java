@@ -35,6 +35,8 @@ import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.core.RelFactories;
 import org.apache.calcite.rel.metadata.DefaultRelMetadataProvider;
 import org.apache.calcite.rel.metadata.RelMetadataProvider;
+import org.apache.calcite.rel.rules.AggregateExpandDistinctAggregatesRule;
+import org.apache.calcite.rel.rules.AggregateExpandDistinctAggregatesRule2;
 import org.apache.calcite.rel.rules.CoreRules;
 import org.apache.calcite.rel.rules.DateRangeRules;
 import org.apache.calcite.rel.rules.JoinPushThroughJoinRule;
@@ -357,7 +359,15 @@ public class CalciteRulesManager
           && plannerContext.featureAvailable(EngineFeature.GROUPING_SETS)) {
         rules.add(CoreRules.AGGREGATE_EXPAND_DISTINCT_AGGREGATES);
       } else {
-        rules.add(CoreRules.AGGREGATE_EXPAND_DISTINCT_AGGREGATES_TO_JOIN);
+        if(true) {
+          RelOptRule r = new AggregateExpandDistinctAggregatesRule2(
+              AggregateExpandDistinctAggregatesRule.Config.JOIN
+          );
+          rules.add(r);
+
+        } else {
+         rules.add(CoreRules.AGGREGATE_EXPAND_DISTINCT_AGGREGATES_TO_JOIN);
+        }
       }
     }
 

@@ -92,7 +92,7 @@ public final class AggregateExpandDistinctAggregatesRule2
 
   AggregateExpandDistinctAggregatesRule a;
     /** Creates an AggregateExpandDistinctAggregatesRule. */
-  AggregateExpandDistinctAggregatesRule2(AggregateExpandDistinctAggregatesRule.Config config) {
+  public AggregateExpandDistinctAggregatesRule2(AggregateExpandDistinctAggregatesRule.Config config) {
     super(config);
   }
 
