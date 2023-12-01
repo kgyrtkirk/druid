@@ -2485,6 +2485,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
   {
     requireMergeBuffers(3);
     msqIncompatible();
+    cannotVectorize();
     final String sqlQuery = "SELECT COUNT(DISTINCT foo.dim1) FILTER(WHERE foo.cnt = 1), SUM(foo.cnt) FROM druid.foo";
 
     testBuilder()

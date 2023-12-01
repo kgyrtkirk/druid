@@ -883,6 +883,8 @@ public final class AggregateExpandDistinctAggregatesRule2
                 rexBuilder.makeNullLiteral(argRef.left.getType()));
         sourceOf.put(arg, projects.size());
         projects.add(condition, "i$" + argRef.right);
+        sourceOf.put(filterArg, projects.size());
+        projects.add(rexBuilder.makeLiteral(true), "__true_" + filterArg);
         continue;
       }
       if (sourceOf.get(arg) != null) {
