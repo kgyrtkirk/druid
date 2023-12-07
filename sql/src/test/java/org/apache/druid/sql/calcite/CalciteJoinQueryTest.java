@@ -3671,8 +3671,12 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
                                 .build()
                         ),
                         "j0.",
-                        equalsCondition(makeColumnExpression("dim1"), makeColumnExpression("j0.d0")),
-                        JoinType.LEFT
+                        StringUtils.format(
+                            "(%s && %s)",
+                            equalsCondition(makeColumnExpression("dim1"), makeColumnExpression("j0.d0")),
+                            equalsCondition(makeExpression("'abc'"), makeColumnExpression("j0.d0"))
+                            ),
+                        JoinType.INNER
                     )
                 )
                 .intervals(querySegmentSpec(Filtration.eternity()))

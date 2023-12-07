@@ -133,7 +133,11 @@ public class CalciteRulesManager
           CoreRules.PROJECT_FILTER_VALUES_MERGE,
           CoreRules.PROJECT_VALUES_MERGE,
           CoreRules.SORT_PROJECT_TRANSPOSE,
-          CoreRules.AGGREGATE_VALUES
+          CoreRules.AGGREGATE_VALUES,
+//          CoreRules.filter_join
+//          FilterJoinExcludePushToChildRule.FILTER_ON_JOIN_EXCLUDE_PUSH_TO_CHILD,
+          CoreRules.FILTER_INTO_JOIN,
+          CoreRules.JOIN_CONDITION_PUSH
       );
 
   /**
