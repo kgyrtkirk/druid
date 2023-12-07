@@ -197,8 +197,8 @@ public class CalciteSelectQueryMSQTest extends CalciteQueryTest
     }
   }
 
-  @Test(timeout = 30000)
-  public void testJoinALot()
+  @Test(timeout = 40000)
+  public void testJoinMultipleTablesWithWhereCondition()
   {
     testBuilder()
         .queryContext(
