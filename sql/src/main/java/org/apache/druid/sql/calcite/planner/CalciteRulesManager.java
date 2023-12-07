@@ -92,6 +92,7 @@ public class CalciteRulesManager
           CoreRules.AGGREGATE_PROJECT_STAR_TABLE,
           CoreRules.PROJECT_MERGE,
           CoreRules.FILTER_SCAN,
+          CoreRules.PROJECT_FILTER_TRANSPOSE,
           CoreRules.FILTER_PROJECT_TRANSPOSE,
           CoreRules.JOIN_PUSH_EXPRESSIONS,
           CoreRules.AGGREGATE_EXPAND_WITHIN_DISTINCT,
