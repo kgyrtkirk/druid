@@ -59,7 +59,6 @@ import org.apache.druid.sql.calcite.rule.SortCollapseRule;
 import org.apache.druid.sql.calcite.rule.logical.DruidLogicalRules;
 import org.apache.druid.sql.calcite.run.EngineFeature;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -92,11 +91,11 @@ public class CalciteRulesManager
           CoreRules.AGGREGATE_PROJECT_STAR_TABLE,
           CoreRules.PROJECT_MERGE,
           CoreRules.FILTER_SCAN,
-          CoreRules.PROJECT_FILTER_TRANSPOSE,
+//          CoreRules.PROJECT_FILTER_TRANSPOSE,
           CoreRules.FILTER_PROJECT_TRANSPOSE,
           CoreRules.JOIN_PUSH_EXPRESSIONS,
           CoreRules.AGGREGATE_EXPAND_WITHIN_DISTINCT,
-          CoreRules.AGGREGATE_CASE_TO_FILTER,
+//          CoreRules.AGGREGATE_CASE_TO_FILTER,
           CoreRules.FILTER_AGGREGATE_TRANSPOSE,
           CoreRules.PROJECT_WINDOW_TRANSPOSE,
           CoreRules.MATCH,
@@ -134,7 +133,16 @@ public class CalciteRulesManager
           CoreRules.PROJECT_FILTER_VALUES_MERGE,
           CoreRules.PROJECT_VALUES_MERGE,
           CoreRules.SORT_PROJECT_TRANSPOSE,
-          CoreRules.AGGREGATE_VALUES
+          CoreRules.AGGREGATE_VALUES,
+                    CoreRules.AGGREGATE_REMOVE,
+                    CoreRules.PROJECT_MERGE,  //  AGGREGATE_REMOVE may leave project-on-project behind
+                    CoreRules.AGGREGATE_CASE_TO_FILTER,
+                    CoreRules.AGGREGATE_PROJECT_MERGE,
+                    CoreRules.PROJECT_AGGREGATE_MERGE
+//          CoreRules.filter_join
+//          FilterJoinExcludePushToChildRule.FILTER_ON_JOIN_EXCLUDE_PUSH_TO_CHILD,
+//          CoreRules.FILTER_INTO_JOIN
+//          CoreRules.JOIN_CONDITION_PUSH
       );
 
   /**
@@ -225,19 +233,12 @@ public class CalciteRulesManager
   public List<Program> programs(final PlannerContext plannerContext)
   {
     // Program that pre-processes the tree before letting the full-on VolcanoPlanner loose.
-    List<RelOptRule> hepRules = new ArrayList<RelOptRule>();
-    hepRules.addAll(REDUCTION_RULES);
-    if (plannerContext.getJoinAlgorithm().requiresSubquery()) {
-      hepRules.add(CoreRules.FILTER_INTO_JOIN);
-    }
     final Program preProgram =
         Programs.sequence(
             Programs.subQuery(DefaultRelMetadataProvider.INSTANCE),
             DecorrelateAndTrimFieldsProgram.INSTANCE,
-            buildHepProgram(hepRules, true, DefaultRelMetadataProvider.INSTANCE, HEP_DEFAULT_MATCH_LIMIT)
-
+            buildHepProgram(REDUCTION_RULES, true, DefaultRelMetadataProvider.INSTANCE, HEP_DEFAULT_MATCH_LIMIT)
         );
-
 
     boolean isDebug = plannerContext.queryContext().isDebug();
     return ImmutableList.of(
