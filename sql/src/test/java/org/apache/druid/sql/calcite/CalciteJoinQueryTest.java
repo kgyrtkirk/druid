@@ -1181,7 +1181,13 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
                     join(
                         join(
                             new TableDataSource(CalciteTests.DATASOURCE1),
-                            new LookupDataSource("lookyloo"),
+                            new QueryDataSource(
+                                newScanQueryBuilder()
+                                    .dataSource(new LookupDataSource("lookyloo"))
+                                    .filters(equality("v", "xa", ColumnType.STRING))
+                                    .columns("k", "v")
+                                    .build()
+                            ),
                             "j0.",
                             equalsCondition(makeColumnExpression("dim2"), makeColumnExpression("j0.k")),
                             JoinType.INNER
@@ -1193,7 +1199,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
                     )
                 )
                 .intervals(querySegmentSpec(Filtration.eternity()))
-                .filters(equality("j0.v", "xa", ColumnType.STRING))
                 .columns("dim1")
                 .context(queryContext)
                 .build()
@@ -1224,7 +1229,13 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
                     join(
                         join(
                             new TableDataSource(CalciteTests.DATASOURCE1),
-                            new LookupDataSource("lookyloo"),
+                            new QueryDataSource(
+                                newScanQueryBuilder()
+                                    .dataSource(new LookupDataSource("lookyloo"))
+                                    .filters(equality("v", "xa", ColumnType.STRING))
+                                    .columns("k", "v")
+                                    .build()
+                            ),
                             "j0.",
                             equalsCondition(makeColumnExpression("dim2"), makeColumnExpression("j0.k")),
                             JoinType.INNER
@@ -1237,7 +1248,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
                 )
                 .intervals(querySegmentSpec(Filtration.eternity()))
                 .limit(100)
-                .filters(equality("j0.v", "xa", ColumnType.STRING))
                 .columns("__time", "cnt", "dim1", "dim2", "dim3", "m1", "m2", "unique_dim1")
                 .context(queryContext)
                 .build()
@@ -1266,7 +1276,13 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
                     join(
                         join(
                             new TableDataSource(CalciteTests.DATASOURCE1),
-                            new LookupDataSource("lookyloo"),
+                            new QueryDataSource(
+                                newScanQueryBuilder()
+                                    .dataSource(new LookupDataSource("lookyloo"))
+                                    .filters(equality("v", "xa", ColumnType.STRING))
+                                    .columns("k", "v")
+                                    .build()
+                            ),
                             "j0.",
                             equalsCondition(makeColumnExpression("dim2"), makeColumnExpression("j0.k")),
                             JoinType.INNER
@@ -1278,7 +1294,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
                     )
                 )
                 .intervals(querySegmentSpec(Filtration.eternity()))
-                .filters(equality("j0.v", "xa", ColumnType.STRING))
                 .columns("__time", "cnt", "dim1", "dim2", "dim3", "m1", "m2", "unique_dim1")
                 .context(queryContext)
                 .build()
@@ -2022,9 +2037,17 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
                       join(
                           join(
                               new TableDataSource(CalciteTests.DATASOURCE1),
-                              new LookupDataSource("lookyloo"),
+                              new QueryDataSource(
+                                  newScanQueryBuilder()
+                                      .dataSource(new LookupDataSource("lookyloo"))
+                                      .columns("k", "v0")
+                                      .virtualColumns(
+                                          expressionVirtualColumn("v0", "CAST(\"k\", 'LONG')", ColumnType.LONG)
+                                      )
+                                      .build()
+                              ),
                               "j0.",
-                              "1",
+                              "(\"cnt\" == \"j0.v0\")",
                               JoinType.INNER
                           ),
                           new QueryDataSource(
@@ -2049,13 +2072,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
                   .intervals(querySegmentSpec(Filtration.eternity()))
                   .granularity(Granularities.ALL)
                   .aggregators(new CountAggregatorFactory("a0"))
-                  .filters(
-                      NullHandling.sqlCompatible() ?
-                      expressionFilter("(\"cnt\" == CAST(\"j0.k\", 'LONG'))")
-                                                   : and(
-                                                       expressionFilter("(\"cnt\" == CAST(\"j0.k\", 'LONG'))"),
-                                                       expressionFilter("(CAST(\"j0.k\", 'LONG') == \"_j0.cnt\")")
-                                                   ))
                   .context(QUERY_CONTEXT_DEFAULT)
                   .build()
         ),
@@ -3580,6 +3596,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
                             expressionVirtualColumn("v0", "concat(\"k\",'')", ColumnType.STRING)
                         )
                         .setDimensions(new DefaultDimensionSpec("v0", "d0"))
+                        .setDimFilter(isNull("v0"))
                         .build()
                 ),
                 "j0.",
@@ -3599,7 +3616,16 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
                 new QueryDataSource(
                     GroupByQuery
                         .builder()
-                        .setDataSource(new LookupDataSource("lookyloo"))
+                        .setDataSource(
+                            new QueryDataSource(
+                                newScanQueryBuilder()
+                                    .dataSource(new LookupDataSource("lookyloo"))
+                                    .filters(equality("v", "xa", ColumnType.STRING))
+                                    .columns("k", "v")
+                                    .build()
+                            )
+
+                            )
                         .setInterval(querySegmentSpec(Filtration.eternity()))
                         .setGranularity(Granularities.ALL)
                         .setVirtualColumns(
