@@ -59,6 +59,7 @@ import org.apache.druid.sql.calcite.rule.SortCollapseRule;
 import org.apache.druid.sql.calcite.rule.logical.DruidLogicalRules;
 import org.apache.druid.sql.calcite.run.EngineFeature;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -224,12 +225,19 @@ public class CalciteRulesManager
   public List<Program> programs(final PlannerContext plannerContext)
   {
     // Program that pre-processes the tree before letting the full-on VolcanoPlanner loose.
+    List<RelOptRule> hepRules = new ArrayList<RelOptRule>();
+    hepRules.addAll(REDUCTION_RULES);
+    if (plannerContext.getJoinAlgorithm().requiresSubquery()) {
+      hepRules.add(CoreRules.FILTER_INTO_JOIN);
+    }
     final Program preProgram =
         Programs.sequence(
             Programs.subQuery(DefaultRelMetadataProvider.INSTANCE),
             DecorrelateAndTrimFieldsProgram.INSTANCE,
-            buildHepProgram(REDUCTION_RULES, true, DefaultRelMetadataProvider.INSTANCE, HEP_DEFAULT_MATCH_LIMIT)
+            buildHepProgram(hepRules, true, DefaultRelMetadataProvider.INSTANCE, HEP_DEFAULT_MATCH_LIMIT)
+
         );
+
 
     boolean isDebug = plannerContext.queryContext().isDebug();
     return ImmutableList.of(
