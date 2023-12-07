@@ -137,7 +137,7 @@ public class CalciteRulesManager
                     CoreRules.AGGREGATE_REMOVE,
                     CoreRules.PROJECT_MERGE,  //  AGGREGATE_REMOVE may leave project-on-project behind
                     CoreRules.AGGREGATE_CASE_TO_FILTER,
-                    CoreRules.AGGREGATE_PROJECT_MERGE,
+//                    CoreRules.AGGREGATE_PROJECT_MERGE,
                     CoreRules.PROJECT_AGGREGATE_MERGE
 //          CoreRules.filter_join
 //          FilterJoinExcludePushToChildRule.FILTER_ON_JOIN_EXCLUDE_PUSH_TO_CHILD,
