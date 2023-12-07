@@ -20,7 +20,6 @@
 package org.apache.druid.sql.calcite.rel;
 
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import org.apache.calcite.plan.Convention;
@@ -37,7 +36,6 @@ import org.apache.calcite.rel.core.Project;
 import org.apache.calcite.rel.core.RelFactories;
 import org.apache.calcite.rel.core.Sort;
 import org.apache.calcite.rel.core.Window;
-import org.apache.calcite.rel.core.Window.Group;
 import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.rex.RexBuilder;
 import org.apache.calcite.rex.RexInputRef;
@@ -45,8 +43,6 @@ import org.apache.calcite.rex.RexNode;
 import org.apache.calcite.rex.RexUtil;
 import org.apache.calcite.sql.SqlKind;
 import org.apache.calcite.tools.RelBuilder;
-import org.apache.curator.shaded.com.google.common.collect.Sets;
-import org.apache.curator.shaded.com.google.common.collect.Sets.SetView;
 import org.apache.druid.java.util.common.ISE;
 import org.apache.druid.query.DataSource;
 import org.apache.druid.segment.column.RowSignature;
@@ -679,21 +675,6 @@ public class PartialDruidQuery
           cost += CostEstimates.COST_EXPRESSION;
         }
       }
-    }
-
-    if (getWindow() != null) {
-      ImmutableList<Group> groups = getWindow().groups;
-      RelCollation keys = groups.get(0).orderKeys;
-      RelCollation inputTraits = getScan().getTraitSet().getTrait(RelCollationTraitDef.INSTANCE);
-      List<RelFieldCollation> fieldCollations = inputTraits.getFieldCollations();
-SetView<RelFieldCollation> diff = Sets.difference(
-          Sets.newHashSet(groups.get(0).orderKeys.getFieldCollations()),
-            Sets.newHashSet(inputTraits.getFieldCollations())
-          );
-
-      int cnt = diff.size();
-      cost += -cnt * 100f;
-
     }
 
     // Account for the cost of generating outputs.

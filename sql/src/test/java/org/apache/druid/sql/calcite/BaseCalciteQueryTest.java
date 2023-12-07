@@ -876,6 +876,8 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   )
   {
     testBuilder()
+    .queryContext(ImmutableMap.of(PlannerContext.CTX_ENABLE_WINDOW_FNS, true,
+        QueryContexts.ENABLE_DEBUG, true))
         .plannerConfig(plannerConfig)
         .sql(sql)
         .authResult(authenticationResult)

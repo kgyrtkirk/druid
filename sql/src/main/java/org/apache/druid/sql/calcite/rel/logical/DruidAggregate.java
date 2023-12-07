@@ -23,12 +23,15 @@ import org.apache.calcite.plan.RelOptCluster;
 import org.apache.calcite.plan.RelOptCost;
 import org.apache.calcite.plan.RelOptPlanner;
 import org.apache.calcite.plan.RelTraitSet;
+import org.apache.calcite.rel.RelCollation;
+import org.apache.calcite.rel.RelCollations;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.RelWriter;
 import org.apache.calcite.rel.core.Aggregate;
 import org.apache.calcite.rel.core.AggregateCall;
 import org.apache.calcite.rel.metadata.RelMetadataQuery;
 import org.apache.calcite.util.ImmutableBitSet;
+import org.apache.calcite.util.ImmutableIntList;
 import org.apache.druid.sql.calcite.planner.PlannerContext;
 import org.apache.druid.sql.calcite.rel.CostEstimates;
 
@@ -51,9 +54,19 @@ public class DruidAggregate extends Aggregate implements DruidLogicalNode
       PlannerContext plannerContext
   )
   {
-    super(cluster, traitSet, input, groupSet, groupSets, aggCalls);
+    super(cluster, x(traitSet,groupSet,groupSets), input, groupSet, groupSets, aggCalls);
     assert getConvention() instanceof DruidLogicalConvention;
     this.plannerContext = plannerContext;
+  }
+
+  private static RelTraitSet x(RelTraitSet traitSet, ImmutableBitSet groupSet, List<ImmutableBitSet> groupSets)
+  {
+    if(groupSets.size()!=1) {
+      return traitSet;
+    }
+    ImmutableIntList li = ImmutableIntList.copyOf(groupSet.iterator());
+    RelCollation collation = RelCollations.of(li);
+    return traitSet.plus(collation);
   }
 
   @Override

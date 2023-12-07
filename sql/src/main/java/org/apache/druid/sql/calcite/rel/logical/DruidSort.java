@@ -32,6 +32,7 @@ import org.apache.calcite.rel.metadata.RelMetadataQuery;
 import org.apache.calcite.rex.RexNode;
 import org.apache.druid.sql.calcite.planner.OffsetLimit;
 import org.apache.druid.sql.calcite.rel.CostEstimates;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * {@link DruidLogicalNode} convention node for {@link Sort} plan node.
@@ -86,7 +87,10 @@ public class DruidSort extends Sort implements DruidLogicalNode
     if (!getCollation().getFieldCollations().isEmpty() && fetch == null) {
       cost = rowCount * CostEstimates.MULTIPLIER_ORDER_BY;
     }
-    return planner.getCostFactory().makeCost(rowCount, cost, 0);
+    RelOptCost totalCost = planner.getCostFactory().makeCost(rowCount, cost, 0);
+    @Nullable
+    RelOptCost parentCost = super.computeSelfCost(planner, mq);
+    return totalCost;
   }
 
   @Override
