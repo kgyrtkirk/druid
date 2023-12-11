@@ -498,6 +498,43 @@ public class HllSketchSqlAggregatorTest extends BaseCalciteQueryTest
   }
 
   @Test
+  public void testApproxCountDistinctHllSketchIsRounded2()
+  {
+    testQuery(
+        "select __time, \n"
+        + "\n"
+        + "CASE\n"
+        + "    WHEN HLL_SKETCH_ESTIMATE(DS_HLL(m1)) > 0 THEN CAST(DS_HLL(m1) as VARCHAR(1000)) \n"
+        + "  END as \"flags_hll\"\n"
+        + " FROM druid.foo "
+        + "GROUP BY 1 ",
+        ImmutableList.of(
+            GroupByQuery.builder()
+                        .setInterval(querySegmentSpec(Filtration.eternity()))
+                        .setDataSource(CalciteTests.DATASOURCE1)
+                        .setDimensions(dimensions(new DefaultDimensionSpec("dim2", "_d0")))
+                        .setGranularity(Granularities.ALL)
+                        .setAggregatorSpecs(
+                            aggregators(
+                                new HllSketchBuildAggregatorFactory("a0", "m1", null, null, null, true, true)
+                            )
+                        )
+                        .setHavingSpec(having(equality("a0", 2L, ColumnType.LONG)))
+                        .setContext(QUERY_CONTEXT_DEFAULT)
+                        .build()
+        ),
+        NullHandling.sqlCompatible()
+        ? ImmutableList.of(
+            new Object[]{null, 2L},
+            new Object[]{"a", 2L}
+        )
+        : ImmutableList.of(
+            new Object[]{"a", 2L}
+        )
+    );
+  }
+
+  @Test
   public void testHllSketchFilteredAggregatorsGroupBy()
   {
     testQuery(

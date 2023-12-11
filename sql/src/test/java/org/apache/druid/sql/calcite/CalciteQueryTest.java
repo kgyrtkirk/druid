@@ -14598,15 +14598,14 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     skipVectorize();
     cannotVectorize();
     msqIncompatible();
-    String sql = "with t AS (\n"
-        + "SELECT  \n"
-        + "    RANK() OVER (PARTITION BY m2 ORDER BY m2 ASC) \n"
-        + "      AS ranking,\n"
-        + "    COUNT(m1) as trend_score\n"
-        + "FROM foo\n"
-        + "GROUP BY m2,m1 LIMIT 10\n"
-        + ")\n"
-        + "select ranking, trend_score from t ORDER BY trend_score";
+    String sql = "select __time, \n"
+        + "\n"
+        + "CASE\n"
+        + "    WHEN HLL_SKETCH_ESTIMATE(DS_HLL(comment)) > 0 THEN DS_HLL(comment)\n"
+        + "  END as flags_hll\n"
+        + "  \n"
+        + "FROM wikipedia\n"
+        + "GROUP BY 1";
     ImmutableList<Object[]> expectedResults = ImmutableList.of(
         new Object[] {1L, 1L},
         new Object[] {1L, 1L},
