@@ -132,23 +132,29 @@ public class DruidJoinRule extends RelOptRule
     DruidQuery q = left.toDruidQueryForExplaining();
     List<Interval> intervals = q.getQuery().getIntervals();
     boolean a = (intervals.size() == 0) || (intervals.size() == 1 && Intervals.isEternity(intervals.get(0)));
+
     final boolean isLeftDirectAccessPossible = a && enableLeftScanDirect && (left instanceof DruidQueryRel);
 
 
-
     if (!plannerContext.getJoinAlgorithm().requiresSubquery()
-        && left.getPartialDruidQuery().stage() == PartialDruidQuery.Stage.SELECT_PROJECT
+        && (left.getPartialDruidQuery().stage() == PartialDruidQuery.Stage.SELECT_PROJECT ||
+            left.getPartialDruidQuery().stage() == PartialDruidQuery.Stage.WHERE_FILTER )
         && (isLeftDirectAccessPossible || left.getPartialDruidQuery().getWhereFilter() == null)) {
       // Swap the left-side projection above the join, so the left side is a simple scan or mapping. This helps us
       // avoid subqueries.
       final RelNode leftScan = left.getPartialDruidQuery().getScan();
       final Project leftProject = left.getPartialDruidQuery().getSelectProject();
+      if(leftProject == null) {
+        for (int i = 0; i < left.getRowType().getFieldCount(); i++) {
+          newProjectExprs.add(rexBuilder.makeInputRef(join.getRowType().getFieldList().get(i).getType(), i));
+        }
+      } else {
+        newProjectExprs.addAll(leftProject.getProjects());
+        conditionAnalysis = conditionAnalysis.pushThroughLeftProject(leftProject);
+      }
       leftFilter = left.getPartialDruidQuery().getWhereFilter();
 
-      // Left-side projection expressions rewritten to be on top of the join.
-      newProjectExprs.addAll(leftProject.getProjects());
       newLeft = left.withPartialQuery(PartialDruidQuery.create(leftScan));
-      conditionAnalysis = conditionAnalysis.pushThroughLeftProject(leftProject);
     } else {
       // Leave left as-is. Write input refs that do nothing.
       for (int i = 0; i < left.getRowType().getFieldCount(); i++) {
