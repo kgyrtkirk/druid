@@ -47,12 +47,15 @@ import org.apache.calcite.tools.RelBuilder;
 import org.apache.calcite.util.ImmutableBitSet;
 import org.apache.druid.common.config.NullHandling;
 import org.apache.druid.error.DruidException;
+import org.apache.druid.java.util.common.Intervals;
 import org.apache.druid.query.LookupDataSource;
 import org.apache.druid.sql.calcite.planner.PlannerContext;
 import org.apache.druid.sql.calcite.rel.DruidJoinQueryRel;
+import org.apache.druid.sql.calcite.rel.DruidQuery;
 import org.apache.druid.sql.calcite.rel.DruidQueryRel;
 import org.apache.druid.sql.calcite.rel.DruidRel;
 import org.apache.druid.sql.calcite.rel.PartialDruidQuery;
+import org.joda.time.Interval;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -84,7 +87,7 @@ public class DruidJoinRule extends RelOptRule
   {
     return new DruidJoinRule(plannerContext);
   }
-  
+
   @Override
   public boolean matches(RelOptRuleCall call)
   {
@@ -125,7 +128,13 @@ public class DruidJoinRule extends RelOptRule
         join.getLeft().getRowType(),
         rexBuilder
     );
-    final boolean isLeftDirectAccessPossible = enableLeftScanDirect && (left instanceof DruidQueryRel);
+
+    DruidQuery q = left.toDruidQueryForExplaining();
+    List<Interval> intervals = q.getQuery().getIntervals();
+    boolean a = (intervals.size() == 0) || (intervals.size() == 1 && Intervals.isEternity(intervals.get(0)));
+    final boolean isLeftDirectAccessPossible = a && enableLeftScanDirect && (left instanceof DruidQueryRel);
+
+
 
     if (!plannerContext.getJoinAlgorithm().requiresSubquery()
         && left.getPartialDruidQuery().stage() == PartialDruidQuery.Stage.SELECT_PROJECT
@@ -275,7 +284,7 @@ public class DruidJoinRule extends RelOptRule
       // for an example.
       return conditionAnalysis.getUnsupportedOnSubConditions().isEmpty();
     }
-    
+
     return true;
   }
 

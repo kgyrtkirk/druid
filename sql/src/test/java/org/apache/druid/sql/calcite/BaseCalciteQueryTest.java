@@ -89,6 +89,7 @@ import org.apache.druid.server.security.ResourceAction;
 import org.apache.druid.sql.SqlStatementFactory;
 import org.apache.druid.sql.calcite.QueryTestRunner.QueryResults;
 import org.apache.druid.sql.calcite.expression.DruidExpression;
+import org.apache.druid.sql.calcite.filtration.Filtration;
 import org.apache.druid.sql.calcite.planner.Calcites;
 import org.apache.druid.sql.calcite.planner.PlannerConfig;
 import org.apache.druid.sql.calcite.planner.PlannerContext;
@@ -605,8 +606,10 @@ public class BaseCalciteQueryTest extends CalciteTestBase
 
   public static Druids.ScanQueryBuilder newScanQueryBuilder()
   {
-    return new Druids.ScanQueryBuilder().resultFormat(ScanQuery.ResultFormat.RESULT_FORMAT_COMPACTED_LIST)
-                                        .legacy(false);
+    return new Druids.ScanQueryBuilder()
+        .resultFormat(ScanQuery.ResultFormat.RESULT_FORMAT_COMPACTED_LIST)
+        .intervals(querySegmentSpec(Filtration.eternity()))
+        .legacy(false);
   }
 
   protected static DruidExceptionMatcher invalidSqlIs(String s)
@@ -1407,9 +1410,14 @@ public class BaseCalciteQueryTest extends CalciteTestBase
 
   protected Map<String, Object> withLeftDirectAccessEnabled(Map<String, Object> context)
   {
+    return withJoinLeftScanDirect(context, true);
+  }
+
+  protected Map<String, Object> withJoinLeftScanDirect(Map<String, Object> context, boolean joinLeftScanDirect)
+  {
     // since context is usually immutable in tests, make a copy
     HashMap<String, Object> newContext = new HashMap<>(context);
-    newContext.put(QueryContexts.SQL_JOIN_LEFT_SCAN_DIRECT, true);
+    newContext.put(QueryContexts.SQL_JOIN_LEFT_SCAN_DIRECT, joinLeftScanDirect);
     return newContext;
   }
 
