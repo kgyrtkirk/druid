@@ -111,7 +111,7 @@ public class QueryContexts
   public static final boolean DEFAULT_ENABLE_JOIN_FILTER_REWRITE_VALUE_COLUMN_FILTERS = false;
   public static final boolean DEFAULT_ENABLE_REWRITE_JOIN_TO_FILTER = true;
   public static final long DEFAULT_ENABLE_JOIN_FILTER_REWRITE_MAX_SIZE = 10000;
-  public static final boolean DEFAULT_ENABLE_SQL_JOIN_LEFT_SCAN_DIRECT = false;
+  public static final boolean DEFAULT_ENABLE_SQL_JOIN_LEFT_SCAN_DIRECT = true;
   public static final boolean DEFAULT_USE_FILTER_CNF = false;
   public static final boolean DEFAULT_SECONDARY_PARTITION_PRUNING = true;
   public static final boolean DEFAULT_ENABLE_DEBUG = false;

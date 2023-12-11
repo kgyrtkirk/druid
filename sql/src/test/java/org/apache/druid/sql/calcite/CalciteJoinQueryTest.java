@@ -3174,17 +3174,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     Druids.ScanQueryBuilder baseScanBuilder = newScanQueryBuilder()
         .dataSource(
             join(
-                new QueryDataSource(
-                    newScanQueryBuilder()
-                        .dataSource(CalciteTests.DATASOURCE1)
-                        .eternityInterval()
-                        .filters(equality("dim1", "10.1", ColumnType.STRING))
-                        .virtualColumns(expressionVirtualColumn("v0", "'10.1'", ColumnType.STRING))
-                        .columns(ImmutableList.of("__time", "v0"))
-                        .resultFormat(ScanQuery.ResultFormat.RESULT_FORMAT_COMPACTED_LIST)
-                        .context(queryContext)
-                        .build()
-                ),
+                new TableDataSource(CalciteTests.DATASOURCE1),
                 new QueryDataSource(
                     newScanQueryBuilder()
                         .dataSource(CalciteTests.DATASOURCE1)
@@ -3197,12 +3187,13 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
                 ),
                 "j0.",
                 equalsCondition(makeColumnExpression("v0"), makeColumnExpression("j0.dim1")),
-                JoinType.INNER
+                JoinType.INNER,
+                equality("dim1", "10.1", ColumnType.STRING)
             )
         )
-        .virtualColumns(expressionVirtualColumn("_v0", "'10.1'", ColumnType.STRING))
+        .virtualColumns(expressionVirtualColumn("v0", "'10.1'", ColumnType.STRING))
         .intervals(querySegmentSpec(Filtration.eternity()))
-        .columns("__time", "_v0")
+        .columns("__time", "v0")
         .context(queryContext);
 
     testQuery(
