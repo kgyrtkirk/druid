@@ -48,6 +48,7 @@ import org.apache.druid.query.aggregation.datasketches.hll.HllSketchToEstimatePo
 import org.apache.druid.query.aggregation.datasketches.hll.HllSketchToEstimateWithBoundsPostAggregator;
 import org.apache.druid.query.aggregation.datasketches.hll.HllSketchToStringPostAggregator;
 import org.apache.druid.query.aggregation.datasketches.hll.HllSketchUnionPostAggregator;
+import org.apache.druid.query.aggregation.datasketches.theta.SketchModule;
 import org.apache.druid.query.aggregation.post.ArithmeticPostAggregator;
 import org.apache.druid.query.aggregation.post.FieldAccessPostAggregator;
 import org.apache.druid.query.aggregation.post.FinalizingFieldAccessPostAggregator;
@@ -245,6 +246,7 @@ public class HllSketchSqlAggregatorTest extends BaseCalciteQueryTest
   {
     super.configureGuice(builder);
     builder.addModule(new HllSketchModule());
+    builder.addModule(new SketchModule());
   }
 
   @SuppressWarnings("resource")
@@ -504,7 +506,7 @@ public class HllSketchSqlAggregatorTest extends BaseCalciteQueryTest
         "select __time, \n"
         + "\n"
         + "CASE\n"
-        + "    WHEN HLL_SKETCH_ESTIMATE(DS_HLL(m1)) > 0 THEN CAST(DS_HLL(m1) as VARCHAR(1000)) \n"
+        + "    WHEN HLL_SKETCH_ESTIMATE(DS_HLL(m1)) > 0 THEN DS_THETA(m1 || 'x') \n"
         + "  END as \"flags_hll\"\n"
         + " FROM druid.foo "
         + "GROUP BY 1 ",

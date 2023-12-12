@@ -32,4 +32,10 @@ public class ThetaSketchSqlOperators
           ColumnType.ofComplex(SketchModule.THETA_SKETCH),
           true
       );
+      public static final SqlReturnTypeInference RETURN_TYPE_INFERENCE2 =
+          opBinding -> RowSignatures.makeComplexType(
+              opBinding.getTypeFactory(),
+              ColumnType.ofComplex(SketchModule.THETA_SKETCH),
+              true
+          );
 }

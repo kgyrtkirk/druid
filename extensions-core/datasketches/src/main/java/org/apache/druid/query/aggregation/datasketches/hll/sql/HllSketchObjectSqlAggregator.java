@@ -42,7 +42,7 @@ public class HllSketchObjectSqlAggregator extends HllSketchBaseSqlAggregator imp
                          .operandTypeInference(InferTypes.VARCHAR_1024)
                          .requiredOperandCount(1)
                          .literalOperands(1, 2)
-                         .returnTypeNullable(SqlTypeName.OTHER)
+                         .returnTypeNonNull(SqlTypeName.OTHER)
                          .functionCategory(SqlFunctionCategory.USER_DEFINED_FUNCTION)
                          .build();
 
