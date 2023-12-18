@@ -1,0 +1,53 @@
+{
+  "type": "kafka",
+  "spec": {
+    "ioConfig": {
+      "type": "kafka",
+      "consumerProperties": {
+        "bootstrap.servers": "kafka:9092"
+      },
+      "topic": "dbserver1.inventory.customers",
+      "inputFormat": {
+        "type": "kafka",
+        "keyFormat": {
+          "type": "json"
+        },
+        "valueFormat": {
+          "type": "json"
+        }
+      }
+    },
+    "tuningConfig": {
+      "type": "kafka"
+    },
+    "dataSchema": {
+      "dataSource": "dbserver1.inventory.customers",
+      "timestampSpec": {
+        "column": "kafka.timestamp",
+        "format": "millis"
+      },
+      "dimensionsSpec": {
+        "dimensions": [
+          {
+            "type": "json",
+            "name": "schema"
+          },
+          {
+            "type": "json",
+            "name": "payload"
+          },
+          "kafka.topic",
+          {
+            "type": "json",
+            "name": "kafka.key"
+          }
+        ]
+      },
+      "granularitySpec": {
+        "queryGranularity": "none",
+        "rollup": false,
+        "segmentGranularity": "hour"
+      }
+    }
+  }
+}
