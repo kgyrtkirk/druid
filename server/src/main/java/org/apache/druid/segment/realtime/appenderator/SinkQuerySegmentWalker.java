@@ -149,8 +149,14 @@ public class SinkQuerySegmentWalker implements QuerySegmentWalker
     return getQueryRunnerForSegments(query, specs);
   }
 
+
   @Override
   public <T> QueryRunner<T> getQueryRunnerForSegments(final Query<T> query, final Iterable<SegmentDescriptor> specs)
+  {
+    return  getQueryRunnerForSegments1(query,specs);
+  }
+
+  public <T> QueryRunner<T> getQueryRunnerForSegments1(final Query<T> query, final Iterable<SegmentDescriptor> specs)
   {
     // We only handle one particular dataSource. Make sure that's what we have, then ignore from here on out.
     final DataSource dataSourceFromQuery = query.getDataSource();
