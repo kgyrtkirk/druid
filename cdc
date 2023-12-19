@@ -37,7 +37,7 @@ case "$1" in
 		docker-compose -f $DE/tutorial/docker-compose-mysql.yaml down
 		;;
 	setup_mysql)
-		_mysql 'create table u1 (id integer, state text, create_ts bigint default (floor(unix_timestamp(now(3))*1000)));'
+		_mysql 'create table u1 (id integer, cnt integer,create_ts bigint default (floor(unix_timestamp(now(3))*1000)));'
 		;;
 	setup_connect)
 		_connect bash -c 'cat >register-mysql.json' < "$DE/tutorial/register-mysql.json"
@@ -49,7 +49,12 @@ case "$1" in
 		;;
 	kafka_dump)
 		_kafka /kafka/bin/kafka-console-consumer.sh --bootstrap-server kafka:9092 --from-beginning --property print.key=true --topic dbserver1.inventory.u1
-
+		;;
+	insert)
+		_mysql "insert into u1 (id,cnt) select count(1),0 from u1"
+		;;
+	update)
+		_mysql "update u1 set cnt=cnt+1 order by rand() limit 1"
 		;;
 	*)
 		echo "unknown cmd: $1" && exit 1

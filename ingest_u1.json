@@ -17,8 +17,8 @@
             "createBitmapIndex": false
           },
           {
-            "type": "string",
-            "name": "state",
+            "type": "long",
+            "name": "cnt",
             "multiValueHandling": "SORTED_ARRAY",
             "createBitmapIndex": true
           },
@@ -56,8 +56,8 @@
           },
           {
             "type": "expression",
-            "name": "state",
-            "expression": "json_value(payload,'$.after.state')"
+            "name": "cnt",
+            "expression": "json_value(payload,'$.after.cnt')"
           },
           {
             "type": "expression",
@@ -92,8 +92,8 @@
               },
               {
                 "type": "path",
-                "name": "state",
-                "expr": "$.payload.after.state",
+                "name": "cnt",
+                "expr": "$.payload.after.cnt",
                 "nodes": null
               },
               {
