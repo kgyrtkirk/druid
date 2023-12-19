@@ -32,8 +32,9 @@ case "$1" in
 		docker-compose -f $DE/tutorial/docker-compose-mysql.yaml up -d
 		docker network connect tutorial_default cdc || echo "last error is probably not a problem"
 		;;
-	rm)
-		docker-compose -f $DE/tutorial/docker-compose-mysql.yaml rm -f
+	down)
+		docker network disconnect tutorial_default cdc || echo "last error is probably not a problem"
+		docker-compose -f $DE/tutorial/docker-compose-mysql.yaml down
 		;;
 	setup_mysql)
 		_mysql 'create table u1 (id integer, state text, create_ts bigint default (floor(unix_timestamp(now(3))*1000)));'
