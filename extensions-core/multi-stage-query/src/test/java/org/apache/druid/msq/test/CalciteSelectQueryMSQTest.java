@@ -231,4 +231,26 @@ public class CalciteSelectQueryMSQTest extends CalciteQueryTest
         )
         .run();
   }
+
+  @Test(timeout = 40000)
+  public void testJoinMultipleTablesWithWhereCondition1()
+  {
+    testBuilder()
+        .queryContext(
+            ImmutableMap.of(
+                "sqlJoinAlgorithm", "sortMerge"
+            )
+        )
+        .sql(
+            "SELECT f1.dim1,f2.dim2 FROM"
+                + " druid.numfoo as f1 "
+                + " left join druid.foo2 as f2 on (true) "
+                + "where true"
+                + "  and (f1.dim1 > f2.dim2 or f1.dim2 > f2.dim1 or f1 is null or f2 is null)"
+                + "group by 1,2 "
+                + "order by 2 desc limit 1001"
+        )
+        .run();
+  }
+
 }

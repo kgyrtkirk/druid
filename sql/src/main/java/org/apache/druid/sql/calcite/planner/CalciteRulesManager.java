@@ -37,6 +37,7 @@ import org.apache.calcite.rel.metadata.DefaultRelMetadataProvider;
 import org.apache.calcite.rel.metadata.RelMetadataProvider;
 import org.apache.calcite.rel.rules.CoreRules;
 import org.apache.calcite.rel.rules.DateRangeRules;
+import org.apache.calcite.rel.rules.FilterJoinRule;
 import org.apache.calcite.rel.rules.JoinPushThroughJoinRule;
 import org.apache.calcite.rel.rules.PruneEmptyRules;
 import org.apache.calcite.sql.SqlExplainFormat;
@@ -48,6 +49,7 @@ import org.apache.calcite.tools.Programs;
 import org.apache.calcite.tools.RelBuilder;
 import org.apache.druid.java.util.common.logger.Logger;
 import org.apache.druid.sql.calcite.external.ExternalTableScanRule;
+import org.apache.druid.sql.calcite.rule.DruidJoinRule;
 import org.apache.druid.sql.calcite.rule.DruidLogicalValuesRule;
 import org.apache.druid.sql.calcite.rule.DruidRelToDruidRule;
 import org.apache.druid.sql.calcite.rule.DruidRules;
@@ -74,6 +76,11 @@ public class CalciteRulesManager
   private static final int HEP_DEFAULT_MATCH_LIMIT = Integer.parseInt(
       System.getProperty(HEP_DEFAULT_MATCH_LIMIT_CONFIG_STRING, "1200")
   );
+
+  private static final RelOptRule DRUID_FILTER_INTO_JOIN = FilterJoinRule.FilterIntoJoinRule.FilterIntoJoinRuleConfig.DEFAULT
+      .withPredicate(DruidJoinRule::validJoinPredicate)
+      .toRule();
+
 
   /**
    * Rules from {@link org.apache.calcite.plan.RelOptRules#BASE_RULES}, minus:
@@ -202,12 +209,13 @@ public class CalciteRulesManager
       ImmutableList.of(
           CoreRules.PROJECT_JOIN_TRANSPOSE,
           CoreRules.PROJECT_JOIN_REMOVE,
-          CoreRules.FILTER_INTO_JOIN,
+          DRUID_FILTER_INTO_JOIN,
           CoreRules.JOIN_PUSH_EXPRESSIONS,
           CoreRules.SORT_JOIN_TRANSPOSE,
           JoinPushThroughJoinRule.LEFT,
           CoreRules.JOIN_COMMUTE
       );
+
 
   private final Set<ExtensionCalciteRuleProvider> extensionCalciteRuleProviderSet;
 
@@ -228,7 +236,7 @@ public class CalciteRulesManager
     // Program that pre-processes the tree before letting the full-on VolcanoPlanner loose.
     List<RelOptRule> hepRules = new ArrayList<RelOptRule>(REDUCTION_RULES);
     if (plannerContext.getJoinAlgorithm().requiresSubquery()) {
-      hepRules.add(CoreRules.FILTER_INTO_JOIN);
+      hepRules.add(DRUID_FILTER_INTO_JOIN);
     }
     final Program preProgram =
         Programs.sequence(

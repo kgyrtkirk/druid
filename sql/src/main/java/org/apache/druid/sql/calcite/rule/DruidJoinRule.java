@@ -84,7 +84,28 @@ public class DruidJoinRule extends RelOptRule
   {
     return new DruidJoinRule(plannerContext);
   }
-  
+
+  public static boolean validJoinPredicate(Join join, JoinRelType joinType, RexNode exp) {
+
+
+//    ConditionAnalysis a = analyzeCondition(
+//        join.getCondition(),
+//        join.getLeft().getRowType(),
+//        join.getCluster().getRexBuilder()
+//    );
+    if(true) {
+      return true;
+    }
+
+
+
+    // ideally; this should happen in Calcite
+    if(!joinType.projectsRight()) {
+      throw new RuntimeException("Can't filter predicate which is not allowed when righ is not projected!");
+    }
+    return false;
+  }
+
   @Override
   public boolean matches(RelOptRuleCall call)
   {
@@ -275,7 +296,7 @@ public class DruidJoinRule extends RelOptRule
       // for an example.
       return conditionAnalysis.getUnsupportedOnSubConditions().isEmpty();
     }
-    
+
     return true;
   }
 
