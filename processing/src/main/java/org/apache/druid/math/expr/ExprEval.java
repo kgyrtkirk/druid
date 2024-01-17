@@ -694,9 +694,8 @@ public abstract class ExprEval<T>
   }
 
   // Cached String values
-  private boolean stringValueCached = false;
   @Nullable
-  private String stringValue;
+  private Hold1<String> stringHolder;
 
   @Nullable
   final T value;
@@ -733,12 +732,10 @@ public abstract class ExprEval<T>
   @Nullable
   public String asString()
   {
-    if (!stringValueCached) {
-      stringValue = computeStringValue();
-      stringValueCached = true;
+    if (stringHolder == null) {
+      stringHolder = new Hold1<>(computeStringValue());
     }
-
-    return stringValue;
+    return stringHolder.get();
   }
 
   protected String computeStringValue()
@@ -1451,6 +1448,7 @@ public abstract class ExprEval<T>
 
   private static class NestedDataExprEval extends ExprEval<Object>
   {
+
     @Nullable
     private Number number;
     private boolean computedNumber = false;
@@ -1566,16 +1564,5 @@ public abstract class ExprEval<T>
   public static Types.InvalidCastException invalidCast(ExpressionType fromType, ExpressionType toType)
   {
     return new Types.InvalidCastException(fromType, toType);
-  }
-
-  public void immutable()
-  {
-    // call some methods which may populate cache as a sideeffect
-    asString();
-    asInt();
-    asLong();
-    asBoolean();
-    asDouble();
-    asArray();
   }
 }

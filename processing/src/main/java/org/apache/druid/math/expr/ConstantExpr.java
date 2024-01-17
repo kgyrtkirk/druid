@@ -58,7 +58,6 @@ abstract class ConstantExpr<T> implements Expr
     this.outputType = outputType;
     this.value = value;
     this.exprEval = realEval();
-    exprEval.immutable();
   }
 
   @Nullable
