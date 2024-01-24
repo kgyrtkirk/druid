@@ -166,7 +166,7 @@ public class CalciteRulesManager
           PruneEmptyRules.JOIN_RIGHT_INSTANCE,
           PruneEmptyRules.SORT_FETCH_ZERO_INSTANCE,
           PruneEmptyRules.EMPTY_TABLE_INSTANCE,
-          CoreRules.PROJECT_TO_LOGICAL_PROJECT_AND_WINDOW,
+          CoreRules.PROJECT_TO_LOGICAL_PROJECT_AND_WINDOW.config.toRule(),
           CoreRules.FILTER_MERGE,
           CoreRules.INTERSECT_TO_DISTINCT
       );
@@ -266,6 +266,10 @@ public class CalciteRulesManager
 
     // Program that pre-processes the tree before letting the full-on VolcanoPlanner loose.
     final List<Program> prePrograms = new ArrayList<>();
+
+//    prePrograms.add(new LoggingProgram("Finished pre-Volcano manipulation program1", isDebug));
+//    prePrograms.add(Programs.ofRules(CoreRules.PROJECT_TO_LOGICAL_PROJECT_AND_WINDOW));
+
     prePrograms.add(new LoggingProgram("Start", isDebug));
     prePrograms.add(Programs.subQuery(DefaultRelMetadataProvider.INSTANCE));
     prePrograms.add(new LoggingProgram("Finished subquery program", isDebug));
@@ -276,7 +280,8 @@ public class CalciteRulesManager
 
     if (isDruid) {
       prePrograms.add(buildPreVolcanoManipulationProgram(plannerContext));
-      prePrograms.add(new LoggingProgram("Finished pre-Volcano manipulation program", isDebug));
+
+      prePrograms.add(new LoggingProgram("Finished pre-Volcano manipulation program2", isDebug));
     }
 
     return Programs.sequence(prePrograms.toArray(new Program[0]));
@@ -317,6 +322,7 @@ public class CalciteRulesManager
       // make it impossible to convert to COALESCE.
       builder.addRuleInstance(new CaseToCoalesceRule());
       builder.addRuleInstance(new CoalesceLookupRule());
+      builder.addRuleInstance(CoreRules.PROJECT_TO_LOGICAL_PROJECT_AND_WINDOW);
     }
 
     // Remaining rules run as a single group until fixpoint.

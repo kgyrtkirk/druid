@@ -29,6 +29,7 @@ import org.apache.calcite.rel.core.Project;
 import org.apache.calcite.rel.core.Sort;
 import org.apache.calcite.rel.core.TableFunctionScan;
 import org.apache.calcite.rel.core.TableScan;
+import org.apache.calcite.rel.core.Window;
 import org.apache.calcite.rel.logical.LogicalAggregate;
 import org.apache.calcite.rel.logical.LogicalCorrelate;
 import org.apache.calcite.rel.logical.LogicalExchange;
@@ -308,9 +309,35 @@ public class DruidQueryGenerator extends RelShuttleImpl
       return visitFilter((Filter) other);
     } else if (other instanceof LogicalValues) {
       return visit((LogicalValues) other);
+    } else if (other instanceof Window){
+      return visitWindow((Window)other);
+
     }
 
     return super.visit(other);
+  }
+
+  private RelNode visitWindow(Window other)
+  {
+    RelNode result = super.visit(other);
+    if (!PartialDruidQuery.Stage.WINDOW.canFollow(currentStage)) {
+      queryList.add(partialDruidQuery);
+      queryTables.add(currentTable);
+      partialDruidQuery = PartialDruidQuery.createOuterQuery(partialDruidQuery);
+    }
+
+    partialDruidQuery = partialDruidQuery.withWindow((Window) result);
+    currentStage = PartialDruidQuery.Stage.WINDOW;
+//    } else if (currentStage == PartialDruidQuery.Stage.SCAN) {
+//
+//
+//    if(true)
+//    {
+//      throw new RuntimeException("FIXME: Unimplemented!");
+//    }
+//    return null;
+
+      return result;
   }
 
   public PartialDruidQuery getPartialDruidQuery()
