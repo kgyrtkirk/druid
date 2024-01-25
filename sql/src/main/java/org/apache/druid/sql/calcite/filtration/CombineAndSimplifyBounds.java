@@ -49,7 +49,7 @@ public class CombineAndSimplifyBounds extends BottomUpTransform
   private CombineAndSimplifyBounds()
   {
   }
-  public static CombineAndSimplifyBounds instance1()
+  public static CombineAndSimplifyBounds instance()
   {
     return INSTANCE;
   }
