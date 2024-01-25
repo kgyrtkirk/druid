@@ -1487,6 +1487,7 @@ public class DruidQuery
         operators,
         null
     );
+
   }
 
   /**
@@ -1497,7 +1498,7 @@ public class DruidQuery
   {
     if (sorting == null
         || sorting.getOrderBys().isEmpty()
-//        || sorting.getProjection() != null
+//        || sorting.getProjection() != null // FIXME!!!FRD XXX
         ) {
       return null;
     }
