@@ -73,14 +73,14 @@ public class CombineAndSimplifyBounds extends BottomUpTransform
     } else if (filter instanceof NotDimFilter) {
       final DimFilter field = ((NotDimFilter) filter).getField();
       final DimFilter candidate;
-      if (field instanceof OrDimFilter) {
-        candidate = doSimplifyAnd(negateAll(getOrFilterChildren((OrDimFilter) field)));
-      } else if (field instanceof AndDimFilter) {
-        candidate = doSimplifyOr(negateAll(getAndFilterChildren((AndDimFilter) field)));
-      } else {
+//      if (field instanceof OrDimFilter) {
+//        candidate = doSimplifyAnd(negateAll(getOrFilterChildren((OrDimFilter) field)));
+//      } else if (field instanceof AndDimFilter) {
+//        candidate = doSimplifyOr(negateAll(getAndFilterChildren((AndDimFilter) field)));
+//      } else {
         candidate = negate(field);
-      }
-      return filter;//computeCost(filter) <= computeCost(candidate) ? filter : candidate;
+//      }
+      return candidate;//computeCost(filter) <= computeCost(candidate) ? filter : candidate;
     } else {
       return filter;
     }
@@ -267,6 +267,19 @@ public class CombineAndSimplifyBounds extends BottomUpTransform
             childrenToAdd.add(Filtration.matchEverything());
           } else {
             childrenToAdd.add(Ranges.toFilter(rangeRefKey, range));
+          }
+        }
+      } else {
+        if (disjunction && rangeSet.asRanges().size() == 2) {
+          Range<RangeValue> span = rangeSet.span();
+          if (Range.all().equals(rangeSet.span())) {
+
+            for (final ObjectIntPair<RangeFilter> rangeAndChildIndex : filterList) {
+              childrenToRemove.add(rangeAndChildIndex.rightInt());
+            }
+
+            RangeSet<RangeValue> newRange = RangeSets.intersectRanges(rangeSet.complement().asRanges());
+            childrenToAdd.add(new NotDimFilter(Ranges.toFilter(rangeRefKey, newRange.span())));
           }
         }
       }
