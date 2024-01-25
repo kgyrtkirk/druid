@@ -209,7 +209,20 @@ public class CombineAndSimplifyBounds extends BottomUpTransform
             childrenToAdd.add(Bounds.toFilter(boundRefKey, range));
           }
         }
+      } else if (disjunction && rangeSet.asRanges().size() == 2) {
+        Range<BoundValue> span = rangeSet.span();
+        if (Range.all().equals(rangeSet.span())) {
+          // 2 ranges in disjunction - spanning ALL
+          // this must be a < 11 || 22 < a
+          for (final ObjectIntPair<BoundDimFilter> boundAndChildIndex : filterList) {
+            childrenToRemove.add(boundAndChildIndex.rightInt());
+          }
+
+          RangeSet<BoundValue> newRange = RangeSets.intersectRanges(rangeSet.complement().asRanges());
+          childrenToAdd.add(new NotDimFilter(Bounds.toFilter(boundRefKey, newRange.span())));
+        }
       }
+
     }
 
     // Consolidate groups of numeric ranges in "ranges", using the leastRestrictiveNumericTypes computed earlier.
@@ -273,6 +286,8 @@ public class CombineAndSimplifyBounds extends BottomUpTransform
         if (disjunction && rangeSet.asRanges().size() == 2) {
           Range<RangeValue> span = rangeSet.span();
           if (Range.all().equals(rangeSet.span())) {
+            // 2 ranges in disjunction - spanning ALL
+            // this must be a < 11 || 22 < a
 
             for (final ObjectIntPair<RangeFilter> rangeAndChildIndex : filterList) {
               childrenToRemove.add(rangeAndChildIndex.rightInt());
