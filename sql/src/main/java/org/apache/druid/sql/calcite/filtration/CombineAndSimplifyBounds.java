@@ -63,12 +63,12 @@ public class CombineAndSimplifyBounds extends BottomUpTransform
     } else if (filter instanceof AndDimFilter) {
       final List<DimFilter> children = getAndFilterChildren((AndDimFilter) filter);
       final DimFilter one = doSimplifyAnd(children);
-      final DimFilter two = negate(doSimplifyOr(negateAll(children)));
+      //      final DimFilter two = negate(doSimplifyOr(negateAll(children)));
       return one;//computeCost(one) <= computeCost(two) ? one : two;
     } else if (filter instanceof OrDimFilter) {
       final List<DimFilter> children = getOrFilterChildren((OrDimFilter) filter);
       final DimFilter one = doSimplifyOr(children);
-      final DimFilter two = negate(doSimplifyAnd(negateAll(children)));
+      // final DimFilter two = negate(doSimplifyAnd(negateAll(children)));
       return one;//computeCost(one) <= computeCost(two) ? one : two;
     } else if (filter instanceof NotDimFilter) {
       final DimFilter field = ((NotDimFilter) filter).getField();
