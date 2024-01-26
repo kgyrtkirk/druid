@@ -53,10 +53,8 @@
                 "type" : "NoopLimitSpec"
               },
               "context" : {
-                "debug" : true,
                 "enableWindowing" : true,
-                "plannerStrategy" : "DECOUPLED",
-                "sqlQueryId" : "432603da-b063-4207-906e-afaba570a1df",
+                "sqlQueryId" : "44c0d4d5-6326-44ee-a1ed-b2e3bf91d43a",
                 "vectorize" : "false",
                 "vectorizeVirtualColumns" : "false"
               }
@@ -67,10 +65,8 @@
             "intervals" : [ "-146136543-09-08T08:23:32.096Z/146140482-04-24T15:36:27.903Z" ]
           },
           "context" : {
-            "debug" : true,
             "enableWindowing" : true,
-            "plannerStrategy" : "DECOUPLED",
-            "sqlQueryId" : "432603da-b063-4207-906e-afaba570a1df",
+            "sqlQueryId" : "44c0d4d5-6326-44ee-a1ed-b2e3bf91d43a",
             "vectorize" : "false",
             "vectorizeVirtualColumns" : "false"
           },
@@ -114,10 +110,8 @@
       "columns" : [ "a0", "d0", "d1", "w0" ],
       "legacy" : false,
       "context" : {
-        "debug" : true,
         "enableWindowing" : true,
-        "plannerStrategy" : "DECOUPLED",
-        "sqlQueryId" : "432603da-b063-4207-906e-afaba570a1df",
+        "sqlQueryId" : "44c0d4d5-6326-44ee-a1ed-b2e3bf91d43a",
         "vectorize" : "false",
         "vectorizeVirtualColumns" : "false"
       },
@@ -131,10 +125,8 @@
     "intervals" : [ "-146136543-09-08T08:23:32.096Z/146140482-04-24T15:36:27.903Z" ]
   },
   "context" : {
-    "debug" : true,
     "enableWindowing" : true,
-    "plannerStrategy" : "DECOUPLED",
-    "sqlQueryId" : "432603da-b063-4207-906e-afaba570a1df",
+    "sqlQueryId" : "44c0d4d5-6326-44ee-a1ed-b2e3bf91d43a",
     "vectorize" : "false",
     "vectorizeVirtualColumns" : "false"
   },
