@@ -323,9 +323,9 @@ public class DruidQueryGenerator extends RelShuttleImpl
     if (!PartialDruidQuery.Stage.WINDOW.canFollow(currentStage)) {
       queryList.add(partialDruidQuery);
       queryTables.add(currentTable);
-      partialDruidQuery = PartialDruidQuery.createOuterQuery(partialDruidQuery);      
+      partialDruidQuery = PartialDruidQuery.createOuterQuery(partialDruidQuery);
     }
-    
+
     partialDruidQuery = partialDruidQuery.withWindow((Window) result);
     currentStage = PartialDruidQuery.Stage.WINDOW;
 //    } else if (currentStage == PartialDruidQuery.Stage.SCAN) {

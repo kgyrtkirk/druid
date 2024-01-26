@@ -15076,7 +15076,6 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
         .run();
   }
 
-  @NotYetSupported(Modes.CANNOT_TRANSLATE)
   @Test
   public void testWindowingWithOrderBy()
   {
