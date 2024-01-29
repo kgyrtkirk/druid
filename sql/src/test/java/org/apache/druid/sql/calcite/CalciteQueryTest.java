@@ -9187,7 +9187,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @SqlTestFrameworkConfig(decoupledIgnoreQuery = DecoupledIgnoreQuery.EXPLICIT_SORT)
+//  @SqlTestFrameworkConfig(decoupledIgnoreQuery = DecoupledIgnoreQuery.EXPLICIT_SORT)
   @Test
   public void testTimeseriesUsingTimeFloorWithTimeShift()
   {
@@ -9228,7 +9228,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @SqlTestFrameworkConfig(decoupledIgnoreQuery = DecoupledIgnoreQuery.EXPLICIT_SORT)
+//  @SqlTestFrameworkConfig(decoupledIgnoreQuery = DecoupledIgnoreQuery.EXPLICIT_SORT)
   @Test
   public void testTimeseriesUsingTimeFloorWithTimestampAdd()
   {
@@ -10119,7 +10119,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @SqlTestFrameworkConfig(decoupledIgnoreQuery = DecoupledIgnoreQuery.EXPLICIT_SORT)
+//  @SqlTestFrameworkConfig(decoupledIgnoreQuery = DecoupledIgnoreQuery.EXPLICIT_SORT)
   @Test
   public void testGroupByExtractYear()
   {
@@ -10158,7 +10158,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @SqlTestFrameworkConfig(decoupledIgnoreQuery = DecoupledIgnoreQuery.EXPLICIT_SORT)
+//  @SqlTestFrameworkConfig(decoupledIgnoreQuery = DecoupledIgnoreQuery.EXPLICIT_SORT)
   @Test
   public void testGroupByFormatYearAndMonth()
   {
@@ -10393,7 +10393,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @SqlTestFrameworkConfig(decoupledIgnoreQuery = DecoupledIgnoreQuery.EXPLICIT_SORT)
+//  @SqlTestFrameworkConfig(decoupledIgnoreQuery = DecoupledIgnoreQuery.EXPLICIT_SORT)
   @Test
   public void testGroupByTimeAndOtherDimension()
   {
