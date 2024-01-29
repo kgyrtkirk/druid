@@ -2236,7 +2236,6 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @SqlTestFrameworkConfig(decoupledIgnoreQuery = DecoupledIgnoreQuery.EXPLICIT_SORT)
   @Test
   public void testGroupByAndOrderByOrdinalOfAlias()
   {

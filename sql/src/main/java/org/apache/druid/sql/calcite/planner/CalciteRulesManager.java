@@ -433,6 +433,8 @@ public class CalciteRulesManager
     final ImmutableList.Builder<RelOptRule> retVal = ImmutableList
         .<RelOptRule>builder()
 //        .addAll(baseRuleSet(plannerContext))
+//        .add(          CoreRules.PROJECT_REMOVE)
+        .add(          CoreRules.SORT_REMOVE)
         .add(new DruidLogicalRules(plannerContext).rules().toArray(new RelOptRule[0]));
     return retVal.build();
   }
