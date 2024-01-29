@@ -1,0 +1,7 @@
+LogicalSort(fetch=[2]): rowcount = 1.4999997909250677, cumulative cost = {233.1874995557158 rows, 466.99999498220166 cpu, 0.0 io}, id = 186
+  LogicalAggregate(group=[{0, 1}], EXPR$2=[COUNT()]): rowcount = 1.4999997909250677, cumulative cost = {231.68749976479072 rows, 431.0 cpu, 0.0 io}, id = 184
+    LogicalProject(dim4=[CAST('a':VARCHAR):VARCHAR], EXPR$1=[SUBSTRING($1, 1, 1)]): rowcount = 15.0, cumulative cost = {230.0 rows, 431.0 cpu, 0.0 io}, id = 182
+      LogicalFilter(condition=[=($0, 'a')]): rowcount = 15.0, cumulative cost = {215.0 rows, 401.0 cpu, 0.0 io}, id = 180
+        LogicalProject(dim4=[$4], dim5=[$5]): rowcount = 100.0, cumulative cost = {200.0 rows, 301.0 cpu, 0.0 io}, id = 178
+          LogicalTableScan(table=[[druid, numfoo]]): rowcount = 100.0, cumulative cost = {100.0 rows, 101.0 cpu, 0.0 io}, id = 144
+
