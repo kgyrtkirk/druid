@@ -323,6 +323,7 @@ public class CalciteRulesManager
       builder.addRuleInstance(new CaseToCoalesceRule());
       builder.addRuleInstance(new CoalesceLookupRule());
       builder.addRuleInstance(CoreRules.PROJECT_TO_LOGICAL_PROJECT_AND_WINDOW);
+//      builder.addRuleInstance(CoreRules.PROJECT_MERGE);
     }
 
     // Remaining rules run as a single group until fixpoint.

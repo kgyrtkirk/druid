@@ -264,7 +264,7 @@ public class DrillWindowQueryTest extends BaseCalciteQueryTest
         new DoubleDimensionSchema("col2"),
         new DoubleDimensionSchema("col3"),
         new LongDimensionSchema("col4"),
-        new LongDimensionSchema("col5"),
+        new LongDimensionSchema("col5"), // time
         new LongDimensionSchema("col6"),
         new StringDimensionSchema("col7"),
         new StringDimensionSchema("col8"),
