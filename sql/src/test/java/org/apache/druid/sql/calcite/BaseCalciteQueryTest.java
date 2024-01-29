@@ -963,10 +963,15 @@ public class BaseCalciteQueryTest extends CalciteTestBase
 
   protected QueryTestBuilder testBuilder()
   {
-    return new QueryTestBuilder(new CalciteTestConfig())
+    QueryTestBuilder builder = new QueryTestBuilder(new CalciteTestConfig())
         .cannotVectorize(cannotVectorize)
         .skipVectorize(skipVectorize)
         .msqCompatible(msqCompatible);
+
+
+    return builder;
+
+
   }
 
   public class CalciteTestConfig implements QueryTestBuilder.QueryTestConfig

@@ -112,6 +112,7 @@ import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.segment.join.JoinType;
 import org.apache.druid.sql.calcite.NotYetSupported.Modes;
+import org.apache.druid.sql.calcite.SqlTestFrameworkConfig.DecoupledIgnoreQuery;
 import org.apache.druid.sql.calcite.expression.DruidExpression;
 import org.apache.druid.sql.calcite.filtration.Filtration;
 import org.apache.druid.sql.calcite.planner.Calcites;
@@ -145,6 +146,7 @@ import static org.junit.Assert.assertThrows;
 
 public class CalciteQueryTest extends BaseCalciteQueryTest
 {
+
   @Test
   public void testInformationSchemaSchemata()
   {
@@ -8106,6 +8108,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @SqlTestFrameworkConfig(decoupledIgnoreQuery = DecoupledIgnoreQuery.AGG_COL_EXCHANGE)
   @Test
   public void testGroupBySortPushDown()
   {
@@ -9184,6 +9187,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @SqlTestFrameworkConfig(decoupledIgnoreQuery = DecoupledIgnoreQuery.EXPLICIT_SORT)
   @Test
   public void testTimeseriesUsingTimeFloorWithTimeShift()
   {
@@ -9224,6 +9228,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @SqlTestFrameworkConfig(decoupledIgnoreQuery = DecoupledIgnoreQuery.EXPLICIT_SORT)
   @Test
   public void testTimeseriesUsingTimeFloorWithTimestampAdd()
   {
@@ -12564,6 +12569,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @SqlTestFrameworkConfig(decoupledIgnoreQuery = DecoupledIgnoreQuery.EXPR_POSTAGG)
   @Test
   public void testGroupByWithLiteralInSubqueryGrouping()
   {
@@ -12752,6 +12758,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @SqlTestFrameworkConfig(decoupledIgnoreQuery = DecoupledIgnoreQuery.EXPR_POSTAGG)
   @Test
   public void testRepeatedIdenticalVirtualExpressionGrouping()
   {
@@ -14355,7 +14362,6 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledMismatch
   @Test
   public void testSubqueryTypeMismatchWithLiterals()
   {

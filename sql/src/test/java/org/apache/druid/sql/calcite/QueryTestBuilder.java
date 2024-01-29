@@ -153,7 +153,7 @@ public class QueryTestBuilder
 
   public QueryTestBuilder expectedQuery(Query<?> expectedQuery)
   {
-    if (true || expectedQuery == null) {
+    if (expectedQuery == null) {
       return this;
     }
     return expectedQueries(Collections.singletonList(expectedQuery));

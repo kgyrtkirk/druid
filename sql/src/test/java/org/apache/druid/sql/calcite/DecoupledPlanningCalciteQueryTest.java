@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableMap;
 import org.apache.druid.query.QueryContexts;
 import org.apache.druid.server.security.AuthConfig;
 import org.apache.druid.sql.calcite.NotYetSupported.NotYetSupportedProcessor;
+import org.apache.druid.sql.calcite.SqlTestFrameworkConfig.DecoupledIgnoreQuery;
 import org.apache.druid.sql.calcite.planner.PlannerConfig;
 import org.apache.druid.sql.calcite.util.SqlTestFramework;
 import org.junit.Rule;
@@ -40,17 +41,25 @@ public class DecoupledPlanningCalciteQueryTest extends CalciteQueryTest
   @Override
   protected QueryTestBuilder testBuilder()
   {
-    return new QueryTestBuilder(
-        new CalciteTestConfig(CONTEXT_OVERRIDES)
-        {
-          @Override
-          public SqlTestFramework.PlannerFixture plannerFixture(PlannerConfig plannerConfig, AuthConfig authConfig)
-          {
-            plannerConfig = plannerConfig.withOverrides(CONTEXT_OVERRIDES);
-            return queryFramework().plannerFixture(DecoupledPlanningCalciteQueryTest.this, plannerConfig, authConfig);
-          }
-        })
+
+    CalciteTestConfig testConfig = new CalciteTestConfig(CONTEXT_OVERRIDES)
+    {
+      @Override
+      public SqlTestFramework.PlannerFixture plannerFixture(PlannerConfig plannerConfig, AuthConfig authConfig)
+      {
+        plannerConfig = plannerConfig.withOverrides(CONTEXT_OVERRIDES);
+        return queryFramework().plannerFixture(DecoupledPlanningCalciteQueryTest.this, plannerConfig, authConfig);
+      }
+    };
+
+    QueryTestBuilder builder = new QueryTestBuilder(testConfig)
         .cannotVectorize(cannotVectorize)
         .skipVectorize(skipVectorize);
+
+    if (queryFrameworkRule.getConfig().decoupledIgnoreQuery() != DecoupledIgnoreQuery.NONE) {
+      builder.verifyNativeQueries(x -> false);
+    }
+
+    return builder;
   }
 }

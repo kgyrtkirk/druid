@@ -50,6 +50,22 @@ public @interface SqlTestFrameworkConfig
 
   ResultCacheMode resultCache() default ResultCacheMode.DISABLED;
 
+  DecoupledIgnoreQuery decoupledIgnoreQuery() default DecoupledIgnoreQuery.NONE;
+
+  enum DecoupledIgnoreQuery
+  {
+    NONE,
+    // decoupled has moved virtualcolumn to postagg (improved plan)
+    EXPR_POSTAGG,
+    // dim1/dim2 exchange
+    AGG_COL_EXCHANGE,
+    // decoupled plan has order+limit; meanwhile below query doesn't
+    // semantically they are the same as GBY orders by dim cols
+    // it should be hidden if its not necessary - possibly missing REMOVE_SORT ?
+    EXPLICIT_SORT
+
+  };
+
   /**
    * @see {@link SqlTestFrameworkConfig}
    */
@@ -115,6 +131,11 @@ public @interface SqlTestFrameworkConfig
     public SqlTestFramework get()
     {
       return getConfigurationInstance().framework;
+    }
+
+    public SqlTestFrameworkConfig getConfig()
+    {
+      return config;
     }
 
     private ConfigurationInstance getConfigurationInstance()
