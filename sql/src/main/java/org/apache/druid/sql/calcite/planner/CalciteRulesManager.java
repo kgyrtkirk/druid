@@ -235,6 +235,10 @@ public class CalciteRulesManager
     final Program druidPreProgram = buildPreProgram(plannerContext, true);
     final Program bindablePreProgram = buildPreProgram(plannerContext, false);
 
+    HepProgramBuilder hepP =HepProgram.builder();
+    hepP.addGroupBegin();
+    hepP.addRuleCollection(baseRuleSet(plannerContext));
+    hepP.addGroupEnd();
     return ImmutableList.of(
         Programs.sequence(
             druidPreProgram,
@@ -246,8 +250,11 @@ public class CalciteRulesManager
             Programs.ofRules(bindableConventionRuleSet(plannerContext)),
             new LoggingProgram("After bindable volcano planner program", isDebug)
         ),
+
         Programs.sequence(
             druidPreProgram,
+            Programs.of(hepP.build(), true, DefaultRelMetadataProvider.INSTANCE),
+//            Programs.sequence(baseRuleSet(plannerContext)),
             Programs.ofRules(logicalConventionRuleSet(plannerContext)),
             new LoggingProgram("After logical volcano planner program", isDebug)
         )
@@ -317,12 +324,15 @@ public class CalciteRulesManager
     final HepProgramBuilder builder = HepProgram.builder();
     builder.addMatchLimit(CalciteRulesManager.HEP_DEFAULT_MATCH_LIMIT);
 
+
+
     if (isDruid) {
       // COALESCE rules must run before REDUCTION_RULES, since otherwise ReduceExpressionsRule#pushPredicateIntoCase may
       // make it impossible to convert to COALESCE.
       builder.addRuleInstance(new CaseToCoalesceRule());
       builder.addRuleInstance(new CoalesceLookupRule());
-      builder.addRuleInstance(CoreRules.PROJECT_TO_LOGICAL_PROJECT_AND_WINDOW);
+//      builder.addRuleInstance(CoreRules.PROJECT_TO_LOGICAL_PROJECT_AND_WINDOW);
+//    prePrograms.add(Programs.ofRules(CoreRules.PROJECT_TO_LOGICAL_PROJECT_AND_WINDOW));
 //      builder.addRuleInstance(CoreRules.PROJECT_MERGE);
     }
 
@@ -354,6 +364,16 @@ public class CalciteRulesManager
     for (final RelOptRule rule : REDUCTION_RULES) {
       builder.addRuleInstance(rule);
     }
+//    for (final RelOptRule rule : ABSTRACT_RELATIONAL_RULES) {
+//      builder.addRuleInstance(rule);
+//    }
+//    for (final RelOptRule rule : ABSTRACT_RULES) {
+//      builder.addRuleInstance(rule);
+//    }
+//    for (final RelOptRule rule : BASE_RULES) {
+//      builder.addRuleInstance(rule);
+//    }
+
 
     builder.addGroupEnd();
 
@@ -412,7 +432,7 @@ public class CalciteRulesManager
   {
     final ImmutableList.Builder<RelOptRule> retVal = ImmutableList
         .<RelOptRule>builder()
-        .addAll(baseRuleSet(plannerContext))
+//        .addAll(baseRuleSet(plannerContext))
         .add(new DruidLogicalRules(plannerContext).rules().toArray(new RelOptRule[0]));
     return retVal.build();
   }
