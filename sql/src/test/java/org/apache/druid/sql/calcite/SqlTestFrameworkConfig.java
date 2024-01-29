@@ -62,7 +62,13 @@ public @interface SqlTestFrameworkConfig
     // decoupled plan has order+limit; meanwhile below query doesn't
     // semantically they are the same as GBY orders by dim cols
     // it should be hidden if its not necessary - possibly missing REMOVE_SORT ?
-    EXPLICIT_SORT
+    EXPLICIT_SORT,
+    // this happens when AGGREGATE_REMOVE gets supressed by AGGREGATE_CASE_REWRITE
+    AGGREGATE_REMOVE_NOT_FIRED,
+    // improved plan
+    IMPROVED_PLAN,
+    // worse plan; may loose vectorization; but no extra queries
+    SLIGHTLY_WORSE_PLAN
 
   };
 

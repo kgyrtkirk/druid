@@ -2236,10 +2236,10 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @SqlTestFrameworkConfig(decoupledIgnoreQuery = DecoupledIgnoreQuery.EXPLICIT_SORT)
   @Test
   public void testGroupByAndOrderByOrdinalOfAlias()
   {
-    // FIXME: no idea if old plan was good?!
     testQuery(
         "SELECT cnt as theCnt, COUNT(*) FROM druid.foo GROUP BY 1 ORDER BY 1 ASC",
         ImmutableList.of(
@@ -8204,6 +8204,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @SqlTestFrameworkConfig(decoupledIgnoreQuery = DecoupledIgnoreQuery.IMPROVED_PLAN)
   @Test
   public void testGroupByLimitPushdownExtraction()
   {
@@ -8658,7 +8659,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @SqlTestFrameworkConfig(numMergeBuffers = 3)
+  @SqlTestFrameworkConfig(numMergeBuffers = 3, decoupledIgnoreQuery = DecoupledIgnoreQuery.SLIGHTLY_WORSE_PLAN)
   @Test
   public void testQueryWithSelectProjectAndIdentityProjectDoesNotRename()
   {
@@ -10119,7 +10120,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
-
+  @SqlTestFrameworkConfig(decoupledIgnoreQuery = DecoupledIgnoreQuery.EXPLICIT_SORT)
   @Test
   public void testGroupByExtractYear()
   {
@@ -10158,6 +10159,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @SqlTestFrameworkConfig(decoupledIgnoreQuery = DecoupledIgnoreQuery.EXPLICIT_SORT)
   @Test
   public void testGroupByFormatYearAndMonth()
   {
@@ -10392,6 +10394,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @SqlTestFrameworkConfig(decoupledIgnoreQuery = DecoupledIgnoreQuery.EXPLICIT_SORT)
   @Test
   public void testGroupByTimeAndOtherDimension()
   {
@@ -14362,6 +14365,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @SqlTestFrameworkConfig(decoupledIgnoreQuery = DecoupledIgnoreQuery.AGGREGATE_REMOVE_NOT_FIRED)
   @Test
   public void testSubqueryTypeMismatchWithLiterals()
   {
@@ -14983,6 +14987,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
         .run();
   }
 
+  @SqlTestFrameworkConfig(decoupledIgnoreQuery = DecoupledIgnoreQuery.SLIGHTLY_WORSE_PLAN)
   @Test
   public void testWindowingWithScanAndSort()
   {
