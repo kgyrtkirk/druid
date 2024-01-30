@@ -77,15 +77,22 @@ public final class Rows
       // guava's toString function fails on null objects, so please do not use it
       return ((List<?>) inputValue).stream().map(String::valueOf).collect(Collectors.toList());
     } else if (inputValue instanceof byte[]) {
-      // convert byte[] to base64 encoded string
-      return Collections.singletonList(StringUtils.encodeBase64String((byte[]) inputValue));
+      byte[] array = (byte[]) inputValue;
+      return objectToStringsByteA(array);
     } else if (inputValue instanceof ByteBuffer) {
-      return Collections.singletonList(StringUtils.fromUtf8(((ByteBuffer) inputValue).array()));
+      byte[] array = ((ByteBuffer) inputValue).array();
+      return objectToStringsByteA(array);
     } else if (inputValue instanceof Object[]) {
       return Arrays.stream((Object[]) inputValue).map(String::valueOf).collect(Collectors.toList());
     } else {
       return Collections.singletonList(String.valueOf(inputValue));
     }
+  }
+
+  private static List<String> objectToStringsByteA(byte[] array)
+  {
+    // convert byte[] to base64 encoded string
+    return Collections.singletonList(StringUtils.encodeBase64String(array));
   }
 
   /**
