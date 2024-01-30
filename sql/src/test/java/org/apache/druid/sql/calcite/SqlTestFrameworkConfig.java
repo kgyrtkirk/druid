@@ -56,6 +56,7 @@ public @interface SqlTestFrameworkConfig
   {
     NONE,
     // decoupled has moved virtualcolumn to postagg (improved plan)
+    // CoreRules.AGGREGATE_ANY_PULL_UP_CONSTANTS
     EXPR_POSTAGG,
     // dim1/dim2 exchange
     AGG_COL_EXCHANGE,
@@ -65,7 +66,7 @@ public @interface SqlTestFrameworkConfig
 //    EXPLICIT_SORT,
     // this happens when AGGREGATE_REMOVE gets supressed by AGGREGATE_CASE_REWRITE
     AGGREGATE_REMOVE_NOT_FIRED,
-    // improved plan
+    // improved plan - AGGREGATE_ANY_PULL_UP_CONSTANTS ; enable for default?
     IMPROVED_PLAN,
     // worse plan; may loose vectorization; but no extra queries
     SLIGHTLY_WORSE_PLAN

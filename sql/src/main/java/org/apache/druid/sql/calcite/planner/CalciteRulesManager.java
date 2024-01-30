@@ -238,10 +238,20 @@ public class CalciteRulesManager
     HepProgramBuilder hepP =HepProgram.builder();
     hepP.addGroupBegin();
     hepP.addRuleCollection(baseRuleSet(plannerContext));
+    for (ExtensionCalciteRuleProvider extensionCalciteRuleProvider : extensionCalciteRuleProviderSet) {
+      hepP.addRuleInstance(extensionCalciteRuleProvider.getRule(plannerContext));
+    }
+
     hepP.addGroupEnd();
+    HepProgramBuilder hepP1 =HepProgram.builder();
+    hepP1.addGroupBegin();
+    hepP1.addRuleCollection(ABSTRACT_RELATIONAL_RULES);
+    hepP1.addRuleCollection(ABSTRACT_RULES);
+    hepP1.addGroupEnd();
     return ImmutableList.of(
         Programs.sequence(
             druidPreProgram,
+            Programs.of(hepP1.build(), true, DefaultRelMetadataProvider.INSTANCE),
             Programs.ofRules(druidConventionRuleSet(plannerContext)),
             new LoggingProgram("After Druid volcano planner program", isDebug)
         ),
@@ -253,7 +263,9 @@ public class CalciteRulesManager
 
         Programs.sequence(
             druidPreProgram,
+            Programs.of(hepP1.build(), true, DefaultRelMetadataProvider.INSTANCE),
             Programs.of(hepP.build(), true, DefaultRelMetadataProvider.INSTANCE),
+            new LoggingProgram("After baseRuleSet", isDebug),
 //            Programs.sequence(baseRuleSet(plannerContext)),
             Programs.ofRules(logicalConventionRuleSet(plannerContext)),
             new LoggingProgram("After logical volcano planner program", isDebug)

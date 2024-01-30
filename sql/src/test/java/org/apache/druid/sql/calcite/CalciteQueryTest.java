@@ -12571,7 +12571,6 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @SqlTestFrameworkConfig(decoupledIgnoreQuery = DecoupledIgnoreQuery.EXPR_POSTAGG)
   @Test
   public void testGroupByWithLiteralInSubqueryGrouping()
   {

@@ -1231,10 +1231,18 @@ public class DruidQuery
 
     // Must have GROUP BY one column, no GROUPING SETS, ORDER BY ≤ 1 column, LIMIT > 0 and ≤ maxTopNLimit,
     // no OFFSET, no HAVING, no windowing.
-    final boolean topNOk = grouping != null
-                           && grouping.getDimensions().size() == 1
-                           && !grouping.getSubtotals().hasEffect(grouping.getDimensionSpecs())
-                           && sorting != null
+    boolean c = grouping != null;
+    if(!c) {
+      return null;
+    }
+    boolean b = c
+                               && grouping.getDimensions().size() == 1
+                               && !grouping.getSubtotals().hasEffect(grouping.getDimensionSpecs())
+                               && sorting != null;
+    if(!b) {
+      return null;
+    }
+    final boolean topNOk = b
                            && (sorting.getOrderBys().size() <= 1
                                && sorting.getOffsetLimit().hasLimit()
                                && sorting.getOffsetLimit().getLimit() > 0
