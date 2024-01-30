@@ -309,8 +309,8 @@ public class DruidQueryGenerator extends RelShuttleImpl
       return visitFilter((Filter) other);
     } else if (other instanceof LogicalValues) {
       return visit((LogicalValues) other);
-    } else if (other instanceof Window){
-      return visitWindow((Window)other);
+    } else if (other instanceof Window) {
+      return visitWindow((Window) other);
     }
 
     return super.visit(other);
