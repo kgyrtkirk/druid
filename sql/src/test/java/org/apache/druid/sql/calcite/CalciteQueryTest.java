@@ -146,7 +146,6 @@ import static org.junit.Assert.assertThrows;
 
 public class CalciteQueryTest extends BaseCalciteQueryTest
 {
-
   @Test
   public void testInformationSchemaSchemata()
   {
