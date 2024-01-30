@@ -37,7 +37,7 @@ public class DecoupledPlanningCalciteQueryTest extends CalciteQueryTest
   private static final ImmutableMap<String, Object> CONTEXT_OVERRIDES = ImmutableMap.of(
       PlannerConfig.CTX_NATIVE_QUERY_SQL_PLANNING_MODE, PlannerConfig.NATIVE_QUERY_SQL_PLANNING_MODE_DECOUPLED,
       QueryContexts.ENABLE_DEBUG, true
-      );
+  );
 
   @Override
   protected QueryTestBuilder testBuilder()
