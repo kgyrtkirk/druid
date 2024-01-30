@@ -166,7 +166,7 @@ public class CalciteRulesManager
           PruneEmptyRules.JOIN_RIGHT_INSTANCE,
           PruneEmptyRules.SORT_FETCH_ZERO_INSTANCE,
           PruneEmptyRules.EMPTY_TABLE_INSTANCE,
-          CoreRules.PROJECT_TO_LOGICAL_PROJECT_AND_WINDOW.config.toRule(),
+          CoreRules.PROJECT_TO_LOGICAL_PROJECT_AND_WINDOW,
           CoreRules.FILTER_MERGE,
           CoreRules.INTERSECT_TO_DISTINCT
       );
@@ -235,10 +235,6 @@ public class CalciteRulesManager
     final Program druidPreProgram = buildPreProgram(plannerContext, true);
     final Program bindablePreProgram = buildPreProgram(plannerContext, false);
 
-    HepProgramBuilder hepP =HepProgram.builder();
-    hepP.addGroupBegin();
-    hepP.addRuleCollection(baseRuleSet(plannerContext));
-    hepP.addGroupEnd();
     return ImmutableList.of(
         Programs.sequence(
             druidPreProgram,
@@ -250,15 +246,24 @@ public class CalciteRulesManager
             Programs.ofRules(bindableConventionRuleSet(plannerContext)),
             new LoggingProgram("After bindable volcano planner program", isDebug)
         ),
-
         Programs.sequence(
             druidPreProgram,
-            Programs.of(hepP.build(), true, DefaultRelMetadataProvider.INSTANCE),
-//            Programs.sequence(baseRuleSet(plannerContext)),
+            buildBaseRuleSetProgram(plannerContext),
+            new LoggingProgram("After baseRuleSet program", isDebug),
             Programs.ofRules(logicalConventionRuleSet(plannerContext)),
             new LoggingProgram("After logical volcano planner program", isDebug)
         )
     );
+  }
+
+  private Program buildBaseRuleSetProgram(PlannerContext plannerContext)
+  {
+    // FIXME: rename/etc
+    HepProgramBuilder hepP = HepProgram.builder();
+    hepP.addGroupBegin();
+    hepP.addRuleCollection(baseRuleSet(plannerContext));
+    hepP.addGroupEnd();
+    return Programs.of(hepP.build(), true, DefaultRelMetadataProvider.INSTANCE);
   }
 
   /**
@@ -273,10 +278,6 @@ public class CalciteRulesManager
 
     // Program that pre-processes the tree before letting the full-on VolcanoPlanner loose.
     final List<Program> prePrograms = new ArrayList<>();
-
-//    prePrograms.add(new LoggingProgram("Finished pre-Volcano manipulation program1", isDebug));
-//    prePrograms.add(Programs.ofRules(CoreRules.PROJECT_TO_LOGICAL_PROJECT_AND_WINDOW));
-
     prePrograms.add(new LoggingProgram("Start", isDebug));
     prePrograms.add(Programs.subQuery(DefaultRelMetadataProvider.INSTANCE));
     prePrograms.add(new LoggingProgram("Finished subquery program", isDebug));
@@ -287,8 +288,7 @@ public class CalciteRulesManager
 
     if (isDruid) {
       prePrograms.add(buildPreVolcanoManipulationProgram(plannerContext));
-
-      prePrograms.add(new LoggingProgram("Finished pre-Volcano manipulation program2", isDebug));
+      prePrograms.add(new LoggingProgram("Finished pre-Volcano manipulation program", isDebug));
     }
 
     return Programs.sequence(prePrograms.toArray(new Program[0]));
@@ -324,16 +324,11 @@ public class CalciteRulesManager
     final HepProgramBuilder builder = HepProgram.builder();
     builder.addMatchLimit(CalciteRulesManager.HEP_DEFAULT_MATCH_LIMIT);
 
-
-
     if (isDruid) {
       // COALESCE rules must run before REDUCTION_RULES, since otherwise ReduceExpressionsRule#pushPredicateIntoCase may
       // make it impossible to convert to COALESCE.
       builder.addRuleInstance(new CaseToCoalesceRule());
       builder.addRuleInstance(new CoalesceLookupRule());
-//      builder.addRuleInstance(CoreRules.PROJECT_TO_LOGICAL_PROJECT_AND_WINDOW);
-//    prePrograms.add(Programs.ofRules(CoreRules.PROJECT_TO_LOGICAL_PROJECT_AND_WINDOW));
-//      builder.addRuleInstance(CoreRules.PROJECT_MERGE);
     }
 
     // Remaining rules run as a single group until fixpoint.
@@ -364,16 +359,6 @@ public class CalciteRulesManager
     for (final RelOptRule rule : REDUCTION_RULES) {
       builder.addRuleInstance(rule);
     }
-//    for (final RelOptRule rule : ABSTRACT_RELATIONAL_RULES) {
-//      builder.addRuleInstance(rule);
-//    }
-//    for (final RelOptRule rule : ABSTRACT_RULES) {
-//      builder.addRuleInstance(rule);
-//    }
-//    for (final RelOptRule rule : BASE_RULES) {
-//      builder.addRuleInstance(rule);
-//    }
-
 
     builder.addGroupEnd();
 
@@ -432,9 +417,7 @@ public class CalciteRulesManager
   {
     final ImmutableList.Builder<RelOptRule> retVal = ImmutableList
         .<RelOptRule>builder()
-//        .addAll(baseRuleSet(plannerContext))
-//        .add(          CoreRules.PROJECT_REMOVE)
-        .add(          CoreRules.SORT_REMOVE)
+        .add(CoreRules.SORT_REMOVE)
         .add(new DruidLogicalRules(plannerContext).rules().toArray(new RelOptRule[0]));
     return retVal.build();
   }

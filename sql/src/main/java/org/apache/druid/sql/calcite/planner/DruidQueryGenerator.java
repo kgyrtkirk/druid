@@ -311,7 +311,6 @@ public class DruidQueryGenerator extends RelShuttleImpl
       return visit((LogicalValues) other);
     } else if (other instanceof Window){
       return visitWindow((Window)other);
-
     }
 
     return super.visit(other);
@@ -325,19 +324,10 @@ public class DruidQueryGenerator extends RelShuttleImpl
       queryTables.add(currentTable);
       partialDruidQuery = PartialDruidQuery.createOuterQuery(partialDruidQuery);
     }
-
     partialDruidQuery = partialDruidQuery.withWindow((Window) result);
     currentStage = PartialDruidQuery.Stage.WINDOW;
-//    } else if (currentStage == PartialDruidQuery.Stage.SCAN) {
-//
-//
-//    if(true)
-//    {
-//      throw new RuntimeException("FIXME: Unimplemented!");
-//    }
-//    return null;
 
-      return result;
+    return result;
   }
 
   public PartialDruidQuery getPartialDruidQuery()

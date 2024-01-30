@@ -1496,8 +1496,7 @@ public class DruidQuery
   {
     if (sorting == null
         || sorting.getOrderBys().isEmpty()
-        || (sorting.getProjection()!=null && !sorting.getProjection().getVirtualColumns().isEmpty())
-        ) {
+        || (sorting.getProjection() != null && !sorting.getProjection().getVirtualColumns().isEmpty())) {
       return null;
     }
 
