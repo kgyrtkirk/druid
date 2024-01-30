@@ -4,3 +4,4 @@ LogicalSort(fetch=[2]): rowcount = 1.4999997909250677, cumulative cost = {233.18
       LogicalFilter(condition=[=($0, 'a')]): rowcount = 15.0, cumulative cost = {215.0 rows, 401.0 cpu, 0.0 io}, id = 180
         LogicalProject(dim4=[$4], dim5=[$5]): rowcount = 100.0, cumulative cost = {200.0 rows, 301.0 cpu, 0.0 io}, id = 178
           LogicalTableScan(table=[[druid, numfoo]]): rowcount = 100.0, cumulative cost = {100.0 rows, 101.0 cpu, 0.0 io}, id = 144
+
