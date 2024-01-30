@@ -38,13 +38,6 @@ import java.util.List;
  */
 public class DruidXWindow extends Window implements DruidLogicalNode
 {
-
-//  public DruidWindow(RelOptCluster cluster, RelTraitSet traits, RelNode child, RexNode condition)
-//  {
-//    super(cluster, traits, child, constants, rowType, groups)
-//    assert getConvention() instanceof DruidLogicalConvention;
-//  }
-
   public DruidXWindow(RelOptCluster cluster, RelTraitSet traitSet, List<RelHint> hints, RelNode input,
       List<RexLiteral> constants, RelDataType rowType, List<Group> groups)
   {

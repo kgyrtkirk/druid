@@ -1452,7 +1452,7 @@ public class DruidQuery
 
     // This is not yet supported
     if (dataSource.isConcrete()) {
-//      return null; FIXME: @WireTransferable; ok in tests
+      return null;
     }
     if (!(dataSource instanceof InlineDataSource || dataSource instanceof QueryDataSource)) {
       // We need a scan query to pull the results up for us before applying the window
@@ -1486,7 +1486,6 @@ public class DruidQuery
         operators,
         null
     );
-
   }
 
   /**
