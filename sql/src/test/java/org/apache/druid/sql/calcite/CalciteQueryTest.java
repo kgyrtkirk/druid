@@ -111,8 +111,8 @@ import org.apache.druid.segment.VirtualColumns;
 import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.segment.join.JoinType;
+import org.apache.druid.sql.calcite.DecoupledTestConfig.NativeQueryIgnore;
 import org.apache.druid.sql.calcite.NotYetSupported.Modes;
-import org.apache.druid.sql.calcite.SqlTestFrameworkConfig.DecoupledIgnoreQuery;
 import org.apache.druid.sql.calcite.expression.DruidExpression;
 import org.apache.druid.sql.calcite.filtration.Filtration;
 import org.apache.druid.sql.calcite.planner.Calcites;
@@ -8173,7 +8173,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @SqlTestFrameworkConfig(decoupledIgnoreQuery = DecoupledIgnoreQuery.AGG_COL_EXCHANGE)
+  @DecoupledTestConfig(nativeQueryIgnore = NativeQueryIgnore.AGG_COL_EXCHANGE)
   @Test
   public void testGroupBySortPushDown()
   {
@@ -8269,7 +8269,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @SqlTestFrameworkConfig(decoupledIgnoreQuery = DecoupledIgnoreQuery.IMPROVED_PLAN)
+  @DecoupledTestConfig(nativeQueryIgnore = NativeQueryIgnore.IMPROVED_PLAN)
   @Test
   public void testGroupByLimitPushdownExtraction()
   {
@@ -8724,7 +8724,8 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @SqlTestFrameworkConfig(numMergeBuffers = 3, decoupledIgnoreQuery = DecoupledIgnoreQuery.SLIGHTLY_WORSE_PLAN)
+  @DecoupledTestConfig(nativeQueryIgnore = NativeQueryIgnore.SLIGHTLY_WORSE_PLAN)
+  @SqlTestFrameworkConfig(numMergeBuffers = 3)
   @Test
   public void testQueryWithSelectProjectAndIdentityProjectDoesNotRename()
   {
@@ -12594,6 +12595,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @DecoupledTestConfig
   @Test
   public void testNvlColumns()
   {
@@ -12632,7 +12634,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @SqlTestFrameworkConfig(decoupledIgnoreQuery = DecoupledIgnoreQuery.EXPR_POSTAGG)
+  @DecoupledTestConfig(nativeQueryIgnore = NativeQueryIgnore.EXPR_POSTAGG)
   @Test
   public void testGroupByWithLiteralInSubqueryGrouping()
   {
@@ -12821,7 +12823,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @SqlTestFrameworkConfig(decoupledIgnoreQuery = DecoupledIgnoreQuery.EXPR_POSTAGG)
+  @DecoupledTestConfig(nativeQueryIgnore = NativeQueryIgnore.EXPR_POSTAGG)
   @Test
   public void testRepeatedIdenticalVirtualExpressionGrouping()
   {
@@ -14425,7 +14427,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @SqlTestFrameworkConfig(decoupledIgnoreQuery = DecoupledIgnoreQuery.AGGREGATE_REMOVE_NOT_FIRED)
+  @DecoupledTestConfig(nativeQueryIgnore = NativeQueryIgnore.AGGREGATE_REMOVE_NOT_FIRED)
   @Test
   public void testSubqueryTypeMismatchWithLiterals()
   {
@@ -15071,7 +15073,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
         .run();
   }
 
-  @SqlTestFrameworkConfig(decoupledIgnoreQuery = DecoupledIgnoreQuery.SLIGHTLY_WORSE_PLAN)
+  @DecoupledTestConfig(nativeQueryIgnore = NativeQueryIgnore.SLIGHTLY_WORSE_PLAN)
   @Test
   public void testWindowingWithScanAndSort()
   {

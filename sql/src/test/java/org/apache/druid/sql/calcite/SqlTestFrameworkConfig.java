@@ -50,25 +50,6 @@ public @interface SqlTestFrameworkConfig
 
   ResultCacheMode resultCache() default ResultCacheMode.DISABLED;
 
-  DecoupledIgnoreQuery decoupledIgnoreQuery() default DecoupledIgnoreQuery.NONE;
-
-  enum DecoupledIgnoreQuery
-  {
-    NONE,
-    // decoupled has moved virtualcolumn to postagg (improved plan)
-    // CoreRules.AGGREGATE_ANY_PULL_UP_CONSTANTS
-    EXPR_POSTAGG,
-    // dim1/dim2 exchange
-    AGG_COL_EXCHANGE,
-    // this happens when AGGREGATE_REMOVE gets supressed by AGGREGATE_CASE_REWRITE
-    AGGREGATE_REMOVE_NOT_FIRED,
-    // improved plan - AGGREGATE_ANY_PULL_UP_CONSTANTS ; enable for default?
-    IMPROVED_PLAN,
-    // worse plan; may loose vectorization; but no extra queries
-    SLIGHTLY_WORSE_PLAN
-
-  };
-
   /**
    * @see {@link SqlTestFrameworkConfig}
    */
@@ -100,6 +81,7 @@ public @interface SqlTestFrameworkConfig
     private SqlTestFrameworkConfig config;
     private ClassRule classRule;
     private QueryComponentSupplier testHost;
+    private Description description;
 
     public MethodRule(ClassRule classRule, QueryComponentSupplier testHost)
     {
@@ -124,6 +106,7 @@ public @interface SqlTestFrameworkConfig
     @Override
     public Statement apply(Statement base, Description description)
     {
+      this.description = description;
       config = description.getAnnotation(SqlTestFrameworkConfig.class);
       if (config == null) {
         config = defaultConfig();
@@ -136,9 +119,9 @@ public @interface SqlTestFrameworkConfig
       return getConfigurationInstance().framework;
     }
 
-    public SqlTestFrameworkConfig getConfig()
+    public Description getDescription()
     {
-      return config;
+      return description;
     }
 
     private ConfigurationInstance getConfigurationInstance()

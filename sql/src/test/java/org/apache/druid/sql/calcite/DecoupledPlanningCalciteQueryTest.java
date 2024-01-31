@@ -23,7 +23,6 @@ import com.google.common.collect.ImmutableMap;
 import org.apache.druid.query.QueryContexts;
 import org.apache.druid.server.security.AuthConfig;
 import org.apache.druid.sql.calcite.NotYetSupported.NotYetSupportedProcessor;
-import org.apache.druid.sql.calcite.SqlTestFrameworkConfig.DecoupledIgnoreQuery;
 import org.apache.druid.sql.calcite.planner.PlannerConfig;
 import org.apache.druid.sql.calcite.util.SqlTestFramework;
 import org.junit.Rule;
@@ -57,7 +56,9 @@ public class DecoupledPlanningCalciteQueryTest extends CalciteQueryTest
         .cannotVectorize(cannotVectorize)
         .skipVectorize(skipVectorize);
 
-    if (queryFrameworkRule.getConfig().decoupledIgnoreQuery() != DecoupledIgnoreQuery.NONE) {
+    DecoupledTestConfig decTestConfig = queryFrameworkRule.getDescription().getAnnotation(DecoupledTestConfig.class);
+
+    if (decTestConfig != null && decTestConfig.nativeQueryIgnore().isPresent()) {
       builder.verifyNativeQueries(x -> false);
     }
 

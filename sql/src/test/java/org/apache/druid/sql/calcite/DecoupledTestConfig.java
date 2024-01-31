@@ -26,7 +26,30 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD})
-public @interface DecoupledPlanMismatch
+public @interface DecoupledTestConfig
 {
-//FIXME unused
+  NativeQueryIgnore nativeQueryIgnore() default NativeQueryIgnore.NONE;
+
+  enum NativeQueryIgnore
+  {
+    NONE,
+    // decoupled has moved virtualcolumn to postagg (improved plan)
+    // CoreRules.AGGREGATE_ANY_PULL_UP_CONSTANTS
+    EXPR_POSTAGG,
+    // dim1/dim2 exchange
+    AGG_COL_EXCHANGE,
+    // this happens when AGGREGATE_REMOVE gets supressed by
+    // AGGREGATE_CASE_REWRITE
+    AGGREGATE_REMOVE_NOT_FIRED,
+    // improved plan - AGGREGATE_ANY_PULL_UP_CONSTANTS ; enable for default?
+    IMPROVED_PLAN,
+    // worse plan; may loose vectorization; but no extra queries
+    SLIGHTLY_WORSE_PLAN;
+
+    public boolean isPresent()
+    {
+      return this != NONE;
+    }
+  };
+
 }
