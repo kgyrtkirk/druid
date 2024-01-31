@@ -44,6 +44,7 @@ import org.apache.calcite.rel.logical.LogicalUnion;
 import org.apache.calcite.rel.logical.LogicalValues;
 import org.apache.calcite.rex.RexLiteral;
 import org.apache.druid.java.util.common.ISE;
+import org.apache.druid.java.util.common.UOE;
 import org.apache.druid.query.InlineDataSource;
 import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.sql.calcite.rel.PartialDruidQuery;
@@ -313,7 +314,7 @@ public class DruidQueryGenerator extends RelShuttleImpl
       return visitWindow((Window) other);
     }
 
-    throw new ISE("Found unsupported RelNode [%s]", other.getClass().getSimpleName());
+    throw new UOE("Found unsupported RelNode [%s]", other.getClass().getSimpleName());
   }
 
   private RelNode visitWindow(Window other)
