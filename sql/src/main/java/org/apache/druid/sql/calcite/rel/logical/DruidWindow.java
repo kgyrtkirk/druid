@@ -36,9 +36,9 @@ import java.util.List;
 /**
  * {@link DruidLogicalNode} convention node for {@link Filter} plan node.
  */
-public class DruidXWindow extends Window implements DruidLogicalNode
+public class DruidWindow extends Window implements DruidLogicalNode
 {
-  public DruidXWindow(RelOptCluster cluster, RelTraitSet traitSet, List<RelHint> hints, RelNode input,
+  public DruidWindow(RelOptCluster cluster, RelTraitSet traitSet, List<RelHint> hints, RelNode input,
       List<RexLiteral> constants, RelDataType rowType, List<Group> groups)
   {
     super(cluster, traitSet, input, constants, rowType, groups);
@@ -47,7 +47,7 @@ public class DruidXWindow extends Window implements DruidLogicalNode
   @Override
   public RelNode copy(RelTraitSet traitSet, List<RelNode> inputs)
   {
-    return new DruidXWindow(getCluster(), traitSet, hints, inputs.get(0), constants, rowType, groups);
+    return new DruidWindow(getCluster(), traitSet, hints, inputs.get(0), constants, rowType, groups);
   }
 
   @Override

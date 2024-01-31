@@ -258,12 +258,12 @@ public class CalciteRulesManager
 
   private Program buildBaseRuleSetProgram(PlannerContext plannerContext)
   {
-    // FIXME: rename/etc
-    HepProgramBuilder hepP = HepProgram.builder();
-    hepP.addGroupBegin();
-    hepP.addRuleCollection(baseRuleSet(plannerContext));
-    hepP.addGroupEnd();
-    return Programs.of(hepP.build(), true, DefaultRelMetadataProvider.INSTANCE);
+    final HepProgramBuilder builder = HepProgram.builder();
+    builder.addMatchLimit(CalciteRulesManager.HEP_DEFAULT_MATCH_LIMIT);
+    builder.addGroupBegin();
+    builder.addRuleCollection(baseRuleSet(plannerContext));
+    builder.addGroupEnd();
+    return Programs.of(builder.build(), true, DefaultRelMetadataProvider.INSTANCE);
   }
 
   /**
