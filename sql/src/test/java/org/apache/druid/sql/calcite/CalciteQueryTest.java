@@ -12595,7 +12595,6 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig
   @Test
   public void testNvlColumns()
   {

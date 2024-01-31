@@ -41,7 +41,7 @@ public class DruidWindow extends Window implements DruidLogicalNode
   public DruidWindow(RelOptCluster cluster, RelTraitSet traitSet, List<RelHint> hints, RelNode input,
       List<RexLiteral> constants, RelDataType rowType, List<Group> groups)
   {
-    super(cluster, traitSet, input, constants, rowType, groups);
+    super(cluster, traitSet, hints, input, constants, rowType, groups);
   }
 
   @Override

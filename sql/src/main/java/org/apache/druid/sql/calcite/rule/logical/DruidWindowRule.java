@@ -33,7 +33,10 @@ public class DruidWindowRule extends ConverterRule
 
   public DruidWindowRule(Class<? extends RelNode> clazz, RelTrait in, RelTrait out, String descriptionPrefix)
   {
-    super(clazz, in, out, descriptionPrefix);
+    super(
+        Config.INSTANCE
+            .withConversion(clazz, in, out, descriptionPrefix)
+    );
   }
 
   @Override
@@ -45,10 +48,10 @@ public class DruidWindowRule extends ConverterRule
         w.getCluster(),
         newTrait,
         w.getHints(),
-        convert(w.getInput(),
-            w.getInput().getTraitSet()
-            .replace(DruidLogicalConvention.instance())
-),
+        convert(
+            w.getInput(),
+            w.getInput().getTraitSet().replace(DruidLogicalConvention.instance())
+        ),
         w.getConstants(),
         w.getRowType(),
         w.groups

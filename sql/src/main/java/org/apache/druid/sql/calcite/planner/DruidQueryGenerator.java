@@ -313,7 +313,7 @@ public class DruidQueryGenerator extends RelShuttleImpl
       return visitWindow((Window) other);
     }
 
-    return super.visit(other);
+    throw new ISE("Found unsupported RelNode [%s]", other.getClass().getSimpleName());
   }
 
   private RelNode visitWindow(Window other)
