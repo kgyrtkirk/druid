@@ -19,8 +19,14 @@
 
 package org.apache.druid.sql.calcite.rel.logical;
 
-@SuppressWarnings("java/missing-clone-method")
+@SuppressWarnings("codeql[java/missing-clone-method]")
 public class A2 implements Cloneable
 {
   int a;
+
+  @SuppressWarnings("lgtm[java/missing-clone-method]")
+  static class LG {
+    int a;
+
+  }
 }

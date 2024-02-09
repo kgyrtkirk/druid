@@ -19,7 +19,7 @@
 
 package org.apache.druid.sql.calcite.rel.logical;
 
-@SuppressWarnings("clone")
+@SuppressWarnings("codeql[clone]")
 public class A4 implements Cloneable
 {
   int a;

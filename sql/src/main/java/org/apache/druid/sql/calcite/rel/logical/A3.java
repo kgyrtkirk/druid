@@ -19,7 +19,7 @@
 
 package org.apache.druid.sql.calcite.rel.logical;
 
-@SuppressWarnings("missing-clone-method")
+@SuppressWarnings("codeql[missing-clone-method]")
 public class A3 implements Cloneable
 {
   int a;
