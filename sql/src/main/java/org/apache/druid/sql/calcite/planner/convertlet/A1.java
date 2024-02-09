@@ -17,16 +17,9 @@
  * under the License.
  */
 
-package org.apache.druid.sql.calcite.rel;
+package org.apache.druid.sql.calcite.planner.convertlet;
 
-@SuppressWarnings("lgtm[java/missing-clone-method]")
-public class A5 implements Cloneable
+public class A1 implements Cloneable
 {
-  int o;
-
-  public A5()
-  {
-    o = 3;
-  }
-
+  int a;
 }

@@ -17,10 +17,10 @@
  * under the License.
  */
 
-package org.apache.druid.sql.calcite.rel;
+package org.apache.druid.sql.calcite.planner.convertlet;
 
-@SuppressWarnings("codeql[clone]")
-public class A4 implements Cloneable
+@SuppressWarnings("codeql[missing-clone-method]")
+public class A3 implements Cloneable
 {
   int a;
 }
