@@ -17,9 +17,16 @@
  * under the License.
  */
 
-package org.apache.druid.sql.calcite.rel.logical;
+package org.apache.druid.sql.calcite.rel;
 
-public class A1 implements Cloneable
+@SuppressWarnings("lgtm[java/missing-clone-method]")
+public class A6 implements Cloneable
 {
-  int a;
+  public final int a;
+
+  public A6(int aa)
+  {
+    a = aa;
+
+  }
 }

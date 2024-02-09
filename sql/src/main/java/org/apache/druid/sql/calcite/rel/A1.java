@@ -17,10 +17,9 @@
  * under the License.
  */
 
-package org.apache.druid.sql.calcite.rel.logical;
+package org.apache.druid.sql.calcite.rel;
 
-public class A5 implements Cloneable
+public class A1 implements Cloneable
 {
-
-
+  int a;
 }
