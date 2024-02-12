@@ -33,7 +33,6 @@ public class DecoupledPlanningCalciteQueryTest extends CalciteQueryTest
   @Rule(order = 0)
   public NotYetSupportedProcessor decoupledIgnoreProcessor = new NotYetSupportedProcessor();
 
-
   private static final ImmutableMap<String, Object> CONTEXT_OVERRIDES =
       ImmutableMap.<String, Object>builder()
       .putAll(BaseCalciteQueryTest.QUERY_CONTEXT_DEFAULT)
