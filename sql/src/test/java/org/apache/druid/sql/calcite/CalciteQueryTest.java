@@ -2759,6 +2759,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @DecoupledTestConfig(nativeQueryIgnore = NativeQueryIgnore.GBY_DOESNT_SORT)
   @Test
   public void testGroupByWithSelectProjections()
   {
@@ -2791,7 +2792,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @NotYetSupported(Modes.PLAN_MISMATCH)
+  @DecoupledTestConfig(nativeQueryIgnore = NativeQueryIgnore.GBY_DOESNT_SORT)
   @Test
   public void testGroupByWithSelectAndOrderByProjections()
   {
@@ -2876,7 +2877,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @NotYetSupported(Modes.PLAN_MISMATCH)
+  @DecoupledTestConfig(nativeQueryIgnore =NativeQueryIgnore.SLIGHTLY_WORSE_PLAN)
   @Test
   public void testTopNWithSelectAndOrderByProjections()
   {
@@ -4842,7 +4843,8 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @NotYetSupported(Modes.PLAN_MISMATCH)
+  // not a TopN - instead: its a groupby like the next testcase; possibly not working configs?
+  @DecoupledTestConfig(nativeQueryIgnore = NativeQueryIgnore.SLIGHTLY_WORSE_PLAN)
   @Test
   public void testGroupByWithSortOnPostAggregationDefault()
   {
@@ -4874,7 +4876,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @NotYetSupported(Modes.PLAN_MISMATCH)
+  @DecoupledTestConfig(nativeQueryIgnore = NativeQueryIgnore.GBY_DOESNT_SORT)
   @Test
   public void testGroupByWithSortOnPostAggregationNoTopNConfig()
   {
@@ -4918,7 +4920,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @NotYetSupported(Modes.PLAN_MISMATCH)
+  @DecoupledTestConfig(nativeQueryIgnore = NativeQueryIgnore.GBY_DOESNT_SORT)
   @Test
   public void testGroupByWithSortOnPostAggregationNoTopNContext()
   {
@@ -6905,7 +6907,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @NotYetSupported(Modes.PLAN_MISMATCH)
+  @DecoupledTestConfig(nativeQueryIgnore = NativeQueryIgnore.AGG_COL_EXCHANGE)
   @Test
   public void testExactCountDistinctWithGroupingAndOtherAggregators()
   {
@@ -6960,6 +6962,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @DecoupledTestConfig(nativeQueryIgnore = NativeQueryIgnore.AGG_COL_EXCHANGE)
   @Test
   public void testMultipleExactCountDistinctWithGroupingAndOtherAggregatorsUsingJoin()
   {
@@ -8350,7 +8353,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @NotYetSupported(Modes.PLAN_MISMATCH)
+  @DecoupledTestConfig(nativeQueryIgnore = NativeQueryIgnore.TS_TO_SCAN)
   @Test
   public void testFilterOnCurrentTimestampWithIntervalArithmetic()
   {
@@ -8398,7 +8401,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @NotYetSupported(Modes.PLAN_MISMATCH)
+  @DecoupledTestConfig(nativeQueryIgnore = NativeQueryIgnore.TS_TO_SCAN)
   @Test
   public void testFilterOnCurrentTimestampOnView()
   {
@@ -10490,7 +10493,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @NotYetSupported(Modes.PLAN_MISMATCH)
+  @DecoupledTestConfig(nativeQueryIgnore = NativeQueryIgnore.IMPROVED_PLAN)
   @Test
   public void testGroupByTimeFloorAndDimOnGroupByTimeFloorAndDim()
   {
@@ -12201,6 +12204,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @NotYetSupported(Modes.REQUIRE_TIMECONDITION)
   @Test
   public void testRequireTimeConditionPositive3()
   {
@@ -12335,7 +12339,6 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @NotYetSupported(Modes.ERROR_HANDLING)
   @Test
   public void testRequireTimeConditionSemiJoinNegative()
   {

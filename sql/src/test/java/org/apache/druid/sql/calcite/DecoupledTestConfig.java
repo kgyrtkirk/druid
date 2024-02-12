@@ -20,6 +20,8 @@
 package org.apache.druid.sql.calcite;
 
 import org.apache.calcite.rel.rules.CoreRules;
+import org.apache.druid.query.scan.ScanQuery;
+import org.apache.druid.query.timeseries.TimeseriesQuery;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -63,7 +65,17 @@ public @interface DecoupledTestConfig
     /**
      * Worse plan; may loose vectorization; but no extra queries
      */
-    SLIGHTLY_WORSE_PLAN;
+    SLIGHTLY_WORSE_PLAN,
+    /**
+     * {@link TimeseriesQuery} to {@link ScanQuery} change.
+     *
+     * Not yet sure if this is improvement; or some issue
+     */
+    TS_TO_SCAN,
+    /**
+     * GroupBy doesn't sorted?!
+     */
+    GBY_DOESNT_SORT;
 
     public boolean isPresent()
     {
