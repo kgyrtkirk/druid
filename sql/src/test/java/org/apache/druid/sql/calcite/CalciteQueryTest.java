@@ -2877,7 +2877,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(nativeQueryIgnore =NativeQueryIgnore.SLIGHTLY_WORSE_PLAN)
+  @DecoupledTestConfig(nativeQueryIgnore = NativeQueryIgnore.SLIGHTLY_WORSE_PLAN)
   @Test
   public void testTopNWithSelectAndOrderByProjections()
   {
