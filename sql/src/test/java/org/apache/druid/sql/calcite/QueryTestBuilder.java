@@ -113,7 +113,10 @@ public class QueryTestBuilder
 
   public QueryTestBuilder(final QueryTestConfig config)
   {
-    Preconditions.checkNotNull(config.baseQueryContext(), "config's queryContext is null - probably set it to BaseCalciteQueryTest.QUERY_CONTEXT_DEFAULT");
+    Preconditions.checkNotNull(
+        config.baseQueryContext(),
+        "config's queryContext is null - probably set it to BaseCalciteQueryTest.QUERY_CONTEXT_DEFAULT"
+    );
     this.config = config;
     this.queryContext = config.baseQueryContext();
   }
