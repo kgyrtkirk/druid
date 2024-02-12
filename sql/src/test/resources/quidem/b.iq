@@ -1,0 +1,4 @@
+!use hr
+select 1x;
+!ok
+!plan
