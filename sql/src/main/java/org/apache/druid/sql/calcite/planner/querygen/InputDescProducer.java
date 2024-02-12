@@ -19,7 +19,7 @@
 
 package org.apache.druid.sql.calcite.planner.querygen;
 
-import com.amazonaws.annotation.Immutable;
+import com.google.errorprone.annotations.Immutable;
 import org.apache.druid.query.DataSource;
 import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.sql.calcite.planner.PlannerContext;
