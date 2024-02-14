@@ -87,6 +87,7 @@ public @interface NotYetSupported
     RESULT_MISMATCH(AssertionError.class, "(assertResultsEquals|AssertionError: column content mismatch)"),
     UNSUPPORTED_NULL_ORDERING(DruidException.class, "(A|DE)SCENDING ordering with NULLS (LAST|FIRST)"),
     UNION_WITH_COMPLEX_OPERAND(DruidException.class, "Only Table and Values are supported as inputs for Union"),
+    UNION_MORE_STRICT_ROWTYPE_CHECK(DruidException.class, "Row signature mismatch in Union inputs"),
     REQUIRE_TIMECONDITION(CannotBuildQueryException.class, "requireTimeCondition is enabled, all");
 
     public Class<? extends Throwable> throwableClass;
