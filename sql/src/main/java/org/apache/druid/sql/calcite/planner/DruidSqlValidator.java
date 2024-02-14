@@ -29,12 +29,9 @@ import org.apache.calcite.sql.SqlIdentifier;
 import org.apache.calcite.sql.SqlKind;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlNodeList;
-import org.apache.calcite.sql.SqlOperator;
 import org.apache.calcite.sql.SqlOperatorTable;
 import org.apache.calcite.sql.SqlUtil;
 import org.apache.calcite.sql.SqlWindow;
-import org.apache.calcite.sql.fun.SqlInternalOperators;
-import org.apache.calcite.sql.fun.SqlStdOperatorTable;
 import org.apache.calcite.sql.parser.SqlParserPos;
 import org.apache.calcite.sql.validate.SqlValidatorScope;
 import org.apache.calcite.sql2rel.SqlToRelConverter.SqlIdentifierFinder;
@@ -44,7 +41,6 @@ import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.query.QueryContexts;
 import org.apache.druid.sql.calcite.run.EngineFeature;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.checker.nullness.qual.PolyNull;
 
 /**
  * Druid extended SQL validator. (At present, it doesn't actually
@@ -196,47 +192,47 @@ public class DruidSqlValidator extends BaseDruidSqlValidator
         pos.getEndColumnNum());
   }
 
-  @Override
-  protected @PolyNull SqlNode performUnconditionalRewrites(@PolyNull SqlNode node, boolean underFrom)
-  {
-    if (
-         node != null
-        && node.getKind() == SqlKind.IN) {
-      SqlCall call = (SqlCall) node;
-      if(call.getOperandList().get(1) instanceof SqlNodeList) {
-        SqlParserPos pos = call.getParserPosition();
-        SqlNode left = call.getOperandList().get(0);
-        SqlNodeList right = (SqlNodeList) call.getOperandList().get(1);
-        Pair<SqlNodeList, SqlNodeList> exprAndLiterals = decomposeInArgs(right);
-        SqlNodeList exprs = exprAndLiterals.left;
-        SqlNodeList literals = exprAndLiterals.right;
-
-        if(!literals.isEmpty()) {
-          SqlOperator op;
-          if(literals.size() >= NATIVE_IN_THRESHOLD) {
-          op = SqlInternalOperators.DRUID_IN;
-          }else {
-          op = SqlStdOperatorTable.IN;
-          }
-          SqlCall inLiteralsCall = op.createCall(pos, left, literals);
-//          SqlCall inLiteralsCall = SqlInternalOperators.DRUID_IN.createCall(pos, left, literals);
-
-          if(!exprs.isEmpty()) {
-
-            node = SqlStdOperatorTable.OR.createCall(
-                pos,
-                SqlStdOperatorTable.IN.createCall(pos, left, exprs),
-                inLiteralsCall
-            );
-          } else {
-            node = inLiteralsCall;
-          }
-        }
-      }
-    }
-    return super.performUnconditionalRewrites(node, underFrom);
-  }
-
+//  @Override
+//  protected @PolyNull SqlNode performUnconditionalRewrites(@PolyNull SqlNode node, boolean underFrom)
+//  {
+//    if (
+//         node != null
+//        && node.getKind() == SqlKind.IN) {
+//      SqlCall call = (SqlCall) node;
+//      if(call.getOperandList().get(1) instanceof SqlNodeList) {
+//        SqlParserPos pos = call.getParserPosition();
+//        SqlNode left = call.getOperandList().get(0);
+//        SqlNodeList right = (SqlNodeList) call.getOperandList().get(1);
+//        Pair<SqlNodeList, SqlNodeList> exprAndLiterals = decomposeInArgs(right);
+//        SqlNodeList exprs = exprAndLiterals.left;
+//        SqlNodeList literals = exprAndLiterals.right;
+//
+//        if(!literals.isEmpty()) {
+//          SqlOperator op;
+//          if(literals.size() >= NATIVE_IN_THRESHOLD) {
+//          op = SqlInternalOperators.DRUID_IN;
+//          }else {
+//          op = SqlStdOperatorTable.IN;
+//          }
+//          SqlCall inLiteralsCall = op.createCall(pos, left, literals);
+////          SqlCall inLiteralsCall = SqlInternalOperators.DRUID_IN.createCall(pos, left, literals);
+//
+//          if(!exprs.isEmpty()) {
+//
+//            node = SqlStdOperatorTable.OR.createCall(
+//                pos,
+//                SqlStdOperatorTable.IN.createCall(pos, left, exprs),
+//                inLiteralsCall
+//            );
+//          } else {
+//            node = inLiteralsCall;
+//          }
+//        }
+//      }
+//    }
+//    return super.performUnconditionalRewrites(node, underFrom);
+//  }
+//
   /**
    * Decomposes the IN arguments into lists of expressions and literals.
    *
