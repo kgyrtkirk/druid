@@ -15319,7 +15319,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
         .run();
   }
   @Test
-  public void testWindowingWithOrderBy3a()
+  public void testWindowingWithOrderBy3()
   {
     skipVectorize();
     msqIncompatible();
@@ -15346,7 +15346,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
         .run();
   }
   @Test
-  public void testWindowingWithOrderBy3()
+  public void testWindowingWithOrderBy3a()
   {
     skipVectorize();
     msqIncompatible();
