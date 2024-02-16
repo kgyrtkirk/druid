@@ -70,7 +70,7 @@ import java.util.stream.Collectors;
  */
 public class DruidJoinQueryRel extends DruidRel<DruidJoinQueryRel>
 {
-  private static final TableDataSource DUMMY_DATA_SOURCE = new TableDataSource("__join__");
+  static final TableDataSource DUMMY_DATA_SOURCE = new TableDataSource("__join__");
 
   private final Filter leftFilter;
   private final PartialDruidQuery partialQuery;

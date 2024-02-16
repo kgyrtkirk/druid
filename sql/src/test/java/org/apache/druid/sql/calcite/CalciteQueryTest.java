@@ -15289,4 +15289,89 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
         )
         .run();
   }
+
+  @Test
+  public void testWindowingWithOrderBy2()
+  {
+    skipVectorize();
+    msqIncompatible();
+    testBuilder()
+        .sql("with "
+            + "main as "
+            + "(select dim1 as pickup,count(*) as cnt from foo group by 1 order by 2 desc limit 200),"
+            + "compare0 as "
+            + "(select dim1 as pickup,count(*) as cnt from numfoo group by 1 order by 2 desc limit 200) "
+            + "SELECT "
+            + " main.pickup,"
+            + " main.cnt,"
+            + " coalesce(compare0.cnt,0) as prevCount,"
+            + " safe_divide(100.0 * (main.cnt - compare0.cnt), compare0.cnt) as delta "
+            + "from main "
+            + "left join compare0 on main.pickup is not distinct from compare0.pickup "
+            + "order by delta desc"
+        )
+        .queryContext(
+            ImmutableMap.of(
+                PlannerContext.CTX_ENABLE_WINDOW_FNS, true,
+                QueryContexts.ENABLE_DEBUG, true
+            )
+        )
+        .run();
+  }
+  @Test
+  public void testWindowingWithOrderBy3a()
+  {
+    skipVectorize();
+    msqIncompatible();
+    testBuilder()
+        .sql("with "
+            + "main as "
+            + "(select dim1 as pickup,count(*) as cnt from foo group by 1 order by 2 desc limit 200),"
+            + "compare0 as "
+            + "(select dim1 as pickup,count(*) as cnt from numfoo group by 1 order by 2 desc limit 200) "
+            + "SELECT "
+            + " main.pickup,"
+            + " main.cnt,"
+            + " compare0.cnt,"
+            + " SUM(main.cnt) OVER (ORDER BY main.pickup)"
+            + "from main "
+            + "left join compare0 on main.pickup is not distinct from compare0.pickup "
+        )
+        .queryContext(
+            ImmutableMap.of(
+                PlannerContext.CTX_ENABLE_WINDOW_FNS, true,
+                QueryContexts.ENABLE_DEBUG, true
+            )
+        )
+        .run();
+  }
+  @Test
+  public void testWindowingWithOrderBy3()
+  {
+    skipVectorize();
+    msqIncompatible();
+    testBuilder()
+        .sql("with "
+            + "main as "
+            + "(select dim1 as pickup,count(*) as cnt from foo group by 1 order by 2 desc limit 200),"
+            + "compare0 as "
+            + "(select dim1 as pickup,count(*) as cnt from numfoo group by 1 order by 2 desc limit 200),"
+            + "main2 as "
+            + "(select main.pickup,main.cnt as m_cnt,compare0.cnt as c_cnt from main left join compare0 on main.pickup is not distinct from compare0.pickup limit 1000) "
+            + "SELECT "
+            + " pickup"
+            + " m_cnt,"
+            + " coalesce(c_cnt,0) as prevCount,"
+            + " safe_divide(100.0 * (m_cnt - c_cnt), c_cnt) as delta "
+            + "from main2 "
+            + "order by delta desc"
+        )
+        .queryContext(
+            ImmutableMap.of(
+                PlannerContext.CTX_ENABLE_WINDOW_FNS, true,
+                QueryContexts.ENABLE_DEBUG, true
+            )
+        )
+        .run();
+  }
 }
