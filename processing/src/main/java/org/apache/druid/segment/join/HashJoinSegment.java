@@ -154,7 +154,7 @@ public class HashJoinSegment implements SegmentReference
   public <T> T as(Class<T> clazz)
   {
     if (CloseableShapeshifter.class.equals(clazz)) {
-      return (T) new XRowsAndColumns(this);
+      return (T) new XRowsAndColumns(this.asStorageAdapter());
     }
     return SegmentReference.super.as(clazz);
   }

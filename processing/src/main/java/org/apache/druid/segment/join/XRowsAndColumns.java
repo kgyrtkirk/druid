@@ -46,23 +46,23 @@ public class XRowsAndColumns implements CloseableShapeshifter, RowsAndColumns
   @Override
   public <T> T as(Class<T> clazz)
   {
-  }
-
-  @Override
-  public Collection<String> getColumnNames()
-  {
-    if (true) {
-      throw new RuntimeException("FIXME: Unimplemented!");
+    if (StorageAdapter.class == clazz) {
+      return (T) storageAdapter;
     }
     return null;
 
   }
 
   @Override
+  public Collection<String> getColumnNames()
+  {
+    return storageAdapter.getRowSignature().getColumnNames();
+  }
+
+  @Override
   public int numRows()
   {
-    StorageAdapter sa = storageAdapter.asStorageAdapter();
-    return sa.getNumRows();
+    return storageAdapter.getNumRows();
   }
 
   @Override
@@ -72,7 +72,6 @@ public class XRowsAndColumns implements CloseableShapeshifter, RowsAndColumns
       throw new RuntimeException("FIXME: Unimplemented!");
     }
     return null;
-
   }
 
 }
