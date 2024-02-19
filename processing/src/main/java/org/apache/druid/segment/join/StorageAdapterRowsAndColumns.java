@@ -74,5 +74,4 @@ public class StorageAdapterRowsAndColumns implements CloseableShapeshifter, Rows
   public void close() throws IOException
   {
   }
-
 }

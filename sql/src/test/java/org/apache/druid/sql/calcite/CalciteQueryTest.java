@@ -15104,7 +15104,6 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
         .run();
   }
 
-
   @Test
   public void testScanAndSortCanGetSchemaFromScanQuery()
   {
@@ -15120,7 +15119,6 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
         .expectedResults(expectedResults)
         .run();
   }
-
 
   @DecoupledTestConfig(nativeQueryIgnore = NativeQueryIgnore.SLIGHTLY_WORSE_PLAN)
   @Test
@@ -15225,8 +15223,6 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
   @Test
   public void testWindowingWithOrderBy()
   {
-    skipVectorize();
-    msqIncompatible();
     testBuilder()
         .sql(
             "SELECT\n"
@@ -15286,11 +15282,10 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
         .run();
   }
 
+  @NotYetSupported(Modes.MISSING_JOIN_CONVERSION)
   @Test
-  public void testWindowingWithOrderBy2()
+  public void testScanAndSortOnJoin()
   {
-    skipVectorize();
-    msqIncompatible();
     testBuilder()
         .sql("with "
             + "main as "
@@ -15308,20 +15303,21 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
         )
         .expectedResults(
             ImmutableList.of(
-                new Object[]{"", 1L, 1L, 0.0D},
-                new Object[]{"1", 1L, 1L, 0.0D},
-                new Object[]{"10.1", 1L, 1L, 0.0D},
-                new Object[]{"2", 1L, 1L, 0.0D},
-                new Object[]{"abc", 1L, 1L, 0.0D},
-                new Object[]{"def", 1L, 1L, 0.0D}            )
+                new Object[] {"", 1L, 1L, 0.0D},
+                new Object[] {"1", 1L, 1L, 0.0D},
+                new Object[] {"10.1", 1L, 1L, 0.0D},
+                new Object[] {"2", 1L, 1L, 0.0D},
+                new Object[] {"abc", 1L, 1L, 0.0D},
+                new Object[] {"def", 1L, 1L, 0.0D}
+            )
         )
         .run();
   }
+
+  @NotYetSupported(Modes.MISSING_JOIN_CONVERSION)
   @Test
-  public void testWindowingWithOrderBy3()
+  public void testWindowingOverJoin()
   {
-    skipVectorize();
-    msqIncompatible();
     testBuilder()
         .sql("with "
             + "main as "
@@ -15344,41 +15340,12 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
         )
         .expectedResults(
             ImmutableList.of(
-                new Object[] {946684800000L, 1L, 1L},
-                new Object[] {946771200000L, 1L, 2L},
-                new Object[] {946857600000L, 1L, 3L},
-                new Object[] {978307200000L, 1L, 4L},
-                new Object[] {978393600000L, 1L, 5L},
-                new Object[] {978480000000L, 1L, 6L}
-            )
-        )
-        .run();
-  }
-  @Test
-  public void testWindowingWithOrderBy3a()
-  {
-    skipVectorize();
-    msqIncompatible();
-    testBuilder()
-        .sql("with "
-            + "main as "
-            + "(select dim1 as pickup,count(*) as cnt from foo group by 1 order by 2 desc limit 200),"
-            + "compare0 as "
-            + "(select dim1 as pickup,count(*) as cnt from numfoo group by 1 order by 2 desc limit 200),"
-            + "main2 as "
-            + "(select main.pickup,main.cnt as m_cnt,compare0.cnt as c_cnt from main left join compare0 on main.pickup is not distinct from compare0.pickup limit 1000) "
-            + "SELECT "
-            + " pickup"
-            + " m_cnt,"
-            + " coalesce(c_cnt,0) as prevCount,"
-            + " safe_divide(100.0 * (m_cnt - c_cnt), c_cnt) as delta "
-            + "from main2 "
-            + "order by delta desc"
-        )
-        .queryContext(
-            ImmutableMap.of(
-                PlannerContext.CTX_ENABLE_WINDOW_FNS, true,
-                QueryContexts.ENABLE_DEBUG, true
+                new Object[]{"", 1L, 1L, 1L},
+                new Object[]{"1", 1L, 1L, 2L},
+                new Object[]{"10.1", 1L, 1L, 3L},
+                new Object[]{"2", 1L, 1L, 4L},
+                new Object[]{"abc", 1L, 1L, 5L},
+                new Object[]{"def", 1L, 1L, 6L}
             )
         )
         .run();
