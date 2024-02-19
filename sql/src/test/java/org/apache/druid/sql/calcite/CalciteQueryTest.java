@@ -15107,6 +15107,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
   @Test
   public void testScanAndSortCanGetSchemaFromScanQuery()
   {
+    msqIncompatible();
     String sql = "select * from (select * from \"wikipedia\" limit 3) order by \"user\"";
     ImmutableList<Object[]> expectedResults = ImmutableList.of(
         new Object[]{1442018825474L, "#en.wikipedia", "Auburn", "/* Status of peremptory norms under international law */ fixed spelling of 'Wimbledon'", "AU", "Australia", "true", "false", "false", "false", "false", null, "Main", "Peremptory norm", "NSW", "New South Wales", "60.225.66.142", 0L, 0L, 0L},
@@ -15223,6 +15224,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
   @Test
   public void testWindowingWithOrderBy()
   {
+    msqIncompatible();
     testBuilder()
         .sql(
             "SELECT\n"
@@ -15286,6 +15288,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
   @Test
   public void testScanAndSortOnJoin()
   {
+    msqIncompatible();
     testBuilder()
         .sql("with "
             + "main as "
@@ -15318,6 +15321,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
   @Test
   public void testWindowingOverJoin()
   {
+    msqIncompatible();
     testBuilder()
         .sql("with "
             + "main as "
