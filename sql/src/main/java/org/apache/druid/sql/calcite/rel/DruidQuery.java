@@ -1508,13 +1508,10 @@ public class DruidQuery
       return null;
     }
 
-//    if(dataSource !=DruidJoinQueryRel.DUMMY_DATA_SOURCE )
-    {
-      if ( dataSource.isConcrete()) {
-        // Currently only non-time orderings of subqueries are allowed.
-        setPlanningErrorOrderByNonTimeIsUnsupported();
-        return null;
-      }
+    if (dataSource.isConcrete()) {
+      // Currently only non-time orderings of subqueries are allowed.
+      setPlanningErrorOrderByNonTimeIsUnsupported();
+      return null;
     }
 
     QueryDataSource newDataSource = new QueryDataSource(scan);

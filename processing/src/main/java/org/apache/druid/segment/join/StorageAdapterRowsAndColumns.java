@@ -19,6 +19,7 @@
 
 package org.apache.druid.segment.join;
 
+import org.apache.druid.error.DruidException;
 import org.apache.druid.query.rowsandcols.RowsAndColumns;
 import org.apache.druid.query.rowsandcols.column.Column;
 import org.apache.druid.segment.CloseableShapeshifter;
@@ -27,22 +28,16 @@ import org.apache.druid.segment.StorageAdapter;
 import java.io.IOException;
 import java.util.Collection;
 
-public class XRowsAndColumns implements CloseableShapeshifter, RowsAndColumns
+public class StorageAdapterRowsAndColumns implements CloseableShapeshifter, RowsAndColumns
 {
-
   private final StorageAdapter storageAdapter;
 
-  public XRowsAndColumns(StorageAdapter storageAdapter)
+  public StorageAdapterRowsAndColumns(StorageAdapter storageAdapter)
   {
     this.storageAdapter = storageAdapter;
   }
 
-  @Override
-  public void close() throws IOException
-  {
-    // FIXME close?
-  }
-
+  @SuppressWarnings("unchecked")
   @Override
   public <T> T as(Class<T> clazz)
   {
@@ -50,7 +45,6 @@ public class XRowsAndColumns implements CloseableShapeshifter, RowsAndColumns
       return (T) storageAdapter;
     }
     return null;
-
   }
 
   @Override
@@ -62,16 +56,23 @@ public class XRowsAndColumns implements CloseableShapeshifter, RowsAndColumns
   @Override
   public int numRows()
   {
-    return storageAdapter.getNumRows();
+    throw notSupportedMethod();
   }
 
   @Override
   public Column findColumn(String name)
   {
-    if (true) {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-    return null;
+    throw notSupportedMethod();
+  }
+
+  private DruidException notSupportedMethod()
+  {
+    return DruidException.defensive("This method should not be called!");
+  }
+
+  @Override
+  public void close() throws IOException
+  {
   }
 
 }
