@@ -56,6 +56,7 @@ public class StorageAdapterRowsAndColumns implements CloseableShapeshifter, Rows
   @Override
   public int numRows()
   {
+    //FIXME materialize
     throw notSupportedMethod();
   }
 
