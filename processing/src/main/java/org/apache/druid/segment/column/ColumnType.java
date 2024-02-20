@@ -73,6 +73,7 @@ public class ColumnType extends BaseTypeSignature<ValueType>
    * @see ValueType#ARRAY
    * @see ValueType#STRING
    */
+  public static final ColumnType NULL = new ColumnType(ValueType.NULL, null, null);
   public static final ColumnType STRING_ARRAY = ofArray(STRING);
   /**
    * An array of Longs. Values will be represented as Object[] or long[]
@@ -106,6 +107,7 @@ public class ColumnType extends BaseTypeSignature<ValueType>
    * @see ValueType#COMPLEX
    */
   public static final ColumnType UNKNOWN_COMPLEX = ofComplex(null);
+
 
   @JsonCreator
   public ColumnType(

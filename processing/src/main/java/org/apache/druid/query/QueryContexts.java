@@ -122,7 +122,7 @@ public class QueryContexts
   public static final int DEFAULT_IN_SUB_QUERY_THRESHOLD = Integer.MAX_VALUE;
   public static final boolean DEFAULT_ENABLE_TIME_BOUNDARY_PLANNING = false;
   public static final boolean DEFAULT_WINDOWING_STRICT_VALIDATION = true;
-  public static final RowSignatureMode DEFAULT_ROW_SIGNATURE_MODE = RowSignatureMode.ALLOW_NULL;
+  public static final RowSignatureMode DEFAULT_ROW_SIGNATURE_MODE = RowSignatureMode.NULL_COLUMN;
 
   @SuppressWarnings("unused") // Used by Jackson serialization
   public enum Vectorize
@@ -190,6 +190,16 @@ public class QueryContexts
       public ColumnType getTypeForNullColumn(String columnName)
       {
         return null;
+      }
+    },
+    /**
+     * NULL column
+     */
+    NULL_COLUMN {
+      @Override
+      public ColumnType getTypeForNullColumn(String columnName)
+      {
+        return ColumnType.NULL;
       }
     },
     /**

@@ -70,6 +70,12 @@ public enum ValueType implements TypeDescriptor
    */
   STRING,
   /**
+   * Null type.
+   *
+   * The value of such a field is always null.
+   */
+  NULL,
+  /**
    * Placeholder for arbitrary 'complex' types, which have a corresponding serializer/deserializer implementation. Note
    * that knowing a type is complex alone isn't enough information to work with it directly, and additional information
    * in the form of a type name which must be registered in the complex type registry. Complex types are not currently
