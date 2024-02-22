@@ -27,6 +27,7 @@ import org.apache.druid.sql.calcite.planner.PlannerConfig;
 import org.apache.druid.sql.calcite.util.SqlTestFramework;
 import org.apache.druid.sql.calcite.util.SqlTestFramework.PlannerComponentSupplier;
 import org.junit.Rule;
+import org.junit.Test;
 
 public class DecoupledPlanningCalciteQueryTest extends CalciteQueryTest
 {
@@ -65,4 +66,11 @@ public class DecoupledPlanningCalciteQueryTest extends CalciteQueryTest
 
     return builder;
   }
+
+  @Test
+  public void testLatestToLatestByConversion()
+  {
+    super.testLatestToLatestByConversion();
+  }
+
 }

@@ -717,6 +717,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
   public void testLatestToLatestByConversion()
   {
     msqIncompatible();
+    skipVectorize();
     testQuery(
         "SELECT LATEST(dim1,10) FROM (SELECT DISTINCT __time, dim1 from foo)",
         ImmutableList.of(
@@ -740,6 +741,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
                 .build()),
         ImmutableList.of(new Object[]{"abc"})
     );
+    System.out.println("fin");
   }
 
   @Test

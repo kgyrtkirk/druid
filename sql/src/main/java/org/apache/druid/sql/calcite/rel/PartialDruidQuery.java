@@ -734,16 +734,16 @@ public class PartialDruidQuery
   public String toString()
   {
     return "PartialDruidQuery{" +
-           "scan=" + scan +
-           ", whereFilter=" + whereFilter +
-           ", selectProject=" + selectProject +
-           ", aggregate=" + aggregate +
-           ", havingFilter=" + havingFilter +
-           ", aggregateProject=" + aggregateProject +
-           ", sort=" + sort +
-           ", sortProject=" + sortProject +
-           ", window=" + window +
-           ", windowProject=" + windowProject +
+           "\n scan=" + scan +
+           ",\n whereFilter=" + whereFilter +
+           ",\n selectProject=" + selectProject +
+           ",\n aggregate=" + aggregate +
+           ",\n havingFilter=" + havingFilter +
+           ",\n aggregateProject=" + aggregateProject +
+           ",\n sort=" + sort +
+           ",\n sortProject=" + sortProject +
+           ",\n window=" + window +
+           ",\n windowProject=" + windowProject +
            '}';
   }
 }

@@ -19,6 +19,7 @@
 
 package org.apache.druid.sql.calcite.aggregation.builtin;
 
+import org.Rumble;
 import org.apache.calcite.rel.core.AggregateCall;
 import org.apache.calcite.rex.RexLiteral;
 import org.apache.calcite.rex.RexNode;
@@ -46,6 +47,7 @@ import org.apache.druid.sql.calcite.rel.InputAccessor;
 import org.apache.druid.sql.calcite.rel.VirtualColumnRegistry;
 
 import javax.annotation.Nullable;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -53,7 +55,6 @@ public class EarliestLatestBySqlAggregator implements SqlAggregator
 {
   public static final SqlAggregator EARLIEST_BY = new EarliestLatestBySqlAggregator(EarliestLatestAnySqlAggregator.AggregatorType.EARLIEST);
   public static final SqlAggregator LATEST_BY = new EarliestLatestBySqlAggregator(EarliestLatestAnySqlAggregator.AggregatorType.LATEST);
-
   private final EarliestLatestAnySqlAggregator.AggregatorType aggregatorType;
   private final SqlAggFunction function;
 
@@ -123,17 +124,23 @@ public class EarliestLatestBySqlAggregator implements SqlAggregator
         break;
       case 3:
         int maxStringBytes;
-        try {
+        if(Rumble.INSTANCE.BUG_ON) {
           maxStringBytes = RexLiteral.intValue(rexNodes.get(2));
+        } else {
+          try {
+            maxStringBytes = RexLiteral.intValue(rexNodes.get(2));
+          }
+          catch (AssertionError ae) {
+            plannerContext.setPlanningError(
+                "The third argument '%s' to function '%s' is not a number",
+                rexNodes.get(2),
+                aggregateCall.getName()
+            );
+            Rumble.INSTANCE.countBad++;
+            return null;
+          }
         }
-        catch (AssertionError ae) {
-          plannerContext.setPlanningError(
-              "The third argument '%s' to function '%s' is not a number",
-              rexNodes.get(2),
-              aggregateCall.getName()
-          );
-          return null;
-        }
+        Rumble.INSTANCE.countGood++;
         theAggFactory = aggregatorType.createAggregatorFactory(
             aggregatorName,
             fieldName,
