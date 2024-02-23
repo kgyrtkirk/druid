@@ -88,7 +88,8 @@ public @interface NotYetSupported
     UNSUPPORTED_NULL_ORDERING(DruidException.class, "(A|DE)SCENDING ordering with NULLS (LAST|FIRST)"),
     UNION_WITH_COMPLEX_OPERAND(DruidException.class, "Only Table and Values are supported as inputs for Union"),
     UNION_MORE_STRICT_ROWTYPE_CHECK(DruidException.class, "Row signature mismatch in Union inputs"),
-    REQUIRE_TIMECONDITION(CannotBuildQueryException.class, "requireTimeCondition is enabled, all");
+    REQUIRE_TIMECONDITION(CannotBuildQueryException.class, "requireTimeCondition is enabled, all"),
+    JOIN_CONDITION_NOT_PUSHED_CONDITION(DruidException.class, "SQL requires a join with '.*' condition");
 
     public Class<? extends Throwable> throwableClass;
     public String regex;
