@@ -2784,7 +2784,6 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(nativeQueryIgnore = NativeQueryIgnore.GBY_DOESNT_SORT)
   @Test
   public void testGroupByWithSelectProjections()
   {
@@ -2817,7 +2816,6 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
-//  @DecoupledTestConfig(nativeQueryIgnore = NativeQueryIgnore.GBY_DOESNT_SORT)
   @Test
   public void testGroupByWithSelectAndOrderByProjections()
   {
@@ -2902,7 +2900,6 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
-//  @DecoupledTestConfig(nativeQueryIgnore = NativeQueryIgnore.SLIGHTLY_WORSE_PLAN)
   @Test
   public void testTopNWithSelectAndOrderByProjections()
   {
@@ -4868,9 +4865,6 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
-
-  // not a TopN - instead: its a groupby like the next testcase; possibly not working configs?
-//  @DecoupledTestConfig(nativeQueryIgnore = NativeQueryIgnore.SLIGHTLY_WORSE_PLAN)
   @Test
   public void testGroupByWithSortOnPostAggregationDefault()
   {
@@ -4902,7 +4896,6 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
-//  @DecoupledTestConfig(nativeQueryIgnore = NativeQueryIgnore.GBY_DOESNT_SORT)
   @Test
   public void testGroupByWithSortOnPostAggregationNoTopNConfig()
   {
@@ -4946,7 +4939,6 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
-///  @DecoupledTestConfig(nativeQueryIgnore = NativeQueryIgnore.GBY_DOESNT_SORT)
   @Test
   public void testGroupByWithSortOnPostAggregationNoTopNContext()
   {
