@@ -20,7 +20,6 @@
 package org.apache.druid.sql.calcite;
 
 import com.google.common.collect.ImmutableList;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.druid.sql.calcite.NotYetSupported.Modes;
 import org.junit.Test;
 import org.reflections.Reflections;
@@ -106,7 +105,8 @@ public class NotYetSupportedUsageTest
     public String toString()
     {
       return " | " + className + " | " + methodNames.size() + " | " + mode + " | "
-          + StringUtils.defaultIfBlank(mode.getComment(), "-") + " | ";
+//          + StringUtils.defaultIfBlank(mode.getComment(), "-") + " | "
+          ;
     }
   }
 
