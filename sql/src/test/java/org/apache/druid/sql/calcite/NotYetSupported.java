@@ -108,16 +108,28 @@ public @interface NotYetSupported
 
     public Class<? extends Throwable> throwableClass;
     public String regex;
+    public String comment;
 
-    Modes(Class<? extends Throwable> cl, String regex)
+    Modes(Class<? extends Throwable> cl, String regex, String comment)
     {
       this.throwableClass = cl;
       this.regex = regex;
+      this.comment = comment;
+    }
+
+    Modes(Class<? extends Throwable> cl, String regex)
+    {
+      this(cl, regex, null);
     }
 
     Pattern getPattern()
     {
       return Pattern.compile(regex, Pattern.MULTILINE | Pattern.DOTALL);
+    }
+
+    String getComment()
+    {
+      return comment;
     }
   };
 
