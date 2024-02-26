@@ -20,15 +20,22 @@
 package org.apache.druid.sql.calcite;
 
 import com.google.common.collect.ImmutableMap;
+import junitparams.Parameters;
 import org.apache.druid.query.QueryContexts;
 import org.apache.druid.server.security.AuthConfig;
+import org.apache.druid.sql.calcite.DecoupledTestConfig.NativeQueryIgnore;
 import org.apache.druid.sql.calcite.NotYetSupported.NotYetSupportedProcessor;
 import org.apache.druid.sql.calcite.planner.PlannerConfig;
 import org.apache.druid.sql.calcite.util.SqlTestFramework;
 import org.apache.druid.sql.calcite.util.SqlTestFramework.PlannerComponentSupplier;
 import org.junit.Rule;
+import org.junit.Test;
 
-public class DecoupledPlanningCalciteUnionQueryTest extends CalciteUnionQueryTest
+import java.util.Map;
+
+import static org.junit.Assert.assertNotNull;
+
+public class DecoupledPlanningCalciteJoinQueryTest extends CalciteJoinQueryTest
 {
 
   @Rule(order = 0)
@@ -64,5 +71,13 @@ public class DecoupledPlanningCalciteUnionQueryTest extends CalciteUnionQueryTes
     }
 
     return builder;
+  }
+
+  @Test
+  @Parameters(source = QueryContextForJoinProvider.class)
+  @DecoupledTestConfig(nativeQueryIgnore = NativeQueryIgnore.JOIN_LEFT_DIRECT_ACCESS)
+  public void ensureDecoupledTestConfigAnnotationWorks(Map<String, Object> queryContext)
+  {
+    assertNotNull(queryFrameworkRule.getAnnotation(DecoupledTestConfig.class));
   }
 }

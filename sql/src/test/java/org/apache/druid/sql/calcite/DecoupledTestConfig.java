@@ -22,6 +22,8 @@ package org.apache.druid.sql.calcite;
 import org.apache.calcite.rel.rules.CoreRules;
 import org.apache.druid.query.scan.ScanQuery;
 import org.apache.druid.query.timeseries.TimeseriesQuery;
+import org.apache.druid.query.QueryContexts;
+import org.apache.druid.query.aggregation.post.FinalizingFieldAccessPostAggregator;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -75,7 +77,31 @@ public @interface DecoupledTestConfig
     /**
      * GroupBy doesn't sorted?!
      */
-    GBY_DOESNT_SORT;
+    GBY_DOESNT_SORT,
+    /**
+     * Equvivalent plan.
+     *
+     * Renamed variable
+     */
+    EQUIV_PLAN,
+    /**
+     * {@link QueryContexts#SQL_JOIN_LEFT_SCAN_DIRECT} not supported.
+     */
+    JOIN_LEFT_DIRECT_ACCESS,
+    /**
+     * Different filter layout.
+     *
+     * Filter is pushed below join to the left.
+     */
+    JOIN_FILTER_LOCATIONS,
+    /**
+     * New scans / etc.
+     */
+    DEFINETLY_WORSE_PLAN,
+    /**
+     * A new {@link FinalizingFieldAccessPostAggregator} appeared in the plan.
+     */
+    FINALIZING_FIELD_ACCESS;
 
     public boolean isPresent()
     {
