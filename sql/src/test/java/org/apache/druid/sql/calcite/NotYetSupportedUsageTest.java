@@ -104,9 +104,7 @@ public class NotYetSupportedUsageTest
     @Override
     public String toString()
     {
-      return " | " + className + " | " + methodNames.size() + " | " + mode + " | "
-//          + StringUtils.defaultIfBlank(mode.getComment(), "-") + " | "
-          ;
+      return " | " + className + " | " + methodNames.size() + " | " + mode + " | ";
     }
   }
 
@@ -115,22 +113,22 @@ public class NotYetSupportedUsageTest
   {
     Set<Method> methodsAnnotatedWith = getAnnotatedMethods();
 
-    Map<List<Object>, ReportEntry> mmap = new HashMap<>();
+    Map<List<Object>, ReportEntry> mentryMap = new HashMap<>();
     for (Method method : methodsAnnotatedWith) {
       ReportEntry entry = new ReportEntry(
           method.getDeclaringClass().getSimpleName(),
           method.getName(),
           getAnnotation(method)
       );
-      ReportEntry existing = mmap.get(entry.getKey());
+      ReportEntry existing = mentryMap.get(entry.getKey());
       if (existing != null) {
         existing.merge(entry);
       } else {
-        mmap.put(entry.getKey(), entry);
+        mentryMap.put(entry.getKey(), entry);
       }
     }
 
-    ArrayList<ReportEntry> results = new ArrayList(mmap.values());
+    ArrayList<ReportEntry> results = new ArrayList<>(mentryMap.values());
     results.sort(ReportEntry.CLASS_NCASES_MODE_COMPARATOR);
     for (ReportEntry reportEntry : results) {
       System.out.println(reportEntry);

@@ -93,7 +93,7 @@ public @interface NotYetSupported
     INCORRECT_SYNTAX(DruidException.class, "Incorrect syntax near the keyword"),
     // at least c7 is represented oddly in the parquet file
     T_ALLTYPES_ISSUES(AssertionError.class, "(t_alltype|allTypsUniq|fewRowsAllData).parquet.*Verifier.verify"),
-    RESULT_MISMATCH(AssertionError.class, "(assertResultsEquals|AssertionError: column content mismatch)"),
+    RESULT_MISMATCH(AssertionError.class, "(assertResulEquals|AssertionError: column content mismatch)"),
     UNSUPPORTED_NULL_ORDERING(DruidException.class, "(A|DE)SCENDING ordering with NULLS (LAST|FIRST)"),
     UNION_WITH_COMPLEX_OPERAND(DruidException.class, "Only Table and Values are supported as inputs for Union"),
     UNION_MORE_STRICT_ROWTYPE_CHECK(DruidException.class, "Row signature mismatch in Union inputs"),
@@ -108,28 +108,16 @@ public @interface NotYetSupported
 
     public Class<? extends Throwable> throwableClass;
     public String regex;
-    public String comment;
-
-    Modes(Class<? extends Throwable> cl, String regex, String comment)
-    {
-      this.throwableClass = cl;
-      this.regex = regex;
-      this.comment = comment;
-    }
 
     Modes(Class<? extends Throwable> cl, String regex)
     {
-      this(cl, regex, null);
+      this.throwableClass = cl;
+      this.regex = regex;
     }
 
     Pattern getPattern()
     {
       return Pattern.compile(regex, Pattern.MULTILINE | Pattern.DOTALL);
-    }
-
-    String getComment()
-    {
-      return comment;
     }
   };
 
