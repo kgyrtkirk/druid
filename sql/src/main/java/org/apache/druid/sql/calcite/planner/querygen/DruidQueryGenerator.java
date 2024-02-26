@@ -62,24 +62,24 @@ public class DruidQueryGenerator
   {
     Stack<DruidLogicalNode> stack = new Stack<>();
     stack.push(relRoot);
-    Vertex vertex = buildVertexFor(stack, true);
+    Vertex vertex = buildVertexFor(stack);
     return vertex.buildQuery(true);
   }
 
-  private Vertex buildVertexFor(Stack<DruidLogicalNode> stack, boolean isRoot)
+  private Vertex buildVertexFor(Stack<DruidLogicalNode> stack)
   {
     List<Vertex> newInputs = new ArrayList<>();
 
     for (RelNode input : stack.peek().getInputs()) {
       stack.push((DruidLogicalNode) input);
-      newInputs.add(buildVertexFor(stack, false));
+      newInputs.add(buildVertexFor(stack));
       stack.pop();
     }
-    Vertex vertex = processNodeWithInputs(stack, newInputs, isRoot);
+    Vertex vertex = processNodeWithInputs(stack, newInputs);
     return vertex;
   }
 
-  private Vertex processNodeWithInputs(Stack<DruidLogicalNode> stack, List<Vertex> newInputs, boolean isRoot)
+  private Vertex processNodeWithInputs(Stack<DruidLogicalNode> stack, List<Vertex> newInputs)
   {
     DruidLogicalNode node = stack.peek();
     if (node instanceof SourceDescProducer) {
@@ -87,7 +87,7 @@ public class DruidQueryGenerator
     }
     if (newInputs.size() == 1) {
       Vertex inputVertex = newInputs.get(0);
-      Optional<Vertex> newVertex = inputVertex.extendWith(stack, isRoot);
+      Optional<Vertex> newVertex = inputVertex.extendWith(stack);
       if (newVertex.isPresent()) {
         return newVertex.get();
       }
@@ -95,7 +95,7 @@ public class DruidQueryGenerator
           PartialDruidQuery.createOuterQuery(((PDQVertex) inputVertex).partialDruidQuery),
           ImmutableList.of(inputVertex)
       );
-      newVertex = inputVertex.extendWith(stack, false);
+      newVertex = inputVertex.extendWith(stack);
       if (newVertex.isPresent()) {
         return newVertex.get();
       }
@@ -116,7 +116,7 @@ public class DruidQueryGenerator
     /**
      * Extends the current vertex to include the specified parent.
      */
-    Optional<Vertex> extendWith(Stack<DruidLogicalNode> stack, boolean isRoot);
+    Optional<Vertex> extendWith(Stack<DruidLogicalNode> stack);
 
     /**
      * Decides wether this {@link Vertex} can be unwrapped into an {@link SourceDesc}.
@@ -207,9 +207,9 @@ public class DruidQueryGenerator
        * Extends the the current partial query with the new parent if possible.
        */
       @Override
-      public Optional<Vertex> extendWith(Stack<DruidLogicalNode> stack, boolean isRoot)
+      public Optional<Vertex> extendWith(Stack<DruidLogicalNode> stack)
       {
-        Optional<PartialDruidQuery> newPartialQuery = extendPartialDruidQuery(stack, isRoot);
+        Optional<PartialDruidQuery> newPartialQuery = extendPartialDruidQuery(stack);
         if (!newPartialQuery.isPresent()) {
           return Optional.empty();
         }
@@ -219,7 +219,7 @@ public class DruidQueryGenerator
       /**
        * Merges the given {@link RelNode} into the current {@link PartialDruidQuery}.
        */
-      private Optional<PartialDruidQuery> extendPartialDruidQuery(Stack<DruidLogicalNode> stack, boolean isRoot)
+      private Optional<PartialDruidQuery> extendPartialDruidQuery(Stack<DruidLogicalNode> stack)
       {
         DruidLogicalNode parentNode = stack.peek();
         if (accepts(stack, Stage.WHERE_FILTER, Filter.class)) {
@@ -261,23 +261,24 @@ public class DruidQueryGenerator
         return Optional.empty();
       }
 
-      private boolean accepts(Stack<DruidLogicalNode> stack, Stage stage, Class<? extends RelNode> class1)
+      private boolean accepts(Stack<DruidLogicalNode> stack, Stage stage, Class<? extends RelNode> clazz)
       {
-        if (Project.class == class1 && stack.size() >= 2) {
-          DruidLogicalNode parent2 = stack.get(stack.size() - 2);
-          if (stage.ordinal() > stage.AGGREGATE.ordinal()) {
-            if (parent2 instanceof DruidAggregate && !partialDruidQuery.canAccept(Stage.AGGREGATE)) {
-              return false;
-            }
+        DruidLogicalNode currentNode = stack.peek();
+        if (Project.class == clazz && stack.size() >= 2) {
+          // peek at parent and postpone project for next query stage
+          DruidLogicalNode parentNode = stack.get(stack.size() - 2);
+          if (stage.ordinal() > Stage.AGGREGATE.ordinal()
+              && parentNode instanceof DruidAggregate
+              && !partialDruidQuery.canAccept(Stage.AGGREGATE)) {
+            return false;
           }
-          if (stage.ordinal() > stage.SORT.ordinal()) {
-            if (parent2 instanceof DruidSort && !partialDruidQuery.canAccept(Stage.SORT)) {
-              return false;
-            }
+          if (stage.ordinal() > Stage.SORT.ordinal()
+              && parentNode instanceof DruidSort
+              && !partialDruidQuery.canAccept(Stage.SORT)) {
+            return false;
           }
         }
-
-        return partialDruidQuery.canAccept(stage) && class1.isInstance(stack.peek());
+        return partialDruidQuery.canAccept(stage) && clazz.isInstance(currentNode);
       }
 
       @Override
