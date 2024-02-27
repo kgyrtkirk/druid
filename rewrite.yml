@@ -7,5 +7,6 @@ preconditions:
   #- org.openrewrite.FindSourceFiles:
   #    filePattern: "**/{*Calcite*Test,MSQTestBase}.java"
 recipeList:
-  - org.openrewrite.java.testing.junit5.JUnit4to5Migration
-  - org.openrewrite.java.testing.junit5.StaticImports
+  #- org.openrewrite.java.testing.junit5.JUnit4to5Migration
+  #- org.openrewrite.java.testing.junit5.StaticImports
+  - org.openrewrite.java.testing.junit5.ExpectedExceptionToAssertThrows
