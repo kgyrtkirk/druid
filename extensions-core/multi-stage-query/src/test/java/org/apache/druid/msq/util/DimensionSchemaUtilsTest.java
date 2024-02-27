@@ -28,7 +28,6 @@ import org.apache.druid.error.DruidException;
 import org.apache.druid.segment.AutoTypeColumnSchema;
 import org.apache.druid.segment.column.ColumnType;
 import org.junit.Assert;
-import org.junit.Test;
 
 public class DimensionSchemaUtilsTest
 {

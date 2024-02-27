@@ -25,7 +25,6 @@ import com.google.inject.Injector;
 import org.apache.druid.guice.GuiceInjectors;
 import org.apache.druid.segment.loading.OmniDataSegmentKiller;
 import org.junit.Assert;
-import org.junit.Test;
 
 public class GoogleStorageDruidModuleTest
 {

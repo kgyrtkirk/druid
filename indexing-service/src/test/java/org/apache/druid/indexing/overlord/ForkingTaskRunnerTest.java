@@ -45,7 +45,6 @@ import org.assertj.core.util.Lists;
 import org.joda.time.Period;
 import org.junit.Assert;
 import org.junit.Rule;
-import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import javax.annotation.Nonnull;

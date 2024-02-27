@@ -22,7 +22,6 @@ package org.apache.druid.query.aggregation.datasketches.quantiles;
 import org.apache.datasketches.quantiles.DoublesUnion;
 import org.apache.druid.java.util.common.StringUtils;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.util.Arrays;
 

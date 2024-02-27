@@ -34,26 +34,23 @@ import org.apache.druid.segment.loading.StorageLocationConfig;
 import org.apache.druid.server.DruidNode;
 import org.apache.druid.server.coordination.DruidServerMetadata;
 import org.apache.druid.server.coordination.ServerType;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Collections;
 
-@RunWith(MockitoJUnitRunner.class)
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+@ExtendWith(MockitoExtension.class)
 public class StorageNodeModuleTest
 {
   private static final boolean INJECT_SERVER_TYPE_CONFIG = true;
-
-  @Rule
-  public ExpectedException exceptionRule = ExpectedException.none();
 
   @Mock(answer = Answers.RETURNS_MOCKS)
   private DruidNode self;
@@ -69,7 +66,7 @@ public class StorageNodeModuleTest
   private Injector injector;
   private StorageNodeModule target;
 
-  @Before
+  @BeforeEach
   public void setUp()
   {
     Mockito.when(segmentLoaderConfig.getLocations()).thenReturn(Collections.singletonList(storageLocation));
@@ -84,8 +81,8 @@ public class StorageNodeModuleTest
     Boolean isSegmentCacheConfigured = injector.getInstance(
         Key.get(Boolean.class, Names.named(StorageNodeModule.IS_SEGMENT_CACHE_CONFIGURED))
     );
-    Assert.assertNotNull(isSegmentCacheConfigured);
-    Assert.assertTrue(isSegmentCacheConfigured);
+    Assertions.assertNotNull(isSegmentCacheConfigured);
+    Assertions.assertTrue(isSegmentCacheConfigured);
   }
 
   @Test
@@ -95,44 +92,46 @@ public class StorageNodeModuleTest
     Boolean isSegmentCacheConfigured = injector.getInstance(
         Key.get(Boolean.class, Names.named(StorageNodeModule.IS_SEGMENT_CACHE_CONFIGURED))
     );
-    Assert.assertNotNull(isSegmentCacheConfigured);
-    Assert.assertFalse(isSegmentCacheConfigured);
+    Assertions.assertNotNull(isSegmentCacheConfigured);
+    Assertions.assertFalse(isSegmentCacheConfigured);
   }
 
   @Test
   public void getDataNodeServiceWithNoServerTypeConfigShouldThrowProvisionException()
   {
-    exceptionRule.expect(ProvisionException.class);
-    exceptionRule.expectMessage("Must override the binding for ServerTypeConfig if you want a DataNodeService.");
-    injector = makeInjector(!INJECT_SERVER_TYPE_CONFIG);
-    injector.getInstance(DataNodeService.class);
+    Throwable exception = assertThrows(ProvisionException.class, () -> {
+      injector = makeInjector(!INJECT_SERVER_TYPE_CONFIG);
+      injector.getInstance(DataNodeService.class);
+    });
+    assertTrue(exception.getMessage().contains("Must override the binding for ServerTypeConfig if you want a DataNodeService."));
   }
 
   @Test
   public void getDataNodeServiceWithNoSegmentCacheConfiguredThrowProvisionException()
   {
-    exceptionRule.expect(ProvisionException.class);
-    exceptionRule.expectMessage("druid.segmentCache.locations must be set on historicals.");
-    Mockito.doReturn(ServerType.HISTORICAL).when(serverTypeConfig).getServerType();
-    mockSegmentCacheNotConfigured();
-    injector.getInstance(DataNodeService.class);
+    Throwable exception = assertThrows(ProvisionException.class, () -> {
+      Mockito.doReturn(ServerType.HISTORICAL).when(serverTypeConfig).getServerType();
+      mockSegmentCacheNotConfigured();
+      injector.getInstance(DataNodeService.class);
+    });
+    assertTrue(exception.getMessage().contains("druid.segmentCache.locations must be set on historicals."));
   }
 
   @Test
   public void getDataNodeServiceIsInjectedAsSingleton()
   {
     DataNodeService dataNodeService = injector.getInstance(DataNodeService.class);
-    Assert.assertNotNull(dataNodeService);
+    Assertions.assertNotNull(dataNodeService);
     DataNodeService other = injector.getInstance(DataNodeService.class);
-    Assert.assertSame(dataNodeService, other);
+    Assertions.assertSame(dataNodeService, other);
   }
 
   @Test
   public void getDataNodeServiceIsInjectedAndDiscoverable()
   {
     DataNodeService dataNodeService = injector.getInstance(DataNodeService.class);
-    Assert.assertNotNull(dataNodeService);
-    Assert.assertTrue(dataNodeService.isDiscoverable());
+    Assertions.assertNotNull(dataNodeService);
+    Assertions.assertTrue(dataNodeService.isDiscoverable());
   }
 
   @Test
@@ -140,26 +139,27 @@ public class StorageNodeModuleTest
   {
     mockSegmentCacheNotConfigured();
     DataNodeService dataNodeService = injector.getInstance(DataNodeService.class);
-    Assert.assertNotNull(dataNodeService);
-    Assert.assertFalse(dataNodeService.isDiscoverable());
+    Assertions.assertNotNull(dataNodeService);
+    Assertions.assertFalse(dataNodeService.isDiscoverable());
   }
 
   @Test
   public void testDruidServerMetadataIsInjectedAsSingleton()
   {
     DruidServerMetadata druidServerMetadata = injector.getInstance(DruidServerMetadata.class);
-    Assert.assertNotNull(druidServerMetadata);
+    Assertions.assertNotNull(druidServerMetadata);
     DruidServerMetadata other = injector.getInstance(DruidServerMetadata.class);
-    Assert.assertSame(druidServerMetadata, other);
+    Assertions.assertSame(druidServerMetadata, other);
   }
 
   @Test
   public void testDruidServerMetadataWithNoServerTypeConfigShouldThrowProvisionException()
   {
-    exceptionRule.expect(ProvisionException.class);
-    exceptionRule.expectMessage("Must override the binding for ServerTypeConfig if you want a DruidServerMetadata.");
-    injector = makeInjector(!INJECT_SERVER_TYPE_CONFIG);
-    injector.getInstance(DruidServerMetadata.class);
+    Throwable exception = assertThrows(ProvisionException.class, () -> {
+      injector = makeInjector(!INJECT_SERVER_TYPE_CONFIG);
+      injector.getInstance(DruidServerMetadata.class);
+    });
+    assertTrue(exception.getMessage().contains("Must override the binding for ServerTypeConfig if you want a DruidServerMetadata."));
   }
 
   private Injector makeInjector(boolean withServerTypeConfig)

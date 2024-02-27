@@ -21,8 +21,9 @@ package org.apache.druid.data.input.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
-import junit.framework.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  */
@@ -42,7 +43,7 @@ public class TimeAndDimsParseSpecTest
         ParseSpec.class
     );
 
-    Assert.assertEquals(new TimeAndDimsParseSpec(null, null), actual);
+    assertEquals(new TimeAndDimsParseSpec(null, null), actual);
   }
 
   @Test
@@ -61,7 +62,7 @@ public class TimeAndDimsParseSpecTest
         ParseSpec.class
     );
 
-    Assert.assertEquals(
+    assertEquals(
         new TimeAndDimsParseSpec(
             new TimestampSpec("tcol", null, null),
             new DimensionsSpec(DimensionsSpec.getDefaultSchemas(ImmutableList.of("host")))

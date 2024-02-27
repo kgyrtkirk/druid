@@ -23,18 +23,18 @@ import com.google.common.collect.ImmutableList;
 import org.apache.druid.frame.channel.ByteTracker;
 import org.apache.druid.frame.channel.FrameWithPartition;
 import org.apache.druid.frame.channel.WritableFrameChannel;
-import org.junit.Assert;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 
 public class ComposingOutputChannelFactoryTest extends OutputChannelFactoryTest
 {
-  @ClassRule
-  public static TemporaryFolder folder = new TemporaryFolder();
+  @TempDir
+  public static File folder;
 
   public ComposingOutputChannelFactoryTest() throws IOException
   {
@@ -43,8 +43,8 @@ public class ComposingOutputChannelFactoryTest extends OutputChannelFactoryTest
             ImmutableList.of(
                 // TODO : currently hardcoded 256k since it allows one frame to be written to each factory
                 // nicer to do that automatically
-                new FileOutputChannelFactory(folder.newFolder(), 100, new ByteTracker(256_000)),
-                new FileOutputChannelFactory(folder.newFolder(), 100, new ByteTracker(256_000))
+                new FileOutputChannelFactory(newFolder(folder, "junit"), 100, new ByteTracker(256_000)),
+                new FileOutputChannelFactory(newFolder(folder, "junit"), 100, new ByteTracker(256_000))
             ),
             100
         ),
@@ -57,17 +57,17 @@ public class ComposingOutputChannelFactoryTest extends OutputChannelFactoryTest
   {
     ComposingOutputChannelFactory outputChannelFactory = new ComposingOutputChannelFactory(
         ImmutableList.of(
-            new FileOutputChannelFactory(folder.newFolder(), 100, new ByteTracker(1)),
+            new FileOutputChannelFactory(newFolder(folder, "junit"), 100, new ByteTracker(1)),
             new ThrowingOutputChannelFactory() // adding this to check if it gets called
         ),
         100
     );
     OutputChannel channel = outputChannelFactory.openChannel(1);
 
-    Assert.assertEquals(1, channel.getPartitionNumber());
+    Assertions.assertEquals(1, channel.getPartitionNumber());
     WritableFrameChannel writableFrameChannel = channel.getWritableChannel();
     writableFrameChannel.writabilityFuture().get();
-    Assert.assertThrows(
+    Assertions.assertThrows(
         UnsupportedOperationException.class,
         () -> writableFrameChannel.write(new FrameWithPartition(frame, 1))
     );
@@ -80,14 +80,14 @@ public class ComposingOutputChannelFactoryTest extends OutputChannelFactoryTest
     // can handle the test data frames
     ComposingOutputChannelFactory outputChannelFactory = new ComposingOutputChannelFactory(
         ImmutableList.of(
-            new FileOutputChannelFactory(folder.newFolder(), 100, new ByteTracker(1_000_000)),
+            new FileOutputChannelFactory(newFolder(folder, "junit"), 100, new ByteTracker(1_000_000)),
             new ThrowingOutputChannelFactory()
         ),
         100
     );
     OutputChannel channel = outputChannelFactory.openChannel(1);
 
-    Assert.assertEquals(1, channel.getPartitionNumber());
+    Assertions.assertEquals(1, channel.getPartitionNumber());
     WritableFrameChannel writableFrameChannel = channel.getWritableChannel();
     writableFrameChannel.writabilityFuture().get();
     writableFrameChannel.write(new FrameWithPartition(frame, 1));
@@ -117,5 +117,23 @@ public class ComposingOutputChannelFactoryTest extends OutputChannelFactoryTest
     {
       throw new UnsupportedOperationException();
     }
+
+    private static File newFolder(File root, String... subDirs) throws IOException {
+      String subFolder = String.join("/", subDirs);
+      File result = new File(root, subFolder);
+      if (!result.mkdirs()) {
+        throw new IOException("Couldn't create folders " + root);
+      }
+      return result;
+    }
+  }
+
+  private static File newFolder(File root, String... subDirs) throws IOException {
+    String subFolder = String.join("/", subDirs);
+    File result = new File(root, subFolder);
+    if (!result.mkdirs()) {
+      throw new IOException("Couldn't create folders " + root);
+    }
+    return result;
   }
 }

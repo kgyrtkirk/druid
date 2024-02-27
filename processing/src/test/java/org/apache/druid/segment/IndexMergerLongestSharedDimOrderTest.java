@@ -30,18 +30,18 @@ import org.apache.druid.segment.column.ColumnHolder;
 import org.apache.druid.segment.data.ListIndexed;
 import org.joda.time.Interval;
 import org.joda.time.chrono.ISOChronology;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
 import static org.mockito.Mockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class IndexMergerLongestSharedDimOrderTest
 {
   @Mock
@@ -56,7 +56,7 @@ public class IndexMergerLongestSharedDimOrderTest
   @Mock
   BitmapFactory mockBitmapFactory;
 
-  @Before
+  @BeforeEach
   public void setUp()
   {
     when(mockSupplier.get()).thenReturn(mockColumnHolder);
@@ -68,7 +68,7 @@ public class IndexMergerLongestSharedDimOrderTest
   public void testGetLongestSharedDimOrderWithNullDimensionSpecAndEmptyIndex()
   {
     List<String> actual = IndexMerger.getLongestSharedDimOrder(ImmutableList.of(), null);
-    Assert.assertNull(actual);
+    Assertions.assertNull(actual);
   }
 
   @Test
@@ -77,15 +77,15 @@ public class IndexMergerLongestSharedDimOrderTest
     QueryableIndexIndexableAdapter index1 = makeIndexWithDimensionList(ImmutableList.of("a", "b", "c"));
     QueryableIndexIndexableAdapter index2 = makeIndexWithDimensionList(ImmutableList.of("b", "c"));
     List<String> actual = IndexMerger.getLongestSharedDimOrder(ImmutableList.of(index1, index2), null);
-    Assert.assertNotNull(actual);
-    Assert.assertEquals(ImmutableList.of("a", "b", "c"), actual);
+    Assertions.assertNotNull(actual);
+    Assertions.assertEquals(ImmutableList.of("a", "b", "c"), actual);
 
     //  Valid ordering as although second index has gap, it is still same ordering
     index1 = makeIndexWithDimensionList(ImmutableList.of("a", "b", "c"));
     index2 = makeIndexWithDimensionList(ImmutableList.of("a", "c"));
     actual = IndexMerger.getLongestSharedDimOrder(ImmutableList.of(index1, index2), null);
-    Assert.assertNotNull(actual);
-    Assert.assertEquals(ImmutableList.of("a", "b", "c"), actual);
+    Assertions.assertNotNull(actual);
+    Assertions.assertEquals(ImmutableList.of("a", "b", "c"), actual);
   }
 
   @Test
@@ -95,13 +95,13 @@ public class IndexMergerLongestSharedDimOrderTest
     QueryableIndexIndexableAdapter index1 = makeIndexWithDimensionList(ImmutableList.of("a", "b"));
     QueryableIndexIndexableAdapter index2 = makeIndexWithDimensionList(ImmutableList.of("b", "c"));
     List<String> actual = IndexMerger.getLongestSharedDimOrder(ImmutableList.of(index1, index2), null);
-    Assert.assertNull(actual);
+    Assertions.assertNull(actual);
 
     //  No valid ordering as ordering is not the same in all indexes
     index1 = makeIndexWithDimensionList(ImmutableList.of("a", "b", "c"));
     index2 = makeIndexWithDimensionList(ImmutableList.of("c", "b"));
     actual = IndexMerger.getLongestSharedDimOrder(ImmutableList.of(index1, index2), null);
-    Assert.assertNull(actual);
+    Assertions.assertNull(actual);
   }
 
 
@@ -113,13 +113,13 @@ public class IndexMergerLongestSharedDimOrderTest
     QueryableIndexIndexableAdapter index1 = makeIndexWithDimensionList(ImmutableList.of("a", "b"));
     QueryableIndexIndexableAdapter index2 = makeIndexWithDimensionList(ImmutableList.of("b", "c"));
     List<String> actual = IndexMerger.getLongestSharedDimOrder(ImmutableList.of(index1, index2), empty);
-    Assert.assertNull(actual);
+    Assertions.assertNull(actual);
 
     //  No valid ordering as ordering is not the same in all indexes
     index1 = makeIndexWithDimensionList(ImmutableList.of("a", "b", "c"));
     index2 = makeIndexWithDimensionList(ImmutableList.of("c", "b"));
     actual = IndexMerger.getLongestSharedDimOrder(ImmutableList.of(index1, index2), empty);
-    Assert.assertNull(actual);
+    Assertions.assertNull(actual);
   }
 
   @Test
@@ -130,8 +130,8 @@ public class IndexMergerLongestSharedDimOrderTest
     QueryableIndexIndexableAdapter index1 = makeIndexWithDimensionList(ImmutableList.of("a", "b"));
     QueryableIndexIndexableAdapter index2 = makeIndexWithDimensionList(ImmutableList.of("b", "c"));
     List<String> actual = IndexMerger.getLongestSharedDimOrder(ImmutableList.of(index1, index2), valid);
-    Assert.assertNotNull(actual);
-    Assert.assertEquals(ImmutableList.of("a", "b", "c"), actual);
+    Assertions.assertNotNull(actual);
+    Assertions.assertEquals(ImmutableList.of("a", "b", "c"), actual);
   }
 
   @Test
@@ -143,7 +143,7 @@ public class IndexMergerLongestSharedDimOrderTest
     QueryableIndexIndexableAdapter index2 = makeIndexWithDimensionList(ImmutableList.of("c", "b"));
     List<String> actual = IndexMerger.getLongestSharedDimOrder(ImmutableList.of(index1, index2), valid);
     // Since ordering of index2 is not the same as the ordering of the schema in DimensionSpec
-    Assert.assertNull(actual);
+    Assertions.assertNull(actual);
   }
 
   @Test
@@ -155,7 +155,7 @@ public class IndexMergerLongestSharedDimOrderTest
     QueryableIndexIndexableAdapter index2 = makeIndexWithDimensionList(ImmutableList.of("c", "b", "e"));
     List<String> actual = IndexMerger.getLongestSharedDimOrder(ImmutableList.of(index1, index2), valid);
     // Since index2 has dimension that is not in the schema in DimensionSpec. This should not be possible.
-    Assert.assertNull(actual);
+    Assertions.assertNull(actual);
   }
 
   private QueryableIndexIndexableAdapter makeIndexWithDimensionList(List<String> dimensions)

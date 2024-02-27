@@ -21,7 +21,6 @@ package org.apache.druid.compressedbigdecimal;
 
 import org.apache.druid.query.aggregation.Aggregator;
 import org.junit.Assert;
-import org.junit.Test;
 
 public abstract class CompressedBigDecimalAggregatorTestBase
 {

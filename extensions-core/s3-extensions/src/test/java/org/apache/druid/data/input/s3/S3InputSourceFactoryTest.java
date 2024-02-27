@@ -23,7 +23,6 @@ import org.apache.druid.storage.s3.S3InputDataConfig;
 import org.apache.druid.storage.s3.ServerSideEncryptingAmazonS3;
 import org.easymock.EasyMock;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.List;

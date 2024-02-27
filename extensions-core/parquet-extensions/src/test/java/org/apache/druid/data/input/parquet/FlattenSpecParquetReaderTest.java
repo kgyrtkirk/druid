@@ -31,7 +31,6 @@ import org.apache.druid.java.util.common.parsers.JSONPathFieldSpec;
 import org.apache.druid.java.util.common.parsers.JSONPathFieldType;
 import org.apache.druid.java.util.common.parsers.JSONPathSpec;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.io.IOException;
 import java.util.List;

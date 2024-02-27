@@ -62,9 +62,8 @@ import org.apache.druid.segment.incremental.OnheapIncrementalIndex;
 import org.apache.druid.segment.writeout.OffHeapMemorySegmentWriteOutMediumFactory;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.joda.time.Interval;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.File;
 import java.io.IOException;
@@ -77,7 +76,6 @@ import java.util.concurrent.ThreadLocalRandom;
 
 /**
  */
-@RunWith(Parameterized.class)
 public class SpatialFilterTest extends InitializedNullHandlingTest
 {
   private static IndexMerger INDEX_MERGER = TestHelper.getTestIndexMergerV9(OffHeapMemorySegmentWriteOutMediumFactory.instance());
@@ -93,7 +91,6 @@ public class SpatialFilterTest extends InitializedNullHandlingTest
 
   private static List<String> DIMS = Lists.newArrayList("dim", "lat", "long", "lat2", "long2");
 
-  @Parameterized.Parameters
   public static Collection<?> constructorFeeder() throws IOException
   {
     final IndexSpec indexSpec = IndexSpec.DEFAULT;
@@ -534,16 +531,18 @@ public class SpatialFilterTest extends InitializedNullHandlingTest
     }
   }
 
-  private final Segment segment;
+  private Segment segment;
 
-  public SpatialFilterTest(Segment segment)
+  public void initSpatialFilterTest(Segment segment)
   {
     this.segment = segment;
   }
 
-  @Test
-  public void testSpatialQuery()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest
+  public void testSpatialQuery(Segment segment)
   {
+    initSpatialFilterTest(segment);
     TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
                                   .dataSource("test")
                                   .granularity(Granularities.ALL)
@@ -593,9 +592,11 @@ public class SpatialFilterTest extends InitializedNullHandlingTest
   }
 
 
-  @Test
-  public void testSpatialQueryWithOtherSpatialDim()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest
+  public void testSpatialQueryWithOtherSpatialDim(Segment segment)
   {
+    initSpatialFilterTest(segment);
     TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
                                   .dataSource("test")
                                   .granularity(Granularities.ALL)
@@ -644,9 +645,11 @@ public class SpatialFilterTest extends InitializedNullHandlingTest
     }
   }
 
-  @Test
-  public void testSpatialQueryMorePoints()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest
+  public void testSpatialQueryMorePoints(Segment segment)
   {
+    initSpatialFilterTest(segment);
     TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
                                   .dataSource("test")
                                   .granularity(Granularities.DAY)
@@ -731,15 +734,19 @@ public class SpatialFilterTest extends InitializedNullHandlingTest
     }
   }
 
-  @Test
-  public void testEqualsContract()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest
+  public void testEqualsContract(Segment segment)
   {
+    initSpatialFilterTest(segment);
     EqualsVerifier.forClass(SpatialFilter.class).usingGetClass().verify();
   }
 
-  @Test
-  public void testEqualsContractForBoundDruidPredicateFactory()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest
+  public void testEqualsContractForBoundDruidPredicateFactory(Segment segment)
   {
+    initSpatialFilterTest(segment);
     EqualsVerifier.forClass(SpatialFilter.BoundDruidPredicateFactory.class).usingGetClass().verify();
   }
 }

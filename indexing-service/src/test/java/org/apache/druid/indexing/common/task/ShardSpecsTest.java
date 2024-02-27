@@ -35,7 +35,6 @@ import org.apache.druid.timeline.partition.HashPartitionFunction;
 import org.apache.druid.timeline.partition.ShardSpec;
 import org.joda.time.Interval;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.List;

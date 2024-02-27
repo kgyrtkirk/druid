@@ -33,11 +33,13 @@ import org.apache.druid.guice.JsonConfigProvider;
 import org.apache.druid.guice.LazySingleton;
 import org.apache.druid.jackson.DefaultObjectMapper;
 import org.apache.druid.segment.TestHelper;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class InternalQueryConfigTest
 {
@@ -56,7 +58,7 @@ public class InternalQueryConfigTest
         InternalQueryConfig.class
     );
 
-    Assert.assertEquals(ImmutableMap.of(), config.getContext());
+    Assertions.assertEquals(ImmutableMap.of(), config.getContext());
 
     //non-defaults
     json = "{ \"context\": {\"priority\": 5}}";
@@ -70,7 +72,7 @@ public class InternalQueryConfigTest
 
     Map<String, Object> expected = new HashMap<>();
     expected.put("priority", 5);
-    Assert.assertEquals(expected, config.getContext());
+    Assertions.assertEquals(expected, config.getContext());
   }
 
   /**
@@ -78,16 +80,18 @@ public class InternalQueryConfigTest
    *
    * @throws Exception
    */
-  @Test(expected = JsonEOFException.class)
+  @Test
   public void testMalfomattedContext() throws Exception
   {
-    String malformedJson = "{\"priority: 5}";
-    MAPPER.readValue(
-        MAPPER.writeValueAsString(
-            MAPPER.readValue(malformedJson, InternalQueryConfig.class)
-        ),
-        InternalQueryConfig.class
-    );
+    assertThrows(JsonEOFException.class, () -> {
+      String malformedJson = "{\"priority: 5}";
+      MAPPER.readValue(
+          MAPPER.writeValueAsString(
+              MAPPER.readValue(malformedJson, InternalQueryConfig.class)
+          ),
+          InternalQueryConfig.class
+      );
+    });
   }
 
   /**
@@ -116,6 +120,6 @@ public class InternalQueryConfigTest
         }
     );
     InternalQueryConfig config = injector.getInstance(InternalQueryConfig.class);
-    Assert.assertEquals(ImmutableMap.of(), config.getContext());
+    Assertions.assertEquals(ImmutableMap.of(), config.getContext());
   }
 }

@@ -22,13 +22,14 @@ package org.apache.druid.math.expr;
 import com.google.common.collect.ImmutableList;
 import org.apache.druid.segment.join.Equality;
 import org.hamcrest.CoreMatchers;
-import org.hamcrest.MatcherAssert;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class ExprsTest
 {
@@ -38,9 +39,9 @@ public class ExprsTest
     final List<Expr> decomposed = Exprs.decomposeAnd(new IdentifierExpr("foo"));
 
     // Expr instances don't, in general, implement value-based equals and hashCode. So we need to verify each field.
-    Assert.assertEquals(1, decomposed.size());
-    Assert.assertThat(decomposed.get(0), CoreMatchers.instanceOf(IdentifierExpr.class));
-    Assert.assertEquals("foo", ((IdentifierExpr) decomposed.get(0)).getIdentifier());
+    Assertions.assertEquals(1, decomposed.size());
+    assertThat(decomposed.get(0), CoreMatchers.instanceOf(IdentifierExpr.class));
+    Assertions.assertEquals("foo", ((IdentifierExpr) decomposed.get(0)).getIdentifier());
   }
 
   @Test
@@ -55,17 +56,17 @@ public class ExprsTest
     );
 
     // Expr instances don't, in general, implement value-based equals and hashCode. So we need to verify each field.
-    Assert.assertEquals(4, decomposed.size());
+    Assertions.assertEquals(4, decomposed.size());
 
     for (Expr expr : decomposed) {
-      Assert.assertThat(expr, CoreMatchers.instanceOf(IdentifierExpr.class));
+      assertThat(expr, CoreMatchers.instanceOf(IdentifierExpr.class));
     }
 
     final List<String> identifiers = decomposed.stream()
                                                .map(expr -> ((IdentifierExpr) expr).getIdentifier())
                                                .collect(Collectors.toList());
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         ImmutableList.of("foo", "bar", "baz", "qux"),
         identifiers
     );
@@ -75,7 +76,7 @@ public class ExprsTest
   public void test_decomposeEquals_notAnEquals()
   {
     final Optional<Equality> result = Exprs.decomposeEquals(new IdentifierExpr("foo"), "j.");
-    Assert.assertFalse(result.isPresent());
+    Assertions.assertFalse(result.isPresent());
   }
 
   @Test
@@ -90,13 +91,13 @@ public class ExprsTest
         "j."
     );
 
-    Assert.assertTrue(result.isPresent());
+    Assertions.assertTrue(result.isPresent());
 
     final Equality equality = result.get();
-    MatcherAssert.assertThat(equality.getLeftExpr(), CoreMatchers.instanceOf(IdentifierExpr.class));
-    Assert.assertEquals("foo", ((IdentifierExpr) equality.getLeftExpr()).getIdentifier());
-    Assert.assertEquals("bar", equality.getRightColumn());
-    Assert.assertFalse(equality.isIncludeNull());
+    assertThat(equality.getLeftExpr(), CoreMatchers.instanceOf(IdentifierExpr.class));
+    Assertions.assertEquals("foo", ((IdentifierExpr) equality.getLeftExpr()).getIdentifier());
+    Assertions.assertEquals("bar", equality.getRightColumn());
+    Assertions.assertFalse(equality.isIncludeNull());
   }
 
   @Test
@@ -114,12 +115,12 @@ public class ExprsTest
         "j."
     );
 
-    Assert.assertTrue(result.isPresent());
+    Assertions.assertTrue(result.isPresent());
 
     final Equality equality = result.get();
-    MatcherAssert.assertThat(equality.getLeftExpr(), CoreMatchers.instanceOf(IdentifierExpr.class));
-    Assert.assertEquals("foo", ((IdentifierExpr) equality.getLeftExpr()).getIdentifier());
-    Assert.assertEquals("bar", equality.getRightColumn());
-    Assert.assertTrue(equality.isIncludeNull());
+    assertThat(equality.getLeftExpr(), CoreMatchers.instanceOf(IdentifierExpr.class));
+    Assertions.assertEquals("foo", ((IdentifierExpr) equality.getLeftExpr()).getIdentifier());
+    Assertions.assertEquals("bar", equality.getRightColumn());
+    Assertions.assertTrue(equality.isIncludeNull());
   }
 }

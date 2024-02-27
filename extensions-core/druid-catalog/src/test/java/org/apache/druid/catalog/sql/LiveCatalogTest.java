@@ -37,7 +37,6 @@ import org.apache.druid.sql.calcite.table.DruidTable;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
-import org.junit.Test;
 
 import java.util.Arrays;
 

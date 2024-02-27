@@ -24,7 +24,6 @@ import nl.jqno.equalsverifier.EqualsVerifier;
 import org.apache.druid.jackson.DefaultObjectMapper;
 import org.apache.druid.java.util.common.DateTimes;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.io.IOException;
 

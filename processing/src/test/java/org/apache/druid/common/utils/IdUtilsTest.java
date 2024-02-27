@@ -22,8 +22,8 @@ package org.apache.druid.common.utils;
 import org.apache.druid.error.DruidExceptionMatcher;
 import org.apache.druid.java.util.common.DateTimes;
 import org.apache.druid.java.util.common.Intervals;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class IdUtilsTest
 {
@@ -143,7 +143,7 @@ public class IdUtilsTest
         "suffix",
         DateTimes.of("2020-01-01").toString()
     );
-    Assert.assertEquals(expected, id);
+    Assertions.assertEquals(expected, id);
   }
 
   @Test
@@ -167,6 +167,6 @@ public class IdUtilsTest
         DateTimes.of("2020-06-01").toString(),
         DateTimes.of("2020-01-01").toString()
     );
-    Assert.assertEquals(expected, id);
+    Assertions.assertEquals(expected, id);
   }
 }

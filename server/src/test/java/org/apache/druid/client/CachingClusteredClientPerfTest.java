@@ -57,8 +57,9 @@ import org.apache.druid.timeline.DataSegment;
 import org.apache.druid.timeline.VersionedIntervalTimeline;
 import org.apache.druid.timeline.partition.LinearShardSpec;
 import org.joda.time.Interval;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
@@ -67,6 +68,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.TimeUnit;
 
 import static org.mockito.ArgumentMatchers.any;
 
@@ -77,7 +79,8 @@ import static org.mockito.ArgumentMatchers.any;
 public class CachingClusteredClientPerfTest
 {
 
-  @Test(timeout = 10_000)
+  @Test
+  @Timeout(value = 10_000, unit = TimeUnit.MILLISECONDS)
   public void testGetQueryRunnerForSegments_singleIntervalLargeSegments()
   {
     final int segmentCount = 30_000;
@@ -147,7 +150,7 @@ public class CachingClusteredClientPerfTest
         segmentDescriptors
     );
     Sequence<SegmentDescriptor> sequence = queryRunner.run(QueryPlus.wrap(fakeQuery));
-    Assert.assertEquals(segmentDescriptors, sequence.toList());
+    Assertions.assertEquals(segmentDescriptors, sequence.toList());
   }
 
   private Query<SegmentDescriptor> makeFakeQuery(Interval interval)

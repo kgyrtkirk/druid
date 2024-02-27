@@ -24,7 +24,6 @@ import org.apache.druid.metadata.MetadataStorageConnectorConfig;
 import org.apache.druid.server.initialization.JdbcAccessSecurityConfig;
 import org.joda.time.Period;
 import org.junit.Rule;
-import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;

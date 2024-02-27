@@ -64,11 +64,11 @@ import org.apache.druid.segment.index.semantic.StringValueSetIndexes;
 import org.apache.druid.segment.writeout.SegmentWriteOutMediumFactory;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.joda.time.Interval;
-import org.junit.Assert;
 import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -84,14 +84,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 public class IndexMergerTestBase extends InitializedNullHandlingTest
 {
-  @Rule
-  public final TemporaryFolder temporaryFolder = new TemporaryFolder();
+  @TempDir
+  public File temporaryFolder;
 
   protected IndexMerger indexMerger;
 
-  @Parameterized.Parameters(name = "{index}: metric compression={0}, dimension compression={1}, long encoding={2}, segment write-out medium={3}")
   public static Collection<Object[]> data()
   {
     return Collections2.transform(
@@ -137,14 +138,14 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
     );
   }
 
-  private final IndexSpec indexSpec;
-  private final IndexIO indexIO;
-  private final boolean useBitmapIndexes;
+  private IndexSpec indexSpec;
+  private IndexIO indexIO;
+  private boolean useBitmapIndexes;
 
   @Rule
   public final CloserRule closer = new CloserRule(false);
 
-  protected IndexMergerTestBase(
+  protected void initIndexMergerTestBase(
       @Nullable BitmapSerdeFactory bitmapSerdeFactory,
       CompressionStrategy compressionStrategy,
       CompressionStrategy dimCompressionStrategy,
@@ -161,39 +162,43 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
     this.useBitmapIndexes = bitmapSerdeFactory != null;
   }
 
-  @Test
-  public void testPersist() throws Exception
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}: metric compression={0}, dimension compression={1}, long encoding={2}, segment write-out medium={3}")
+  public void testPersist(@Nullable BitmapSerdeFactory bitmapSerdeFactory, CompressionStrategy compressionStrategy, CompressionStrategy dimCompressionStrategy, CompressionFactory.LongEncodingStrategy longEncodingStrategy) throws Exception
   {
+    initIndexMergerTestBase(bitmapSerdeFactory, compressionStrategy, dimCompressionStrategy, longEncodingStrategy);
     final long timestamp = System.currentTimeMillis();
 
     IncrementalIndex toPersist = IncrementalIndexTest.createIndex(null);
     IncrementalIndexTest.populateIndex(timestamp, toPersist);
 
-    final File tempDir = temporaryFolder.newFolder();
+    final File tempDir = newFolder(temporaryFolder, "junit");
     QueryableIndex index = closer.closeLater(
         indexIO.loadIndex(indexMerger.persist(toPersist, tempDir, indexSpec, null))
     );
 
-    Assert.assertEquals(2, index.getColumnHolder(ColumnHolder.TIME_COLUMN_NAME).getLength());
-    Assert.assertEquals(Arrays.asList("dim1", "dim2"), Lists.newArrayList(index.getAvailableDimensions()));
-    Assert.assertEquals(3, index.getColumnNames().size());
+    Assertions.assertEquals(2, index.getColumnHolder(ColumnHolder.TIME_COLUMN_NAME).getLength());
+    Assertions.assertEquals(Arrays.asList("dim1", "dim2"), Lists.newArrayList(index.getAvailableDimensions()));
+    Assertions.assertEquals(3, index.getColumnNames().size());
 
     assertDimCompression(index, indexSpec.getDimensionCompression());
 
-    Assert.assertArrayEquals(
+    Assertions.assertArrayEquals(
         IncrementalIndexTest.getDefaultCombiningAggregatorFactories(),
         index.getMetadata().getAggregators()
     );
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         Granularities.NONE,
         index.getMetadata().getQueryGranularity()
     );
   }
 
-  @Test
-  public void testPersistWithDifferentDims() throws Exception
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}: metric compression={0}, dimension compression={1}, long encoding={2}, segment write-out medium={3}")
+  public void testPersistWithDifferentDims(@Nullable BitmapSerdeFactory bitmapSerdeFactory, CompressionStrategy compressionStrategy, CompressionStrategy dimCompressionStrategy, CompressionFactory.LongEncodingStrategy longEncodingStrategy) throws Exception
   {
+    initIndexMergerTestBase(bitmapSerdeFactory, compressionStrategy, dimCompressionStrategy, longEncodingStrategy);
     IncrementalIndex toPersist = IncrementalIndexTest.createIndex(null);
     toPersist.add(
         new MapBasedInputRow(
@@ -210,22 +215,22 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
         )
     );
 
-    final File tempDir = temporaryFolder.newFolder();
+    final File tempDir = newFolder(temporaryFolder, "junit");
     QueryableIndex index = closer.closeLater(
         indexIO.loadIndex(indexMerger.persist(toPersist, tempDir, indexSpec, null))
     );
 
-    Assert.assertEquals(2, index.getColumnHolder(ColumnHolder.TIME_COLUMN_NAME).getLength());
-    Assert.assertEquals(Arrays.asList("dim1", "dim2"), Lists.newArrayList(index.getAvailableDimensions()));
-    Assert.assertEquals(3, index.getColumnNames().size());
+    Assertions.assertEquals(2, index.getColumnHolder(ColumnHolder.TIME_COLUMN_NAME).getLength());
+    Assertions.assertEquals(Arrays.asList("dim1", "dim2"), Lists.newArrayList(index.getAvailableDimensions()));
+    Assertions.assertEquals(3, index.getColumnNames().size());
     assertDimCompression(index, indexSpec.getDimensionCompression());
 
     final QueryableIndexIndexableAdapter adapter = new QueryableIndexIndexableAdapter(index);
     final List<DebugRow> rowList = RowIteratorHelper.toList(adapter.getRows());
 
-    Assert.assertEquals(2, rowList.size());
-    Assert.assertEquals(ImmutableList.of("1", "2"), rowList.get(0).dimensionValues());
-    Assert.assertEquals(Arrays.asList("3", null), rowList.get(1).dimensionValues());
+    Assertions.assertEquals(2, rowList.size());
+    Assertions.assertEquals(ImmutableList.of("1", "2"), rowList.get(0).dimensionValues());
+    Assertions.assertEquals(Arrays.asList("3", null), rowList.get(1).dimensionValues());
 
     checkBitmapIndex(Collections.emptyList(), getBitmapIndex(adapter, "dim1", null));
     checkBitmapIndex(Collections.singletonList(0), getBitmapIndex(adapter, "dim1", "1"));
@@ -235,9 +240,11 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
     checkBitmapIndex(Collections.singletonList(0), getBitmapIndex(adapter, "dim2", "2"));
   }
 
-  @Test
-  public void testPersistWithSegmentMetadata() throws Exception
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}: metric compression={0}, dimension compression={1}, long encoding={2}, segment write-out medium={3}")
+  public void testPersistWithSegmentMetadata(@Nullable BitmapSerdeFactory bitmapSerdeFactory, CompressionStrategy compressionStrategy, CompressionStrategy dimCompressionStrategy, CompressionFactory.LongEncodingStrategy longEncodingStrategy) throws Exception
   {
+    initIndexMergerTestBase(bitmapSerdeFactory, compressionStrategy, dimCompressionStrategy, longEncodingStrategy);
     final long timestamp = System.currentTimeMillis();
 
     IncrementalIndex toPersist = IncrementalIndexTest.createIndex(null);
@@ -246,18 +253,18 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
     Map<String, Object> metadataElems = ImmutableMap.of("key", "value");
     toPersist.getMetadata().putAll(metadataElems);
 
-    final File tempDir = temporaryFolder.newFolder();
+    final File tempDir = newFolder(temporaryFolder, "junit");
     QueryableIndex index = closer.closeLater(
         indexIO.loadIndex(indexMerger.persist(toPersist, tempDir, indexSpec, null))
     );
 
-    Assert.assertEquals(2, index.getColumnHolder(ColumnHolder.TIME_COLUMN_NAME).getLength());
-    Assert.assertEquals(Arrays.asList("dim1", "dim2"), Lists.newArrayList(index.getAvailableDimensions()));
-    Assert.assertEquals(3, index.getColumnNames().size());
+    Assertions.assertEquals(2, index.getColumnHolder(ColumnHolder.TIME_COLUMN_NAME).getLength());
+    Assertions.assertEquals(Arrays.asList("dim1", "dim2"), Lists.newArrayList(index.getAvailableDimensions()));
+    Assertions.assertEquals(3, index.getColumnNames().size());
 
     assertDimCompression(index, indexSpec.getDimensionCompression());
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         new Metadata(
             metadataElems,
             IncrementalIndexTest.getDefaultCombiningAggregatorFactories(),
@@ -269,9 +276,11 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
     );
   }
 
-  @Test
-  public void testPersistMerge() throws Exception
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}: metric compression={0}, dimension compression={1}, long encoding={2}, segment write-out medium={3}")
+  public void testPersistMerge(@Nullable BitmapSerdeFactory bitmapSerdeFactory, CompressionStrategy compressionStrategy, CompressionStrategy dimCompressionStrategy, CompressionFactory.LongEncodingStrategy longEncodingStrategy) throws Exception
   {
+    initIndexMergerTestBase(bitmapSerdeFactory, compressionStrategy, dimCompressionStrategy, longEncodingStrategy);
     final long timestamp = System.currentTimeMillis();
     IncrementalIndex toPersist1 = IncrementalIndexTest.createIndex(null);
     IncrementalIndexTest.populateIndex(timestamp, toPersist1);
@@ -297,25 +306,25 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
         )
     );
 
-    final File tempDir1 = temporaryFolder.newFolder();
-    final File tempDir2 = temporaryFolder.newFolder();
-    final File mergedDir = temporaryFolder.newFolder();
+    final File tempDir1 = newFolder(temporaryFolder, "junit");
+    final File tempDir2 = newFolder(temporaryFolder, "junit");
+    final File mergedDir = newFolder(temporaryFolder, "junit");
 
     QueryableIndex index1 = closer.closeLater(
         indexIO.loadIndex(indexMerger.persist(toPersist1, tempDir1, indexSpec, null))
     );
 
-    Assert.assertEquals(2, index1.getColumnHolder(ColumnHolder.TIME_COLUMN_NAME).getLength());
-    Assert.assertEquals(Arrays.asList("dim1", "dim2"), Lists.newArrayList(index1.getAvailableDimensions()));
-    Assert.assertEquals(3, index1.getColumnNames().size());
+    Assertions.assertEquals(2, index1.getColumnHolder(ColumnHolder.TIME_COLUMN_NAME).getLength());
+    Assertions.assertEquals(Arrays.asList("dim1", "dim2"), Lists.newArrayList(index1.getAvailableDimensions()));
+    Assertions.assertEquals(3, index1.getColumnNames().size());
 
     QueryableIndex index2 = closer.closeLater(
         indexIO.loadIndex(indexMerger.persist(toPersist2, tempDir2, indexSpec, null))
     );
 
-    Assert.assertEquals(2, index2.getColumnHolder(ColumnHolder.TIME_COLUMN_NAME).getLength());
-    Assert.assertEquals(Arrays.asList("dim1", "dim2"), Lists.newArrayList(index2.getAvailableDimensions()));
-    Assert.assertEquals(3, index2.getColumnNames().size());
+    Assertions.assertEquals(2, index2.getColumnHolder(ColumnHolder.TIME_COLUMN_NAME).getLength());
+    Assertions.assertEquals(Arrays.asList("dim1", "dim2"), Lists.newArrayList(index2.getAvailableDimensions()));
+    Assertions.assertEquals(3, index2.getColumnNames().size());
 
     AggregatorFactory[] mergedAggregators = new AggregatorFactory[]{
         new CountAggregatorFactory("count")
@@ -334,22 +343,24 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
         )
     );
 
-    Assert.assertEquals(3, merged.getColumnHolder(ColumnHolder.TIME_COLUMN_NAME).getLength());
-    Assert.assertEquals(Arrays.asList("dim1", "dim2"), Lists.newArrayList(merged.getAvailableDimensions()));
-    Assert.assertEquals(3, merged.getColumnNames().size());
+    Assertions.assertEquals(3, merged.getColumnHolder(ColumnHolder.TIME_COLUMN_NAME).getLength());
+    Assertions.assertEquals(Arrays.asList("dim1", "dim2"), Lists.newArrayList(merged.getAvailableDimensions()));
+    Assertions.assertEquals(3, merged.getColumnNames().size());
     assertDimCompression(index2, indexSpec.getDimensionCompression());
     assertDimCompression(index1, indexSpec.getDimensionCompression());
     assertDimCompression(merged, indexSpec.getDimensionCompression());
 
-    Assert.assertArrayEquals(
+    Assertions.assertArrayEquals(
         getCombiningAggregators(mergedAggregators),
         merged.getMetadata().getAggregators()
     );
   }
 
-  @Test
-  public void testPersistEmptyColumn() throws Exception
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}: metric compression={0}, dimension compression={1}, long encoding={2}, segment write-out medium={3}")
+  public void testPersistEmptyColumn(@Nullable BitmapSerdeFactory bitmapSerdeFactory, CompressionStrategy compressionStrategy, CompressionStrategy dimCompressionStrategy, CompressionFactory.LongEncodingStrategy longEncodingStrategy) throws Exception
   {
+    initIndexMergerTestBase(bitmapSerdeFactory, compressionStrategy, dimCompressionStrategy, longEncodingStrategy);
     final IncrementalIndex toPersist1 = new OnheapIncrementalIndex.Builder()
         .setSimpleTestingIndexSchema(/* empty */)
         .setMaxRowCount(10)
@@ -360,9 +371,9 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
         .setMaxRowCount(10)
         .build();
 
-    final File tmpDir1 = temporaryFolder.newFolder();
-    final File tmpDir2 = temporaryFolder.newFolder();
-    final File tmpDir3 = temporaryFolder.newFolder();
+    final File tmpDir1 = newFolder(temporaryFolder, "junit");
+    final File tmpDir2 = newFolder(temporaryFolder, "junit");
+    final File tmpDir3 = newFolder(temporaryFolder, "junit");
 
     toPersist1.add(
         new MapBasedInputRow(
@@ -400,29 +411,31 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
         )
     );
 
-    Assert.assertEquals(1, index1.getColumnHolder(ColumnHolder.TIME_COLUMN_NAME).getLength());
-    Assert.assertEquals(ImmutableList.of("dim2"), ImmutableList.copyOf(index1.getAvailableDimensions()));
+    Assertions.assertEquals(1, index1.getColumnHolder(ColumnHolder.TIME_COLUMN_NAME).getLength());
+    Assertions.assertEquals(ImmutableList.of("dim2"), ImmutableList.copyOf(index1.getAvailableDimensions()));
 
-    Assert.assertEquals(1, index2.getColumnHolder(ColumnHolder.TIME_COLUMN_NAME).getLength());
-    Assert.assertEquals(ImmutableList.of("dim2"), ImmutableList.copyOf(index2.getAvailableDimensions()));
+    Assertions.assertEquals(1, index2.getColumnHolder(ColumnHolder.TIME_COLUMN_NAME).getLength());
+    Assertions.assertEquals(ImmutableList.of("dim2"), ImmutableList.copyOf(index2.getAvailableDimensions()));
 
-    Assert.assertEquals(2, merged.getColumnHolder(ColumnHolder.TIME_COLUMN_NAME).getLength());
-    Assert.assertEquals(ImmutableList.of("dim2"), ImmutableList.copyOf(merged.getAvailableDimensions()));
+    Assertions.assertEquals(2, merged.getColumnHolder(ColumnHolder.TIME_COLUMN_NAME).getLength());
+    Assertions.assertEquals(ImmutableList.of("dim2"), ImmutableList.copyOf(merged.getAvailableDimensions()));
 
     assertDimCompression(index1, indexSpec.getDimensionCompression());
     assertDimCompression(index2, indexSpec.getDimensionCompression());
     assertDimCompression(merged, indexSpec.getDimensionCompression());
   }
 
-  @Test
-  public void testMergeRetainsValues() throws Exception
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}: metric compression={0}, dimension compression={1}, long encoding={2}, segment write-out medium={3}")
+  public void testMergeRetainsValues(@Nullable BitmapSerdeFactory bitmapSerdeFactory, CompressionStrategy compressionStrategy, CompressionStrategy dimCompressionStrategy, CompressionFactory.LongEncodingStrategy longEncodingStrategy) throws Exception
   {
+    initIndexMergerTestBase(bitmapSerdeFactory, compressionStrategy, dimCompressionStrategy, longEncodingStrategy);
     final long timestamp = System.currentTimeMillis();
     IncrementalIndex toPersist1 = IncrementalIndexTest.createIndex(null);
     IncrementalIndexTest.populateIndex(timestamp, toPersist1);
 
-    final File tempDir1 = temporaryFolder.newFolder();
-    final File mergedDir = temporaryFolder.newFolder();
+    final File tempDir1 = newFolder(temporaryFolder, "junit");
+    final File mergedDir = newFolder(temporaryFolder, "junit");
     final IndexableAdapter incrementalAdapter = new IncrementalIndexAdapter(
         toPersist1.getInterval(),
         toPersist1,
@@ -439,9 +452,9 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
 
     indexIO.validateTwoSegments(incrementalAdapter, queryableAdapter);
 
-    Assert.assertEquals(2, index1.getColumnHolder(ColumnHolder.TIME_COLUMN_NAME).getLength());
-    Assert.assertEquals(Arrays.asList("dim1", "dim2"), Lists.newArrayList(index1.getAvailableDimensions()));
-    Assert.assertEquals(3, index1.getColumnNames().size());
+    Assertions.assertEquals(2, index1.getColumnHolder(ColumnHolder.TIME_COLUMN_NAME).getLength());
+    Assertions.assertEquals(Arrays.asList("dim1", "dim2"), Lists.newArrayList(index1.getAvailableDimensions()));
+    Assertions.assertEquals(3, index1.getColumnNames().size());
 
 
     QueryableIndex merged = closer.closeLater(
@@ -458,9 +471,9 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
         )
     );
 
-    Assert.assertEquals(2, merged.getColumnHolder(ColumnHolder.TIME_COLUMN_NAME).getLength());
-    Assert.assertEquals(Arrays.asList("dim1", "dim2"), Lists.newArrayList(merged.getAvailableDimensions()));
-    Assert.assertEquals(3, merged.getColumnNames().size());
+    Assertions.assertEquals(2, merged.getColumnHolder(ColumnHolder.TIME_COLUMN_NAME).getLength());
+    Assertions.assertEquals(Arrays.asList("dim1", "dim2"), Lists.newArrayList(merged.getAvailableDimensions()));
+    Assertions.assertEquals(3, merged.getColumnNames().size());
 
     indexIO.validateTwoSegments(tempDir1, mergedDir);
 
@@ -468,15 +481,17 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
     assertDimCompression(merged, indexSpec.getDimensionCompression());
   }
 
-  @Test
-  public void testMergeSpecChange() throws Exception
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}: metric compression={0}, dimension compression={1}, long encoding={2}, segment write-out medium={3}")
+  public void testMergeSpecChange(@Nullable BitmapSerdeFactory bitmapSerdeFactory, CompressionStrategy compressionStrategy, CompressionStrategy dimCompressionStrategy, CompressionFactory.LongEncodingStrategy longEncodingStrategy) throws Exception
   {
+    initIndexMergerTestBase(bitmapSerdeFactory, compressionStrategy, dimCompressionStrategy, longEncodingStrategy);
     final long timestamp = System.currentTimeMillis();
     IncrementalIndex toPersist1 = IncrementalIndexTest.createIndex(null);
     IncrementalIndexTest.populateIndex(timestamp, toPersist1);
 
-    final File tempDir1 = temporaryFolder.newFolder();
-    final File mergedDir = temporaryFolder.newFolder();
+    final File tempDir1 = newFolder(temporaryFolder, "junit");
+    final File mergedDir = newFolder(temporaryFolder, "junit");
     final IndexableAdapter incrementalAdapter = new IncrementalIndexAdapter(
         toPersist1.getInterval(),
         toPersist1,
@@ -493,9 +508,9 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
 
     indexIO.validateTwoSegments(incrementalAdapter, queryableAdapter);
 
-    Assert.assertEquals(2, index1.getColumnHolder(ColumnHolder.TIME_COLUMN_NAME).getLength());
-    Assert.assertEquals(Arrays.asList("dim1", "dim2"), Lists.newArrayList(index1.getAvailableDimensions()));
-    Assert.assertEquals(3, index1.getColumnNames().size());
+    Assertions.assertEquals(2, index1.getColumnHolder(ColumnHolder.TIME_COLUMN_NAME).getLength());
+    Assertions.assertEquals(Arrays.asList("dim1", "dim2"), Lists.newArrayList(index1.getAvailableDimensions()));
+    Assertions.assertEquals(3, index1.getColumnNames().size());
 
     IndexSpec.Builder builder = IndexSpec.builder().withBitmapSerdeFactory(indexSpec.getBitmapSerdeFactory());
     if (CompressionStrategy.LZ4.equals(indexSpec.getDimensionCompression())) {
@@ -527,9 +542,9 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
         )
     );
 
-    Assert.assertEquals(2, merged.getColumnHolder(ColumnHolder.TIME_COLUMN_NAME).getLength());
-    Assert.assertEquals(Arrays.asList("dim1", "dim2"), Lists.newArrayList(merged.getAvailableDimensions()));
-    Assert.assertEquals(3, merged.getColumnNames().size());
+    Assertions.assertEquals(2, merged.getColumnHolder(ColumnHolder.TIME_COLUMN_NAME).getLength());
+    Assertions.assertEquals(Arrays.asList("dim1", "dim2"), Lists.newArrayList(merged.getAvailableDimensions()));
+    Assertions.assertEquals(3, merged.getColumnNames().size());
 
     indexIO.validateTwoSegments(tempDir1, mergedDir);
 
@@ -570,21 +585,23 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
 
     Object strategy = compressionField.get(supplier);
 
-    Assert.assertEquals(expectedStrategy, strategy);
+    Assertions.assertEquals(expectedStrategy, strategy);
   }
 
 
-  @Test
-  public void testNonLexicographicDimOrderMerge() throws Exception
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}: metric compression={0}, dimension compression={1}, long encoding={2}, segment write-out medium={3}")
+  public void testNonLexicographicDimOrderMerge(@Nullable BitmapSerdeFactory bitmapSerdeFactory, CompressionStrategy compressionStrategy, CompressionStrategy dimCompressionStrategy, CompressionFactory.LongEncodingStrategy longEncodingStrategy) throws Exception
   {
+    initIndexMergerTestBase(bitmapSerdeFactory, compressionStrategy, dimCompressionStrategy, longEncodingStrategy);
     IncrementalIndex toPersist1 = getIndexD3();
     IncrementalIndex toPersist2 = getIndexD3();
     IncrementalIndex toPersist3 = getIndexD3();
 
-    final File tmpDir = temporaryFolder.newFolder();
-    final File tmpDir2 = temporaryFolder.newFolder();
-    final File tmpDir3 = temporaryFolder.newFolder();
-    final File tmpDirMerged = temporaryFolder.newFolder();
+    final File tmpDir = newFolder(temporaryFolder, "junit");
+    final File tmpDir2 = newFolder(temporaryFolder, "junit");
+    final File tmpDir3 = newFolder(temporaryFolder, "junit");
+    final File tmpDirMerged = newFolder(temporaryFolder, "junit");
 
     QueryableIndex index1 = closer.closeLater(
         indexIO.loadIndex(indexMerger.persist(toPersist1, tmpDir, indexSpec, null))
@@ -616,17 +633,17 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
     final QueryableIndexIndexableAdapter adapter = new QueryableIndexIndexableAdapter(merged);
     final List<DebugRow> rowList = RowIteratorHelper.toList(adapter.getRows());
 
-    Assert.assertEquals(Arrays.asList("d3", "d1", "d2"), ImmutableList.copyOf(adapter.getDimensionNames()));
-    Assert.assertEquals(3, rowList.size());
+    Assertions.assertEquals(Arrays.asList("d3", "d1", "d2"), ImmutableList.copyOf(adapter.getDimensionNames()));
+    Assertions.assertEquals(3, rowList.size());
 
-    Assert.assertEquals(Arrays.asList("30000", "100", "4000"), rowList.get(0).dimensionValues());
-    Assert.assertEquals(Collections.singletonList(3L), rowList.get(0).metricValues());
+    Assertions.assertEquals(Arrays.asList("30000", "100", "4000"), rowList.get(0).dimensionValues());
+    Assertions.assertEquals(Collections.singletonList(3L), rowList.get(0).metricValues());
 
-    Assert.assertEquals(Arrays.asList("40000", "300", "2000"), rowList.get(1).dimensionValues());
-    Assert.assertEquals(Collections.singletonList(3L), rowList.get(1).metricValues());
+    Assertions.assertEquals(Arrays.asList("40000", "300", "2000"), rowList.get(1).dimensionValues());
+    Assertions.assertEquals(Collections.singletonList(3L), rowList.get(1).metricValues());
 
-    Assert.assertEquals(Arrays.asList("50000", "200", "3000"), rowList.get(2).dimensionValues());
-    Assert.assertEquals(Collections.singletonList(3L), rowList.get(2).metricValues());
+    Assertions.assertEquals(Arrays.asList("50000", "200", "3000"), rowList.get(2).dimensionValues());
+    Assertions.assertEquals(Collections.singletonList(3L), rowList.get(2).metricValues());
 
     checkBitmapIndex(Collections.emptyList(), getBitmapIndex(adapter, "d3", null));
     checkBitmapIndex(Collections.singletonList(0), getBitmapIndex(adapter, "d3", "30000"));
@@ -645,9 +662,11 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
 
   }
 
-  @Test
-  public void testMergeWithDimensionsList() throws Exception
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}: metric compression={0}, dimension compression={1}, long encoding={2}, segment write-out medium={3}")
+  public void testMergeWithDimensionsList(@Nullable BitmapSerdeFactory bitmapSerdeFactory, CompressionStrategy compressionStrategy, CompressionStrategy dimCompressionStrategy, CompressionFactory.LongEncodingStrategy longEncodingStrategy) throws Exception
   {
+    initIndexMergerTestBase(bitmapSerdeFactory, compressionStrategy, dimCompressionStrategy, longEncodingStrategy);
     IncrementalIndexSchema schema = new IncrementalIndexSchema.Builder()
         .withDimensionsSpec(new DimensionsSpec(makeDimensionSchemas(Arrays.asList("dimA", "dimB", "dimC"))))
         .withMetrics(new CountAggregatorFactory("count"))
@@ -672,10 +691,10 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
     addDimValuesToIndex(toPersist3, "dimC", Arrays.asList("1", "2"));
 
 
-    final File tmpDir = temporaryFolder.newFolder();
-    final File tmpDir2 = temporaryFolder.newFolder();
-    final File tmpDir3 = temporaryFolder.newFolder();
-    final File tmpDirMerged = temporaryFolder.newFolder();
+    final File tmpDir = newFolder(temporaryFolder, "junit");
+    final File tmpDir2 = newFolder(temporaryFolder, "junit");
+    final File tmpDir3 = newFolder(temporaryFolder, "junit");
+    final File tmpDirMerged = newFolder(temporaryFolder, "junit");
 
     QueryableIndex index1 = closer.closeLater(
         indexIO.loadIndex(indexMerger.persist(toPersist1, tmpDir, indexSpec, null))
@@ -706,23 +725,23 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
     final QueryableIndexIndexableAdapter adapter = new QueryableIndexIndexableAdapter(merged);
     final List<DebugRow> rowList = RowIteratorHelper.toList(adapter.getRows());
 
-    Assert.assertEquals(ImmutableList.of("dimA", "dimC"), ImmutableList.copyOf(adapter.getDimensionNames()));
-    Assert.assertEquals(4, rowList.size());
+    Assertions.assertEquals(ImmutableList.of("dimA", "dimC"), ImmutableList.copyOf(adapter.getDimensionNames()));
+    Assertions.assertEquals(4, rowList.size());
 
-    Assert.assertEquals(Arrays.asList(null, "1"), rowList.get(0).dimensionValues());
-    Assert.assertEquals(Collections.singletonList(1L), rowList.get(0).metricValues());
+    Assertions.assertEquals(Arrays.asList(null, "1"), rowList.get(0).dimensionValues());
+    Assertions.assertEquals(Collections.singletonList(1L), rowList.get(0).metricValues());
 
-    Assert.assertEquals(Arrays.asList(null, "2"), rowList.get(1).dimensionValues());
-    Assert.assertEquals(Collections.singletonList(1L), rowList.get(1).metricValues());
+    Assertions.assertEquals(Arrays.asList(null, "2"), rowList.get(1).dimensionValues());
+    Assertions.assertEquals(Collections.singletonList(1L), rowList.get(1).metricValues());
 
-    Assert.assertEquals(Arrays.asList("1", null), rowList.get(2).dimensionValues());
-    Assert.assertEquals(Collections.singletonList(2L), rowList.get(2).metricValues());
+    Assertions.assertEquals(Arrays.asList("1", null), rowList.get(2).dimensionValues());
+    Assertions.assertEquals(Collections.singletonList(2L), rowList.get(2).metricValues());
 
-    Assert.assertEquals(Arrays.asList("2", null), rowList.get(3).dimensionValues());
-    Assert.assertEquals(Collections.singletonList(2L), rowList.get(3).metricValues());
+    Assertions.assertEquals(Arrays.asList("2", null), rowList.get(3).dimensionValues());
+    Assertions.assertEquals(Collections.singletonList(2L), rowList.get(3).metricValues());
 
-    Assert.assertEquals(useBitmapIndexes, adapter.getCapabilities("dimA").hasBitmapIndexes());
-    Assert.assertEquals(useBitmapIndexes, adapter.getCapabilities("dimC").hasBitmapIndexes());
+    Assertions.assertEquals(useBitmapIndexes, adapter.getCapabilities("dimA").hasBitmapIndexes());
+    Assertions.assertEquals(useBitmapIndexes, adapter.getCapabilities("dimC").hasBitmapIndexes());
 
     if (useBitmapIndexes) {
       checkBitmapIndex(Arrays.asList(0, 1), getBitmapIndex(adapter, "dimA", null));
@@ -740,9 +759,11 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
   }
 
 
-  @Test
-  public void testDisjointDimMerge() throws Exception
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}: metric compression={0}, dimension compression={1}, long encoding={2}, segment write-out medium={3}")
+  public void testDisjointDimMerge(@Nullable BitmapSerdeFactory bitmapSerdeFactory, CompressionStrategy compressionStrategy, CompressionStrategy dimCompressionStrategy, CompressionFactory.LongEncodingStrategy longEncodingStrategy) throws Exception
   {
+    initIndexMergerTestBase(bitmapSerdeFactory, compressionStrategy, dimCompressionStrategy, longEncodingStrategy);
     IncrementalIndex toPersistA = getSingleDimIndex("dimA", Arrays.asList("1", "2"));
     IncrementalIndex toPersistB1 = getSingleDimIndex("dimB", Arrays.asList("1", "2", "3"));
     IncrementalIndex toPersistB2 = getIndexWithDims(Arrays.asList("dimA", "dimB"));
@@ -750,9 +771,9 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
 
     for (IncrementalIndex toPersistB : Arrays.asList(toPersistB1, toPersistB2)) {
 
-      final File tmpDirA = temporaryFolder.newFolder();
-      final File tmpDirB = temporaryFolder.newFolder();
-      final File tmpDirMerged = temporaryFolder.newFolder();
+      final File tmpDirA = newFolder(temporaryFolder, "junit");
+      final File tmpDirB = newFolder(temporaryFolder, "junit");
+      final File tmpDirMerged = newFolder(temporaryFolder, "junit");
 
       QueryableIndex indexA = closer.closeLater(
           indexIO.loadIndex(indexMerger.persist(toPersistA, tmpDirA, indexSpec, null))
@@ -780,26 +801,26 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
       final QueryableIndexIndexableAdapter adapter = new QueryableIndexIndexableAdapter(merged);
       final List<DebugRow> rowList = RowIteratorHelper.toList(adapter.getRows());
 
-      Assert.assertEquals(ImmutableList.of("dimA", "dimB"), ImmutableList.copyOf(adapter.getDimensionNames()));
-      Assert.assertEquals(5, rowList.size());
+      Assertions.assertEquals(ImmutableList.of("dimA", "dimB"), ImmutableList.copyOf(adapter.getDimensionNames()));
+      Assertions.assertEquals(5, rowList.size());
 
-      Assert.assertEquals(Arrays.asList(null, "1"), rowList.get(0).dimensionValues());
-      Assert.assertEquals(Collections.singletonList(1L), rowList.get(0).metricValues());
+      Assertions.assertEquals(Arrays.asList(null, "1"), rowList.get(0).dimensionValues());
+      Assertions.assertEquals(Collections.singletonList(1L), rowList.get(0).metricValues());
 
-      Assert.assertEquals(Arrays.asList(null, "2"), rowList.get(1).dimensionValues());
-      Assert.assertEquals(Collections.singletonList(1L), rowList.get(1).metricValues());
+      Assertions.assertEquals(Arrays.asList(null, "2"), rowList.get(1).dimensionValues());
+      Assertions.assertEquals(Collections.singletonList(1L), rowList.get(1).metricValues());
 
-      Assert.assertEquals(Arrays.asList(null, "3"), rowList.get(2).dimensionValues());
-      Assert.assertEquals(Collections.singletonList(1L), rowList.get(2).metricValues());
+      Assertions.assertEquals(Arrays.asList(null, "3"), rowList.get(2).dimensionValues());
+      Assertions.assertEquals(Collections.singletonList(1L), rowList.get(2).metricValues());
 
-      Assert.assertEquals(Arrays.asList("1", null), rowList.get(3).dimensionValues());
-      Assert.assertEquals(Collections.singletonList(1L), rowList.get(3).metricValues());
+      Assertions.assertEquals(Arrays.asList("1", null), rowList.get(3).dimensionValues());
+      Assertions.assertEquals(Collections.singletonList(1L), rowList.get(3).metricValues());
 
-      Assert.assertEquals(Arrays.asList("2", null), rowList.get(4).dimensionValues());
-      Assert.assertEquals(Collections.singletonList(1L), rowList.get(4).metricValues());
+      Assertions.assertEquals(Arrays.asList("2", null), rowList.get(4).dimensionValues());
+      Assertions.assertEquals(Collections.singletonList(1L), rowList.get(4).metricValues());
 
       // dimA always has bitmap indexes, since it has them in indexA (it comes in through discovery).
-      Assert.assertTrue(adapter.getCapabilities("dimA").hasBitmapIndexes());
+      Assertions.assertTrue(adapter.getCapabilities("dimA").hasBitmapIndexes());
       checkBitmapIndex(Arrays.asList(0, 1, 2), getBitmapIndex(adapter, "dimA", null));
       checkBitmapIndex(Collections.singletonList(3), getBitmapIndex(adapter, "dimA", "1"));
       checkBitmapIndex(Collections.singletonList(4), getBitmapIndex(adapter, "dimA", "2"));
@@ -808,7 +829,7 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
       // dimB may or may not have bitmap indexes, since it comes in through explicit definition in toPersistB2.
       //noinspection ObjectEquality
       if (toPersistB == toPersistB2) {
-        Assert.assertEquals(useBitmapIndexes, adapter.getCapabilities("dimB").hasBitmapIndexes());
+        Assertions.assertEquals(useBitmapIndexes, adapter.getCapabilities("dimB").hasBitmapIndexes());
       }
       //noinspection ObjectEquality
       if (toPersistB != toPersistB2 || useBitmapIndexes) {
@@ -820,9 +841,11 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
     }
   }
 
-  @Test
-  public void testJointDimMerge() throws Exception
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}: metric compression={0}, dimension compression={1}, long encoding={2}, segment write-out medium={3}")
+  public void testJointDimMerge(@Nullable BitmapSerdeFactory bitmapSerdeFactory, CompressionStrategy compressionStrategy, CompressionStrategy dimCompressionStrategy, CompressionFactory.LongEncodingStrategy longEncodingStrategy) throws Exception
   {
+    initIndexMergerTestBase(bitmapSerdeFactory, compressionStrategy, dimCompressionStrategy, longEncodingStrategy);
     // (d1, d2, d3) from only one index, and their dim values are ('empty', 'has null', 'no null')
     // (d4, d5, d6, d7, d8, d9) are from both indexes
     // d4: 'empty' join 'empty'
@@ -881,9 +904,9 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
               ImmutableMap.of("d5", "", "d6", "621", "d7", "", "d8", "821", "d9", "921")
           )
       );
-      final File tmpDirA = temporaryFolder.newFolder();
-      final File tmpDirB = temporaryFolder.newFolder();
-      final File tmpDirMerged = temporaryFolder.newFolder();
+      final File tmpDirA = newFolder(temporaryFolder, "junit");
+      final File tmpDirB = newFolder(temporaryFolder, "junit");
+      final File tmpDirMerged = newFolder(temporaryFolder, "junit");
 
       QueryableIndex indexA = closer.closeLater(
           indexIO.loadIndex(indexMerger.persist(toPersistA, tmpDirA, indexSpec, null))
@@ -911,31 +934,31 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
       final List<DebugRow> rowList = RowIteratorHelper.toList(adapter.getRows());
 
       if (NullHandling.replaceWithDefault()) {
-        Assert.assertEquals(
+        Assertions.assertEquals(
             ImmutableList.of("d2", "d3", "d5", "d6", "d7", "d8", "d9"),
             ImmutableList.copyOf(adapter.getDimensionNames())
         );
       } else {
-        Assert.assertEquals(
+        Assertions.assertEquals(
             ImmutableList.of("d1", "d2", "d3", "d5", "d6", "d7", "d8", "d9"),
             ImmutableList.copyOf(adapter.getDimensionNames())
         );
       }
-      Assert.assertEquals(4, rowList.size());
+      Assertions.assertEquals(4, rowList.size());
       if (NullHandling.replaceWithDefault()) {
-        Assert.assertEquals(
+        Assertions.assertEquals(
             Arrays.asList(null, "310", null, null, null, null, "910"),
             rowList.get(0).dimensionValues()
         );
-        Assert.assertEquals(
+        Assertions.assertEquals(
             Arrays.asList("210", "311", null, null, "710", "810", "911"),
             rowList.get(1).dimensionValues()
         );
-        Assert.assertEquals(
+        Assertions.assertEquals(
             Arrays.asList(null, null, "520", "620", "720", "820", "920"),
             rowList.get(2).dimensionValues()
         );
-        Assert.assertEquals(
+        Assertions.assertEquals(
             Arrays.asList(null, null, null, "621", null, "821", "921"),
             rowList.get(3).dimensionValues()
         );
@@ -944,19 +967,19 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
         checkBitmapIndex(Arrays.asList(0, 1, 3), getBitmapIndex(adapter, "d5", null));
         checkBitmapIndex(Arrays.asList(0, 3), getBitmapIndex(adapter, "d7", null));
       } else {
-        Assert.assertEquals(
+        Assertions.assertEquals(
             Arrays.asList("", "", "310", null, null, "", null, "910"),
             rowList.get(0).dimensionValues()
         );
-        Assert.assertEquals(
+        Assertions.assertEquals(
             Arrays.asList(null, "210", "311", null, null, "710", "810", "911"),
             rowList.get(1).dimensionValues()
         );
-        Assert.assertEquals(
+        Assertions.assertEquals(
             Arrays.asList(null, null, null, "520", "620", "720", "820", "920"),
             rowList.get(2).dimensionValues()
         );
-        Assert.assertEquals(
+        Assertions.assertEquals(
             Arrays.asList(null, null, null, "", "621", "", "821", "921"),
             rowList.get(3).dimensionValues()
         );
@@ -993,9 +1016,11 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
     }
   }
 
-  @Test
-  public void testNoRollupMergeWithDuplicateRow() throws Exception
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}: metric compression={0}, dimension compression={1}, long encoding={2}, segment write-out medium={3}")
+  public void testNoRollupMergeWithDuplicateRow(@Nullable BitmapSerdeFactory bitmapSerdeFactory, CompressionStrategy compressionStrategy, CompressionStrategy dimCompressionStrategy, CompressionFactory.LongEncodingStrategy longEncodingStrategy) throws Exception
   {
+    initIndexMergerTestBase(bitmapSerdeFactory, compressionStrategy, dimCompressionStrategy, longEncodingStrategy);
     // (d3, d6, d8, d9) as actually data from index1 and index2
     // index1 has two duplicate rows
     // index2 has 1 row which is same as index1 row and another different row
@@ -1055,9 +1080,9 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
             )
         )
     );
-    final File tmpDirA = temporaryFolder.newFolder();
-    final File tmpDirB = temporaryFolder.newFolder();
-    final File tmpDirMerged = temporaryFolder.newFolder();
+    final File tmpDirA = newFolder(temporaryFolder, "junit");
+    final File tmpDirB = newFolder(temporaryFolder, "junit");
+    final File tmpDirMerged = newFolder(temporaryFolder, "junit");
 
     QueryableIndex indexA = closer.closeLater(
         indexIO.loadIndex(indexMerger.persist(toPersistA, tmpDirA, indexSpec, null))
@@ -1085,28 +1110,28 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
     final List<DebugRow> rowList = RowIteratorHelper.toList(adapter.getRows());
 
     if (NullHandling.replaceWithDefault()) {
-      Assert.assertEquals(
+      Assertions.assertEquals(
           ImmutableList.of("d3", "d6", "d8", "d9"),
           ImmutableList.copyOf(adapter.getDimensionNames())
       );
     } else {
-      Assert.assertEquals(
+      Assertions.assertEquals(
           ImmutableList.of("d1", "d2", "d3", "d5", "d6", "d7", "d8", "d9"),
           ImmutableList.copyOf(adapter.getDimensionNames())
       );
     }
 
-    Assert.assertEquals(4, rowList.size());
+    Assertions.assertEquals(4, rowList.size());
     if (NullHandling.replaceWithDefault()) {
-      Assert.assertEquals(Arrays.asList("310", null, null, "910"), rowList.get(0).dimensionValues());
-      Assert.assertEquals(Arrays.asList("310", null, null, "910"), rowList.get(1).dimensionValues());
-      Assert.assertEquals(Arrays.asList("310", null, null, "910"), rowList.get(2).dimensionValues());
-      Assert.assertEquals(Arrays.asList(null, "621", "821", "921"), rowList.get(3).dimensionValues());
+      Assertions.assertEquals(Arrays.asList("310", null, null, "910"), rowList.get(0).dimensionValues());
+      Assertions.assertEquals(Arrays.asList("310", null, null, "910"), rowList.get(1).dimensionValues());
+      Assertions.assertEquals(Arrays.asList("310", null, null, "910"), rowList.get(2).dimensionValues());
+      Assertions.assertEquals(Arrays.asList(null, "621", "821", "921"), rowList.get(3).dimensionValues());
     } else {
-      Assert.assertEquals(Arrays.asList("", "", "310", null, null, "", null, "910"), rowList.get(0).dimensionValues());
-      Assert.assertEquals(Arrays.asList("", "", "310", null, null, "", null, "910"), rowList.get(1).dimensionValues());
-      Assert.assertEquals(Arrays.asList("", "", "310", null, null, "", null, "910"), rowList.get(2).dimensionValues());
-      Assert.assertEquals(
+      Assertions.assertEquals(Arrays.asList("", "", "310", null, null, "", null, "910"), rowList.get(0).dimensionValues());
+      Assertions.assertEquals(Arrays.asList("", "", "310", null, null, "", null, "910"), rowList.get(1).dimensionValues());
+      Assertions.assertEquals(Arrays.asList("", "", "310", null, null, "", null, "910"), rowList.get(2).dimensionValues());
+      Assertions.assertEquals(
           Arrays.asList(null, null, null, "", "621", "", "821", "921"),
           rowList.get(3).dimensionValues()
       );
@@ -1128,17 +1153,19 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
 
   private void checkBitmapIndex(List<Integer> expected, BitmapValues real)
   {
-    Assert.assertEquals("bitmap size", expected.size(), real.size());
+    Assertions.assertEquals(expected.size(), real.size(), "bitmap size");
     int i = 0;
     for (IntIterator iterator = real.iterator(); iterator.hasNext(); ) {
       int index = iterator.nextInt();
-      Assert.assertEquals(expected.get(i++), (Integer) index);
+      Assertions.assertEquals(expected.get(i++), (Integer) index);
     }
   }
 
-  @Test
-  public void testMergeWithSupersetOrdering() throws Exception
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}: metric compression={0}, dimension compression={1}, long encoding={2}, segment write-out medium={3}")
+  public void testMergeWithSupersetOrdering(@Nullable BitmapSerdeFactory bitmapSerdeFactory, CompressionStrategy compressionStrategy, CompressionStrategy dimCompressionStrategy, CompressionFactory.LongEncodingStrategy longEncodingStrategy) throws Exception
   {
+    initIndexMergerTestBase(bitmapSerdeFactory, compressionStrategy, dimCompressionStrategy, longEncodingStrategy);
     IncrementalIndex toPersistA = getSingleDimIndex("dimA", Arrays.asList("1", "2"));
     IncrementalIndex toPersistB = getSingleDimIndex("dimB", Arrays.asList("1", "2", "3"));
 
@@ -1170,13 +1197,13 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
     IncrementalIndex toPersistC = getSingleDimIndex("dimA", Arrays.asList("1", "2"));
     addDimValuesToIndex(toPersistC, "dimC", Arrays.asList("1", "2", "3"));
 
-    final File tmpDirA = temporaryFolder.newFolder();
-    final File tmpDirB = temporaryFolder.newFolder();
-    final File tmpDirBA = temporaryFolder.newFolder();
-    final File tmpDirBA2 = temporaryFolder.newFolder();
-    final File tmpDirC = temporaryFolder.newFolder();
-    final File tmpDirMerged = temporaryFolder.newFolder();
-    final File tmpDirMerged2 = temporaryFolder.newFolder();
+    final File tmpDirA = newFolder(temporaryFolder, "junit");
+    final File tmpDirB = newFolder(temporaryFolder, "junit");
+    final File tmpDirBA = newFolder(temporaryFolder, "junit");
+    final File tmpDirBA2 = newFolder(temporaryFolder, "junit");
+    final File tmpDirC = newFolder(temporaryFolder, "junit");
+    final File tmpDirMerged = newFolder(temporaryFolder, "junit");
+    final File tmpDirMerged2 = newFolder(temporaryFolder, "junit");
 
     QueryableIndex indexA = closer.closeLater(
         indexIO.loadIndex(indexMerger.persist(toPersistA, tmpDirA, indexSpec, null))
@@ -1232,23 +1259,23 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
     final QueryableIndexIndexableAdapter adapter2 = new QueryableIndexIndexableAdapter(merged2);
     final List<DebugRow> rowList2 = RowIteratorHelper.toList(adapter2.getRows());
 
-    Assert.assertEquals(ImmutableList.of("dimB", "dimA"), ImmutableList.copyOf(adapter.getDimensionNames()));
-    Assert.assertEquals(5, rowList.size());
+    Assertions.assertEquals(ImmutableList.of("dimB", "dimA"), ImmutableList.copyOf(adapter.getDimensionNames()));
+    Assertions.assertEquals(5, rowList.size());
 
-    Assert.assertEquals(Arrays.asList(null, "1"), rowList.get(0).dimensionValues());
-    Assert.assertEquals(Collections.singletonList(3L), rowList.get(0).metricValues());
+    Assertions.assertEquals(Arrays.asList(null, "1"), rowList.get(0).dimensionValues());
+    Assertions.assertEquals(Collections.singletonList(3L), rowList.get(0).metricValues());
 
-    Assert.assertEquals(Arrays.asList(null, "2"), rowList.get(1).dimensionValues());
-    Assert.assertEquals(Collections.singletonList(2L), rowList.get(1).metricValues());
+    Assertions.assertEquals(Arrays.asList(null, "2"), rowList.get(1).dimensionValues());
+    Assertions.assertEquals(Collections.singletonList(2L), rowList.get(1).metricValues());
 
-    Assert.assertEquals(Arrays.asList("1", null), rowList.get(2).dimensionValues());
-    Assert.assertEquals(Collections.singletonList(3L), rowList.get(2).metricValues());
+    Assertions.assertEquals(Arrays.asList("1", null), rowList.get(2).dimensionValues());
+    Assertions.assertEquals(Collections.singletonList(3L), rowList.get(2).metricValues());
 
-    Assert.assertEquals(Arrays.asList("2", null), rowList.get(3).dimensionValues());
-    Assert.assertEquals(Collections.singletonList(2L), rowList.get(3).metricValues());
+    Assertions.assertEquals(Arrays.asList("2", null), rowList.get(3).dimensionValues());
+    Assertions.assertEquals(Collections.singletonList(2L), rowList.get(3).metricValues());
 
-    Assert.assertEquals(Arrays.asList("3", null), rowList.get(4).dimensionValues());
-    Assert.assertEquals(Collections.singletonList(2L), rowList.get(4).metricValues());
+    Assertions.assertEquals(Arrays.asList("3", null), rowList.get(4).dimensionValues());
+    Assertions.assertEquals(Collections.singletonList(2L), rowList.get(4).metricValues());
 
     checkBitmapIndex(Arrays.asList(2, 3, 4), getBitmapIndex(adapter, "dimA", null));
     checkBitmapIndex(Collections.singletonList(0), getBitmapIndex(adapter, "dimA", "1"));
@@ -1260,37 +1287,37 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
     checkBitmapIndex(Collections.singletonList(4), getBitmapIndex(adapter, "dimB", "3"));
 
 
-    Assert.assertEquals(ImmutableList.of("dimA", "dimB", "dimC"), ImmutableList.copyOf(adapter2.getDimensionNames()));
-    Assert.assertEquals(12, rowList2.size());
-    Assert.assertEquals(Arrays.asList(null, null, "1"), rowList2.get(0).dimensionValues());
-    Assert.assertEquals(Collections.singletonList(1L), rowList2.get(0).metricValues());
-    Assert.assertEquals(Arrays.asList(null, null, "2"), rowList2.get(1).dimensionValues());
-    Assert.assertEquals(Collections.singletonList(1L), rowList2.get(1).metricValues());
+    Assertions.assertEquals(ImmutableList.of("dimA", "dimB", "dimC"), ImmutableList.copyOf(adapter2.getDimensionNames()));
+    Assertions.assertEquals(12, rowList2.size());
+    Assertions.assertEquals(Arrays.asList(null, null, "1"), rowList2.get(0).dimensionValues());
+    Assertions.assertEquals(Collections.singletonList(1L), rowList2.get(0).metricValues());
+    Assertions.assertEquals(Arrays.asList(null, null, "2"), rowList2.get(1).dimensionValues());
+    Assertions.assertEquals(Collections.singletonList(1L), rowList2.get(1).metricValues());
 
-    Assert.assertEquals(Arrays.asList(null, null, "3"), rowList2.get(2).dimensionValues());
-    Assert.assertEquals(Collections.singletonList(1L), rowList2.get(2).metricValues());
-    Assert.assertEquals(Arrays.asList(null, "1", null), rowList2.get(3).dimensionValues());
-    Assert.assertEquals(Collections.singletonList(1L), rowList2.get(3).metricValues());
+    Assertions.assertEquals(Arrays.asList(null, null, "3"), rowList2.get(2).dimensionValues());
+    Assertions.assertEquals(Collections.singletonList(1L), rowList2.get(2).metricValues());
+    Assertions.assertEquals(Arrays.asList(null, "1", null), rowList2.get(3).dimensionValues());
+    Assertions.assertEquals(Collections.singletonList(1L), rowList2.get(3).metricValues());
 
-    Assert.assertEquals(Arrays.asList(null, "2", null), rowList2.get(4).dimensionValues());
-    Assert.assertEquals(Collections.singletonList(1L), rowList2.get(4).metricValues());
-    Assert.assertEquals(Arrays.asList(null, "3", null), rowList2.get(5).dimensionValues());
-    Assert.assertEquals(Collections.singletonList(1L), rowList2.get(5).metricValues());
+    Assertions.assertEquals(Arrays.asList(null, "2", null), rowList2.get(4).dimensionValues());
+    Assertions.assertEquals(Collections.singletonList(1L), rowList2.get(4).metricValues());
+    Assertions.assertEquals(Arrays.asList(null, "3", null), rowList2.get(5).dimensionValues());
+    Assertions.assertEquals(Collections.singletonList(1L), rowList2.get(5).metricValues());
 
-    Assert.assertEquals(Arrays.asList("1", null, null), rowList2.get(6).dimensionValues());
-    Assert.assertEquals(Collections.singletonList(3L), rowList2.get(6).metricValues());
-    Assert.assertEquals(Arrays.asList("2", null, null), rowList2.get(7).dimensionValues());
-    Assert.assertEquals(Collections.singletonList(1L), rowList2.get(7).metricValues());
+    Assertions.assertEquals(Arrays.asList("1", null, null), rowList2.get(6).dimensionValues());
+    Assertions.assertEquals(Collections.singletonList(3L), rowList2.get(6).metricValues());
+    Assertions.assertEquals(Arrays.asList("2", null, null), rowList2.get(7).dimensionValues());
+    Assertions.assertEquals(Collections.singletonList(1L), rowList2.get(7).metricValues());
 
-    Assert.assertEquals(Arrays.asList(null, "1", null), rowList2.get(8).dimensionValues());
-    Assert.assertEquals(Collections.singletonList(1L), rowList2.get(8).metricValues());
-    Assert.assertEquals(Arrays.asList(null, "2", null), rowList2.get(9).dimensionValues());
-    Assert.assertEquals(Collections.singletonList(1L), rowList2.get(9).metricValues());
+    Assertions.assertEquals(Arrays.asList(null, "1", null), rowList2.get(8).dimensionValues());
+    Assertions.assertEquals(Collections.singletonList(1L), rowList2.get(8).metricValues());
+    Assertions.assertEquals(Arrays.asList(null, "2", null), rowList2.get(9).dimensionValues());
+    Assertions.assertEquals(Collections.singletonList(1L), rowList2.get(9).metricValues());
 
-    Assert.assertEquals(Arrays.asList(null, "3", null), rowList2.get(10).dimensionValues());
-    Assert.assertEquals(Collections.singletonList(1L), rowList2.get(10).metricValues());
-    Assert.assertEquals(Arrays.asList("2", null, null), rowList2.get(11).dimensionValues());
-    Assert.assertEquals(Collections.singletonList(2L), rowList2.get(11).metricValues());
+    Assertions.assertEquals(Arrays.asList(null, "3", null), rowList2.get(10).dimensionValues());
+    Assertions.assertEquals(Collections.singletonList(1L), rowList2.get(10).metricValues());
+    Assertions.assertEquals(Arrays.asList("2", null, null), rowList2.get(11).dimensionValues());
+    Assertions.assertEquals(Collections.singletonList(2L), rowList2.get(11).metricValues());
 
     checkBitmapIndex(Arrays.asList(0, 1, 2, 3, 4, 5, 8, 9, 10), getBitmapIndex(adapter2, "dimA", null));
     checkBitmapIndex(Collections.singletonList(6), getBitmapIndex(adapter2, "dimA", "1"));
@@ -1308,9 +1335,11 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
 
   }
 
-  @Test
-  public void testMismatchedDimensions() throws IOException
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}: metric compression={0}, dimension compression={1}, long encoding={2}, segment write-out medium={3}")
+  public void testMismatchedDimensions(@Nullable BitmapSerdeFactory bitmapSerdeFactory, CompressionStrategy compressionStrategy, CompressionStrategy dimCompressionStrategy, CompressionFactory.LongEncodingStrategy longEncodingStrategy) throws IOException
   {
+    initIndexMergerTestBase(bitmapSerdeFactory, compressionStrategy, dimCompressionStrategy, longEncodingStrategy);
     IncrementalIndex index1 = IncrementalIndexTest.createIndex(new AggregatorFactory[]{
         new LongSumAggregatorFactory("A", "A")
     });
@@ -1341,7 +1370,7 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
         new IncrementalIndexAdapter(interval, index2, factory)
     );
 
-    final File tmpDirMerged = temporaryFolder.newFolder();
+    final File tmpDirMerged = newFolder(temporaryFolder, "junit");
 
     indexMerger.merge(
         toMerge,
@@ -1357,9 +1386,11 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
     );
   }
 
-  @Test
-  public void testAddMetrics() throws IOException
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}: metric compression={0}, dimension compression={1}, long encoding={2}, segment write-out medium={3}")
+  public void testAddMetrics(@Nullable BitmapSerdeFactory bitmapSerdeFactory, CompressionStrategy compressionStrategy, CompressionStrategy dimCompressionStrategy, CompressionFactory.LongEncodingStrategy longEncodingStrategy) throws IOException
   {
+    initIndexMergerTestBase(bitmapSerdeFactory, compressionStrategy, dimCompressionStrategy, longEncodingStrategy);
     IncrementalIndex index1 = IncrementalIndexTest.createIndex(new AggregatorFactory[]{
         new LongSumAggregatorFactory("A", "A")
     });
@@ -1395,7 +1426,7 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
 
     );
 
-    final File tmpDirMerged = temporaryFolder.newFolder();
+    final File tmpDirMerged = newFolder(temporaryFolder, "junit");
 
     File merged = indexMerger.merge(
         toMerge,
@@ -1408,13 +1439,15 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
     );
     final QueryableIndexStorageAdapter adapter = new QueryableIndexStorageAdapter(closer.closeLater(indexIO.loadIndex(
         merged)));
-    Assert.assertEquals(ImmutableSet.of("A", "C"), ImmutableSet.copyOf(adapter.getAvailableMetrics()));
+    Assertions.assertEquals(ImmutableSet.of("A", "C"), ImmutableSet.copyOf(adapter.getAvailableMetrics()));
 
   }
 
-  @Test
-  public void testAddMetricsBothSidesNull() throws IOException
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}: metric compression={0}, dimension compression={1}, long encoding={2}, segment write-out medium={3}")
+  public void testAddMetricsBothSidesNull(@Nullable BitmapSerdeFactory bitmapSerdeFactory, CompressionStrategy compressionStrategy, CompressionStrategy dimCompressionStrategy, CompressionFactory.LongEncodingStrategy longEncodingStrategy) throws IOException
   {
+    initIndexMergerTestBase(bitmapSerdeFactory, compressionStrategy, dimCompressionStrategy, longEncodingStrategy);
     IncrementalIndex index1 = IncrementalIndexTest.createIndex(new AggregatorFactory[]{
         new LongSumAggregatorFactory("A", "A")
     });
@@ -1464,7 +1497,7 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
         new IncrementalIndexAdapter(interval, index3, factory)
     );
 
-    final File tmpDirMerged = temporaryFolder.newFolder();
+    final File tmpDirMerged = newFolder(temporaryFolder, "junit");
 
     File merged = indexMerger.merge(
         toMerge,
@@ -1480,13 +1513,15 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
     );
     final QueryableIndexStorageAdapter adapter = new QueryableIndexStorageAdapter(closer.closeLater(indexIO.loadIndex(
         merged)));
-    Assert.assertEquals(ImmutableSet.of("A", "C"), ImmutableSet.copyOf(adapter.getAvailableMetrics()));
+    Assertions.assertEquals(ImmutableSet.of("A", "C"), ImmutableSet.copyOf(adapter.getAvailableMetrics()));
 
   }
 
-  @Test
-  public void testMismatchedMetrics() throws IOException
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}: metric compression={0}, dimension compression={1}, long encoding={2}, segment write-out medium={3}")
+  public void testMismatchedMetrics(@Nullable BitmapSerdeFactory bitmapSerdeFactory, CompressionStrategy compressionStrategy, CompressionStrategy dimCompressionStrategy, CompressionFactory.LongEncodingStrategy longEncodingStrategy) throws IOException
   {
+    initIndexMergerTestBase(bitmapSerdeFactory, compressionStrategy, dimCompressionStrategy, longEncodingStrategy);
     IncrementalIndex index1 = IncrementalIndexTest.createIndex(new AggregatorFactory[]{
         new LongSumAggregatorFactory("A", "A")
     });
@@ -1527,7 +1562,7 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
         new IncrementalIndexAdapter(interval, index5, factory)
     );
 
-    final File tmpDirMerged = temporaryFolder.newFolder();
+    final File tmpDirMerged = newFolder(temporaryFolder, "junit");
 
     File merged = indexMerger.merge(
         toMerge,
@@ -1547,63 +1582,69 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
     // Since D was not present in any of the indices, it is not present in the output
     final QueryableIndexStorageAdapter adapter = new QueryableIndexStorageAdapter(closer.closeLater(indexIO.loadIndex(
         merged)));
-    Assert.assertEquals(ImmutableSet.of("A", "B", "C"), ImmutableSet.copyOf(adapter.getAvailableMetrics()));
+    Assertions.assertEquals(ImmutableSet.of("A", "B", "C"), ImmutableSet.copyOf(adapter.getAvailableMetrics()));
 
   }
 
-  @Test(expected = IAE.class)
-  public void testMismatchedMetricsVarying() throws IOException
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}: metric compression={0}, dimension compression={1}, long encoding={2}, segment write-out medium={3}")
+  public void testMismatchedMetricsVarying(@Nullable BitmapSerdeFactory bitmapSerdeFactory, CompressionStrategy compressionStrategy, CompressionStrategy dimCompressionStrategy, CompressionFactory.LongEncodingStrategy longEncodingStrategy) throws IOException
   {
+    initIndexMergerTestBase(bitmapSerdeFactory, compressionStrategy, dimCompressionStrategy, longEncodingStrategy);
+    assertThrows(IAE.class, () -> {
 
-    IncrementalIndex index2 = IncrementalIndexTest.createIndex(new AggregatorFactory[]{
-        new LongSumAggregatorFactory("A", "A"),
-        new LongSumAggregatorFactory("C", "C")
+      IncrementalIndex index2 = IncrementalIndexTest.createIndex(new AggregatorFactory[]{
+          new LongSumAggregatorFactory("A", "A"),
+          new LongSumAggregatorFactory("C", "C")
+      });
+      closer.closeLater(index2);
+
+      IncrementalIndex index5 = IncrementalIndexTest.createIndex(new AggregatorFactory[]{
+          new LongSumAggregatorFactory("C", "C"),
+          new LongSumAggregatorFactory("B", "B")
+      });
+      closer.closeLater(index5);
+
+
+      Interval interval = new Interval(DateTimes.EPOCH, DateTimes.nowUtc());
+      RoaringBitmapFactory factory = new RoaringBitmapFactory();
+      List<IndexableAdapter> toMerge = Collections.singletonList(
+          new IncrementalIndexAdapter(interval, index2, factory)
+      );
+
+      final File tmpDirMerged = newFolder(temporaryFolder, "junit");
+
+      final File merged = indexMerger.merge(
+          toMerge,
+          true,
+          new AggregatorFactory[]{
+              new LongSumAggregatorFactory("B", "B"),
+              new LongSumAggregatorFactory("A", "A"),
+              new LongSumAggregatorFactory("D", "D")
+          },
+          tmpDirMerged,
+          null,
+          indexSpec,
+          -1
+      );
+      final QueryableIndexStorageAdapter adapter = new QueryableIndexStorageAdapter(
+          closer.closeLater(indexIO.loadIndex(merged))
+      );
+      Assertions.assertEquals(ImmutableSet.of("A", "B", "C"), ImmutableSet.copyOf(adapter.getAvailableMetrics()));
     });
-    closer.closeLater(index2);
-
-    IncrementalIndex index5 = IncrementalIndexTest.createIndex(new AggregatorFactory[]{
-        new LongSumAggregatorFactory("C", "C"),
-        new LongSumAggregatorFactory("B", "B")
-    });
-    closer.closeLater(index5);
-
-
-    Interval interval = new Interval(DateTimes.EPOCH, DateTimes.nowUtc());
-    RoaringBitmapFactory factory = new RoaringBitmapFactory();
-    List<IndexableAdapter> toMerge = Collections.singletonList(
-        new IncrementalIndexAdapter(interval, index2, factory)
-    );
-
-    final File tmpDirMerged = temporaryFolder.newFolder();
-
-    final File merged = indexMerger.merge(
-        toMerge,
-        true,
-        new AggregatorFactory[]{
-            new LongSumAggregatorFactory("B", "B"),
-            new LongSumAggregatorFactory("A", "A"),
-            new LongSumAggregatorFactory("D", "D")
-        },
-        tmpDirMerged,
-        null,
-        indexSpec,
-        -1
-    );
-    final QueryableIndexStorageAdapter adapter = new QueryableIndexStorageAdapter(
-        closer.closeLater(indexIO.loadIndex(merged))
-    );
-    Assert.assertEquals(ImmutableSet.of("A", "B", "C"), ImmutableSet.copyOf(adapter.getAvailableMetrics()));
   }
 
-  @Test
-  public void testMergeNumericDims() throws Exception
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}: metric compression={0}, dimension compression={1}, long encoding={2}, segment write-out medium={3}")
+  public void testMergeNumericDims(@Nullable BitmapSerdeFactory bitmapSerdeFactory, CompressionStrategy compressionStrategy, CompressionStrategy dimCompressionStrategy, CompressionFactory.LongEncodingStrategy longEncodingStrategy) throws Exception
   {
+    initIndexMergerTestBase(bitmapSerdeFactory, compressionStrategy, dimCompressionStrategy, longEncodingStrategy);
     IncrementalIndex toPersist1 = getIndexWithNumericDims();
     IncrementalIndex toPersist2 = getIndexWithNumericDims();
 
-    final File tmpDir = temporaryFolder.newFolder();
-    final File tmpDir2 = temporaryFolder.newFolder();
-    final File tmpDirMerged = temporaryFolder.newFolder();
+    final File tmpDir = newFolder(temporaryFolder, "junit");
+    final File tmpDir2 = newFolder(temporaryFolder, "junit");
+    final File tmpDirMerged = newFolder(temporaryFolder, "junit");
 
     QueryableIndex index1 = closer.closeLater(
         indexIO.loadIndex(indexMerger.persist(toPersist1, tmpDir, indexSpec, null))
@@ -1630,10 +1671,10 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
     final IndexableAdapter adapter = new QueryableIndexIndexableAdapter(merged);
     final List<DebugRow> rowList = RowIteratorHelper.toList(adapter.getRows());
 
-    Assert.assertEquals(ImmutableList.of("dimA", "dimB", "dimC"), ImmutableList.copyOf(adapter.getDimensionNames()));
-    Assert.assertEquals(4, rowList.size());
+    Assertions.assertEquals(ImmutableList.of("dimA", "dimB", "dimC"), ImmutableList.copyOf(adapter.getDimensionNames()));
+    Assertions.assertEquals(4, rowList.size());
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         Arrays.asList(
             NullHandling.defaultLongValue(),
             NullHandling.defaultFloatValue(),
@@ -1641,16 +1682,16 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
         ),
         rowList.get(0).dimensionValues()
     );
-    Assert.assertEquals(Collections.singletonList(2L), rowList.get(0).metricValues());
+    Assertions.assertEquals(Collections.singletonList(2L), rowList.get(0).metricValues());
 
-    Assert.assertEquals(Arrays.asList(72L, 60000.789f, "World"), rowList.get(1).dimensionValues());
-    Assert.assertEquals(Collections.singletonList(2L), rowList.get(0).metricValues());
+    Assertions.assertEquals(Arrays.asList(72L, 60000.789f, "World"), rowList.get(1).dimensionValues());
+    Assertions.assertEquals(Collections.singletonList(2L), rowList.get(0).metricValues());
 
-    Assert.assertEquals(Arrays.asList(100L, 4000.567f, "Hello"), rowList.get(2).dimensionValues());
-    Assert.assertEquals(Collections.singletonList(2L), rowList.get(1).metricValues());
+    Assertions.assertEquals(Arrays.asList(100L, 4000.567f, "Hello"), rowList.get(2).dimensionValues());
+    Assertions.assertEquals(Collections.singletonList(2L), rowList.get(1).metricValues());
 
-    Assert.assertEquals(Arrays.asList(3001L, 1.2345f, "Foobar"), rowList.get(3).dimensionValues());
-    Assert.assertEquals(Collections.singletonList(2L), rowList.get(2).metricValues());
+    Assertions.assertEquals(Arrays.asList(3001L, 1.2345f, "Foobar"), rowList.get(3).dimensionValues());
+    Assertions.assertEquals(Collections.singletonList(2L), rowList.get(2).metricValues());
   }
 
   private IncrementalIndex getIndexWithNumericDims() throws Exception
@@ -1712,9 +1753,11 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
   }
 
 
-  @Test
-  public void testPersistNullColumnSkipping() throws Exception
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}: metric compression={0}, dimension compression={1}, long encoding={2}, segment write-out medium={3}")
+  public void testPersistNullColumnSkipping(@Nullable BitmapSerdeFactory bitmapSerdeFactory, CompressionStrategy compressionStrategy, CompressionStrategy dimCompressionStrategy, CompressionFactory.LongEncodingStrategy longEncodingStrategy) throws Exception
   {
+    initIndexMergerTestBase(bitmapSerdeFactory, compressionStrategy, dimCompressionStrategy, longEncodingStrategy);
     //check that column d2 is skipped because it only has null values
     IncrementalIndex index1 = IncrementalIndexTest.createIndex(new AggregatorFactory[]{
         new LongSumAggregatorFactory("A", "A")
@@ -1731,7 +1774,7 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
         ImmutableMap.of("d1", "b", "A", 1)
     ));
 
-    final File tempDir = temporaryFolder.newFolder();
+    final File tempDir = newFolder(temporaryFolder, "junit");
     QueryableIndex index = closer.closeLater(
         indexIO.loadIndex(indexMerger.persist(index1, tempDir, indexSpec, null))
     );
@@ -1739,14 +1782,14 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
     List<String> actualColumnNames = Lists.newArrayList(index.getColumnNames());
     Collections.sort(expectedColumnNames);
     Collections.sort(actualColumnNames);
-    Assert.assertEquals(expectedColumnNames, actualColumnNames);
+    Assertions.assertEquals(expectedColumnNames, actualColumnNames);
 
     SmooshedFileMapper sfm = closer.closeLater(SmooshedFileMapper.load(tempDir));
     List<String> expectedFilenames = Arrays.asList("A", "__time", "d1", "index.drd", "metadata.drd");
     List<String> actualFilenames = new ArrayList<>(sfm.getInternalFilenames());
     Collections.sort(expectedFilenames);
     Collections.sort(actualFilenames);
-    Assert.assertEquals(expectedFilenames, actualFilenames);
+    Assertions.assertEquals(expectedFilenames, actualFilenames);
   }
 
 
@@ -1824,9 +1867,11 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
     return combiningAggregators;
   }
 
-  @Test
-  public void testMultiValueHandling() throws Exception
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}: metric compression={0}, dimension compression={1}, long encoding={2}, segment write-out medium={3}")
+  public void testMultiValueHandling(@Nullable BitmapSerdeFactory bitmapSerdeFactory, CompressionStrategy compressionStrategy, CompressionStrategy dimCompressionStrategy, CompressionFactory.LongEncodingStrategy longEncodingStrategy) throws Exception
   {
+    initIndexMergerTestBase(bitmapSerdeFactory, compressionStrategy, dimCompressionStrategy, longEncodingStrategy);
     InputRow[] rows = new InputRow[]{
         new MapBasedInputRow(
             1,
@@ -1857,22 +1902,22 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
     adapter = new QueryableIndexIndexableAdapter(index);
     rowList = RowIteratorHelper.toList(adapter.getRows());
 
-    Assert.assertEquals(2, index.getColumnHolder(ColumnHolder.TIME_COLUMN_NAME).getLength());
-    Assert.assertEquals(Arrays.asList("dim1", "dim2"), Lists.newArrayList(index.getAvailableDimensions()));
-    Assert.assertEquals(3, index.getColumnNames().size());
+    Assertions.assertEquals(2, index.getColumnHolder(ColumnHolder.TIME_COLUMN_NAME).getLength());
+    Assertions.assertEquals(Arrays.asList("dim1", "dim2"), Lists.newArrayList(index.getAvailableDimensions()));
+    Assertions.assertEquals(3, index.getColumnNames().size());
 
-    Assert.assertEquals(2, rowList.size());
-    Assert.assertEquals(
+    Assertions.assertEquals(2, rowList.size());
+    Assertions.assertEquals(
         Arrays.asList(Arrays.asList("a", "a", "b", "x"), Arrays.asList("a", "b", "x", "x")),
         rowList.get(0).dimensionValues()
     );
-    Assert.assertEquals(
+    Assertions.assertEquals(
         Arrays.asList(Arrays.asList("a", "b", "x"), Arrays.asList("a", "b", "x")),
         rowList.get(1).dimensionValues()
     );
 
-    Assert.assertEquals(useBitmapIndexes, adapter.getCapabilities("dim1").hasBitmapIndexes());
-    Assert.assertEquals(useBitmapIndexes, adapter.getCapabilities("dim2").hasBitmapIndexes());
+    Assertions.assertEquals(useBitmapIndexes, adapter.getCapabilities("dim1").hasBitmapIndexes());
+    Assertions.assertEquals(useBitmapIndexes, adapter.getCapabilities("dim2").hasBitmapIndexes());
 
     if (useBitmapIndexes) {
       checkBitmapIndex(Collections.emptyList(), getBitmapIndex(adapter, "dim1", null));
@@ -1889,21 +1934,21 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
     schema = makeDimensionSchemas(Arrays.asList("dim1", "dim2"), MultiValueHandling.SORTED_SET);
     index = persistAndLoad(schema, rows);
 
-    Assert.assertEquals(1, index.getColumnHolder(ColumnHolder.TIME_COLUMN_NAME).getLength());
-    Assert.assertEquals(Arrays.asList("dim1", "dim2"), Lists.newArrayList(index.getAvailableDimensions()));
-    Assert.assertEquals(3, index.getColumnNames().size());
+    Assertions.assertEquals(1, index.getColumnHolder(ColumnHolder.TIME_COLUMN_NAME).getLength());
+    Assertions.assertEquals(Arrays.asList("dim1", "dim2"), Lists.newArrayList(index.getAvailableDimensions()));
+    Assertions.assertEquals(3, index.getColumnNames().size());
 
     adapter = new QueryableIndexIndexableAdapter(index);
     rowList = RowIteratorHelper.toList(adapter.getRows());
 
-    Assert.assertEquals(1, rowList.size());
-    Assert.assertEquals(
+    Assertions.assertEquals(1, rowList.size());
+    Assertions.assertEquals(
         Arrays.asList(Arrays.asList("a", "b", "x"), Arrays.asList("a", "b", "x")),
         rowList.get(0).dimensionValues()
     );
 
-    Assert.assertEquals(useBitmapIndexes, adapter.getCapabilities("dim1").hasBitmapIndexes());
-    Assert.assertEquals(useBitmapIndexes, adapter.getCapabilities("dim2").hasBitmapIndexes());
+    Assertions.assertEquals(useBitmapIndexes, adapter.getCapabilities("dim1").hasBitmapIndexes());
+    Assertions.assertEquals(useBitmapIndexes, adapter.getCapabilities("dim2").hasBitmapIndexes());
 
     if (useBitmapIndexes) {
       checkBitmapIndex(Collections.emptyList(), getBitmapIndex(adapter, "dim1", null));
@@ -1920,25 +1965,25 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
     schema = makeDimensionSchemas(Arrays.asList("dim1", "dim2"), MultiValueHandling.ARRAY);
     index = persistAndLoad(schema, rows);
 
-    Assert.assertEquals(2, index.getColumnHolder(ColumnHolder.TIME_COLUMN_NAME).getLength());
-    Assert.assertEquals(Arrays.asList("dim1", "dim2"), Lists.newArrayList(index.getAvailableDimensions()));
-    Assert.assertEquals(3, index.getColumnNames().size());
+    Assertions.assertEquals(2, index.getColumnHolder(ColumnHolder.TIME_COLUMN_NAME).getLength());
+    Assertions.assertEquals(Arrays.asList("dim1", "dim2"), Lists.newArrayList(index.getAvailableDimensions()));
+    Assertions.assertEquals(3, index.getColumnNames().size());
 
     adapter = new QueryableIndexIndexableAdapter(index);
     rowList = RowIteratorHelper.toList(adapter.getRows());
 
-    Assert.assertEquals(2, rowList.size());
-    Assert.assertEquals(
+    Assertions.assertEquals(2, rowList.size());
+    Assertions.assertEquals(
         Arrays.asList(Arrays.asList("a", "b", "x"), Arrays.asList("x", "a", "b")),
         rowList.get(0).dimensionValues()
     );
-    Assert.assertEquals(
+    Assertions.assertEquals(
         Arrays.asList(Arrays.asList("x", "a", "a", "b"), Arrays.asList("a", "x", "b", "x")),
         rowList.get(1).dimensionValues()
     );
 
-    Assert.assertEquals(useBitmapIndexes, adapter.getCapabilities("dim1").hasBitmapIndexes());
-    Assert.assertEquals(useBitmapIndexes, adapter.getCapabilities("dim2").hasBitmapIndexes());
+    Assertions.assertEquals(useBitmapIndexes, adapter.getCapabilities("dim1").hasBitmapIndexes());
+    Assertions.assertEquals(useBitmapIndexes, adapter.getCapabilities("dim2").hasBitmapIndexes());
 
     if (useBitmapIndexes) {
       checkBitmapIndex(Collections.emptyList(), getBitmapIndex(adapter, "dim1", null));
@@ -1952,9 +1997,11 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
     }
   }
 
-  @Test
-  public void testDimensionWithEmptyName() throws Exception
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}: metric compression={0}, dimension compression={1}, long encoding={2}, segment write-out medium={3}")
+  public void testDimensionWithEmptyName(@Nullable BitmapSerdeFactory bitmapSerdeFactory, CompressionStrategy compressionStrategy, CompressionStrategy dimCompressionStrategy, CompressionFactory.LongEncodingStrategy longEncodingStrategy) throws Exception
   {
+    initIndexMergerTestBase(bitmapSerdeFactory, compressionStrategy, dimCompressionStrategy, longEncodingStrategy);
     final long timestamp = System.currentTimeMillis();
 
     IncrementalIndex toPersist = IncrementalIndexTest.createIndex(null);
@@ -1965,7 +2012,7 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
         ImmutableMap.of("", "1", "dim2", "2")
     ));
 
-    final File tempDir = temporaryFolder.newFolder();
+    final File tempDir = newFolder(temporaryFolder, "junit");
     QueryableIndex index = closer.closeLater(
         indexIO.loadIndex(
             indexMerger.persist(
@@ -1977,29 +2024,31 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
         )
     );
 
-    Assert.assertEquals(3, index.getColumnHolder(ColumnHolder.TIME_COLUMN_NAME).getLength());
-    Assert.assertEquals(
+    Assertions.assertEquals(3, index.getColumnHolder(ColumnHolder.TIME_COLUMN_NAME).getLength());
+    Assertions.assertEquals(
         Arrays.asList("dim1", "dim2"),
         Lists.newArrayList(index.getAvailableDimensions())
     );
-    Assert.assertEquals(3, index.getColumnNames().size());
+    Assertions.assertEquals(3, index.getColumnNames().size());
 
     assertDimCompression(index, indexSpec.getDimensionCompression());
 
-    Assert.assertArrayEquals(
+    Assertions.assertArrayEquals(
         IncrementalIndexTest.getDefaultCombiningAggregatorFactories(),
         index.getMetadata().getAggregators()
     );
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         Granularities.NONE,
         index.getMetadata().getQueryGranularity()
     );
   }
 
-  @Test
-  public void testMultivalDim_mergeAcrossSegments_rollupWorks() throws Exception
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}: metric compression={0}, dimension compression={1}, long encoding={2}, segment write-out medium={3}")
+  public void testMultivalDim_mergeAcrossSegments_rollupWorks(@Nullable BitmapSerdeFactory bitmapSerdeFactory, CompressionStrategy compressionStrategy, CompressionStrategy dimCompressionStrategy, CompressionFactory.LongEncodingStrategy longEncodingStrategy) throws Exception
   {
+    initIndexMergerTestBase(bitmapSerdeFactory, compressionStrategy, dimCompressionStrategy, longEncodingStrategy);
     List<String> dims = Arrays.asList(
         "dimA",
         "dimMultiVal"
@@ -2056,9 +2105,9 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
     toPersistB.add(new MapBasedInputRow(1, dims, event3));
     toPersistB.add(new MapBasedInputRow(1, dims, event4));
 
-    final File tmpDirA = temporaryFolder.newFolder();
-    final File tmpDirB = temporaryFolder.newFolder();
-    final File tmpDirMerged = temporaryFolder.newFolder();
+    final File tmpDirA = newFolder(temporaryFolder, "junit");
+    final File tmpDirB = newFolder(temporaryFolder, "junit");
+    final File tmpDirMerged = newFolder(temporaryFolder, "junit");
 
     QueryableIndex indexA = closer.closeLater(
         indexIO.loadIndex(indexMerger.persist(toPersistA, tmpDirA, indexSpec, null))
@@ -2087,18 +2136,18 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
     final QueryableIndexIndexableAdapter adapter = new QueryableIndexIndexableAdapter(merged);
     final List<DebugRow> rowList = RowIteratorHelper.toList(adapter.getRows());
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         ImmutableList.of("dimA", "dimMultiVal"),
         ImmutableList.copyOf(adapter.getDimensionNames())
     );
 
-    Assert.assertEquals(3, rowList.size());
-    Assert.assertEquals(Arrays.asList("leek", Arrays.asList("1", "2", "3", "5")), rowList.get(0).dimensionValues());
-    Assert.assertEquals(1L, rowList.get(0).metricValues().get(0));
-    Assert.assertEquals(Arrays.asList("leek", Arrays.asList("1", "2", "4")), rowList.get(1).dimensionValues());
-    Assert.assertEquals(2L, rowList.get(1).metricValues().get(0));
-    Assert.assertEquals(Arrays.asList("potato", Arrays.asList("0", "1", "4")), rowList.get(2).dimensionValues());
-    Assert.assertEquals(1L, rowList.get(2).metricValues().get(0));
+    Assertions.assertEquals(3, rowList.size());
+    Assertions.assertEquals(Arrays.asList("leek", Arrays.asList("1", "2", "3", "5")), rowList.get(0).dimensionValues());
+    Assertions.assertEquals(1L, rowList.get(0).metricValues().get(0));
+    Assertions.assertEquals(Arrays.asList("leek", Arrays.asList("1", "2", "4")), rowList.get(1).dimensionValues());
+    Assertions.assertEquals(2L, rowList.get(1).metricValues().get(0));
+    Assertions.assertEquals(Arrays.asList("potato", Arrays.asList("0", "1", "4")), rowList.get(2).dimensionValues());
+    Assertions.assertEquals(1L, rowList.get(2).metricValues().get(0));
 
     checkBitmapIndex(Arrays.asList(0, 1), getBitmapIndex(adapter, "dimA", "leek"));
     checkBitmapIndex(Collections.singletonList(2), getBitmapIndex(adapter, "dimA", "potato"));
@@ -2112,9 +2161,11 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
   }
 
 
-  @Test
-  public void testMultivalDim_persistAndMerge_dimensionValueOrderingRules() throws Exception
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}: metric compression={0}, dimension compression={1}, long encoding={2}, segment write-out medium={3}")
+  public void testMultivalDim_persistAndMerge_dimensionValueOrderingRules(@Nullable BitmapSerdeFactory bitmapSerdeFactory, CompressionStrategy compressionStrategy, CompressionStrategy dimCompressionStrategy, CompressionFactory.LongEncodingStrategy longEncodingStrategy) throws Exception
   {
+    initIndexMergerTestBase(bitmapSerdeFactory, compressionStrategy, dimCompressionStrategy, longEncodingStrategy);
     List<String> dims = Arrays.asList(
         "dimA",
         "dimMultiVal"
@@ -2276,7 +2327,7 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
       toPersistA.add(new MapBasedInputRow(1, dims, event));
     }
 
-    final File tmpDirA = temporaryFolder.newFolder();
+    final File tmpDirA = newFolder(temporaryFolder, "junit");
     QueryableIndex indexA = closer.closeLater(
         indexIO.loadIndex(indexMerger.persist(toPersistA, tmpDirA, indexSpec, null))
     );
@@ -2289,7 +2340,7 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
           .build();
 
       toPersist.add(new MapBasedInputRow(1, dims, event));
-      final File tmpDir = temporaryFolder.newFolder();
+      final File tmpDir = newFolder(temporaryFolder, "junit");
       QueryableIndex queryableIndex = closer.closeLater(
           indexIO.loadIndex(indexMerger.persist(toPersist, tmpDir, indexSpec, null))
       );
@@ -2297,7 +2348,7 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
     }
     singleEventIndexes.add(indexA);
 
-    final File tmpDirMerged = temporaryFolder.newFolder();
+    final File tmpDirMerged = newFolder(temporaryFolder, "junit");
     final QueryableIndex merged = closer.closeLater(
         indexIO.loadIndex(
             indexMerger.mergeQueryableIndex(
@@ -2317,46 +2368,46 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
     final QueryableIndexIndexableAdapter adapter = new QueryableIndexIndexableAdapter(merged);
     final List<DebugRow> rowList = RowIteratorHelper.toList(adapter.getRows());
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         ImmutableList.of("dimA", "dimMultiVal"),
         ImmutableList.copyOf(adapter.getDimensionNames())
     );
 
     if (NullHandling.replaceWithDefault()) {
-      Assert.assertEquals(11, rowList.size());
+      Assertions.assertEquals(11, rowList.size());
 
-      Assert.assertEquals(Arrays.asList("leek", null), rowList.get(0).dimensionValues());
-      Assert.assertEquals(12L, rowList.get(0).metricValues().get(0));
+      Assertions.assertEquals(Arrays.asList("leek", null), rowList.get(0).dimensionValues());
+      Assertions.assertEquals(12L, rowList.get(0).metricValues().get(0));
 
-      Assert.assertEquals(Arrays.asList("leek", Arrays.asList(null, "1", "2", "3")), rowList.get(1).dimensionValues());
-      Assert.assertEquals(4L, rowList.get(1).metricValues().get(0));
+      Assertions.assertEquals(Arrays.asList("leek", Arrays.asList(null, "1", "2", "3")), rowList.get(1).dimensionValues());
+      Assertions.assertEquals(4L, rowList.get(1).metricValues().get(0));
 
-      Assert.assertEquals(Arrays.asList("leek", Arrays.asList(null, "3")), rowList.get(2).dimensionValues());
-      Assert.assertEquals(4L, rowList.get(2).metricValues().get(0));
+      Assertions.assertEquals(Arrays.asList("leek", Arrays.asList(null, "3")), rowList.get(2).dimensionValues());
+      Assertions.assertEquals(4L, rowList.get(2).metricValues().get(0));
 
-      Assert.assertEquals(Arrays.asList("leek", "1"), rowList.get(3).dimensionValues());
-      Assert.assertEquals(4L, rowList.get(3).metricValues().get(0));
+      Assertions.assertEquals(Arrays.asList("leek", "1"), rowList.get(3).dimensionValues());
+      Assertions.assertEquals(4L, rowList.get(3).metricValues().get(0));
 
-      Assert.assertEquals(Arrays.asList("leek", Arrays.asList("1", "2", "3")), rowList.get(4).dimensionValues());
-      Assert.assertEquals(2L, rowList.get(4).metricValues().get(0));
+      Assertions.assertEquals(Arrays.asList("leek", Arrays.asList("1", "2", "3")), rowList.get(4).dimensionValues());
+      Assertions.assertEquals(2L, rowList.get(4).metricValues().get(0));
 
-      Assert.assertEquals(Arrays.asList("leek", Arrays.asList("1", "3")), rowList.get(5).dimensionValues());
-      Assert.assertEquals(2L, rowList.get(5).metricValues().get(0));
+      Assertions.assertEquals(Arrays.asList("leek", Arrays.asList("1", "3")), rowList.get(5).dimensionValues());
+      Assertions.assertEquals(2L, rowList.get(5).metricValues().get(0));
 
-      Assert.assertEquals(Arrays.asList("leek", Arrays.asList("1", "3", "5")), rowList.get(6).dimensionValues());
-      Assert.assertEquals(2L, rowList.get(6).metricValues().get(0));
+      Assertions.assertEquals(Arrays.asList("leek", Arrays.asList("1", "3", "5")), rowList.get(6).dimensionValues());
+      Assertions.assertEquals(2L, rowList.get(6).metricValues().get(0));
 
-      Assert.assertEquals(Arrays.asList("leek", Arrays.asList("1", "4")), rowList.get(7).dimensionValues());
-      Assert.assertEquals(2L, rowList.get(7).metricValues().get(0));
+      Assertions.assertEquals(Arrays.asList("leek", Arrays.asList("1", "4")), rowList.get(7).dimensionValues());
+      Assertions.assertEquals(2L, rowList.get(7).metricValues().get(0));
 
-      Assert.assertEquals(Arrays.asList("leek", "2"), rowList.get(8).dimensionValues());
-      Assert.assertEquals(4L, rowList.get(8).metricValues().get(0));
+      Assertions.assertEquals(Arrays.asList("leek", "2"), rowList.get(8).dimensionValues());
+      Assertions.assertEquals(4L, rowList.get(8).metricValues().get(0));
 
-      Assert.assertEquals(Arrays.asList("potato", Arrays.asList("1", "3")), rowList.get(9).dimensionValues());
-      Assert.assertEquals(2L, rowList.get(9).metricValues().get(0));
+      Assertions.assertEquals(Arrays.asList("potato", Arrays.asList("1", "3")), rowList.get(9).dimensionValues());
+      Assertions.assertEquals(2L, rowList.get(9).metricValues().get(0));
 
-      Assert.assertEquals(Arrays.asList("potato", "2"), rowList.get(10).dimensionValues());
-      Assert.assertEquals(4L, rowList.get(10).metricValues().get(0));
+      Assertions.assertEquals(Arrays.asList("potato", "2"), rowList.get(10).dimensionValues());
+      Assertions.assertEquals(4L, rowList.get(10).metricValues().get(0));
 
       checkBitmapIndex(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8), getBitmapIndex(adapter, "dimA", "leek"));
       checkBitmapIndex(Arrays.asList(9, 10), getBitmapIndex(adapter, "dimA", "potato"));
@@ -2369,49 +2420,49 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
       checkBitmapIndex(Collections.singletonList(7), getBitmapIndex(adapter, "dimMultiVal", "4"));
       checkBitmapIndex(Collections.singletonList(6), getBitmapIndex(adapter, "dimMultiVal", "5"));
     } else {
-      Assert.assertEquals(14, rowList.size());
+      Assertions.assertEquals(14, rowList.size());
 
-      Assert.assertEquals(Arrays.asList("leek", null), rowList.get(0).dimensionValues());
-      Assert.assertEquals(8L, rowList.get(0).metricValues().get(0));
+      Assertions.assertEquals(Arrays.asList("leek", null), rowList.get(0).dimensionValues());
+      Assertions.assertEquals(8L, rowList.get(0).metricValues().get(0));
 
-      Assert.assertEquals(Arrays.asList("leek", Arrays.asList(null, "1", "2", "3")), rowList.get(1).dimensionValues());
-      Assert.assertEquals(2L, rowList.get(1).metricValues().get(0));
+      Assertions.assertEquals(Arrays.asList("leek", Arrays.asList(null, "1", "2", "3")), rowList.get(1).dimensionValues());
+      Assertions.assertEquals(2L, rowList.get(1).metricValues().get(0));
 
-      Assert.assertEquals(Arrays.asList("leek", Arrays.asList(null, "3")), rowList.get(2).dimensionValues());
-      Assert.assertEquals(2L, rowList.get(2).metricValues().get(0));
+      Assertions.assertEquals(Arrays.asList("leek", Arrays.asList(null, "3")), rowList.get(2).dimensionValues());
+      Assertions.assertEquals(2L, rowList.get(2).metricValues().get(0));
 
-      Assert.assertEquals(Arrays.asList("leek", ""), rowList.get(3).dimensionValues());
-      Assert.assertEquals(4L, rowList.get(3).metricValues().get(0));
+      Assertions.assertEquals(Arrays.asList("leek", ""), rowList.get(3).dimensionValues());
+      Assertions.assertEquals(4L, rowList.get(3).metricValues().get(0));
 
-      Assert.assertEquals(Arrays.asList("leek", Arrays.asList("", "1", "2", "3")), rowList.get(4).dimensionValues());
-      Assert.assertEquals(2L, rowList.get(4).metricValues().get(0));
+      Assertions.assertEquals(Arrays.asList("leek", Arrays.asList("", "1", "2", "3")), rowList.get(4).dimensionValues());
+      Assertions.assertEquals(2L, rowList.get(4).metricValues().get(0));
 
-      Assert.assertEquals(Arrays.asList("leek", Arrays.asList("", "3")), rowList.get(5).dimensionValues());
-      Assert.assertEquals(2L, rowList.get(5).metricValues().get(0));
+      Assertions.assertEquals(Arrays.asList("leek", Arrays.asList("", "3")), rowList.get(5).dimensionValues());
+      Assertions.assertEquals(2L, rowList.get(5).metricValues().get(0));
 
-      Assert.assertEquals(Arrays.asList("leek", "1"), rowList.get(6).dimensionValues());
-      Assert.assertEquals(4L, rowList.get(6).metricValues().get(0));
+      Assertions.assertEquals(Arrays.asList("leek", "1"), rowList.get(6).dimensionValues());
+      Assertions.assertEquals(4L, rowList.get(6).metricValues().get(0));
 
-      Assert.assertEquals(Arrays.asList("leek", Arrays.asList("1", "2", "3")), rowList.get(7).dimensionValues());
-      Assert.assertEquals(2L, rowList.get(7).metricValues().get(0));
+      Assertions.assertEquals(Arrays.asList("leek", Arrays.asList("1", "2", "3")), rowList.get(7).dimensionValues());
+      Assertions.assertEquals(2L, rowList.get(7).metricValues().get(0));
 
-      Assert.assertEquals(Arrays.asList("leek", Arrays.asList("1", "3")), rowList.get(8).dimensionValues());
-      Assert.assertEquals(2L, rowList.get(8).metricValues().get(0));
+      Assertions.assertEquals(Arrays.asList("leek", Arrays.asList("1", "3")), rowList.get(8).dimensionValues());
+      Assertions.assertEquals(2L, rowList.get(8).metricValues().get(0));
 
-      Assert.assertEquals(Arrays.asList("leek", Arrays.asList("1", "3", "5")), rowList.get(9).dimensionValues());
-      Assert.assertEquals(2L, rowList.get(9).metricValues().get(0));
+      Assertions.assertEquals(Arrays.asList("leek", Arrays.asList("1", "3", "5")), rowList.get(9).dimensionValues());
+      Assertions.assertEquals(2L, rowList.get(9).metricValues().get(0));
 
-      Assert.assertEquals(Arrays.asList("leek", Arrays.asList("1", "4")), rowList.get(10).dimensionValues());
-      Assert.assertEquals(2L, rowList.get(10).metricValues().get(0));
+      Assertions.assertEquals(Arrays.asList("leek", Arrays.asList("1", "4")), rowList.get(10).dimensionValues());
+      Assertions.assertEquals(2L, rowList.get(10).metricValues().get(0));
 
-      Assert.assertEquals(Arrays.asList("leek", "2"), rowList.get(11).dimensionValues());
-      Assert.assertEquals(4L, rowList.get(11).metricValues().get(0));
+      Assertions.assertEquals(Arrays.asList("leek", "2"), rowList.get(11).dimensionValues());
+      Assertions.assertEquals(4L, rowList.get(11).metricValues().get(0));
 
-      Assert.assertEquals(Arrays.asList("potato", Arrays.asList("1", "3")), rowList.get(12).dimensionValues());
-      Assert.assertEquals(2L, rowList.get(12).metricValues().get(0));
+      Assertions.assertEquals(Arrays.asList("potato", Arrays.asList("1", "3")), rowList.get(12).dimensionValues());
+      Assertions.assertEquals(2L, rowList.get(12).metricValues().get(0));
 
-      Assert.assertEquals(Arrays.asList("potato", "2"), rowList.get(13).dimensionValues());
-      Assert.assertEquals(4L, rowList.get(13).metricValues().get(0));
+      Assertions.assertEquals(Arrays.asList("potato", "2"), rowList.get(13).dimensionValues());
+      Assertions.assertEquals(4L, rowList.get(13).metricValues().get(0));
 
       checkBitmapIndex(Arrays.asList(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11), getBitmapIndex(adapter, "dimA", "leek"));
       checkBitmapIndex(Arrays.asList(12, 13), getBitmapIndex(adapter, "dimA", "potato"));
@@ -2453,36 +2504,36 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
     final QueryableIndexIndexableAdapter adapter = new QueryableIndexIndexableAdapter(merged);
     final List<DebugRow> rowList = RowIteratorHelper.toList(adapter.getRows());
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         ImmutableList.of("d1", "d2", "d3", "d4", "d5"),
         ImmutableList.copyOf(adapter.getDimensionNames())
     );
 
-    Assert.assertEquals(4, rowList.size());
+    Assertions.assertEquals(4, rowList.size());
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         Arrays.asList("a", "b", "c", "d", "e"),
         rowList.get(0).dimensionValues()
     );
-    Assert.assertEquals(1L, rowList.get(0).metricValues().get(0));
+    Assertions.assertEquals(1L, rowList.get(0).metricValues().get(0));
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         Arrays.asList("aa", "bb", "cc", "dd", "ee"),
         rowList.get(1).dimensionValues()
     );
-    Assert.assertEquals(1L, rowList.get(1).metricValues().get(0));
+    Assertions.assertEquals(1L, rowList.get(1).metricValues().get(0));
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         Arrays.asList("aaa", "bbb", "ccc", "ddd", "eee"),
         rowList.get(2).dimensionValues()
     );
-    Assert.assertEquals(1L, rowList.get(2).metricValues().get(0));
+    Assertions.assertEquals(1L, rowList.get(2).metricValues().get(0));
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         Arrays.asList("1", "2", "3", "4", "5"),
         rowList.get(3).dimensionValues()
     );
-    Assert.assertEquals(3L, rowList.get(3).metricValues().get(0));
+    Assertions.assertEquals(3L, rowList.get(3).metricValues().get(0));
 
     checkBitmapIndex(Collections.singletonList(0), getBitmapIndex(adapter, "d1", "a"));
     checkBitmapIndex(Collections.singletonList(1), getBitmapIndex(adapter, "d1", "aa"));
@@ -2511,9 +2562,11 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
     checkBitmapIndex(Collections.singletonList(3), getBitmapIndex(adapter, "d5", "5"));
   }
 
-  @Test
-  public void testMaxColumnsToMerge() throws Exception
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}: metric compression={0}, dimension compression={1}, long encoding={2}, segment write-out medium={3}")
+  public void testMaxColumnsToMerge(@Nullable BitmapSerdeFactory bitmapSerdeFactory, CompressionStrategy compressionStrategy, CompressionStrategy dimCompressionStrategy, CompressionFactory.LongEncodingStrategy longEncodingStrategy) throws Exception
   {
+    initIndexMergerTestBase(bitmapSerdeFactory, compressionStrategy, dimCompressionStrategy, longEncodingStrategy);
     IncrementalIndexSchema indexSchema = new IncrementalIndexSchema.Builder()
         .withMetrics(new CountAggregatorFactory("count"))
         .withRollup(true)
@@ -2540,9 +2593,9 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
     toPersistC.add(getRowForTestMaxColumnsToMerge(30000, "aaa", "bbb", "ccc", "ddd", "eee"));
     toPersistC.add(getRowForTestMaxColumnsToMerge(99999, "1", "2", "3", "4", "5"));
 
-    final File tmpDirA = temporaryFolder.newFolder();
-    final File tmpDirB = temporaryFolder.newFolder();
-    final File tmpDirC = temporaryFolder.newFolder();
+    final File tmpDirA = newFolder(temporaryFolder, "junit");
+    final File tmpDirB = newFolder(temporaryFolder, "junit");
+    final File tmpDirC = newFolder(temporaryFolder, "junit");
 
     QueryableIndex indexA = closer.closeLater(
         indexIO.loadIndex(indexMerger.persist(toPersistA, tmpDirA, indexSpec, null))
@@ -2557,7 +2610,7 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
     );
 
     // no column limit
-    final File tmpDirMerged0 = temporaryFolder.newFolder();
+    final File tmpDirMerged0 = newFolder(temporaryFolder, "junit");
     final QueryableIndex merged0 = closer.closeLater(
         indexIO.loadIndex(
             indexMerger.mergeQueryableIndex(
@@ -2574,7 +2627,7 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
     validateTestMaxColumnsToMergeOutputSegment(merged0);
 
     // column limit is greater than total # of columns
-    final File tmpDirMerged1 = temporaryFolder.newFolder();
+    final File tmpDirMerged1 = newFolder(temporaryFolder, "junit");
     final QueryableIndex merged1 = closer.closeLater(
         indexIO.loadIndex(
             indexMerger.mergeQueryableIndex(
@@ -2591,7 +2644,7 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
     validateTestMaxColumnsToMergeOutputSegment(merged1);
 
     // column limit is greater than 2 segments worth of columns
-    final File tmpDirMerged2 = temporaryFolder.newFolder();
+    final File tmpDirMerged2 = newFolder(temporaryFolder, "junit");
     final QueryableIndex merged2 = closer.closeLater(
         indexIO.loadIndex(
             indexMerger.mergeQueryableIndex(
@@ -2608,7 +2661,7 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
     validateTestMaxColumnsToMergeOutputSegment(merged2);
 
     // column limit is between 1 and 2 segments worth of columns (merge two segments at once)
-    final File tmpDirMerged3 = temporaryFolder.newFolder();
+    final File tmpDirMerged3 = newFolder(temporaryFolder, "junit");
     final QueryableIndex merged3 = closer.closeLater(
         indexIO.loadIndex(
             indexMerger.mergeQueryableIndex(
@@ -2625,7 +2678,7 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
     validateTestMaxColumnsToMergeOutputSegment(merged3);
 
     // column limit is less than 1 segment
-    final File tmpDirMerged4 = temporaryFolder.newFolder();
+    final File tmpDirMerged4 = newFolder(temporaryFolder, "junit");
     final QueryableIndex merged4 = closer.closeLater(
         indexIO.loadIndex(
             indexMerger.mergeQueryableIndex(
@@ -2642,7 +2695,7 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
     validateTestMaxColumnsToMergeOutputSegment(merged4);
 
     // column limit is exactly 1 segment's worth of columns
-    final File tmpDirMerged5 = temporaryFolder.newFolder();
+    final File tmpDirMerged5 = newFolder(temporaryFolder, "junit");
     final QueryableIndex merged5 = closer.closeLater(
         indexIO.loadIndex(
             indexMerger.mergeQueryableIndex(
@@ -2659,7 +2712,7 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
     validateTestMaxColumnsToMergeOutputSegment(merged5);
 
     // column limit is exactly 2 segment's worth of columns
-    final File tmpDirMerged6 = temporaryFolder.newFolder();
+    final File tmpDirMerged6 = newFolder(temporaryFolder, "junit");
     final QueryableIndex merged6 = closer.closeLater(
         indexIO.loadIndex(
             indexMerger.mergeQueryableIndex(
@@ -2676,7 +2729,7 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
     validateTestMaxColumnsToMergeOutputSegment(merged6);
 
     // column limit is exactly the total number of columns
-    final File tmpDirMerged7 = temporaryFolder.newFolder();
+    final File tmpDirMerged7 = newFolder(temporaryFolder, "junit");
     final QueryableIndex merged7 = closer.closeLater(
         indexIO.loadIndex(
             indexMerger.mergeQueryableIndex(
@@ -2701,7 +2754,7 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
       toPersist.add(row);
     }
 
-    final File tempDir = temporaryFolder.newFolder();
+    final File tempDir = newFolder(temporaryFolder, "junit");
     return closer.closeLater(indexIO.loadIndex(indexMerger.persist(toPersist, tempDir, indexSpec, null)));
   }
 
@@ -2724,5 +2777,14 @@ public class IndexMergerTestBase extends InitializedNullHandlingTest
                          )
                      )
                      .collect(Collectors.toList());
+  }
+
+  private static File newFolder(File root, String... subDirs) throws IOException {
+    String subFolder = String.join("/", subDirs);
+    File result = new File(root, subFolder);
+    if (!result.mkdirs()) {
+      throw new IOException("Couldn't create folders " + root);
+    }
+    return result;
   }
 }

@@ -30,7 +30,6 @@ import org.apache.druid.segment.indexing.IOConfig;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Rule;
-import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import java.util.Collections;

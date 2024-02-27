@@ -26,12 +26,10 @@ import com.google.common.collect.Sets;
 import org.apache.druid.java.util.common.IAE;
 import org.apache.druid.storage.StorageConnector;
 import org.apache.druid.storage.StorageConnectorProvider;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,18 +42,15 @@ import java.util.UUID;
 
 public class LocalFileStorageConnectorTest
 {
-  @Rule
-  public TemporaryFolder temporaryFolder = new TemporaryFolder();
-
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
+  @TempDir
+  public File temporaryFolder;
   private File tempDir;
   private StorageConnector storageConnector;
 
-  @Before
+  @BeforeEach
   public void init() throws IOException
   {
-    tempDir = temporaryFolder.newFolder();
+    tempDir = newFolder(temporaryFolder, "junit");
     storageConnector = new LocalFileStorageConnectorProvider(tempDir).get();
   }
 
@@ -68,15 +63,15 @@ public class LocalFileStorageConnectorTest
     createAndPopulateFile(uuid);
 
     // check if file is created
-    Assert.assertTrue(storageConnector.pathExists(uuid));
-    Assert.assertTrue(new File(tempDir.getAbsolutePath(), uuid).exists());
+    Assertions.assertTrue(storageConnector.pathExists(uuid));
+    Assertions.assertTrue(new File(tempDir.getAbsolutePath(), uuid).exists());
 
     // check contents
     checkContents(uuid);
 
     // delete file
     storageConnector.deleteFile(uuid);
-    Assert.assertFalse(new File(tempDir.getAbsolutePath(), uuid).exists());
+    Assertions.assertFalse(new File(tempDir.getAbsolutePath(), uuid).exists());
   }
 
   @Test
@@ -90,20 +85,20 @@ public class LocalFileStorageConnectorTest
     createAndPopulateFile(uuid1);
     createAndPopulateFile(uuid2);
 
-    Assert.assertTrue(storageConnector.pathExists(uuid1));
-    Assert.assertTrue(storageConnector.pathExists(uuid2));
+    Assertions.assertTrue(storageConnector.pathExists(uuid1));
+    Assertions.assertTrue(storageConnector.pathExists(uuid2));
 
     checkContents(uuid1);
     checkContents(uuid2);
 
     File baseFile = new File(tempDir.getAbsolutePath(), uuid_base);
-    Assert.assertTrue(baseFile.exists());
-    Assert.assertTrue(baseFile.isDirectory());
-    Assert.assertEquals(2, baseFile.listFiles().length);
+    Assertions.assertTrue(baseFile.exists());
+    Assertions.assertTrue(baseFile.isDirectory());
+    Assertions.assertEquals(2, baseFile.listFiles().length);
 
     storageConnector.deleteRecursively(uuid_base);
-    Assert.assertFalse(baseFile.exists());
-    Assert.assertTrue(new File(tempDir.getAbsolutePath(), topLevelDir).exists());
+    Assertions.assertFalse(baseFile.exists());
+    Assertions.assertTrue(new File(tempDir.getAbsolutePath(), topLevelDir).exists());
   }
 
   @Test
@@ -118,17 +113,18 @@ public class LocalFileStorageConnectorTest
 
     // delete file
     storageConnector.deleteFiles(ImmutableList.of(uuid1, uuid2));
-    Assert.assertFalse(new File(tempDir.getAbsolutePath(), uuid1).exists());
-    Assert.assertFalse(new File(tempDir.getAbsolutePath(), uuid2).exists());
+    Assertions.assertFalse(new File(tempDir.getAbsolutePath(), uuid1).exists());
+    Assertions.assertFalse(new File(tempDir.getAbsolutePath(), uuid2).exists());
   }
 
   @Test
   public void incorrectBasePath() throws IOException
   {
-    File file = temporaryFolder.newFile();
-    expectedException.expect(IAE.class);
-    StorageConnectorProvider storageConnectorProvider = new LocalFileStorageConnectorProvider(file);
-    storageConnectorProvider.get();
+    assertThrows(IAE.class, () -> {
+      File file = File.createTempFile("junit", null, temporaryFolder);
+      StorageConnectorProvider storageConnectorProvider = new LocalFileStorageConnectorProvider(file);
+      storageConnectorProvider.get();
+    });
   }
 
   @Test
@@ -144,21 +140,21 @@ public class LocalFileStorageConnectorTest
 
     List<String> topLevelDirContents = Lists.newArrayList(storageConnector.listDir(topLevelDir));
     List<String> expectedTopLevelDirContents = ImmutableList.of(new File(uuid_base).getName());
-    Assert.assertEquals(expectedTopLevelDirContents, topLevelDirContents);
+    Assertions.assertEquals(expectedTopLevelDirContents, topLevelDirContents);
 
     // Converted to a set since the output of the listDir can be shuffled
     Set<String> nextLevelDirContents = Sets.newHashSet(storageConnector.listDir(uuid_base));
     Set<String> expectedNextLevelDirContents = ImmutableSet.of(new File(uuid1).getName(), new File(uuid2).getName());
-    Assert.assertEquals(expectedNextLevelDirContents, nextLevelDirContents);
+    Assertions.assertEquals(expectedNextLevelDirContents, nextLevelDirContents);
 
     // Check if listDir throws if an unknown path is passed as an argument
-    Assert.assertThrows(
+    Assertions.assertThrows(
         IAE.class,
         () -> storageConnector.listDir("unknown_top_path")
     );
 
     // Check if listDir throws if a file path is passed as an argument
-    Assert.assertThrows(
+    Assertions.assertThrows(
         IAE.class,
         () -> storageConnector.listDir(uuid1)
     );
@@ -178,24 +174,24 @@ public class LocalFileStorageConnectorTest
       for (int length = 1; length <= data.length() - start; length++) {
         InputStream is = storageConnector.readRange(uuid, start, length);
         byte[] dataBytes = new byte[length];
-        Assert.assertEquals(is.read(dataBytes), length);
-        Assert.assertEquals(is.read(), -1); // reading further produces no data
-        Assert.assertEquals(data.substring(start, start + length), new String(dataBytes, StandardCharsets.UTF_8));
+        Assertions.assertEquals(is.read(dataBytes), length);
+        Assertions.assertEquals(is.read(), -1); // reading further produces no data
+        Assertions.assertEquals(data.substring(start, start + length), new String(dataBytes, StandardCharsets.UTF_8));
       }
     }
 
     // empty read
     InputStream is = storageConnector.readRange(uuid, 0, 0);
     byte[] dataBytes = new byte[0];
-    Assert.assertEquals(is.read(dataBytes), -1);
-    Assert.assertEquals(data.substring(0, 0), new String(dataBytes, StandardCharsets.UTF_8));
+    Assertions.assertEquals(is.read(dataBytes), -1);
+    Assertions.assertEquals(data.substring(0, 0), new String(dataBytes, StandardCharsets.UTF_8));
   }
 
   private void checkContents(String uuid) throws IOException
   {
     try (InputStream inputStream = storageConnector.read(uuid)) {
-      Assert.assertEquals(1, inputStream.read());
-      Assert.assertEquals(0, inputStream.available());
+      Assertions.assertEquals(1, inputStream.read());
+      Assertions.assertEquals(0, inputStream.available());
     }
   }
 
@@ -204,5 +200,14 @@ public class LocalFileStorageConnectorTest
     try (OutputStream os = storageConnector.write(uuid)) {
       os.write(1);
     }
+  }
+
+  private static File newFolder(File root, String... subDirs) throws IOException {
+    String subFolder = String.join("/", subDirs);
+    File result = new File(root, subFolder);
+    if (!result.mkdirs()) {
+      throw new IOException("Couldn't create folders " + root);
+    }
+    return result;
   }
 }

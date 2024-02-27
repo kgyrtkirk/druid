@@ -35,7 +35,6 @@ import org.apache.druid.testsEx.categories.MultiStageQueryWithMM;
 import org.apache.druid.testsEx.config.DruidTestRunner;
 import org.apache.druid.testsEx.utils.DruidClusterAdminClient;
 import org.junit.Assert;
-import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 

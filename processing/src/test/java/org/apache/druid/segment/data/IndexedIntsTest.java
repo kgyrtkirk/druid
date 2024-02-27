@@ -19,24 +19,21 @@
 
 package org.apache.druid.segment.data;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
 import java.util.Collection;
 
 /**
  */
-@RunWith(Parameterized.class)
 public class IndexedIntsTest
 {
   private static final int[] ARRAY = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
-  private final IndexedInts indexed;
+  private IndexedInts indexed;
 
-  @Parameterized.Parameters
   public static Collection<?> constructorFeeder()
   {
     return Arrays.asList(
@@ -47,19 +44,21 @@ public class IndexedIntsTest
     );
   }
 
-  public IndexedIntsTest(
+  public void initIndexedIntsTest(
       IndexedInts indexed
   )
   {
     this.indexed = indexed;
   }
 
-  @Test
-  public void testSanity()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest
+  public void testSanity(IndexedInts indexed)
   {
-    Assert.assertEquals(ARRAY.length, indexed.size());
+    initIndexedIntsTest(indexed);
+    Assertions.assertEquals(ARRAY.length, indexed.size());
     for (int i = 0; i < ARRAY.length; i++) {
-      Assert.assertEquals(ARRAY[i], indexed.get(i));
+      Assertions.assertEquals(ARRAY[i], indexed.get(i));
     }
   }
 }

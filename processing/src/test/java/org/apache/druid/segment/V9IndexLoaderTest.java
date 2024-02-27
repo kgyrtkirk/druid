@@ -28,8 +28,8 @@ import org.apache.druid.segment.IndexIO.V9IndexLoader;
 import org.apache.druid.segment.column.ColumnConfig;
 import org.apache.druid.segment.column.ColumnHolder;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -50,7 +50,7 @@ public class V9IndexLoaderTest extends InitializedNullHandlingTest
 
     ForkSegmentLoadDropHandler segmentLoadDropHandler = new ForkSegmentLoadDropHandler();
     ForkSegment segment = new ForkSegment(true);
-    Assert.assertTrue(segment.getSegmentExist());
+    Assertions.assertTrue(segment.getSegmentExist());
     File inDir = new File(path);
 
     QueryableIndex queryableIndex = loader.load(
@@ -59,17 +59,17 @@ public class V9IndexLoaderTest extends InitializedNullHandlingTest
         true,
         () -> segmentLoadDropHandler.removeSegment(segment)
     );
-    Assert.assertNotNull(queryableIndex);
+    Assertions.assertNotNull(queryableIndex);
     assertFailToDeserializeColumn(queryableIndex::getDimensionHandlers);
     List<String> columnNames = queryableIndex.getColumnNames();
     for (String columnName : columnNames) {
       if (COUNT_COLUMN.equals(columnName)) {
         assertFailToDeserializeColumn(() -> queryableIndex.getColumnHolder(columnName));
       } else {
-        Assert.assertNotNull(queryableIndex.getColumnHolder(columnName));
+        Assertions.assertNotNull(queryableIndex.getColumnHolder(columnName));
       }
     }
-    Assert.assertFalse(segment.getSegmentExist());
+    Assertions.assertFalse(segment.getSegmentExist());
   }
 
   private static void assertFailToDeserializeColumn(Runnable runnable)
@@ -78,9 +78,9 @@ public class V9IndexLoaderTest extends InitializedNullHandlingTest
       runnable.run();
     }
     catch (Exception e) {
-      Assert.assertTrue(e instanceof RuntimeException);
-      Assert.assertTrue(e.getCause() instanceof IOException);
-      Assert.assertTrue(e.getMessage().contains("Exception test while deserializing a column"));
+      Assertions.assertTrue(e instanceof RuntimeException);
+      Assertions.assertTrue(e.getCause() instanceof IOException);
+      Assertions.assertTrue(e.getMessage().contains("Exception test while deserializing a column"));
     }
   }
 

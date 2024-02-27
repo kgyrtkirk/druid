@@ -25,17 +25,16 @@ import org.apache.druid.math.expr.ExprEval;
 import org.apache.druid.math.expr.ExprMacroTable;
 import org.apache.druid.math.expr.Parser;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public abstract class MacroTestBase extends InitializedNullHandlingTest
 {
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
 
   private final ExprMacroTable.ExprMacro macro;
 
@@ -46,8 +45,9 @@ public abstract class MacroTestBase extends InitializedNullHandlingTest
 
   protected void expectException(Class<? extends Throwable> type, String message)
   {
-    expectedException.expect(type);
-    expectedException.expectMessage(message);
+    Throwable exception = assertThrows(type, () -> {
+    });
+    assertTrue(exception.getMessage().contains(message));
   }
 
   protected Expr apply(final List<Expr> args)
@@ -91,7 +91,7 @@ public abstract class MacroTestBase extends InitializedNullHandlingTest
     final GuiceExprMacroTable macroTable = new GuiceExprMacroTable(ImmutableSet.of(wrappedMacro));
     final Expr expr = Parser.parse(expression, macroTable);
 
-    Assert.assertTrue("Calls made to macro.apply", wrappedMacro.calls.get() > 0);
+    Assertions.assertTrue(wrappedMacro.calls.get() > 0, "Calls made to macro.apply");
 
     return expr.eval(bindings);
   }

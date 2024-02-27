@@ -33,12 +33,13 @@ import org.jboss.netty.buffer.BigEndianHeapChannelBuffer;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.io.TempDir;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -48,11 +49,13 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 public class LookupReferencesManagerTest
 {
   private static final String LOOKUP_TIER = "lookupTier";
-  @Rule
-  public TemporaryFolder temporaryFolder = new TemporaryFolder();
+  @TempDir
+  public File temporaryFolder;
   LookupReferencesManager lookupReferencesManager;
   LookupExtractorFactory lookupExtractorFactory;
   LookupExtractorFactoryContainer container;
@@ -60,7 +63,7 @@ public class LookupReferencesManagerTest
   private DruidLeaderClient druidLeaderClient;
   private LookupListeningAnnouncerConfig config;
 
-  @Before
+  @BeforeEach
   public void setUp() throws IOException
   {
     EmittingLogger.registerEmitter(new NoopServiceEmitter());
@@ -77,9 +80,9 @@ public class LookupReferencesManagerTest
     );
     container = new LookupExtractorFactoryContainer("v0", lookupExtractorFactory);
     mapper.registerSubtypes(MapLookupExtractorFactory.class);
-    String temporaryPath = temporaryFolder.newFolder().getAbsolutePath();
+    String temporaryPath = newFolder(temporaryFolder, "junit").getAbsolutePath();
     lookupReferencesManager = new LookupReferencesManager(
-        new LookupConfig(temporaryFolder.newFolder().getAbsolutePath()),
+        new LookupConfig(newFolder(temporaryFolder, "junit").getAbsolutePath()),
         mapper,
         druidLeaderClient,
         config,
@@ -121,42 +124,50 @@ public class LookupReferencesManagerTest
     ).addChunk(strResult);
     EasyMock.expect(druidLeaderClient.go(request)).andReturn(responseHolder);
     EasyMock.replay(druidLeaderClient);
-    Assert.assertFalse(lookupReferencesManager.lifecycleLock.awaitStarted(1, TimeUnit.MICROSECONDS));
-    Assert.assertNull(lookupReferencesManager.mainThread);
-    Assert.assertNull(lookupReferencesManager.stateRef.get());
+    Assertions.assertFalse(lookupReferencesManager.lifecycleLock.awaitStarted(1, TimeUnit.MICROSECONDS));
+    Assertions.assertNull(lookupReferencesManager.mainThread);
+    Assertions.assertNull(lookupReferencesManager.stateRef.get());
 
     lookupReferencesManager.start();
-    Assert.assertTrue(lookupReferencesManager.lifecycleLock.awaitStarted(1, TimeUnit.MICROSECONDS));
-    Assert.assertTrue(lookupReferencesManager.mainThread.isAlive());
-    Assert.assertNotNull(lookupReferencesManager.stateRef.get());
+    Assertions.assertTrue(lookupReferencesManager.lifecycleLock.awaitStarted(1, TimeUnit.MICROSECONDS));
+    Assertions.assertTrue(lookupReferencesManager.mainThread.isAlive());
+    Assertions.assertNotNull(lookupReferencesManager.stateRef.get());
 
     lookupReferencesManager.stop();
-    Assert.assertFalse(lookupReferencesManager.lifecycleLock.awaitStarted(1, TimeUnit.MICROSECONDS));
-    Assert.assertFalse(lookupReferencesManager.mainThread.isAlive());
+    Assertions.assertFalse(lookupReferencesManager.lifecycleLock.awaitStarted(1, TimeUnit.MICROSECONDS));
+    Assertions.assertFalse(lookupReferencesManager.mainThread.isAlive());
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test
   public void testGetExceptionWhenClosed()
   {
-    lookupReferencesManager.get("test");
+    assertThrows(IllegalStateException.class, () -> {
+      lookupReferencesManager.get("test");
+    });
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test
   public void testAddExceptionWhenClosed()
   {
-    lookupReferencesManager.add("test", EasyMock.createMock(LookupExtractorFactoryContainer.class));
+    assertThrows(IllegalStateException.class, () -> {
+      lookupReferencesManager.add("test", EasyMock.createMock(LookupExtractorFactoryContainer.class));
+    });
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test
   public void testRemoveExceptionWhenClosed()
   {
-    lookupReferencesManager.remove("test", null);
+    assertThrows(IllegalStateException.class, () -> {
+      lookupReferencesManager.remove("test", null);
+    });
   }
 
-  @Test(expected = IllegalStateException.class)
+  @Test
   public void testGetAllLookupsStateExceptionWhenClosed()
   {
-    lookupReferencesManager.getAllLookupsState();
+    assertThrows(IllegalStateException.class, () -> {
+      lookupReferencesManager.getAllLookupsState();
+    });
   }
 
   @Test
@@ -186,19 +197,19 @@ public class LookupReferencesManagerTest
     EasyMock.expect(druidLeaderClient.go(request)).andReturn(responseHolder);
     EasyMock.replay(druidLeaderClient);
     lookupReferencesManager.start();
-    Assert.assertEquals(Optional.empty(), lookupReferencesManager.get("test"));
+    Assertions.assertEquals(Optional.empty(), lookupReferencesManager.get("test"));
 
     LookupExtractorFactoryContainer testContainer = new LookupExtractorFactoryContainer("0", lookupExtractorFactory);
 
     lookupReferencesManager.add("test", testContainer);
     lookupReferencesManager.handlePendingNotices();
 
-    Assert.assertEquals(Optional.of(testContainer), lookupReferencesManager.get("test"));
+    Assertions.assertEquals(Optional.of(testContainer), lookupReferencesManager.get("test"));
 
     lookupReferencesManager.remove("test", testContainer);
     lookupReferencesManager.handlePendingNotices();
 
-    Assert.assertEquals(Optional.empty(), lookupReferencesManager.get("test"));
+    Assertions.assertEquals(Optional.empty(), lookupReferencesManager.get("test"));
   }
 
   @Test
@@ -229,14 +240,14 @@ public class LookupReferencesManagerTest
     EasyMock.expect(druidLeaderClient.go(request)).andReturn(responseHolder);
     EasyMock.replay(druidLeaderClient);
     lookupReferencesManager.start();
-    Assert.assertEquals(Optional.empty(), lookupReferencesManager.get("test"));
+    Assertions.assertEquals(Optional.empty(), lookupReferencesManager.get("test"));
 
     LookupExtractorFactoryContainer testContainer = new LookupExtractorFactoryContainer("0", lookupExtractorFactory);
 
     lookupReferencesManager.add("test", testContainer);
     lookupReferencesManager.handlePendingNotices();
 
-    Assert.assertEquals(Optional.of(testContainer), lookupReferencesManager.get("test"));
+    Assertions.assertEquals(Optional.of(testContainer), lookupReferencesManager.get("test"));
 
     LookupExtractorFactory badLookupExtractorFactory = EasyMock.createMock(LookupExtractorFactory.class);
     EasyMock.expect(badLookupExtractorFactory.start()).andReturn(false).anyTimes();
@@ -250,12 +261,12 @@ public class LookupReferencesManagerTest
 
     lookupReferencesManager.handlePendingNotices();
 
-    Assert.assertEquals(Optional.of(testContainer), lookupReferencesManager.get("test"));
+    Assertions.assertEquals(Optional.of(testContainer), lookupReferencesManager.get("test"));
 
     lookupReferencesManager.remove("test", testContainer);
     lookupReferencesManager.handlePendingNotices();
 
-    Assert.assertEquals(Optional.empty(), lookupReferencesManager.get("test"));
+    Assertions.assertEquals(Optional.empty(), lookupReferencesManager.get("test"));
   }
 
   @Test
@@ -286,14 +297,14 @@ public class LookupReferencesManagerTest
     EasyMock.expect(druidLeaderClient.go(request)).andReturn(responseHolder);
     EasyMock.replay(druidLeaderClient);
     lookupReferencesManager.start();
-    Assert.assertEquals(Optional.empty(), lookupReferencesManager.get("test"));
+    Assertions.assertEquals(Optional.empty(), lookupReferencesManager.get("test"));
 
     LookupExtractorFactoryContainer testContainer = new LookupExtractorFactoryContainer("0", lookupExtractorFactory);
 
     lookupReferencesManager.add("test", testContainer);
     lookupReferencesManager.handlePendingNotices();
 
-    Assert.assertEquals(Optional.of(testContainer), lookupReferencesManager.get("test"));
+    Assertions.assertEquals(Optional.of(testContainer), lookupReferencesManager.get("test"));
 
     LookupExtractorFactory badLookupExtractorFactory = EasyMock.createMock(LookupExtractorFactory.class);
     EasyMock.expect(badLookupExtractorFactory.start()).andReturn(false).anyTimes();
@@ -307,12 +318,12 @@ public class LookupReferencesManagerTest
 
     lookupReferencesManager.handlePendingNotices();
 
-    Assert.assertEquals(Optional.of(testContainer), lookupReferencesManager.get("test"));
+    Assertions.assertEquals(Optional.of(testContainer), lookupReferencesManager.get("test"));
 
     lookupReferencesManager.remove("test", testContainer);
     lookupReferencesManager.handlePendingNotices();
 
-    Assert.assertEquals(Optional.empty(), lookupReferencesManager.get("test"));
+    Assertions.assertEquals(Optional.empty(), lookupReferencesManager.get("test"));
   }
   @Test
   public void testCloseIsCalledAfterStopping() throws Exception
@@ -405,7 +416,7 @@ public class LookupReferencesManagerTest
     EasyMock.expect(druidLeaderClient.go(request)).andReturn(responseHolder);
     EasyMock.replay(druidLeaderClient);
     lookupReferencesManager.start();
-    Assert.assertEquals(Optional.empty(), lookupReferencesManager.get("notThere"));
+    Assertions.assertEquals(Optional.empty(), lookupReferencesManager.get("notThere"));
   }
 
   @Test
@@ -509,7 +520,7 @@ public class LookupReferencesManagerTest
     lookupReferencesManager.start();
     lookupReferencesManager.add("testName", new LookupExtractorFactoryContainer("1", lookupExtractorFactory1));
     lookupReferencesManager.handlePendingNotices();
-    Assert.assertTrue(lookupReferencesManager.get("testName").isPresent());
+    Assertions.assertTrue(lookupReferencesManager.get("testName").isPresent());
     EasyMock.verify(lookupExtractorFactory1);
   }
   @Test
@@ -568,9 +579,9 @@ public class LookupReferencesManagerTest
     lookupReferencesManager.add("two", container2);
     lookupReferencesManager.handlePendingNotices();
 
-    Assert.assertEquals(ImmutableSet.of("one", "two"), lookupReferencesManager.getAllLookupNames());
+    Assertions.assertEquals(ImmutableSet.of("one", "two"), lookupReferencesManager.getAllLookupNames());
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         ImmutableSet.of("one", "two"),
         ((LookupExtractorFactoryContainerProvider) lookupReferencesManager).getAllLookupNames()
     );
@@ -633,22 +644,23 @@ public class LookupReferencesManagerTest
 
     LookupsState state = lookupReferencesManager.getAllLookupsState();
 
-    Assert.assertEquals(2, state.getCurrent().size());
-    Assert.assertEquals(container1, state.getCurrent().get("one"));
-    Assert.assertEquals(container2, state.getCurrent().get("two"));
+    Assertions.assertEquals(2, state.getCurrent().size());
+    Assertions.assertEquals(container1, state.getCurrent().get("one"));
+    Assertions.assertEquals(container2, state.getCurrent().get("two"));
 
-    Assert.assertEquals(1, state.getToLoad().size());
-    Assert.assertEquals(container3, state.getToLoad().get("three"));
+    Assertions.assertEquals(1, state.getToLoad().size());
+    Assertions.assertEquals(container3, state.getToLoad().get("three"));
 
-    Assert.assertEquals(1, state.getToDrop().size());
-    Assert.assertTrue(state.getToDrop().contains("one"));
+    Assertions.assertEquals(1, state.getToDrop().size());
+    Assertions.assertTrue(state.getToDrop().contains("one"));
   }
 
-  @Test(timeout = 60_000L)
+  @Test
+  @Timeout(value = 60_000L, unit = TimeUnit.MILLISECONDS)
   public void testRealModeWithMainThread() throws Exception
   {
     LookupReferencesManager lookupReferencesManager = new LookupReferencesManager(
-        new LookupConfig(temporaryFolder.newFolder().getAbsolutePath()),
+        new LookupConfig(newFolder(temporaryFolder, "junit").getAbsolutePath()),
         mapper, druidLeaderClient, config
     );
     Map<String, Object> lookupMap = new HashMap<>();
@@ -669,14 +681,14 @@ public class LookupReferencesManagerTest
     EasyMock.expect(druidLeaderClient.go(request)).andReturn(responseHolder);
     EasyMock.replay(druidLeaderClient);
     lookupReferencesManager.start();
-    Assert.assertTrue(lookupReferencesManager.mainThread.isAlive());
+    Assertions.assertTrue(lookupReferencesManager.mainThread.isAlive());
 
     LookupExtractorFactory lookupExtractorFactory = EasyMock.createMock(LookupExtractorFactory.class);
     EasyMock.expect(lookupExtractorFactory.start()).andReturn(true).once();
     EasyMock.expect(lookupExtractorFactory.destroy()).andReturn(true).once();
     EasyMock.expect(lookupExtractorFactory.isInitialized()).andReturn(true).anyTimes();
     EasyMock.replay(lookupExtractorFactory);
-    Assert.assertEquals(Optional.empty(), lookupReferencesManager.get("test"));
+    Assertions.assertEquals(Optional.empty(), lookupReferencesManager.get("test"));
 
     LookupExtractorFactoryContainer testContainer = new LookupExtractorFactoryContainer("0", lookupExtractorFactory);
     lookupReferencesManager.add("test", testContainer);
@@ -685,7 +697,7 @@ public class LookupReferencesManagerTest
       Thread.sleep(100);
     }
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         ImmutableSet.of("test", "testMockForRealModeWithMainThread"),
         lookupReferencesManager.getAllLookupNames()
     );
@@ -696,14 +708,14 @@ public class LookupReferencesManagerTest
       Thread.sleep(100);
     }
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         ImmutableSet.of("testMockForRealModeWithMainThread"),
         lookupReferencesManager.getAllLookupNames()
     );
 
     lookupReferencesManager.stop();
 
-    Assert.assertFalse(lookupReferencesManager.mainThread.isAlive());
+    Assertions.assertFalse(lookupReferencesManager.mainThread.isAlive());
   }
 
   @Test
@@ -759,16 +771,16 @@ public class LookupReferencesManagerTest
     EasyMock.replay(druidLeaderClient);
 
     lookupReferencesManager.start();
-    Assert.assertEquals(Optional.of(container1), lookupReferencesManager.get("testLookup1"));
-    Assert.assertEquals(Optional.of(container2), lookupReferencesManager.get("testLookup2"));
-    Assert.assertEquals(Optional.of(container3), lookupReferencesManager.get("testLookup3"));
+    Assertions.assertEquals(Optional.of(container1), lookupReferencesManager.get("testLookup1"));
+    Assertions.assertEquals(Optional.of(container2), lookupReferencesManager.get("testLookup2"));
+    Assertions.assertEquals(Optional.of(container3), lookupReferencesManager.get("testLookup3"));
 
   }
 
   @Test
   public void testLoadLookupOnCoordinatorFailure() throws Exception
   {
-    LookupConfig lookupConfig = new LookupConfig(temporaryFolder.newFolder().getAbsolutePath())
+    LookupConfig lookupConfig = new LookupConfig(newFolder(temporaryFolder, "junit").getAbsolutePath())
     {
       @Override
       public int getCoordinatorRetryDelay()
@@ -828,7 +840,7 @@ public class LookupReferencesManagerTest
     EasyMock.expect(druidLeaderClient.go(request)).andThrow(new IllegalStateException()).anyTimes();
     EasyMock.replay(druidLeaderClient);
     lookupReferencesManager.start();
-    Assert.assertEquals(
+    Assertions.assertEquals(
         Optional.of(container),
         lookupReferencesManager.get("testMockForLoadLookupOnCoordinatorFailure")
     );
@@ -869,6 +881,15 @@ public class LookupReferencesManagerTest
     EasyMock.expect(druidLeaderClient.go(request)).andReturn(responseHolder);
 
     lookupReferencesManager.start();
-    Assert.assertEquals(Optional.empty(), lookupReferencesManager.get("testMockForDisableLookupSync"));
+    Assertions.assertEquals(Optional.empty(), lookupReferencesManager.get("testMockForDisableLookupSync"));
+  }
+
+  private static File newFolder(File root, String... subDirs) throws IOException {
+    String subFolder = String.join("/", subDirs);
+    File result = new File(root, subFolder);
+    if (!result.mkdirs()) {
+      throw new IOException("Couldn't create folders " + root);
+    }
+    return result;
   }
 }

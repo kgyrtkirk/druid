@@ -19,31 +19,28 @@
 
 package org.apache.druid.collections.bitmap;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.roaringbitmap.IntIterator;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-@RunWith(Parameterized.class)
 public class WrappedRoaringBitmapTest
 {
   private static final int[] DATA = new int[]{1, 3, 5, 7, 9, 10, 11, 100, 122};
 
-  private final int cardinality;
+  private int cardinality;
   private WrappedRoaringBitmap bitmap;
 
-  public WrappedRoaringBitmapTest(int cardinality)
+  public void initWrappedRoaringBitmapTest(int cardinality)
   {
     this.cardinality = cardinality;
   }
 
-  @Parameterized.Parameters
   public static List<Object[]> constructorFeeder()
   {
     final List<Object[]> constructors = new ArrayList<>();
@@ -53,7 +50,7 @@ public class WrappedRoaringBitmapTest
     return constructors;
   }
 
-  @Before
+  @BeforeEach
   public void setUp()
   {
     bitmap = (WrappedRoaringBitmap) RoaringBitmapFactory.INSTANCE.makeEmptyMutableBitmap();
@@ -62,71 +59,85 @@ public class WrappedRoaringBitmapTest
     }
   }
 
-  @Test
-  public void testGet()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest
+  public void testGet(int cardinality)
   {
+    initWrappedRoaringBitmapTest(cardinality);
     for (int i = 0; i < DATA.length; i++) {
-      Assert.assertEquals(String.valueOf(i), i < cardinality, bitmap.get(DATA[i]));
+      Assertions.assertEquals(i < cardinality, bitmap.get(DATA[i]), String.valueOf(i));
     }
 
-    Assert.assertFalse(bitmap.get(-1));
-    Assert.assertFalse(bitmap.get(Integer.MAX_VALUE));
+    Assertions.assertFalse(bitmap.get(-1));
+    Assertions.assertFalse(bitmap.get(Integer.MAX_VALUE));
   }
 
-  @Test
-  public void testSize()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest
+  public void testSize(int cardinality)
   {
-    Assert.assertEquals(cardinality, bitmap.size());
+    initWrappedRoaringBitmapTest(cardinality);
+    Assertions.assertEquals(cardinality, bitmap.size());
   }
 
-  @Test
-  public void testRemove()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest
+  public void testRemove(int cardinality)
   {
+    initWrappedRoaringBitmapTest(cardinality);
     bitmap.remove(Integer.MAX_VALUE);
-    Assert.assertEquals(cardinality, bitmap.size());
+    Assertions.assertEquals(cardinality, bitmap.size());
 
     if (cardinality > 0) {
       bitmap.remove(DATA[0]);
-      Assert.assertEquals(cardinality - 1, bitmap.size());
+      Assertions.assertEquals(cardinality - 1, bitmap.size());
     }
   }
 
-  @Test
-  public void testClear()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest
+  public void testClear(int cardinality)
   {
+    initWrappedRoaringBitmapTest(cardinality);
     bitmap.clear();
-    Assert.assertEquals(0, bitmap.size());
+    Assertions.assertEquals(0, bitmap.size());
   }
 
-  @Test
-  public void testIterator()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest
+  public void testIterator(int cardinality)
   {
+    initWrappedRoaringBitmapTest(cardinality);
     final IntIterator iterator = bitmap.iterator();
 
     int i = 0;
     while (iterator.hasNext()) {
       final int n = iterator.next();
-      Assert.assertEquals(String.valueOf(i), DATA[i], n);
+      Assertions.assertEquals(DATA[i], n, String.valueOf(i));
       i++;
     }
-    Assert.assertEquals("number of elements", i, cardinality);
+    Assertions.assertEquals(i, cardinality, "number of elements");
   }
 
-  @Test
-  public void testSerialize()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest
+  public void testSerialize(int cardinality)
   {
+    initWrappedRoaringBitmapTest(cardinality);
     byte[] buffer = new byte[bitmap.getSizeInBytes()];
     ByteBuffer byteBuffer = ByteBuffer.wrap(buffer);
     bitmap.serialize(byteBuffer);
     byteBuffer.flip();
     ImmutableBitmap immutableBitmap = new RoaringBitmapFactory().mapImmutableBitmap(byteBuffer);
-    Assert.assertEquals(cardinality, immutableBitmap.size());
+    Assertions.assertEquals(cardinality, immutableBitmap.size());
   }
 
-  @Test
-  public void testToByteArray()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest
+  public void testToByteArray(int cardinality)
   {
+    initWrappedRoaringBitmapTest(cardinality);
     ImmutableBitmap immutableBitmap = new RoaringBitmapFactory().mapImmutableBitmap(ByteBuffer.wrap(bitmap.toBytes()));
-    Assert.assertEquals(cardinality, immutableBitmap.size());
+    Assertions.assertEquals(cardinality, immutableBitmap.size());
   }
 }

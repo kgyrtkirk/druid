@@ -38,18 +38,17 @@ import org.apache.druid.timeline.partition.NumberedShardSpec;
 import org.apache.druid.timeline.partition.PartitionIds;
 import org.apache.druid.timeline.partition.ShardSpec;
 import org.apache.druid.timeline.partition.SingleDimensionShardSpec;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Set;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public class SegmentPublisherHelperTest
 {
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
 
   @Test
   public void testAnnotateAtomicUpdateGroupSize()
@@ -82,9 +81,9 @@ public class SegmentPublisherHelperTest
     );
     final Set<DataSegment> annotated = SegmentPublisherHelper.annotateShardSpec(segments);
     for (DataSegment segment : annotated) {
-      Assert.assertSame(NumberedOverwriteShardSpec.class, segment.getShardSpec().getClass());
+      Assertions.assertSame(NumberedOverwriteShardSpec.class, segment.getShardSpec().getClass());
       final NumberedOverwriteShardSpec shardSpec = (NumberedOverwriteShardSpec) segment.getShardSpec();
-      Assert.assertEquals(3, shardSpec.getAtomicUpdateGroupSize());
+      Assertions.assertEquals(3, shardSpec.getAtomicUpdateGroupSize());
     }
   }
 
@@ -98,9 +97,9 @@ public class SegmentPublisherHelperTest
     );
     final Set<DataSegment> annotated = SegmentPublisherHelper.annotateShardSpec(segments);
     for (DataSegment segment : annotated) {
-      Assert.assertSame(NumberedShardSpec.class, segment.getShardSpec().getClass());
+      Assertions.assertSame(NumberedShardSpec.class, segment.getShardSpec().getClass());
       final NumberedShardSpec shardSpec = (NumberedShardSpec) segment.getShardSpec();
-      Assert.assertEquals(3, shardSpec.getNumCorePartitions());
+      Assertions.assertEquals(3, shardSpec.getNumCorePartitions());
     }
   }
 
@@ -141,9 +140,9 @@ public class SegmentPublisherHelperTest
     );
     final Set<DataSegment> annotated = SegmentPublisherHelper.annotateShardSpec(segments);
     for (DataSegment segment : annotated) {
-      Assert.assertSame(HashBasedNumberedShardSpec.class, segment.getShardSpec().getClass());
+      Assertions.assertSame(HashBasedNumberedShardSpec.class, segment.getShardSpec().getClass());
       final HashBasedNumberedShardSpec shardSpec = (HashBasedNumberedShardSpec) segment.getShardSpec();
-      Assert.assertEquals(3, shardSpec.getNumCorePartitions());
+      Assertions.assertEquals(3, shardSpec.getNumCorePartitions());
     }
   }
 
@@ -157,9 +156,9 @@ public class SegmentPublisherHelperTest
     );
     final Set<DataSegment> annotated = SegmentPublisherHelper.annotateShardSpec(segments);
     for (DataSegment segment : annotated) {
-      Assert.assertSame(SingleDimensionShardSpec.class, segment.getShardSpec().getClass());
+      Assertions.assertSame(SingleDimensionShardSpec.class, segment.getShardSpec().getClass());
       final SingleDimensionShardSpec shardSpec = (SingleDimensionShardSpec) segment.getShardSpec();
-      Assert.assertEquals(3, shardSpec.getNumCorePartitions());
+      Assertions.assertEquals(3, shardSpec.getNumCorePartitions());
     }
   }
 
@@ -191,9 +190,9 @@ public class SegmentPublisherHelperTest
     );
     final Set<DataSegment> annotated = SegmentPublisherHelper.annotateShardSpec(segments);
     for (DataSegment segment : annotated) {
-      Assert.assertSame(DimensionRangeShardSpec.class, segment.getShardSpec().getClass());
+      Assertions.assertSame(DimensionRangeShardSpec.class, segment.getShardSpec().getClass());
       final DimensionRangeShardSpec shardSpec = (DimensionRangeShardSpec) segment.getShardSpec();
-      Assert.assertEquals(3, shardSpec.getNumCorePartitions());
+      Assertions.assertEquals(3, shardSpec.getNumCorePartitions());
     }
   }
 
@@ -206,20 +205,21 @@ public class SegmentPublisherHelperTest
         newSegment(new NumberedShardSpec(2, 0))
     );
     final Set<DataSegment> annotated = SegmentPublisherHelper.annotateShardSpec(segments);
-    Assert.assertEquals(segments, annotated);
+    Assertions.assertEquals(segments, annotated);
   }
 
   @Test
   public void testAnnotateShardSpecThrowingExceptionForBucketNumberedShardSpec()
   {
-    final Set<DataSegment> segments = ImmutableSet.of(
-        newSegment(new HashBucketShardSpec(0, 3, null, HashPartitionFunction.MURMUR3_32_ABS, new ObjectMapper())),
-        newSegment(new HashBucketShardSpec(1, 3, null, HashPartitionFunction.MURMUR3_32_ABS, new ObjectMapper())),
-        newSegment(new HashBucketShardSpec(2, 3, null, HashPartitionFunction.MURMUR3_32_ABS, new ObjectMapper()))
-    );
-    expectedException.expect(IllegalStateException.class);
-    expectedException.expectMessage("Cannot publish segments with shardSpec");
-    SegmentPublisherHelper.annotateShardSpec(segments);
+    Throwable exception = assertThrows(IllegalStateException.class, () -> {
+      final Set<DataSegment> segments = ImmutableSet.of(
+          newSegment(new HashBucketShardSpec(0, 3, null, HashPartitionFunction.MURMUR3_32_ABS, new ObjectMapper())),
+          newSegment(new HashBucketShardSpec(1, 3, null, HashPartitionFunction.MURMUR3_32_ABS, new ObjectMapper())),
+          newSegment(new HashBucketShardSpec(2, 3, null, HashPartitionFunction.MURMUR3_32_ABS, new ObjectMapper()))
+      );
+      SegmentPublisherHelper.annotateShardSpec(segments);
+    });
+    assertTrue(exception.getMessage().contains("Cannot publish segments with shardSpec"));
   }
 
   private static DataSegment newSegment(ShardSpec shardSpec)

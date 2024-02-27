@@ -29,12 +29,14 @@ import org.apache.druid.java.util.metrics.StubServiceEmitter;
 import org.apache.druid.query.timeseries.TimeseriesQueryQueryToolChest;
 import org.apache.druid.query.timeseries.TimeseriesResultValue;
 import org.hamcrest.CoreMatchers;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
+
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class CPUTimeMetricQueryRunnerTest
 {
@@ -68,16 +70,16 @@ public class CPUTimeMetricQueryRunnerTest
         ).withQueryMetrics(new TimeseriesQueryQueryToolChest())
     );
 
-    Assert.assertEquals(expectedResults, results.toList());
-    Assert.assertEquals(1, emitter.getEvents().size());
+    Assertions.assertEquals(expectedResults, results.toList());
+    Assertions.assertEquals(1, emitter.getEvents().size());
 
     final Event event = Iterables.getOnlyElement(emitter.getEvents());
 
-    Assert.assertEquals("metrics", event.toMap().get("feed"));
-    Assert.assertEquals("query/cpu/time", event.toMap().get("metric"));
+    Assertions.assertEquals("metrics", event.toMap().get("feed"));
+    Assertions.assertEquals("query/cpu/time", event.toMap().get("metric"));
 
     final Object value = event.toMap().get("value");
-    Assert.assertThat(value, CoreMatchers.instanceOf(Long.class));
-    Assert.assertTrue((long) value > 0);
+    assertThat(value, CoreMatchers.instanceOf(Long.class));
+    Assertions.assertTrue((long) value > 0);
   }
 }

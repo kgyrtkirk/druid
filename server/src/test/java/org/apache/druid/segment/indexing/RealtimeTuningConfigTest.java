@@ -28,11 +28,13 @@ import org.apache.druid.timeline.partition.NumberedShardSpec;
 import org.hamcrest.CoreMatchers;
 import org.joda.time.Duration;
 import org.joda.time.Period;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.util.UUID;
+
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class RealtimeTuningConfigTest
 {
@@ -47,7 +49,7 @@ public class RealtimeTuningConfigTest
       RealtimeTuningConfig.makeDefaultTuningConfig(null);
     }
     catch (IllegalStateException e) {
-      Assert.assertThat(
+      assertThat(
           e.getMessage(),
           CoreMatchers.startsWith("java.io.tmpdir (" + nonExistedDirectory + ") does not exist")
       );
@@ -63,7 +65,7 @@ public class RealtimeTuningConfigTest
     final RealtimeTuningConfig tuningConfig = RealtimeTuningConfig.makeDefaultTuningConfig(
         new File("/tmp/nonexistent")
     );
-    Assert.assertEquals(new File("/tmp/nonexistent"), tuningConfig.getBasePersistDirectory());
+    Assertions.assertEquals(new File("/tmp/nonexistent"), tuningConfig.getBasePersistDirectory());
   }
 
   @Test
@@ -82,19 +84,19 @@ public class RealtimeTuningConfigTest
         TuningConfig.class
     );
 
-    Assert.assertEquals(new OnheapIncrementalIndex.Spec(), config.getAppendableIndexSpec());
-    Assert.assertEquals(Duration.standardMinutes(15).getMillis(), config.getHandoffConditionTimeout());
-    Assert.assertEquals(0, config.getAlertTimeout());
-    Assert.assertEquals(IndexSpec.DEFAULT, config.getIndexSpec());
-    Assert.assertEquals(IndexSpec.DEFAULT, config.getIndexSpecForIntermediatePersists());
-    Assert.assertEquals(new Period("PT10M"), config.getIntermediatePersistPeriod());
-    Assert.assertEquals(new NumberedShardSpec(0, 1), config.getShardSpec());
-    Assert.assertEquals(0, config.getMaxPendingPersists());
-    Assert.assertEquals(150000, config.getMaxRowsInMemory());
-    Assert.assertEquals(0, config.getMergeThreadPriority());
-    Assert.assertEquals(0, config.getPersistThreadPriority());
-    Assert.assertEquals(new Period("PT10M"), config.getWindowPeriod());
-    Assert.assertFalse(config.isReportParseExceptions());
+    Assertions.assertEquals(new OnheapIncrementalIndex.Spec(), config.getAppendableIndexSpec());
+    Assertions.assertEquals(Duration.standardMinutes(15).getMillis(), config.getHandoffConditionTimeout());
+    Assertions.assertEquals(0, config.getAlertTimeout());
+    Assertions.assertEquals(IndexSpec.DEFAULT, config.getIndexSpec());
+    Assertions.assertEquals(IndexSpec.DEFAULT, config.getIndexSpecForIntermediatePersists());
+    Assertions.assertEquals(new Period("PT10M"), config.getIntermediatePersistPeriod());
+    Assertions.assertEquals(new NumberedShardSpec(0, 1), config.getShardSpec());
+    Assertions.assertEquals(0, config.getMaxPendingPersists());
+    Assertions.assertEquals(150000, config.getMaxRowsInMemory());
+    Assertions.assertEquals(0, config.getMergeThreadPriority());
+    Assertions.assertEquals(0, config.getPersistThreadPriority());
+    Assertions.assertEquals(new Period("PT10M"), config.getWindowPeriod());
+    Assertions.assertFalse(config.isReportParseExceptions());
   }
 
   @Test
@@ -127,22 +129,22 @@ public class RealtimeTuningConfigTest
         TuningConfig.class
     );
 
-    Assert.assertEquals(new OnheapIncrementalIndex.Spec(), config.getAppendableIndexSpec());
-    Assert.assertEquals(100, config.getHandoffConditionTimeout());
-    Assert.assertEquals(70, config.getAlertTimeout());
-    Assert.assertEquals(new Period("PT1H"), config.getIntermediatePersistPeriod());
-    Assert.assertEquals(new NumberedShardSpec(0, 1), config.getShardSpec());
-    Assert.assertEquals(100, config.getMaxPendingPersists());
-    Assert.assertEquals(100, config.getMaxRowsInMemory());
-    Assert.assertEquals(100, config.getMergeThreadPriority());
-    Assert.assertEquals(100, config.getPersistThreadPriority());
-    Assert.assertEquals(new Period("PT1H"), config.getWindowPeriod());
-    Assert.assertEquals(true, config.isReportParseExceptions());
-    Assert.assertEquals(
+    Assertions.assertEquals(new OnheapIncrementalIndex.Spec(), config.getAppendableIndexSpec());
+    Assertions.assertEquals(100, config.getHandoffConditionTimeout());
+    Assertions.assertEquals(70, config.getAlertTimeout());
+    Assertions.assertEquals(new Period("PT1H"), config.getIntermediatePersistPeriod());
+    Assertions.assertEquals(new NumberedShardSpec(0, 1), config.getShardSpec());
+    Assertions.assertEquals(100, config.getMaxPendingPersists());
+    Assertions.assertEquals(100, config.getMaxRowsInMemory());
+    Assertions.assertEquals(100, config.getMergeThreadPriority());
+    Assertions.assertEquals(100, config.getPersistThreadPriority());
+    Assertions.assertEquals(new Period("PT1H"), config.getWindowPeriod());
+    Assertions.assertEquals(true, config.isReportParseExceptions());
+    Assertions.assertEquals(
         IndexSpec.builder().withMetricCompression(CompressionStrategy.NONE).build(),
         config.getIndexSpec()
     );
-    Assert.assertEquals(
+    Assertions.assertEquals(
         IndexSpec.builder().withDimensionCompression(CompressionStrategy.UNCOMPRESSED).build(),
         config.getIndexSpecForIntermediatePersists()
     );

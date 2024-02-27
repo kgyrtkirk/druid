@@ -34,16 +34,13 @@ import org.apache.druid.segment.writeout.SegmentWriteOutMedium;
 import org.apache.druid.segment.writeout.TmpFileSegmentWriteOutMediumFactory;
 import org.apache.druid.segment.writeout.WriteOutBytes;
 import org.apache.druid.utils.CloseableUtils;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.File;
 import java.io.IOException;
@@ -54,23 +51,21 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
-@RunWith(Parameterized.class)
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public class CompressedVSizeColumnarIntsSerializerTest
 {
   private static final int[] MAX_VALUES = new int[]{0xFF, 0xFFFF, 0xFFFFFF, 0x0FFFFFFF};
   private final SegmentWriteOutMedium segmentWriteOutMedium = new OffHeapMemorySegmentWriteOutMedium();
-  private final CompressionStrategy compressionStrategy;
-  private final ByteOrder byteOrder;
+  private CompressionStrategy compressionStrategy;
+  private ByteOrder byteOrder;
   private final Random rand = new Random(0);
   private int[] vals;
 
-  @Rule
-  public TemporaryFolder temporaryFolder = new TemporaryFolder();
+  @TempDir
+  public File temporaryFolder;
 
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
-
-  public CompressedVSizeColumnarIntsSerializerTest(
+  public void initCompressedVSizeColumnarIntsSerializerTest(
       CompressionStrategy compressionStrategy,
       ByteOrder byteOrder
   )
@@ -79,7 +74,6 @@ public class CompressedVSizeColumnarIntsSerializerTest
     this.byteOrder = byteOrder;
   }
 
-  @Parameterized.Parameters(name = "{index}: compression={0}, byteOrder={1}")
   public static Iterable<Object[]> compressionStrategiesAndByteOrders()
   {
     Set<List<Object>> combinations = Sets.cartesianProduct(
@@ -93,13 +87,13 @@ public class CompressedVSizeColumnarIntsSerializerTest
     );
   }
 
-  @Before
+  @BeforeEach
   public void setUp()
   {
     vals = null;
   }
 
-  @After
+  @AfterEach
   public void tearDown() throws Exception
   {
     segmentWriteOutMedium.close();
@@ -115,7 +109,7 @@ public class CompressedVSizeColumnarIntsSerializerTest
 
   private void checkSerializedSizeAndData(int chunkSize) throws Exception
   {
-    FileSmoosher smoosher = new FileSmoosher(temporaryFolder.newFolder());
+    FileSmoosher smoosher = new FileSmoosher(newFolder(temporaryFolder, "junit"));
     final String columnName = "test";
     CompressedVSizeColumnarIntsSerializer writer = new CompressedVSizeColumnarIntsSerializer(
         columnName,
@@ -143,7 +137,7 @@ public class CompressedVSizeColumnarIntsSerializerTest
     writer.writeTo(writeOutBytes, smoosher);
     smoosher.close();
 
-    Assert.assertEquals(writtenLength, supplierFromList.getSerializedSize());
+    Assertions.assertEquals(writtenLength, supplierFromList.getSerializedSize());
 
     // read from ByteBuffer and check values
     CompressedVSizeColumnarIntsSupplier supplierFromByteBuffer = CompressedVSizeColumnarIntsSupplier.fromByteBuffer(
@@ -152,14 +146,16 @@ public class CompressedVSizeColumnarIntsSerializerTest
     );
     ColumnarInts columnarInts = supplierFromByteBuffer.get();
     for (int i = 0; i < vals.length; ++i) {
-      Assert.assertEquals(vals[i], columnarInts.get(i));
+      Assertions.assertEquals(vals[i], columnarInts.get(i));
     }
     CloseableUtils.closeAndWrapExceptions(columnarInts);
   }
 
-  @Test
-  public void testSmallData() throws Exception
+  @MethodSource("compressionStrategiesAndByteOrders")
+  @ParameterizedTest(name = "{index}: compression={0}, byteOrder={1}")
+  public void testSmallData(CompressionStrategy compressionStrategy, ByteOrder byteOrder) throws Exception
   {
+    initCompressedVSizeColumnarIntsSerializerTest(compressionStrategy, byteOrder);
     // less than one chunk
     for (int maxValue : MAX_VALUES) {
       final int maxChunkSize = CompressedVSizeColumnarIntsSupplier.maxIntsInBufferForValue(maxValue);
@@ -168,9 +164,11 @@ public class CompressedVSizeColumnarIntsSerializerTest
     }
   }
 
-  @Test
-  public void testLargeData() throws Exception
+  @MethodSource("compressionStrategiesAndByteOrders")
+  @ParameterizedTest(name = "{index}: compression={0}, byteOrder={1}")
+  public void testLargeData(CompressionStrategy compressionStrategy, ByteOrder byteOrder) throws Exception
   {
+    initCompressedVSizeColumnarIntsSerializerTest(compressionStrategy, byteOrder);
     // more than one chunk
     for (int maxValue : MAX_VALUES) {
       final int maxChunkSize = CompressedVSizeColumnarIntsSupplier.maxIntsInBufferForValue(maxValue);
@@ -181,52 +179,57 @@ public class CompressedVSizeColumnarIntsSerializerTest
 
 
   // this test takes ~18 minutes to run
-  @Ignore
-  @Test
-  public void testTooManyValues() throws IOException
+  @Disabled
+  @MethodSource("compressionStrategiesAndByteOrders")
+  @ParameterizedTest(name = "{index}: compression={0}, byteOrder={1}")
+  public void testTooManyValues(CompressionStrategy compressionStrategy, ByteOrder byteOrder) throws IOException
   {
-    final int maxValue = 0x0FFFFFFF;
-    final int maxChunkSize = CompressedVSizeColumnarIntsSupplier.maxIntsInBufferForValue(maxValue);
-    expectedException.expect(ColumnCapacityExceededException.class);
-    expectedException.expectMessage(ColumnCapacityExceededException.formatMessage("test"));
-    try (
+    Throwable exception = assertThrows(ColumnCapacityExceededException.class, () -> {
+      initCompressedVSizeColumnarIntsSerializerTest(compressionStrategy, byteOrder);
+      final int maxValue = 0x0FFFFFFF;
+      final int maxChunkSize = CompressedVSizeColumnarIntsSupplier.maxIntsInBufferForValue(maxValue);
+      try (
         SegmentWriteOutMedium segmentWriteOutMedium =
-            TmpFileSegmentWriteOutMediumFactory.instance().makeSegmentWriteOutMedium(temporaryFolder.newFolder())
-    ) {
-      GenericIndexedWriter genericIndexed = GenericIndexedWriter.ofCompressedByteBuffers(
-          segmentWriteOutMedium,
-          "test",
-          compressionStrategy,
-          Long.BYTES * 10000
-      );
-      CompressedVSizeColumnarIntsSerializer serializer = new CompressedVSizeColumnarIntsSerializer(
-          "test",
-          segmentWriteOutMedium,
-          maxValue,
-          maxChunkSize,
-          byteOrder,
-          compressionStrategy,
-          genericIndexed
-      );
-      serializer.open();
+              TmpFileSegmentWriteOutMediumFactory.instance().makeSegmentWriteOutMedium(newFolder(temporaryFolder, "junit"))
+          ) {
+        GenericIndexedWriter genericIndexed = GenericIndexedWriter.ofCompressedByteBuffers(
+            segmentWriteOutMedium,
+            "test",
+            compressionStrategy,
+            Long.BYTES * 10000
+        );
+        CompressedVSizeColumnarIntsSerializer serializer = new CompressedVSizeColumnarIntsSerializer(
+            "test",
+            segmentWriteOutMedium,
+            maxValue,
+            maxChunkSize,
+            byteOrder,
+            compressionStrategy,
+            genericIndexed
+        );
+        serializer.open();
 
-      final long numRows = Integer.MAX_VALUE + 100L;
-      for (long i = 0L; i < numRows; i++) {
-        serializer.addValue(ThreadLocalRandom.current().nextInt(0, Integer.MAX_VALUE));
+        final long numRows = Integer.MAX_VALUE + 100L;
+        for (long i = 0L; i < numRows; i++) {
+          serializer.addValue(ThreadLocalRandom.current().nextInt(0, Integer.MAX_VALUE));
+        }
       }
-    }
+    });
+    assertTrue(exception.getMessage().contains(ColumnCapacityExceededException.formatMessage("test")));
   }
 
-  @Test
-  public void testEmpty() throws Exception
+  @MethodSource("compressionStrategiesAndByteOrders")
+  @ParameterizedTest(name = "{index}: compression={0}, byteOrder={1}")
+  public void testEmpty(CompressionStrategy compressionStrategy, ByteOrder byteOrder) throws Exception
   {
+    initCompressedVSizeColumnarIntsSerializerTest(compressionStrategy, byteOrder);
     vals = new int[0];
     checkSerializedSizeAndData(2);
   }
 
   private void checkV2SerializedSizeAndData(int chunkSize) throws Exception
   {
-    File tmpDirectory = temporaryFolder.newFolder();
+    File tmpDirectory = newFolder(temporaryFolder, "junit");
     FileSmoosher smoosher = new FileSmoosher(tmpDirectory);
     final String columnName = "test";
     GenericIndexedWriter genericIndexed = GenericIndexedWriter.ofCompressedByteBuffers(
@@ -266,19 +269,30 @@ public class CompressedVSizeColumnarIntsSerializerTest
 
     ColumnarInts columnarInts = supplierFromByteBuffer.get();
     for (int i = 0; i < vals.length; ++i) {
-      Assert.assertEquals(vals[i], columnarInts.get(i));
+      Assertions.assertEquals(vals[i], columnarInts.get(i));
     }
     CloseableUtils.closeAll(columnarInts, mapper);
   }
 
-  @Test
-  public void testMultiValueFileLargeData() throws Exception
+  @MethodSource("compressionStrategiesAndByteOrders")
+  @ParameterizedTest(name = "{index}: compression={0}, byteOrder={1}")
+  public void testMultiValueFileLargeData(CompressionStrategy compressionStrategy, ByteOrder byteOrder) throws Exception
   {
+    initCompressedVSizeColumnarIntsSerializerTest(compressionStrategy, byteOrder);
     for (int maxValue : MAX_VALUES) {
       final int maxChunkSize = CompressedVSizeColumnarIntsSupplier.maxIntsInBufferForValue(maxValue);
       generateVals((rand.nextInt(5) + 5) * maxChunkSize + rand.nextInt(maxChunkSize), maxValue);
       checkV2SerializedSizeAndData(maxChunkSize);
     }
+  }
+
+  private static File newFolder(File root, String... subDirs) throws IOException {
+    String subFolder = String.join("/", subDirs);
+    File result = new File(root, subFolder);
+    if (!result.mkdirs()) {
+      throw new IOException("Couldn't create folders " + root);
+    }
+    return result;
   }
 
 }

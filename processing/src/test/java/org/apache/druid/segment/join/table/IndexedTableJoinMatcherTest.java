@@ -36,14 +36,12 @@ import org.apache.druid.segment.DimensionSelector;
 import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.data.ArrayBasedIndexedInts;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.experimental.runners.Enclosed;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -52,21 +50,24 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 
-@RunWith(Enclosed.class)
+
+
 public class IndexedTableJoinMatcherTest
 {
   private static final int SIZE = 3;
 
-  @RunWith(Enclosed.class)
-  public static class ConditionMatcherFactoryTest
+  @Nested
+  public class ConditionMatcherFactoryTest
   {
-    public static class MakeLongProcessorTest extends InitializedNullHandlingTest
+    @Nested
+    @Nested
+    public class MakeLongProcessorTest extends InitializedNullHandlingTest
     {
       @Mock
       private BaseLongColumnValueSelector selector;
       private AutoCloseable mocks;
 
-      @Before
+      @BeforeEach
       public void setUp()
       {
         mocks = MockitoAnnotations.openMocks(this);
@@ -78,7 +79,7 @@ public class IndexedTableJoinMatcherTest
         Mockito.doReturn(1L).when(selector).getLong();
       }
 
-      @After
+      @AfterEach
       public void tearDown() throws Exception
       {
         mocks.close();
@@ -91,7 +92,7 @@ public class IndexedTableJoinMatcherTest
             new IndexedTableJoinMatcher.ConditionMatcherFactory(longPlusOneIndex(), false);
         final IndexedTableJoinMatcher.ConditionMatcher processor = conditionMatcherFactory.makeLongProcessor(selector);
 
-        Assert.assertEquals(ImmutableList.of(2), ImmutableList.copyOf(processor.match()));
+        Assertions.assertEquals(ImmutableList.of(2), ImmutableList.copyOf(processor.match()));
       }
 
       @Test
@@ -101,7 +102,7 @@ public class IndexedTableJoinMatcherTest
             new IndexedTableJoinMatcher.ConditionMatcherFactory(longPlusOneIndex(), false);
         final IndexedTableJoinMatcher.ConditionMatcher processor = conditionMatcherFactory.makeLongProcessor(selector);
 
-        Assert.assertEquals(2, processor.matchSingleRow());
+        Assertions.assertEquals(2, processor.matchSingleRow());
       }
 
       @Test
@@ -111,7 +112,7 @@ public class IndexedTableJoinMatcherTest
             new IndexedTableJoinMatcher.ConditionMatcherFactory(longAlwaysOneTwoThreeIndex(), false);
         final IndexedTableJoinMatcher.ConditionMatcher processor = conditionMatcherFactory.makeLongProcessor(selector);
 
-        Assert.assertEquals(ImmutableList.of(1, 2, 3), ImmutableList.copyOf(processor.match()));
+        Assertions.assertEquals(ImmutableList.of(1, 2, 3), ImmutableList.copyOf(processor.match()));
       }
 
       @Test
@@ -121,7 +122,7 @@ public class IndexedTableJoinMatcherTest
             new IndexedTableJoinMatcher.ConditionMatcherFactory(longAlwaysOneTwoThreeIndex(), false);
         final IndexedTableJoinMatcher.ConditionMatcher processor = conditionMatcherFactory.makeLongProcessor(selector);
 
-        Assert.assertThrows(UnsupportedOperationException.class, processor::matchSingleRow);
+        Assertions.assertThrows(UnsupportedOperationException.class, processor::matchSingleRow);
       }
 
       @Test
@@ -131,7 +132,7 @@ public class IndexedTableJoinMatcherTest
             new IndexedTableJoinMatcher.ConditionMatcherFactory(certainStringToThreeIndex(), false);
         final IndexedTableJoinMatcher.ConditionMatcher processor = conditionMatcherFactory.makeLongProcessor(selector);
 
-        Assert.assertEquals(ImmutableList.of(3), ImmutableList.copyOf(processor.match()));
+        Assertions.assertEquals(ImmutableList.of(3), ImmutableList.copyOf(processor.match()));
       }
 
       @Test
@@ -141,26 +142,26 @@ public class IndexedTableJoinMatcherTest
             new IndexedTableJoinMatcher.ConditionMatcherFactory(certainStringToThreeIndex(), false);
         final IndexedTableJoinMatcher.ConditionMatcher processor = conditionMatcherFactory.makeLongProcessor(selector);
 
-        Assert.assertEquals(3, processor.matchSingleRow());
+        Assertions.assertEquals(3, processor.matchSingleRow());
       }
     }
 
-    public static class MakeComplexProcessorTest extends InitializedNullHandlingTest
+    @Nested
+    @Nested
+    public class MakeComplexProcessorTest extends InitializedNullHandlingTest
     {
-      @Rule
-      public ExpectedException expectedException = ExpectedException.none();
 
       @Mock
       private BaseObjectColumnValueSelector<?> selector;
       private AutoCloseable mocks;
 
-      @Before
+      @BeforeEach
       public void setUp()
       {
         mocks = MockitoAnnotations.openMocks(this);
       }
 
-      @After
+      @AfterEach
       public void tearDown() throws Exception
       {
         mocks.close();
@@ -175,7 +176,7 @@ public class IndexedTableJoinMatcherTest
         final IndexedTableJoinMatcher.ConditionMatcher processor =
             conditionMatcherFactory.makeComplexProcessor(selector);
 
-        Assert.assertEquals(ImmutableList.of(), ImmutableList.copyOf(processor.match()));
+        Assertions.assertEquals(ImmutableList.of(), ImmutableList.copyOf(processor.match()));
       }
 
       @Test
@@ -187,14 +188,14 @@ public class IndexedTableJoinMatcherTest
         final IndexedTableJoinMatcher.ConditionMatcher processor =
             conditionMatcherFactory.makeComplexProcessor(selector);
 
-        Assert.assertEquals(IndexedTableJoinMatcher.NO_CONDITION_MATCH, processor.matchSingleRow());
+        Assertions.assertEquals(IndexedTableJoinMatcher.NO_CONDITION_MATCH, processor.matchSingleRow());
       }
     }
 
-    public static class MakeDimensionProcessorTest extends InitializedNullHandlingTest
+    @Nested
+    @Nested
+    public class MakeDimensionProcessorTest extends InitializedNullHandlingTest
     {
-      @Rule
-      public ExpectedException expectedException = ExpectedException.none();
 
       @Mock
       private DimensionSelector dimensionSelector;
@@ -204,45 +205,49 @@ public class IndexedTableJoinMatcherTest
       @Test
       public void testMatchMultiValuedRowCardinalityUnknownShouldThrowException() throws Exception
       {
-        try (final AutoCloseable mocks = MockitoAnnotations.openMocks(this)) {
-          ArrayBasedIndexedInts row = new ArrayBasedIndexedInts(new int[]{2, 4, 6});
-          Mockito.doReturn(row).when(dimensionSelector).getRow();
-          Mockito.doReturn(DimensionDictionarySelector.CARDINALITY_UNKNOWN)
-                 .when(dimensionSelector)
-                 .getValueCardinality();
+        assertThrows(QueryUnsupportedException.class, () -> {
+          try (final AutoCloseable mocks = MockitoAnnotations.openMocks(this)) {
+            ArrayBasedIndexedInts row = new ArrayBasedIndexedInts(new int[]{2, 4, 6});
+            Mockito.doReturn(row).when(dimensionSelector).getRow();
+            Mockito.doReturn(DimensionDictionarySelector.CARDINALITY_UNKNOWN)
+                .when(dimensionSelector)
+                .getValueCardinality();
 
-          IndexedTableJoinMatcher.ConditionMatcherFactory conditionMatcherFactory =
-              new IndexedTableJoinMatcher.ConditionMatcherFactory(stringToLengthIndex(), false);
-          IndexedTableJoinMatcher.ConditionMatcher dimensionProcessor = conditionMatcherFactory.makeDimensionProcessor(
-              dimensionSelector,
-              false
-          );
+            IndexedTableJoinMatcher.ConditionMatcherFactory conditionMatcherFactory =
+                new IndexedTableJoinMatcher.ConditionMatcherFactory(stringToLengthIndex(), false);
+            IndexedTableJoinMatcher.ConditionMatcher dimensionProcessor = conditionMatcherFactory.makeDimensionProcessor(
+                dimensionSelector,
+                false
+            );
 
-          // Test match should throw exception
-          expectedException.expect(QueryUnsupportedException.class);
-          dimensionProcessor.match();
-        }
+            // Test match should throw exception
+            expectedException.expect(QueryUnsupportedException.class);
+            dimensionProcessor.match();
+          }
+        });
       }
 
       @Test
       public void testMatchMultiValuedRowCardinalityKnownShouldThrowException() throws Exception
       {
-        try (final AutoCloseable mocks = MockitoAnnotations.openMocks(this)) {
-          ArrayBasedIndexedInts row = new ArrayBasedIndexedInts(new int[]{2, 4, 6});
-          Mockito.doReturn(row).when(dimensionSelector).getRow();
-          Mockito.doReturn(3).when(dimensionSelector).getValueCardinality();
+        assertThrows(QueryUnsupportedException.class, () -> {
+          try (final AutoCloseable mocks = MockitoAnnotations.openMocks(this)) {
+            ArrayBasedIndexedInts row = new ArrayBasedIndexedInts(new int[]{2, 4, 6});
+            Mockito.doReturn(row).when(dimensionSelector).getRow();
+            Mockito.doReturn(3).when(dimensionSelector).getValueCardinality();
 
-          IndexedTableJoinMatcher.ConditionMatcherFactory conditionMatcherFactory =
-              new IndexedTableJoinMatcher.ConditionMatcherFactory(stringToLengthIndex(), false);
-          IndexedTableJoinMatcher.ConditionMatcher dimensionProcessor = conditionMatcherFactory.makeDimensionProcessor(
-              dimensionSelector,
-              false
-          );
+            IndexedTableJoinMatcher.ConditionMatcherFactory conditionMatcherFactory =
+                new IndexedTableJoinMatcher.ConditionMatcherFactory(stringToLengthIndex(), false);
+            IndexedTableJoinMatcher.ConditionMatcher dimensionProcessor = conditionMatcherFactory.makeDimensionProcessor(
+                dimensionSelector,
+                false
+            );
 
-          // Test match should throw exception
-          expectedException.expect(QueryUnsupportedException.class);
-          dimensionProcessor.match();
-        }
+            // Test match should throw exception
+            expectedException.expect(QueryUnsupportedException.class);
+            dimensionProcessor.match();
+          }
+        });
       }
 
       @Test
@@ -262,10 +267,10 @@ public class IndexedTableJoinMatcherTest
               false
           );
 
-          Assert.assertNotNull(dimensionProcessor.match());
-          Assert.assertTrue(dimensionProcessor.match().isEmpty());
+          Assertions.assertNotNull(dimensionProcessor.match());
+          Assertions.assertTrue(dimensionProcessor.match().isEmpty());
 
-          Assert.assertEquals(IndexedTableJoinMatcher.NO_CONDITION_MATCH, dimensionProcessor.matchSingleRow());
+          Assertions.assertEquals(IndexedTableJoinMatcher.NO_CONDITION_MATCH, dimensionProcessor.matchSingleRow());
         }
       }
 
@@ -284,10 +289,10 @@ public class IndexedTableJoinMatcherTest
               false
           );
 
-          Assert.assertNotNull(dimensionProcessor.match());
-          Assert.assertTrue(dimensionProcessor.match().isEmpty());
+          Assertions.assertNotNull(dimensionProcessor.match());
+          Assertions.assertTrue(dimensionProcessor.match().isEmpty());
 
-          Assert.assertEquals(IndexedTableJoinMatcher.NO_CONDITION_MATCH, dimensionProcessor.matchSingleRow());
+          Assertions.assertEquals(IndexedTableJoinMatcher.NO_CONDITION_MATCH, dimensionProcessor.matchSingleRow());
         }
       }
 
@@ -297,8 +302,8 @@ public class IndexedTableJoinMatcherTest
         IndexedTableJoinMatcher.ConditionMatcher target =
             makeConditionMatcher(DimensionDictionarySelector.CARDINALITY_UNKNOWN);
 
-        Assert.assertEquals(ImmutableList.of(KEY.length()), new IntArrayList(target.match()));
-        Assert.assertEquals(KEY.length(), target.matchSingleRow());
+        Assertions.assertEquals(ImmutableList.of(KEY.length()), new IntArrayList(target.match()));
+        Assertions.assertEquals(KEY.length(), target.matchSingleRow());
       }
 
       @Test
@@ -307,8 +312,8 @@ public class IndexedTableJoinMatcherTest
         int lowCardinality = IndexedTableJoinMatcher.ConditionMatcherFactory.CACHE_MAX_SIZE / 10;
         IndexedTableJoinMatcher.ConditionMatcher target = makeConditionMatcher(lowCardinality);
 
-        Assert.assertEquals(ImmutableList.of(KEY.length()), new IntArrayList(target.match()));
-        Assert.assertEquals(KEY.length(), target.matchSingleRow());
+        Assertions.assertEquals(ImmutableList.of(KEY.length()), new IntArrayList(target.match()));
+        Assertions.assertEquals(KEY.length(), target.matchSingleRow());
       }
 
       @Test
@@ -317,8 +322,8 @@ public class IndexedTableJoinMatcherTest
         int highCardinality = IndexedTableJoinMatcher.ConditionMatcherFactory.CACHE_MAX_SIZE / 10;
         IndexedTableJoinMatcher.ConditionMatcher target = makeConditionMatcher(highCardinality);
 
-        Assert.assertEquals(ImmutableList.of(KEY.length()), new IntArrayList(target.match()));
-        Assert.assertEquals(KEY.length(), target.matchSingleRow());
+        Assertions.assertEquals(ImmutableList.of(KEY.length()), new IntArrayList(target.match()));
+        Assertions.assertEquals(KEY.length(), target.matchSingleRow());
       }
 
       private static IndexedTableJoinMatcher.ConditionMatcher makeConditionMatcher(int valueCardinality)
@@ -350,14 +355,15 @@ public class IndexedTableJoinMatcherTest
     }
   }
 
-  public static class LruLoadingHashMapTest
+  @Nested
+  public class LruLoadingHashMapTest
   {
     @SuppressWarnings("MismatchedQueryAndUpdateOfCollection")  // updated via computeIfAbsent
     private IndexedTableJoinMatcher.LruLoadingHashMap<Long, Long> target;
 
     private AtomicLong counter;
 
-    @Before
+    @BeforeEach
     public void setup()
     {
       counter = new AtomicLong(0);
@@ -373,17 +379,17 @@ public class IndexedTableJoinMatcherTest
     public void loadsValueIfAbsent()
     {
       Long key = 1L;
-      Assert.assertEquals(key, target.getAndLoadIfAbsent(key));
-      Assert.assertEquals(1L, counter.longValue());
+      Assertions.assertEquals(key, target.getAndLoadIfAbsent(key));
+      Assertions.assertEquals(1L, counter.longValue());
     }
 
     @Test
     public void doesNotLoadIfPresent()
     {
       Long key = 1L;
-      Assert.assertEquals(key, target.getAndLoadIfAbsent(key));
-      Assert.assertEquals(key, target.getAndLoadIfAbsent(key));
-      Assert.assertEquals(1L, counter.longValue());
+      Assertions.assertEquals(key, target.getAndLoadIfAbsent(key));
+      Assertions.assertEquals(key, target.getAndLoadIfAbsent(key));
+      Assertions.assertEquals(1L, counter.longValue());
     }
 
     @Test
@@ -394,23 +400,24 @@ public class IndexedTableJoinMatcherTest
 
       for (long i = start; i < next; i++) {
         Long key = i;
-        Assert.assertEquals(key, target.getAndLoadIfAbsent(key));
+        Assertions.assertEquals(key, target.getAndLoadIfAbsent(key));
       }
 
-      Assert.assertEquals(next, target.getAndLoadIfAbsent(next));
-      Assert.assertNull(target.get(start));
+      Assertions.assertEquals(next, target.getAndLoadIfAbsent(next));
+      Assertions.assertNull(target.get(start));
 
-      Assert.assertEquals(SIZE + 1, counter.longValue());
+      Assertions.assertEquals(SIZE + 1, counter.longValue());
     }
   }
 
-  public static class Int2IntListLookupTableTest
+  @Nested
+  public class Int2IntListLookupTableTest
   {
     private IndexedTableJoinMatcher.Int2IntSortedSetLookupTable target;
 
     private AtomicLong counter;
 
-    @Before
+    @BeforeEach
     public void setup()
     {
       counter = new AtomicLong(0);
@@ -426,27 +433,28 @@ public class IndexedTableJoinMatcherTest
     public void loadsValueIfAbsent()
     {
       int key = 1;
-      Assert.assertEquals(IntSortedSets.singleton(key), target.getAndLoadIfAbsent(key));
-      Assert.assertEquals(1L, counter.longValue());
+      Assertions.assertEquals(IntSortedSets.singleton(key), target.getAndLoadIfAbsent(key));
+      Assertions.assertEquals(1L, counter.longValue());
     }
 
     @Test
     public void doesNotLoadIfPresent()
     {
       int key = 1;
-      Assert.assertEquals(IntSortedSets.singleton(key), target.getAndLoadIfAbsent(key));
-      Assert.assertEquals(IntSortedSets.singleton(key), target.getAndLoadIfAbsent(key));
-      Assert.assertEquals(1L, counter.longValue());
+      Assertions.assertEquals(IntSortedSets.singleton(key), target.getAndLoadIfAbsent(key));
+      Assertions.assertEquals(IntSortedSets.singleton(key), target.getAndLoadIfAbsent(key));
+      Assertions.assertEquals(1L, counter.longValue());
     }
   }
 
-  public static class Int2IntSortedSetLruCache
+  @Nested
+  public class Int2IntSortedSetLruCache
   {
     private IndexedTableJoinMatcher.Int2IntSortedSetLruCache target;
 
     private AtomicLong counter;
 
-    @Before
+    @BeforeEach
     public void setup()
     {
       counter = new AtomicLong(0);
@@ -462,17 +470,17 @@ public class IndexedTableJoinMatcherTest
     public void loadsValueIfAbsent()
     {
       int key = 1;
-      Assert.assertEquals(IntSortedSets.singleton(key), target.getAndLoadIfAbsent(key));
-      Assert.assertEquals(1L, counter.longValue());
+      Assertions.assertEquals(IntSortedSets.singleton(key), target.getAndLoadIfAbsent(key));
+      Assertions.assertEquals(1L, counter.longValue());
     }
 
     @Test
     public void doesNotLoadIfPresent()
     {
       int key = 1;
-      Assert.assertEquals(IntSortedSets.singleton(key), target.getAndLoadIfAbsent(key));
-      Assert.assertEquals(IntSortedSets.singleton(key), target.getAndLoadIfAbsent(key));
-      Assert.assertEquals(1L, counter.longValue());
+      Assertions.assertEquals(IntSortedSets.singleton(key), target.getAndLoadIfAbsent(key));
+      Assertions.assertEquals(IntSortedSets.singleton(key), target.getAndLoadIfAbsent(key));
+      Assertions.assertEquals(1L, counter.longValue());
     }
 
     @Test
@@ -482,13 +490,13 @@ public class IndexedTableJoinMatcherTest
       int next = start + SIZE;
 
       for (int key = start; key < next; key++) {
-        Assert.assertEquals(IntSortedSets.singleton(key), target.getAndLoadIfAbsent(key));
+        Assertions.assertEquals(IntSortedSets.singleton(key), target.getAndLoadIfAbsent(key));
       }
 
-      Assert.assertEquals(IntSortedSets.singleton(next), target.getAndLoadIfAbsent(next));
-      Assert.assertNull(target.get(start));
+      Assertions.assertEquals(IntSortedSets.singleton(next), target.getAndLoadIfAbsent(next));
+      Assertions.assertNull(target.get(start));
 
-      Assert.assertEquals(SIZE + 1, counter.longValue());
+      Assertions.assertEquals(SIZE + 1, counter.longValue());
     }
   }
 

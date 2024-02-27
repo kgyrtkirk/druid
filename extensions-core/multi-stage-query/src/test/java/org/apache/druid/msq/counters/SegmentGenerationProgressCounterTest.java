@@ -20,7 +20,6 @@
 package org.apache.druid.msq.counters;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
-import org.junit.Test;
 
 public class SegmentGenerationProgressCounterTest
 {

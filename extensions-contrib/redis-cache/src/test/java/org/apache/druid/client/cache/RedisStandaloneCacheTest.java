@@ -36,7 +36,6 @@ import org.apache.druid.java.util.common.lifecycle.Lifecycle;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Test;
 import redis.clients.jedis.JedisPool;
 
 import java.io.IOException;

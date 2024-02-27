@@ -29,14 +29,14 @@ import org.apache.druid.server.coordinator.loading.SegmentLoadQueueManager;
 import org.apache.druid.server.coordinator.loading.TestLoadQueuePeon;
 import org.apache.druid.server.coordinator.stats.CoordinatorRunStats;
 import org.apache.druid.server.coordinator.stats.Stats;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class CollectSegmentAndServerStatsTest
 {
   @Mock
@@ -60,8 +60,8 @@ public class CollectSegmentAndServerStatsTest
     DruidCoordinatorRuntimeParams params = duty.run(runtimeParams);
 
     CoordinatorRunStats stats = params.getCoordinatorStats();
-    Assert.assertTrue(stats.hasStat(Stats.SegmentQueue.NUM_TO_LOAD));
-    Assert.assertTrue(stats.hasStat(Stats.SegmentQueue.NUM_TO_DROP));
+    Assertions.assertTrue(stats.hasStat(Stats.SegmentQueue.NUM_TO_LOAD));
+    Assertions.assertTrue(stats.hasStat(Stats.SegmentQueue.NUM_TO_DROP));
   }
 
 }

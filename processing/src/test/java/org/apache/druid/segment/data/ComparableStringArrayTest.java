@@ -19,8 +19,8 @@
 
 package org.apache.druid.segment.data;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -34,43 +34,43 @@ public class ComparableStringArrayTest
   @Test
   public void testDelegate()
   {
-    Assert.assertArrayEquals(array, comparableStringArray.getDelegate());
-    Assert.assertEquals(0, ComparableStringArray.of(new String[0]).getDelegate().length);
-    Assert.assertEquals(0, ComparableStringArray.of().getDelegate().length);
+    Assertions.assertArrayEquals(array, comparableStringArray.getDelegate());
+    Assertions.assertEquals(0, ComparableStringArray.of(new String[0]).getDelegate().length);
+    Assertions.assertEquals(0, ComparableStringArray.of().getDelegate().length);
   }
 
   @Test
   public void testHashCode()
   {
-    Assert.assertEquals(Arrays.hashCode(array), comparableStringArray.hashCode());
+    Assertions.assertEquals(Arrays.hashCode(array), comparableStringArray.hashCode());
     Set<ComparableStringArray> set = new HashSet<>();
     set.add(comparableStringArray);
     set.add(ComparableStringArray.of(array));
-    Assert.assertEquals(1, set.size());
+    Assertions.assertEquals(1, set.size());
   }
 
   @Test
   public void testEquals()
   {
-    Assert.assertTrue(comparableStringArray.equals(ComparableStringArray.of(array)));
-    Assert.assertFalse(comparableStringArray.equals(ComparableStringArray.of("a", "b", "C")));
-    Assert.assertFalse(comparableStringArray.equals(ComparableStringArray.EMPTY_ARRAY));
-    Assert.assertFalse(comparableStringArray.equals(null));
+    Assertions.assertTrue(comparableStringArray.equals(ComparableStringArray.of(array)));
+    Assertions.assertFalse(comparableStringArray.equals(ComparableStringArray.of("a", "b", "C")));
+    Assertions.assertFalse(comparableStringArray.equals(ComparableStringArray.EMPTY_ARRAY));
+    Assertions.assertFalse(comparableStringArray.equals(null));
   }
 
   @Test
   public void testCompareTo()
   {
-    Assert.assertEquals(0, comparableStringArray.compareTo(ComparableStringArray.of(array)));
-    Assert.assertEquals(1, comparableStringArray.compareTo(null));
-    Assert.assertEquals(1, comparableStringArray.compareTo(ComparableStringArray.of("a", "b")));
-    Assert.assertEquals(-1, comparableStringArray.compareTo(ComparableStringArray.of("a", "b", "c", "d")));
-    Assert.assertTrue(comparableStringArray.compareTo(ComparableStringArray.of("b")) < 0);
+    Assertions.assertEquals(0, comparableStringArray.compareTo(ComparableStringArray.of(array)));
+    Assertions.assertEquals(1, comparableStringArray.compareTo(null));
+    Assertions.assertEquals(1, comparableStringArray.compareTo(ComparableStringArray.of("a", "b")));
+    Assertions.assertEquals(-1, comparableStringArray.compareTo(ComparableStringArray.of("a", "b", "c", "d")));
+    Assertions.assertTrue(comparableStringArray.compareTo(ComparableStringArray.of("b")) < 0);
 
     ComparableStringArray nullList = ComparableStringArray.of(null, "a");
 
-    Assert.assertTrue(comparableStringArray.compareTo(nullList) > 0);
-    Assert.assertTrue(nullList.compareTo(comparableStringArray) < 0);
-    Assert.assertTrue(nullList.compareTo(ComparableStringArray.of(null, "a")) == 0);
+    Assertions.assertTrue(comparableStringArray.compareTo(nullList) > 0);
+    Assertions.assertTrue(nullList.compareTo(comparableStringArray) < 0);
+    Assertions.assertTrue(nullList.compareTo(ComparableStringArray.of(null, "a")) == 0);
   }
 }

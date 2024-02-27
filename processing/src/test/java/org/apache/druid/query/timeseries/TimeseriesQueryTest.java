@@ -29,35 +29,34 @@ import org.apache.druid.query.aggregation.LongSumAggregatorFactory;
 import org.apache.druid.segment.TestHelper;
 import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.virtual.ExpressionVirtualColumn;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
 import java.util.Arrays;
 
-@RunWith(Parameterized.class)
 public class TimeseriesQueryTest
 {
   private static final ObjectMapper JSON_MAPPER = TestHelper.makeJsonMapper();
 
-  @Parameterized.Parameters(name = "descending={0}")
   public static Iterable<Object[]> constructorFeeder()
   {
     return QueryRunnerTestHelper.cartesian(Arrays.asList(false, true));
   }
 
-  private final boolean descending;
+  private boolean descending;
 
-  public TimeseriesQueryTest(boolean descending)
+  public void initTimeseriesQueryTest(boolean descending)
   {
     this.descending = descending;
   }
 
-  @Test
-  public void testQuerySerialization() throws IOException
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "descending={0}")
+  public void testQuerySerialization(boolean descending) throws IOException
   {
+    initTimeseriesQueryTest(descending);
     Query query = Druids.newTimeseriesQueryBuilder()
                         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
                         .granularity(QueryRunnerTestHelper.DAY_GRAN)
@@ -70,12 +69,14 @@ public class TimeseriesQueryTest
     String json = JSON_MAPPER.writeValueAsString(query);
     Query serdeQuery = JSON_MAPPER.readValue(json, Query.class);
 
-    Assert.assertEquals(query, serdeQuery);
+    Assertions.assertEquals(query, serdeQuery);
   }
 
-  @Test
-  public void testGetRequiredColumns()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "descending={0}")
+  public void testGetRequiredColumns(boolean descending)
   {
+    initTimeseriesQueryTest(descending);
     final TimeseriesQuery query =
         Druids.newTimeseriesQueryBuilder()
               .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
@@ -99,6 +100,6 @@ public class TimeseriesQueryTest
               .descending(descending)
               .build();
 
-    Assert.assertEquals(ImmutableSet.of("__time", "fieldFromVirtualColumn", "aField"), query.getRequiredColumns());
+    Assertions.assertEquals(ImmutableSet.of("__time", "fieldFromVirtualColumn", "aField"), query.getRequiredColumns());
   }
 }

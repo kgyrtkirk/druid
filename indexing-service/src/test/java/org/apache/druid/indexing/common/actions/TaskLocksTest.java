@@ -47,7 +47,6 @@ import org.apache.druid.timeline.partition.NumberedShardSpec;
 import org.joda.time.Interval;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Test;
 
 import java.util.List;
 import java.util.Map;

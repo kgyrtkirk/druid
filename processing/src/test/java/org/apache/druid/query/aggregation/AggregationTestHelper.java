@@ -332,7 +332,7 @@ public class AggregationTestHelper implements Closeable
       String queryJson
   ) throws Exception
   {
-    File segmentDir = tempFolder.newFolder();
+    File segmentDir = newFolder(tempFolder, "junit");
     createIndex(inputDataFile, parserJson, aggregators, segmentDir, minTimestamp, gran, maxRowCount, true);
     return runQueryOnSegments(Collections.singletonList(segmentDir), queryJson);
   }
@@ -347,7 +347,7 @@ public class AggregationTestHelper implements Closeable
       Query<T> query
   ) throws Exception
   {
-    File segmentDir = tempFolder.newFolder();
+    File segmentDir = newFolder(tempFolder, "junit");
     createIndex(inputDataFile, parserJson, aggregators, segmentDir, minTimestamp, gran, maxRowCount, true);
     return runQueryOnSegments(Collections.singletonList(segmentDir), query);
   }
@@ -363,7 +363,7 @@ public class AggregationTestHelper implements Closeable
       String queryJson
   ) throws Exception
   {
-    File segmentDir = tempFolder.newFolder();
+    File segmentDir = newFolder(tempFolder, "junit");
     createIndex(inputDataFile, parserJson, aggregators, segmentDir, minTimestamp, gran, maxRowCount, rollup);
     return runQueryOnSegments(Collections.singletonList(segmentDir), queryJson);
   }
@@ -401,7 +401,7 @@ public class AggregationTestHelper implements Closeable
       String queryJson
   ) throws Exception
   {
-    File segmentDir = tempFolder.newFolder();
+    File segmentDir = newFolder(tempFolder, "junit");
     createIndex(inputDataStream, parserJson, aggregators, segmentDir, minTimestamp, gran, maxRowCount, rollup);
     return runQueryOnSegments(Collections.singletonList(segmentDir), queryJson);
   }
@@ -521,7 +521,7 @@ public class AggregationTestHelper implements Closeable
       while (rows.hasNext()) {
         Object row = rows.next();
         if (!index.canAppendRow()) {
-          File tmp = tempFolder.newFolder();
+          File tmp = newFolder(tempFolder, "junit");
           toMerge.add(tmp);
           indexMerger.persist(index, tmp, IndexSpec.DEFAULT, null);
           index.close();
@@ -549,7 +549,7 @@ public class AggregationTestHelper implements Closeable
       }
 
       if (toMerge.size() > 0) {
-        File tmp = tempFolder.newFolder();
+        File tmp = newFolder(tempFolder, "junit");
         toMerge.add(tmp);
         indexMerger.persist(index, tmp, IndexSpec.DEFAULT, null);
 
@@ -652,7 +652,7 @@ public class AggregationTestHelper implements Closeable
   ) throws Exception
   {
     if (outDir == null) {
-      outDir = tempFolder.newFolder();
+      outDir = newFolder(tempFolder, "junit");
     }
     indexMerger.persist(index, outDir, IndexSpec.DEFAULT, null);
 
@@ -850,6 +850,15 @@ public class AggregationTestHelper implements Closeable
   public void close() throws IOException
   {
     resourceCloser.close();
+  }
+
+  private static File newFolder(File root, String... subDirs) throws IOException {
+    String subFolder = String.join("/", subDirs);
+    File result = new File(root, subFolder);
+    if (!result.mkdirs()) {
+      throw new IOException("Couldn't create folders " + root);
+    }
+    return result;
   }
 }
 

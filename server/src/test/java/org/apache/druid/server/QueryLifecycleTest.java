@@ -47,17 +47,17 @@ import org.apache.druid.server.security.AuthorizerMapper;
 import org.apache.druid.server.security.Resource;
 import org.apache.druid.server.security.ResourceType;
 import org.easymock.EasyMock;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.servlet.http.HttpServletRequest;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class QueryLifecycleTest
 {
@@ -84,10 +84,7 @@ public class QueryLifecycleTest
   AuthenticationResult authenticationResult;
   Authorizer authorizer;
 
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
-
-  @Before
+  @BeforeEach
   public void setup()
   {
     toolChestWarehouse = EasyMock.createMock(QueryToolChestWarehouse.class);
@@ -123,7 +120,7 @@ public class QueryLifecycleTest
     );
   }
 
-  @After
+  @AfterEach
   public void teardown()
   {
     EasyMock.verify(
@@ -163,22 +160,23 @@ public class QueryLifecycleTest
   @Test
   public void testRunSimpleUnauthorized()
   {
-    expectedException.expect(ISE.class);
-    expectedException.expectMessage(Access.DEFAULT_ERROR_MESSAGE);
+    Throwable exception = assertThrows(ISE.class, () -> {
 
-    EasyMock.expect(queryConfig.getContext()).andReturn(ImmutableMap.of()).anyTimes();
-    EasyMock.expect(authenticationResult.getIdentity()).andReturn(IDENTITY).anyTimes();
-    EasyMock.expect(toolChestWarehouse.getToolChest(EasyMock.anyObject()))
-            .andReturn(toolChest)
-            .once();
+      EasyMock.expect(queryConfig.getContext()).andReturn(ImmutableMap.of()).anyTimes();
+      EasyMock.expect(authenticationResult.getIdentity()).andReturn(IDENTITY).anyTimes();
+      EasyMock.expect(toolChestWarehouse.getToolChest(EasyMock.anyObject()))
+          .andReturn(toolChest)
+          .once();
 
-    EasyMock.expect(toolChest.makeMetrics(EasyMock.anyObject())).andReturn(metrics).anyTimes();
+      EasyMock.expect(toolChest.makeMetrics(EasyMock.anyObject())).andReturn(metrics).anyTimes();
 
 
-    replayAll();
+      replayAll();
 
-    QueryLifecycle lifecycle = createLifecycle(new AuthConfig());
-    lifecycle.runSimple(query, authenticationResult, new Access(false));
+      QueryLifecycle lifecycle = createLifecycle(new AuthConfig());
+      lifecycle.runSimple(query, authenticationResult, new Access(false));
+    });
+    assertTrue(exception.getMessage().contains(Access.DEFAULT_ERROR_MESSAGE));
   }
 
   @Test
@@ -215,18 +213,18 @@ public class QueryLifecycleTest
     lifecycle.initialize(query);
 
     final Map<String, Object> revisedContext = new HashMap<>(lifecycle.getQuery().getContext());
-    Assert.assertTrue(lifecycle.getQuery().getContext().containsKey("queryId"));
+    Assertions.assertTrue(lifecycle.getQuery().getContext().containsKey("queryId"));
     revisedContext.remove("queryId");
-    Assert.assertEquals(
+    Assertions.assertEquals(
         userContext,
         revisedContext
     );
 
-    Assert.assertTrue(lifecycle.authorize(mockRequest()).isAllowed());
+    Assertions.assertTrue(lifecycle.authorize(mockRequest()).isAllowed());
 
     lifecycle = createLifecycle(authConfig);
     lifecycle.initialize(query);
-    Assert.assertTrue(lifecycle.authorize(authenticationResult).isAllowed());
+    Assertions.assertTrue(lifecycle.authorize(authenticationResult).isAllowed());
   }
 
   @Test
@@ -260,11 +258,11 @@ public class QueryLifecycleTest
         .build();
     QueryLifecycle lifecycle = createLifecycle(authConfig);
     lifecycle.initialize(query);
-    Assert.assertFalse(lifecycle.authorize(mockRequest()).isAllowed());
+    Assertions.assertFalse(lifecycle.authorize(mockRequest()).isAllowed());
 
     lifecycle = createLifecycle(authConfig);
     lifecycle.initialize(query);
-    Assert.assertFalse(lifecycle.authorize(authenticationResult).isAllowed());
+    Assertions.assertFalse(lifecycle.authorize(authenticationResult).isAllowed());
   }
 
   @Test
@@ -299,18 +297,18 @@ public class QueryLifecycleTest
     lifecycle.initialize(query);
 
     final Map<String, Object> revisedContext = new HashMap<>(lifecycle.getQuery().getContext());
-    Assert.assertTrue(lifecycle.getQuery().getContext().containsKey("queryId"));
+    Assertions.assertTrue(lifecycle.getQuery().getContext().containsKey("queryId"));
     revisedContext.remove("queryId");
-    Assert.assertEquals(
+    Assertions.assertEquals(
         userContext,
         revisedContext
     );
 
-    Assert.assertTrue(lifecycle.authorize(mockRequest()).isAllowed());
+    Assertions.assertTrue(lifecycle.authorize(mockRequest()).isAllowed());
 
     lifecycle = createLifecycle(authConfig);
     lifecycle.initialize(query);
-    Assert.assertTrue(lifecycle.authorize(authenticationResult).isAllowed());
+    Assertions.assertTrue(lifecycle.authorize(authenticationResult).isAllowed());
   }
 
   @Test
@@ -346,18 +344,18 @@ public class QueryLifecycleTest
     lifecycle.initialize(query);
 
     final Map<String, Object> revisedContext = new HashMap<>(lifecycle.getQuery().getContext());
-    Assert.assertTrue(lifecycle.getQuery().getContext().containsKey("queryId"));
+    Assertions.assertTrue(lifecycle.getQuery().getContext().containsKey("queryId"));
     revisedContext.remove("queryId");
-    Assert.assertEquals(
+    Assertions.assertEquals(
         userContext,
         revisedContext
     );
 
-    Assert.assertTrue(lifecycle.authorize(mockRequest()).isAllowed());
+    Assertions.assertTrue(lifecycle.authorize(mockRequest()).isAllowed());
 
     lifecycle = createLifecycle(authConfig);
     lifecycle.initialize(query);
-    Assert.assertTrue(lifecycle.authorize(authenticationResult).isAllowed());
+    Assertions.assertTrue(lifecycle.authorize(authenticationResult).isAllowed());
   }
 
   @Test
@@ -394,11 +392,11 @@ public class QueryLifecycleTest
         .build();
     QueryLifecycle lifecycle = createLifecycle(authConfig);
     lifecycle.initialize(query);
-    Assert.assertFalse(lifecycle.authorize(mockRequest()).isAllowed());
+    Assertions.assertFalse(lifecycle.authorize(mockRequest()).isAllowed());
 
     lifecycle = createLifecycle(authConfig);
     lifecycle.initialize(query);
-    Assert.assertFalse(lifecycle.authorize(authenticationResult).isAllowed());
+    Assertions.assertFalse(lifecycle.authorize(authenticationResult).isAllowed());
   }
 
   @Test
@@ -432,16 +430,16 @@ public class QueryLifecycleTest
     lifecycle.initialize(query);
 
     final Map<String, Object> revisedContext = lifecycle.getQuery().getContext();
-    Assert.assertNotNull(revisedContext);
-    Assert.assertTrue(revisedContext.containsKey("foo"));
-    Assert.assertTrue(revisedContext.containsKey("baz"));
-    Assert.assertTrue(revisedContext.containsKey("queryId"));
+    Assertions.assertNotNull(revisedContext);
+    Assertions.assertTrue(revisedContext.containsKey("foo"));
+    Assertions.assertTrue(revisedContext.containsKey("baz"));
+    Assertions.assertTrue(revisedContext.containsKey("queryId"));
 
-    Assert.assertTrue(lifecycle.authorize(mockRequest()).isAllowed());
+    Assertions.assertTrue(lifecycle.authorize(mockRequest()).isAllowed());
 
     lifecycle = createLifecycle(authConfig);
     lifecycle.initialize(query);
-    Assert.assertTrue(lifecycle.authorize(mockRequest()).isAllowed());
+    Assertions.assertTrue(lifecycle.authorize(mockRequest()).isAllowed());
   }
 
   private HttpServletRequest mockRequest()

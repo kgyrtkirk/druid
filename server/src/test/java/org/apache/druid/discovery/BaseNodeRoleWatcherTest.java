@@ -23,8 +23,9 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.apache.druid.java.util.common.concurrent.Execs;
 import org.apache.druid.server.DruidNode;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,11 +33,13 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class BaseNodeRoleWatcherTest
 {
-  @Test(timeout = 60_000L)
+  @Test
+  @Timeout(value = 60_000L, unit = TimeUnit.MILLISECONDS)
   public void testGeneralUseSimulation()
   {
     BaseNodeRoleWatcher nodeRoleWatcher = new BaseNodeRoleWatcher(
@@ -74,9 +77,9 @@ public class BaseNodeRoleWatcherTest
     nodeRoleWatcher.registerListener(listener3);
 
     List<DiscoveryDruidNode> presentNodes = new ArrayList<>(nodeRoleWatcher.getAllNodes());
-    Assert.assertEquals(2, presentNodes.size());
-    Assert.assertTrue(presentNodes.contains(broker1));
-    Assert.assertTrue(presentNodes.contains(broker3));
+    Assertions.assertEquals(2, presentNodes.size());
+    Assertions.assertTrue(presentNodes.contains(broker1));
+    Assertions.assertTrue(presentNodes.contains(broker3));
 
     assertListener(listener1, true, presentNodes, Collections.emptyList());
     assertListener(listener2, true, presentNodes, Collections.emptyList());
@@ -88,7 +91,7 @@ public class BaseNodeRoleWatcherTest
     nodeRoleWatcher.childRemoved(broker3);
     nodeRoleWatcher.childAdded(broker1);
 
-    Assert.assertEquals(ImmutableSet.of(broker2, broker1), new HashSet<>(nodeRoleWatcher.getAllNodes()));
+    Assertions.assertEquals(ImmutableSet.of(broker2, broker1), new HashSet<>(nodeRoleWatcher.getAllNodes()));
 
     List<DiscoveryDruidNode> nodesAdded = new ArrayList<>(presentNodes);
     nodesAdded.add(broker2);
@@ -106,7 +109,7 @@ public class BaseNodeRoleWatcherTest
 
     nodeRoleWatcher.resetNodes(resetNodes);
 
-    Assert.assertEquals(ImmutableSet.of(broker2, broker3), new HashSet<>(nodeRoleWatcher.getAllNodes()));
+    Assertions.assertEquals(ImmutableSet.of(broker2, broker3), new HashSet<>(nodeRoleWatcher.getAllNodes()));
 
     nodesAdded.add(broker3);
     nodesRemoved.add(broker1);
@@ -127,9 +130,9 @@ public class BaseNodeRoleWatcherTest
 
   private void assertListener(TestListener listener, boolean nodeViewInitialized, List<DiscoveryDruidNode> nodesAdded, List<DiscoveryDruidNode> nodesRemoved)
   {
-    Assert.assertEquals(nodeViewInitialized, listener.nodeViewInitialized.get());
-    Assert.assertEquals(nodesAdded, listener.nodesAddedList);
-    Assert.assertEquals(nodesRemoved, listener.nodesRemovedList);
+    Assertions.assertEquals(nodeViewInitialized, listener.nodeViewInitialized.get());
+    Assertions.assertEquals(nodesAdded, listener.nodesAddedList);
+    Assertions.assertEquals(nodesRemoved, listener.nodesRemovedList);
   }
 
   public static class TestListener implements DruidNodeDiscovery.Listener

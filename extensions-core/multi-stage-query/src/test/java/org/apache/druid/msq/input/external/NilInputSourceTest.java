@@ -21,7 +21,6 @@ package org.apache.druid.msq.input.external;
 
 import org.apache.druid.msq.input.NilInputSource;
 import org.junit.Assert;
-import org.junit.Test;
 
 public class NilInputSourceTest
 {

@@ -45,8 +45,8 @@ import org.apache.druid.segment.filter.OrFilter;
 import org.apache.druid.segment.filter.SelectorFilter;
 import org.apache.druid.timeline.SegmentId;
 import org.joda.time.Interval;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -219,10 +219,10 @@ public class RowsAndColumnsDecoratorTest extends SemanticTestBase
     }
 
     if (ordering != null) {
-      Assert.assertThrows(msg, ISE.class, () -> decor.toRowsAndColumns().numRows());
+      Assertions.assertThrows(ISE.class, () -> decor.toRowsAndColumns().numRows(), msg);
     } else {
       final RowsAndColumns rac = decor.toRowsAndColumns();
-      Assert.assertEquals(msg, vals.size(), rac.numRows());
+      Assertions.assertEquals(vals.size(), rac.numRows(), msg);
 
       ColumnAccessor[] accessors = new ColumnAccessor[siggy.size()];
       for (int i = 0; i < siggy.size(); ++i) {
@@ -237,7 +237,7 @@ public class RowsAndColumnsDecoratorTest extends SemanticTestBase
             actuals[j] = StringUtils.fromUtf8(((ByteBuffer) actuals[j]).asReadOnlyBuffer());
           }
         }
-        Assert.assertArrayEquals(StringUtils.format("%s, row[%,d]", msg, i), vals.get(i), actuals);
+        Assertions.assertArrayEquals(vals.get(i), actuals, StringUtils.format("%s, row[%,d]", msg, i));
       }
     }
   }

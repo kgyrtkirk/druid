@@ -24,8 +24,8 @@ import org.apache.druid.common.config.NullHandling;
 import org.apache.druid.java.util.common.ISE;
 import org.apache.druid.query.rowsandcols.concrete.FrameRowsAndColumns;
 import org.apache.druid.query.rowsandcols.concrete.FrameRowsAndColumnsTest;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
@@ -111,6 +111,6 @@ public abstract class RowsAndColumnsTestBase
         break;
       }
     }
-    Assert.assertTrue(inList);
+    Assertions.assertTrue(inList);
   }
 }

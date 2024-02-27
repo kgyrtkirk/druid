@@ -28,19 +28,18 @@ import org.apache.druid.data.input.InputSource;
 import org.apache.druid.data.input.impl.systemfield.SystemField;
 import org.apache.druid.data.input.impl.systemfield.SystemFields;
 import org.apache.druid.metadata.DefaultPasswordProvider;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.net.URI;
 import java.util.EnumSet;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public class HttpInputSourceTest
 {
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
 
   @Test
   public void testSerde() throws IOException
@@ -57,60 +56,60 @@ public class HttpInputSourceTest
     );
     final byte[] json = mapper.writeValueAsBytes(source);
     final HttpInputSource fromJson = (HttpInputSource) mapper.readValue(json, InputSource.class);
-    Assert.assertEquals(source, fromJson);
+    Assertions.assertEquals(source, fromJson);
   }
 
   @Test
   public void testConstructorAllowsOnlyDefaultProtocols()
   {
-    new HttpInputSource(
-        ImmutableList.of(URI.create("http:///")),
-        "myName",
-        new DefaultPasswordProvider("myPassword"),
-        null,
-        new HttpInputSourceConfig(null)
-    );
+    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
+      new HttpInputSource(
+          ImmutableList.of(URI.create("http:///")),
+          "myName",
+          new DefaultPasswordProvider("myPassword"),
+          null,
+          new HttpInputSourceConfig(null)
+      );
 
-    new HttpInputSource(
-        ImmutableList.of(URI.create("https:///")),
-        "myName",
-        new DefaultPasswordProvider("myPassword"),
-        null,
-        new HttpInputSourceConfig(null)
-    );
-
-    expectedException.expect(IllegalArgumentException.class);
-    expectedException.expectMessage("Only [http, https] protocols are allowed");
-    new HttpInputSource(
-        ImmutableList.of(URI.create("my-protocol:///")),
-        "myName",
-        new DefaultPasswordProvider("myPassword"),
-        null,
-        new HttpInputSourceConfig(null)
-    );
+      new HttpInputSource(
+          ImmutableList.of(URI.create("https:///")),
+          "myName",
+          new DefaultPasswordProvider("myPassword"),
+          null,
+          new HttpInputSourceConfig(null)
+      );
+      new HttpInputSource(
+          ImmutableList.of(URI.create("my-protocol:///")),
+          "myName",
+          new DefaultPasswordProvider("myPassword"),
+          null,
+          new HttpInputSourceConfig(null)
+      );
+    });
+    assertTrue(exception.getMessage().contains("Only [http, https] protocols are allowed"));
   }
 
   @Test
   public void testConstructorAllowsOnlyCustomProtocols()
   {
-    final HttpInputSourceConfig customConfig = new HttpInputSourceConfig(ImmutableSet.of("druid"));
-    new HttpInputSource(
-        ImmutableList.of(URI.create("druid:///")),
-        "myName",
-        new DefaultPasswordProvider("myPassword"),
-        null,
-        customConfig
-    );
-
-    expectedException.expect(IllegalArgumentException.class);
-    expectedException.expectMessage("Only [druid] protocols are allowed");
-    new HttpInputSource(
-        ImmutableList.of(URI.create("https:///")),
-        "myName",
-        new DefaultPasswordProvider("myPassword"),
-        null,
-        customConfig
-    );
+    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
+      final HttpInputSourceConfig customConfig = new HttpInputSourceConfig(ImmutableSet.of("druid"));
+      new HttpInputSource(
+          ImmutableList.of(URI.create("druid:///")),
+          "myName",
+          new DefaultPasswordProvider("myPassword"),
+          null,
+          customConfig
+      );
+      new HttpInputSource(
+          ImmutableList.of(URI.create("https:///")),
+          "myName",
+          new DefaultPasswordProvider("myPassword"),
+          null,
+          customConfig
+      );
+    });
+    assertTrue(exception.getMessage().contains("Only [druid] protocols are allowed"));
   }
 
   @Test
@@ -125,15 +124,15 @@ public class HttpInputSourceTest
         httpInputSourceConfig
     );
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         EnumSet.of(SystemField.URI, SystemField.PATH),
         inputSource.getConfiguredSystemFields()
     );
 
     final HttpEntity entity = new HttpEntity(URI.create("https://example.com/foo"), null, null);
 
-    Assert.assertEquals("https://example.com/foo", inputSource.getSystemFieldValue(entity, SystemField.URI));
-    Assert.assertEquals("/foo", inputSource.getSystemFieldValue(entity, SystemField.PATH));
+    Assertions.assertEquals("https://example.com/foo", inputSource.getSystemFieldValue(entity, SystemField.URI));
+    Assertions.assertEquals("/foo", inputSource.getSystemFieldValue(entity, SystemField.PATH));
   }
 
   @Test

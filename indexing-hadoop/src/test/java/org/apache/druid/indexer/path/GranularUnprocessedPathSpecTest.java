@@ -20,7 +20,6 @@
 package org.apache.druid.indexer.path;
 
 import org.junit.Assert;
-import org.junit.Test;
 
 public class GranularUnprocessedPathSpecTest
 {

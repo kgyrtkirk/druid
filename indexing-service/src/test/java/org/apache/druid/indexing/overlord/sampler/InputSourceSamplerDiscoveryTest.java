@@ -39,7 +39,6 @@ import org.apache.druid.segment.indexing.DataSchema;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.apache.logging.log4j.util.Strings;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.util.List;
 

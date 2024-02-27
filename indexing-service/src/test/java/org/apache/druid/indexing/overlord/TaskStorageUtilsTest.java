@@ -23,7 +23,6 @@ import com.google.common.collect.ImmutableMap;
 import org.apache.druid.java.util.common.DateTimes;
 import org.apache.druid.metadata.TaskLookup;
 import org.junit.Assert;
-import org.junit.Test;
 
 public class TaskStorageUtilsTest
 {

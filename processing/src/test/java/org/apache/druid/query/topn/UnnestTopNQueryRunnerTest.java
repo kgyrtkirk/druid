@@ -49,11 +49,10 @@ import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.incremental.IncrementalIndex;
 import org.apache.druid.segment.virtual.ExpressionVirtualColumn;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -67,27 +66,25 @@ import java.util.Map;
 /**
  *
  */
-@RunWith(Parameterized.class)
 public class UnnestTopNQueryRunnerTest extends InitializedNullHandlingTest
 {
   private static final Closer RESOURCE_CLOSER = Closer.create();
-  private final List<AggregatorFactory> commonAggregators;
+  private List<AggregatorFactory> commonAggregators;
 
 
-  public UnnestTopNQueryRunnerTest(
+  public void initUnnestTopNQueryRunnerTest(
       List<AggregatorFactory> commonAggregators
   )
   {
     this.commonAggregators = commonAggregators;
   }
 
-  @AfterClass
+  @AfterAll
   public static void teardown() throws IOException
   {
     RESOURCE_CLOSER.close();
   }
 
-  @Parameterized.Parameters(name = "{0}")
   public static Iterable<Object[]> constructorFeeder()
   {
     List<Object[]> constructors = new ArrayList<>();
@@ -122,9 +119,11 @@ public class UnnestTopNQueryRunnerTest extends InitializedNullHandlingTest
     return mergeRunner.run(QueryPlus.wrap(query), context);
   }
 
-  @Test
-  public void testEmptyTopN()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testEmptyTopN(List<AggregatorFactory> commonAggregators)
   {
+    initUnnestTopNQueryRunnerTest(commonAggregators);
     final CloseableStupidPool<ByteBuffer> defaultPool = TestQueryRunners.createDefaultNonBlockingPool();
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.UNNEST_DATA_SOURCE)
@@ -173,9 +172,11 @@ public class UnnestTopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResultsWithCustomRunner(expectedResults, query, queryRunner);
   }
 
-  @Test
-  public void testTopNLexicographicUnnest()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testTopNLexicographicUnnest(List<AggregatorFactory> commonAggregators)
   {
+    initUnnestTopNQueryRunnerTest(commonAggregators);
     final CloseableStupidPool<ByteBuffer> defaultPool = TestQueryRunners.createDefaultNonBlockingPool();
 
     TopNQuery query = new TopNQueryBuilder()
@@ -245,9 +246,11 @@ public class UnnestTopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResultsWithCustomRunner(expectedResults, query, queryRunner);
   }
 
-  @Test
-  public void testTopNStringVirtualColumnUnnest()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testTopNStringVirtualColumnUnnest(List<AggregatorFactory> commonAggregators)
   {
+    initUnnestTopNQueryRunnerTest(commonAggregators);
     final CloseableStupidPool<ByteBuffer> defaultPool = TestQueryRunners.createDefaultNonBlockingPool();
 
     TopNQuery query = new TopNQueryBuilder()
@@ -324,9 +327,11 @@ public class UnnestTopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResultsWithCustomRunner(expectedResults, query, vcrunner);
   }
 
-  @Test
-  public void testTopNStringVirtualMultiColumnUnnest()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testTopNStringVirtualMultiColumnUnnest(List<AggregatorFactory> commonAggregators)
   {
+    initUnnestTopNQueryRunnerTest(commonAggregators);
     final CloseableStupidPool<ByteBuffer> defaultPool = TestQueryRunners.createDefaultNonBlockingPool();
     final CloseableStupidPool<ByteBuffer> customPool = new CloseableStupidPool<>(
         "TopNQueryRunnerFactory-bufferPool",
@@ -395,8 +400,8 @@ public class UnnestTopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResultsWithCustomRunner(expectedResults, query, vcrunner);
     RESOURCE_CLOSER.register(() -> {
       // Verify that all objects have been returned to the pool.
-      Assert.assertEquals("defaultPool objects created", defaultPool.poolSize(), defaultPool.objectsCreatedCount());
-      Assert.assertEquals("customPool objects created", customPool.poolSize(), customPool.objectsCreatedCount());
+      Assertions.assertEquals(defaultPool.poolSize(), defaultPool.objectsCreatedCount(), "defaultPool objects created");
+      Assertions.assertEquals(customPool.poolSize(), customPool.objectsCreatedCount(), "customPool objects created");
       defaultPool.close();
       customPool.close();
     });

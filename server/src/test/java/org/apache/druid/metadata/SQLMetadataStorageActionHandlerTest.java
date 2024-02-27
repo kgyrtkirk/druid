@@ -39,10 +39,11 @@ import org.apache.druid.metadata.TaskLookup.CompleteTaskLookup;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Duration;
-import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import java.sql.ResultSet;
 import java.util.HashMap;
@@ -51,6 +52,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class SQLMetadataStorageActionHandlerTest
@@ -65,7 +67,7 @@ public class SQLMetadataStorageActionHandlerTest
 
   private final String entryTable = "entries";
 
-  @Before
+  @BeforeEach
   public void setUp()
   {
     TestDerbyConnector connector = derbyConnectorRule.getConnector();
@@ -131,66 +133,66 @@ public class SQLMetadataStorageActionHandlerTest
 
     handler.insert(entryId, DateTimes.of("2014-01-02T00:00:00.123"), "testDataSource", entry, true, null, "type", "group");
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         Optional.of(entry),
         handler.getEntry(entryId)
     );
 
-    Assert.assertEquals(Optional.absent(), handler.getEntry("non_exist_entry"));
+    Assertions.assertEquals(Optional.absent(), handler.getEntry("non_exist_entry"));
 
-    Assert.assertEquals(Optional.absent(), handler.getStatus(entryId));
+    Assertions.assertEquals(Optional.absent(), handler.getStatus(entryId));
 
-    Assert.assertEquals(Optional.absent(), handler.getStatus("non_exist_entry"));
+    Assertions.assertEquals(Optional.absent(), handler.getStatus("non_exist_entry"));
 
-    Assert.assertTrue(handler.setStatus(entryId, true, status1));
+    Assertions.assertTrue(handler.setStatus(entryId, true, status1));
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         ImmutableList.of(Pair.of(entry, status1)),
         handler.getTaskInfos(ActiveTaskLookup.getInstance(), null).stream()
                .map(taskInfo -> Pair.of(taskInfo.getTask(), taskInfo.getStatus()))
                .collect(Collectors.toList())
     );
 
-    Assert.assertTrue(handler.setStatus(entryId, true, status2));
+    Assertions.assertTrue(handler.setStatus(entryId, true, status2));
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         ImmutableList.of(Pair.of(entry, status2)),
         handler.getTaskInfos(ActiveTaskLookup.getInstance(), null).stream()
                .map(taskInfo -> Pair.of(taskInfo.getTask(), taskInfo.getStatus()))
                .collect(Collectors.toList())
     );
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         ImmutableList.of(),
         handler.getTaskInfos(CompleteTaskLookup.withTasksCreatedPriorTo(null, DateTimes.of("2014-01-01")), null)
     );
 
-    Assert.assertTrue(handler.setStatus(entryId, false, status1));
+    Assertions.assertTrue(handler.setStatus(entryId, false, status1));
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         Optional.of(status1),
         handler.getStatus(entryId)
     );
 
     // inactive statuses cannot be updated, this should fail
-    Assert.assertFalse(handler.setStatus(entryId, false, status2));
+    Assertions.assertFalse(handler.setStatus(entryId, false, status2));
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         Optional.of(status1),
         handler.getStatus(entryId)
     );
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         Optional.of(entry),
         handler.getEntry(entryId)
     );
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         ImmutableList.of(),
         handler.getTaskInfos(CompleteTaskLookup.withTasksCreatedPriorTo(null, DateTimes.of("2014-01-03")), null)
     );
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         ImmutableList.of(status1),
         handler.getTaskInfos(CompleteTaskLookup.withTasksCreatedPriorTo(null, DateTimes.of("2014-01-01")), null)
                .stream()
@@ -217,10 +219,10 @@ public class SQLMetadataStorageActionHandlerTest
         ),
         null
     );
-    Assert.assertEquals(7, statuses.size());
+    Assertions.assertEquals(7, statuses.size());
     int i = 10;
     for (TaskInfo<Map<String, Object>, Map<String, Object>> status : statuses) {
-      Assert.assertEquals(ImmutableMap.of("count", i-- * 10), status.getStatus());
+      Assertions.assertEquals(ImmutableMap.of("count", i-- * 10), status.getStatus());
     }
   }
 
@@ -242,14 +244,15 @@ public class SQLMetadataStorageActionHandlerTest
         ),
         null
     );
-    Assert.assertEquals(5, statuses.size());
+    Assertions.assertEquals(5, statuses.size());
     int i = 5;
     for (TaskInfo<Map<String, Object>, Map<String, Object>> status : statuses) {
-      Assert.assertEquals(ImmutableMap.of("count", i-- * 10), status.getStatus());
+      Assertions.assertEquals(ImmutableMap.of("count", i-- * 10), status.getStatus());
     }
   }
 
-  @Test(timeout = 60_000L)
+  @Test
+  @Timeout(value = 60_000L, unit = TimeUnit.MILLISECONDS)
   public void testDuplicateInsertThrowsEntryExistsException()
   {
     final String entryId = "abcd";
@@ -257,7 +260,7 @@ public class SQLMetadataStorageActionHandlerTest
     Map<String, Object> status = ImmutableMap.of("count", 42);
 
     handler.insert(entryId, DateTimes.of("2014-01-01"), "test", entry, true, status, "type", "group");
-    Assert.assertThrows(
+    Assertions.assertThrows(
         EntryExistsException.class,
         () -> handler.insert(entryId, DateTimes.of("2014-01-01"), "test", entry, true, status, "type", "group")
     );
@@ -272,12 +275,12 @@ public class SQLMetadataStorageActionHandlerTest
 
     handler.insert(entryId, DateTimes.of("2014-01-01"), "test", entry, true, status, "type", "group");
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         ImmutableList.of(),
         handler.getLogs("non_exist_entry")
     );
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         ImmutableMap.of(),
         handler.getLocks(entryId)
     );
@@ -285,10 +288,10 @@ public class SQLMetadataStorageActionHandlerTest
     final ImmutableMap<String, String> log1 = ImmutableMap.of("logentry", "created");
     final ImmutableMap<String, String> log2 = ImmutableMap.of("logentry", "updated");
 
-    Assert.assertTrue(handler.addLog(entryId, log1));
-    Assert.assertTrue(handler.addLog(entryId, log2));
+    Assertions.assertTrue(handler.addLog(entryId, log1));
+    Assertions.assertTrue(handler.addLog(entryId, log2));
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         ImmutableList.of(log1, log2),
         handler.getLogs(entryId)
     );
@@ -304,12 +307,12 @@ public class SQLMetadataStorageActionHandlerTest
 
     handler.insert(entryId, DateTimes.of("2014-01-01"), "test", entry, true, status, "type", "group");
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         ImmutableMap.<Long, Map<String, Object>>of(),
         handler.getLocks("non_exist_entry")
     );
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         ImmutableMap.<Long, Map<String, Object>>of(),
         handler.getLocks(entryId)
     );
@@ -317,13 +320,13 @@ public class SQLMetadataStorageActionHandlerTest
     final ImmutableMap<String, Object> lock1 = ImmutableMap.of("lock", 1);
     final ImmutableMap<String, Object> lock2 = ImmutableMap.of("lock", 2);
 
-    Assert.assertTrue(handler.addLock(entryId, lock1));
-    Assert.assertTrue(handler.addLock(entryId, lock2));
+    Assertions.assertTrue(handler.addLock(entryId, lock1));
+    Assertions.assertTrue(handler.addLock(entryId, lock2));
 
     final Map<Long, Map<String, Object>> locks = handler.getLocks(entryId);
-    Assert.assertEquals(2, locks.size());
+    Assertions.assertEquals(2, locks.size());
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         ImmutableSet.<Map<String, Object>>of(lock1, lock2),
         new HashSet<>(locks.values())
     );
@@ -333,11 +336,11 @@ public class SQLMetadataStorageActionHandlerTest
     locks.remove(lockId);
 
     final Map<Long, Map<String, Object>> updated = handler.getLocks(entryId);
-    Assert.assertEquals(
+    Assertions.assertEquals(
         new HashSet<>(locks.values()),
         new HashSet<>(updated.values())
     );
-    Assert.assertEquals(updated.keySet(), locks.keySet());
+    Assertions.assertEquals(updated.keySet(), locks.keySet());
   }
 
   @Test
@@ -349,12 +352,12 @@ public class SQLMetadataStorageActionHandlerTest
 
     handler.insert(entryId, DateTimes.of("2014-01-01"), "test", entry, true, status, "type", "group");
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         ImmutableMap.<Long, Map<String, Object>>of(),
         handler.getLocks("non_exist_entry")
     );
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         ImmutableMap.<Long, Map<String, Object>>of(),
         handler.getLocks(entryId)
     );
@@ -362,12 +365,12 @@ public class SQLMetadataStorageActionHandlerTest
     final ImmutableMap<String, Object> lock1 = ImmutableMap.of("lock", 1);
     final ImmutableMap<String, Object> lock2 = ImmutableMap.of("lock", 2);
 
-    Assert.assertTrue(handler.addLock(entryId, lock1));
+    Assertions.assertTrue(handler.addLock(entryId, lock1));
 
     final Long lockId1 = handler.getLockId(entryId, lock1);
-    Assert.assertNotNull(lockId1);
+    Assertions.assertNotNull(lockId1);
 
-    Assert.assertTrue(handler.replaceLock(entryId, lockId1, lock2));
+    Assertions.assertTrue(handler.replaceLock(entryId, lockId1, lock2));
   }
 
   @Test
@@ -379,12 +382,12 @@ public class SQLMetadataStorageActionHandlerTest
 
     handler.insert(entryId, DateTimes.of("2014-01-01"), "test", entry, true, status, "type", "group");
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         ImmutableMap.<Long, Map<String, Object>>of(),
         handler.getLocks("non_exist_entry")
     );
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         ImmutableMap.<Long, Map<String, Object>>of(),
         handler.getLocks(entryId)
     );
@@ -392,10 +395,10 @@ public class SQLMetadataStorageActionHandlerTest
     final ImmutableMap<String, Object> lock1 = ImmutableMap.of("lock", 1);
     final ImmutableMap<String, Object> lock2 = ImmutableMap.of("lock", 2);
 
-    Assert.assertTrue(handler.addLock(entryId, lock1));
+    Assertions.assertTrue(handler.addLock(entryId, lock1));
 
-    Assert.assertNotNull(handler.getLockId(entryId, lock1));
-    Assert.assertNull(handler.getLockId(entryId, lock2));
+    Assertions.assertNotNull(handler.getLockId(entryId, lock1));
+    Assertions.assertNull(handler.getLockId(entryId, lock2));
   }
 
   @Test
@@ -405,32 +408,32 @@ public class SQLMetadataStorageActionHandlerTest
     Map<String, Object> entry1 = ImmutableMap.of("numericId", 1234);
     Map<String, Object> status1 = ImmutableMap.of("count", 42, "temp", 1);
     handler.insert(entryId1, DateTimes.of("2014-01-01T00:00:00.123"), "testDataSource", entry1, false, status1, "type", "group");
-    Assert.assertTrue(handler.addLog(entryId1, ImmutableMap.of("logentry", "created")));
+    Assertions.assertTrue(handler.addLog(entryId1, ImmutableMap.of("logentry", "created")));
 
     final String entryId2 = "ABC123";
     Map<String, Object> entry2 = ImmutableMap.of("a", 1);
     Map<String, Object> status2 = ImmutableMap.of("count", 42);
     handler.insert(entryId2, DateTimes.of("2014-01-01T00:00:00.123"), "test", entry2, true, status2, "type", "group");
-    Assert.assertTrue(handler.addLog(entryId2, ImmutableMap.of("logentry", "created")));
+    Assertions.assertTrue(handler.addLog(entryId2, ImmutableMap.of("logentry", "created")));
 
     final String entryId3 = "DEF5678";
     Map<String, Object> entry3 = ImmutableMap.of("numericId", 5678);
     Map<String, Object> status3 = ImmutableMap.of("count", 21, "temp", 2);
     handler.insert(entryId3, DateTimes.of("2014-01-02T12:00:00.123"), "testDataSource", entry3, false, status3, "type", "group");
-    Assert.assertTrue(handler.addLog(entryId3, ImmutableMap.of("logentry", "created")));
+    Assertions.assertTrue(handler.addLog(entryId3, ImmutableMap.of("logentry", "created")));
 
-    Assert.assertEquals(Optional.of(entry1), handler.getEntry(entryId1));
-    Assert.assertEquals(Optional.of(entry2), handler.getEntry(entryId2));
-    Assert.assertEquals(Optional.of(entry3), handler.getEntry(entryId3));
+    Assertions.assertEquals(Optional.of(entry1), handler.getEntry(entryId1));
+    Assertions.assertEquals(Optional.of(entry2), handler.getEntry(entryId2));
+    Assertions.assertEquals(Optional.of(entry3), handler.getEntry(entryId3));
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         ImmutableList.of(entryId2),
         handler.getTaskInfos(ActiveTaskLookup.getInstance(), null).stream()
                .map(taskInfo -> taskInfo.getId())
                .collect(Collectors.toList())
     );
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         ImmutableList.of(entryId3, entryId1),
         handler.getTaskInfos(CompleteTaskLookup.withTasksCreatedPriorTo(null, DateTimes.of("2014-01-01")), null)
                .stream()
@@ -441,13 +444,13 @@ public class SQLMetadataStorageActionHandlerTest
 
     handler.removeTasksOlderThan(DateTimes.of("2014-01-02").getMillis());
     // active task not removed.
-    Assert.assertEquals(
+    Assertions.assertEquals(
         ImmutableList.of(entryId2),
         handler.getTaskInfos(ActiveTaskLookup.getInstance(), null).stream()
                .map(taskInfo -> taskInfo.getId())
                .collect(Collectors.toList())
     );
-    Assert.assertEquals(
+    Assertions.assertEquals(
         ImmutableList.of(entryId3),
         handler.getTaskInfos(CompleteTaskLookup.withTasksCreatedPriorTo(null, DateTimes.of("2014-01-01")), null)
                .stream()
@@ -456,9 +459,9 @@ public class SQLMetadataStorageActionHandlerTest
 
     );
     // tasklogs
-    Assert.assertEquals(0, handler.getLogs(entryId1).size());
-    Assert.assertEquals(1, handler.getLogs(entryId2).size());
-    Assert.assertEquals(1, handler.getLogs(entryId3).size());
+    Assertions.assertEquals(0, handler.getLogs(entryId1).size());
+    Assertions.assertEquals(1, handler.getLogs(entryId2).size());
+    Assertions.assertEquals(1, handler.getLogs(entryId3).size());
   }
 
   @Test
@@ -474,11 +477,11 @@ public class SQLMetadataStorageActionHandlerTest
       insertTaskInfo(createRandomTaskInfo(TaskState.SUCCESS), false);
     }
 
-    Assert.assertEquals(numActiveTasks + numCompletedTasks, getUnmigratedTaskCount().intValue());
+    Assertions.assertEquals(numActiveTasks + numCompletedTasks, getUnmigratedTaskCount().intValue());
 
     handler.populateTaskTypeAndGroupId();
 
-    Assert.assertEquals(0, getUnmigratedTaskCount().intValue());
+    Assertions.assertEquals(0, getUnmigratedTaskCount().intValue());
   }
 
   @Test
@@ -507,7 +510,7 @@ public class SQLMetadataStorageActionHandlerTest
 
     // Payload based fetch. task type and groupid will be populated
     taskMetadataInfos = handler.getTaskStatusList(taskLookups, null, true);
-    Assert.assertEquals(4, taskMetadataInfos.size());
+    Assertions.assertEquals(4, taskMetadataInfos.size());
     verifyTaskInfoToMetadataInfo(completedUnaltered, taskMetadataInfos, false);
     verifyTaskInfoToMetadataInfo(completedAltered, taskMetadataInfos, false);
     verifyTaskInfoToMetadataInfo(activeUnaltered, taskMetadataInfos, false);
@@ -515,7 +518,7 @@ public class SQLMetadataStorageActionHandlerTest
 
     // New columns based fetch before migration is complete. type and payload are null when altered = false
     taskMetadataInfos = handler.getTaskStatusList(taskLookups, null, false);
-    Assert.assertEquals(4, taskMetadataInfos.size());
+    Assertions.assertEquals(4, taskMetadataInfos.size());
     verifyTaskInfoToMetadataInfo(completedUnaltered, taskMetadataInfos, true);
     verifyTaskInfoToMetadataInfo(completedAltered, taskMetadataInfos, false);
     verifyTaskInfoToMetadataInfo(activeUnaltered, taskMetadataInfos, true);
@@ -526,7 +529,7 @@ public class SQLMetadataStorageActionHandlerTest
 
     // Payload based fetch. task type and groupid will still be populated in tasks tab
     taskMetadataInfos = handler.getTaskStatusList(taskLookups, null, true);
-    Assert.assertEquals(4, taskMetadataInfos.size());
+    Assertions.assertEquals(4, taskMetadataInfos.size());
     verifyTaskInfoToMetadataInfo(completedUnaltered, taskMetadataInfos, false);
     verifyTaskInfoToMetadataInfo(completedAltered, taskMetadataInfos, false);
     verifyTaskInfoToMetadataInfo(activeUnaltered, taskMetadataInfos, false);
@@ -534,7 +537,7 @@ public class SQLMetadataStorageActionHandlerTest
 
     // New columns based fetch after migration is complete. All data must be populated in the tasks table
     taskMetadataInfos = handler.getTaskStatusList(taskLookups, null, false);
-    Assert.assertEquals(4, taskMetadataInfos.size());
+    Assertions.assertEquals(4, taskMetadataInfos.size());
     verifyTaskInfoToMetadataInfo(completedUnaltered, taskMetadataInfos, false);
     verifyTaskInfoToMetadataInfo(completedAltered, taskMetadataInfos, false);
     verifyTaskInfoToMetadataInfo(activeUnaltered, taskMetadataInfos, false);
@@ -614,37 +617,37 @@ public class SQLMetadataStorageActionHandlerTest
       }
       return;
     }
-    Assert.fail();
+    Assertions.fail();
   }
 
   private void verifyTaskInfoToMetadataInfo(TaskInfo<Map<String, Object>, Map<String, Object>> taskInfo,
                                             TaskInfo<TaskIdentifier, Map<String, Object>> taskMetadataInfo,
                                             boolean nullNewColumns)
   {
-    Assert.assertEquals(taskInfo.getId(), taskMetadataInfo.getId());
-    Assert.assertEquals(taskInfo.getCreatedTime(), taskMetadataInfo.getCreatedTime());
-    Assert.assertEquals(taskInfo.getDataSource(), taskMetadataInfo.getDataSource());
+    Assertions.assertEquals(taskInfo.getId(), taskMetadataInfo.getId());
+    Assertions.assertEquals(taskInfo.getCreatedTime(), taskMetadataInfo.getCreatedTime());
+    Assertions.assertEquals(taskInfo.getDataSource(), taskMetadataInfo.getDataSource());
 
     verifyTaskStatus(taskInfo.getStatus(), taskMetadataInfo.getStatus());
 
     Map<String, Object> task = taskInfo.getTask();
     TaskIdentifier taskIdentifier = taskMetadataInfo.getTask();
-    Assert.assertEquals(task.get("id"), taskIdentifier.getId());
+    Assertions.assertEquals(task.get("id"), taskIdentifier.getId());
     if (nullNewColumns) {
-      Assert.assertNull(taskIdentifier.getGroupId());
-      Assert.assertNull(taskIdentifier.getType());
+      Assertions.assertNull(taskIdentifier.getGroupId());
+      Assertions.assertNull(taskIdentifier.getType());
     } else {
-      Assert.assertEquals(task.get("groupId"), taskIdentifier.getGroupId());
-      Assert.assertEquals(task.get("type"), taskIdentifier.getType());
+      Assertions.assertEquals(task.get("groupId"), taskIdentifier.getGroupId());
+      Assertions.assertEquals(task.get("type"), taskIdentifier.getType());
     }
   }
 
   private void verifyTaskStatus(Map<String, Object> expected, Map<String, Object> actual)
   {
-    Assert.assertEquals(expected.get("id"), actual.get("id"));
-    Assert.assertEquals(expected.get("duration"), actual.get("duration"));
-    Assert.assertEquals(expected.get("errorMsg"), actual.get("errorMsg"));
-    Assert.assertEquals(expected.get("status").toString(), actual.get("status"));
-    Assert.assertEquals(expected.get("location"), JSON_MAPPER.convertValue(actual.get("location"), TaskLocation.class));
+    Assertions.assertEquals(expected.get("id"), actual.get("id"));
+    Assertions.assertEquals(expected.get("duration"), actual.get("duration"));
+    Assertions.assertEquals(expected.get("errorMsg"), actual.get("errorMsg"));
+    Assertions.assertEquals(expected.get("status").toString(), actual.get("status"));
+    Assertions.assertEquals(expected.get("location"), JSON_MAPPER.convertValue(actual.get("location"), TaskLocation.class));
   }
 }

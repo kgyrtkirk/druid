@@ -36,9 +36,10 @@ import org.apache.druid.server.security.AllowAllAuthenticator;
 import org.apache.druid.server.security.AuthConfig;
 import org.apache.druid.server.security.AuthTestUtils;
 import org.easymock.EasyMock;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Response;
@@ -52,6 +53,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class EventReceiverFirehoseTest
 {
@@ -70,7 +73,7 @@ public class EventReceiverFirehoseTest
   private EventReceiverFirehoseRegister register = new EventReceiverFirehoseRegister();
   private HttpServletRequest req;
 
-  @Before
+  @BeforeEach
   public void setUp()
   {
     req = EasyMock.createMock(HttpServletRequest.class);
@@ -101,48 +104,50 @@ public class EventReceiverFirehoseTest
     );
   }
 
-  @Test(timeout = 60_000L)
+  @Test
+  @Timeout(value = 60_000L, unit = TimeUnit.MILLISECONDS)
   public void testSingleThread() throws IOException, InterruptedException
   {
     for (int i = 0; i < NUM_EVENTS; ++i) {
       setUpRequestExpectations(null, null);
       final InputStream inputStream = IOUtils.toInputStream(inputRow, StandardCharsets.UTF_8);
       firehose.addAll(inputStream, req);
-      Assert.assertEquals(i + 1, firehose.getCurrentBufferSize());
+      Assertions.assertEquals(i + 1, firehose.getCurrentBufferSize());
       inputStream.close();
     }
 
     EasyMock.verify(req);
 
     final Iterable<Map.Entry<String, EventReceiverFirehoseMetric>> metrics = register.getMetrics();
-    Assert.assertEquals(1, Iterables.size(metrics));
+    Assertions.assertEquals(1, Iterables.size(metrics));
 
     final Map.Entry<String, EventReceiverFirehoseMetric> entry = Iterables.getLast(metrics);
-    Assert.assertEquals(SERVICE_NAME, entry.getKey());
-    Assert.assertEquals(CAPACITY, entry.getValue().getCapacity());
-    Assert.assertEquals(CAPACITY, firehose.getCapacity());
-    Assert.assertEquals(NUM_EVENTS, entry.getValue().getCurrentBufferSize());
-    Assert.assertEquals(NUM_EVENTS, firehose.getCurrentBufferSize());
+    Assertions.assertEquals(SERVICE_NAME, entry.getKey());
+    Assertions.assertEquals(CAPACITY, entry.getValue().getCapacity());
+    Assertions.assertEquals(CAPACITY, firehose.getCapacity());
+    Assertions.assertEquals(NUM_EVENTS, entry.getValue().getCurrentBufferSize());
+    Assertions.assertEquals(NUM_EVENTS, firehose.getCurrentBufferSize());
 
     for (int i = NUM_EVENTS - 1; i >= 0; --i) {
-      Assert.assertTrue(firehose.hasMore());
-      Assert.assertNotNull(firehose.nextRow());
-      Assert.assertEquals(i, firehose.getCurrentBufferSize());
+      Assertions.assertTrue(firehose.hasMore());
+      Assertions.assertNotNull(firehose.nextRow());
+      Assertions.assertEquals(i, firehose.getCurrentBufferSize());
     }
 
-    Assert.assertEquals(CAPACITY, entry.getValue().getCapacity());
-    Assert.assertEquals(CAPACITY, firehose.getCapacity());
-    Assert.assertEquals(0, entry.getValue().getCurrentBufferSize());
-    Assert.assertEquals(0, firehose.getCurrentBufferSize());
+    Assertions.assertEquals(CAPACITY, entry.getValue().getCapacity());
+    Assertions.assertEquals(CAPACITY, firehose.getCapacity());
+    Assertions.assertEquals(0, entry.getValue().getCurrentBufferSize());
+    Assertions.assertEquals(0, firehose.getCurrentBufferSize());
 
     firehose.close();
-    Assert.assertFalse(firehose.hasMore());
-    Assert.assertEquals(0, Iterables.size(register.getMetrics()));
+    Assertions.assertFalse(firehose.hasMore());
+    Assertions.assertEquals(0, Iterables.size(register.getMetrics()));
 
     awaitDelayedExecutorThreadTerminated();
   }
 
-  @Test(timeout = 60_000L)
+  @Test
+  @Timeout(value = 60_000L, unit = TimeUnit.MILLISECONDS)
   public void testMultipleThreads() throws InterruptedException, IOException, TimeoutException, ExecutionException
   {
     EasyMock.expect(req.getAttribute(AuthConfig.DRUID_AUTHORIZATION_CHECKED))
@@ -187,69 +192,72 @@ public class EventReceiverFirehoseTest
     EasyMock.verify(req);
 
     final Iterable<Map.Entry<String, EventReceiverFirehoseMetric>> metrics = register.getMetrics();
-    Assert.assertEquals(1, Iterables.size(metrics));
+    Assertions.assertEquals(1, Iterables.size(metrics));
 
     final Map.Entry<String, EventReceiverFirehoseMetric> entry = Iterables.getLast(metrics);
     
-    Assert.assertEquals(SERVICE_NAME, entry.getKey());
-    Assert.assertEquals(CAPACITY, entry.getValue().getCapacity());
-    Assert.assertEquals(CAPACITY, firehose.getCapacity());
-    Assert.assertEquals(2 * NUM_EVENTS, entry.getValue().getCurrentBufferSize());
-    Assert.assertEquals(2 * NUM_EVENTS, firehose.getCurrentBufferSize());
+    Assertions.assertEquals(SERVICE_NAME, entry.getKey());
+    Assertions.assertEquals(CAPACITY, entry.getValue().getCapacity());
+    Assertions.assertEquals(CAPACITY, firehose.getCapacity());
+    Assertions.assertEquals(2 * NUM_EVENTS, entry.getValue().getCurrentBufferSize());
+    Assertions.assertEquals(2 * NUM_EVENTS, firehose.getCurrentBufferSize());
 
     for (int i = 2 * NUM_EVENTS - 1; i >= 0; --i) {
-      Assert.assertTrue(firehose.hasMore());
-      Assert.assertNotNull(firehose.nextRow());
-      Assert.assertEquals(i, firehose.getCurrentBufferSize());
+      Assertions.assertTrue(firehose.hasMore());
+      Assertions.assertNotNull(firehose.nextRow());
+      Assertions.assertEquals(i, firehose.getCurrentBufferSize());
     }
 
-    Assert.assertEquals(CAPACITY, entry.getValue().getCapacity());
-    Assert.assertEquals(CAPACITY, firehose.getCapacity());
-    Assert.assertEquals(0, entry.getValue().getCurrentBufferSize());
-    Assert.assertEquals(0, firehose.getCurrentBufferSize());
+    Assertions.assertEquals(CAPACITY, entry.getValue().getCapacity());
+    Assertions.assertEquals(CAPACITY, firehose.getCapacity());
+    Assertions.assertEquals(0, entry.getValue().getCurrentBufferSize());
+    Assertions.assertEquals(0, firehose.getCurrentBufferSize());
 
     firehose.close();
-    Assert.assertFalse(firehose.hasMore());
-    Assert.assertEquals(0, Iterables.size(register.getMetrics()));
+    Assertions.assertFalse(firehose.hasMore());
+    Assertions.assertEquals(0, Iterables.size(register.getMetrics()));
 
     awaitDelayedExecutorThreadTerminated();
 
     executorService.shutdownNow();
   }
 
-  @Test(expected = ISE.class)
+  @Test
   public void testDuplicateRegistering()
   {
-    EventReceiverFirehoseFactory eventReceiverFirehoseFactory2 = new EventReceiverFirehoseFactory(
-        SERVICE_NAME,
-        CAPACITY,
-        MAX_IDLE_TIME_MILLIS,
-        null,
-        new DefaultObjectMapper(),
-        new DefaultObjectMapper(),
-        register,
-        AuthTestUtils.TEST_AUTHORIZER_MAPPER
-    );
-    EventReceiverFirehoseFactory.EventReceiverFirehose firehose2 =
-        (EventReceiverFirehoseFactory.EventReceiverFirehose) eventReceiverFirehoseFactory2
-            .connect(
-                new MapInputRowParser(
-                    new JSONParseSpec(
-                        new TimestampSpec(
-                            "timestamp",
-                            "auto",
-                            null
-                        ), new DimensionsSpec(DimensionsSpec.getDefaultSchemas(ImmutableList.of("d1"))),
-                        null,
-                        null,
-                        null
-                    )
-                ),
-                null
-            );
+    assertThrows(ISE.class, () -> {
+      EventReceiverFirehoseFactory eventReceiverFirehoseFactory2 = new EventReceiverFirehoseFactory(
+          SERVICE_NAME,
+          CAPACITY,
+          MAX_IDLE_TIME_MILLIS,
+          null,
+          new DefaultObjectMapper(),
+          new DefaultObjectMapper(),
+          register,
+          AuthTestUtils.TEST_AUTHORIZER_MAPPER
+      );
+      EventReceiverFirehoseFactory.EventReceiverFirehose firehose2 =
+          (EventReceiverFirehoseFactory.EventReceiverFirehose) eventReceiverFirehoseFactory2
+              .connect(
+                  new MapInputRowParser(
+                      new JSONParseSpec(
+                          new TimestampSpec(
+                              "timestamp",
+                              "auto",
+                              null
+                          ), new DimensionsSpec(DimensionsSpec.getDefaultSchemas(ImmutableList.of("d1"))),
+                          null,
+                          null,
+                          null
+                      )
+                  ),
+                  null
+              );
+    });
   }
 
-  @Test(timeout = 60_000L)
+  @Test
+  @Timeout(value = 60_000L, unit = TimeUnit.MILLISECONDS)
   public void testShutdownWithPrevTime() throws Exception
   {
     EasyMock.expect(req.getAttribute(AuthConfig.DRUID_AUTHORIZATION_CHECKED))
@@ -280,7 +288,8 @@ public class EventReceiverFirehoseTest
     firehose.getDelayedCloseExecutor().join();
   }
 
-  @Test(timeout = 60_000L)
+  @Test
+  @Timeout(value = 60_000L, unit = TimeUnit.MILLISECONDS)
   public void testShutdown() throws Exception
   {
     EasyMock.expect(req.getAttribute(AuthConfig.DRUID_AUTHORIZATION_CHECKED))
@@ -307,36 +316,36 @@ public class EventReceiverFirehoseTest
 
       final InputStream inputStream = IOUtils.toInputStream(inputRow, StandardCharsets.UTF_8);
       firehose.addAll(inputStream, req);
-      Assert.assertEquals(i + 1, firehose.getCurrentBufferSize());
+      Assertions.assertEquals(i + 1, firehose.getCurrentBufferSize());
       inputStream.close();
     }
 
     EasyMock.verify(req);
 
     final Iterable<Map.Entry<String, EventReceiverFirehoseMetric>> metrics = register.getMetrics();
-    Assert.assertEquals(1, Iterables.size(metrics));
+    Assertions.assertEquals(1, Iterables.size(metrics));
 
     final Map.Entry<String, EventReceiverFirehoseMetric> entry = Iterables.getLast(metrics);
-    Assert.assertEquals(SERVICE_NAME, entry.getKey());
-    Assert.assertEquals(CAPACITY, entry.getValue().getCapacity());
-    Assert.assertEquals(CAPACITY, firehose.getCapacity());
-    Assert.assertEquals(NUM_EVENTS, entry.getValue().getCurrentBufferSize());
-    Assert.assertEquals(NUM_EVENTS, firehose.getCurrentBufferSize());
+    Assertions.assertEquals(SERVICE_NAME, entry.getKey());
+    Assertions.assertEquals(CAPACITY, entry.getValue().getCapacity());
+    Assertions.assertEquals(CAPACITY, firehose.getCapacity());
+    Assertions.assertEquals(NUM_EVENTS, entry.getValue().getCurrentBufferSize());
+    Assertions.assertEquals(NUM_EVENTS, firehose.getCurrentBufferSize());
 
     for (int i = NUM_EVENTS - 1; i >= 0; --i) {
-      Assert.assertTrue(firehose.hasMore());
-      Assert.assertNotNull(firehose.nextRow());
-      Assert.assertEquals(i, firehose.getCurrentBufferSize());
+      Assertions.assertTrue(firehose.hasMore());
+      Assertions.assertNotNull(firehose.nextRow());
+      Assertions.assertEquals(i, firehose.getCurrentBufferSize());
     }
 
-    Assert.assertEquals(CAPACITY, entry.getValue().getCapacity());
-    Assert.assertEquals(CAPACITY, firehose.getCapacity());
-    Assert.assertEquals(0, entry.getValue().getCurrentBufferSize());
-    Assert.assertEquals(0, firehose.getCurrentBufferSize());
+    Assertions.assertEquals(CAPACITY, entry.getValue().getCapacity());
+    Assertions.assertEquals(CAPACITY, firehose.getCapacity());
+    Assertions.assertEquals(0, entry.getValue().getCurrentBufferSize());
+    Assertions.assertEquals(0, firehose.getCurrentBufferSize());
 
     firehose.close();
-    Assert.assertFalse(firehose.hasMore());
-    Assert.assertEquals(0, Iterables.size(register.getMetrics()));
+    Assertions.assertFalse(firehose.hasMore());
+    Assertions.assertEquals(0, Iterables.size(register.getMetrics()));
   }
 
   @Test
@@ -347,8 +356,8 @@ public class EventReceiverFirehoseTest
 
       final InputStream inputStream = IOUtils.toInputStream(inputRow, StandardCharsets.UTF_8);
       final Response response = firehose.addAll(inputStream, req);
-      Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
-      Assert.assertEquals(1, firehose.getCurrentBufferSize());
+      Assertions.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+      Assertions.assertEquals(1, firehose.getCurrentBufferSize());
       inputStream.close();
     }
 
@@ -365,7 +374,7 @@ public class EventReceiverFirehoseTest
     final InputStream inputStream = IOUtils.toInputStream(inputRow, StandardCharsets.UTF_8);
     final Response response = firehose.addAll(inputStream, req);
 
-    Assert.assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+    Assertions.assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
 
     inputStream.close();
 
@@ -382,17 +391,17 @@ public class EventReceiverFirehoseTest
 
       final InputStream inputStream = IOUtils.toInputStream(inputRow, StandardCharsets.UTF_8);
       final Response response = firehose.addAll(inputStream, req);
-      Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+      Assertions.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
       inputStream.close();
-      Assert.assertTrue(firehose.hasMore());
-      Assert.assertNotNull(firehose.nextRow());
+      Assertions.assertTrue(firehose.hasMore());
+      Assertions.assertNotNull(firehose.nextRow());
     }
 
     setUpRequestExpectations("toomany", "0");
 
     final InputStream inputStream = IOUtils.toInputStream(inputRow, StandardCharsets.UTF_8);
     final Response response = firehose.addAll(inputStream, req);
-    Assert.assertEquals(Response.Status.FORBIDDEN.getStatusCode(), response.getStatus());
+    Assertions.assertEquals(Response.Status.FORBIDDEN.getStatusCode(), response.getStatus());
     inputStream.close();
 
     EasyMock.verify(req);
@@ -408,7 +417,7 @@ public class EventReceiverFirehoseTest
     final InputStream inputStream = IOUtils.toInputStream(inputRow, StandardCharsets.UTF_8);
     final Response response = firehose.addAll(inputStream, req);
 
-    Assert.assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+    Assertions.assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
 
     inputStream.close();
 

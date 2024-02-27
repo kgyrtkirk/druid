@@ -21,7 +21,6 @@ package org.apache.druid.msq.indexing;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.apache.druid.sql.calcite.planner.ColumnMapping;
-import org.junit.Test;
 
 public class ColumnMappingTest
 {

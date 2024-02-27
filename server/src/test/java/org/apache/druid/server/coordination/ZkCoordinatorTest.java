@@ -39,11 +39,11 @@ import org.apache.druid.timeline.DataSegment;
 import org.apache.druid.timeline.partition.NoneShardSpec;
 import org.apache.zookeeper.CreateMode;
 import org.easymock.EasyMock;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
 import java.io.IOException;
@@ -52,6 +52,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  */
@@ -82,14 +83,14 @@ public class ZkCoordinatorTest extends CuratorTestBase
   private File infoDir;
   private List<StorageLocationConfig> locations;
 
-  @Rule
-  public TemporaryFolder temporaryFolder = new TemporaryFolder();
+  @TempDir
+  public File temporaryFolder;
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception
   {
     try {
-      infoDir = temporaryFolder.newFolder();
+      infoDir = newFolder(temporaryFolder, "junit");
       log.info("Creating tmp test files in [%s]", infoDir);
     }
     catch (IOException e) {
@@ -109,13 +110,14 @@ public class ZkCoordinatorTest extends CuratorTestBase
     curator.blockUntilConnected();
   }
 
-  @After
+  @AfterEach
   public void tearDown()
   {
     tearDownServerAndCurator();
   }
 
-  @Test(timeout = 60_000L)
+  @Test
+  @Timeout(value = 60_000L, unit = TimeUnit.MILLISECONDS)
   public void testLoadDrop() throws Exception
   {
     EmittingLogger.registerEmitter(new NoopServiceEmitter());
@@ -231,5 +233,14 @@ public class ZkCoordinatorTest extends CuratorTestBase
     }
 
     zkCoordinator.stop();
+  }
+
+  private static File newFolder(File root, String... subDirs) throws IOException {
+    String subFolder = String.join("/", subDirs);
+    File result = new File(root, subFolder);
+    if (!result.mkdirs()) {
+      throw new IOException("Couldn't create folders " + root);
+    }
+    return result;
   }
 }

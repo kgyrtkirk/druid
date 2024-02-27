@@ -27,8 +27,8 @@ import org.apache.druid.query.aggregation.AggregatorFactory;
 import org.apache.druid.query.aggregation.DoubleMaxAggregatorFactory;
 import org.apache.druid.query.aggregation.LongMaxAggregatorFactory;
 import org.apache.druid.query.aggregation.LongSumAggregatorFactory;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -60,19 +60,19 @@ public class MetadataTest
         Metadata.class
     );
 
-    Assert.assertEquals(metadata, other);
+    Assertions.assertEquals(metadata, other);
   }
 
   @Test
   public void testMerge()
   {
-    Assert.assertNull(Metadata.merge(null, null));
-    Assert.assertNull(Metadata.merge(ImmutableList.of(), null));
+    Assertions.assertNull(Metadata.merge(null, null));
+    Assertions.assertNull(Metadata.merge(ImmutableList.of(), null));
 
     List<Metadata> metadataToBeMerged = new ArrayList<>();
 
     metadataToBeMerged.add(null);
-    Assert.assertNull(Metadata.merge(metadataToBeMerged, null));
+    Assertions.assertNull(Metadata.merge(metadataToBeMerged, null));
 
     //sanity merge check
     AggregatorFactory[] aggs = new AggregatorFactory[] {
@@ -111,7 +111,7 @@ public class MetadataTest
         Granularities.ALL,
         Boolean.FALSE
     );
-    Assert.assertEquals(merged, Metadata.merge(ImmutableList.of(m1, m2), null));
+    Assertions.assertEquals(merged, Metadata.merge(ImmutableList.of(m1, m2), null));
 
     //merge check with one metadata being null
     metadataToBeMerged.clear();
@@ -121,7 +121,7 @@ public class MetadataTest
 
     final Metadata merged2 = new Metadata(Collections.singletonMap("k", "v"), null, null, null, null);
 
-    Assert.assertEquals(merged2, Metadata.merge(metadataToBeMerged, null));
+    Assertions.assertEquals(merged2, Metadata.merge(metadataToBeMerged, null));
 
     //merge check with client explicitly providing merged aggregators
     AggregatorFactory[] explicitAggs = new AggregatorFactory[] {
@@ -130,7 +130,7 @@ public class MetadataTest
 
     final Metadata merged3 = new Metadata(Collections.singletonMap("k", "v"), explicitAggs, null, null, null);
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         merged3,
         Metadata.merge(metadataToBeMerged, explicitAggs)
     );
@@ -142,7 +142,7 @@ public class MetadataTest
         Granularities.ALL,
         null
     );
-    Assert.assertEquals(
+    Assertions.assertEquals(
         merged4,
         Metadata.merge(ImmutableList.of(m3, m2), explicitAggs)
     );

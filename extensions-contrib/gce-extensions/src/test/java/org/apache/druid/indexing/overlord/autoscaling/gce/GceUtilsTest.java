@@ -20,7 +20,6 @@
 package org.apache.druid.indexing.overlord.autoscaling.gce;
 
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;

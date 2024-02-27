@@ -22,7 +22,6 @@ package org.apache.druid.indexing.common;
 import org.joda.time.Duration;
 import org.joda.time.Period;
 import org.junit.Assert;
-import org.junit.Test;
 
 /**
  */

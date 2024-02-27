@@ -36,7 +36,6 @@ import org.apache.druid.metadata.MetadataStorageConnectorConfig;
 import org.apache.druid.segment.indexing.granularity.UniformGranularitySpec;
 import org.joda.time.Period;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.util.Collections;
 

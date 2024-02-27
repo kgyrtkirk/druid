@@ -25,8 +25,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.druid.data.input.impl.DimensionSchema.MultiValueHandling;
 import org.apache.druid.guice.DruidSecondaryModule;
 import org.apache.druid.guice.GuiceAnnotationIntrospector;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class StringDimensionSchemaTest
 {
@@ -45,7 +45,7 @@ public class StringDimensionSchemaTest
   {
     final String json = "\"dim\"";
     final StringDimensionSchema schema = (StringDimensionSchema) jsonMapper.readValue(json, DimensionSchema.class);
-    Assert.assertEquals(new StringDimensionSchema("dim"), schema);
+    Assertions.assertEquals(new StringDimensionSchema("dim"), schema);
   }
 
   @Test
@@ -58,6 +58,6 @@ public class StringDimensionSchemaTest
                         + "  \"createBitmapIndex\" : false\n"
                         + "}";
     final StringDimensionSchema schema = (StringDimensionSchema) jsonMapper.readValue(json, DimensionSchema.class);
-    Assert.assertEquals(new StringDimensionSchema("dim", MultiValueHandling.SORTED_SET, false), schema);
+    Assertions.assertEquals(new StringDimensionSchema("dim", MultiValueHandling.SORTED_SET, false), schema);
   }
 }

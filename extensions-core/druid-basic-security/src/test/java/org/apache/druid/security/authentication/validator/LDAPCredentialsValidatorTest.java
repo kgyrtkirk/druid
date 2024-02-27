@@ -25,7 +25,6 @@ import org.apache.druid.security.basic.BasicAuthLDAPConfig;
 import org.apache.druid.security.basic.BasicAuthUtils;
 import org.apache.druid.security.basic.authentication.validator.LDAPCredentialsValidator;
 import org.junit.Assert;
-import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 

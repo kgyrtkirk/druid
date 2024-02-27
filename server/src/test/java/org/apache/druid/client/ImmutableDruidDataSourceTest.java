@@ -29,18 +29,13 @@ import org.apache.druid.java.util.common.Intervals;
 import org.apache.druid.test.utils.ImmutableDruidDataSourceTestUtils;
 import org.apache.druid.timeline.DataSegment;
 import org.apache.druid.timeline.DataSegment.PruneSpecsHolder;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
 public class ImmutableDruidDataSourceTest
 {
-
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
 
   @Test
   public void testSerde() throws IOException
@@ -67,10 +62,10 @@ public class ImmutableDruidDataSourceTest
 
     final ImmutableDruidDataSource dataSource2 = getImmutableDruidDataSource(segment2);
 
-    Assert.assertThrows(
-        "ImmutableDruidDataSource shouldn't be used as the key in containers",
+    Assertions.assertThrows(
         UnsupportedOperationException.class,
-        () -> dataSource1.equals(dataSource2)
+        () -> dataSource1.equals(dataSource2),
+        "ImmutableDruidDataSource shouldn't be used as the key in containers"
     );
   }
 
@@ -106,10 +101,10 @@ public class ImmutableDruidDataSourceTest
     final DataSegment segment = getTestSegment();
     final ImmutableDruidDataSource dataSource = getImmutableDruidDataSource(segment);
 
-    Assert.assertThrows(
-        "ImmutableDruidDataSource shouldn't be used as the key in containers",
+    Assertions.assertThrows(
         UnsupportedOperationException.class,
-        dataSource::hashCode
+        dataSource::hashCode,
+        "ImmutableDruidDataSource shouldn't be used as the key in containers"
     );
   }
 }

@@ -22,7 +22,6 @@ package org.apache.druid.query.aggregation.datasketches.kll;
 import org.apache.datasketches.kll.KllFloatsSketch;
 import org.apache.druid.java.util.common.StringUtils;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.util.Arrays;
 

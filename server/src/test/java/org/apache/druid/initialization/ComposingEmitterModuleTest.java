@@ -31,8 +31,8 @@ import org.apache.druid.java.util.emitter.core.Emitter;
 import org.apache.druid.server.emitter.ComposingEmitterConfig;
 import org.apache.druid.server.emitter.ComposingEmitterModule;
 import org.easymock.EasyMock;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.validation.Validation;
 import javax.validation.Validator;
@@ -46,7 +46,7 @@ public class ComposingEmitterModuleTest
   private final String testEmitterType = "http";
   private Emitter emitter;
 
-  @Before
+  @BeforeEach
   public void setup()
   {
     emitter = EasyMock.createMock(Emitter.class);

@@ -22,8 +22,8 @@ package org.apache.druid.frame.key;
 import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class RowKeyTest extends InitializedNullHandlingTest
 {
@@ -36,57 +36,57 @@ public class RowKeyTest extends InitializedNullHandlingTest
         RowSignature.builder().add("1", ColumnType.LONG).add("2", ColumnType.STRING).build();
 
     //noinspection AssertBetweenInconvertibleTypes: testing this case on purpose
-    Assert.assertNotEquals(
+    Assertions.assertNotEquals(
         "not a key",
         KeyTestUtils.createKey(signatureLong, 1L)
     );
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         KeyTestUtils.createKey(signatureLong, 1L),
         KeyTestUtils.createKey(signatureLong, 1L)
     );
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         KeyTestUtils.createKey(RowSignature.empty()),
         KeyTestUtils.createKey(RowSignature.empty())
     );
 
-    Assert.assertNotEquals(
+    Assertions.assertNotEquals(
         KeyTestUtils.createKey(RowSignature.empty()),
         KeyTestUtils.createKey(signatureLong, 2L)
     );
 
-    Assert.assertNotEquals(
+    Assertions.assertNotEquals(
         KeyTestUtils.createKey(signatureLong, 1L),
         KeyTestUtils.createKey(signatureLong, 2L)
     );
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         KeyTestUtils.createKey(signatureLongString, 1L, "abc"),
         KeyTestUtils.createKey(signatureLongString, 1L, "abc")
     );
 
-    Assert.assertNotEquals(
+    Assertions.assertNotEquals(
         KeyTestUtils.createKey(signatureLongString, 1L, "abc"),
         KeyTestUtils.createKey(signatureLongString, 1L, "def")
     );
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         KeyTestUtils.createKey(signatureLong, 1L).hashCode(),
         KeyTestUtils.createKey(signatureLong, 1L).hashCode()
     );
 
-    Assert.assertNotEquals(
+    Assertions.assertNotEquals(
         KeyTestUtils.createKey(signatureLong, 1L).hashCode(),
         KeyTestUtils.createKey(signatureLong, 2L).hashCode()
     );
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         KeyTestUtils.createKey(signatureLongString, 1L, "abc").hashCode(),
         KeyTestUtils.createKey(signatureLongString, 1L, "abc").hashCode()
     );
 
-    Assert.assertNotEquals(
+    Assertions.assertNotEquals(
         KeyTestUtils.createKey(signatureLongString, 1L, "abc").hashCode(),
         KeyTestUtils.createKey(signatureLongString, 1L, "def").hashCode()
     );
@@ -97,11 +97,11 @@ public class RowKeyTest extends InitializedNullHandlingTest
   {
     final RowSignature signatureLong = RowSignature.builder().add("1", ColumnType.LONG).build();
     final RowKey longKey = KeyTestUtils.createKey(signatureLong, 1L, "abc");
-    Assert.assertEquals(RowKey.OBJECT_OVERHEAD_SIZE_BYTES + longKey.array().length, longKey.estimatedObjectSizeBytes());
+    Assertions.assertEquals(RowKey.OBJECT_OVERHEAD_SIZE_BYTES + longKey.array().length, longKey.estimatedObjectSizeBytes());
 
     final RowSignature signatureLongString =
         RowSignature.builder().add("1", ColumnType.LONG).add("2", ColumnType.STRING).build();
     final RowKey longStringKey = KeyTestUtils.createKey(signatureLongString, 1L, "abc");
-    Assert.assertEquals(RowKey.OBJECT_OVERHEAD_SIZE_BYTES + longStringKey.array().length, longStringKey.estimatedObjectSizeBytes());
+    Assertions.assertEquals(RowKey.OBJECT_OVERHEAD_SIZE_BYTES + longStringKey.array().length, longStringKey.estimatedObjectSizeBytes());
   }
 }

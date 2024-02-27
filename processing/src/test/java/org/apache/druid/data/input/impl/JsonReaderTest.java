@@ -33,19 +33,17 @@ import org.apache.druid.java.util.common.parsers.JSONPathFieldSpec;
 import org.apache.druid.java.util.common.parsers.JSONPathFieldType;
 import org.apache.druid.java.util.common.parsers.JSONPathSpec;
 import org.apache.druid.java.util.common.parsers.ParseException;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 public class JsonReaderTest
 {
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
 
   @Test
   public void testParseMultipleRows() throws IOException
@@ -97,23 +95,23 @@ public class JsonReaderTest
         final InputRow row = iterator.next();
 
         final String msgId = String.valueOf(++numActualIterations);
-        Assert.assertEquals(DateTimes.of("2019-01-01"), row.getTimestamp());
-        Assert.assertEquals("x", Iterables.getOnlyElement(row.getDimension("foo")));
-        Assert.assertEquals("4", Iterables.getOnlyElement(row.getDimension("baz")));
-        Assert.assertEquals("4", Iterables.getOnlyElement(row.getDimension("root_baz")));
-        Assert.assertEquals("4", Iterables.getOnlyElement(row.getDimension("tree_baz")));
-        Assert.assertEquals(msgId, Iterables.getOnlyElement(row.getDimension("path_omg")));
-        Assert.assertEquals(msgId, Iterables.getOnlyElement(row.getDimension("jq_omg")));
-        Assert.assertEquals(msgId, Iterables.getOnlyElement(row.getDimension("tree_omg")));
+        Assertions.assertEquals(DateTimes.of("2019-01-01"), row.getTimestamp());
+        Assertions.assertEquals("x", Iterables.getOnlyElement(row.getDimension("foo")));
+        Assertions.assertEquals("4", Iterables.getOnlyElement(row.getDimension("baz")));
+        Assertions.assertEquals("4", Iterables.getOnlyElement(row.getDimension("root_baz")));
+        Assertions.assertEquals("4", Iterables.getOnlyElement(row.getDimension("tree_baz")));
+        Assertions.assertEquals(msgId, Iterables.getOnlyElement(row.getDimension("path_omg")));
+        Assertions.assertEquals(msgId, Iterables.getOnlyElement(row.getDimension("jq_omg")));
+        Assertions.assertEquals(msgId, Iterables.getOnlyElement(row.getDimension("tree_omg")));
 
-        Assert.assertTrue(row.getDimension("root_baz2").isEmpty());
-        Assert.assertTrue(row.getDimension("tree_baz2").isEmpty());
-        Assert.assertTrue(row.getDimension("path_omg2").isEmpty());
-        Assert.assertTrue(row.getDimension("jq_omg2").isEmpty());
-        Assert.assertTrue(row.getDimension("tree_omg2").isEmpty());
+        Assertions.assertTrue(row.getDimension("root_baz2").isEmpty());
+        Assertions.assertTrue(row.getDimension("tree_baz2").isEmpty());
+        Assertions.assertTrue(row.getDimension("path_omg2").isEmpty());
+        Assertions.assertTrue(row.getDimension("jq_omg2").isEmpty());
+        Assertions.assertTrue(row.getDimension("tree_omg2").isEmpty());
       }
 
-      Assert.assertEquals(numExpectedIterations, numActualIterations);
+      Assertions.assertEquals(numExpectedIterations, numActualIterations);
     }
   }
 
@@ -172,86 +170,85 @@ public class JsonReaderTest
 
         final InputRow row = iterator.next();
 
-        Assert.assertEquals(DateTimes.of("2019-01-01"), row.getTimestamp());
-        Assert.assertEquals("x", Iterables.getOnlyElement(row.getDimension("foo")));
-        Assert.assertEquals("4", Iterables.getOnlyElement(row.getDimension("baz")));
-        Assert.assertEquals("4", Iterables.getOnlyElement(row.getDimension("root_baz")));
-        Assert.assertEquals("4", Iterables.getOnlyElement(row.getDimension("tree_baz")));
-        Assert.assertEquals("1", Iterables.getOnlyElement(row.getDimension("path_omg")));
-        Assert.assertEquals("1", Iterables.getOnlyElement(row.getDimension("jq_omg")));
-        Assert.assertEquals("1", Iterables.getOnlyElement(row.getDimension("tree_omg")));
+        Assertions.assertEquals(DateTimes.of("2019-01-01"), row.getTimestamp());
+        Assertions.assertEquals("x", Iterables.getOnlyElement(row.getDimension("foo")));
+        Assertions.assertEquals("4", Iterables.getOnlyElement(row.getDimension("baz")));
+        Assertions.assertEquals("4", Iterables.getOnlyElement(row.getDimension("root_baz")));
+        Assertions.assertEquals("4", Iterables.getOnlyElement(row.getDimension("tree_baz")));
+        Assertions.assertEquals("1", Iterables.getOnlyElement(row.getDimension("path_omg")));
+        Assertions.assertEquals("1", Iterables.getOnlyElement(row.getDimension("jq_omg")));
+        Assertions.assertEquals("1", Iterables.getOnlyElement(row.getDimension("tree_omg")));
 
-        Assert.assertTrue(row.getDimension("root_baz2").isEmpty());
-        Assert.assertTrue(row.getDimension("tree_baz2").isEmpty());
-        Assert.assertTrue(row.getDimension("path_omg2").isEmpty());
-        Assert.assertTrue(row.getDimension("jq_omg2").isEmpty());
-        Assert.assertTrue(row.getDimension("tree_omg2").isEmpty());
+        Assertions.assertTrue(row.getDimension("root_baz2").isEmpty());
+        Assertions.assertTrue(row.getDimension("tree_baz2").isEmpty());
+        Assertions.assertTrue(row.getDimension("path_omg2").isEmpty());
+        Assertions.assertTrue(row.getDimension("jq_omg2").isEmpty());
+        Assertions.assertTrue(row.getDimension("tree_omg2").isEmpty());
 
         numActualIterations++;
       }
 
-      Assert.assertEquals(numExpectedIterations, numActualIterations);
+      Assertions.assertEquals(numExpectedIterations, numActualIterations);
     }
   }
 
   @Test
   public void testInvalidJSONText() throws IOException
   {
-    final JsonInputFormat format = new JsonInputFormat(
-        new JSONPathSpec(
-            true,
-            ImmutableList.of(
-                new JSONPathFieldSpec(JSONPathFieldType.ROOT, "root_baz", "baz"),
-                new JSONPathFieldSpec(JSONPathFieldType.ROOT, "root_baz2", "baz2"),
-                new JSONPathFieldSpec(JSONPathFieldType.PATH, "path_omg", "$.o.mg"),
-                new JSONPathFieldSpec(JSONPathFieldType.PATH, "path_omg2", "$.o.mg2"),
-                new JSONPathFieldSpec(JSONPathFieldType.JQ, "jq_omg", ".o.mg"),
-                new JSONPathFieldSpec(JSONPathFieldType.JQ, "jq_omg2", ".o.mg2"),
-                new JSONPathFieldSpec(JSONPathFieldType.TREE, "tree_baz", null, Collections.singletonList("baz")),
-                new JSONPathFieldSpec(JSONPathFieldType.TREE, "tree_baz2", null, Collections.singletonList("baz2")),
-                new JSONPathFieldSpec(JSONPathFieldType.TREE, "tree_omg", null, Arrays.asList("o", "mg")),
-                new JSONPathFieldSpec(JSONPathFieldType.TREE, "tree_omg2", null, Arrays.asList("o", "mg2"))
-            )
-        ),
-        null,
-        null,
-        false, //make sure JsonReader is used
-        false,
-        false
-    );
+    assertThrows(ParseException.class, () -> {
+      final JsonInputFormat format = new JsonInputFormat(
+          new JSONPathSpec(
+              true,
+              ImmutableList.of(
+                  new JSONPathFieldSpec(JSONPathFieldType.ROOT, "root_baz", "baz"),
+                  new JSONPathFieldSpec(JSONPathFieldType.ROOT, "root_baz2", "baz2"),
+                  new JSONPathFieldSpec(JSONPathFieldType.PATH, "path_omg", "$.o.mg"),
+                  new JSONPathFieldSpec(JSONPathFieldType.PATH, "path_omg2", "$.o.mg2"),
+                  new JSONPathFieldSpec(JSONPathFieldType.JQ, "jq_omg", ".o.mg"),
+                  new JSONPathFieldSpec(JSONPathFieldType.JQ, "jq_omg2", ".o.mg2"),
+                  new JSONPathFieldSpec(JSONPathFieldType.TREE, "tree_baz", null, Collections.singletonList("baz")),
+                  new JSONPathFieldSpec(JSONPathFieldType.TREE, "tree_baz2", null, Collections.singletonList("baz2")),
+                  new JSONPathFieldSpec(JSONPathFieldType.TREE, "tree_omg", null, Arrays.asList("o", "mg")),
+                  new JSONPathFieldSpec(JSONPathFieldType.TREE, "tree_omg2", null, Arrays.asList("o", "mg2"))
+              )
+          ),
+          null,
+          null,
+          false, //make sure JsonReader is used
+          false,
+          false
+      );
 
-    final ByteEntity source = new ByteEntity(
-        StringUtils.toUtf8("{\"timestamp\":\"2019-01-01\",\"bar\":null,\"foo\":\"x\",\"baz\":4,\"o\":{\"mg\":1}}"
-                           + "{\"timestamp\":\"2019-01-01\",\"bar\":null,\"foo\":\"x\",\"baz\":4xxx,\"o\":{\"mg\":2}}"
-                           //baz property is illegal
-                           + "{\"timestamp\":\"2019-01-01\",\"bar\":null,\"foo\":\"x\",\"baz\":4,\"o\":{\"mg\":3}}")
-    );
+      final ByteEntity source = new ByteEntity(
+          StringUtils.toUtf8("{\"timestamp\":\"2019-01-01\",\"bar\":null,\"foo\":\"x\",\"baz\":4,\"o\":{\"mg\":1}}"
+              + "{\"timestamp\":\"2019-01-01\",\"bar\":null,\"foo\":\"x\",\"baz\":4xxx,\"o\":{\"mg\":2}}"
+              //baz property is illegal
+              + "{\"timestamp\":\"2019-01-01\",\"bar\":null,\"foo\":\"x\",\"baz\":4,\"o\":{\"mg\":3}}")
+      );
 
-    final InputEntityReader reader = format.createReader(
-        new InputRowSchema(
-            new TimestampSpec("timestamp", "iso", null),
-            new DimensionsSpec(DimensionsSpec.getDefaultSchemas(ImmutableList.of("bar", "foo"))),
-            ColumnsFilter.all()
-        ),
-        source,
-        null
-    );
+      final InputEntityReader reader = format.createReader(
+          new InputRowSchema(
+              new TimestampSpec("timestamp", "iso", null),
+              new DimensionsSpec(DimensionsSpec.getDefaultSchemas(ImmutableList.of("bar", "foo"))),
+              ColumnsFilter.all()
+          ),
+          source,
+          null
+      );
 
-    //expect a ParseException on the following `next` call on iterator
-    expectedException.expect(ParseException.class);
+      // the 2nd line is ill-formed, so the parse of this text chunk aborts
+      final int numExpectedIterations = 0;
 
-    // the 2nd line is ill-formed, so the parse of this text chunk aborts
-    final int numExpectedIterations = 0;
+      try (CloseableIterator<InputRow> iterator = reader.read()) {
+        int numActualIterations = 0;
+        while (iterator.hasNext()) {
+          iterator.next();
+          ++numActualIterations;
+        }
 
-    try (CloseableIterator<InputRow> iterator = reader.read()) {
-      int numActualIterations = 0;
-      while (iterator.hasNext()) {
-        iterator.next();
-        ++numActualIterations;
+        Assertions.assertEquals(numExpectedIterations, numActualIterations);
       }
-
-      Assert.assertEquals(numExpectedIterations, numActualIterations);
-    }
+    });
   }
 
   @Test
@@ -303,31 +300,31 @@ public class JsonReaderTest
         final InputRowListPlusRawValues rawValues = iterator.next();
 
         // 3 rows returned together
-        Assert.assertEquals(3, rawValues.getInputRows().size());
+        Assertions.assertEquals(3, rawValues.getInputRows().size());
 
         for (int i = 0; i < 3; i++) {
           InputRow row = rawValues.getInputRows().get(i);
 
           final String msgId = String.valueOf(++acturalRowCount);
-          Assert.assertEquals(DateTimes.of("2019-01-01"), row.getTimestamp());
-          Assert.assertEquals("x", Iterables.getOnlyElement(row.getDimension("foo")));
-          Assert.assertEquals("4", Iterables.getOnlyElement(row.getDimension("baz")));
-          Assert.assertEquals("4", Iterables.getOnlyElement(row.getDimension("root_baz")));
-          Assert.assertEquals("4", Iterables.getOnlyElement(row.getDimension("tree_baz")));
-          Assert.assertEquals(msgId, Iterables.getOnlyElement(row.getDimension("path_omg")));
-          Assert.assertEquals(msgId, Iterables.getOnlyElement(row.getDimension("jq_omg")));
-          Assert.assertEquals(msgId, Iterables.getOnlyElement(row.getDimension("tree_omg")));
+          Assertions.assertEquals(DateTimes.of("2019-01-01"), row.getTimestamp());
+          Assertions.assertEquals("x", Iterables.getOnlyElement(row.getDimension("foo")));
+          Assertions.assertEquals("4", Iterables.getOnlyElement(row.getDimension("baz")));
+          Assertions.assertEquals("4", Iterables.getOnlyElement(row.getDimension("root_baz")));
+          Assertions.assertEquals("4", Iterables.getOnlyElement(row.getDimension("tree_baz")));
+          Assertions.assertEquals(msgId, Iterables.getOnlyElement(row.getDimension("path_omg")));
+          Assertions.assertEquals(msgId, Iterables.getOnlyElement(row.getDimension("jq_omg")));
+          Assertions.assertEquals(msgId, Iterables.getOnlyElement(row.getDimension("tree_omg")));
 
-          Assert.assertTrue(row.getDimension("root_baz2").isEmpty());
-          Assert.assertTrue(row.getDimension("tree_baz2").isEmpty());
-          Assert.assertTrue(row.getDimension("path_omg2").isEmpty());
-          Assert.assertTrue(row.getDimension("jq_omg2").isEmpty());
-          Assert.assertTrue(row.getDimension("tree_omg2").isEmpty());
+          Assertions.assertTrue(row.getDimension("root_baz2").isEmpty());
+          Assertions.assertTrue(row.getDimension("tree_baz2").isEmpty());
+          Assertions.assertTrue(row.getDimension("path_omg2").isEmpty());
+          Assertions.assertTrue(row.getDimension("jq_omg2").isEmpty());
+          Assertions.assertTrue(row.getDimension("tree_omg2").isEmpty());
         }
       }
     }
 
-    Assert.assertEquals(3, acturalRowCount);
+    Assertions.assertEquals(3, acturalRowCount);
   }
 
   @Test
@@ -385,71 +382,70 @@ public class JsonReaderTest
 
         final InputRowListPlusRawValues rawValues = iterator.next();
 
-        Assert.assertNotNull(rawValues.getParseException());
+        Assertions.assertNotNull(rawValues.getParseException());
       }
 
-      Assert.assertEquals(numExpectedIterations, numActualIterations);
+      Assertions.assertEquals(numExpectedIterations, numActualIterations);
     }
   }
 
   @Test
   public void testEmptyJSONText() throws IOException
   {
-    final JsonInputFormat format = new JsonInputFormat(
-        new JSONPathSpec(
-            true,
-            ImmutableList.of(
-                new JSONPathFieldSpec(JSONPathFieldType.ROOT, "root_baz", "baz"),
-                new JSONPathFieldSpec(JSONPathFieldType.ROOT, "root_baz2", "baz2"),
-                new JSONPathFieldSpec(JSONPathFieldType.PATH, "path_omg", "$.o.mg"),
-                new JSONPathFieldSpec(JSONPathFieldType.PATH, "path_omg2", "$.o.mg2"),
-                new JSONPathFieldSpec(JSONPathFieldType.JQ, "jq_omg", ".o.mg"),
-                new JSONPathFieldSpec(JSONPathFieldType.JQ, "jq_omg2", ".o.mg2"),
-                new JSONPathFieldSpec(JSONPathFieldType.TREE, "tree_baz", null, Collections.singletonList("baz")),
-                new JSONPathFieldSpec(JSONPathFieldType.TREE, "tree_baz2", null, Collections.singletonList("baz2")),
-                new JSONPathFieldSpec(JSONPathFieldType.TREE, "tree_omg", null, Arrays.asList("o", "mg")),
-                new JSONPathFieldSpec(JSONPathFieldType.TREE, "tree_omg2", null, Arrays.asList("o", "mg2"))
-            )
-        ),
-        null,
-        null,
-        false, //make sure JsonReader is used
-        false,
-        false
-    );
+    assertThrows(ParseException.class, () -> {
+      final JsonInputFormat format = new JsonInputFormat(
+          new JSONPathSpec(
+              true,
+              ImmutableList.of(
+                  new JSONPathFieldSpec(JSONPathFieldType.ROOT, "root_baz", "baz"),
+                  new JSONPathFieldSpec(JSONPathFieldType.ROOT, "root_baz2", "baz2"),
+                  new JSONPathFieldSpec(JSONPathFieldType.PATH, "path_omg", "$.o.mg"),
+                  new JSONPathFieldSpec(JSONPathFieldType.PATH, "path_omg2", "$.o.mg2"),
+                  new JSONPathFieldSpec(JSONPathFieldType.JQ, "jq_omg", ".o.mg"),
+                  new JSONPathFieldSpec(JSONPathFieldType.JQ, "jq_omg2", ".o.mg2"),
+                  new JSONPathFieldSpec(JSONPathFieldType.TREE, "tree_baz", null, Collections.singletonList("baz")),
+                  new JSONPathFieldSpec(JSONPathFieldType.TREE, "tree_baz2", null, Collections.singletonList("baz2")),
+                  new JSONPathFieldSpec(JSONPathFieldType.TREE, "tree_omg", null, Arrays.asList("o", "mg")),
+                  new JSONPathFieldSpec(JSONPathFieldType.TREE, "tree_omg2", null, Arrays.asList("o", "mg2"))
+              )
+          ),
+          null,
+          null,
+          false, //make sure JsonReader is used
+          false,
+          false
+      );
 
-    //input is empty
-    final ByteEntity source = new ByteEntity(
-        StringUtils.toUtf8(
-            "" // empty row
-        )
-    );
+      //input is empty
+      final ByteEntity source = new ByteEntity(
+          StringUtils.toUtf8(
+              "" // empty row
+          )
+      );
 
-    final InputEntityReader reader = format.createReader(
-        new InputRowSchema(
-            new TimestampSpec("timestamp", "iso", null),
-            new DimensionsSpec(DimensionsSpec.getDefaultSchemas(ImmutableList.of("bar", "foo"))),
-            ColumnsFilter.all()
-        ),
-        source,
-        null
-    );
+      final InputEntityReader reader = format.createReader(
+          new InputRowSchema(
+              new TimestampSpec("timestamp", "iso", null),
+              new DimensionsSpec(DimensionsSpec.getDefaultSchemas(ImmutableList.of("bar", "foo"))),
+              ColumnsFilter.all()
+          ),
+          source,
+          null
+      );
 
-    //expect a ParseException on the following `next` call on iterator
-    expectedException.expect(ParseException.class);
+      // the 2nd line is ill-formed, so the parse of this text chunk aborts
+      final int numExpectedIterations = 0;
 
-    // the 2nd line is ill-formed, so the parse of this text chunk aborts
-    final int numExpectedIterations = 0;
+      try (CloseableIterator<InputRow> iterator = reader.read()) {
+        int numActualIterations = 0;
+        while (iterator.hasNext()) {
+          iterator.next();
+          ++numActualIterations;
+        }
 
-    try (CloseableIterator<InputRow> iterator = reader.read()) {
-      int numActualIterations = 0;
-      while (iterator.hasNext()) {
-        iterator.next();
-        ++numActualIterations;
+        Assertions.assertEquals(numExpectedIterations, numActualIterations);
       }
-
-      Assert.assertEquals(numExpectedIterations, numActualIterations);
-    }
+    });
   }
 
 
@@ -505,10 +501,10 @@ public class JsonReaderTest
 
         final InputRowListPlusRawValues rawValues = iterator.next();
 
-        Assert.assertNotNull(rawValues.getParseException());
+        Assertions.assertNotNull(rawValues.getParseException());
       }
 
-      Assert.assertEquals(numExpectedIterations, numActualIterations);
+      Assertions.assertEquals(numExpectedIterations, numActualIterations);
     }
   }
 }

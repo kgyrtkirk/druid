@@ -33,7 +33,6 @@ import org.apache.druid.segment.column.StringEncodingStrategy;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
 import org.junit.Assert;
-import org.junit.Test;
 import org.junit.internal.matchers.ThrowableMessageMatcher;
 
 import javax.annotation.Nullable;

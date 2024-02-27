@@ -23,8 +23,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.server.coordination.ServerType;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  */
@@ -47,7 +47,7 @@ public class DataNodeServiceTest
         DruidService.class
     );
 
-    Assert.assertEquals(expected, actual);
+    Assertions.assertEquals(expected, actual);
   }
 
   @Test
@@ -66,7 +66,7 @@ public class DataNodeServiceTest
         DruidService.class
     );
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         new DataNodeService(
             "tier",
             100,
@@ -93,7 +93,7 @@ public class DataNodeServiceTest
         DruidService.class
     );
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         new DataNodeService(
             "tier",
             100,
@@ -121,7 +121,7 @@ public class DataNodeServiceTest
         DruidService.class
     );
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         new DataNodeService(
             "tier",
             100,
@@ -142,6 +142,6 @@ public class DataNodeServiceTest
         1
     );
     final String json = mapper.writeValueAsString(dataNodeService);
-    Assert.assertTrue(json.startsWith(StringUtils.format("{\"type\":\"%s\"", DataNodeService.DISCOVERY_SERVICE_KEY)));
+    Assertions.assertTrue(json.startsWith(StringUtils.format("{\"type\":\"%s\"", DataNodeService.DISCOVERY_SERVICE_KEY)));
   }
 }

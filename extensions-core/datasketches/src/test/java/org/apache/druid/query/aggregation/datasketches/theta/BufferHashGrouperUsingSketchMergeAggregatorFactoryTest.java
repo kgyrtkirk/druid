@@ -34,7 +34,6 @@ import org.apache.druid.query.groupby.epinephelinae.Grouper;
 import org.apache.druid.query.groupby.epinephelinae.GrouperTestUtil;
 import org.apache.druid.query.groupby.epinephelinae.IntKey;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.nio.ByteBuffer;
 

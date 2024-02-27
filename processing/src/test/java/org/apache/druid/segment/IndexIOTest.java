@@ -42,11 +42,10 @@ import org.apache.druid.segment.incremental.IndexSizeExceededException;
 import org.apache.druid.segment.incremental.OnheapIncrementalIndex;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.joda.time.Interval;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -62,7 +61,6 @@ import java.util.Objects;
 /**
  * This is mostly a test of the validator
  */
-@RunWith(Parameterized.class)
 public class IndexIOTest extends InitializedNullHandlingTest
 {
   private static Interval DEFAULT_INTERVAL = Intervals.of("1970-01-01/2000-01-01");
@@ -88,7 +86,6 @@ public class IndexIOTest extends InitializedNullHandlingTest
     return outList;
   }
 
-  @Parameterized.Parameters(name = "{0}, {1}")
   public static Iterable<Object[]> constructionFeeder()
   {
     final Map<String, Object> map = ImmutableMap.of();
@@ -238,11 +235,11 @@ public class IndexIOTest extends InitializedNullHandlingTest
     return Lists.transform(mapList, (Function<Map, Map>) input -> Maps.filterValues(input, Objects::nonNull));
   }
 
-  private final Collection<Map<String, Object>> events1;
-  private final Collection<Map<String, Object>> events2;
-  private final Class<? extends Exception> exception;
+  private Collection<Map<String, Object>> events1;
+  private Collection<Map<String, Object>> events2;
+  private Class<? extends Exception> exception;
 
-  public IndexIOTest(
+  public void initIndexIOTest(
       Collection<Map<String, Object>> events1,
       Collection<Map<String, Object>> events2,
       Class<? extends Exception> exception
@@ -282,7 +279,7 @@ public class IndexIOTest extends InitializedNullHandlingTest
   IndexableAdapter adapter1;
   IndexableAdapter adapter2;
 
-  @Before
+  @BeforeEach
   public void setUp() throws IndexSizeExceededException
   {
     long timestamp = 0L;
@@ -308,9 +305,11 @@ public class IndexIOTest extends InitializedNullHandlingTest
     );
   }
 
-  @Test
-  public void testRowValidatorEquals() throws Exception
+  @MethodSource("constructionFeeder")
+  @ParameterizedTest(name = "{0}, {1}")
+  public void testRowValidatorEquals(Collection<Map<String, Object>> events1, Collection<Map<String, Object>> events2, Class<? extends Exception> exception) throws Exception
   {
+    initIndexIOTest(events1, events2, exception);
     Exception ex = null;
     try {
       TestHelper.getTestIndexIO().validateTwoSegments(adapter1, adapter2);
@@ -319,7 +318,7 @@ public class IndexIOTest extends InitializedNullHandlingTest
       ex = e;
     }
     if (exception != null) {
-      Assert.assertNotNull("Exception was not thrown", ex);
+      Assertions.assertNotNull(ex, "Exception was not thrown");
       if (!exception.isAssignableFrom(ex.getClass())) {
         throw ex;
       }

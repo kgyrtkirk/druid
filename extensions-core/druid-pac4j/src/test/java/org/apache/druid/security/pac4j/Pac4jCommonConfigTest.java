@@ -22,7 +22,6 @@ package org.apache.druid.security.pac4j;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.druid.jackson.DefaultObjectMapper;
 import org.junit.Assert;
-import org.junit.Test;
 
 public class Pac4jCommonConfigTest
 {

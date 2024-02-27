@@ -20,7 +20,6 @@
 package org.apache.druid.query.movingaverage.averagers;
 
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.util.Collections;
 import java.util.HashMap;

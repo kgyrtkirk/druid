@@ -22,8 +22,8 @@ package org.apache.druid.rpc;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.apache.druid.server.coordination.DruidServerMetadata;
 import org.apache.druid.server.coordination.ServerType;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class ServiceLocationTest
 {
@@ -40,7 +40,7 @@ public class ServiceLocationTest
         2
     );
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         new ServiceLocation("hostName", 9092, -1, ""),
         ServiceLocation.fromDruidServerMetadata(druidServerMetadata)
     );
@@ -59,7 +59,7 @@ public class ServiceLocationTest
         2
     );
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         new ServiceLocation("hostName", -1, 8100, ""),
         ServiceLocation.fromDruidServerMetadata(druidServerMetadata)
     );

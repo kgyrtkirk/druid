@@ -36,13 +36,15 @@ import org.apache.druid.segment.column.ColumnCapabilities;
 import org.apache.druid.segment.column.ValueType;
 import org.apache.druid.timeline.SegmentId;
 import org.hamcrest.CoreMatchers;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class LookupSegmentTest
 {
@@ -105,25 +107,25 @@ public class LookupSegmentTest
   @Test
   public void test_getId()
   {
-    Assert.assertEquals(SegmentId.dummy(LOOKUP_NAME), LOOKUP_SEGMENT.getId());
+    Assertions.assertEquals(SegmentId.dummy(LOOKUP_NAME), LOOKUP_SEGMENT.getId());
   }
 
   @Test
   public void test_getDataInterval()
   {
-    Assert.assertEquals(Intervals.ETERNITY, LOOKUP_SEGMENT.getDataInterval());
+    Assertions.assertEquals(Intervals.ETERNITY, LOOKUP_SEGMENT.getDataInterval());
   }
 
   @Test
   public void test_asQueryableIndex()
   {
-    Assert.assertNull(LOOKUP_SEGMENT.asQueryableIndex());
+    Assertions.assertNull(LOOKUP_SEGMENT.asQueryableIndex());
   }
 
   @Test
   public void test_asStorageAdapter_getAvailableDimensions()
   {
-    Assert.assertEquals(
+    Assertions.assertEquals(
         ImmutableList.of("k", "v"),
         Lists.newArrayList(LOOKUP_SEGMENT.asStorageAdapter().getAvailableDimensions().iterator())
     );
@@ -132,7 +134,7 @@ public class LookupSegmentTest
   @Test
   public void test_asStorageAdapter_getAvailableMetrics()
   {
-    Assert.assertEquals(
+    Assertions.assertEquals(
         ImmutableList.of(),
         Lists.newArrayList(LOOKUP_SEGMENT.asStorageAdapter().getAvailableMetrics())
     );
@@ -143,13 +145,13 @@ public class LookupSegmentTest
   {
     final ColumnCapabilities capabilities = LOOKUP_SEGMENT.asStorageAdapter().getColumnCapabilities("k");
 
-    Assert.assertEquals(ValueType.STRING, capabilities.getType());
+    Assertions.assertEquals(ValueType.STRING, capabilities.getType());
 
     // Note: the "k" column does not actually have multiple values, but the RowBasedStorageAdapter doesn't allow
     // reporting complete single-valued capabilities. It would be good to change this in the future, so query engines
     // running on top of lookups can take advantage of singly-valued optimizations.
-    Assert.assertTrue(capabilities.hasMultipleValues().isUnknown());
-    Assert.assertFalse(capabilities.isDictionaryEncoded().isTrue());
+    Assertions.assertTrue(capabilities.hasMultipleValues().isUnknown());
+    Assertions.assertFalse(capabilities.isDictionaryEncoded().isTrue());
   }
 
   @Test
@@ -160,21 +162,21 @@ public class LookupSegmentTest
     // Note: the "v" column does not actually have multiple values, but the RowBasedStorageAdapter doesn't allow
     // reporting complete single-valued capabilities. It would be good to change this in the future, so query engines
     // running on top of lookups can take advantage of singly-valued optimizations.
-    Assert.assertEquals(ValueType.STRING, capabilities.getType());
-    Assert.assertTrue(capabilities.hasMultipleValues().isUnknown());
-    Assert.assertFalse(capabilities.isDictionaryEncoded().isTrue());
+    Assertions.assertEquals(ValueType.STRING, capabilities.getType());
+    Assertions.assertTrue(capabilities.hasMultipleValues().isUnknown());
+    Assertions.assertFalse(capabilities.isDictionaryEncoded().isTrue());
   }
 
   @Test
   public void test_asStorageAdapter_getInterval()
   {
-    Assert.assertEquals(Intervals.ETERNITY, LOOKUP_SEGMENT.asStorageAdapter().getInterval());
+    Assertions.assertEquals(Intervals.ETERNITY, LOOKUP_SEGMENT.asStorageAdapter().getInterval());
   }
 
   @Test
   public void test_asStorageAdapter_getDimensionCardinalityK()
   {
-    Assert.assertEquals(
+    Assertions.assertEquals(
         DimensionDictionarySelector.CARDINALITY_UNKNOWN,
         LOOKUP_SEGMENT.asStorageAdapter().getDimensionCardinality("k")
     );
@@ -183,7 +185,7 @@ public class LookupSegmentTest
   @Test
   public void test_asStorageAdapter_getDimensionCardinalityV()
   {
-    Assert.assertEquals(
+    Assertions.assertEquals(
         DimensionDictionarySelector.CARDINALITY_UNKNOWN,
         LOOKUP_SEGMENT.asStorageAdapter().getDimensionCardinality("v")
     );
@@ -218,7 +220,7 @@ public class LookupSegmentTest
         }
     );
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         ImmutableList.of(
             Pair.of("a", "b"),
             Pair.of("x", "y")
@@ -232,6 +234,6 @@ public class LookupSegmentTest
   {
     // This allows us to assume that RowBasedStorageAdapterTest is further exercising makeCursors and verifying misc.
     // methods like getMinTime, getMaxTime, getMetadata, etc, without checking them explicitly in _this_ test class.
-    Assert.assertThat(LOOKUP_SEGMENT.asStorageAdapter(), CoreMatchers.instanceOf(RowBasedStorageAdapter.class));
+    assertThat(LOOKUP_SEGMENT.asStorageAdapter(), CoreMatchers.instanceOf(RowBasedStorageAdapter.class));
   }
 }

@@ -21,8 +21,8 @@ package org.apache.druid.segment.data;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
 import java.util.List;
@@ -36,40 +36,40 @@ public class ComparableListTest
   @Test
   public void testDelegate()
   {
-    Assert.assertEquals(integers, comparableList.getDelegate());
-    Assert.assertEquals(0, new ComparableList(ImmutableList.of()).getDelegate().size());
+    Assertions.assertEquals(integers, comparableList.getDelegate());
+    Assertions.assertEquals(0, new ComparableList(ImmutableList.of()).getDelegate().size());
   }
 
   @Test
   public void testHashCode()
   {
-    Assert.assertEquals(integers.hashCode(), comparableList.hashCode());
+    Assertions.assertEquals(integers.hashCode(), comparableList.hashCode());
     Set<ComparableList> set = new HashSet<>();
     set.add(comparableList);
     set.add(new ComparableList(integers));
-    Assert.assertEquals(1, set.size());
+    Assertions.assertEquals(1, set.size());
   }
 
   @Test
   public void testEquals()
   {
-    Assert.assertTrue(comparableList.equals(new ComparableList(integers)));
-    Assert.assertFalse(comparableList.equals(new ComparableList(ImmutableList.of(1, 2, 5))));
-    Assert.assertFalse(comparableList.equals(null));
+    Assertions.assertTrue(comparableList.equals(new ComparableList(integers)));
+    Assertions.assertFalse(comparableList.equals(new ComparableList(ImmutableList.of(1, 2, 5))));
+    Assertions.assertFalse(comparableList.equals(null));
   }
 
   @Test
   public void testCompareTo()
   {
-    Assert.assertEquals(0, comparableList.compareTo(new ComparableList(integers)));
-    Assert.assertEquals(1, comparableList.compareTo(null));
-    Assert.assertEquals(1, comparableList.compareTo(new ComparableList(ImmutableList.of(1, 2))));
-    Assert.assertEquals(-1, comparableList.compareTo(new ComparableList(ImmutableList.of(1, 2, 3, 4))));
-    Assert.assertTrue(comparableList.compareTo(new ComparableList(ImmutableList.of(2))) < 0);
+    Assertions.assertEquals(0, comparableList.compareTo(new ComparableList(integers)));
+    Assertions.assertEquals(1, comparableList.compareTo(null));
+    Assertions.assertEquals(1, comparableList.compareTo(new ComparableList(ImmutableList.of(1, 2))));
+    Assertions.assertEquals(-1, comparableList.compareTo(new ComparableList(ImmutableList.of(1, 2, 3, 4))));
+    Assertions.assertTrue(comparableList.compareTo(new ComparableList(ImmutableList.of(2))) < 0);
     ComparableList nullList = new ComparableList(Lists.newArrayList(null, 1));
 
-    Assert.assertTrue(comparableList.compareTo(nullList) > 0);
-    Assert.assertTrue(nullList.compareTo(comparableList) < 0);
-    Assert.assertTrue(nullList.compareTo(new ComparableList(Lists.newArrayList(null, 1))) == 0);
+    Assertions.assertTrue(comparableList.compareTo(nullList) > 0);
+    Assertions.assertTrue(nullList.compareTo(comparableList) < 0);
+    Assertions.assertTrue(nullList.compareTo(new ComparableList(Lists.newArrayList(null, 1))) == 0);
   }
 }

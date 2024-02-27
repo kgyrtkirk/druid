@@ -25,7 +25,6 @@ import io.delta.kernel.data.Row;
 import io.delta.kernel.defaults.client.DefaultTableClient;
 import org.apache.hadoop.conf.Configuration;
 import org.junit.Assert;
-import org.junit.Test;
 
 public class RowSerdeTest
 {

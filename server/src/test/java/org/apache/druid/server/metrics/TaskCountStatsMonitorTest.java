@@ -23,9 +23,9 @@ import com.google.common.collect.ImmutableMap;
 import org.apache.druid.java.util.metrics.StubServiceEmitter;
 import org.apache.druid.server.coordinator.stats.CoordinatorRunStats;
 import org.apache.druid.server.coordinator.stats.CoordinatorStat;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
@@ -33,7 +33,7 @@ public class TaskCountStatsMonitorTest
 {
   private TaskCountStatsProvider statsProvider;
 
-  @Before
+  @BeforeEach
   public void setUp()
   {
     statsProvider = new TaskCountStatsProvider()
@@ -85,7 +85,7 @@ public class TaskCountStatsMonitorTest
     final TaskCountStatsMonitor monitor = new TaskCountStatsMonitor(statsProvider);
     final StubServiceEmitter emitter = new StubServiceEmitter("service", "host");
     monitor.doMonitor(emitter);
-    Assert.assertEquals(7, emitter.getEvents().size());
+    Assertions.assertEquals(7, emitter.getEvents().size());
     emitter.verifyValue("task/success/count", 1L);
     emitter.verifyValue("task/failed/count", 1L);
     emitter.verifyValue("task/running/count", 1L);

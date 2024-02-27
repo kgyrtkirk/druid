@@ -29,7 +29,6 @@ import org.apache.druid.server.security.AuthConfig;
 import org.apache.druid.server.security.AuthenticationResult;
 import org.easymock.EasyMock;
 import org.junit.Assert;
-import org.junit.Test;
 import org.pac4j.oidc.profile.creator.TokenValidator;
 
 import javax.servlet.FilterChain;

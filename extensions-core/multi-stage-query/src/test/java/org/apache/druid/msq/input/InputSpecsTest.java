@@ -23,7 +23,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import org.apache.druid.msq.input.stage.StageInputSpec;
 import org.junit.Assert;
-import org.junit.Test;
 
 public class InputSpecsTest
 {

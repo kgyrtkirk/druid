@@ -26,8 +26,8 @@ import org.apache.druid.query.aggregation.LongSumAggregatorFactory;
 import org.apache.druid.query.dimension.DefaultDimensionSpec;
 import org.apache.druid.query.groupby.GroupByQuery;
 import org.apache.druid.segment.TestHelper;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
@@ -41,14 +41,14 @@ public class DataSourceTest
     DataSource dataSource = new TableDataSource("somedatasource");
     String json = JSON_MAPPER.writeValueAsString(dataSource);
     DataSource serdeDataSource = JSON_MAPPER.readValue(json, DataSource.class);
-    Assert.assertEquals(dataSource, serdeDataSource);
+    Assertions.assertEquals(dataSource, serdeDataSource);
   }
 
   @Test
   public void testLegacyDataSource() throws IOException
   {
     DataSource dataSource = JSON_MAPPER.readValue("\"somedatasource\"", DataSource.class);
-    Assert.assertEquals(new TableDataSource("somedatasource"), dataSource);
+    Assertions.assertEquals(new TableDataSource("somedatasource"), dataSource);
   }
 
   @Test
@@ -58,7 +58,7 @@ public class DataSourceTest
         "{\"type\":\"table\", \"name\":\"somedatasource\"}",
         DataSource.class
     );
-    Assert.assertEquals(new TableDataSource("somedatasource"), dataSource);
+    Assertions.assertEquals(new TableDataSource("somedatasource"), dataSource);
   }
 
   @Test
@@ -76,7 +76,7 @@ public class DataSourceTest
     String dataSourceJSON = "{\"type\":\"query\", \"query\":" + JSON_MAPPER.writeValueAsString(query) + "}";
 
     DataSource dataSource = JSON_MAPPER.readValue(dataSourceJSON, DataSource.class);
-    Assert.assertEquals(new QueryDataSource(query), dataSource);
+    Assertions.assertEquals(new QueryDataSource(query), dataSource);
   }
 
   @Test
@@ -86,17 +86,17 @@ public class DataSourceTest
         "{\"type\":\"union\", \"dataSources\":[\"ds1\", \"ds2\"]}",
         DataSource.class
     );
-    Assert.assertTrue(dataSource instanceof UnionDataSource);
-    Assert.assertEquals(
+    Assertions.assertTrue(dataSource instanceof UnionDataSource);
+    Assertions.assertEquals(
         Lists.newArrayList(new TableDataSource("ds1"), new TableDataSource("ds2")),
         Lists.newArrayList(((UnionDataSource) dataSource).getDataSourcesAsTableDataSources())
     );
-    Assert.assertEquals(
+    Assertions.assertEquals(
         ImmutableSet.of("ds1", "ds2"),
         dataSource.getTableNames()
     );
 
     final DataSource serde = JSON_MAPPER.readValue(JSON_MAPPER.writeValueAsString(dataSource), DataSource.class);
-    Assert.assertEquals(dataSource, serde);
+    Assertions.assertEquals(dataSource, serde);
   }
 }

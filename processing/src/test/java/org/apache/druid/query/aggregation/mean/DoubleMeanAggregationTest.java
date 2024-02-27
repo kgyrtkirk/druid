@@ -24,8 +24,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
 import org.apache.druid.common.config.NullHandling;
 import org.apache.druid.data.input.Row;
 import org.apache.druid.java.util.common.granularity.Granularities;
@@ -50,25 +48,24 @@ import org.apache.druid.segment.Segment;
 import org.apache.druid.segment.TestIndex;
 import org.apache.druid.timeline.SegmentId;
 import org.easymock.EasyMock;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.List;
 
-@RunWith(JUnitParamsRunner.class)
 public class DoubleMeanAggregationTest
 {
-  public Object[] doVectorize()
+  public static Object[] doVectorize()
   {
     return Lists.newArrayList(true, false).toArray();
   }
 
-  @Rule
-  public final TemporaryFolder tempFolder = new TemporaryFolder();
+  @TempDir
+  public File tempFolder;
 
   private final AggregationTestHelper groupByQueryTestHelper;
   private final AggregationTestHelper timeseriesQueryTestHelper;
@@ -101,8 +98,8 @@ public class DoubleMeanAggregationTest
     );
   }
 
-  @Test
-  @Parameters(method = "doVectorize")
+  @ParameterizedTest
+  @MethodSource("doVectorize")
   public void testBufferAggretatorUsingGroupByQuery(boolean doVectorize) throws Exception
   {
     GroupByQuery query = new GroupByQuery.Builder()
@@ -124,13 +121,13 @@ public class DoubleMeanAggregationTest
     Sequence<ResultRow> seq = groupByQueryTestHelper.runQueryOnSegmentsObjs(segments, query);
     Row result = Iterables.getOnlyElement(seq.toList()).toMapBasedRow(query);
 
-    Assert.assertEquals(6.2d, result.getMetric("meanOnDouble").doubleValue(), 0.0001d);
-    Assert.assertEquals(6.2d, result.getMetric("meanOnString").doubleValue(), 0.0001d);
-    Assert.assertEquals(4.1333d, result.getMetric("meanOnMultiValue").doubleValue(), 0.0001d);
+    Assertions.assertEquals(6.2d, result.getMetric("meanOnDouble").doubleValue(), 0.0001d);
+    Assertions.assertEquals(6.2d, result.getMetric("meanOnString").doubleValue(), 0.0001d);
+    Assertions.assertEquals(4.1333d, result.getMetric("meanOnMultiValue").doubleValue(), 0.0001d);
   }
 
-  @Test
-  @Parameters(method = "doVectorize")
+  @ParameterizedTest
+  @MethodSource("doVectorize")
   public void testVectorAggretatorUsingGroupByQueryOnDoubleColumn(boolean doVectorize) throws Exception
   {
     GroupByQuery query = new GroupByQuery.Builder()
@@ -150,11 +147,11 @@ public class DoubleMeanAggregationTest
     Sequence<ResultRow> seq = groupByQueryTestHelper.runQueryOnSegmentsObjs(segments, query);
     Row result = Iterables.getOnlyElement(seq.toList()).toMapBasedRow(query);
 
-    Assert.assertEquals(6.2d, result.getMetric("meanOnDouble").doubleValue(), 0.0001d);
+    Assertions.assertEquals(6.2d, result.getMetric("meanOnDouble").doubleValue(), 0.0001d);
   }
 
-  @Test
-  @Parameters(method = "doVectorize")
+  @ParameterizedTest
+  @MethodSource("doVectorize")
   public void testVectorAggretatorUsingGroupByQueryOnDoubleColumnOnBiggerSegments(boolean doVectorize) throws Exception
   {
     GroupByQuery query = new GroupByQuery.Builder()
@@ -174,14 +171,14 @@ public class DoubleMeanAggregationTest
     Sequence<ResultRow> seq = groupByQueryTestHelper.runQueryOnSegmentsObjs(biggerSegments, query);
     Row result = Iterables.getOnlyElement(seq.toList()).toMapBasedRow(query);
     if (NullHandling.replaceWithDefault()) {
-      Assert.assertEquals(39.2307d, result.getMetric("meanOnDouble").doubleValue(), 0.0001d);
+      Assertions.assertEquals(39.2307d, result.getMetric("meanOnDouble").doubleValue(), 0.0001d);
     } else {
-      Assert.assertEquals(51.0d, result.getMetric("meanOnDouble").doubleValue(), 0.0001d);
+      Assertions.assertEquals(51.0d, result.getMetric("meanOnDouble").doubleValue(), 0.0001d);
     }
   }
 
-  @Test
-  @Parameters(method = "doVectorize")
+  @ParameterizedTest
+  @MethodSource("doVectorize")
   public void testAggretatorUsingTimeseriesQuery(boolean doVectorize) throws Exception
   {
     TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
@@ -209,12 +206,12 @@ public class DoubleMeanAggregationTest
     Sequence seq = timeseriesQueryTestHelper.runQueryOnSegmentsObjs(segments, query);
     TimeseriesResultValue result = ((Result<TimeseriesResultValue>) Iterables.getOnlyElement(seq.toList())).getValue();
 
-    Assert.assertEquals(6.2d, result.getDoubleMetric("meanOnDouble").doubleValue(), 0.0001d);
-    Assert.assertEquals(6.2d, result.getDoubleMetric("meanOnString").doubleValue(), 0.0001d);
-    Assert.assertEquals(4.1333d, result.getDoubleMetric("meanOnMultiValue").doubleValue(), 0.0001d);
+    Assertions.assertEquals(6.2d, result.getDoubleMetric("meanOnDouble").doubleValue(), 0.0001d);
+    Assertions.assertEquals(6.2d, result.getDoubleMetric("meanOnString").doubleValue(), 0.0001d);
+    Assertions.assertEquals(4.1333d, result.getDoubleMetric("meanOnMultiValue").doubleValue(), 0.0001d);
   }
 
-  @Test
+  @ParameterizedTest
   public void testAggregateWithSize()
   {
     Double[] values = new Double[]{3.0, 1.0, 2.0};
@@ -228,19 +225,19 @@ public class DoubleMeanAggregationTest
     DoubleMeanAggregatorFactory aggregatorFactory = new DoubleMeanAggregatorFactory("name", "fieldName");
     AggregatorAndSize aggregatorAndSize = aggregatorFactory.factorizeWithSize(colSelectorFactory);
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         aggregatorFactory.getMaxIntermediateSize(),
         aggregatorAndSize.getInitialSizeBytes()
     );
-    Assert.assertTrue(aggregatorAndSize.getAggregator() instanceof DoubleMeanAggregator);
+    Assertions.assertTrue(aggregatorAndSize.getAggregator() instanceof DoubleMeanAggregator);
     Aggregator aggregator = aggregatorAndSize.getAggregator();
     for (int i = 0; i < values.length; ++i) {
       long sizeDelta = aggregator.aggregateWithSize();
-      Assert.assertEquals(0L, sizeDelta);
+      Assertions.assertEquals(0L, sizeDelta);
       columnValueSelector.increment();
     }
 
     DoubleMeanHolder meanHolder = (DoubleMeanHolder) aggregator.get();
-    Assert.assertEquals(2.0, meanHolder.mean(), 0.0);
+    Assertions.assertEquals(2.0, meanHolder.mean(), 0.0);
   }
 }

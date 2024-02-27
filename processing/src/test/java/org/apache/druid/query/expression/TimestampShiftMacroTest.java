@@ -34,8 +34,8 @@ import org.joda.time.Days;
 import org.joda.time.Minutes;
 import org.joda.time.Months;
 import org.joda.time.Years;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -103,7 +103,7 @@ public class TimestampShiftMacroTest extends MacroTestBase
             ExprEval.of(step).toExpr()
         ));
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         timestamp.withPeriodAdded(Months.ONE, step).getMillis(),
         expr.eval(InputBindings.nilBindings()).asLong()
     );
@@ -120,7 +120,7 @@ public class TimestampShiftMacroTest extends MacroTestBase
             ExprEval.of(step).toExpr()
         ));
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         timestamp.withPeriodAdded(Months.ONE, step).getMillis(),
         expr.eval(InputBindings.nilBindings()).asLong()
     );
@@ -137,7 +137,7 @@ public class TimestampShiftMacroTest extends MacroTestBase
             ExprEval.of(step).toExpr()
         ));
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         timestamp.withPeriodAdded(Months.ONE, step).getMillis(),
         expr.eval(InputBindings.nilBindings()).asLong()
     );
@@ -153,7 +153,7 @@ public class TimestampShiftMacroTest extends MacroTestBase
             ExprEval.of(1).toExpr()
         ));
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         timestamp.withPeriodAdded(Minutes.ONE, 1).getMillis(),
         expr.eval(InputBindings.nilBindings()).asLong()
     );
@@ -169,7 +169,7 @@ public class TimestampShiftMacroTest extends MacroTestBase
             ExprEval.of(1).toExpr()
         ));
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         timestamp.withPeriodAdded(Days.ONE, 1).getMillis(),
         expr.eval(InputBindings.nilBindings()).asLong()
     );
@@ -186,7 +186,7 @@ public class TimestampShiftMacroTest extends MacroTestBase
             ExprEval.of("America/Los_Angeles").toExpr()
         ));
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         timestamp.toDateTime(DateTimes.inferTzFromString("America/Los_Angeles")).withPeriodAdded(Years.ONE, 1).getMillis(),
         expr.eval(InputBindings.nilBindings()).asLong()
     );
@@ -205,7 +205,7 @@ public class TimestampShiftMacroTest extends MacroTestBase
         ));
 
     final int step = 3;
-    Assert.assertEquals(
+    Assertions.assertEquals(
         timestamp.toDateTime(DateTimes.inferTzFromString("America/Los_Angeles")).withPeriodAdded(Years.ONE, step).getMillis(),
         expr.eval(new Expr.ObjectBinding()
         {
@@ -242,9 +242,9 @@ public class TimestampShiftMacroTest extends MacroTestBase
     );
 
     if (NullHandling.replaceWithDefault()) {
-      Assert.assertEquals(2678400000L, expr.eval(InputBindings.nilBindings()).value());
+      Assertions.assertEquals(2678400000L, expr.eval(InputBindings.nilBindings()).value());
     } else {
-      Assert.assertNull(expr.eval(InputBindings.nilBindings()).value());
+      Assertions.assertNull(expr.eval(InputBindings.nilBindings()).value());
     }
   }
 }

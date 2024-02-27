@@ -40,14 +40,13 @@ import org.apache.druid.segment.Segment;
 import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.virtual.NestedFieldVirtualColumn;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,20 +55,19 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.BiFunction;
 
-@RunWith(Parameterized.class)
 public class NestedDataTopNQueryTest extends InitializedNullHandlingTest
 {
   private static final Logger LOG = new Logger(NestedDataTopNQueryTest.class);
 
-  @Rule
-  public final TemporaryFolder tempFolder = new TemporaryFolder();
+  @TempDir
+  public File tempFolder;
 
-  private final AggregationTestHelper helper;
-  private final BiFunction<TemporaryFolder, Closer, List<Segment>> segmentsGenerator;
-  private final Closer closer;
+  private AggregationTestHelper helper;
+  private BiFunction<File, Closer, List<Segment>> segmentsGenerator;
+  private Closer closer;
 
-  public NestedDataTopNQueryTest(
-      BiFunction<TemporaryFolder, Closer, List<Segment>> segmentGenerator
+  public void initNestedDataTopNQueryTest(
+      BiFunction<File, Closer, List<Segment>> segmentGenerator
   )
   {
     NestedDataModule.registerHandlersAndSerde();
@@ -81,28 +79,29 @@ public class NestedDataTopNQueryTest extends InitializedNullHandlingTest
     this.closer = Closer.create();
   }
 
-  @Parameterized.Parameters(name = "segments = {0}")
   public static Collection<?> constructorFeeder()
   {
     final List<Object[]> constructors = new ArrayList<>();
-    final List<BiFunction<TemporaryFolder, Closer, List<Segment>>> segmentsGenerators =
+    final List<BiFunction<File, Closer, List<Segment>>> segmentsGenerators =
         NestedDataTestUtils.getSegmentGenerators(NestedDataTestUtils.SIMPLE_DATA_FILE);
 
-    for (BiFunction<TemporaryFolder, Closer, List<Segment>> generatorFn : segmentsGenerators) {
+    for (BiFunction<File, Closer, List<Segment>> generatorFn : segmentsGenerators) {
       constructors.add(new Object[]{generatorFn});
     }
     return constructors;
   }
 
-  @After
+  @AfterEach
   public void teardown() throws IOException
   {
     closer.close();
   }
 
-  @Test
-  public void testGroupBySomeField()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "segments = {0}")
+  public void testGroupBySomeField(BiFunction<File, Closer, List<Segment>> segmentGenerator)
   {
+    initNestedDataTopNQueryTest(segmentGenerator);
     TopNQuery topN = new TopNQueryBuilder().dataSource("test_datasource")
                                            .granularity(Granularities.ALL)
                                            .intervals(Collections.singletonList(Intervals.ETERNITY))
@@ -131,9 +130,11 @@ public class NestedDataTopNQueryTest extends InitializedNullHandlingTest
     );
   }
 
-  @Test
-  public void testGroupBySomeFieldAggregateSomeField()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "segments = {0}")
+  public void testGroupBySomeFieldAggregateSomeField(BiFunction<File, Closer, List<Segment>> segmentGenerator)
   {
+    initNestedDataTopNQueryTest(segmentGenerator);
     TopNQuery topN = new TopNQueryBuilder().dataSource("test_datasource")
                                            .granularity(Granularities.ALL)
                                            .intervals(Collections.singletonList(Intervals.ETERNITY))
@@ -167,14 +168,14 @@ public class NestedDataTopNQueryTest extends InitializedNullHandlingTest
 
   private static void verifyResults(List<Object[]> results, List<Object[]> expected)
   {
-    Assert.assertEquals(expected.size(), results.size());
+    Assertions.assertEquals(expected.size(), results.size());
 
     for (int i = 0; i < expected.size(); i++) {
       LOG.info("result #%d, %s", i, Arrays.toString(results.get(i)));
-      Assert.assertArrayEquals(
-          StringUtils.format("result #%d", i + 1),
+      Assertions.assertArrayEquals(
           expected.get(i),
-          results.get(i)
+          results.get(i),
+          StringUtils.format("result #%d", i + 1)
       );
     }
   }

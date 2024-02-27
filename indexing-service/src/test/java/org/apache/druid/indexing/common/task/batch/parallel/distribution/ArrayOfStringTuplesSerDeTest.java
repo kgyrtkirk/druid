@@ -22,7 +22,6 @@ package org.apache.druid.indexing.common.task.batch.parallel.distribution;
 import org.apache.datasketches.memory.Memory;
 import org.apache.druid.data.input.StringTuple;
 import org.junit.Assert;
-import org.junit.Test;
 
 public class ArrayOfStringTuplesSerDeTest
 {

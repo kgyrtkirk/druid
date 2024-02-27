@@ -27,7 +27,6 @@ import org.apache.druid.segment.DimensionDictionarySelector;
 import org.apache.druid.segment.IdLookup;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.junit.Assert;
-import org.junit.Test;
 
 import javax.annotation.Nullable;
 import java.nio.ByteBuffer;

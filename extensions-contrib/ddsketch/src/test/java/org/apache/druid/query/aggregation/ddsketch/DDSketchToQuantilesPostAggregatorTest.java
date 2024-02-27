@@ -25,7 +25,6 @@ import org.apache.druid.java.util.common.IAE;
 import org.apache.druid.query.aggregation.PostAggregator;
 import org.apache.druid.query.aggregation.post.ConstantPostAggregator;
 import org.junit.Assert;
-import org.junit.Test;
 
 public class DDSketchToQuantilesPostAggregatorTest
 {

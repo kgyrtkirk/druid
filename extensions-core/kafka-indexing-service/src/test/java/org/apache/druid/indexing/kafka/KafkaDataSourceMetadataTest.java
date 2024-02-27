@@ -34,7 +34,6 @@ import org.apache.druid.initialization.CoreInjectorBuilder;
 import org.apache.druid.initialization.DruidModule;
 import org.apache.druid.utils.CollectionUtils;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.util.Map;
 

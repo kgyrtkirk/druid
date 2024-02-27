@@ -20,8 +20,8 @@
 package org.apache.druid.java.util.emitter.core;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.Properties;
 
@@ -36,8 +36,8 @@ public class LoggingEmitterConfigTest
         Emitters.makeCustomFactoryMap(props),
         LoggingEmitterConfig.class
     );
-    Assert.assertEquals("getLoggerClass", LoggingEmitter.class.getName(), config.getLoggerClass());
-    Assert.assertEquals("getLogLevel", "info", config.getLogLevel());
+    Assertions.assertEquals(LoggingEmitter.class.getName(), config.getLoggerClass(), "getLoggerClass");
+    Assertions.assertEquals("info", config.getLogLevel(), "getLogLevel");
   }
 
   @Test
@@ -50,8 +50,8 @@ public class LoggingEmitterConfigTest
         LoggingEmitterConfig.class
     );
 
-    Assert.assertEquals("getLoggerClass", LoggingEmitter.class.getName(), config.getLoggerClass());
-    Assert.assertEquals("getLogLevel", "debug", config.getLogLevel());
+    Assertions.assertEquals(LoggingEmitter.class.getName(), config.getLoggerClass(), "getLoggerClass");
+    Assertions.assertEquals("debug", config.getLogLevel(), "getLogLevel");
   }
 
   @Test
@@ -67,8 +67,8 @@ public class LoggingEmitterConfigTest
         LoggingEmitterConfig.class
     );
 
-    Assert.assertEquals("getLoggerClass", "Foo", config.getLoggerClass());
-    Assert.assertEquals("getLogLevel", "INFO", config.getLogLevel());
+    Assertions.assertEquals("Foo", config.getLoggerClass(), "getLoggerClass");
+    Assertions.assertEquals("INFO", config.getLogLevel(), "getLogLevel");
   }
 
   @Test
@@ -84,7 +84,7 @@ public class LoggingEmitterConfigTest
         LoggingEmitterConfig.class
     );
 
-    Assert.assertEquals("getLoggerClass", "Foo", config.getLoggerClass());
-    Assert.assertEquals("getLogLevel", "INFO", config.getLogLevel());
+    Assertions.assertEquals("Foo", config.getLoggerClass(), "getLoggerClass");
+    Assertions.assertEquals("INFO", config.getLogLevel(), "getLogLevel");
   }
 }

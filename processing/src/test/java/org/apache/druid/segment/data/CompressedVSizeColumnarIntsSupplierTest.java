@@ -30,12 +30,11 @@ import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.java.util.common.io.Closer;
 import org.apache.druid.segment.CompressedPools;
 import org.apache.druid.utils.CloseableUtils;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -50,10 +49,8 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-@RunWith(Parameterized.class)
 public class CompressedVSizeColumnarIntsSupplierTest extends CompressionStrategyTest
 {
-  @Parameterized.Parameters(name = "{index}: compression={0}, byteOrder={1}")
   public static Iterable<Object[]> compressionStrategies()
   {
     Set<List<Object>> combinations = Sets.cartesianProduct(
@@ -69,7 +66,7 @@ public class CompressedVSizeColumnarIntsSupplierTest extends CompressionStrategy
 
   private static final int[] MAX_VALUES = new int[]{0xFF, 0xFFFF, 0xFFFFFF, 0x0FFFFFFF};
 
-  public CompressedVSizeColumnarIntsSupplierTest(CompressionStrategy compressionStrategy, ByteOrder byteOrder)
+  public void initCompressedVSizeColumnarIntsSupplierTest(CompressionStrategy compressionStrategy, ByteOrder byteOrder)
   {
     super(compressionStrategy);
     this.byteOrder = byteOrder;
@@ -79,10 +76,10 @@ public class CompressedVSizeColumnarIntsSupplierTest extends CompressionStrategy
   private ColumnarInts columnarInts;
   private CompressedVSizeColumnarIntsSupplier supplier;
   private int[] vals;
-  private final ByteOrder byteOrder;
+  private ByteOrder byteOrder;
 
 
-  @Before
+  @BeforeEach
   public void setUp()
   {
     closer = Closer.create();
@@ -92,7 +89,7 @@ public class CompressedVSizeColumnarIntsSupplierTest extends CompressionStrategy
     vals = null;
   }
 
-  @After
+  @AfterEach
   public void tearDown() throws Exception
   {
     CloseableUtils.closeAll(columnarInts, closer);
@@ -134,7 +131,7 @@ public class CompressedVSizeColumnarIntsSupplierTest extends CompressionStrategy
     theSupplier.writeTo(Channels.newChannel(baos), null);
 
     final byte[] bytes = baos.toByteArray();
-    Assert.assertEquals(theSupplier.getSerializedSize(), bytes.length);
+    Assertions.assertEquals(theSupplier.getSerializedSize(), bytes.length);
 
     supplier = CompressedVSizeColumnarIntsSupplier.fromByteBuffer(ByteBuffer.wrap(bytes), byteOrder);
     columnarInts = supplier.get();
@@ -152,98 +149,110 @@ public class CompressedVSizeColumnarIntsSupplierTest extends CompressionStrategy
     makeWithSerde(chunkSize);
   }
 
-  @Test
-  public void testSanity()
+  @MethodSource("compressionStrategies")
+  @ParameterizedTest(name = "{index}: compression={0}, byteOrder={1}")
+  public void testSanity(CompressionStrategy compressionStrategy, ByteOrder byteOrder)
   {
+    initCompressedVSizeColumnarIntsSupplierTest(compressionStrategy, byteOrder);
     setupSimple(2);
-    Assert.assertEquals(8, supplier.getBaseBuffers().size());
+    Assertions.assertEquals(8, supplier.getBaseBuffers().size());
     assertIndexMatchesVals();
 
     setupSimple(4);
-    Assert.assertEquals(4, supplier.getBaseBuffers().size());
+    Assertions.assertEquals(4, supplier.getBaseBuffers().size());
     assertIndexMatchesVals();
 
     setupSimple(32);
-    Assert.assertEquals(1, supplier.getBaseBuffers().size());
+    Assertions.assertEquals(1, supplier.getBaseBuffers().size());
     assertIndexMatchesVals();
   }
 
-  @Test
-  public void testLargeChunks() throws Exception
+  @MethodSource("compressionStrategies")
+  @ParameterizedTest(name = "{index}: compression={0}, byteOrder={1}")
+  public void testLargeChunks(CompressionStrategy compressionStrategy, ByteOrder byteOrder) throws Exception
   {
+    initCompressedVSizeColumnarIntsSupplierTest(compressionStrategy, byteOrder);
     for (int maxValue : MAX_VALUES) {
       final int maxChunkSize = CompressedVSizeColumnarIntsSupplier.maxIntsInBufferForValue(maxValue);
 
       setupLargeChunks(maxChunkSize, 10 * maxChunkSize, maxValue);
-      Assert.assertEquals(10, supplier.getBaseBuffers().size());
+      Assertions.assertEquals(10, supplier.getBaseBuffers().size());
       assertIndexMatchesVals();
 
       setupLargeChunks(maxChunkSize, 10 * maxChunkSize + 1, maxValue);
-      Assert.assertEquals(11, supplier.getBaseBuffers().size());
+      Assertions.assertEquals(11, supplier.getBaseBuffers().size());
       assertIndexMatchesVals();
 
       setupLargeChunks(1, 0xFFFF, maxValue);
-      Assert.assertEquals(0xFFFF, supplier.getBaseBuffers().size());
+      Assertions.assertEquals(0xFFFF, supplier.getBaseBuffers().size());
       assertIndexMatchesVals();
 
       setupLargeChunks(maxChunkSize / 2, 10 * (maxChunkSize / 2) + 1, maxValue);
-      Assert.assertEquals(11, supplier.getBaseBuffers().size());
+      Assertions.assertEquals(11, supplier.getBaseBuffers().size());
       assertIndexMatchesVals();
     }
   }
 
-  @Test
-  public void testChunkTooBig() throws Exception
+  @MethodSource("compressionStrategies")
+  @ParameterizedTest(name = "{index}: compression={0}, byteOrder={1}")
+  public void testChunkTooBig(CompressionStrategy compressionStrategy, ByteOrder byteOrder) throws Exception
   {
+    initCompressedVSizeColumnarIntsSupplierTest(compressionStrategy, byteOrder);
     for (int maxValue : MAX_VALUES) {
       final int maxChunkSize = CompressedVSizeColumnarIntsSupplier.maxIntsInBufferForValue(maxValue);
       try {
         setupLargeChunks(maxChunkSize + 1, 10 * (maxChunkSize + 1), maxValue);
-        Assert.fail();
+        Assertions.fail();
       }
       catch (IllegalArgumentException e) {
-        Assert.assertTrue("chunk too big for maxValue " + maxValue, true);
+        Assertions.assertTrue(true, "chunk too big for maxValue " + maxValue);
       }
     }
   }
 
-  @Test
-  public void testmaxIntsInBuffer()
+  @MethodSource("compressionStrategies")
+  @ParameterizedTest(name = "{index}: compression={0}, byteOrder={1}")
+  public void testmaxIntsInBuffer(CompressionStrategy compressionStrategy, ByteOrder byteOrder)
   {
-    Assert.assertEquals(CompressedPools.BUFFER_SIZE, CompressedVSizeColumnarIntsSupplier.maxIntsInBufferForBytes(1));
-    Assert.assertEquals(
+    initCompressedVSizeColumnarIntsSupplierTest(compressionStrategy, byteOrder);
+    Assertions.assertEquals(CompressedPools.BUFFER_SIZE, CompressedVSizeColumnarIntsSupplier.maxIntsInBufferForBytes(1));
+    Assertions.assertEquals(
         CompressedPools.BUFFER_SIZE / 2,
         CompressedVSizeColumnarIntsSupplier.maxIntsInBufferForBytes(2)
     );
-    Assert.assertEquals(
+    Assertions.assertEquals(
         CompressedPools.BUFFER_SIZE / 4,
         CompressedVSizeColumnarIntsSupplier.maxIntsInBufferForBytes(4)
     );
 
-    Assert.assertEquals(CompressedPools.BUFFER_SIZE, 0x10000); // nearest power of 2 is 2^14
-    Assert.assertEquals(1 << 14, CompressedVSizeColumnarIntsSupplier.maxIntsInBufferForBytes(3));
+    Assertions.assertEquals(CompressedPools.BUFFER_SIZE, 0x10000); // nearest power of 2 is 2^14
+    Assertions.assertEquals(1 << 14, CompressedVSizeColumnarIntsSupplier.maxIntsInBufferForBytes(3));
   }
 
-  @Test
-  public void testSanityWithSerde() throws Exception
+  @MethodSource("compressionStrategies")
+  @ParameterizedTest(name = "{index}: compression={0}, byteOrder={1}")
+  public void testSanityWithSerde(CompressionStrategy compressionStrategy, ByteOrder byteOrder) throws Exception
   {
+    initCompressedVSizeColumnarIntsSupplierTest(compressionStrategy, byteOrder);
     setupSimpleWithSerde(4);
 
-    Assert.assertEquals(4, supplier.getBaseBuffers().size());
+    Assertions.assertEquals(4, supplier.getBaseBuffers().size());
     assertIndexMatchesVals();
 
     setupSimpleWithSerde(2);
 
-    Assert.assertEquals(8, supplier.getBaseBuffers().size());
+    Assertions.assertEquals(8, supplier.getBaseBuffers().size());
     assertIndexMatchesVals();
   }
 
 
   // This test attempts to cause a race condition with the DirectByteBuffers, it's non-deterministic in causing it,
   // which sucks but I can't think of a way to deterministically cause it...
-  @Test
-  public void testConcurrentThreadReads() throws Exception
+  @MethodSource("compressionStrategies")
+  @ParameterizedTest(name = "{index}: compression={0}, byteOrder={1}")
+  public void testConcurrentThreadReads(CompressionStrategy compressionStrategy, ByteOrder byteOrder) throws Exception
   {
+    initCompressedVSizeColumnarIntsSupplierTest(compressionStrategy, byteOrder);
     setupSimple(4);
 
     final AtomicReference<String> reason = new AtomicReference<>("none");
@@ -339,20 +348,20 @@ public class CompressedVSizeColumnarIntsSupplierTest extends CompressionStrategy
     }
 
     if (failureHappened.get()) {
-      Assert.fail("Failure happened.  Reason: " + reason.get());
+      Assertions.fail("Failure happened.  Reason: " + reason.get());
     }
   }
 
   private void assertIndexMatchesVals()
   {
-    Assert.assertEquals(vals.length, columnarInts.size());
+    Assertions.assertEquals(vals.length, columnarInts.size());
 
     // sequential access of every element
     int[] indices = new int[vals.length];
     for (int i = 0, size = columnarInts.size(); i < size; ++i) {
       final int expected = vals[i];
       final int actual = columnarInts.get(i);
-      Assert.assertEquals(expected, actual);
+      Assertions.assertEquals(expected, actual);
       indices[i] = i;
     }
 
@@ -361,7 +370,7 @@ public class CompressedVSizeColumnarIntsSupplierTest extends CompressionStrategy
     final int limit = Math.min(columnarInts.size(), 1000);
     for (int i = 0; i < limit; ++i) {
       int k = indices[i];
-      Assert.assertEquals(vals[k], columnarInts.get(k));
+      Assertions.assertEquals(vals[k], columnarInts.get(k));
     }
   }
 }

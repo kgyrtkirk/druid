@@ -27,8 +27,8 @@ import org.apache.druid.java.util.common.logger.Logger;
 import org.apache.druid.math.expr.vector.ExprEvalVector;
 import org.apache.druid.math.expr.vector.ExprVectorProcessor;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
@@ -295,24 +295,24 @@ public class VectorExprSanityTest extends InitializedNullHandlingTest
   )
   {
     NonnullPair<Expr.ObjectBinding[], Expr.VectorInputBinding> bindings = makeSequentialBinding(VECTOR_SIZE, types);
-    Assert.assertTrue(StringUtils.format("Cannot vectorize %s", expr), parsed.canVectorize(bindings.rhs));
+    Assertions.assertTrue(parsed.canVectorize(bindings.rhs), StringUtils.format("Cannot vectorize %s", expr));
     ExpressionType outputType = parsed.getOutputType(bindings.rhs);
     ExprEvalVector<?> vectorEval = parsed.asVectorProcessor(bindings.rhs).evalVector(bindings.rhs);
     // 'null' expressions can have an output type of null, but still evaluate in default mode, so skip type checks
     if (outputType != null) {
-      Assert.assertEquals(expr, outputType, vectorEval.getType());
+      Assertions.assertEquals(outputType, vectorEval.getType(), expr);
     }
     final Object[] vectorVals = vectorEval.getObjectVector();
     for (int i = 0; i < VECTOR_SIZE; i++) {
       ExprEval<?> eval = parsed.eval(bindings.lhs[i]);
       // 'null' expressions can have an output type of null, but still evaluate in default mode, so skip type checks
       if (outputType != null && !eval.isNumericNull()) {
-        Assert.assertEquals(eval.type(), outputType);
+        Assertions.assertEquals(eval.type(), outputType);
       }
-      Assert.assertEquals(
-          StringUtils.format("Values do not match for row %s for expression %s", i, expr),
+      Assertions.assertEquals(
           eval.valueOrDefault(),
-          vectorVals[i]
+          vectorVals[i],
+          StringUtils.format("Values do not match for row %s for expression %s", i, expr)
       );
     }
   }
@@ -340,12 +340,12 @@ public class VectorExprSanityTest extends InitializedNullHandlingTest
         return inspector.getType(name);
       }
     };
-    Assert.assertTrue(StringUtils.format("Cannot vectorize %s", expr), parsed.canVectorize(inspector));
+    Assertions.assertTrue(parsed.canVectorize(inspector), StringUtils.format("Cannot vectorize %s", expr));
     ExpressionType outputType = parsed.getOutputType(inspector);
     final ExprVectorProcessor processor = parsed.asVectorProcessor(vectorInputBindingInspector);
     // 'null' expressions can have an output type of null, but still evaluate in default mode, so skip type checks
     if (outputType != null) {
-      Assert.assertEquals(expr, outputType, processor.getOutputType());
+      Assertions.assertEquals(outputType, processor.getOutputType(), expr);
     }
     for (int iterations = 0; iterations < numIterations; iterations++) {
       NonnullPair<Expr.ObjectBinding[], Expr.VectorInputBinding> bindings = makeRandomizedBindings(VECTOR_SIZE, types);
@@ -355,12 +355,12 @@ public class VectorExprSanityTest extends InitializedNullHandlingTest
         ExprEval<?> eval = parsed.eval(bindings.lhs[i]);
         // 'null' expressions can have an output type of null, but still evaluate in default mode, so skip type checks
         if (outputType != null && !eval.isNumericNull()) {
-          Assert.assertEquals(eval.type(), outputType);
+          Assertions.assertEquals(eval.type(), outputType);
         }
-        Assert.assertEquals(
-            StringUtils.format("Values do not match for row %s for expression %s", i, expr),
+        Assertions.assertEquals(
             eval.valueOrDefault(),
-            vectorVals[i]
+            vectorVals[i],
+            StringUtils.format("Values do not match for row %s for expression %s", i, expr)
         );
       }
     }

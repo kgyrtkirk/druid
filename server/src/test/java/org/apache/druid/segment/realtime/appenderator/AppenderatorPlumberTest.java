@@ -28,27 +28,29 @@ import org.apache.druid.segment.realtime.plumber.IntervalStartVersioningPolicy;
 import org.apache.druid.segment.realtime.plumber.NoopRejectionPolicyFactory;
 import org.apache.druid.server.coordination.DataSegmentAnnouncer;
 import org.easymock.EasyMock;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+import java.io.File;
+import java.io.IOException;
 
 public class AppenderatorPlumberTest
 {
   private AppenderatorPlumber plumber;
   private StreamAppenderatorTester streamAppenderatorTester;
 
-  @Rule
-  public TemporaryFolder temporaryFolder = new TemporaryFolder();
+  @TempDir
+  public File temporaryFolder;
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception
   {
     this.streamAppenderatorTester =
         new StreamAppenderatorTester.Builder()
             .maxRowsInMemory(10)
-            .basePersistDirectory(temporaryFolder.newFolder())
+            .basePersistDirectory(newFolder(temporaryFolder, "junit"))
             .build();
     DataSegmentAnnouncer segmentAnnouncer = EasyMock
         .createMock(DataSegmentAnnouncer.class);
@@ -79,7 +81,7 @@ public class AppenderatorPlumberTest
         null,
         null,
         null,
-        temporaryFolder.newFolder(),
+        newFolder(temporaryFolder, "junit"),
         new IntervalStartVersioningPolicy(),
         new NoopRejectionPolicyFactory(),
         null,
@@ -108,32 +110,41 @@ public class AppenderatorPlumberTest
     Appenderator appenderator = streamAppenderatorTester.getAppenderator();
 
     // startJob
-    Assert.assertEquals(null, plumber.startJob());
+    Assertions.assertEquals(null, plumber.startJob());
 
     // getDataSource
-    Assert.assertEquals(StreamAppenderatorTester.DATASOURCE, appenderator.getDataSource());
+    Assertions.assertEquals(StreamAppenderatorTester.DATASOURCE, appenderator.getDataSource());
 
     InputRow[] rows = new InputRow[] {
         StreamAppenderatorTest.ir("2000", "foo", 1),
         StreamAppenderatorTest.ir("2000", "bar", 2), StreamAppenderatorTest.ir("2000", "qux", 4)};
     // add
-    Assert.assertEquals(1, plumber.add(rows[0], null).getRowCount());
+    Assertions.assertEquals(1, plumber.add(rows[0], null).getRowCount());
 
-    Assert.assertEquals(2, plumber.add(rows[1], null).getRowCount());
+    Assertions.assertEquals(2, plumber.add(rows[1], null).getRowCount());
 
-    Assert.assertEquals(3, plumber.add(rows[2], null).getRowCount());
+    Assertions.assertEquals(3, plumber.add(rows[2], null).getRowCount());
 
     
-    Assert.assertEquals(1, plumber.getSegmentsView().size());
+    Assertions.assertEquals(1, plumber.getSegmentsView().size());
     
     SegmentIdWithShardSpec si = plumber.getSegmentsView().values().toArray(new SegmentIdWithShardSpec[0])[0];
     
-    Assert.assertEquals(3, appenderator.getRowCount(si));
+    Assertions.assertEquals(3, appenderator.getRowCount(si));
 
     appenderator.clear();    
-    Assert.assertTrue(appenderator.getSegments().isEmpty());
+    Assertions.assertTrue(appenderator.getSegments().isEmpty());
     
     plumber.dropSegment(si);
     plumber.finishJob();
+  }
+
+  private static File newFolder(File root, String... subDirs) throws IOException {
+    String subFolder = String.join("/", subDirs);
+    File result = new File(root, subFolder);
+    if (!result.mkdirs()) {
+      throw new IOException("Couldn't create folders " + root);
+    }
+    return result;
   }
 }

@@ -22,14 +22,15 @@ package org.apache.druid.collections.bitmap;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import junit.framework.Assert;
 import org.apache.druid.extendedset.intset.ConciseSet;
 import org.apache.druid.extendedset.intset.ImmutableConciseSet;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ConciseBitmapFactoryTest
 {
@@ -52,7 +53,7 @@ public class ConciseBitmapFactoryTest
         )
     );
 
-    Assert.assertEquals(0, bitmap.size());
+    assertEquals(0, bitmap.size());
   }
 
   @Test
@@ -72,7 +73,7 @@ public class ConciseBitmapFactoryTest
         )
     );
 
-    Assert.assertEquals(3, bitmap.size());
+    assertEquals(3, bitmap.size());
   }
 
   @Test
@@ -87,8 +88,8 @@ public class ConciseBitmapFactoryTest
         ImmutableConciseSet.newImmutableFromMutable(conciseSet));
     final MutableBitmap mutableBitmap = new WrappedConciseBitmap(conciseSet);
     for (int i = 0; i < 10; ++i) {
-      Assert.assertEquals(Integer.toString(i), ints.contains(i), mutableBitmap.get(i));
-      Assert.assertEquals(Integer.toString(i), ints.contains(i), immutableBitmap.get(i));
+      assertEquals(ints.contains(i), mutableBitmap.get(i), Integer.toString(i));
+      assertEquals(ints.contains(i), immutableBitmap.get(i), Integer.toString(i));
     }
   }
 }

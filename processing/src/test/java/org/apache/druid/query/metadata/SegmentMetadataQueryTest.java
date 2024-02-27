@@ -70,12 +70,10 @@ import org.apache.druid.segment.join.JoinType;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.apache.druid.timeline.LogicalSegment;
 import org.apache.druid.timeline.SegmentId;
-import org.hamcrest.MatcherAssert;
 import org.joda.time.Interval;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -88,7 +86,8 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-@RunWith(Parameterized.class)
+import static org.hamcrest.MatcherAssert.assertThat;
+
 public class SegmentMetadataQueryTest extends InitializedNullHandlingTest
 {
   private static final SegmentMetadataQueryRunnerFactory FACTORY = new SegmentMetadataQueryRunnerFactory(
@@ -142,19 +141,18 @@ public class SegmentMetadataQueryTest extends InitializedNullHandlingTest
     );
   }
 
-  private final QueryRunner runner1;
-  private final QueryRunner runner2;
-  private final boolean mmap1;
-  private final boolean mmap2;
-  private final boolean rollup1;
-  private final boolean rollup2;
-  private final boolean differentIds;
-  private final SegmentMetadataQuery testQuery;
-  private final SegmentAnalysis expectedSegmentAnalysis1;
-  private final SegmentAnalysis expectedSegmentAnalysis2;
-  private final boolean bitmaps;
+  private QueryRunner runner1;
+  private QueryRunner runner2;
+  private boolean mmap1;
+  private boolean mmap2;
+  private boolean rollup1;
+  private boolean rollup2;
+  private boolean differentIds;
+  private SegmentMetadataQuery testQuery;
+  private SegmentAnalysis expectedSegmentAnalysis1;
+  private SegmentAnalysis expectedSegmentAnalysis2;
+  private boolean bitmaps;
 
-  @Parameterized.Parameters(name = "mmap1 = {0}, mmap2 = {1}, rollup1 = {2}, rollup2 = {3}, differentIds = {4}, bitmaps={5}")
   public static Collection<Object[]> constructorFeeder()
   {
     return ImmutableList.of(
@@ -168,7 +166,7 @@ public class SegmentMetadataQueryTest extends InitializedNullHandlingTest
     );
   }
 
-  public SegmentMetadataQueryTest(
+  public void initSegmentMetadataQueryTest(
       boolean mmap1,
       boolean mmap2,
       boolean rollup1,
@@ -324,18 +322,22 @@ public class SegmentMetadataQueryTest extends InitializedNullHandlingTest
     );
   }
 
-  @Test
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "mmap1 = {0}, mmap2 = {1}, rollup1 = {2}, rollup2 = {3}, differentIds = {4}, bitmaps={5}")
   @SuppressWarnings("unchecked")
-  public void testSegmentMetadataQuery()
+  public void testSegmentMetadataQuery(boolean mmap1, boolean mmap2, boolean rollup1, boolean rollup2, boolean differentIds, boolean bitmaps)
   {
+    initSegmentMetadataQueryTest(mmap1, mmap2, rollup1, rollup2, differentIds, bitmaps);
     List<SegmentAnalysis> results = runner1.run(QueryPlus.wrap(testQuery)).toList();
 
-    Assert.assertEquals(Collections.singletonList(expectedSegmentAnalysis1), results);
+    Assertions.assertEquals(Collections.singletonList(expectedSegmentAnalysis1), results);
   }
 
-  @Test
-  public void testSegmentMetadataQueryWithRollupMerge()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "mmap1 = {0}, mmap2 = {1}, rollup1 = {2}, rollup2 = {3}, differentIds = {4}, bitmaps={5}")
+  public void testSegmentMetadataQueryWithRollupMerge(boolean mmap1, boolean mmap2, boolean rollup1, boolean rollup2, boolean differentIds, boolean bitmaps)
   {
+    initSegmentMetadataQueryTest(mmap1, mmap2, rollup1, rollup2, differentIds, bitmaps);
     SegmentAnalysis mergedSegmentAnalysis = new SegmentAnalysis(
         differentIds ? "merged" : SegmentId.dummy(DATASOURCE).toString(),
         null,
@@ -407,9 +409,11 @@ public class SegmentMetadataQueryTest extends InitializedNullHandlingTest
     exec.shutdownNow();
   }
 
-  @Test
-  public void testSegmentMetadataQueryWithHasMultipleValuesMerge()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "mmap1 = {0}, mmap2 = {1}, rollup1 = {2}, rollup2 = {3}, differentIds = {4}, bitmaps={5}")
+  public void testSegmentMetadataQueryWithHasMultipleValuesMerge(boolean mmap1, boolean mmap2, boolean rollup1, boolean rollup2, boolean differentIds, boolean bitmaps)
   {
+    initSegmentMetadataQueryTest(mmap1, mmap2, rollup1, rollup2, differentIds, bitmaps);
     SegmentAnalysis mergedSegmentAnalysis = new SegmentAnalysis(
         differentIds ? "merged" : SegmentId.dummy(DATASOURCE).toString(),
         null,
@@ -481,9 +485,11 @@ public class SegmentMetadataQueryTest extends InitializedNullHandlingTest
     exec.shutdownNow();
   }
 
-  @Test
-  public void testSegmentMetadataQueryWithComplexColumnMerge()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "mmap1 = {0}, mmap2 = {1}, rollup1 = {2}, rollup2 = {3}, differentIds = {4}, bitmaps={5}")
+  public void testSegmentMetadataQueryWithComplexColumnMerge(boolean mmap1, boolean mmap2, boolean rollup1, boolean rollup2, boolean differentIds, boolean bitmaps)
   {
+    initSegmentMetadataQueryTest(mmap1, mmap2, rollup1, rollup2, differentIds, bitmaps);
     SegmentAnalysis mergedSegmentAnalysis = new SegmentAnalysis(
         differentIds ? "merged" : SegmentId.dummy(DATASOURCE).toString(),
         null,
@@ -555,9 +561,11 @@ public class SegmentMetadataQueryTest extends InitializedNullHandlingTest
     exec.shutdownNow();
   }
 
-  @Test
-  public void testSegmentMetadataQueryWithDefaultAnalysisMerge()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "mmap1 = {0}, mmap2 = {1}, rollup1 = {2}, rollup2 = {3}, differentIds = {4}, bitmaps={5}")
+  public void testSegmentMetadataQueryWithDefaultAnalysisMerge(boolean mmap1, boolean mmap2, boolean rollup1, boolean rollup2, boolean differentIds, boolean bitmaps)
   {
+    initSegmentMetadataQueryTest(mmap1, mmap2, rollup1, rollup2, differentIds, bitmaps);
     int size1 = 0;
     int size2 = 0;
     if (bitmaps) {
@@ -578,9 +586,11 @@ public class SegmentMetadataQueryTest extends InitializedNullHandlingTest
     testSegmentMetadataQueryWithDefaultAnalysisMerge("placement", analysis);
   }
 
-  @Test
-  public void testSegmentMetadataQueryWithDefaultAnalysisMerge2()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "mmap1 = {0}, mmap2 = {1}, rollup1 = {2}, rollup2 = {3}, differentIds = {4}, bitmaps={5}")
+  public void testSegmentMetadataQueryWithDefaultAnalysisMerge2(boolean mmap1, boolean mmap2, boolean rollup1, boolean rollup2, boolean differentIds, boolean bitmaps)
   {
+    initSegmentMetadataQueryTest(mmap1, mmap2, rollup1, rollup2, differentIds, bitmaps);
     int size1 = 0;
     int size2 = 0;
     if (bitmaps) {
@@ -601,9 +611,11 @@ public class SegmentMetadataQueryTest extends InitializedNullHandlingTest
     testSegmentMetadataQueryWithDefaultAnalysisMerge("market", analysis);
   }
 
-  @Test
-  public void testSegmentMetadataQueryWithDefaultAnalysisMerge3()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "mmap1 = {0}, mmap2 = {1}, rollup1 = {2}, rollup2 = {3}, differentIds = {4}, bitmaps={5}")
+  public void testSegmentMetadataQueryWithDefaultAnalysisMerge3(boolean mmap1, boolean mmap2, boolean rollup1, boolean rollup2, boolean differentIds, boolean bitmaps)
   {
+    initSegmentMetadataQueryTest(mmap1, mmap2, rollup1, rollup2, differentIds, bitmaps);
     int size1 = 0;
     int size2 = 0;
     if (bitmaps) {
@@ -701,9 +713,11 @@ public class SegmentMetadataQueryTest extends InitializedNullHandlingTest
     exec.shutdownNow();
   }
 
-  @Test
-  public void testSegmentMetadataQueryWithNoAnalysisTypesMerge()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "mmap1 = {0}, mmap2 = {1}, rollup1 = {2}, rollup2 = {3}, differentIds = {4}, bitmaps={5}")
+  public void testSegmentMetadataQueryWithNoAnalysisTypesMerge(boolean mmap1, boolean mmap2, boolean rollup1, boolean rollup2, boolean differentIds, boolean bitmaps)
   {
+    initSegmentMetadataQueryTest(mmap1, mmap2, rollup1, rollup2, differentIds, bitmaps);
     SegmentAnalysis mergedSegmentAnalysis = new SegmentAnalysis(
         differentIds ? "merged" : SegmentId.dummy(DATASOURCE).toString(),
         null,
@@ -763,9 +777,11 @@ public class SegmentMetadataQueryTest extends InitializedNullHandlingTest
     exec.shutdownNow();
   }
 
-  @Test
-  public void testSegmentMetadataQueryWithAggregatorsMerge()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "mmap1 = {0}, mmap2 = {1}, rollup1 = {2}, rollup2 = {3}, differentIds = {4}, bitmaps={5}")
+  public void testSegmentMetadataQueryWithAggregatorsMerge(boolean mmap1, boolean mmap2, boolean rollup1, boolean rollup2, boolean differentIds, boolean bitmaps)
   {
+    initSegmentMetadataQueryTest(mmap1, mmap2, rollup1, rollup2, differentIds, bitmaps);
     final Map<String, AggregatorFactory> expectedAggregators = new HashMap<>();
     for (AggregatorFactory agg : TestIndex.METRIC_AGGS) {
       expectedAggregators.put(agg.getName(), agg.getCombiningFactory());
@@ -829,9 +845,11 @@ public class SegmentMetadataQueryTest extends InitializedNullHandlingTest
     exec.shutdownNow();
   }
 
-  @Test
-  public void testSegmentMetadataQueryWithAggregatorsMergeLenientStrategy()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "mmap1 = {0}, mmap2 = {1}, rollup1 = {2}, rollup2 = {3}, differentIds = {4}, bitmaps={5}")
+  public void testSegmentMetadataQueryWithAggregatorsMergeLenientStrategy(boolean mmap1, boolean mmap2, boolean rollup1, boolean rollup2, boolean differentIds, boolean bitmaps)
   {
+    initSegmentMetadataQueryTest(mmap1, mmap2, rollup1, rollup2, differentIds, bitmaps);
     final Map<String, AggregatorFactory> expectedAggregators = new HashMap<>();
     for (AggregatorFactory agg : TestIndex.METRIC_AGGS) {
       expectedAggregators.put(agg.getName(), agg.getCombiningFactory());
@@ -896,9 +914,11 @@ public class SegmentMetadataQueryTest extends InitializedNullHandlingTest
     exec.shutdownNow();
   }
 
-  @Test
-  public void testSegmentMetadataQueryWithTimestampSpecMerge()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "mmap1 = {0}, mmap2 = {1}, rollup1 = {2}, rollup2 = {3}, differentIds = {4}, bitmaps={5}")
+  public void testSegmentMetadataQueryWithTimestampSpecMerge(boolean mmap1, boolean mmap2, boolean rollup1, boolean rollup2, boolean differentIds, boolean bitmaps)
   {
+    initSegmentMetadataQueryTest(mmap1, mmap2, rollup1, rollup2, differentIds, bitmaps);
     SegmentAnalysis mergedSegmentAnalysis = new SegmentAnalysis(
         differentIds ? "merged" : SegmentId.dummy(DATASOURCE).toString(),
         null,
@@ -958,9 +978,11 @@ public class SegmentMetadataQueryTest extends InitializedNullHandlingTest
     exec.shutdownNow();
   }
 
-  @Test
-  public void testSegmentMetadataQueryWithQueryGranularityMerge()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "mmap1 = {0}, mmap2 = {1}, rollup1 = {2}, rollup2 = {3}, differentIds = {4}, bitmaps={5}")
+  public void testSegmentMetadataQueryWithQueryGranularityMerge(boolean mmap1, boolean mmap2, boolean rollup1, boolean rollup2, boolean differentIds, boolean bitmaps)
   {
+    initSegmentMetadataQueryTest(mmap1, mmap2, rollup1, rollup2, differentIds, bitmaps);
     SegmentAnalysis mergedSegmentAnalysis = new SegmentAnalysis(
         differentIds ? "merged" : SegmentId.dummy(DATASOURCE).toString(),
         null,
@@ -1020,9 +1042,11 @@ public class SegmentMetadataQueryTest extends InitializedNullHandlingTest
     exec.shutdownNow();
   }
 
-  @Test
-  public void testBySegmentResults()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "mmap1 = {0}, mmap2 = {1}, rollup1 = {2}, rollup2 = {3}, differentIds = {4}, bitmaps={5}")
+  public void testBySegmentResults(boolean mmap1, boolean mmap2, boolean rollup1, boolean rollup2, boolean differentIds, boolean bitmaps)
   {
+    initSegmentMetadataQueryTest(mmap1, mmap2, rollup1, rollup2, differentIds, bitmaps);
     Result<BySegmentResultValue> bySegmentResult = new Result<BySegmentResultValue>(
         expectedSegmentAnalysis1.getIntervals().get(0).getStart(),
         new BySegmentResultValueClass(
@@ -1060,9 +1084,11 @@ public class SegmentMetadataQueryTest extends InitializedNullHandlingTest
     exec.shutdownNow();
   }
 
-  @Test
-  public void testSerde() throws Exception
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "mmap1 = {0}, mmap2 = {1}, rollup1 = {2}, rollup2 = {3}, differentIds = {4}, bitmaps={5}")
+  public void testSerde(boolean mmap1, boolean mmap2, boolean rollup1, boolean rollup2, boolean differentIds, boolean bitmaps) throws Exception
   {
+    initSegmentMetadataQueryTest(mmap1, mmap2, rollup1, rollup2, differentIds, bitmaps);
     String queryStr = "{\n"
                       + "  \"queryType\":\"segmentMetadata\",\n"
                       + "  \"dataSource\":\"test_ds\",\n"
@@ -1076,70 +1102,76 @@ public class SegmentMetadataQueryTest extends InitializedNullHandlingTest
     );
 
     Query query = MAPPER.readValue(queryStr, Query.class);
-    Assert.assertTrue(query instanceof SegmentMetadataQuery);
-    Assert.assertEquals("test_ds", Iterables.getOnlyElement(query.getDataSource().getTableNames()));
-    Assert.assertEquals(
+    Assertions.assertTrue(query instanceof SegmentMetadataQuery);
+    Assertions.assertEquals("test_ds", Iterables.getOnlyElement(query.getDataSource().getTableNames()));
+    Assertions.assertEquals(
         Intervals.of("2013-12-04T00:00:00.000Z/2013-12-05T00:00:00.000Z"),
         query.getIntervals().get(0)
     );
-    Assert.assertEquals(expectedAnalysisTypes, ((SegmentMetadataQuery) query).getAnalysisTypes());
-    Assert.assertEquals(AggregatorMergeStrategy.STRICT, ((SegmentMetadataQuery) query).getAggregatorMergeStrategy());
+    Assertions.assertEquals(expectedAnalysisTypes, ((SegmentMetadataQuery) query).getAnalysisTypes());
+    Assertions.assertEquals(AggregatorMergeStrategy.STRICT, ((SegmentMetadataQuery) query).getAggregatorMergeStrategy());
 
     // test serialize and deserialize
-    Assert.assertEquals(query, MAPPER.readValue(MAPPER.writeValueAsString(query), Query.class));
+    Assertions.assertEquals(query, MAPPER.readValue(MAPPER.writeValueAsString(query), Query.class));
 
     // test copy
-    Assert.assertEquals(query, Druids.SegmentMetadataQueryBuilder.copy((SegmentMetadataQuery) query).build());
+    Assertions.assertEquals(query, Druids.SegmentMetadataQueryBuilder.copy((SegmentMetadataQuery) query).build());
   }
 
-  @Test
-  public void testSerdeWithDefaultInterval() throws Exception
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "mmap1 = {0}, mmap2 = {1}, rollup1 = {2}, rollup2 = {3}, differentIds = {4}, bitmaps={5}")
+  public void testSerdeWithDefaultInterval(boolean mmap1, boolean mmap2, boolean rollup1, boolean rollup2, boolean differentIds, boolean bitmaps) throws Exception
   {
+    initSegmentMetadataQueryTest(mmap1, mmap2, rollup1, rollup2, differentIds, bitmaps);
     String queryStr = "{\n"
                       + "  \"queryType\":\"segmentMetadata\",\n"
                       + "  \"dataSource\":\"test_ds\"\n"
                       + "}";
     Query query = MAPPER.readValue(queryStr, Query.class);
-    Assert.assertTrue(query instanceof SegmentMetadataQuery);
-    Assert.assertTrue(query.getDataSource() instanceof TableDataSource);
-    Assert.assertEquals("test_ds", Iterables.getOnlyElement(query.getDataSource().getTableNames()));
-    Assert.assertEquals(Intervals.ETERNITY, query.getIntervals().get(0));
-    Assert.assertTrue(((SegmentMetadataQuery) query).isUsingDefaultInterval());
-    Assert.assertEquals(AggregatorMergeStrategy.STRICT, ((SegmentMetadataQuery) query).getAggregatorMergeStrategy());
+    Assertions.assertTrue(query instanceof SegmentMetadataQuery);
+    Assertions.assertTrue(query.getDataSource() instanceof TableDataSource);
+    Assertions.assertEquals("test_ds", Iterables.getOnlyElement(query.getDataSource().getTableNames()));
+    Assertions.assertEquals(Intervals.ETERNITY, query.getIntervals().get(0));
+    Assertions.assertTrue(((SegmentMetadataQuery) query).isUsingDefaultInterval());
+    Assertions.assertEquals(AggregatorMergeStrategy.STRICT, ((SegmentMetadataQuery) query).getAggregatorMergeStrategy());
 
     // test serialize and deserialize
-    Assert.assertEquals(query, MAPPER.readValue(MAPPER.writeValueAsString(query), Query.class));
+    Assertions.assertEquals(query, MAPPER.readValue(MAPPER.writeValueAsString(query), Query.class));
 
     // test copy
-    Assert.assertEquals(query, Druids.SegmentMetadataQueryBuilder.copy((SegmentMetadataQuery) query).build());
+    Assertions.assertEquals(query, Druids.SegmentMetadataQueryBuilder.copy((SegmentMetadataQuery) query).build());
   }
 
-  @Test
-  public void testSerdeWithLatestAggregatorStrategy() throws Exception
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "mmap1 = {0}, mmap2 = {1}, rollup1 = {2}, rollup2 = {3}, differentIds = {4}, bitmaps={5}")
+  public void testSerdeWithLatestAggregatorStrategy(boolean mmap1, boolean mmap2, boolean rollup1, boolean rollup2, boolean differentIds, boolean bitmaps) throws Exception
   {
+    initSegmentMetadataQueryTest(mmap1, mmap2, rollup1, rollup2, differentIds, bitmaps);
     String queryStr = "{\n"
                       + "  \"queryType\":\"segmentMetadata\",\n"
                       + "  \"dataSource\":\"test_ds\",\n"
                       + "  \"aggregatorMergeStrategy\":\"latest\"\n"
                       + "}";
     Query query = MAPPER.readValue(queryStr, Query.class);
-    Assert.assertTrue(query instanceof SegmentMetadataQuery);
-    Assert.assertTrue(query.getDataSource() instanceof TableDataSource);
-    Assert.assertEquals("test_ds", Iterables.getOnlyElement(query.getDataSource().getTableNames()));
-    Assert.assertEquals(Intervals.ETERNITY, query.getIntervals().get(0));
-    Assert.assertTrue(((SegmentMetadataQuery) query).isUsingDefaultInterval());
-    Assert.assertEquals(AggregatorMergeStrategy.LATEST, ((SegmentMetadataQuery) query).getAggregatorMergeStrategy());
+    Assertions.assertTrue(query instanceof SegmentMetadataQuery);
+    Assertions.assertTrue(query.getDataSource() instanceof TableDataSource);
+    Assertions.assertEquals("test_ds", Iterables.getOnlyElement(query.getDataSource().getTableNames()));
+    Assertions.assertEquals(Intervals.ETERNITY, query.getIntervals().get(0));
+    Assertions.assertTrue(((SegmentMetadataQuery) query).isUsingDefaultInterval());
+    Assertions.assertEquals(AggregatorMergeStrategy.LATEST, ((SegmentMetadataQuery) query).getAggregatorMergeStrategy());
 
     // test serialize and deserialize
-    Assert.assertEquals(query, MAPPER.readValue(MAPPER.writeValueAsString(query), Query.class));
+    Assertions.assertEquals(query, MAPPER.readValue(MAPPER.writeValueAsString(query), Query.class));
 
     // test copy
-    Assert.assertEquals(query, Druids.SegmentMetadataQueryBuilder.copy((SegmentMetadataQuery) query).build());
+    Assertions.assertEquals(query, Druids.SegmentMetadataQueryBuilder.copy((SegmentMetadataQuery) query).build());
   }
 
-  @Test
-  public void testSerdeWithBothDeprecatedAndNewParameters()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "mmap1 = {0}, mmap2 = {1}, rollup1 = {2}, rollup2 = {3}, differentIds = {4}, bitmaps={5}")
+  public void testSerdeWithBothDeprecatedAndNewParameters(boolean mmap1, boolean mmap2, boolean rollup1, boolean rollup2, boolean differentIds, boolean bitmaps)
   {
+    initSegmentMetadataQueryTest(mmap1, mmap2, rollup1, rollup2, differentIds, bitmaps);
     String queryStr = "{\n"
                       + "  \"queryType\":\"segmentMetadata\",\n"
                       + "  \"dataSource\":\"test_ds\",\n"
@@ -1147,30 +1179,32 @@ public class SegmentMetadataQueryTest extends InitializedNullHandlingTest
                       + "  \"aggregatorMergeStrategy\":\"lenient\"\n"
                       + "}";
 
-    ValueInstantiationException exception = Assert.assertThrows(
+    ValueInstantiationException exception = Assertions.assertThrows(
         ValueInstantiationException.class,
         () -> MAPPER.readValue(queryStr, Query.class)
     );
 
-    Assert.assertTrue(
+    Assertions.assertTrue(
         exception.getCause().getMessage().contains(
             "Both lenientAggregatorMerge [true] and aggregatorMergeStrategy [lenient] parameters cannot be set. Consider using aggregatorMergeStrategy since lenientAggregatorMerge is deprecated."
         )
     );
   }
 
-  @Test
-  public void testDefaultIntervalAndFiltering()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "mmap1 = {0}, mmap2 = {1}, rollup1 = {2}, rollup2 = {3}, differentIds = {4}, bitmaps={5}")
+  public void testDefaultIntervalAndFiltering(boolean mmap1, boolean mmap2, boolean rollup1, boolean rollup2, boolean differentIds, boolean bitmaps)
   {
+    initSegmentMetadataQueryTest(mmap1, mmap2, rollup1, rollup2, differentIds, bitmaps);
     SegmentMetadataQuery testQuery = Druids.newSegmentMetadataQueryBuilder()
                                            .dataSource(DATASOURCE)
                                            .toInclude(new ListColumnIncluderator(Collections.singletonList("placement")))
                                            .merge(true)
                                            .build();
     /* No interval specified, should use default interval */
-    Assert.assertTrue(testQuery.isUsingDefaultInterval());
-    Assert.assertEquals(Intervals.ETERNITY, testQuery.getIntervals().get(0));
-    Assert.assertEquals(testQuery.getIntervals().size(), 1);
+    Assertions.assertTrue(testQuery.isUsingDefaultInterval());
+    Assertions.assertEquals(Intervals.ETERNITY, testQuery.getIntervals().get(0));
+    Assertions.assertEquals(testQuery.getIntervals().size(), 1);
 
     List<LogicalSegment> testSegments = Arrays.asList(
         new LogicalSegment()
@@ -1326,9 +1360,9 @@ public class SegmentMetadataQueryTest extends InitializedNullHandlingTest
         }
     );
 
-    Assert.assertEquals(filteredSegments.size(), 2);
+    Assertions.assertEquals(filteredSegments.size(), 2);
     for (int i = 0; i < filteredSegments.size(); i++) {
-      Assert.assertEquals(expectedSegments.get(i).getInterval(), filteredSegments.get(i).getInterval());
+      Assertions.assertEquals(expectedSegments.get(i).getInterval(), filteredSegments.get(i).getInterval());
     }
 
     /* Test 2 year period filtering */
@@ -1413,15 +1447,17 @@ public class SegmentMetadataQueryTest extends InitializedNullHandlingTest
         }
     );
 
-    Assert.assertEquals(filteredSegments2.size(), 5);
+    Assertions.assertEquals(filteredSegments2.size(), 5);
     for (int i = 0; i < filteredSegments2.size(); i++) {
-      Assert.assertEquals(expectedSegments2.get(i).getInterval(), filteredSegments2.get(i).getInterval());
+      Assertions.assertEquals(expectedSegments2.get(i).getInterval(), filteredSegments2.get(i).getInterval());
     }
   }
 
-  @Test
-  public void testCacheKeyWithListColumnIncluderator()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "mmap1 = {0}, mmap2 = {1}, rollup1 = {2}, rollup2 = {3}, differentIds = {4}, bitmaps={5}")
+  public void testCacheKeyWithListColumnIncluderator(boolean mmap1, boolean mmap2, boolean rollup1, boolean rollup2, boolean differentIds, boolean bitmaps)
   {
+    initSegmentMetadataQueryTest(mmap1, mmap2, rollup1, rollup2, differentIds, bitmaps);
     SegmentMetadataQuery oneColumnQuery = Druids.newSegmentMetadataQueryBuilder()
                                                 .dataSource(DATASOURCE)
                                                 .toInclude(new ListColumnIncluderator(Collections.singletonList("foo")))
@@ -1442,12 +1478,14 @@ public class SegmentMetadataQueryTest extends InitializedNullHandlingTest
                                                                                                                   .computeCacheKey(
                                                                                                                       twoColumnQuery);
 
-    Assert.assertFalse(Arrays.equals(oneColumnQueryCacheKey, twoColumnQueryCacheKey));
+    Assertions.assertFalse(Arrays.equals(oneColumnQueryCacheKey, twoColumnQueryCacheKey));
   }
 
-  @Test
-  public void testAnanlysisTypesBeingSet()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "mmap1 = {0}, mmap2 = {1}, rollup1 = {2}, rollup2 = {3}, differentIds = {4}, bitmaps={5}")
+  public void testAnanlysisTypesBeingSet(boolean mmap1, boolean mmap2, boolean rollup1, boolean rollup2, boolean differentIds, boolean bitmaps)
   {
+    initSegmentMetadataQueryTest(mmap1, mmap2, rollup1, rollup2, differentIds, bitmaps);
     SegmentMetadataQuery query1 = Druids.newSegmentMetadataQueryBuilder()
                                         .dataSource(DATASOURCE)
                                         .toInclude(new ListColumnIncluderator(Collections.singletonList("foo")))
@@ -1477,15 +1515,17 @@ public class SegmentMetadataQueryTest extends InitializedNullHandlingTest
     EnumSet<SegmentMetadataQuery.AnalysisType> expectedAnalysisWCfg1 = EnumSet.of(SegmentMetadataQuery.AnalysisType.CARDINALITY);
     EnumSet<SegmentMetadataQuery.AnalysisType> expectedAnalysisWCfg2 = EnumSet.of(SegmentMetadataQuery.AnalysisType.MINMAX);
 
-    Assert.assertEquals(analysis1, expectedAnalysis1);
-    Assert.assertEquals(analysis2, expectedAnalysis2);
-    Assert.assertEquals(analysisWCfg1, expectedAnalysisWCfg1);
-    Assert.assertEquals(analysisWCfg2, expectedAnalysisWCfg2);
+    Assertions.assertEquals(analysis1, expectedAnalysis1);
+    Assertions.assertEquals(analysis2, expectedAnalysis2);
+    Assertions.assertEquals(analysisWCfg1, expectedAnalysisWCfg1);
+    Assertions.assertEquals(analysisWCfg2, expectedAnalysisWCfg2);
   }
 
-  @Test
-  public void testLongNullableColumn()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "mmap1 = {0}, mmap2 = {1}, rollup1 = {2}, rollup2 = {3}, differentIds = {4}, bitmaps={5}")
+  public void testLongNullableColumn(boolean mmap1, boolean mmap2, boolean rollup1, boolean rollup2, boolean differentIds, boolean bitmaps)
   {
+    initSegmentMetadataQueryTest(mmap1, mmap2, rollup1, rollup2, differentIds, bitmaps);
     ColumnAnalysis analysis = new ColumnAnalysis(
         ColumnType.LONG,
         ValueType.LONG.toString(),
@@ -1500,9 +1540,11 @@ public class SegmentMetadataQueryTest extends InitializedNullHandlingTest
     testSegmentMetadataQueryWithDefaultAnalysisMerge("longNumericNull", analysis);
   }
 
-  @Test
-  public void testDoubleNullableColumn()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "mmap1 = {0}, mmap2 = {1}, rollup1 = {2}, rollup2 = {3}, differentIds = {4}, bitmaps={5}")
+  public void testDoubleNullableColumn(boolean mmap1, boolean mmap2, boolean rollup1, boolean rollup2, boolean differentIds, boolean bitmaps)
   {
+    initSegmentMetadataQueryTest(mmap1, mmap2, rollup1, rollup2, differentIds, bitmaps);
     ColumnAnalysis analysis = new ColumnAnalysis(
         ColumnType.DOUBLE,
         ValueType.DOUBLE.toString(),
@@ -1518,9 +1560,11 @@ public class SegmentMetadataQueryTest extends InitializedNullHandlingTest
   }
 
 
-  @Test
-  public void testFloatNullableColumn()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "mmap1 = {0}, mmap2 = {1}, rollup1 = {2}, rollup2 = {3}, differentIds = {4}, bitmaps={5}")
+  public void testFloatNullableColumn(boolean mmap1, boolean mmap2, boolean rollup1, boolean rollup2, boolean differentIds, boolean bitmaps)
   {
+    initSegmentMetadataQueryTest(mmap1, mmap2, rollup1, rollup2, differentIds, bitmaps);
     ColumnAnalysis analysis = new ColumnAnalysis(
         ColumnType.FLOAT,
         ValueType.FLOAT.toString(),
@@ -1535,9 +1579,11 @@ public class SegmentMetadataQueryTest extends InitializedNullHandlingTest
     testSegmentMetadataQueryWithDefaultAnalysisMerge("floatNumericNull", analysis);
   }
 
-  @Test
-  public void testStringNullOnlyColumn()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "mmap1 = {0}, mmap2 = {1}, rollup1 = {2}, rollup2 = {3}, differentIds = {4}, bitmaps={5}")
+  public void testStringNullOnlyColumn(boolean mmap1, boolean mmap2, boolean rollup1, boolean rollup2, boolean differentIds, boolean bitmaps)
   {
+    initSegmentMetadataQueryTest(mmap1, mmap2, rollup1, rollup2, differentIds, bitmaps);
     ColumnAnalysis analysis = new ColumnAnalysis(
         ColumnType.STRING,
         ValueType.STRING.toString(),
@@ -1552,11 +1598,13 @@ public class SegmentMetadataQueryTest extends InitializedNullHandlingTest
     testSegmentMetadataQueryWithDefaultAnalysisMerge("null_column", analysis);
   }
 
-  @Test
-  public void testSegmentMetadataQueryWithInvalidDatasourceTypes()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "mmap1 = {0}, mmap2 = {1}, rollup1 = {2}, rollup2 = {3}, differentIds = {4}, bitmaps={5}")
+  public void testSegmentMetadataQueryWithInvalidDatasourceTypes(boolean mmap1, boolean mmap2, boolean rollup1, boolean rollup2, boolean differentIds, boolean bitmaps)
   {
-    MatcherAssert.assertThat(
-        Assert.assertThrows(
+    initSegmentMetadataQueryTest(mmap1, mmap2, rollup1, rollup2, differentIds, bitmaps);
+    assertThat(
+        Assertions.assertThrows(
             DruidException.class,
             () -> new SegmentMetadataQuery(
                 InlineDataSource.fromIterable(
@@ -1579,8 +1627,8 @@ public class SegmentMetadataQueryTest extends InitializedNullHandlingTest
                 "Invalid dataSource type [InlineDataSource{signature={column:STRING}}]. SegmentMetadataQuery only supports table or union datasources.")
     );
 
-    MatcherAssert.assertThat(
-        Assert.assertThrows(
+    assertThat(
+        Assertions.assertThrows(
             DruidException.class,
             () -> new SegmentMetadataQuery(
                 new LookupDataSource("lookyloo"),
@@ -1600,8 +1648,8 @@ public class SegmentMetadataQueryTest extends InitializedNullHandlingTest
                 "Invalid dataSource type [LookupDataSource{lookupName='lookyloo'}]. SegmentMetadataQuery only supports table or union datasources.")
     );
 
-    MatcherAssert.assertThat(
-        Assert.assertThrows(
+    assertThat(
+        Assertions.assertThrows(
             DruidException.class,
             () -> new SegmentMetadataQuery(
                 JoinDataSource.create(
@@ -1631,11 +1679,13 @@ public class SegmentMetadataQueryTest extends InitializedNullHandlingTest
     );
   }
 
-  @Test
-  public void testSegmentMetadataQueryWithAggregatorMergeStrictStrategy()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "mmap1 = {0}, mmap2 = {1}, rollup1 = {2}, rollup2 = {3}, differentIds = {4}, bitmaps={5}")
+  public void testSegmentMetadataQueryWithAggregatorMergeStrictStrategy(boolean mmap1, boolean mmap2, boolean rollup1, boolean rollup2, boolean differentIds, boolean bitmaps)
   {
+    initSegmentMetadataQueryTest(mmap1, mmap2, rollup1, rollup2, differentIds, bitmaps);
     // This is the default behavior -- if nothing is specified, the merge strategy is strict.
-    Assert.assertEquals(
+    Assertions.assertEquals(
         AggregatorMergeStrategy.STRICT,
         new SegmentMetadataQuery(
             new TableDataSource("foo"),
@@ -1650,7 +1700,7 @@ public class SegmentMetadataQueryTest extends InitializedNullHandlingTest
         ).getAggregatorMergeStrategy()
     );
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         AggregatorMergeStrategy.STRICT,
         new SegmentMetadataQuery(
             new TableDataSource("foo"),
@@ -1665,7 +1715,7 @@ public class SegmentMetadataQueryTest extends InitializedNullHandlingTest
         ).getAggregatorMergeStrategy()
     );
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         AggregatorMergeStrategy.STRICT,
         new SegmentMetadataQuery(
             new TableDataSource("foo"),
@@ -1681,10 +1731,12 @@ public class SegmentMetadataQueryTest extends InitializedNullHandlingTest
     );
   }
 
-  @Test
-  public void testSegmentMetadataQueryWithAggregatorMergeLenientStrategy()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "mmap1 = {0}, mmap2 = {1}, rollup1 = {2}, rollup2 = {3}, differentIds = {4}, bitmaps={5}")
+  public void testSegmentMetadataQueryWithAggregatorMergeLenientStrategy(boolean mmap1, boolean mmap2, boolean rollup1, boolean rollup2, boolean differentIds, boolean bitmaps)
   {
-    Assert.assertEquals(
+    initSegmentMetadataQueryTest(mmap1, mmap2, rollup1, rollup2, differentIds, bitmaps);
+    Assertions.assertEquals(
         AggregatorMergeStrategy.LENIENT,
         new SegmentMetadataQuery(
             new TableDataSource("foo"),
@@ -1699,7 +1751,7 @@ public class SegmentMetadataQueryTest extends InitializedNullHandlingTest
         ).getAggregatorMergeStrategy()
     );
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         AggregatorMergeStrategy.LENIENT,
         new SegmentMetadataQuery(
             new TableDataSource("foo"),
@@ -1715,10 +1767,12 @@ public class SegmentMetadataQueryTest extends InitializedNullHandlingTest
     );
   }
 
-  @Test
-  public void testSegmentMetadataQueryWithAggregatorMergeLatestStrategy()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "mmap1 = {0}, mmap2 = {1}, rollup1 = {2}, rollup2 = {3}, differentIds = {4}, bitmaps={5}")
+  public void testSegmentMetadataQueryWithAggregatorMergeLatestStrategy(boolean mmap1, boolean mmap2, boolean rollup1, boolean rollup2, boolean differentIds, boolean bitmaps)
   {
-    Assert.assertEquals(
+    initSegmentMetadataQueryTest(mmap1, mmap2, rollup1, rollup2, differentIds, bitmaps);
+    Assertions.assertEquals(
         AggregatorMergeStrategy.LATEST,
         new SegmentMetadataQuery(
             new TableDataSource("foo"),
@@ -1734,11 +1788,13 @@ public class SegmentMetadataQueryTest extends InitializedNullHandlingTest
     );
   }
 
-  @Test
-  public void testSegmentMetadataQueryWithBothDeprecatedAndNewParameter()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "mmap1 = {0}, mmap2 = {1}, rollup1 = {2}, rollup2 = {3}, differentIds = {4}, bitmaps={5}")
+  public void testSegmentMetadataQueryWithBothDeprecatedAndNewParameter(boolean mmap1, boolean mmap2, boolean rollup1, boolean rollup2, boolean differentIds, boolean bitmaps)
   {
-    MatcherAssert.assertThat(
-        Assert.assertThrows(
+    initSegmentMetadataQueryTest(mmap1, mmap2, rollup1, rollup2, differentIds, bitmaps);
+    assertThat(
+        Assertions.assertThrows(
             DruidException.class,
             () -> new SegmentMetadataQuery(
                 new TableDataSource("foo"),
@@ -1758,8 +1814,8 @@ public class SegmentMetadataQueryTest extends InitializedNullHandlingTest
                                  + " Consider using aggregatorMergeStrategy since lenientAggregatorMerge is deprecated.")
     );
 
-    MatcherAssert.assertThat(
-        Assert.assertThrows(
+    assertThat(
+        Assertions.assertThrows(
             DruidException.class,
             () -> new SegmentMetadataQuery(
                 new TableDataSource("foo"),
@@ -1779,8 +1835,8 @@ public class SegmentMetadataQueryTest extends InitializedNullHandlingTest
                                  + " Consider using aggregatorMergeStrategy since lenientAggregatorMerge is deprecated.")
     );
 
-    MatcherAssert.assertThat(
-        Assert.assertThrows(
+    assertThat(
+        Assertions.assertThrows(
             DruidException.class,
             () -> new SegmentMetadataQuery(
                 new TableDataSource("foo"),

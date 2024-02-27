@@ -34,19 +34,18 @@ import org.apache.druid.java.util.emitter.core.Emitter;
 import org.apache.druid.java.util.emitter.core.NoopEmitter;
 import org.apache.druid.java.util.emitter.core.ParametrizedUriEmitter;
 import org.hamcrest.CoreMatchers;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import javax.validation.Validation;
 import javax.validation.Validator;
 import java.util.Properties;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public class EmitterModuleTest
 {
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
 
   @Test
   public void testParametrizedUriEmitterConfig()
@@ -64,7 +63,7 @@ public class EmitterModuleTest
     final Emitter emitter = makeInjectorWithProperties(props).getInstance(Emitter.class);
 
     // Testing that ParametrizedUriEmitter is successfully deserialized from the above config
-    Assert.assertThat(emitter, CoreMatchers.instanceOf(ParametrizedUriEmitter.class));
+    assertThat(emitter, CoreMatchers.instanceOf(ParametrizedUriEmitter.class));
   }
 
   @Test
@@ -74,17 +73,18 @@ public class EmitterModuleTest
     props.setProperty("druid.emitter", "");
 
     final Emitter emitter = makeInjectorWithProperties(props).getInstance(Emitter.class);
-    Assert.assertThat(emitter, CoreMatchers.instanceOf(NoopEmitter.class));
+    assertThat(emitter, CoreMatchers.instanceOf(NoopEmitter.class));
   }
 
   @Test
   public void testInvalidEmitterType()
   {
-    final Properties props = new Properties();
-    props.setProperty("druid.emitter", "invalid");
-
-    expectedException.expectMessage("Unknown emitter type[druid.emitter]=[invalid]");
-    makeInjectorWithProperties(props).getInstance(Emitter.class);
+    Throwable exception = assertThrows(Exception.class, () -> {
+      final Properties props = new Properties();
+      props.setProperty("druid.emitter", "invalid");
+      makeInjectorWithProperties(props).getInstance(Emitter.class);
+    });
+    assertTrue(exception.getMessage().contains("Unknown emitter type[druid.emitter]=[invalid]"));
   }
 
   private Injector makeInjectorWithProperties(final Properties props)

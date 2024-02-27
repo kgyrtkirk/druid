@@ -33,7 +33,6 @@ import org.apache.druid.indexing.seekablestream.SeekableStreamStartSequenceNumbe
 import org.apache.druid.initialization.CoreInjectorBuilder;
 import org.apache.druid.initialization.DruidModule;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.util.Map;
 import java.util.Set;

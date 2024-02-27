@@ -41,9 +41,9 @@ import org.apache.druid.query.lookup.LookupExtractionFn;
 import org.apache.druid.query.lookup.LookupExtractor;
 import org.apache.druid.segment.IndexBuilder;
 import org.apache.druid.segment.StorageAdapter;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -77,7 +77,7 @@ public class InFilterTest extends BaseFilterTest
   }
 
 
-  @AfterClass
+  @AfterAll
   public static void tearDown() throws Exception
   {
     BaseFilterTest.tearDown(InFilterTest.class.getName());
@@ -520,17 +520,17 @@ public class InFilterTest extends BaseFilterTest
     InDimFilter filter = (InDimFilter) toInFilter("dim0", "a", "c").toFilter();
     InDimFilter filter2 = (InDimFilter) toInFilter("dim1", "a", "c").toFilter();
 
-    Assert.assertTrue(filter.supportsRequiredColumnRewrite());
-    Assert.assertTrue(filter2.supportsRequiredColumnRewrite());
+    Assertions.assertTrue(filter.supportsRequiredColumnRewrite());
+    Assertions.assertTrue(filter2.supportsRequiredColumnRewrite());
 
     Filter rewrittenFilter = filter.rewriteRequiredColumns(ImmutableMap.of("dim0", "dim1"));
-    Assert.assertEquals(filter2, rewrittenFilter);
+    Assertions.assertEquals(filter2, rewrittenFilter);
 
-    Throwable t = Assert.assertThrows(
+    Throwable t = Assertions.assertThrows(
         IAE.class,
         () -> filter.rewriteRequiredColumns(ImmutableMap.of("invalidName", "dim1"))
     );
-    Assert.assertEquals(
+    Assertions.assertEquals(
         "Received a non-applicable rewrite: {invalidName=dim1}, filter's dimension: dim0",
         t.getMessage()
     );

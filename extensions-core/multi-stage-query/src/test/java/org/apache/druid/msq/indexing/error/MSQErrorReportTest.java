@@ -26,7 +26,6 @@ import org.apache.druid.java.util.common.parsers.ParseException;
 import org.apache.druid.query.QueryTimeoutException;
 import org.apache.druid.query.groupby.epinephelinae.UnexpectedMultiValueDimensionException;
 import org.junit.Assert;
-import org.junit.Test;
 
 public class MSQErrorReportTest
 {

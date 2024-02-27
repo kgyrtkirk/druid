@@ -65,9 +65,9 @@ import org.apache.druid.timeline.partition.SingleDimensionShardSpec;
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;
 import org.joda.time.Interval;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.io.IOException;
@@ -91,7 +91,7 @@ public class SegmentMetadataQuerySegmentWalkerTest
   private DruidServer[] servers;
   private Random random;
 
-  @Before
+  @BeforeEach
   public void setUp()
   {
     warehouse = new MapQueryToolChestWarehouse(
@@ -203,7 +203,7 @@ public class SegmentMetadataQuerySegmentWalkerTest
                              .map(segment -> segment.getId().toString())
                              .collect(
                                  Collectors.toSet());
-    Assert.assertEquals(expectedSegmentIds, actualSegmentIds);
+    Assertions.assertEquals(expectedSegmentIds, actualSegmentIds);
   }
 
   @Test
@@ -297,7 +297,7 @@ public class SegmentMetadataQuerySegmentWalkerTest
                              .map(segment -> segment.getId().toString())
                              .collect(
                                  Collectors.toSet());
-    Assert.assertEquals(expectedSegmentIds, actualSegmentIds);
+    Assertions.assertEquals(expectedSegmentIds, actualSegmentIds);
   }
 
   private Map<String, ServerExpectations> populateTimeline(

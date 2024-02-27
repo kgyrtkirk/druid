@@ -28,8 +28,8 @@ import com.google.inject.Module;
 import com.google.inject.ProvisionException;
 import com.google.inject.multibindings.MapBinder;
 import com.google.inject.name.Names;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -94,49 +94,49 @@ public class PolyBindTest
     );
 
 
-    Assert.assertEquals("A", injector.getInstance(Gogo.class).go());
-    Assert.assertEquals("B", injector.getInstance(Key.get(Gogo.class, Names.named("reverse"))).go());
+    Assertions.assertEquals("A", injector.getInstance(Gogo.class).go());
+    Assertions.assertEquals("B", injector.getInstance(Key.get(Gogo.class, Names.named("reverse"))).go());
     props.setProperty("billy", "b");
-    Assert.assertEquals("B", injector.getInstance(Gogo.class).go());
-    Assert.assertEquals("A", injector.getInstance(Key.get(Gogo.class, Names.named("reverse"))).go());
+    Assertions.assertEquals("B", injector.getInstance(Gogo.class).go());
+    Assertions.assertEquals("A", injector.getInstance(Key.get(Gogo.class, Names.named("reverse"))).go());
     props.setProperty("billy", "a");
-    Assert.assertEquals("A", injector.getInstance(Gogo.class).go());
-    Assert.assertEquals("B", injector.getInstance(Key.get(Gogo.class, Names.named("reverse"))).go());
+    Assertions.assertEquals("A", injector.getInstance(Gogo.class).go());
+    Assertions.assertEquals("B", injector.getInstance(Key.get(Gogo.class, Names.named("reverse"))).go());
     props.setProperty("billy", "b");
-    Assert.assertEquals("B", injector.getInstance(Gogo.class).go());
-    Assert.assertEquals("A", injector.getInstance(Key.get(Gogo.class, Names.named("reverse"))).go());
+    Assertions.assertEquals("B", injector.getInstance(Gogo.class).go());
+    Assertions.assertEquals("A", injector.getInstance(Key.get(Gogo.class, Names.named("reverse"))).go());
     props.setProperty("billy", "c");
     try {
-      Assert.assertEquals("A", injector.getInstance(Gogo.class).go());
-      Assert.fail(); // should never be reached
+      Assertions.assertEquals("A", injector.getInstance(Gogo.class).go());
+      Assertions.fail(); // should never be reached
     }
     catch (Exception e) {
-      Assert.assertTrue(e instanceof ProvisionException);
-      Assert.assertTrue(e.getMessage().contains("Unknown provider [c] of Key[type=org.apache.druid.guice.PolyBindTest$Gogo"));
+      Assertions.assertTrue(e instanceof ProvisionException);
+      Assertions.assertTrue(e.getMessage().contains("Unknown provider [c] of Key[type=org.apache.druid.guice.PolyBindTest$Gogo"));
     }
     try {
-      Assert.assertEquals("B", injector.getInstance(Key.get(Gogo.class, Names.named("reverse"))).go());
-      Assert.fail(); // should never be reached
+      Assertions.assertEquals("B", injector.getInstance(Key.get(Gogo.class, Names.named("reverse"))).go());
+      Assertions.fail(); // should never be reached
     }
     catch (Exception e) {
-      Assert.assertTrue(e instanceof ProvisionException);
-      Assert.assertTrue(e.getMessage().contains("Unknown provider [c] of Key[type=org.apache.druid.guice.PolyBindTest$Gogo"));
+      Assertions.assertTrue(e instanceof ProvisionException);
+      Assertions.assertTrue(e.getMessage().contains("Unknown provider [c] of Key[type=org.apache.druid.guice.PolyBindTest$Gogo"));
     }
 
     // test default property value
-    Assert.assertEquals("B", injector.getInstance(GogoSally.class).go());
+    Assertions.assertEquals("B", injector.getInstance(GogoSally.class).go());
     props.setProperty("sally", "a");
-    Assert.assertEquals("A", injector.getInstance(GogoSally.class).go());
+    Assertions.assertEquals("A", injector.getInstance(GogoSally.class).go());
     props.setProperty("sally", "b");
-    Assert.assertEquals("B", injector.getInstance(GogoSally.class).go());
+    Assertions.assertEquals("B", injector.getInstance(GogoSally.class).go());
     props.setProperty("sally", "c");
     try {
       injector.getInstance(GogoSally.class).go();
-      Assert.fail(); // should never be reached
+      Assertions.fail(); // should never be reached
     }
     catch (Exception e) {
-      Assert.assertTrue(e instanceof ProvisionException);
-      Assert.assertTrue(e.getMessage().contains("Unknown provider [c] of Key[type=org.apache.druid.guice.PolyBindTest$GogoSally"));
+      Assertions.assertTrue(e instanceof ProvisionException);
+      Assertions.assertTrue(e.getMessage().contains("Unknown provider [c] of Key[type=org.apache.druid.guice.PolyBindTest$GogoSally"));
     }
   }
 

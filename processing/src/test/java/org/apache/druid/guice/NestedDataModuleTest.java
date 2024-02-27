@@ -27,10 +27,10 @@ import org.apache.druid.segment.DimensionHandlerUtils;
 import org.apache.druid.segment.NestedCommonFormatColumnHandler;
 import org.apache.druid.segment.NestedDataColumnHandlerV4;
 import org.apache.druid.segment.nested.NestedDataComplexTypeSerde;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import javax.annotation.Nullable;
 import java.util.Properties;
@@ -40,7 +40,7 @@ public class NestedDataModuleTest
   @Nullable
   private static DimensionHandlerProvider DEFAULT_HANDLER_PROVIDER;
 
-  @BeforeClass
+  @BeforeAll
   public static void setup()
   {
     DEFAULT_HANDLER_PROVIDER = DimensionHandlerUtils.DIMENSION_HANDLER_PROVIDERS.get(
@@ -48,7 +48,7 @@ public class NestedDataModuleTest
     );
     DimensionHandlerUtils.DIMENSION_HANDLER_PROVIDERS.remove(NestedDataComplexTypeSerde.TYPE_NAME);
   }
-  @AfterClass
+  @AfterAll
   public static void teardown()
   {
     if (DEFAULT_HANDLER_PROVIDER == null) {
@@ -74,7 +74,7 @@ public class NestedDataModuleTest
     DimensionHandlerProvider provider = DimensionHandlerUtils.DIMENSION_HANDLER_PROVIDERS.get(
         NestedDataComplexTypeSerde.TYPE_NAME
     );
-    Assert.assertTrue(provider.get("test") instanceof NestedCommonFormatColumnHandler);
+    Assertions.assertTrue(provider.get("test") instanceof NestedCommonFormatColumnHandler);
   }
 
   @Test
@@ -91,7 +91,7 @@ public class NestedDataModuleTest
     DimensionHandlerProvider provider = DimensionHandlerUtils.DIMENSION_HANDLER_PROVIDERS.get(
         NestedDataComplexTypeSerde.TYPE_NAME
     );
-    Assert.assertTrue(provider.get("test") instanceof NestedDataColumnHandlerV4);
+    Assertions.assertTrue(provider.get("test") instanceof NestedDataColumnHandlerV4);
   }
 
   private Injector makeInjector(Properties props)

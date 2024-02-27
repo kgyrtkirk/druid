@@ -43,18 +43,18 @@ import org.apache.druid.segment.indexing.RealtimeTuningConfig;
 import org.apache.druid.segment.indexing.granularity.UniformGranularitySpec;
 import org.apache.druid.segment.realtime.FireDepartmentMetrics;
 import org.apache.druid.timeline.partition.LinearShardSpec;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
 public class DefaultOfflineAppenderatorFactoryTest
 {
-  @Rule
-  public TemporaryFolder temporaryFolder = new TemporaryFolder();
+  @TempDir
+  public File temporaryFolder;
 
   @Test
   public void testBuild() throws IOException, SegmentNotWritableException
@@ -133,7 +133,7 @@ public class DefaultOfflineAppenderatorFactoryTest
         null,
         null,
         null,
-        temporaryFolder.newFolder(),
+        newFolder(temporaryFolder, "junit"),
         null,
         null,
         null,
@@ -156,24 +156,33 @@ public class DefaultOfflineAppenderatorFactoryTest
         new FireDepartmentMetrics()
     );
     try {
-      Assert.assertEquals("dataSourceName", appenderator.getDataSource());
-      Assert.assertEquals(null, appenderator.startJob());
+      Assertions.assertEquals("dataSourceName", appenderator.getDataSource());
+      Assertions.assertEquals(null, appenderator.startJob());
       SegmentIdWithShardSpec identifier = new SegmentIdWithShardSpec(
           "dataSourceName",
           Intervals.of("2000/2001"),
           "A",
           new LinearShardSpec(0)
       );
-      Assert.assertEquals(0, ((AppenderatorImpl) appenderator).getRowsInMemory());
+      Assertions.assertEquals(0, ((AppenderatorImpl) appenderator).getRowsInMemory());
       appenderator.add(identifier, StreamAppenderatorTest.ir("2000", "bar", 1), null);
-      Assert.assertEquals(1, ((AppenderatorImpl) appenderator).getRowsInMemory());
+      Assertions.assertEquals(1, ((AppenderatorImpl) appenderator).getRowsInMemory());
       appenderator.add(identifier, StreamAppenderatorTest.ir("2000", "baz", 1), null);
-      Assert.assertEquals(2, ((AppenderatorImpl) appenderator).getRowsInMemory());
+      Assertions.assertEquals(2, ((AppenderatorImpl) appenderator).getRowsInMemory());
       appenderator.close();
-      Assert.assertEquals(0, ((AppenderatorImpl) appenderator).getRowsInMemory());
+      Assertions.assertEquals(0, ((AppenderatorImpl) appenderator).getRowsInMemory());
     }
     finally {
       appenderator.close();
     }
+  }
+
+  private static File newFolder(File root, String... subDirs) throws IOException {
+    String subFolder = String.join("/", subDirs);
+    File result = new File(root, subFolder);
+    if (!result.mkdirs()) {
+      throw new IOException("Couldn't create folders " + root);
+    }
+    return result;
   }
 }

@@ -21,7 +21,6 @@ package org.apache.druid.compressedbigdecimal;
 
 import org.apache.druid.query.aggregation.AggregatorFactory;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.util.Base64;
 import java.util.HashMap;

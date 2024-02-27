@@ -25,7 +25,6 @@ import org.apache.druid.java.util.common.FileUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.io.File;
 import java.util.HashMap;

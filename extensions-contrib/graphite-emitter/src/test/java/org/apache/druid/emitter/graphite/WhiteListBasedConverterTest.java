@@ -26,7 +26,6 @@ import org.apache.druid.annotations.UsedByJUnitParamsRunner;
 import org.apache.druid.jackson.DefaultObjectMapper;
 import org.apache.druid.java.util.emitter.service.ServiceMetricEvent;
 import org.junit.Assert;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.File;

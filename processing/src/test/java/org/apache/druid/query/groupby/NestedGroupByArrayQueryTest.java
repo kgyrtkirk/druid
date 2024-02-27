@@ -39,15 +39,14 @@ import org.apache.druid.segment.column.ValueType;
 import org.apache.druid.segment.data.ComparableList;
 import org.apache.druid.segment.data.ComparableStringArray;
 import org.apache.druid.segment.virtual.NestedFieldVirtualColumn;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -59,22 +58,21 @@ import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-@RunWith(Parameterized.class)
 public class NestedGroupByArrayQueryTest
 {
   private static final Logger LOG = new Logger(NestedDataGroupByQueryTest.class);
 
-  @Rule
-  public final TemporaryFolder tempFolder = new TemporaryFolder();
+  @TempDir
+  public File tempFolder;
 
-  private final Closer closer;
-  private final QueryContexts.Vectorize vectorize;
-  private final AggregationTestHelper helper;
-  private final BiFunction<TemporaryFolder, Closer, List<Segment>> segmentsGenerator;
+  private Closer closer;
+  private QueryContexts.Vectorize vectorize;
+  private AggregationTestHelper helper;
+  private BiFunction<File, Closer, List<Segment>> segmentsGenerator;
 
-  public NestedGroupByArrayQueryTest(
+  public void initNestedGroupByArrayQueryTest(
       GroupByQueryConfig config,
-      BiFunction<TemporaryFolder, Closer, List<Segment>> segmentGenerator,
+      BiFunction<File, Closer, List<Segment>> segmentGenerator,
       String vectorize
   )
   {
@@ -97,15 +95,14 @@ public class NestedGroupByArrayQueryTest
     );
   }
 
-  @Parameterized.Parameters(name = "config = {0}, segments = {1}, vectorize = {2}")
   public static Collection<?> constructorFeeder()
   {
     final List<Object[]> constructors = new ArrayList<>();
-    final List<BiFunction<TemporaryFolder, Closer, List<Segment>>> segmentsGenerators =
+    final List<BiFunction<File, Closer, List<Segment>>> segmentsGenerators =
         NestedDataTestUtils.getSegmentGenerators(NestedDataTestUtils.ARRAY_TYPES_DATA_FILE);
 
     for (GroupByQueryConfig config : GroupByQueryRunnerTest.testConfigs()) {
-      for (BiFunction<TemporaryFolder, Closer, List<Segment>> generatorFn : segmentsGenerators) {
+      for (BiFunction<File, Closer, List<Segment>> generatorFn : segmentsGenerators) {
         // skip force because arrays don't really support vectorize engine, but we want the coverage for once they do...
         for (String vectorize : new String[]{"false", "true"}) {
           constructors.add(new Object[]{config, generatorFn, vectorize});
@@ -115,20 +112,22 @@ public class NestedGroupByArrayQueryTest
     return constructors;
   }
 
-  @Before
+  @BeforeEach
   public void setup()
   {
   }
 
-  @After
+  @AfterEach
   public void teardown() throws IOException
   {
     closer.close();
   }
 
-  @Test
-  public void testGroupByRootArrayString()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "config = {0}, segments = {1}, vectorize = {2}")
+  public void testGroupByRootArrayString(GroupByQueryConfig config, BiFunction<File, Closer, List<Segment>> segmentGenerator, String vectorize)
   {
+    initNestedGroupByArrayQueryTest(config, segmentGenerator, vectorize);
     GroupByQuery groupQuery = GroupByQuery.builder()
                                           .setDataSource("test_datasource")
                                           .setGranularity(Granularities.ALL)
@@ -151,9 +150,11 @@ public class NestedGroupByArrayQueryTest
     );
   }
 
-  @Test
-  public void testGroupByRootArrayLong()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "config = {0}, segments = {1}, vectorize = {2}")
+  public void testGroupByRootArrayLong(GroupByQueryConfig config, BiFunction<File, Closer, List<Segment>> segmentGenerator, String vectorize)
   {
+    initNestedGroupByArrayQueryTest(config, segmentGenerator, vectorize);
     GroupByQuery groupQuery = GroupByQuery.builder()
                                           .setDataSource("test_datasource")
                                           .setGranularity(Granularities.ALL)
@@ -176,9 +177,11 @@ public class NestedGroupByArrayQueryTest
     );
   }
 
-  @Test
-  public void testGroupByRootArrayDouble()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "config = {0}, segments = {1}, vectorize = {2}")
+  public void testGroupByRootArrayDouble(GroupByQueryConfig config, BiFunction<File, Closer, List<Segment>> segmentGenerator, String vectorize)
   {
+    initNestedGroupByArrayQueryTest(config, segmentGenerator, vectorize);
     GroupByQuery groupQuery = GroupByQuery.builder()
                                           .setDataSource("test_datasource")
                                           .setGranularity(Granularities.ALL)
@@ -201,9 +204,11 @@ public class NestedGroupByArrayQueryTest
     );
   }
 
-  @Test
-  public void testGroupByRootArrayStringElement()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "config = {0}, segments = {1}, vectorize = {2}")
+  public void testGroupByRootArrayStringElement(GroupByQueryConfig config, BiFunction<File, Closer, List<Segment>> segmentGenerator, String vectorize)
   {
+    initNestedGroupByArrayQueryTest(config, segmentGenerator, vectorize);
     GroupByQuery groupQuery = GroupByQuery.builder()
                                           .setDataSource("test_datasource")
                                           .setGranularity(Granularities.ALL)
@@ -231,9 +236,11 @@ public class NestedGroupByArrayQueryTest
     );
   }
 
-  @Test
-  public void testGroupByRootArrayStringElementDouble()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "config = {0}, segments = {1}, vectorize = {2}")
+  public void testGroupByRootArrayStringElementDouble(GroupByQueryConfig config, BiFunction<File, Closer, List<Segment>> segmentGenerator, String vectorize)
   {
+    initNestedGroupByArrayQueryTest(config, segmentGenerator, vectorize);
     GroupByQuery groupQuery = GroupByQuery.builder()
                                           .setDataSource("test_datasource")
                                           .setGranularity(Granularities.ALL)
@@ -260,9 +267,11 @@ public class NestedGroupByArrayQueryTest
     );
   }
 
-  @Test
-  public void testGroupByRootArrayStringElementLong()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "config = {0}, segments = {1}, vectorize = {2}")
+  public void testGroupByRootArrayStringElementLong(GroupByQueryConfig config, BiFunction<File, Closer, List<Segment>> segmentGenerator, String vectorize)
   {
+    initNestedGroupByArrayQueryTest(config, segmentGenerator, vectorize);
     GroupByQuery groupQuery = GroupByQuery.builder()
                                           .setDataSource("test_datasource")
                                           .setGranularity(Granularities.ALL)
@@ -289,9 +298,11 @@ public class NestedGroupByArrayQueryTest
     );
   }
 
-  @Test
-  public void testGroupByRootArrayStringElementFloat()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "config = {0}, segments = {1}, vectorize = {2}")
+  public void testGroupByRootArrayStringElementFloat(GroupByQueryConfig config, BiFunction<File, Closer, List<Segment>> segmentGenerator, String vectorize)
   {
+    initNestedGroupByArrayQueryTest(config, segmentGenerator, vectorize);
     GroupByQuery groupQuery = GroupByQuery.builder()
                                           .setDataSource("test_datasource")
                                           .setGranularity(Granularities.ALL)
@@ -318,9 +329,11 @@ public class NestedGroupByArrayQueryTest
     );
   }
 
-  @Test
-  public void testGroupByRootArrayLongElement()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "config = {0}, segments = {1}, vectorize = {2}")
+  public void testGroupByRootArrayLongElement(GroupByQueryConfig config, BiFunction<File, Closer, List<Segment>> segmentGenerator, String vectorize)
   {
+    initNestedGroupByArrayQueryTest(config, segmentGenerator, vectorize);
     GroupByQuery groupQuery = GroupByQuery.builder()
                                           .setDataSource("test_datasource")
                                           .setGranularity(Granularities.ALL)
@@ -348,9 +361,11 @@ public class NestedGroupByArrayQueryTest
     );
   }
 
-  @Test
-  public void testGroupByRootArrayLongElementDouble()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "config = {0}, segments = {1}, vectorize = {2}")
+  public void testGroupByRootArrayLongElementDouble(GroupByQueryConfig config, BiFunction<File, Closer, List<Segment>> segmentGenerator, String vectorize)
   {
+    initNestedGroupByArrayQueryTest(config, segmentGenerator, vectorize);
     GroupByQuery groupQuery = GroupByQuery.builder()
                                           .setDataSource("test_datasource")
                                           .setGranularity(Granularities.ALL)
@@ -378,9 +393,11 @@ public class NestedGroupByArrayQueryTest
     );
   }
 
-  @Test
-  public void testGroupByRootArrayLongElementFloat()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "config = {0}, segments = {1}, vectorize = {2}")
+  public void testGroupByRootArrayLongElementFloat(GroupByQueryConfig config, BiFunction<File, Closer, List<Segment>> segmentGenerator, String vectorize)
   {
+    initNestedGroupByArrayQueryTest(config, segmentGenerator, vectorize);
     GroupByQuery groupQuery = GroupByQuery.builder()
                                           .setDataSource("test_datasource")
                                           .setGranularity(Granularities.ALL)
@@ -408,9 +425,11 @@ public class NestedGroupByArrayQueryTest
     );
   }
 
-  @Test
-  public void testGroupByRootArrayLongElementString()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "config = {0}, segments = {1}, vectorize = {2}")
+  public void testGroupByRootArrayLongElementString(GroupByQueryConfig config, BiFunction<File, Closer, List<Segment>> segmentGenerator, String vectorize)
   {
+    initNestedGroupByArrayQueryTest(config, segmentGenerator, vectorize);
     GroupByQuery groupQuery = GroupByQuery.builder()
                                           .setDataSource("test_datasource")
                                           .setGranularity(Granularities.ALL)
@@ -438,9 +457,11 @@ public class NestedGroupByArrayQueryTest
     );
   }
 
-  @Test
-  public void testGroupByEmptyIshArrays()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "config = {0}, segments = {1}, vectorize = {2}")
+  public void testGroupByEmptyIshArrays(GroupByQueryConfig config, BiFunction<File, Closer, List<Segment>> segmentGenerator, String vectorize)
   {
+    initNestedGroupByArrayQueryTest(config, segmentGenerator, vectorize);
     GroupByQuery groupQuery = GroupByQuery.builder()
                                           .setDataSource("test_datasource")
                                           .setGranularity(Granularities.ALL)
@@ -492,19 +513,19 @@ public class NestedGroupByArrayQueryTest
                )
                .collect(Collectors.toList());
     LOG.info("results:\n%s", serdeAndBack.stream().map(ResultRow::toString).collect(Collectors.joining("\n")));
-    Assert.assertEquals(expected.size(), serdeAndBack.size());
+    Assertions.assertEquals(expected.size(), serdeAndBack.size());
     for (int i = 0; i < expected.size(); i++) {
       final Object[] resultRow = serdeAndBack.get(i).getArray();
-      Assert.assertEquals(expected.get(i).length, resultRow.length);
+      Assertions.assertEquals(expected.get(i).length, resultRow.length);
       for (int j = 0; j < resultRow.length; j++) {
         if (expected.get(i)[j] == null) {
-          Assert.assertNull(resultRow[j]);
+          Assertions.assertNull(resultRow[j]);
         } else if (rowSignature.getColumnType(j).map(t -> t.is(ValueType.DOUBLE)).orElse(false)) {
-          Assert.assertEquals((Double) expected.get(i)[j], (Double) resultRow[j], 0.01);
+          Assertions.assertEquals((Double) expected.get(i)[j], (Double) resultRow[j], 0.01);
         } else if (rowSignature.getColumnType(j).map(t -> t.is(ValueType.FLOAT)).orElse(false)) {
-          Assert.assertEquals((Float) expected.get(i)[j], (Float) resultRow[j], 0.01);
+          Assertions.assertEquals((Float) expected.get(i)[j], (Float) resultRow[j], 0.01);
         } else {
-          Assert.assertEquals(expected.get(i)[j], resultRow[j]);
+          Assertions.assertEquals(expected.get(i)[j], resultRow[j]);
         }
       }
     }

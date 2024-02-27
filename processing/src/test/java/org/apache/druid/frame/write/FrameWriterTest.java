@@ -62,14 +62,13 @@ import org.apache.druid.segment.serde.ComplexMetrics;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.apache.druid.timeline.SegmentId;
 import org.hamcrest.CoreMatchers;
-import org.hamcrest.MatcherAssert;
-import org.junit.Assert;
-import org.junit.Assume;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.hamcrest.junit.MatcherAssume;
 import org.junit.internal.matchers.ThrowableMessageMatcher;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
@@ -82,25 +81,26 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+
 /**
  * Tests that exercise {@link FrameWriter} implementations.
  */
-@RunWith(Parameterized.class)
 public class FrameWriterTest extends InitializedNullHandlingTest
 {
   private static final int DEFAULT_ALLOCATOR_CAPACITY = 1_000_000;
 
   @Nullable
-  private final FrameType inputFrameType;
-  private final FrameType outputFrameType;
-  private final KeyOrder sortedness;
+  private FrameType inputFrameType;
+  private FrameType outputFrameType;
+  private KeyOrder sortedness;
 
   private MemoryAllocator allocator;
 
   @Nullable
   private Consumer<ColumnCapabilitiesImpl> capabilitiesAdjustFn;
 
-  public FrameWriterTest(
+  public void initFrameWriterTest(
       @Nullable final FrameType inputFrameType,
       final FrameType outputFrameType,
       final KeyOrder sortedness
@@ -112,7 +112,6 @@ public class FrameWriterTest extends InitializedNullHandlingTest
     this.allocator = ArenaMemoryAllocator.createOnHeap(DEFAULT_ALLOCATOR_CAPACITY);
   }
 
-  @Parameterized.Parameters(name = "inputFrameType = {0}, outputFrameType = {1}, sorted = {2}")
   public static Iterable<Object[]> constructorFeeder()
   {
     final List<Object[]> constructors = new ArrayList<>();
@@ -136,43 +135,53 @@ public class FrameWriterTest extends InitializedNullHandlingTest
     return constructors;
   }
 
-  @BeforeClass
+  @BeforeAll
   public static void setUpClass()
   {
     ComplexMetrics.registerSerde(HyperUniquesSerde.TYPE_NAME, new HyperUniquesSerde());
   }
 
-  @Test
-  public void test_string_multiValueTrue()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "inputFrameType = {0}, outputFrameType = {1}, sorted = {2}")
+  public void test_string_multiValueTrue(@Nullable final FrameType inputFrameType, final FrameType outputFrameType, final KeyOrder sortedness)
   {
+    initFrameWriterTest(inputFrameType, outputFrameType, sortedness);
     capabilitiesAdjustFn = capabilities -> capabilities.setHasMultipleValues(ColumnCapabilities.Capable.TRUE);
     testWithDataset(FrameWriterTestData.TEST_STRINGS_SINGLE_VALUE);
   }
 
-  @Test
-  public void test_string_multiValueFalse()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "inputFrameType = {0}, outputFrameType = {1}, sorted = {2}")
+  public void test_string_multiValueFalse(@Nullable final FrameType inputFrameType, final FrameType outputFrameType, final KeyOrder sortedness)
   {
+    initFrameWriterTest(inputFrameType, outputFrameType, sortedness);
     capabilitiesAdjustFn = capabilities -> capabilities.setHasMultipleValues(ColumnCapabilities.Capable.FALSE);
     testWithDataset(FrameWriterTestData.TEST_STRINGS_SINGLE_VALUE);
   }
 
-  @Test
-  public void test_string_multiValueUnknown()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "inputFrameType = {0}, outputFrameType = {1}, sorted = {2}")
+  public void test_string_multiValueUnknown(@Nullable final FrameType inputFrameType, final FrameType outputFrameType, final KeyOrder sortedness)
   {
+    initFrameWriterTest(inputFrameType, outputFrameType, sortedness);
     capabilitiesAdjustFn = capabilities -> capabilities.setHasMultipleValues(ColumnCapabilities.Capable.UNKNOWN);
     testWithDataset(FrameWriterTestData.TEST_STRINGS_SINGLE_VALUE);
   }
 
-  @Test
-  public void test_singleValueWithEmpty_multiValueTrue()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "inputFrameType = {0}, outputFrameType = {1}, sorted = {2}")
+  public void test_singleValueWithEmpty_multiValueTrue(@Nullable final FrameType inputFrameType, final FrameType outputFrameType, final KeyOrder sortedness)
   {
+    initFrameWriterTest(inputFrameType, outputFrameType, sortedness);
     capabilitiesAdjustFn = capabilities -> capabilities.setHasMultipleValues(ColumnCapabilities.Capable.TRUE);
     testWithDataset(FrameWriterTestData.TEST_STRINGS_MULTI_VALUE);
   }
 
-  @Test
-  public void test_singleValueWithEmpty_multiValueFalse()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "inputFrameType = {0}, outputFrameType = {1}, sorted = {2}")
+  public void test_singleValueWithEmpty_multiValueFalse(@Nullable final FrameType inputFrameType, final FrameType outputFrameType, final KeyOrder sortedness)
   {
+    initFrameWriterTest(inputFrameType, outputFrameType, sortedness);
     capabilitiesAdjustFn = capabilities -> capabilities.setHasMultipleValues(ColumnCapabilities.Capable.FALSE);
 
     // When columnar frames are in multiValue = false mode, and when they see a dataset that is all single strings and
@@ -188,32 +197,38 @@ public class FrameWriterTest extends InitializedNullHandlingTest
     );
   }
 
-  @Test
-  public void test_singleValueWithEmpty_multiValueUnknown()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "inputFrameType = {0}, outputFrameType = {1}, sorted = {2}")
+  public void test_singleValueWithEmpty_multiValueUnknown(@Nullable final FrameType inputFrameType, final FrameType outputFrameType, final KeyOrder sortedness)
   {
+    initFrameWriterTest(inputFrameType, outputFrameType, sortedness);
     capabilitiesAdjustFn = capabilities -> capabilities.setHasMultipleValues(ColumnCapabilities.Capable.UNKNOWN);
     testWithDataset(FrameWriterTestData.TEST_STRINGS_SINGLE_VALUE_WITH_EMPTY);
   }
 
-  @Test
-  public void test_multiValueString_multiValueTrue()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "inputFrameType = {0}, outputFrameType = {1}, sorted = {2}")
+  public void test_multiValueString_multiValueTrue(@Nullable final FrameType inputFrameType, final FrameType outputFrameType, final KeyOrder sortedness)
   {
+    initFrameWriterTest(inputFrameType, outputFrameType, sortedness);
     capabilitiesAdjustFn = capabilities -> capabilities.setHasMultipleValues(ColumnCapabilities.Capable.TRUE);
     testWithDataset(FrameWriterTestData.TEST_STRINGS_MULTI_VALUE);
   }
 
-  @Test
-  public void test_multiValueString_multiValueFalse()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "inputFrameType = {0}, outputFrameType = {1}, sorted = {2}")
+  public void test_multiValueString_multiValueFalse(@Nullable final FrameType inputFrameType, final FrameType outputFrameType, final KeyOrder sortedness)
   {
+    initFrameWriterTest(inputFrameType, outputFrameType, sortedness);
     capabilitiesAdjustFn = capabilities -> capabilities.setHasMultipleValues(ColumnCapabilities.Capable.FALSE);
 
     if (outputFrameType == FrameType.COLUMNAR) {
-      final IllegalStateException e = Assert.assertThrows(
+      final IllegalStateException e = Assertions.assertThrows(
           IllegalStateException.class,
           () -> testWithDataset(FrameWriterTestData.TEST_STRINGS_MULTI_VALUE)
       );
 
-      MatcherAssert.assertThat(
+      assertThat(
           e,
           ThrowableMessageMatcher.hasMessage(CoreMatchers.startsWith("Encountered unexpected multi-value row"))
       );
@@ -222,66 +237,86 @@ public class FrameWriterTest extends InitializedNullHandlingTest
     }
   }
 
-  @Test
-  public void test_multiValueString_multiValueUnknown()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "inputFrameType = {0}, outputFrameType = {1}, sorted = {2}")
+  public void test_multiValueString_multiValueUnknown(@Nullable final FrameType inputFrameType, final FrameType outputFrameType, final KeyOrder sortedness)
   {
+    initFrameWriterTest(inputFrameType, outputFrameType, sortedness);
     capabilitiesAdjustFn = capabilities -> capabilities.setHasMultipleValues(ColumnCapabilities.Capable.UNKNOWN);
     testWithDataset(FrameWriterTestData.TEST_STRINGS_MULTI_VALUE);
   }
 
-  @Test
-  public void test_arrayString()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "inputFrameType = {0}, outputFrameType = {1}, sorted = {2}")
+  public void test_arrayString(@Nullable final FrameType inputFrameType, final FrameType outputFrameType, final KeyOrder sortedness)
   {
+    initFrameWriterTest(inputFrameType, outputFrameType, sortedness);
     testWithDataset(FrameWriterTestData.TEST_ARRAYS_STRING);
   }
 
-  @Test
-  public void test_long()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "inputFrameType = {0}, outputFrameType = {1}, sorted = {2}")
+  public void test_long(@Nullable final FrameType inputFrameType, final FrameType outputFrameType, final KeyOrder sortedness)
   {
+    initFrameWriterTest(inputFrameType, outputFrameType, sortedness);
     testWithDataset(FrameWriterTestData.TEST_LONGS);
   }
 
-  @Test
-  public void test_arrayLong()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "inputFrameType = {0}, outputFrameType = {1}, sorted = {2}")
+  public void test_arrayLong(@Nullable final FrameType inputFrameType, final FrameType outputFrameType, final KeyOrder sortedness)
   {
+    initFrameWriterTest(inputFrameType, outputFrameType, sortedness);
     testWithDataset(FrameWriterTestData.TEST_ARRAYS_LONG);
   }
 
-  @Test
-  public void test_arrayFloat()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "inputFrameType = {0}, outputFrameType = {1}, sorted = {2}")
+  public void test_arrayFloat(@Nullable final FrameType inputFrameType, final FrameType outputFrameType, final KeyOrder sortedness)
   {
+    initFrameWriterTest(inputFrameType, outputFrameType, sortedness);
     testWithDataset(FrameWriterTestData.TEST_ARRAYS_FLOAT);
   }
 
-  @Test
-  public void test_arrayDouble()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "inputFrameType = {0}, outputFrameType = {1}, sorted = {2}")
+  public void test_arrayDouble(@Nullable final FrameType inputFrameType, final FrameType outputFrameType, final KeyOrder sortedness)
   {
+    initFrameWriterTest(inputFrameType, outputFrameType, sortedness);
     testWithDataset(FrameWriterTestData.TEST_ARRAYS_DOUBLE);
   }
 
-  @Test
-  public void test_float()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "inputFrameType = {0}, outputFrameType = {1}, sorted = {2}")
+  public void test_float(@Nullable final FrameType inputFrameType, final FrameType outputFrameType, final KeyOrder sortedness)
   {
+    initFrameWriterTest(inputFrameType, outputFrameType, sortedness);
     testWithDataset(FrameWriterTestData.TEST_FLOATS);
   }
 
-  @Test
-  public void test_double()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "inputFrameType = {0}, outputFrameType = {1}, sorted = {2}")
+  public void test_double(@Nullable final FrameType inputFrameType, final FrameType outputFrameType, final KeyOrder sortedness)
   {
+    initFrameWriterTest(inputFrameType, outputFrameType, sortedness);
     testWithDataset(FrameWriterTestData.TEST_DOUBLES);
   }
 
-  @Test
-  public void test_complex()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "inputFrameType = {0}, outputFrameType = {1}, sorted = {2}")
+  public void test_complex(@Nullable final FrameType inputFrameType, final FrameType outputFrameType, final KeyOrder sortedness)
   {
+    initFrameWriterTest(inputFrameType, outputFrameType, sortedness);
     // Complex types can't be sorted, so skip the sortedness tests.
-    Assume.assumeThat(sortedness, CoreMatchers.is(KeyOrder.NONE));
+    MatcherAssume.assumeThat(sortedness, CoreMatchers.is(KeyOrder.NONE));
     testWithDataset(FrameWriterTestData.TEST_COMPLEX);
   }
 
-  @Test
-  public void test_readNullsInDefaultValueMode()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "inputFrameType = {0}, outputFrameType = {1}, sorted = {2}")
+  public void test_readNullsInDefaultValueMode(@Nullable final FrameType inputFrameType, final FrameType outputFrameType, final KeyOrder sortedness)
   {
+    initFrameWriterTest(inputFrameType, outputFrameType, sortedness);
     // Test that nulls written in SQL-compatible mode are read as nulls in default-value mode.
 
     final RowSignature signature =
@@ -309,7 +344,7 @@ public class FrameWriterTest extends InitializedNullHandlingTest
       NullHandling.initializeForTests();
     }
 
-    Assert.assertEquals(1, (int) writeResult.rhs);
+    Assertions.assertEquals(1, (int) writeResult.rhs);
 
     try {
       // Read frame in default-value mode.
@@ -326,9 +361,11 @@ public class FrameWriterTest extends InitializedNullHandlingTest
     }
   }
 
-  @Test
-  public void test_typePairs()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "inputFrameType = {0}, outputFrameType = {1}, sorted = {2}")
+  public void test_typePairs(@Nullable final FrameType inputFrameType, final FrameType outputFrameType, final KeyOrder sortedness)
   {
+    initFrameWriterTest(inputFrameType, outputFrameType, sortedness);
     // Test all possible arrangements of two different types.
     for (final FrameWriterTestData.Dataset<?> dataset1 : FrameWriterTestData.DATASETS) {
       for (final FrameWriterTestData.Dataset<?> dataset2 : FrameWriterTestData.DATASETS) {
@@ -355,7 +392,7 @@ public class FrameWriterTest extends InitializedNullHandlingTest
 
         try {
           final Pair<Frame, Integer> writeResult = writeFrame(rowSequence, signature, sortColumns);
-          Assert.assertEquals(rowSequence.toList().size(), (int) writeResult.rhs);
+          Assertions.assertEquals(rowSequence.toList().size(), (int) writeResult.rhs);
           verifyFrame(sortIfNeeded(rowSequence, signature, sortColumns), writeResult.lhs, signature);
         }
         catch (AssertionError e) {
@@ -375,11 +412,13 @@ public class FrameWriterTest extends InitializedNullHandlingTest
     }
   }
 
-  @Test
-  public void test_insufficientWriteCapacity()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "inputFrameType = {0}, outputFrameType = {1}, sorted = {2}")
+  public void test_insufficientWriteCapacity(@Nullable final FrameType inputFrameType, final FrameType outputFrameType, final KeyOrder sortedness)
   {
+    initFrameWriterTest(inputFrameType, outputFrameType, sortedness);
     // Test every possible capacity, up to the amount required to write all items from every list.
-    Assume.assumeFalse(inputFrameType == FrameType.COLUMNAR || outputFrameType == FrameType.COLUMNAR);
+    Assumptions.assumeFalse(inputFrameType == FrameType.COLUMNAR || outputFrameType == FrameType.COLUMNAR);
     final RowSignature signature = makeSignature(FrameWriterTestData.DATASETS);
     final Sequence<List<Object>> rowSequence = unsortAndMakeRows(FrameWriterTestData.DATASETS);
     final int totalRows = rowSequence.toList().size();
@@ -432,7 +471,7 @@ public class FrameWriterTest extends InitializedNullHandlingTest
 
     // We expect that at some point in this test, a partial frame would have been written. If not: that's strange
     // and may mean the test isn't testing the right thing.
-    Assert.assertTrue("did write a partial frame", didWritePartial);
+    Assertions.assertTrue(didWritePartial, "did write a partial frame");
   }
 
   /**
@@ -529,7 +568,7 @@ public class FrameWriterTest extends InitializedNullHandlingTest
     final Sequence<List<Object>> rowSequence = rows(data);
     final Pair<Frame, Integer> writeResult = writeFrame(rowSequence, signature, signature.getColumnNames());
 
-    Assert.assertEquals(data.size(), (int) writeResult.rhs);
+    Assertions.assertEquals(data.size(), (int) writeResult.rhs);
     verifyFrame(rows(dataset.getData(sortedness)), writeResult.lhs, signature);
   }
 
@@ -543,7 +582,7 @@ public class FrameWriterTest extends InitializedNullHandlingTest
     final Sequence<List<Object>> rowSequence = rows(data);
     final Pair<Frame, Integer> writeResult = writeFrame(rowSequence, signature, signature.getColumnNames());
 
-    Assert.assertEquals(data.size(), (int) writeResult.rhs);
+    Assertions.assertEquals(data.size(), (int) writeResult.rhs);
     verifyFrame(rows(readDataset.getData(sortedness)), writeResult.lhs, signature);
   }
 
@@ -704,7 +743,7 @@ public class FrameWriterTest extends InitializedNullHandlingTest
     private final ColumnSelectorFactory delegate;
     private final Consumer<ColumnCapabilitiesImpl> fn;
 
-    public OverrideCapabilitiesColumnSelectorFactory(
+    public void initFrameWriterTest(
         final ColumnSelectorFactory delegate,
         final Consumer<ColumnCapabilitiesImpl> fn
     )

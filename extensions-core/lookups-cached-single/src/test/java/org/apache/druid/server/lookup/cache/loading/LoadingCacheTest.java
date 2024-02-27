@@ -25,7 +25,6 @@ import org.apache.druid.jackson.DefaultObjectMapper;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 

@@ -21,7 +21,6 @@ package org.apache.druid.msq.input.table;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.jqno.equalsverifier.EqualsVerifier;
-import org.junit.Test;
 
 public class SegmentWithDescriptorTest
 {

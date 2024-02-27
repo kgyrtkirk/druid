@@ -22,7 +22,6 @@ package org.apache.druid.indexing.overlord.duty;
 import org.apache.druid.indexing.overlord.TaskStorage;
 import org.apache.druid.tasklogs.TaskLogKiller;
 import org.junit.Assert;
-import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 

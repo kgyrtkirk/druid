@@ -54,10 +54,10 @@ import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.apache.druid.timeline.DataSegment;
 import org.apache.druid.timeline.partition.LinearShardSpec;
 import org.apache.druid.timeline.partition.NumberedShardSpec;
-import org.junit.Rule;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -92,8 +92,8 @@ public abstract class SegmentMetadataCacheCommon extends InitializedNullHandling
   public Closer resourceCloser;
   public QueryToolChestWarehouse queryToolChestWarehouse;
 
-  @Rule
-  public TemporaryFolder temporaryFolder = new TemporaryFolder();
+  @TempDir
+  public File temporaryFolder;
 
   public QueryableIndex index1;
   public QueryableIndex index2;
@@ -124,7 +124,7 @@ public abstract class SegmentMetadataCacheCommon extends InitializedNullHandling
 
   public void setUpData() throws Exception
   {
-    final File tmpDir = temporaryFolder.newFolder();
+    final File tmpDir = newFolder(temporaryFolder, "junit");
     index1 = IndexBuilder.create()
                          .tmpDir(new File(tmpDir, "1"))
                          .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
@@ -325,5 +325,14 @@ public abstract class SegmentMetadataCacheCommon extends InitializedNullHandling
         100L,
         DataSegment.PruneSpecsHolder.DEFAULT
     );
+  }
+
+  private static File newFolder(File root, String... subDirs) throws IOException {
+    String subFolder = String.join("/", subDirs);
+    File result = new File(root, subFolder);
+    if (!result.mkdirs()) {
+      throw new IOException("Couldn't create folders " + root);
+    }
+    return result;
   }
 }

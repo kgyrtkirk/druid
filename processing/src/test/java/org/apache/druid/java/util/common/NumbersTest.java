@@ -20,42 +20,44 @@
 package org.apache.druid.java.util.common;
 
 import org.hamcrest.CoreMatchers;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.ExpectedException;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class NumbersTest
 {
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
 
   @Test
   public void testParseLong()
   {
     final String strVal = "100";
-    Assert.assertEquals(100L, Numbers.parseLong(strVal));
+    Assertions.assertEquals(100L, Numbers.parseLong(strVal));
 
     final Long longVal = 100L;
-    Assert.assertEquals(100L, Numbers.parseLong(longVal));
+    Assertions.assertEquals(100L, Numbers.parseLong(longVal));
 
     final Double doubleVal = 100.;
-    Assert.assertEquals(100L, Numbers.parseLong(doubleVal));
+    Assertions.assertEquals(100L, Numbers.parseLong(doubleVal));
   }
 
   @Test
   public void testParseLongWithNull()
   {
-    expectedException.expect(NullPointerException.class);
-    expectedException.expectMessage("Input is null");
-    Numbers.parseLong(null);
+    Throwable exception = assertThrows(NullPointerException.class, () -> {
+      Numbers.parseLong(null);
+    });
+    assertTrue(exception.getMessage().contains("Input is null"));
   }
 
   @Test
   public void testParseLongWithUnparseableString()
   {
-    expectedException.expect(NumberFormatException.class);
-    Numbers.parseLong("unparseable");
+    assertThrows(NumberFormatException.class, () -> {
+      Numbers.parseLong("unparseable");
+    });
   }
 
   @Test
@@ -70,28 +72,30 @@ public class NumbersTest
   public void testParseInt()
   {
     final String strVal = "100";
-    Assert.assertEquals(100, Numbers.parseInt(strVal));
+    Assertions.assertEquals(100, Numbers.parseInt(strVal));
 
     final Integer longVal = 100;
-    Assert.assertEquals(100, Numbers.parseInt(longVal));
+    Assertions.assertEquals(100, Numbers.parseInt(longVal));
 
     final Float floatVal = 100.F;
-    Assert.assertEquals(100, Numbers.parseInt(floatVal));
+    Assertions.assertEquals(100, Numbers.parseInt(floatVal));
   }
 
   @Test
   public void testParseIntWithNull()
   {
-    expectedException.expect(NullPointerException.class);
-    expectedException.expectMessage("Input is null");
-    Numbers.parseInt(null);
+    Throwable exception = assertThrows(NullPointerException.class, () -> {
+      Numbers.parseInt(null);
+    });
+    assertTrue(exception.getMessage().contains("Input is null"));
   }
 
   @Test
   public void testParseIntWithUnparseableString()
   {
-    expectedException.expect(NumberFormatException.class);
-    Numbers.parseInt("unparseable");
+    assertThrows(NumberFormatException.class, () -> {
+      Numbers.parseInt("unparseable");
+    });
   }
 
   @Test
@@ -106,18 +110,19 @@ public class NumbersTest
   public void testParseBoolean()
   {
     final String strVal = "false";
-    Assert.assertEquals(false, Numbers.parseBoolean(strVal));
+    Assertions.assertEquals(false, Numbers.parseBoolean(strVal));
 
     final Boolean booleanVal = Boolean.FALSE;
-    Assert.assertEquals(false, Numbers.parseBoolean(booleanVal));
+    Assertions.assertEquals(false, Numbers.parseBoolean(booleanVal));
   }
 
   @Test
   public void testParseBooleanWithNull()
   {
-    expectedException.expect(NullPointerException.class);
-    expectedException.expectMessage("Input is null");
-    Numbers.parseBoolean(null);
+    Throwable exception = assertThrows(NullPointerException.class, () -> {
+      Numbers.parseBoolean(null);
+    });
+    assertTrue(exception.getMessage().contains("Input is null"));
   }
 
   @Test
@@ -131,32 +136,34 @@ public class NumbersTest
   @Test
   public void testParseLongObject()
   {
-    Assert.assertEquals(null, Numbers.parseLongObject(null));
-    Assert.assertEquals((Long) 1L, Numbers.parseLongObject("1"));
-    Assert.assertEquals((Long) 32L, Numbers.parseLongObject("32.1243"));
+    Assertions.assertEquals(null, Numbers.parseLongObject(null));
+    Assertions.assertEquals((Long) 1L, Numbers.parseLongObject("1"));
+    Assertions.assertEquals((Long) 32L, Numbers.parseLongObject("32.1243"));
   }
 
   @Test
   public void testParseLongObjectUnparseable()
   {
-    expectedException.expect(IllegalArgumentException.class);
-    expectedException.expectMessage("Cannot parse string to long");
-    Assert.assertEquals((Long) 1337L, Numbers.parseLongObject("'1'"));
+    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
+      Assertions.assertEquals((Long) 1337L, Numbers.parseLongObject("'1'"));
+    });
+    assertTrue(exception.getMessage().contains("Cannot parse string to long"));
   }
 
   @Test
   public void testParseDoubleObject()
   {
-    Assert.assertEquals(null, Numbers.parseLongObject(null));
-    Assert.assertEquals((Double) 1.0, Numbers.parseDoubleObject("1"));
-    Assert.assertEquals((Double) 32.1243, Numbers.parseDoubleObject("32.1243"));
+    Assertions.assertEquals(null, Numbers.parseLongObject(null));
+    Assertions.assertEquals((Double) 1.0, Numbers.parseDoubleObject("1"));
+    Assertions.assertEquals((Double) 32.1243, Numbers.parseDoubleObject("32.1243"));
   }
 
   @Test
   public void testParseDoubleObjectUnparseable()
   {
-    expectedException.expect(IllegalArgumentException.class);
-    expectedException.expectMessage("Cannot parse string to double");
-    Assert.assertEquals((Double) 300.0, Numbers.parseDoubleObject("'1.1'"));
+    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
+      Assertions.assertEquals((Double) 300.0, Numbers.parseDoubleObject("'1.1'"));
+    });
+    assertTrue(exception.getMessage().contains("Cannot parse string to double"));
   }
 }

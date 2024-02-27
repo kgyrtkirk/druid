@@ -20,8 +20,8 @@
 package org.apache.druid.data.input.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class DimensionSchemaTest
 {
@@ -31,7 +31,7 @@ public class DimensionSchemaTest
   public void testStringDimensionSchemaSerde() throws Exception
   {
     final StringDimensionSchema schema1 = new StringDimensionSchema("foo");
-    Assert.assertEquals(
+    Assertions.assertEquals(
         schema1,
         OBJECT_MAPPER.readValue(OBJECT_MAPPER.writeValueAsString(schema1), DimensionSchema.class)
     );
@@ -41,7 +41,7 @@ public class DimensionSchemaTest
         DimensionSchema.MultiValueHandling.ARRAY,
         false
     );
-    Assert.assertEquals(
+    Assertions.assertEquals(
         schema2,
         OBJECT_MAPPER.readValue(OBJECT_MAPPER.writeValueAsString(schema2), DimensionSchema.class)
     );

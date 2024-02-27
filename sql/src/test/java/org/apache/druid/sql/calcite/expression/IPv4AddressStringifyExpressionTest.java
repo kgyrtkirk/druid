@@ -26,9 +26,9 @@ import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.sql.calcite.expression.builtin.IPv4AddressStringifyOperatorConversion;
 import org.apache.druid.sql.calcite.util.CalciteTestBase;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -49,7 +49,7 @@ public class IPv4AddressStringifyExpressionTest extends CalciteTestBase
   private IPv4AddressStringifyOperatorConversion target;
   private ExpressionTestHelper testHelper;
 
-  @Before
+  @BeforeEach
   public void setUp()
   {
     target = new IPv4AddressStringifyOperatorConversion();
@@ -59,7 +59,7 @@ public class IPv4AddressStringifyExpressionTest extends CalciteTestBase
   @Test
   public void testTooFewArgs()
   {
-    Throwable t = Assert.assertThrows(
+    Throwable t = Assertions.assertThrows(
         ExpressionValidationException.class,
         () -> testExpression(
             Collections.emptyList(),
@@ -67,13 +67,13 @@ public class IPv4AddressStringifyExpressionTest extends CalciteTestBase
             IGNORE_EXPECTED_RESULT
         )
     );
-    Assert.assertEquals("Function[ipv4_stringify] requires 1 argument", t.getMessage());
+    Assertions.assertEquals("Function[ipv4_stringify] requires 1 argument", t.getMessage());
   }
 
   @Test
   public void testTooManyArgs()
   {
-    Throwable t = Assert.assertThrows(
+    Throwable t = Assertions.assertThrows(
         ExpressionValidationException.class,
         () -> testExpression(
             Arrays.asList(
@@ -84,7 +84,7 @@ public class IPv4AddressStringifyExpressionTest extends CalciteTestBase
             IGNORE_EXPECTED_RESULT
         )
     );
-    Assert.assertEquals("Function[ipv4_stringify] requires 1 argument", t.getMessage());
+    Assertions.assertEquals("Function[ipv4_stringify] requires 1 argument", t.getMessage());
   }
 
   @Test

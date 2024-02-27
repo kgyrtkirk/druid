@@ -35,16 +35,17 @@ import org.apache.druid.query.filter.Filter;
 import org.apache.druid.query.ordering.StringComparators;
 import org.apache.druid.segment.IndexBuilder;
 import org.apache.druid.segment.StorageAdapter;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.io.Closeable;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @RunWith(Parameterized.class)
 public class BoundFilterTest extends BaseFilterTest
@@ -66,10 +67,7 @@ public class BoundFilterTest extends BaseFilterTest
     super(testName, ROWS, indexBuilder, finisher, cnf, optimize);
   }
 
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
-
-  @AfterClass
+  @AfterAll
   public static void tearDown() throws Exception
   {
     BaseFilterTest.tearDown(BoundFilterTest.class.getName());
@@ -861,21 +859,21 @@ public class BoundFilterTest extends BaseFilterTest
   @Test
   public void testRequiredColumnRewrite()
   {
-    BoundFilter filter = new BoundFilter(
-        new BoundDimFilter("dim0", "", "", false, false, true, null, StringComparators.ALPHANUMERIC)
-    );
-    BoundFilter filter2 = new BoundFilter(
-        new BoundDimFilter("dim1", "", "", false, false, true, null, StringComparators.ALPHANUMERIC)
-    );
-    Assert.assertTrue(filter.supportsRequiredColumnRewrite());
-    Assert.assertTrue(filter2.supportsRequiredColumnRewrite());
+    Throwable exception = assertThrows(IAE.class, () -> {
+      BoundFilter filter = new BoundFilter(
+          new BoundDimFilter("dim0", "", "", false, false, true, null, StringComparators.ALPHANUMERIC)
+      );
+      BoundFilter filter2 = new BoundFilter(
+          new BoundDimFilter("dim1", "", "", false, false, true, null, StringComparators.ALPHANUMERIC)
+      );
+      Assertions.assertTrue(filter.supportsRequiredColumnRewrite());
+      Assertions.assertTrue(filter2.supportsRequiredColumnRewrite());
 
-    Filter rewrittenFilter = filter.rewriteRequiredColumns(ImmutableMap.of("dim0", "dim1"));
-    Assert.assertEquals(filter2, rewrittenFilter);
-
-    expectedException.expect(IAE.class);
-    expectedException.expectMessage("Received a non-applicable rewrite: {invalidName=dim1}, filter's dimension: dim0");
-    filter.rewriteRequiredColumns(ImmutableMap.of("invalidName", "dim1"));
+      Filter rewrittenFilter = filter.rewriteRequiredColumns(ImmutableMap.of("dim0", "dim1"));
+      Assertions.assertEquals(filter2, rewrittenFilter);
+      filter.rewriteRequiredColumns(ImmutableMap.of("invalidName", "dim1"));
+    });
+    assertTrue(exception.getMessage().contains("Received a non-applicable rewrite: {invalidName=dim1}, filter's dimension: dim0"));
   }
 
   @Test

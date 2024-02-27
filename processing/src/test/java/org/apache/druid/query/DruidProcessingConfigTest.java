@@ -25,11 +25,9 @@ import org.apache.druid.guice.JsonConfigProvider;
 import org.apache.druid.guice.StartupInjectorBuilder;
 import org.apache.druid.utils.JvmUtils;
 import org.apache.druid.utils.RuntimeInfo;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.Properties;
 
@@ -42,14 +40,11 @@ public class DruidProcessingConfigTest
   private static final long DIRECT_SIZE = BUFFER_SIZE * (3L + 2L + 1L);
   private static final long HEAP_SIZE = BUFFER_SIZE * 2L;
 
-  @AfterClass
+  @AfterAll
   public static void teardown()
   {
     JvmUtils.resetTestsToDefaultRuntimeInfo();
   }
-
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
 
 
   @Test
@@ -58,12 +53,12 @@ public class DruidProcessingConfigTest
     Injector injector = makeInjector(NUM_PROCESSORS, DIRECT_SIZE, HEAP_SIZE);
     DruidProcessingConfig config = injector.getInstance(DruidProcessingConfig.class);
 
-    Assert.assertEquals(Integer.MAX_VALUE, config.poolCacheMaxCount());
-    Assert.assertEquals(NUM_PROCESSORS - 1, config.getNumThreads());
-    Assert.assertEquals(Math.max(2, config.getNumThreads() / 4), config.getNumMergeBuffers());
-    Assert.assertTrue(config.isFifo());
-    Assert.assertEquals(System.getProperty("java.io.tmpdir"), config.getTmpDir());
-    Assert.assertEquals(BUFFER_SIZE, config.intermediateComputeSizeBytes());
+    Assertions.assertEquals(Integer.MAX_VALUE, config.poolCacheMaxCount());
+    Assertions.assertEquals(NUM_PROCESSORS - 1, config.getNumThreads());
+    Assertions.assertEquals(Math.max(2, config.getNumThreads() / 4), config.getNumMergeBuffers());
+    Assertions.assertTrue(config.isFifo());
+    Assertions.assertEquals(System.getProperty("java.io.tmpdir"), config.getTmpDir());
+    Assertions.assertEquals(BUFFER_SIZE, config.intermediateComputeSizeBytes());
   }
 
   @Test
@@ -72,12 +67,12 @@ public class DruidProcessingConfigTest
     Injector injector = makeInjector(1, BUFFER_SIZE * 4L, HEAP_SIZE);
     DruidProcessingConfig config = injector.getInstance(DruidProcessingConfig.class);
 
-    Assert.assertEquals(Integer.MAX_VALUE, config.poolCacheMaxCount());
-    Assert.assertTrue(config.getNumThreads() == 1);
-    Assert.assertEquals(Math.max(2, config.getNumThreads() / 4), config.getNumMergeBuffers());
-    Assert.assertTrue(config.isFifo());
-    Assert.assertEquals(System.getProperty("java.io.tmpdir"), config.getTmpDir());
-    Assert.assertEquals(BUFFER_SIZE, config.intermediateComputeSizeBytes());
+    Assertions.assertEquals(Integer.MAX_VALUE, config.poolCacheMaxCount());
+    Assertions.assertTrue(config.getNumThreads() == 1);
+    Assertions.assertEquals(Math.max(2, config.getNumThreads() / 4), config.getNumMergeBuffers());
+    Assertions.assertTrue(config.isFifo());
+    Assertions.assertEquals(System.getProperty("java.io.tmpdir"), config.getTmpDir());
+    Assertions.assertEquals(BUFFER_SIZE, config.intermediateComputeSizeBytes());
   }
 
   @Test
@@ -87,7 +82,7 @@ public class DruidProcessingConfigTest
     Injector injector = makeInjector(1, BUFFER_SIZE * 100L, HEAP_SIZE);
     DruidProcessingConfig config = injector.getInstance(DruidProcessingConfig.class);
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         DruidProcessingBufferConfig.MAX_DEFAULT_PROCESSING_BUFFER_SIZE_BYTES,
         config.intermediateComputeSizeBytes()
     );
@@ -112,13 +107,13 @@ public class DruidProcessingConfigTest
     );
     DruidProcessingConfig config = injector.getInstance(DruidProcessingConfig.class);
 
-    Assert.assertEquals(1, config.intermediateComputeSizeBytes()); // heh
-    Assert.assertEquals(1, config.poolCacheMaxCount());
-    Assert.assertEquals(256, config.getNumThreads());
-    Assert.assertEquals(64, config.getNumMergeBuffers());
-    Assert.assertFalse(config.isFifo());
-    Assert.assertEquals("/test/path", config.getTmpDir());
-    Assert.assertEquals(0, config.getNumInitalBuffersForIntermediatePool());
+    Assertions.assertEquals(1, config.intermediateComputeSizeBytes()); // heh
+    Assertions.assertEquals(1, config.poolCacheMaxCount());
+    Assertions.assertEquals(256, config.getNumThreads());
+    Assertions.assertEquals(64, config.getNumMergeBuffers());
+    Assertions.assertFalse(config.isFifo());
+    Assertions.assertEquals("/test/path", config.getTmpDir());
+    Assertions.assertEquals(0, config.getNumInitalBuffersForIntermediatePool());
   }
 
   @Test
@@ -133,11 +128,11 @@ public class DruidProcessingConfigTest
         HEAP_SIZE,
         props
     );
-    Throwable t = Assert.assertThrows(
+    Throwable t = Assertions.assertThrows(
         ProvisionException.class,
         () -> injector.getInstance(DruidProcessingConfig.class)
     );
-    Assert.assertTrue(
+    Assertions.assertTrue(
         t.getMessage()
          .contains("Cannot construct instance of `org.apache.druid.java.util.common.HumanReadableBytes`, problem: Invalid format of number: -1. Negative value is not allowed.")
     );
@@ -154,12 +149,12 @@ public class DruidProcessingConfigTest
         HEAP_SIZE,
         props
     );
-    Throwable t = Assert.assertThrows(
+    Throwable t = Assertions.assertThrows(
         ProvisionException.class,
         () -> injector.getInstance(DruidProcessingConfig.class)
     );
 
-    Assert.assertTrue(t.getMessage().contains("druid.processing.buffer.sizeBytes must be less than 2GiB"));
+    Assertions.assertTrue(t.getMessage().contains("druid.processing.buffer.sizeBytes must be less than 2GiB"));
   }
 
   private static Injector makeInjector(int numProcessors, long directMemorySize, long heapSize)

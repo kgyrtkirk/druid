@@ -31,11 +31,9 @@ import org.apache.druid.segment.TestIndex;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.apache.druid.timeline.SegmentId;
 import org.joda.time.Interval;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.annotation.Nullable;
 import java.io.Closeable;
@@ -43,16 +41,16 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.function.Function;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public class FireHydrantTest extends InitializedNullHandlingTest
 {
   private IncrementalIndexSegment incrementalIndexSegment;
   private QueryableIndexSegment queryableIndexSegment;
   private FireHydrant hydrant;
 
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
-
-  @Before
+  @BeforeEach
   public void setup()
   {
     incrementalIndexSegment = new IncrementalIndexSegment(TestIndex.getIncrementalTestIndex(), SegmentId.dummy("test"));
@@ -65,63 +63,64 @@ public class FireHydrantTest extends InitializedNullHandlingTest
   @Test
   public void testGetIncrementedSegmentNotSwapped()
   {
-    Assert.assertEquals(0, hydrant.getHydrantSegment().getNumReferences());
+    Assertions.assertEquals(0, hydrant.getHydrantSegment().getNumReferences());
     ReferenceCountingSegment segment = hydrant.getIncrementedSegment();
-    Assert.assertNotNull(segment);
-    Assert.assertTrue(segment.getBaseSegment() == incrementalIndexSegment);
-    Assert.assertEquals(1, segment.getNumReferences());
+    Assertions.assertNotNull(segment);
+    Assertions.assertTrue(segment.getBaseSegment() == incrementalIndexSegment);
+    Assertions.assertEquals(1, segment.getNumReferences());
   }
 
   @Test
   public void testGetIncrementedSegmentSwapped()
   {
     ReferenceCountingSegment incrementalSegmentReference = hydrant.getHydrantSegment();
-    Assert.assertEquals(0, incrementalSegmentReference.getNumReferences());
+    Assertions.assertEquals(0, incrementalSegmentReference.getNumReferences());
     hydrant.swapSegment(queryableIndexSegment);
     ReferenceCountingSegment segment = hydrant.getIncrementedSegment();
-    Assert.assertNotNull(segment);
-    Assert.assertTrue(segment.getBaseSegment() == queryableIndexSegment);
-    Assert.assertEquals(0, incrementalSegmentReference.getNumReferences());
-    Assert.assertEquals(1, segment.getNumReferences());
+    Assertions.assertNotNull(segment);
+    Assertions.assertTrue(segment.getBaseSegment() == queryableIndexSegment);
+    Assertions.assertEquals(0, incrementalSegmentReference.getNumReferences());
+    Assertions.assertEquals(1, segment.getNumReferences());
   }
 
   @Test
   public void testGetIncrementedSegmentClosed()
   {
-    expectedException.expect(ISE.class);
-    expectedException.expectMessage("segment.close() is called somewhere outside FireHydrant.swapSegment()");
-    hydrant.getHydrantSegment().close();
-    Assert.assertEquals(0, hydrant.getHydrantSegment().getNumReferences());
-    ReferenceCountingSegment segment = hydrant.getIncrementedSegment();
+    Throwable exception = assertThrows(ISE.class, () -> {
+      hydrant.getHydrantSegment().close();
+      Assertions.assertEquals(0, hydrant.getHydrantSegment().getNumReferences());
+      ReferenceCountingSegment segment = hydrant.getIncrementedSegment();
+    });
+    assertTrue(exception.getMessage().contains("segment.close() is called somewhere outside FireHydrant.swapSegment()"));
   }
 
   @Test
   public void testGetAndIncrementSegment() throws IOException
   {
     ReferenceCountingSegment incrementalSegmentReference = hydrant.getHydrantSegment();
-    Assert.assertEquals(0, incrementalSegmentReference.getNumReferences());
+    Assertions.assertEquals(0, incrementalSegmentReference.getNumReferences());
 
     Pair<ReferenceCountingSegment, Closeable> segmentAndCloseable = hydrant.getAndIncrementSegment();
-    Assert.assertEquals(1, segmentAndCloseable.lhs.getNumReferences());
+    Assertions.assertEquals(1, segmentAndCloseable.lhs.getNumReferences());
     segmentAndCloseable.rhs.close();
-    Assert.assertEquals(0, segmentAndCloseable.lhs.getNumReferences());
+    Assertions.assertEquals(0, segmentAndCloseable.lhs.getNumReferences());
   }
 
   @Test
   public void testGetSegmentForQuery() throws IOException
   {
     ReferenceCountingSegment incrementalSegmentReference = hydrant.getHydrantSegment();
-    Assert.assertEquals(0, incrementalSegmentReference.getNumReferences());
+    Assertions.assertEquals(0, incrementalSegmentReference.getNumReferences());
 
     Optional<Pair<SegmentReference, Closeable>> maybeSegmentAndCloseable = hydrant.getSegmentForQuery(
         Function.identity()
     );
-    Assert.assertTrue(maybeSegmentAndCloseable.isPresent());
-    Assert.assertEquals(1, incrementalSegmentReference.getNumReferences());
+    Assertions.assertTrue(maybeSegmentAndCloseable.isPresent());
+    Assertions.assertEquals(1, incrementalSegmentReference.getNumReferences());
 
     Pair<SegmentReference, Closeable> segmentAndCloseable = maybeSegmentAndCloseable.get();
     segmentAndCloseable.rhs.close();
-    Assert.assertEquals(0, incrementalSegmentReference.getNumReferences());
+    Assertions.assertEquals(0, incrementalSegmentReference.getNumReferences());
   }
 
   @Test
@@ -130,20 +129,20 @@ public class FireHydrantTest extends InitializedNullHandlingTest
     ReferenceCountingSegment incrementalSegmentReference = hydrant.getHydrantSegment();
     hydrant.swapSegment(queryableIndexSegment);
     ReferenceCountingSegment queryableSegmentReference = hydrant.getHydrantSegment();
-    Assert.assertEquals(0, incrementalSegmentReference.getNumReferences());
-    Assert.assertEquals(0, queryableSegmentReference.getNumReferences());
+    Assertions.assertEquals(0, incrementalSegmentReference.getNumReferences());
+    Assertions.assertEquals(0, queryableSegmentReference.getNumReferences());
 
     Optional<Pair<SegmentReference, Closeable>> maybeSegmentAndCloseable = hydrant.getSegmentForQuery(
         Function.identity()
     );
-    Assert.assertTrue(maybeSegmentAndCloseable.isPresent());
-    Assert.assertEquals(0, incrementalSegmentReference.getNumReferences());
-    Assert.assertEquals(1, queryableSegmentReference.getNumReferences());
+    Assertions.assertTrue(maybeSegmentAndCloseable.isPresent());
+    Assertions.assertEquals(0, incrementalSegmentReference.getNumReferences());
+    Assertions.assertEquals(1, queryableSegmentReference.getNumReferences());
 
     Pair<SegmentReference, Closeable> segmentAndCloseable = maybeSegmentAndCloseable.get();
     segmentAndCloseable.rhs.close();
-    Assert.assertEquals(0, incrementalSegmentReference.getNumReferences());
-    Assert.assertEquals(0, queryableSegmentReference.getNumReferences());
+    Assertions.assertEquals(0, incrementalSegmentReference.getNumReferences());
+    Assertions.assertEquals(0, queryableSegmentReference.getNumReferences());
   }
 
   @Test
@@ -152,21 +151,21 @@ public class FireHydrantTest extends InitializedNullHandlingTest
     ReferenceCountingSegment incrementalSegmentReference = hydrant.getHydrantSegment();
     hydrant.swapSegment(null);
     ReferenceCountingSegment queryableSegmentReference = hydrant.getHydrantSegment();
-    Assert.assertEquals(0, incrementalSegmentReference.getNumReferences());
-    Assert.assertNull(queryableSegmentReference);
+    Assertions.assertEquals(0, incrementalSegmentReference.getNumReferences());
+    Assertions.assertNull(queryableSegmentReference);
 
     Optional<Pair<SegmentReference, Closeable>> maybeSegmentAndCloseable = hydrant.getSegmentForQuery(
         Function.identity()
     );
-    Assert.assertEquals(0, incrementalSegmentReference.getNumReferences());
-    Assert.assertFalse(maybeSegmentAndCloseable.isPresent());
+    Assertions.assertEquals(0, incrementalSegmentReference.getNumReferences());
+    Assertions.assertFalse(maybeSegmentAndCloseable.isPresent());
   }
 
   @Test
   public void testGetSegmentForQueryButNotAbleToAcquireReferences()
   {
     ReferenceCountingSegment incrementalSegmentReference = hydrant.getHydrantSegment();
-    Assert.assertEquals(0, incrementalSegmentReference.getNumReferences());
+    Assertions.assertEquals(0, incrementalSegmentReference.getNumReferences());
 
     Optional<Pair<SegmentReference, Closeable>> maybeSegmentAndCloseable = hydrant.getSegmentForQuery(
         segmentReference -> new SegmentReference()
@@ -209,22 +208,23 @@ public class FireHydrantTest extends InitializedNullHandlingTest
           }
         }
     );
-    Assert.assertFalse(maybeSegmentAndCloseable.isPresent());
-    Assert.assertEquals(0, incrementalSegmentReference.getNumReferences());
+    Assertions.assertFalse(maybeSegmentAndCloseable.isPresent());
+    Assertions.assertEquals(0, incrementalSegmentReference.getNumReferences());
   }
 
   @Test
   public void testGetSegmentForQueryButNotAbleToAcquireReferencesSegmentClosed()
   {
-    expectedException.expect(ISE.class);
-    expectedException.expectMessage("segment.close() is called somewhere outside FireHydrant.swapSegment()");
-    ReferenceCountingSegment incrementalSegmentReference = hydrant.getHydrantSegment();
-    Assert.assertEquals(0, incrementalSegmentReference.getNumReferences());
-    incrementalSegmentReference.close();
+    Throwable exception = assertThrows(ISE.class, () -> {
+      ReferenceCountingSegment incrementalSegmentReference = hydrant.getHydrantSegment();
+      Assertions.assertEquals(0, incrementalSegmentReference.getNumReferences());
+      incrementalSegmentReference.close();
 
-    Optional<Pair<SegmentReference, Closeable>> maybeSegmentAndCloseable = hydrant.getSegmentForQuery(
-        Function.identity()
-    );
+      Optional<Pair<SegmentReference, Closeable>> maybeSegmentAndCloseable = hydrant.getSegmentForQuery(
+          Function.identity()
+      );
+    });
+    assertTrue(exception.getMessage().contains("segment.close() is called somewhere outside FireHydrant.swapSegment()"));
   }
 
   @Test

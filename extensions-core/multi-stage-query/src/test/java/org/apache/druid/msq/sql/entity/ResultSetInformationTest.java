@@ -25,7 +25,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import org.apache.druid.sql.http.ResultFormat;
 import org.junit.Assert;
-import org.junit.Test;
 
 public class ResultSetInformationTest
 {

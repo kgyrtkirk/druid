@@ -24,7 +24,6 @@ import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.java.util.common.guava.Comparators;
 import org.joda.time.Interval;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.util.Iterator;
 import java.util.SortedSet;

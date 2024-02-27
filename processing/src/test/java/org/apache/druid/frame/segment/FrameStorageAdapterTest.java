@@ -49,14 +49,15 @@ import org.apache.druid.segment.vector.VectorCursor;
 import org.apache.druid.segment.virtual.ExpressionVirtualColumn;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.joda.time.Interval;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Assume;
-import org.junit.Before;
-import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -65,27 +66,27 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
-@RunWith(Enclosed.class)
+
+
 public class FrameStorageAdapterTest
 {
   /**
    * Basic tests: everything except makeCursors, makeVectorCursor.
    */
-  @RunWith(Parameterized.class)
-  public static class BasicTests extends InitializedNullHandlingTest
+  @Nested
+  public class BasicTests extends InitializedNullHandlingTest
   {
-    private final FrameType frameType;
+    private FrameType frameType;
 
     private StorageAdapter queryableAdapter;
     private FrameSegment frameSegment;
     private StorageAdapter frameAdapter;
 
-    public BasicTests(final FrameType frameType)
+    public void initBasicTests(final FrameType frameType)
     {
       this.frameType = frameType;
     }
 
-    @Parameterized.Parameters(name = "frameType = {0}")
     public static Iterable<Object[]> constructorFeeder()
     {
       final List<Object[]> constructors = new ArrayList<>();
@@ -97,7 +98,7 @@ public class FrameStorageAdapterTest
       return constructors;
     }
 
-    @Before
+    @BeforeEach
     public void setUp()
     {
 
@@ -106,7 +107,7 @@ public class FrameStorageAdapterTest
       frameAdapter = frameSegment.asStorageAdapter();
     }
 
-    @After
+    @AfterEach
     public void tearDown()
     {
       if (frameSegment != null) {
@@ -114,140 +115,164 @@ public class FrameStorageAdapterTest
       }
     }
 
-    @Test
-    public void test_getInterval()
+    @MethodSource("constructorFeeder")
+    @ParameterizedTest(name = "frameType = {0}")
+    public void test_getInterval(final FrameType frameType)
     {
-      Assert.assertEquals(queryableAdapter.getInterval(), frameAdapter.getInterval());
+      initBasicTests(frameType);
+      Assertions.assertEquals(queryableAdapter.getInterval(), frameAdapter.getInterval());
     }
 
-    @Test
-    public void test_getRowSignature()
+    @MethodSource("constructorFeeder")
+    @ParameterizedTest(name = "frameType = {0}")
+    public void test_getRowSignature(final FrameType frameType)
     {
-      Assert.assertEquals(queryableAdapter.getRowSignature(), frameAdapter.getRowSignature());
+      initBasicTests(frameType);
+      Assertions.assertEquals(queryableAdapter.getRowSignature(), frameAdapter.getRowSignature());
     }
 
-    @Test
-    public void test_getAvailableDimensions()
+    @MethodSource("constructorFeeder")
+    @ParameterizedTest(name = "frameType = {0}")
+    public void test_getAvailableDimensions(final FrameType frameType)
     {
+      initBasicTests(frameType);
       // All columns are dimensions to the frameAdapter.
-      Assert.assertEquals(
+      Assertions.assertEquals(
           queryableAdapter.getRowSignature().getColumnNames(),
           ImmutableList.copyOf(frameAdapter.getAvailableDimensions())
       );
     }
 
-    @Test
-    public void test_getAvailableMetrics()
+    @MethodSource("constructorFeeder")
+    @ParameterizedTest(name = "frameType = {0}")
+    public void test_getAvailableMetrics(final FrameType frameType)
     {
+      initBasicTests(frameType);
       // All columns are dimensions to the frameAdapter.
-      Assert.assertEquals(Collections.emptyList(), frameAdapter.getAvailableMetrics());
+      Assertions.assertEquals(Collections.emptyList(), frameAdapter.getAvailableMetrics());
     }
 
-    @Test
-    public void test_getDimensionCardinality_knownColumns()
+    @MethodSource("constructorFeeder")
+    @ParameterizedTest(name = "frameType = {0}")
+    public void test_getDimensionCardinality_knownColumns(final FrameType frameType)
     {
+      initBasicTests(frameType);
       for (final String columnName : frameAdapter.getRowSignature().getColumnNames()) {
-        Assert.assertEquals(
-            columnName,
+        Assertions.assertEquals(
             DimensionDictionarySelector.CARDINALITY_UNKNOWN,
-            frameAdapter.getDimensionCardinality(columnName)
+            frameAdapter.getDimensionCardinality(columnName),
+            columnName
         );
       }
     }
 
-    @Test
-    public void test_getDimensionCardinality_unknownColumn()
+    @MethodSource("constructorFeeder")
+    @ParameterizedTest(name = "frameType = {0}")
+    public void test_getDimensionCardinality_unknownColumn(final FrameType frameType)
     {
-      Assert.assertEquals(
+      initBasicTests(frameType);
+      Assertions.assertEquals(
           DimensionDictionarySelector.CARDINALITY_UNKNOWN,
           frameAdapter.getDimensionCardinality("nonexistent")
       );
     }
 
-    @Test
-    public void test_getColumnCapabilities_typeOfKnownColumns()
+    @MethodSource("constructorFeeder")
+    @ParameterizedTest(name = "frameType = {0}")
+    public void test_getColumnCapabilities_typeOfKnownColumns(final FrameType frameType)
     {
+      initBasicTests(frameType);
       for (final String columnName : frameAdapter.getRowSignature().getColumnNames()) {
         final ColumnCapabilities expectedCapabilities = queryableAdapter.getColumnCapabilities(columnName);
         final ColumnCapabilities actualCapabilities = frameAdapter.getColumnCapabilities(columnName);
 
-        Assert.assertEquals(
-            StringUtils.format("column [%s] type", columnName),
+        Assertions.assertEquals(
             expectedCapabilities.toColumnType(),
-            actualCapabilities.toColumnType()
+            actualCapabilities.toColumnType(),
+            StringUtils.format("column [%s] type", columnName)
         );
 
         if (frameType == FrameType.COLUMNAR) {
           // Columnar frames retain fine-grained hasMultipleValues information
-          Assert.assertEquals(
-              StringUtils.format("column [%s] hasMultipleValues", columnName),
+          Assertions.assertEquals(
               expectedCapabilities.hasMultipleValues(),
-              actualCapabilities.hasMultipleValues()
+              actualCapabilities.hasMultipleValues(),
+              StringUtils.format("column [%s] hasMultipleValues", columnName)
           );
         } else {
           // Row-based frames do not retain fine-grained hasMultipleValues information
-          Assert.assertEquals(
-              StringUtils.format("column [%s] hasMultipleValues", columnName),
+          Assertions.assertEquals(
               expectedCapabilities.getType() == ValueType.STRING
               ? ColumnCapabilities.Capable.UNKNOWN
               : ColumnCapabilities.Capable.FALSE,
-              actualCapabilities.hasMultipleValues()
+              actualCapabilities.hasMultipleValues(),
+              StringUtils.format("column [%s] hasMultipleValues", columnName)
           );
         }
       }
     }
 
-    @Test
-    public void test_getColumnCapabilities_unknownColumn()
+    @MethodSource("constructorFeeder")
+    @ParameterizedTest(name = "frameType = {0}")
+    public void test_getColumnCapabilities_unknownColumn(final FrameType frameType)
     {
-      Assert.assertNull(frameAdapter.getColumnCapabilities("nonexistent"));
+      initBasicTests(frameType);
+      Assertions.assertNull(frameAdapter.getColumnCapabilities("nonexistent"));
     }
 
-    @Test
-    public void test_getMinTime()
+    @MethodSource("constructorFeeder")
+    @ParameterizedTest(name = "frameType = {0}")
+    public void test_getMinTime(final FrameType frameType)
     {
-      Assert.assertEquals(queryableAdapter.getInterval().getStart(), frameAdapter.getMinTime());
+      initBasicTests(frameType);
+      Assertions.assertEquals(queryableAdapter.getInterval().getStart(), frameAdapter.getMinTime());
     }
 
-    @Test
-    public void test_getMaxTime()
+    @MethodSource("constructorFeeder")
+    @ParameterizedTest(name = "frameType = {0}")
+    public void test_getMaxTime(final FrameType frameType)
     {
-      Assert.assertEquals(queryableAdapter.getInterval().getEnd().minus(1), frameAdapter.getMaxTime());
+      initBasicTests(frameType);
+      Assertions.assertEquals(queryableAdapter.getInterval().getEnd().minus(1), frameAdapter.getMaxTime());
     }
 
-    @Test
-    public void test_getNumRows()
+    @MethodSource("constructorFeeder")
+    @ParameterizedTest(name = "frameType = {0}")
+    public void test_getNumRows(final FrameType frameType)
     {
-      Assert.assertEquals(queryableAdapter.getNumRows(), frameAdapter.getNumRows());
+      initBasicTests(frameType);
+      Assertions.assertEquals(queryableAdapter.getNumRows(), frameAdapter.getNumRows());
     }
 
-    @Test
-    public void test_getMetadata()
+    @MethodSource("constructorFeeder")
+    @ParameterizedTest(name = "frameType = {0}")
+    public void test_getMetadata(final FrameType frameType)
     {
-      Assert.assertNull(frameAdapter.getMetadata());
+      initBasicTests(frameType);
+      Assertions.assertNull(frameAdapter.getMetadata());
     }
   }
 
   /**
    * CursorTests: matrix of tests of makeCursors, makeVectorCursor
    */
-  @RunWith(Parameterized.class)
-  public static class CursorTests extends InitializedNullHandlingTest
+  @Nested
+  public class CursorTests extends InitializedNullHandlingTest
   {
     private static final int VECTOR_SIZE = 7;
 
-    private final FrameType frameType;
+    private FrameType frameType;
     @Nullable
-    private final Filter filter;
-    private final Interval interval;
-    private final VirtualColumns virtualColumns;
-    private final boolean descending;
+    private Filter filter;
+    private Interval interval;
+    private VirtualColumns virtualColumns;
+    private boolean descending;
 
     private StorageAdapter queryableAdapter;
     private FrameSegment frameSegment;
     private StorageAdapter frameAdapter;
 
-    public CursorTests(
+    public void initCursorTests(
         FrameType frameType,
         @Nullable DimFilter filter,
         Interval interval,
@@ -262,11 +287,6 @@ public class FrameStorageAdapterTest
       this.descending = descending;
     }
 
-    @Parameterized.Parameters(name = "frameType = {0}, "
-                                     + "filter = {1}, "
-                                     + "interval = {2}, "
-                                     + "virtualColumns = {3}, "
-                                     + "descending = {4}")
     public static Iterable<Object[]> constructorFeeder()
     {
       final List<Object[]> constructors = new ArrayList<>();
@@ -330,7 +350,7 @@ public class FrameStorageAdapterTest
       return constructors;
     }
 
-    @Before
+    @BeforeEach
     public void setUp()
     {
       queryableAdapter = new QueryableIndexStorageAdapter(TestIndex.getMMappedTestIndex());
@@ -338,7 +358,7 @@ public class FrameStorageAdapterTest
       frameAdapter = frameSegment.asStorageAdapter();
     }
 
-    @After
+    @AfterEach
     public void tearDown()
     {
       if (frameSegment != null) {
@@ -346,9 +366,15 @@ public class FrameStorageAdapterTest
       }
     }
 
-    @Test
-    public void test_makeCursors()
+    @MethodSource("constructorFeeder")
+    @ParameterizedTest(name = "frameType = {0}, "
+        + "filter = {1}, "
+        + "interval = {2}, "
+        + "virtualColumns = {3}, "
+        + "descending = {4}")
+    public void test_makeCursors(FrameType frameType, @Nullable DimFilter filter, Interval interval, VirtualColumns virtualColumns, boolean descending)
     {
+      initCursorTests(frameType, filter, interval, virtualColumns, descending);
       assertCursorsMatch(
           adapter ->
               adapter.makeCursors(
@@ -362,10 +388,16 @@ public class FrameStorageAdapterTest
       );
     }
 
-    @Test
-    public void test_makeVectorCursor()
+    @MethodSource("constructorFeeder")
+    @ParameterizedTest(name = "frameType = {0}, "
+        + "filter = {1}, "
+        + "interval = {2}, "
+        + "virtualColumns = {3}, "
+        + "descending = {4}")
+    public void test_makeVectorCursor(FrameType frameType, @Nullable DimFilter filter, Interval interval, VirtualColumns virtualColumns, boolean descending)
     {
-      Assume.assumeTrue(frameAdapter.canVectorize(filter, virtualColumns, descending));
+      initCursorTests(frameType, filter, interval, virtualColumns, descending);
+      Assumptions.assumeTrue(frameAdapter.canVectorize(filter, virtualColumns, descending));
 
       assertVectorCursorsMatch(
           adapter ->

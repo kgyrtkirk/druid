@@ -55,10 +55,8 @@ import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.HttpVersion;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
@@ -73,13 +71,14 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 /**
  */
 @SuppressWarnings("DoNotMock")
 public class DruidLeaderClientTest extends BaseJettyTest
 {
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
 
   private DiscoveryDruidNode discoveryDruidNode;
   private HttpClient httpClient;
@@ -137,33 +136,32 @@ public class DruidLeaderClientTest extends BaseJettyTest
 
     Request request = druidLeaderClient.makeRequest(HttpMethod.POST, "/simple/direct");
     request.setContent("hello".getBytes(StandardCharsets.UTF_8));
-    Assert.assertEquals("hello", druidLeaderClient.go(request).getContent());
+    Assertions.assertEquals("hello", druidLeaderClient.go(request).getContent());
   }
 
   @Test
   public void testNoLeaderFound() throws Exception
   {
-    DruidNodeDiscovery druidNodeDiscovery = EasyMock.createMock(DruidNodeDiscovery.class);
-    EasyMock.expect(druidNodeDiscovery.getAllNodes()).andReturn(ImmutableList.of());
+    Throwable exception = assertThrows(IOException.class, () -> {
+      DruidNodeDiscovery druidNodeDiscovery = EasyMock.createMock(DruidNodeDiscovery.class);
+      EasyMock.expect(druidNodeDiscovery.getAllNodes()).andReturn(ImmutableList.of());
 
-    DruidNodeDiscoveryProvider druidNodeDiscoveryProvider = EasyMock.createMock(DruidNodeDiscoveryProvider.class);
-    EasyMock.expect(druidNodeDiscoveryProvider.getForNodeRole(NodeRole.PEON)).andReturn(druidNodeDiscovery);
+      DruidNodeDiscoveryProvider druidNodeDiscoveryProvider = EasyMock.createMock(DruidNodeDiscoveryProvider.class);
+      EasyMock.expect(druidNodeDiscoveryProvider.getForNodeRole(NodeRole.PEON)).andReturn(druidNodeDiscovery);
 
-    EasyMock.replay(druidNodeDiscovery, druidNodeDiscoveryProvider);
+      EasyMock.replay(druidNodeDiscovery, druidNodeDiscoveryProvider);
 
-    DruidLeaderClient druidLeaderClient = new DruidLeaderClient(
-        httpClient,
-        druidNodeDiscoveryProvider,
-        NodeRole.PEON,
-        "/simple/leader"
-    );
-    druidLeaderClient.start();
-
-    expectedException.expect(IOException.class);
-    expectedException.expectMessage(
-        "A leader node could not be found for [PEON] service. "
-        + "Check logs of service [PEON] to confirm it is healthy.");
-    druidLeaderClient.makeRequest(HttpMethod.POST, "/simple/direct");
+      DruidLeaderClient druidLeaderClient = new DruidLeaderClient(
+          httpClient,
+          druidNodeDiscoveryProvider,
+          NodeRole.PEON,
+          "/simple/leader"
+      );
+      druidLeaderClient.start();
+      druidLeaderClient.makeRequest(HttpMethod.POST, "/simple/direct");
+    });
+    assertTrue(exception.getMessage().contains("A leader node could not be found for [PEON] service. "
+        + "Check logs of service [PEON] to confirm it is healthy."));
   }
 
   @Test
@@ -189,7 +187,7 @@ public class DruidLeaderClientTest extends BaseJettyTest
 
     Request request = druidLeaderClient.makeRequest(HttpMethod.POST, "/simple/redirect");
     request.setContent("hello".getBytes(StandardCharsets.UTF_8));
-    Assert.assertEquals("hello", druidLeaderClient.go(request).getContent());
+    Assertions.assertEquals("hello", druidLeaderClient.go(request).getContent());
   }
 
   @Test
@@ -219,7 +217,7 @@ public class DruidLeaderClientTest extends BaseJettyTest
 
     Request request = druidLeaderClient.makeRequest(HttpMethod.POST, "/simple/redirect");
     request.setContent("hello".getBytes(StandardCharsets.UTF_8));
-    Assert.assertEquals("hello", druidLeaderClient.go(request).getContent());
+    Assertions.assertEquals("hello", druidLeaderClient.go(request).getContent());
   }
 
   @Test
@@ -253,7 +251,7 @@ public class DruidLeaderClientTest extends BaseJettyTest
 
     Request request = druidLeaderClient.makeRequest(HttpMethod.POST, "/simple/direct");
     request.setContent("hello".getBytes(StandardCharsets.UTF_8));
-    Assert.assertEquals("hello", druidLeaderClient.go(request).getContent());
+    Assertions.assertEquals("hello", druidLeaderClient.go(request).getContent());
     EasyMock.verify(druidNodeDiscovery);
   }
 
@@ -278,7 +276,7 @@ public class DruidLeaderClientTest extends BaseJettyTest
     );
     druidLeaderClient.start();
 
-    Assert.assertEquals("http://localhost:1234/", druidLeaderClient.findCurrentLeader());
+    Assertions.assertEquals("http://localhost:1234/", druidLeaderClient.findCurrentLeader());
   }
 
   static class TestJettyServerInitializer implements JettyServerInitializer

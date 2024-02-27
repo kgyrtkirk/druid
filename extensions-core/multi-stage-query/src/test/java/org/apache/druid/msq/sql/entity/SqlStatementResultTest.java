@@ -29,7 +29,6 @@ import org.apache.druid.msq.indexing.error.QueryNotSupportedFault;
 import org.apache.druid.msq.sql.SqlStatementState;
 import org.apache.druid.msq.sql.resources.SqlStatementResourceTest;
 import org.junit.Assert;
-import org.junit.Test;
 
 public class SqlStatementResultTest
 {

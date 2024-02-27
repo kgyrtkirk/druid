@@ -46,16 +46,15 @@ import org.apache.druid.rpc.HttpResponseException;
 import org.apache.druid.rpc.MockServiceClient;
 import org.apache.druid.rpc.RequestBuilder;
 import org.hamcrest.CoreMatchers;
-import org.hamcrest.MatcherAssert;
 import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.joda.time.Interval;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -65,6 +64,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class OverlordClientImplTest
 {
@@ -88,7 +89,7 @@ public class OverlordClientImplTest
   private MockServiceClient serviceClient;
   private OverlordClient overlordClient;
 
-  @Before
+  @BeforeEach
   public void setup()
   {
     jsonMapper = new DefaultObjectMapper();
@@ -96,7 +97,7 @@ public class OverlordClientImplTest
     overlordClient = new OverlordClientImpl(serviceClient, jsonMapper);
   }
 
-  @After
+  @AfterEach
   public void tearDown()
   {
     serviceClient.verify();
@@ -112,7 +113,7 @@ public class OverlordClientImplTest
         StringUtils.toUtf8("http://followTheLeader")
     );
 
-    Assert.assertEquals(URI.create("http://followTheLeader"), overlordClient.findCurrentLeader().get());
+    Assertions.assertEquals(URI.create("http://followTheLeader"), overlordClient.findCurrentLeader().get());
   }
 
   @Test
@@ -125,7 +126,7 @@ public class OverlordClientImplTest
         jsonMapper.writeValueAsBytes(STATUSES)
     );
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         STATUSES,
         ImmutableList.copyOf(overlordClient.taskStatuses(null, null, null).get())
     );
@@ -141,7 +142,7 @@ public class OverlordClientImplTest
         jsonMapper.writeValueAsBytes(STATUSES)
     );
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         STATUSES,
         ImmutableList.copyOf(overlordClient.taskStatuses("RUNNING", null, null).get())
     );
@@ -157,7 +158,7 @@ public class OverlordClientImplTest
         jsonMapper.writeValueAsBytes(STATUSES)
     );
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         STATUSES,
         ImmutableList.copyOf(overlordClient.taskStatuses("RUNNING", "foo", null).get())
     );
@@ -173,7 +174,7 @@ public class OverlordClientImplTest
         jsonMapper.writeValueAsBytes(STATUSES)
     );
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         STATUSES,
         ImmutableList.copyOf(overlordClient.taskStatuses(null, "foo", null).get())
     );
@@ -192,7 +193,7 @@ public class OverlordClientImplTest
         jsonMapper.writeValueAsBytes(STATUSES)
     );
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         STATUSES,
         ImmutableList.copyOf(overlordClient.taskStatuses("RUNNING", "foo?", 0).get())
     );
@@ -211,7 +212,7 @@ public class OverlordClientImplTest
         jsonMapper.writeValueAsBytes(STATUSES)
     );
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         STATUSES,
         ImmutableList.copyOf(overlordClient.taskStatuses(null, null, 0).get())
     );
@@ -234,7 +235,7 @@ public class OverlordClientImplTest
         jsonMapper.writeValueAsBytes(lockMap)
     );
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         lockMap,
         overlordClient.findLockedIntervals(requests).get()
     );
@@ -255,7 +256,7 @@ public class OverlordClientImplTest
         jsonMapper.writeValueAsBytes(null)
     );
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         Collections.emptyMap(),
         overlordClient.findLockedIntervals(requests).get()
     );
@@ -279,7 +280,7 @@ public class OverlordClientImplTest
         jsonMapper.writeValueAsBytes(statuses)
     );
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         statuses,
         ImmutableList.copyOf(overlordClient.supervisorStatuses().get())
     );
@@ -299,7 +300,7 @@ public class OverlordClientImplTest
     );
 
     final ListenableFuture<Map<String, Object>> future = overlordClient.taskReportAsMap(taskId);
-    Assert.assertEquals(response, future.get());
+    Assertions.assertEquals(response, future.get());
   }
 
   @Test
@@ -321,13 +322,13 @@ public class OverlordClientImplTest
 
     final ListenableFuture<Map<String, Object>> future = overlordClient.taskReportAsMap(taskId);
 
-    final ExecutionException e = Assert.assertThrows(
+    final ExecutionException e = Assertions.assertThrows(
         ExecutionException.class,
         future::get
     );
 
-    MatcherAssert.assertThat(e.getCause(), CoreMatchers.instanceOf(HttpResponseException.class));
-    Assert.assertEquals(
+    assertThat(e.getCause(), CoreMatchers.instanceOf(HttpResponseException.class));
+    Assertions.assertEquals(
         HttpResponseStatus.NOT_FOUND.getCode(),
         ((HttpResponseException) e.getCause()).getResponse().getStatus().getCode()
     );
@@ -347,7 +348,7 @@ public class OverlordClientImplTest
 
     final Map<String, Object> actualResponse =
         FutureUtils.getUnchecked(overlordClient.taskReportAsMap(taskID), true);
-    Assert.assertEquals(Collections.emptyMap(), actualResponse);
+    Assertions.assertEquals(Collections.emptyMap(), actualResponse);
   }
 
   @Test
@@ -369,7 +370,7 @@ public class OverlordClientImplTest
         jsonMapper.writeValueAsBytes(indexingTotalWorkerCapacityInfo)
     );
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         indexingTotalWorkerCapacityInfo,
         FutureUtils.getUnchecked(overlordClient.getTotalWorkerCapacity(), true)
     );
@@ -396,7 +397,7 @@ public class OverlordClientImplTest
         jsonMapper.writeValueAsBytes(workers)
     );
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         workers,
         FutureUtils.getUnchecked(overlordClient.getWorkers(), true)
     );
@@ -417,7 +418,7 @@ public class OverlordClientImplTest
         )
     );
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         Integer.valueOf(2),
         FutureUtils.getUnchecked(overlordClient.killPendingSegments("foo", Intervals.of("2000/2001")), true)
     );
@@ -444,7 +445,7 @@ public class OverlordClientImplTest
         DefaultObjectMapper.INSTANCE.writeValueAsBytes(new TaskPayloadResponse(taskID, clientTaskQuery))
     );
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         clientTaskQuery,
         overlordClient.taskPayload(taskID).get().getPayload()
     );

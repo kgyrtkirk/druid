@@ -20,7 +20,6 @@
 package org.apache.druid.server.lookup.cache.loading;
 
 import org.junit.Assert;
-import org.junit.Test;
 
 public class OnHeapLoadingCacheTest
 {

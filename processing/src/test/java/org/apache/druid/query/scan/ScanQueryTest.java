@@ -30,9 +30,9 @@ import org.apache.druid.query.spec.MultipleIntervalSegmentSpec;
 import org.apache.druid.query.spec.QuerySegmentSpec;
 import org.apache.druid.segment.column.ColumnHolder;
 import org.joda.time.Interval;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,6 +41,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 public class ScanQueryTest
 {
   private static QuerySegmentSpec intervalSpec;
@@ -48,7 +50,7 @@ public class ScanQueryTest
   private static ScanResultValue s2;
   private static ScanResultValue s3;
 
-  @BeforeClass
+  @BeforeAll
   public static void setup()
   {
     intervalSpec = new MultipleIntervalSegmentSpec(
@@ -92,33 +94,36 @@ public class ScanQueryTest
     );
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testAscendingScanQueryWithInvalidColumns()
   {
-    Druids.newScanQueryBuilder()
+    assertThrows(IllegalArgumentException.class, () -> {
+      Druids.newScanQueryBuilder()
           .order(ScanQuery.Order.ASCENDING)
           .columns(ImmutableList.of("not time", "also not time"))
           .dataSource("source")
           .intervals(intervalSpec)
           .build();
+    });
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testDescendingScanQueryWithInvalidColumns()
   {
-    Druids.newScanQueryBuilder()
+    assertThrows(IllegalArgumentException.class, () -> {
+      Druids.newScanQueryBuilder()
           .order(ScanQuery.Order.DESCENDING)
           .columns(ImmutableList.of("not time", "also not time"))
           .dataSource("source")
           .intervals(intervalSpec)
           .build();
+    });
   }
 
   @Test
   public void testConflictingOrderByAndTimeOrder()
   {
-    Assert.assertThrows(
-        "Cannot provide 'order' incompatible with 'orderBy'",
+    Assertions.assertThrows(
         IllegalArgumentException.class,
         () ->
             Druids.newScanQueryBuilder()
@@ -133,14 +138,15 @@ public class ScanQueryTest
                   .columns(ImmutableList.of("__time", "quality"))
                   .dataSource("source")
                   .intervals(intervalSpec)
-                  .build()
+                  .build(),
+        "Cannot provide 'order' incompatible with 'orderBy'"
     );
   }
 
   @Test
   public void testCompatibleOrderByAndTimeOrder()
   {
-    Assert.assertNotNull(
+    Assertions.assertNotNull(
         Druids.newScanQueryBuilder()
               .order(ScanQuery.Order.ASCENDING)
               .orderBy(ImmutableList.of(new ScanQuery.OrderBy("__time", ScanQuery.Order.ASCENDING)))
@@ -256,7 +262,7 @@ public class ScanQueryTest
         ).flatMerge(seq -> seq, noOrderScan.getResultOrdering());
 
     List<ScanResultValue> noOrderList = noOrderSeq.toList();
-    Assert.assertEquals(3, noOrderList.size());
+    Assertions.assertEquals(3, noOrderList.size());
 
 
     // Ascending
@@ -268,9 +274,9 @@ public class ScanQueryTest
     ).flatMerge(seq -> seq, ascendingOrderScan.getResultOrdering());
 
     List<ScanResultValue> ascendingList = ascendingOrderSeq.toList();
-    Assert.assertEquals(2, ascendingList.size());
-    Assert.assertEquals(s1, ascendingList.get(0));
-    Assert.assertEquals(s2, ascendingList.get(1));
+    Assertions.assertEquals(2, ascendingList.size());
+    Assertions.assertEquals(s1, ascendingList.get(0));
+    Assertions.assertEquals(s2, ascendingList.get(1));
 
     // Descending
     Sequence<ScanResultValue> descendingOrderSeq = Sequences.simple(
@@ -281,30 +287,32 @@ public class ScanQueryTest
     ).flatMerge(seq -> seq, descendingOrderScan.getResultOrdering());
 
     List<ScanResultValue> descendingList = descendingOrderSeq.toList();
-    Assert.assertEquals(2, descendingList.size());
-    Assert.assertEquals(s2, descendingList.get(0));
-    Assert.assertEquals(s1, descendingList.get(1));
+    Assertions.assertEquals(2, descendingList.size());
+    Assertions.assertEquals(s2, descendingList.get(0));
+    Assertions.assertEquals(s1, descendingList.get(1));
   }
 
-  @Test(expected = ISE.class)
+  @Test
   public void testTimeOrderingWithoutTimeColumn()
   {
-    ScanQuery descendingOrderScan = Druids.newScanQueryBuilder()
-                                          .order(ScanQuery.Order.DESCENDING)
-                                          .resultFormat(ScanQuery.ResultFormat.RESULT_FORMAT_LIST)
-                                          .dataSource("some src")
-                                          .intervals(intervalSpec)
-                                          .build();
-    // This should fail because s3 doesn't have a timestamp
-    Sequence<ScanResultValue> borkedSequence = Sequences.simple(
-        ImmutableList.of(
-            Sequences.simple(ImmutableList.of(s1)),
-            Sequences.simple(ImmutableList.of(s2, s3))
-        )
-    ).flatMerge(seq -> seq, descendingOrderScan.getResultOrdering());
+    assertThrows(ISE.class, () -> {
+      ScanQuery descendingOrderScan = Druids.newScanQueryBuilder()
+          .order(ScanQuery.Order.DESCENDING)
+          .resultFormat(ScanQuery.ResultFormat.RESULT_FORMAT_LIST)
+          .dataSource("some src")
+          .intervals(intervalSpec)
+          .build();
+      // This should fail because s3 doesn't have a timestamp
+      Sequence<ScanResultValue> borkedSequence = Sequences.simple(
+          ImmutableList.of(
+              Sequences.simple(ImmutableList.of(s1)),
+              Sequences.simple(ImmutableList.of(s2, s3))
+          )
+      ).flatMerge(seq -> seq, descendingOrderScan.getResultOrdering());
 
-    // This should throw an ISE
-    List<ScanResultValue> res = borkedSequence.toList();
+      // This should throw an ISE
+      List<ScanResultValue> res = borkedSequence.toList();
+    });
   }
 
   @Test
@@ -319,7 +327,7 @@ public class ScanQueryTest
               .intervals(intervalSpec)
               .build();
 
-    Assert.assertNotNull(scanQuery.getResultOrdering());
+    Assertions.assertNotNull(scanQuery.getResultOrdering());
   }
 
   @Test
@@ -335,7 +343,7 @@ public class ScanQueryTest
               .intervals(intervalSpec)
               .build();
 
-    Assert.assertThrows("Cannot execute query with orderBy [quality ASC]", ISE.class, scanQuery::getResultOrdering);
+    Assertions.assertThrows(ISE.class, scanQuery::getResultOrdering, "Cannot execute query with orderBy [quality ASC]");
   }
 
   @Test
@@ -349,7 +357,7 @@ public class ScanQueryTest
               .intervals(intervalSpec)
               .build();
 
-    Assert.assertNull(query.getRequiredColumns());
+    Assertions.assertNull(query.getRequiredColumns());
   }
 
   @Test
@@ -364,7 +372,7 @@ public class ScanQueryTest
               .columns(Collections.emptyList())
               .build();
 
-    Assert.assertNull(query.getRequiredColumns());
+    Assertions.assertNull(query.getRequiredColumns());
   }
 
   @Test
@@ -378,6 +386,6 @@ public class ScanQueryTest
               .columns("foo", "bar")
               .build();
 
-    Assert.assertEquals(ImmutableSet.of("__time", "foo", "bar"), query.getRequiredColumns());
+    Assertions.assertEquals(ImmutableSet.of("__time", "foo", "bar"), query.getRequiredColumns());
   }
 }

@@ -33,7 +33,6 @@ import org.apache.druid.segment.indexing.RealtimeIOConfig;
 import org.apache.druid.segment.realtime.FireDepartment;
 import org.easymock.EasyMock;
 import org.junit.Assert;
-import org.junit.Test;
 
 public class TaskAnnouncementTest
 {

@@ -30,9 +30,9 @@ import org.apache.druid.server.coordination.SegmentLoadDropHandler;
 import org.apache.druid.timeline.DataSegment;
 import org.easymock.EasyMock;
 import org.easymock.EasyMockSupport;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Map;
@@ -44,7 +44,7 @@ public class HistoricalMetricsMonitorTest extends EasyMockSupport
   private SegmentLoadDropHandler segmentLoadDropMgr;
   private StubServiceEmitter serviceEmitter;
 
-  @Before
+  @BeforeEach
   public void setUp()
   {
     druidServerConfig = EasyMock.createStrictMock(DruidServerConfig.class);
@@ -97,12 +97,12 @@ public class HistoricalMetricsMonitorTest extends EasyMockSupport
 
     final List<Event> events = serviceEmitter.getEvents();
 
-    Assert.assertEquals(ImmutableMap.<String, Object>of(
+    Assertions.assertEquals(ImmutableMap.<String, Object>of(
         "metric", "segment/max",
         "value", maxSize
     ), asMap(events.get(0)));
 
-    Assert.assertEquals(ImmutableMap.<String, Object>of(
+    Assertions.assertEquals(ImmutableMap.<String, Object>of(
         "dataSource", dataSource,
         "metric", "segment/pendingDelete",
         "priority", String.valueOf(priority),
@@ -110,7 +110,7 @@ public class HistoricalMetricsMonitorTest extends EasyMockSupport
         "value", dataSegment.getSize()
     ), asMap(events.get(1)));
 
-    Assert.assertEquals(ImmutableMap.<String, Object>of(
+    Assertions.assertEquals(ImmutableMap.<String, Object>of(
         "metric", "segment/used",
         "value", dataSegment.getSize(),
         "tier", tier,
@@ -118,7 +118,7 @@ public class HistoricalMetricsMonitorTest extends EasyMockSupport
         "dataSource", dataSource
     ), asMap(events.get(2)));
 
-    Assert.assertEquals(ImmutableMap.<String, Object>of(
+    Assertions.assertEquals(ImmutableMap.<String, Object>of(
         "metric", "segment/usedPercent",
         "value", dataSegment.getSize() * 1.0D / maxSize,
         "tier", tier,
@@ -126,7 +126,7 @@ public class HistoricalMetricsMonitorTest extends EasyMockSupport
         "dataSource", dataSource
     ), asMap(events.get(3)));
 
-    Assert.assertEquals(ImmutableMap.<String, Object>of(
+    Assertions.assertEquals(ImmutableMap.<String, Object>of(
         "metric", "segment/count",
         "value", 1L,
         "tier", tier,
@@ -138,10 +138,10 @@ public class HistoricalMetricsMonitorTest extends EasyMockSupport
   private Map<String, Object> asMap(Event event)
   {
     final Map<String, Object> map = event.toMap();
-    Assert.assertNotNull(map.remove("feed"));
-    Assert.assertNotNull(map.remove("timestamp"));
-    Assert.assertNotNull(map.remove("service"));
-    Assert.assertNotNull(map.remove("host"));
+    Assertions.assertNotNull(map.remove("feed"));
+    Assertions.assertNotNull(map.remove("timestamp"));
+    Assertions.assertNotNull(map.remove("service"));
+    Assertions.assertNotNull(map.remove("host"));
 
     return map;
   }

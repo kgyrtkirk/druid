@@ -21,7 +21,6 @@ package org.apache.druid.storage.s3.output;
 
 import org.apache.druid.java.util.common.HumanReadableBytes;
 import org.junit.Rule;
-import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
 

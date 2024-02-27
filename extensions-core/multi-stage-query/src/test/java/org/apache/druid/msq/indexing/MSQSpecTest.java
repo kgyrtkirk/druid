@@ -22,7 +22,6 @@ package org.apache.druid.msq.indexing;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.apache.druid.segment.IndexSpec;
 import org.apache.druid.segment.data.CompressionStrategy;
-import org.junit.Test;
 
 public class MSQSpecTest
 {

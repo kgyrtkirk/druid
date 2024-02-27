@@ -27,8 +27,8 @@ import org.apache.druid.segment.data.CompressionFactory;
 import org.apache.druid.segment.data.CompressionFactory.LongEncodingStrategy;
 import org.apache.druid.segment.data.CompressionStrategy;
 import org.apache.druid.segment.data.RoaringBitmapSerdeFactory;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
@@ -43,12 +43,12 @@ public class IndexSpecTest
         + ", \"longEncoding\" : \"auto\", \"stringDictionaryEncoding\":{\"type\":\"frontCoded\", \"bucketSize\":16}}";
 
     final IndexSpec spec = objectMapper.readValue(json, IndexSpec.class);
-    Assert.assertEquals(RoaringBitmapSerdeFactory.getInstance(), spec.getBitmapSerdeFactory());
-    Assert.assertEquals(CompressionStrategy.LZ4, spec.getDimensionCompression());
-    Assert.assertEquals(CompressionStrategy.LZF, spec.getMetricCompression());
-    Assert.assertEquals(CompressionFactory.LongEncodingStrategy.AUTO, spec.getLongEncoding());
+    Assertions.assertEquals(RoaringBitmapSerdeFactory.getInstance(), spec.getBitmapSerdeFactory());
+    Assertions.assertEquals(CompressionStrategy.LZ4, spec.getDimensionCompression());
+    Assertions.assertEquals(CompressionStrategy.LZF, spec.getMetricCompression());
+    Assertions.assertEquals(CompressionFactory.LongEncodingStrategy.AUTO, spec.getLongEncoding());
 
-    Assert.assertEquals(spec, objectMapper.readValue(objectMapper.writeValueAsBytes(spec), IndexSpec.class));
+    Assertions.assertEquals(spec, objectMapper.readValue(objectMapper.writeValueAsBytes(spec), IndexSpec.class));
   }
 
   @Test
@@ -59,17 +59,17 @@ public class IndexSpecTest
 
     final IndexSpec spec = objectMapper.readValue(json, IndexSpec.class);
 
-    Assert.assertEquals(CompressionStrategy.UNCOMPRESSED, spec.getDimensionCompression());
-    Assert.assertEquals(spec, objectMapper.readValue(objectMapper.writeValueAsBytes(spec), IndexSpec.class));
+    Assertions.assertEquals(CompressionStrategy.UNCOMPRESSED, spec.getDimensionCompression());
+    Assertions.assertEquals(spec, objectMapper.readValue(objectMapper.writeValueAsBytes(spec), IndexSpec.class));
   }
 
   @Test
   public void testDefaults()
   {
     final IndexSpec spec = IndexSpec.DEFAULT;
-    Assert.assertEquals(CompressionStrategy.LZ4, spec.getDimensionCompression());
-    Assert.assertEquals(CompressionStrategy.LZ4, spec.getMetricCompression());
-    Assert.assertEquals(LongEncodingStrategy.LONGS, spec.getLongEncoding());
+    Assertions.assertEquals(CompressionStrategy.LZ4, spec.getDimensionCompression());
+    Assertions.assertEquals(CompressionStrategy.LZ4, spec.getMetricCompression());
+    Assertions.assertEquals(LongEncodingStrategy.LONGS, spec.getLongEncoding());
   }
 
   @Test
@@ -78,19 +78,19 @@ public class IndexSpecTest
     final ObjectMapper objectMapper = new DefaultObjectMapper();
     final IndexSpec spec = IndexSpec.DEFAULT;
     final Map<String, Object> map = spec.asMap(objectMapper);
-    Assert.assertEquals(
+    Assertions.assertEquals(
         spec.getBitmapSerdeFactory(),
         objectMapper.convertValue(map.get("bitmap"), BitmapSerdeFactory.class)
     );
-    Assert.assertEquals(
+    Assertions.assertEquals(
         spec.getDimensionCompression(),
         objectMapper.convertValue(map.get("dimensionCompression"), CompressionStrategy.class)
     );
-    Assert.assertEquals(
+    Assertions.assertEquals(
         spec.getMetricCompression(),
         objectMapper.convertValue(map.get("metricCompression"), CompressionStrategy.class)
     );
-    Assert.assertEquals(
+    Assertions.assertEquals(
         spec.getLongEncoding(),
         objectMapper.convertValue(map.get("longEncoding"), LongEncodingStrategy.class)
     );

@@ -22,7 +22,6 @@ package org.apache.druid.indexing.overlord.supervisor;
 import org.apache.druid.indexing.seekablestream.supervisor.NoticesQueue;
 import org.apache.druid.java.util.common.concurrent.Execs;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;

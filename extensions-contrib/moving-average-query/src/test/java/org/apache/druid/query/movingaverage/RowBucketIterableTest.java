@@ -29,7 +29,6 @@ import org.joda.time.Period;
 import org.joda.time.chrono.ISOChronology;
 import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;

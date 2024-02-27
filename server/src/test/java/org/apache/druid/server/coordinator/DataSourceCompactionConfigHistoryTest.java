@@ -23,16 +23,16 @@ import com.google.common.collect.ImmutableList;
 import org.apache.druid.audit.AuditInfo;
 import org.apache.druid.java.util.common.DateTimes;
 import org.joda.time.DateTime;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class DataSourceCompactionConfigHistoryTest
 {
   private static final String DATASOURCE = "DATASOURCE";
@@ -62,7 +62,7 @@ public class DataSourceCompactionConfigHistoryTest
 
   private DataSourceCompactionConfigHistory target;
 
-  @Before
+  @BeforeEach
   public void setUp()
   {
     Mockito.when(compactionConfig.getCompactionTaskSlotRatio()).thenReturn(COMPACTION_TASK_SLOT_RATIO);
@@ -80,11 +80,11 @@ public class DataSourceCompactionConfigHistoryTest
   public void testAddCompactionConfigShouldAddToHistory()
   {
     target.add(compactionConfig, auditInfo, AUDIT_TIME);
-    Assert.assertEquals(1, target.getHistory().size());
+    Assertions.assertEquals(1, target.getHistory().size());
     DataSourceCompactionConfigAuditEntry auditEntry = target.getHistory().get(0);
-    Assert.assertEquals(DATASOURCE, auditEntry.getCompactionConfig().getDataSource());
-    Assert.assertEquals(auditInfo, auditEntry.getAuditInfo());
-    Assert.assertEquals(AUDIT_TIME, auditEntry.getAuditTime());
+    Assertions.assertEquals(DATASOURCE, auditEntry.getCompactionConfig().getDataSource());
+    Assertions.assertEquals(auditInfo, auditEntry.getAuditInfo());
+    Assertions.assertEquals(AUDIT_TIME, auditEntry.getAuditTime());
   }
 
   @Test
@@ -93,15 +93,15 @@ public class DataSourceCompactionConfigHistoryTest
     target.add(compactionConfig, auditInfo, AUDIT_TIME);
     Mockito.when(compactionConfig.getCompactionConfigs()).thenReturn(ImmutableList.of(configForDataSource2));
     target.add(compactionConfig, auditInfo2, AUDIT_TIME_2);
-    Assert.assertEquals(2, target.getHistory().size());
+    Assertions.assertEquals(2, target.getHistory().size());
     DataSourceCompactionConfigAuditEntry auditEntry = target.getHistory().get(0);
-    Assert.assertEquals(DATASOURCE, auditEntry.getCompactionConfig().getDataSource());
-    Assert.assertEquals(auditInfo, auditEntry.getAuditInfo());
-    Assert.assertEquals(AUDIT_TIME, auditEntry.getAuditTime());
+    Assertions.assertEquals(DATASOURCE, auditEntry.getCompactionConfig().getDataSource());
+    Assertions.assertEquals(auditInfo, auditEntry.getAuditInfo());
+    Assertions.assertEquals(AUDIT_TIME, auditEntry.getAuditTime());
     auditEntry = target.getHistory().get(1);
-    Assert.assertEquals(null, auditEntry.getCompactionConfig());
-    Assert.assertEquals(auditInfo2, auditEntry.getAuditInfo());
-    Assert.assertEquals(AUDIT_TIME_2, auditEntry.getAuditTime());
+    Assertions.assertEquals(null, auditEntry.getCompactionConfig());
+    Assertions.assertEquals(auditInfo2, auditEntry.getAuditInfo());
+    Assertions.assertEquals(AUDIT_TIME_2, auditEntry.getAuditTime());
   }
 
   @Test
@@ -110,11 +110,11 @@ public class DataSourceCompactionConfigHistoryTest
     target.add(compactionConfig, auditInfo, AUDIT_TIME);
     Mockito.when(compactionConfig.getCompactionConfigs()).thenReturn(ImmutableList.of(configForDataSource));
     target.add(compactionConfig, auditInfo2, AUDIT_TIME_2);
-    Assert.assertEquals(1, target.getHistory().size());
+    Assertions.assertEquals(1, target.getHistory().size());
     DataSourceCompactionConfigAuditEntry auditEntry = target.getHistory().get(0);
-    Assert.assertEquals(DATASOURCE, auditEntry.getCompactionConfig().getDataSource());
-    Assert.assertEquals(auditInfo, auditEntry.getAuditInfo());
-    Assert.assertEquals(AUDIT_TIME, auditEntry.getAuditTime());
+    Assertions.assertEquals(DATASOURCE, auditEntry.getCompactionConfig().getDataSource());
+    Assertions.assertEquals(auditInfo, auditEntry.getAuditInfo());
+    Assertions.assertEquals(AUDIT_TIME, auditEntry.getAuditTime());
   }
 
   @Test
@@ -126,15 +126,15 @@ public class DataSourceCompactionConfigHistoryTest
     Mockito.when(compactionConfig.getCompactionConfigs())
            .thenReturn(ImmutableList.of(configForDataSourceWithChange, configForDataSource2));
     target.add(compactionConfig, auditInfo3, AUDIT_TIME_3);
-    Assert.assertEquals(3, target.getHistory().size());
+    Assertions.assertEquals(3, target.getHistory().size());
     DataSourceCompactionConfigAuditEntry auditEntry = target.getHistory().get(0);
-    Assert.assertEquals(DATASOURCE, auditEntry.getCompactionConfig().getDataSource());
-    Assert.assertEquals(auditInfo, auditEntry.getAuditInfo());
-    Assert.assertEquals(AUDIT_TIME, auditEntry.getAuditTime());
+    Assertions.assertEquals(DATASOURCE, auditEntry.getCompactionConfig().getDataSource());
+    Assertions.assertEquals(auditInfo, auditEntry.getAuditInfo());
+    Assertions.assertEquals(AUDIT_TIME, auditEntry.getAuditTime());
     auditEntry = target.getHistory().get(2);
-    Assert.assertEquals(configForDataSourceWithChange, auditEntry.getCompactionConfig());
-    Assert.assertEquals(auditInfo3, auditEntry.getAuditInfo());
-    Assert.assertEquals(AUDIT_TIME_3, auditEntry.getAuditTime());
+    Assertions.assertEquals(configForDataSourceWithChange, auditEntry.getCompactionConfig());
+    Assertions.assertEquals(auditInfo3, auditEntry.getAuditInfo());
+    Assertions.assertEquals(AUDIT_TIME_3, auditEntry.getAuditTime());
   }
 
   @Test
@@ -143,15 +143,15 @@ public class DataSourceCompactionConfigHistoryTest
     target.add(compactionConfig, auditInfo, AUDIT_TIME);
     Mockito.when(compactionConfig.getCompactionConfigs()).thenReturn(ImmutableList.of(configForDataSourceWithChange));
     target.add(compactionConfig, auditInfo2, AUDIT_TIME_2);
-    Assert.assertEquals(2, target.getHistory().size());
+    Assertions.assertEquals(2, target.getHistory().size());
     DataSourceCompactionConfigAuditEntry auditEntry = target.getHistory().get(0);
-    Assert.assertEquals(DATASOURCE, auditEntry.getCompactionConfig().getDataSource());
-    Assert.assertEquals(auditInfo, auditEntry.getAuditInfo());
-    Assert.assertEquals(AUDIT_TIME, auditEntry.getAuditTime());
+    Assertions.assertEquals(DATASOURCE, auditEntry.getCompactionConfig().getDataSource());
+    Assertions.assertEquals(auditInfo, auditEntry.getAuditInfo());
+    Assertions.assertEquals(AUDIT_TIME, auditEntry.getAuditTime());
     auditEntry = target.getHistory().get(1);
-    Assert.assertEquals(DATASOURCE, auditEntry.getCompactionConfig().getDataSource());
-    Assert.assertEquals(auditInfo2, auditEntry.getAuditInfo());
-    Assert.assertEquals(AUDIT_TIME_2, auditEntry.getAuditTime());
+    Assertions.assertEquals(DATASOURCE, auditEntry.getCompactionConfig().getDataSource());
+    Assertions.assertEquals(auditInfo2, auditEntry.getAuditInfo());
+    Assertions.assertEquals(AUDIT_TIME_2, auditEntry.getAuditTime());
   }
 
   @Test
@@ -161,17 +161,17 @@ public class DataSourceCompactionConfigHistoryTest
     int newMaxTaskSlots = MAX_COMPACTION_TASK_SLOTS - 1;
     Mockito.when(compactionConfig.getMaxCompactionTaskSlots()).thenReturn(newMaxTaskSlots);
     target.add(compactionConfig, auditInfo2, AUDIT_TIME_2);
-    Assert.assertEquals(2, target.getHistory().size());
+    Assertions.assertEquals(2, target.getHistory().size());
     DataSourceCompactionConfigAuditEntry auditEntry = target.getHistory().get(0);
-    Assert.assertEquals(DATASOURCE, auditEntry.getCompactionConfig().getDataSource());
-    Assert.assertEquals(auditInfo, auditEntry.getAuditInfo());
-    Assert.assertEquals(AUDIT_TIME, auditEntry.getAuditTime());
-    Assert.assertEquals(MAX_COMPACTION_TASK_SLOTS, auditEntry.getGlobalConfig().getMaxCompactionTaskSlots());
+    Assertions.assertEquals(DATASOURCE, auditEntry.getCompactionConfig().getDataSource());
+    Assertions.assertEquals(auditInfo, auditEntry.getAuditInfo());
+    Assertions.assertEquals(AUDIT_TIME, auditEntry.getAuditTime());
+    Assertions.assertEquals(MAX_COMPACTION_TASK_SLOTS, auditEntry.getGlobalConfig().getMaxCompactionTaskSlots());
     auditEntry = target.getHistory().get(1);
-    Assert.assertEquals(DATASOURCE, auditEntry.getCompactionConfig().getDataSource());
-    Assert.assertEquals(auditInfo2, auditEntry.getAuditInfo());
-    Assert.assertEquals(AUDIT_TIME_2, auditEntry.getAuditTime());
-    Assert.assertEquals(newMaxTaskSlots, auditEntry.getGlobalConfig().getMaxCompactionTaskSlots());
+    Assertions.assertEquals(DATASOURCE, auditEntry.getCompactionConfig().getDataSource());
+    Assertions.assertEquals(auditInfo2, auditEntry.getAuditInfo());
+    Assertions.assertEquals(AUDIT_TIME_2, auditEntry.getAuditTime());
+    Assertions.assertEquals(newMaxTaskSlots, auditEntry.getGlobalConfig().getMaxCompactionTaskSlots());
   }
 
   @Test
@@ -179,7 +179,7 @@ public class DataSourceCompactionConfigHistoryTest
   {
     target = new DataSourceCompactionConfigHistory(DATASOURCE_NOT_EXISTS);
     target.add(compactionConfig, auditInfo, AUDIT_TIME);
-    Assert.assertTrue(target.getHistory().isEmpty());
+    Assertions.assertTrue(target.getHistory().isEmpty());
   }
 
 }

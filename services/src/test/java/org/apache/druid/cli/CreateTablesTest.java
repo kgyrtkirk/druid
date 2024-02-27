@@ -26,7 +26,6 @@ import org.apache.druid.metadata.TestDerbyConnector;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
-import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.util.Locale;

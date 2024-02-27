@@ -23,14 +23,13 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ListenableFuture;
 import org.apache.druid.java.util.common.lifecycle.Lifecycle;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Assume;
-import org.junit.Before;
-import org.junit.Test;
 import org.junit.internal.AssumptionViolatedException;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.List;
 import java.util.Random;
@@ -43,22 +42,20 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  *
  */
-@RunWith(Parameterized.class)
 public class PrioritizedExecutorServiceTest
 {
   private PrioritizedExecutorService exec;
   private CountDownLatch latch;
   private CountDownLatch finishLatch;
-  private final boolean useFifo;
-  private final DruidProcessingConfig config;
+  private boolean useFifo;
+  private DruidProcessingConfig config;
 
-  @Parameterized.Parameters(name = "{0}")
   public static Iterable<Object[]> constructorFeeder()
   {
     return ImmutableList.of(new Object[]{true}, new Object[]{false});
   }
 
-  public PrioritizedExecutorServiceTest(final boolean useFifo)
+  public void initPrioritizedExecutorServiceTest(final boolean useFifo)
   {
     this.useFifo = useFifo;
     this.config = new DruidProcessingConfig()
@@ -77,7 +74,7 @@ public class PrioritizedExecutorServiceTest
     };
   }
 
-  @Before
+  @BeforeEach
   public void setUp()
   {
     exec = PrioritizedExecutorService.create(
@@ -108,7 +105,7 @@ public class PrioritizedExecutorServiceTest
     finishLatch = new CountDownLatch(3);
   }
 
-  @After
+  @AfterEach
   public void tearDown()
   {
     exec.shutdownNow();
@@ -120,9 +117,11 @@ public class PrioritizedExecutorServiceTest
    *
    * @throws Exception
    */
-  @Test
-  public void testSubmit() throws Exception
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testSubmit(final boolean useFifo) throws Exception
   {
+    initPrioritizedExecutorServiceTest(useFifo);
     final ConcurrentLinkedQueue<Integer> order = new ConcurrentLinkedQueue<Integer>();
 
     exec.submit(
@@ -177,27 +176,31 @@ public class PrioritizedExecutorServiceTest
     latch.countDown();
     finishLatch.await();
 
-    Assert.assertTrue(order.size() == 3);
+    Assertions.assertTrue(order.size() == 3);
 
     List<Integer> expected = ImmutableList.of(2, 0, -1);
-    Assert.assertEquals(expected, ImmutableList.copyOf(order));
+    Assertions.assertEquals(expected, ImmutableList.copyOf(order));
   }
 
-  @Test
-  public void testExecuteRegularRunnable()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testExecuteRegularRunnable(final boolean useFifo)
   {
+    initPrioritizedExecutorServiceTest(useFifo);
     final CountDownLatch latch = new CountDownLatch(1);
 
-    Assert.assertThrows(
-        "Class does not implemented PrioritizedRunnable",
+    Assertions.assertThrows(
         IllegalArgumentException.class,
-        () -> exec.execute(latch::countDown)
+        () -> exec.execute(latch::countDown),
+        "Class does not implemented PrioritizedRunnable"
     );
   }
 
-  @Test
-  public void testExecutePrioritizedRunnable() throws InterruptedException
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testExecutePrioritizedRunnable(final boolean useFifo) throws InterruptedException
   {
+    initPrioritizedExecutorServiceTest(useFifo);
     final CountDownLatch latch = new CountDownLatch(1);
     exec.execute(
         new PrioritizedRunnable()
@@ -219,9 +222,11 @@ public class PrioritizedExecutorServiceTest
   }
 
   // Make sure entries are processed FIFO
-  @Test
-  public void testOrderedExecutionEqualPriorityRunnable() throws ExecutionException, InterruptedException
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testOrderedExecutionEqualPriorityRunnable(final boolean useFifo) throws ExecutionException, InterruptedException
   {
+    initPrioritizedExecutorServiceTest(useFifo);
     final int numTasks = 100;
     final List<ListenableFuture<?>> futures = Lists.newArrayListWithExpectedSize(numTasks);
     final AtomicInteger hasRun = new AtomicInteger(0);
@@ -232,9 +237,11 @@ public class PrioritizedExecutorServiceTest
     checkFutures(futures);
   }
 
-  @Test
-  public void testOrderedExecutionEqualPriorityCallable() throws ExecutionException, InterruptedException
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testOrderedExecutionEqualPriorityCallable(final boolean useFifo) throws ExecutionException, InterruptedException
   {
+    initPrioritizedExecutorServiceTest(useFifo);
     final int numTasks = 1_000;
     final List<ListenableFuture<?>> futures = Lists.newArrayListWithExpectedSize(numTasks);
     final AtomicInteger hasRun = new AtomicInteger(0);
@@ -245,9 +252,11 @@ public class PrioritizedExecutorServiceTest
     checkFutures(futures);
   }
 
-  @Test
-  public void testOrderedExecutionEqualPriorityMix() throws ExecutionException, InterruptedException
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testOrderedExecutionEqualPriorityMix(final boolean useFifo) throws ExecutionException, InterruptedException
   {
+    initPrioritizedExecutorServiceTest(useFifo);
     exec = new PrioritizedExecutorService(exec.threadPoolExecutor, true, 0, config);
     final int numTasks = 1_000;
     final List<ListenableFuture<?>> futures = Lists.newArrayListWithExpectedSize(numTasks);
@@ -268,16 +277,18 @@ public class PrioritizedExecutorServiceTest
           futures.add(exec.submit(getCheckingRunnable(i, hasRun)));
           break;
         default:
-          Assert.fail("Bad random result");
+          Assertions.fail("Bad random result");
       }
     }
     latch.countDown();
     checkFutures(futures);
   }
 
-  @Test
-  public void testOrderedExecutionMultiplePriorityMix() throws ExecutionException, InterruptedException
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testOrderedExecutionMultiplePriorityMix(final boolean useFifo) throws ExecutionException, InterruptedException
   {
+    initPrioritizedExecutorServiceTest(useFifo);
     final int _default = 0;
     final int min = -1;
     final int max = 1;
@@ -394,9 +405,9 @@ public class PrioritizedExecutorServiceTest
           throw new RuntimeException(e);
         }
         if (useFifo) {
-          Assert.assertEquals(myOrder, hasRun.getAndIncrement());
+          Assertions.assertEquals(myOrder, hasRun.getAndIncrement());
         } else {
-          Assume.assumeTrue(Integer.compare(myOrder, hasRun.getAndIncrement()) == 0);
+          Assumptions.assumeTrue(Integer.compare(myOrder, hasRun.getAndIncrement()) == 0);
         }
       }
     };

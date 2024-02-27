@@ -28,14 +28,14 @@ import org.easymock.EasyMock;
 import org.easymock.EasyMockRunner;
 import org.easymock.Mock;
 import org.easymock.MockType;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 
 import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @RunWith(EasyMockRunner.class)
 public class MapJoinableFactoryTest
@@ -49,12 +49,10 @@ public class MapJoinableFactoryTest
   private JoinConditionAnalysis condition;
   @Mock
   private Joinable mockJoinable;
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
 
   private MapJoinableFactory target;
 
-  @Before
+  @BeforeEach
   public void setUp()
   {
     noopDataSource = new NoopDataSource();
@@ -70,7 +68,7 @@ public class MapJoinableFactoryTest
   public void testBuildDataSourceNotRegisteredShouldReturnAbsent()
   {
     Optional<Joinable> joinable = target.build(inlineDataSource, condition);
-    Assert.assertFalse(joinable.isPresent());
+    Assertions.assertFalse(joinable.isPresent());
   }
 
   @Test
@@ -79,7 +77,7 @@ public class MapJoinableFactoryTest
     EasyMock.expect(noopJoinableFactory.build(noopDataSource, condition)).andReturn(Optional.empty());
     EasyMock.replay(noopJoinableFactory);
     Optional<Joinable> joinable = target.build(noopDataSource, condition);
-    Assert.assertFalse(joinable.isPresent());
+    Assertions.assertFalse(joinable.isPresent());
   }
 
   @Test
@@ -88,7 +86,7 @@ public class MapJoinableFactoryTest
     EasyMock.expect(noopJoinableFactory.build(noopDataSource, condition)).andReturn(Optional.of(mockJoinable));
     EasyMock.replay(noopJoinableFactory);
     Optional<Joinable> joinable = target.build(noopDataSource, condition);
-    Assert.assertEquals(mockJoinable, joinable.get());
+    Assertions.assertEquals(mockJoinable, joinable.get());
 
   }
 
@@ -99,37 +97,38 @@ public class MapJoinableFactoryTest
     EasyMock.expect(noopJoinableFactory.computeJoinCacheKey(noopDataSource, condition)).andReturn(expected);
     EasyMock.replay(noopJoinableFactory);
     Optional<byte[]> actual = target.computeJoinCacheKey(noopDataSource, condition);
-    Assert.assertSame(expected, actual);
+    Assertions.assertSame(expected, actual);
   }
 
   @Test
   public void testBuildExceptionWhenTwoJoinableFactoryForSameDataSource()
   {
-    JoinableFactory anotherNoopJoinableFactory = EasyMock.mock(MapJoinableFactory.class);
-    target = new MapJoinableFactory(
-        ImmutableSet.of(noopJoinableFactory, anotherNoopJoinableFactory),
-        ImmutableMap.of(
-            noopJoinableFactory.getClass(),
-            NoopDataSource.class,
-            anotherNoopJoinableFactory.getClass(),
-            NoopDataSource.class
-        )
-    );
-    EasyMock.expect(noopJoinableFactory.build(noopDataSource, condition)).andReturn(Optional.of(mockJoinable));
-    EasyMock.expect(anotherNoopJoinableFactory.build(noopDataSource, condition)).andReturn(Optional.of(mockJoinable));
-    EasyMock.replay(noopJoinableFactory, anotherNoopJoinableFactory);
-    expectedException.expect(ISE.class);
-    expectedException.expectMessage(StringUtils.format(
+    Throwable exception = assertThrows(ISE.class, () -> {
+      JoinableFactory anotherNoopJoinableFactory = EasyMock.mock(MapJoinableFactory.class);
+      target = new MapJoinableFactory(
+          ImmutableSet.of(noopJoinableFactory, anotherNoopJoinableFactory),
+          ImmutableMap.of(
+              noopJoinableFactory.getClass(),
+              NoopDataSource.class,
+              anotherNoopJoinableFactory.getClass(),
+              NoopDataSource.class
+          )
+      );
+      EasyMock.expect(noopJoinableFactory.build(noopDataSource, condition)).andReturn(Optional.of(mockJoinable));
+      EasyMock.expect(anotherNoopJoinableFactory.build(noopDataSource, condition)).andReturn(Optional.of(mockJoinable));
+      EasyMock.replay(noopJoinableFactory, anotherNoopJoinableFactory);
+      target.build(noopDataSource, condition);
+    });
+    assertTrue(exception.getMessage().contains(StringUtils.format(
         "Multiple joinable factories are valid for table[%s]",
         noopDataSource
-    ));
-    target.build(noopDataSource, condition);
+    )));
   }
 
   @Test
   public void testIsDirectShouldBeFalseForNotRegistered()
   {
-    Assert.assertFalse(target.isDirectlyJoinable(inlineDataSource));
+    Assertions.assertFalse(target.isDirectlyJoinable(inlineDataSource));
   }
 
   @Test
@@ -137,6 +136,6 @@ public class MapJoinableFactoryTest
   {
     EasyMock.expect(noopJoinableFactory.isDirectlyJoinable(noopDataSource)).andReturn(true).anyTimes();
     EasyMock.replay(noopJoinableFactory);
-    Assert.assertTrue(target.isDirectlyJoinable(noopDataSource));
+    Assertions.assertTrue(target.isDirectlyJoinable(noopDataSource));
   }
 }

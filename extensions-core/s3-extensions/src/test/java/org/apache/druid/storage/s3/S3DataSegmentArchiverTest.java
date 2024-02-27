@@ -35,7 +35,6 @@ import org.apache.druid.timeline.DataSegment;
 import org.easymock.EasyMock;
 import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.junit.Test;
 
 import java.util.Map;
 

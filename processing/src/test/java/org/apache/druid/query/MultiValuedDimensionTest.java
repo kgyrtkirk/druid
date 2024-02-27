@@ -70,13 +70,10 @@ import org.apache.druid.segment.writeout.SegmentWriteOutMediumFactory;
 import org.apache.druid.segment.writeout.TmpFileSegmentWriteOutMediumFactory;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.apache.druid.timeline.SegmentId;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.File;
 import java.io.IOException;
@@ -89,12 +86,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 /**
  */
-@RunWith(Parameterized.class)
 public class MultiValuedDimensionTest extends InitializedNullHandlingTest
 {
-  @Parameterized.Parameters(name = "groupby: {0} forceHashAggregation: {2} ({1})")
   public static Collection<?> constructorFeeder()
   {
     final List<Object[]> constructors = new ArrayList<>();
@@ -107,8 +105,8 @@ public class MultiValuedDimensionTest extends InitializedNullHandlingTest
     return constructors;
   }
 
-  private final AggregationTestHelper helper;
-  private final SegmentWriteOutMediumFactory segmentWriteOutMediumFactory;
+  private AggregationTestHelper helper;
+  private SegmentWriteOutMediumFactory segmentWriteOutMediumFactory;
 
   private IncrementalIndex incrementalIndex;
   private QueryableIndex queryableIndex;
@@ -118,13 +116,10 @@ public class MultiValuedDimensionTest extends InitializedNullHandlingTest
   private QueryableIndex queryableIndexNullSampler;
   private File persistedSegmentDirNullSampler;
 
-  private final GroupByQueryConfig config;
-  private final ImmutableMap<String, Object> context;
+  private GroupByQueryConfig config;
+  private ImmutableMap<String, Object> context;
 
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
-
-  public MultiValuedDimensionTest(final GroupByQueryConfig config, SegmentWriteOutMediumFactory segmentWriteOutMediumFactory, boolean forceHashAggregation)
+  public void initMultiValuedDimensionTest(final GroupByQueryConfig config, SegmentWriteOutMediumFactory segmentWriteOutMediumFactory, boolean forceHashAggregation)
   {
     helper = AggregationTestHelper.createGroupByQueryAggregationTestHelper(
         ImmutableList.of(),
@@ -137,7 +132,7 @@ public class MultiValuedDimensionTest extends InitializedNullHandlingTest
     this.context = ImmutableMap.of("forceHashAggregation", forceHashAggregation);
   }
 
-  @Before
+  @BeforeEach
   public void setup() throws Exception
   {
     incrementalIndex = new OnheapIncrementalIndex.Builder()
@@ -209,15 +204,17 @@ public class MultiValuedDimensionTest extends InitializedNullHandlingTest
     queryableIndexNullSampler = TestHelper.getTestIndexIO().loadIndex(persistedSegmentDirNullSampler);
   }
 
-  @After
+  @AfterEach
   public void teardown() throws IOException
   {
     helper.close();
   }
 
-  @Test
-  public void testGroupByNoFilter()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "groupby: {0} forceHashAggregation: {2} ({1})")
+  public void testGroupByNoFilter(final GroupByQueryConfig config, SegmentWriteOutMediumFactory segmentWriteOutMediumFactory, boolean forceHashAggregation)
   {
+    initMultiValuedDimensionTest(config, segmentWriteOutMediumFactory, forceHashAggregation);
     GroupByQuery query = GroupByQuery
         .builder()
         .setDataSource("xx")
@@ -256,9 +253,11 @@ public class MultiValuedDimensionTest extends InitializedNullHandlingTest
     TestHelper.assertExpectedObjects(expectedResults, result.toList(), "noFilter");
   }
 
-  @Test
-  public void testGroupByWithDimFilter()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "groupby: {0} forceHashAggregation: {2} ({1})")
+  public void testGroupByWithDimFilter(final GroupByQueryConfig config, SegmentWriteOutMediumFactory segmentWriteOutMediumFactory, boolean forceHashAggregation)
   {
+    initMultiValuedDimensionTest(config, segmentWriteOutMediumFactory, forceHashAggregation);
     GroupByQuery query = GroupByQuery
         .builder()
         .setDataSource("xx")
@@ -289,9 +288,11 @@ public class MultiValuedDimensionTest extends InitializedNullHandlingTest
     TestHelper.assertExpectedObjects(expectedResults, result.toList(), "dimFilter");
   }
 
-  @Test
-  public void testGroupByWithDimFilterEmptyResults()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "groupby: {0} forceHashAggregation: {2} ({1})")
+  public void testGroupByWithDimFilterEmptyResults(final GroupByQueryConfig config, SegmentWriteOutMediumFactory segmentWriteOutMediumFactory, boolean forceHashAggregation)
   {
+    initMultiValuedDimensionTest(config, segmentWriteOutMediumFactory, forceHashAggregation);
     GroupByQuery query = GroupByQuery
         .builder()
         .setDataSource("xx")
@@ -318,9 +319,11 @@ public class MultiValuedDimensionTest extends InitializedNullHandlingTest
     TestHelper.assertExpectedObjects(expectedResults, result.toList(), "filter-empty");
   }
 
-  @Test
-  public void testGroupByWithDimFilterNullishResults()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "groupby: {0} forceHashAggregation: {2} ({1})")
+  public void testGroupByWithDimFilterNullishResults(final GroupByQueryConfig config, SegmentWriteOutMediumFactory segmentWriteOutMediumFactory, boolean forceHashAggregation)
   {
+    initMultiValuedDimensionTest(config, segmentWriteOutMediumFactory, forceHashAggregation);
     GroupByQuery query = GroupByQuery
         .builder()
         .setDataSource("xx")
@@ -362,9 +365,11 @@ public class MultiValuedDimensionTest extends InitializedNullHandlingTest
     TestHelper.assertExpectedObjects(expectedResults, result.toList(), "filter-nullish");
   }
 
-  @Test
-  public void testGroupByWithDimFilterAndWithFilteredDimSpec()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "groupby: {0} forceHashAggregation: {2} ({1})")
+  public void testGroupByWithDimFilterAndWithFilteredDimSpec(final GroupByQueryConfig config, SegmentWriteOutMediumFactory segmentWriteOutMediumFactory, boolean forceHashAggregation)
   {
+    initMultiValuedDimensionTest(config, segmentWriteOutMediumFactory, forceHashAggregation);
     GroupByQuery query = GroupByQuery
         .builder()
         .setDataSource("xx")
@@ -391,9 +396,11 @@ public class MultiValuedDimensionTest extends InitializedNullHandlingTest
     TestHelper.assertExpectedObjects(expectedResults, result.toList(), "filteredDim");
   }
 
-  @Test
-  public void testGroupByExpression()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "groupby: {0} forceHashAggregation: {2} ({1})")
+  public void testGroupByExpression(final GroupByQueryConfig config, SegmentWriteOutMediumFactory segmentWriteOutMediumFactory, boolean forceHashAggregation)
   {
+    initMultiValuedDimensionTest(config, segmentWriteOutMediumFactory, forceHashAggregation);
     GroupByQuery query = GroupByQuery
         .builder()
         .setDataSource("xx")
@@ -441,9 +448,11 @@ public class MultiValuedDimensionTest extends InitializedNullHandlingTest
     TestHelper.assertExpectedObjects(expectedResults, result.toList(), "expr");
   }
 
-  @Test
-  public void testGroupByExpressionMultiMulti()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "groupby: {0} forceHashAggregation: {2} ({1})")
+  public void testGroupByExpressionMultiMulti(final GroupByQueryConfig config, SegmentWriteOutMediumFactory segmentWriteOutMediumFactory, boolean forceHashAggregation)
   {
+    initMultiValuedDimensionTest(config, segmentWriteOutMediumFactory, forceHashAggregation);
     GroupByQuery query = GroupByQuery
         .builder()
         .setDataSource("xx")
@@ -492,9 +501,11 @@ public class MultiValuedDimensionTest extends InitializedNullHandlingTest
     TestHelper.assertExpectedObjects(expectedResults, result.toList(), "expr-multi-multi");
   }
 
-  @Test
-  public void testGroupByExpressionMultiMultiBackwardsCompat0dot22andOlder()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "groupby: {0} forceHashAggregation: {2} ({1})")
+  public void testGroupByExpressionMultiMultiBackwardsCompat0dot22andOlder(final GroupByQueryConfig config, SegmentWriteOutMediumFactory segmentWriteOutMediumFactory, boolean forceHashAggregation)
   {
+    initMultiValuedDimensionTest(config, segmentWriteOutMediumFactory, forceHashAggregation);
     try {
       ExpressionProcessing.initializeForHomogenizeNullMultiValueStrings();
       GroupByQuery query = GroupByQuery
@@ -539,9 +550,11 @@ public class MultiValuedDimensionTest extends InitializedNullHandlingTest
     }
   }
 
-  @Test
-  public void testGroupByExpressionMultiMultiAuto()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "groupby: {0} forceHashAggregation: {2} ({1})")
+  public void testGroupByExpressionMultiMultiAuto(final GroupByQueryConfig config, SegmentWriteOutMediumFactory segmentWriteOutMediumFactory, boolean forceHashAggregation)
   {
+    initMultiValuedDimensionTest(config, segmentWriteOutMediumFactory, forceHashAggregation);
     GroupByQuery query = GroupByQuery
         .builder()
         .setDataSource("xx")
@@ -580,9 +593,11 @@ public class MultiValuedDimensionTest extends InitializedNullHandlingTest
     TestHelper.assertExpectedObjects(expectedResults, result.toList(), "expr-multi-multi-auto");
   }
 
-  @Test
-  public void testGroupByExpressionMultiMultiAutoAuto()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "groupby: {0} forceHashAggregation: {2} ({1})")
+  public void testGroupByExpressionMultiMultiAutoAuto(final GroupByQueryConfig config, SegmentWriteOutMediumFactory segmentWriteOutMediumFactory, boolean forceHashAggregation)
   {
+    initMultiValuedDimensionTest(config, segmentWriteOutMediumFactory, forceHashAggregation);
     GroupByQuery query = GroupByQuery
         .builder()
         .setDataSource("xx")
@@ -621,9 +636,11 @@ public class MultiValuedDimensionTest extends InitializedNullHandlingTest
     TestHelper.assertExpectedObjects(expectedResults, result.toList(), "expr-multi-multi-auto-auto");
   }
 
-  @Test
-  public void testGroupByExpressionMultiMultiAutoAutoDupeIdentifier()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "groupby: {0} forceHashAggregation: {2} ({1})")
+  public void testGroupByExpressionMultiMultiAutoAutoDupeIdentifier(final GroupByQueryConfig config, SegmentWriteOutMediumFactory segmentWriteOutMediumFactory, boolean forceHashAggregation)
   {
+    initMultiValuedDimensionTest(config, segmentWriteOutMediumFactory, forceHashAggregation);
     GroupByQuery query = GroupByQuery
         .builder()
         .setDataSource("xx")
@@ -669,9 +686,11 @@ public class MultiValuedDimensionTest extends InitializedNullHandlingTest
     TestHelper.assertExpectedObjects(expectedResults, result.toList(), "expr-multi-multi-auto-auto-self");
   }
 
-  @Test
-  public void testGroupByExpressionMultiMultiAutoAutoWithFilter()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "groupby: {0} forceHashAggregation: {2} ({1})")
+  public void testGroupByExpressionMultiMultiAutoAutoWithFilter(final GroupByQueryConfig config, SegmentWriteOutMediumFactory segmentWriteOutMediumFactory, boolean forceHashAggregation)
   {
+    initMultiValuedDimensionTest(config, segmentWriteOutMediumFactory, forceHashAggregation);
     GroupByQuery query = GroupByQuery
         .builder()
         .setDataSource("xx")
@@ -711,9 +730,11 @@ public class MultiValuedDimensionTest extends InitializedNullHandlingTest
     TestHelper.assertExpectedObjects(expectedResults, result.toList(), "expr-multi-multi-auto-auto");
   }
 
-  @Test
-  public void testGroupByExpressionAuto()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "groupby: {0} forceHashAggregation: {2} ({1})")
+  public void testGroupByExpressionAuto(final GroupByQueryConfig config, SegmentWriteOutMediumFactory segmentWriteOutMediumFactory, boolean forceHashAggregation)
   {
+    initMultiValuedDimensionTest(config, segmentWriteOutMediumFactory, forceHashAggregation);
     // virtual column is a single input column and input is not used explicitly as an array,
     // so this one will work for group by v1, even with multi-value inputs
     GroupByQuery query = GroupByQuery
@@ -756,9 +777,11 @@ public class MultiValuedDimensionTest extends InitializedNullHandlingTest
     TestHelper.assertExpectedObjects(expectedResults, result.toList(), "expr-auto");
   }
 
-  @Test
-  public void testGroupByExpressionArrayExpressionFilter()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "groupby: {0} forceHashAggregation: {2} ({1})")
+  public void testGroupByExpressionArrayExpressionFilter(final GroupByQueryConfig config, SegmentWriteOutMediumFactory segmentWriteOutMediumFactory, boolean forceHashAggregation)
   {
+    initMultiValuedDimensionTest(config, segmentWriteOutMediumFactory, forceHashAggregation);
     GroupByQuery query = GroupByQuery
         .builder()
         .setDataSource("xx")
@@ -802,9 +825,11 @@ public class MultiValuedDimensionTest extends InitializedNullHandlingTest
     TestHelper.assertExpectedObjects(expectedResults, result.toList(), "expr-auto");
   }
 
-  @Test
-  public void testGroupByExpressionArrayFnArg()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "groupby: {0} forceHashAggregation: {2} ({1})")
+  public void testGroupByExpressionArrayFnArg(final GroupByQueryConfig config, SegmentWriteOutMediumFactory segmentWriteOutMediumFactory, boolean forceHashAggregation)
   {
+    initMultiValuedDimensionTest(config, segmentWriteOutMediumFactory, forceHashAggregation);
     GroupByQuery query = GroupByQuery
         .builder()
         .setDataSource("xx")
@@ -841,9 +866,11 @@ public class MultiValuedDimensionTest extends InitializedNullHandlingTest
     TestHelper.assertExpectedObjects(expectedResults, result.toList(), "expr-array-fn");
   }
 
-  @Test
-  public void testGroupByExpressionAutoArrayFnArg()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "groupby: {0} forceHashAggregation: {2} ({1})")
+  public void testGroupByExpressionAutoArrayFnArg(final GroupByQueryConfig config, SegmentWriteOutMediumFactory segmentWriteOutMediumFactory, boolean forceHashAggregation)
   {
+    initMultiValuedDimensionTest(config, segmentWriteOutMediumFactory, forceHashAggregation);
     GroupByQuery query = GroupByQuery
         .builder()
         .setDataSource("xx")
@@ -880,9 +907,11 @@ public class MultiValuedDimensionTest extends InitializedNullHandlingTest
     TestHelper.assertExpectedObjects(expectedResults, result.toList(), "expr-arrayfn-auto");
   }
 
-  @Test
-  public void testGroupByExpressionFoldArrayToString()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "groupby: {0} forceHashAggregation: {2} ({1})")
+  public void testGroupByExpressionFoldArrayToString(final GroupByQueryConfig config, SegmentWriteOutMediumFactory segmentWriteOutMediumFactory, boolean forceHashAggregation)
   {
+    initMultiValuedDimensionTest(config, segmentWriteOutMediumFactory, forceHashAggregation);
     GroupByQuery query = GroupByQuery
         .builder()
         .setDataSource("xx")
@@ -927,9 +956,11 @@ public class MultiValuedDimensionTest extends InitializedNullHandlingTest
     TestHelper.assertExpectedObjects(expectedResults, result.toList(), "expr-arrayfn-auto");
   }
 
-  @Test
-  public void testGroupByExpressionFoldArrayToStringWithConcats()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "groupby: {0} forceHashAggregation: {2} ({1})")
+  public void testGroupByExpressionFoldArrayToStringWithConcats(final GroupByQueryConfig config, SegmentWriteOutMediumFactory segmentWriteOutMediumFactory, boolean forceHashAggregation)
   {
+    initMultiValuedDimensionTest(config, segmentWriteOutMediumFactory, forceHashAggregation);
     GroupByQuery query = GroupByQuery
         .builder()
         .setDataSource("xx")
@@ -967,79 +998,83 @@ public class MultiValuedDimensionTest extends InitializedNullHandlingTest
   }
 
 
-  @Test
-  public void testGroupByExpressionMultiConflicting()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "groupby: {0} forceHashAggregation: {2} ({1})")
+  public void testGroupByExpressionMultiConflicting(final GroupByQueryConfig config, SegmentWriteOutMediumFactory segmentWriteOutMediumFactory, boolean forceHashAggregation)
   {
-    expectedException.expect(RuntimeException.class);
-    expectedException.expectMessage(
-        "Invalid expression: (concat [(cartesian_map ([x, othertags] -> (concat [x, othertags])), [tags, othertags]), tags]); [tags] used as both scalar and array variables"
-    );
-    GroupByQuery query = GroupByQuery
-        .builder()
-        .setDataSource("xx")
-        .setQuerySegmentSpec(new LegacySegmentSpec("1970/3000"))
-        .setGranularity(Granularities.ALL)
-        .setDimensions(new DefaultDimensionSpec("texpr", "texpr"))
-        .setVirtualColumns(
-            new ExpressionVirtualColumn(
-                "texpr",
-                "concat(map((x) -> concat(x, othertags), tags), tags)",
-                ColumnType.STRING,
-                TestExprMacroTable.INSTANCE
-            )
-        )
-        .setLimit(5)
-        .setAggregatorSpecs(new CountAggregatorFactory("count"))
-        .setContext(context)
-        .build();
+    Throwable exception = assertThrows(RuntimeException.class, () -> {
+      initMultiValuedDimensionTest(config, segmentWriteOutMediumFactory, forceHashAggregation);
+      GroupByQuery query = GroupByQuery
+          .builder()
+          .setDataSource("xx")
+          .setQuerySegmentSpec(new LegacySegmentSpec("1970/3000"))
+          .setGranularity(Granularities.ALL)
+          .setDimensions(new DefaultDimensionSpec("texpr", "texpr"))
+          .setVirtualColumns(
+              new ExpressionVirtualColumn(
+                  "texpr",
+                  "concat(map((x) -> concat(x, othertags), tags), tags)",
+                  ColumnType.STRING,
+                  TestExprMacroTable.INSTANCE
+              )
+          )
+          .setLimit(5)
+          .setAggregatorSpecs(new CountAggregatorFactory("count"))
+          .setContext(context)
+          .build();
 
-    helper.runQueryOnSegmentsObjs(
-        ImmutableList.of(
-            new QueryableIndexSegment(queryableIndex, SegmentId.dummy("sid1")),
-            new IncrementalIndexSegment(incrementalIndex, SegmentId.dummy("sid2"))
-        ),
-        query
-    ).toList();
+      helper.runQueryOnSegmentsObjs(
+          ImmutableList.of(
+              new QueryableIndexSegment(queryableIndex, SegmentId.dummy("sid1")),
+              new IncrementalIndexSegment(incrementalIndex, SegmentId.dummy("sid2"))
+          ),
+          query
+      ).toList();
+    });
+    assertTrue(exception.getMessage().contains("Invalid expression: (concat [(cartesian_map ([x, othertags] -> (concat [x, othertags])), [tags, othertags]), tags]); [tags] used as both scalar and array variables"));
   }
 
-  @Test
-  public void testGroupByExpressionMultiConflictingAlso()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "groupby: {0} forceHashAggregation: {2} ({1})")
+  public void testGroupByExpressionMultiConflictingAlso(final GroupByQueryConfig config, SegmentWriteOutMediumFactory segmentWriteOutMediumFactory, boolean forceHashAggregation)
   {
-    expectedException.expect(RuntimeException.class);
-    expectedException.expectMessage(
-        "Invalid expression: (array_concat [tags, (array_append [othertags, tags])]); [tags] used as both scalar and array variables"
-    );
-    GroupByQuery query = GroupByQuery
-        .builder()
-        .setDataSource("xx")
-        .setQuerySegmentSpec(new LegacySegmentSpec("1970/3000"))
-        .setGranularity(Granularities.ALL)
-        .setDimensions(new DefaultDimensionSpec("texpr", "texpr"))
-        .setVirtualColumns(
-            new ExpressionVirtualColumn(
-                "texpr",
-                "array_concat(tags, (array_append(othertags, tags)))",
-                ColumnType.STRING,
-                TestExprMacroTable.INSTANCE
-            )
-        )
-        .setLimit(5)
-        .setAggregatorSpecs(new CountAggregatorFactory("count"))
-        .setContext(context)
-        .build();
+    Throwable exception = assertThrows(RuntimeException.class, () -> {
+      initMultiValuedDimensionTest(config, segmentWriteOutMediumFactory, forceHashAggregation);
+      GroupByQuery query = GroupByQuery
+          .builder()
+          .setDataSource("xx")
+          .setQuerySegmentSpec(new LegacySegmentSpec("1970/3000"))
+          .setGranularity(Granularities.ALL)
+          .setDimensions(new DefaultDimensionSpec("texpr", "texpr"))
+          .setVirtualColumns(
+              new ExpressionVirtualColumn(
+                  "texpr",
+                  "array_concat(tags, (array_append(othertags, tags)))",
+                  ColumnType.STRING,
+                  TestExprMacroTable.INSTANCE
+              )
+          )
+          .setLimit(5)
+          .setAggregatorSpecs(new CountAggregatorFactory("count"))
+          .setContext(context)
+          .build();
 
-    helper.runQueryOnSegmentsObjs(
-        ImmutableList.of(
-            new QueryableIndexSegment(queryableIndex, SegmentId.dummy("sid1")),
-            new IncrementalIndexSegment(incrementalIndex, SegmentId.dummy("sid2"))
-        ),
-        query
-    ).toList();
+      helper.runQueryOnSegmentsObjs(
+          ImmutableList.of(
+              new QueryableIndexSegment(queryableIndex, SegmentId.dummy("sid1")),
+              new IncrementalIndexSegment(incrementalIndex, SegmentId.dummy("sid2"))
+          ),
+          query
+      ).toList();
+    });
+    assertTrue(exception.getMessage().contains("Invalid expression: (array_concat [tags, (array_append [othertags, tags])]); [tags] used as both scalar and array variables"));
   }
 
-  @Test
-  public void testTopNWithDimFilterAndWithFilteredDimSpec()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "groupby: {0} forceHashAggregation: {2} ({1})")
+  public void testTopNWithDimFilterAndWithFilteredDimSpec(final GroupByQueryConfig config, SegmentWriteOutMediumFactory segmentWriteOutMediumFactory, boolean forceHashAggregation)
   {
+    initMultiValuedDimensionTest(config, segmentWriteOutMediumFactory, forceHashAggregation);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource("xx")
         .granularity(Granularities.ALL)
@@ -1084,9 +1119,11 @@ public class MultiValuedDimensionTest extends InitializedNullHandlingTest
     }
   }
 
-  @Test
-  public void testTopNExpression()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "groupby: {0} forceHashAggregation: {2} ({1})")
+  public void testTopNExpression(final GroupByQueryConfig config, SegmentWriteOutMediumFactory segmentWriteOutMediumFactory, boolean forceHashAggregation)
   {
+    initMultiValuedDimensionTest(config, segmentWriteOutMediumFactory, forceHashAggregation);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource("xx")
         .granularity(Granularities.ALL)
@@ -1146,9 +1183,11 @@ public class MultiValuedDimensionTest extends InitializedNullHandlingTest
     }
   }
 
-  @Test
-  public void testTopNExpressionAutoTransform()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "groupby: {0} forceHashAggregation: {2} ({1})")
+  public void testTopNExpressionAutoTransform(final GroupByQueryConfig config, SegmentWriteOutMediumFactory segmentWriteOutMediumFactory, boolean forceHashAggregation)
   {
+    initMultiValuedDimensionTest(config, segmentWriteOutMediumFactory, forceHashAggregation);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource("xx")
         .granularity(Granularities.ALL)
@@ -1204,7 +1243,7 @@ public class MultiValuedDimensionTest extends InitializedNullHandlingTest
     }
   }
 
-  @After
+  @AfterEach
   public void cleanup() throws Exception
   {
     queryableIndex.close();

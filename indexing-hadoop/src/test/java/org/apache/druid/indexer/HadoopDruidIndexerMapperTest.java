@@ -46,7 +46,6 @@ import org.apache.hadoop.mapreduce.Counter;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.easymock.EasyMock;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.io.DataInput;
 import java.io.DataOutput;

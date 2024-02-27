@@ -24,20 +24,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.apache.druid.java.util.common.HumanReadableBytes;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public class MaxSizeSplitHintSpecTest
 {
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
 
   @Test
   public void testSerde() throws IOException
@@ -46,7 +45,7 @@ public class MaxSizeSplitHintSpecTest
     final MaxSizeSplitHintSpec original = new MaxSizeSplitHintSpec(new HumanReadableBytes(1024L), 20_000);
     final byte[] bytes = mapper.writeValueAsBytes(original);
     final MaxSizeSplitHintSpec fromJson = (MaxSizeSplitHintSpec) mapper.readValue(bytes, SplitHintSpec.class);
-    Assert.assertEquals(original, fromJson);
+    Assertions.assertEquals(original, fromJson);
   }
 
   @Test
@@ -59,33 +58,35 @@ public class MaxSizeSplitHintSpecTest
                         + "  \"maxNumFiles\":20000"
                         + "}\n";
     final MaxSizeSplitHintSpec fromJson = (MaxSizeSplitHintSpec) mapper.readValue(json, SplitHintSpec.class);
-    Assert.assertEquals(new MaxSizeSplitHintSpec(new HumanReadableBytes(1024L), 20_000), fromJson);
+    Assertions.assertEquals(new MaxSizeSplitHintSpec(new HumanReadableBytes(1024L), 20_000), fromJson);
   }
 
   @Test
   public void testConstructorWith0MaxNumFiles()
   {
-    expectedException.expect(IllegalArgumentException.class);
-    expectedException.expectMessage("maxNumFiles should be larger than 0");
-    new MaxSizeSplitHintSpec(null, 0);
+    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
+      new MaxSizeSplitHintSpec(null, 0);
+    });
+    assertTrue(exception.getMessage().contains("maxNumFiles should be larger than 0"));
   }
 
   @Test
   public void testConstructorWith0MaxSplitSize()
   {
-    expectedException.expect(IllegalArgumentException.class);
-    expectedException.expectMessage("maxSplitSize should be larger than 0");
-    new MaxSizeSplitHintSpec(0, null);
+    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
+      new MaxSizeSplitHintSpec(0, null);
+    });
+    assertTrue(exception.getMessage().contains("maxSplitSize should be larger than 0"));
   }
 
   @Test
   public void testDefaults()
   {
-    Assert.assertEquals(
+    Assertions.assertEquals(
         MaxSizeSplitHintSpec.DEFAULT_MAX_SPLIT_SIZE,
         new MaxSizeSplitHintSpec(null, null).getMaxSplitSize()
     );
-    Assert.assertEquals(
+    Assertions.assertEquals(
         MaxSizeSplitHintSpec.DEFAULT_MAX_NUM_FILES,
         new MaxSizeSplitHintSpec(null, null).getMaxNumFiles()
     );
@@ -100,11 +101,11 @@ public class MaxSizeSplitHintSpecTest
     final List<List<Integer>> splits = Lists.newArrayList(
         splitHintSpec.split(IntStream.generate(() -> eachInputSize).limit(10).iterator(), inputAttributeExtractor)
     );
-    Assert.assertEquals(4, splits.size());
-    Assert.assertEquals(3, splits.get(0).size());
-    Assert.assertEquals(3, splits.get(1).size());
-    Assert.assertEquals(3, splits.get(2).size());
-    Assert.assertEquals(1, splits.get(3).size());
+    Assertions.assertEquals(4, splits.size());
+    Assertions.assertEquals(3, splits.get(0).size());
+    Assertions.assertEquals(3, splits.get(1).size());
+    Assertions.assertEquals(3, splits.get(2).size());
+    Assertions.assertEquals(1, splits.get(3).size());
   }
 
   @Test
@@ -116,9 +117,9 @@ public class MaxSizeSplitHintSpecTest
     final List<List<Integer>> splits = Lists.newArrayList(
         splitHintSpec.split(IntStream.generate(() -> eachInputSize).limit(10).iterator(), inputAttributeExtractor)
     );
-    Assert.assertEquals(10, splits.size());
+    Assertions.assertEquals(10, splits.size());
     for (List<Integer> split : splits) {
-      Assert.assertEquals(1, split.size());
+      Assertions.assertEquals(1, split.size());
     }
   }
 
@@ -131,11 +132,11 @@ public class MaxSizeSplitHintSpecTest
     final List<List<Integer>> splits = Lists.newArrayList(
         splitHintSpec.split(IntStream.generate(() -> eachInputSize).limit(10).iterator(), inputAttributeExtractor)
     );
-    Assert.assertEquals(4, splits.size());
-    Assert.assertEquals(3, splits.get(0).size());
-    Assert.assertEquals(3, splits.get(1).size());
-    Assert.assertEquals(3, splits.get(2).size());
-    Assert.assertEquals(1, splits.get(3).size());
+    Assertions.assertEquals(4, splits.size());
+    Assertions.assertEquals(3, splits.get(0).size());
+    Assertions.assertEquals(3, splits.get(1).size());
+    Assertions.assertEquals(3, splits.get(2).size());
+    Assertions.assertEquals(1, splits.get(3).size());
   }
 
   @Test

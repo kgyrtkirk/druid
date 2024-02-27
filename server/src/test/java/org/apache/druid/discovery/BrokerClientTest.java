@@ -39,8 +39,8 @@ import org.apache.druid.server.initialization.jetty.JettyServerInitializer;
 import org.easymock.EasyMock;
 import org.eclipse.jetty.server.Server;
 import org.jboss.netty.handler.codec.http.HttpMethod;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -97,7 +97,7 @@ public class BrokerClientTest extends BaseJettyTest
 
     Request request = brokerClient.makeRequest(HttpMethod.POST, "/simple/direct");
     request.setContent("hello".getBytes(StandardCharsets.UTF_8));
-    Assert.assertEquals("hello", brokerClient.sendQuery(request));
+    Assertions.assertEquals("hello", brokerClient.sendQuery(request));
   }
 
   @Test
@@ -118,7 +118,7 @@ public class BrokerClientTest extends BaseJettyTest
 
     Request request = brokerClient.makeRequest(HttpMethod.POST, "/simple/flakey");
     request.setContent("hello".getBytes(StandardCharsets.UTF_8));
-    Assert.assertEquals("hello", brokerClient.sendQuery(request));
+    Assertions.assertEquals("hello", brokerClient.sendQuery(request));
   }
 
   @Path("/simple")

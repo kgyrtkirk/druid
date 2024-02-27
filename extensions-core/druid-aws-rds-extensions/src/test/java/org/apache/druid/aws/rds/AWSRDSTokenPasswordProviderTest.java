@@ -26,7 +26,6 @@ import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.druid.metadata.PasswordProvider;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.io.IOException;
 

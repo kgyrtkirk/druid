@@ -25,7 +25,6 @@ import org.apache.druid.jackson.DefaultObjectMapper;
 import org.apache.druid.query.aggregation.PostAggregator;
 import org.apache.druid.query.aggregation.post.FieldAccessPostAggregator;
 import org.junit.Assert;
-import org.junit.Test;
 
 public class KllFloatsSketchToQuantilePostAggregatorTest
 {

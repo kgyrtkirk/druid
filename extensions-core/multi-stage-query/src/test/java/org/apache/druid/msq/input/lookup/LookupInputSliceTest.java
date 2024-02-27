@@ -25,7 +25,6 @@ import org.apache.druid.msq.guice.MSQIndexingModule;
 import org.apache.druid.msq.input.InputSlice;
 import org.apache.druid.segment.TestHelper;
 import org.junit.Assert;
-import org.junit.Test;
 
 public class LookupInputSliceTest
 {

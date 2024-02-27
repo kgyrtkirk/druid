@@ -22,8 +22,8 @@ package org.apache.druid.concurrent;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.apache.druid.java.util.common.concurrent.Execs;
 import org.apache.druid.java.util.common.logger.Logger;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -106,13 +106,13 @@ public class ExecsTest
     // it could be doing nothing for any reason). But waiting a short period of time and checking that it hasn't done
     // anything should hopefully be sufficient.
     Thread.sleep(500);
-    Assert.assertEquals(capacity + 1, producedCount.get());
+    Assertions.assertEquals(capacity + 1, producedCount.get());
     // let the tasks run
     taskStartSignal.countDown();
     // wait until all tasks complete
     taskCompletedSignal.await();
     // verify all tasks consumed
-    Assert.assertEquals(nTasks, consumedCount.get());
+    Assertions.assertEquals(nTasks, consumedCount.get());
     // cleanup
     blockingExecutor.shutdown();
     producer.shutdown();
@@ -121,6 +121,6 @@ public class ExecsTest
   @Test
   public void testDirectExecutorFactory()
   {
-    Assert.assertNotNull(Execs.directExecutor());
+    Assertions.assertNotNull(Execs.directExecutor());
   }
 }

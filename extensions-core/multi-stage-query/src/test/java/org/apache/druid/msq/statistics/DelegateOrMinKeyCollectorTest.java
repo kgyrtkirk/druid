@@ -32,7 +32,6 @@ import org.apache.druid.segment.column.RowSignature;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.util.Comparator;
 import java.util.NoSuchElementException;

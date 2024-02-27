@@ -50,12 +50,11 @@ import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.apache.druid.timeline.SegmentId;
 import org.apache.druid.timeline.partition.NoneShardSpec;
 import org.joda.time.Interval;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -65,7 +64,6 @@ import java.util.List;
 /**
  *
  */
-@RunWith(Parameterized.class)
 public class MultiSegmentScanQueryTest extends InitializedNullHandlingTest
 {
   private static final ScanQueryQueryToolChest TOOL_CHEST = new ScanQueryQueryToolChest(
@@ -117,7 +115,7 @@ public class MultiSegmentScanQueryTest extends InitializedNullHandlingTest
   private static Segment segment0;
   private static Segment segment1;
 
-  @BeforeClass
+  @BeforeAll
   public static void setup() throws IOException
   {
     CharSource v_0112 = CharSource.wrap(StringUtils.join(V_0112, "\n"));
@@ -158,14 +156,13 @@ public class MultiSegmentScanQueryTest extends InitializedNullHandlingTest
         .build();
   }
 
-  @AfterClass
+  @AfterAll
   public static void clear()
   {
     IOUtils.closeQuietly(segment0);
     IOUtils.closeQuietly(segment1);
   }
 
-  @Parameterized.Parameters(name = "limit={0},offset={1},batchSize={2}")
   public static Iterable<Object[]> constructorFeeder()
   {
     return QueryRunnerTestHelper.cartesian(
@@ -175,11 +172,11 @@ public class MultiSegmentScanQueryTest extends InitializedNullHandlingTest
     );
   }
 
-  private final int limit;
-  private final int offset;
-  private final int batchSize;
+  private int limit;
+  private int offset;
+  private int batchSize;
 
-  public MultiSegmentScanQueryTest(int limit, int offset, int batchSize)
+  public void initMultiSegmentScanQueryTest(int limit, int offset, int batchSize)
   {
     this.limit = limit;
     this.offset = offset;
@@ -198,9 +195,11 @@ public class MultiSegmentScanQueryTest extends InitializedNullHandlingTest
                  .offset(offset);
   }
 
-  @Test
-  public void testMergeRunnersWithLimitAndOffset()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "limit={0},offset={1},batchSize={2}")
+  public void testMergeRunnersWithLimitAndOffset(int limit, int offset, int batchSize)
   {
+    initMultiSegmentScanQueryTest(limit, offset, batchSize);
     ScanQuery query = newBuilder().build();
     List<ScanResultValue> results = FACTORY
         .mergeRunners(
@@ -213,15 +212,17 @@ public class MultiSegmentScanQueryTest extends InitializedNullHandlingTest
     for (ScanResultValue result : results) {
       totalCount += ((List) result.getEvents()).size();
     }
-    Assert.assertEquals(
+    Assertions.assertEquals(
         totalCount,
         limit != 0 ? Math.min(limit, V_0112.length + V_0113.length) : V_0112.length + V_0113.length
     );
   }
 
-  @Test
-  public void testMergeResultsWithLimitAndOffset()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "limit={0},offset={1},batchSize={2}")
+  public void testMergeResultsWithLimitAndOffset(int limit, int offset, int batchSize)
   {
+    initMultiSegmentScanQueryTest(limit, offset, batchSize);
     QueryRunner<ScanResultValue> runner = TOOL_CHEST.mergeResults(
         (queryPlus, responseContext) -> {
           // simulate results back from 2 historicals
@@ -240,7 +241,7 @@ public class MultiSegmentScanQueryTest extends InitializedNullHandlingTest
     for (ScanResultValue result : results) {
       totalCount += ((List) result.getEvents()).size();
     }
-    Assert.assertEquals(
+    Assertions.assertEquals(
         totalCount,
         Math.max(
             0,

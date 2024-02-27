@@ -41,7 +41,6 @@ import org.apache.druid.segment.column.ColumnType;
 import org.easymock.EasyMock;
 import org.junit.Assert;
 import org.junit.Rule;
-import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import java.util.Arrays;

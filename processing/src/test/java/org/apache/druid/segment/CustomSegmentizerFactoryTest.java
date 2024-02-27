@@ -35,11 +35,10 @@ import org.apache.druid.segment.loading.SegmentizerFactory;
 import org.apache.druid.segment.writeout.OffHeapMemorySegmentWriteOutMediumFactory;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.apache.druid.timeline.DataSegment;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
 import java.io.IOException;
@@ -50,10 +49,10 @@ public class CustomSegmentizerFactoryTest extends InitializedNullHandlingTest
   private static IndexIO INDEX_IO;
   private static IndexMerger INDEX_MERGER;
 
-  @Rule
-  public TemporaryFolder temporaryFolder = new TemporaryFolder();
+  @TempDir
+  public File temporaryFolder;
 
-  @BeforeClass
+  @BeforeAll
   public static void setup()
   {
     final ObjectMapper mapper = new DefaultObjectMapper();
@@ -78,7 +77,7 @@ public class CustomSegmentizerFactoryTest extends InitializedNullHandlingTest
   public void testDefaultSegmentizerPersist() throws IOException
   {
     IncrementalIndex data = TestIndex.makeRealtimeIndex("druid.sample.numeric.tsv");
-    File segment = new File(temporaryFolder.newFolder(), "segment");
+    File segment = new File(newFolder(temporaryFolder, "junit"), "segment");
     File persisted = INDEX_MERGER.persist(
         data,
         Intervals.of("2011-01-12T00:00:00.000Z/2011-05-01T00:00:00.000Z"),
@@ -88,16 +87,16 @@ public class CustomSegmentizerFactoryTest extends InitializedNullHandlingTest
     );
 
     File factoryJson = new File(persisted, "factory.json");
-    Assert.assertTrue(factoryJson.exists());
+    Assertions.assertTrue(factoryJson.exists());
     SegmentizerFactory factory = JSON_MAPPER.readValue(factoryJson, SegmentizerFactory.class);
-    Assert.assertTrue(factory instanceof MMappedQueryableSegmentizerFactory);
+    Assertions.assertTrue(factory instanceof MMappedQueryableSegmentizerFactory);
   }
 
   @Test
   public void testCustomSegmentizerPersist() throws IOException
   {
     IncrementalIndex data = TestIndex.makeRealtimeIndex("druid.sample.numeric.tsv");
-    File segment = new File(temporaryFolder.newFolder(), "segment");
+    File segment = new File(newFolder(temporaryFolder, "junit"), "segment");
     File persisted = INDEX_MERGER.persist(
         data,
         Intervals.of("2011-01-12T00:00:00.000Z/2011-05-01T00:00:00.000Z"),
@@ -107,9 +106,9 @@ public class CustomSegmentizerFactoryTest extends InitializedNullHandlingTest
     );
 
     File factoryJson = new File(persisted, "factory.json");
-    Assert.assertTrue(factoryJson.exists());
+    Assertions.assertTrue(factoryJson.exists());
     SegmentizerFactory factory = JSON_MAPPER.readValue(factoryJson, SegmentizerFactory.class);
-    Assert.assertTrue(factory instanceof CustomSegmentizerFactory);
+    Assertions.assertTrue(factory instanceof CustomSegmentizerFactory);
   }
 
   private static class CustomSegmentizerFactory implements SegmentizerFactory
@@ -124,5 +123,23 @@ public class CustomSegmentizerFactoryTest extends InitializedNullHandlingTest
         throw new SegmentLoadingException(e, "%s", e.getMessage());
       }
     }
+
+    private static File newFolder(File root, String... subDirs) throws IOException {
+      String subFolder = String.join("/", subDirs);
+      File result = new File(root, subFolder);
+      if (!result.mkdirs()) {
+        throw new IOException("Couldn't create folders " + root);
+      }
+      return result;
+    }
+  }
+
+  private static File newFolder(File root, String... subDirs) throws IOException {
+    String subFolder = String.join("/", subDirs);
+    File result = new File(root, subFolder);
+    if (!result.mkdirs()) {
+      throw new IOException("Couldn't create folders " + root);
+    }
+    return result;
   }
 }

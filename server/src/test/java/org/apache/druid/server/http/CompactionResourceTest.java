@@ -24,10 +24,10 @@ import com.google.common.collect.ImmutableMap;
 import org.apache.druid.server.coordinator.AutoCompactionSnapshot;
 import org.apache.druid.server.coordinator.DruidCoordinator;
 import org.easymock.EasyMock;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.ws.rs.core.Response;
 import java.util.Map;
@@ -50,13 +50,13 @@ public class CompactionResourceTest
       1
   );
 
-  @Before
+  @BeforeEach
   public void setUp()
   {
     mock = EasyMock.createStrictMock(DruidCoordinator.class);
   }
 
-  @After
+  @AfterEach
   public void tearDown()
   {
     EasyMock.verify(mock);
@@ -74,8 +74,8 @@ public class CompactionResourceTest
     EasyMock.replay(mock);
 
     final Response response = new CompactionResource(mock).getCompactionSnapshotForDataSource("");
-    Assert.assertEquals(ImmutableMap.of("latestStatus", expected.values()), response.getEntity());
-    Assert.assertEquals(200, response.getStatus());
+    Assertions.assertEquals(ImmutableMap.of("latestStatus", expected.values()), response.getEntity());
+    Assertions.assertEquals(200, response.getStatus());
   }
 
   @Test
@@ -91,8 +91,8 @@ public class CompactionResourceTest
     EasyMock.replay(mock);
 
     final Response response = new CompactionResource(mock).getCompactionSnapshotForDataSource(null);
-    Assert.assertEquals(ImmutableMap.of("latestStatus", expected.values()), response.getEntity());
-    Assert.assertEquals(200, response.getStatus());
+    Assertions.assertEquals(ImmutableMap.of("latestStatus", expected.values()), response.getEntity());
+    Assertions.assertEquals(200, response.getStatus());
   }
 
   @Test
@@ -104,8 +104,8 @@ public class CompactionResourceTest
     EasyMock.replay(mock);
 
     final Response response = new CompactionResource(mock).getCompactionSnapshotForDataSource(dataSourceName);
-    Assert.assertEquals(ImmutableMap.of("latestStatus", ImmutableList.of(expectedSnapshot)), response.getEntity());
-    Assert.assertEquals(200, response.getStatus());
+    Assertions.assertEquals(ImmutableMap.of("latestStatus", ImmutableList.of(expectedSnapshot)), response.getEntity());
+    Assertions.assertEquals(200, response.getStatus());
   }
 
   @Test
@@ -117,6 +117,6 @@ public class CompactionResourceTest
     EasyMock.replay(mock);
 
     final Response response = new CompactionResource(mock).getCompactionSnapshotForDataSource(dataSourceName);
-    Assert.assertEquals(404, response.getStatus());
+    Assertions.assertEquals(404, response.getStatus());
   }
 }

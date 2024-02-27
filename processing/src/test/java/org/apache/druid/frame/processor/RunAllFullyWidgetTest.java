@@ -44,15 +44,14 @@ import org.apache.druid.java.util.common.guava.Sequences;
 import org.apache.druid.segment.QueryableIndexStorageAdapter;
 import org.apache.druid.segment.TestIndex;
 import org.hamcrest.CoreMatchers;
-import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
 import org.junit.internal.matchers.ThrowableMessageMatcher;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -61,17 +60,19 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-@RunWith(Parameterized.class)
+import static org.hamcrest.MatcherAssert.assertThat;
+
 public class RunAllFullyWidgetTest extends FrameProcessorExecutorTest.BaseFrameProcessorExecutorTestSuite
 {
-  private final int bouncerPoolSize;
-  private final int maxOutstandingProcessors;
-  private final boolean delayed;
+  private int bouncerPoolSize;
+  private int maxOutstandingProcessors;
+  private boolean delayed;
   private final AtomicLong closed = new AtomicLong();
 
   private Bouncer bouncer;
@@ -82,7 +83,7 @@ public class RunAllFullyWidgetTest extends FrameProcessorExecutorTest.BaseFrameP
   @GuardedBy("this")
   private int concurrentNow = 0;
 
-  public RunAllFullyWidgetTest(int numThreads, int bouncerPoolSize, int maxOutstandingProcessors, boolean delayed)
+  public void initRunAllFullyWidgetTest(int numThreads, int bouncerPoolSize, int maxOutstandingProcessors, boolean delayed)
   {
     super(numThreads);
     this.bouncerPoolSize = bouncerPoolSize;
@@ -90,8 +91,6 @@ public class RunAllFullyWidgetTest extends FrameProcessorExecutorTest.BaseFrameP
     this.delayed = delayed;
   }
 
-  @Parameterized.Parameters(name =
-      "numThreads = {0}, bouncerPoolSize = {1}, maxOutstandingProcessors = {2}, delayed = {3}")
   public static Collection<Object[]> constructorFeeder()
   {
     final List<Object[]> constructors = new ArrayList<>();
@@ -109,7 +108,7 @@ public class RunAllFullyWidgetTest extends FrameProcessorExecutorTest.BaseFrameP
     return constructors;
   }
 
-  @Before
+  @BeforeEach
   @Override
   public void setUp() throws Exception
   {
@@ -122,26 +121,29 @@ public class RunAllFullyWidgetTest extends FrameProcessorExecutorTest.BaseFrameP
     }
   }
 
-  @After
+  @AfterEach
   @Override
   public void tearDown() throws Exception
   {
     super.tearDown(); // Stops exec, waits for termination
 
     synchronized (this) {
-      Assert.assertEquals(0, concurrentNow);
-      MatcherAssert.assertThat(concurrentHighWatermark, Matchers.lessThanOrEqualTo(bouncerPoolSize));
-      MatcherAssert.assertThat(concurrentHighWatermark, Matchers.lessThanOrEqualTo(maxOutstandingProcessors));
+      Assertions.assertEquals(0, concurrentNow);
+      assertThat(concurrentHighWatermark, Matchers.lessThanOrEqualTo(bouncerPoolSize));
+      assertThat(concurrentHighWatermark, Matchers.lessThanOrEqualTo(maxOutstandingProcessors));
     }
 
-    Assert.assertEquals("Bouncer current running count", 0, bouncer.getCurrentCount());
-    Assert.assertEquals("Bouncer max pool size", bouncerPoolSize, bouncer.getMaxCount());
-    Assert.assertEquals("Encountered single close (from ensureClose)", 1, closed.get());
+    Assertions.assertEquals(0, bouncer.getCurrentCount(), "Bouncer current running count");
+    Assertions.assertEquals(bouncerPoolSize, bouncer.getMaxCount(), "Bouncer max pool size");
+    Assertions.assertEquals(1, closed.get(), "Encountered single close (from ensureClose)");
   }
 
-  @Test
-  public void test_runAllFully_emptyChannel() throws Exception
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name =
+      "numThreads = {0}, bouncerPoolSize = {1}, maxOutstandingProcessors = {2}, delayed = {3}")
+  public void test_runAllFully_emptyChannel(int numThreads, int bouncerPoolSize, int maxOutstandingProcessors, boolean delayed) throws Exception
   {
+    initRunAllFullyWidgetTest(numThreads, bouncerPoolSize, maxOutstandingProcessors, delayed);
     final ListenableFuture<String> future = exec.runAllFully(
         possiblyDelay(ensureClose(ProcessorManagers.none().withAccumulation("xyzzy", (s1, s2) -> s1 + s2))),
         maxOutstandingProcessors,
@@ -149,12 +151,15 @@ public class RunAllFullyWidgetTest extends FrameProcessorExecutorTest.BaseFrameP
         null
     );
 
-    Assert.assertEquals("xyzzy", future.get());
+    Assertions.assertEquals("xyzzy", future.get());
   }
 
-  @Test
-  public void test_runAllFully_fiftyThousandProcessors() throws Exception
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name =
+      "numThreads = {0}, bouncerPoolSize = {1}, maxOutstandingProcessors = {2}, delayed = {3}")
+  public void test_runAllFully_fiftyThousandProcessors(int numThreads, int bouncerPoolSize, int maxOutstandingProcessors, boolean delayed) throws Exception
   {
+    initRunAllFullyWidgetTest(numThreads, bouncerPoolSize, maxOutstandingProcessors, delayed);
     final int numProcessors = 100;
 
     // Doesn't matter what's in this frame.
@@ -194,12 +199,15 @@ public class RunAllFullyWidgetTest extends FrameProcessorExecutorTest.BaseFrameP
         null
     );
 
-    Assert.assertEquals(numProcessors, (long) future.get());
+    Assertions.assertEquals(numProcessors, (long) future.get());
   }
 
-  @Test
-  public void test_runAllFully_failing()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name =
+      "numThreads = {0}, bouncerPoolSize = {1}, maxOutstandingProcessors = {2}, delayed = {3}")
+  public void test_runAllFully_failing(int numThreads, int bouncerPoolSize, int maxOutstandingProcessors, boolean delayed)
   {
+    initRunAllFullyWidgetTest(numThreads, bouncerPoolSize, maxOutstandingProcessors, delayed);
     final ListenableFuture<Long> future = exec.runAllFully(
         possiblyDelay(
             ensureClose(
@@ -224,18 +232,21 @@ public class RunAllFullyWidgetTest extends FrameProcessorExecutorTest.BaseFrameP
         null
     );
 
-    final ExecutionException e = Assert.assertThrows(ExecutionException.class, future::get);
-    MatcherAssert.assertThat(e.getCause(), CoreMatchers.instanceOf(RuntimeException.class));
-    MatcherAssert.assertThat(e.getCause().getCause(), CoreMatchers.instanceOf(RuntimeException.class));
-    MatcherAssert.assertThat(
+    final ExecutionException e = Assertions.assertThrows(ExecutionException.class, future::get);
+    assertThat(e.getCause(), CoreMatchers.instanceOf(RuntimeException.class));
+    assertThat(e.getCause().getCause(), CoreMatchers.instanceOf(RuntimeException.class));
+    assertThat(
         e.getCause().getCause(),
         ThrowableMessageMatcher.hasMessage(CoreMatchers.equalTo("failure!"))
     );
   }
 
-  @Test
-  public void test_runAllFully_errorAccumulateFn()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name =
+      "numThreads = {0}, bouncerPoolSize = {1}, maxOutstandingProcessors = {2}, delayed = {3}")
+  public void test_runAllFully_errorAccumulateFn(int numThreads, int bouncerPoolSize, int maxOutstandingProcessors, boolean delayed)
   {
+    initRunAllFullyWidgetTest(numThreads, bouncerPoolSize, maxOutstandingProcessors, delayed);
     final ListenableFuture<Long> future = exec.runAllFully(
         possiblyDelay(
             ensureClose(
@@ -257,14 +268,17 @@ public class RunAllFullyWidgetTest extends FrameProcessorExecutorTest.BaseFrameP
         null
     );
 
-    final ExecutionException e = Assert.assertThrows(ExecutionException.class, future::get);
-    MatcherAssert.assertThat(e.getCause(), CoreMatchers.instanceOf(IllegalStateException.class));
-    MatcherAssert.assertThat(e.getCause(), ThrowableMessageMatcher.hasMessage(CoreMatchers.equalTo("error!")));
+    final ExecutionException e = Assertions.assertThrows(ExecutionException.class, future::get);
+    assertThat(e.getCause(), CoreMatchers.instanceOf(IllegalStateException.class));
+    assertThat(e.getCause(), ThrowableMessageMatcher.hasMessage(CoreMatchers.equalTo("error!")));
   }
 
-  @Test
-  public void test_runAllFully_errorChannelFirstElement()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name =
+      "numThreads = {0}, bouncerPoolSize = {1}, maxOutstandingProcessors = {2}, delayed = {3}")
+  public void test_runAllFully_errorChannelFirstElement(int numThreads, int bouncerPoolSize, int maxOutstandingProcessors, boolean delayed)
   {
+    initRunAllFullyWidgetTest(numThreads, bouncerPoolSize, maxOutstandingProcessors, delayed);
     final ListenableFuture<Long> future = exec.runAllFully(
         possiblyDelay(
             new ThrowOnNextProcessorManager<>(
@@ -284,14 +298,17 @@ public class RunAllFullyWidgetTest extends FrameProcessorExecutorTest.BaseFrameP
         null
     );
 
-    final ExecutionException e = Assert.assertThrows(ExecutionException.class, future::get);
-    MatcherAssert.assertThat(e.getCause(), CoreMatchers.instanceOf(IllegalStateException.class));
-    MatcherAssert.assertThat(e.getCause(), ThrowableMessageMatcher.hasMessage(CoreMatchers.equalTo("error!")));
+    final ExecutionException e = Assertions.assertThrows(ExecutionException.class, future::get);
+    assertThat(e.getCause(), CoreMatchers.instanceOf(IllegalStateException.class));
+    assertThat(e.getCause(), ThrowableMessageMatcher.hasMessage(CoreMatchers.equalTo("error!")));
   }
 
-  @Test
-  public void test_runAllFully_errorChannelSecondElement()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name =
+      "numThreads = {0}, bouncerPoolSize = {1}, maxOutstandingProcessors = {2}, delayed = {3}")
+  public void test_runAllFully_errorChannelSecondElement(int numThreads, int bouncerPoolSize, int maxOutstandingProcessors, boolean delayed)
   {
+    initRunAllFullyWidgetTest(numThreads, bouncerPoolSize, maxOutstandingProcessors, delayed);
     final ListenableFuture<Long> future = exec.runAllFully(
         possiblyDelay(
             new ThrowOnNextProcessorManager<>(
@@ -311,14 +328,17 @@ public class RunAllFullyWidgetTest extends FrameProcessorExecutorTest.BaseFrameP
         null
     );
 
-    final ExecutionException e = Assert.assertThrows(ExecutionException.class, future::get);
-    MatcherAssert.assertThat(e.getCause(), CoreMatchers.instanceOf(IllegalStateException.class));
-    MatcherAssert.assertThat(e.getCause(), ThrowableMessageMatcher.hasMessage(CoreMatchers.equalTo("error!")));
+    final ExecutionException e = Assertions.assertThrows(ExecutionException.class, future::get);
+    assertThat(e.getCause(), CoreMatchers.instanceOf(IllegalStateException.class));
+    assertThat(e.getCause(), ThrowableMessageMatcher.hasMessage(CoreMatchers.equalTo("error!")));
   }
 
-  @Test
-  public void test_runAllFully_errorChannelHundredthElement()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name =
+      "numThreads = {0}, bouncerPoolSize = {1}, maxOutstandingProcessors = {2}, delayed = {3}")
+  public void test_runAllFully_errorChannelHundredthElement(int numThreads, int bouncerPoolSize, int maxOutstandingProcessors, boolean delayed)
   {
+    initRunAllFullyWidgetTest(numThreads, bouncerPoolSize, maxOutstandingProcessors, delayed);
     final ListenableFuture<Long> future = exec.runAllFully(
         possiblyDelay(
             new ThrowOnNextProcessorManager<>(
@@ -338,14 +358,17 @@ public class RunAllFullyWidgetTest extends FrameProcessorExecutorTest.BaseFrameP
         null
     );
 
-    final ExecutionException e = Assert.assertThrows(ExecutionException.class, future::get);
-    MatcherAssert.assertThat(e.getCause(), CoreMatchers.instanceOf(IllegalStateException.class));
-    MatcherAssert.assertThat(e.getCause(), ThrowableMessageMatcher.hasMessage(CoreMatchers.equalTo("error!")));
+    final ExecutionException e = Assertions.assertThrows(ExecutionException.class, future::get);
+    assertThat(e.getCause(), CoreMatchers.instanceOf(IllegalStateException.class));
+    assertThat(e.getCause(), ThrowableMessageMatcher.hasMessage(CoreMatchers.equalTo("error!")));
   }
 
-  @Test
-  public void test_runAllFully_errorChannelClose()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name =
+      "numThreads = {0}, bouncerPoolSize = {1}, maxOutstandingProcessors = {2}, delayed = {3}")
+  public void test_runAllFully_errorChannelClose(int numThreads, int bouncerPoolSize, int maxOutstandingProcessors, boolean delayed)
   {
+    initRunAllFullyWidgetTest(numThreads, bouncerPoolSize, maxOutstandingProcessors, delayed);
     final ListenableFuture<Long> future = exec.runAllFully(
         possiblyDelay(
             new ThrowOnCloseProcessorManager<>(
@@ -364,14 +387,17 @@ public class RunAllFullyWidgetTest extends FrameProcessorExecutorTest.BaseFrameP
         null
     );
 
-    final ExecutionException e = Assert.assertThrows(ExecutionException.class, future::get);
-    MatcherAssert.assertThat(e.getCause(), CoreMatchers.instanceOf(IllegalStateException.class));
-    MatcherAssert.assertThat(e.getCause(), ThrowableMessageMatcher.hasMessage(CoreMatchers.equalTo("error!")));
+    final ExecutionException e = Assertions.assertThrows(ExecutionException.class, future::get);
+    assertThat(e.getCause(), CoreMatchers.instanceOf(IllegalStateException.class));
+    assertThat(e.getCause(), ThrowableMessageMatcher.hasMessage(CoreMatchers.equalTo("error!")));
   }
 
-  @Test
-  public void test_runAllFully_errorChannelSecondElementAndClose()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name =
+      "numThreads = {0}, bouncerPoolSize = {1}, maxOutstandingProcessors = {2}, delayed = {3}")
+  public void test_runAllFully_errorChannelSecondElementAndClose(int numThreads, int bouncerPoolSize, int maxOutstandingProcessors, boolean delayed)
   {
+    initRunAllFullyWidgetTest(numThreads, bouncerPoolSize, maxOutstandingProcessors, delayed);
     final ListenableFuture<Long> future = exec.runAllFully(
         possiblyDelay(
             new ThrowOnCloseProcessorManager<>(
@@ -393,15 +419,19 @@ public class RunAllFullyWidgetTest extends FrameProcessorExecutorTest.BaseFrameP
         null
     );
 
-    final ExecutionException e = Assert.assertThrows(ExecutionException.class, future::get);
-    MatcherAssert.assertThat(e.getCause(), CoreMatchers.instanceOf(IllegalStateException.class));
-    MatcherAssert.assertThat(e.getCause(), ThrowableMessageMatcher.hasMessage(CoreMatchers.equalTo("error!")));
+    final ExecutionException e = Assertions.assertThrows(ExecutionException.class, future::get);
+    assertThat(e.getCause(), CoreMatchers.instanceOf(IllegalStateException.class));
+    assertThat(e.getCause(), ThrowableMessageMatcher.hasMessage(CoreMatchers.equalTo("error!")));
   }
 
-  @Test(timeout = 30_000L)
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name =
+      "numThreads = {0}, bouncerPoolSize = {1}, maxOutstandingProcessors = {2}, delayed = {3}")
+  @Timeout(value = 30_000L, unit = TimeUnit.MILLISECONDS)
   @SuppressWarnings("BusyWait")
-  public void test_runAllFully_futureCancel() throws InterruptedException
+  public void test_runAllFully_futureCancel(int numThreads, int bouncerPoolSize, int maxOutstandingProcessors, boolean delayed) throws InterruptedException
   {
+    initRunAllFullyWidgetTest(numThreads, bouncerPoolSize, maxOutstandingProcessors, delayed);
     final int expectedRunningProcessors = Math.min(Math.min(bouncerPoolSize, maxOutstandingProcessors), numThreads);
 
     final List<SleepyFrameProcessor> processors =
@@ -425,15 +455,15 @@ public class RunAllFullyWidgetTest extends FrameProcessorExecutorTest.BaseFrameP
       processors.get(i).awaitRun();
     }
 
-    Assert.assertTrue(future.cancel(true));
-    Assert.assertTrue(future.isCancelled());
+    Assertions.assertTrue(future.cancel(true));
+    Assertions.assertTrue(future.isCancelled());
 
     // We don't have a good way to wait for future cancellation to truly finish. Resort to a waiting-loop.
     while (exec.cancelableProcessorCount() > 0) {
       Thread.sleep(10);
     }
 
-    Assert.assertEquals(0, exec.cancelableProcessorCount());
+    Assertions.assertEquals(0, exec.cancelableProcessorCount());
   }
 
   /**
@@ -463,7 +493,7 @@ public class RunAllFullyWidgetTest extends FrameProcessorExecutorTest.BaseFrameP
     private final AtomicBoolean didCleanup = new AtomicBoolean(false);
     private final FrameProcessor<T> delegate;
 
-    public ConcurrencyTrackingFrameProcessor(FrameProcessor<T> delegate)
+    public void initRunAllFullyWidgetTest(FrameProcessor<T> delegate)
     {
       this.delegate = delegate;
     }
@@ -518,7 +548,7 @@ public class RunAllFullyWidgetTest extends FrameProcessorExecutorTest.BaseFrameP
   {
     private final ProcessorManager<T, R> delegate;
 
-    public EnsureCloseProcessorManager(ProcessorManager<T, R> delegate)
+    public void initRunAllFullyWidgetTest(ProcessorManager<T, R> delegate)
     {
       this.delegate = delegate;
     }
@@ -551,7 +581,7 @@ public class RunAllFullyWidgetTest extends FrameProcessorExecutorTest.BaseFrameP
     private final ProcessorManager<T, R> delegate;
     private int i;
 
-    public ThrowOnNextProcessorManager(final ProcessorManager<T, R> delegate, final int i)
+    public void initRunAllFullyWidgetTest(final ProcessorManager<T, R> delegate, final int i)
     {
       this.delegate = delegate;
       this.i = i;
@@ -588,7 +618,7 @@ public class RunAllFullyWidgetTest extends FrameProcessorExecutorTest.BaseFrameP
   {
     private final ProcessorManager<T, R> delegate;
 
-    public ThrowOnCloseProcessorManager(ProcessorManager<T, R> delegate)
+    public void initRunAllFullyWidgetTest(ProcessorManager<T, R> delegate)
     {
       this.delegate = delegate;
     }
@@ -622,7 +652,7 @@ public class RunAllFullyWidgetTest extends FrameProcessorExecutorTest.BaseFrameP
   {
     private final ProcessorManager<T, R> delegate;
 
-    public DelayedProcessorManager(ProcessorManager<T, R> delegate)
+    public void initRunAllFullyWidgetTest(ProcessorManager<T, R> delegate)
     {
       this.delegate = delegate;
     }

@@ -20,21 +20,21 @@
 package org.apache.druid.metadata;
 
 import org.apache.druid.common.exception.DruidException;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class EntryExistsExceptionTest
 {
   @Test
   public void testExceptionMessageAndResponseCode()
   {
-    EntryExistsException exception = Assert.assertThrows(
+    EntryExistsException exception = Assertions.assertThrows(
         EntryExistsException.class,
         () -> {
           throw new EntryExistsException("task", "100");
         }
     );
-    Assert.assertEquals("task [100] already exists.", exception.getMessage());
-    Assert.assertEquals(DruidException.HTTP_CODE_BAD_REQUEST, exception.getResponseCode());
+    Assertions.assertEquals("task [100] already exists.", exception.getMessage());
+    Assertions.assertEquals(DruidException.HTTP_CODE_BAD_REQUEST, exception.getResponseCode());
   }
 }

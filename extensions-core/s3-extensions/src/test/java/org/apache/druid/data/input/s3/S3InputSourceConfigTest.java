@@ -24,7 +24,6 @@ import nl.jqno.equalsverifier.EqualsVerifier;
 import org.apache.druid.metadata.DefaultPasswordProvider;
 import org.apache.druid.segment.TestHelper;
 import org.junit.Assert;
-import org.junit.Test;
 
 public class S3InputSourceConfigTest
 {

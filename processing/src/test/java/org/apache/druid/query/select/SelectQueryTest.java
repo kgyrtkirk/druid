@@ -23,9 +23,9 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.druid.jackson.DefaultObjectMapper;
 import org.apache.druid.java.util.common.StringUtils;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SelectQueryTest
 {
@@ -45,19 +45,17 @@ public class SelectQueryTest
 
   private final ObjectMapper objectMapper = new DefaultObjectMapper();
 
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
-
   @Test
   public void testSerde() throws Exception
   {
-    final String exceptionMessage =
-        StringUtils.format(
-            "Cannot construct instance of `org.apache.druid.query.select.SelectQuery`, problem: %s",
-            SelectQuery.REMOVED_ERROR_MESSAGE
-        );
-    expectedException.expect(JsonMappingException.class);
-    expectedException.expectMessage(exceptionMessage);
-    objectMapper.readValue(SOME_QUERY_THAT_IS_DOOMED_TO_FAIL, SelectQuery.class);
+    Throwable exception = assertThrows(JsonMappingException.class, () -> {
+      final String exceptionMessage =
+          StringUtils.format(
+              "Cannot construct instance of `org.apache.druid.query.select.SelectQuery`, problem: %s",
+              SelectQuery.REMOVED_ERROR_MESSAGE
+          );
+      objectMapper.readValue(SOME_QUERY_THAT_IS_DOOMED_TO_FAIL, SelectQuery.class);
+    });
+    assertTrue(exception.getMessage().contains(exceptionMessage));
   }
 }

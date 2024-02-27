@@ -30,7 +30,6 @@ import org.apache.kafka.common.header.Header;
 import org.apache.kafka.common.header.Headers;
 import org.apache.kafka.common.header.internals.RecordHeaders;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;

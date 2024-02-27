@@ -26,7 +26,6 @@ import org.apache.druid.server.security.ResourceType;
 import org.apache.hadoop.conf.Configuration;
 import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.junit.Test;
 
 public class RangerAuthorizerTest
 {

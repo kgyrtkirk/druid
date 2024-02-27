@@ -24,7 +24,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.druid.java.util.common.IAE;
 import org.apache.druid.java.util.common.StringUtils;
 import org.junit.Assert;
-import org.junit.Test;
 
 public class S3InputDataConfigTest
 {

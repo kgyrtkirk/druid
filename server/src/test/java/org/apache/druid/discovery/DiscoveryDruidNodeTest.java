@@ -29,8 +29,8 @@ import org.apache.druid.guice.ServerModule;
 import org.apache.druid.jackson.DefaultObjectMapper;
 import org.apache.druid.server.DruidNode;
 import org.apache.druid.server.coordination.ServerType;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 
@@ -75,7 +75,7 @@ public class DiscoveryDruidNodeTest
     );
     final String json = mapper.writeValueAsString(node);
     final DiscoveryDruidNode fromJson = mapper.readValue(json, DiscoveryDruidNode.class);
-    Assert.assertEquals(node, fromJson);
+    Assertions.assertEquals(node, fromJson);
   }
 
   @Test
@@ -89,7 +89,7 @@ public class DiscoveryDruidNodeTest
     );
     final String json = mapper.writeValueAsString(node);
     final DiscoveryDruidNode fromJson = mapper.readValue(json, DiscoveryDruidNode.class);
-    Assert.assertEquals(
+    Assertions.assertEquals(
         new DiscoveryDruidNode(
             druidNode,
             nodeRole,
@@ -123,7 +123,7 @@ public class DiscoveryDruidNodeTest
         )
     );
     final String json = mapper.writeValueAsString(node);
-    Assert.assertEquals(
+    Assertions.assertEquals(
         node,
         mapper.readValue(json, DiscoveryDruidNode.class)
     );
@@ -157,7 +157,7 @@ public class DiscoveryDruidNodeTest
                         + "    }\n"
                         + "  }\n"
                         + "}";
-    Assert.assertEquals(
+    Assertions.assertEquals(
         new DiscoveryDruidNode(
             new DruidNode(
                 "druid/broker",
@@ -206,7 +206,7 @@ public class DiscoveryDruidNodeTest
                         + "    }\n"
                         + "  }\n"
                         + "}";
-    Assert.assertEquals(
+    Assertions.assertEquals(
         new DiscoveryDruidNode(
             new DruidNode(
                 "druid/broker",
@@ -256,7 +256,7 @@ public class DiscoveryDruidNodeTest
                         + "    }\n"
                         + "  }\n"
                         + "}";
-    Assert.assertEquals(
+    Assertions.assertEquals(
         new DiscoveryDruidNode(
             new DruidNode(
                 "druid/broker",

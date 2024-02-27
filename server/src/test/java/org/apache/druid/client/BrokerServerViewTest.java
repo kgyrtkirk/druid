@@ -54,10 +54,10 @@ import org.apache.druid.timeline.partition.PartitionHolder;
 import org.apache.druid.timeline.partition.SingleElementPartitionChunk;
 import org.easymock.EasyMock;
 import org.joda.time.Interval;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -65,6 +65,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class BrokerServerViewTest extends CuratorTestBase
 {
@@ -84,7 +86,7 @@ public class BrokerServerViewTest extends CuratorTestBase
     zkPathsConfig = new ZkPathsConfig();
   }
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception
   {
     setupServerAndCurator();
@@ -106,37 +108,37 @@ public class BrokerServerViewTest extends CuratorTestBase
     final int partition = segment.getShardSpec().getPartitionNum();
     final Interval intervals = Intervals.of("2014-10-20T00:00:00Z/P1D");
     announceSegmentForServer(druidServer, segment, zkPathsConfig, jsonMapper);
-    Assert.assertTrue(timing.forWaiting().awaitLatch(segmentViewInitLatch));
-    Assert.assertTrue(timing.forWaiting().awaitLatch(segmentAddedLatch));
+    Assertions.assertTrue(timing.forWaiting().awaitLatch(segmentViewInitLatch));
+    Assertions.assertTrue(timing.forWaiting().awaitLatch(segmentAddedLatch));
 
     TimelineLookup<String, ServerSelector> timeline = brokerServerView.getTimeline(
         (new TableDataSource("test_broker_server_view")).getAnalysis()
     ).get();
     List<TimelineObjectHolder<String, ServerSelector>> serverLookupRes = timeline.lookup(intervals);
-    Assert.assertEquals(1, serverLookupRes.size());
+    Assertions.assertEquals(1, serverLookupRes.size());
 
     TimelineObjectHolder<String, ServerSelector> actualTimelineObjectHolder = serverLookupRes.get(0);
-    Assert.assertEquals(intervals, actualTimelineObjectHolder.getInterval());
-    Assert.assertEquals("v1", actualTimelineObjectHolder.getVersion());
+    Assertions.assertEquals(intervals, actualTimelineObjectHolder.getInterval());
+    Assertions.assertEquals("v1", actualTimelineObjectHolder.getVersion());
 
     PartitionHolder<ServerSelector> actualPartitionHolder = actualTimelineObjectHolder.getObject();
-    Assert.assertTrue(actualPartitionHolder.isComplete());
-    Assert.assertEquals(1, Iterables.size(actualPartitionHolder));
+    Assertions.assertTrue(actualPartitionHolder.isComplete());
+    Assertions.assertEquals(1, Iterables.size(actualPartitionHolder));
 
     ServerSelector selector = (actualPartitionHolder.iterator().next()).getObject();
-    Assert.assertFalse(selector.isEmpty());
-    Assert.assertEquals(segment, selector.getSegment());
-    Assert.assertEquals(druidServer, selector.pick(null).getServer());
-    Assert.assertNotNull(timeline.findChunk(intervals, "v1", partition));
+    Assertions.assertFalse(selector.isEmpty());
+    Assertions.assertEquals(segment, selector.getSegment());
+    Assertions.assertEquals(druidServer, selector.pick(null).getServer());
+    Assertions.assertNotNull(timeline.findChunk(intervals, "v1", partition));
 
     unannounceSegmentForServer(druidServer, segment, zkPathsConfig);
-    Assert.assertTrue(timing.forWaiting().awaitLatch(segmentRemovedLatch));
+    Assertions.assertTrue(timing.forWaiting().awaitLatch(segmentRemovedLatch));
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         0,
         timeline.lookup(intervals).size()
     );
-    Assert.assertNull(timeline.findChunk(intervals, "v1", partition));
+    Assertions.assertNull(timeline.findChunk(intervals, "v1", partition));
   }
 
   @Test
@@ -168,8 +170,8 @@ public class BrokerServerViewTest extends CuratorTestBase
     for (int i = 0; i < 5; ++i) {
       announceSegmentForServer(druidServers.get(i), segments.get(i), zkPathsConfig, jsonMapper);
     }
-    Assert.assertTrue(timing.forWaiting().awaitLatch(segmentViewInitLatch));
-    Assert.assertTrue(timing.forWaiting().awaitLatch(segmentAddedLatch));
+    Assertions.assertTrue(timing.forWaiting().awaitLatch(segmentViewInitLatch));
+    Assertions.assertTrue(timing.forWaiting().awaitLatch(segmentAddedLatch));
 
     TimelineLookup timeline = brokerServerView.getTimeline(
         (new TableDataSource("test_broker_server_view")).getAnalysis()
@@ -189,7 +191,7 @@ public class BrokerServerViewTest extends CuratorTestBase
 
     // unannounce the segment created by dataSegmentWithIntervalAndVersion("2011-04-01/2011-04-09", "v2")
     unannounceSegmentForServer(druidServers.get(2), segments.get(2), zkPathsConfig);
-    Assert.assertTrue(timing.forWaiting().awaitLatch(segmentRemovedLatch));
+    Assertions.assertTrue(timing.forWaiting().awaitLatch(segmentRemovedLatch));
 
     // renew segmentRemovedLatch since we still have 4 segments to unannounce
     segmentRemovedLatch = new CountDownLatch(4);
@@ -218,9 +220,9 @@ public class BrokerServerViewTest extends CuratorTestBase
         unannounceSegmentForServer(druidServers.get(i), segments.get(i), zkPathsConfig);
       }
     }
-    Assert.assertTrue(timing.forWaiting().awaitLatch(segmentRemovedLatch));
+    Assertions.assertTrue(timing.forWaiting().awaitLatch(segmentRemovedLatch));
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         0,
         ((List<TimelineObjectHolder>) timeline.lookup(Intervals.of("2011-04-01/2011-04-09"))).size()
     );
@@ -270,8 +272,8 @@ public class BrokerServerViewTest extends CuratorTestBase
     for (int i = 0; i < 5; ++i) {
       announceSegmentForServer(druidServers.get(i), segments.get(i), zkPathsConfig, jsonMapper);
     }
-    Assert.assertTrue(timing.forWaiting().awaitLatch(segmentViewInitLatch));
-    Assert.assertTrue(timing.forWaiting().awaitLatch(segmentAddedLatch));
+    Assertions.assertTrue(timing.forWaiting().awaitLatch(segmentViewInitLatch));
+    Assertions.assertTrue(timing.forWaiting().awaitLatch(segmentAddedLatch));
 
     TimelineLookup timeline = brokerServerView.getTimeline(
         (new TableDataSource("test_broker_server_view")).getAnalysis()
@@ -292,7 +294,7 @@ public class BrokerServerViewTest extends CuratorTestBase
 
     // unannounce the broker segment should do nothing to announcements
     unannounceSegmentForServer(druidBroker, brokerSegment, zkPathsConfig);
-    Assert.assertTrue(timing.forWaiting().awaitLatch(segmentRemovedLatch));
+    Assertions.assertTrue(timing.forWaiting().awaitLatch(segmentRemovedLatch));
 
     // renew segmentRemovedLatch since we still have 5 segments to unannounce
     segmentRemovedLatch = new CountDownLatch(5);
@@ -319,7 +321,7 @@ public class BrokerServerViewTest extends CuratorTestBase
     for (int i = 0; i < 5; ++i) {
       unannounceSegmentForServer(druidServers.get(i), segments.get(i), zkPathsConfig);
     }
-    Assert.assertTrue(timing.forWaiting().awaitLatch(segmentRemovedLatch));
+    Assertions.assertTrue(timing.forWaiting().awaitLatch(segmentRemovedLatch));
   }
 
   @Test
@@ -349,8 +351,8 @@ public class BrokerServerViewTest extends CuratorTestBase
     announceSegmentForServer(server21, segment3, zkPathsConfig, jsonMapper);
 
     // Wait for the segments to be added
-    Assert.assertTrue(timing.forWaiting().awaitLatch(segmentViewInitLatch));
-    Assert.assertTrue(timing.forWaiting().awaitLatch(segmentAddedLatch));
+    Assertions.assertTrue(timing.forWaiting().awaitLatch(segmentViewInitLatch));
+    Assertions.assertTrue(timing.forWaiting().awaitLatch(segmentAddedLatch));
 
     // Get the timeline for the datasource
     TimelineLookup<String, ServerSelector> timeline = brokerServerView.getTimeline(
@@ -358,30 +360,30 @@ public class BrokerServerViewTest extends CuratorTestBase
     ).get();
 
     // Verify that the timeline has no entry for the interval of segment 1
-    Assert.assertTrue(timeline.lookup(segment1.getInterval()).isEmpty());
+    Assertions.assertTrue(timeline.lookup(segment1.getInterval()).isEmpty());
 
     // Verify that there is one entry for the interval of segment 2
     List<TimelineObjectHolder<String, ServerSelector>> timelineHolders =
         timeline.lookup(segment2.getInterval());
-    Assert.assertEquals(1, timelineHolders.size());
+    Assertions.assertEquals(1, timelineHolders.size());
 
     TimelineObjectHolder<String, ServerSelector> timelineHolder = timelineHolders.get(0);
-    Assert.assertEquals(segment2.getInterval(), timelineHolder.getInterval());
-    Assert.assertEquals(segment2.getVersion(), timelineHolder.getVersion());
+    Assertions.assertEquals(segment2.getInterval(), timelineHolder.getInterval());
+    Assertions.assertEquals(segment2.getVersion(), timelineHolder.getVersion());
 
     PartitionHolder<ServerSelector> partitionHolder = timelineHolder.getObject();
-    Assert.assertTrue(partitionHolder.isComplete());
-    Assert.assertEquals(1, Iterables.size(partitionHolder));
+    Assertions.assertTrue(partitionHolder.isComplete());
+    Assertions.assertEquals(1, Iterables.size(partitionHolder));
 
     ServerSelector selector = (partitionHolder.iterator().next()).getObject();
-    Assert.assertFalse(selector.isEmpty());
-    Assert.assertEquals(segment2, selector.getSegment());
+    Assertions.assertFalse(selector.isEmpty());
+    Assertions.assertEquals(segment2, selector.getSegment());
 
     // Verify that the ServerSelector always picks Tier 1
     for (int i = 0; i < 5; ++i) {
-      Assert.assertEquals(server21, selector.pick(null).getServer());
+      Assertions.assertEquals(server21, selector.pick(null).getServer());
     }
-    Assert.assertEquals(Collections.singletonList(server21.getMetadata()), selector.getCandidates(2));
+    Assertions.assertEquals(Collections.singletonList(server21.getMetadata()), selector.getCandidates(2));
   }
 
   @Test
@@ -409,8 +411,8 @@ public class BrokerServerViewTest extends CuratorTestBase
     announceSegmentForServer(historicalServer, segment3, zkPathsConfig, jsonMapper);
 
     // Wait for the segments to be added
-    Assert.assertTrue(timing.forWaiting().awaitLatch(segmentViewInitLatch));
-    Assert.assertTrue(timing.forWaiting().awaitLatch(segmentAddedLatch));
+    Assertions.assertTrue(timing.forWaiting().awaitLatch(segmentViewInitLatch));
+    Assertions.assertTrue(timing.forWaiting().awaitLatch(segmentAddedLatch));
 
     // Get the timeline for the datasource
     TimelineLookup<String, ServerSelector> timeline = brokerServerView.getTimeline(
@@ -418,30 +420,30 @@ public class BrokerServerViewTest extends CuratorTestBase
     ).get();
 
     // Verify that the timeline has no entry for the interval of segment 1
-    Assert.assertTrue(timeline.lookup(segment1.getInterval()).isEmpty());
+    Assertions.assertTrue(timeline.lookup(segment1.getInterval()).isEmpty());
 
     // Verify that there is one entry for the interval of segment 2
     List<TimelineObjectHolder<String, ServerSelector>> timelineHolders =
         timeline.lookup(segment2.getInterval());
-    Assert.assertEquals(1, timelineHolders.size());
+    Assertions.assertEquals(1, timelineHolders.size());
 
     TimelineObjectHolder<String, ServerSelector> timelineHolder = timelineHolders.get(0);
-    Assert.assertEquals(segment2.getInterval(), timelineHolder.getInterval());
-    Assert.assertEquals(segment2.getVersion(), timelineHolder.getVersion());
+    Assertions.assertEquals(segment2.getInterval(), timelineHolder.getInterval());
+    Assertions.assertEquals(segment2.getVersion(), timelineHolder.getVersion());
 
     PartitionHolder<ServerSelector> partitionHolder = timelineHolder.getObject();
-    Assert.assertTrue(partitionHolder.isComplete());
-    Assert.assertEquals(1, Iterables.size(partitionHolder));
+    Assertions.assertTrue(partitionHolder.isComplete());
+    Assertions.assertEquals(1, Iterables.size(partitionHolder));
 
     ServerSelector selector = (partitionHolder.iterator().next()).getObject();
-    Assert.assertFalse(selector.isEmpty());
-    Assert.assertEquals(segment2, selector.getSegment());
+    Assertions.assertFalse(selector.isEmpty());
+    Assertions.assertEquals(segment2, selector.getSegment());
 
     // Verify that the ServerSelector always picks the Historical server
     for (int i = 0; i < 5; ++i) {
-      Assert.assertEquals(historicalServer, selector.pick(null).getServer());
+      Assertions.assertEquals(historicalServer, selector.pick(null).getServer());
     }
-    Assert.assertEquals(Collections.singletonList(historicalServer.getMetadata()), selector.getCandidates(2));
+    Assertions.assertEquals(Collections.singletonList(historicalServer.getMetadata()), selector.getCandidates(2));
   }
 
   @Test
@@ -471,8 +473,8 @@ public class BrokerServerViewTest extends CuratorTestBase
     announceSegmentForServer(server21, segment3, zkPathsConfig, jsonMapper);
 
     // Wait for the segments to be added
-    Assert.assertTrue(timing.forWaiting().awaitLatch(segmentViewInitLatch));
-    Assert.assertTrue(timing.forWaiting().awaitLatch(segmentAddedLatch));
+    Assertions.assertTrue(timing.forWaiting().awaitLatch(segmentViewInitLatch));
+    Assertions.assertTrue(timing.forWaiting().awaitLatch(segmentAddedLatch));
 
     // Get the timeline for the datasource
     TimelineLookup<String, ServerSelector> timeline = brokerServerView.getTimeline(
@@ -480,51 +482,57 @@ public class BrokerServerViewTest extends CuratorTestBase
     ).get();
 
     // Verify that the timeline has no entry for the interval of segment 1
-    Assert.assertTrue(timeline.lookup(segment1.getInterval()).isEmpty());
+    Assertions.assertTrue(timeline.lookup(segment1.getInterval()).isEmpty());
 
     // Verify that there is one entry for the interval of segment 2
     List<TimelineObjectHolder<String, ServerSelector>> timelineHolders =
         timeline.lookup(segment2.getInterval());
-    Assert.assertEquals(1, timelineHolders.size());
+    Assertions.assertEquals(1, timelineHolders.size());
 
     TimelineObjectHolder<String, ServerSelector> timelineHolder = timelineHolders.get(0);
-    Assert.assertEquals(segment2.getInterval(), timelineHolder.getInterval());
-    Assert.assertEquals(segment2.getVersion(), timelineHolder.getVersion());
+    Assertions.assertEquals(segment2.getInterval(), timelineHolder.getInterval());
+    Assertions.assertEquals(segment2.getVersion(), timelineHolder.getVersion());
 
     PartitionHolder<ServerSelector> partitionHolder = timelineHolder.getObject();
-    Assert.assertTrue(partitionHolder.isComplete());
-    Assert.assertEquals(1, Iterables.size(partitionHolder));
+    Assertions.assertTrue(partitionHolder.isComplete());
+    Assertions.assertEquals(1, Iterables.size(partitionHolder));
 
     ServerSelector selector = (partitionHolder.iterator().next()).getObject();
-    Assert.assertFalse(selector.isEmpty());
-    Assert.assertEquals(segment2, selector.getSegment());
+    Assertions.assertFalse(selector.isEmpty());
+    Assertions.assertEquals(segment2, selector.getSegment());
 
     // Verify that the ServerSelector always picks Tier 1
     for (int i = 0; i < 5; ++i) {
-      Assert.assertEquals(server21, selector.pick(null).getServer());
+      Assertions.assertEquals(server21, selector.pick(null).getServer());
     }
-    Assert.assertEquals(Collections.singletonList(server21.getMetadata()), selector.getCandidates(2));
+    Assertions.assertEquals(Collections.singletonList(server21.getMetadata()), selector.getCandidates(2));
   }
 
-  @Test(expected = ISE.class)
+  @Test
   public void testInvalidWatchedTiersConfig() throws Exception
   {
-    // Verify that specifying both ignoredTiers and watchedTiers fails startup
-    final String tier1 = "tier1";
-    final String tier2 = "tier2";
-    setupViews(Sets.newHashSet(tier2), Sets.newHashSet(tier1), true);
+    assertThrows(ISE.class, () -> {
+      // Verify that specifying both ignoredTiers and watchedTiers fails startup
+      final String tier1 = "tier1";
+      final String tier2 = "tier2";
+      setupViews(Sets.newHashSet(tier2), Sets.newHashSet(tier1), true);
+    });
   }
 
-  @Test(expected = ISE.class)
+  @Test
   public void testEmptyWatchedTiersConfig() throws Exception
   {
-    setupViews(Collections.emptySet(), null, true);
+    assertThrows(ISE.class, () -> {
+      setupViews(Collections.emptySet(), null, true);
+    });
   }
 
-  @Test(expected = ISE.class)
+  @Test
   public void testEmptyIgnoredTiersConfig() throws Exception
   {
-    setupViews(null, Collections.emptySet(), true);
+    assertThrows(ISE.class, () -> {
+      setupViews(null, Collections.emptySet(), true);
+    });
   }
 
   /**
@@ -567,24 +575,24 @@ public class BrokerServerViewTest extends CuratorTestBase
       List<Pair<Interval, Pair<String, Pair<DruidServer, DataSegment>>>> expected, List<TimelineObjectHolder> actual
   )
   {
-    Assert.assertEquals(expected.size(), actual.size());
+    Assertions.assertEquals(expected.size(), actual.size());
 
     for (int i = 0; i < expected.size(); ++i) {
       Pair<Interval, Pair<String, Pair<DruidServer, DataSegment>>> expectedPair = expected.get(i);
       TimelineObjectHolder<String, ServerSelector> actualTimelineObjectHolder = actual.get(i);
 
-      Assert.assertEquals(expectedPair.lhs, actualTimelineObjectHolder.getInterval());
-      Assert.assertEquals(expectedPair.rhs.lhs, actualTimelineObjectHolder.getVersion());
+      Assertions.assertEquals(expectedPair.lhs, actualTimelineObjectHolder.getInterval());
+      Assertions.assertEquals(expectedPair.rhs.lhs, actualTimelineObjectHolder.getVersion());
 
       PartitionHolder<ServerSelector> actualPartitionHolder = actualTimelineObjectHolder.getObject();
-      Assert.assertTrue(actualPartitionHolder.isComplete());
-      Assert.assertEquals(1, Iterables.size(actualPartitionHolder));
+      Assertions.assertTrue(actualPartitionHolder.isComplete());
+      Assertions.assertEquals(1, Iterables.size(actualPartitionHolder));
 
       ServerSelector selector = ((SingleElementPartitionChunk<ServerSelector>) actualPartitionHolder.iterator()
                                                                                                     .next()).getObject();
-      Assert.assertFalse(selector.isEmpty());
-      Assert.assertEquals(expectedPair.rhs.rhs.lhs, selector.pick(null).getServer());
-      Assert.assertEquals(expectedPair.rhs.rhs.rhs, selector.getSegment());
+      Assertions.assertFalse(selector.isEmpty());
+      Assertions.assertEquals(expectedPair.rhs.rhs.lhs, selector.pick(null).getServer());
+      Assertions.assertEquals(expectedPair.rhs.rhs.rhs, selector.getSegment());
     }
   }
 
@@ -715,7 +723,7 @@ public class BrokerServerViewTest extends CuratorTestBase
     return retVal;
   }
 
-  @After
+  @AfterEach
   public void tearDown() throws Exception
   {
     baseView.stop();

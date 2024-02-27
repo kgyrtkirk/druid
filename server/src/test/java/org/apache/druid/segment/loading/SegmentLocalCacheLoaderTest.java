@@ -28,12 +28,12 @@ import org.apache.druid.server.coordination.TestStorageLocation;
 import org.apache.druid.timeline.DataSegment;
 import org.apache.druid.timeline.partition.TombstoneShardSpec;
 import org.joda.time.Interval;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 
@@ -41,13 +41,13 @@ public class SegmentLocalCacheLoaderTest
 {
   private static final long MAX_SIZE = 1000L;
 
-  @Rule
-  public TemporaryFolder temporaryFolder = new TemporaryFolder();
+  @TempDir
+  public File temporaryFolder;
   private TestStorageLocation storageLoc;
   private ObjectMapper objectMapper;
   private SegmentLocalCacheLoader segmentLocalCacheLoader;
 
-  @Before
+  @BeforeEach
   public void setUp() throws IOException
   {
     storageLoc = new TestStorageLocation(temporaryFolder);
@@ -79,29 +79,29 @@ public class SegmentLocalCacheLoaderTest
 
     ReferenceCountingSegment segment = segmentLocalCacheLoader.getSegment(tombstone, false, null);
 
-    Assert.assertNotNull(segment.getId());
-    Assert.assertEquals(interval, segment.getDataInterval());
-    Assert.assertNotNull(segment.asStorageAdapter());
+    Assertions.assertNotNull(segment.getId());
+    Assertions.assertEquals(interval, segment.getDataInterval());
+    Assertions.assertNotNull(segment.asStorageAdapter());
 
-    Assert.assertTrue(segment.asStorageAdapter().isFromTombstone());
+    Assertions.assertTrue(segment.asStorageAdapter().isFromTombstone());
 
-    Assert.assertEquals(interval, segment.asQueryableIndex().getDataInterval());
-    Assert.assertThrows(UnsupportedOperationException.class, () -> segment.asQueryableIndex().getMetadata());
-    Assert.assertThrows(UnsupportedOperationException.class, () -> segment.asQueryableIndex().getNumRows());
-    Assert.assertThrows(UnsupportedOperationException.class, () -> segment.asQueryableIndex().getAvailableDimensions());
-    Assert.assertThrows(
+    Assertions.assertEquals(interval, segment.asQueryableIndex().getDataInterval());
+    Assertions.assertThrows(UnsupportedOperationException.class, () -> segment.asQueryableIndex().getMetadata());
+    Assertions.assertThrows(UnsupportedOperationException.class, () -> segment.asQueryableIndex().getNumRows());
+    Assertions.assertThrows(UnsupportedOperationException.class, () -> segment.asQueryableIndex().getAvailableDimensions());
+    Assertions.assertThrows(
         UnsupportedOperationException.class,
         () -> segment.asQueryableIndex().getBitmapFactoryForDimensions()
     );
-    Assert.assertThrows(
+    Assertions.assertThrows(
         UnsupportedOperationException.class,
         () -> segment.asQueryableIndex().getDimensionHandlers()
     );
-    Assert.assertThrows(
+    Assertions.assertThrows(
         UnsupportedOperationException.class,
         () -> segment.asQueryableIndex().getColumnHolder(null)
     );
-    Assert.assertThrows(
+    Assertions.assertThrows(
         UnsupportedOperationException.class,
         () -> segment.asQueryableIndex().getColumnHolder(null)
     );

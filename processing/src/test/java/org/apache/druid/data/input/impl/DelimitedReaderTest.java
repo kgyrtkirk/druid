@@ -29,9 +29,9 @@ import org.apache.druid.data.input.InputRowSchema;
 import org.apache.druid.java.util.common.DateTimes;
 import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.java.util.common.parsers.CloseableIterator;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -47,7 +47,7 @@ public class DelimitedReaderTest
       ColumnsFilter.all()
   );
 
-  @BeforeClass
+  @BeforeAll
   public static void setup()
   {
     NullHandling.initializeForTests();
@@ -144,21 +144,21 @@ public class DelimitedReaderTest
     try (CloseableIterator<InputRow> iterator = reader.read()) {
       while (iterator.hasNext()) {
         final InputRow row = iterator.next();
-        Assert.assertEquals(
+        Assertions.assertEquals(
             DateTimes.of(StringUtils.format("2019-01-01T00:00:%02dZ", (numResults + 1) * 10)),
             row.getTimestamp()
         );
-        Assert.assertEquals(
+        Assertions.assertEquals(
             StringUtils.format("name_%d", numResults + 1),
             Iterables.getOnlyElement(row.getDimension("name"))
         );
-        Assert.assertEquals(
+        Assertions.assertEquals(
             ImmutableList.of(Integer.toString((numResults + 1) * 5), Integer.toString(numResults + 1)),
             row.getDimension("score")
         );
         numResults++;
       }
-      Assert.assertEquals(3, numResults);
+      Assertions.assertEquals(3, numResults);
     }
   }
 
@@ -179,21 +179,21 @@ public class DelimitedReaderTest
     try (CloseableIterator<InputRow> iterator = reader.read()) {
       while (iterator.hasNext()) {
         final InputRow row = iterator.next();
-        Assert.assertEquals(
+        Assertions.assertEquals(
             DateTimes.of(StringUtils.format("2019-01-01T00:00:%02dZ", (numResults + 1) * 10)),
             row.getTimestamp()
         );
-        Assert.assertEquals(
+        Assertions.assertEquals(
             StringUtils.format("name_%d", numResults + 1),
             Iterables.getOnlyElement(row.getDimension("name"))
         );
-        Assert.assertEquals(
+        Assertions.assertEquals(
             ImmutableList.of(Integer.toString((numResults + 1) * 5), Integer.toString(numResults + 1)),
             row.getDimension("score")
         );
         numResults++;
       }
-      Assert.assertEquals(3, numResults);
+      Assertions.assertEquals(3, numResults);
     }
   }
 
@@ -215,15 +215,15 @@ public class DelimitedReaderTest
     );
     final InputEntityReader reader = format.createReader(INPUT_ROW_SCHEMA, source, null);
     try (CloseableIterator<InputRow> iterator = reader.read()) {
-      Assert.assertTrue(iterator.hasNext());
+      Assertions.assertTrue(iterator.hasNext());
       final InputRow row = iterator.next();
-      Assert.assertEquals(DateTimes.of("2019-01-01T00:00:10Z"), row.getTimestamp());
-      Assert.assertEquals("name_1", Iterables.getOnlyElement(row.getDimension("name")));
-      Assert.assertEquals(
+      Assertions.assertEquals(DateTimes.of("2019-01-01T00:00:10Z"), row.getTimestamp());
+      Assertions.assertEquals("name_1", Iterables.getOnlyElement(row.getDimension("name")));
+      Assertions.assertEquals(
           "Как говорится: \\\"всё течет всё изменяется\\\". Украина как всегда обвиняет Россию в собственных проблемах. #ПровокацияКиева",
           Iterables.getOnlyElement(row.getDimension("Comment"))
       );
-      Assert.assertFalse(iterator.hasNext());
+      Assertions.assertFalse(iterator.hasNext());
     }
   }
 
@@ -248,21 +248,21 @@ public class DelimitedReaderTest
     try (CloseableIterator<InputRow> iterator = reader.read()) {
       while (iterator.hasNext()) {
         final InputRow row = iterator.next();
-        Assert.assertEquals(
+        Assertions.assertEquals(
             DateTimes.of(StringUtils.format("2019-01-01T00:00:%02dZ", (numResults + 1) * 10)),
             row.getTimestamp()
         );
-        Assert.assertEquals(
+        Assertions.assertEquals(
             StringUtils.format("name_%d", numResults + 1),
             Iterables.getOnlyElement(row.getDimension("name"))
         );
-        Assert.assertEquals(
+        Assertions.assertEquals(
             Integer.toString((numResults + 1) * 5),
             Iterables.getOnlyElement(row.getDimension("score"))
         );
         numResults++;
       }
-      Assert.assertEquals(3, numResults);
+      Assertions.assertEquals(3, numResults);
     }
   }
 }

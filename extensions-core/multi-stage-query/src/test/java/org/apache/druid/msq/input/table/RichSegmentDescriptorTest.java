@@ -28,7 +28,6 @@ import org.apache.druid.segment.TestHelper;
 import org.apache.druid.server.coordination.DruidServerMetadata;
 import org.apache.druid.server.coordination.ServerType;
 import org.junit.Assert;
-import org.junit.Test;
 
 public class RichSegmentDescriptorTest
 {

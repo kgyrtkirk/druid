@@ -37,8 +37,8 @@ import org.apache.druid.segment.TestIndex;
 import org.apache.druid.segment.VirtualColumns;
 import org.apache.druid.segment.incremental.IncrementalIndexStorageAdapter;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.List;
@@ -68,7 +68,7 @@ public abstract class OutputChannelFactoryTest extends InitializedNullHandlingTe
   {
     OutputChannel channel = outputChannelFactory.openChannel(1);
 
-    Assert.assertEquals(1, channel.getPartitionNumber());
+    Assertions.assertEquals(1, channel.getPartitionNumber());
 
     // write data to the channel
     WritableFrameChannel writableFrameChannel = channel.getWritableChannel();
@@ -81,7 +81,7 @@ public abstract class OutputChannelFactoryTest extends InitializedNullHandlingTe
         channel.getReadableChannel(),
         sourceAdapter
     );
-    Assert.assertEquals(frameSize, channel.getFrameMemoryAllocator().capacity());
+    Assertions.assertEquals(frameSize, channel.getFrameMemoryAllocator().capacity());
   }
 
   @Test
@@ -105,7 +105,7 @@ public abstract class OutputChannelFactoryTest extends InitializedNullHandlingTe
           partitionedReadableFrameChannelSupplier.get().getReadableFrameChannel(partition),
           sourceAdapter
       );
-      Assert.assertEquals(frameSize, channel.getFrameMemoryAllocator().capacity());
+      Assertions.assertEquals(frameSize, channel.getFrameMemoryAllocator().capacity());
     }
   }
 
@@ -124,8 +124,8 @@ public abstract class OutputChannelFactoryTest extends InitializedNullHandlingTe
     }
     Frame readbackFrame = readableFrameChannel.read();
     readableFrameChannel.readabilityFuture().get();
-    Assert.assertFalse(readableFrameChannel.canRead());
-    Assert.assertTrue(readableFrameChannel.isFinished());
+    Assertions.assertFalse(readableFrameChannel.canRead());
+    Assertions.assertTrue(readableFrameChannel.isFinished());
     readableFrameChannel.close();
 
     // build list of rows from written and read data to verify
@@ -152,8 +152,8 @@ public abstract class OutputChannelFactoryTest extends InitializedNullHandlingTe
         null
     ).flatMap(cursor -> FrameTestUtil.readRowsFromCursor(cursor, adapter.getRowSignature())).toList();
 
-    Assert.assertEquals("Read rows count is different from written rows count", writtenData.size(), readData.size());
-    Assert.assertEquals("Read data is different from written data", writtenData, readData);
+    Assertions.assertEquals(writtenData.size(), readData.size(), "Read rows count is different from written rows count");
+    Assertions.assertEquals(writtenData, readData, "Read data is different from written data");
   }
 
   @Test
@@ -161,8 +161,8 @@ public abstract class OutputChannelFactoryTest extends InitializedNullHandlingTe
   {
     final OutputChannel channel = outputChannelFactory.openNilChannel(1);
 
-    Assert.assertEquals(1, channel.getPartitionNumber());
-    Assert.assertTrue(channel.getReadableChannel().isFinished());
-    Assert.assertThrows(IllegalStateException.class, channel::getWritableChannel);
+    Assertions.assertEquals(1, channel.getPartitionNumber());
+    Assertions.assertTrue(channel.getReadableChannel().isFinished());
+    Assertions.assertThrows(IllegalStateException.class, channel::getWritableChannel);
   }
 }

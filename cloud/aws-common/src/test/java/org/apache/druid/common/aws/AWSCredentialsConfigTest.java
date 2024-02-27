@@ -28,10 +28,10 @@ import org.apache.druid.guice.JsonConfigProvider;
 import org.apache.druid.guice.JsonConfigurator;
 import org.apache.druid.guice.LazySingleton;
 import org.apache.druid.metadata.DefaultPasswordProvider;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.validation.Validation;
 import javax.validation.Validator;
@@ -44,13 +44,13 @@ public class AWSCredentialsConfigTest
   private static final String SOME_SECRET = "someSecret";
   private final Properties properties = new Properties();
 
-  @Before
+  @BeforeEach
   public void setUp()
   {
     cleanProperties();
   }
 
-  @After
+  @AfterEach
   public void tearDown()
   {
     cleanProperties();
@@ -80,8 +80,8 @@ public class AWSCredentialsConfigTest
         }
     );
     final AWSCredentialsConfig credentialsConfig = injector.getInstance(AWSCredentialsConfig.class);
-    Assert.assertEquals(SOME_SECRET, credentialsConfig.getAccessKey().getPassword());
-    Assert.assertEquals(SOME_SECRET, credentialsConfig.getSecretKey().getPassword());
+    Assertions.assertEquals(SOME_SECRET, credentialsConfig.getAccessKey().getPassword());
+    Assertions.assertEquals(SOME_SECRET, credentialsConfig.getSecretKey().getPassword());
   }
 
   @Test
@@ -104,7 +104,7 @@ public class AWSCredentialsConfigTest
         }
     );
     final AWSCredentialsConfig credentialsConfig = injector.getInstance(AWSCredentialsConfig.class);
-    Assert.assertEquals(SOME_SECRET, credentialsConfig.getAccessKey().getPassword());
-    Assert.assertEquals(SOME_SECRET, credentialsConfig.getSecretKey().getPassword());
+    Assertions.assertEquals(SOME_SECRET, credentialsConfig.getAccessKey().getPassword());
+    Assertions.assertEquals(SOME_SECRET, credentialsConfig.getSecretKey().getPassword());
   }
 }

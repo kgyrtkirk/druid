@@ -22,7 +22,6 @@ package org.apache.druid.indexer;
 import org.apache.druid.java.util.common.StringUtils;
 import org.apache.hadoop.io.WritableComparator;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;

@@ -29,21 +29,18 @@ import org.apache.druid.segment.index.BitmapColumnIndex;
 import org.apache.druid.segment.index.semantic.LexicographicalRangeIndexes;
 import org.apache.druid.segment.index.semantic.StringValueSetIndexes;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
-import org.mockito.quality.Strictness;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
 import java.util.Arrays;
 
+@ExtendWith(MockitoExtension.class)
 public class LikeDimFilterTest extends InitializedNullHandlingTest
 {
-  @Rule
-  public MockitoRule mockitoRule = MockitoJUnit.rule().strictness(Strictness.STRICT_STUBS);
 
   @Test
   public void testSerde() throws IOException
@@ -51,7 +48,7 @@ public class LikeDimFilterTest extends InitializedNullHandlingTest
     final ObjectMapper objectMapper = new DefaultObjectMapper();
     final DimFilter filter = new LikeDimFilter("foo", "bar%", "@", new SubstringDimExtractionFn(1, 2));
     final DimFilter filter2 = objectMapper.readValue(objectMapper.writeValueAsString(filter), DimFilter.class);
-    Assert.assertEquals(filter, filter2);
+    Assertions.assertEquals(filter, filter2);
   }
 
   @Test
@@ -60,8 +57,8 @@ public class LikeDimFilterTest extends InitializedNullHandlingTest
     final DimFilter filter = new LikeDimFilter("foo", "bar%", "@", new SubstringDimExtractionFn(1, 2));
     final DimFilter filter2 = new LikeDimFilter("foo", "bar%", "@", new SubstringDimExtractionFn(1, 2));
     final DimFilter filter3 = new LikeDimFilter("foo", "bar%", null, new SubstringDimExtractionFn(1, 2));
-    Assert.assertArrayEquals(filter.getCacheKey(), filter2.getCacheKey());
-    Assert.assertFalse(Arrays.equals(filter.getCacheKey(), filter3.getCacheKey()));
+    Assertions.assertArrayEquals(filter.getCacheKey(), filter2.getCacheKey());
+    Assertions.assertFalse(Arrays.equals(filter.getCacheKey(), filter3.getCacheKey()));
   }
 
   @Test
@@ -70,17 +67,17 @@ public class LikeDimFilterTest extends InitializedNullHandlingTest
     final DimFilter filter = new LikeDimFilter("foo", "bar%", "@", new SubstringDimExtractionFn(1, 2));
     final DimFilter filter2 = new LikeDimFilter("foo", "bar%", "@", new SubstringDimExtractionFn(1, 2));
     final DimFilter filter3 = new LikeDimFilter("foo", "bar%", null, new SubstringDimExtractionFn(1, 2));
-    Assert.assertEquals(filter, filter2);
-    Assert.assertNotEquals(filter, filter3);
-    Assert.assertEquals(filter.hashCode(), filter2.hashCode());
-    Assert.assertNotEquals(filter.hashCode(), filter3.hashCode());
+    Assertions.assertEquals(filter, filter2);
+    Assertions.assertNotEquals(filter, filter3);
+    Assertions.assertEquals(filter.hashCode(), filter2.hashCode());
+    Assertions.assertNotEquals(filter.hashCode(), filter3.hashCode());
   }
 
   @Test
   public void testGetRequiredColumns()
   {
     final DimFilter filter = new LikeDimFilter("foo", "bar%", "@", new SubstringDimExtractionFn(1, 2));
-    Assert.assertEquals(filter.getRequiredColumns(), Sets.newHashSet("foo"));
+    Assertions.assertEquals(filter.getRequiredColumns(), Sets.newHashSet("foo"));
   }
 
   @Test
@@ -122,7 +119,7 @@ public class LikeDimFilterTest extends InitializedNullHandlingTest
     ).thenReturn(bitmapColumnIndex);
 
     final BitmapColumnIndex retVal = likeFilter.getBitmapColumnIndex(indexSelector);
-    Assert.assertSame("likeFilter returns the intended bitmapColumnIndex", bitmapColumnIndex, retVal);
+    Assertions.assertSame(bitmapColumnIndex, retVal, "likeFilter returns the intended bitmapColumnIndex");
   }
 
   @Test
@@ -143,6 +140,6 @@ public class LikeDimFilterTest extends InitializedNullHandlingTest
     Mockito.when(valueIndex.forValue("f")).thenReturn(bitmapColumnIndex);
 
     final BitmapColumnIndex retVal = likeFilter.getBitmapColumnIndex(indexSelector);
-    Assert.assertSame("likeFilter returns the intended bitmapColumnIndex", bitmapColumnIndex, retVal);
+    Assertions.assertSame(bitmapColumnIndex, retVal, "likeFilter returns the intended bitmapColumnIndex");
   }
 }

@@ -34,7 +34,6 @@ import io.delta.kernel.utils.CloseableIterator;
 import io.delta.kernel.utils.FileStatus;
 import org.apache.hadoop.conf.Configuration;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.io.IOException;
 import java.util.Map;

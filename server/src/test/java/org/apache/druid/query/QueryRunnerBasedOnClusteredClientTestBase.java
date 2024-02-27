@@ -54,9 +54,9 @@ import org.apache.druid.server.metrics.NoopServiceEmitter;
 import org.apache.druid.timeline.DataSegment;
 import org.apache.druid.timeline.partition.NumberedShardSpec;
 import org.joda.time.Interval;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -120,13 +120,13 @@ public abstract class QueryRunnerBasedOnClusteredClientTestBase
     };
   }
 
-  @AfterClass
+  @AfterAll
   public static void tearDownAbstractClass() throws IOException
   {
     CLOSER.close();
   }
 
-  @Before
+  @BeforeEach
   public void setupTestBase()
   {
     segmentGenerator = new SegmentGenerator();
@@ -148,7 +148,7 @@ public abstract class QueryRunnerBasedOnClusteredClientTestBase
     servers = new ArrayList<>();
   }
 
-  @After
+  @AfterEach
   public void tearDownTestBase() throws IOException
   {
     segmentGenerator.close();

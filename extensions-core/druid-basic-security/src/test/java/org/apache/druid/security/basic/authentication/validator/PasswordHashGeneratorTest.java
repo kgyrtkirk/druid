@@ -22,7 +22,6 @@ package org.apache.druid.security.basic.authentication.validator;
 import com.google.common.cache.CacheStats;
 import org.apache.druid.security.basic.BasicAuthUtils;
 import org.junit.Assert;
-import org.junit.Test;
 
 public class PasswordHashGeneratorTest
 {

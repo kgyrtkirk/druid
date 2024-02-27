@@ -25,7 +25,6 @@ import org.apache.druid.java.util.common.Pair;
 import org.apache.druid.testsEx.categories.AzureDeepStorage;
 import org.apache.druid.testsEx.config.DruidTestRunner;
 import org.apache.druid.testsEx.indexer.AbstractAzureInputSourceParallelIndexTest;
-import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 

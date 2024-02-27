@@ -29,13 +29,15 @@ import org.apache.druid.timeline.DataSegment;
 import org.apache.druid.timeline.partition.NoneShardSpec;
 import org.apache.druid.timeline.partition.TombstoneShardSpec;
 import org.easymock.EasyMock;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ServerSelectorTest
 {
-  @Before
+  @BeforeEach
   public void setUp()
   {
     TierSelectorStrategy tierSelectorStrategy = EasyMock.createMock(TierSelectorStrategy.class);
@@ -99,16 +101,18 @@ public class ServerSelectorTest
                    .build()
     );
 
-    Assert.assertEquals(ImmutableList.of("a", "b", "c"), selector.getSegment().getDimensions());
+    Assertions.assertEquals(ImmutableList.of("a", "b", "c"), selector.getSegment().getDimensions());
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void testSegmentCannotBeNull()
   {
-    final ServerSelector selector = new ServerSelector(
-        null,
-        new HighestPriorityTierSelectorStrategy(new RandomServerSelectorStrategy())
-    );
+    assertThrows(NullPointerException.class, () -> {
+      final ServerSelector selector = new ServerSelector(
+          null,
+          new HighestPriorityTierSelectorStrategy(new RandomServerSelectorStrategy())
+      );
+    });
   }
 
   @Test
@@ -133,7 +137,7 @@ public class ServerSelectorTest
                    .build(),
         new HighestPriorityTierSelectorStrategy(new RandomServerSelectorStrategy())
     );
-    Assert.assertFalse(selector.hasData());
+    Assertions.assertFalse(selector.hasData());
   }
 
   @Test
@@ -160,7 +164,7 @@ public class ServerSelectorTest
                    .build(),
         new HighestPriorityTierSelectorStrategy(new RandomServerSelectorStrategy())
     );
-    Assert.assertTrue(selector.hasData());
+    Assertions.assertTrue(selector.hasData());
   }
 
 }

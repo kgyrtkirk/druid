@@ -20,7 +20,6 @@
 package org.apache.druid.k8s.overlord.common;
 
 import org.junit.Assert;
-import org.junit.Test;
 
 public class KubernetesOverlordUtilsTest
 {

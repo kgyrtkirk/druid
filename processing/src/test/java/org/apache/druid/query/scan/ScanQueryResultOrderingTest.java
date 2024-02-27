@@ -44,11 +44,10 @@ import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.timeline.SegmentId;
 import org.joda.time.DateTime;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -64,7 +63,6 @@ import java.util.stream.IntStream;
  *
  * Ensures that we have run-to-run stability of result order, which is important for offset-based pagination.
  */
-@RunWith(Parameterized.class)
 public class ScanQueryResultOrderingTest
 {
   private static final String DATASOURCE = "datasource";
@@ -134,15 +132,14 @@ public class ScanQueryResultOrderingTest
       )
   );
 
-  private final List<Integer> segmentToServerMap;
-  private final int limit;
-  private final int batchSize;
-  private final int maxRowsQueuedForOrdering;
+  private List<Integer> segmentToServerMap;
+  private int limit;
+  private int batchSize;
+  private int maxRowsQueuedForOrdering;
 
   private ScanQueryRunnerFactory queryRunnerFactory;
   private List<QueryRunner<ScanResultValue>> segmentRunners;
 
-  @Parameterized.Parameters(name = "Segment-to-server map[{0}], limit[{1}], batchSize[{2}], maxRowsQueuedForOrdering[{3}]")
   public static Iterable<Object[]> constructorFeeder()
   {
     // Set number of server equal to number of segments, then try all possible distributions of segments to servers.
@@ -173,7 +170,7 @@ public class ScanQueryResultOrderingTest
     ).stream().map(args -> args.toArray(new Object[0])).collect(Collectors.toList());
   }
 
-  public ScanQueryResultOrderingTest(
+  public void initScanQueryResultOrderingTest(
       final List<Integer> segmentToServerMap,
       final int limit,
       final int batchSize,
@@ -186,7 +183,7 @@ public class ScanQueryResultOrderingTest
     this.maxRowsQueuedForOrdering = maxRowsQueuedForOrdering;
   }
 
-  @Before
+  @BeforeEach
   public void setUp()
   {
     queryRunnerFactory = new ScanQueryRunnerFactory(
@@ -201,9 +198,11 @@ public class ScanQueryResultOrderingTest
     segmentRunners = SEGMENTS.stream().map(queryRunnerFactory::createRunner).collect(Collectors.toList());
   }
 
-  @Test
-  public void testOrderNone()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "Segment-to-server map[{0}], limit[{1}], batchSize[{2}], maxRowsQueuedForOrdering[{3}]")
+  public void testOrderNone(final List<Integer> segmentToServerMap, final int limit, final int batchSize, final int maxRowsQueuedForOrdering)
   {
+    initScanQueryResultOrderingTest(segmentToServerMap, limit, batchSize, maxRowsQueuedForOrdering);
     assertResultsEquals(
         Druids.newScanQueryBuilder()
               .dataSource("ds")
@@ -235,9 +234,11 @@ public class ScanQueryResultOrderingTest
     );
   }
 
-  @Test
-  public void testOrderTimeAscending()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "Segment-to-server map[{0}], limit[{1}], batchSize[{2}], maxRowsQueuedForOrdering[{3}]")
+  public void testOrderTimeAscending(final List<Integer> segmentToServerMap, final int limit, final int batchSize, final int maxRowsQueuedForOrdering)
   {
+    initScanQueryResultOrderingTest(segmentToServerMap, limit, batchSize, maxRowsQueuedForOrdering);
     assertResultsEquals(
         Druids.newScanQueryBuilder()
               .dataSource("ds")
@@ -269,9 +270,11 @@ public class ScanQueryResultOrderingTest
     );
   }
 
-  @Test
-  public void testOrderTimeDescending()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "Segment-to-server map[{0}], limit[{1}], batchSize[{2}], maxRowsQueuedForOrdering[{3}]")
+  public void testOrderTimeDescending(final List<Integer> segmentToServerMap, final int limit, final int batchSize, final int maxRowsQueuedForOrdering)
   {
+    initScanQueryResultOrderingTest(segmentToServerMap, limit, batchSize, maxRowsQueuedForOrdering);
     assertResultsEquals(
         Druids.newScanQueryBuilder()
               .dataSource("ds")
@@ -384,7 +387,7 @@ public class ScanQueryResultOrderingTest
         brokerRunner
     );
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         expectedResults.stream().limit(limit == 0 ? Long.MAX_VALUE : limit).collect(Collectors.toList()),
         results
     );

@@ -21,7 +21,6 @@ package org.apache.druid.security.kerberos;
 
 import org.apache.hadoop.security.authentication.client.AuthenticatedURL;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.net.CookieManager;
 import java.net.CookieStore;

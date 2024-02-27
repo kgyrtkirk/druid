@@ -58,10 +58,9 @@ import org.apache.druid.query.topn.TopNResultValue;
 import org.apache.druid.segment.incremental.IncrementalIndex;
 import org.apache.druid.segment.writeout.SegmentWriteOutMediumFactory;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -72,11 +71,9 @@ import java.util.List;
 
 /**
  */
-@RunWith(Parameterized.class)
 public class SchemalessTestSimpleTest extends InitializedNullHandlingTest
 {
 
-  @Parameterized.Parameters
   public static Collection<?> constructorFeeder()
   {
     List<Object[]> argumentArrays = new ArrayList<>();
@@ -115,19 +112,21 @@ public class SchemalessTestSimpleTest extends InitializedNullHandlingTest
       Collections.singletonList(Intervals.of("1970-01-01T00:00:00.000Z/2020-01-01T00:00:00.000Z"))
   );
 
-  private final Segment segment;
-  private final boolean coalesceAbsentAndEmptyDims;
+  private Segment segment;
+  private boolean coalesceAbsentAndEmptyDims;
 
-  public SchemalessTestSimpleTest(Segment segment, boolean coalesceAbsentAndEmptyDims)
+  public void initSchemalessTestSimpleTest(Segment segment, boolean coalesceAbsentAndEmptyDims)
   {
     this.segment = segment;
     // Empty and empty dims are equivalent only when replaceWithDefault is true
     this.coalesceAbsentAndEmptyDims = coalesceAbsentAndEmptyDims && NullHandling.replaceWithDefault();
   }
 
-  @Test
-  public void testFullOnTimeseries()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest
+  public void testFullOnTimeseries(Segment segment, boolean coalesceAbsentAndEmptyDims)
   {
+    initSchemalessTestSimpleTest(segment, coalesceAbsentAndEmptyDims);
     TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
                                   .dataSource(dataSource)
                                   .granularity(ALL_GRAN)
@@ -168,7 +167,7 @@ public class SchemalessTestSimpleTest extends InitializedNullHandlingTest
 
   //  @Test TODO: Handling of null values is inconsistent right now, need to make it all consistent and re-enable test
   // TODO: Complain to Eric when you see this.  It shouldn't be like this...
-  @Ignore
+  @Disabled
   @SuppressWarnings("unused")
   public void testFullOnTopN()
   {
@@ -242,9 +241,11 @@ public class SchemalessTestSimpleTest extends InitializedNullHandlingTest
     }
   }
 
-  @Test
-  public void testFullOnSearch()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest
+  public void testFullOnSearch(Segment segment, boolean coalesceAbsentAndEmptyDims)
   {
+    initSchemalessTestSimpleTest(segment, coalesceAbsentAndEmptyDims);
     SearchQuery query = Druids.newSearchQueryBuilder()
                               .dataSource(dataSource)
                               .granularity(ALL_GRAN)
@@ -270,9 +271,11 @@ public class SchemalessTestSimpleTest extends InitializedNullHandlingTest
     TestHelper.assertExpectedResults(expectedResults, runner.run(QueryPlus.wrap(query)));
   }
 
-  @Test
-  public void testTimeBoundary()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest
+  public void testTimeBoundary(Segment segment, boolean coalesceAbsentAndEmptyDims)
   {
+    initSchemalessTestSimpleTest(segment, coalesceAbsentAndEmptyDims);
     TimeBoundaryQuery query = Druids.newTimeBoundaryQueryBuilder()
                                     .dataSource("testing")
                                     .build();

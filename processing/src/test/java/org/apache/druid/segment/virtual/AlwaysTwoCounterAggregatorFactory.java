@@ -35,7 +35,7 @@ import org.apache.druid.segment.vector.SingleValueDimensionVectorSelector;
 import org.apache.druid.segment.vector.VectorColumnSelectorFactory;
 import org.apache.druid.segment.vector.VectorObjectSelector;
 import org.apache.druid.segment.vector.VectorValueSelector;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 
 import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
@@ -151,7 +151,7 @@ public class AlwaysTwoCounterAggregatorFactory extends CountAggregatorFactory
 
         long count = 0;
         for (int i = startRow; i < endRow; i++) {
-          Assert.assertEquals(2L, vector[i]);
+          Assertions.assertEquals(2L, vector[i]);
           count += 1;
         }
 
@@ -164,10 +164,10 @@ public class AlwaysTwoCounterAggregatorFactory extends CountAggregatorFactory
         long count = 0;
         for (int i = startRow; i < endRow; i++) {
           if (vector[i] instanceof List) {
-            Assert.assertEquals(ImmutableList.of("2", "2"), vector[i]);
+            Assertions.assertEquals(ImmutableList.of("2", "2"), vector[i]);
             count += 2;
           } else {
-            Assert.assertEquals("2", vector[i]);
+            Assertions.assertEquals("2", vector[i]);
             count += 1;
           }
         }
@@ -180,7 +180,7 @@ public class AlwaysTwoCounterAggregatorFactory extends CountAggregatorFactory
 
         long count = 0;
         for (int i = startRow; i < endRow; i++) {
-          Assert.assertEquals("2", singleValueDimensionSelector.lookupName(rowVector[i]));
+          Assertions.assertEquals("2", singleValueDimensionSelector.lookupName(rowVector[i]));
           count += 1;
         }
 
@@ -194,7 +194,7 @@ public class AlwaysTwoCounterAggregatorFactory extends CountAggregatorFactory
         for (int i = startRow; i < endRow; i++) {
           //noinspection SSBasedInspection
           for (int j = 0; j < rowVector[i].size(); j++) {
-            Assert.assertEquals("2", multiValueDimensionSelector.lookupName(rowVector[i].get(j)));
+            Assertions.assertEquals("2", multiValueDimensionSelector.lookupName(rowVector[i].get(j)));
             count += 1;
           }
         }
@@ -219,7 +219,7 @@ public class AlwaysTwoCounterAggregatorFactory extends CountAggregatorFactory
 
         for (int i = 0; i < numRows; i++) {
           final int position = positions[i] + positionOffset;
-          Assert.assertEquals(2L, vector[i]);
+          Assertions.assertEquals(2L, vector[i]);
           buf.putLong(position, buf.getLong(position) + 1);
         }
         return;
@@ -229,10 +229,10 @@ public class AlwaysTwoCounterAggregatorFactory extends CountAggregatorFactory
         for (int i = 0; i < numRows; i++) {
           final int position = positions[i] + positionOffset;
           if (vector[i] instanceof List) {
-            Assert.assertEquals(ImmutableList.of("2", "2"), vector[i]);
+            Assertions.assertEquals(ImmutableList.of("2", "2"), vector[i]);
             buf.putLong(position, buf.getLong(position) + 2);
           } else {
-            Assert.assertEquals("2", vector[i]);
+            Assertions.assertEquals("2", vector[i]);
             buf.putLong(position, buf.getLong(position) + 1);
           }
         }
@@ -242,7 +242,7 @@ public class AlwaysTwoCounterAggregatorFactory extends CountAggregatorFactory
         final int[] rowVector = singleValueDimensionSelector.getRowVector();
         for (int i = 0; i < numRows; i++) {
           final int position = positions[i] + positionOffset;
-          Assert.assertEquals("2", singleValueDimensionSelector.lookupName(rowVector[i]));
+          Assertions.assertEquals("2", singleValueDimensionSelector.lookupName(rowVector[i]));
           buf.putLong(position, buf.getLong(position) + 1);
         }
         return;
@@ -253,7 +253,7 @@ public class AlwaysTwoCounterAggregatorFactory extends CountAggregatorFactory
           final int position = positions[i] + positionOffset;
           //noinspection SSBasedInspection
           for (int j = 0; j < rowVector[i].size(); j++) {
-            Assert.assertEquals("2", multiValueDimensionSelector.lookupName(rowVector[i].get(j)));
+            Assertions.assertEquals("2", multiValueDimensionSelector.lookupName(rowVector[i].get(j)));
             buf.putLong(position, buf.getLong(position) + 1);
           }
         }

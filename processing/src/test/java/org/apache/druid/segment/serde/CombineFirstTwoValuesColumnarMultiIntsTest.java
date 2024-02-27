@@ -25,9 +25,9 @@ import org.apache.druid.segment.data.ColumnarMultiInts;
 import org.apache.druid.segment.data.IndexedInts;
 import org.apache.druid.segment.data.VSizeColumnarInts;
 import org.apache.druid.segment.data.VSizeColumnarMultiInts;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
@@ -39,7 +39,7 @@ public class CombineFirstTwoValuesColumnarMultiIntsTest
   private ColumnarMultiInts original;
   private CombineFirstTwoValuesColumnarMultiInts combined;
 
-  @Before
+  @BeforeEach
   public void setUp()
   {
     original = VSizeColumnarMultiInts.fromIterable(
@@ -56,7 +56,7 @@ public class CombineFirstTwoValuesColumnarMultiIntsTest
   @Test
   public void testSize()
   {
-    Assert.assertEquals(original.size(), combined.size());
+    Assertions.assertEquals(original.size(), combined.size());
   }
 
   @Test
@@ -67,7 +67,7 @@ public class CombineFirstTwoValuesColumnarMultiIntsTest
     assertEquals(new int[]{2, 0, 1, 0, 4, 0}, combined.get(2));
 
     // "get" reuses a holder
-    Assert.assertSame(combined.get(1), combined.get(0));
+    Assertions.assertSame(combined.get(1), combined.get(0));
   }
 
   @Test
@@ -78,13 +78,13 @@ public class CombineFirstTwoValuesColumnarMultiIntsTest
     assertEquals(new int[]{2, 0, 1, 0, 4, 0}, combined.getUnshared(2));
 
     // Unlike "get", "getUnshared" does not reuse a holder
-    Assert.assertNotSame(combined.getUnshared(1), combined.getUnshared(0));
+    Assertions.assertNotSame(combined.getUnshared(1), combined.getUnshared(0));
   }
 
   @Test
   public void testIndexOf()
   {
-    Assert.assertThrows(
+    Assertions.assertThrows(
         UnsupportedOperationException.class,
         () -> combined.indexOf(original.get(0))
     );
@@ -93,14 +93,14 @@ public class CombineFirstTwoValuesColumnarMultiIntsTest
   @Test
   public void testIsSorted()
   {
-    Assert.assertFalse(combined.isSorted());
+    Assertions.assertFalse(combined.isSorted());
   }
 
   @Test
   public void testIterator()
   {
     final List<IndexedInts> fromIterator = Lists.newArrayList(combined.iterator());
-    Assert.assertEquals(3, fromIterator.size());
+    Assertions.assertEquals(3, fromIterator.size());
     assertEquals(new int[]{0, 1, 2}, fromIterator.get(0));
     assertEquals(new int[]{0, 0, 1, 2}, fromIterator.get(1));
     assertEquals(new int[]{2, 0, 1, 0, 4, 0}, fromIterator.get(2));
@@ -114,6 +114,6 @@ public class CombineFirstTwoValuesColumnarMultiIntsTest
       actualArray[i] = actual.get(i);
     }
 
-    Assert.assertArrayEquals(expected, actualArray);
+    Assertions.assertArrayEquals(expected, actualArray);
   }
 }

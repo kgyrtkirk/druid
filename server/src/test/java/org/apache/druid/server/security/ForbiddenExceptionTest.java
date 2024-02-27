@@ -19,17 +19,17 @@
 
 package org.apache.druid.server.security;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.function.Function;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ForbiddenExceptionTest
 {
   private static final String ERROR_MESSAGE_ORIGINAL = "aaaa";
@@ -44,8 +44,8 @@ public class ForbiddenExceptionTest
     Mockito.when(trasformFunction.apply(ArgumentMatchers.eq(ERROR_MESSAGE_ORIGINAL))).thenReturn(null);
     ForbiddenException forbiddenException = new ForbiddenException(ERROR_MESSAGE_ORIGINAL);
     ForbiddenException actual = forbiddenException.sanitize(trasformFunction);
-    Assert.assertNotNull(actual);
-    Assert.assertEquals(actual.getMessage(), Access.DEFAULT_ERROR_MESSAGE);
+    Assertions.assertNotNull(actual);
+    Assertions.assertEquals(actual.getMessage(), Access.DEFAULT_ERROR_MESSAGE);
     Mockito.verify(trasformFunction).apply(ArgumentMatchers.eq(ERROR_MESSAGE_ORIGINAL));
     Mockito.verifyNoMoreInteractions(trasformFunction);
   }
@@ -56,8 +56,8 @@ public class ForbiddenExceptionTest
     Mockito.when(trasformFunction.apply(ArgumentMatchers.eq(ERROR_MESSAGE_ORIGINAL))).thenReturn(ERROR_MESSAGE_TRANSFORMED);
     ForbiddenException forbiddenException = new ForbiddenException(ERROR_MESSAGE_ORIGINAL);
     ForbiddenException actual = forbiddenException.sanitize(trasformFunction);
-    Assert.assertNotNull(actual);
-    Assert.assertEquals(actual.getMessage(), ERROR_MESSAGE_TRANSFORMED);
+    Assertions.assertNotNull(actual);
+    Assertions.assertEquals(actual.getMessage(), ERROR_MESSAGE_TRANSFORMED);
     Mockito.verify(trasformFunction).apply(ArgumentMatchers.eq(ERROR_MESSAGE_ORIGINAL));
     Mockito.verifyNoMoreInteractions(trasformFunction);
   }
@@ -67,21 +67,21 @@ public class ForbiddenExceptionTest
   public void testAccess()
   {
     Access access = new Access(false);
-    Assert.assertFalse(access.isAllowed());
-    Assert.assertEquals("", access.getMessage());
-    Assert.assertEquals("Allowed:false, Message:", access.toString());
-    Assert.assertEquals(Access.DEFAULT_ERROR_MESSAGE, access.toMessage());
+    Assertions.assertFalse(access.isAllowed());
+    Assertions.assertEquals("", access.getMessage());
+    Assertions.assertEquals("Allowed:false, Message:", access.toString());
+    Assertions.assertEquals(Access.DEFAULT_ERROR_MESSAGE, access.toMessage());
 
     access = new Access(true);
-    Assert.assertTrue(access.isAllowed());
-    Assert.assertEquals("", access.getMessage());
-    Assert.assertEquals("Allowed:true, Message:", access.toString());
-    Assert.assertEquals("Authorized", access.toMessage());
+    Assertions.assertTrue(access.isAllowed());
+    Assertions.assertEquals("", access.getMessage());
+    Assertions.assertEquals("Allowed:true, Message:", access.toString());
+    Assertions.assertEquals("Authorized", access.toMessage());
 
     access = new Access(false, "oops");
-    Assert.assertFalse(access.isAllowed());
-    Assert.assertEquals("oops", access.getMessage());
-    Assert.assertEquals("Allowed:false, Message:oops", access.toString());
-    Assert.assertEquals("Allowed:false, Message:oops", access.toMessage());
+    Assertions.assertFalse(access.isAllowed());
+    Assertions.assertEquals("oops", access.getMessage());
+    Assertions.assertEquals("Allowed:false, Message:oops", access.toString());
+    Assertions.assertEquals("Allowed:false, Message:oops", access.toMessage());
   }
 }

@@ -36,12 +36,11 @@ import org.apache.druid.timeline.DataSegment;
 import org.apache.druid.timeline.partition.NumberedShardSpec;
 import org.hamcrest.CoreMatchers;
 import org.joda.time.Interval;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.rules.ExpectedException;
-import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.io.IOException;
@@ -55,11 +54,8 @@ import java.util.stream.Collectors;
 
 public class SegmentLocalCacheManagerConcurrencyTest
 {
-  @Rule
-  public final TemporaryFolder tmpFolder = new TemporaryFolder();
-
-  @Rule
-  public final ExpectedException expectedException = ExpectedException.none();
+  @TempDir
+  public File tmpFolder;
 
   private final ObjectMapper jsonMapper;
   private final String dataSource = "test_ds";
@@ -82,11 +78,11 @@ public class SegmentLocalCacheManagerConcurrencyTest
     segmentVersion = DateTimes.nowUtc().toString();
   }
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception
   {
     EmittingLogger.registerEmitter(new NoopServiceEmitter());
-    localSegmentCacheFolder = tmpFolder.newFolder("segment_cache_folder");
+    localSegmentCacheFolder = newFolder(tmpFolder, "segment_cache_folder");
 
     final List<StorageLocationConfig> locations = new ArrayList<>();
     // Each segment has the size of 1000 bytes. This deep storage is capable of storing up to 2 segments.
@@ -100,7 +96,7 @@ public class SegmentLocalCacheManagerConcurrencyTest
     executorService = Execs.multiThreaded(4, "segment-loader-local-cache-manager-concurrency-test-%d");
   }
 
-  @After
+  @AfterEach
   public void tearDown()
   {
     executorService.shutdownNow();
@@ -109,7 +105,7 @@ public class SegmentLocalCacheManagerConcurrencyTest
   @Test
   public void testGetSegment() throws IOException, ExecutionException, InterruptedException
   {
-    final File localStorageFolder = tmpFolder.newFolder("local_storage_folder");
+    final File localStorageFolder = newFolder(tmpFolder, "local_storage_folder");
     final List<DataSegment> segmentsToLoad = new ArrayList<>(4);
 
     final Interval interval = Intervals.of("2019-01-01/P1D");
@@ -174,5 +170,14 @@ public class SegmentLocalCacheManagerConcurrencyTest
                       .binaryVersion(9)
                       .size(1000L)
                       .build();
+  }
+
+  private static File newFolder(File root, String... subDirs) throws IOException {
+    String subFolder = String.join("/", subDirs);
+    File result = new File(root, subFolder);
+    if (!result.mkdirs()) {
+      throw new IOException("Couldn't create folders " + root);
+    }
+    return result;
   }
 }

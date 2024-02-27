@@ -47,9 +47,9 @@ import org.apache.druid.segment.QueryableIndexStorageAdapter;
 import org.apache.druid.segment.StorageAdapter;
 import org.apache.druid.segment.filter.cnf.CNFFilterExplosionException;
 import org.apache.druid.segment.index.BitmapColumnIndex;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -181,7 +181,7 @@ public class FilterPartitionTest extends BaseFilterTest
     super(testName, ROWS, indexBuilder, finisher, cnf, optimize);
   }
 
-  @AfterClass
+  @AfterAll
   public static void tearDown() throws Exception
   {
     BaseFilterTest.tearDown(FilterPartitionTest.class.getName());
@@ -640,8 +640,8 @@ public class FilterPartitionTest extends BaseFilterTest
     Filter filter1 = dimFilter1.toFilter();
     Filter filter1CNF = Filters.toCnf(filter1);
 
-    Assert.assertEquals(AndFilter.class, filter1CNF.getClass());
-    Assert.assertEquals(2, ((AndFilter) filter1CNF).getFilters().size());
+    Assertions.assertEquals(AndFilter.class, filter1CNF.getClass());
+    Assertions.assertEquals(2, ((AndFilter) filter1CNF).getFilters().size());
 
     assertFilterMatches(
         dimFilter1,
@@ -698,8 +698,8 @@ public class FilterPartitionTest extends BaseFilterTest
     Filter filter1 = dimFilter1.toFilter();
     Filter filter1CNF = Filters.toCnf(filter1);
 
-    Assert.assertEquals(AndFilter.class, filter1CNF.getClass());
-    Assert.assertEquals(2, ((AndFilter) filter1CNF).getFilters().size());
+    Assertions.assertEquals(AndFilter.class, filter1CNF.getClass());
+    Assertions.assertEquals(2, ((AndFilter) filter1CNF).getFilters().size());
 
     assertFilterMatches(
         dimFilter1,
@@ -751,16 +751,16 @@ public class FilterPartitionTest extends BaseFilterTest
     Filter normalFilter = new SelectorFilter("dim1", "HELLO");
     FilterAnalysis filterAnalysisNormal =
         FilterAnalysis.analyzeFilter(normalFilter, bitmapIndexSelector, null, numRows);
-    Assert.assertTrue(filterAnalysisNormal.getPreFilterBitmap() != null);
-    Assert.assertTrue(filterAnalysisNormal.getPostFilter() == null);
+    Assertions.assertTrue(filterAnalysisNormal.getPreFilterBitmap() != null);
+    Assertions.assertTrue(filterAnalysisNormal.getPostFilter() == null);
 
 
     // no bitmap index, should be a post filter
     Filter noBitmapFilter = new NoBitmapSelectorFilter("dim1", "HELLO");
     FilterAnalysis noBitmapFilterAnalysis =
         FilterAnalysis.analyzeFilter(noBitmapFilter, bitmapIndexSelector, null, numRows);
-    Assert.assertTrue(noBitmapFilterAnalysis.getPreFilterBitmap() == null);
-    Assert.assertTrue(noBitmapFilterAnalysis.getPostFilter() != null);
+    Assertions.assertTrue(noBitmapFilterAnalysis.getPreFilterBitmap() == null);
+    Assertions.assertTrue(noBitmapFilterAnalysis.getPostFilter() != null);
 
     // this column has a bitmap index, but is forced to not use it
     Filter bitmapFilterWithForceNoIndexTuning = new SelectorFilter(
@@ -770,8 +770,8 @@ public class FilterPartitionTest extends BaseFilterTest
     );
     FilterAnalysis bitmapFilterWithForceNoIndexTuningAnalysis =
         FilterAnalysis.analyzeFilter(bitmapFilterWithForceNoIndexTuning, bitmapIndexSelector, null, numRows);
-    Assert.assertTrue(bitmapFilterWithForceNoIndexTuningAnalysis.getPreFilterBitmap() == null);
-    Assert.assertTrue(bitmapFilterWithForceNoIndexTuningAnalysis.getPostFilter() != null);
+    Assertions.assertTrue(bitmapFilterWithForceNoIndexTuningAnalysis.getPreFilterBitmap() == null);
+    Assertions.assertTrue(bitmapFilterWithForceNoIndexTuningAnalysis.getPostFilter() != null);
 
     // this max cardinality is too low to use bitmap index
     Filter bitmapFilterWithCardinalityMax = new SelectorFilter(
@@ -781,8 +781,8 @@ public class FilterPartitionTest extends BaseFilterTest
     );
     FilterAnalysis bitmapFilterWithCardinalityMaxAnalysis =
         FilterAnalysis.analyzeFilter(bitmapFilterWithCardinalityMax, bitmapIndexSelector, null, numRows);
-    Assert.assertTrue(bitmapFilterWithCardinalityMaxAnalysis.getPreFilterBitmap() == null);
-    Assert.assertTrue(bitmapFilterWithCardinalityMaxAnalysis.getPostFilter() != null);
+    Assertions.assertTrue(bitmapFilterWithCardinalityMaxAnalysis.getPreFilterBitmap() == null);
+    Assertions.assertTrue(bitmapFilterWithCardinalityMaxAnalysis.getPostFilter() != null);
 
     // this max cardinality is high enough that we can still use bitmap index
     Filter bitmapFilterWithCardinalityMax2 = new SelectorFilter(
@@ -792,8 +792,8 @@ public class FilterPartitionTest extends BaseFilterTest
     );
     FilterAnalysis bitmapFilterWithCardinalityMax2Analysis =
         FilterAnalysis.analyzeFilter(bitmapFilterWithCardinalityMax2, bitmapIndexSelector, null, numRows);
-    Assert.assertTrue(bitmapFilterWithCardinalityMax2Analysis.getPreFilterBitmap() != null);
-    Assert.assertTrue(bitmapFilterWithCardinalityMax2Analysis.getPostFilter() == null);
+    Assertions.assertTrue(bitmapFilterWithCardinalityMax2Analysis.getPreFilterBitmap() != null);
+    Assertions.assertTrue(bitmapFilterWithCardinalityMax2Analysis.getPostFilter() == null);
 
     // this min cardinality is too high, will not use bitmap index
     Filter bitmapFilterWithCardinalityMin = new SelectorFilter(
@@ -803,8 +803,8 @@ public class FilterPartitionTest extends BaseFilterTest
     );
     FilterAnalysis bitmapFilterWithCardinalityMinAnalysis =
         FilterAnalysis.analyzeFilter(bitmapFilterWithCardinalityMin, bitmapIndexSelector, null, numRows);
-    Assert.assertTrue(bitmapFilterWithCardinalityMinAnalysis.getPreFilterBitmap() == null);
-    Assert.assertTrue(bitmapFilterWithCardinalityMinAnalysis.getPostFilter() != null);
+    Assertions.assertTrue(bitmapFilterWithCardinalityMinAnalysis.getPreFilterBitmap() == null);
+    Assertions.assertTrue(bitmapFilterWithCardinalityMinAnalysis.getPostFilter() != null);
 
     // cannot force using bitmap if there are no bitmaps
     Filter noBitmapFilterWithForceUse = new NoBitmapSelectorFilter(
@@ -814,7 +814,7 @@ public class FilterPartitionTest extends BaseFilterTest
     );
     FilterAnalysis noBitmapFilterWithForceUseAnalysis =
         FilterAnalysis.analyzeFilter(noBitmapFilterWithForceUse, bitmapIndexSelector, null, numRows);
-    Assert.assertTrue(noBitmapFilterWithForceUseAnalysis.getPreFilterBitmap() == null);
-    Assert.assertTrue(noBitmapFilterWithForceUseAnalysis.getPostFilter() != null);
+    Assertions.assertTrue(noBitmapFilterWithForceUseAnalysis.getPreFilterBitmap() == null);
+    Assertions.assertTrue(noBitmapFilterWithForceUseAnalysis.getPostFilter() != null);
   }
 }

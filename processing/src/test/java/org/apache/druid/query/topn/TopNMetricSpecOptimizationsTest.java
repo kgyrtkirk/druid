@@ -46,8 +46,8 @@ import org.apache.druid.segment.data.Indexed;
 import org.apache.druid.segment.data.IndexedInts;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -94,8 +94,8 @@ public class TopNMetricSpecOptimizationsTest
 
     arrayProviderToTest.ignoreAfterThreshold();
     Pair<Integer, Integer> thePair = arrayProviderToTest.computeStartEnd(cardinality);
-    Assert.assertEquals(new Integer(0), thePair.lhs);
-    Assert.assertEquals(new Integer(threshold), thePair.rhs);
+    Assertions.assertEquals(new Integer(0), thePair.lhs);
+    Assertions.assertEquals(new Integer(threshold), thePair.rhs);
   }
 
   @Test
@@ -129,8 +129,8 @@ public class TopNMetricSpecOptimizationsTest
 
     arrayProviderToTest.ignoreAfterThreshold();
     Pair<Integer, Integer> thePair = arrayProviderToTest.computeStartEnd(cardinality);
-    Assert.assertEquals(new Integer(0), thePair.lhs);
-    Assert.assertEquals(new Integer(threshold), thePair.rhs);
+    Assertions.assertEquals(new Integer(0), thePair.lhs);
+    Assertions.assertEquals(new Integer(threshold), thePair.rhs);
   }
 
   @Test
@@ -164,8 +164,8 @@ public class TopNMetricSpecOptimizationsTest
 
     arrayProviderToTest.ignoreAfterThreshold();
     Pair<Integer, Integer> thePair = arrayProviderToTest.computeStartEnd(cardinality);
-    Assert.assertEquals(new Integer(0), thePair.lhs);
-    Assert.assertEquals(new Integer(cardinality), thePair.rhs);
+    Assertions.assertEquals(new Integer(0), thePair.lhs);
+    Assertions.assertEquals(new Integer(cardinality), thePair.rhs);
   }
 
   @Test
@@ -199,8 +199,8 @@ public class TopNMetricSpecOptimizationsTest
 
     arrayProviderToTest.ignoreAfterThreshold();
     Pair<Integer, Integer> thePair = arrayProviderToTest.computeStartEnd(cardinality);
-    Assert.assertEquals(new Integer(0), thePair.lhs);
-    Assert.assertEquals(new Integer(cardinality), thePair.rhs);
+    Assertions.assertEquals(new Integer(0), thePair.lhs);
+    Assertions.assertEquals(new Integer(cardinality), thePair.rhs);
   }
 
   @Test
@@ -234,8 +234,8 @@ public class TopNMetricSpecOptimizationsTest
     );
 
     Pair<Integer, Integer> thePair = arrayProviderToTest.computeStartEnd(cardinality);
-    Assert.assertEquals(new Integer(0), thePair.lhs);
-    Assert.assertEquals(new Integer(cardinality), thePair.rhs);
+    Assertions.assertEquals(new Integer(0), thePair.lhs);
+    Assertions.assertEquals(new Integer(cardinality), thePair.rhs);
   }
 
   private StorageAdapter makeFakeStorageAdapter(String start, String end, int cardinality)

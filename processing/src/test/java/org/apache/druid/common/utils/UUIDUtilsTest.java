@@ -25,10 +25,9 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import org.apache.druid.java.util.common.StringUtils;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -38,10 +37,8 @@ import java.util.UUID;
 /**
  *
  */
-@RunWith(Parameterized.class)
 public class UUIDUtilsTest
 {
-  @Parameterized.Parameters
   public static Collection<Object[]> constructorFeeder()
   {
     final ArrayList<String[]> args = new ArrayList<>();
@@ -82,10 +79,10 @@ public class UUIDUtilsTest
     );
   }
 
-  private final String[] args;
-  private final String expectedBase;
+  private String[] args;
+  private String expectedBase;
 
-  public UUIDUtilsTest(String[] args, String expectedBase)
+  public void initUUIDUtilsTest(String[] args, String expectedBase)
   {
     this.args = args;
     this.expectedBase = expectedBase;
@@ -103,12 +100,14 @@ public class UUIDUtilsTest
     strings.add(uuidString.substring(16, 20));
     strings.add(uuidString.substring(20, 32));
     UUID uuid = UUID.fromString(Joiner.on('-').join(strings));
-    Assert.assertEquals(StringUtils.removeChar(uuid.toString(), '-'), uuidString);
+    Assertions.assertEquals(StringUtils.removeChar(uuid.toString(), '-'), uuidString);
   }
 
-  @Test
-  public void testUuid()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest
+  public void testUuid(String[] args, String expectedBase)
   {
+    initUUIDUtilsTest(args, expectedBase);
     final String uuid = UUIDUtils.generateUuid(args);
     validateIsStandardUUID(uuid.substring(expectedBase.length()));
   }

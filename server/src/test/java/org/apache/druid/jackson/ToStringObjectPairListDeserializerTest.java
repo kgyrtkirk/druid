@@ -25,8 +25,8 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.apache.druid.java.util.common.NonnullPair;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
@@ -59,7 +59,7 @@ public class ToStringObjectPairListDeserializerTest
     );
     final String json = objectMapper.writeValueAsString(map);
     final StringObjectPairList pairList = objectMapper.readValue(json, StringObjectPairList.class);
-    Assert.assertEquals(
+    Assertions.assertEquals(
         new StringObjectPairList(
             ImmutableList.of(
                 new NonnullPair<>("rootKey", "rootVal"),

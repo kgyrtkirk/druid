@@ -51,21 +51,19 @@ import org.apache.druid.segment.vector.VectorValueSelector;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.apache.druid.timeline.DataSegment;
 import org.apache.druid.timeline.partition.LinearShardSpec;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-@RunWith(Parameterized.class)
 public class ExpressionVectorSelectorsTest extends InitializedNullHandlingTest
 {
   private static List<String> EXPRESSIONS = ImmutableList.of(
@@ -106,7 +104,7 @@ public class ExpressionVectorSelectorsTest extends InitializedNullHandlingTest
   private static QueryableIndex INDEX_OTHER_ENCODINGS;
   private static Closer CLOSER;
 
-  @BeforeClass
+  @BeforeAll
   public static void setupClass()
   {
     CLOSER = Closer.create();
@@ -150,13 +148,12 @@ public class ExpressionVectorSelectorsTest extends InitializedNullHandlingTest
     );
   }
 
-  @AfterClass
+  @AfterAll
   public static void teardownClass() throws IOException
   {
     CLOSER.close();
   }
 
-  @Parameterized.Parameters(name = "expression = {0}, encoding = {1}")
   public static Iterable<?> constructorFeeder()
   {
     List<Object[]> params = new ArrayList<>();
@@ -175,7 +172,7 @@ public class ExpressionVectorSelectorsTest extends InitializedNullHandlingTest
   private QueryableIndex queryableIndexToUse;
   private Closer perTestCloser = Closer.create();
 
-  public ExpressionVectorSelectorsTest(String expression, String encoding)
+  public void initExpressionVectorSelectorsTest(String expression, String encoding)
   {
     this.expression = expression;
     this.encoding = encoding;
@@ -186,7 +183,7 @@ public class ExpressionVectorSelectorsTest extends InitializedNullHandlingTest
     }
   }
 
-  @Before
+  @BeforeEach
   public void setup()
   {
     Expr parsed = Parser.parse(expression, ExprMacroTable.nil());
@@ -196,16 +193,18 @@ public class ExpressionVectorSelectorsTest extends InitializedNullHandlingTest
     }
   }
 
-  @After
+  @AfterEach
   public void teardown() throws IOException
   {
     perTestCloser.close();
   }
 
 
-  @Test
-  public void sanityTestVectorizedExpressionSelector()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "expression = {0}, encoding = {1}")
+  public void sanityTestVectorizedExpressionSelector(String expression, String encoding)
   {
+    initExpressionVectorSelectorsTest(expression, encoding);
     sanityTestVectorizedExpressionSelectors(expression, outputType, queryableIndexToUse, perTestCloser, ROWS_PER_SEGMENT);
   }
 
@@ -314,10 +313,10 @@ public class ExpressionVectorSelectorsTest extends InitializedNullHandlingTest
                                                                .makeColumnValueSelector("v");
           int rows = 0;
           while (!nonVectorized.isDone()) {
-            Assert.assertEquals(
-                "Failed at row " + rows,
+            Assertions.assertEquals(
                 nonSelector.getObject(),
-                results.get(rows)
+                results.get(rows),
+                "Failed at row " + rows
             );
             rows++;
             nonVectorized.advance();
@@ -325,7 +324,7 @@ public class ExpressionVectorSelectorsTest extends InitializedNullHandlingTest
           return rows;
         }).accumulate(0, (acc, in) -> acc + in);
 
-    Assert.assertTrue(rowCountCursor > 0);
-    Assert.assertEquals(rowCountCursor, rowCount);
+    Assertions.assertTrue(rowCountCursor > 0);
+    Assertions.assertEquals(rowCountCursor, rowCount);
   }
 }

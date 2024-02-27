@@ -21,7 +21,6 @@ package org.apache.druid.query.movingaverage.averagers;
 
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.Assert;
-import org.junit.Test;
 
 public class DoubleMeanNoNullAveragerFactoryTest
 {

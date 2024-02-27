@@ -21,7 +21,6 @@ package org.apache.druid.msq.indexing;
 
 import com.google.common.collect.ImmutableMap;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.util.HashSet;
 import java.util.Set;

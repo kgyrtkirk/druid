@@ -25,7 +25,6 @@ import org.apache.druid.jackson.DefaultObjectMapper;
 import org.apache.druid.segment.IndexSpec;
 import org.apache.druid.segment.incremental.OnheapIncrementalIndex;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.util.List;
 

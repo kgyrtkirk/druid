@@ -25,7 +25,7 @@ import org.apache.druid.java.util.common.logger.Logger;
 import org.apache.druid.segment.TestHelper;
 import org.apache.druid.segment.loading.StorageLocationConfig;
 import org.apache.druid.timeline.DataSegment;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
@@ -43,8 +43,8 @@ public class TestStorageLocation
 
   public TestStorageLocation(TemporaryFolder temporaryFolder) throws IOException
   {
-    cacheDir = temporaryFolder.newFolder();
-    infoDir = temporaryFolder.newFolder();
+    cacheDir = newFolder(temporaryFolder, "junit");
+    infoDir = newFolder(temporaryFolder, "junit");
     log.info("Creating tmp test files in [%s]", infoDir);
     jsonMapper = TestHelper.makeJsonMapper();
   }
@@ -73,7 +73,7 @@ public class TestStorageLocation
       throw new RuntimeException(e);
     }
 
-    Assert.assertTrue(segmentInfoCacheFile.exists());
+    Assertions.assertTrue(segmentInfoCacheFile.exists());
   }
 
   public void deleteSegmentInfoFromCache(final DataSegment segment)
@@ -83,12 +83,12 @@ public class TestStorageLocation
       segmentInfoCacheFile.delete();
     }
 
-    Assert.assertFalse(segmentInfoCacheFile.exists());
+    Assertions.assertFalse(segmentInfoCacheFile.exists());
   }
 
   public void checkInfoCache(Set<DataSegment> expectedSegments)
   {
-    Assert.assertTrue(infoDir.exists());
+    Assertions.assertTrue(infoDir.exists());
     File[] files = infoDir.listFiles();
 
     Set<DataSegment> segmentsInFiles = Arrays
@@ -102,7 +102,7 @@ public class TestStorageLocation
           }
         })
         .collect(Collectors.toSet());
-    Assert.assertEquals(expectedSegments, segmentsInFiles);
+    Assertions.assertEquals(expectedSegments, segmentsInFiles);
   }
 
   public StorageLocationConfig toStorageLocationConfig() throws IOException
@@ -115,5 +115,14 @@ public class TestStorageLocation
   {
     FileUtils.mkdirp(cacheDir);
     return new StorageLocationConfig(cacheDir, maxSize, freeSpacePercent);
+  }
+
+  private static File newFolder(File root, String... subDirs) throws IOException {
+    String subFolder = String.join("/", subDirs);
+    File result = new File(root, subFolder);
+    if (!result.mkdirs()) {
+      throw new IOException("Couldn't create folders " + root);
+    }
+    return result;
   }
 }

@@ -24,7 +24,6 @@ import com.google.common.io.Files;
 import org.apache.druid.common.aws.FileSessionCredentialsProvider;
 import org.junit.Assert;
 import org.junit.Rule;
-import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.BufferedWriter;

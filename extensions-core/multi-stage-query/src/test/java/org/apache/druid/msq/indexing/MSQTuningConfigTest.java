@@ -27,7 +27,6 @@ import org.apache.druid.segment.column.StringEncodingStrategy;
 import org.apache.druid.segment.data.CompressionStrategy;
 import org.apache.druid.segment.data.FrontCodedIndexed;
 import org.junit.Assert;
-import org.junit.Test;
 
 public class MSQTuningConfigTest
 {

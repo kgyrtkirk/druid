@@ -22,7 +22,6 @@ package org.apache.druid.k8s.overlord;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.druid.jackson.DefaultObjectMapper;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.io.IOException;
 

@@ -25,7 +25,6 @@ import org.apache.druid.segment.TestFloatColumnSelector;
 import org.apache.druid.segment.TestObjectColumnSelector;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;

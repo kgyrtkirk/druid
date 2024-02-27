@@ -24,8 +24,8 @@ import com.fasterxml.jackson.databind.InjectableValues;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.druid.error.DruidException;
 import org.apache.druid.jackson.DefaultObjectMapper;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class NestedDataColumnSchemaTest
 {
@@ -57,8 +57,8 @@ public class NestedDataColumnSchemaTest
   {
     final NestedDataColumnSchema v4 = new NestedDataColumnSchema("test", 4);
     final NestedDataColumnSchema v5 = new NestedDataColumnSchema("test", 5);
-    Assert.assertEquals(v4, MAPPER.readValue(MAPPER.writeValueAsString(v4), NestedDataColumnSchema.class));
-    Assert.assertEquals(v5, MAPPER.readValue(MAPPER.writeValueAsString(v5), NestedDataColumnSchema.class));
+    Assertions.assertEquals(v4, MAPPER.readValue(MAPPER.writeValueAsString(v4), NestedDataColumnSchema.class));
+    Assertions.assertEquals(v5, MAPPER.readValue(MAPPER.writeValueAsString(v5), NestedDataColumnSchema.class));
   }
 
   @Test
@@ -66,7 +66,7 @@ public class NestedDataColumnSchemaTest
   {
     final String there = "{\"type\":\"json\", \"name\":\"test\"}";
     NestedDataColumnSchema andBack = MAPPER.readValue(there, NestedDataColumnSchema.class);
-    Assert.assertEquals(new NestedDataColumnSchema("test", 5), andBack);
+    Assertions.assertEquals(new NestedDataColumnSchema("test", 5), andBack);
   }
 
   @Test
@@ -74,7 +74,7 @@ public class NestedDataColumnSchemaTest
   {
     final String there = "{\"type\":\"json\", \"name\":\"test\"}";
     NestedDataColumnSchema andBack = MAPPER_V4.readValue(there, NestedDataColumnSchema.class);
-    Assert.assertEquals(new NestedDataColumnSchema("test", 4), andBack);
+    Assertions.assertEquals(new NestedDataColumnSchema("test", 4), andBack);
   }
 
   @Test
@@ -82,20 +82,20 @@ public class NestedDataColumnSchemaTest
   {
     final String there = "{\"type\":\"json\", \"name\":\"test\",\"formatVersion\":4}";
     NestedDataColumnSchema andBack = MAPPER.readValue(there, NestedDataColumnSchema.class);
-    Assert.assertEquals(new NestedDataColumnSchema("test", 4), andBack);
+    Assertions.assertEquals(new NestedDataColumnSchema("test", 4), andBack);
   }
 
   @Test
   public void testVersionTooSmall()
   {
-    Throwable t = Assert.assertThrows(DruidException.class, () -> new NestedDataColumnSchema("test", 3));
-    Assert.assertEquals("Unsupported nested column format version[3]", t.getMessage());
+    Throwable t = Assertions.assertThrows(DruidException.class, () -> new NestedDataColumnSchema("test", 3));
+    Assertions.assertEquals("Unsupported nested column format version[3]", t.getMessage());
   }
 
   @Test
   public void testVersionTooBig()
   {
-    Throwable t = Assert.assertThrows(DruidException.class, () -> new NestedDataColumnSchema("test", 6));
-    Assert.assertEquals("Unsupported nested column format version[6]", t.getMessage());
+    Throwable t = Assertions.assertThrows(DruidException.class, () -> new NestedDataColumnSchema("test", 6));
+    Assertions.assertEquals("Unsupported nested column format version[6]", t.getMessage());
   }
 }

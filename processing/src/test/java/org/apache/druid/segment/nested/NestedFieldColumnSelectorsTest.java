@@ -52,12 +52,12 @@ import org.apache.druid.segment.vector.VectorObjectSelector;
 import org.apache.druid.segment.vector.VectorValueSelector;
 import org.apache.druid.segment.virtual.NestedFieldVirtualColumn;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -73,8 +73,8 @@ public class NestedFieldColumnSelectorsTest extends InitializedNullHandlingTest
   private static final String NESTED_SPARSE_MIXED_FIELD = "sparse_mixed";
 
 
-  @Rule
-  public final TemporaryFolder tempFolder = new TemporaryFolder();
+  @TempDir
+  public File tempFolder;
 
   private final AggregationTestHelper helper;
   private final Closer closer;
@@ -90,7 +90,7 @@ public class NestedFieldColumnSelectorsTest extends InitializedNullHandlingTest
     this.closer = Closer.create();
   }
 
-  @After
+  @AfterEach
   public void teardown() throws IOException
   {
     closer.close();
@@ -109,51 +109,51 @@ public class NestedFieldColumnSelectorsTest extends InitializedNullHandlingTest
     ColumnValueSelector longValueSelector = columnSelectorFactory.makeColumnValueSelector(
         NESTED_LONG_FIELD
     );
-    Assert.assertNotNull(longValueSelector);
-    Assert.assertTrue(longValueSelector instanceof LongColumnSelector);
+    Assertions.assertNotNull(longValueSelector);
+    Assertions.assertTrue(longValueSelector instanceof LongColumnSelector);
 
     ColumnValueSelector doubleValueSelector = columnSelectorFactory.makeColumnValueSelector(
         NESTED_DOUBLE_FIELD
     );
-    Assert.assertNotNull(doubleValueSelector);
-    Assert.assertTrue(doubleValueSelector instanceof DoubleColumnSelector);
+    Assertions.assertNotNull(doubleValueSelector);
+    Assertions.assertTrue(doubleValueSelector instanceof DoubleColumnSelector);
 
     ColumnValueSelector mixedNumericValueSelector = columnSelectorFactory.makeColumnValueSelector(
         NESTED_MIXED_NUMERIC_FIELD
     );
-    Assert.assertNotNull(mixedNumericValueSelector);
-    Assert.assertTrue(mixedNumericValueSelector instanceof ColumnValueSelector);
+    Assertions.assertNotNull(mixedNumericValueSelector);
+    Assertions.assertTrue(mixedNumericValueSelector instanceof ColumnValueSelector);
 
     ColumnValueSelector mixedValueSelector = columnSelectorFactory.makeColumnValueSelector(
         NESTED_MIXED_FIELD
     );
-    Assert.assertNotNull(mixedValueSelector);
-    Assert.assertTrue(mixedValueSelector instanceof ColumnValueSelector);
+    Assertions.assertNotNull(mixedValueSelector);
+    Assertions.assertTrue(mixedValueSelector instanceof ColumnValueSelector);
 
 
     ColumnValueSelector sparseLongValueSelector = columnSelectorFactory.makeColumnValueSelector(
         NESTED_SPARSE_LONG_FIELD
     );
-    Assert.assertNotNull(sparseLongValueSelector);
-    Assert.assertTrue(sparseLongValueSelector instanceof LongColumnSelector);
+    Assertions.assertNotNull(sparseLongValueSelector);
+    Assertions.assertTrue(sparseLongValueSelector instanceof LongColumnSelector);
 
     ColumnValueSelector sparseDoubleValueSelector = columnSelectorFactory.makeColumnValueSelector(
         NESTED_SPARSE_DOUBLE_FIELD
     );
-    Assert.assertNotNull(sparseDoubleValueSelector);
-    Assert.assertTrue(sparseDoubleValueSelector instanceof DoubleColumnSelector);
+    Assertions.assertNotNull(sparseDoubleValueSelector);
+    Assertions.assertTrue(sparseDoubleValueSelector instanceof DoubleColumnSelector);
 
     ColumnValueSelector sparseMixedNumericValueSelector = columnSelectorFactory.makeColumnValueSelector(
         NESTED_SPARSE_MIXED_NUMERIC_FIELD
     );
-    Assert.assertNotNull(sparseMixedNumericValueSelector);
-    Assert.assertTrue(sparseMixedNumericValueSelector instanceof ColumnValueSelector);
+    Assertions.assertNotNull(sparseMixedNumericValueSelector);
+    Assertions.assertTrue(sparseMixedNumericValueSelector instanceof ColumnValueSelector);
 
     ColumnValueSelector sparseMixedValueSelector = columnSelectorFactory.makeColumnValueSelector(
         NESTED_SPARSE_MIXED_FIELD
     );
-    Assert.assertNotNull(sparseMixedValueSelector);
-    Assert.assertTrue(sparseMixedValueSelector instanceof ColumnValueSelector);
+    Assertions.assertNotNull(sparseMixedValueSelector);
+    Assertions.assertTrue(sparseMixedValueSelector instanceof ColumnValueSelector);
     //CHECKSTYLE.ON: Regexp
   }
 
@@ -171,63 +171,63 @@ public class NestedFieldColumnSelectorsTest extends InitializedNullHandlingTest
     VectorValueSelector longValueSelector = factory.makeValueSelector(
         NESTED_LONG_FIELD
     );
-    Assert.assertNotNull(longValueSelector);
-    Assert.assertTrue(longValueSelector instanceof BaseLongVectorValueSelector);
+    Assertions.assertNotNull(longValueSelector);
+    Assertions.assertTrue(longValueSelector instanceof BaseLongVectorValueSelector);
 
     VectorValueSelector doubleValueSelector = factory.makeValueSelector(
         NESTED_DOUBLE_FIELD
     );
-    Assert.assertNotNull(doubleValueSelector);
-    Assert.assertTrue(doubleValueSelector instanceof BaseDoubleVectorValueSelector);
+    Assertions.assertNotNull(doubleValueSelector);
+    Assertions.assertTrue(doubleValueSelector instanceof BaseDoubleVectorValueSelector);
 
-    Assert.assertThrows(DruidException.class, () -> factory.makeValueSelector(NESTED_MIXED_FIELD));
+    Assertions.assertThrows(DruidException.class, () -> factory.makeValueSelector(NESTED_MIXED_FIELD));
 
     VectorValueSelector mixedNumericValueSelector = factory.makeValueSelector(
         NESTED_MIXED_NUMERIC_FIELD
     );
-    Assert.assertTrue(mixedNumericValueSelector instanceof BaseDoubleVectorValueSelector);
+    Assertions.assertTrue(mixedNumericValueSelector instanceof BaseDoubleVectorValueSelector);
 
     // can also make single value dimension selectors for all nested column types
     SingleValueDimensionVectorSelector longDimensionSelector = factory.makeSingleValueDimensionSelector(
         DefaultDimensionSpec.of(NESTED_LONG_FIELD)
     );
-    Assert.assertNotNull(longDimensionSelector);
+    Assertions.assertNotNull(longDimensionSelector);
 
     SingleValueDimensionVectorSelector doubleDimensionSelector = factory.makeSingleValueDimensionSelector(
         DefaultDimensionSpec.of(NESTED_DOUBLE_FIELD)
     );
-    Assert.assertNotNull(doubleDimensionSelector);
+    Assertions.assertNotNull(doubleDimensionSelector);
 
     SingleValueDimensionVectorSelector mixedNumericDimensionValueSelector = factory.makeSingleValueDimensionSelector(
         DefaultDimensionSpec.of(NESTED_MIXED_NUMERIC_FIELD)
     );
-    Assert.assertNotNull(mixedNumericDimensionValueSelector);
+    Assertions.assertNotNull(mixedNumericDimensionValueSelector);
 
     SingleValueDimensionVectorSelector mixedValueSelector = factory.makeSingleValueDimensionSelector(
         DefaultDimensionSpec.of(NESTED_MIXED_FIELD)
     );
-    Assert.assertNotNull(mixedValueSelector);
+    Assertions.assertNotNull(mixedValueSelector);
 
     // and object selectors
     VectorObjectSelector longObjectSelector = factory.makeObjectSelector(
         NESTED_LONG_FIELD
     );
-    Assert.assertNotNull(longObjectSelector);
+    Assertions.assertNotNull(longObjectSelector);
 
     VectorObjectSelector doubleObjectSelector = factory.makeObjectSelector(
         NESTED_DOUBLE_FIELD
     );
-    Assert.assertNotNull(doubleObjectSelector);
+    Assertions.assertNotNull(doubleObjectSelector);
 
     VectorObjectSelector mixedNumericObjectSelector = factory.makeObjectSelector(
         NESTED_MIXED_NUMERIC_FIELD
     );
-    Assert.assertNotNull(mixedNumericObjectSelector);
+    Assertions.assertNotNull(mixedNumericObjectSelector);
 
     VectorObjectSelector mixedObjectSelector = factory.makeObjectSelector(
         NESTED_MIXED_FIELD
     );
-    Assert.assertNotNull(mixedObjectSelector);
+    Assertions.assertNotNull(mixedObjectSelector);
     //CHECKSTYLE.ON: Regexp
   }
 
@@ -345,7 +345,7 @@ public class NestedFieldColumnSelectorsTest extends InitializedNullHandlingTest
         true,
         IndexSpec.DEFAULT
     );
-    Assert.assertEquals(1, segments.size());
+    Assertions.assertEquals(1, segments.size());
     StorageAdapter storageAdapter = segments.get(0).asStorageAdapter();
     Sequence<Cursor> cursorSequence = storageAdapter.makeCursors(
         null,
@@ -376,7 +376,7 @@ public class NestedFieldColumnSelectorsTest extends InitializedNullHandlingTest
         true,
         IndexSpec.DEFAULT
     );
-    Assert.assertEquals(1, segments.size());
+    Assertions.assertEquals(1, segments.size());
     StorageAdapter storageAdapter = segments.get(0).asStorageAdapter();
     VectorCursor cursor = storageAdapter.makeVectorCursor(
         null,

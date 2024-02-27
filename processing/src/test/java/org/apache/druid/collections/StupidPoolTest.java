@@ -23,10 +23,16 @@ import com.google.common.base.Supplier;
 import org.apache.druid.java.util.common.ISE;
 import org.easymock.EasyMock;
 import org.hamcrest.core.IsInstanceOf;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
+
+import java.util.concurrent.TimeUnit;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class StupidPoolTest
 {
@@ -35,7 +41,7 @@ public class StupidPoolTest
   private ResourceHolder<String> resourceHolderObj;
   private String defaultString = new String("test");
 
-  @Before
+  @BeforeEach
   public void setUp()
   {
     generator = EasyMock.createMock(Supplier.class);
@@ -45,7 +51,7 @@ public class StupidPoolTest
     resourceHolderObj = poolOfString.take();
   }
 
-  @After
+  @AfterEach
   public void tearDown()
   {
     if (resourceHolderObj != null) {
@@ -57,19 +63,22 @@ public class StupidPoolTest
   @Test
   public void testTake()
   {
-    Assert.assertThat(resourceHolderObj, new IsInstanceOf(ResourceHolder.class));
+    assertThat(resourceHolderObj, new IsInstanceOf(ResourceHolder.class));
     Object expectedObject = resourceHolderObj.get();
-    Assert.assertEquals(expectedObject, defaultString);
+    Assertions.assertEquals(expectedObject, defaultString);
   }
 
-  @Test(expected = ISE.class)
+  @Test
   public void testExceptionInResourceHolderGet()
   {
-    resourceHolderObj.close();
-    resourceHolderObj.get();
+    assertThrows(ISE.class, () -> {
+      resourceHolderObj.close();
+      resourceHolderObj.get();
+    });
   }
 
-  @Test(timeout = 60_000L)
+  @Test
+  @Timeout(value = 60_000L, unit = TimeUnit.MILLISECONDS)
   public void testResourceHandlerClearedByJVM()
   {
     StupidPool<String> poolOfString = new StupidPool<>("poolOfString", () -> "billybob");
@@ -77,7 +86,7 @@ public class StupidPoolTest
     final StupidPool.ObjectResourceHolder take = (StupidPool.ObjectResourceHolder) poolOfString.take();
     take.forceClean();
 
-    Assert.assertEquals("Expected there to be one leak", 1, poolOfString.leakedObjectsCount());
+    Assertions.assertEquals(1, poolOfString.leakedObjectsCount(), "Expected there to be one leak");
 
     boolean exceptionThrown = false;
     try {
@@ -86,6 +95,6 @@ public class StupidPoolTest
     catch (Exception e) {
       exceptionThrown = true;
     }
-    Assert.assertTrue("Expect the pool to throw an exception as it should be poisoned", exceptionThrown);
+    Assertions.assertTrue(exceptionThrown, "Expect the pool to throw an exception as it should be poisoned");
   }
 }

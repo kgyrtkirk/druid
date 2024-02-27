@@ -32,7 +32,6 @@ import org.apache.druid.query.filter.BloomKFilter;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.junit.Assert;
 import org.junit.Rule;
-import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 

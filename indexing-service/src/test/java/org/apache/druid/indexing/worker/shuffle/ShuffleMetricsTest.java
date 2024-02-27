@@ -24,7 +24,6 @@ import org.apache.druid.indexing.worker.shuffle.ShuffleMetrics.PerDatasourceShuf
 import org.apache.druid.java.util.common.concurrent.Execs;
 import org.junit.Assert;
 import org.junit.Rule;
-import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import java.util.ArrayList;

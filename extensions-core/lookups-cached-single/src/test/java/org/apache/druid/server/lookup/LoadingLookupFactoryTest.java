@@ -30,7 +30,6 @@ import org.apache.druid.server.lookup.cache.loading.OffHeapLoadingCache;
 import org.apache.druid.server.lookup.cache.loading.OnHeapLoadingCache;
 import org.easymock.EasyMock;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.io.IOException;
 import java.util.Collections;

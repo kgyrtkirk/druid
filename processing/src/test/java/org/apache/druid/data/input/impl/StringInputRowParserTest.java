@@ -22,14 +22,11 @@ package org.apache.druid.data.input.impl;
 import com.google.common.collect.ImmutableList;
 import org.apache.druid.js.JavaScriptConfig;
 import org.hamcrest.CoreMatchers;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.ExpectedException;
 
 public class StringInputRowParserTest
 {
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
 
   @Test
   public void testDisableJavaScript()

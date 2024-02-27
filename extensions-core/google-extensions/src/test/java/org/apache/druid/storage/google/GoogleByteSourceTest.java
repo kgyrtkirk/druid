@@ -21,7 +21,6 @@ package org.apache.druid.storage.google;
 
 import org.easymock.EasyMock;
 import org.easymock.EasyMockSupport;
-import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStream;

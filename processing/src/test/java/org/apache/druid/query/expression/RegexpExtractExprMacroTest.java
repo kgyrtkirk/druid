@@ -23,8 +23,8 @@ import org.apache.druid.common.config.NullHandling;
 import org.apache.druid.math.expr.ExprEval;
 import org.apache.druid.math.expr.ExpressionType;
 import org.apache.druid.math.expr.InputBindings;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class RegexpExtractExprMacroTest extends MacroTestBase
 {
@@ -54,7 +54,7 @@ public class RegexpExtractExprMacroTest extends MacroTestBase
         "regexp_extract(a, 'f(.o)')",
         InputBindings.forInputSupplier("a", ExpressionType.STRING, () -> "foo")
     );
-    Assert.assertEquals("foo", result.value());
+    Assertions.assertEquals("foo", result.value());
   }
 
   @Test
@@ -64,7 +64,7 @@ public class RegexpExtractExprMacroTest extends MacroTestBase
         "regexp_extract(a, 'f(.o)', 0)",
         InputBindings.forInputSupplier("a", ExpressionType.STRING, () -> "foo")
     );
-    Assert.assertEquals("foo", result.value());
+    Assertions.assertEquals("foo", result.value());
   }
 
   @Test
@@ -74,20 +74,20 @@ public class RegexpExtractExprMacroTest extends MacroTestBase
         "regexp_extract(a, 'f(.o)', 1)",
         InputBindings.forInputSupplier("a", ExpressionType.STRING, () -> "foo")
     );
-    Assert.assertEquals("oo", result.value());
+    Assertions.assertEquals("oo", result.value());
   }
 
   @Test
   public void testMatchGroup2()
   {
-    Throwable t = Assert.assertThrows(
+    Throwable t = Assertions.assertThrows(
         IndexOutOfBoundsException.class,
         () -> eval(
             "regexp_extract(a, 'f(.o)', 2)",
             InputBindings.forInputSupplier("a", ExpressionType.STRING, () -> "foo")
         )
     );
-    Assert.assertEquals("No group 2", t.getMessage());
+    Assertions.assertEquals("No group 2", t.getMessage());
   }
 
   @Test
@@ -97,7 +97,7 @@ public class RegexpExtractExprMacroTest extends MacroTestBase
         "regexp_extract(a, 'f(.x)')",
         InputBindings.forInputSupplier("a", ExpressionType.STRING, () -> "foo")
     );
-    Assert.assertNull(result.value());
+    Assertions.assertNull(result.value());
   }
 
   @Test
@@ -107,7 +107,7 @@ public class RegexpExtractExprMacroTest extends MacroTestBase
         "regexp_extract(a, '.o$')",
         InputBindings.forInputSupplier("a", ExpressionType.STRING, () -> "foo")
     );
-    Assert.assertEquals("oo", result.value());
+    Assertions.assertEquals("oo", result.value());
   }
 
   @Test
@@ -121,7 +121,7 @@ public class RegexpExtractExprMacroTest extends MacroTestBase
         "regexp_extract(a, null)",
         InputBindings.forInputSupplier("a", ExpressionType.STRING, () -> "foo")
     );
-    Assert.assertNull(result.value());
+    Assertions.assertNull(result.value());
   }
 
   @Test
@@ -131,7 +131,7 @@ public class RegexpExtractExprMacroTest extends MacroTestBase
         "regexp_extract(a, '')",
         InputBindings.forInputSupplier("a", ExpressionType.STRING, () -> "foo")
     );
-    Assert.assertEquals(NullHandling.emptyToNullIfNeeded(""), result.value());
+    Assertions.assertEquals(NullHandling.emptyToNullIfNeeded(""), result.value());
   }
 
   @Test
@@ -156,13 +156,13 @@ public class RegexpExtractExprMacroTest extends MacroTestBase
     }
 
     final ExprEval<?> result = eval("regexp_extract(a, null)", InputBindings.nilBindings());
-    Assert.assertNull(result.value());
+    Assertions.assertNull(result.value());
   }
 
   @Test
   public void testEmptyStringPatternOnNull()
   {
     final ExprEval<?> result = eval("regexp_extract(a, '')", InputBindings.nilBindings());
-    Assert.assertNull(result.value());
+    Assertions.assertNull(result.value());
   }
 }

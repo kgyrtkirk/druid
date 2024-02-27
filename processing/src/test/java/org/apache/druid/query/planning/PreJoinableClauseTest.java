@@ -24,8 +24,8 @@ import org.apache.druid.math.expr.ExprMacroTable;
 import org.apache.druid.query.TableDataSource;
 import org.apache.druid.segment.join.JoinConditionAnalysis;
 import org.apache.druid.segment.join.JoinType;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class PreJoinableClauseTest
 {
@@ -39,25 +39,25 @@ public class PreJoinableClauseTest
   @Test
   public void test_getPrefix()
   {
-    Assert.assertEquals("j.", clause.getPrefix());
+    Assertions.assertEquals("j.", clause.getPrefix());
   }
 
   @Test
   public void test_getJoinType()
   {
-    Assert.assertEquals(JoinType.LEFT, clause.getJoinType());
+    Assertions.assertEquals(JoinType.LEFT, clause.getJoinType());
   }
 
   @Test
   public void test_getCondition()
   {
-    Assert.assertEquals("x == \"j.x\"", clause.getCondition().getOriginalExpression());
+    Assertions.assertEquals("x == \"j.x\"", clause.getCondition().getOriginalExpression());
   }
 
   @Test
   public void test_getDataSource()
   {
-    Assert.assertEquals(new TableDataSource("foo"), clause.getDataSource());
+    Assertions.assertEquals(new TableDataSource("foo"), clause.getDataSource());
   }
 
   @Test

@@ -29,7 +29,6 @@ import org.apache.druid.server.DruidNode;
 import org.joda.time.Duration;
 import org.junit.Assert;
 import org.junit.Ignore;
-import org.junit.Test;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;

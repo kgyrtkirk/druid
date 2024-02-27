@@ -24,16 +24,14 @@ import org.apache.datasketches.memory.WritableMemory;
 import org.apache.druid.java.util.common.ISE;
 import org.apache.druid.segment.ColumnValueSelector;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
-import org.mockito.quality.Strictness;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,12 +39,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@ExtendWith(MockitoExtension.class)
 public class DoubleArrayFieldReaderTest extends InitializedNullHandlingTest
 {
   private static final long MEMORY_POSITION = 1;
-
-  @Rule
-  public MockitoRule mockitoRule = MockitoJUnit.rule().strictness(Strictness.STRICT_STUBS);
 
   @Mock
   public ColumnValueSelector writeSelector;
@@ -105,14 +101,14 @@ public class DoubleArrayFieldReaderTest extends InitializedNullHandlingTest
     DOUBLES_LIST_2 = Arrays.stream(DOUBLES_ARRAY_2).map(val -> (Double) val).collect(Collectors.toList());
   }
 
-  @Before
+  @BeforeEach
   public void setUp()
   {
     memory = WritableMemory.allocate(1000);
     fieldWriter = NumericArrayFieldWriter.getDoubleArrayFieldWriter(writeSelector);
   }
 
-  @After
+  @AfterEach
   public void tearDown()
   {
     fieldWriter.close();
@@ -122,28 +118,28 @@ public class DoubleArrayFieldReaderTest extends InitializedNullHandlingTest
   public void test_isNull_null()
   {
     writeToMemory(null, MEMORY_POSITION);
-    Assert.assertTrue(new DoubleArrayFieldReader().isNull(memory, MEMORY_POSITION));
+    Assertions.assertTrue(new DoubleArrayFieldReader().isNull(memory, MEMORY_POSITION));
   }
 
   @Test
   public void test_isNull_aValue()
   {
     writeToMemory(DOUBLES_ARRAY_1, MEMORY_POSITION);
-    Assert.assertFalse(new DoubleArrayFieldReader().isNull(memory, MEMORY_POSITION));
+    Assertions.assertFalse(new DoubleArrayFieldReader().isNull(memory, MEMORY_POSITION));
   }
 
   @Test
   public void test_isNull_emptyArray()
   {
     writeToMemory(new Object[]{}, MEMORY_POSITION);
-    Assert.assertFalse(new DoubleArrayFieldReader().isNull(memory, MEMORY_POSITION));
+    Assertions.assertFalse(new DoubleArrayFieldReader().isNull(memory, MEMORY_POSITION));
   }
 
   @Test
   public void test_isNull_arrayWithSingleNullElement()
   {
     writeToMemory(new Object[]{null}, MEMORY_POSITION);
-    Assert.assertFalse(new DoubleArrayFieldReader().isNull(memory, MEMORY_POSITION));
+    Assertions.assertFalse(new DoubleArrayFieldReader().isNull(memory, MEMORY_POSITION));
   }
 
   @Test
@@ -157,7 +153,7 @@ public class DoubleArrayFieldReaderTest extends InitializedNullHandlingTest
             new ConstantFieldPointer(MEMORY_POSITION, sz)
         );
 
-    Assert.assertTrue(readSelector.isNull());
+    Assertions.assertTrue(readSelector.isNull());
   }
 
   @Test
@@ -232,14 +228,14 @@ public class DoubleArrayFieldReaderTest extends InitializedNullHandlingTest
   private void assertResults(List<Double> expected, Object actual)
   {
     if (expected == null) {
-      Assert.assertNull(actual);
+      Assertions.assertNull(actual);
     }
-    Assert.assertTrue(actual instanceof Object[]);
+    Assertions.assertTrue(actual instanceof Object[]);
     List<Double> actualList = new ArrayList<>();
     for (Object val : (Object[]) actual) {
       actualList.add((Double) val);
     }
 
-    Assert.assertEquals(expected, actualList);
+    Assertions.assertEquals(expected, actualList);
   }
 }

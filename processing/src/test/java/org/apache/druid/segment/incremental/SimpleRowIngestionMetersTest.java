@@ -19,8 +19,8 @@
 
 package org.apache.druid.segment.incremental;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class SimpleRowIngestionMetersTest
 {
@@ -33,7 +33,7 @@ public class SimpleRowIngestionMetersTest
     rowIngestionMeters.incrementProcessedWithError();
     rowIngestionMeters.incrementUnparseable();
     rowIngestionMeters.incrementThrownAway();
-    Assert.assertEquals(rowIngestionMeters.getTotals(), new RowIngestionMetersTotals(1, 5, 1, 1, 1));
+    Assertions.assertEquals(rowIngestionMeters.getTotals(), new RowIngestionMetersTotals(1, 5, 1, 1, 1));
   }
 
   @Test
@@ -42,6 +42,6 @@ public class SimpleRowIngestionMetersTest
     SimpleRowIngestionMeters rowIngestionMeters = new SimpleRowIngestionMeters();
     RowIngestionMetersTotals rowIngestionMetersTotals = new RowIngestionMetersTotals(10, 0, 1, 0, 1);
     rowIngestionMeters.addRowIngestionMetersTotals(rowIngestionMetersTotals);
-    Assert.assertEquals(rowIngestionMeters.getTotals(), rowIngestionMetersTotals);
+    Assertions.assertEquals(rowIngestionMeters.getTotals(), rowIngestionMetersTotals);
   }
 }

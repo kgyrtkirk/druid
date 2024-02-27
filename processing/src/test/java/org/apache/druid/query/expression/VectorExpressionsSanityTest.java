@@ -29,7 +29,7 @@ import org.apache.druid.math.expr.ExpressionType;
 import org.apache.druid.math.expr.VectorExprSanityTest;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.joda.time.DateTime;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 

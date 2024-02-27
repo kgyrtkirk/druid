@@ -22,7 +22,6 @@ package org.apache.druid.metadata.storage.sqlserver;
 import junit.framework.Assert;
 import org.apache.druid.metadata.storage.sqlserver.SQLServerConnector.CustomStatementRewriter;
 import org.junit.Before;
-import org.junit.Test;
 import org.skife.jdbi.v2.Binding;
 import org.skife.jdbi.v2.StatementContext;
 import org.skife.jdbi.v2.exceptions.UnableToCreateStatementException;

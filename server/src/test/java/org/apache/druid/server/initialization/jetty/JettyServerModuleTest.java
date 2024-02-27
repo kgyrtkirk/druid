@@ -21,7 +21,7 @@ package org.apache.druid.server.initialization.jetty;
 
 import org.apache.druid.java.util.metrics.StubServiceEmitter;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 public class JettyServerModuleTest

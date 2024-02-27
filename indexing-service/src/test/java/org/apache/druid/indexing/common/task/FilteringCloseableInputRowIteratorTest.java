@@ -34,7 +34,6 @@ import org.apache.druid.segment.incremental.SimpleRowIngestionMeters;
 import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 

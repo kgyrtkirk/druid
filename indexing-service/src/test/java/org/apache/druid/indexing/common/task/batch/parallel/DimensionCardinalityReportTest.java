@@ -35,7 +35,6 @@ import org.joda.time.Interval;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
-import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;

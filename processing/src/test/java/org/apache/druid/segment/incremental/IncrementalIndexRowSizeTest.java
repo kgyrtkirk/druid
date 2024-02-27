@@ -26,11 +26,10 @@ import org.apache.druid.data.input.MapBasedInputRow;
 import org.apache.druid.query.aggregation.CountAggregatorFactory;
 import org.apache.druid.segment.CloserRule;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.Assert;
 import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -39,15 +38,14 @@ import java.util.Map;
 
 /**
  */
-@RunWith(Parameterized.class)
 public class IncrementalIndexRowSizeTest extends InitializedNullHandlingTest
 {
-  public final IncrementalIndexCreator indexCreator;
+  public IncrementalIndexCreator indexCreator;
 
   @Rule
   public final CloserRule closer = new CloserRule(false);
 
-  public IncrementalIndexRowSizeTest(String indexType) throws JsonProcessingException
+  public void initIncrementalIndexRowSizeTest(String indexType) throws JsonProcessingException
   {
     indexCreator = closer.closeLater(
         new IncrementalIndexCreator(indexType, (builder, args) -> builder
@@ -59,15 +57,16 @@ public class IncrementalIndexRowSizeTest extends InitializedNullHandlingTest
     );
   }
 
-  @Parameterized.Parameters(name = "{index}: {0}")
   public static Collection<?> constructorFeeder()
   {
     return IncrementalIndexCreator.getAppendableIndexTypes();
   }
 
-  @Test
-  public void testIncrementalIndexRowSizeBasic()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{index}: {0}")
+  public void testIncrementalIndexRowSizeBasic(String indexType)
   {
+    initIncrementalIndexRowSizeTest(indexType);
     IncrementalIndex index = indexCreator.createIndex();
     long time = System.currentTimeMillis();
     IncrementalIndex.IncrementalIndexRowResult tndResult = index.toIncrementalIndexRow(toMapRow(
@@ -79,12 +78,14 @@ public class IncrementalIndexRowSizeTest extends InitializedNullHandlingTest
     ));
     IncrementalIndexRow td1 = tndResult.getIncrementalIndexRow();
     // 32 (timestamp + dims array + dimensionDescList) + 50 ("A") + 50 ("B")
-    Assert.assertEquals(132, td1.estimateBytesInMemory());
+    Assertions.assertEquals(132, td1.estimateBytesInMemory());
   }
 
-  @Test
-  public void testIncrementalIndexRowSizeArr()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{index}: {0}")
+  public void testIncrementalIndexRowSizeArr(String indexType)
   {
+    initIncrementalIndexRowSizeTest(indexType);
     IncrementalIndex index = indexCreator.createIndex();
     long time = System.currentTimeMillis();
     IncrementalIndex.IncrementalIndexRowResult tndResult = index.toIncrementalIndexRow(toMapRow(
@@ -96,12 +97,14 @@ public class IncrementalIndexRowSizeTest extends InitializedNullHandlingTest
     ));
     IncrementalIndexRow td1 = tndResult.getIncrementalIndexRow();
     // 32 (timestamp + dims array + dimensionDescList) + 50 ("A") + 100 ("A", "B")
-    Assert.assertEquals(182, td1.estimateBytesInMemory());
+    Assertions.assertEquals(182, td1.estimateBytesInMemory());
   }
 
-  @Test
-  public void testIncrementalIndexRowSizeComplex()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{index}: {0}")
+  public void testIncrementalIndexRowSizeComplex(String indexType)
   {
+    initIncrementalIndexRowSizeTest(indexType);
     IncrementalIndex index = indexCreator.createIndex();
     long time = System.currentTimeMillis();
     IncrementalIndex.IncrementalIndexRowResult tndResult = index.toIncrementalIndexRow(toMapRow(
@@ -113,12 +116,14 @@ public class IncrementalIndexRowSizeTest extends InitializedNullHandlingTest
     ));
     IncrementalIndexRow td1 = tndResult.getIncrementalIndexRow();
     // 32 (timestamp + dims array + dimensionDescList) + 60 ("nelson") + 114 ("123", "abcdef")
-    Assert.assertEquals(206, td1.estimateBytesInMemory());
+    Assertions.assertEquals(206, td1.estimateBytesInMemory());
   }
 
-  @Test
-  public void testIncrementalIndexRowSizeEmptyString()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{index}: {0}")
+  public void testIncrementalIndexRowSizeEmptyString(String indexType)
   {
+    initIncrementalIndexRowSizeTest(indexType);
     IncrementalIndex index = indexCreator.createIndex();
     long time = System.currentTimeMillis();
     IncrementalIndex.IncrementalIndexRowResult tndResult = index.toIncrementalIndexRow(toMapRow(
@@ -128,7 +133,7 @@ public class IncrementalIndexRowSizeTest extends InitializedNullHandlingTest
     ));
     IncrementalIndexRow td1 = tndResult.getIncrementalIndexRow();
     // 28 (timestamp + dims array + dimensionDescList) + 4 OR 48 depending on NullHandling.sqlCompatible()
-    Assert.assertEquals(NullHandling.sqlCompatible() ? 76 : 32, td1.estimateBytesInMemory());
+    Assertions.assertEquals(NullHandling.sqlCompatible() ? 76 : 32, td1.estimateBytesInMemory());
   }
 
   private MapBasedInputRow toMapRow(long time, Object... dimAndVal)

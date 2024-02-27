@@ -23,8 +23,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.io.Closeables;
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
 import org.apache.druid.common.config.NullHandling;
 import org.apache.druid.data.input.InputRow;
 import org.apache.druid.data.input.impl.DimensionsSpec;
@@ -54,14 +52,14 @@ import org.apache.druid.segment.QueryableIndexSegment;
 import org.apache.druid.segment.TestHelper;
 import org.apache.druid.segment.incremental.IncrementalIndexSchema;
 import org.apache.druid.timeline.SegmentId;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -70,14 +68,13 @@ import java.util.Map;
 /**
  * Tests designed to exercise changing column types, adding columns, removing columns, etc.
  */
-@RunWith(JUnitParamsRunner.class)
 public class SchemaEvolutionTest
 {
   private static final String DATA_SOURCE = "foo";
   private static final String TIMESTAMP_COLUMN = "t";
   private static final double THIRTY_ONE_POINT_ONE = 31.1d;
 
-  public Object[] doVectorize()
+  public static Object[] doVectorize()
   {
     return Lists.newArrayList(true, false).toArray();
   }
@@ -130,8 +127,8 @@ public class SchemaEvolutionTest
     return results.toList();
   }
 
-  @Rule
-  public final TemporaryFolder temporaryFolder = new TemporaryFolder();
+  @TempDir
+  public File temporaryFolder;
 
   // Index1: c1 is a string, c2 nonexistent, "uniques" nonexistent
   private QueryableIndex index1 = null;
@@ -145,14 +142,14 @@ public class SchemaEvolutionTest
   // Index4: c1 is nonexistent, c2 is uniques on c2
   private QueryableIndex index4 = null;
 
-  @Before
+  @BeforeEach
   public void setUp() throws IOException
   {
     NullHandling.initializeForTests();
 
     // Index1: c1 is a string, c2 nonexistent, "uniques" nonexistent
     index1 = IndexBuilder.create()
-                         .tmpDir(temporaryFolder.newFolder())
+                         .tmpDir(newFolder(temporaryFolder, "junit"))
                          .schema(
                              new IncrementalIndexSchema.Builder()
                                  .withMetrics(new CountAggregatorFactory("cnt"))
@@ -164,7 +161,7 @@ public class SchemaEvolutionTest
 
     // Index2: c1 is a long, c2 is a string, "uniques" is uniques on c2, "longmin" is min on c1
     index2 = IndexBuilder.create()
-                         .tmpDir(temporaryFolder.newFolder())
+                         .tmpDir(newFolder(temporaryFolder, "junit"))
                          .schema(
                              new IncrementalIndexSchema.Builder()
                                  .withMetrics(
@@ -181,7 +178,7 @@ public class SchemaEvolutionTest
 
     // Index3: c1 is a float, c2 is a string, "uniques" is uniques on c2
     index3 = IndexBuilder.create()
-                         .tmpDir(temporaryFolder.newFolder())
+                         .tmpDir(newFolder(temporaryFolder, "junit"))
                          .schema(
                              new IncrementalIndexSchema.Builder()
                                  .withMetrics(
@@ -197,7 +194,7 @@ public class SchemaEvolutionTest
 
     // Index4: c1 is nonexistent, c2 is uniques on c2
     index4 = IndexBuilder.create()
-                         .tmpDir(temporaryFolder.newFolder())
+                         .tmpDir(newFolder(temporaryFolder, "junit"))
                          .schema(
                              new IncrementalIndexSchema.Builder()
                                  .withMetrics(new HyperUniquesAggregatorFactory("c2", "c2"))
@@ -213,7 +210,7 @@ public class SchemaEvolutionTest
     }
   }
 
-  @After
+  @AfterEach
   public void tearDown() throws IOException
   {
     Closeables.close(index1, false);
@@ -222,8 +219,8 @@ public class SchemaEvolutionTest
     Closeables.close(index4, false);
   }
 
-  @Test
-  @Parameters(method = "doVectorize")
+  @ParameterizedTest
+  @MethodSource("doVectorize")
   public void testHyperUniqueEvolutionTimeseries(boolean doVectorize)
   {
     final TimeseriesQueryRunnerFactory factory = QueryRunnerTestHelper.newTimeseriesQueryRunnerFactory();
@@ -241,20 +238,20 @@ public class SchemaEvolutionTest
         .build();
 
     // index1 has no "uniques" column
-    Assert.assertEquals(
+    Assertions.assertEquals(
         timeseriesResult(ImmutableMap.of("uniques", 0d)),
         runQuery(query, factory, ImmutableList.of(index1))
     );
 
     // index1 (no uniques) + index2 and index3 (yes uniques); we should be able to combine
-    Assert.assertEquals(
+    Assertions.assertEquals(
         timeseriesResult(ImmutableMap.of("uniques", 4.003911343725148d)),
         runQuery(query, factory, ImmutableList.of(index1, index2, index3))
     );
   }
 
-  @Test
-  @Parameters(method = "doVectorize")
+  @ParameterizedTest
+  @MethodSource("doVectorize")
   public void testNumericEvolutionTimeseriesAggregation(boolean doVectorize)
   {
     final TimeseriesQueryRunnerFactory factory = QueryRunnerTestHelper.newTimeseriesQueryRunnerFactory();
@@ -278,19 +275,19 @@ public class SchemaEvolutionTest
 
     // Only string(1)
     // Note: Expressions implicitly cast strings to numbers, leading to the a/b vs c/d difference.
-    Assert.assertEquals(
+    Assertions.assertEquals(
         timeseriesResult(ImmutableMap.of("a", 31L, "b", THIRTY_ONE_POINT_ONE, "c", 31L, "d", THIRTY_ONE_POINT_ONE)),
         runQuery(query, factory, ImmutableList.of(index1))
     );
 
     // Only long(2)
-    Assert.assertEquals(
+    Assertions.assertEquals(
         timeseriesResult(ImmutableMap.of("a", 31L, "b", 31.0, "c", 31L, "d", 31.0)),
         runQuery(query, factory, ImmutableList.of(index2))
     );
 
     // Only float(3)
-    Assert.assertEquals(
+    Assertions.assertEquals(
         timeseriesResult(ImmutableMap.of("a", 31L, "b", THIRTY_ONE_POINT_ONE, "c", 31L, "d", THIRTY_ONE_POINT_ONE)),
         runQuery(query, factory, ImmutableList.of(index3))
     );
@@ -301,14 +298,14 @@ public class SchemaEvolutionTest
     result.put("b", NullHandling.defaultDoubleValue());
     result.put("c", NullHandling.defaultLongValue());
     result.put("d", NullHandling.defaultDoubleValue());
-    Assert.assertEquals(
+    Assertions.assertEquals(
         timeseriesResult(result),
         runQuery(query, factory, ImmutableList.of(index4))
     );
 
     // string(1) + long(2) + float(3) + nonexistent(4)
     // Note: Expressions implicitly cast strings to numbers, leading to the a/b vs c/d difference.
-    Assert.assertEquals(
+    Assertions.assertEquals(
         timeseriesResult(ImmutableMap.of(
             "a", 31L * 3,
             "b", THIRTY_ONE_POINT_ONE * 2 + 31,
@@ -319,7 +316,7 @@ public class SchemaEvolutionTest
     );
 
     // long(2) + float(3) + nonexistent(4)
-    Assert.assertEquals(
+    Assertions.assertEquals(
         timeseriesResult(ImmutableMap.of(
             "a", 31L * 2,
             "b", THIRTY_ONE_POINT_ONE + 31,
@@ -330,8 +327,8 @@ public class SchemaEvolutionTest
     );
   }
 
-  @Test
-  @Parameters(method = "doVectorize")
+  @ParameterizedTest
+  @MethodSource("doVectorize")
   public void testNumericEvolutionFiltering(boolean doVectorize)
   {
     final TimeseriesQueryRunnerFactory factory = QueryRunnerTestHelper.newTimeseriesQueryRunnerFactory();
@@ -356,25 +353,25 @@ public class SchemaEvolutionTest
         .build();
 
     // Only string(1) -- which we can filter but not aggregate
-    Assert.assertEquals(
+    Assertions.assertEquals(
         timeseriesResult(ImmutableMap.of("a", 19L, "b", 19.1, "c", 2L, "d", 19.1f, "e", 9L)),
         runQuery(query, factory, ImmutableList.of(index1))
     );
 
      // Only long(2) -- which we can filter and aggregate
-    Assert.assertEquals(
+    Assertions.assertEquals(
         timeseriesResult(ImmutableMap.of("a", 19L, "b", 19.0, "c", 2L, "d", 19.0f, "e", 9L)),
         runQuery(query, factory, ImmutableList.of(index2))
     );
 
     // Only float(3) -- which we can't filter, but can aggregate
-    Assert.assertEquals(
+    Assertions.assertEquals(
         timeseriesResult(ImmutableMap.of("a", 19L, "b", 19.1, "c", 2L, "d", 19.1f, "e", 9L)),
         runQuery(query, factory, ImmutableList.of(index3))
     );
 
     // Only nonexistent(4)
-    Assert.assertEquals(
+    Assertions.assertEquals(
         timeseriesResult(TestHelper.makeMap(
             "a",
             NullHandling.defaultLongValue(),
@@ -391,7 +388,7 @@ public class SchemaEvolutionTest
     );
 
     // string(1) + long(2) + float(3) + nonexistent(4)
-    Assert.assertEquals(
+    Assertions.assertEquals(
         timeseriesResult(ImmutableMap.of(
             "a", 57L,
             "b", 57.2,
@@ -401,5 +398,14 @@ public class SchemaEvolutionTest
         )),
         runQuery(query, factory, ImmutableList.of(index1, index2, index3, index4))
     );
+  }
+
+  private static File newFolder(File root, String... subDirs) throws IOException {
+    String subFolder = String.join("/", subDirs);
+    File result = new File(root, subFolder);
+    if (!result.mkdirs()) {
+      throw new IOException("Couldn't create folders " + root);
+    }
+    return result;
   }
 }

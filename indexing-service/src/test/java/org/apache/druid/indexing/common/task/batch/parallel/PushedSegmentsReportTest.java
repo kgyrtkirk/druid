@@ -20,7 +20,6 @@
 package org.apache.druid.indexing.common.task.batch.parallel;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
-import org.junit.Test;
 
 public class PushedSegmentsReportTest
 {

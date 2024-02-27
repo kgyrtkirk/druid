@@ -31,8 +31,8 @@ import org.apache.druid.server.coordinator.DataSourceCompactionConfig;
 import org.apache.druid.server.coordinator.UserCompactionTaskQueryTuningConfig;
 import org.joda.time.Interval;
 import org.joda.time.Period;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
@@ -58,7 +58,7 @@ public class NewestSegmentFirstIteratorTest
         )
     );
 
-    Assert.assertEquals(expectedSkipIntervals, skipIntervals);
+    Assertions.assertEquals(expectedSkipIntervals, skipIntervals);
   }
 
   @Test
@@ -78,7 +78,7 @@ public class NewestSegmentFirstIteratorTest
         )
     );
 
-    Assert.assertEquals(expectedIntervals, fullSkipIntervals);
+    Assertions.assertEquals(expectedIntervals, fullSkipIntervals);
   }
 
   @Test
@@ -98,7 +98,7 @@ public class NewestSegmentFirstIteratorTest
         null,
         null
     );
-    Assert.assertEquals(
+    Assertions.assertEquals(
         new DynamicPartitionsSpec(null, Long.MAX_VALUE),
         CompactionStatus.findPartitionsSpecFromConfig(
             ClientCompactionTaskQueryTuningConfig.from(config.getTuningConfig(), config.getMaxRowsPerSegment(), null)
@@ -143,7 +143,7 @@ public class NewestSegmentFirstIteratorTest
         null,
         null
     );
-    Assert.assertEquals(
+    Assertions.assertEquals(
         new DynamicPartitionsSpec(null, Long.MAX_VALUE),
         CompactionStatus.findPartitionsSpecFromConfig(
             ClientCompactionTaskQueryTuningConfig.from(config.getTuningConfig(), config.getMaxRowsPerSegment(), null)
@@ -188,7 +188,7 @@ public class NewestSegmentFirstIteratorTest
         null,
         null
     );
-    Assert.assertEquals(
+    Assertions.assertEquals(
         new DynamicPartitionsSpec(null, 1000L),
         CompactionStatus.findPartitionsSpecFromConfig(
             ClientCompactionTaskQueryTuningConfig.from(config.getTuningConfig(), config.getMaxRowsPerSegment(), null)
@@ -233,7 +233,7 @@ public class NewestSegmentFirstIteratorTest
         null,
         null
     );
-    Assert.assertEquals(
+    Assertions.assertEquals(
         new DynamicPartitionsSpec(100, 1000L),
         CompactionStatus.findPartitionsSpecFromConfig(
             ClientCompactionTaskQueryTuningConfig.from(config.getTuningConfig(), config.getMaxRowsPerSegment(), null)
@@ -278,7 +278,7 @@ public class NewestSegmentFirstIteratorTest
         null,
         null
     );
-    Assert.assertEquals(
+    Assertions.assertEquals(
         new DynamicPartitionsSpec(100, 1000L),
         CompactionStatus.findPartitionsSpecFromConfig(
             ClientCompactionTaskQueryTuningConfig.from(config.getTuningConfig(), config.getMaxRowsPerSegment(), null)
@@ -323,7 +323,7 @@ public class NewestSegmentFirstIteratorTest
         null,
         null
     );
-    Assert.assertEquals(
+    Assertions.assertEquals(
         new DynamicPartitionsSpec(null, Long.MAX_VALUE),
         CompactionStatus.findPartitionsSpecFromConfig(
             ClientCompactionTaskQueryTuningConfig.from(config.getTuningConfig(), config.getMaxRowsPerSegment(), null)
@@ -368,7 +368,7 @@ public class NewestSegmentFirstIteratorTest
         null,
         null
     );
-    Assert.assertEquals(
+    Assertions.assertEquals(
         new DynamicPartitionsSpec(null, Long.MAX_VALUE),
         CompactionStatus.findPartitionsSpecFromConfig(
             ClientCompactionTaskQueryTuningConfig.from(config.getTuningConfig(), config.getMaxRowsPerSegment(), null)
@@ -413,7 +413,7 @@ public class NewestSegmentFirstIteratorTest
         null,
         null
     );
-    Assert.assertEquals(
+    Assertions.assertEquals(
         new HashedPartitionsSpec(null, 10, ImmutableList.of("dim")),
         CompactionStatus.findPartitionsSpecFromConfig(
             ClientCompactionTaskQueryTuningConfig.from(config.getTuningConfig(), config.getMaxRowsPerSegment(), null)
@@ -458,7 +458,7 @@ public class NewestSegmentFirstIteratorTest
         null,
         null
     );
-    Assert.assertEquals(
+    Assertions.assertEquals(
         new SingleDimensionPartitionsSpec(10000, null, "dim", false),
         CompactionStatus.findPartitionsSpecFromConfig(
             ClientCompactionTaskQueryTuningConfig.from(config.getTuningConfig(), config.getMaxRowsPerSegment(), null)

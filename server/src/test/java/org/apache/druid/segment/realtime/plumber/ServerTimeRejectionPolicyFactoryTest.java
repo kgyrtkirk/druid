@@ -22,8 +22,8 @@ package org.apache.druid.segment.realtime.plumber;
 import org.apache.druid.java.util.common.DateTimes;
 import org.joda.time.DateTime;
 import org.joda.time.Period;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  */
@@ -40,8 +40,8 @@ public class ServerTimeRejectionPolicyFactoryTest
     DateTime past = now.minus(period).minus(100);
     DateTime future = now.plus(period).plus(100);
 
-    Assert.assertTrue(rejectionPolicy.accept(now.getMillis()));
-    Assert.assertFalse(rejectionPolicy.accept(past.getMillis()));
-    Assert.assertFalse(rejectionPolicy.accept(future.getMillis()));
+    Assertions.assertTrue(rejectionPolicy.accept(now.getMillis()));
+    Assertions.assertFalse(rejectionPolicy.accept(past.getMillis()));
+    Assertions.assertFalse(rejectionPolicy.accept(future.getMillis()));
   }
 }

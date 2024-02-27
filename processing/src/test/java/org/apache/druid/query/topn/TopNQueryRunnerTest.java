@@ -94,13 +94,10 @@ import org.apache.druid.segment.column.ColumnHolder;
 import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.virtual.ExpressionVirtualColumn;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -115,18 +112,16 @@ import java.util.stream.Collectors;
 
 /**
  */
-@RunWith(Parameterized.class)
 public class TopNQueryRunnerTest extends InitializedNullHandlingTest
 {
   private static final Closer RESOURCE_CLOSER = Closer.create();
 
-  @AfterClass
+  @AfterAll
   public static void teardown() throws IOException
   {
     RESOURCE_CLOSER.close();
   }
 
-  @Parameterized.Parameters(name = "{7}")
   public static Iterable<Object[]> constructorFeeder()
   {
     List<QueryRunner<Result<TopNResultValue>>> retVal = queryRunners();
@@ -182,8 +177,8 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
 
     RESOURCE_CLOSER.register(() -> {
       // Verify that all objects have been returned to the pool.
-      Assert.assertEquals("defaultPool objects created", defaultPool.poolSize(), defaultPool.objectsCreatedCount());
-      Assert.assertEquals("customPool objects created", customPool.poolSize(), customPool.objectsCreatedCount());
+      Assertions.assertEquals(defaultPool.poolSize(), defaultPool.objectsCreatedCount(), "defaultPool objects created");
+      Assertions.assertEquals(customPool.poolSize(), customPool.objectsCreatedCount(), "customPool objects created");
       defaultPool.close();
       customPool.close();
     });
@@ -191,16 +186,12 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     return retVal;
   }
 
-  private final QueryRunner<Result<TopNResultValue>> runner;
-  private final boolean duplicateSingleAggregatorQueries;
-  private final List<AggregatorFactory> commonAggregators;
-
-
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
+  private QueryRunner<Result<TopNResultValue>> runner;
+  private boolean duplicateSingleAggregatorQueries;
+  private List<AggregatorFactory> commonAggregators;
 
   @SuppressWarnings("unused")
-  public TopNQueryRunnerTest(
+  public void initTopNQueryRunnerTest(
       QueryRunner<Result<TopNResultValue>> runner,
       boolean specializeGeneric1AggPooledTopN,
       boolean specializeGeneric2AggPooledTopN,
@@ -271,9 +262,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     return runner.run(QueryPlus.wrap(query), context);
   }
 
-  @Test
-  public void testEmptyTopN()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testEmptyTopN(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -305,9 +298,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testFullOnTopN()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testFullOnTopN(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -377,9 +372,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     );
   }
 
-  @Test
-  public void testTopNOnMissingColumn()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNOnMissingColumn(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -403,9 +400,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testTopNOnMissingColumnWithExtractionFn()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNOnMissingColumnWithExtractionFn(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -432,9 +431,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testFullOnTopNOverPostAggs()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testFullOnTopNOverPostAggs(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -495,9 +496,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testFullOnTopNOverPostAggsOnDimension()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testFullOnTopNOverPostAggsOnDimension(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -566,9 +569,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testFullOnTopNOverUniques()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testFullOnTopNOverUniques(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -629,9 +634,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testTopNOverMissingUniques()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNOverMissingUniques(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -666,9 +673,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testTopNOverHyperUniqueFinalizingPostAggregator()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNOverHyperUniqueFinalizingPostAggregator(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -712,9 +721,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testTopNOverHyperUniqueExpression()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNOverHyperUniqueExpression(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -767,9 +778,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testTopNOverHyperUniqueExpressionRounded()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNOverHyperUniqueExpressionRounded(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -816,9 +829,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testTopNOverFirstLastAggregator()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNOverFirstLastAggregator(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.MONTH_GRAN)
@@ -925,9 +940,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testTopNOverFirstLastFloatAggregatorUsingDoubleColumn()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNOverFirstLastFloatAggregatorUsingDoubleColumn(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.MONTH_GRAN)
@@ -1034,9 +1051,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testTopNOverFirstLastFloatAggregatorUsingFloatColumn()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNOverFirstLastFloatAggregatorUsingFloatColumn(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.MONTH_GRAN)
@@ -1144,10 +1163,12 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
   }
 
 
-
-  @Test
-  public void testTopNBySegment()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNBySegment(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
 
     final HashMap<String, Object> specialContext = new HashMap<String, Object>();
     specialContext.put(QueryContexts.BY_SEGMENT_KEY, "true");
@@ -1230,9 +1251,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     TestHelper.assertExpectedResults(expectedResults, result.getValue().getResults());
   }
 
-  @Test
-  public void testTopN()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopN(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -1278,9 +1301,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testTopNByUniques()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNByUniques(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -1326,9 +1351,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testTopNWithOrFilter1()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNWithOrFilter1(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -1374,9 +1401,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testTopNWithOrFilter2()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNWithOrFilter2(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -1415,9 +1444,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testTopNWithFilter1()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNWithFilter1(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -1449,9 +1480,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testTopNWithFilter2()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNWithFilter2(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -1497,9 +1530,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testTopNWithFilter2OneDay()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNWithFilter2OneDay(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -1549,9 +1584,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testTopNWithNonExistentFilterInOr()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNWithNonExistentFilterInOr(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -1590,9 +1627,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testTopNWithNonExistentFilter()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNWithNonExistentFilter(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -1612,9 +1651,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     );
   }
 
-  @Test
-  public void testTopNWithNonExistentFilterMultiDim()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNWithNonExistentFilterMultiDim(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     AndDimFilter andDimFilter = new AndDimFilter(
         new SelectorDimFilter(QueryRunnerTestHelper.MARKET_DIMENSION, "billyblank", null),
         new SelectorDimFilter(QueryRunnerTestHelper.QUALITY_DIMENSION, "mezzanine", null)
@@ -1638,9 +1679,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     );
   }
 
-  @Test
-  public void testTopNWithMultiValueDimFilter1()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNWithMultiValueDimFilter1(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -1671,9 +1714,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     );
   }
 
-  @Test
-  public void testTopNWithMultiValueDimFilter2()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNWithMultiValueDimFilter2(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -1709,9 +1754,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     );
   }
 
-  @Test
-  public void testTopNWithMultiValueDimFilter3()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNWithMultiValueDimFilter3(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -1750,9 +1797,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testTopNWithMultiValueDimFilter4()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNWithMultiValueDimFilter4(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -1798,9 +1847,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testTopNWithMultiValueDimFilter5()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNWithMultiValueDimFilter5(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -1853,9 +1904,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testTopNWithNonExistentDimension()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNWithNonExistentDimension(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -1886,9 +1939,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testTopNWithNonExistentDimensionAndActualFilter()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNWithNonExistentDimensionAndActualFilter(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -1920,9 +1975,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testTopNWithNonExistentDimensionAndNonExistentFilter()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNWithNonExistentDimensionAndNonExistentFilter(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -1954,9 +2011,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testTopNLexicographic()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNLexicographic(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -2001,9 +2060,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testTopNLexicographicNoAggregators()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNLexicographicNoAggregators(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -2034,9 +2095,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testTopNLexicographicWithPreviousStop()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNLexicographicWithPreviousStop(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -2074,9 +2137,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testTopNLexicographicWithNonExistingPreviousStop()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNLexicographicWithNonExistingPreviousStop(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -2114,9 +2179,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testTopNInvertedLexicographicWithPreviousStop()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNInvertedLexicographicWithPreviousStop(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -2154,9 +2221,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testTopNInvertedLexicographicWithNonExistingPreviousStop()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNInvertedLexicographicWithNonExistingPreviousStop(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -2195,9 +2264,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
   }
 
 
-  @Test
-  public void testTopNDimExtractionToOne()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNDimExtractionToOne(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -2232,14 +2303,16 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
         )
     );
     List<Result<TopNResultValue>> list = runWithMerge(query).toList();
-    Assert.assertEquals(list.size(), 1);
-    Assert.assertEquals("Didn't merge results", list.get(0).getValue().getValue().size(), 1);
+    Assertions.assertEquals(list.size(), 1);
+    Assertions.assertEquals(list.get(0).getValue().getValue().size(), 1, "Didn't merge results");
     TestHelper.assertExpectedResults(expectedResults, list, "Failed to match");
   }
 
-  @Test
-  public void testTopNDimExtractionTimeToOneLong()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNDimExtractionTimeToOneLong(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -2279,14 +2352,16 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
         )
     );
     List<Result<TopNResultValue>> list = runWithMerge(query).toList();
-    Assert.assertEquals(list.size(), 1);
-    Assert.assertEquals("Didn't merge results", list.get(0).getValue().getValue().size(), 1);
+    Assertions.assertEquals(list.size(), 1);
+    Assertions.assertEquals(list.get(0).getValue().getValue().size(), 1, "Didn't merge results");
     TestHelper.assertExpectedResults(expectedResults, list, "Failed to match");
   }
 
-  @Test
-  public void testTopNCollapsingDimExtraction()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNCollapsingDimExtraction(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -2352,9 +2427,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testTopNDimExtraction()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNDimExtraction(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -2405,9 +2482,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testTopNDimExtractionNoAggregators()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNDimExtractionNoAggregators(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -2444,9 +2523,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testTopNDimExtractionFastTopNOptimalWithReplaceMissing()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNDimExtractionFastTopNOptimalWithReplaceMissing(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -2508,9 +2589,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
   }
 
 
-  @Test
-  public void testTopNDimExtractionFastTopNUnOptimalWithReplaceMissing()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNDimExtractionFastTopNUnOptimalWithReplaceMissing(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -2572,10 +2655,12 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
   }
 
 
-  @Test
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
   // Test a "direct" query
-  public void testTopNDimExtractionFastTopNOptimal()
+  public void testTopNDimExtractionFastTopNOptimal(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -2636,10 +2721,12 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
   // Test query path that must rebucket the data
-  public void testTopNDimExtractionFastTopNUnOptimal()
+  public void testTopNDimExtractionFastTopNUnOptimal(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -2703,9 +2790,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testTopNLexicographicDimExtractionOptimalNamespace()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNLexicographicDimExtractionOptimalNamespace(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -2769,9 +2858,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testTopNLexicographicDimExtractionUnOptimalNamespace()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNLexicographicDimExtractionUnOptimalNamespace(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -2836,9 +2927,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
   }
 
 
-  @Test
-  public void testTopNLexicographicDimExtractionOptimalNamespaceWithRunner()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNLexicographicDimExtractionOptimalNamespaceWithRunner(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -2902,9 +2995,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testTopNLexicographicDimExtraction()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNLexicographicDimExtraction(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -2955,9 +3050,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testInvertedTopNLexicographicDimExtraction2()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testInvertedTopNLexicographicDimExtraction2(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -3008,9 +3105,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testTopNLexicographicDimExtractionWithPreviousStop()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNLexicographicDimExtractionWithPreviousStop(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -3054,9 +3153,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testTopNLexicographicDimExtractionWithSortingPreservedAndPreviousStop()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNLexicographicDimExtractionWithSortingPreservedAndPreviousStop(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -3126,9 +3227,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
   }
 
 
-  @Test
-  public void testInvertedTopNLexicographicDimExtractionWithPreviousStop()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testInvertedTopNLexicographicDimExtractionWithPreviousStop(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -3172,9 +3275,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testInvertedTopNLexicographicDimExtractionWithPreviousStop2()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testInvertedTopNLexicographicDimExtractionWithPreviousStop2(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -3218,9 +3323,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testTopNWithNullProducingDimExtractionFn()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNWithNullProducingDimExtractionFn(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     final ExtractionFn nullStringDimExtraction = new DimExtractionFn()
     {
       @Override
@@ -3301,14 +3408,16 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
 
   }
 
-  @Test
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
   /**
    * This test exists only to show what the current behavior is and not necessarily to define that this is
    * correct behavior.  In fact, the behavior when returning the empty string from a DimExtractionFn is, by
    * contract, undefined, so this can do anything.
    */
-  public void testTopNWithEmptyStringProducingDimExtractionFn()
+  public void testTopNWithEmptyStringProducingDimExtractionFn(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     final ExtractionFn emptyStringDimExtraction = new DimExtractionFn()
     {
       @Override
@@ -3388,9 +3497,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testInvertedTopNQuery()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testInvertedTopNQuery(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query =
         new TopNQueryBuilder()
             .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
@@ -3436,9 +3547,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testTopNQueryByComplexMetric()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNQueryByComplexMetric(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     ImmutableList<DimensionSpec> aggregatorDimensionSpecs = ImmutableList.of(new DefaultDimensionSpec(
         QueryRunnerTestHelper.QUALITY_DIMENSION,
         QueryRunnerTestHelper.QUALITY_DIMENSION
@@ -3485,9 +3598,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testTopNQueryCardinalityAggregatorWithExtractionFn()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNQueryCardinalityAggregatorWithExtractionFn(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     String helloJsFn = "function(str) { return 'hello' }";
     ExtractionFn helloFn = new JavaScriptExtractionFn(helloJsFn, false, JavaScriptConfig.getEnabledInstance());
 
@@ -3534,9 +3649,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testTopNDependentPostAgg()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNDependentPostAgg(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -3616,9 +3733,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testTopNBySegmentResults()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNBySegmentResults(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -3691,13 +3810,15 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     );
     Sequence<Result<TopNResultValue>> results = runWithMerge(query);
     for (Result<TopNResultValue> result : results.toList()) {
-      Assert.assertEquals(result.getValue(), result.getValue()); // TODO: fix this test
+      Assertions.assertEquals(result.getValue(), result.getValue()); // TODO: fix this test
     }
   }
 
-  @Test
-  public void testTopNWithTimeColumn()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNWithTimeColumn(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .intervals(QueryRunnerTestHelper.FIRST_TO_THIRD)
@@ -3751,9 +3872,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testTopNTimeExtraction()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNTimeExtraction(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -3798,9 +3921,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testTopNOverNullDimension()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNOverNullDimension(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -3843,9 +3968,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testTopNOverNullDimensionWithFilter()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNOverNullDimensionWithFilter(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -3891,9 +4018,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testTopNOverPartialNullDimension()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNOverPartialNullDimension(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(Granularities.ALL)
@@ -3928,9 +4057,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testTopNOverPartialNullDimensionWithFilterOnNullValue()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNOverPartialNullDimensionWithFilterOnNullValue(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(Granularities.ALL)
@@ -3960,9 +4091,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testTopNOverPartialNullDimensionWithFilterOnNOTNullValue()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNOverPartialNullDimensionWithFilterOnNOTNullValue(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(Granularities.ALL)
@@ -3992,9 +4125,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testAlphaNumericTopNWithNullPreviousStop()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testAlphaNumericTopNWithNullPreviousStop(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(Granularities.ALL)
@@ -4031,9 +4166,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     TestHelper.assertExpectedResults(expectedResults, runner.run(QueryPlus.wrap(query)));
   }
 
-  @Test
-  public void testNumericDimensionTopNWithNullPreviousStop()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testNumericDimensionTopNWithNullPreviousStop(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(Granularities.ALL)
@@ -4071,9 +4208,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
   }
 
 
-  @Test
-  public void testTopNWithExtractionFilter()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNWithExtractionFilter(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     Map<String, String> extractionMap = new HashMap<>();
     extractionMap.put("spot", "spot0");
     MapLookupExtractor mapLookupExtractor = new MapLookupExtractor(extractionMap, false);
@@ -4120,9 +4259,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     TestHelper.assertExpectedResults(expectedResults, retval);
   }
 
-  @Test
-  public void testTopNWithExtractionFilterAndFilteredAggregatorCaseNoExistingValue()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNWithExtractionFilterAndFilteredAggregatorCaseNoExistingValue(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     Map<String, String> extractionMap = new HashMap<>();
 
     MapLookupExtractor mapLookupExtractor = new MapLookupExtractor(extractionMap, false);
@@ -4186,9 +4327,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     return runWithMerge(query, ResponseContext.createEmpty());
   }
 
-  @Test
-  public void testTopNWithExtractionFilterNoExistingValue()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNWithExtractionFilterNoExistingValue(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     Map<String, String> extractionMap = new HashMap<>();
 
     MapLookupExtractor mapLookupExtractor = new MapLookupExtractor(extractionMap, false);
@@ -4251,9 +4394,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     TestHelper.assertExpectedResults(expectedResults, retval);
   }
 
-  @Test
-  public void testFullOnTopNFloatColumn()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testFullOnTopNFloatColumn(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -4323,9 +4468,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testFullOnTopNFloatColumnWithExFn()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testFullOnTopNFloatColumnWithExFn(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     String jsFn = "function(str) { return 'super-' + str; }";
     ExtractionFn jsExtractionFn = new JavaScriptExtractionFn(jsFn, false, JavaScriptConfig.getEnabledInstance());
 
@@ -4398,9 +4545,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testFullOnTopNFloatColumnAsString()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testFullOnTopNFloatColumnAsString(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -4470,9 +4619,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testFullOnTopNLongColumn()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testFullOnTopNLongColumn(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -4542,9 +4693,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testFullOnTopNLongVirtualColumn()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testFullOnTopNLongVirtualColumn(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -4615,9 +4768,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testFullOnTopNAggregateLongVirtualColumn()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testFullOnTopNAggregateLongVirtualColumn(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -4657,9 +4812,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testTopNStringVirtualColumn()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNStringVirtualColumn(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -4712,9 +4869,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testFullOnTopNLongColumnWithExFn()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testFullOnTopNLongColumnWithExFn(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     String jsFn = "function(str) { return 'super-' + str; }";
     ExtractionFn jsExtractionFn = new JavaScriptExtractionFn(jsFn, false, JavaScriptConfig.getEnabledInstance());
 
@@ -4787,9 +4946,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testFullOnTopNLongColumnAsString()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testFullOnTopNLongColumnAsString(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -4859,9 +5020,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testFullOnTopNNumericStringColumnAsLong()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testFullOnTopNNumericStringColumnAsLong(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -4931,9 +5094,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testFullOnTopNNumericStringColumnAsFloat()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testFullOnTopNNumericStringColumnAsFloat(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -5003,9 +5168,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testFullOnTopNLongTimeColumn()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testFullOnTopNLongTimeColumn(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -5075,9 +5242,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testSortOnDoubleAsLong()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testSortOnDoubleAsLong(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -5111,9 +5280,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testSortOnTimeAsLong()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testSortOnTimeAsLong(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -5147,9 +5318,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testSortOnStringAsDouble()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testSortOnStringAsDouble(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -5171,9 +5344,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testSortOnDoubleAsDouble()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testSortOnDoubleAsDouble(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -5207,9 +5382,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testFullOnTopNLongTimeColumnWithExFn()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testFullOnTopNLongTimeColumnWithExFn(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     String jsFn = "function(str) { return 'super-' + str; }";
     ExtractionFn jsExtractionFn = new JavaScriptExtractionFn(jsFn, false, JavaScriptConfig.getEnabledInstance());
 
@@ -5282,9 +5459,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testFullOnTopNDimExtractionAllNulls()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testFullOnTopNDimExtractionAllNulls(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     String jsFn = "function(str) { return null; }";
     ExtractionFn jsExtractionFn = new JavaScriptExtractionFn(jsFn, false, JavaScriptConfig.getEnabledInstance());
 
@@ -5335,9 +5514,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testFullOnTopNStringOutputAsLong()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testFullOnTopNStringOutputAsLong(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     ExtractionFn strlenFn = StrlenExtractionFn.instance();
 
     TopNQuery query = new TopNQueryBuilder()
@@ -5409,9 +5590,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testFullOnTopNNumericStringColumnWithDecoration()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testFullOnTopNNumericStringColumnWithDecoration(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     ListFilteredDimensionSpec filteredSpec = new ListFilteredDimensionSpec(
         new DefaultDimensionSpec("qualityNumericString", "qns_alias", ColumnType.LONG),
         Sets.newHashSet("120000", "140000", "160000"),
@@ -5478,9 +5661,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testFullOnTopNDecorationOnNumeric()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testFullOnTopNDecorationOnNumeric(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     ListFilteredDimensionSpec filteredSpec = new ListFilteredDimensionSpec(
         new DefaultDimensionSpec("qualityLong", "ql_alias", ColumnType.LONG),
         Sets.newHashSet("1200", "1400", "1600"),
@@ -5547,9 +5732,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testFullOnTopNWithAggsOnNumericDims()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testFullOnTopNWithAggsOnNumericDims(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     List<Pair<AggregatorFactory, List<?>>> aggregations = new ArrayList<>();
     aggregations.add(new Pair<>(
         QueryRunnerTestHelper.ROWS_COUNT,
@@ -5646,9 +5833,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
   }
 
 
-  @Test
-  public void testFullOnTopNBoundFilterAndLongSumMetric()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testFullOnTopNBoundFilterAndLongSumMetric(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     // this tests the stack overflow issue from https://github.com/apache/druid/issues/4628
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
@@ -5682,9 +5871,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
   /**
    * Regression test for https://github.com/apache/druid/issues/5132
    */
-  @Test
-  public void testTopNWithNonBitmapFilter()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testTopNWithNonBitmapFilter(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -5706,12 +5897,14 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
         .build();
 
     // Don't check results, just the fact that the query could complete
-    Assert.assertNotNull(runWithMerge(query).toList());
+    Assertions.assertNotNull(runWithMerge(query).toList());
   }
 
-  @Test
-  public void test_topN_orderByLongNumericColumnWithNulls_returnsDescendingResults()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void test_topN_orderByLongNumericColumnWithNulls_returnsDescendingResults(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -5777,9 +5970,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void test_topN_orderByFloatNumericColumnWithNulls_returnsDescendingResults()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void test_topN_orderByFloatNumericColumnWithNulls_returnsDescendingResults(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -5845,9 +6040,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void test_topN_orderByDoubleNumericColumnWithNulls_returnsDescendingResults()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void test_topN_orderByDoubleNumericColumnWithNulls_returnsDescendingResults(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -5914,9 +6111,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
   }
 
 
-  @Test
-  public void testAggregateOnLongNumericNull()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testAggregateOnLongNumericNull(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -5946,9 +6145,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testAggregateOnDoubleNumericNull()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testAggregateOnDoubleNumericNull(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -5978,9 +6179,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testAggregateOnFloatNumericNull()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testAggregateOnFloatNumericNull(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -6010,9 +6213,11 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testExpressionAggregator()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testExpressionAggregator(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
     // sorted by array length of array_agg_distinct
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
@@ -6126,9 +6331,12 @@ public class TopNQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, query);
   }
 
-  @Test
-  public void testExpressionAggregatorComplex()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{7}")
+  public void testExpressionAggregatorComplex(QueryRunner<Result<TopNResultValue>> runner, boolean specializeGeneric1AggPooledTopN, boolean specializeGeneric2AggPooledTopN, boolean specializeHistorical1SimpleDoubleAggPooledTopN, boolean specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, boolean duplicateSingleAggregatorQueries, List<AggregatorFactory> commonAggregators, String testName)
   {
+
+    initTopNQueryRunnerTest(runner, specializeGeneric1AggPooledTopN, specializeGeneric2AggPooledTopN, specializeHistorical1SimpleDoubleAggPooledTopN, specializeHistoricalSingleValueDimSelector1SimpleDoubleAggPooledTopN, duplicateSingleAggregatorQueries, commonAggregators, testName);
 
     // sorted by array hyperunique expression
     TopNQuery query = new TopNQueryBuilder()

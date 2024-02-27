@@ -30,7 +30,6 @@ import org.apache.druid.indexing.worker.config.WorkerConfig;
 import org.apache.druid.java.util.common.DateTimes;
 import org.apache.druid.segment.TestHelper;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.util.HashSet;
 

@@ -24,8 +24,8 @@ import org.apache.druid.common.config.NullHandling;
 import org.apache.druid.math.expr.ExprEval;
 import org.apache.druid.math.expr.ExpressionType;
 import org.apache.druid.math.expr.InputBindings;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class RegexpReplaceExprMacroTest extends MacroTestBase
 {
@@ -77,9 +77,9 @@ public class RegexpReplaceExprMacroTest extends MacroTestBase
     );
 
     if (NullHandling.sqlCompatible()) {
-      Assert.assertNull(result.value());
+      Assertions.assertNull(result.value());
     } else {
-      Assert.assertEquals("xfxoxox", result.value());
+      Assertions.assertEquals("xfxoxox", result.value());
     }
   }
 
@@ -90,7 +90,7 @@ public class RegexpReplaceExprMacroTest extends MacroTestBase
         "regexp_replace(a, 'f.x', 'beep')",
         InputBindings.forInputSupplier("a", ExpressionType.STRING, () -> "foo")
     );
-    Assert.assertEquals("foo", result.value());
+    Assertions.assertEquals("foo", result.value());
   }
 
   @Test
@@ -100,7 +100,7 @@ public class RegexpReplaceExprMacroTest extends MacroTestBase
         "regexp_replace(a, '', 'x')",
         InputBindings.forInputSupplier("a", ExpressionType.STRING, () -> "foo")
     );
-    Assert.assertEquals("xfxoxox", result.value());
+    Assertions.assertEquals("xfxoxox", result.value());
   }
 
   @Test
@@ -110,7 +110,7 @@ public class RegexpReplaceExprMacroTest extends MacroTestBase
         "regexp_replace(a, '^foo\\\\nbar$', 'xxx')",
         InputBindings.forInputSupplier("a", ExpressionType.STRING, () -> "foo\nbar")
     );
-    Assert.assertEquals("xxx", result.value());
+    Assertions.assertEquals("xxx", result.value());
   }
 
   @Test
@@ -120,7 +120,7 @@ public class RegexpReplaceExprMacroTest extends MacroTestBase
         "regexp_replace(a, '^foo\\\\nbar$', 'xxx')",
         InputBindings.forInputSupplier("a", ExpressionType.STRING, () -> "foo\nbarz")
     );
-    Assert.assertEquals("foo\nbarz", result.value());
+    Assertions.assertEquals("foo\nbarz", result.value());
   }
 
   @Test
@@ -132,9 +132,9 @@ public class RegexpReplaceExprMacroTest extends MacroTestBase
     );
 
     if (NullHandling.sqlCompatible()) {
-      Assert.assertNull(result.value());
+      Assertions.assertNull(result.value());
     } else {
-      Assert.assertEquals("x", result.value());
+      Assertions.assertEquals("x", result.value());
     }
   }
 
@@ -145,7 +145,7 @@ public class RegexpReplaceExprMacroTest extends MacroTestBase
         "regexp_replace(a, '', 'x')",
         InputBindings.forInputSupplier("a", ExpressionType.STRING, () -> "")
     );
-    Assert.assertEquals("x", result.value());
+    Assertions.assertEquals("x", result.value());
   }
 
   @Test
@@ -161,7 +161,7 @@ public class RegexpReplaceExprMacroTest extends MacroTestBase
             )
         )
     );
-    Assert.assertEquals("x", result.value());
+    Assertions.assertEquals("x", result.value());
   }
 
   @Test
@@ -170,9 +170,9 @@ public class RegexpReplaceExprMacroTest extends MacroTestBase
     final ExprEval<?> result = eval("regexp_replace(a, null, 'x')", InputBindings.nilBindings());
 
     if (NullHandling.sqlCompatible()) {
-      Assert.assertNull(result.value());
+      Assertions.assertNull(result.value());
     } else {
-      Assert.assertEquals("x", result.value());
+      Assertions.assertEquals("x", result.value());
     }
   }
 
@@ -187,9 +187,9 @@ public class RegexpReplaceExprMacroTest extends MacroTestBase
     );
 
     if (NullHandling.sqlCompatible()) {
-      Assert.assertNull(result.value());
+      Assertions.assertNull(result.value());
     } else {
-      Assert.assertEquals("x", result.value());
+      Assertions.assertEquals("x", result.value());
     }
   }
 
@@ -199,9 +199,9 @@ public class RegexpReplaceExprMacroTest extends MacroTestBase
     final ExprEval<?> result = eval("regexp_replace(a, '', 'x')", InputBindings.nilBindings());
 
     if (NullHandling.sqlCompatible()) {
-      Assert.assertNull(result.value());
+      Assertions.assertNull(result.value());
     } else {
-      Assert.assertEquals("x", result.value());
+      Assertions.assertEquals("x", result.value());
     }
   }
 
@@ -213,7 +213,7 @@ public class RegexpReplaceExprMacroTest extends MacroTestBase
         InputBindings.forInputSupplier("a", ExpressionType.STRING, () -> "http://example.com/path/to?query")
     );
 
-    Assert.assertEquals("http://example.com/*/*", result.value());
+    Assertions.assertEquals("http://example.com/*/*", result.value());
   }
 
   @Test
@@ -233,6 +233,6 @@ public class RegexpReplaceExprMacroTest extends MacroTestBase
         )
     );
 
-    Assert.assertEquals("http://example.com/*/*", result.value());
+    Assertions.assertEquals("http://example.com/*/*", result.value());
   }
 }

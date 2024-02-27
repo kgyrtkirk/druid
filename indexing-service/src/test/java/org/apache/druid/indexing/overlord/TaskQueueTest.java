@@ -74,7 +74,6 @@ import org.apache.druid.timeline.DataSegment;
 import org.easymock.EasyMock;
 import org.joda.time.Interval;
 import org.junit.Assert;
-import org.junit.Test;
 import org.mockito.Mockito;
 
 import javax.annotation.Nullable;

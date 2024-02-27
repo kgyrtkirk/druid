@@ -25,7 +25,6 @@ import com.amazonaws.services.s3.model.S3ObjectSummary;
 import org.apache.druid.java.util.common.StringUtils;
 import org.easymock.EasyMock;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.net.URI;
 import java.util.Date;

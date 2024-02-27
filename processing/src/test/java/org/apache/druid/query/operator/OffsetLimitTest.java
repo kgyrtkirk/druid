@@ -20,11 +20,12 @@
 package org.apache.druid.query.operator;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class OffsetLimitTest
 {
@@ -87,10 +88,12 @@ public class OffsetLimitTest
     assertEquals(offset + 1, ol.getToIndex(offset + 1));
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testInvalidOffset()
   {
-    new OffsetLimit(-1, -1);
+    assertThrows(IllegalArgumentException.class, () -> {
+      new OffsetLimit(-1, -1);
+    });
   }
 
   @Test

@@ -35,13 +35,17 @@ import org.apache.druid.timeline.partition.LinearShardSpec;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.chrono.ISOChronology;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import java.io.File;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ClosedSegmentsSinksBatchAppenderatorTest extends InitializedNullHandlingTest
 {
@@ -58,33 +62,33 @@ public class ClosedSegmentsSinksBatchAppenderatorTest extends InitializedNullHan
       final Appenderator appenderator = tester.getAppenderator();
 
       // startJob
-      Assert.assertNull(appenderator.startJob());
+      Assertions.assertNull(appenderator.startJob());
 
       // getDataSource
-      Assert.assertEquals(ClosedSegmensSinksBatchAppenderatorTester.DATASOURCE, appenderator.getDataSource());
+      Assertions.assertEquals(ClosedSegmensSinksBatchAppenderatorTester.DATASOURCE, appenderator.getDataSource());
 
       // add #1
-      Assert.assertEquals(
+      Assertions.assertEquals(
           1,
           appenderator.add(IDENTIFIERS.get(0), createInputRow("2000", "foo", 1), null)
                       .getNumRowsInSegment()
       );
 
       // add #2
-      Assert.assertEquals(
+      Assertions.assertEquals(
           1,
           appenderator.add(IDENTIFIERS.get(1), createInputRow("2000", "bar", 2), null)
                       .getNumRowsInSegment()
       );
 
       // getSegments
-      Assert.assertEquals(
+      Assertions.assertEquals(
           IDENTIFIERS.subList(0, 2),
           appenderator.getSegments().stream().sorted().collect(Collectors.toList())
       );
 
       // add #3, this hits max rows in memory:
-      Assert.assertEquals(
+      Assertions.assertEquals(
           2,
           appenderator.add(IDENTIFIERS.get(1), createInputRow("2000", "sux", 1), null)
                       .getNumRowsInSegment()
@@ -92,13 +96,13 @@ public class ClosedSegmentsSinksBatchAppenderatorTest extends InitializedNullHan
 
       // since we just added three rows and the max rows in memory is three, all the segments (sinks etc.)
       // above should be cleared now
-      Assert.assertEquals(
+      Assertions.assertEquals(
           Collections.emptyList(),
           ((BatchAppenderator) appenderator).getInMemorySegments().stream().sorted().collect(Collectors.toList())
       );
 
       // add #4, this will add one more temporary segment:
-      Assert.assertEquals(
+      Assertions.assertEquals(
           1,
           appenderator.add(IDENTIFIERS.get(2), createInputRow("2001", "qux", 4), null)
                       .getNumRowsInSegment()
@@ -110,20 +114,20 @@ public class ClosedSegmentsSinksBatchAppenderatorTest extends InitializedNullHan
           null,
           false
       ).get();
-      Assert.assertEquals(
+      Assertions.assertEquals(
           IDENTIFIERS.subList(0, 3),
           Lists.transform(
               segmentsAndCommitMetadata.getSegments(),
               SegmentIdWithShardSpec::fromDataSegment
           ).stream().sorted().collect(Collectors.toList())
       );
-      Assert.assertEquals(
+      Assertions.assertEquals(
           tester.getPushedSegments().stream().sorted().collect(Collectors.toList()),
           segmentsAndCommitMetadata.getSegments().stream().sorted().collect(Collectors.toList())
       );
 
       appenderator.close();
-      Assert.assertTrue(appenderator.getSegments().isEmpty());
+      Assertions.assertTrue(appenderator.getSegments().isEmpty());
     }
   }
 
@@ -139,24 +143,24 @@ public class ClosedSegmentsSinksBatchAppenderatorTest extends InitializedNullHan
       final Appenderator appenderator = tester.getAppenderator();
 
       // startJob
-      Assert.assertNull(appenderator.startJob());
+      Assertions.assertNull(appenderator.startJob());
 
       // getDataSource
-      Assert.assertEquals(ClosedSegmensSinksBatchAppenderatorTester.DATASOURCE, appenderator.getDataSource());
+      Assertions.assertEquals(ClosedSegmensSinksBatchAppenderatorTester.DATASOURCE, appenderator.getDataSource());
 
       // Create a segment identifier with a non-utc interval
       SegmentIdWithShardSpec segmentIdWithNonUTCTime =
           createNonUTCSegmentId("2021-06-27T00:00:00.000+09:00/2021-06-28T00:00:00.000+09:00",
                           "A", 0); // should be in seg_0
 
-      Assert.assertEquals(
+      Assertions.assertEquals(
           1,
           appenderator.add(segmentIdWithNonUTCTime, createInputRow("2021-06-27T00:01:11.080Z", "foo", 1), null)
                       .getNumRowsInSegment()
       );
 
       // getSegments
-      Assert.assertEquals(
+      Assertions.assertEquals(
           Collections.singletonList(segmentIdWithNonUTCTime),
           appenderator.getSegments().stream().sorted().collect(Collectors.toList())
       );
@@ -164,7 +168,7 @@ public class ClosedSegmentsSinksBatchAppenderatorTest extends InitializedNullHan
 
       // since we just added one row and the max rows in memory is one, all the segments (sinks etc)
       // above should be cleared now
-      Assert.assertEquals(
+      Assertions.assertEquals(
           Collections.emptyList(),
           ((BatchAppenderator) appenderator).getInMemorySegments().stream().sorted().collect(Collectors.toList())
       );
@@ -176,20 +180,20 @@ public class ClosedSegmentsSinksBatchAppenderatorTest extends InitializedNullHan
           null,
           false
       ).get();
-      Assert.assertEquals(
+      Assertions.assertEquals(
           Collections.singletonList(segmentIdWithNonUTCTime),
           Lists.transform(
               segmentsAndCommitMetadata.getSegments(),
               SegmentIdWithShardSpec::fromDataSegment
           ).stream().sorted().collect(Collectors.toList())
       );
-      Assert.assertEquals(
+      Assertions.assertEquals(
           tester.getPushedSegments().stream().sorted().collect(Collectors.toList()),
           segmentsAndCommitMetadata.getSegments().stream().sorted().collect(Collectors.toList())
       );
 
       appenderator.close();
-      Assert.assertTrue(appenderator.getSegments().isEmpty());
+      Assertions.assertTrue(appenderator.getSegments().isEmpty());
     }
   }
 
@@ -214,17 +218,17 @@ public class ClosedSegmentsSinksBatchAppenderatorTest extends InitializedNullHan
       // 44(map overhead) + 28 (TimeAndDims overhead) + 56 (aggregator metrics) + 54 (dimsKeySize) =
       // 182 + 1 byte when null handling is enabled
       int nullHandlingOverhead = NullHandling.sqlCompatible() ? 1 : 0;
-      Assert.assertEquals(
+      Assertions.assertEquals(
           182 + nullHandlingOverhead,
           ((BatchAppenderator) appenderator).getBytesInMemory(IDENTIFIERS.get(0))
       );
       appenderator.add(IDENTIFIERS.get(1), createInputRow("2000", "bar", 1), null);
-      Assert.assertEquals(
+      Assertions.assertEquals(
           182 + nullHandlingOverhead,
           ((BatchAppenderator) appenderator).getBytesInMemory(IDENTIFIERS.get(1))
       );
       appenderator.close();
-      Assert.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
+      Assertions.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
     }
   }
 
@@ -247,15 +251,15 @@ public class ClosedSegmentsSinksBatchAppenderatorTest extends InitializedNullHan
       appenderator.add(IDENTIFIERS.get(0), createInputRow("2000", "foo", 1), null);
       //expectedSizeInBytes = 44(map overhead) + 28 (TimeAndDims overhead) + 56 (aggregator metrics) + 54 (dimsKeySize) = 182
       int nullHandlingOverhead = NullHandling.sqlCompatible() ? 1 : 0;
-      Assert.assertEquals(182 + nullHandlingOverhead, ((BatchAppenderator) appenderator).getBytesCurrentlyInMemory());
+      Assertions.assertEquals(182 + nullHandlingOverhead, ((BatchAppenderator) appenderator).getBytesCurrentlyInMemory());
       appenderator.add(IDENTIFIERS.get(1), createInputRow("2000", "bar", 1), null);
-      Assert.assertEquals(
+      Assertions.assertEquals(
           364 + 2 * nullHandlingOverhead,
           ((BatchAppenderator) appenderator).getBytesCurrentlyInMemory()
       );
-      Assert.assertEquals(2, appenderator.getSegments().size());
+      Assertions.assertEquals(2, appenderator.getSegments().size());
       appenderator.close();
-      Assert.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
+      Assertions.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
     }
   }
 
@@ -273,11 +277,11 @@ public class ClosedSegmentsSinksBatchAppenderatorTest extends InitializedNullHan
       int currentInMemoryIndexSize = 182 + nullHandlingOverhead;
       int sinkSizeOverhead = BatchAppenderator.ROUGH_OVERHEAD_PER_SINK;
       // currHydrant in the sink still has > 0 bytesInMemory since we do not persist yet
-      Assert.assertEquals(
+      Assertions.assertEquals(
           currentInMemoryIndexSize,
           ((BatchAppenderator) appenderator).getBytesInMemory(IDENTIFIERS.get(0))
       );
-      Assert.assertEquals(
+      Assertions.assertEquals(
           currentInMemoryIndexSize + sinkSizeOverhead,
           ((BatchAppenderator) appenderator).getBytesCurrentlyInMemory()
       );
@@ -291,12 +295,12 @@ public class ClosedSegmentsSinksBatchAppenderatorTest extends InitializedNullHan
       currentInMemoryIndexSize = 0;
       // We are now over maxSizeInBytes after the add. Hence, we do a persist.
       // currHydrant in the sink has 0 bytesInMemory since we just did a persist
-      Assert.assertEquals(
+      Assertions.assertEquals(
           currentInMemoryIndexSize,
           ((BatchAppenderator) appenderator).getBytesInMemory(IDENTIFIERS.get(0))
       );
       // no sinks no hydrants after a persist, so we should have zero bytes currently in memory
-      Assert.assertEquals(
+      Assertions.assertEquals(
           currentInMemoryIndexSize,
           ((BatchAppenderator) appenderator).getBytesCurrentlyInMemory()
       );
@@ -305,11 +309,11 @@ public class ClosedSegmentsSinksBatchAppenderatorTest extends InitializedNullHan
       appenderator.add(IDENTIFIERS.get(0), createInputRow("2000", "bob", 1), null);
       // currHydrant in the sink still has > 0 bytesInMemory since we do not persist yet
       currentInMemoryIndexSize = 182 + nullHandlingOverhead;
-      Assert.assertEquals(
+      Assertions.assertEquals(
           currentInMemoryIndexSize,
           ((BatchAppenderator) appenderator).getBytesInMemory(IDENTIFIERS.get(0))
       );
-      Assert.assertEquals(
+      Assertions.assertEquals(
           currentInMemoryIndexSize + sinkSizeOverhead,
           ((BatchAppenderator) appenderator).getBytesCurrentlyInMemory()
       );
@@ -323,30 +327,33 @@ public class ClosedSegmentsSinksBatchAppenderatorTest extends InitializedNullHan
       currentInMemoryIndexSize = 0;
       // We are now over maxSizeInBytes after the add. Hence, we do a persist.
       // so no sinks & hydrants should be in memory...
-      Assert.assertEquals(
+      Assertions.assertEquals(
           currentInMemoryIndexSize,
           ((BatchAppenderator) appenderator).getBytesInMemory(IDENTIFIERS.get(0))
       );
-      Assert.assertEquals(
+      Assertions.assertEquals(
           currentInMemoryIndexSize,
           ((BatchAppenderator) appenderator).getBytesCurrentlyInMemory()
       );
       appenderator.persistAll(null).get();
       appenderator.close();
-      Assert.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
-      Assert.assertEquals(0, ((BatchAppenderator) appenderator).getBytesCurrentlyInMemory());
+      Assertions.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
+      Assertions.assertEquals(0, ((BatchAppenderator) appenderator).getBytesCurrentlyInMemory());
     }
   }
 
-  @Test(expected = RuntimeException.class, timeout = 5000L)
+  @Test
+  @Timeout(value = 5000L, unit = TimeUnit.MILLISECONDS)
   public void testTaskFailAsPersistCannotFreeAnyMoreMemory() throws Exception
   {
-    try (final ClosedSegmensSinksBatchAppenderatorTester tester =
-             new ClosedSegmensSinksBatchAppenderatorTester(100, 5180, true)) {
-      final Appenderator appenderator = tester.getAppenderator();
-      appenderator.startJob();
-      appenderator.add(IDENTIFIERS.get(0), createInputRow("2000", "foo", 1), null);
-    }
+    assertThrows(RuntimeException.class, () -> {
+      try (final ClosedSegmensSinksBatchAppenderatorTester tester =
+          new ClosedSegmensSinksBatchAppenderatorTester(100, 5180, true)) {
+        final Appenderator appenderator = tester.getAppenderator();
+        appenderator.startJob();
+        appenderator.add(IDENTIFIERS.get(0), createInputRow("2000", "foo", 1), null);
+      }
+    });
   }
 
   @Test
@@ -368,13 +375,13 @@ public class ClosedSegmentsSinksBatchAppenderatorTest extends InitializedNullHan
       appenderator.add(IDENTIFIERS.get(0), createInputRow("2000", "foo", 1), null);
 
       // Expected 0 since we persisted after the add
-      Assert.assertEquals(
+      Assertions.assertEquals(
           0,
           ((BatchAppenderator) appenderator).getBytesCurrentlyInMemory()
       );
       appenderator.add(IDENTIFIERS.get(0), createInputRow("2000", "foo", 1), null);
 
-      Assert.assertEquals(
+      Assertions.assertEquals(
           0,
           ((BatchAppenderator) appenderator).getBytesCurrentlyInMemory()
       );
@@ -395,7 +402,7 @@ public class ClosedSegmentsSinksBatchAppenderatorTest extends InitializedNullHan
       int nullHandlingOverhead = NullHandling.sqlCompatible() ? 1 : 0;
       int currentInMemoryIndexSize = 182 + nullHandlingOverhead;
       int sinkSizeOverhead = BatchAppenderator.ROUGH_OVERHEAD_PER_SINK;
-      Assert.assertEquals(
+      Assertions.assertEquals(
           currentInMemoryIndexSize + sinkSizeOverhead,
           ((BatchAppenderator) appenderator).getBytesCurrentlyInMemory()
       );
@@ -403,8 +410,8 @@ public class ClosedSegmentsSinksBatchAppenderatorTest extends InitializedNullHan
       // Close with row still in memory (no persist)
       appenderator.close();
 
-      Assert.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
-      Assert.assertEquals(0, ((BatchAppenderator) appenderator).getBytesCurrentlyInMemory());
+      Assertions.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
+      Assertions.assertEquals(0, ((BatchAppenderator) appenderator).getBytesCurrentlyInMemory());
     }
   }
 
@@ -426,15 +433,15 @@ public class ClosedSegmentsSinksBatchAppenderatorTest extends InitializedNullHan
       int currentInMemoryIndexSize = 182 + nullHandlingOverhead;
       int sinkSizeOverhead = 2 * BatchAppenderator.ROUGH_OVERHEAD_PER_SINK;
       // currHydrant in the sink still has > 0 bytesInMemory since we do not persist yet
-      Assert.assertEquals(
+      Assertions.assertEquals(
           currentInMemoryIndexSize,
           ((BatchAppenderator) appenderator).getBytesInMemory(IDENTIFIERS.get(0))
       );
-      Assert.assertEquals(
+      Assertions.assertEquals(
           currentInMemoryIndexSize,
           ((BatchAppenderator) appenderator).getBytesInMemory(IDENTIFIERS.get(1))
       );
-      Assert.assertEquals(
+      Assertions.assertEquals(
           (2 * currentInMemoryIndexSize) + sinkSizeOverhead,
           ((BatchAppenderator) appenderator).getBytesCurrentlyInMemory()
       );
@@ -450,15 +457,15 @@ public class ClosedSegmentsSinksBatchAppenderatorTest extends InitializedNullHan
       currentInMemoryIndexSize = 0;
       // We are now over maxSizeInBytes after the add. Hence, we do a persist.
       // currHydrant and the sink has 0 bytesInMemory since we just did a persist
-      Assert.assertEquals(
+      Assertions.assertEquals(
           currentInMemoryIndexSize,
           ((BatchAppenderator) appenderator).getBytesInMemory(IDENTIFIERS.get(0))
       );
-      Assert.assertEquals(
+      Assertions.assertEquals(
           currentInMemoryIndexSize,
           ((BatchAppenderator) appenderator).getBytesInMemory(IDENTIFIERS.get(1))
       );
-      Assert.assertEquals(
+      Assertions.assertEquals(
           currentInMemoryIndexSize,
           ((BatchAppenderator) appenderator).getBytesCurrentlyInMemory()
       );
@@ -467,32 +474,32 @@ public class ClosedSegmentsSinksBatchAppenderatorTest extends InitializedNullHan
       appenderator.add(IDENTIFIERS.get(0), createInputRow("2000", "bob", 1), null);
       // currHydrant in the sink still has > 0 bytesInMemory since we do not persist yet
       currentInMemoryIndexSize = 182 + nullHandlingOverhead;
-      Assert.assertEquals(
+      Assertions.assertEquals(
           currentInMemoryIndexSize,
           ((BatchAppenderator) appenderator).getBytesInMemory(IDENTIFIERS.get(0))
       );
-      Assert.assertEquals(
+      Assertions.assertEquals(
           0,
           ((BatchAppenderator) appenderator).getBytesInMemory(IDENTIFIERS.get(1))
       );
       // only one sink so far:
       sinkSizeOverhead = BatchAppenderator.ROUGH_OVERHEAD_PER_SINK;
-      Assert.assertEquals(
+      Assertions.assertEquals(
           currentInMemoryIndexSize + sinkSizeOverhead,
           ((BatchAppenderator) appenderator).getBytesCurrentlyInMemory()
       );
       // Now add a single row to sink 1
       appenderator.add(IDENTIFIERS.get(1), createInputRow("2000", "bob", 1), null);
-      Assert.assertEquals(
+      Assertions.assertEquals(
           currentInMemoryIndexSize,
           ((BatchAppenderator) appenderator).getBytesInMemory(IDENTIFIERS.get(0))
       );
-      Assert.assertEquals(
+      Assertions.assertEquals(
           currentInMemoryIndexSize,
           ((BatchAppenderator) appenderator).getBytesInMemory(IDENTIFIERS.get(1))
       );
       sinkSizeOverhead += BatchAppenderator.ROUGH_OVERHEAD_PER_SINK;
-      Assert.assertEquals(
+      Assertions.assertEquals(
           (2 * currentInMemoryIndexSize) + sinkSizeOverhead,
           ((BatchAppenderator) appenderator).getBytesCurrentlyInMemory()
       );
@@ -508,24 +515,24 @@ public class ClosedSegmentsSinksBatchAppenderatorTest extends InitializedNullHan
       currentInMemoryIndexSize = 0;
       // We are now over maxSizeInBytes after the add. Hence, we do a persist.
       // currHydrant in the sink has 0 bytesInMemory since we just did a persist
-      Assert.assertEquals(
+      Assertions.assertEquals(
           currentInMemoryIndexSize,
           ((BatchAppenderator) appenderator).getBytesInMemory(IDENTIFIERS.get(0))
       );
-      Assert.assertEquals(
+      Assertions.assertEquals(
           currentInMemoryIndexSize,
           ((BatchAppenderator) appenderator).getBytesInMemory(IDENTIFIERS.get(1))
       );
       // Mapped index size is the memory still needed after we persisted indexes. Note that the segments have
       // 1 dimension columns, 2 metric column, 1 time column. However, we have two indexes now from the two pervious
       // persists.
-      Assert.assertEquals(
+      Assertions.assertEquals(
           currentInMemoryIndexSize,
           ((BatchAppenderator) appenderator).getBytesCurrentlyInMemory()
       );
       appenderator.close();
-      Assert.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
-      Assert.assertEquals(0, ((BatchAppenderator) appenderator).getBytesCurrentlyInMemory());
+      Assertions.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
+      Assertions.assertEquals(0, ((BatchAppenderator) appenderator).getBytesCurrentlyInMemory());
     }
   }
 
@@ -536,29 +543,29 @@ public class ClosedSegmentsSinksBatchAppenderatorTest extends InitializedNullHan
              new ClosedSegmensSinksBatchAppenderatorTester(100, -1, true)) {
       final Appenderator appenderator = tester.getAppenderator();
 
-      Assert.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
+      Assertions.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
       appenderator.startJob();
-      Assert.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
+      Assertions.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
       appenderator.add(IDENTIFIERS.get(0), createInputRow("2000", "foo", 1), null);
       //we still calculate the size even when ignoring it to make persist decision
       int nullHandlingOverhead = NullHandling.sqlCompatible() ? 1 : 0;
-      Assert.assertEquals(
+      Assertions.assertEquals(
           182 + nullHandlingOverhead,
           ((BatchAppenderator) appenderator).getBytesInMemory(IDENTIFIERS.get(0))
       );
-      Assert.assertEquals(1, ((BatchAppenderator) appenderator).getRowsInMemory());
+      Assertions.assertEquals(1, ((BatchAppenderator) appenderator).getRowsInMemory());
       appenderator.add(IDENTIFIERS.get(1), createInputRow("2000", "bar", 1), null);
 
       // we added two rows only, and we told that maxSizeInBytes should be ignored, so it should not have been
       // persisted:
       int sinkSizeOverhead = 2 * BatchAppenderator.ROUGH_OVERHEAD_PER_SINK;
-      Assert.assertEquals(
+      Assertions.assertEquals(
           (364 + 2 * nullHandlingOverhead) + sinkSizeOverhead,
           ((BatchAppenderator) appenderator).getBytesCurrentlyInMemory()
       );
-      Assert.assertEquals(2, ((BatchAppenderator) appenderator).getRowsInMemory());
+      Assertions.assertEquals(2, ((BatchAppenderator) appenderator).getRowsInMemory());
       appenderator.close();
-      Assert.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
+      Assertions.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
     }
   }
 
@@ -568,29 +575,29 @@ public class ClosedSegmentsSinksBatchAppenderatorTest extends InitializedNullHan
     try (final ClosedSegmensSinksBatchAppenderatorTester tester = new ClosedSegmensSinksBatchAppenderatorTester(3, true)) {
       final Appenderator appenderator = tester.getAppenderator();
 
-      Assert.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
+      Assertions.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
       appenderator.startJob();
-      Assert.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
+      Assertions.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
       appenderator.add(IDENTIFIERS.get(0), createInputRow("2000", "foo", 1), null);
-      Assert.assertEquals(1, ((BatchAppenderator) appenderator).getRowsInMemory());
+      Assertions.assertEquals(1, ((BatchAppenderator) appenderator).getRowsInMemory());
       appenderator.add(IDENTIFIERS.get(1), createInputRow("2000", "bar", 1), null);
-      Assert.assertEquals(2, ((BatchAppenderator) appenderator).getRowsInMemory());
+      Assertions.assertEquals(2, ((BatchAppenderator) appenderator).getRowsInMemory());
       appenderator.add(IDENTIFIERS.get(1), createInputRow("2000", "bar", 1), null);
-      Assert.assertEquals(2, ((BatchAppenderator) appenderator).getRowsInMemory());
+      Assertions.assertEquals(2, ((BatchAppenderator) appenderator).getRowsInMemory());
       // no persist since last add was for a dup record
       appenderator.add(IDENTIFIERS.get(1), createInputRow("2000", "bat", 1), null);
       // persist expected ^ (3) rows added
-      Assert.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
+      Assertions.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
 
       appenderator.add(IDENTIFIERS.get(0), createInputRow("2000", "baz", 1), null);
-      Assert.assertEquals(1, ((BatchAppenderator) appenderator).getRowsInMemory());
+      Assertions.assertEquals(1, ((BatchAppenderator) appenderator).getRowsInMemory());
       appenderator.add(IDENTIFIERS.get(1), createInputRow("2000", "qux", 1), null);
-      Assert.assertEquals(2, ((BatchAppenderator) appenderator).getRowsInMemory());
+      Assertions.assertEquals(2, ((BatchAppenderator) appenderator).getRowsInMemory());
       appenderator.add(IDENTIFIERS.get(0), createInputRow("2000", "bob", 1), null);
       // persist expected ^ (3) rows added
-      Assert.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
-      Assert.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
-      Assert.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
+      Assertions.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
+      Assertions.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
+      Assertions.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
       appenderator.close();
     }
   }
@@ -601,9 +608,9 @@ public class ClosedSegmentsSinksBatchAppenderatorTest extends InitializedNullHan
     try (final ClosedSegmensSinksBatchAppenderatorTester tester = new ClosedSegmensSinksBatchAppenderatorTester(1, false)) {
       final Appenderator appenderator = tester.getAppenderator();
 
-      Assert.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
+      Assertions.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
       appenderator.startJob();
-      Assert.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
+      Assertions.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
       appenderator.add(IDENTIFIERS.get(0), createInputRow("2000", "foo", 1), null);
       appenderator.add(IDENTIFIERS.get(0), createInputRow("2000", "foo2", 1), null);
       appenderator.add(IDENTIFIERS.get(0), createInputRow("2000", "foo3", 1), null);
@@ -616,14 +623,14 @@ public class ClosedSegmentsSinksBatchAppenderatorTest extends InitializedNullHan
           null,
           false
       ).get();
-      Assert.assertEquals(
+      Assertions.assertEquals(
           IDENTIFIERS.subList(0, 1),
           Lists.transform(
               segmentsAndCommitMetadata.getSegments(),
               SegmentIdWithShardSpec::fromDataSegment
           ).stream().sorted().collect(Collectors.toList())
       );
-      Assert.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
+      Assertions.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
       appenderator.close();
     }
   }
@@ -634,56 +641,56 @@ public class ClosedSegmentsSinksBatchAppenderatorTest extends InitializedNullHan
     try (final ClosedSegmensSinksBatchAppenderatorTester tester = new ClosedSegmensSinksBatchAppenderatorTester(3, true)) {
       final Appenderator appenderator = tester.getAppenderator();
 
-      Assert.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
+      Assertions.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
       appenderator.startJob();
-      Assert.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
+      Assertions.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
       Appenderator.AppenderatorAddResult addResult0 =
           appenderator.add(IDENTIFIERS.get(0), createInputRow("2000", "foo", 1), null);
-      Assert.assertEquals(1, ((BatchAppenderator) appenderator).getRowsInMemory());
-      Assert.assertEquals(1, addResult0.getNumRowsInSegment());
+      Assertions.assertEquals(1, ((BatchAppenderator) appenderator).getRowsInMemory());
+      Assertions.assertEquals(1, addResult0.getNumRowsInSegment());
 
       Appenderator.AppenderatorAddResult addResult1 =
           appenderator.add(IDENTIFIERS.get(1), createInputRow("2000", "bar", 1), null);
-      Assert.assertEquals(2, ((BatchAppenderator) appenderator).getRowsInMemory());
-      Assert.assertEquals(1, addResult1.getNumRowsInSegment());
+      Assertions.assertEquals(2, ((BatchAppenderator) appenderator).getRowsInMemory());
+      Assertions.assertEquals(1, addResult1.getNumRowsInSegment());
 
       addResult1 = // dup!
           appenderator.add(IDENTIFIERS.get(1), createInputRow("2000", "bar", 1), null);
-      Assert.assertEquals(2, ((BatchAppenderator) appenderator).getRowsInMemory());
-      Assert.assertEquals(1, addResult1.getNumRowsInSegment()); // dup record does not count
+      Assertions.assertEquals(2, ((BatchAppenderator) appenderator).getRowsInMemory());
+      Assertions.assertEquals(1, addResult1.getNumRowsInSegment()); // dup record does not count
       // no persist since last add was for a dup record
 
       addResult1 =
           appenderator.add(IDENTIFIERS.get(1), createInputRow("2000", "bat", 1), null);
-      Assert.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
-      Assert.assertEquals(2, addResult1.getNumRowsInSegment());
+      Assertions.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
+      Assertions.assertEquals(2, addResult1.getNumRowsInSegment());
       // persist expected ^ (3) rows added
 
       // total rows per segment ought to be preserved even when sinks are removed from memory:
       addResult1 =
           appenderator.add(IDENTIFIERS.get(1), createInputRow("2000", "bat", 1), null);
-      Assert.assertEquals(1, ((BatchAppenderator) appenderator).getRowsInMemory());
-      Assert.assertEquals(3, addResult1.getNumRowsInSegment());
+      Assertions.assertEquals(1, ((BatchAppenderator) appenderator).getRowsInMemory());
+      Assertions.assertEquals(3, addResult1.getNumRowsInSegment());
 
       addResult0 =
           appenderator.add(IDENTIFIERS.get(0), createInputRow("2000", "baz", 1), null);
-      Assert.assertEquals(2, ((BatchAppenderator) appenderator).getRowsInMemory());
-      Assert.assertEquals(2, addResult0.getNumRowsInSegment());
+      Assertions.assertEquals(2, ((BatchAppenderator) appenderator).getRowsInMemory());
+      Assertions.assertEquals(2, addResult0.getNumRowsInSegment());
 
       addResult1 =
           appenderator.add(IDENTIFIERS.get(1), createInputRow("2000", "qux", 1), null);
-      Assert.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
-      Assert.assertEquals(4, addResult1.getNumRowsInSegment());
+      Assertions.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
+      Assertions.assertEquals(4, addResult1.getNumRowsInSegment());
       // persist expected ^ (3) rows added
 
       addResult0 =
           appenderator.add(IDENTIFIERS.get(0), createInputRow("2000", "bob", 1), null);
-      Assert.assertEquals(1, ((BatchAppenderator) appenderator).getRowsInMemory());
-      Assert.assertEquals(3, addResult0.getNumRowsInSegment());
+      Assertions.assertEquals(1, ((BatchAppenderator) appenderator).getRowsInMemory());
+      Assertions.assertEquals(3, addResult0.getNumRowsInSegment());
 
       appenderator.close();
 
-      Assert.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
+      Assertions.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
     }
   }
 
@@ -699,29 +706,29 @@ public class ClosedSegmentsSinksBatchAppenderatorTest extends InitializedNullHan
     appenderator.add(IDENTIFIERS.get(0), createInputRow("2000", "foo", 1), null);
     appenderator.add(IDENTIFIERS.get(0), createInputRow("2000", "bar", 2), null);
 
-    Assert.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
+    Assertions.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
 
     appenderator.add(IDENTIFIERS.get(1), createInputRow("2000", "baz", 3), null);
     appenderator.add(IDENTIFIERS.get(1), createInputRow("2000", "qux", 4), null);
 
-    Assert.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
+    Assertions.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
 
     appenderator.add(IDENTIFIERS.get(2), createInputRow("2001", "bob", 5), null);
-    Assert.assertEquals(1, ((BatchAppenderator) appenderator).getRowsInMemory());
+    Assertions.assertEquals(1, ((BatchAppenderator) appenderator).getRowsInMemory());
     appenderator.persistAll(null).get();
 
-    Assert.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
+    Assertions.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
 
     List<File> segmentPaths = ((BatchAppenderator) appenderator).getPersistedidentifierPaths();
-    Assert.assertNotNull(segmentPaths);
-    Assert.assertEquals(3, segmentPaths.size());
+    Assertions.assertNotNull(segmentPaths);
+    Assertions.assertEquals(3, segmentPaths.size());
 
 
     appenderator.push(IDENTIFIERS, null, false).get();
 
     segmentPaths = ((BatchAppenderator) appenderator).getPersistedidentifierPaths();
-    Assert.assertNotNull(segmentPaths);
-    Assert.assertEquals(0, segmentPaths.size());
+    Assertions.assertNotNull(segmentPaths);
+    Assertions.assertEquals(0, segmentPaths.size());
 
     appenderator.close();
 
@@ -737,73 +744,74 @@ public class ClosedSegmentsSinksBatchAppenderatorTest extends InitializedNullHan
 
     appenderator.add(IDENTIFIERS.get(0), createInputRow("2000", "foo", 1), null);
     appenderator.add(IDENTIFIERS.get(0), createInputRow("2000", "bar", 2), null);
-    Assert.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
-    Assert.assertEquals(2, appenderator.getTotalRowCount());
+    Assertions.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
+    Assertions.assertEquals(2, appenderator.getTotalRowCount());
 
     appenderator.add(IDENTIFIERS.get(1), createInputRow("2000", "baz", 3), null);
     appenderator.add(IDENTIFIERS.get(1), createInputRow("2000", "qux", 4), null);
-    Assert.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
-    Assert.assertEquals(4, appenderator.getTotalRowCount());
+    Assertions.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
+    Assertions.assertEquals(4, appenderator.getTotalRowCount());
 
     appenderator.add(IDENTIFIERS.get(2), createInputRow("2001", "bob", 5), null);
-    Assert.assertEquals(1, ((BatchAppenderator) appenderator).getRowsInMemory());
+    Assertions.assertEquals(1, ((BatchAppenderator) appenderator).getRowsInMemory());
     appenderator.persistAll(null).get();
-    Assert.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
-    Assert.assertEquals(5, appenderator.getTotalRowCount());
+    Assertions.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
+    Assertions.assertEquals(5, appenderator.getTotalRowCount());
 
     List<File> segmentPaths = ((BatchAppenderator) appenderator).getPersistedidentifierPaths();
-    Assert.assertNotNull(segmentPaths);
-    Assert.assertEquals(3, segmentPaths.size());
+    Assertions.assertNotNull(segmentPaths);
+    Assertions.assertEquals(3, segmentPaths.size());
 
     appenderator.close();
 
     segmentPaths = ((BatchAppenderator) appenderator).getPersistedidentifierPaths();
-    Assert.assertNotNull(segmentPaths);
-    Assert.assertEquals(0, segmentPaths.size());
+    Assertions.assertNotNull(segmentPaths);
+    Assertions.assertEquals(0, segmentPaths.size());
 
-    Assert.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
-    Assert.assertEquals(0, appenderator.getTotalRowCount());
+    Assertions.assertEquals(0, ((BatchAppenderator) appenderator).getRowsInMemory());
+    Assertions.assertEquals(0, appenderator.getTotalRowCount());
 
   }
 
 
-  @Test(timeout = 5000L)
+  @Test
+  @Timeout(value = 5000L, unit = TimeUnit.MILLISECONDS)
   public void testTotalRowCount() throws Exception
   {
     try (final ClosedSegmensSinksBatchAppenderatorTester tester = new ClosedSegmensSinksBatchAppenderatorTester(3, true)) {
       final Appenderator appenderator = tester.getAppenderator();
 
-      Assert.assertEquals(0, appenderator.getTotalRowCount());
+      Assertions.assertEquals(0, appenderator.getTotalRowCount());
       appenderator.startJob();
-      Assert.assertEquals(0, appenderator.getTotalRowCount());
+      Assertions.assertEquals(0, appenderator.getTotalRowCount());
       appenderator.add(IDENTIFIERS.get(0), createInputRow("2000", "foo", 1), null);
-      Assert.assertEquals(1, appenderator.getTotalRowCount());
+      Assertions.assertEquals(1, appenderator.getTotalRowCount());
       appenderator.add(IDENTIFIERS.get(1), createInputRow("2000", "bar", 1), null);
-      Assert.assertEquals(2, appenderator.getTotalRowCount());
+      Assertions.assertEquals(2, appenderator.getTotalRowCount());
 
       appenderator.persistAll(null).get();
-      Assert.assertEquals(2, appenderator.getTotalRowCount());
+      Assertions.assertEquals(2, appenderator.getTotalRowCount());
       appenderator.drop(IDENTIFIERS.get(0)).get();
-      Assert.assertEquals(1, appenderator.getTotalRowCount());
+      Assertions.assertEquals(1, appenderator.getTotalRowCount());
       appenderator.drop(IDENTIFIERS.get(1)).get();
-      Assert.assertEquals(0, appenderator.getTotalRowCount());
+      Assertions.assertEquals(0, appenderator.getTotalRowCount());
 
       appenderator.add(IDENTIFIERS.get(2), createInputRow("2001", "bar", 1), null);
-      Assert.assertEquals(1, appenderator.getTotalRowCount());
+      Assertions.assertEquals(1, appenderator.getTotalRowCount());
       appenderator.add(IDENTIFIERS.get(2), createInputRow("2001", "baz", 1), null);
-      Assert.assertEquals(2, appenderator.getTotalRowCount());
+      Assertions.assertEquals(2, appenderator.getTotalRowCount());
       appenderator.add(IDENTIFIERS.get(2), createInputRow("2001", "qux", 1), null);
-      Assert.assertEquals(3, appenderator.getTotalRowCount());
+      Assertions.assertEquals(3, appenderator.getTotalRowCount());
       appenderator.add(IDENTIFIERS.get(2), createInputRow("2001", "bob", 1), null);
-      Assert.assertEquals(4, appenderator.getTotalRowCount());
+      Assertions.assertEquals(4, appenderator.getTotalRowCount());
 
       appenderator.persistAll(null).get();
-      Assert.assertEquals(4, appenderator.getTotalRowCount());
+      Assertions.assertEquals(4, appenderator.getTotalRowCount());
       appenderator.drop(IDENTIFIERS.get(2)).get();
-      Assert.assertEquals(0, appenderator.getTotalRowCount());
+      Assertions.assertEquals(0, appenderator.getTotalRowCount());
 
       appenderator.close();
-      Assert.assertEquals(0, appenderator.getTotalRowCount());
+      Assertions.assertEquals(0, appenderator.getTotalRowCount());
     }
   }
 
@@ -823,14 +831,15 @@ public class ClosedSegmentsSinksBatchAppenderatorTest extends InitializedNullHan
       ), null);
       appenderator.add(IDENTIFIERS.get(0), createInputRow("2000", "foo", 1), null);
 
-      Assert.assertEquals(1, rowIngestionMeters.getProcessed());
-      Assert.assertEquals(1, rowIngestionMeters.getProcessedWithError());
-      Assert.assertEquals(0, rowIngestionMeters.getUnparseable());
-      Assert.assertEquals(0, rowIngestionMeters.getThrownAway());
+      Assertions.assertEquals(1, rowIngestionMeters.getProcessed());
+      Assertions.assertEquals(1, rowIngestionMeters.getProcessedWithError());
+      Assertions.assertEquals(0, rowIngestionMeters.getUnparseable());
+      Assertions.assertEquals(0, rowIngestionMeters.getThrownAway());
     }
   }
 
-  @Test(timeout = 10000L)
+  @Test
+  @Timeout(value = 10000L, unit = TimeUnit.MILLISECONDS)
   public void testPushContract() throws Exception
   {
     final RowIngestionMeters rowIngestionMeters = new SimpleRowIngestionMeters();
@@ -854,7 +863,7 @@ public class ClosedSegmentsSinksBatchAppenderatorTest extends InitializedNullHan
       ).get();
 
       // only one segment must have been pushed:
-      Assert.assertEquals(
+      Assertions.assertEquals(
           Collections.singletonList(IDENTIFIERS.get(0)),
           Lists.transform(
               segmentsAndCommitMetadata.getSegments(),
@@ -862,7 +871,7 @@ public class ClosedSegmentsSinksBatchAppenderatorTest extends InitializedNullHan
           ).stream().sorted().collect(Collectors.toList())
       );
 
-      Assert.assertEquals(
+      Assertions.assertEquals(
           tester.getPushedSegments().stream().sorted().collect(Collectors.toList()),
           segmentsAndCommitMetadata.getSegments().stream().sorted().collect(Collectors.toList())
       );
@@ -870,7 +879,7 @@ public class ClosedSegmentsSinksBatchAppenderatorTest extends InitializedNullHan
       appenderator.drop(IDENTIFIERS.get(0));
 
       // and the segment that was not pushed should still be active
-      Assert.assertEquals(
+      Assertions.assertEquals(
           Collections.singletonList(IDENTIFIERS.get(1)),
           appenderator.getSegments()
       );
@@ -879,7 +888,8 @@ public class ClosedSegmentsSinksBatchAppenderatorTest extends InitializedNullHan
     }
   }
 
-  @Test(timeout = 5000L)
+  @Test
+  @Timeout(value = 5000L, unit = TimeUnit.MILLISECONDS)
   public void testCloseContract() throws Exception
   {
     final RowIngestionMeters rowIngestionMeters = new SimpleRowIngestionMeters();
@@ -913,18 +923,18 @@ public class ClosedSegmentsSinksBatchAppenderatorTest extends InitializedNullHan
       // close should wait for all pushes and persists to end:
       appenderator.close();
 
-      Assert.assertTrue(!firstFuture.isCancelled());
-      Assert.assertTrue(!secondFuture.isCancelled());
+      Assertions.assertTrue(!firstFuture.isCancelled());
+      Assertions.assertTrue(!secondFuture.isCancelled());
 
-      Assert.assertTrue(firstFuture.isDone());
-      Assert.assertTrue(secondFuture.isDone());
+      Assertions.assertTrue(firstFuture.isDone());
+      Assertions.assertTrue(secondFuture.isDone());
 
       final SegmentsAndCommitMetadata segmentsAndCommitMetadataForFirstFuture = firstFuture.get();
       final SegmentsAndCommitMetadata segmentsAndCommitMetadataForSecondFuture = secondFuture.get();
 
       // all segments must have been pushed:
-      Assert.assertEquals(segmentsAndCommitMetadataForFirstFuture.getSegments().size(), 1);
-      Assert.assertEquals(segmentsAndCommitMetadataForSecondFuture.getSegments().size(), 1);
+      Assertions.assertEquals(segmentsAndCommitMetadataForFirstFuture.getSegments().size(), 1);
+      Assertions.assertEquals(segmentsAndCommitMetadataForSecondFuture.getSegments().size(), 1);
 
     }
   }

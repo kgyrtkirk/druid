@@ -22,11 +22,10 @@ package org.apache.druid.data.input;
 import org.apache.druid.data.input.impl.ByteEntity;
 import org.apache.druid.data.input.impl.FileEntity;
 import org.apache.druid.data.input.impl.InputStatsImpl;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -37,12 +36,12 @@ import java.util.Arrays;
 
 public class BytesCountingInputEntityTest
 {
-  @Rule
-  public TemporaryFolder folder = new TemporaryFolder();
+  @TempDir
+  public File folder;
 
   private InputStats inputStats;
 
-  @Before
+  @BeforeEach
   public void setup()
   {
     inputStats = new InputStatsImpl();
@@ -52,19 +51,19 @@ public class BytesCountingInputEntityTest
   public void testFetch() throws IOException
   {
     final int fileSize = 200;
-    final File sourceFile = folder.newFile("testWithFileEntity");
+    final File sourceFile = File.createTempFile("testWithFileEntity", null, folder);
     writeBytesToFile(sourceFile, fileSize);
 
     final BytesCountingInputEntity inputEntity = new BytesCountingInputEntity(new FileEntity(sourceFile), inputStats);
-    inputEntity.fetch(folder.newFolder(), new byte[50]);
-    Assert.assertEquals(fileSize, inputStats.getProcessedBytes());
+    inputEntity.fetch(newFolder(folder, "junit"), new byte[50]);
+    Assertions.assertEquals(fileSize, inputStats.getProcessedBytes());
   }
 
   @Test
   public void testFetchFromPartiallyReadFile() throws IOException
   {
     final int fileSize = 200;
-    final File sourceFile = folder.newFile("testWithFileEntity");
+    final File sourceFile = File.createTempFile("testWithFileEntity", null, folder);
     writeBytesToFile(sourceFile, fileSize);
 
     final int bufferSize = 50;
@@ -73,17 +72,17 @@ public class BytesCountingInputEntityTest
     // Read the file partially
     final BytesCountingInputEntity inputEntity = new BytesCountingInputEntity(new FileEntity(sourceFile), inputStats);
     inputEntity.open().read(intermediateBuffer);
-    Assert.assertEquals(bufferSize, inputStats.getProcessedBytes());
+    Assertions.assertEquals(bufferSize, inputStats.getProcessedBytes());
 
     // Read the whole file again
-    inputEntity.fetch(folder.newFolder(), intermediateBuffer);
-    Assert.assertEquals(fileSize + bufferSize, inputStats.getProcessedBytes());
+    inputEntity.fetch(newFolder(folder, "junit"), intermediateBuffer);
+    Assertions.assertEquals(fileSize + bufferSize, inputStats.getProcessedBytes());
   }
 
   @Test
   public void testFetchFromDirectory() throws IOException
   {
-    final File sourceDir = folder.newFolder("testWithDirectory");
+    final File sourceDir = newFolder(folder, "testWithDirectory");
 
     final int fileSize1 = 100;
     final File sourceFile1 = new File(sourceDir, "file1");
@@ -94,8 +93,8 @@ public class BytesCountingInputEntityTest
     writeBytesToFile(sourceFile2, fileSize2);
 
     final BytesCountingInputEntity inputEntity = new BytesCountingInputEntity(new FileEntity(sourceDir), inputStats);
-    inputEntity.fetch(folder.newFolder(), new byte[1000]);
-    Assert.assertEquals(fileSize1 + fileSize2, inputStats.getProcessedBytes());
+    inputEntity.fetch(newFolder(folder, "junit"), new byte[1000]);
+    Assertions.assertEquals(fileSize1 + fileSize2, inputStats.getProcessedBytes());
   }
 
   @Test
@@ -108,7 +107,7 @@ public class BytesCountingInputEntityTest
         inputStats
     );
     inputEntity.open().read(new byte[200]);
-    Assert.assertEquals(entitySize, inputStats.getProcessedBytes());
+    Assertions.assertEquals(entitySize, inputStats.getProcessedBytes());
   }
 
   @Test
@@ -122,7 +121,7 @@ public class BytesCountingInputEntityTest
         inputStats
     );
     inputEntity.open().read(new byte[bufferSize]);
-    Assert.assertEquals(bufferSize, inputStats.getProcessedBytes());
+    Assertions.assertEquals(bufferSize, inputStats.getProcessedBytes());
   }
 
   private void writeBytesToFile(File sourceFile, int numBytes) throws IOException
@@ -140,6 +139,15 @@ public class BytesCountingInputEntityTest
     outputStreamWriter.write(chars);
     outputStreamWriter.flush();
     outputStreamWriter.close();
+  }
+
+  private static File newFolder(File root, String... subDirs) throws IOException {
+    String subFolder = String.join("/", subDirs);
+    File result = new File(root, subFolder);
+    if (!result.mkdirs()) {
+      throw new IOException("Couldn't create folders " + root);
+    }
+    return result;
   }
 
 }

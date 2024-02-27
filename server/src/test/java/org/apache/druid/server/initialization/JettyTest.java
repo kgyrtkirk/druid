@@ -55,11 +55,10 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.joda.time.Duration;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
@@ -96,8 +95,8 @@ import java.util.zip.GZIPOutputStream;
 
 public class JettyTest extends BaseJettyTest
 {
-  @Rule
-  public TemporaryFolder folder = new TemporaryFolder();
+  @TempDir
+  public File folder;
 
   private HttpClientConfig sslConfig;
 
@@ -119,9 +118,9 @@ public class JettyTest extends BaseJettyTest
     TLSServerConfig tlsConfig;
     try {
       File keyStore = new File(JettyTest.class.getClassLoader().getResource("server.jks").getFile());
-      Path tmpKeyStore = Files.copy(keyStore.toPath(), new File(folder.newFolder(), "server.jks").toPath());
+      Path tmpKeyStore = Files.copy(keyStore.toPath(), new File(newFolder(folder, "junit"), "server.jks").toPath());
       File trustStore = new File(JettyTest.class.getClassLoader().getResource("truststore.jks").getFile());
-      Path tmpTrustStore = Files.copy(trustStore.toPath(), new File(folder.newFolder(), "truststore.jks").toPath());
+      Path tmpTrustStore = Files.copy(trustStore.toPath(), new File(newFolder(folder, "junit"), "truststore.jks").toPath());
       PasswordProvider pp = () -> "druid123";
       tlsConfig = new TLSServerConfig()
       {
@@ -282,7 +281,7 @@ public class JettyTest extends BaseJettyTest
   }
 
   @Test
-  @Ignore // this test will deadlock if it hits an issue, so ignored by default
+  @Disabled // this test will deadlock if it hits an issue, so ignored by default
   public void testTimeouts() throws Exception
   {
     // test for request timeouts properly not locking up all threads
@@ -344,8 +343,8 @@ public class JettyTest extends BaseJettyTest
     final URL url = new URL("http://localhost:" + port + "/default");
     final HttpURLConnection get = (HttpURLConnection) url.openConnection();
     get.setRequestProperty("Accept-Encoding", "gzip");
-    Assert.assertEquals("gzip", get.getContentEncoding());
-    Assert.assertEquals(
+    Assertions.assertEquals("gzip", get.getContentEncoding());
+    Assertions.assertEquals(
         DEFAULT_RESPONSE_CONTENT,
         IOUtils.toString(new GZIPInputStream(get.getInputStream()), StandardCharsets.UTF_8)
     );
@@ -353,20 +352,20 @@ public class JettyTest extends BaseJettyTest
     final HttpURLConnection post = (HttpURLConnection) url.openConnection();
     post.setRequestProperty("Accept-Encoding", "gzip");
     post.setRequestMethod("POST");
-    Assert.assertEquals("gzip", post.getContentEncoding());
-    Assert.assertEquals(
+    Assertions.assertEquals("gzip", post.getContentEncoding());
+    Assertions.assertEquals(
         DEFAULT_RESPONSE_CONTENT,
         IOUtils.toString(new GZIPInputStream(post.getInputStream()), StandardCharsets.UTF_8)
     );
 
     final HttpURLConnection getNoGzip = (HttpURLConnection) url.openConnection();
-    Assert.assertNotEquals("gzip", getNoGzip.getContentEncoding());
-    Assert.assertEquals(DEFAULT_RESPONSE_CONTENT, IOUtils.toString(getNoGzip.getInputStream(), StandardCharsets.UTF_8));
+    Assertions.assertNotEquals("gzip", getNoGzip.getContentEncoding());
+    Assertions.assertEquals(DEFAULT_RESPONSE_CONTENT, IOUtils.toString(getNoGzip.getInputStream(), StandardCharsets.UTF_8));
 
     final HttpURLConnection postNoGzip = (HttpURLConnection) url.openConnection();
     postNoGzip.setRequestMethod("POST");
-    Assert.assertNotEquals("gzip", postNoGzip.getContentEncoding());
-    Assert.assertEquals(
+    Assertions.assertNotEquals("gzip", postNoGzip.getContentEncoding());
+    Assertions.assertEquals(
         DEFAULT_RESPONSE_CONTENT,
         IOUtils.toString(postNoGzip.getInputStream(), StandardCharsets.UTF_8)
     );
@@ -375,7 +374,7 @@ public class JettyTest extends BaseJettyTest
   // Tests that threads are not stuck when partial chunk is not finalized
   // https://bugs.eclipse.org/bugs/show_bug.cgi?id=424107
   @Test
-  @Ignore
+  @Disabled
   // above bug is not fixed in jetty for gzip encoding, and the chunk is still finalized instead of throwing exception.
   public void testChunkNotFinalized() throws Exception
   {
@@ -387,7 +386,7 @@ public class JettyTest extends BaseJettyTest
     try {
       StringWriter writer = new StringWriter();
       IOUtils.copy(go.get(), writer, "utf-8");
-      Assert.fail("Should have thrown Exception");
+      Assertions.fail("Should have thrown Exception");
     }
     catch (IOException e) {
       // Expected.
@@ -433,11 +432,11 @@ public class JettyTest extends BaseJettyTest
     URL url = new URL("http://localhost:" + port + "/default");
     HttpURLConnection get = (HttpURLConnection) url.openConnection();
     get.setRequestProperty(DummyAuthFilter.AUTH_HDR, DummyAuthFilter.SECRET_USER);
-    Assert.assertEquals(HttpServletResponse.SC_OK, get.getResponseCode());
+    Assertions.assertEquals(HttpServletResponse.SC_OK, get.getResponseCode());
 
     get = (HttpURLConnection) url.openConnection();
     get.setRequestProperty(DummyAuthFilter.AUTH_HDR, "hacker");
-    Assert.assertEquals(HttpServletResponse.SC_UNAUTHORIZED, get.getResponseCode());
+    Assertions.assertEquals(HttpServletResponse.SC_UNAUTHORIZED, get.getResponseCode());
   }
 
   @Test
@@ -451,7 +450,7 @@ public class JettyTest extends BaseJettyTest
     Request request = new Request(HttpMethod.POST, new URL("http://localhost:" + port + "/return"));
     request.setHeader("Content-Encoding", "gzip");
     request.setContent(MediaType.TEXT_PLAIN, out.toByteArray());
-    Assert.assertEquals(text, new String(IOUtils.toByteArray(client.go(
+    Assertions.assertEquals(text, new String(IOUtils.toByteArray(client.go(
         request,
         new InputStreamResponseHandler()
     ).get()), Charset.defaultCharset()));
@@ -473,17 +472,17 @@ public class JettyTest extends BaseJettyTest
     latchedRequestState.reset();
     waitForJettyServerModuleActiveConnectionsZero(jsm);
 
-    Assert.assertEquals(0, jsm.getActiveConnections());
+    Assertions.assertEquals(0, jsm.getActiveConnections());
     ListenableFuture<InputStream> go = client.go(
         request,
         new InputStreamResponseHandler()
     );
     latchedRequestState.clientWaitForServerToStartRequest();
-    Assert.assertEquals(1, jsm.getActiveConnections());
+    Assertions.assertEquals(1, jsm.getActiveConnections());
     latchedRequestState.clientReadyToFinishRequest();
     go.get();
     waitForJettyServerModuleActiveConnectionsZero(jsm);
-    Assert.assertEquals(0, jsm.getActiveConnections());
+    Assertions.assertEquals(0, jsm.getActiveConnections());
   }
 
   @Test
@@ -512,17 +511,17 @@ public class JettyTest extends BaseJettyTest
     latchedRequestState.reset();
 
     waitForJettyServerModuleActiveConnectionsZero(jsm);
-    Assert.assertEquals(0, jsm.getActiveConnections());
+    Assertions.assertEquals(0, jsm.getActiveConnections());
     ListenableFuture<InputStream> go = client.go(
         request,
         new InputStreamResponseHandler()
     );
     latchedRequestState.clientWaitForServerToStartRequest();
-    Assert.assertEquals(1, jsm.getActiveConnections());
+    Assertions.assertEquals(1, jsm.getActiveConnections());
     latchedRequestState.clientReadyToFinishRequest();
     go.get();
     waitForJettyServerModuleActiveConnectionsZero(jsm);
-    Assert.assertEquals(0, jsm.getActiveConnections());
+    Assertions.assertEquals(0, jsm.getActiveConnections());
   }
 
   @Test
@@ -539,7 +538,7 @@ public class JettyTest extends BaseJettyTest
     X509Certificate[] chain = new X509Certificate[]{mockX509Certificate};
 
     // The EndpointIdentificationAlgorithm should not be null as we set it to HTTPS earlier
-    Assert.assertNotNull(sslEngine.getSSLParameters().getEndpointIdentificationAlgorithm());
+    Assertions.assertNotNull(sslEngine.getSSLParameters().getEndpointIdentificationAlgorithm());
 
     CustomCheckX509TrustManager customCheckX509TrustManager = new CustomCheckX509TrustManager(
         mockX509ExtendedTrustManager,
@@ -560,14 +559,14 @@ public class JettyTest extends BaseJettyTest
     // The EndpointIdentificationAlgorithm should be null or empty Stringas the CustomCheckX509TrustManager
     // has validateServerHostnames set to false
     String endpointIdentificationAlgorithm = transformedSSLEngine.getSSLParameters().getEndpointIdentificationAlgorithm();
-    Assert.assertTrue(endpointIdentificationAlgorithm == null || endpointIdentificationAlgorithm.isEmpty());
+    Assertions.assertTrue(endpointIdentificationAlgorithm == null || endpointIdentificationAlgorithm.isEmpty());
   }
 
   @Test
   public void testJettyErrorHandlerWithFilter()
   {
     // Response filter is disabled by default hence we show servlet information
-    Assert.assertTrue(server.getErrorHandler().isShowServlet());
+    Assertions.assertTrue(server.getErrorHandler().isShowServlet());
   }
 
   private void waitForJettyServerModuleActiveConnectionsZero(JettyServerModule jsm) throws InterruptedException
@@ -582,5 +581,14 @@ public class JettyTest extends BaseJettyTest
     if (jsm.getActiveConnections() > 0) {
       throw new RuntimeException("Connections greater than 0. activeConnections=" + jsm.getActiveConnections() + " port=" + port);
     }
+  }
+
+  private static File newFolder(File root, String... subDirs) throws IOException {
+    String subFolder = String.join("/", subDirs);
+    File result = new File(root, subFolder);
+    if (!result.mkdirs()) {
+      throw new IOException("Couldn't create folders " + root);
+    }
+    return result;
   }
 }

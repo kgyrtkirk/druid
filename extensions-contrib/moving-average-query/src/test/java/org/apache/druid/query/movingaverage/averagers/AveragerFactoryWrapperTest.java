@@ -21,7 +21,6 @@ package org.apache.druid.query.movingaverage.averagers;
 
 import org.apache.druid.query.movingaverage.AveragerFactoryWrapper;
 import org.junit.Assert;
-import org.junit.Test;
 
 public class AveragerFactoryWrapperTest
 {

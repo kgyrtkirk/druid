@@ -23,7 +23,6 @@ import com.google.protobuf.Descriptors;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.apache.druid.java.util.common.parsers.ParseException;
 import org.junit.Rule;
-import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 public class FileBasedProtobufBytesDecoderTest

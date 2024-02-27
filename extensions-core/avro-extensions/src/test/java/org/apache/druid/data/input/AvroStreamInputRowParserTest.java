@@ -47,7 +47,6 @@ import org.apache.druid.java.util.common.parsers.JSONPathSpec;
 import org.apache.druid.java.util.common.parsers.ParseException;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Test;
 import org.schemarepo.InMemoryRepository;
 import org.schemarepo.Repository;
 import org.schemarepo.SchemaValidationException;

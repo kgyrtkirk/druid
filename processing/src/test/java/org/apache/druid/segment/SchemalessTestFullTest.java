@@ -61,9 +61,8 @@ import org.apache.druid.segment.writeout.OffHeapMemorySegmentWriteOutMediumFacto
 import org.apache.druid.segment.writeout.SegmentWriteOutMediumFactory;
 import org.apache.druid.segment.writeout.TmpFileSegmentWriteOutMediumFactory;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -73,10 +72,8 @@ import java.util.Map;
 
 /**
  */
-@RunWith(Parameterized.class)
 public class SchemalessTestFullTest extends InitializedNullHandlingTest
 {
-  @Parameterized.Parameters
   public static Collection<?> constructorFeeder()
   {
     return ImmutableList.of(
@@ -88,7 +85,7 @@ public class SchemalessTestFullTest extends InitializedNullHandlingTest
   final double UNIQUES_2 = 2.000977198748901d;
   final double UNIQUES_1 = 1.0002442201269182d;
 
-  final SchemalessIndexTest schemalessIndexTest;
+  SchemalessIndexTest schemalessIndexTest;
   final String dataSource = "testing";
   final Granularity ALL_GRAN = Granularities.ALL;
   final String marketDimension = "market";
@@ -112,14 +109,16 @@ public class SchemalessTestFullTest extends InitializedNullHandlingTest
       Collections.singletonList(Intervals.of("1970-01-01T00:00:00.000Z/2020-01-01T00:00:00.000Z"))
   );
 
-  public SchemalessTestFullTest(SegmentWriteOutMediumFactory segmentWriteOutMediumFactory)
+  public void initSchemalessTestFullTest(SegmentWriteOutMediumFactory segmentWriteOutMediumFactory)
   {
     schemalessIndexTest = new SchemalessIndexTest(segmentWriteOutMediumFactory);
   }
 
-  @Test
-  public void testCompleteIntersectingSchemas()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest
+  public void testCompleteIntersectingSchemas(SegmentWriteOutMediumFactory segmentWriteOutMediumFactory)
   {
+    initSchemalessTestFullTest(segmentWriteOutMediumFactory);
     List<Result<TimeseriesResultValue>> expectedTimeSeriesResults = Collections.singletonList(
         new Result<>(
             DateTimes.of("2011-01-12T00:00:00.000Z"),
@@ -252,9 +251,11 @@ public class SchemalessTestFullTest extends InitializedNullHandlingTest
     );
   }
 
-  @Test
-  public void testEmptyStrings()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest
+  public void testEmptyStrings(SegmentWriteOutMediumFactory segmentWriteOutMediumFactory)
   {
+    initSchemalessTestFullTest(segmentWriteOutMediumFactory);
     List<Result<TimeseriesResultValue>> expectedTimeSeriesResults = Collections.singletonList(
         new Result<>(
             DateTimes.of("2011-01-12T00:00:00.000Z"),
@@ -389,9 +390,11 @@ public class SchemalessTestFullTest extends InitializedNullHandlingTest
   }
 
 
-  @Test
-  public void testNonIntersectingSchemas()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest
+  public void testNonIntersectingSchemas(SegmentWriteOutMediumFactory segmentWriteOutMediumFactory)
   {
+    initSchemalessTestFullTest(segmentWriteOutMediumFactory);
     List<Result<TimeseriesResultValue>> expectedTimeseriesResults = Collections.singletonList(
         new Result<>(
             DateTimes.of("2011-01-12T00:00:00.000Z"),
@@ -521,9 +524,11 @@ public class SchemalessTestFullTest extends InitializedNullHandlingTest
     );
   }
 
-  @Test
-  public void testPartialIntersectingSchemas()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest
+  public void testPartialIntersectingSchemas(SegmentWriteOutMediumFactory segmentWriteOutMediumFactory)
   {
+    initSchemalessTestFullTest(segmentWriteOutMediumFactory);
     List<Result<TimeseriesResultValue>> expectedTimeseriesResults = Collections.singletonList(
         new Result<>(
             DateTimes.of("2011-01-12T00:00:00.000Z"),
@@ -653,9 +658,11 @@ public class SchemalessTestFullTest extends InitializedNullHandlingTest
     );
   }
 
-  @Test
-  public void testSupersetSchemas()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest
+  public void testSupersetSchemas(SegmentWriteOutMediumFactory segmentWriteOutMediumFactory)
   {
+    initSchemalessTestFullTest(segmentWriteOutMediumFactory);
     List<Result<TimeseriesResultValue>> expectedTimeseriesResults = Collections.singletonList(
         new Result<>(
             DateTimes.of("2011-01-12T00:00:00.000Z"),
@@ -736,9 +743,11 @@ public class SchemalessTestFullTest extends InitializedNullHandlingTest
     );
   }
 
-  @Test
-  public void testValueAndEmptySchemas()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest
+  public void testValueAndEmptySchemas(SegmentWriteOutMediumFactory segmentWriteOutMediumFactory)
   {
+    initSchemalessTestFullTest(segmentWriteOutMediumFactory);
     List<Result<TimeseriesResultValue>> expectedTimeseriesResults = Collections.singletonList(
         new Result<>(
             DateTimes.of("2011-01-12T00:00:00.000Z"),
@@ -859,9 +868,11 @@ public class SchemalessTestFullTest extends InitializedNullHandlingTest
     );
   }
 
-  @Test
-  public void testEmptySchemas()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest
+  public void testEmptySchemas(SegmentWriteOutMediumFactory segmentWriteOutMediumFactory)
   {
+    initSchemalessTestFullTest(segmentWriteOutMediumFactory);
     List<Result<TimeseriesResultValue>> expectedTimeseriesResults = Collections.singletonList(
         new Result<>(
             DateTimes.of("2011-01-12T00:00:00.000Z"),
@@ -957,9 +968,11 @@ public class SchemalessTestFullTest extends InitializedNullHandlingTest
     );
   }
 
-  @Test
-  public void testExactSameSchemas()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest
+  public void testExactSameSchemas(SegmentWriteOutMediumFactory segmentWriteOutMediumFactory)
   {
+    initSchemalessTestFullTest(segmentWriteOutMediumFactory);
     List<Result<TimeseriesResultValue>> expectedTimeseriesResults = Collections.singletonList(
         new Result<>(
             DateTimes.of("2011-01-12T00:00:00.000Z"),
@@ -1040,9 +1053,11 @@ public class SchemalessTestFullTest extends InitializedNullHandlingTest
     );
   }
 
-  @Test
-  public void testMultiDimensionalValues()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest
+  public void testMultiDimensionalValues(SegmentWriteOutMediumFactory segmentWriteOutMediumFactory)
   {
+    initSchemalessTestFullTest(segmentWriteOutMediumFactory);
     List<Result<TimeseriesResultValue>> expectedTimeseriesResults = Collections.singletonList(
         new Result<>(
             DateTimes.of("2011-01-12T00:00:00.000Z"),
@@ -1170,9 +1185,11 @@ public class SchemalessTestFullTest extends InitializedNullHandlingTest
     );
   }
 
-  @Test
-  public void testDifferentMetrics()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest
+  public void testDifferentMetrics(SegmentWriteOutMediumFactory segmentWriteOutMediumFactory)
   {
+    initSchemalessTestFullTest(segmentWriteOutMediumFactory);
     List<Result<TimeseriesResultValue>> expectedTimeseriesResults = Collections.singletonList(
         new Result<>(
             DateTimes.of("2011-01-12T00:00:00.000Z"),

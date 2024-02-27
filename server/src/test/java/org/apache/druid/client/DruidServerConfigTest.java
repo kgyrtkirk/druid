@@ -30,13 +30,13 @@ import org.apache.druid.initialization.Initialization;
 import org.apache.druid.jackson.DefaultObjectMapper;
 import org.apache.druid.segment.loading.SegmentLoaderConfig;
 import org.apache.druid.segment.loading.StorageLocationConfig;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,8 +45,8 @@ public class DruidServerConfigTest
   private File testSegmentCacheDir1;
   private File testSegmentCacheDir2;
 
-  @Rule
-  public final TemporaryFolder tmpFolder = new TemporaryFolder();
+  @TempDir
+  public File tmpFolder;
 
   public ObjectMapper mapper = new DefaultObjectMapper();
 
@@ -56,11 +56,11 @@ public class DruidServerConfigTest
     binder.bindConstant().annotatedWith(Names.named("tlsServicePort")).to(-1);
   };
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception
   {
-    testSegmentCacheDir1 = tmpFolder.newFolder("segment_cache_folder1");
-    testSegmentCacheDir2 = tmpFolder.newFolder("segment_cache_folder2");
+    testSegmentCacheDir1 = newFolder(tmpFolder, "segment_cache_folder1");
+    testSegmentCacheDir2 = newFolder(tmpFolder, "segment_cache_folder2");
   }
 
   @Test
@@ -71,8 +71,8 @@ public class DruidServerConfigTest
     );
     final DruidServerConfig druidServerConfig = injector.getInstance(DruidServerConfig.class);
 
-    Assert.assertNotNull(druidServerConfig);
-    Assert.assertEquals(DruidServerConfig.class, druidServerConfig.getClass());
+    Assertions.assertNotNull(druidServerConfig);
+    Assertions.assertEquals(DruidServerConfig.class, druidServerConfig.getClass());
   }
 
   @Test
@@ -84,7 +84,7 @@ public class DruidServerConfigTest
     locations.add(locationConfig1);
     locations.add(locationConfig2);
     DruidServerConfig druidServerConfig = new DruidServerConfig(new SegmentLoaderConfig().withLocations(locations));
-    Assert.assertEquals(30000000000L, druidServerConfig.getMaxSize());
+    Assertions.assertEquals(30000000000L, druidServerConfig.getMaxSize());
   }
 
   @Test
@@ -121,8 +121,17 @@ public class DruidServerConfigTest
         DruidServerConfig.class
     );
 
-    Assert.assertEquals(serverConfigWithDefaultSize.getMaxSize(), 10000000000L);
-    Assert.assertEquals(serverConfigWithNonDefaultSize.getMaxSize(), 123456L);
+    Assertions.assertEquals(serverConfigWithDefaultSize.getMaxSize(), 10000000000L);
+    Assertions.assertEquals(serverConfigWithNonDefaultSize.getMaxSize(), 123456L);
+  }
+
+  private static File newFolder(File root, String... subDirs) throws IOException {
+    String subFolder = String.join("/", subDirs);
+    File result = new File(root, subFolder);
+    if (!result.mkdirs()) {
+      throw new IOException("Couldn't create folders " + root);
+    }
+    return result;
   }
 }
 

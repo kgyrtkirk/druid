@@ -25,7 +25,6 @@ import org.apache.druid.catalog.sync.RestUpdateSender.RestSender;
 import org.apache.druid.java.util.http.client.response.StatusResponseHolder;
 import org.apache.druid.server.DruidNode;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
-import org.junit.Test;
 
 import java.net.URL;
 import java.util.Arrays;

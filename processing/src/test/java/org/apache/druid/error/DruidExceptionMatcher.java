@@ -23,11 +23,12 @@ import org.apache.druid.matchers.DruidMatchers;
 import org.hamcrest.Description;
 import org.hamcrest.DiagnosingMatcher;
 import org.hamcrest.Matcher;
-import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.hamcrest.core.AllOf;
 
 import java.util.ArrayList;
+
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class DruidExceptionMatcher extends DiagnosingMatcher<Throwable>
 {
@@ -119,13 +120,13 @@ public class DruidExceptionMatcher extends DiagnosingMatcher<Throwable>
     }
     catch (Throwable e) {
       if (e instanceof DruidException) {
-        MatcherAssert.assertThat(e, this);
+        assertThat(e, this);
         thrown = true;
       } else {
         throw new RuntimeException(e);
       }
     }
-    MatcherAssert.assertThat(thrown, Matchers.is(true));
+    assertThat(thrown, Matchers.is(true));
   }
 
   public interface ThrowingSupplier

@@ -23,10 +23,9 @@ import com.google.common.primitives.Ints;
 import org.apache.commons.io.IOUtils;
 import org.apache.druid.java.util.common.FileUtils;
 import org.apache.druid.java.util.common.StringUtils;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
 import java.nio.BufferUnderflowException;
@@ -35,10 +34,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
 
-@RunWith(Parameterized.class)
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 public class WriteOutBytesTest
 {
-  @Parameterized.Parameters
   public static Collection<Object[]> constructorFeeder() throws IOException
   {
     return Arrays.asList(
@@ -48,16 +47,18 @@ public class WriteOutBytesTest
     );
   }
 
-  private final SegmentWriteOutMedium segmentWriteOutMedium;
+  private SegmentWriteOutMedium segmentWriteOutMedium;
 
-  public WriteOutBytesTest(SegmentWriteOutMedium segmentWriteOutMedium)
+  public void initWriteOutBytesTest(SegmentWriteOutMedium segmentWriteOutMedium)
   {
     this.segmentWriteOutMedium = segmentWriteOutMedium;
   }
 
-  @Test
-  public void testWriteOutBytes() throws IOException
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest
+  public void testWriteOutBytes(SegmentWriteOutMedium segmentWriteOutMedium) throws IOException
   {
+    initWriteOutBytesTest(segmentWriteOutMedium);
     WriteOutBytes writeOutBytes = segmentWriteOutMedium.makeWriteOutBytes();
 
     writeOutBytes.write('1');
@@ -75,22 +76,24 @@ public class WriteOutBytesTest
     ByteBuffer bb = ByteBuffer.wrap(new byte[]{'a', 'b', 'c'});
     bb.position(2);
     writeOutBytes.write(bb);
-    Assert.assertEquals(3, bb.position());
+    Assertions.assertEquals(3, bb.position());
     verifyContents(writeOutBytes, "12345abc");
   }
 
   private void verifyContents(WriteOutBytes writeOutBytes, String expected) throws IOException
   {
-    Assert.assertEquals(expected, IOUtils.toString(writeOutBytes.asInputStream(), StandardCharsets.US_ASCII));
+    Assertions.assertEquals(expected, IOUtils.toString(writeOutBytes.asInputStream(), StandardCharsets.US_ASCII));
     ByteBuffer bb = ByteBuffer.allocate((int) writeOutBytes.size());
     writeOutBytes.readFully(0, bb);
     bb.flip();
-    Assert.assertEquals(expected, StringUtils.fromUtf8(bb));
+    Assertions.assertEquals(expected, StringUtils.fromUtf8(bb));
   }
 
-  @Test
-  public void testCrossBufferRandomAccess() throws IOException
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest
+  public void testCrossBufferRandomAccess(SegmentWriteOutMedium segmentWriteOutMedium) throws IOException
   {
+    initWriteOutBytesTest(segmentWriteOutMedium);
     WriteOutBytes writeOutBytes = segmentWriteOutMedium.makeWriteOutBytes();
     for (int i = 0; i < ByteBufferWriteOutBytes.BUFFER_SIZE; i++) {
       writeOutBytes.write('0');
@@ -101,20 +104,26 @@ public class WriteOutBytesTest
     ByteBuffer bb = ByteBuffer.allocate(4);
     writeOutBytes.readFully(ByteBufferWriteOutBytes.BUFFER_SIZE - 1, bb);
     bb.flip();
-    Assert.assertEquals("0123", StringUtils.fromUtf8(bb));
+    Assertions.assertEquals("0123", StringUtils.fromUtf8(bb));
   }
 
-  @Test(expected = BufferUnderflowException.class)
-  public void testReadFullyUnderflow() throws IOException
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest
+  public void testReadFullyUnderflow(SegmentWriteOutMedium segmentWriteOutMedium) throws IOException
   {
-    WriteOutBytes writeOutBytes = segmentWriteOutMedium.makeWriteOutBytes();
-    writeOutBytes.write('1');
-    writeOutBytes.readFully(0, ByteBuffer.allocate(2));
+    initWriteOutBytesTest(segmentWriteOutMedium);
+    assertThrows(BufferUnderflowException.class, () -> {
+      WriteOutBytes writeOutBytes = segmentWriteOutMedium.makeWriteOutBytes();
+      writeOutBytes.write('1');
+      writeOutBytes.readFully(0, ByteBuffer.allocate(2));
+    });
   }
 
-  @Test
-  public void testReadFullyEmptyAtTheEnd() throws IOException
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest
+  public void testReadFullyEmptyAtTheEnd(SegmentWriteOutMedium segmentWriteOutMedium) throws IOException
   {
+    initWriteOutBytesTest(segmentWriteOutMedium);
     WriteOutBytes writeOutBytes = segmentWriteOutMedium.makeWriteOutBytes();
     writeOutBytes.write('1');
     writeOutBytes.readFully(1, ByteBuffer.allocate(0));

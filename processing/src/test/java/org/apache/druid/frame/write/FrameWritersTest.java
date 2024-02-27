@@ -32,12 +32,13 @@ import org.apache.druid.segment.join.filter.AllNullColumnSelectorFactory;
 import org.apache.druid.segment.serde.ComplexMetrics;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.hamcrest.CoreMatchers;
-import org.hamcrest.MatcherAssert;
-import org.junit.Assert;
-import org.junit.Test;
 import org.junit.internal.matchers.ThrowableMessageMatcher;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
+
+import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * Tests {@link FrameWriters#makeFrameWriterFactory} ability to create factories. Largely doesn't test actual
@@ -57,8 +58,8 @@ public class FrameWritersTest extends InitializedNullHandlingTest
         Collections.singletonList(new KeyColumn("x", KeyOrder.ASCENDING))
     );
 
-    MatcherAssert.assertThat(factory, CoreMatchers.instanceOf(RowBasedFrameWriterFactory.class));
-    Assert.assertEquals(ALLOCATOR_CAPACITY, factory.allocatorCapacity());
+    assertThat(factory, CoreMatchers.instanceOf(RowBasedFrameWriterFactory.class));
+    Assertions.assertEquals(ALLOCATOR_CAPACITY, factory.allocatorCapacity());
   }
 
   @Test
@@ -80,8 +81,8 @@ public class FrameWritersTest extends InitializedNullHandlingTest
         Collections.emptyList()
     );
 
-    MatcherAssert.assertThat(factory, CoreMatchers.instanceOf(ColumnarFrameWriterFactory.class));
-    Assert.assertEquals(ALLOCATOR_CAPACITY, factory.allocatorCapacity());
+    assertThat(factory, CoreMatchers.instanceOf(ColumnarFrameWriterFactory.class));
+    Assertions.assertEquals(ALLOCATOR_CAPACITY, factory.allocatorCapacity());
   }
 
   @Test
@@ -94,13 +95,13 @@ public class FrameWritersTest extends InitializedNullHandlingTest
         Collections.emptyList()
     );
 
-    final UnsupportedColumnTypeException e = Assert.assertThrows(
+    final UnsupportedColumnTypeException e = Assertions.assertThrows(
         UnsupportedColumnTypeException.class,
         () -> factory.newFrameWriter(new AllNullColumnSelectorFactory())
     );
 
-    Assert.assertEquals("x", e.getColumnName());
-    Assert.assertEquals(ColumnType.ofArray(ColumnType.LONG_ARRAY), e.getColumnType());
+    Assertions.assertEquals("x", e.getColumnName());
+    Assertions.assertEquals(ColumnType.ofArray(ColumnType.LONG_ARRAY), e.getColumnType());
   }
 
   @Test
@@ -110,7 +111,7 @@ public class FrameWritersTest extends InitializedNullHandlingTest
     // even though they don't explicitly register it.
     ComplexMetrics.registerSerde(HyperUniquesSerde.TYPE_NAME, new HyperUniquesSerde());
 
-    final IllegalArgumentException e = Assert.assertThrows(
+    final IllegalArgumentException e = Assertions.assertThrows(
         IllegalArgumentException.class,
         () ->
             FrameWriters.makeFrameWriterFactory(
@@ -121,7 +122,7 @@ public class FrameWritersTest extends InitializedNullHandlingTest
             )
     );
 
-    MatcherAssert.assertThat(
+    assertThat(
         e,
         ThrowableMessageMatcher.hasMessage(
             CoreMatchers.containsString("Sort column [x] is not comparable (type = COMPLEX<hyperUnique>)")
@@ -132,7 +133,7 @@ public class FrameWritersTest extends InitializedNullHandlingTest
   @Test
   public void test_rowBased_sortColumnsNotPrefix()
   {
-    final IllegalArgumentException e = Assert.assertThrows(
+    final IllegalArgumentException e = Assertions.assertThrows(
         IllegalArgumentException.class,
         () ->
             FrameWriters.makeFrameWriterFactory(
@@ -143,7 +144,7 @@ public class FrameWritersTest extends InitializedNullHandlingTest
             )
     );
 
-    MatcherAssert.assertThat(
+    assertThat(
         e,
         ThrowableMessageMatcher.hasMessage(
             CoreMatchers.containsString("Sort column [y] must be a prefix of the signature")
@@ -154,7 +155,7 @@ public class FrameWritersTest extends InitializedNullHandlingTest
   @Test
   public void test_columnar_cantSort()
   {
-    final IllegalArgumentException e = Assert.assertThrows(
+    final IllegalArgumentException e = Assertions.assertThrows(
         IllegalArgumentException.class,
         () ->
             FrameWriters.makeFrameWriterFactory(
@@ -165,7 +166,7 @@ public class FrameWritersTest extends InitializedNullHandlingTest
             )
     );
 
-    MatcherAssert.assertThat(
+    assertThat(
         e,
         ThrowableMessageMatcher.hasMessage(CoreMatchers.containsString("Columnar frames cannot be sorted"))
     );

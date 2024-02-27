@@ -28,7 +28,6 @@ import org.apache.druid.indexing.overlord.autoscaling.AutoScaler;
 import org.apache.druid.jackson.DefaultObjectMapper;
 import org.apache.druid.java.util.common.StringUtils;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.util.Collections;
 

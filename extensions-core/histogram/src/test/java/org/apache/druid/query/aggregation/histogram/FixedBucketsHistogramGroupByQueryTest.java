@@ -40,7 +40,6 @@ import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 

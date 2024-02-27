@@ -31,7 +31,6 @@ import org.apache.druid.indexing.overlord.autoscaling.ec2.EC2NodeData;
 import org.apache.druid.indexing.overlord.autoscaling.ec2.StringEC2UserData;
 import org.apache.druid.jackson.DefaultObjectMapper;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.util.Collections;
 

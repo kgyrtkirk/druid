@@ -20,7 +20,6 @@
 package org.apache.druid.emitter.opentsdb;
 
 import org.junit.Assert;
-import org.junit.Test;
 
 public class OpentsdbSenderTest
 {

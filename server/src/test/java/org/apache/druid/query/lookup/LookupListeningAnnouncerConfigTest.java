@@ -32,11 +32,13 @@ import org.apache.druid.guice.annotations.Self;
 import org.apache.druid.initialization.Initialization;
 import org.apache.druid.server.DruidNode;
 import org.apache.druid.server.metrics.DataSourceTaskIdHolder;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Properties;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class LookupListeningAnnouncerConfigTest
 {
@@ -65,7 +67,7 @@ public class LookupListeningAnnouncerConfigTest
 
   private final Properties properties = injector.getInstance(Properties.class);
 
-  @Before
+  @BeforeEach
   public void setUp()
   {
     properties.clear();
@@ -81,7 +83,7 @@ public class LookupListeningAnnouncerConfigTest
     );
     configProvider.inject(properties, configurator);
     final LookupListeningAnnouncerConfig config = configProvider.get();
-    Assert.assertEquals(LookupListeningAnnouncerConfig.DEFAULT_TIER, config.getLookupTier());
+    Assertions.assertEquals(LookupListeningAnnouncerConfig.DEFAULT_TIER, config.getLookupTier());
   }
 
   @Test
@@ -96,21 +98,23 @@ public class LookupListeningAnnouncerConfigTest
     );
     configProvider.inject(properties, configurator);
     final LookupListeningAnnouncerConfig config = configProvider.get();
-    Assert.assertEquals(lookupTier, config.getLookupTier());
+    Assertions.assertEquals(lookupTier, config.getLookupTier());
   }
 
-  @Test(expected = NullPointerException.class)
+  @Test
   public void testFailsOnEmptyTier()
   {
-    final JsonConfigurator configurator = injector.getBinding(JsonConfigurator.class).getProvider().get();
-    properties.put(PROPERTY_BASE + ".lookupTier", "");
-    final JsonConfigProvider<LookupListeningAnnouncerConfig> configProvider = JsonConfigProvider.of(
-        PROPERTY_BASE,
-        LookupListeningAnnouncerConfig.class
-    );
-    configProvider.inject(properties, configurator);
-    final LookupListeningAnnouncerConfig config = configProvider.get();
-    config.getLookupTier();
+    assertThrows(NullPointerException.class, () -> {
+      final JsonConfigurator configurator = injector.getBinding(JsonConfigurator.class).getProvider().get();
+      properties.put(PROPERTY_BASE + ".lookupTier", "");
+      final JsonConfigProvider<LookupListeningAnnouncerConfig> configProvider = JsonConfigProvider.of(
+          PROPERTY_BASE,
+          LookupListeningAnnouncerConfig.class
+      );
+      configProvider.inject(properties, configurator);
+      final LookupListeningAnnouncerConfig config = configProvider.get();
+      config.getLookupTier();
+    });
   }
 
   @Test
@@ -124,22 +128,24 @@ public class LookupListeningAnnouncerConfigTest
     );
     configProvider.inject(properties, configurator);
     final LookupListeningAnnouncerConfig config = configProvider.get();
-    Assert.assertEquals("some_datasource", config.getLookupTier());
+    Assertions.assertEquals("some_datasource", config.getLookupTier());
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testFailsInjection()
   {
-    final String lookupTier = "some_tier";
-    final JsonConfigurator configurator = injector.getBinding(JsonConfigurator.class).getProvider().get();
-    properties.put(PROPERTY_BASE + ".lookupTier", lookupTier);
-    properties.put(PROPERTY_BASE + ".lookupTierIsDatasource", "true");
-    final JsonConfigProvider<LookupListeningAnnouncerConfig> configProvider = JsonConfigProvider.of(
-        PROPERTY_BASE,
-        LookupListeningAnnouncerConfig.class
-    );
-    configProvider.inject(properties, configurator);
-    final LookupListeningAnnouncerConfig config = configProvider.get();
-    Assert.assertEquals(lookupTier, config.getLookupTier());
+    assertThrows(IllegalArgumentException.class, () -> {
+      final String lookupTier = "some_tier";
+      final JsonConfigurator configurator = injector.getBinding(JsonConfigurator.class).getProvider().get();
+      properties.put(PROPERTY_BASE + ".lookupTier", lookupTier);
+      properties.put(PROPERTY_BASE + ".lookupTierIsDatasource", "true");
+      final JsonConfigProvider<LookupListeningAnnouncerConfig> configProvider = JsonConfigProvider.of(
+          PROPERTY_BASE,
+          LookupListeningAnnouncerConfig.class
+      );
+      configProvider.inject(properties, configurator);
+      final LookupListeningAnnouncerConfig config = configProvider.get();
+      Assertions.assertEquals(lookupTier, config.getLookupTier());
+    });
   }
 }

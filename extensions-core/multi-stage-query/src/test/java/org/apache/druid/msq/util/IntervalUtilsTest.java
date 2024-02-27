@@ -26,7 +26,6 @@ import org.apache.druid.java.util.common.granularity.PeriodGranularity;
 import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.List;

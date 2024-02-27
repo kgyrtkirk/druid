@@ -25,7 +25,6 @@ import org.apache.druid.discovery.NodeRole;
 import org.apache.druid.server.DruidNode;
 import org.joda.time.Duration;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.util.concurrent.CountDownLatch;
 

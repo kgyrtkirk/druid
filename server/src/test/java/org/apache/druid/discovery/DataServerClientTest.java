@@ -39,9 +39,9 @@ import org.apache.druid.rpc.ServiceClientFactory;
 import org.apache.druid.rpc.ServiceLocation;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -58,7 +58,7 @@ public class DataServerClientTest
   ScanQuery query;
   DataServerClient target;
 
-  @Before
+  @BeforeEach
   public void setUp()
   {
     jsonMapper = DruidServiceTestUtils.newJsonMapper();
@@ -114,6 +114,6 @@ public class DataServerClientTest
         Closer.create()
     );
 
-    Assert.assertEquals(ImmutableList.of(scanResultValue), result.toList());
+    Assertions.assertEquals(ImmutableList.of(scanResultValue), result.toList());
   }
 }

@@ -27,8 +27,8 @@ import com.google.common.collect.Range;
 import com.google.common.collect.RangeSet;
 import org.apache.druid.timeline.partition.ShardSpec;
 import org.easymock.EasyMock;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -100,7 +100,7 @@ public class DimFilterUtilsTest
           )
       );
     }
-    Assert.assertEquals(expected, result);
+    Assertions.assertEquals(expected, result);
   }
 
   private static RangeSet<String> rangeSet(List<Range<String>> ranges)

@@ -32,7 +32,6 @@ import org.apache.druid.java.util.common.StringUtils;
 import org.apache.zookeeper.data.Stat;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Test;
 
 import java.util.function.Function;
 

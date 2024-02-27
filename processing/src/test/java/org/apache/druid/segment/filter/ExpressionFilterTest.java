@@ -46,11 +46,11 @@ import org.apache.druid.segment.StorageAdapter;
 import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.segment.incremental.IncrementalIndexSchema;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -126,19 +126,19 @@ public class ExpressionFilterTest extends BaseFilterTest
     );
   }
 
-  @Before
+  @BeforeEach
   public void setup()
   {
     ExpressionProcessing.initializeForStrictBooleansTests(true);
   }
 
-  @After
+  @AfterEach
   public void teardown()
   {
     ExpressionProcessing.initializeForTests();
   }
 
-  @AfterClass
+  @AfterAll
   public static void tearDown() throws Exception
   {
     BaseFilterTest.tearDown(ColumnComparisonFilterTest.class.getName());
@@ -383,13 +383,13 @@ public class ExpressionFilterTest extends BaseFilterTest
   @Test
   public void testGetRequiredColumn()
   {
-    Assert.assertEquals(edf("like(dim1, '1%')").getRequiredColumns(), Sets.newHashSet("dim1"));
-    Assert.assertEquals(edf("dim2 == '1'").getRequiredColumns(), Sets.newHashSet("dim2"));
-    Assert.assertEquals(edf("dim3 < '2'").getRequiredColumns(), Sets.newHashSet("dim3"));
-    Assert.assertEquals(edf("dim4 == ''").getRequiredColumns(), Sets.newHashSet("dim4"));
-    Assert.assertEquals(edf("1 + 1").getRequiredColumns(), new HashSet<>());
-    Assert.assertEquals(edf("dim0 == dim3").getRequiredColumns(), Sets.newHashSet("dim0", "dim3"));
-    Assert.assertEquals(edf("missing == ''").getRequiredColumns(), Sets.newHashSet("missing"));
+    Assertions.assertEquals(edf("like(dim1, '1%')").getRequiredColumns(), Sets.newHashSet("dim1"));
+    Assertions.assertEquals(edf("dim2 == '1'").getRequiredColumns(), Sets.newHashSet("dim2"));
+    Assertions.assertEquals(edf("dim3 < '2'").getRequiredColumns(), Sets.newHashSet("dim3"));
+    Assertions.assertEquals(edf("dim4 == ''").getRequiredColumns(), Sets.newHashSet("dim4"));
+    Assertions.assertEquals(edf("1 + 1").getRequiredColumns(), new HashSet<>());
+    Assertions.assertEquals(edf("dim0 == dim3").getRequiredColumns(), Sets.newHashSet("dim0", "dim3"));
+    Assertions.assertEquals(edf("missing == ''").getRequiredColumns(), Sets.newHashSet("missing"));
   }
 
   @Test
@@ -405,13 +405,13 @@ public class ExpressionFilterTest extends BaseFilterTest
   public void testRequiredColumnRewrite()
   {
     Filter filter = edf("dim1 == '1'").toFilter();
-    Assert.assertFalse(filter.supportsRequiredColumnRewrite());
+    Assertions.assertFalse(filter.supportsRequiredColumnRewrite());
 
-    Throwable t = Assert.assertThrows(
+    Throwable t = Assertions.assertThrows(
         UnsupportedOperationException.class,
         () -> filter.rewriteRequiredColumns(ImmutableMap.of("invalidName", "dim1"))
     );
-    Assert.assertEquals("Required column rewrite is not supported by this filter.", t.getMessage());
+    Assertions.assertEquals("Required column rewrite is not supported by this filter.", t.getMessage());
   }
 
   protected static ExpressionDimFilter edf(final String expression)

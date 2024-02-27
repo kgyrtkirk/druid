@@ -29,7 +29,6 @@ import org.apache.druid.query.spec.MultipleIntervalSegmentSpec;
 import org.apache.druid.sql.calcite.planner.ColumnMapping;
 import org.apache.druid.sql.calcite.planner.ColumnMappings;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.util.Collections;
 

@@ -55,12 +55,11 @@ import org.apache.druid.segment.VirtualColumns;
 import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.virtual.ExpressionVirtualColumn;
 import org.joda.time.DateTime;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -69,21 +68,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 /**
  * This class is for testing both timeseries and groupBy queries with the same set of queries.
  */
-@RunWith(Parameterized.class)
 public class GroupByTimeseriesQueryRunnerTest extends TimeseriesQueryRunnerTest
 {
   private static TestGroupByBuffers BUFFER_POOLS = null;
 
-  @BeforeClass
+  @BeforeAll
   public static void setUpClass()
   {
     BUFFER_POOLS = TestGroupByBuffers.createDefault();
   }
 
-  @AfterClass
+  @AfterAll
   public static void tearDownClass()
   {
     BUFFER_POOLS.close();
@@ -91,7 +92,6 @@ public class GroupByTimeseriesQueryRunnerTest extends TimeseriesQueryRunnerTest
   }
 
   @SuppressWarnings("unchecked")
-  @Parameterized.Parameters(name = "{0}, vectorize = {1}")
   public static Iterable<Object[]> constructorFeeder()
   {
     setUpClass();
@@ -193,16 +193,18 @@ public class GroupByTimeseriesQueryRunnerTest extends TimeseriesQueryRunnerTest
     return constructors;
   }
 
-  public GroupByTimeseriesQueryRunnerTest(QueryRunner runner, boolean vectorize)
+  public void initGroupByTimeseriesQueryRunnerTest(QueryRunner runner, boolean vectorize)
   {
     super(runner, false, vectorize, QueryRunnerTestHelper.COMMON_DOUBLE_AGGREGATORS);
   }
 
   // GroupBy handles timestamps differently when granularity is ALL
+  @MethodSource("constructorFeeder")
   @Override
-  @Test
-  public void testFullOnTimeseriesMaxMin()
+  @ParameterizedTest(name = "{0}, vectorize = {1}")
+  public void testFullOnTimeseriesMaxMin(QueryRunner runner, boolean vectorize)
   {
+    initGroupByTimeseriesQueryRunnerTest(runner, vectorize);
     TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
                                   .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
                                   .granularity(Granularities.ALL)
@@ -220,23 +222,25 @@ public class GroupByTimeseriesQueryRunnerTest extends TimeseriesQueryRunnerTest
     Iterable<Result<TimeseriesResultValue>> results = runner.run(QueryPlus.wrap(query)).toList();
     Result<TimeseriesResultValue> result = results.iterator().next();
 
-    Assert.assertEquals(expectedEarliest, result.getTimestamp());
-    Assert.assertFalse(
-        StringUtils.format("Timestamp[%s] > expectedLast[%s]", result.getTimestamp(), expectedLast),
-        result.getTimestamp().isAfter(expectedLast)
+    Assertions.assertEquals(expectedEarliest, result.getTimestamp());
+    Assertions.assertFalse(
+        result.getTimestamp().isAfter(expectedLast),
+        StringUtils.format("Timestamp[%s] > expectedLast[%s]", result.getTimestamp(), expectedLast)
     );
 
     final TimeseriesResultValue value = result.getValue();
 
-    Assert.assertEquals(result.toString(), 1870.061029, value.getDoubleMetric("maxIndex"), 1870.061029 * 1e-6);
-    Assert.assertEquals(result.toString(), 59.021022, value.getDoubleMetric("minIndex"), 59.021022 * 1e-6);
+    Assertions.assertEquals(1870.061029, value.getDoubleMetric("maxIndex"), 1870.061029 * 1e-6, result.toString());
+    Assertions.assertEquals(59.021022, value.getDoubleMetric("minIndex"), 59.021022 * 1e-6, result.toString());
   }
 
   // GroupBy handles timestamps differently when granularity is ALL
+  @MethodSource("constructorFeeder")
   @Override
-  @Test
-  public void testFullOnTimeseriesMinMaxAggregators()
+  @ParameterizedTest(name = "{0}, vectorize = {1}")
+  public void testFullOnTimeseriesMinMaxAggregators(QueryRunner runner, boolean vectorize)
   {
+    initGroupByTimeseriesQueryRunnerTest(runner, vectorize);
     TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
                                   .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
                                   .granularity(Granularities.ALL)
@@ -259,119 +263,148 @@ public class GroupByTimeseriesQueryRunnerTest extends TimeseriesQueryRunnerTest
     Iterable<Result<TimeseriesResultValue>> results = runner.run(QueryPlus.wrap(query)).toList();
     Result<TimeseriesResultValue> result = results.iterator().next();
 
-    Assert.assertEquals(expectedEarliest, result.getTimestamp());
-    Assert.assertFalse(
-        StringUtils.format("Timestamp[%s] > expectedLast[%s]", result.getTimestamp(), expectedLast),
-        result.getTimestamp().isAfter(expectedLast)
+    Assertions.assertEquals(expectedEarliest, result.getTimestamp());
+    Assertions.assertFalse(
+        result.getTimestamp().isAfter(expectedLast),
+        StringUtils.format("Timestamp[%s] > expectedLast[%s]", result.getTimestamp(), expectedLast)
     );
-    Assert.assertEquals(59L, (long) result.getValue().getLongMetric(QueryRunnerTestHelper.LONG_MIN_INDEX_METRIC));
-    Assert.assertEquals(1870, (long) result.getValue().getLongMetric(QueryRunnerTestHelper.LONG_MAX_INDEX_METRIC));
-    Assert.assertEquals(
+    Assertions.assertEquals(59L, (long) result.getValue().getLongMetric(QueryRunnerTestHelper.LONG_MIN_INDEX_METRIC));
+    Assertions.assertEquals(1870, (long) result.getValue().getLongMetric(QueryRunnerTestHelper.LONG_MAX_INDEX_METRIC));
+    Assertions.assertEquals(
         59.021022D,
         result.getValue().getDoubleMetric(QueryRunnerTestHelper.DOUBLE_MIN_INDEX_METRIC),
         0
     );
-    Assert.assertEquals(
+    Assertions.assertEquals(
         1870.061029D,
         result.getValue().getDoubleMetric(QueryRunnerTestHelper.DOUBLE_MAX_INDEX_METRIC),
         0
     );
-    Assert.assertEquals(59.021023F, result.getValue().getFloatMetric(QueryRunnerTestHelper.FLOAT_MIN_INDEX_METRIC), 0);
-    Assert.assertEquals(1870.061F, result.getValue().getFloatMetric(QueryRunnerTestHelper.FLOAT_MAX_INDEX_METRIC), 0);
+    Assertions.assertEquals(59.021023F, result.getValue().getFloatMetric(QueryRunnerTestHelper.FLOAT_MIN_INDEX_METRIC), 0);
+    Assertions.assertEquals(1870.061F, result.getValue().getFloatMetric(QueryRunnerTestHelper.FLOAT_MAX_INDEX_METRIC), 0);
   }
 
+  @MethodSource("constructorFeeder")
   @Override
-  public void testEmptyTimeseries()
+  @ParameterizedTest(name = "{0}, vectorize = {1}")
+  public void testEmptyTimeseries(QueryRunner runner, boolean vectorize)
   {
+    initGroupByTimeseriesQueryRunnerTest(runner, vectorize);
     // Skip this test because the timeseries test expects the empty range to have one entry, but group by
     // does not expect anything
   }
 
+  @MethodSource("constructorFeeder")
   @Override
-  public void testFullOnTimeseries()
+  @ParameterizedTest(name = "{0}, vectorize = {1}")
+  public void testFullOnTimeseries(QueryRunner runner, boolean vectorize)
   {
+    initGroupByTimeseriesQueryRunnerTest(runner, vectorize);
     // Skip this test because the timeseries test expects a skipped day to be filled in, but group by doesn't
     // fill anything in.
   }
 
+  @MethodSource("constructorFeeder")
   @Override
-  public void testFullOnTimeseriesWithFilter()
+  @ParameterizedTest(name = "{0}, vectorize = {1}")
+  public void testFullOnTimeseriesWithFilter(QueryRunner runner, boolean vectorize)
   {
+    initGroupByTimeseriesQueryRunnerTest(runner, vectorize);
     // Skip this test because the timeseries test expects a skipped day to be filled in, but group by doesn't
     // fill anything in.
   }
 
+  @MethodSource("constructorFeeder")
   @Override
-  public void testTimeseriesQueryZeroFilling()
+  @ParameterizedTest(name = "{0}, vectorize = {1}")
+  public void testTimeseriesQueryZeroFilling(QueryRunner runner, boolean vectorize)
   {
+    initGroupByTimeseriesQueryRunnerTest(runner, vectorize);
     // Skip this test because the timeseries test expects skipped hours to be filled in, but group by doesn't
     // fill anything in.
   }
 
+  @MethodSource("constructorFeeder")
   @Override
-  public void testTimeseriesWithNonExistentFilter()
+  @ParameterizedTest(name = "{0}, vectorize = {1}")
+  public void testTimeseriesWithNonExistentFilter(QueryRunner runner, boolean vectorize)
   {
+    initGroupByTimeseriesQueryRunnerTest(runner, vectorize);
     // Skip this test because the timeseries test expects a day that doesn't have a filter match to be filled in,
     // but group by just doesn't return a value if the filter doesn't match.
   }
 
+  @MethodSource("constructorFeeder")
   @Override
-  public void testTimeseriesWithNonExistentFilterAndMultiDim()
+  @ParameterizedTest(name = "{0}, vectorize = {1}")
+  public void testTimeseriesWithNonExistentFilterAndMultiDim(QueryRunner runner, boolean vectorize)
   {
+    initGroupByTimeseriesQueryRunnerTest(runner, vectorize);
     // Skip this test because the timeseries test expects a day that doesn't have a filter match to be filled in,
     // but group by just doesn't return a value if the filter doesn't match.
   }
 
+  @MethodSource("constructorFeeder")
   @Override
-  public void testTimeseriesWithFilterOnNonExistentDimension()
+  @ParameterizedTest(name = "{0}, vectorize = {1}")
+  public void testTimeseriesWithFilterOnNonExistentDimension(QueryRunner runner, boolean vectorize)
   {
+    initGroupByTimeseriesQueryRunnerTest(runner, vectorize);
     // Skip this test because the timeseries test expects a day that doesn't have a filter match to be filled in,
     // but group by just doesn't return a value if the filter doesn't match.
   }
 
+  @MethodSource("constructorFeeder")
   @Override
-  public void testTimeseriesWithExpressionAggregatorTooBig()
+  @ParameterizedTest(name = "{0}, vectorize = {1}")
+  public void testTimeseriesWithExpressionAggregatorTooBig(QueryRunner runner, boolean vectorize)
   {
-    cannotVectorize();
-    if (!vectorize) {
-      // size bytes when it overshoots varies slightly between algorithms
-      expectedException.expectMessage("Unable to serialize [ARRAY<STRING>]");
-    }
-    TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
-                                  .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
-                                  .granularity(Granularities.DAY)
-                                  .intervals(QueryRunnerTestHelper.FIRST_TO_THIRD)
-                                  .aggregators(
-                                      Collections.singletonList(
-                                          new ExpressionLambdaAggregatorFactory(
-                                              "array_agg_distinct",
-                                              ImmutableSet.of(QueryRunnerTestHelper.MARKET_DIMENSION),
-                                              "acc",
-                                              "[]",
-                                              null,
-                                              null,
-                                              true,
-                                              false,
-                                              "array_set_add(acc, market)",
-                                              "array_set_add_all(acc, array_agg_distinct)",
-                                              null,
-                                              null,
-                                              HumanReadableBytes.valueOf(10),
-                                              TestExprMacroTable.INSTANCE
-                                          )
-                                      )
-                                  )
-                                  .descending(descending)
-                                  .context(makeContext())
-                                  .build();
+    Throwable exception = assertThrows(Exception.class, () -> {
+      initGroupByTimeseriesQueryRunnerTest(runner, vectorize);
+      cannotVectorize();
+      if (!vectorize) {
+        // size bytes when it overshoots varies slightly between algorithms
+        expectedException.expectMessage("Unable to serialize [ARRAY<STRING>]");
+      }
+      TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
+          .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
+          .granularity(Granularities.DAY)
+          .intervals(QueryRunnerTestHelper.FIRST_TO_THIRD)
+          .aggregators(
+              Collections.singletonList(
+                  new ExpressionLambdaAggregatorFactory(
+                      "array_agg_distinct",
+                      ImmutableSet.of(QueryRunnerTestHelper.MARKET_DIMENSION),
+                      "acc",
+                      "[]",
+                      null,
+                      null,
+                      true,
+                      false,
+                      "array_set_add(acc, market)",
+                      "array_set_add_all(acc, array_agg_distinct)",
+                      null,
+                      null,
+                      HumanReadableBytes.valueOf(10),
+                      TestExprMacroTable.INSTANCE
+                  )
+              )
+          )
+          .descending(descending)
+          .context(makeContext())
+          .build();
 
-    runner.run(QueryPlus.wrap(query)).toList();
+      runner.run(QueryPlus.wrap(query)).toList();
+    });
+    assertTrue(exception.getMessage().contains("Unable to serialize [ARRAY<STRING>]"));
   }
 
+  @MethodSource("constructorFeeder")
   @Override
-  @Test
-  public void testTimeseriesWithInvertedFilterOnNonExistentDimension()
+  @ParameterizedTest(name = "{0}, vectorize = {1}")
+  public void testTimeseriesWithInvertedFilterOnNonExistentDimension(QueryRunner runner, boolean vectorize)
   {
+    initGroupByTimeseriesQueryRunnerTest(runner, vectorize);
     if (NullHandling.replaceWithDefault()) {
       super.testTimeseriesWithInvertedFilterOnNonExistentDimension();
       return;
@@ -391,6 +424,6 @@ public class GroupByTimeseriesQueryRunnerTest extends TimeseriesQueryRunnerTest
     Iterable<Result<TimeseriesResultValue>> results = runner.run(QueryPlus.wrap(query))
                                                             .toList();
     // group by query results are empty instead of day bucket results with zeros and nulls
-    Assert.assertEquals(Collections.emptyList(), results);
+    Assertions.assertEquals(Collections.emptyList(), results);
   }
 }

@@ -23,7 +23,6 @@ import com.google.common.base.Suppliers;
 import org.apache.druid.metadata.MetadataStorageConnectorConfig;
 import org.apache.druid.metadata.MetadataStorageTablesConfig;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.sql.SQLException;
 

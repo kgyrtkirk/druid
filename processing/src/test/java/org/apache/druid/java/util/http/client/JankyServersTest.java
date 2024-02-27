@@ -28,11 +28,10 @@ import org.jboss.netty.channel.ChannelException;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.timeout.ReadTimeoutException;
 import org.joda.time.Duration;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.ExpectedException;
 
 import javax.net.ssl.SSLContext;
@@ -47,6 +46,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 /**
  * Tests with a bunch of goofy not-actually-http servers.
  */
@@ -57,10 +59,7 @@ public class JankyServersTest
   static ServerSocket echoServerSocket;
   static ServerSocket closingServerSocket;
 
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
-
-  @BeforeClass
+  @BeforeAll
   public static void setUp() throws Exception
   {
     exec = Executors.newCachedThreadPool();
@@ -140,7 +139,7 @@ public class JankyServersTest
     );
   }
 
-  @AfterClass
+  @AfterAll
   public static void tearDown() throws Exception
   {
     exec.shutdownNow();
@@ -170,7 +169,7 @@ public class JankyServersTest
         e = e1.getCause();
       }
 
-      Assert.assertTrue("ReadTimeoutException thrown by 'get'", e instanceof ReadTimeoutException);
+      Assertions.assertTrue(e instanceof ReadTimeoutException, "ReadTimeoutException thrown by 'get'");
     }
     finally {
       lifecycle.stop();
@@ -199,7 +198,7 @@ public class JankyServersTest
         e = e1.getCause();
       }
 
-      Assert.assertTrue("ReadTimeoutException thrown by 'get'", e instanceof ReadTimeoutException);
+      Assertions.assertTrue(e instanceof ReadTimeoutException, "ReadTimeoutException thrown by 'get'");
     }
     finally {
       lifecycle.stop();
@@ -231,7 +230,7 @@ public class JankyServersTest
         e = e1.getCause();
       }
 
-      Assert.assertTrue("ChannelException thrown by 'get'", e instanceof ChannelException);
+      Assertions.assertTrue(e instanceof ChannelException, "ChannelException thrown by 'get'");
     }
     finally {
       lifecycle.stop();
@@ -259,7 +258,7 @@ public class JankyServersTest
         e1.printStackTrace();
       }
 
-      Assert.assertTrue("ChannelException thrown by 'get'", isChannelClosedException(e));
+      Assertions.assertTrue(isChannelClosedException(e), "ChannelException thrown by 'get'");
     }
     finally {
       lifecycle.stop();
@@ -289,7 +288,7 @@ public class JankyServersTest
         e1.printStackTrace();
       }
 
-      Assert.assertTrue("ChannelException thrown by 'get'", isChannelClosedException(e));
+      Assertions.assertTrue(isChannelClosedException(e), "ChannelException thrown by 'get'");
     }
     finally {
       lifecycle.stop();
@@ -325,7 +324,7 @@ public class JankyServersTest
         e1.printStackTrace();
       }
 
-      Assert.assertTrue("ChannelException thrown by 'get'", isChannelClosedException(e));
+      Assertions.assertTrue(isChannelClosedException(e), "ChannelException thrown by 'get'");
     }
     finally {
       lifecycle.stop();
@@ -361,7 +360,7 @@ public class JankyServersTest
         e1.printStackTrace();
       }
 
-      Assert.assertTrue("ChannelException thrown by 'get'", isChannelClosedException(e));
+      Assertions.assertTrue(isChannelClosedException(e), "ChannelException thrown by 'get'");
     }
     finally {
       lifecycle.stop();
@@ -378,47 +377,53 @@ public class JankyServersTest
   @Test
   public void testHttpEchoServer() throws Throwable
   {
-    final Lifecycle lifecycle = new Lifecycle();
-    try {
-      final HttpClientConfig config = HttpClientConfig.builder().build();
-      final HttpClient client = HttpClientInit.createClient(config, lifecycle);
-      final ListenableFuture<StatusResponseHolder> response = client
-          .go(
-              new Request(HttpMethod.GET, new URL(StringUtils.format("http://localhost:%d/", echoServerSocket.getLocalPort()))),
-              StatusResponseHandler.getInstance()
-          );
+    Throwable exception = assertThrows(ExecutionException.class, () -> {
+      final Lifecycle lifecycle = new Lifecycle();
+      try {
+        final HttpClientConfig config = HttpClientConfig.builder().build();
+        final HttpClient client = HttpClientInit.createClient(config, lifecycle);
+        final ListenableFuture<StatusResponseHolder> response = client
+            .go(
+                new Request(HttpMethod.GET, new URL(StringUtils.format("http://localhost:%d/", echoServerSocket.getLocalPort()))),
+                StatusResponseHandler.getInstance()
+            );
 
-      expectedException.expect(ExecutionException.class);
-      expectedException.expectMessage("java.lang.IllegalArgumentException: invalid version format: GET");
+        expectedException.expect(ExecutionException.class);
+        expectedException.expectMessage("java.lang.IllegalArgumentException: invalid version format: GET");
 
-      response.get();
-    }
-    finally {
-      lifecycle.stop();
-    }
+        response.get();
+      }
+      finally {
+        lifecycle.stop();
+      }
+    });
+    assertTrue(exception.getMessage().contains("java.lang.IllegalArgumentException: invalid version format: GET"));
   }
 
   @Test
   public void testHttpsEchoServer() throws Throwable
   {
-    final Lifecycle lifecycle = new Lifecycle();
-    try {
-      final HttpClientConfig config = HttpClientConfig.builder().withSslContext(SSLContext.getDefault()).build();
-      final HttpClient client = HttpClientInit.createClient(config, lifecycle);
+    Throwable exception = assertThrows(ExecutionException.class, () -> {
+      final Lifecycle lifecycle = new Lifecycle();
+      try {
+        final HttpClientConfig config = HttpClientConfig.builder().withSslContext(SSLContext.getDefault()).build();
+        final HttpClient client = HttpClientInit.createClient(config, lifecycle);
 
-      final ListenableFuture<StatusResponseHolder> response = client
-          .go(
-              new Request(HttpMethod.GET, new URL(StringUtils.format("https://localhost:%d/", echoServerSocket.getLocalPort()))),
-              StatusResponseHandler.getInstance()
-          );
+        final ListenableFuture<StatusResponseHolder> response = client
+            .go(
+                new Request(HttpMethod.GET, new URL(StringUtils.format("https://localhost:%d/", echoServerSocket.getLocalPort()))),
+                StatusResponseHandler.getInstance()
+            );
 
-      expectedException.expect(ExecutionException.class);
-      expectedException.expectMessage("org.jboss.netty.channel.ChannelException: Faulty channel in resource pool");
+        expectedException.expect(ExecutionException.class);
+        expectedException.expectMessage("org.jboss.netty.channel.ChannelException: Faulty channel in resource pool");
 
-      response.get();
-    }
-    finally {
-      lifecycle.stop();
-    }
+        response.get();
+      }
+      finally {
+        lifecycle.stop();
+      }
+    });
+    assertTrue(exception.getMessage().contains("org.jboss.netty.channel.ChannelException: Faulty channel in resource pool"));
   }
 }

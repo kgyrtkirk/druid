@@ -25,7 +25,6 @@ import org.apache.druid.server.security.AuthValidator;
 import org.apache.druid.server.security.ResourceAction;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
 import org.mockito.Mock;

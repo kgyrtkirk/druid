@@ -21,7 +21,6 @@ package org.apache.druid.indexing.common.actions;
 
 import org.apache.druid.indexing.overlord.ForkingTaskRunner;
 import org.apache.druid.indexing.overlord.ForkingTaskRunnerFactory;
-import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

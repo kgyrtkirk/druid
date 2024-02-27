@@ -33,21 +33,21 @@ import org.apache.druid.server.coordinator.CoordinatorConfigManager;
 import org.apache.druid.server.coordinator.DataSourceCompactionConfig;
 import org.apache.druid.server.coordinator.UserCompactionTaskGranularityConfig;
 import org.joda.time.Period;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Response;
 import java.util.Collection;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class CoordinatorCompactionConfigsResourceTest
 {
   private static final DataSourceCompactionConfig OLD_CONFIG = new DataSourceCompactionConfig(
@@ -102,7 +102,7 @@ public class CoordinatorCompactionConfigsResourceTest
 
   private CoordinatorCompactionConfigsResource coordinatorCompactionConfigsResource;
 
-  @Before
+  @BeforeEach
   public void setup()
   {
     Mockito.when(mockConnector.lookup(
@@ -154,13 +154,13 @@ public class CoordinatorCompactionConfigsResourceTest
         true,
         mockHttpServletRequest
     );
-    Assert.assertEquals(Response.Status.OK.getStatusCode(), result.getStatus());
-    Assert.assertNotNull(oldConfigCaptor.getValue());
-    Assert.assertEquals(oldConfigCaptor.getValue(), OLD_CONFIG_IN_BYTES);
-    Assert.assertNotNull(newConfigCaptor.getValue());
-    Assert.assertEquals(newConfigCaptor.getValue().getMaxCompactionTaskSlots(), maxCompactionTaskSlots);
-    Assert.assertTrue(newConfigCaptor.getValue().isUseAutoScaleSlots());
-    Assert.assertEquals(compactionTaskSlotRatio, newConfigCaptor.getValue().getCompactionTaskSlotRatio(), 0);
+    Assertions.assertEquals(Response.Status.OK.getStatusCode(), result.getStatus());
+    Assertions.assertNotNull(oldConfigCaptor.getValue());
+    Assertions.assertEquals(oldConfigCaptor.getValue(), OLD_CONFIG_IN_BYTES);
+    Assertions.assertNotNull(newConfigCaptor.getValue());
+    Assertions.assertEquals(newConfigCaptor.getValue().getMaxCompactionTaskSlots(), maxCompactionTaskSlots);
+    Assertions.assertTrue(newConfigCaptor.getValue().isUseAutoScaleSlots());
+    Assertions.assertEquals(compactionTaskSlotRatio, newConfigCaptor.getValue().getCompactionTaskSlotRatio(), 0);
   }
 
   @Test
@@ -195,13 +195,13 @@ public class CoordinatorCompactionConfigsResourceTest
         newConfig,
         mockHttpServletRequest
     );
-    Assert.assertEquals(Response.Status.OK.getStatusCode(), result.getStatus());
-    Assert.assertNotNull(oldConfigCaptor.getValue());
-    Assert.assertEquals(oldConfigCaptor.getValue(), OLD_CONFIG_IN_BYTES);
-    Assert.assertNotNull(newConfigCaptor.getValue());
-    Assert.assertEquals(2, newConfigCaptor.getValue().getCompactionConfigs().size());
-    Assert.assertEquals(OLD_CONFIG, newConfigCaptor.getValue().getCompactionConfigs().get(0));
-    Assert.assertEquals(newConfig, newConfigCaptor.getValue().getCompactionConfigs().get(1));
+    Assertions.assertEquals(Response.Status.OK.getStatusCode(), result.getStatus());
+    Assertions.assertNotNull(oldConfigCaptor.getValue());
+    Assertions.assertEquals(oldConfigCaptor.getValue(), OLD_CONFIG_IN_BYTES);
+    Assertions.assertNotNull(newConfigCaptor.getValue());
+    Assertions.assertEquals(2, newConfigCaptor.getValue().getCompactionConfigs().size());
+    Assertions.assertEquals(OLD_CONFIG, newConfigCaptor.getValue().getCompactionConfigs().get(0));
+    Assertions.assertEquals(newConfig, newConfigCaptor.getValue().getCompactionConfigs().get(1));
   }
 
   @Test
@@ -244,11 +244,11 @@ public class CoordinatorCompactionConfigsResourceTest
         datasourceName,
         mockHttpServletRequest
     );
-    Assert.assertEquals(Response.Status.OK.getStatusCode(), result.getStatus());
-    Assert.assertNotNull(oldConfigCaptor.getValue());
-    Assert.assertEquals(oldConfigCaptor.getValue(), OLD_CONFIG_IN_BYTES);
-    Assert.assertNotNull(newConfigCaptor.getValue());
-    Assert.assertEquals(0, newConfigCaptor.getValue().getCompactionConfigs().size());
+    Assertions.assertEquals(Response.Status.OK.getStatusCode(), result.getStatus());
+    Assertions.assertNotNull(oldConfigCaptor.getValue());
+    Assertions.assertEquals(oldConfigCaptor.getValue(), OLD_CONFIG_IN_BYTES);
+    Assertions.assertNotNull(newConfigCaptor.getValue());
+    Assertions.assertEquals(0, newConfigCaptor.getValue().getCompactionConfigs().size());
   }
 
   @Test
@@ -341,12 +341,12 @@ public class CoordinatorCompactionConfigsResourceTest
         true,
         mockHttpServletRequest
     );
-    Assert.assertEquals(Response.Status.OK.getStatusCode(), result.getStatus());
-    Assert.assertNull(oldConfigCaptor.getValue());
-    Assert.assertNotNull(newConfigCaptor.getValue());
-    Assert.assertEquals(newConfigCaptor.getValue().getMaxCompactionTaskSlots(), maxCompactionTaskSlots);
-    Assert.assertTrue(newConfigCaptor.getValue().isUseAutoScaleSlots());
-    Assert.assertEquals(compactionTaskSlotRatio, newConfigCaptor.getValue().getCompactionTaskSlotRatio(), 0);
+    Assertions.assertEquals(Response.Status.OK.getStatusCode(), result.getStatus());
+    Assertions.assertNull(oldConfigCaptor.getValue());
+    Assertions.assertNotNull(newConfigCaptor.getValue());
+    Assertions.assertEquals(newConfigCaptor.getValue().getMaxCompactionTaskSlots(), maxCompactionTaskSlots);
+    Assertions.assertTrue(newConfigCaptor.getValue().isUseAutoScaleSlots());
+    Assertions.assertEquals(compactionTaskSlotRatio, newConfigCaptor.getValue().getCompactionTaskSlotRatio(), 0);
   }
 
   @Test
@@ -396,11 +396,11 @@ public class CoordinatorCompactionConfigsResourceTest
         newConfig,
         mockHttpServletRequest
     );
-    Assert.assertEquals(Response.Status.OK.getStatusCode(), result.getStatus());
-    Assert.assertNull(oldConfigCaptor.getValue());
-    Assert.assertNotNull(newConfigCaptor.getValue());
-    Assert.assertEquals(1, newConfigCaptor.getValue().getCompactionConfigs().size());
-    Assert.assertEquals(newConfig, newConfigCaptor.getValue().getCompactionConfigs().get(0));
+    Assertions.assertEquals(Response.Status.OK.getStatusCode(), result.getStatus());
+    Assertions.assertNull(oldConfigCaptor.getValue());
+    Assertions.assertNotNull(newConfigCaptor.getValue());
+    Assertions.assertEquals(1, newConfigCaptor.getValue().getCompactionConfigs().size());
+    Assertions.assertEquals(newConfig, newConfigCaptor.getValue().getCompactionConfigs().get(0));
   }
 
   @Test
@@ -423,7 +423,7 @@ public class CoordinatorCompactionConfigsResourceTest
         DATASOURCE_NOT_EXISTS,
         mockHttpServletRequest
     );
-    Assert.assertEquals(Response.Status.NOT_FOUND.getStatusCode(), result.getStatus());
+    Assertions.assertEquals(Response.Status.NOT_FOUND.getStatusCode(), result.getStatus());
   }
 
   @Test
@@ -434,7 +434,7 @@ public class CoordinatorCompactionConfigsResourceTest
         null,
         null
     );
-    Assert.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
-    Assert.assertTrue(((Collection) response.getEntity()).isEmpty());
+    Assertions.assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+    Assertions.assertTrue(((Collection) response.getEntity()).isEmpty());
   }
 }

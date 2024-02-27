@@ -22,13 +22,15 @@ package org.apache.druid.java.util.common.parsers;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import junit.framework.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  */
@@ -88,10 +90,10 @@ public class RegexParserTest
     builder.put("User-Agent", "S3Console/0.4");
     builder.put("Version ID", "-");
 
-    Assert.assertEquals(
-        "result",
+    assertEquals(
         builder.build(),
-        parsed
+        parsed,
+        "result"
     );
   }
 
@@ -152,10 +154,10 @@ public class RegexParserTest
     );
     builder.put("Version ID", "-");
 
-    Assert.assertEquals(
-        "result",
+    assertEquals(
         builder.build(),
-        parsed
+        parsed,
+        "result"
     );
   }
 
@@ -181,10 +183,10 @@ public class RegexParserTest
     builder.put("Bucket Owner", "79a59df900b949e55d96a1e698fbacedfd6e09d98eacf8f8d5218e7cd47ef2be");
     builder.put("Bucket", Lists.newArrayList("mybucket", "mybucket2"));
 
-    Assert.assertEquals(
-        "result",
+    assertEquals(
         builder.build(),
-        parsed
+        parsed,
+        "result"
     );
   }
 
@@ -204,29 +206,31 @@ public class RegexParserTest
     ImmutableMap.Builder builder = ImmutableMap.builder();
     builder.put("column_1", Lists.newArrayList("1", "2"));
 
-    Assert.assertEquals(
-        "result",
+    assertEquals(
         builder.build(),
-        parsed
+        parsed,
+        "result"
     );
   }
 
-  @Test(expected = ParseException.class)
+  @Test
   public void testFailure()
   {
-    final String pattern = "AAAAA";
+    assertThrows(ParseException.class, () -> {
+      final String pattern = "AAAAA";
 
-    final List<String> fieldNames = Collections.singletonList(
-        "dummy"
-    );
+      final List<String> fieldNames = Collections.singletonList(
+          "dummy"
+      );
 
-    final Parser<String, Object> parser = new RegexParser(
-        pattern,
-        Optional.of("@"),
-        fieldNames
-    );
-    String data = "BBBB";
+      final Parser<String, Object> parser = new RegexParser(
+          pattern,
+          Optional.of("@"),
+          fieldNames
+      );
+      String data = "BBBB";
 
-    parser.parseToMap(data);
+      parser.parseToMap(data);
+    });
   }
 }

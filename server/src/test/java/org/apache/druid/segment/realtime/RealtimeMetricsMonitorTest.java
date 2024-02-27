@@ -23,8 +23,8 @@ import org.apache.druid.jackson.DefaultObjectMapper;
 import org.apache.druid.java.util.metrics.StubServiceEmitter;
 import org.apache.druid.segment.indexing.DataSchema;
 import org.apache.druid.segment.indexing.RealtimeIOConfig;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 import java.util.Random;
@@ -35,7 +35,7 @@ public class RealtimeMetricsMonitorTest
   private StubServiceEmitter emitter;
   private Random random;
 
-  @Before
+  @BeforeEach
   public void setup()
   {
     random = new Random(100);

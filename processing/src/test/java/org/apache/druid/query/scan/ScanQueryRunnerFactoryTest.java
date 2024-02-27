@@ -40,13 +40,11 @@ import org.apache.druid.query.spec.MultipleSpecificSegmentSpec;
 import org.apache.druid.query.spec.QuerySegmentSpec;
 import org.apache.druid.query.spec.SpecificSegmentSpec;
 import org.joda.time.Interval;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.experimental.runners.Enclosed;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -56,8 +54,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@RunWith(Enclosed.class)
+
+
 public class ScanQueryRunnerFactoryTest
 {
   private static final ScanQueryConfig CONFIG = new ScanQueryConfig()
@@ -84,14 +85,14 @@ public class ScanQueryRunnerFactoryTest
       CONFIG
   );
 
-  @RunWith(Parameterized.class)
-  public static class ScanQueryRunnerFactoryParameterizedTest
+  @Nested
+  public class ScanQueryRunnerFactoryParameterizedTest
   {
     private int numElements;
     private ScanQuery query;
     private ScanQuery.ResultFormat resultFormat;
 
-    public ScanQueryRunnerFactoryParameterizedTest(
+    public void initScanQueryRunnerFactoryParameterizedTest(
         final int numElements,
         final int batchSize,
         final long limit,
@@ -111,7 +112,6 @@ public class ScanQueryRunnerFactoryTest
       this.resultFormat = resultFormat;
     }
 
-    @Parameterized.Parameters(name = "{0} {1} {2} {3} {4}")
     public static Iterable<Object[]> constructorFeeder()
     {
       List<Integer> numsElements = ImmutableList.of(0, 10, 100);
@@ -135,9 +135,11 @@ public class ScanQueryRunnerFactoryTest
       );
     }
 
-    @Test
-    public void testSortAndLimitScanResultValues() throws IOException
+    @MethodSource("constructorFeeder")
+    @ParameterizedTest(name = "{0} {1} {2} {3} {4}")
+    public void testSortAndLimitScanResultValues(final int numElements, final int batchSize, final long limit, final ScanQuery.ResultFormat resultFormat, final ScanQuery.Order order) throws IOException
     {
+      initScanQueryRunnerFactoryParameterizedTest(numElements, batchSize, limit, resultFormat, order);
       List<ScanResultValue> srvs = new ArrayList<>(numElements);
       List<Long> expectedEventTimestamps = new ArrayList<>();
       for (int i = 0; i < numElements; i++) {
@@ -168,20 +170,22 @@ public class ScanQueryRunnerFactoryTest
             ))
         ).toList();
         if (query.getScanRowsLimit() > Integer.MAX_VALUE) {
-          Assert.fail("Unsupported exception should have been thrown due to high limit");
+          Assertions.fail("Unsupported exception should have been thrown due to high limit");
         }
         validateSortedOutput(output, expectedEventTimestamps);
       }
       catch (UOE e) {
         if (query.getScanRowsLimit() <= Integer.MAX_VALUE) {
-          Assert.fail("Unsupported operation exception should not have been thrown here");
+          Assertions.fail("Unsupported operation exception should not have been thrown here");
         }
       }
     }
 
-    @Test
-    public void testNWayMerge()
+    @MethodSource("constructorFeeder")
+    @ParameterizedTest(name = "{0} {1} {2} {3} {4}")
+    public void testNWayMerge(final int numElements, final int batchSize, final long limit, final ScanQuery.ResultFormat resultFormat, final ScanQuery.Order order)
     {
+      initScanQueryRunnerFactoryParameterizedTest(numElements, batchSize, limit, resultFormat, order);
       List<Long> expectedEventTimestamps = new ArrayList<>(numElements * 3);
 
       List<ScanResultValue> scanResultValues1 = new ArrayList<>(numElements);
@@ -262,42 +266,40 @@ public class ScanQueryRunnerFactoryTest
       // check each scan result value has one event
       for (ScanResultValue srv : output) {
         if (resultFormat.equals(ScanQuery.ResultFormat.RESULT_FORMAT_COMPACTED_LIST)) {
-          Assert.assertTrue(ScanQueryTestHelper.getEventsCompactedListResultFormat(srv).size() == 1);
+          Assertions.assertTrue(ScanQueryTestHelper.getEventsCompactedListResultFormat(srv).size() == 1);
         } else if (resultFormat.equals(ScanQuery.ResultFormat.RESULT_FORMAT_LIST)) {
-          Assert.assertTrue(ScanQueryTestHelper.getEventsListResultFormat(srv).size() == 1);
+          Assertions.assertTrue(ScanQueryTestHelper.getEventsListResultFormat(srv).size() == 1);
         }
       }
 
       // check total # of rows <= limit
-      Assert.assertTrue(output.size() <= query.getScanRowsLimit());
+      Assertions.assertTrue(output.size() <= query.getScanRowsLimit());
 
       // check ordering is correct
       for (int i = 1; i < output.size(); i++) {
         if (query.getTimeOrder().equals(ScanQuery.Order.DESCENDING)) {
-          Assert.assertTrue(output.get(i).getFirstEventTimestamp(resultFormat) <
+          Assertions.assertTrue(output.get(i).getFirstEventTimestamp(resultFormat) <
                             output.get(i - 1).getFirstEventTimestamp(resultFormat));
         } else {
-          Assert.assertTrue(output.get(i).getFirstEventTimestamp(resultFormat) >
+          Assertions.assertTrue(output.get(i).getFirstEventTimestamp(resultFormat) >
                             output.get(i - 1).getFirstEventTimestamp(resultFormat));
         }
       }
 
       // check the values are correct
       for (int i = 0; i < query.getScanRowsLimit() && i < output.size(); i++) {
-        Assert.assertEquals((long) expectedEventTimestamps.get(i), output.get(i).getFirstEventTimestamp(resultFormat));
+        Assertions.assertEquals((long) expectedEventTimestamps.get(i), output.get(i).getFirstEventTimestamp(resultFormat));
       }
     }
   }
 
-  public static class ScanQueryRunnerFactoryNonParameterizedTest
+  @Nested
+  public class ScanQueryRunnerFactoryNonParameterizedTest
   {
     private SegmentDescriptor descriptor = new SegmentDescriptor(new Interval(
         DateTimes.of("2010-01-01"),
         DateTimes.of("2019-01-01").plusHours(1)
     ), "1", 0);
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     @Test
     public void testGetValidIntervalsFromSpec()
@@ -310,76 +312,78 @@ public class ScanQueryRunnerFactoryTest
       QuerySegmentSpec singleSpecificSpec = new SpecificSegmentSpec(descriptor);
 
       List<Interval> intervals = FACTORY.getIntervalsFromSpecificQuerySpec(multiSpecificSpec);
-      Assert.assertEquals(1, intervals.size());
-      Assert.assertEquals(descriptor.getInterval(), intervals.get(0));
+      Assertions.assertEquals(1, intervals.size());
+      Assertions.assertEquals(descriptor.getInterval(), intervals.get(0));
 
       intervals = FACTORY.getIntervalsFromSpecificQuerySpec(singleSpecificSpec);
-      Assert.assertEquals(1, intervals.size());
-      Assert.assertEquals(descriptor.getInterval(), intervals.get(0));
+      Assertions.assertEquals(1, intervals.size());
+      Assertions.assertEquals(descriptor.getInterval(), intervals.get(0));
     }
 
-    @Test(expected = UOE.class)
+    @Test
     public void testGetSegmentDescriptorsFromInvalidIntervalSpec()
     {
-      QuerySegmentSpec multiIntervalSpec = new MultipleIntervalSegmentSpec(
-          Collections.singletonList(
-              new Interval(
-                  DateTimes.of("2010-01-01"),
-                  DateTimes.of("2019-01-01").plusHours(1)
-              )
-          )
-      );
-      FACTORY.getIntervalsFromSpecificQuerySpec(multiIntervalSpec);
+      assertThrows(UOE.class, () -> {
+        QuerySegmentSpec multiIntervalSpec = new MultipleIntervalSegmentSpec(
+            Collections.singletonList(
+                new Interval(
+                    DateTimes.of("2010-01-01"),
+                    DateTimes.of("2019-01-01").plusHours(1)
+                )
+            )
+        );
+        FACTORY.getIntervalsFromSpecificQuerySpec(multiIntervalSpec);
+      });
     }
 
-    @Test(expected = UOE.class)
+    @Test
     public void testGetSegmentDescriptorsFromInvalidLegacySpec()
     {
-      QuerySegmentSpec legacySpec = new LegacySegmentSpec(
-          new Interval(
-              DateTimes.of("2010-01-01"),
-              DateTimes.of("2019-01-01").plusHours(1)
-          )
-      );
-      FACTORY.getIntervalsFromSpecificQuerySpec(legacySpec);
+      assertThrows(UOE.class, () -> {
+        QuerySegmentSpec legacySpec = new LegacySegmentSpec(
+            new Interval(
+                DateTimes.of("2010-01-01"),
+                DateTimes.of("2019-01-01").plusHours(1)
+            )
+        );
+        FACTORY.getIntervalsFromSpecificQuerySpec(legacySpec);
+      });
     }
 
 
     @Test
     public void testMergeRunnersGuardrailsExceeded()
     {
-      final QueryRunner<ScanResultValue> runner = FACTORY.mergeRunners(
-          Execs.directExecutor(),
-          IntStream.range(0, CONFIG.getMaxSegmentPartitionsOrderedInMemory() + 1)
-                   .mapToObj(i -> (QueryRunner<ScanResultValue>) (queryPlus, responseContext) -> Sequences.empty())
-                   .collect(Collectors.toList())
-      );
+      Throwable exception = assertThrows(ResourceLimitExceededException.class, () -> {
+        final QueryRunner<ScanResultValue> runner = FACTORY.mergeRunners(
+            Execs.directExecutor(),
+            IntStream.range(0, CONFIG.getMaxSegmentPartitionsOrderedInMemory() + 1)
+                .mapToObj(i -> (QueryRunner<ScanResultValue>) (queryPlus, responseContext) -> Sequences.empty())
+                .collect(Collectors.toList())
+        );
 
-      expectedException.expect(ResourceLimitExceededException.class);
-      expectedException.expectMessage(
-          "Time ordering is not supported for a Scan query with 5 segments per time chunk and a row limit of 10,001. "
-          + "Try reducing your query limit below maxRowsQueuedForOrdering (currently 10,000), or using compaction to "
-          + "reduce the number of segments per time chunk, or raising maxSegmentPartitionsOrderedInMemory "
-          + "(currently 4) above the number of segments you have per time chunk."
-      );
-
-      runner.run(
-          QueryPlus.wrap(
-              Druids.newScanQueryBuilder()
+        runner.run(
+            QueryPlus.wrap(
+                Druids.newScanQueryBuilder()
                     .dataSource("foo")
                     .limit(CONFIG.getMaxRowsQueuedForOrdering() + 1)
                     .intervals(
                         new MultipleSpecificSegmentSpec(
                             IntStream.range(0, CONFIG.getMaxSegmentPartitionsOrderedInMemory() + 1)
-                                     .mapToObj(i -> new SegmentDescriptor(Intervals.ETERNITY, "v0", i))
-                                     .collect(Collectors.toList())
+                                .mapToObj(i -> new SegmentDescriptor(Intervals.ETERNITY, "v0", i))
+                                .collect(Collectors.toList())
                         )
                     )
                     .order(ScanQuery.Order.ASCENDING)
                     .build()
-          ),
-          ResponseContext.createEmpty()
-      );
+            ),
+            ResponseContext.createEmpty()
+        );
+      });
+      assertTrue(exception.getMessage().contains("Time ordering is not supported for a Scan query with 5 segments per time chunk and a row limit of 10,001. "
+          + "Try reducing your query limit below maxRowsQueuedForOrdering (currently 10,000), or using compaction to "
+          + "reduce the number of segments per time chunk, or raising maxSegmentPartitionsOrderedInMemory "
+          + "(currently 4) above the number of segments you have per time chunk."));
     }
   }
 }

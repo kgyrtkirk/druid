@@ -20,18 +20,16 @@
 package org.apache.druid.query.filter.vector;
 
 import org.apache.druid.java.util.common.StringUtils;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class VectorMatchTest
 {
   private static final int VECTOR_SIZE = 7;
   private static final int VECTOR_BITS = 1 << VECTOR_SIZE;
-
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
 
   @Test
   public void testAddAllExhaustive()
@@ -65,11 +63,11 @@ public class VectorMatchTest
   @Test
   public void testAddAllOnSelf()
   {
-    final VectorMatch match = VectorMatch.wrap(new int[]{0, 1}).setSelectionSize(2);
-
-    expectedException.expect(IllegalStateException.class);
-    expectedException.expectMessage("'other' must be a different instance from 'this'");
-    match.addAll(match, VectorMatch.wrap(new int[2]));
+    Throwable exception = assertThrows(IllegalStateException.class, () -> {
+      final VectorMatch match = VectorMatch.wrap(new int[]{0, 1}).setSelectionSize(2);
+      match.addAll(match, VectorMatch.wrap(new int[2]));
+    });
+    assertTrue(exception.getMessage().contains("'other' must be a different instance from 'this'"));
   }
 
   @Test
@@ -103,11 +101,11 @@ public class VectorMatchTest
   @Test
   public void testRemoveAllOnSelf()
   {
-    final VectorMatch match = VectorMatch.wrap(new int[]{0, 1}).setSelectionSize(2);
-
-    expectedException.expect(IllegalStateException.class);
-    expectedException.expectMessage("'other' must be a different instance from 'this'");
-    match.removeAll(match);
+    Throwable exception = assertThrows(IllegalStateException.class, () -> {
+      final VectorMatch match = VectorMatch.wrap(new int[]{0, 1}).setSelectionSize(2);
+      match.removeAll(match);
+    });
+    assertTrue(exception.getMessage().contains("'other' must be a different instance from 'this'"));
   }
 
   @Test
@@ -128,7 +126,7 @@ public class VectorMatchTest
       target.copyFrom(match);
 
       // Sanity check: array shouldn't have been modified
-      Assert.assertArrayEquals(array, arrayTwo);
+      Assertions.assertArrayEquals(array, arrayTwo);
 
       assertMatchEquals(match.toString(), match, target);
     }
@@ -137,11 +135,11 @@ public class VectorMatchTest
   @Test
   public void testCopyFromOnSelf()
   {
-    final VectorMatch match = VectorMatch.wrap(new int[]{0, 1}).setSelectionSize(2);
-
-    expectedException.expect(IllegalStateException.class);
-    expectedException.expectMessage("'other' must be a different instance from 'this'");
-    match.copyFrom(match);
+    Throwable exception = assertThrows(IllegalStateException.class, () -> {
+      final VectorMatch match = VectorMatch.wrap(new int[]{0, 1}).setSelectionSize(2);
+      match.copyFrom(match);
+    });
+    assertTrue(exception.getMessage().contains("'other' must be a different instance from 'this'"));
   }
 
   /**
@@ -149,7 +147,7 @@ public class VectorMatchTest
    */
   private static void assertMatchEquals(String message, ReadableVectorMatch expected, ReadableVectorMatch actual)
   {
-    Assert.assertEquals(message, expected.toString(), actual.toString());
+    Assertions.assertEquals(expected.toString(), actual.toString(), message);
   }
 
   private static int populate(final int[] array, final int bits)

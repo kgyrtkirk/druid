@@ -20,7 +20,6 @@
 package org.apache.druid.k8s.overlord.common;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
-import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 

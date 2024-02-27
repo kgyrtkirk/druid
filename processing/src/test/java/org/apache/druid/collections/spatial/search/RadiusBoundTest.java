@@ -19,8 +19,8 @@
 
 package org.apache.druid.collections.spatial.search;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 
@@ -31,19 +31,19 @@ public class RadiusBoundTest
   {
     final float[] coords0 = new float[]{1.0F, 2.0F};
     final float[] coords1 = new float[]{1.1F, 2.1F};
-    Assert.assertArrayEquals(
+    Assertions.assertArrayEquals(
         new RadiusBound(coords0, 3.0F, 10).getCacheKey(),
         new RadiusBound(coords0, 3.0F, 10).getCacheKey()
     );
-    Assert.assertFalse(Arrays.equals(
+    Assertions.assertFalse(Arrays.equals(
         new RadiusBound(coords0, 3.0F, 10).getCacheKey(),
         new RadiusBound(coords1, 3.0F, 10).getCacheKey()
     ));
-    Assert.assertFalse(Arrays.equals(
+    Assertions.assertFalse(Arrays.equals(
         new RadiusBound(coords0, 3.0F, 10).getCacheKey(),
         new RadiusBound(coords0, 3.1F, 10).getCacheKey()
     ));
-    Assert.assertFalse(Arrays.equals(
+    Assertions.assertFalse(Arrays.equals(
         new RadiusBound(coords0, 3.0F, 10).getCacheKey(),
         new RadiusBound(coords0, 3.0F, 9).getCacheKey()
     ));

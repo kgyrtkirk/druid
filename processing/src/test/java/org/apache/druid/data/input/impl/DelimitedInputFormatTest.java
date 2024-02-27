@@ -22,18 +22,17 @@ package org.apache.druid.data.input.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.druid.data.input.InputFormat;
 import org.apache.druid.utils.CompressionUtils;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.Collections;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public class DelimitedInputFormatTest
 {
-  @Rule
-  public final ExpectedException expectedException = ExpectedException.none();
 
   @Test
   public void testSerde() throws IOException
@@ -49,31 +48,34 @@ public class DelimitedInputFormatTest
     );
     final byte[] bytes = mapper.writeValueAsBytes(format);
     final DelimitedInputFormat fromJson = (DelimitedInputFormat) mapper.readValue(bytes, InputFormat.class);
-    Assert.assertEquals(format, fromJson);
+    Assertions.assertEquals(format, fromJson);
   }
 
   @Test
   public void testTab()
   {
-    expectedException.expect(IllegalArgumentException.class);
-    expectedException.expectMessage("Column[a\t] cannot have the delimiter[\t] in its name");
-    new DelimitedInputFormat(Collections.singletonList("a\t"), ",", null, null, false, 0);
+    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
+      new DelimitedInputFormat(Collections.singletonList("a\t"), ",", null, null, false, 0);
+    });
+    assertTrue(exception.getMessage().contains("Column[a\t] cannot have the delimiter[\t] in its name"));
   }
 
   @Test
   public void testDelimiterAndListDelimiter()
   {
-    expectedException.expect(IllegalArgumentException.class);
-    expectedException.expectMessage("Cannot have same delimiter and list delimiter of [,]");
-    new DelimitedInputFormat(Collections.singletonList("a\t"), ",", ",", null, false, 0);
+    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
+      new DelimitedInputFormat(Collections.singletonList("a\t"), ",", ",", null, false, 0);
+    });
+    assertTrue(exception.getMessage().contains("Cannot have same delimiter and list delimiter of [,]"));
   }
 
   @Test
   public void testCustomizeSeparator()
   {
-    expectedException.expect(IllegalArgumentException.class);
-    expectedException.expectMessage("Column[a|] cannot have the delimiter[|] in its name");
-    new DelimitedInputFormat(Collections.singletonList("a|"), ",", "|", null, false, 0);
+    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
+      new DelimitedInputFormat(Collections.singletonList("a|"), ",", "|", null, false, 0);
+    });
+    assertTrue(exception.getMessage().contains("Column[a|] cannot have the delimiter[|] in its name"));
   }
 
   @Test
@@ -87,7 +89,7 @@ public class DelimitedInputFormatTest
         true,
         0
     );
-    Assert.assertTrue(format.isFindColumnsFromHeader());
+    Assertions.assertTrue(format.isFindColumnsFromHeader());
   }
 
   @Test
@@ -101,15 +103,16 @@ public class DelimitedInputFormatTest
         true,
         0
     );
-    Assert.assertTrue(format.isFindColumnsFromHeader());
+    Assertions.assertTrue(format.isFindColumnsFromHeader());
   }
 
   @Test
   public void testMissingFindColumnsFromHeaderWithMissingColumnsThrowingError()
   {
-    expectedException.expect(IllegalArgumentException.class);
-    expectedException.expectMessage("Either [columns] or [findColumnsFromHeader] must be set");
-    new DelimitedInputFormat(null, null, "delim", null, null, 0);
+    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
+      new DelimitedInputFormat(null, null, "delim", null, null, 0);
+    });
+    assertTrue(exception.getMessage().contains("Either [columns] or [findColumnsFromHeader] must be set"));
   }
 
   @Test
@@ -123,29 +126,30 @@ public class DelimitedInputFormatTest
         null,
         0
     );
-    Assert.assertFalse(format.isFindColumnsFromHeader());
+    Assertions.assertFalse(format.isFindColumnsFromHeader());
   }
 
   @Test
   public void testHasHeaderRowWithMissingFindColumnsThrowingError()
   {
-    expectedException.expect(IllegalArgumentException.class);
-    expectedException.expectMessage("Cannot accept both [findColumnsFromHeader] and [hasHeaderRow]");
-    new DelimitedInputFormat(null, null, "delim", true, false, 0);
+    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
+      new DelimitedInputFormat(null, null, "delim", true, false, 0);
+    });
+    assertTrue(exception.getMessage().contains("Cannot accept both [findColumnsFromHeader] and [hasHeaderRow]"));
   }
 
   @Test
   public void testHasHeaderRowWithMissingColumnsReturningItsValue()
   {
     final DelimitedInputFormat format = new DelimitedInputFormat(null, null, "delim", true, null, 0);
-    Assert.assertTrue(format.isFindColumnsFromHeader());
+    Assertions.assertTrue(format.isFindColumnsFromHeader());
   }
   @Test
   public void test_getWeightedSize_withoutCompression()
   {
     final DelimitedInputFormat format = new DelimitedInputFormat(null, null, "delim", true, null, 0);
     final long unweightedSize = 100L;
-    Assert.assertEquals(unweightedSize, format.getWeightedSize("file.tsv", unweightedSize));
+    Assertions.assertEquals(unweightedSize, format.getWeightedSize("file.tsv", unweightedSize));
   }
 
   @Test
@@ -153,7 +157,7 @@ public class DelimitedInputFormatTest
   {
     final DelimitedInputFormat format = new DelimitedInputFormat(null, null, "delim", true, null, 0);
     final long unweightedSize = 100L;
-    Assert.assertEquals(
+    Assertions.assertEquals(
         unweightedSize * CompressionUtils.COMPRESSED_TEXT_WEIGHT_FACTOR,
         format.getWeightedSize("file.tsv.gz", unweightedSize)
     );

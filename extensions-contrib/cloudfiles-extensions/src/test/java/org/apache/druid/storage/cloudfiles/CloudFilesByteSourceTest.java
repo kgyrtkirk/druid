@@ -21,7 +21,6 @@ package org.apache.druid.storage.cloudfiles;
 
 import org.jclouds.io.Payload;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStream;

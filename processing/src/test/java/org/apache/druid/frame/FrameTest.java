@@ -37,19 +37,16 @@ import org.apache.druid.segment.TestIndex;
 import org.apache.druid.segment.incremental.IncrementalIndexStorageAdapter;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.hamcrest.CoreMatchers;
-import org.hamcrest.MatcherAssert;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.experimental.runners.Enclosed;
 import org.junit.internal.matchers.ThrowableMessageMatcher;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -61,19 +58,22 @@ import java.nio.channels.Channels;
 import java.util.ArrayList;
 import java.util.List;
 
-@RunWith(Enclosed.class)
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+
+
 public class FrameTest
 {
   // Tests that use good frames built from a standard test file.
-  public static class GoodFramesTest extends InitializedNullHandlingTest
+  @Nested
+  public class GoodFramesTest extends InitializedNullHandlingTest
   {
     private Frame columnarFrame;
     private Frame rowBasedSortedFrame;
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
-    @Before
+    @BeforeEach
     public void setUp()
     {
       final StorageAdapter adapter = new QueryableIndexStorageAdapter(TestIndex.getNoRollupMMappedTestIndex());
@@ -104,68 +104,72 @@ public class FrameTest
     @Test
     public void test_numRows()
     {
-      Assert.assertEquals(1209, columnarFrame.numRows());
-      Assert.assertEquals(1209, rowBasedSortedFrame.numRows());
+      Assertions.assertEquals(1209, columnarFrame.numRows());
+      Assertions.assertEquals(1209, rowBasedSortedFrame.numRows());
     }
 
     @Test
     public void test_numRegions()
     {
-      Assert.assertEquals(21, columnarFrame.numRegions());
-      Assert.assertEquals(2, rowBasedSortedFrame.numRegions());
+      Assertions.assertEquals(21, columnarFrame.numRegions());
+      Assertions.assertEquals(2, rowBasedSortedFrame.numRegions());
     }
 
     @Test
     public void test_isPermuted()
     {
-      Assert.assertFalse(columnarFrame.isPermuted());
-      Assert.assertTrue(rowBasedSortedFrame.isPermuted());
+      Assertions.assertFalse(columnarFrame.isPermuted());
+      Assertions.assertTrue(rowBasedSortedFrame.isPermuted());
     }
 
     @Test
     public void test_physicalRow_standard()
     {
       for (int i = 0; i < columnarFrame.numRows(); i++) {
-        Assert.assertEquals(i, columnarFrame.physicalRow(i));
+        Assertions.assertEquals(i, columnarFrame.physicalRow(i));
       }
     }
 
     @Test
     public void test_physicalRow_standard_outOfBoundsTooLow()
     {
-      expectedException.expect(IllegalArgumentException.class);
-      expectedException.expectMessage("Row [-1] out of bounds");
-      columnarFrame.physicalRow(-1);
+      Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
+        columnarFrame.physicalRow(-1);
+      });
+      assertTrue(exception.getMessage().contains("Row [-1] out of bounds"));
     }
 
     @Test
     public void test_physicalRow_standard_outOfBoundsTooHigh()
     {
-      expectedException.expect(IllegalArgumentException.class);
-      expectedException.expectMessage("Row [1,209] out of bounds");
-      columnarFrame.physicalRow(Ints.checkedCast(columnarFrame.numRows()));
+      Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
+        columnarFrame.physicalRow(Ints.checkedCast(columnarFrame.numRows()));
+      });
+      assertTrue(exception.getMessage().contains("Row [1,209] out of bounds"));
     }
 
     @Test
     public void test_physicalRow_sorted_outOfBoundsTooLow()
     {
-      expectedException.expect(IllegalArgumentException.class);
-      expectedException.expectMessage("Row [-1] out of bounds");
-      rowBasedSortedFrame.physicalRow(-1);
+      Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
+        rowBasedSortedFrame.physicalRow(-1);
+      });
+      assertTrue(exception.getMessage().contains("Row [-1] out of bounds"));
     }
 
     @Test
     public void test_physicalRow_sorted_outOfBoundsTooHigh()
     {
-      expectedException.expect(IllegalArgumentException.class);
-      expectedException.expectMessage("Row [1,209] out of bounds");
-      rowBasedSortedFrame.physicalRow(Ints.checkedCast(columnarFrame.numRows()));
+      Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
+        rowBasedSortedFrame.physicalRow(Ints.checkedCast(columnarFrame.numRows()));
+      });
+      assertTrue(exception.getMessage().contains("Row [1,209] out of bounds"));
     }
   }
 
   // Tests that explore "wrap", "decompress", and "writeTo" with different kinds of backing memory.
-  @RunWith(Parameterized.class)
-  public static class WrapAndWriteTest extends InitializedNullHandlingTest
+  @Nested
+  public class WrapAndWriteTest extends InitializedNullHandlingTest
   {
     private static byte[] FRAME_DATA;
     private static byte[] FRAME_DATA_COMPRESSED;
@@ -293,17 +297,16 @@ public class FrameTest
       abstract Frame decompress(Closer closer) throws IOException;
     }
 
-    private final MemType memType;
-    private final boolean compressed;
+    private MemType memType;
+    private boolean compressed;
     private final Closer closer = Closer.create();
 
-    public WrapAndWriteTest(final MemType memType, final boolean compressed)
+    public void initWrapAndWriteTest(final MemType memType, final boolean compressed)
     {
       this.memType = memType;
       this.compressed = compressed;
     }
 
-    @Parameterized.Parameters(name = "memType = {0}, compressed = {1}")
     public static Iterable<Object[]> constructorFeeder()
     {
       final List<Object[]> constructors = new ArrayList<>();
@@ -317,7 +320,7 @@ public class FrameTest
       return constructors;
     }
 
-    @BeforeClass
+    @BeforeAll
     public static void setUpClass() throws Exception
     {
       final StorageAdapter adapter = new IncrementalIndexStorageAdapter(TestIndex.getIncrementalTestIndex());
@@ -330,22 +333,24 @@ public class FrameTest
       FRAME_DATA_COMPRESSED = frameToByteArray(frame, true);
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDownClass()
     {
       FRAME_DATA = null;
       FRAME_DATA_COMPRESSED = null;
     }
 
-    @After
+    @AfterEach
     public void tearDown() throws IOException
     {
       closer.close();
     }
 
-    @Test
-    public void testWrapAndWrite() throws Exception
+    @MethodSource("constructorFeeder")
+    @ParameterizedTest(name = "memType = {0}, compressed = {1}")
+    public void testWrapAndWrite(final MemType memType, final boolean compressed) throws Exception
     {
+      initWrapAndWriteTest(memType, compressed);
       final Frame frame = compressed ? memType.decompress(closer) : memType.wrap(closer);
 
       // And write.
@@ -358,18 +363,19 @@ public class FrameTest
       );
 
       if (!compressed) {
-        Assert.assertArrayEquals(FRAME_DATA, baos.toByteArray());
+        Assertions.assertArrayEquals(FRAME_DATA, baos.toByteArray());
       } else {
         // Decompress and check.
         final byte[] compressedData = baos.toByteArray();
         final Frame frame2 = Frame.decompress(Memory.wrap(baos.toByteArray()), 0, compressedData.length);
-        Assert.assertArrayEquals(FRAME_DATA, frameToByteArray(frame2, false));
+        Assertions.assertArrayEquals(FRAME_DATA, frameToByteArray(frame2, false));
       }
     }
   }
 
   // Tests that use bad frames.
-  public static class BadFramesTest extends InitializedNullHandlingTest
+  @Nested
+  public class BadFramesTest extends InitializedNullHandlingTest
   {
     @Test
     public void testGoodFrameIsActuallyGood() throws Exception
@@ -378,7 +384,7 @@ public class FrameTest
       final Frame frame = makeGoodFrame();
       final Memory compressedFrameMemory = Memory.wrap(frameToByteArray(frame, true));
 
-      Assert.assertEquals(
+      Assertions.assertEquals(
           frame.writableMemory(),
           Frame.decompress(compressedFrameMemory, 0, compressedFrameMemory.getCapacity()).writableMemory()
       );
@@ -393,12 +399,12 @@ public class FrameTest
       // Tweak a byte.
       compressedFrameMemory.putByte(100L, (byte) 0);
 
-      final IllegalStateException e = Assert.assertThrows(
+      final IllegalStateException e = Assertions.assertThrows(
           IllegalStateException.class,
           () -> Frame.decompress(compressedFrameMemory, 0, compressedFrameMemory.getCapacity())
       );
 
-      MatcherAssert.assertThat(e, ThrowableMessageMatcher.hasMessage(CoreMatchers.containsString("Checksum mismatch")));
+      assertThat(e, ThrowableMessageMatcher.hasMessage(CoreMatchers.containsString("Checksum mismatch")));
     }
 
     private static Frame makeGoodFrame()

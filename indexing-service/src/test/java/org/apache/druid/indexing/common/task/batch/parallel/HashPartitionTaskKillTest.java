@@ -49,7 +49,6 @@ import org.apache.druid.segment.indexing.granularity.UniformGranularitySpec;
 import org.joda.time.Interval;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Test;
 
 import javax.annotation.Nullable;
 import java.io.File;

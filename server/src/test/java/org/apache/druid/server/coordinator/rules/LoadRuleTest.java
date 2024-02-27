@@ -45,13 +45,12 @@ import org.apache.druid.server.coordinator.stats.CoordinatorRunStats;
 import org.apache.druid.server.coordinator.stats.Stats;
 import org.apache.druid.timeline.DataSegment;
 import org.apache.druid.timeline.partition.NoneShardSpec;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -62,7 +61,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  *
  */
-@RunWith(Parameterized.class)
 public class LoadRuleTest
 {
   private static final String DS_WIKI = "wiki";
@@ -71,22 +69,21 @@ public class LoadRuleTest
   private BalancerStrategy balancerStrategy;
 
   private SegmentLoadQueueManager loadQueueManager;
-  private final boolean useRoundRobinAssignment;
+  private boolean useRoundRobinAssignment;
 
   private final AtomicInteger serverId = new AtomicInteger();
 
-  @Parameterized.Parameters(name = "useRoundRobin = {0}")
   public static List<Boolean> getTestParams()
   {
     return Arrays.asList(true, false);
   }
 
-  public LoadRuleTest(boolean useRoundRobinAssignment)
+  public void initLoadRuleTest(boolean useRoundRobinAssignment)
   {
     this.useRoundRobinAssignment = useRoundRobinAssignment;
   }
 
-  @Before
+  @BeforeEach
   public void setUp()
   {
     exec = MoreExecutors.listeningDecorator(Execs.multiThreaded(1, "LoadRuleTest-%d"));
@@ -94,15 +91,17 @@ public class LoadRuleTest
     loadQueueManager = new SegmentLoadQueueManager(null, null);
   }
 
-  @After
+  @AfterEach
   public void tearDown()
   {
     exec.shutdown();
   }
 
-  @Test
-  public void testLoadRuleAssignsSegments()
+  @MethodSource("getTestParams")
+  @ParameterizedTest(name = "useRoundRobin = {0}")
+  public void testLoadRuleAssignsSegments(boolean useRoundRobinAssignment)
   {
+    initLoadRuleTest(useRoundRobinAssignment);
     // Cluster has 2 tiers with 1 server each
     final ServerHolder server1 = createServer(Tier.T1);
     final ServerHolder server2 = createServer(Tier.T2);
@@ -114,11 +113,11 @@ public class LoadRuleTest
 
     final DataSegment segment = createDataSegment(DS_WIKI);
     LoadRule rule = loadForever(ImmutableMap.of(Tier.T1, 1, Tier.T2, 2));
-    Assert.assertTrue(rule.shouldMatchingSegmentBeLoaded());
+    Assertions.assertTrue(rule.shouldMatchingSegmentBeLoaded());
     CoordinatorRunStats stats = runRuleAndGetStats(rule, segment, druidCluster);
 
-    Assert.assertEquals(1L, stats.getSegmentStat(Stats.Segments.ASSIGNED, Tier.T1, DS_WIKI));
-    Assert.assertEquals(1L, stats.getSegmentStat(Stats.Segments.ASSIGNED, Tier.T2, DS_WIKI));
+    Assertions.assertEquals(1L, stats.getSegmentStat(Stats.Segments.ASSIGNED, Tier.T1, DS_WIKI));
+    Assertions.assertEquals(1L, stats.getSegmentStat(Stats.Segments.ASSIGNED, Tier.T2, DS_WIKI));
   }
 
   private CoordinatorRunStats runRuleAndGetStats(LoadRule rule, DataSegment segment, DruidCluster cluster)
@@ -157,9 +156,11 @@ public class LoadRuleTest
         .build();
   }
 
-  @Test
-  public void testLoadPrimaryAssignDoesNotOverAssign()
+  @MethodSource("getTestParams")
+  @ParameterizedTest(name = "useRoundRobin = {0}")
+  public void testLoadPrimaryAssignDoesNotOverAssign(boolean useRoundRobinAssignment)
   {
+    initLoadRuleTest(useRoundRobinAssignment);
     ServerHolder server1 = createServer(Tier.T1);
     ServerHolder server2 = createServer(Tier.T1);
     DruidCluster druidCluster = DruidCluster
@@ -170,19 +171,21 @@ public class LoadRuleTest
     final LoadRule rule = loadForever(ImmutableMap.of(Tier.T1, 1));
     final DataSegment segment = createDataSegment(DS_WIKI);
     CoordinatorRunStats firstRunStats = runRuleAndGetStats(rule, segment, druidCluster);
-    Assert.assertEquals(1L, firstRunStats.getSegmentStat(Stats.Segments.ASSIGNED, Tier.T1, segment.getDataSource()));
-    Assert.assertEquals(1, server1.getLoadingSegments().size() + server2.getLoadingSegments().size());
+    Assertions.assertEquals(1L, firstRunStats.getSegmentStat(Stats.Segments.ASSIGNED, Tier.T1, segment.getDataSource()));
+    Assertions.assertEquals(1, server1.getLoadingSegments().size() + server2.getLoadingSegments().size());
 
     // Verify that multiple runs don't assign primary segment again if at replication count
     CoordinatorRunStats secondRunStats = runRuleAndGetStats(rule, segment, druidCluster);
-    Assert.assertFalse(secondRunStats.hasStat(Stats.Segments.ASSIGNED));
-    Assert.assertEquals(1, server1.getLoadingSegments().size() + server2.getLoadingSegments().size());
+    Assertions.assertFalse(secondRunStats.hasStat(Stats.Segments.ASSIGNED));
+    Assertions.assertEquals(1, server1.getLoadingSegments().size() + server2.getLoadingSegments().size());
   }
 
-  @Test
-  @Ignore("Enable this test when timeout behaviour is fixed")
-  public void testOverAssignForTimedOutSegments()
+  @ParameterizedTest(name = "useRoundRobin = {0}")
+  @Disabled("Enable this test when timeout behaviour is fixed")
+  @MethodSource("getTestParams")
+  public void testOverAssignForTimedOutSegments(boolean useRoundRobinAssignment)
   {
+    initLoadRuleTest(useRoundRobinAssignment);
     ServerHolder server1 = createServer(Tier.T1);
     ServerHolder server2 = createServer(Tier.T1);
     DruidCluster druidCluster = DruidCluster
@@ -195,16 +198,18 @@ public class LoadRuleTest
     CoordinatorRunStats stats = runRuleAndGetStats(rule, segment, druidCluster);
 
     // Ensure that the segment is assigned to one of the historicals
-    Assert.assertEquals(1L, stats.getSegmentStat(Stats.Segments.ASSIGNED, Tier.T1, segment.getDataSource()));
+    Assertions.assertEquals(1L, stats.getSegmentStat(Stats.Segments.ASSIGNED, Tier.T1, segment.getDataSource()));
 
     // Ensure that the primary segment is assigned again in case the peon timed out on loading the segment
     CoordinatorRunStats statsAfterLoadPrimary = runRuleAndGetStats(rule, segment, druidCluster);
-    Assert.assertEquals(1L, statsAfterLoadPrimary.getSegmentStat(Stats.Segments.ASSIGNED, Tier.T1, DS_WIKI));
+    Assertions.assertEquals(1L, statsAfterLoadPrimary.getSegmentStat(Stats.Segments.ASSIGNED, Tier.T1, DS_WIKI));
   }
 
-  @Test
-  public void testSkipReplicationForTimedOutSegments()
+  @MethodSource("getTestParams")
+  @ParameterizedTest(name = "useRoundRobin = {0}")
+  public void testSkipReplicationForTimedOutSegments(boolean useRoundRobinAssignment)
   {
+    initLoadRuleTest(useRoundRobinAssignment);
     ServerHolder server1 = createServer(Tier.T1);
     ServerHolder server2 = createServer(Tier.T1);
     DruidCluster druidCluster = DruidCluster
@@ -217,18 +222,20 @@ public class LoadRuleTest
     CoordinatorRunStats stats = runRuleAndGetStats(rule, segment, druidCluster);
 
     // Ensure that the segment is assigned to one of the historicals
-    Assert.assertEquals(1L, stats.getSegmentStat(Stats.Segments.ASSIGNED, Tier.T1, segment.getDataSource()));
+    Assertions.assertEquals(1L, stats.getSegmentStat(Stats.Segments.ASSIGNED, Tier.T1, segment.getDataSource()));
 
     // Add the segment to the timed out list to simulate peon timeout on loading the segment
     // Default behavior is to not replicate the timed out segments on other servers
     CoordinatorRunStats statsAfterLoadPrimary = runRuleAndGetStats(rule, segment, druidCluster);
 
-    Assert.assertFalse(statsAfterLoadPrimary.hasStat(Stats.Segments.ASSIGNED));
+    Assertions.assertFalse(statsAfterLoadPrimary.hasStat(Stats.Segments.ASSIGNED));
   }
 
-  @Test
-  public void testLoadUsedSegmentsForAllSegmentGranularityAndCachingCostBalancerStrategy()
+  @MethodSource("getTestParams")
+  @ParameterizedTest(name = "useRoundRobin = {0}")
+  public void testLoadUsedSegmentsForAllSegmentGranularityAndCachingCostBalancerStrategy(boolean useRoundRobinAssignment)
   {
+    initLoadRuleTest(useRoundRobinAssignment);
     final List<DataSegment> segments =
         CreateDataSegments.ofDatasource(DS_WIKI)
                           .forIntervals(1, Granularities.ALL)
@@ -249,12 +256,14 @@ public class LoadRuleTest
         segments.get(1),
         makeCoordinatorRuntimeParams(druidCluster, segments.toArray(new DataSegment[0]))
     );
-    Assert.assertEquals(1L, stats.getSegmentStat(Stats.Segments.ASSIGNED, Tier.T1, DS_WIKI));
+    Assertions.assertEquals(1L, stats.getSegmentStat(Stats.Segments.ASSIGNED, Tier.T1, DS_WIKI));
   }
 
-  @Test
-  public void testSegmentsAreDroppedIfLoadRuleHasZeroReplicas()
+  @MethodSource("getTestParams")
+  @ParameterizedTest(name = "useRoundRobin = {0}")
+  public void testSegmentsAreDroppedIfLoadRuleHasZeroReplicas(boolean useRoundRobinAssignment)
   {
+    initLoadRuleTest(useRoundRobinAssignment);
     final DataSegment segment = createDataSegment(DS_WIKI);
 
     final ServerHolder serverT11 = createServer(Tier.T1, segment);
@@ -268,16 +277,18 @@ public class LoadRuleTest
         .build();
 
     LoadRule rule = loadForever(ImmutableMap.of(Tier.T1, 0, Tier.T2, 0));
-    Assert.assertFalse(rule.shouldMatchingSegmentBeLoaded());
+    Assertions.assertFalse(rule.shouldMatchingSegmentBeLoaded());
     CoordinatorRunStats stats = runRuleAndGetStats(rule, segment, druidCluster);
 
-    Assert.assertEquals(1L, stats.getSegmentStat(Stats.Segments.DROPPED, Tier.T1, DS_WIKI));
-    Assert.assertEquals(2L, stats.getSegmentStat(Stats.Segments.DROPPED, Tier.T2, DS_WIKI));
+    Assertions.assertEquals(1L, stats.getSegmentStat(Stats.Segments.DROPPED, Tier.T1, DS_WIKI));
+    Assertions.assertEquals(2L, stats.getSegmentStat(Stats.Segments.DROPPED, Tier.T2, DS_WIKI));
   }
 
-  @Test
-  public void testLoadIgnoresInvalidTiers()
+  @MethodSource("getTestParams")
+  @ParameterizedTest(name = "useRoundRobin = {0}")
+  public void testLoadIgnoresInvalidTiers(boolean useRoundRobinAssignment)
   {
+    initLoadRuleTest(useRoundRobinAssignment);
     ServerHolder server = createServer(Tier.T1);
     DruidCluster druidCluster = DruidCluster
         .builder()
@@ -286,15 +297,17 @@ public class LoadRuleTest
 
     final DataSegment segment = createDataSegment(DS_WIKI);
     LoadRule rule = loadForever(ImmutableMap.of("invalidTier", 1, Tier.T1, 1));
-    Assert.assertTrue(rule.shouldMatchingSegmentBeLoaded());
+    Assertions.assertTrue(rule.shouldMatchingSegmentBeLoaded());
     CoordinatorRunStats stats = runRuleAndGetStats(rule, segment, druidCluster);
-    Assert.assertEquals(1L, stats.getSegmentStat(Stats.Segments.ASSIGNED, Tier.T1, DS_WIKI));
-    Assert.assertEquals(0L, stats.getSegmentStat(Stats.Segments.ASSIGNED, "invalidTier", DS_WIKI));
+    Assertions.assertEquals(1L, stats.getSegmentStat(Stats.Segments.ASSIGNED, Tier.T1, DS_WIKI));
+    Assertions.assertEquals(0L, stats.getSegmentStat(Stats.Segments.ASSIGNED, "invalidTier", DS_WIKI));
   }
 
-  @Test
-  public void testDropIgnoresInvalidTiers()
+  @MethodSource("getTestParams")
+  @ParameterizedTest(name = "useRoundRobin = {0}")
+  public void testDropIgnoresInvalidTiers(boolean useRoundRobinAssignment)
   {
+    initLoadRuleTest(useRoundRobinAssignment);
     final DataSegment segment = createDataSegment(DS_WIKI);
 
     // Cluster has 1 tier with 2 servers
@@ -308,13 +321,15 @@ public class LoadRuleTest
     LoadRule rule = loadForever(ImmutableMap.of("invalidTier", 1, Tier.T1, 1));
     CoordinatorRunStats stats = runRuleAndGetStats(rule, segment, druidCluster);
 
-    Assert.assertEquals(1L, stats.getSegmentStat(Stats.Segments.DROPPED, Tier.T1, DS_WIKI));
-    Assert.assertEquals(0L, stats.getSegmentStat(Stats.Segments.DROPPED, "invalidTier", DS_WIKI));
+    Assertions.assertEquals(1L, stats.getSegmentStat(Stats.Segments.DROPPED, Tier.T1, DS_WIKI));
+    Assertions.assertEquals(0L, stats.getSegmentStat(Stats.Segments.DROPPED, "invalidTier", DS_WIKI));
   }
 
-  @Test
-  public void testMaxLoadingQueueSize()
+  @MethodSource("getTestParams")
+  @ParameterizedTest(name = "useRoundRobin = {0}")
+  public void testMaxLoadingQueueSize(boolean useRoundRobinAssignment)
   {
+    initLoadRuleTest(useRoundRobinAssignment);
     final TestLoadQueuePeon peon = new TestLoadQueuePeon();
 
     final int maxSegmentsInQueue = 2;
@@ -349,19 +364,21 @@ public class LoadRuleTest
         .build();
 
     final LoadRule rule = loadForever(ImmutableMap.of(Tier.T1, 1));
-    Assert.assertTrue(rule.shouldMatchingSegmentBeLoaded());
+    Assertions.assertTrue(rule.shouldMatchingSegmentBeLoaded());
     CoordinatorRunStats stats1 = runRuleAndGetStats(rule, dataSegment1, params);
     CoordinatorRunStats stats2 = runRuleAndGetStats(rule, dataSegment2, params);
     CoordinatorRunStats stats3 = runRuleAndGetStats(rule, dataSegment3, params);
 
-    Assert.assertEquals(1L, stats1.getSegmentStat(Stats.Segments.ASSIGNED, Tier.T1, dataSegment1.getDataSource()));
-    Assert.assertEquals(1L, stats2.getSegmentStat(Stats.Segments.ASSIGNED, Tier.T1, dataSegment2.getDataSource()));
-    Assert.assertEquals(0L, stats3.getSegmentStat(Stats.Segments.ASSIGNED, Tier.T1, dataSegment3.getDataSource()));
+    Assertions.assertEquals(1L, stats1.getSegmentStat(Stats.Segments.ASSIGNED, Tier.T1, dataSegment1.getDataSource()));
+    Assertions.assertEquals(1L, stats2.getSegmentStat(Stats.Segments.ASSIGNED, Tier.T1, dataSegment2.getDataSource()));
+    Assertions.assertEquals(0L, stats3.getSegmentStat(Stats.Segments.ASSIGNED, Tier.T1, dataSegment3.getDataSource()));
   }
 
-  @Test
-  public void testSegmentIsAssignedOnlyToActiveServer()
+  @MethodSource("getTestParams")
+  @ParameterizedTest(name = "useRoundRobin = {0}")
+  public void testSegmentIsAssignedOnlyToActiveServer(boolean useRoundRobinAssignment)
   {
+    initLoadRuleTest(useRoundRobinAssignment);
     final ServerHolder decommServerT1 = createDecommissioningServer(Tier.T1);
     final ServerHolder serverT2 = createServer(Tier.T2);
 
@@ -373,19 +390,21 @@ public class LoadRuleTest
 
     // Load rule requires 1 replica on each tier
     LoadRule rule = loadForever(ImmutableMap.of(Tier.T1, 1, Tier.T2, 1));
-    Assert.assertTrue(rule.shouldMatchingSegmentBeLoaded());
+    Assertions.assertTrue(rule.shouldMatchingSegmentBeLoaded());
     DataSegment segment = createDataSegment(DS_WIKI);
     CoordinatorRunStats stats = runRuleAndGetStats(rule, segment, druidCluster);
 
     // Verify that segment is not loaded on decommissioning server
-    Assert.assertEquals(1L, stats.getSegmentStat(Stats.Segments.ASSIGNED, Tier.T2, DS_WIKI));
-    Assert.assertEquals(0, decommServerT1.getLoadingSegments().size());
-    Assert.assertTrue(serverT2.getLoadingSegments().contains(segment));
+    Assertions.assertEquals(1L, stats.getSegmentStat(Stats.Segments.ASSIGNED, Tier.T2, DS_WIKI));
+    Assertions.assertEquals(0, decommServerT1.getLoadingSegments().size());
+    Assertions.assertTrue(serverT2.getLoadingSegments().contains(segment));
   }
 
-  @Test
-  public void testSegmentIsAssignedOnlyToActiveServers()
+  @MethodSource("getTestParams")
+  @ParameterizedTest(name = "useRoundRobin = {0}")
+  public void testSegmentIsAssignedOnlyToActiveServers(boolean useRoundRobinAssignment)
   {
+    initLoadRuleTest(useRoundRobinAssignment);
     // 2 tiers with 2 servers each, 1 server is decommissioning
     ServerHolder decommServerT11 = createDecommissioningServer(Tier.T1);
     ServerHolder serverT12 = createServer(Tier.T1);
@@ -404,20 +423,22 @@ public class LoadRuleTest
     CoordinatorRunStats stats = runRuleAndGetStats(rule, segment, druidCluster);
 
     // Verify that no replica is assigned to decommissioning server
-    Assert.assertEquals(1L, stats.getSegmentStat(Stats.Segments.ASSIGNED, Tier.T1, DS_WIKI));
-    Assert.assertTrue(decommServerT11.getLoadingSegments().isEmpty());
-    Assert.assertEquals(0, decommServerT11.getLoadingSegments().size());
+    Assertions.assertEquals(1L, stats.getSegmentStat(Stats.Segments.ASSIGNED, Tier.T1, DS_WIKI));
+    Assertions.assertTrue(decommServerT11.getLoadingSegments().isEmpty());
+    Assertions.assertEquals(0, decommServerT11.getLoadingSegments().size());
 
-    Assert.assertEquals(2L, stats.getSegmentStat(Stats.Segments.ASSIGNED, Tier.T2, DS_WIKI));
+    Assertions.assertEquals(2L, stats.getSegmentStat(Stats.Segments.ASSIGNED, Tier.T2, DS_WIKI));
   }
 
   /**
    * 2 servers with a segment, one server decommissioning.
    * Should drop a segment from both.
    */
-  @Test
-  public void testDropDuringDecommissioning()
+  @MethodSource("getTestParams")
+  @ParameterizedTest(name = "useRoundRobin = {0}")
+  public void testDropDuringDecommissioning(boolean useRoundRobinAssignment)
   {
+    initLoadRuleTest(useRoundRobinAssignment);
     final DataSegment segment1 = createDataSegment("foo1");
     final DataSegment segment2 = createDataSegment("foo2");
 
@@ -431,19 +452,21 @@ public class LoadRuleTest
 
     DruidCoordinatorRuntimeParams params = makeCoordinatorRuntimeParams(druidCluster, segment1, segment2);
     final LoadRule rule = loadForever(ImmutableMap.of(Tier.T1, 0));
-    Assert.assertFalse(rule.shouldMatchingSegmentBeLoaded());
+    Assertions.assertFalse(rule.shouldMatchingSegmentBeLoaded());
     CoordinatorRunStats stats = runRuleAndGetStats(rule, segment1, params);
-    Assert.assertEquals(1L, stats.getSegmentStat(Stats.Segments.DROPPED, Tier.T1, segment1.getDataSource()));
-    Assert.assertTrue(server1.getPeon().getSegmentsToDrop().contains(segment1));
+    Assertions.assertEquals(1L, stats.getSegmentStat(Stats.Segments.DROPPED, Tier.T1, segment1.getDataSource()));
+    Assertions.assertTrue(server1.getPeon().getSegmentsToDrop().contains(segment1));
 
     stats = runRuleAndGetStats(rule, segment2, params);
-    Assert.assertEquals(1L, stats.getSegmentStat(Stats.Segments.DROPPED, Tier.T1, segment2.getDataSource()));
-    Assert.assertTrue(server2.getPeon().getSegmentsToDrop().contains(segment2));
+    Assertions.assertEquals(1L, stats.getSegmentStat(Stats.Segments.DROPPED, Tier.T1, segment2.getDataSource()));
+    Assertions.assertTrue(server2.getPeon().getSegmentsToDrop().contains(segment2));
   }
 
-  @Test
-  public void testExtraReplicasAreDroppedFromDecommissioningServer()
+  @MethodSource("getTestParams")
+  @ParameterizedTest(name = "useRoundRobin = {0}")
+  public void testExtraReplicasAreDroppedFromDecommissioningServer(boolean useRoundRobinAssignment)
   {
+    initLoadRuleTest(useRoundRobinAssignment);
     final DataSegment segment1 = createDataSegment(DS_WIKI);
 
     // 3 servers, each serving the same segment
@@ -465,10 +488,10 @@ public class LoadRuleTest
     );
 
     // Verify that the extra replica is dropped from the decommissioning server
-    Assert.assertEquals(1L, stats.getSegmentStat(Stats.Segments.DROPPED, Tier.T1, DS_WIKI));
-    Assert.assertEquals(0, server1.getPeon().getSegmentsToDrop().size());
-    Assert.assertEquals(1, server2.getPeon().getSegmentsToDrop().size());
-    Assert.assertEquals(0, server3.getPeon().getSegmentsToDrop().size());
+    Assertions.assertEquals(1L, stats.getSegmentStat(Stats.Segments.DROPPED, Tier.T1, DS_WIKI));
+    Assertions.assertEquals(0, server1.getPeon().getSegmentsToDrop().size());
+    Assertions.assertEquals(1, server2.getPeon().getSegmentsToDrop().size());
+    Assertions.assertEquals(0, server3.getPeon().getSegmentsToDrop().size());
   }
 
   private DataSegment createDataSegment(String dataSource)
@@ -530,9 +553,11 @@ public class LoadRuleTest
     static final String T2 = "tier2";
   }
 
-  @Test
-  public void testEquals()
+  @MethodSource("getTestParams")
+  @ParameterizedTest(name = "useRoundRobin = {0}")
+  public void testEquals(boolean useRoundRobinAssignment)
   {
+    initLoadRuleTest(useRoundRobinAssignment);
     EqualsVerifier.forClass(LoadRule.class)
                   .withNonnullFields("tieredReplicants")
                   .withIgnoredFields("shouldSegmentBeLoaded")

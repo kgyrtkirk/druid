@@ -22,8 +22,8 @@ package org.apache.druid.frame.key;
 import com.google.common.collect.ImmutableList;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.apache.druid.java.util.common.guava.Comparators;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 
@@ -37,7 +37,7 @@ public class ClusterByTest
         new KeyColumn("y", KeyOrder.ASCENDING)
     );
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         RowKeyComparator.create(keyColumns),
         new ClusterBy(keyColumns, 1).keyComparator()
     );
@@ -46,13 +46,13 @@ public class ClusterByTest
   @Test
   public void test_bucketComparator_noKey()
   {
-    Assert.assertSame(Comparators.alwaysEqual(), ClusterBy.none().bucketComparator());
+    Assertions.assertSame(Comparators.alwaysEqual(), ClusterBy.none().bucketComparator());
   }
 
   @Test
   public void test_bucketComparator_noBucketKey()
   {
-    Assert.assertSame(
+    Assertions.assertSame(
         Comparators.alwaysEqual(),
         new ClusterBy(
             ImmutableList.of(
@@ -67,7 +67,7 @@ public class ClusterByTest
   @Test
   public void test_bucketComparator_withBucketKey()
   {
-    Assert.assertEquals(
+    Assertions.assertEquals(
         RowKeyComparator.create(ImmutableList.of(new KeyColumn("x", KeyOrder.ASCENDING))),
         new ClusterBy(
             ImmutableList.of(
@@ -82,7 +82,7 @@ public class ClusterByTest
   @Test
   public void test_sortable()
   {
-    Assert.assertFalse(
+    Assertions.assertFalse(
         new ClusterBy(
             ImmutableList.of(
                 new KeyColumn("x", KeyOrder.NONE),
@@ -92,7 +92,7 @@ public class ClusterByTest
         ).sortable()
     );
 
-    Assert.assertTrue(
+    Assertions.assertTrue(
         new ClusterBy(
             ImmutableList.of(
                 new KeyColumn("x", KeyOrder.ASCENDING),
@@ -102,7 +102,7 @@ public class ClusterByTest
         ).sortable()
     );
 
-    Assert.assertTrue(new ClusterBy(Collections.emptyList(), 0).sortable());
+    Assertions.assertTrue(new ClusterBy(Collections.emptyList(), 0).sortable());
   }
 
   @Test

@@ -25,7 +25,6 @@ import nl.jqno.equalsverifier.EqualsVerifier;
 import org.apache.druid.jackson.DefaultObjectMapper;
 import org.apache.druid.query.aggregation.AggregatorFactory;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.io.IOException;
 

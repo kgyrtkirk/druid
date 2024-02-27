@@ -27,19 +27,18 @@ import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.segment.join.table.IndexedTableJoinable;
 import org.hamcrest.CoreMatchers;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class InlineJoinableFactoryTest
 {
   private static final String PREFIX = "j.";
-
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
 
   private final InlineJoinableFactory factory = new InlineJoinableFactory();
 
@@ -54,16 +53,17 @@ public class InlineJoinableFactoryTest
   @Test
   public void testBuildNonInline()
   {
-    expectedException.expect(ClassCastException.class);
-    expectedException.expectMessage("TableDataSource cannot be cast");
+    Throwable exception = assertThrows(ClassCastException.class, () -> {
 
-    final Optional<Joinable> ignored = factory.build(new TableDataSource("foo"), makeCondition("x == \"j.y\""));
+      final Optional<Joinable> ignored = factory.build(new TableDataSource("foo"), makeCondition("x == \"j.y\""));
+    });
+    assertTrue(exception.getMessage().contains("TableDataSource cannot be cast"));
   }
 
   @Test
   public void testBuildNonHashJoin()
   {
-    Assert.assertEquals(
+    Assertions.assertEquals(
         Optional.empty(),
         factory.build(inlineDataSource, makeCondition("x > \"j.y\""))
     );
@@ -74,17 +74,17 @@ public class InlineJoinableFactoryTest
   {
     final Joinable joinable = factory.build(inlineDataSource, makeCondition("x == \"j.long\"")).get();
 
-    Assert.assertThat(joinable, CoreMatchers.instanceOf(IndexedTableJoinable.class));
-    Assert.assertEquals(ImmutableList.of("str", "long"), joinable.getAvailableColumns());
-    Assert.assertEquals(3, joinable.getCardinality("str"));
-    Assert.assertEquals(3, joinable.getCardinality("long"));
+    assertThat(joinable, CoreMatchers.instanceOf(IndexedTableJoinable.class));
+    Assertions.assertEquals(ImmutableList.of("str", "long"), joinable.getAvailableColumns());
+    Assertions.assertEquals(3, joinable.getCardinality("str"));
+    Assertions.assertEquals(3, joinable.getCardinality("long"));
   }
 
   @Test
   public void testIsDirectlyJoinable()
   {
-    Assert.assertTrue(factory.isDirectlyJoinable(inlineDataSource));
-    Assert.assertFalse(factory.isDirectlyJoinable(new TableDataSource("foo")));
+    Assertions.assertTrue(factory.isDirectlyJoinable(inlineDataSource));
+    Assertions.assertFalse(factory.isDirectlyJoinable(new TableDataSource("foo")));
   }
 
   private static JoinConditionAnalysis makeCondition(final String condition)

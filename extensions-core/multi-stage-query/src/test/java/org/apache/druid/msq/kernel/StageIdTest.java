@@ -25,7 +25,6 @@ import com.google.common.collect.Ordering;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.apache.druid.segment.TestHelper;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.util.List;
 

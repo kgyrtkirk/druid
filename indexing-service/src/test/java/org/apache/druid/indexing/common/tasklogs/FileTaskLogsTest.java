@@ -33,7 +33,6 @@ import org.apache.druid.segment.TestHelper;
 import org.apache.druid.tasklogs.TaskLogs;
 import org.junit.Assert;
 import org.junit.Rule;
-import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
 

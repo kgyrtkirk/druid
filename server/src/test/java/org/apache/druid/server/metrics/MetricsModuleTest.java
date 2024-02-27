@@ -50,10 +50,9 @@ import org.apache.druid.java.util.metrics.OshiSysMonitor;
 import org.apache.druid.java.util.metrics.SysMonitor;
 import org.apache.druid.server.DruidNode;
 import org.hamcrest.CoreMatchers;
-import org.junit.Assert;
-import org.junit.Assume;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
@@ -65,9 +64,6 @@ import java.util.Properties;
 public class MetricsModuleTest
 {
   private static final String CPU_ARCH = System.getProperty("os.arch");
-
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
 
   @Test
   public void testSimpleInjection()
@@ -89,8 +85,8 @@ public class MetricsModuleTest
     );
     final DataSourceTaskIdHolder dimensionIdHolder = new DataSourceTaskIdHolder();
     injector.injectMembers(dimensionIdHolder);
-    Assert.assertNull(dimensionIdHolder.getDataSource());
-    Assert.assertNull(dimensionIdHolder.getTaskId());
+    Assertions.assertNull(dimensionIdHolder.getDataSource());
+    Assertions.assertNull(dimensionIdHolder.getTaskId());
   }
 
   @Test
@@ -119,8 +115,8 @@ public class MetricsModuleTest
     );
     final DataSourceTaskIdHolder dimensionIdHolder = new DataSourceTaskIdHolder();
     injector.injectMembers(dimensionIdHolder);
-    Assert.assertEquals(dataSource, dimensionIdHolder.getDataSource());
-    Assert.assertEquals(taskId, dimensionIdHolder.getTaskId());
+    Assertions.assertEquals(dataSource, dimensionIdHolder.getDataSource());
+    Assertions.assertEquals(taskId, dimensionIdHolder.getTaskId());
   }
 
   @Test
@@ -128,7 +124,7 @@ public class MetricsModuleTest
   {
     final MonitorScheduler monitorScheduler =
         createInjector(new Properties(), ImmutableSet.of()).getInstance(MonitorScheduler.class);
-    Assert.assertSame(BasicMonitorScheduler.class, monitorScheduler.getClass());
+    Assertions.assertSame(BasicMonitorScheduler.class, monitorScheduler.getClass());
   }
 
   @Test
@@ -141,7 +137,7 @@ public class MetricsModuleTest
     );
     final MonitorScheduler monitorScheduler =
         createInjector(properties, ImmutableSet.of()).getInstance(MonitorScheduler.class);
-    Assert.assertSame(ClockDriftSafeMonitorScheduler.class, monitorScheduler.getClass());
+    Assertions.assertSame(ClockDriftSafeMonitorScheduler.class, monitorScheduler.getClass());
   }
 
   @Test
@@ -154,7 +150,7 @@ public class MetricsModuleTest
     );
     final MonitorScheduler monitorScheduler =
         createInjector(properties, ImmutableSet.of()).getInstance(MonitorScheduler.class);
-    Assert.assertSame(BasicMonitorScheduler.class, monitorScheduler.getClass());
+    Assertions.assertSame(BasicMonitorScheduler.class, monitorScheduler.getClass());
   }
 
   @Test
@@ -175,14 +171,14 @@ public class MetricsModuleTest
   public void testGetSysMonitorViaInjector()
   {
     // Do not run the tests on ARM64. Sigar library has no binaries for ARM64
-    Assume.assumeFalse("aarch64".equals(CPU_ARCH));
+    Assumptions.assumeFalse("aarch64".equals(CPU_ARCH));
 
     final Injector injector = createInjector(new Properties(), ImmutableSet.of(NodeRole.PEON));
     final SysMonitor sysMonitor = injector.getInstance(SysMonitor.class);
     final ServiceEmitter emitter = Mockito.mock(ServiceEmitter.class);
     sysMonitor.doMonitor(emitter);
 
-    Assert.assertTrue(sysMonitor instanceof NoopSysMonitor);
+    Assertions.assertTrue(sysMonitor instanceof NoopSysMonitor);
     Mockito.verify(emitter, Mockito.never()).emit(ArgumentMatchers.any(ServiceEventBuilder.class));
   }
 
@@ -190,14 +186,14 @@ public class MetricsModuleTest
   public void testGetSysMonitorWhenNull()
   {
     // Do not run the tests on ARM64. Sigar library has no binaries for ARM64
-    Assume.assumeFalse("aarch64".equals(CPU_ARCH));
+    Assumptions.assumeFalse("aarch64".equals(CPU_ARCH));
 
     Injector injector = createInjector(new Properties(), ImmutableSet.of());
     final SysMonitor sysMonitor = injector.getInstance(SysMonitor.class);
     final ServiceEmitter emitter = Mockito.mock(ServiceEmitter.class);
     sysMonitor.doMonitor(emitter);
 
-    Assert.assertFalse(sysMonitor instanceof NoopSysMonitor);
+    Assertions.assertFalse(sysMonitor instanceof NoopSysMonitor);
     Mockito.verify(emitter, Mockito.atLeastOnce()).emit(ArgumentMatchers.any(ServiceEventBuilder.class));
   }
   @Test
@@ -209,7 +205,7 @@ public class MetricsModuleTest
     final ServiceEmitter emitter = Mockito.mock(ServiceEmitter.class);
     sysMonitor.doMonitor(emitter);
 
-    Assert.assertTrue(sysMonitor instanceof NoopOshiSysMonitor);
+    Assertions.assertTrue(sysMonitor instanceof NoopOshiSysMonitor);
     Mockito.verify(emitter, Mockito.never()).emit(ArgumentMatchers.any(ServiceEventBuilder.class));
   }
   @Test
@@ -221,7 +217,7 @@ public class MetricsModuleTest
     final ServiceEmitter emitter = Mockito.mock(ServiceEmitter.class);
     sysMonitor.doMonitor(emitter);
 
-    Assert.assertFalse(sysMonitor instanceof NoopOshiSysMonitor);
+    Assertions.assertFalse(sysMonitor instanceof NoopOshiSysMonitor);
     Mockito.verify(emitter, Mockito.atLeastOnce()).emit(ArgumentMatchers.any(ServiceEventBuilder.class));
   }
 

@@ -24,8 +24,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.druid.jackson.DefaultObjectMapper;
 import org.apache.druid.java.util.common.granularity.Granularities;
 import org.apache.druid.sql.destination.TableDestination;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 
@@ -37,11 +37,11 @@ public class ExplainAttributesTest
   public void testSimpleGetters()
   {
     ExplainAttributes selectAttributes = new ExplainAttributes("SELECT", null, null, null, null);
-    Assert.assertEquals("SELECT", selectAttributes.getStatementType());
-    Assert.assertNull(selectAttributes.getTargetDataSource());
-    Assert.assertNull(selectAttributes.getPartitionedBy());
-    Assert.assertNull(selectAttributes.getClusteredBy());
-    Assert.assertNull(selectAttributes.getReplaceTimeChunks());
+    Assertions.assertEquals("SELECT", selectAttributes.getStatementType());
+    Assertions.assertNull(selectAttributes.getTargetDataSource());
+    Assertions.assertNull(selectAttributes.getPartitionedBy());
+    Assertions.assertNull(selectAttributes.getClusteredBy());
+    Assertions.assertNull(selectAttributes.getReplaceTimeChunks());
   }
 
   @Test
@@ -57,7 +57,7 @@ public class ExplainAttributesTest
     final String expectedAttributes = "{"
                                       + "\"statementType\":\"SELECT\""
                                       + "}";
-    Assert.assertEquals(expectedAttributes, DEFAULT_OBJECT_MAPPER.writeValueAsString(selectAttributes));
+    Assertions.assertEquals(expectedAttributes, DEFAULT_OBJECT_MAPPER.writeValueAsString(selectAttributes));
   }
 
   @Test
@@ -75,7 +75,7 @@ public class ExplainAttributesTest
                                       + "\"targetDataSource\":{\"type\":\"table\",\"tableName\":\"foo\"},"
                                       + "\"partitionedBy\":\"DAY\""
                                       + "}";
-    Assert.assertEquals(expectedAttributes, DEFAULT_OBJECT_MAPPER.writeValueAsString(insertAttributes));
+    Assertions.assertEquals(expectedAttributes, DEFAULT_OBJECT_MAPPER.writeValueAsString(insertAttributes));
   }
 
   @Test
@@ -93,7 +93,7 @@ public class ExplainAttributesTest
                                       + "\"targetDataSource\":{\"type\":\"table\",\"tableName\":\"foo\"},"
                                       + "\"partitionedBy\":{\"type\":\"all\"}"
                                       + "}";
-    Assert.assertEquals(expectedAttributes, DEFAULT_OBJECT_MAPPER.writeValueAsString(insertAttributes));
+    Assertions.assertEquals(expectedAttributes, DEFAULT_OBJECT_MAPPER.writeValueAsString(insertAttributes));
   }
 
   @Test
@@ -112,7 +112,7 @@ public class ExplainAttributesTest
         + "\"partitionedBy\":\"HOUR\","
         + "\"replaceTimeChunks\":\"ALL\""
         + "}";
-    Assert.assertEquals(expectedAttributes1, DEFAULT_OBJECT_MAPPER.writeValueAsString(replaceAttributes1));
+    Assertions.assertEquals(expectedAttributes1, DEFAULT_OBJECT_MAPPER.writeValueAsString(replaceAttributes1));
 
 
     ExplainAttributes replaceAttributes2 = new ExplainAttributes(
@@ -128,7 +128,7 @@ public class ExplainAttributesTest
                                       + "\"partitionedBy\":\"HOUR\","
                                       + "\"replaceTimeChunks\":\"2019-08-25T02:00:00.000Z/2019-08-25T03:00:00.000Z\""
                                       + "}";
-    Assert.assertEquals(expectedAttributes2, DEFAULT_OBJECT_MAPPER.writeValueAsString(replaceAttributes2));
+    Assertions.assertEquals(expectedAttributes2, DEFAULT_OBJECT_MAPPER.writeValueAsString(replaceAttributes2));
   }
 
   @Test
@@ -148,7 +148,7 @@ public class ExplainAttributesTest
                                        + "\"clusteredBy\":[\"foo\",\"CEIL(`f2`)\"],"
                                        + "\"replaceTimeChunks\":\"ALL\""
                                        + "}";
-    Assert.assertEquals(expectedAttributes1, DEFAULT_OBJECT_MAPPER.writeValueAsString(replaceAttributes1));
+    Assertions.assertEquals(expectedAttributes1, DEFAULT_OBJECT_MAPPER.writeValueAsString(replaceAttributes1));
 
 
     ExplainAttributes replaceAttributes2 = new ExplainAttributes(
@@ -165,6 +165,6 @@ public class ExplainAttributesTest
                                        + "\"clusteredBy\":[\"foo\",\"boo\"],"
                                        + "\"replaceTimeChunks\":\"2019-08-25T02:00:00.000Z/2019-08-25T03:00:00.000Z\""
                                        + "}";
-    Assert.assertEquals(expectedAttributes2, DEFAULT_OBJECT_MAPPER.writeValueAsString(replaceAttributes2));
+    Assertions.assertEquals(expectedAttributes2, DEFAULT_OBJECT_MAPPER.writeValueAsString(replaceAttributes2));
   }
 }

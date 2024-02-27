@@ -27,16 +27,14 @@ import org.apache.druid.segment.writeout.OffHeapMemorySegmentWriteOutMedium;
 import org.apache.druid.segment.writeout.SegmentWriteOutMedium;
 import org.apache.druid.segment.writeout.TmpFileSegmentWriteOutMediumFactory;
 import org.apache.druid.utils.CloseableUtils;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -48,10 +46,10 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-@RunWith(Parameterized.class)
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public class CompressedLongsSerdeTest
 {
-  @Parameterized.Parameters(name = "{0} {1} {2}")
   public static Iterable<Object[]> compressionStrategies()
   {
     List<Object[]> data = new ArrayList<>();
@@ -64,15 +62,12 @@ public class CompressedLongsSerdeTest
     return data;
   }
 
-  @Rule
-  public TemporaryFolder temporaryFolder = new TemporaryFolder();
+  @TempDir
+  public File temporaryFolder;
 
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
-
-  protected final CompressionFactory.LongEncodingStrategy encodingStrategy;
-  protected final CompressionStrategy compressionStrategy;
-  protected final ByteOrder order;
+  protected CompressionFactory.LongEncodingStrategy encodingStrategy;
+  protected CompressionStrategy compressionStrategy;
+  protected ByteOrder order;
 
   private final long[] values0 = {};
   private final long[] values1 = {0, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 1};
@@ -98,7 +93,7 @@ public class CompressedLongsSerdeTest
     return ret;
   }
 
-  public CompressedLongsSerdeTest(
+  public void initCompressedLongsSerdeTest(
       CompressionFactory.LongEncodingStrategy encodingStrategy,
       CompressionStrategy compressionStrategy,
       ByteOrder order
@@ -109,9 +104,11 @@ public class CompressedLongsSerdeTest
     this.order = order;
   }
 
-  @Test
-  public void testValueSerde() throws Exception
+  @MethodSource("compressionStrategies")
+  @ParameterizedTest(name = "{0} {1} {2}")
+  public void testValueSerde(CompressionFactory.LongEncodingStrategy encodingStrategy, CompressionStrategy compressionStrategy, ByteOrder order) throws Exception
   {
+    initCompressedLongsSerdeTest(encodingStrategy, compressionStrategy, order);
     testWithValues(values0);
     testWithValues(values1);
     testWithValues(values2);
@@ -123,9 +120,11 @@ public class CompressedLongsSerdeTest
     testWithValues(values8);
   }
 
-  @Test
-  public void testChunkSerde() throws Exception
+  @MethodSource("compressionStrategies")
+  @ParameterizedTest(name = "{0} {1} {2}")
+  public void testChunkSerde(CompressionFactory.LongEncodingStrategy encodingStrategy, CompressionStrategy compressionStrategy, ByteOrder order) throws Exception
   {
+    initCompressedLongsSerdeTest(encodingStrategy, compressionStrategy, order);
     long[] chunk = new long[10000];
     for (int i = 0; i < 10000; i++) {
       chunk[i] = i;
@@ -134,35 +133,38 @@ public class CompressedLongsSerdeTest
   }
 
   // this test takes ~50 minutes to run (even skipping 'auto')
-  @Ignore
-  @Test
-  public void testTooManyValues() throws IOException
+  @Disabled
+  @MethodSource("compressionStrategies")
+  @ParameterizedTest(name = "{0} {1} {2}")
+  public void testTooManyValues(CompressionFactory.LongEncodingStrategy encodingStrategy, CompressionStrategy compressionStrategy, ByteOrder order) throws IOException
   {
-    // uncomment this if 'auto' encoded long unbounded heap usage gets put in check and this can actually pass
-    if (encodingStrategy.equals(CompressionFactory.LongEncodingStrategy.AUTO)) {
-      return;
-    }
-    expectedException.expect(ColumnCapacityExceededException.class);
-    expectedException.expectMessage(ColumnCapacityExceededException.formatMessage("test"));
-    try (
-        SegmentWriteOutMedium segmentWriteOutMedium =
-            TmpFileSegmentWriteOutMediumFactory.instance().makeSegmentWriteOutMedium(temporaryFolder.newFolder())
-    ) {
-      ColumnarLongsSerializer serializer = CompressionFactory.getLongSerializer(
-          "test",
-          segmentWriteOutMedium,
-          "test",
-          order,
-          encodingStrategy,
-          compressionStrategy
-      );
-      serializer.open();
-
-      final long numRows = Integer.MAX_VALUE + 100L;
-      for (long i = 0L; i < numRows; i++) {
-        serializer.add(ThreadLocalRandom.current().nextLong());
+    Throwable exception = assertThrows(ColumnCapacityExceededException.class, () -> {
+      initCompressedLongsSerdeTest(encodingStrategy, compressionStrategy, order);
+      // uncomment this if 'auto' encoded long unbounded heap usage gets put in check and this can actually pass
+      if (encodingStrategy.equals(CompressionFactory.LongEncodingStrategy.AUTO)) {
+        return;
       }
-    }
+      try (
+        SegmentWriteOutMedium segmentWriteOutMedium =
+              TmpFileSegmentWriteOutMediumFactory.instance().makeSegmentWriteOutMedium(newFolder(temporaryFolder, "junit"))
+          ) {
+        ColumnarLongsSerializer serializer = CompressionFactory.getLongSerializer(
+            "test",
+            segmentWriteOutMedium,
+            "test",
+            order,
+            encodingStrategy,
+            compressionStrategy
+        );
+        serializer.open();
+
+        final long numRows = Integer.MAX_VALUE + 100L;
+        for (long i = 0L; i < numRows; i++) {
+          serializer.add(ThreadLocalRandom.current().nextLong());
+        }
+      }
+    });
+    assertTrue(exception.getMessage().contains(ColumnCapacityExceededException.formatMessage("test")));
   }
 
   public void testWithValues(long[] values) throws Exception
@@ -186,11 +188,11 @@ public class CompressedLongsSerdeTest
     for (long value : values) {
       serializer.add(value);
     }
-    Assert.assertEquals(values.length, serializer.size());
+    Assertions.assertEquals(values.length, serializer.size());
 
     final ByteArrayOutputStream baos = new ByteArrayOutputStream();
     serializer.writeTo(Channels.newChannel(baos), null);
-    Assert.assertEquals(baos.size(), serializer.getSerializedSize());
+    Assertions.assertEquals(baos.size(), serializer.getSerializedSize());
     CompressedColumnarLongsSupplier supplier = CompressedColumnarLongsSupplier
         .fromByteBuffer(ByteBuffer.wrap(baos.toByteArray()), order);
     try (ColumnarLongs longs = supplier.get()) {
@@ -214,13 +216,13 @@ public class CompressedLongsSerdeTest
     indexed.get(filled, startIndex, size);
 
     for (int i = startIndex; i < filled.length; i++) {
-      Assert.assertEquals(vals[i + startIndex], filled[i]);
+      Assertions.assertEquals(vals[i + startIndex], filled[i]);
     }
   }
 
   private void assertIndexMatchesVals(ColumnarLongs indexed, long[] vals)
   {
-    Assert.assertEquals(vals.length, indexed.size());
+    Assertions.assertEquals(vals.length, indexed.size());
 
     // sequential access
     long[] vector = new long[256];
@@ -229,8 +231,8 @@ public class CompressedLongsSerdeTest
       if (i % 256 == 0) {
         indexed.get(vector, i, Math.min(256, indexed.size() - i));
       }
-      Assert.assertEquals(vals[i], indexed.get(i));
-      Assert.assertEquals(vals[i], vector[i % 256]);
+      Assertions.assertEquals(vals[i], indexed.get(i));
+      Assertions.assertEquals(vals[i], vector[i % 256]);
       indices[i] = i;
     }
 
@@ -240,7 +242,7 @@ public class CompressedLongsSerdeTest
     final int limit = Math.min(indexed.size(), 1000);
     for (int i = 0; i < limit; ++i) {
       int k = indices[i];
-      Assert.assertEquals(vals[k], indexed.get(k));
+      Assertions.assertEquals(vals[k], indexed.get(k));
     }
   }
 
@@ -250,7 +252,7 @@ public class CompressedLongsSerdeTest
     supplier.writeTo(Channels.newChannel(baos), null);
 
     final byte[] bytes = baos.toByteArray();
-    Assert.assertEquals(supplier.getSerializedSize(), bytes.length);
+    Assertions.assertEquals(supplier.getSerializedSize(), bytes.length);
     CompressedColumnarLongsSupplier anotherSupplier = CompressedColumnarLongsSupplier.fromByteBuffer(
         ByteBuffer.wrap(bytes),
         order
@@ -360,7 +362,16 @@ public class CompressedLongsSerdeTest
     }
 
     if (failureHappened.get()) {
-      Assert.fail("Failure happened.  Reason: " + reason.get());
+      Assertions.fail("Failure happened.  Reason: " + reason.get());
     }
+  }
+
+  private static File newFolder(File root, String... subDirs) throws IOException {
+    String subFolder = String.join("/", subDirs);
+    File result = new File(root, subFolder);
+    if (!result.mkdirs()) {
+      throw new IOException("Couldn't create folders " + root);
+    }
+    return result;
   }
 }

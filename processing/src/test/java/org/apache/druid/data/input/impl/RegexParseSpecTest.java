@@ -21,8 +21,8 @@ package org.apache.druid.data.input.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.druid.jackson.DefaultObjectMapper;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -47,11 +47,11 @@ public class RegexParseSpecTest
         jsonMapper.writeValueAsString(spec),
         ParseSpec.class
     );
-    Assert.assertEquals("abc", serde.getTimestampSpec().getTimestampColumn());
-    Assert.assertEquals("iso", serde.getTimestampSpec().getTimestampFormat());
+    Assertions.assertEquals("abc", serde.getTimestampSpec().getTimestampColumn());
+    Assertions.assertEquals("iso", serde.getTimestampSpec().getTimestampFormat());
 
-    Assert.assertEquals("abc", serde.getPattern());
-    Assert.assertEquals("\u0001", serde.getListDelimiter());
-    Assert.assertEquals(Collections.singletonList("abc"), serde.getDimensionsSpec().getDimensionNames());
+    Assertions.assertEquals("abc", serde.getPattern());
+    Assertions.assertEquals("\u0001", serde.getListDelimiter());
+    Assertions.assertEquals(Collections.singletonList("abc"), serde.getDimensionsSpec().getDimensionNames());
   }
 }

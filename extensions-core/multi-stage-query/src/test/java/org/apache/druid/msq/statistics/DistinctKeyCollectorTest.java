@@ -31,7 +31,6 @@ import org.apache.druid.java.util.common.Pair;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.util.Collections;
 import java.util.Comparator;

@@ -58,7 +58,6 @@ import org.joda.time.Duration;
 import org.joda.time.Interval;
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Test;
 
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServletRequest;

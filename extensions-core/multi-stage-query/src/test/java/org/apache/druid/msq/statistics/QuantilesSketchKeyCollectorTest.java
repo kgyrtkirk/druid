@@ -32,7 +32,6 @@ import org.apache.druid.java.util.common.Pair;
 import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.column.RowSignature;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.util.Collections;
 import java.util.Comparator;

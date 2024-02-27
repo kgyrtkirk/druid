@@ -31,24 +31,22 @@ import org.apache.druid.segment.CloserRule;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.easymock.EasyMock;
 import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Collection;
 import java.util.Collections;
 
-@RunWith(Parameterized.class)
 public class IncrementalIndexIngestionTest extends InitializedNullHandlingTest
 {
   private static final int MAX_ROWS = 100_000;
 
-  public final IncrementalIndexCreator indexCreator;
+  public IncrementalIndexCreator indexCreator;
 
   @Rule
   public final CloserRule closer = new CloserRule(false);
 
-  public IncrementalIndexIngestionTest(String indexType) throws JsonProcessingException
+  public void initIncrementalIndexIngestionTest(String indexType) throws JsonProcessingException
   {
     NestedDataModule.registerHandlersAndSerde();
     indexCreator = closer.closeLater(new IncrementalIndexCreator(indexType, (builder, args) -> builder
@@ -58,15 +56,16 @@ public class IncrementalIndexIngestionTest extends InitializedNullHandlingTest
     ));
   }
 
-  @Parameterized.Parameters(name = "{index}: {0}")
   public static Collection<?> constructorFeeder()
   {
     return IncrementalIndexCreator.getAppendableIndexTypes();
   }
 
-  @Test
-  public void testOnHeapIncrementalIndexClose() throws Exception
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{index}: {0}")
+  public void testOnHeapIncrementalIndexClose(String indexType) throws Exception
   {
+    initIncrementalIndexIngestionTest(indexType);
     // Prepare the mocks & set close() call count expectation to 1
     Aggregator mockedAggregator = EasyMock.createMock(LongMaxAggregator.class);
     mockedAggregator.close();

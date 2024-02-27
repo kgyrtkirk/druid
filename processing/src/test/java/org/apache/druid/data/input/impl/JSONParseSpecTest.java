@@ -27,8 +27,8 @@ import org.apache.druid.java.util.common.parsers.JSONPathFieldSpec;
 import org.apache.druid.java.util.common.parsers.JSONPathFieldType;
 import org.apache.druid.java.util.common.parsers.JSONPathSpec;
 import org.apache.druid.java.util.common.parsers.Parser;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -74,13 +74,13 @@ public class JSONParseSpecTest
 
     final Parser<String, Object> parser = parseSpec.makeParser();
     final Map<String, Object> parsedRow = parser.parseToMap("{\"bar\":null,\"foo\":\"x\",\"baz\":4,\"o\":{\"mg\":1}}");
-    Assert.assertNotNull(parsedRow);
-    Assert.assertEquals(expected, parsedRow);
-    Assert.assertNull(parsedRow.get("bar"));
-    Assert.assertNull(parsedRow.get("buzz"));
-    Assert.assertNull(parsedRow.get("root_baz2"));
-    Assert.assertNull(parsedRow.get("jq_omg2"));
-    Assert.assertNull(parsedRow.get("path_omg2"));
+    Assertions.assertNotNull(parsedRow);
+    Assertions.assertEquals(expected, parsedRow);
+    Assertions.assertNull(parsedRow.get("bar"));
+    Assertions.assertNull(parsedRow.get("buzz"));
+    Assertions.assertNull(parsedRow.get("root_baz2"));
+    Assertions.assertNull(parsedRow.get("jq_omg2"));
+    Assertions.assertNull(parsedRow.get("path_omg2"));
   }
 
   @Test
@@ -109,8 +109,8 @@ public class JSONParseSpecTest
     final Parser<String, Object> parser = parseSpec.makeParser();
     final Map<String, Object> parsedRow = parser.parseToMap("{\"something_else\": {\"foo\": \"test\"}}");
 
-    Assert.assertNotNull(parsedRow);
-    Assert.assertEquals(expected, parsedRow);
+    Assertions.assertNotNull(parsedRow);
+    Assertions.assertEquals(expected, parsedRow);
   }
 
   @Test
@@ -146,8 +146,8 @@ public class JSONParseSpecTest
     final Parser<String, Object> parser = parseSpec.makeParser();
     final Map<String, Object> parsedRow = parser.parseToMap("{\"baz\":[\"1\",null,\"2\",null],\"nullFoo\":{\"value\":[null,null]},\"something_else\": {\"foo\": \"test\"}}");
 
-    Assert.assertNotNull(parsedRow);
-    Assert.assertEquals(expected, parsedRow);
+    Assertions.assertNotNull(parsedRow);
+    Assertions.assertEquals(expected, parsedRow);
   }
 
   @Test
@@ -167,11 +167,11 @@ public class JSONParseSpecTest
         jsonMapper.writeValueAsString(spec),
         ParseSpec.class
     );
-    Assert.assertEquals("timestamp", serde.getTimestampSpec().getTimestampColumn());
-    Assert.assertEquals("iso", serde.getTimestampSpec().getTimestampFormat());
+    Assertions.assertEquals("timestamp", serde.getTimestampSpec().getTimestampColumn());
+    Assertions.assertEquals("iso", serde.getTimestampSpec().getTimestampFormat());
 
-    Assert.assertEquals(Arrays.asList("bar", "foo"), serde.getDimensionsSpec().getDimensionNames());
-    Assert.assertEquals(feature, serde.getFeatureSpec());
+    Assertions.assertEquals(Arrays.asList("bar", "foo"), serde.getDimensionsSpec().getDimensionNames());
+    Assertions.assertEquals(feature, serde.getFeatureSpec());
   }
 
   @Test

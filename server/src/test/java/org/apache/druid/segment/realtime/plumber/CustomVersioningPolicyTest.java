@@ -23,8 +23,8 @@ import org.apache.druid.server.ServerTestHelper;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class CustomVersioningPolicyTest
 {
@@ -42,7 +42,7 @@ public class CustomVersioningPolicyTest
         CustomVersioningPolicy.class
     );
 
-    Assert.assertEquals(version, policy.getVersion(interval));
-    Assert.assertEquals(version, serialized.getVersion(interval));
+    Assertions.assertEquals(version, policy.getVersion(interval));
+    Assertions.assertEquals(version, serialized.getVersion(interval));
   }
 }

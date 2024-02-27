@@ -33,8 +33,8 @@ import org.apache.druid.timeline.DataSegment.PruneSpecsHolder;
 import org.apache.druid.timeline.partition.NoneShardSpec;
 import org.apache.druid.timeline.partition.ShardSpec;
 import org.joda.time.Interval;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
@@ -89,20 +89,20 @@ public class SegmentStatusInClusterTest
         JacksonUtils.TYPE_REFERENCE_MAP_STRING_OBJECT
     );
 
-    Assert.assertEquals(14, objectMap.size());
-    Assert.assertEquals("something", objectMap.get("dataSource"));
-    Assert.assertEquals(INTERVAL.toString(), objectMap.get("interval"));
-    Assert.assertEquals("1", objectMap.get("version"));
-    Assert.assertEquals(LOAD_SPEC, objectMap.get("loadSpec"));
-    Assert.assertEquals("dim1,dim2", objectMap.get("dimensions"));
-    Assert.assertEquals("met1,met2", objectMap.get("metrics"));
-    Assert.assertEquals(ImmutableMap.of("type", "none"), objectMap.get("shardSpec"));
-    Assert.assertEquals(TEST_VERSION, objectMap.get("binaryVersion"));
-    Assert.assertEquals(1, objectMap.get("size"));
-    Assert.assertEquals(OVERSHADOWED, objectMap.get("overshadowed"));
-    Assert.assertEquals(REPLICATION_FACTOR, objectMap.get("replicationFactor"));
-    Assert.assertEquals(NUM_ROWS.intValue(), objectMap.get("numRows"));
-    Assert.assertEquals(REALTIME, objectMap.get("realtime"));
+    Assertions.assertEquals(14, objectMap.size());
+    Assertions.assertEquals("something", objectMap.get("dataSource"));
+    Assertions.assertEquals(INTERVAL.toString(), objectMap.get("interval"));
+    Assertions.assertEquals("1", objectMap.get("version"));
+    Assertions.assertEquals(LOAD_SPEC, objectMap.get("loadSpec"));
+    Assertions.assertEquals("dim1,dim2", objectMap.get("dimensions"));
+    Assertions.assertEquals("met1,met2", objectMap.get("metrics"));
+    Assertions.assertEquals(ImmutableMap.of("type", "none"), objectMap.get("shardSpec"));
+    Assertions.assertEquals(TEST_VERSION, objectMap.get("binaryVersion"));
+    Assertions.assertEquals(1, objectMap.get("size"));
+    Assertions.assertEquals(OVERSHADOWED, objectMap.get("overshadowed"));
+    Assertions.assertEquals(REPLICATION_FACTOR, objectMap.get("replicationFactor"));
+    Assertions.assertEquals(NUM_ROWS.intValue(), objectMap.get("numRows"));
+    Assertions.assertEquals(REALTIME, objectMap.get("realtime"));
 
     final String json = MAPPER.writeValueAsString(SEGMENT);
 
@@ -112,17 +112,17 @@ public class SegmentStatusInClusterTest
     );
 
     DataSegment dataSegment = SEGMENT.getDataSegment();
-    Assert.assertEquals(dataSegment.getDataSource(), deserializedSegment.getDataSource());
-    Assert.assertEquals(dataSegment.getInterval(), deserializedSegment.getInterval());
-    Assert.assertEquals(dataSegment.getVersion(), deserializedSegment.getVersion());
-    Assert.assertEquals(dataSegment.getLoadSpec(), deserializedSegment.getLoadSpec());
-    Assert.assertEquals(dataSegment.getDimensions(), deserializedSegment.getDimensions());
-    Assert.assertEquals(dataSegment.getMetrics(), deserializedSegment.getMetrics());
-    Assert.assertEquals(dataSegment.getShardSpec(), deserializedSegment.getShardSpec());
-    Assert.assertEquals(dataSegment.getSize(), deserializedSegment.getSize());
-    Assert.assertEquals(dataSegment.getId(), deserializedSegment.getId());
-    Assert.assertEquals(OVERSHADOWED, deserializedSegment.isOvershadowed());
-    Assert.assertEquals(REPLICATION_FACTOR, deserializedSegment.getReplicationFactor());
+    Assertions.assertEquals(dataSegment.getDataSource(), deserializedSegment.getDataSource());
+    Assertions.assertEquals(dataSegment.getInterval(), deserializedSegment.getInterval());
+    Assertions.assertEquals(dataSegment.getVersion(), deserializedSegment.getVersion());
+    Assertions.assertEquals(dataSegment.getLoadSpec(), deserializedSegment.getLoadSpec());
+    Assertions.assertEquals(dataSegment.getDimensions(), deserializedSegment.getDimensions());
+    Assertions.assertEquals(dataSegment.getMetrics(), deserializedSegment.getMetrics());
+    Assertions.assertEquals(dataSegment.getShardSpec(), deserializedSegment.getShardSpec());
+    Assertions.assertEquals(dataSegment.getSize(), deserializedSegment.getSize());
+    Assertions.assertEquals(dataSegment.getId(), deserializedSegment.getId());
+    Assertions.assertEquals(OVERSHADOWED, deserializedSegment.isOvershadowed());
+    Assertions.assertEquals(REPLICATION_FACTOR, deserializedSegment.getReplicationFactor());
   }
 
   // Previously, the implementation of SegmentStatusInCluster had @JsonCreator/@JsonProperty and @JsonUnwrapped
@@ -133,8 +133,8 @@ public class SegmentStatusInClusterTest
   {
     String json = MAPPER.writeValueAsString(SEGMENT);
     SegmentStatusInCluster segment = MAPPER.readValue(json, SegmentStatusInCluster.class);
-    Assert.assertEquals(SEGMENT, segment);
-    Assert.assertEquals(json, MAPPER.writeValueAsString(segment));
+    Assertions.assertEquals(SEGMENT, segment);
+    Assertions.assertEquals(json, MAPPER.writeValueAsString(segment));
   }
 }
 

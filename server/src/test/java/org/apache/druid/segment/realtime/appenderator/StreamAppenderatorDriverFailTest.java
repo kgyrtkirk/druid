@@ -51,11 +51,10 @@ import org.easymock.EasyMock;
 import org.easymock.EasyMockSupport;
 import org.hamcrest.CoreMatchers;
 import org.joda.time.Interval;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.ExpectedException;
 
 import java.io.IOException;
@@ -99,10 +98,7 @@ public class StreamAppenderatorDriverFailTest extends EasyMockSupport
   StreamAppenderatorDriver driver;
   DataSegmentKiller dataSegmentKiller;
 
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
-
-  @Before
+  @BeforeEach
   public void setUp()
   {
     allocator = new TestSegmentAllocator(DATA_SOURCE, Granularities.HOUR);
@@ -110,7 +106,7 @@ public class StreamAppenderatorDriverFailTest extends EasyMockSupport
     dataSegmentKiller = createStrictMock(DataSegmentKiller.class);
   }
 
-  @After
+  @AfterEach
   public void tearDown() throws Exception
   {
     if (driver != null) {
@@ -143,11 +139,11 @@ public class StreamAppenderatorDriverFailTest extends EasyMockSupport
     final TestCommitterSupplier<Integer> committerSupplier = new TestCommitterSupplier<>();
     segmentHandoffNotifierFactory.setHandoffDelay(100);
 
-    Assert.assertNull(driver.startJob(null));
+    Assertions.assertNull(driver.startJob(null));
 
     for (int i = 0; i < ROWS.size(); i++) {
       committerSupplier.setMetadata(i + 1);
-      Assert.assertTrue(driver.add(ROWS.get(i), "dummy", committerSupplier, false, true).isOk());
+      Assertions.assertTrue(driver.add(ROWS.get(i), "dummy", committerSupplier, false, true).isOk());
     }
 
     driver.publish(
@@ -181,11 +177,11 @@ public class StreamAppenderatorDriverFailTest extends EasyMockSupport
     final TestCommitterSupplier<Integer> committerSupplier = new TestCommitterSupplier<>();
     segmentHandoffNotifierFactory.setHandoffDelay(100);
 
-    Assert.assertNull(driver.startJob(null));
+    Assertions.assertNull(driver.startJob(null));
 
     for (int i = 0; i < ROWS.size(); i++) {
       committerSupplier.setMetadata(i + 1);
-      Assert.assertTrue(driver.add(ROWS.get(i), "dummy", committerSupplier, false, true).isOk());
+      Assertions.assertTrue(driver.add(ROWS.get(i), "dummy", committerSupplier, false, true).isOk());
     }
 
     driver.publish(
@@ -219,11 +215,11 @@ public class StreamAppenderatorDriverFailTest extends EasyMockSupport
     final TestCommitterSupplier<Integer> committerSupplier = new TestCommitterSupplier<>();
     segmentHandoffNotifierFactory.setHandoffDelay(100);
 
-    Assert.assertNull(driver.startJob(null));
+    Assertions.assertNull(driver.startJob(null));
 
     for (int i = 0; i < ROWS.size(); i++) {
       committerSupplier.setMetadata(i + 1);
-      Assert.assertTrue(driver.add(ROWS.get(i), "dummy", committerSupplier, false, true).isOk());
+      Assertions.assertTrue(driver.add(ROWS.get(i), "dummy", committerSupplier, false, true).isOk());
     }
 
     final SegmentsAndCommitMetadata published = driver.publish(
@@ -272,11 +268,11 @@ public class StreamAppenderatorDriverFailTest extends EasyMockSupport
     final TestCommitterSupplier<Integer> committerSupplier = new TestCommitterSupplier<>();
     segmentHandoffNotifierFactory.setHandoffDelay(100);
 
-    Assert.assertNull(driver.startJob(null));
+    Assertions.assertNull(driver.startJob(null));
 
     for (int i = 0; i < ROWS.size(); i++) {
       committerSupplier.setMetadata(i + 1);
-      Assert.assertTrue(driver.add(ROWS.get(i), "dummy", committerSupplier, false, true).isOk());
+      Assertions.assertTrue(driver.add(ROWS.get(i), "dummy", committerSupplier, false, true).isOk());
     }
 
     if (!failWithException) {

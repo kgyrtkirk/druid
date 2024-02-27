@@ -22,7 +22,6 @@ package org.apache.druid.compressedbigdecimal;
 import org.apache.druid.segment.ColumnValueSelector;
 import org.easymock.EasyMock;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.io.IOException;
 import java.math.BigDecimal;

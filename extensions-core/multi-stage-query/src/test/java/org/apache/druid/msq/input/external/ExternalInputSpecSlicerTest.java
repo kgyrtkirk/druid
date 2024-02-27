@@ -34,7 +34,6 @@ import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.utils.Streams;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Test;
 
 import javax.annotation.Nullable;
 import java.io.File;

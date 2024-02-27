@@ -42,9 +42,9 @@ import org.apache.druid.timeline.DataSegment;
 import org.apache.druid.timeline.SegmentTimeline;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 
 import java.util.Set;
@@ -64,13 +64,14 @@ public class MarkOvershadowedSegmentsAsUnusedTest
 
   private TestSegmentsMetadataManager segmentsMetadataManager;
 
-  @Before
+  @BeforeEach
   public void setup()
   {
     segmentsMetadataManager = new TestSegmentsMetadataManager();
   }
 
   @Test
+  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters({"historical", "broker"})
   public void testRun(String serverType)
   {
@@ -107,18 +108,18 @@ public class MarkOvershadowedSegmentsAsUnusedTest
                                                       .get("test");
 
     // Verify that the segments V0 and V1 are overshadowed
-    Assert.assertTrue(timeline.isOvershadowed(segmentV0));
-    Assert.assertTrue(timeline.isOvershadowed(segmentV1));
+    Assertions.assertTrue(timeline.isOvershadowed(segmentV0));
+    Assertions.assertTrue(timeline.isOvershadowed(segmentV1));
 
     // Run the duty and verify that the overshadowed segments are marked unused
     params = new MarkOvershadowedSegmentsAsUnused(segmentsMetadataManager::markSegmentsAsUnused).run(params);
 
     Set<DataSegment> updatedUsedSegments = Sets.newHashSet(segmentsMetadataManager.iterateAllUsedSegments());
-    Assert.assertEquals(1, updatedUsedSegments.size());
-    Assert.assertTrue(updatedUsedSegments.contains(segmentV2));
+    Assertions.assertEquals(1, updatedUsedSegments.size());
+    Assertions.assertTrue(updatedUsedSegments.contains(segmentV2));
 
     CoordinatorRunStats runStats = params.getCoordinatorStats();
-    Assert.assertEquals(
+    Assertions.assertEquals(
         2L,
         runStats.get(Stats.Segments.OVERSHADOWED, RowKey.of(Dimension.DATASOURCE, "test"))
     );

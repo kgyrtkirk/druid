@@ -22,12 +22,11 @@ package org.apache.druid.collections;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.Iterables;
 import org.apache.druid.java.util.common.concurrent.Execs;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +34,10 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class BlockingPoolTest
 {
@@ -43,10 +46,7 @@ public class BlockingPoolTest
   private CloseableDefaultBlockingPool<Integer> pool;
   private CloseableDefaultBlockingPool<Integer> emptyPool;
 
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
-
-  @Before
+  @BeforeEach
   public void setup()
   {
     service = Execs.multiThreaded(2, "blocking-pool-test");
@@ -54,7 +54,7 @@ public class BlockingPoolTest
     emptyPool = new CloseableDefaultBlockingPool<>(Suppliers.ofInstance(1), 0);
   }
 
-  @After
+  @AfterEach
   public void teardown()
   {
     pool.close();
@@ -65,56 +65,62 @@ public class BlockingPoolTest
   @Test
   public void testTakeFromEmptyPool()
   {
-    expectedException.expect(IllegalStateException.class);
-    expectedException.expectMessage("Pool was initialized with limit = 0, there are no objects to take.");
-    emptyPool.takeBatch(1, 0);
+    Throwable exception = assertThrows(IllegalStateException.class, () -> {
+      emptyPool.takeBatch(1, 0);
+    });
+    assertTrue(exception.getMessage().contains("Pool was initialized with limit = 0, there are no objects to take."));
   }
 
   @Test
   public void testDrainFromEmptyPool()
   {
-    expectedException.expect(IllegalStateException.class);
-    expectedException.expectMessage("Pool was initialized with limit = 0, there are no objects to take.");
-    emptyPool.takeBatch(1, 0);
+    Throwable exception = assertThrows(IllegalStateException.class, () -> {
+      emptyPool.takeBatch(1, 0);
+    });
+    assertTrue(exception.getMessage().contains("Pool was initialized with limit = 0, there are no objects to take."));
   }
 
-  @Test(timeout = 60_000L)
+  @Test
+  @Timeout(value = 60_000L, unit = TimeUnit.MILLISECONDS)
   public void testTake()
   {
     final ReferenceCountingResourceHolder<Integer> holder = Iterables.getOnlyElement(pool.takeBatch(1, 100), null);
-    Assert.assertNotNull(holder);
-    Assert.assertEquals(9, pool.getPoolSize());
+    Assertions.assertNotNull(holder);
+    Assertions.assertEquals(9, pool.getPoolSize());
     holder.close();
-    Assert.assertEquals(10, pool.getPoolSize());
+    Assertions.assertEquals(10, pool.getPoolSize());
   }
 
-  @Test(timeout = 60_000L)
+  @Test
+  @Timeout(value = 60_000L, unit = TimeUnit.MILLISECONDS)
   public void testTakeTimeout()
   {
     final List<ReferenceCountingResourceHolder<Integer>> batchHolder = pool.takeBatch(10, 100L);
     final ReferenceCountingResourceHolder<Integer> holder = Iterables.getOnlyElement(pool.takeBatch(1, 100), null);
-    Assert.assertNull(holder);
+    Assertions.assertNull(holder);
     batchHolder.forEach(ReferenceCountingResourceHolder::close);
   }
 
-  @Test(timeout = 60_000L)
+  @Test
+  @Timeout(value = 60_000L, unit = TimeUnit.MILLISECONDS)
   public void testTakeBatch()
   {
     final List<ReferenceCountingResourceHolder<Integer>> holder = pool.takeBatch(6, 100L);
-    Assert.assertNotNull(holder);
-    Assert.assertEquals(6, holder.size());
-    Assert.assertEquals(4, pool.getPoolSize());
+    Assertions.assertNotNull(holder);
+    Assertions.assertEquals(6, holder.size());
+    Assertions.assertEquals(4, pool.getPoolSize());
     holder.forEach(ReferenceCountingResourceHolder::close);
-    Assert.assertEquals(10, pool.getPoolSize());
+    Assertions.assertEquals(10, pool.getPoolSize());
   }
 
-  @Test(timeout = 60_000L)
+  @Test
+  @Timeout(value = 60_000L, unit = TimeUnit.MILLISECONDS)
   public void testWaitAndTakeBatch() throws InterruptedException, ExecutionException
   {
     List<ReferenceCountingResourceHolder<Integer>> batchHolder = pool.takeBatch(10, 10);
-    Assert.assertNotNull(batchHolder);
-    Assert.assertEquals(10, batchHolder.size());
-    Assert.assertEquals(0, pool.getPoolSize());
+    Assertions.assertNotNull(batchHolder);
+    Assertions.assertEquals(10, batchHolder.size());
+    Assertions.assertEquals(0, pool.getPoolSize());
 
     final Future<List<ReferenceCountingResourceHolder<Integer>>> future = service.submit(
         () -> pool.takeBatch(8, 100)
@@ -123,22 +129,24 @@ public class BlockingPoolTest
     batchHolder.forEach(ReferenceCountingResourceHolder::close);
 
     batchHolder = future.get();
-    Assert.assertNotNull(batchHolder);
-    Assert.assertEquals(8, batchHolder.size());
-    Assert.assertEquals(2, pool.getPoolSize());
+    Assertions.assertNotNull(batchHolder);
+    Assertions.assertEquals(8, batchHolder.size());
+    Assertions.assertEquals(2, pool.getPoolSize());
 
     batchHolder.forEach(ReferenceCountingResourceHolder::close);
-    Assert.assertEquals(10, pool.getPoolSize());
+    Assertions.assertEquals(10, pool.getPoolSize());
   }
 
-  @Test(timeout = 60_000L)
+  @Test
+  @Timeout(value = 60_000L, unit = TimeUnit.MILLISECONDS)
   public void testTakeBatchTooManyObjects()
   {
     final List<ReferenceCountingResourceHolder<Integer>> holder = pool.takeBatch(100, 100L);
-    Assert.assertTrue(holder.isEmpty());
+    Assertions.assertTrue(holder.isEmpty());
   }
 
-  @Test(timeout = 60_000L)
+  @Test
+  @Timeout(value = 60_000L, unit = TimeUnit.MILLISECONDS)
   public void testConcurrentTake() throws ExecutionException, InterruptedException
   {
     final int limit1 = pool.maxSize() / 2;
@@ -166,8 +174,8 @@ public class BlockingPoolTest
     final List<ReferenceCountingResourceHolder<Integer>> r1 = f1.get();
     final List<ReferenceCountingResourceHolder<Integer>> r2 = f2.get();
 
-    Assert.assertEquals(0, pool.getPoolSize());
-    Assert.assertTrue(r1.contains(null) || r2.contains(null));
+    Assertions.assertEquals(0, pool.getPoolSize());
+    Assertions.assertTrue(r1.contains(null) || r2.contains(null));
 
     int nonNullCount = 0;
     for (ReferenceCountingResourceHolder<Integer> holder : r1) {
@@ -181,7 +189,7 @@ public class BlockingPoolTest
         nonNullCount++;
       }
     }
-    Assert.assertEquals(pool.maxSize(), nonNullCount);
+    Assertions.assertEquals(pool.maxSize(), nonNullCount);
 
     final Future future1 = service.submit(() -> {
       for (ReferenceCountingResourceHolder<Integer> holder : r1) {
@@ -201,10 +209,11 @@ public class BlockingPoolTest
     future1.get();
     future2.get();
 
-    Assert.assertEquals(pool.maxSize(), pool.getPoolSize());
+    Assertions.assertEquals(pool.maxSize(), pool.getPoolSize());
   }
 
-  @Test(timeout = 60_000L)
+  @Test
+  @Timeout(value = 60_000L, unit = TimeUnit.MILLISECONDS)
   public void testConcurrentTakeBatch() throws ExecutionException, InterruptedException
   {
     final int batch1 = pool.maxSize() / 2;
@@ -220,21 +229,22 @@ public class BlockingPoolTest
     final List<ReferenceCountingResourceHolder<Integer>> r2 = f2.get();
 
     if (!r1.isEmpty()) {
-      Assert.assertTrue(r2.isEmpty());
-      Assert.assertEquals(pool.maxSize() - batch1, pool.getPoolSize());
-      Assert.assertEquals(batch1, r1.size());
+      Assertions.assertTrue(r2.isEmpty());
+      Assertions.assertEquals(pool.maxSize() - batch1, pool.getPoolSize());
+      Assertions.assertEquals(batch1, r1.size());
       r1.forEach(ReferenceCountingResourceHolder::close);
     } else {
-      Assert.assertNotNull(r2);
-      Assert.assertEquals(pool.maxSize() - batch2, pool.getPoolSize());
-      Assert.assertEquals(batch2, r2.size());
+      Assertions.assertNotNull(r2);
+      Assertions.assertEquals(pool.maxSize() - batch2, pool.getPoolSize());
+      Assertions.assertEquals(batch2, r2.size());
       r2.forEach(ReferenceCountingResourceHolder::close);
     }
 
-    Assert.assertEquals(pool.maxSize(), pool.getPoolSize());
+    Assertions.assertEquals(pool.maxSize(), pool.getPoolSize());
   }
 
-  @Test(timeout = 60_000L)
+  @Test
+  @Timeout(value = 60_000L, unit = TimeUnit.MILLISECONDS)
   public void testConcurrentBatchClose() throws ExecutionException, InterruptedException
   {
     final int batch1 = pool.maxSize() / 2;
@@ -249,11 +259,11 @@ public class BlockingPoolTest
     final List<ReferenceCountingResourceHolder<Integer>> r1 = f1.get();
     final List<ReferenceCountingResourceHolder<Integer>> r2 = f2.get();
 
-    Assert.assertNotNull(r1);
-    Assert.assertNotNull(r2);
-    Assert.assertEquals(batch1, r1.size());
-    Assert.assertEquals(batch2, r2.size());
-    Assert.assertEquals(0, pool.getPoolSize());
+    Assertions.assertNotNull(r1);
+    Assertions.assertNotNull(r2);
+    Assertions.assertEquals(batch1, r1.size());
+    Assertions.assertEquals(batch2, r2.size());
+    Assertions.assertEquals(0, pool.getPoolSize());
 
     final Future future1 = service.submit(() -> r1.forEach(ReferenceCountingResourceHolder::close));
     final Future future2 = service.submit(() -> r2.forEach(ReferenceCountingResourceHolder::close));
@@ -261,11 +271,12 @@ public class BlockingPoolTest
     future1.get();
     future2.get();
 
-    Assert.assertEquals(pool.maxSize(), pool.getPoolSize());
+    Assertions.assertEquals(pool.maxSize(), pool.getPoolSize());
   }
 
   @SuppressWarnings("CatchMayIgnoreException")
-  @Test(timeout = 60_000L)
+  @Test
+  @Timeout(value = 60_000L, unit = TimeUnit.MILLISECONDS)
   public void testConcurrentTakeBatchClose() throws ExecutionException, InterruptedException
   {
     final List<ReferenceCountingResourceHolder<Integer>> r1 = pool.takeBatch(1, 10);
@@ -285,11 +296,11 @@ public class BlockingPoolTest
 
     final List<ReferenceCountingResourceHolder<Integer>> r2 = f2.get();
     f1.get();
-    Assert.assertNotNull(r2);
-    Assert.assertEquals(10, r2.size());
-    Assert.assertEquals(0, pool.getPoolSize());
+    Assertions.assertNotNull(r2);
+    Assertions.assertEquals(10, r2.size());
+    Assertions.assertEquals(0, pool.getPoolSize());
 
     r2.forEach(ReferenceCountingResourceHolder::close);
-    Assert.assertEquals(pool.maxSize(), pool.getPoolSize());
+    Assertions.assertEquals(pool.maxSize(), pool.getPoolSize());
   }
 }

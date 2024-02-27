@@ -22,7 +22,6 @@ package org.apache.druid.server.lookup;
 import org.easymock.EasyMock;
 import org.joda.time.Period;
 import org.junit.Assert;
-import org.junit.Test;
 
 public class PollingLookupFactoryTest
 {

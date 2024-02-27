@@ -44,22 +44,24 @@ import org.apache.druid.segment.IndexBuilder;
 import org.apache.druid.segment.StorageAdapter;
 import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Assume;
-import org.junit.Test;
-import org.junit.experimental.runners.Enclosed;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.io.Closeable;
 import java.util.Arrays;
 
-@RunWith(Enclosed.class)
+
+
 public class EqualityFilterTests
 {
+  @Nested
   @RunWith(Parameterized.class)
-  public static class EqualityFilterTest extends BaseFilterTest
+  public class EqualityFilterTest extends BaseFilterTest
   {
     public EqualityFilterTest(
         String testName,
@@ -72,7 +74,7 @@ public class EqualityFilterTests
       super(testName, DEFAULT_ROWS, indexBuilder, finisher, cnf, optimize);
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDown() throws Exception
     {
       BaseFilterTest.tearDown(EqualityFilterTest.class.getName());
@@ -839,7 +841,7 @@ public class EqualityFilterTests
     @Test
     public void testArrays()
     {
-      Assume.assumeTrue(canTestArrayColumns());
+      Assumptions.assumeTrue(canTestArrayColumns());
       /*
           dim0 .. arrayString               arrayLong             arrayDouble
           "0", .. ["a", "b", "c"],          [1L, 2L, 3L],         [1.1, 2.2, 3.3]
@@ -1112,7 +1114,7 @@ public class EqualityFilterTests
 
        */
       // only auto well supports variant types
-      Assume.assumeTrue(isAutoSchema());
+      Assumptions.assumeTrue(isAutoSchema());
       assertFilterMatches(
           new EqualityFilter(
               "variant",
@@ -1207,7 +1209,7 @@ public class EqualityFilterTests
     public void testNestedColumnEquality()
     {
       // nested column mirrors the top level columns, so these cases are copied from other tests
-      Assume.assumeTrue(canTestArrayColumns());
+      Assumptions.assumeTrue(canTestArrayColumns());
 
       if (NullHandling.sqlCompatible()) {
         assertFilterMatches(
@@ -1612,7 +1614,8 @@ public class EqualityFilterTests
     }
   }
 
-  public static class EqualityFilterNonParameterizedTests extends InitializedNullHandlingTest
+  @Nested
+  public class EqualityFilterNonParameterizedTests extends InitializedNullHandlingTest
   {
     @Test
     public void testSerde() throws JsonProcessingException
@@ -1620,51 +1623,51 @@ public class EqualityFilterTests
       ObjectMapper mapper = new DefaultObjectMapper();
       EqualityFilter filter = new EqualityFilter("x", ColumnType.STRING, "hello", null);
       String s = mapper.writeValueAsString(filter);
-      Assert.assertEquals(filter, mapper.readValue(s, EqualityFilter.class));
+      Assertions.assertEquals(filter, mapper.readValue(s, EqualityFilter.class));
 
       filter = new EqualityFilter("x", ColumnType.LONG, 1L, null);
       s = mapper.writeValueAsString(filter);
-      Assert.assertEquals(filter, mapper.readValue(s, EqualityFilter.class));
+      Assertions.assertEquals(filter, mapper.readValue(s, EqualityFilter.class));
 
       filter = new EqualityFilter("x", ColumnType.LONG, 1, null);
       s = mapper.writeValueAsString(filter);
-      Assert.assertEquals(filter, mapper.readValue(s, EqualityFilter.class));
+      Assertions.assertEquals(filter, mapper.readValue(s, EqualityFilter.class));
 
       filter = new EqualityFilter("x", ColumnType.DOUBLE, 111.111, null);
       s = mapper.writeValueAsString(filter);
-      Assert.assertEquals(filter, mapper.readValue(s, EqualityFilter.class));
+      Assertions.assertEquals(filter, mapper.readValue(s, EqualityFilter.class));
 
       filter = new EqualityFilter("x", ColumnType.FLOAT, 1234.0f, null);
       s = mapper.writeValueAsString(filter);
-      Assert.assertEquals(filter, mapper.readValue(s, EqualityFilter.class));
+      Assertions.assertEquals(filter, mapper.readValue(s, EqualityFilter.class));
 
       filter = new EqualityFilter("x", ColumnType.STRING_ARRAY, new Object[]{"a", "b", null, "c"}, null);
       s = mapper.writeValueAsString(filter);
-      Assert.assertEquals(filter, mapper.readValue(s, EqualityFilter.class));
+      Assertions.assertEquals(filter, mapper.readValue(s, EqualityFilter.class));
 
       filter = new EqualityFilter("x", ColumnType.STRING_ARRAY, Arrays.asList("a", "b", null, "c"), null);
       s = mapper.writeValueAsString(filter);
-      Assert.assertEquals(filter, mapper.readValue(s, EqualityFilter.class));
+      Assertions.assertEquals(filter, mapper.readValue(s, EqualityFilter.class));
 
       filter = new EqualityFilter("x", ColumnType.LONG_ARRAY, new Object[]{1L, null, 2L, 3L}, null);
       s = mapper.writeValueAsString(filter);
-      Assert.assertEquals(filter, mapper.readValue(s, EqualityFilter.class));
+      Assertions.assertEquals(filter, mapper.readValue(s, EqualityFilter.class));
 
       filter = new EqualityFilter("x", ColumnType.LONG_ARRAY, Arrays.asList(1L, null, 2L, 3L), null);
       s = mapper.writeValueAsString(filter);
-      Assert.assertEquals(filter, mapper.readValue(s, EqualityFilter.class));
+      Assertions.assertEquals(filter, mapper.readValue(s, EqualityFilter.class));
 
       filter = new EqualityFilter("x", ColumnType.DOUBLE_ARRAY, new Object[]{1.1, 2.1, null, 3.1}, null);
       s = mapper.writeValueAsString(filter);
-      Assert.assertEquals(filter, mapper.readValue(s, EqualityFilter.class));
+      Assertions.assertEquals(filter, mapper.readValue(s, EqualityFilter.class));
 
       filter = new EqualityFilter("x", ColumnType.DOUBLE_ARRAY, Arrays.asList(1.1, 2.1, null, 3.1), null);
       s = mapper.writeValueAsString(filter);
-      Assert.assertEquals(filter, mapper.readValue(s, EqualityFilter.class));
+      Assertions.assertEquals(filter, mapper.readValue(s, EqualityFilter.class));
 
       filter = new EqualityFilter("x", ColumnType.NESTED_DATA, ImmutableMap.of("x", ImmutableList.of(1, 2, 3)), null);
       s = mapper.writeValueAsString(filter);
-      Assert.assertEquals(filter, mapper.readValue(s, EqualityFilter.class));
+      Assertions.assertEquals(filter, mapper.readValue(s, EqualityFilter.class));
     }
 
     @Test
@@ -1674,33 +1677,33 @@ public class EqualityFilterTests
       EqualityFilter f1_2 = new EqualityFilter("x", ColumnType.STRING, "hello", null);
       EqualityFilter f2 = new EqualityFilter("x", ColumnType.STRING, "world", null);
       EqualityFilter f3 = new EqualityFilter("x", ColumnType.STRING, "hello", new FilterTuning(true, null, null));
-      Assert.assertArrayEquals(f1.getCacheKey(), f1_2.getCacheKey());
-      Assert.assertFalse(Arrays.equals(f1.getCacheKey(), f2.getCacheKey()));
-      Assert.assertArrayEquals(f1.getCacheKey(), f3.getCacheKey());
+      Assertions.assertArrayEquals(f1.getCacheKey(), f1_2.getCacheKey());
+      Assertions.assertFalse(Arrays.equals(f1.getCacheKey(), f2.getCacheKey()));
+      Assertions.assertArrayEquals(f1.getCacheKey(), f3.getCacheKey());
 
       f1 = new EqualityFilter("x", ColumnType.LONG, 1L, null);
       f1_2 = new EqualityFilter("x", ColumnType.LONG, 1, null);
       f2 = new EqualityFilter("x", ColumnType.LONG, 2L, null);
       f3 = new EqualityFilter("x", ColumnType.LONG, 1L, new FilterTuning(true, null, null));
-      Assert.assertArrayEquals(f1.getCacheKey(), f1_2.getCacheKey());
-      Assert.assertFalse(Arrays.equals(f1.getCacheKey(), f2.getCacheKey()));
-      Assert.assertArrayEquals(f1.getCacheKey(), f3.getCacheKey());
+      Assertions.assertArrayEquals(f1.getCacheKey(), f1_2.getCacheKey());
+      Assertions.assertFalse(Arrays.equals(f1.getCacheKey(), f2.getCacheKey()));
+      Assertions.assertArrayEquals(f1.getCacheKey(), f3.getCacheKey());
 
       f1 = new EqualityFilter("x", ColumnType.DOUBLE, 1.1, null);
       f1_2 = new EqualityFilter("x", ColumnType.DOUBLE, 1.1, null);
       f2 = new EqualityFilter("x", ColumnType.DOUBLE, 2.2, null);
       f3 = new EqualityFilter("x", ColumnType.DOUBLE, 1.1, new FilterTuning(true, null, null));
-      Assert.assertArrayEquals(f1.getCacheKey(), f1_2.getCacheKey());
-      Assert.assertFalse(Arrays.equals(f1.getCacheKey(), f2.getCacheKey()));
-      Assert.assertArrayEquals(f1.getCacheKey(), f3.getCacheKey());
+      Assertions.assertArrayEquals(f1.getCacheKey(), f1_2.getCacheKey());
+      Assertions.assertFalse(Arrays.equals(f1.getCacheKey(), f2.getCacheKey()));
+      Assertions.assertArrayEquals(f1.getCacheKey(), f3.getCacheKey());
 
       f1 = new EqualityFilter("x", ColumnType.FLOAT, 1.1f, null);
       f1_2 = new EqualityFilter("x", ColumnType.FLOAT, 1.1f, null);
       f2 = new EqualityFilter("x", ColumnType.FLOAT, 2.2f, null);
       f3 = new EqualityFilter("x", ColumnType.FLOAT, 1.1f, new FilterTuning(true, null, null));
-      Assert.assertArrayEquals(f1.getCacheKey(), f1_2.getCacheKey());
-      Assert.assertFalse(Arrays.equals(f1.getCacheKey(), f2.getCacheKey()));
-      Assert.assertArrayEquals(f1.getCacheKey(), f3.getCacheKey());
+      Assertions.assertArrayEquals(f1.getCacheKey(), f1_2.getCacheKey());
+      Assertions.assertFalse(Arrays.equals(f1.getCacheKey(), f2.getCacheKey()));
+      Assertions.assertArrayEquals(f1.getCacheKey(), f3.getCacheKey());
 
       f1 = new EqualityFilter("x", ColumnType.STRING_ARRAY, new Object[]{"a", "b", null, "c"}, null);
       f1_2 = new EqualityFilter("x", ColumnType.STRING_ARRAY, Arrays.asList("a", "b", null, "c"), null);
@@ -1711,9 +1714,9 @@ public class EqualityFilterTests
           new Object[]{"a", "b", null, "c"},
           new FilterTuning(true, null, null)
       );
-      Assert.assertArrayEquals(f1.getCacheKey(), f1_2.getCacheKey());
-      Assert.assertFalse(Arrays.equals(f1.getCacheKey(), f2.getCacheKey()));
-      Assert.assertArrayEquals(f1.getCacheKey(), f3.getCacheKey());
+      Assertions.assertArrayEquals(f1.getCacheKey(), f1_2.getCacheKey());
+      Assertions.assertFalse(Arrays.equals(f1.getCacheKey(), f2.getCacheKey()));
+      Assertions.assertArrayEquals(f1.getCacheKey(), f3.getCacheKey());
 
       f1 = new EqualityFilter("x", ColumnType.LONG_ARRAY, new Object[]{100L, 200L, null, 300L}, null);
       f1_2 = new EqualityFilter("x", ColumnType.LONG_ARRAY, Arrays.asList(100L, 200L, null, 300L), null);
@@ -1724,9 +1727,9 @@ public class EqualityFilterTests
           new Object[]{100L, 200L, null, 300L},
           new FilterTuning(true, null, null)
       );
-      Assert.assertArrayEquals(f1.getCacheKey(), f1_2.getCacheKey());
-      Assert.assertFalse(Arrays.equals(f1.getCacheKey(), f2.getCacheKey()));
-      Assert.assertArrayEquals(f1.getCacheKey(), f3.getCacheKey());
+      Assertions.assertArrayEquals(f1.getCacheKey(), f1_2.getCacheKey());
+      Assertions.assertFalse(Arrays.equals(f1.getCacheKey(), f2.getCacheKey()));
+      Assertions.assertArrayEquals(f1.getCacheKey(), f3.getCacheKey());
 
       f1 = new EqualityFilter("x", ColumnType.DOUBLE_ARRAY, new Object[]{1.001, null, 20.0002, 300.0003}, null);
       f1_2 = new EqualityFilter("x", ColumnType.DOUBLE_ARRAY, Arrays.asList(1.001, null, 20.0002, 300.0003), null);
@@ -1737,9 +1740,9 @@ public class EqualityFilterTests
           new Object[]{1.001, null, 20.0002, 300.0003},
           new FilterTuning(true, null, null)
       );
-      Assert.assertArrayEquals(f1.getCacheKey(), f1_2.getCacheKey());
-      Assert.assertFalse(Arrays.equals(f1.getCacheKey(), f2.getCacheKey()));
-      Assert.assertArrayEquals(f1.getCacheKey(), f3.getCacheKey());
+      Assertions.assertArrayEquals(f1.getCacheKey(), f1_2.getCacheKey());
+      Assertions.assertFalse(Arrays.equals(f1.getCacheKey(), f2.getCacheKey()));
+      Assertions.assertArrayEquals(f1.getCacheKey(), f3.getCacheKey());
 
       NestedDataModule.registerHandlersAndSerde();
       f1 = new EqualityFilter("x", ColumnType.NESTED_DATA, ImmutableMap.of("x", ImmutableList.of(1, 2, 3)), null);
@@ -1751,29 +1754,29 @@ public class EqualityFilterTests
           ImmutableMap.of("x", ImmutableList.of(1, 2, 3)),
           new FilterTuning(true, null, null)
       );
-      Assert.assertArrayEquals(f1.getCacheKey(), f1_2.getCacheKey());
-      Assert.assertFalse(Arrays.equals(f1.getCacheKey(), f2.getCacheKey()));
-      Assert.assertArrayEquals(f1.getCacheKey(), f3.getCacheKey());
+      Assertions.assertArrayEquals(f1.getCacheKey(), f1_2.getCacheKey());
+      Assertions.assertFalse(Arrays.equals(f1.getCacheKey(), f2.getCacheKey()));
+      Assertions.assertArrayEquals(f1.getCacheKey(), f3.getCacheKey());
     }
 
     @Test
     public void testInvalidParameters()
     {
-      Throwable t = Assert.assertThrows(
+      Throwable t = Assertions.assertThrows(
           DruidException.class,
           () -> new EqualityFilter(null, ColumnType.STRING, null, null)
       );
-      Assert.assertEquals("Invalid equality filter, column cannot be null", t.getMessage());
-      t = Assert.assertThrows(
+      Assertions.assertEquals("Invalid equality filter, column cannot be null", t.getMessage());
+      t = Assertions.assertThrows(
           DruidException.class,
           () -> new EqualityFilter("dim0", null, null, null)
       );
-      Assert.assertEquals("Invalid equality filter on column [dim0], matchValueType cannot be null", t.getMessage());
-      t = Assert.assertThrows(
+      Assertions.assertEquals("Invalid equality filter on column [dim0], matchValueType cannot be null", t.getMessage());
+      t = Assertions.assertThrows(
           DruidException.class,
           () -> new EqualityFilter("dim0", ColumnType.STRING, null, null)
       );
-      Assert.assertEquals("Invalid equality filter on column [dim0], matchValue cannot be null", t.getMessage());
+      Assertions.assertEquals("Invalid equality filter on column [dim0], matchValue cannot be null", t.getMessage());
     }
 
     @Test
@@ -1783,15 +1786,15 @@ public class EqualityFilterTests
 
       RangeSet<String> set = TreeRangeSet.create();
       set.add(Range.singleton("hello"));
-      Assert.assertEquals(set, filter.getDimensionRangeSet("x"));
-      Assert.assertNull(filter.getDimensionRangeSet("y"));
+      Assertions.assertEquals(set, filter.getDimensionRangeSet("x"));
+      Assertions.assertNull(filter.getDimensionRangeSet("y"));
 
       ExprEval<?> eval = ExprEval.ofType(ExpressionType.STRING_ARRAY, new Object[]{"abc", "def"});
       filter = new EqualityFilter("x", ColumnType.STRING_ARRAY, eval.value(), null);
       set = TreeRangeSet.create();
       set.add(Range.singleton(Arrays.deepToString(eval.asArray())));
-      Assert.assertEquals(set, filter.getDimensionRangeSet("x"));
-      Assert.assertNull(filter.getDimensionRangeSet("y"));
+      Assertions.assertEquals(set, filter.getDimensionRangeSet("x"));
+      Assertions.assertNull(filter.getDimensionRangeSet("y"));
     }
 
     @Test

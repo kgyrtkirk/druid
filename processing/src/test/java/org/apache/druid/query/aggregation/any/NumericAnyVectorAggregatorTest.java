@@ -22,20 +22,20 @@ package org.apache.druid.query.aggregation.any;
 import org.apache.druid.common.config.NullHandling;
 import org.apache.druid.segment.vector.VectorValueSelector;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static org.apache.druid.query.aggregation.any.NumericAnyVectorAggregator.BYTE_FLAG_FOUND_MASK;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class NumericAnyVectorAggregatorTest extends InitializedNullHandlingTest
 {
   private static final int NULL_POSITION = 10;
@@ -50,7 +50,7 @@ public class NumericAnyVectorAggregatorTest extends InitializedNullHandlingTest
 
   private NumericAnyVectorAggregator target;
 
-  @Before
+  @BeforeEach
   public void setUp()
   {
     Mockito.doReturn(NULLS).when(selector).getNullVector();
@@ -93,8 +93,8 @@ public class NumericAnyVectorAggregatorTest extends InitializedNullHandlingTest
   public void initShouldSetDoubleAfterPositionToZero()
   {
     target.init(buf, POSITION);
-    Assert.assertEquals(0, buf.get(POSITION) & BYTE_FLAG_FOUND_MASK);
-    Assert.assertEquals(
+    Assertions.assertEquals(0, buf.get(POSITION) & BYTE_FLAG_FOUND_MASK);
+    Assertions.assertEquals(
         NullHandling.sqlCompatible() ? NullHandling.IS_NULL_BYTE : NullHandling.IS_NOT_NULL_BYTE,
         buf.get(POSITION)
     );
@@ -105,9 +105,9 @@ public class NumericAnyVectorAggregatorTest extends InitializedNullHandlingTest
   {
     target.aggregate(buf, POSITION, 0, 3);
     if (NullHandling.sqlCompatible()) {
-      Assert.assertEquals(BYTE_FLAG_FOUND_MASK | NullHandling.IS_NULL_BYTE, buf.get(POSITION));
+      Assertions.assertEquals(BYTE_FLAG_FOUND_MASK | NullHandling.IS_NULL_BYTE, buf.get(POSITION));
     } else {
-      Assert.assertEquals(BYTE_FLAG_FOUND_MASK | NullHandling.IS_NOT_NULL_BYTE, buf.get(POSITION));
+      Assertions.assertEquals(BYTE_FLAG_FOUND_MASK | NullHandling.IS_NOT_NULL_BYTE, buf.get(POSITION));
     }
   }
 
@@ -115,7 +115,7 @@ public class NumericAnyVectorAggregatorTest extends InitializedNullHandlingTest
   public void aggregateNotFoundAndHasNullsOutsideRangeShouldPutValue()
   {
     target.aggregate(buf, POSITION, 0, 1);
-    Assert.assertEquals(BYTE_FLAG_FOUND_MASK | NullHandling.IS_NOT_NULL_BYTE, buf.get(POSITION));
+    Assertions.assertEquals(BYTE_FLAG_FOUND_MASK | NullHandling.IS_NOT_NULL_BYTE, buf.get(POSITION));
   }
 
   @Test
@@ -123,7 +123,7 @@ public class NumericAnyVectorAggregatorTest extends InitializedNullHandlingTest
   {
     Mockito.doReturn(null).when(selector).getNullVector();
     target.aggregate(buf, POSITION, 0, 3);
-    Assert.assertEquals(BYTE_FLAG_FOUND_MASK | NullHandling.IS_NOT_NULL_BYTE, buf.get(POSITION));
+    Assertions.assertEquals(BYTE_FLAG_FOUND_MASK | NullHandling.IS_NOT_NULL_BYTE, buf.get(POSITION));
   }
 
   @Test
@@ -131,7 +131,7 @@ public class NumericAnyVectorAggregatorTest extends InitializedNullHandlingTest
   {
     Mockito.doReturn(null).when(selector).getNullVector();
     target.aggregate(buf, POSITION, NULLS.length, NULLS.length + 1);
-    Assert.assertNotEquals(BYTE_FLAG_FOUND_MASK, (buf.get(POSITION) & BYTE_FLAG_FOUND_MASK));
+    Assertions.assertNotEquals(BYTE_FLAG_FOUND_MASK, (buf.get(POSITION) & BYTE_FLAG_FOUND_MASK));
   }
 
   @Test
@@ -144,11 +144,11 @@ public class NumericAnyVectorAggregatorTest extends InitializedNullHandlingTest
     target.aggregate(buf, 3, positions, null, positionOffset);
     for (int i = 0; i < positions.length; i++) {
       int position = positions[i] + positionOffset;
-      Assert.assertEquals(
+      Assertions.assertEquals(
           BYTE_FLAG_FOUND_MASK | NullHandling.IS_NOT_NULL_BYTE,
           buf.get(position) & (byte) (BYTE_FLAG_FOUND_MASK | NullHandling.IS_NOT_NULL_BYTE)
       );
-      Assert.assertEquals(i, buf.getLong(position + 1));
+      Assertions.assertEquals(i, buf.getLong(position + 1));
     }
   }
 
@@ -163,11 +163,11 @@ public class NumericAnyVectorAggregatorTest extends InitializedNullHandlingTest
     target.aggregate(buf, 3, positions, rows, positionOffset);
     for (int i = 0; i < positions.length; i++) {
       int position = positions[i] + positionOffset;
-      Assert.assertEquals(
+      Assertions.assertEquals(
           BYTE_FLAG_FOUND_MASK | NullHandling.IS_NOT_NULL_BYTE,
           buf.get(position) & (byte) (BYTE_FLAG_FOUND_MASK | NullHandling.IS_NOT_NULL_BYTE)
       );
-      Assert.assertEquals(rows[i], buf.getLong(position + 1));
+      Assertions.assertEquals(rows[i], buf.getLong(position + 1));
     }
   }
 
@@ -177,28 +177,28 @@ public class NumericAnyVectorAggregatorTest extends InitializedNullHandlingTest
     long previous = buf.getLong(POSITION + 1);
     buf.put(POSITION, BYTE_FLAG_FOUND_MASK);
     target.aggregate(buf, POSITION, 0, 3);
-    Assert.assertEquals(previous, buf.getLong(POSITION + 1));
+    Assertions.assertEquals(previous, buf.getLong(POSITION + 1));
   }
 
   @Test
   public void getNullShouldReturnNull()
   {
-    Assert.assertNull(target.get(buf, NULL_POSITION));
+    Assertions.assertNull(target.get(buf, NULL_POSITION));
   }
 
   @Test
   public void getNotNullShouldReturnValue()
   {
-    Assert.assertEquals(FOUND_OBJECT, target.get(buf, POSITION));
+    Assertions.assertEquals(FOUND_OBJECT, target.get(buf, POSITION));
   }
 
   @Test
   public void isValueNull()
   {
     buf.put(POSITION, (byte) 4);
-    Assert.assertFalse(target.isValueNull(buf, POSITION));
+    Assertions.assertFalse(target.isValueNull(buf, POSITION));
     buf.put(POSITION, (byte) 3);
-    Assert.assertTrue(target.isValueNull(buf, POSITION));
+    Assertions.assertTrue(target.isValueNull(buf, POSITION));
   }
 
   private void clearBufferForPositions(int offset, int... positions)

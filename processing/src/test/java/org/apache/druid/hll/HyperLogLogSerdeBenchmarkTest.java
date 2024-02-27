@@ -26,12 +26,11 @@ import com.google.common.hash.HashCode;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -42,14 +41,13 @@ import java.util.Random;
 /**
  * TODO rewrite to use JMH and move to the benchmarks project
  */
-@RunWith(Parameterized.class)
-@Ignore // Don't need to run every time
+@Disabled // Don't need to run every time
 public class HyperLogLogSerdeBenchmarkTest extends AbstractBenchmark
 {
-  private final HyperLogLogCollector collector;
-  private final long NUM_HASHES;
+  private HyperLogLogCollector collector;
+  private long NUM_HASHES;
 
-  public HyperLogLogSerdeBenchmarkTest(final HyperLogLogCollector collector, Long num_hashes)
+  public void initHyperLogLogSerdeBenchmarkTest(final HyperLogLogCollector collector, Long num_hashes)
   {
     this.collector = collector;
     this.NUM_HASHES = num_hashes;
@@ -57,7 +55,6 @@ public class HyperLogLogSerdeBenchmarkTest extends AbstractBenchmark
 
   private static final HashFunction HASH_FUNCTION = Hashing.murmur3_128();
 
-  @Parameterized.Parameters
   public static Collection<Object[]> getParameters()
   {
     return ImmutableList.of(
@@ -229,13 +226,13 @@ public class HyperLogLogSerdeBenchmarkTest extends AbstractBenchmark
     return hasher.hash();
   }
 
-  @BeforeClass
+  @BeforeAll
   public static void setupHash()
   {
 
   }
 
-  @Before
+  @BeforeEach
   public void setup()
   {
     fillCollector(collector);
@@ -246,9 +243,11 @@ public class HyperLogLogSerdeBenchmarkTest extends AbstractBenchmark
   volatile HashCode hashCode;
 
   @BenchmarkOptions(benchmarkRounds = 100000, warmupRounds = 100)
-  @Test
-  public void benchmarkToByteBuffer()
+  @MethodSource("getParameters")
+  @ParameterizedTest
+  public void benchmarkToByteBuffer(final HyperLogLogCollector collector, Long num_hashes)
   {
+    initHyperLogLogSerdeBenchmarkTest(collector, num_hashes);
     hashCode = getHash(collector.toByteBuffer());
   }
 }

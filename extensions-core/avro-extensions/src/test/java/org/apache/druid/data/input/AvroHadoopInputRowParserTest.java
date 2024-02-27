@@ -31,7 +31,6 @@ import org.apache.druid.data.input.avro.AvroExtensionsModule;
 import org.apache.druid.java.util.common.FileUtils;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;

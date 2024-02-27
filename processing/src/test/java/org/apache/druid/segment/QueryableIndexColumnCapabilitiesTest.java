@@ -47,13 +47,13 @@ import org.apache.druid.segment.column.ValueType;
 import org.apache.druid.segment.incremental.IncrementalIndex;
 import org.apache.druid.segment.incremental.IncrementalIndexSchema;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -62,15 +62,15 @@ import java.util.Map;
 
 public class QueryableIndexColumnCapabilitiesTest extends InitializedNullHandlingTest
 {
-  @ClassRule
-  public static TemporaryFolder temporaryFolder = new TemporaryFolder();
+  @TempDir
+  public static File temporaryFolder;
 
   private static IncrementalIndex INC_INDEX;
   private static QueryableIndex MMAP_INDEX;
   private static IncrementalIndex INC_INDEX_WITH_NULLS;
   private static QueryableIndex MMAP_INDEX_WITH_NULLS;
 
-  @BeforeClass
+  @BeforeAll
   public static void setup() throws IOException
   {
     InputRowSchema rowSchema = new InputRowSchema(
@@ -112,7 +112,7 @@ public class QueryableIndexColumnCapabilitiesTest extends InitializedNullHandlin
                                                .withRollup(false)
                                                .build()
                                        )
-                                       .tmpDir(temporaryFolder.newFolder());
+                                       .tmpDir(newFolder(temporaryFolder, "junit"));
     INC_INDEX = builder.buildIncrementalIndex();
     MMAP_INDEX = builder.buildMMappedIndex();
 
@@ -138,12 +138,12 @@ public class QueryableIndexColumnCapabilitiesTest extends InitializedNullHandlin
                                                         .withRollup(false)
                                                         .build()
                                                 )
-                                                .tmpDir(temporaryFolder.newFolder());
+                                                .tmpDir(newFolder(temporaryFolder, "junit"));
     INC_INDEX_WITH_NULLS = builderWithNulls.buildIncrementalIndex();
     MMAP_INDEX_WITH_NULLS = builderWithNulls.buildMMappedIndex();
   }
 
-  @AfterClass
+  @AfterAll
   public static void teardown()
   {
     INC_INDEX.close();
@@ -228,34 +228,34 @@ public class QueryableIndexColumnCapabilitiesTest extends InitializedNullHandlin
   public void testStringColumn()
   {
     ColumnCapabilities caps = INC_INDEX.getColumnCapabilities("d1");
-    Assert.assertEquals(ValueType.STRING, caps.getType());
-    Assert.assertTrue(caps.hasBitmapIndexes());
-    Assert.assertTrue(caps.isDictionaryEncoded().isMaybeTrue());
-    Assert.assertTrue(caps.isDictionaryEncoded().isTrue());
-    Assert.assertFalse(caps.areDictionaryValuesSorted().isTrue());
-    Assert.assertTrue(caps.areDictionaryValuesUnique().isTrue());
+    Assertions.assertEquals(ValueType.STRING, caps.getType());
+    Assertions.assertTrue(caps.hasBitmapIndexes());
+    Assertions.assertTrue(caps.isDictionaryEncoded().isMaybeTrue());
+    Assertions.assertTrue(caps.isDictionaryEncoded().isTrue());
+    Assertions.assertFalse(caps.areDictionaryValuesSorted().isTrue());
+    Assertions.assertTrue(caps.areDictionaryValuesUnique().isTrue());
     // multi-value is unknown unless explicitly set to 'true'
-    Assert.assertTrue(caps.hasMultipleValues().isUnknown());
+    Assertions.assertTrue(caps.hasMultipleValues().isUnknown());
     // at index merge or query time we 'complete' the capabilities to take a snapshot of the current state,
     // coercing any 'UNKNOWN' values to false
-    Assert.assertFalse(
+    Assertions.assertFalse(
         ColumnCapabilitiesImpl.snapshot(
             caps,
             CapabilitiesBasedFormat.DIMENSION_CAPABILITY_MERGE_LOGIC
         ).hasMultipleValues().isMaybeTrue()
     );
-    Assert.assertFalse(caps.hasSpatialIndexes());
-    Assert.assertTrue(caps.hasNulls().isUnknown());
+    Assertions.assertFalse(caps.hasSpatialIndexes());
+    Assertions.assertTrue(caps.hasNulls().isUnknown());
 
     caps = MMAP_INDEX.getColumnHolder("d1").getCapabilities();
-    Assert.assertEquals(ValueType.STRING, caps.getType());
-    Assert.assertTrue(caps.hasBitmapIndexes());
-    Assert.assertTrue(caps.isDictionaryEncoded().isTrue());
-    Assert.assertTrue(caps.areDictionaryValuesSorted().isTrue());
-    Assert.assertTrue(caps.areDictionaryValuesUnique().isTrue());
-    Assert.assertFalse(caps.hasMultipleValues().isMaybeTrue());
-    Assert.assertFalse(caps.hasSpatialIndexes());
-    Assert.assertFalse(caps.hasNulls().isMaybeTrue());
+    Assertions.assertEquals(ValueType.STRING, caps.getType());
+    Assertions.assertTrue(caps.hasBitmapIndexes());
+    Assertions.assertTrue(caps.isDictionaryEncoded().isTrue());
+    Assertions.assertTrue(caps.areDictionaryValuesSorted().isTrue());
+    Assertions.assertTrue(caps.areDictionaryValuesUnique().isTrue());
+    Assertions.assertFalse(caps.hasMultipleValues().isMaybeTrue());
+    Assertions.assertFalse(caps.hasSpatialIndexes());
+    Assertions.assertFalse(caps.hasNulls().isMaybeTrue());
   }
 
 
@@ -263,57 +263,57 @@ public class QueryableIndexColumnCapabilitiesTest extends InitializedNullHandlin
   public void testStringColumnWithNulls()
   {
     ColumnCapabilities caps = INC_INDEX_WITH_NULLS.getColumnCapabilities("d1");
-    Assert.assertEquals(ValueType.STRING, caps.getType());
-    Assert.assertTrue(caps.hasBitmapIndexes());
-    Assert.assertTrue(caps.isDictionaryEncoded().isTrue());
-    Assert.assertFalse(caps.areDictionaryValuesSorted().isTrue());
-    Assert.assertTrue(caps.areDictionaryValuesUnique().isTrue());
+    Assertions.assertEquals(ValueType.STRING, caps.getType());
+    Assertions.assertTrue(caps.hasBitmapIndexes());
+    Assertions.assertTrue(caps.isDictionaryEncoded().isTrue());
+    Assertions.assertFalse(caps.areDictionaryValuesSorted().isTrue());
+    Assertions.assertTrue(caps.areDictionaryValuesUnique().isTrue());
     // multi-value is unknown unless explicitly set to 'true'
-    Assert.assertTrue(caps.hasMultipleValues().isUnknown());
+    Assertions.assertTrue(caps.hasMultipleValues().isUnknown());
     // at index merge or query time we 'complete' the capabilities to take a snapshot of the current state,
     // coercing any 'UNKNOWN' values to false
-    Assert.assertFalse(
+    Assertions.assertFalse(
         ColumnCapabilitiesImpl.snapshot(
             caps,
             CapabilitiesBasedFormat.DIMENSION_CAPABILITY_MERGE_LOGIC
         ).hasMultipleValues().isMaybeTrue()
     );
-    Assert.assertFalse(caps.hasSpatialIndexes());
-    Assert.assertTrue(caps.hasNulls().isTrue());
+    Assertions.assertFalse(caps.hasSpatialIndexes());
+    Assertions.assertTrue(caps.hasNulls().isTrue());
 
     caps = MMAP_INDEX_WITH_NULLS.getColumnHolder("d1").getCapabilities();
-    Assert.assertEquals(ValueType.STRING, caps.getType());
-    Assert.assertTrue(caps.hasBitmapIndexes());
-    Assert.assertTrue(caps.isDictionaryEncoded().isTrue());
-    Assert.assertTrue(caps.areDictionaryValuesSorted().isTrue());
-    Assert.assertTrue(caps.areDictionaryValuesUnique().isTrue());
-    Assert.assertFalse(caps.hasMultipleValues().isMaybeTrue());
-    Assert.assertFalse(caps.hasSpatialIndexes());
-    Assert.assertTrue(caps.hasNulls().isTrue());
+    Assertions.assertEquals(ValueType.STRING, caps.getType());
+    Assertions.assertTrue(caps.hasBitmapIndexes());
+    Assertions.assertTrue(caps.isDictionaryEncoded().isTrue());
+    Assertions.assertTrue(caps.areDictionaryValuesSorted().isTrue());
+    Assertions.assertTrue(caps.areDictionaryValuesUnique().isTrue());
+    Assertions.assertFalse(caps.hasMultipleValues().isMaybeTrue());
+    Assertions.assertFalse(caps.hasSpatialIndexes());
+    Assertions.assertTrue(caps.hasNulls().isTrue());
   }
 
   @Test
   public void testMultiStringColumn()
   {
     ColumnCapabilities caps = INC_INDEX.getColumnCapabilities("d2");
-    Assert.assertEquals(ValueType.STRING, caps.getType());
-    Assert.assertTrue(caps.hasBitmapIndexes());
-    Assert.assertTrue(caps.isDictionaryEncoded().isTrue());
-    Assert.assertFalse(caps.areDictionaryValuesSorted().isTrue());
-    Assert.assertTrue(caps.areDictionaryValuesUnique().isTrue());
-    Assert.assertTrue(caps.hasMultipleValues().isTrue());
-    Assert.assertFalse(caps.hasSpatialIndexes());
-    Assert.assertTrue(caps.hasNulls().isUnknown());
+    Assertions.assertEquals(ValueType.STRING, caps.getType());
+    Assertions.assertTrue(caps.hasBitmapIndexes());
+    Assertions.assertTrue(caps.isDictionaryEncoded().isTrue());
+    Assertions.assertFalse(caps.areDictionaryValuesSorted().isTrue());
+    Assertions.assertTrue(caps.areDictionaryValuesUnique().isTrue());
+    Assertions.assertTrue(caps.hasMultipleValues().isTrue());
+    Assertions.assertFalse(caps.hasSpatialIndexes());
+    Assertions.assertTrue(caps.hasNulls().isUnknown());
 
     caps = MMAP_INDEX.getColumnHolder("d2").getCapabilities();
-    Assert.assertEquals(ValueType.STRING, caps.getType());
-    Assert.assertTrue(caps.hasBitmapIndexes());
-    Assert.assertTrue(caps.isDictionaryEncoded().isTrue());
-    Assert.assertTrue(caps.areDictionaryValuesSorted().isTrue());
-    Assert.assertTrue(caps.areDictionaryValuesUnique().isTrue());
-    Assert.assertTrue(caps.hasMultipleValues().isTrue());
-    Assert.assertFalse(caps.hasSpatialIndexes());
-    Assert.assertFalse(caps.hasNulls().isMaybeTrue());
+    Assertions.assertEquals(ValueType.STRING, caps.getType());
+    Assertions.assertTrue(caps.hasBitmapIndexes());
+    Assertions.assertTrue(caps.isDictionaryEncoded().isTrue());
+    Assertions.assertTrue(caps.areDictionaryValuesSorted().isTrue());
+    Assertions.assertTrue(caps.areDictionaryValuesUnique().isTrue());
+    Assertions.assertTrue(caps.hasMultipleValues().isTrue());
+    Assertions.assertFalse(caps.hasSpatialIndexes());
+    Assertions.assertFalse(caps.hasNulls().isMaybeTrue());
   }
 
 
@@ -321,24 +321,24 @@ public class QueryableIndexColumnCapabilitiesTest extends InitializedNullHandlin
   public void testMultiStringColumnWithNulls()
   {
     ColumnCapabilities caps = INC_INDEX_WITH_NULLS.getColumnCapabilities("d2");
-    Assert.assertEquals(ValueType.STRING, caps.getType());
-    Assert.assertTrue(caps.hasBitmapIndexes());
-    Assert.assertTrue(caps.isDictionaryEncoded().isTrue());
-    Assert.assertFalse(caps.areDictionaryValuesSorted().isTrue());
-    Assert.assertTrue(caps.areDictionaryValuesUnique().isTrue());
-    Assert.assertTrue(caps.hasMultipleValues().isTrue());
-    Assert.assertFalse(caps.hasSpatialIndexes());
-    Assert.assertTrue(caps.hasNulls().isTrue());
+    Assertions.assertEquals(ValueType.STRING, caps.getType());
+    Assertions.assertTrue(caps.hasBitmapIndexes());
+    Assertions.assertTrue(caps.isDictionaryEncoded().isTrue());
+    Assertions.assertFalse(caps.areDictionaryValuesSorted().isTrue());
+    Assertions.assertTrue(caps.areDictionaryValuesUnique().isTrue());
+    Assertions.assertTrue(caps.hasMultipleValues().isTrue());
+    Assertions.assertFalse(caps.hasSpatialIndexes());
+    Assertions.assertTrue(caps.hasNulls().isTrue());
 
     caps = MMAP_INDEX_WITH_NULLS.getColumnHolder("d2").getCapabilities();
-    Assert.assertEquals(ValueType.STRING, caps.getType());
-    Assert.assertTrue(caps.hasBitmapIndexes());
-    Assert.assertTrue(caps.isDictionaryEncoded().isTrue());
-    Assert.assertTrue(caps.areDictionaryValuesSorted().isTrue());
-    Assert.assertTrue(caps.areDictionaryValuesUnique().isTrue());
-    Assert.assertTrue(caps.hasMultipleValues().isTrue());
-    Assert.assertFalse(caps.hasSpatialIndexes());
-    Assert.assertTrue(caps.hasNulls().isTrue());
+    Assertions.assertEquals(ValueType.STRING, caps.getType());
+    Assertions.assertTrue(caps.hasBitmapIndexes());
+    Assertions.assertTrue(caps.isDictionaryEncoded().isTrue());
+    Assertions.assertTrue(caps.areDictionaryValuesSorted().isTrue());
+    Assertions.assertTrue(caps.areDictionaryValuesUnique().isTrue());
+    Assertions.assertTrue(caps.hasMultipleValues().isTrue());
+    Assertions.assertFalse(caps.hasSpatialIndexes());
+    Assertions.assertTrue(caps.hasNulls().isTrue());
   }
 
   @Test
@@ -353,38 +353,47 @@ public class QueryableIndexColumnCapabilitiesTest extends InitializedNullHandlin
 
   private void assertComplexColumnCapabilites(ColumnCapabilities caps)
   {
-    Assert.assertEquals(HyperUniquesAggregatorFactory.TYPE, caps.toColumnType());
-    Assert.assertFalse(caps.hasBitmapIndexes());
-    Assert.assertFalse(caps.isDictionaryEncoded().isTrue());
-    Assert.assertFalse(caps.areDictionaryValuesSorted().isTrue());
-    Assert.assertFalse(caps.areDictionaryValuesUnique().isTrue());
-    Assert.assertFalse(caps.hasSpatialIndexes());
-    Assert.assertFalse(caps.hasMultipleValues().isUnknown());
-    Assert.assertTrue(caps.hasNulls().isTrue());
+    Assertions.assertEquals(HyperUniquesAggregatorFactory.TYPE, caps.toColumnType());
+    Assertions.assertFalse(caps.hasBitmapIndexes());
+    Assertions.assertFalse(caps.isDictionaryEncoded().isTrue());
+    Assertions.assertFalse(caps.areDictionaryValuesSorted().isTrue());
+    Assertions.assertFalse(caps.areDictionaryValuesUnique().isTrue());
+    Assertions.assertFalse(caps.hasSpatialIndexes());
+    Assertions.assertFalse(caps.hasMultipleValues().isUnknown());
+    Assertions.assertTrue(caps.hasNulls().isTrue());
   }
 
   private void assertNonStringColumnCapabilities(ColumnCapabilities caps, ColumnType valueType)
   {
-    Assert.assertEquals(valueType, caps.toColumnType());
-    Assert.assertFalse(caps.hasBitmapIndexes());
-    Assert.assertFalse(caps.isDictionaryEncoded().isTrue());
-    Assert.assertFalse(caps.areDictionaryValuesSorted().isTrue());
-    Assert.assertFalse(caps.areDictionaryValuesUnique().isTrue());
-    Assert.assertFalse(caps.hasMultipleValues().isMaybeTrue());
-    Assert.assertFalse(caps.hasSpatialIndexes());
-    Assert.assertFalse(caps.hasNulls().isTrue());
+    Assertions.assertEquals(valueType, caps.toColumnType());
+    Assertions.assertFalse(caps.hasBitmapIndexes());
+    Assertions.assertFalse(caps.isDictionaryEncoded().isTrue());
+    Assertions.assertFalse(caps.areDictionaryValuesSorted().isTrue());
+    Assertions.assertFalse(caps.areDictionaryValuesUnique().isTrue());
+    Assertions.assertFalse(caps.hasMultipleValues().isMaybeTrue());
+    Assertions.assertFalse(caps.hasSpatialIndexes());
+    Assertions.assertFalse(caps.hasNulls().isTrue());
   }
 
   private void assertNonStringColumnCapabilitiesWithNulls(ColumnCapabilities caps, ColumnType valueType)
   {
-    Assert.assertEquals(valueType, caps.toColumnType());
-    Assert.assertFalse(caps.hasBitmapIndexes());
-    Assert.assertFalse(caps.isDictionaryEncoded().isTrue());
-    Assert.assertFalse(caps.areDictionaryValuesSorted().isTrue());
-    Assert.assertFalse(caps.areDictionaryValuesUnique().isTrue());
-    Assert.assertFalse(caps.hasMultipleValues().isMaybeTrue());
-    Assert.assertFalse(caps.hasSpatialIndexes());
+    Assertions.assertEquals(valueType, caps.toColumnType());
+    Assertions.assertFalse(caps.hasBitmapIndexes());
+    Assertions.assertFalse(caps.isDictionaryEncoded().isTrue());
+    Assertions.assertFalse(caps.areDictionaryValuesSorted().isTrue());
+    Assertions.assertFalse(caps.areDictionaryValuesUnique().isTrue());
+    Assertions.assertFalse(caps.hasMultipleValues().isMaybeTrue());
+    Assertions.assertFalse(caps.hasSpatialIndexes());
     // check isMaybeTrue because incremental index uses Unknown
-    Assert.assertEquals(NullHandling.sqlCompatible(), caps.hasNulls().isMaybeTrue());
+    Assertions.assertEquals(NullHandling.sqlCompatible(), caps.hasNulls().isMaybeTrue());
+  }
+
+  private static File newFolder(File root, String... subDirs) throws IOException {
+    String subFolder = String.join("/", subDirs);
+    File result = new File(root, subFolder);
+    if (!result.mkdirs()) {
+      throw new IOException("Couldn't create folders " + root);
+    }
+    return result;
   }
 }

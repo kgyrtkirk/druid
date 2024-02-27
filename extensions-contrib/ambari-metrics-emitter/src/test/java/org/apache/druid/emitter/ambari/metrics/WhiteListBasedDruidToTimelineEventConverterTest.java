@@ -27,7 +27,6 @@ import org.apache.druid.jackson.DefaultObjectMapper;
 import org.apache.druid.java.util.emitter.service.ServiceMetricEvent;
 import org.apache.hadoop.metrics2.sink.timeline.TimelineMetric;
 import org.junit.Assert;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.File;

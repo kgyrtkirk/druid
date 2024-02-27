@@ -48,16 +48,16 @@ import org.apache.druid.sql.calcite.schema.DruidSchemaCatalog;
 import org.apache.druid.sql.calcite.util.CalciteTestBase;
 import org.apache.druid.sql.calcite.util.CalciteTests;
 import org.apache.druid.sql.calcite.util.QueryLogHook;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
 import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -73,8 +73,8 @@ public class DruidStatementTest extends CalciteTestBase
   private static String SELECT_STAR_FROM_FOO =
       "SELECT * FROM druid.foo";
 
-  @ClassRule
-  public static TemporaryFolder temporaryFolder = new TemporaryFolder();
+  @TempDir
+  public static File temporaryFolder;
 
   @Rule
   public QueryLogHook queryLogHook = QueryLogHook.create();
@@ -83,16 +83,16 @@ public class DruidStatementTest extends CalciteTestBase
   private static QueryRunnerFactoryConglomerate conglomerate;
   private static Closer resourceCloser;
 
-  @BeforeClass
+  @BeforeAll
   public static void setUpClass() throws Exception
   {
     resourceCloser = Closer.create();
     conglomerate = QueryStackTests.createQueryRunnerFactoryConglomerate(resourceCloser);
-    walker = CalciteTests.createMockWalker(conglomerate, temporaryFolder.newFolder());
+    walker = CalciteTests.createMockWalker(conglomerate, newFolder(temporaryFolder, "junit"));
     resourceCloser.register(walker);
   }
 
-  @AfterClass
+  @AfterAll
   public static void tearDownClass() throws IOException
   {
     resourceCloser.close();
@@ -100,7 +100,7 @@ public class DruidStatementTest extends CalciteTestBase
 
   private SqlStatementFactory sqlStatementFactory;
 
-  @Before
+  @BeforeEach
   public void setUp()
   {
     final PlannerConfig plannerConfig = new PlannerConfig();
@@ -128,7 +128,7 @@ public class DruidStatementTest extends CalciteTestBase
     );
   }
 
-  @After
+  @AfterEach
   public void tearDown()
   {
 
@@ -166,11 +166,11 @@ public class DruidStatementTest extends CalciteTestBase
       // First frame, ask for all rows.
       statement.execute(queryPlus, -1);
       Meta.Frame frame = statement.nextFrame(AbstractDruidJdbcStatement.START_OFFSET, 6);
-      Assert.assertEquals(
+      Assertions.assertEquals(
           subQueryWithOrderByResults(),
           frame
       );
-      Assert.assertTrue(statement.isDone());
+      Assertions.assertTrue(statement.isDone());
     }
   }
 
@@ -187,14 +187,14 @@ public class DruidStatementTest extends CalciteTestBase
       // First frame, ask for all rows.
       statement.execute(queryPlus, -1);
       Meta.Frame frame = statement.nextFrame(AbstractDruidJdbcStatement.START_OFFSET, 6);
-      Assert.assertEquals(
+      Assertions.assertEquals(
           subQueryWithOrderByResults(),
           frame
       );
-      Assert.assertTrue(statement.isDone());
+      Assertions.assertTrue(statement.isDone());
       try {
         statement.nextFrame(6, 6);
-        Assert.fail();
+        Assertions.fail();
       }
       catch (Exception e) {
         // Expected: can't work with an auto-closed result set.
@@ -211,7 +211,7 @@ public class DruidStatementTest extends CalciteTestBase
     try (final DruidJdbcStatement statement = jdbcStatement()) {
       // Error: no call to execute;
       statement.nextFrame(AbstractDruidJdbcStatement.START_OFFSET, 6);
-      Assert.fail();
+      Assertions.fail();
     }
     catch (Exception e) {
       // Expected
@@ -237,7 +237,7 @@ public class DruidStatementTest extends CalciteTestBase
       statement.nextFrame(AbstractDruidJdbcStatement.START_OFFSET, 6);
       statement.closeResultSet();
       statement.nextFrame(AbstractDruidJdbcStatement.START_OFFSET, 6);
-      Assert.fail();
+      Assertions.fail();
     }
     catch (Exception e) {
       // Expected
@@ -256,20 +256,20 @@ public class DruidStatementTest extends CalciteTestBase
     try (final DruidJdbcStatement statement = jdbcStatement()) {
       statement.execute(queryPlus, -1);
       Meta.Frame frame = statement.nextFrame(AbstractDruidJdbcStatement.START_OFFSET, 6);
-      Assert.assertEquals(
+      Assertions.assertEquals(
           subQueryWithOrderByResults(),
           frame
       );
 
       // Do it again. JDBC says we can reuse statements sequentially.
-      Assert.assertTrue(statement.isDone());
+      Assertions.assertTrue(statement.isDone());
       statement.execute(queryPlus, -1);
       frame = statement.nextFrame(AbstractDruidJdbcStatement.START_OFFSET, 6);
-      Assert.assertEquals(
+      Assertions.assertEquals(
           subQueryWithOrderByResults(),
           frame
       );
-      Assert.assertTrue(statement.isDone());
+      Assertions.assertTrue(statement.isDone());
     }
   }
 
@@ -302,7 +302,7 @@ public class DruidStatementTest extends CalciteTestBase
       // First frame, ask for all rows.
       statement.execute(queryPlus, -1);
       Meta.Frame frame = statement.nextFrame(AbstractDruidJdbcStatement.START_OFFSET, 6);
-      Assert.assertEquals(
+      Assertions.assertEquals(
           Meta.Frame.create(
               0,
               true,
@@ -323,7 +323,7 @@ public class DruidStatementTest extends CalciteTestBase
           ),
           frame
       );
-      Assert.assertTrue(statement.isDone());
+      Assertions.assertTrue(statement.isDone());
     }
   }
 
@@ -344,23 +344,23 @@ public class DruidStatementTest extends CalciteTestBase
 
       // First frame, ask for 2 rows.
       statement.execute(queryPlus, -1);
-      Assert.assertEquals(0, statement.getCurrentOffset());
-      Assert.assertFalse(statement.isDone());
+      Assertions.assertEquals(0, statement.getCurrentOffset());
+      Assertions.assertFalse(statement.isDone());
       Meta.Frame frame = statement.nextFrame(AbstractDruidJdbcStatement.START_OFFSET, 2);
-      Assert.assertEquals(
+      Assertions.assertEquals(
           firstFrameResults(),
           frame
       );
-      Assert.assertFalse(statement.isDone());
-      Assert.assertEquals(2, statement.getCurrentOffset());
+      Assertions.assertFalse(statement.isDone());
+      Assertions.assertEquals(2, statement.getCurrentOffset());
 
       // Last frame, ask for all remaining rows.
       frame = statement.nextFrame(2, 10);
-      Assert.assertEquals(
+      Assertions.assertEquals(
           secondFrameResults(),
           frame
       );
-      Assert.assertTrue(statement.isDone());
+      Assertions.assertTrue(statement.isDone());
     }
   }
 
@@ -381,28 +381,28 @@ public class DruidStatementTest extends CalciteTestBase
       // First frame, ask for 2 rows.
       statement.execute(queryPlus, -1);
       Meta.Frame frame = statement.nextFrame(AbstractDruidJdbcStatement.START_OFFSET, 2);
-      Assert.assertEquals(
+      Assertions.assertEquals(
           firstFrameResults(),
           frame
       );
-      Assert.assertFalse(statement.isDone());
+      Assertions.assertFalse(statement.isDone());
 
       // Do it again. Closes the prior result set.
       statement.execute(queryPlus, -1);
       frame = statement.nextFrame(AbstractDruidJdbcStatement.START_OFFSET, 2);
-      Assert.assertEquals(
+      Assertions.assertEquals(
           firstFrameResults(),
           frame
       );
-      Assert.assertFalse(statement.isDone());
+      Assertions.assertFalse(statement.isDone());
 
       // Last frame, ask for all remaining rows.
       frame = statement.nextFrame(2, 10);
-      Assert.assertEquals(
+      Assertions.assertEquals(
           secondFrameResults(),
           frame
       );
-      Assert.assertTrue(statement.isDone());
+      Assertions.assertTrue(statement.isDone());
     }
   }
 
@@ -423,11 +423,11 @@ public class DruidStatementTest extends CalciteTestBase
       // First frame, ask for 2 rows.
       statement.execute(queryPlus, -1);
       Meta.Frame frame = statement.nextFrame(AbstractDruidJdbcStatement.START_OFFSET, 2);
-      Assert.assertEquals(
+      Assertions.assertEquals(
           firstFrameResults(),
           frame
       );
-      Assert.assertFalse(statement.isDone());
+      Assertions.assertFalse(statement.isDone());
 
       // Leave result set open; close statement.
     }
@@ -484,10 +484,10 @@ public class DruidStatementTest extends CalciteTestBase
   @SuppressWarnings("unchecked")
   private void verifySignature(Meta.Signature signature)
   {
-    Assert.assertEquals(Meta.CursorFactory.ARRAY, signature.cursorFactory);
-    Assert.assertEquals(Meta.StatementType.SELECT, signature.statementType);
-    Assert.assertEquals(SELECT_STAR_FROM_FOO, signature.sql);
-    Assert.assertEquals(
+    Assertions.assertEquals(Meta.CursorFactory.ARRAY, signature.cursorFactory);
+    Assertions.assertEquals(Meta.StatementType.SELECT, signature.statementType);
+    Assertions.assertEquals(SELECT_STAR_FROM_FOO, signature.sql);
+    Assertions.assertEquals(
         Lists.newArrayList(
             Lists.newArrayList("__time", "TIMESTAMP", "java.math.BigDecimal"),
             Lists.newArrayList("dim1", "VARCHAR", "java.lang.String"),
@@ -548,11 +548,11 @@ public class DruidStatementTest extends CalciteTestBase
       // First frame, ask for all rows.
       statement.execute(Collections.emptyList());
       Meta.Frame frame = statement.nextFrame(AbstractDruidJdbcStatement.START_OFFSET, 6);
-      Assert.assertEquals(
+      Assertions.assertEquals(
           subQueryWithOrderByResults(),
           frame
       );
-      Assert.assertTrue(statement.isDone());
+      Assertions.assertTrue(statement.isDone());
     }
   }
 
@@ -570,20 +570,20 @@ public class DruidStatementTest extends CalciteTestBase
       statement.prepare();
       statement.execute(Collections.emptyList());
       Meta.Frame frame = statement.nextFrame(AbstractDruidJdbcStatement.START_OFFSET, 6);
-      Assert.assertEquals(
+      Assertions.assertEquals(
           subQueryWithOrderByResults(),
           frame
       );
 
       // Do it again. JDBC says we can reuse prepared statements sequentially.
-      Assert.assertTrue(statement.isDone());
+      Assertions.assertTrue(statement.isDone());
       statement.execute(Collections.emptyList());
       frame = statement.nextFrame(AbstractDruidJdbcStatement.START_OFFSET, 6);
-      Assert.assertEquals(
+      Assertions.assertEquals(
           subQueryWithOrderByResults(),
           frame
       );
-      Assert.assertTrue(statement.isDone());
+      Assertions.assertTrue(statement.isDone());
     }
   }
 
@@ -621,7 +621,7 @@ public class DruidStatementTest extends CalciteTestBase
       // Execute many times. First time.
       statement.execute(matchingParams);
       Meta.Frame frame = statement.nextFrame(AbstractDruidJdbcStatement.START_OFFSET, 6);
-      Assert.assertEquals(
+      Assertions.assertEquals(
           expected,
           frame
       );
@@ -629,7 +629,7 @@ public class DruidStatementTest extends CalciteTestBase
       // Again, same value.
       statement.execute(matchingParams);
       frame = statement.nextFrame(AbstractDruidJdbcStatement.START_OFFSET, 6);
-      Assert.assertEquals(
+      Assertions.assertEquals(
           expected,
           frame
       );
@@ -639,10 +639,19 @@ public class DruidStatementTest extends CalciteTestBase
           Collections.singletonList(
               TypedValue.ofLocal(ColumnMetaData.Rep.STRING, "foo")));
       frame = statement.nextFrame(AbstractDruidJdbcStatement.START_OFFSET, 6);
-      Assert.assertEquals(
+      Assertions.assertEquals(
           Meta.Frame.create(0, true, Collections.emptyList()),
           frame
       );
     }
+  }
+
+  private static File newFolder(File root, String... subDirs) throws IOException {
+    String subFolder = String.join("/", subDirs);
+    File result = new File(root, subFolder);
+    if (!result.mkdirs()) {
+      throw new IOException("Couldn't create folders " + root);
+    }
+    return result;
   }
 }

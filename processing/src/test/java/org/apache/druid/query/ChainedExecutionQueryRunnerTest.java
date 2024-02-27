@@ -35,9 +35,10 @@ import org.apache.druid.query.timeseries.TimeseriesResultValue;
 import org.easymock.Capture;
 import org.easymock.EasyMock;
 import org.easymock.IAnswer;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
@@ -52,6 +53,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
@@ -61,13 +63,14 @@ public class ChainedExecutionQueryRunnerTest
 {
   private final Lock neverRelease = new ReentrantLock();
 
-  @Before
+  @BeforeEach
   public void setup()
   {
     neverRelease.lock();
   }
-  
-  @Test(timeout = 60_000L)
+
+  @Test
+  @Timeout(value = 60_000L, unit = TimeUnit.MILLISECONDS)
   public void testQueryCancellation() throws Exception
   {
     ExecutorService exec = PrioritizedExecutorService.create(
@@ -150,7 +153,7 @@ public class ChainedExecutionQueryRunnerTest
     queriesStarted.await();
 
     // cancel the query
-    Assert.assertTrue(capturedFuture.hasCaptured());
+    Assertions.assertTrue(capturedFuture.hasCaptured());
     ListenableFuture future = capturedFuture.getValue();
     future.cancel(true);
 
@@ -159,38 +162,39 @@ public class ChainedExecutionQueryRunnerTest
       resultFuture.get();
     }
     catch (ExecutionException e) {
-      Assert.assertTrue(e.getCause() instanceof QueryInterruptedException);
+      Assertions.assertTrue(e.getCause() instanceof QueryInterruptedException);
       cause = (QueryInterruptedException) e.getCause();
     }
     queriesInterrupted.await();
-    Assert.assertNotNull(cause);
-    Assert.assertTrue(future.isCancelled());
+    Assertions.assertNotNull(cause);
+    Assertions.assertTrue(future.isCancelled());
 
     DyingQueryRunner interrupted1 = interrupted.poll();
     synchronized (interrupted1) {
-      Assert.assertTrue("runner 1 started", interrupted1.hasStarted);
-      Assert.assertTrue("runner 1 interrupted", interrupted1.interrupted);
+      Assertions.assertTrue(interrupted1.hasStarted, "runner 1 started");
+      Assertions.assertTrue(interrupted1.interrupted, "runner 1 interrupted");
     }
     DyingQueryRunner interrupted2 = interrupted.poll();
     synchronized (interrupted2) {
-      Assert.assertTrue("runner 2 started", interrupted2.hasStarted);
-      Assert.assertTrue("runner 2 interrupted", interrupted2.interrupted);
+      Assertions.assertTrue(interrupted2.hasStarted, "runner 2 started");
+      Assertions.assertTrue(interrupted2.interrupted, "runner 2 interrupted");
     }
     runners.remove(interrupted1);
     runners.remove(interrupted2);
     DyingQueryRunner remainingRunner = runners.iterator().next();
     synchronized (remainingRunner) {
-      Assert.assertTrue("runner 3 should be interrupted or not have started",
-                        !remainingRunner.hasStarted || remainingRunner.interrupted);
+      Assertions.assertTrue(!remainingRunner.hasStarted || remainingRunner.interrupted,
+                        "runner 3 should be interrupted or not have started");
     }
-    Assert.assertFalse("runner 1 not completed", interrupted1.hasCompleted);
-    Assert.assertFalse("runner 2 not completed", interrupted2.hasCompleted);
-    Assert.assertFalse("runner 3 not completed", remainingRunner.hasCompleted);
+    Assertions.assertFalse(interrupted1.hasCompleted, "runner 1 not completed");
+    Assertions.assertFalse(interrupted2.hasCompleted, "runner 2 not completed");
+    Assertions.assertFalse(remainingRunner.hasCompleted, "runner 3 not completed");
 
     EasyMock.verify(watcher);
   }
 
-  @Test(timeout = 60_000L)
+  @Test
+  @Timeout(value = 60_000L, unit = TimeUnit.MILLISECONDS)
   public void testQueryTimeout() throws Exception
   {
     ExecutorService exec = PrioritizedExecutorService.create(
@@ -274,7 +278,7 @@ public class ChainedExecutionQueryRunnerTest
     queryIsRegistered.await();
     queriesStarted.await();
 
-    Assert.assertTrue(capturedFuture.hasCaptured());
+    Assertions.assertTrue(capturedFuture.hasCaptured());
     ListenableFuture future = capturedFuture.getValue();
 
     // wait for query to time out
@@ -283,34 +287,34 @@ public class ChainedExecutionQueryRunnerTest
       resultFuture.get();
     }
     catch (ExecutionException e) {
-      Assert.assertTrue(e.getCause() instanceof QueryTimeoutException);
-      Assert.assertEquals("Query timeout", ((QueryTimeoutException) e.getCause()).getErrorCode());
+      Assertions.assertTrue(e.getCause() instanceof QueryTimeoutException);
+      Assertions.assertEquals("Query timeout", ((QueryTimeoutException) e.getCause()).getErrorCode());
       cause = (QueryTimeoutException) e.getCause();
     }
     queriesInterrupted.await();
-    Assert.assertNotNull(cause);
-    Assert.assertTrue(future.isCancelled());
+    Assertions.assertNotNull(cause);
+    Assertions.assertTrue(future.isCancelled());
 
     DyingQueryRunner interrupted1 = interrupted.poll();
     synchronized (interrupted1) {
-      Assert.assertTrue("runner 1 started", interrupted1.hasStarted);
-      Assert.assertTrue("runner 1 interrupted", interrupted1.interrupted);
+      Assertions.assertTrue(interrupted1.hasStarted, "runner 1 started");
+      Assertions.assertTrue(interrupted1.interrupted, "runner 1 interrupted");
     }
     DyingQueryRunner interrupted2 = interrupted.poll();
     synchronized (interrupted2) {
-      Assert.assertTrue("runner 2 started", interrupted2.hasStarted);
-      Assert.assertTrue("runner 2 interrupted", interrupted2.interrupted);
+      Assertions.assertTrue(interrupted2.hasStarted, "runner 2 started");
+      Assertions.assertTrue(interrupted2.interrupted, "runner 2 interrupted");
     }
     runners.remove(interrupted1);
     runners.remove(interrupted2);
     DyingQueryRunner remainingRunner = runners.iterator().next();
     synchronized (remainingRunner) {
-      Assert.assertTrue("runner 3 should be interrupted or not have started",
-                        !remainingRunner.hasStarted || remainingRunner.interrupted);
+      Assertions.assertTrue(!remainingRunner.hasStarted || remainingRunner.interrupted,
+                        "runner 3 should be interrupted or not have started");
     }
-    Assert.assertFalse("runner 1 not completed", interrupted1.hasCompleted);
-    Assert.assertFalse("runner 2 not completed", interrupted2.hasCompleted);
-    Assert.assertFalse("runner 3 not completed", remainingRunner.hasCompleted);
+    Assertions.assertFalse(interrupted1.hasCompleted, "runner 1 not completed");
+    Assertions.assertFalse(interrupted2.hasCompleted, "runner 2 not completed");
+    Assertions.assertFalse(remainingRunner.hasCompleted, "runner 3 not completed");
 
     EasyMock.verify(watcher);
   }
@@ -341,7 +345,7 @@ public class ChainedExecutionQueryRunnerTest
     ArgumentCaptor<PrioritizedQueryRunnerCallable> captor = ArgumentCaptor.forClass(PrioritizedQueryRunnerCallable.class);
     Mockito.verify(queryProcessingPool, Mockito.times(2)).submitRunnerTask(captor.capture());
     List<QueryRunner> actual = captor.getAllValues().stream().map(PrioritizedQueryRunnerCallable::getRunner).collect(Collectors.toList());
-    Assert.assertEquals(runners, actual);
+    Assertions.assertEquals(runners, actual);
   }
 
   private class DyingQueryRunner implements QueryRunner<Integer>

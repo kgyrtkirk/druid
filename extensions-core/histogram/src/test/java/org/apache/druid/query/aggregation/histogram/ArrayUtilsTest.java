@@ -20,7 +20,6 @@
 package org.apache.druid.query.aggregation.histogram;
 
 import org.junit.Assert;
-import org.junit.Test;
 
 public class ArrayUtilsTest
 {

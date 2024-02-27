@@ -22,7 +22,6 @@ package org.apache.druid.iceberg.filter;
 import org.apache.iceberg.expressions.Expression;
 import org.apache.iceberg.expressions.Expressions;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.util.Arrays;
 

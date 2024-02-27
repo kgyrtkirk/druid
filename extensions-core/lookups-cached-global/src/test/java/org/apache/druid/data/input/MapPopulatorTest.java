@@ -23,7 +23,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.apache.druid.java.util.common.Pair;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.HashSet;

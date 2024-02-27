@@ -26,27 +26,28 @@ import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.java.util.http.client.Request;
 import org.apache.druid.segment.TestHelper;
 import org.hamcrest.CoreMatchers;
-import org.hamcrest.MatcherAssert;
 import org.jboss.netty.buffer.ChannelBufferInputStream;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.joda.time.Duration;
-import org.junit.Assert;
-import org.junit.Test;
 import org.junit.internal.matchers.ThrowableMessageMatcher;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.net.URI;
+
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class RequestBuilderTest
 {
   @Test
   public void test_constructor_noLeadingSlash()
   {
-    final IllegalArgumentException e = Assert.assertThrows(
+    final IllegalArgumentException e = Assertions.assertThrows(
         IllegalArgumentException.class,
         () -> new RequestBuilder(HttpMethod.GET, "q")
     );
 
-    MatcherAssert.assertThat(
+    assertThat(
         e,
         ThrowableMessageMatcher.hasMessage(CoreMatchers.containsString("Path must start with '/'"))
     );
@@ -60,11 +61,11 @@ public class RequestBuilderTest
         .header("x-test-header-2", "def")
         .build(new ServiceLocation("example.com", 8888, -1, ""));
 
-    Assert.assertEquals(HttpMethod.GET, request.getMethod());
-    Assert.assertEquals(new URI("http://example.com:8888/q").toURL(), request.getUrl());
-    Assert.assertEquals("abc", Iterables.getOnlyElement(request.getHeaders().get("x-test-header")));
-    Assert.assertEquals("def", Iterables.getOnlyElement(request.getHeaders().get("x-test-header-2")));
-    Assert.assertFalse(request.hasContent());
+    Assertions.assertEquals(HttpMethod.GET, request.getMethod());
+    Assertions.assertEquals(new URI("http://example.com:8888/q").toURL(), request.getUrl());
+    Assertions.assertEquals("abc", Iterables.getOnlyElement(request.getHeaders().get("x-test-header")));
+    Assertions.assertEquals("def", Iterables.getOnlyElement(request.getHeaders().get("x-test-header-2")));
+    Assertions.assertFalse(request.hasContent());
   }
 
   @Test
@@ -75,11 +76,11 @@ public class RequestBuilderTest
         .header("x-test-header-2", "def")
         .build(new ServiceLocation("example.com", 9999, 8888, "")) /* TLS preferred over plaintext */;
 
-    Assert.assertEquals(HttpMethod.GET, request.getMethod());
-    Assert.assertEquals(new URI("https://example.com:8888/q").toURL(), request.getUrl());
-    Assert.assertEquals("abc", Iterables.getOnlyElement(request.getHeaders().get("x-test-header")));
-    Assert.assertEquals("def", Iterables.getOnlyElement(request.getHeaders().get("x-test-header-2")));
-    Assert.assertFalse(request.hasContent());
+    Assertions.assertEquals(HttpMethod.GET, request.getMethod());
+    Assertions.assertEquals(new URI("https://example.com:8888/q").toURL(), request.getUrl());
+    Assertions.assertEquals("abc", Iterables.getOnlyElement(request.getHeaders().get("x-test-header")));
+    Assertions.assertEquals("def", Iterables.getOnlyElement(request.getHeaders().get("x-test-header-2")));
+    Assertions.assertFalse(request.hasContent());
   }
 
   @Test
@@ -90,11 +91,11 @@ public class RequestBuilderTest
         .header("x-test-header-2", "def")
         .build(new ServiceLocation("example.com", 9999, 8888, "/base")) /* TLS preferred over plaintext */;
 
-    Assert.assertEquals(HttpMethod.GET, request.getMethod());
-    Assert.assertEquals(new URI("https://example.com:8888/base/q").toURL(), request.getUrl());
-    Assert.assertEquals("abc", Iterables.getOnlyElement(request.getHeaders().get("x-test-header")));
-    Assert.assertEquals("def", Iterables.getOnlyElement(request.getHeaders().get("x-test-header-2")));
-    Assert.assertFalse(request.hasContent());
+    Assertions.assertEquals(HttpMethod.GET, request.getMethod());
+    Assertions.assertEquals(new URI("https://example.com:8888/base/q").toURL(), request.getUrl());
+    Assertions.assertEquals("abc", Iterables.getOnlyElement(request.getHeaders().get("x-test-header")));
+    Assertions.assertEquals("def", Iterables.getOnlyElement(request.getHeaders().get("x-test-header-2")));
+    Assertions.assertFalse(request.hasContent());
   }
 
   @Test
@@ -105,11 +106,11 @@ public class RequestBuilderTest
         .header("x-test-header-2", "def")
         .build(new ServiceLocation("example.com", 9999, 8888, "")) /* TLS preferred over plaintext */;
 
-    Assert.assertEquals(HttpMethod.POST, request.getMethod());
-    Assert.assertEquals(new URI("https://example.com:8888/q").toURL(), request.getUrl());
-    Assert.assertEquals("abc", Iterables.getOnlyElement(request.getHeaders().get("x-test-header")));
-    Assert.assertEquals("def", Iterables.getOnlyElement(request.getHeaders().get("x-test-header-2")));
-    Assert.assertFalse(request.hasContent());
+    Assertions.assertEquals(HttpMethod.POST, request.getMethod());
+    Assertions.assertEquals(new URI("https://example.com:8888/q").toURL(), request.getUrl());
+    Assertions.assertEquals("abc", Iterables.getOnlyElement(request.getHeaders().get("x-test-header")));
+    Assertions.assertEquals("def", Iterables.getOnlyElement(request.getHeaders().get("x-test-header-2")));
+    Assertions.assertFalse(request.hasContent());
   }
 
   @Test
@@ -122,14 +123,14 @@ public class RequestBuilderTest
         .content("application/json", StringUtils.toUtf8(json))
         .build(new ServiceLocation("example.com", 9999, 8888, "")) /* TLS preferred over plaintext */;
 
-    Assert.assertEquals(HttpMethod.POST, request.getMethod());
-    Assert.assertEquals(new URI("https://example.com:8888/q").toURL(), request.getUrl());
-    Assert.assertEquals("abc", Iterables.getOnlyElement(request.getHeaders().get("x-test-header")));
-    Assert.assertEquals("def", Iterables.getOnlyElement(request.getHeaders().get("x-test-header-2")));
-    Assert.assertTrue(request.hasContent());
+    Assertions.assertEquals(HttpMethod.POST, request.getMethod());
+    Assertions.assertEquals(new URI("https://example.com:8888/q").toURL(), request.getUrl());
+    Assertions.assertEquals("abc", Iterables.getOnlyElement(request.getHeaders().get("x-test-header")));
+    Assertions.assertEquals("def", Iterables.getOnlyElement(request.getHeaders().get("x-test-header-2")));
+    Assertions.assertTrue(request.hasContent());
 
     // Read and verify content.
-    Assert.assertEquals(
+    Assertions.assertEquals(
         json,
         StringUtils.fromUtf8(ByteStreams.toByteArray(new ChannelBufferInputStream(request.getContent())))
     );
@@ -144,14 +145,14 @@ public class RequestBuilderTest
         .jsonContent(TestHelper.makeJsonMapper(), ImmutableMap.of("foo", 3))
         .build(new ServiceLocation("example.com", 9999, 8888, "")) /* TLS preferred over plaintext */;
 
-    Assert.assertEquals(HttpMethod.POST, request.getMethod());
-    Assert.assertEquals(new URI("https://example.com:8888/q").toURL(), request.getUrl());
-    Assert.assertEquals("abc", Iterables.getOnlyElement(request.getHeaders().get("x-test-header")));
-    Assert.assertEquals("def", Iterables.getOnlyElement(request.getHeaders().get("x-test-header-2")));
-    Assert.assertTrue(request.hasContent());
+    Assertions.assertEquals(HttpMethod.POST, request.getMethod());
+    Assertions.assertEquals(new URI("https://example.com:8888/q").toURL(), request.getUrl());
+    Assertions.assertEquals("abc", Iterables.getOnlyElement(request.getHeaders().get("x-test-header")));
+    Assertions.assertEquals("def", Iterables.getOnlyElement(request.getHeaders().get("x-test-header-2")));
+    Assertions.assertTrue(request.hasContent());
 
     // Read and verify content.
-    Assert.assertEquals(
+    Assertions.assertEquals(
         "{\"foo\":3}",
         StringUtils.fromUtf8(ByteStreams.toByteArray(new ChannelBufferInputStream(request.getContent())))
     );
@@ -160,12 +161,12 @@ public class RequestBuilderTest
   @Test
   public void test_timeout()
   {
-    Assert.assertEquals(RequestBuilder.DEFAULT_TIMEOUT, new RequestBuilder(HttpMethod.GET, "/q").getTimeout());
-    Assert.assertEquals(
+    Assertions.assertEquals(RequestBuilder.DEFAULT_TIMEOUT, new RequestBuilder(HttpMethod.GET, "/q").getTimeout());
+    Assertions.assertEquals(
         Duration.standardSeconds(1),
         new RequestBuilder(HttpMethod.GET, "/q").timeout(Duration.standardSeconds(1)).getTimeout()
     );
-    Assert.assertEquals(
+    Assertions.assertEquals(
         Duration.ZERO,
         new RequestBuilder(HttpMethod.GET, "/q").timeout(Duration.ZERO).getTimeout()
     );

@@ -41,14 +41,13 @@ import org.apache.druid.segment.join.table.IndexedTableJoinable;
 import org.apache.druid.segment.virtual.ExpressionVirtualColumn;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.apache.druid.timeline.SegmentId;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.rules.ExpectedException;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.io.TempDir;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -69,11 +68,8 @@ public class BaseHashJoinSegmentStorageAdapterTest extends InitializedNullHandli
   public static final String REGION_TO_COUNTRY_PREFIX = "rtc.";
   public static Long NULL_COUNTRY;
 
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
-
-  @Rule
-  public TemporaryFolder temporaryFolder = new TemporaryFolder();
+  @TempDir
+  public File temporaryFolder;
 
   public QueryableIndexSegment factSegment;
   public LookupExtractor countryIsoCodeToNameLookup;
@@ -81,18 +77,18 @@ public class BaseHashJoinSegmentStorageAdapterTest extends InitializedNullHandli
   public IndexedTable countriesTable;
   public IndexedTable regionsTable;
 
-  @BeforeClass
+  @BeforeAll
   public static void setUpStatic()
   {
     NullHandling.initializeForTests();
     NULL_COUNTRY = NullHandling.sqlCompatible() ? null : 0L;
   }
 
-  @Before
+  @BeforeEach
   public void setUp() throws IOException
   {
     factSegment = new QueryableIndexSegment(
-        JoinTestHelper.createFactIndexBuilder(temporaryFolder.newFolder()).buildMMappedIndex(),
+        JoinTestHelper.createFactIndexBuilder(newFolder(temporaryFolder, "junit")).buildMMappedIndex(),
         SegmentId.dummy("facts")
     );
     countryIsoCodeToNameLookup = JoinTestHelper.createCountryIsoCodeToNameLookup();
@@ -101,7 +97,7 @@ public class BaseHashJoinSegmentStorageAdapterTest extends InitializedNullHandli
     regionsTable = JoinTestHelper.createRegionsIndexedTable();
   }
 
-  @After
+  @AfterEach
   public void tearDown()
   {
     if (factSegment != null) {
@@ -243,15 +239,15 @@ public class BaseHashJoinSegmentStorageAdapterTest extends InitializedNullHandli
       ExpressionVirtualColumn actualVirtualColumn
   )
   {
-    Assert.assertEquals(
+    Assertions.assertEquals(
         expectedVirtualColumn.getOutputName(),
         actualVirtualColumn.getOutputName()
     );
-    Assert.assertEquals(
+    Assertions.assertEquals(
         expectedVirtualColumn.getOutputType(),
         actualVirtualColumn.getOutputType()
     );
-    Assert.assertEquals(
+    Assertions.assertEquals(
         expectedVirtualColumn.getParsedExpression().get().toString(),
         actualVirtualColumn.getParsedExpression().get().toString()
     );
@@ -290,5 +286,14 @@ public class BaseHashJoinSegmentStorageAdapterTest extends InitializedNullHandli
         ColumnType.STRING,
         ExprMacroTable.nil()
     );
+  }
+
+  private static File newFolder(File root, String... subDirs) throws IOException {
+    String subFolder = String.join("/", subDirs);
+    File result = new File(root, subFolder);
+    if (!result.mkdirs()) {
+      throw new IOException("Couldn't create folders " + root);
+    }
+    return result;
   }
 }

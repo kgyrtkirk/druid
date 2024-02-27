@@ -38,7 +38,6 @@ import org.apache.druid.testsEx.config.DruidTestRunner;
 import org.apache.druid.testsEx.config.Initializer;
 import org.apache.druid.testsEx.indexer.AbstractIndexerTest;
 import org.apache.druid.testsEx.utils.DruidClusterAdminClient;
-import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 

@@ -26,7 +26,6 @@ import com.google.common.collect.testing.TestCollectionGenerator;
 import com.google.common.collect.testing.features.CollectionFeature;
 import com.google.common.collect.testing.features.CollectionSize;
 import junit.framework.Test;
-import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.roaringbitmap.IntIterator;
 
@@ -35,7 +34,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class BitmapIterationTest extends TestCase
+public class BitmapIterationTest
 {
   public static Test suite()
   {

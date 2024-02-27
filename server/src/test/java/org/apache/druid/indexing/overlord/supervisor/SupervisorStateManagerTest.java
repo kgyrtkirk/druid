@@ -22,8 +22,8 @@ package org.apache.druid.indexing.overlord.supervisor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import org.apache.druid.jackson.DefaultObjectMapper;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
@@ -40,17 +40,17 @@ public class SupervisorStateManagerTest
         false
     );
 
-    Assert.assertFalse(stateManagerConfig.isIdleConfigEnabled());
-    Assert.assertEquals(600000, stateManagerConfig.getInactiveAfterMillis());
+    Assertions.assertFalse(stateManagerConfig.isIdleConfigEnabled());
+    Assertions.assertEquals(600000, stateManagerConfig.getInactiveAfterMillis());
 
     supervisorStateManager.markRunFinished();
 
-    Assert.assertEquals(SupervisorStateManager.BasicState.RUNNING, supervisorStateManager.getSupervisorState());
+    Assertions.assertEquals(SupervisorStateManager.BasicState.RUNNING, supervisorStateManager.getSupervisorState());
 
     supervisorStateManager.maybeSetState(SupervisorStateManager.BasicState.IDLE);
     supervisorStateManager.markRunFinished();
 
-    Assert.assertEquals(SupervisorStateManager.BasicState.IDLE, supervisorStateManager.getSupervisorState());
+    Assertions.assertEquals(SupervisorStateManager.BasicState.IDLE, supervisorStateManager.getSupervisorState());
   }
 
   @Test
@@ -63,7 +63,7 @@ public class SupervisorStateManagerTest
     );
     stateManagerConfig = mapper.convertValue(config, SupervisorStateManagerConfig.class);
 
-    Assert.assertTrue(stateManagerConfig.isIdleConfigEnabled());
-    Assert.assertEquals(60000, stateManagerConfig.getInactiveAfterMillis());
+    Assertions.assertTrue(stateManagerConfig.isIdleConfigEnabled());
+    Assertions.assertEquals(60000, stateManagerConfig.getInactiveAfterMillis());
   }
 }

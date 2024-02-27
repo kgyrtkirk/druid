@@ -59,7 +59,6 @@ import org.apache.druid.timeline.DataSegment;
 import org.apache.druid.timeline.partition.LinearShardSpec;
 import org.joda.time.Period;
 import org.junit.Assert;
-import org.junit.Test;
 
 import javax.annotation.Nullable;
 import java.io.File;

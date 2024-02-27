@@ -28,7 +28,6 @@ import org.apache.druid.data.input.impl.FileEntity;
 import org.apache.druid.data.input.impl.TimestampSpec;
 import org.apache.druid.java.util.common.Intervals;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.util.Arrays;
 

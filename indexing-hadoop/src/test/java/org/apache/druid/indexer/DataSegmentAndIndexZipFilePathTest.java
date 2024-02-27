@@ -26,7 +26,6 @@ import org.apache.druid.timeline.DataSegment;
 import org.apache.druid.timeline.SegmentId;
 import org.apache.druid.timeline.partition.NumberedShardSpec;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.io.IOException;
 

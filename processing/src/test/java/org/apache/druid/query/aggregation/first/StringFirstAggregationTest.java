@@ -34,9 +34,9 @@ import org.apache.druid.segment.column.ColumnHolder;
 import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.easymock.EasyMock;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 import java.util.Comparator;
@@ -63,7 +63,7 @@ public class StringFirstAggregationTest extends InitializedNullHandlingTest
       new SerializablePairLongString(51223L, null)
   };
 
-  @Before
+  @BeforeEach
   public void setup()
   {
     NullHandling.initializeForTests();
@@ -96,7 +96,7 @@ public class StringFirstAggregationTest extends InitializedNullHandlingTest
 
     Pair<Long, String> result = (Pair<Long, String>) agg.get();
 
-    Assert.assertEquals(strings[2], result.rhs);
+    Assertions.assertEquals(strings[2], result.rhs);
   }
 
   @Test
@@ -111,7 +111,7 @@ public class StringFirstAggregationTest extends InitializedNullHandlingTest
 
     Pair<Long, String> result = (Pair<Long, String>) agg.get();
 
-    Assert.assertEquals(strings[1], result.rhs);
+    Assertions.assertEquals(strings[1], result.rhs);
   }
 
   @Test
@@ -130,7 +130,7 @@ public class StringFirstAggregationTest extends InitializedNullHandlingTest
 
     Pair<Long, String> result = (Pair<Long, String>) agg.get(buffer, 0);
 
-    Assert.assertEquals(strings[1], result.rhs);
+    Assertions.assertEquals(strings[1], result.rhs);
   }
 
   @Test
@@ -138,7 +138,7 @@ public class StringFirstAggregationTest extends InitializedNullHandlingTest
   {
     SerializablePairLongString pair1 = new SerializablePairLongString(1467225000L, "AAAA");
     SerializablePairLongString pair2 = new SerializablePairLongString(1467240000L, "BBBB");
-    Assert.assertEquals(pair1, stringFirstAggFactory.combine(pair1, pair2));
+    Assertions.assertEquals(pair1, stringFirstAggFactory.combine(pair1, pair2));
   }
 
   @Test
@@ -146,7 +146,7 @@ public class StringFirstAggregationTest extends InitializedNullHandlingTest
   {
     SerializablePairLongString pair1 = new SerializablePairLongString(1467240000L, "AAAA");
     SerializablePairLongString pair2 = new SerializablePairLongString(1467225000L, "BBBB");
-    Assert.assertEquals(pair2, stringFirstAggFactory.combine(pair1, pair2));
+    Assertions.assertEquals(pair2, stringFirstAggFactory.combine(pair1, pair2));
   }
 
   @Test
@@ -154,7 +154,7 @@ public class StringFirstAggregationTest extends InitializedNullHandlingTest
   {
     SerializablePairLongString pair1 = new SerializablePairLongString(1467225000L, "AAAA");
     SerializablePairLongString pair2 = new SerializablePairLongString(1467225000L, "BBBB");
-    Assert.assertEquals(pair1, stringFirstAggFactory.combine(pair1, pair2));
+    Assertions.assertEquals(pair1, stringFirstAggFactory.combine(pair1, pair2));
   }
 
   @Test
@@ -170,8 +170,8 @@ public class StringFirstAggregationTest extends InitializedNullHandlingTest
     Pair<Long, String> result = (Pair<Long, String>) agg.get();
     Pair<Long, String> expected = pairs[3];
 
-    Assert.assertEquals(expected.lhs, result.lhs);
-    Assert.assertEquals(expected.rhs, result.rhs);
+    Assertions.assertEquals(expected.lhs, result.lhs);
+    Assertions.assertEquals(expected.rhs, result.rhs);
   }
 
   @Test
@@ -190,8 +190,8 @@ public class StringFirstAggregationTest extends InitializedNullHandlingTest
     Pair<Long, String> result = (Pair<Long, String>) agg.get(buffer, 0);
     Pair<Long, String> expected = pairs[3];
 
-    Assert.assertEquals(expected.lhs, result.lhs);
-    Assert.assertEquals(expected.rhs, result.rhs);
+    Assertions.assertEquals(expected.lhs, result.lhs);
+    Assertions.assertEquals(expected.rhs, result.rhs);
   }
 
   @Test
@@ -204,16 +204,16 @@ public class StringFirstAggregationTest extends InitializedNullHandlingTest
 
     stringFirstAggregateCombiner.reset(columnSelector);
 
-    Assert.assertEquals(pairs[0], stringFirstAggregateCombiner.getObject());
+    Assertions.assertEquals(pairs[0], stringFirstAggregateCombiner.getObject());
 
     columnSelector.increment();
     stringFirstAggregateCombiner.fold(columnSelector);
 
-    Assert.assertEquals(pairs[0], stringFirstAggregateCombiner.getObject());
+    Assertions.assertEquals(pairs[0], stringFirstAggregateCombiner.getObject());
 
     stringFirstAggregateCombiner.reset(columnSelector);
 
-    Assert.assertEquals(pairs[1], stringFirstAggregateCombiner.getObject());
+    Assertions.assertEquals(pairs[1], stringFirstAggregateCombiner.getObject());
   }
 
   @Test
@@ -227,19 +227,19 @@ public class StringFirstAggregationTest extends InitializedNullHandlingTest
     SerializablePairLongString pair3 = new SerializablePairLongString(3L, null);
 
     // check non null values
-    Assert.assertEquals(0, comparator.compare(pair1, pair1));
-    Assert.assertTrue(comparator.compare(pair1, pair2) > 0);
-    Assert.assertTrue(comparator.compare(pair2, pair1) < 0);
+    Assertions.assertEquals(0, comparator.compare(pair1, pair1));
+    Assertions.assertTrue(comparator.compare(pair1, pair2) > 0);
+    Assertions.assertTrue(comparator.compare(pair2, pair1) < 0);
 
     // check non null value with null value (null values first comparator)
-    Assert.assertEquals(0, comparator.compare(pair3, pair3));
-    Assert.assertTrue(comparator.compare(pair1, pair3) > 0);
-    Assert.assertTrue(comparator.compare(pair3, pair1) < 0);
+    Assertions.assertEquals(0, comparator.compare(pair3, pair3));
+    Assertions.assertTrue(comparator.compare(pair1, pair3) > 0);
+    Assertions.assertTrue(comparator.compare(pair3, pair1) < 0);
 
     // check non null pair with null pair (null pairs first comparator)
-    Assert.assertEquals(0, comparator.compare(null, null));
-    Assert.assertTrue(comparator.compare(pair1, null) > 0);
-    Assert.assertTrue(comparator.compare(null, pair1) < 0);
+    Assertions.assertEquals(0, comparator.compare(null, null));
+    Assertions.assertTrue(comparator.compare(pair1, null) > 0);
+    Assertions.assertTrue(comparator.compare(null, pair1) < 0);
   }
 
   private void aggregate(

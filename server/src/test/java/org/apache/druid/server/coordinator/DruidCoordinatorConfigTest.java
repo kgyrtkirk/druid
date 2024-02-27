@@ -21,8 +21,8 @@ package org.apache.druid.server.coordinator;
 
 import org.apache.druid.java.util.common.config.Config;
 import org.joda.time.Duration;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.skife.config.ConfigurationObjectFactory;
 
 import java.util.Properties;
@@ -39,15 +39,15 @@ public class DruidCoordinatorConfigTest
     //with defaults
     DruidCoordinatorConfig config = factory.build(DruidCoordinatorConfig.class);
 
-    Assert.assertEquals(new Duration("PT300s"), config.getCoordinatorStartDelay());
-    Assert.assertEquals(new Duration("PT60s"), config.getCoordinatorPeriod());
-    Assert.assertEquals(new Duration("PT1800s"), config.getCoordinatorIndexingPeriod());
-    Assert.assertEquals(86400000, config.getCoordinatorKillPeriod().getMillis());
-    Assert.assertEquals(7776000000L, config.getCoordinatorKillDurationToRetain().getMillis());
-    Assert.assertEquals(100, config.getCoordinatorKillMaxSegments());
-    Assert.assertEquals(new Duration(15 * 60 * 1000), config.getLoadTimeoutDelay());
-    Assert.assertFalse(config.getCoordinatorKillIgnoreDurationToRetain());
-    Assert.assertEquals("http", config.getLoadQueuePeonType());
+    Assertions.assertEquals(new Duration("PT300s"), config.getCoordinatorStartDelay());
+    Assertions.assertEquals(new Duration("PT60s"), config.getCoordinatorPeriod());
+    Assertions.assertEquals(new Duration("PT1800s"), config.getCoordinatorIndexingPeriod());
+    Assertions.assertEquals(86400000, config.getCoordinatorKillPeriod().getMillis());
+    Assertions.assertEquals(7776000000L, config.getCoordinatorKillDurationToRetain().getMillis());
+    Assertions.assertEquals(100, config.getCoordinatorKillMaxSegments());
+    Assertions.assertEquals(new Duration(15 * 60 * 1000), config.getLoadTimeoutDelay());
+    Assertions.assertFalse(config.getCoordinatorKillIgnoreDurationToRetain());
+    Assertions.assertEquals("http", config.getLoadQueuePeonType());
 
     //with non-defaults
     Properties props = new Properties();
@@ -66,20 +66,20 @@ public class DruidCoordinatorConfigTest
     factory = Config.createFactory(props);
     config = factory.build(DruidCoordinatorConfig.class);
 
-    Assert.assertEquals(new Duration("PT1s"), config.getCoordinatorStartDelay());
-    Assert.assertEquals(new Duration("PT1s"), config.getCoordinatorPeriod());
-    Assert.assertEquals(new Duration("PT1s"), config.getCoordinatorIndexingPeriod());
-    Assert.assertEquals(new Duration("PT1s"), config.getCoordinatorKillPeriod());
-    Assert.assertEquals(new Duration("PT1s"), config.getCoordinatorKillDurationToRetain());
-    Assert.assertEquals(10000, config.getCoordinatorKillMaxSegments());
-    Assert.assertEquals(new Duration("PT1s"), config.getLoadTimeoutDelay());
-    Assert.assertTrue(config.getCoordinatorKillIgnoreDurationToRetain());
+    Assertions.assertEquals(new Duration("PT1s"), config.getCoordinatorStartDelay());
+    Assertions.assertEquals(new Duration("PT1s"), config.getCoordinatorPeriod());
+    Assertions.assertEquals(new Duration("PT1s"), config.getCoordinatorIndexingPeriod());
+    Assertions.assertEquals(new Duration("PT1s"), config.getCoordinatorKillPeriod());
+    Assertions.assertEquals(new Duration("PT1s"), config.getCoordinatorKillDurationToRetain());
+    Assertions.assertEquals(10000, config.getCoordinatorKillMaxSegments());
+    Assertions.assertEquals(new Duration("PT1s"), config.getLoadTimeoutDelay());
+    Assertions.assertTrue(config.getCoordinatorKillIgnoreDurationToRetain());
 
     // Test negative druid.coordinator.kill.durationToRetain now that it is valid.
     props = new Properties();
     props.setProperty("druid.coordinator.kill.durationToRetain", "PT-1s");
     factory = Config.createFactory(props);
     config = factory.build(DruidCoordinatorConfig.class);
-    Assert.assertEquals(new Duration("PT-1s"), config.getCoordinatorKillDurationToRetain());
+    Assertions.assertEquals(new Duration("PT-1s"), config.getCoordinatorKillDurationToRetain());
   }
 }

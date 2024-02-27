@@ -27,16 +27,14 @@ import org.apache.druid.segment.writeout.OffHeapMemorySegmentWriteOutMedium;
 import org.apache.druid.segment.writeout.SegmentWriteOutMedium;
 import org.apache.druid.segment.writeout.TmpFileSegmentWriteOutMediumFactory;
 import org.apache.druid.utils.CloseableUtils;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -48,10 +46,10 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-@RunWith(Parameterized.class)
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public class CompressedFloatsSerdeTest
 {
-  @Parameterized.Parameters(name = "{0} {1} {2}")
   public static Iterable<Object[]> compressionStrategies()
   {
     List<Object[]> data = new ArrayList<>();
@@ -64,14 +62,11 @@ public class CompressedFloatsSerdeTest
 
   private static final double DELTA = 0.00001;
 
-  @Rule
-  public TemporaryFolder temporaryFolder = new TemporaryFolder();
+  @TempDir
+  public File temporaryFolder;
 
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
-
-  protected final CompressionStrategy compressionStrategy;
-  protected final ByteOrder order;
+  protected CompressionStrategy compressionStrategy;
+  protected ByteOrder order;
 
   private final float[] values0 = {};
   private final float[] values1 = {0f, 1f, 1f, 0f, 1f, 1f, 1f, 1f, 0f, 0f, 1f, 1f};
@@ -106,7 +101,7 @@ public class CompressedFloatsSerdeTest
       21431.414538f, 65487435436632.123f, -43734526234564.65f
   };
 
-  public CompressedFloatsSerdeTest(
+  public void initCompressedFloatsSerdeTest(
       CompressionStrategy compressionStrategy,
       ByteOrder order
   )
@@ -115,9 +110,11 @@ public class CompressedFloatsSerdeTest
     this.order = order;
   }
 
-  @Test
-  public void testValueSerde() throws Exception
+  @MethodSource("compressionStrategies")
+  @ParameterizedTest(name = "{0} {1} {2}")
+  public void testValueSerde(CompressionStrategy compressionStrategy, ByteOrder order) throws Exception
   {
+    initCompressedFloatsSerdeTest(compressionStrategy, order);
     testWithValues(values0);
     testWithValues(values1);
     testWithValues(values2);
@@ -128,9 +125,11 @@ public class CompressedFloatsSerdeTest
     testWithValues(values7);
   }
 
-  @Test
-  public void testChunkSerde() throws Exception
+  @MethodSource("compressionStrategies")
+  @ParameterizedTest(name = "{0} {1} {2}")
+  public void testChunkSerde(CompressionStrategy compressionStrategy, ByteOrder order) throws Exception
   {
+    initCompressedFloatsSerdeTest(compressionStrategy, order);
     float[] chunk = new float[10000];
     for (int i = 0; i < 10000; i++) {
       chunk[i] = i;
@@ -139,30 +138,33 @@ public class CompressedFloatsSerdeTest
   }
 
   // this test takes ~30 minutes to run
-  @Ignore
-  @Test
-  public void testTooManyValues() throws IOException
+  @Disabled
+  @MethodSource("compressionStrategies")
+  @ParameterizedTest(name = "{0} {1} {2}")
+  public void testTooManyValues(CompressionStrategy compressionStrategy, ByteOrder order) throws IOException
   {
-    expectedException.expect(ColumnCapacityExceededException.class);
-    expectedException.expectMessage(ColumnCapacityExceededException.formatMessage("test"));
-    try (
+    Throwable exception = assertThrows(ColumnCapacityExceededException.class, () -> {
+      initCompressedFloatsSerdeTest(compressionStrategy, order);
+      try (
         SegmentWriteOutMedium segmentWriteOutMedium =
-            TmpFileSegmentWriteOutMediumFactory.instance().makeSegmentWriteOutMedium(temporaryFolder.newFolder())
-    ) {
-      ColumnarFloatsSerializer serializer = CompressionFactory.getFloatSerializer(
-          "test",
-          segmentWriteOutMedium,
-          "test",
-          order,
-          compressionStrategy
-      );
-      serializer.open();
+              TmpFileSegmentWriteOutMediumFactory.instance().makeSegmentWriteOutMedium(newFolder(temporaryFolder, "junit"))
+          ) {
+        ColumnarFloatsSerializer serializer = CompressionFactory.getFloatSerializer(
+            "test",
+            segmentWriteOutMedium,
+            "test",
+            order,
+            compressionStrategy
+        );
+        serializer.open();
 
-      final long numRows = Integer.MAX_VALUE + 100L;
-      for (long i = 0L; i < numRows; i++) {
-        serializer.add(ThreadLocalRandom.current().nextFloat());
+        final long numRows = Integer.MAX_VALUE + 100L;
+        for (long i = 0L; i < numRows; i++) {
+          serializer.add(ThreadLocalRandom.current().nextFloat());
+        }
       }
-    }
+    });
+    assertTrue(exception.getMessage().contains(ColumnCapacityExceededException.formatMessage("test")));
   }
 
   public void testWithValues(float[] values) throws Exception
@@ -179,11 +181,11 @@ public class CompressedFloatsSerdeTest
     for (float value : values) {
       serializer.add(value);
     }
-    Assert.assertEquals(values.length, serializer.size());
+    Assertions.assertEquals(values.length, serializer.size());
 
     final ByteArrayOutputStream baos = new ByteArrayOutputStream();
     serializer.writeTo(Channels.newChannel(baos), null);
-    Assert.assertEquals(baos.size(), serializer.getSerializedSize());
+    Assertions.assertEquals(baos.size(), serializer.getSerializedSize());
     CompressedColumnarFloatsSupplier supplier = CompressedColumnarFloatsSupplier
         .fromByteBuffer(ByteBuffer.wrap(baos.toByteArray()), order);
     try (ColumnarFloats floats = supplier.get()) {
@@ -207,18 +209,18 @@ public class CompressedFloatsSerdeTest
     indexed.get(filled, startIndex, filled.length);
 
     for (int i = startIndex; i < filled.length; i++) {
-      Assert.assertEquals(vals[i + startIndex], filled[i], DELTA);
+      Assertions.assertEquals(vals[i + startIndex], filled[i], DELTA);
     }
   }
 
   private void assertIndexMatchesVals(ColumnarFloats indexed, float[] vals)
   {
-    Assert.assertEquals(vals.length, indexed.size());
+    Assertions.assertEquals(vals.length, indexed.size());
 
     // sequential access
     int[] indices = new int[vals.length];
     for (int i = 0; i < indexed.size(); ++i) {
-      Assert.assertEquals(vals[i], indexed.get(i), DELTA);
+      Assertions.assertEquals(vals[i], indexed.get(i), DELTA);
       indices[i] = i;
     }
 
@@ -227,7 +229,7 @@ public class CompressedFloatsSerdeTest
     final int limit = Math.min(indexed.size(), 1000);
     for (int i = 0; i < limit; ++i) {
       int k = indices[i];
-      Assert.assertEquals(vals[k], indexed.get(k), DELTA);
+      Assertions.assertEquals(vals[k], indexed.get(k), DELTA);
     }
   }
 
@@ -237,7 +239,7 @@ public class CompressedFloatsSerdeTest
     supplier.writeTo(Channels.newChannel(baos), null);
 
     final byte[] bytes = baos.toByteArray();
-    Assert.assertEquals(supplier.getSerializedSize(), bytes.length);
+    Assertions.assertEquals(supplier.getSerializedSize(), bytes.length);
     CompressedColumnarFloatsSupplier anotherSupplier = CompressedColumnarFloatsSupplier.fromByteBuffer(
         ByteBuffer.wrap(bytes), order
     );
@@ -346,7 +348,16 @@ public class CompressedFloatsSerdeTest
     }
 
     if (failureHappened.get()) {
-      Assert.fail("Failure happened.  Reason: " + reason.get());
+      Assertions.fail("Failure happened.  Reason: " + reason.get());
     }
+  }
+
+  private static File newFolder(File root, String... subDirs) throws IOException {
+    String subFolder = String.join("/", subDirs);
+    File result = new File(root, subFolder);
+    if (!result.mkdirs()) {
+      throw new IOException("Couldn't create folders " + root);
+    }
+    return result;
   }
 }

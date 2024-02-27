@@ -19,8 +19,8 @@
 
 package org.apache.druid.common.utils;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class ServletResourceUtilsTest
 {
@@ -29,9 +29,9 @@ public class ServletResourceUtilsTest
   public void testSanitizeException()
   {
     final String message = "some message";
-    Assert.assertEquals(message, ServletResourceUtils.sanitizeException(new Throwable(message)).get("error"));
-    Assert.assertEquals("null", ServletResourceUtils.sanitizeException(null).get("error"));
-    Assert.assertEquals(message, ServletResourceUtils.sanitizeException(new Throwable()
+    Assertions.assertEquals(message, ServletResourceUtils.sanitizeException(new Throwable(message)).get("error"));
+    Assertions.assertEquals("null", ServletResourceUtils.sanitizeException(null).get("error"));
+    Assertions.assertEquals(message, ServletResourceUtils.sanitizeException(new Throwable()
     {
       @Override
       public String toString()

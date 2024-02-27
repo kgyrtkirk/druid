@@ -34,7 +34,6 @@ import org.apache.druid.guice.JsonConfigurator;
 import org.apache.druid.initialization.Initialization;
 import org.apache.druid.jackson.DefaultObjectMapper;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.util.List;
 import java.util.Properties;

@@ -20,11 +20,12 @@
 package org.apache.druid.error;
 
 import org.apache.druid.matchers.DruidMatchers;
-import org.hamcrest.MatcherAssert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.Map;
+
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class NotFoundTest
 {
@@ -36,7 +37,7 @@ public class NotFoundTest
         "id not found"
     ));
     final Map<String, Object> asMap = errorResponse.getAsMap();
-    MatcherAssert.assertThat(
+    assertThat(
         asMap,
         DruidMatchers.mapMatcher(
             "error", "druidException",
@@ -49,7 +50,7 @@ public class NotFoundTest
 
     ErrorResponse recomposed = ErrorResponse.fromMap(asMap);
 
-    MatcherAssert.assertThat(
+    assertThat(
         recomposed.getUnderlyingException(),
         new DruidExceptionMatcher(
             DruidException.Persona.USER,

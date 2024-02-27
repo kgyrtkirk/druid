@@ -27,7 +27,6 @@ import org.apache.druid.data.input.MapBasedInputRow;
 import org.apache.druid.segment.data.ObjectStrategy;
 import org.apache.druid.segment.serde.ComplexMetricExtractor;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;

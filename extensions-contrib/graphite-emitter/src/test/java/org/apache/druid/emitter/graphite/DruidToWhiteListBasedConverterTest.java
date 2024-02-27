@@ -20,7 +20,6 @@
 package org.apache.druid.emitter.graphite;
 
 import org.junit.Assert;
-import org.junit.Test;
 
 public class DruidToWhiteListBasedConverterTest
 {

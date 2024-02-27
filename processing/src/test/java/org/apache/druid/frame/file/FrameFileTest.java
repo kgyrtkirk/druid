@@ -42,15 +42,13 @@ import org.apache.druid.segment.incremental.IncrementalIndexStorageAdapter;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.apache.druid.timeline.SegmentId;
 import org.hamcrest.Matchers;
-import org.junit.Assert;
-import org.junit.Assume;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.hamcrest.junit.MatcherAssume;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.rules.ExpectedException;
-import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 
 import java.io.File;
 import java.io.IOException;
@@ -60,7 +58,9 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 
-@RunWith(Parameterized.class)
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public class FrameFileTest extends InitializedNullHandlingTest
 {
   // Partition every 99 rows if "partitioned" is true.
@@ -108,22 +108,19 @@ public class FrameFileTest extends InitializedNullHandlingTest
     abstract StorageAdapter getAdapter();
   }
 
-  @Rule
-  public TemporaryFolder temporaryFolder = new TemporaryFolder();
+  @TempDir
+  public File temporaryFolder;
 
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
-
-  private final FrameType frameType;
-  private final int maxRowsPerFrame;
-  private final boolean partitioned;
-  private final AdapterType adapterType;
-  private final int maxMmapSize;
+  private FrameType frameType;
+  private int maxRowsPerFrame;
+  private boolean partitioned;
+  private AdapterType adapterType;
+  private int maxMmapSize;
 
   private StorageAdapter adapter;
   private File file;
 
-  public FrameFileTest(
+  public void initFrameFileTest(
       final FrameType frameType,
       final int maxRowsPerFrame,
       final boolean partitioned,
@@ -138,13 +135,6 @@ public class FrameFileTest extends InitializedNullHandlingTest
     this.maxMmapSize = maxMmapSize;
   }
 
-  @Parameterized.Parameters(
-      name = "frameType = {0}, "
-             + "maxRowsPerFrame = {1}, "
-             + "partitioned = {2}, "
-             + "adapter = {3}, "
-             + "maxMmapSize = {4}"
-  )
   public static Iterable<Object[]> constructorFeeder()
   {
     final List<Object[]> constructors = new ArrayList<>();
@@ -172,7 +162,7 @@ public class FrameFileTest extends InitializedNullHandlingTest
     return constructors;
   }
 
-  @Before
+  @BeforeEach
   public void setUp() throws IOException
   {
     adapter = adapterType.getAdapter();
@@ -197,54 +187,78 @@ public class FrameFileTest extends InitializedNullHandlingTest
                 }
               }
           ),
-          temporaryFolder.newFile()
+          File.createTempFile("junit", null, temporaryFolder)
       );
 
     } else {
       file = FrameTestUtil.writeFrameFile(
           FrameSequenceBuilder.fromAdapter(adapter).frameType(frameType).maxRowsPerFrame(maxRowsPerFrame).frames(),
-          temporaryFolder.newFile()
+          File.createTempFile("junit", null, temporaryFolder)
       );
     }
   }
 
-  @Test
-  public void test_numFrames() throws IOException
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "frameType = {0}, "
+      + "maxRowsPerFrame = {1}, "
+      + "partitioned = {2}, "
+      + "adapter = {3}, "
+      + "maxMmapSize = {4}")
+  public void test_numFrames(final FrameType frameType, final int maxRowsPerFrame, final boolean partitioned, final AdapterType adapterType, final int maxMmapSize) throws IOException
   {
+    initFrameFileTest(frameType, maxRowsPerFrame, partitioned, adapterType, maxMmapSize);
     try (final FrameFile frameFile = FrameFile.open(file, maxMmapSize, null)) {
-      Assert.assertEquals(computeExpectedNumFrames(), frameFile.numFrames());
+      Assertions.assertEquals(computeExpectedNumFrames(), frameFile.numFrames());
     }
   }
 
-  @Test
-  public void test_numPartitions() throws IOException
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "frameType = {0}, "
+      + "maxRowsPerFrame = {1}, "
+      + "partitioned = {2}, "
+      + "adapter = {3}, "
+      + "maxMmapSize = {4}")
+  public void test_numPartitions(final FrameType frameType, final int maxRowsPerFrame, final boolean partitioned, final AdapterType adapterType, final int maxMmapSize) throws IOException
   {
+    initFrameFileTest(frameType, maxRowsPerFrame, partitioned, adapterType, maxMmapSize);
     try (final FrameFile frameFile = FrameFile.open(file, maxMmapSize, null)) {
-      Assert.assertEquals(computeExpectedNumPartitions(), frameFile.numPartitions());
+      Assertions.assertEquals(computeExpectedNumPartitions(), frameFile.numPartitions());
     }
   }
 
-  @Test
-  public void test_frame_first() throws IOException
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "frameType = {0}, "
+      + "maxRowsPerFrame = {1}, "
+      + "partitioned = {2}, "
+      + "adapter = {3}, "
+      + "maxMmapSize = {4}")
+  public void test_frame_first(final FrameType frameType, final int maxRowsPerFrame, final boolean partitioned, final AdapterType adapterType, final int maxMmapSize) throws IOException
   {
+    initFrameFileTest(frameType, maxRowsPerFrame, partitioned, adapterType, maxMmapSize);
     try (final FrameFile frameFile = FrameFile.open(file, maxMmapSize, null)) {
       // Skip test for empty files.
-      Assume.assumeThat(frameFile.numFrames(), Matchers.greaterThan(0));
+      MatcherAssume.assumeThat(frameFile.numFrames(), Matchers.greaterThan(0));
 
       final Frame firstFrame = frameFile.frame(0);
-      Assert.assertEquals(Math.min(adapter.getNumRows(), maxRowsPerFrame), firstFrame.numRows());
+      Assertions.assertEquals(Math.min(adapter.getNumRows(), maxRowsPerFrame), firstFrame.numRows());
     }
   }
 
-  @Test
-  public void test_frame_last() throws IOException
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "frameType = {0}, "
+      + "maxRowsPerFrame = {1}, "
+      + "partitioned = {2}, "
+      + "adapter = {3}, "
+      + "maxMmapSize = {4}")
+  public void test_frame_last(final FrameType frameType, final int maxRowsPerFrame, final boolean partitioned, final AdapterType adapterType, final int maxMmapSize) throws IOException
   {
+    initFrameFileTest(frameType, maxRowsPerFrame, partitioned, adapterType, maxMmapSize);
     try (final FrameFile frameFile = FrameFile.open(file, maxMmapSize, null)) {
       // Skip test for empty files.
-      Assume.assumeThat(frameFile.numFrames(), Matchers.greaterThan(0));
+      MatcherAssume.assumeThat(frameFile.numFrames(), Matchers.greaterThan(0));
 
       final Frame lastFrame = frameFile.frame(frameFile.numFrames() - 1);
-      Assert.assertEquals(
+      Assertions.assertEquals(
           adapter.getNumRows() % maxRowsPerFrame != 0
           ? adapter.getNumRows() % maxRowsPerFrame
           : Math.min(adapter.getNumRows(), maxRowsPerFrame),
@@ -253,29 +267,53 @@ public class FrameFileTest extends InitializedNullHandlingTest
     }
   }
 
-  @Test
-  public void test_frame_outOfBoundsNegative() throws IOException
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "frameType = {0}, "
+      + "maxRowsPerFrame = {1}, "
+      + "partitioned = {2}, "
+      + "adapter = {3}, "
+      + "maxMmapSize = {4}")
+  public void test_frame_outOfBoundsNegative(final FrameType frameType, final int maxRowsPerFrame, final boolean partitioned, final AdapterType adapterType, final int maxMmapSize) throws IOException
   {
-    try (final FrameFile frameFile = FrameFile.open(file, maxMmapSize, null)) {
-      expectedException.expect(IllegalArgumentException.class);
-      expectedException.expectMessage("Frame [-1] out of bounds");
-      frameFile.frame(-1);
-    }
+    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
+      initFrameFileTest(frameType, maxRowsPerFrame, partitioned, adapterType, maxMmapSize);
+      try (final FrameFile frameFile = FrameFile.open(file, maxMmapSize, null)) {
+        expectedException.expect(IllegalArgumentException.class);
+        expectedException.expectMessage("Frame [-1] out of bounds");
+        frameFile.frame(-1);
+      }
+    });
+    assertTrue(exception.getMessage().contains("Frame [-1] out of bounds"));
   }
 
-  @Test
-  public void test_frame_outOfBoundsTooLarge() throws IOException
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "frameType = {0}, "
+      + "maxRowsPerFrame = {1}, "
+      + "partitioned = {2}, "
+      + "adapter = {3}, "
+      + "maxMmapSize = {4}")
+  public void test_frame_outOfBoundsTooLarge(final FrameType frameType, final int maxRowsPerFrame, final boolean partitioned, final AdapterType adapterType, final int maxMmapSize) throws IOException
   {
-    try (final FrameFile frameFile = FrameFile.open(file, maxMmapSize, null)) {
-      expectedException.expect(IllegalArgumentException.class);
-      expectedException.expectMessage(StringUtils.format("Frame [%,d] out of bounds", frameFile.numFrames()));
-      frameFile.frame(frameFile.numFrames());
-    }
+    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
+      initFrameFileTest(frameType, maxRowsPerFrame, partitioned, adapterType, maxMmapSize);
+      try (final FrameFile frameFile = FrameFile.open(file, maxMmapSize, null)) {
+        expectedException.expect(IllegalArgumentException.class);
+        expectedException.expectMessage(StringUtils.format("Frame [%,d] out of bounds", frameFile.numFrames()));
+        frameFile.frame(frameFile.numFrames());
+      }
+    });
+    assertTrue(exception.getMessage().contains(StringUtils.format("Frame [%,d] out of bounds", frameFile.numFrames())));
   }
 
-  @Test
-  public void test_frame_readAllDataViaStorageAdapter() throws IOException
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "frameType = {0}, "
+      + "maxRowsPerFrame = {1}, "
+      + "partitioned = {2}, "
+      + "adapter = {3}, "
+      + "maxMmapSize = {4}")
+  public void test_frame_readAllDataViaStorageAdapter(final FrameType frameType, final int maxRowsPerFrame, final boolean partitioned, final AdapterType adapterType, final int maxMmapSize) throws IOException
   {
+    initFrameFileTest(frameType, maxRowsPerFrame, partitioned, adapterType, maxMmapSize);
     final FrameReader frameReader = FrameReader.create(adapter.getRowSignature());
 
     try (final FrameFile frameFile = FrameFile.open(file, maxMmapSize, null)) {
@@ -292,14 +330,19 @@ public class FrameFileTest extends InitializedNullHandlingTest
     }
   }
 
-  @Test
-  public void test_getPartitionStartFrame() throws IOException
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "frameType = {0}, "
+      + "maxRowsPerFrame = {1}, "
+      + "partitioned = {2}, "
+      + "adapter = {3}, "
+      + "maxMmapSize = {4}")
+  public void test_getPartitionStartFrame(final FrameType frameType, final int maxRowsPerFrame, final boolean partitioned, final AdapterType adapterType, final int maxMmapSize) throws IOException
   {
+    initFrameFileTest(frameType, maxRowsPerFrame, partitioned, adapterType, maxMmapSize);
     try (final FrameFile frameFile = FrameFile.open(file, maxMmapSize, null)) {
       if (partitioned) {
         for (int partitionNum = 0; partitionNum < frameFile.numPartitions(); partitionNum++) {
-          Assert.assertEquals(
-              "partition #" + partitionNum,
+          Assertions.assertEquals(
               Math.min(
                   IntMath.divide(
                       (partitionNum >= SKIP_PARTITION ? partitionNum + 1 : partitionNum) * PARTITION_SIZE,
@@ -308,67 +351,85 @@ public class FrameFileTest extends InitializedNullHandlingTest
                   ),
                   frameFile.numFrames()
               ),
-              frameFile.getPartitionStartFrame(partitionNum)
+              frameFile.getPartitionStartFrame(partitionNum),
+              "partition #" + partitionNum
           );
         }
       } else {
-        Assert.assertEquals(frameFile.numFrames(), frameFile.getPartitionStartFrame(0));
+        Assertions.assertEquals(frameFile.numFrames(), frameFile.getPartitionStartFrame(0));
       }
     }
   }
 
-  @Test
-  public void test_file() throws IOException
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "frameType = {0}, "
+      + "maxRowsPerFrame = {1}, "
+      + "partitioned = {2}, "
+      + "adapter = {3}, "
+      + "maxMmapSize = {4}")
+  public void test_file(final FrameType frameType, final int maxRowsPerFrame, final boolean partitioned, final AdapterType adapterType, final int maxMmapSize) throws IOException
   {
+    initFrameFileTest(frameType, maxRowsPerFrame, partitioned, adapterType, maxMmapSize);
     try (final FrameFile frameFile = FrameFile.open(file, maxMmapSize, null)) {
-      Assert.assertEquals(file, frameFile.file());
+      Assertions.assertEquals(file, frameFile.file());
     }
   }
 
-  @Test
-  public void test_open_withDeleteOnClose() throws IOException
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "frameType = {0}, "
+      + "maxRowsPerFrame = {1}, "
+      + "partitioned = {2}, "
+      + "adapter = {3}, "
+      + "maxMmapSize = {4}")
+  public void test_open_withDeleteOnClose(final FrameType frameType, final int maxRowsPerFrame, final boolean partitioned, final AdapterType adapterType, final int maxMmapSize) throws IOException
   {
+    initFrameFileTest(frameType, maxRowsPerFrame, partitioned, adapterType, maxMmapSize);
     FrameFile.open(file, maxMmapSize, null).close();
-    Assert.assertTrue(file.exists());
+    Assertions.assertTrue(file.exists());
 
     FrameFile.open(file, null, FrameFile.Flag.DELETE_ON_CLOSE).close();
-    Assert.assertFalse(file.exists());
+    Assertions.assertFalse(file.exists());
   }
 
-  @Test
-  public void test_newReference() throws IOException
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "frameType = {0}, "
+      + "maxRowsPerFrame = {1}, "
+      + "partitioned = {2}, "
+      + "adapter = {3}, "
+      + "maxMmapSize = {4}")
+  public void test_newReference(final FrameType frameType, final int maxRowsPerFrame, final boolean partitioned, final AdapterType adapterType, final int maxMmapSize) throws IOException
   {
-    final FrameFile frameFile1 = FrameFile.open(file, null, FrameFile.Flag.DELETE_ON_CLOSE);
-    final FrameFile frameFile2 = frameFile1.newReference();
-    final FrameFile frameFile3 = frameFile2.newReference();
+    Throwable exception = assertThrows(IllegalStateException.class, () -> {
+      initFrameFileTest(frameType, maxRowsPerFrame, partitioned, adapterType, maxMmapSize);
+      final FrameFile frameFile1 = FrameFile.open(file, null, FrameFile.Flag.DELETE_ON_CLOSE);
+      final FrameFile frameFile2 = frameFile1.newReference();
+      final FrameFile frameFile3 = frameFile2.newReference();
 
-    // Closing original file does nothing; must wait for other files to be closed.
-    frameFile1.close();
-    Assert.assertTrue(file.exists());
+      // Closing original file does nothing; must wait for other files to be closed.
+      frameFile1.close();
+      Assertions.assertTrue(file.exists());
 
-    // Can still get a reference after frameFile1 is closed, just because others are still open. Strange but true.
-    final FrameFile frameFile4 = frameFile1.newReference();
+      // Can still get a reference after frameFile1 is closed, just because others are still open. Strange but true.
+      final FrameFile frameFile4 = frameFile1.newReference();
 
-    // Repeated calls to "close" are deduped.
-    frameFile2.close();
-    frameFile2.close();
-    frameFile2.close();
-    frameFile2.close();
-    frameFile2.close();
-    frameFile2.close();
-    Assert.assertTrue(file.exists());
+      // Repeated calls to "close" are deduped.
+      frameFile2.close();
+      frameFile2.close();
+      frameFile2.close();
+      frameFile2.close();
+      frameFile2.close();
+      frameFile2.close();
+      Assertions.assertTrue(file.exists());
 
-    frameFile3.close();
-    Assert.assertTrue(file.exists());
+      frameFile3.close();
+      Assertions.assertTrue(file.exists());
 
-    // Final reference is closed; file is now gone.
-    frameFile4.close();
-    Assert.assertFalse(file.exists());
-
-    // Can no longer get new references.
-    expectedException.expect(IllegalStateException.class);
-    expectedException.expectMessage("Frame file is closed");
-    frameFile1.newReference();
+      // Final reference is closed; file is now gone.
+      frameFile4.close();
+      Assertions.assertFalse(file.exists());
+      frameFile1.newReference();
+    });
+    assertTrue(exception.getMessage().contains("Frame file is closed"));
   }
 
   private int computeExpectedNumFrames()

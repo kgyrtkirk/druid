@@ -21,7 +21,6 @@ package org.apache.druid.query.aggregation.variance;
 
 import org.apache.druid.segment.data.ObjectStrategy;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.nio.ByteBuffer;
 import java.util.Random;

@@ -24,7 +24,6 @@ import org.apache.druid.msq.test.MSQTestBase;
 import org.apache.druid.msq.test.MSQTestTaskActionClient;
 import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.column.RowSignature;
-import org.junit.Test;
 
 public class InsertLockPreemptedFaultTest extends MSQTestBase
 {

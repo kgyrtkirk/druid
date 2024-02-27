@@ -28,7 +28,6 @@ import org.apache.druid.jackson.DefaultObjectMapper;
 import org.apache.druid.server.DruidNode;
 import org.junit.Assert;
 import org.junit.Ignore;
-import org.junit.Test;
 
 import java.util.Collection;
 import java.util.Iterator;

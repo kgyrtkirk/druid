@@ -22,7 +22,6 @@ package org.apache.druid.query.aggregation.datasketches.tuple;
 import org.apache.datasketches.tuple.arrayofdoubles.ArrayOfDoublesUpdatableSketch;
 import org.apache.datasketches.tuple.arrayofdoubles.ArrayOfDoublesUpdatableSketchBuilder;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;

@@ -52,12 +52,11 @@ import org.apache.druid.sql.calcite.util.CalciteTests;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.apache.druid.timeline.DataSegment;
 import org.apache.druid.timeline.partition.LinearShardSpec;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -65,7 +64,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@RunWith(Parameterized.class)
 public class SqlVectorizedExpressionSanityTest extends InitializedNullHandlingTest
 {
   private static final Logger log = new Logger(SqlVectorizedExpressionSanityTest.class);
@@ -109,7 +107,7 @@ public class SqlVectorizedExpressionSanityTest extends InitializedNullHandlingTe
   @Nullable
   private static PlannerFactory PLANNER_FACTORY;
 
-  @BeforeClass
+  @BeforeAll
   public static void setupClass()
   {
     CLOSER = Closer.create();
@@ -156,13 +154,12 @@ public class SqlVectorizedExpressionSanityTest extends InitializedNullHandlingTe
     );
   }
 
-  @AfterClass
+  @AfterAll
   public static void teardownClass() throws IOException
   {
     CLOSER.close();
   }
 
-  @Parameterized.Parameters(name = "query = {0}")
   public static Iterable<?> constructorFeeder()
   {
     return QUERIES.stream().map(x -> new Object[]{x}).collect(Collectors.toList());
@@ -170,14 +167,16 @@ public class SqlVectorizedExpressionSanityTest extends InitializedNullHandlingTe
 
   private String query;
 
-  public SqlVectorizedExpressionSanityTest(String query)
+  public void initSqlVectorizedExpressionSanityTest(String query)
   {
     this.query = query;
   }
 
-  @Test
-  public void testQuery()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "query = {0}")
+  public void testQuery(String query)
   {
+    initSqlVectorizedExpressionSanityTest(query);
     sanityTestVectorizedSqlQueries(PLANNER_FACTORY, query);
   }
 
@@ -209,32 +208,32 @@ public class SqlVectorizedExpressionSanityTest extends InitializedNullHandlingTe
         Object[] nonVectorizedGet = nonVectorizedYielder.get();
 
         try {
-          Assert.assertEquals(vectorGet.length, nonVectorizedGet.length);
+          Assertions.assertEquals(vectorGet.length, nonVectorizedGet.length);
           for (int i = 0; i < vectorGet.length; i++) {
             Object nonVectorObject = nonVectorizedGet[i];
             Object vectorObject = vectorGet[i];
             if (vectorObject instanceof Float || vectorObject instanceof Double) {
-              Assert.assertEquals(
+              Assertions.assertEquals(
+                  ((Double) nonVectorObject).doubleValue(),
+                  ((Double) vectorObject).doubleValue(),
+                  0.01,
                   StringUtils.format(
                       "Double results differed at row %s (%s : %s)",
                       row,
                       nonVectorObject,
                       vectorObject
-                  ),
-                  ((Double) nonVectorObject).doubleValue(),
-                  ((Double) vectorObject).doubleValue(),
-                  0.01
+                  )
               );
             } else {
-              Assert.assertEquals(
+              Assertions.assertEquals(
+                  nonVectorObject,
+                  vectorObject,
                   StringUtils.format(
                       "Results differed at row %s (%s : %s)",
                       row,
                       nonVectorObject,
                       vectorObject
-                  ),
-                  nonVectorObject,
-                  vectorObject
+                  )
               );
             }
           }
@@ -247,9 +246,9 @@ public class SqlVectorizedExpressionSanityTest extends InitializedNullHandlingTe
         nonVectorizedYielder = nonVectorizedYielder.next(nonVectorizedGet);
         row++;
       }
-      Assert.assertEquals("Expected no mismatched results", 0, misMatch);
-      Assert.assertTrue(vectorizedYielder.isDone());
-      Assert.assertTrue(nonVectorizedYielder.isDone());
+      Assertions.assertEquals(0, misMatch, "Expected no mismatched results");
+      Assertions.assertTrue(vectorizedYielder.isDone());
+      Assertions.assertTrue(nonVectorizedYielder.isDone());
     }
   }
 }

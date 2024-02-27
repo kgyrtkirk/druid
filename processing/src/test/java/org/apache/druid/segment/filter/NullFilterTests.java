@@ -34,10 +34,10 @@ import org.apache.druid.query.filter.NotDimFilter;
 import org.apache.druid.query.filter.NullFilter;
 import org.apache.druid.segment.IndexBuilder;
 import org.apache.druid.segment.StorageAdapter;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.experimental.runners.Enclosed;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -45,11 +45,13 @@ import java.io.Closeable;
 import java.util.Arrays;
 import java.util.Collections;
 
-@RunWith(Enclosed.class)
+
+
 public class NullFilterTests
 {
+  @Nested
   @RunWith(Parameterized.class)
-  public static class NullFilterTest extends BaseFilterTest
+  public class NullFilterTest extends BaseFilterTest
   {
     public NullFilterTest(
         String testName,
@@ -62,7 +64,7 @@ public class NullFilterTests
       super(testName, DEFAULT_ROWS, indexBuilder, finisher, cnf, optimize);
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDown() throws Exception
     {
       BaseFilterTest.tearDown(NullFilterTest.class.getName());
@@ -369,19 +371,20 @@ public class NullFilterTests
     }
   }
 
-  public static class NullFilterNonParameterizedTest
+  @Nested
+  public class NullFilterNonParameterizedTest
   {
     @Test
     public void testGetDimensionRangeSet()
     {
       final NullFilter filter = new NullFilter("x", null);
 
-      Assert.assertEquals(
+      Assertions.assertEquals(
           TreeRangeSet.create(Collections.singleton(Range.lessThan(""))),
           filter.getDimensionRangeSet("x")
       );
 
-      Assert.assertNull(filter.getDimensionRangeSet("y"));
+      Assertions.assertNull(filter.getDimensionRangeSet("y"));
     }
 
     @Test
@@ -390,7 +393,7 @@ public class NullFilterTests
       ObjectMapper mapper = new DefaultObjectMapper();
       NullFilter filter = new NullFilter("x", null);
       String s = mapper.writeValueAsString(filter);
-      Assert.assertEquals(filter, mapper.readValue(s, NullFilter.class));
+      Assertions.assertEquals(filter, mapper.readValue(s, NullFilter.class));
     }
 
     @Test
@@ -400,9 +403,9 @@ public class NullFilterTests
       NullFilter f1_2 = new NullFilter("x", null);
       NullFilter f2 = new NullFilter("y", null);
       NullFilter f3 = new NullFilter("x", new FilterTuning(true, 1234, null));
-      Assert.assertArrayEquals(f1.getCacheKey(), f1_2.getCacheKey());
-      Assert.assertFalse(Arrays.equals(f1.getCacheKey(), f2.getCacheKey()));
-      Assert.assertArrayEquals(f1.getCacheKey(), f3.getCacheKey());
+      Assertions.assertArrayEquals(f1.getCacheKey(), f1_2.getCacheKey());
+      Assertions.assertFalse(Arrays.equals(f1.getCacheKey(), f2.getCacheKey()));
+      Assertions.assertArrayEquals(f1.getCacheKey(), f3.getCacheKey());
     }
 
     @Test

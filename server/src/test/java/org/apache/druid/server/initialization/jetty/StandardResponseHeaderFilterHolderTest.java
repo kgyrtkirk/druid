@@ -24,12 +24,11 @@ import org.apache.druid.server.initialization.ServerConfig;
 import org.easymock.Capture;
 import org.easymock.EasyMock;
 import org.hamcrest.CoreMatchers;
-import org.hamcrest.MatcherAssert;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
 import org.junit.internal.matchers.ThrowableMessageMatcher;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletRequest;
@@ -39,6 +38,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+
 public class StandardResponseHeaderFilterHolderTest
 {
   public ServerConfig serverConfig;
@@ -46,7 +47,7 @@ public class StandardResponseHeaderFilterHolderTest
   public HttpServletResponse httpResponse;
   public FilterChain filterChain;
 
-  @Before
+  @BeforeEach
   public void setUp()
   {
     serverConfig = EasyMock.strictMock(ServerConfig.class);
@@ -55,7 +56,7 @@ public class StandardResponseHeaderFilterHolderTest
     filterChain = EasyMock.strictMock(FilterChain.class);
   }
 
-  @After
+  @AfterEach
   public void tearDown()
   {
     EasyMock.verify(serverConfig, httpRequest, httpResponse, filterChain);
@@ -120,9 +121,9 @@ public class StandardResponseHeaderFilterHolderTest
 
     replayAllMocks();
 
-    final RuntimeException e = Assert.assertThrows(RuntimeException.class, this::makeFilter);
+    final RuntimeException e = Assertions.assertThrows(RuntimeException.class, this::makeFilter);
 
-    MatcherAssert.assertThat(
+    assertThat(
         e,
         ThrowableMessageMatcher.hasMessage(
             CoreMatchers.containsString("Content-Security-Policy header value must be fully ASCII")
@@ -157,7 +158,7 @@ public class StandardResponseHeaderFilterHolderTest
     filter.doFilter(httpRequest, httpResponse, filterChain);
 
     for (final Map.Entry<String, String> entry : expectedHeaders.entrySet()) {
-      Assert.assertEquals(entry.getKey(), entry.getValue(), captureMap.get(entry.getKey()).getValue());
+      Assertions.assertEquals(entry.getValue(), captureMap.get(entry.getKey()).getValue(), entry.getKey());
     }
   }
 

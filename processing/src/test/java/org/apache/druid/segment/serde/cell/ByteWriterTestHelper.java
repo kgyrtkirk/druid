@@ -23,7 +23,7 @@ import com.google.common.primitives.Ints;
 import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.segment.data.CompressionStrategy;
 import org.apache.druid.segment.writeout.HeapByteBufferWriteOutBytes;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -129,7 +129,7 @@ public class ByteWriterTestHelper
     int actualSize = masterByteBuffer.limit();
 
     if (expectedSize > -1) {
-      Assert.assertEquals(expectedSize, actualSize);
+      Assertions.assertEquals(expectedSize, actualSize);
     }
   }
 
@@ -167,7 +167,7 @@ public class ByteWriterTestHelper
     bufferWriteOutBytes.readFully(0, masterByteBuffer);
     masterByteBuffer.flip();
 
-    Assert.assertEquals(bytesWriter.getSerializedSize(), masterByteBuffer.limit());
+    Assertions.assertEquals(bytesWriter.getSerializedSize(), masterByteBuffer.limit());
 
     return masterByteBuffer;
   }
@@ -255,9 +255,9 @@ public class ByteWriterTestHelper
         ByteBuffer readByteBuffer = payloadReader.read(payloadEntrySpan.getStart(), payloadEntrySpan.getSize());
 
         if (expectedByteBuffer == null) {
-          Assert.assertEquals(StringUtils.format("expected empty buffer %s", index), EMPTY_BYTE_BUFFER, readByteBuffer);
+          Assertions.assertEquals(EMPTY_BYTE_BUFFER, readByteBuffer, StringUtils.format("expected empty buffer %s", index));
         } else {
-          Assert.assertEquals(StringUtils.format("failure on buffer %s", index), expectedByteBuffer, readByteBuffer);
+          Assertions.assertEquals(expectedByteBuffer, readByteBuffer, StringUtils.format("failure on buffer %s", index));
         }
       }
 
@@ -303,9 +303,9 @@ public class ByteWriterTestHelper
 
         ByteBuffer readByteBuffer = cellReader.getCell(index);
         if (expectedByteBuffer == null) {
-          Assert.assertEquals(StringUtils.format("failure on buffer %s", index), 0L, readByteBuffer.remaining());
+          Assertions.assertEquals(0L, readByteBuffer.remaining(), StringUtils.format("failure on buffer %s", index));
         } else {
-          Assert.assertEquals(StringUtils.format("failure on buffer %s", index), expectedByteBuffer, readByteBuffer);
+          Assertions.assertEquals(expectedByteBuffer, readByteBuffer, StringUtils.format("failure on buffer %s", index));
         }
       }
 

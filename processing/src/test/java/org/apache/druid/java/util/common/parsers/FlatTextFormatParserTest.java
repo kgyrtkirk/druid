@@ -25,23 +25,20 @@ import org.apache.druid.java.util.common.IAE;
 import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.java.util.common.parsers.AbstractFlatTextFormatParser.FlatTextFormat;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@RunWith(Parameterized.class)
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 public class FlatTextFormatParserTest extends InitializedNullHandlingTest
 {
-  @Parameters(name = "{0}")
   public static Collection<Object[]> constructorFeeder()
   {
     return ImmutableList.of(
@@ -52,65 +49,72 @@ public class FlatTextFormatParserTest extends InitializedNullHandlingTest
 
   private static final FlatTextFormatParserFactory PARSER_FACTORY = new FlatTextFormatParserFactory();
 
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
+  private FlatTextFormat format;
 
-  private final FlatTextFormat format;
-
-  public FlatTextFormatParserTest(FlatTextFormat format)
+  public void initFlatTextFormatParserTest(FlatTextFormat format)
   {
     this.format = format;
   }
 
-  @Test
-  public void testValidHeader()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testValidHeader(FlatTextFormat format)
   {
+    initFlatTextFormatParserTest(format);
     final String header = concat(format, "time", "value1", "value2");
     final Parser<String, Object> parser = PARSER_FACTORY.get(format, header);
-    Assert.assertEquals(ImmutableList.of("time", "value1", "value2"), parser.getFieldNames());
+    Assertions.assertEquals(ImmutableList.of("time", "value1", "value2"), parser.getFieldNames());
   }
 
-  @Test
-  public void testDuplicatedColumnName()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testDuplicatedColumnName(FlatTextFormat format)
   {
-    final String header = concat(format, "time", "value1", "value2", "value2");
+    Throwable exception = assertThrows(ParseException.class, () -> {
+      initFlatTextFormatParserTest(format);
+      final String header = concat(format, "time", "value1", "value2", "value2");
 
-    expectedException.expect(ParseException.class);
-    expectedException.expectMessage(StringUtils.format("Unable to parse header [%s]", header));
-
-    PARSER_FACTORY.get(format, header);
+      PARSER_FACTORY.get(format, header);
+    });
+    assertTrue(exception.getMessage().contains(StringUtils.format("Unable to parse header [%s]", header)));
   }
 
-  @Test
-  public void testWithHeader()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testWithHeader(FlatTextFormat format)
   {
+    initFlatTextFormatParserTest(format);
     final String header = concat(format, "time", "value1", "value2");
     final Parser<String, Object> parser = PARSER_FACTORY.get(format, header);
     final String body = concat(format, "hello", "world", "foo");
     final Map<String, Object> jsonMap = parser.parseToMap(body);
-    Assert.assertEquals(
-        "jsonMap",
+    Assertions.assertEquals(
         ImmutableMap.of("time", "hello", "value1", "world", "value2", "foo"),
-        jsonMap
+        jsonMap,
+        "jsonMap"
     );
   }
 
-  @Test
-  public void testWithoutHeader()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testWithoutHeader(FlatTextFormat format)
   {
+    initFlatTextFormatParserTest(format);
     final Parser<String, Object> parser = PARSER_FACTORY.get(format);
     final String body = concat(format, "hello", "world", "foo");
     final Map<String, Object> jsonMap = parser.parseToMap(body);
-    Assert.assertEquals(
-        "jsonMap",
+    Assertions.assertEquals(
         ImmutableMap.of("column_1", "hello", "column_2", "world", "column_3", "foo"),
-        jsonMap
+        jsonMap,
+        "jsonMap"
     );
   }
 
-  @Test
-  public void testWithSkipHeaderRows()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testWithSkipHeaderRows(FlatTextFormat format)
   {
+    initFlatTextFormatParserTest(format);
     final int skipHeaderRows = 2;
     final Parser<String, Object> parser = PARSER_FACTORY.get(format, false, skipHeaderRows);
     parser.startFileFromBeginning();
@@ -121,67 +125,73 @@ public class FlatTextFormatParserTest extends InitializedNullHandlingTest
     };
     int index;
     for (index = 0; index < skipHeaderRows; index++) {
-      Assert.assertNull(parser.parseToMap(body[index]));
+      Assertions.assertNull(parser.parseToMap(body[index]));
     }
     final Map<String, Object> jsonMap = parser.parseToMap(body[index]);
-    Assert.assertEquals(
-        "jsonMap",
+    Assertions.assertEquals(
         ImmutableMap.of("column_1", "hello", "column_2", "world", "column_3", "foo"),
-        jsonMap
+        jsonMap,
+        "jsonMap"
     );
   }
 
-  @Test
-  public void testWithHeaderRow()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testWithHeaderRow(FlatTextFormat format)
   {
+    initFlatTextFormatParserTest(format);
     final Parser<String, Object> parser = PARSER_FACTORY.get(format, true, 0);
     parser.startFileFromBeginning();
     final String[] body = new String[]{
         concat(format, "time", "value1", "value2"),
         concat(format, "hello", "world", "foo")
     };
-    Assert.assertNull(parser.parseToMap(body[0]));
+    Assertions.assertNull(parser.parseToMap(body[0]));
     final Map<String, Object> jsonMap = parser.parseToMap(body[1]);
-    Assert.assertEquals(
-        "jsonMap",
+    Assertions.assertEquals(
         ImmutableMap.of("time", "hello", "value1", "world", "value2", "foo"),
-        jsonMap
+        jsonMap,
+        "jsonMap"
     );
   }
 
-  @Test
-  public void testWithHeaderRowOfEmptyColumns()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testWithHeaderRowOfEmptyColumns(FlatTextFormat format)
   {
+    initFlatTextFormatParserTest(format);
     final Parser<String, Object> parser = PARSER_FACTORY.get(format, true, 0);
     parser.startFileFromBeginning();
     final String[] body = new String[]{
         concat(format, "time", "", "value2", ""),
         concat(format, "hello", "world", "foo", "bar")
     };
-    Assert.assertNull(parser.parseToMap(body[0]));
+    Assertions.assertNull(parser.parseToMap(body[0]));
     final Map<String, Object> jsonMap = parser.parseToMap(body[1]);
-    Assert.assertEquals(
-        "jsonMap",
+    Assertions.assertEquals(
         ImmutableMap.of("time", "hello", "column_2", "world", "value2", "foo", "column_4", "bar"),
-        jsonMap
+        jsonMap,
+        "jsonMap"
     );
   }
 
-  @Test
-  public void testWithDifferentHeaderRows()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testWithDifferentHeaderRows(FlatTextFormat format)
   {
+    initFlatTextFormatParserTest(format);
     final Parser<String, Object> parser = PARSER_FACTORY.get(format, true, 0);
     parser.startFileFromBeginning();
     final String[] body = new String[]{
         concat(format, "time", "value1", "value2"),
         concat(format, "hello", "world", "foo")
     };
-    Assert.assertNull(parser.parseToMap(body[0]));
+    Assertions.assertNull(parser.parseToMap(body[0]));
     Map<String, Object> jsonMap = parser.parseToMap(body[1]);
-    Assert.assertEquals(
-        "jsonMap",
+    Assertions.assertEquals(
         ImmutableMap.of("time", "hello", "value1", "world", "value2", "foo"),
-        jsonMap
+        jsonMap,
+        "jsonMap"
     );
 
     parser.startFileFromBeginning();
@@ -189,45 +199,48 @@ public class FlatTextFormatParserTest extends InitializedNullHandlingTest
         concat(format, "time", "value1", "value2", "value3"),
         concat(format, "hello", "world", "foo", "bar")
     };
-    Assert.assertNull(parser.parseToMap(body2[0]));
+    Assertions.assertNull(parser.parseToMap(body2[0]));
     jsonMap = parser.parseToMap(body2[1]);
-    Assert.assertEquals(
-        "jsonMap",
+    Assertions.assertEquals(
         ImmutableMap.of("time", "hello", "value1", "world", "value2", "foo", "value3", "bar"),
-        jsonMap
+        jsonMap,
+        "jsonMap"
     );
   }
 
-  @Test
-  public void testWithoutStartFileFromBeginning()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testWithoutStartFileFromBeginning(FlatTextFormat format)
   {
-    expectedException.expect(UnsupportedOperationException.class);
-    expectedException.expectMessage(
-        "hasHeaderRow or maxSkipHeaderRows is not supported. Please check the indexTask supports these options."
-    );
+    Throwable exception = assertThrows(UnsupportedOperationException.class, () -> {
+      initFlatTextFormatParserTest(format);
 
-    final int skipHeaderRows = 2;
-    final Parser<String, Object> parser = PARSER_FACTORY.get(format, false, skipHeaderRows);
-    final String[] body = new String[]{
-        concat(format, "header", "line", "1"),
-        concat(format, "header", "line", "2"),
-        concat(format, "hello", "world", "foo")
-    };
-    parser.parseToMap(body[0]);
+      final int skipHeaderRows = 2;
+      final Parser<String, Object> parser = PARSER_FACTORY.get(format, false, skipHeaderRows);
+      final String[] body = new String[]{
+          concat(format, "header", "line", "1"),
+          concat(format, "header", "line", "2"),
+          concat(format, "hello", "world", "foo")
+      };
+      parser.parseToMap(body[0]);
+    });
+    assertTrue(exception.getMessage().contains("hasHeaderRow or maxSkipHeaderRows is not supported. Please check the indexTask supports these options."));
   }
 
-  @Test
-  public void testWithNullValues()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testWithNullValues(FlatTextFormat format)
   {
+    initFlatTextFormatParserTest(format);
     final Parser<String, Object> parser = PARSER_FACTORY.get(format, true, 0);
     parser.startFileFromBeginning();
     final String[] body = new String[]{
         concat(format, "time", "value1", "value2"),
         concat(format, "hello", "world", "")
     };
-    Assert.assertNull(parser.parseToMap(body[0]));
+    Assertions.assertNull(parser.parseToMap(body[0]));
     final Map<String, Object> jsonMap = parser.parseToMap(body[1]);
-    Assert.assertNull(jsonMap.get("value2"));
+    Assertions.assertNull(jsonMap.get("value2"));
   }
 
   private static class FlatTextFormatParserFactory

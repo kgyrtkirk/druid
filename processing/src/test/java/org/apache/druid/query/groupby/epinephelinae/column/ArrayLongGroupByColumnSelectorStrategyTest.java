@@ -26,19 +26,19 @@ import org.apache.druid.query.groupby.epinephelinae.Grouper;
 import org.apache.druid.query.ordering.StringComparators;
 import org.apache.druid.segment.ColumnValueSelector;
 import org.apache.druid.segment.data.ComparableList;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ArrayLongGroupByColumnSelectorStrategyTest
 {
   protected final List<List<Long>> dictionary = new ArrayList<>();
@@ -50,7 +50,7 @@ public class ArrayLongGroupByColumnSelectorStrategyTest
 
   private ArrayNumericGroupByColumnSelectorStrategy strategy;
 
-  @Before
+  @BeforeEach
   public void setup()
   {
     dictionary.add(ImmutableList.of(1L, 2L));
@@ -68,14 +68,14 @@ public class ArrayLongGroupByColumnSelectorStrategyTest
   @Test
   public void testKeySize()
   {
-    Assert.assertEquals(Integer.BYTES, strategy.getGroupingKeySize());
+    Assertions.assertEquals(Integer.BYTES, strategy.getGroupingKeySize());
   }
 
   @Test
   public void testWriteKey()
   {
     strategy.writeToKeyBuffer(0, 1, buffer1);
-    Assert.assertEquals(1, buffer1.getInt(0));
+    Assertions.assertEquals(1, buffer1.getInt(0));
   }
 
   @Test
@@ -84,16 +84,16 @@ public class ArrayLongGroupByColumnSelectorStrategyTest
     buffer1.putInt(1);
     buffer2.putInt(2);
     Grouper.BufferComparator comparator = strategy.bufferComparator(0, null);
-    Assert.assertTrue(comparator.compare(buffer1, buffer2, 0, 0) > 0);
-    Assert.assertTrue(comparator.compare(buffer2, buffer1, 0, 0) < 0);
+    Assertions.assertTrue(comparator.compare(buffer1, buffer2, 0, 0) > 0);
+    Assertions.assertTrue(comparator.compare(buffer2, buffer1, 0, 0) < 0);
 
     comparator = strategy.bufferComparator(0, StringComparators.LEXICOGRAPHIC);
-    Assert.assertTrue(comparator.compare(buffer1, buffer2, 0, 0) > 0);
-    Assert.assertTrue(comparator.compare(buffer2, buffer1, 0, 0) < 0);
+    Assertions.assertTrue(comparator.compare(buffer1, buffer2, 0, 0) > 0);
+    Assertions.assertTrue(comparator.compare(buffer2, buffer1, 0, 0) < 0);
 
     comparator = strategy.bufferComparator(0, StringComparators.STRLEN);
-    Assert.assertTrue(comparator.compare(buffer1, buffer2, 0, 0) > 0);
-    Assert.assertTrue(comparator.compare(buffer2, buffer1, 0, 0) < 0);
+    Assertions.assertTrue(comparator.compare(buffer1, buffer2, 0, 0) > 0);
+    Assertions.assertTrue(comparator.compare(buffer2, buffer1, 0, 0) < 0);
   }
 
   @Test
@@ -102,7 +102,7 @@ public class ArrayLongGroupByColumnSelectorStrategyTest
     buffer1.putInt(0);
     buffer2.putInt(2);
     Grouper.BufferComparator comparator = strategy.bufferComparator(0, null);
-    Assert.assertTrue(comparator.compare(buffer1, buffer2, 0, 0) > 0);
+    Assertions.assertTrue(comparator.compare(buffer1, buffer2, 0, 0) > 0);
 
   }
 
@@ -112,7 +112,7 @@ public class ArrayLongGroupByColumnSelectorStrategyTest
   {
     ColumnValueSelector columnValueSelector = Mockito.mock(ColumnValueSelector.class);
     Mockito.when(columnValueSelector.getObject()).thenReturn(ImmutableList.of(1L, 2L));
-    Assert.assertEquals(0, strategy.computeDictionaryId(columnValueSelector));
+    Assertions.assertEquals(0, strategy.computeDictionaryId(columnValueSelector));
 
     GroupByColumnSelectorPlus groupByColumnSelectorPlus = Mockito.mock(GroupByColumnSelectorPlus.class);
     Mockito.when(groupByColumnSelectorPlus.getResultRowPosition()).thenReturn(0);
@@ -120,7 +120,7 @@ public class ArrayLongGroupByColumnSelectorStrategyTest
 
     buffer1.putInt(0);
     strategy.processValueFromGroupingKey(groupByColumnSelectorPlus, buffer1, row, 0);
-    Assert.assertEquals(new ComparableList<>(ImmutableList.of(1L, 2L)), row.get(0));
+    Assertions.assertEquals(new ComparableList<>(ImmutableList.of(1L, 2L)), row.get(0));
   }
 
 
@@ -129,7 +129,7 @@ public class ArrayLongGroupByColumnSelectorStrategyTest
   {
     ColumnValueSelector columnValueSelector = Mockito.mock(ColumnValueSelector.class);
     Mockito.when(columnValueSelector.getObject()).thenReturn(ImmutableList.of(4L, 2L));
-    Assert.assertEquals(3, strategy.computeDictionaryId(columnValueSelector));
+    Assertions.assertEquals(3, strategy.computeDictionaryId(columnValueSelector));
 
     GroupByColumnSelectorPlus groupByColumnSelectorPlus = Mockito.mock(GroupByColumnSelectorPlus.class);
     Mockito.when(groupByColumnSelectorPlus.getResultRowPosition()).thenReturn(0);
@@ -137,7 +137,7 @@ public class ArrayLongGroupByColumnSelectorStrategyTest
 
     buffer1.putInt(3);
     strategy.processValueFromGroupingKey(groupByColumnSelectorPlus, buffer1, row, 0);
-    Assert.assertEquals(new ComparableList<>(ImmutableList.of(4L, 2L)), row.get(0));
+    Assertions.assertEquals(new ComparableList<>(ImmutableList.of(4L, 2L)), row.get(0));
   }
 
   @Test
@@ -145,17 +145,17 @@ public class ArrayLongGroupByColumnSelectorStrategyTest
   {
     ColumnValueSelector columnValueSelector = Mockito.mock(ColumnValueSelector.class);
     Mockito.when(columnValueSelector.getObject()).thenReturn(new Object[]{4L, 2L});
-    Assert.assertEquals(3, strategy.computeDictionaryId(columnValueSelector));
+    Assertions.assertEquals(3, strategy.computeDictionaryId(columnValueSelector));
 
     GroupByColumnSelectorPlus groupByColumnSelectorPlus = Mockito.mock(GroupByColumnSelectorPlus.class);
     Mockito.when(groupByColumnSelectorPlus.getResultRowPosition()).thenReturn(0);
     ResultRow row = ResultRow.create(1);
     buffer1.putInt(3);
     strategy.processValueFromGroupingKey(groupByColumnSelectorPlus, buffer1, row, 0);
-    Assert.assertEquals(new ComparableList<>(ImmutableList.of(4L, 2L)), row.get(0));
+    Assertions.assertEquals(new ComparableList<>(ImmutableList.of(4L, 2L)), row.get(0));
   }
 
-  @After
+  @AfterEach
   public void tearDown()
   {
     buffer1.clear();

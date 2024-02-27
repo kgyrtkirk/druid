@@ -20,7 +20,6 @@
 package org.apache.druid.metadata.storage.mysql;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
-import org.junit.Test;
 
 public class MySQLConnectorDriverConfigTest
 {

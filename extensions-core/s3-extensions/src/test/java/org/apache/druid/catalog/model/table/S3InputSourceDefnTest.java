@@ -39,7 +39,6 @@ import org.apache.druid.java.util.common.IAE;
 import org.apache.druid.java.util.common.ISE;
 import org.apache.druid.storage.s3.S3StorageDruidModule;
 import org.junit.Before;
-import org.junit.Test;
 
 import javax.annotation.Nullable;
 

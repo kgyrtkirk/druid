@@ -64,10 +64,9 @@ import org.apache.druid.segment.incremental.OnheapIncrementalIndex;
 import org.apache.druid.segment.virtual.ListFilteredVirtualColumn;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.apache.druid.timeline.SegmentId;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -77,7 +76,6 @@ import java.util.List;
 /**
  *
  */
-@RunWith(Parameterized.class)
 public class SearchQueryRunnerTest extends InitializedNullHandlingTest
 {
   private static final Logger LOG = new Logger(SearchQueryRunnerTest.class);
@@ -85,7 +83,6 @@ public class SearchQueryRunnerTest extends InitializedNullHandlingTest
   private static final SearchQueryQueryToolChest TOOL_CHEST = new SearchQueryQueryToolChest(CONFIG);
   private static final SearchStrategySelector SELECTOR = new SearchStrategySelector(Suppliers.ofInstance(CONFIG));
 
-  @Parameterized.Parameters(name = "{0}")
   public static Iterable<Object[]> constructorFeeder()
   {
     return QueryRunnerTestHelper.transformToConstructionFeeder(
@@ -99,10 +96,10 @@ public class SearchQueryRunnerTest extends InitializedNullHandlingTest
     );
   }
 
-  private final QueryRunner runner;
-  private final QueryRunner decoratedRunner;
+  private QueryRunner runner;
+  private QueryRunner decoratedRunner;
 
-  public SearchQueryRunnerTest(
+  public void initSearchQueryRunnerTest(
       QueryRunner runner
   )
   {
@@ -113,26 +110,30 @@ public class SearchQueryRunnerTest extends InitializedNullHandlingTest
         .applyPostMergeDecoration();
   }
 
-  @Test
-  public void testSearchHitSerDe() throws Exception
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testSearchHitSerDe(QueryRunner runner) throws Exception
   {
+    initSearchQueryRunnerTest(runner);
     for (SearchHit hit : Arrays.asList(new SearchHit("dim1", "val1"), new SearchHit("dim2", "val2", 3))) {
       SearchHit read = TestHelper.makeJsonMapper().readValue(
           TestHelper.makeJsonMapper().writeValueAsString(hit),
           SearchHit.class
       );
-      Assert.assertEquals(hit, read);
+      Assertions.assertEquals(hit, read);
       if (hit.getCount() == null) {
-        Assert.assertNull(read.getCount());
+        Assertions.assertNull(read.getCount());
       } else {
-        Assert.assertEquals(hit.getCount(), read.getCount());
+        Assertions.assertEquals(hit.getCount(), read.getCount());
       }
     }
   }
 
-  @Test
-  public void testSearch()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testSearch(QueryRunner runner)
   {
+    initSearchQueryRunnerTest(runner);
     SearchQuery searchQuery = Druids.newSearchQueryBuilder()
                                     .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
                                     .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -153,9 +154,11 @@ public class SearchQueryRunnerTest extends InitializedNullHandlingTest
     checkSearchQuery(searchQuery, expectedHits);
   }
 
-  @Test
-  public void testSearchWithCardinality()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testSearchWithCardinality(QueryRunner runner)
   {
+    initSearchQueryRunnerTest(runner);
     final SearchQuery searchQuery = Druids.newSearchQueryBuilder()
                                           .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
                                           .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -201,9 +204,11 @@ public class SearchQueryRunnerTest extends InitializedNullHandlingTest
     checkSearchQuery(searchQuery, mergedRunner, expectedHits);
   }
 
-  @Test
-  public void testSearchSameValueInMultiDims()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testSearchSameValueInMultiDims(QueryRunner runner)
   {
+    initSearchQueryRunnerTest(runner);
     SearchQuery searchQuery = Druids.newSearchQueryBuilder()
                                     .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
                                     .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -225,9 +230,11 @@ public class SearchQueryRunnerTest extends InitializedNullHandlingTest
     checkSearchQuery(searchQuery, expectedHits);
   }
 
-  @Test
-  public void testSearchSameValueInMultiDims2()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testSearchSameValueInMultiDims2(QueryRunner runner)
   {
+    initSearchQueryRunnerTest(runner);
     SearchQuery searchQuery = Druids.newSearchQueryBuilder()
                                     .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
                                     .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -250,9 +257,11 @@ public class SearchQueryRunnerTest extends InitializedNullHandlingTest
     checkSearchQuery(searchQuery, expectedHits);
   }
 
-  @Test
-  public void testFragmentSearch()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testFragmentSearch(QueryRunner runner)
   {
+    initSearchQueryRunnerTest(runner);
     SearchQuery searchQuery = Druids.newSearchQueryBuilder()
                                     .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
                                     .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -266,9 +275,11 @@ public class SearchQueryRunnerTest extends InitializedNullHandlingTest
     checkSearchQuery(searchQuery, expectedHits);
   }
 
-  @Test
-  public void testSearchWithDimensionQuality()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testSearchWithDimensionQuality(QueryRunner runner)
   {
+    initSearchQueryRunnerTest(runner);
     List<SearchHit> expectedHits = new ArrayList<>();
     expectedHits.add(new SearchHit(QueryRunnerTestHelper.QUALITY_DIMENSION, "automotive", 93));
     expectedHits.add(new SearchHit(QueryRunnerTestHelper.QUALITY_DIMENSION, "mezzanine", 279));
@@ -288,9 +299,11 @@ public class SearchQueryRunnerTest extends InitializedNullHandlingTest
     );
   }
 
-  @Test
-  public void testSearchWithDimensionProvider()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testSearchWithDimensionProvider(QueryRunner runner)
   {
+    initSearchQueryRunnerTest(runner);
     List<SearchHit> expectedHits = new ArrayList<>();
     expectedHits.add(new SearchHit(QueryRunnerTestHelper.MARKET_DIMENSION, "total_market", 186));
 
@@ -306,9 +319,11 @@ public class SearchQueryRunnerTest extends InitializedNullHandlingTest
     );
   }
 
-  @Test
-  public void testSearchWithDimensionsQualityAndProvider()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testSearchWithDimensionsQualityAndProvider(QueryRunner runner)
   {
+    initSearchQueryRunnerTest(runner);
     List<SearchHit> expectedHits = new ArrayList<>();
     expectedHits.add(new SearchHit(QueryRunnerTestHelper.QUALITY_DIMENSION, "automotive", 93));
     expectedHits.add(new SearchHit(QueryRunnerTestHelper.QUALITY_DIMENSION, "mezzanine", 279));
@@ -334,9 +349,11 @@ public class SearchQueryRunnerTest extends InitializedNullHandlingTest
     );
   }
 
-  @Test
-  public void testSearchWithDimensionsPlacementAndProvider()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testSearchWithDimensionsPlacementAndProvider(QueryRunner runner)
   {
+    initSearchQueryRunnerTest(runner);
     List<SearchHit> expectedHits = new ArrayList<>();
     expectedHits.add(new SearchHit(QueryRunnerTestHelper.MARKET_DIMENSION, "total_market", 186));
 
@@ -358,9 +375,11 @@ public class SearchQueryRunnerTest extends InitializedNullHandlingTest
   }
 
 
-  @Test
-  public void testSearchWithExtractionFilter1()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testSearchWithExtractionFilter1(QueryRunner runner)
   {
+    initSearchQueryRunnerTest(runner);
     final String automotiveSnowman = "automotive☃";
     List<SearchHit> expectedHits = new ArrayList<>();
     expectedHits.add(new SearchHit(QueryRunnerTestHelper.QUALITY_DIMENSION, automotiveSnowman, 93));
@@ -398,9 +417,11 @@ public class SearchQueryRunnerTest extends InitializedNullHandlingTest
     checkSearchQuery(query, expectedHits);
   }
 
-  @Test
-  public void testSearchWithSingleFilter1()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testSearchWithSingleFilter1(QueryRunner runner)
   {
+    initSearchQueryRunnerTest(runner);
     List<SearchHit> expectedHits = new ArrayList<>();
     expectedHits.add(new SearchHit(QueryRunnerTestHelper.QUALITY_DIMENSION, "mezzanine", 93));
 
@@ -422,9 +443,11 @@ public class SearchQueryRunnerTest extends InitializedNullHandlingTest
     );
   }
 
-  @Test
-  public void testSearchWithSingleFilter2()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testSearchWithSingleFilter2(QueryRunner runner)
   {
+    initSearchQueryRunnerTest(runner);
     List<SearchHit> expectedHits = new ArrayList<>();
     expectedHits.add(new SearchHit(QueryRunnerTestHelper.MARKET_DIMENSION, "total_market", 186));
 
@@ -441,9 +464,11 @@ public class SearchQueryRunnerTest extends InitializedNullHandlingTest
     );
   }
 
-  @Test
-  public void testSearchMultiAndFilter()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testSearchMultiAndFilter(QueryRunner runner)
   {
+    initSearchQueryRunnerTest(runner);
     List<SearchHit> expectedHits = new ArrayList<>();
     expectedHits.add(new SearchHit(QueryRunnerTestHelper.QUALITY_DIMENSION, "automotive", 93));
 
@@ -465,9 +490,11 @@ public class SearchQueryRunnerTest extends InitializedNullHandlingTest
     );
   }
 
-  @Test
-  public void testSearchWithMultiOrFilter()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testSearchWithMultiOrFilter(QueryRunner runner)
   {
+    initSearchQueryRunnerTest(runner);
     List<SearchHit> expectedHits = new ArrayList<>();
     expectedHits.add(new SearchHit(QueryRunnerTestHelper.QUALITY_DIMENSION, "automotive", 93));
 
@@ -489,9 +516,11 @@ public class SearchQueryRunnerTest extends InitializedNullHandlingTest
     );
   }
 
-  @Test
-  public void testSearchWithEmptyResults()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testSearchWithEmptyResults(QueryRunner runner)
   {
+    initSearchQueryRunnerTest(runner);
     List<SearchHit> expectedHits = new ArrayList<>();
 
     checkSearchQuery(
@@ -505,9 +534,11 @@ public class SearchQueryRunnerTest extends InitializedNullHandlingTest
     );
   }
 
-  @Test
-  public void testSearchWithFilterEmptyResults()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testSearchWithFilterEmptyResults(QueryRunner runner)
   {
+    initSearchQueryRunnerTest(runner);
     List<SearchHit> expectedHits = new ArrayList<>();
 
     DimFilter filter = new AndDimFilter(
@@ -528,9 +559,11 @@ public class SearchQueryRunnerTest extends InitializedNullHandlingTest
   }
 
 
-  @Test
-  public void testSearchNonExistingDimension()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testSearchNonExistingDimension(QueryRunner runner)
   {
+    initSearchQueryRunnerTest(runner);
     List<SearchHit> expectedHits = new ArrayList<>();
 
     checkSearchQuery(
@@ -545,9 +578,11 @@ public class SearchQueryRunnerTest extends InitializedNullHandlingTest
     );
   }
 
-  @Test
-  public void testSearchAll()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testSearchAll(QueryRunner runner)
   {
+    initSearchQueryRunnerTest(runner);
     List<SearchHit> expectedHits = new ArrayList<>();
     expectedHits.add(new SearchHit(QueryRunnerTestHelper.MARKET_DIMENSION, "spot", 837));
     expectedHits.add(new SearchHit(QueryRunnerTestHelper.MARKET_DIMENSION, "total_market", 186));
@@ -574,9 +609,11 @@ public class SearchQueryRunnerTest extends InitializedNullHandlingTest
     );
   }
 
-  @Test
-  public void testSearchWithNumericSort()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testSearchWithNumericSort(QueryRunner runner)
   {
+    initSearchQueryRunnerTest(runner);
     SearchQuery searchQuery = Druids.newSearchQueryBuilder()
                                     .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
                                     .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -598,9 +635,11 @@ public class SearchQueryRunnerTest extends InitializedNullHandlingTest
     checkSearchQuery(searchQuery, expectedHits);
   }
 
-  @Test
-  public void testSearchOnTime()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testSearchOnTime(QueryRunner runner)
   {
+    initSearchQueryRunnerTest(runner);
     SearchQuery searchQuery = Druids.newSearchQueryBuilder()
                                     .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
                                     .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -625,9 +664,11 @@ public class SearchQueryRunnerTest extends InitializedNullHandlingTest
     checkSearchQuery(searchQuery, expectedHits);
   }
 
-  @Test
-  public void testSearchOnLongColumn()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testSearchOnLongColumn(QueryRunner runner)
   {
+    initSearchQueryRunnerTest(runner);
     SearchQuery searchQuery = Druids.newSearchQueryBuilder()
                                     .dimensions(
                                         new DefaultDimensionSpec(
@@ -647,9 +688,11 @@ public class SearchQueryRunnerTest extends InitializedNullHandlingTest
     checkSearchQuery(searchQuery, expectedHits);
   }
 
-  @Test
-  public void testSearchOnLongColumnWithExFn()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testSearchOnLongColumnWithExFn(QueryRunner runner)
   {
+    initSearchQueryRunnerTest(runner);
     String jsFn = "function(str) { return 'super-' + str; }";
     ExtractionFn jsExtractionFn = new JavaScriptExtractionFn(jsFn, false, JavaScriptConfig.getEnabledInstance());
 
@@ -672,9 +715,11 @@ public class SearchQueryRunnerTest extends InitializedNullHandlingTest
     checkSearchQuery(searchQuery, expectedHits);
   }
 
-  @Test
-  public void testSearchOnFloatColumn()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testSearchOnFloatColumn(QueryRunner runner)
   {
+    initSearchQueryRunnerTest(runner);
     SearchQuery searchQuery = Druids.newSearchQueryBuilder()
                                     .dimensions(
                                         new DefaultDimensionSpec(
@@ -695,9 +740,11 @@ public class SearchQueryRunnerTest extends InitializedNullHandlingTest
     checkSearchQuery(searchQuery, expectedHits);
   }
 
-  @Test
-  public void testSearchOnFloatColumnWithExFn()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testSearchOnFloatColumnWithExFn(QueryRunner runner)
   {
+    initSearchQueryRunnerTest(runner);
     String jsFn = "function(str) { return 'super-' + str; }";
     ExtractionFn jsExtractionFn = new JavaScriptExtractionFn(jsFn, false, JavaScriptConfig.getEnabledInstance());
 
@@ -721,9 +768,11 @@ public class SearchQueryRunnerTest extends InitializedNullHandlingTest
     checkSearchQuery(searchQuery, expectedHits);
   }
 
-  @Test
-  public void testSearchWithNullValueInDimension() throws Exception
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testSearchWithNullValueInDimension(QueryRunner runner) throws Exception
   {
+    initSearchQueryRunnerTest(runner);
     IncrementalIndex index = new OnheapIncrementalIndex.Builder()
         .setIndexSchema(
             new IncrementalIndexSchema.Builder()
@@ -773,9 +822,11 @@ public class SearchQueryRunnerTest extends InitializedNullHandlingTest
     checkSearchQuery(searchQuery, runner, expectedHits);
   }
 
-  @Test
-  public void testSearchWithNotExistedDimension()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testSearchWithNotExistedDimension(QueryRunner runner)
   {
+    initSearchQueryRunnerTest(runner);
     SearchQuery searchQuery = Druids.newSearchQueryBuilder()
                                     .dimensions(
                                         new DefaultDimensionSpec("asdf", "asdf")
@@ -789,9 +840,11 @@ public class SearchQueryRunnerTest extends InitializedNullHandlingTest
     checkSearchQuery(searchQuery, noHit);
   }
 
-  @Test
-  public void testSearchSameValueInMultiDimsVirtualColumns()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testSearchSameValueInMultiDimsVirtualColumns(QueryRunner runner)
   {
+    initSearchQueryRunnerTest(runner);
     SearchQuery searchQuery = Druids.newSearchQueryBuilder()
                                     .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
                                     .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -838,8 +891,8 @@ public class SearchQueryRunnerTest extends InitializedNullHandlingTest
     Iterable<Result<SearchResultValue>> results = runner.run(QueryPlus.wrap(searchQuery)).toList();
     List<SearchHit> copy = new ArrayList<>(expectedResults);
     for (Result<SearchResultValue> result : results) {
-      Assert.assertEquals(DateTimes.of("2011-01-12T00:00:00.000Z"), result.getTimestamp());
-      Assert.assertTrue(result.getValue() instanceof Iterable);
+      Assertions.assertEquals(DateTimes.of("2011-01-12T00:00:00.000Z"), result.getTimestamp());
+      Assertions.assertTrue(result.getValue() instanceof Iterable);
 
       Iterable<SearchHit> resultValues = result.getValue();
       for (SearchHit resultValue : resultValues) {
@@ -881,6 +934,6 @@ public class SearchQueryRunnerTest extends InitializedNullHandlingTest
         LOG.info(v.toString());
       }
     }
-    Assert.fail(errorMsg);
+    Assertions.fail(errorMsg);
   }
 }

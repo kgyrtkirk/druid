@@ -24,9 +24,9 @@ import com.google.inject.Injector;
 import com.google.inject.Scopes;
 import org.apache.druid.guice.LazySingleton;
 import org.apache.druid.server.security.AuthValidator;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.validation.Validation;
 import javax.validation.Validator;
@@ -36,7 +36,7 @@ public class AuthorizerMapperModuleTest
   private AuthorizerMapperModule target;
   private Injector injector;
 
-  @Before
+  @BeforeEach
   public void setUp()
   {
     target = new AuthorizerMapperModule();
@@ -56,6 +56,6 @@ public class AuthorizerMapperModuleTest
         injector.getInstance(AuthValidator.class);
     AuthValidator other =
         injector.getInstance(AuthValidator.class);
-    Assert.assertSame(authValidator, other);
+    Assertions.assertSame(authValidator, other);
   }
 }

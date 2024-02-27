@@ -23,7 +23,6 @@ import org.apache.druid.indexer.TaskLocation;
 import org.apache.druid.indexing.worker.Worker;
 import org.apache.druid.indexing.worker.config.WorkerConfig;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.net.URL;
 

@@ -26,7 +26,6 @@ import org.apache.druid.java.util.common.StringEncoding;
 import org.apache.druid.query.aggregation.AggregatorFactory;
 import org.apache.druid.segment.TestHelper;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.io.IOException;
 

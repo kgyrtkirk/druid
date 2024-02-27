@@ -23,7 +23,6 @@ import org.apache.datasketches.tuple.arrayofdoubles.ArrayOfDoublesUpdatableSketc
 import org.apache.datasketches.tuple.arrayofdoubles.ArrayOfDoublesUpdatableSketchBuilder;
 import org.apache.druid.java.util.common.StringUtils;
 import org.junit.Assert;
-import org.junit.Test;
 
 import java.util.Arrays;
 

@@ -28,8 +28,8 @@ import org.apache.druid.guice.StartupInjectorBuilder;
 import org.apache.druid.initialization.DruidModule;
 import org.apache.druid.initialization.ServerInjectorBuilderTest;
 import org.apache.druid.java.util.common.StringUtils;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -48,7 +48,7 @@ public class StatusResourceTest
     Collection<DruidModule> modules = ImmutableList.of(new ServerInjectorBuilderTest.TestDruidModule());
     List<StatusResource.ModuleVersion> statusResourceModuleList = new StatusResource.Status(modules).getModules();
 
-    Assert.assertEquals("Status should have all modules loaded!", modules.size(), statusResourceModuleList.size());
+    Assertions.assertEquals(modules.size(), statusResourceModuleList.size(), "Status should have all modules loaded!");
 
     for (DruidModule module : modules) {
       String moduleName = module.getClass().getName();
@@ -60,7 +60,7 @@ public class StatusResourceTest
           break;
         }
       }
-      Assert.assertTrue("Status resource should contain module " + moduleName, contains);
+      Assertions.assertTrue(contains, "Status resource should contain module " + moduleName);
     }
   }
 
@@ -87,9 +87,9 @@ public class StatusResourceTest
                                                            .map(StringUtils::toLowerCase)
                                                            .collect(Collectors.toSet());
 
-    Assert.assertTrue(
-        "The list of unfiltered Properties is not > the list of filtered Properties?!?",
-        injector.getInstance(Properties.class).stringPropertyNames().size() > returnedProperties.size()
+    Assertions.assertTrue(
+        injector.getInstance(Properties.class).stringPropertyNames().size() > returnedProperties.size(),
+        "The list of unfiltered Properties is not > the list of filtered Properties?!?"
     );
 
     Set<String> hiddenProperties = new ObjectMapper().readValue(
@@ -99,7 +99,7 @@ public class StatusResourceTest
     hiddenProperties.forEach(
         (property) -> {
           lowerCasePropertyNames.forEach(
-              lowerCasePropertyName -> Assert.assertFalse(lowerCasePropertyName.contains(StringUtils.toLowerCase(
+              lowerCasePropertyName -> Assertions.assertFalse(lowerCasePropertyName.contains(StringUtils.toLowerCase(
                   property)))
           );
         }

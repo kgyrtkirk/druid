@@ -24,7 +24,6 @@ import org.apache.druid.segment.data.ColumnarMultiInts;
 import org.apache.druid.segment.data.ReadableOffset;
 import org.easymock.EasyMock;
 import org.junit.Assert;
-import org.junit.Test;
 
 public class CompressedBigDecimalColumnTest
 {

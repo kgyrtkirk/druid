@@ -20,7 +20,7 @@
 package org.apache.druid.java.util.common.concurrent;
 
 import org.joda.time.Duration;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.ScheduledExecutorService;
 

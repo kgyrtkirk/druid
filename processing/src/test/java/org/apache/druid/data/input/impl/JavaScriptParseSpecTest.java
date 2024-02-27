@@ -25,23 +25,21 @@ import com.google.common.collect.ImmutableMap;
 import org.apache.druid.jackson.DefaultObjectMapper;
 import org.apache.druid.java.util.common.parsers.Parser;
 import org.apache.druid.js.JavaScriptConfig;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  */
 public class JavaScriptParseSpecTest
 {
   private final ObjectMapper jsonMapper = new DefaultObjectMapper();
-
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
 
   @Test
   public void testSerde() throws IOException
@@ -62,11 +60,11 @@ public class JavaScriptParseSpecTest
         jsonMapper.writeValueAsString(spec),
         ParseSpec.class
     );
-    Assert.assertEquals("abc", serde.getTimestampSpec().getTimestampColumn());
-    Assert.assertEquals("iso", serde.getTimestampSpec().getTimestampFormat());
+    Assertions.assertEquals("abc", serde.getTimestampSpec().getTimestampColumn());
+    Assertions.assertEquals("iso", serde.getTimestampSpec().getTimestampFormat());
 
-    Assert.assertEquals("abc", serde.getFunction());
-    Assert.assertEquals(Collections.singletonList("abc"), serde.getDimensionsSpec().getDimensionNames());
+    Assertions.assertEquals("abc", serde.getFunction());
+    Assertions.assertEquals(Collections.singletonList("abc"), serde.getDimensionsSpec().getDimensionNames());
   }
 
   @Test
@@ -82,22 +80,22 @@ public class JavaScriptParseSpecTest
 
     final Parser<String, Object> parser = spec.makeParser();
     final Map<String, Object> obj = parser.parseToMap("x-y");
-    Assert.assertEquals(ImmutableMap.of("one", "x", "two", "y"), obj);
+    Assertions.assertEquals(ImmutableMap.of("one", "x", "two", "y"), obj);
   }
 
   @Test
   public void testMakeParserNotAllowed()
   {
-    final JavaScriptConfig config = new JavaScriptConfig(false);
-    JavaScriptParseSpec spec = new JavaScriptParseSpec(
-        new TimestampSpec("abc", "iso", null),
-        new DimensionsSpec(DimensionsSpec.getDefaultSchemas(Collections.singletonList("abc"))),
-        "abc",
-        config
-    );
-
-    expectedException.expect(IllegalStateException.class);
-    expectedException.expectMessage("JavaScript is disabled");
-    spec.makeParser();
+    Throwable exception = assertThrows(IllegalStateException.class, () -> {
+      final JavaScriptConfig config = new JavaScriptConfig(false);
+      JavaScriptParseSpec spec = new JavaScriptParseSpec(
+          new TimestampSpec("abc", "iso", null),
+          new DimensionsSpec(DimensionsSpec.getDefaultSchemas(Collections.singletonList("abc"))),
+          "abc",
+          config
+      );
+      spec.makeParser();
+    });
+    assertTrue(exception.getMessage().contains("JavaScript is disabled"));
   }
 }

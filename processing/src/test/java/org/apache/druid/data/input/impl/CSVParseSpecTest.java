@@ -19,28 +19,32 @@
 
 package org.apache.druid.data.input.impl;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 public class CSVParseSpecTest
 {
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void testComma()
   {
-    @SuppressWarnings("unused") // expected exception
-    final ParseSpec spec = new CSVParseSpec(
-        new TimestampSpec(
-            "timestamp",
-            "auto",
-            null
-        ),
-        new DimensionsSpec(DimensionsSpec.getDefaultSchemas(Arrays.asList("a,", "b"))),
-        ",",
-        Collections.singletonList("a,"),
-        false,
-        0
-    );
+    assertThrows(IllegalArgumentException.class, () -> {
+      @SuppressWarnings("unused") // expected exception
+      final ParseSpec spec = new CSVParseSpec(
+          new TimestampSpec(
+              "timestamp",
+              "auto",
+              null
+          ),
+          new DimensionsSpec(DimensionsSpec.getDefaultSchemas(Arrays.asList("a,", "b"))),
+          ",",
+          Collections.singletonList("a,"),
+          false,
+          0
+      );
+    });
   }
 }

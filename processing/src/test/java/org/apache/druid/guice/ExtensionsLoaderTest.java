@@ -26,10 +26,9 @@ import com.google.inject.Injector;
 import org.apache.druid.initialization.DruidModule;
 import org.apache.druid.java.util.common.ISE;
 import org.apache.druid.java.util.common.Pair;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,10 +42,12 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 public class ExtensionsLoaderTest
 {
-  @Rule
-  public final TemporaryFolder temporaryFolder = new TemporaryFolder();
+  @TempDir
+  public File temporaryFolder;
 
   private Injector startupInjector()
   {
@@ -60,17 +61,17 @@ public class ExtensionsLoaderTest
   public void test02MakeStartupInjector()
   {
     Injector startupInjector = startupInjector();
-    Assert.assertNotNull(startupInjector);
-    Assert.assertNotNull(startupInjector.getInstance(ObjectMapper.class));
+    Assertions.assertNotNull(startupInjector);
+    Assertions.assertNotNull(startupInjector.getInstance(ObjectMapper.class));
     ExtensionsLoader extnLoader = ExtensionsLoader.instance(startupInjector);
-    Assert.assertNotNull(extnLoader);
-    Assert.assertSame(extnLoader, ExtensionsLoader.instance(startupInjector));
+    Assertions.assertNotNull(extnLoader);
+    Assertions.assertSame(extnLoader, ExtensionsLoader.instance(startupInjector));
   }
 
   @Test
   public void test04DuplicateClassLoaderExtensions() throws Exception
   {
-    final File extensionDir = temporaryFolder.newFolder();
+    final File extensionDir = newFolder(temporaryFolder, "junit");
     Injector startupInjector = startupInjector();
     ExtensionsLoader extnLoader = ExtensionsLoader.instance(startupInjector);
 
@@ -82,7 +83,7 @@ public class ExtensionsLoaderTest
 
     Set<String> loadedModuleNames = new HashSet<>();
     for (DruidModule module : modules) {
-      Assert.assertFalse("Duplicate extensions are loaded", loadedModuleNames.contains(module.getClass().getName()));
+      Assertions.assertFalse(loadedModuleNames.contains(module.getClass().getName()), "Duplicate extensions are loaded");
       loadedModuleNames.add(module.getClass().getName());
     }
   }
@@ -92,7 +93,7 @@ public class ExtensionsLoaderTest
   {
     final ExtensionsLoader extnLoader = new ExtensionsLoader(new ExtensionsConfig());
 
-    final File some_extension_dir = temporaryFolder.newFolder();
+    final File some_extension_dir = newFolder(temporaryFolder, "junit");
     final File a_jar = new File(some_extension_dir, "a.jar");
     final File b_jar = new File(some_extension_dir, "b.jar");
     final File c_jar = new File(some_extension_dir, "c.jar");
@@ -103,7 +104,7 @@ public class ExtensionsLoaderTest
     final URL[] expectedURLs = new URL[]{a_jar.toURI().toURL(), b_jar.toURI().toURL(), c_jar.toURI().toURL()};
     final URL[] actualURLs = loader.getURLs();
     Arrays.sort(actualURLs, Comparator.comparing(URL::getPath));
-    Assert.assertArrayEquals(expectedURLs, actualURLs);
+    Assertions.assertArrayEquals(expectedURLs, actualURLs);
   }
 
   @Test
@@ -114,19 +115,19 @@ public class ExtensionsLoaderTest
     HashSet<DruidModule> moduleSet = new HashSet<>(modules);
 
     Collection<DruidModule> loadedModules = extnLoader.getModules();
-    Assert.assertEquals("Set from loaded modules #1 should be same!", modules.size(), loadedModules.size());
-    Assert.assertEquals("Set from loaded modules #1 should be same!", moduleSet, new HashSet<>(loadedModules));
+    Assertions.assertEquals(modules.size(), loadedModules.size(), "Set from loaded modules #1 should be same!");
+    Assertions.assertEquals(moduleSet, new HashSet<>(loadedModules), "Set from loaded modules #1 should be same!");
 
     Collection<DruidModule> loadedModules2 = extnLoader.getModules();
-    Assert.assertEquals("Set from loaded modules #2 should be same!", modules.size(), loadedModules2.size());
-    Assert.assertEquals("Set from loaded modules #2 should be same!", moduleSet, new HashSet<>(loadedModules2));
+    Assertions.assertEquals(modules.size(), loadedModules2.size(), "Set from loaded modules #2 should be same!");
+    Assertions.assertEquals(moduleSet, new HashSet<>(loadedModules2), "Set from loaded modules #2 should be same!");
   }
 
   @Test
   public void testGetExtensionFilesToLoad_non_exist_extensions_dir() throws IOException
   {
-    final File tmpDir = temporaryFolder.newFolder();
-    Assert.assertTrue("could not create missing folder", !tmpDir.exists() || tmpDir.delete());
+    final File tmpDir = newFolder(temporaryFolder, "junit");
+    Assertions.assertTrue(!tmpDir.exists() || tmpDir.delete(), "could not create missing folder");
     final ExtensionsLoader extnLoader = new ExtensionsLoader(new ExtensionsConfig()
     {
       @Override
@@ -135,34 +136,36 @@ public class ExtensionsLoaderTest
         return tmpDir.getAbsolutePath();
       }
     });
-    Assert.assertArrayEquals(
-        "Non-exist root extensionsDir should return an empty array of File",
+    Assertions.assertArrayEquals(
         new File[]{},
-        extnLoader.getExtensionFilesToLoad()
+        extnLoader.getExtensionFilesToLoad(),
+        "Non-exist root extensionsDir should return an empty array of File"
     );
   }
 
 
-  @Test(expected = ISE.class)
+  @Test
   public void testGetExtensionFilesToLoad_wrong_type_extensions_dir() throws IOException
   {
-    final File extensionsDir = temporaryFolder.newFile();
-    final ExtensionsConfig config = new ExtensionsConfig()
-    {
-      @Override
-      public String getDirectory()
+    assertThrows(ISE.class, () -> {
+      final File extensionsDir = File.createTempFile("junit", null, temporaryFolder);
+      final ExtensionsConfig config = new ExtensionsConfig()
       {
-        return extensionsDir.getAbsolutePath();
-      }
-    };
-    final ExtensionsLoader extnLoader = new ExtensionsLoader(config);
-    extnLoader.getExtensionFilesToLoad();
+        @Override
+        public String getDirectory()
+        {
+          return extensionsDir.getAbsolutePath();
+        }
+      };
+      final ExtensionsLoader extnLoader = new ExtensionsLoader(config);
+      extnLoader.getExtensionFilesToLoad();
+    });
   }
 
   @Test
   public void testGetExtensionFilesToLoad_empty_extensions_dir() throws IOException
   {
-    final File extensionsDir = temporaryFolder.newFolder();
+    final File extensionsDir = newFolder(temporaryFolder, "junit");
     final ExtensionsConfig config = new ExtensionsConfig()
     {
       @Override
@@ -173,10 +176,10 @@ public class ExtensionsLoaderTest
     };
 
     final ExtensionsLoader extnLoader = new ExtensionsLoader(config);
-    Assert.assertArrayEquals(
-        "Empty root extensionsDir should return an empty array of File",
+    Assertions.assertArrayEquals(
         new File[]{},
-        extnLoader.getExtensionFilesToLoad()
+        extnLoader.getExtensionFilesToLoad(),
+        "Empty root extensionsDir should return an empty array of File"
     );
   }
 
@@ -187,7 +190,7 @@ public class ExtensionsLoaderTest
   @Test
   public void testGetExtensionFilesToLoad_null_load_list() throws IOException
   {
-    final File extensionsDir = temporaryFolder.newFolder();
+    final File extensionsDir = newFolder(temporaryFolder, "junit");
     final ExtensionsConfig config = new ExtensionsConfig()
     {
       @Override
@@ -203,7 +206,7 @@ public class ExtensionsLoaderTest
     final File[] expectedFileList = new File[]{mysql_metadata_storage};
     final File[] actualFileList = extnLoader.getExtensionFilesToLoad();
     Arrays.sort(actualFileList);
-    Assert.assertArrayEquals(expectedFileList, actualFileList);
+    Assertions.assertArrayEquals(expectedFileList, actualFileList);
   }
 
   /**
@@ -213,9 +216,9 @@ public class ExtensionsLoaderTest
   @Test
   public void testGetExtensionFilesToLoad_with_load_list() throws IOException
   {
-    final File extensionsDir = temporaryFolder.newFolder();
+    final File extensionsDir = newFolder(temporaryFolder, "junit");
 
-    final File absolutePathExtension = temporaryFolder.newFolder();
+    final File absolutePathExtension = newFolder(temporaryFolder, "junit");
 
     final ExtensionsConfig config = new ExtensionsConfig()
     {
@@ -240,43 +243,45 @@ public class ExtensionsLoaderTest
 
     final File[] expectedFileList = new File[]{mysql_metadata_storage, absolutePathExtension};
     final File[] actualFileList = extnLoader.getExtensionFilesToLoad();
-    Assert.assertArrayEquals(expectedFileList, actualFileList);
+    Assertions.assertArrayEquals(expectedFileList, actualFileList);
   }
 
   /**
    * druid.extension.load is specified, but contains an extension that is not prepared under root extension directory.
    * Initialization.getExtensionFilesToLoad is supposed to throw ISE.
    */
-  @Test(expected = ISE.class)
+  @Test
   public void testGetExtensionFilesToLoad_with_non_exist_item_in_load_list() throws IOException
   {
-    final File extensionsDir = temporaryFolder.newFolder();
-    final ExtensionsConfig config = new ExtensionsConfig()
-    {
-      @Override
-      public LinkedHashSet<String> getLoadList()
+    assertThrows(ISE.class, () -> {
+      final File extensionsDir = newFolder(temporaryFolder, "junit");
+      final ExtensionsConfig config = new ExtensionsConfig()
       {
-        return Sets.newLinkedHashSet(ImmutableList.of("mysql-metadata-storage"));
-      }
+        @Override
+        public LinkedHashSet<String> getLoadList()
+        {
+          return Sets.newLinkedHashSet(ImmutableList.of("mysql-metadata-storage"));
+        }
 
-      @Override
-      public String getDirectory()
-      {
-        return extensionsDir.getAbsolutePath();
-      }
-    };
-    final File random_extension = new File(extensionsDir, "random-extensions");
-    random_extension.mkdir();
-    final ExtensionsLoader extnLoader = new ExtensionsLoader(config);
-    extnLoader.getExtensionFilesToLoad();
+        @Override
+        public String getDirectory()
+        {
+          return extensionsDir.getAbsolutePath();
+        }
+      };
+      final File random_extension = new File(extensionsDir, "random-extensions");
+      random_extension.mkdir();
+      final ExtensionsLoader extnLoader = new ExtensionsLoader(config);
+      extnLoader.getExtensionFilesToLoad();
+    });
   }
 
   @Test
   public void testGetURLsForClasspath() throws Exception
   {
-    File tmpDir1 = temporaryFolder.newFolder();
-    File tmpDir2 = temporaryFolder.newFolder();
-    File tmpDir3 = temporaryFolder.newFolder();
+    File tmpDir1 = newFolder(temporaryFolder, "junit");
+    File tmpDir2 = newFolder(temporaryFolder, "junit");
+    File tmpDir3 = newFolder(temporaryFolder, "junit");
 
     File tmpDir1a = new File(tmpDir1, "a.jar");
     tmpDir1a.createNewFile();
@@ -300,10 +305,10 @@ public class ExtensionsLoaderTest
 
     // getURLsForClasspath uses listFiles which does NOT guarantee any ordering for the name strings.
     List<URL> urLsForClasspath = ExtensionsLoader.getURLsForClasspath(cp);
-    Assert.assertEquals(Sets.newHashSet(tmpDir1a.toURI().toURL(), tmpDir1b.toURI().toURL()),
+    Assertions.assertEquals(Sets.newHashSet(tmpDir1a.toURI().toURL(), tmpDir1b.toURI().toURL()),
                         Sets.newHashSet(urLsForClasspath.subList(0, 2)));
-    Assert.assertEquals(tmpDir3.toURI().toURL(), urLsForClasspath.get(2));
-    Assert.assertEquals(Sets.newHashSet(tmpDir2c.toURI().toURL(), tmpDir2d.toURI().toURL(), tmpDir2e.toURI().toURL()),
+    Assertions.assertEquals(tmpDir3.toURI().toURL(), urLsForClasspath.get(2));
+    Assertions.assertEquals(Sets.newHashSet(tmpDir2c.toURI().toURL(), tmpDir2d.toURI().toURL(), tmpDir2e.toURI().toURL()),
                         Sets.newHashSet(urLsForClasspath.subList(3, 6)));
   }
 
@@ -311,23 +316,32 @@ public class ExtensionsLoaderTest
   public void testExtensionsWithSameDirName() throws Exception
   {
     final String extensionName = "some_extension";
-    final File tmpDir1 = temporaryFolder.newFolder();
-    final File tmpDir2 = temporaryFolder.newFolder();
+    final File tmpDir1 = newFolder(temporaryFolder, "junit");
+    final File tmpDir2 = newFolder(temporaryFolder, "junit");
     final File extension1 = new File(tmpDir1, extensionName);
     final File extension2 = new File(tmpDir2, extensionName);
-    Assert.assertTrue(extension1.mkdir());
-    Assert.assertTrue(extension2.mkdir());
+    Assertions.assertTrue(extension1.mkdir());
+    Assertions.assertTrue(extension2.mkdir());
     final File jar1 = new File(extension1, "jar1.jar");
     final File jar2 = new File(extension2, "jar2.jar");
 
-    Assert.assertTrue(jar1.createNewFile());
-    Assert.assertTrue(jar2.createNewFile());
+    Assertions.assertTrue(jar1.createNewFile());
+    Assertions.assertTrue(jar2.createNewFile());
 
     final ExtensionsLoader extnLoader = new ExtensionsLoader(new ExtensionsConfig());
     final ClassLoader classLoader1 = extnLoader.getClassLoaderForExtension(extension1, false);
     final ClassLoader classLoader2 = extnLoader.getClassLoaderForExtension(extension2, false);
 
-    Assert.assertArrayEquals(new URL[]{jar1.toURI().toURL()}, ((URLClassLoader) classLoader1).getURLs());
-    Assert.assertArrayEquals(new URL[]{jar2.toURI().toURL()}, ((URLClassLoader) classLoader2).getURLs());
+    Assertions.assertArrayEquals(new URL[]{jar1.toURI().toURL()}, ((URLClassLoader) classLoader1).getURLs());
+    Assertions.assertArrayEquals(new URL[]{jar2.toURI().toURL()}, ((URLClassLoader) classLoader2).getURLs());
+  }
+
+  private static File newFolder(File root, String... subDirs) throws IOException {
+    String subFolder = String.join("/", subDirs);
+    File result = new File(root, subFolder);
+    if (!result.mkdirs()) {
+      throw new IOException("Couldn't create folders " + root);
+    }
+    return result;
   }
 }
