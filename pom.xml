@@ -1350,7 +1350,7 @@
       <version>5.23.1</version>
       <configuration>
         <activeRecipes>
-          <recipe>org.openrewrite.java.testing.junit5.JUnit5BestPractices</recipe>
+          <recipe>org.openrewrite.java.testing.junit5.JUnit4to5Migration</recipe>
         </activeRecipes>
       </configuration>
       <dependencies>
