@@ -113,6 +113,7 @@ import org.apache.druid.sql.calcite.util.SqlTestFramework.StandardComponentSuppl
 import org.apache.druid.sql.calcite.util.SqlTestFramework.StandardPlannerComponentSupplier;
 import org.apache.druid.sql.calcite.view.ViewManager;
 import org.apache.druid.sql.http.SqlParameter;
+import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -1229,10 +1230,10 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   public <T extends Exception>void testQueryThrows(
       final String sql,
       final Class<T> exceptionType,
-      final String expectedExceptionMessage)
+      final Matcher<T> exceptionMatcher)
 
   {
-    testQueryThrows(sql, null, null, exceptionType, expectedExceptionMessage);
+    testQueryThrows(sql, null, null, exceptionType, exceptionMatcher);
   }
 
   public <T extends Exception> void testQueryThrows(
@@ -1240,7 +1241,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
       final Map<String, Object> queryContext,
       final List<Query<?>> expectedQueries,
       final Class<T> exceptionType,
-      final String expectedExceptionMessage)
+      final Matcher<T> exceptionMatcher)
   {
     skipVectorize();
     T e = assertThrows(
@@ -1252,7 +1253,9 @@ public class BaseCalciteQueryTest extends CalciteTestBase
             .run()
     );
     System.out.println(e);;
-    assertEquals(expectedExceptionMessage, e.getCause().getMessage());
+    MatcherAssert.assertThat(e, exceptionMatcher);
+//    exceptionMatcher.matches()
+//    assertEquals(exceptionMatcher, e.getCause().getMessage());
   }
 
   public void analyzeResources(

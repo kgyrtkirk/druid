@@ -50,7 +50,9 @@ import org.apache.druid.segment.virtual.ExpressionVirtualColumn;
 import org.apache.druid.segment.virtual.ListFilteredVirtualColumn;
 import org.apache.druid.sql.calcite.filtration.Filtration;
 import org.apache.druid.sql.calcite.util.CalciteTests;
+import org.hamcrest.CoreMatchers;
 import org.junit.Test;
+import org.junit.internal.matchers.ThrowableMessageMatcher;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -131,14 +133,18 @@ public class CalciteMultiValueStringQueryTest extends BaseCalciteQueryTest
         groupByOnMultiValueColumnDisabled,
         ImmutableList.of(),
         RuntimeException.class,
-        StringUtils.format(
-              "org.apache.druid.query.groupby.epinephelinae.UnexpectedMultiValueDimensionException: "
-              + "Encountered multi-value dimension [%s] that cannot be processed with '%s' set to false."
-              + " Consider setting '%s' to true in your query context.",
-              "v0",
-              GroupByQueryConfig.CTX_KEY_ENABLE_MULTI_VALUE_UNNESTING,
-              GroupByQueryConfig.CTX_KEY_ENABLE_MULTI_VALUE_UNNESTING
-          )
+        ThrowableMessageMatcher.hasMessage(
+            CoreMatchers.containsString(
+                StringUtils.format(
+                    "org.apache.druid.query.groupby.epinephelinae.UnexpectedMultiValueDimensionException: "
+                        + "Encountered multi-value dimension [%s] that cannot be processed with '%s' set to false."
+                        + " Consider setting '%s' to true in your query context.",
+                    "v0",
+                    GroupByQueryConfig.CTX_KEY_ENABLE_MULTI_VALUE_UNNESTING,
+                    GroupByQueryConfig.CTX_KEY_ENABLE_MULTI_VALUE_UNNESTING
+                )
+            )
+        )
     );
   }
 

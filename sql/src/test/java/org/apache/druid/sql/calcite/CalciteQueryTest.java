@@ -6116,13 +6116,11 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     testQueryThrows(
         "SELECT COUNT(*) FROM druid.foo "
         + "WHERE TIME_IN_INTERVAL(__time, '2000-01-01/X')",
-        expected -> {
-          expected.expect(CoreMatchers.instanceOf(CalciteContextException.class));
-          expected.expect(ThrowableMessageMatcher.hasMessage(CoreMatchers.containsString(
-              "From line 1, column 38 to line 1, column 77: "
-              + "Function 'TIME_IN_INTERVAL' second argument is not a valid ISO8601 interval: "
-              + "Invalid format: \"X\"")));
-        }
+        CalciteContextException.class,
+        ThrowableMessageMatcher.hasMessage(CoreMatchers.containsString(
+            "From line 1, column 38 to line 1, column 77: "
+            + "Function 'TIME_IN_INTERVAL' second argument is not a valid ISO8601 interval: "
+            + "Invalid format: \"X\""))
     );
   }
 
