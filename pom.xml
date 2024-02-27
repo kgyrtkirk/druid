@@ -1351,6 +1351,7 @@
       <configuration>
         <activeRecipes>
           <recipe>org.openrewrite.java.testing.junit5.JUnit4to5Migration</recipe>
+          <recipe>org.openrewrite.java.testing.junit5.ExpectedExceptionToAssertThrows</recipe>
         </activeRecipes>
       </configuration>
       <dependencies>
