@@ -141,6 +141,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assume.assumeTrue;
 
 /**
@@ -1222,20 +1223,22 @@ public class BaseCalciteQueryTest extends CalciteTestBase
         .run();
   }
 
-  public void testQueryThrows(
+  public <T extends Exception> void testQueryThrows(
       final String sql,
       final Map<String, Object> queryContext,
       final List<Query<?>> expectedQueries,
-      final Consumer<ExpectedException> expectedExceptionInitializer
-  )
+      final Class<T> exceptionType,
+      final String expectedExceptionMessage)
   {
-    testBuilder()
-        .sql(sql)
-        .queryContext(queryContext)
-        .expectedQueries(expectedQueries)
-        .expectedException(expectedExceptionInitializer)
-        .build()
-        .run();
+    T e = assertThrows(
+        exceptionType, () -> testBuilder()
+            .sql(sql)
+            .queryContext(queryContext)
+            .expectedQueries(expectedQueries)
+            .build()
+            .run()
+    );
+    assertEquals(expectedExceptionMessage, e.getMessage());
   }
 
   public void analyzeResources(
