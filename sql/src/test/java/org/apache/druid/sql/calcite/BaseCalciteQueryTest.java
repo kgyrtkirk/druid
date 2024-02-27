@@ -1243,7 +1243,6 @@ public class BaseCalciteQueryTest extends CalciteTestBase
       final Class<T> exceptionType,
       final Matcher<T> exceptionMatcher)
   {
-    skipVectorize();
     T e = assertThrows(
         exceptionType, () -> testBuilder()
             .sql(sql)
@@ -1252,10 +1251,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
             .build()
             .run()
     );
-    System.out.println(e);;
     MatcherAssert.assertThat(e, exceptionMatcher);
-//    exceptionMatcher.matches()
-//    assertEquals(exceptionMatcher, e.getCause().getMessage());
   }
 
   public void analyzeResources(

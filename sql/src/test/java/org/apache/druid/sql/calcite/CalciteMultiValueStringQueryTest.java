@@ -125,7 +125,6 @@ public class CalciteMultiValueStringQueryTest extends BaseCalciteQueryTest
   public void testMultiValueStringGroupByDoesNotWork()
   {
     // Cannot vectorize due to usage of expressions.
-    cannotVectorize();
     Map<String, Object> groupByOnMultiValueColumnDisabled = new HashMap<>(QUERY_CONTEXT_DEFAULT);
     groupByOnMultiValueColumnDisabled.put(GroupByQueryConfig.CTX_KEY_ENABLE_MULTI_VALUE_UNNESTING, false);
     testQueryThrows(
