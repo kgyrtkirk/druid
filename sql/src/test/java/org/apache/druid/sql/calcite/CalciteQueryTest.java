@@ -144,8 +144,6 @@ import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CalciteQueryTest extends BaseCalciteQueryTest
 {
@@ -828,15 +826,14 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
   @Test
   public void testEarliestByInvalidTimestamp()
   {
-    Throwable exception = assertThrows(DruidException.class, () -> {
+    expectedException.expect(DruidException.class);
+    expectedException.expectMessage("Cannot apply 'EARLIEST_BY' to arguments of type 'EARLIEST_BY(<FLOAT>, <BIGINT>)");
 
-      testQuery(
-          "SELECT EARLIEST_BY(m1, l1) FROM druid.numfoo",
-          ImmutableList.of(),
-          ImmutableList.of()
-      );
-    });
-    assertTrue(exception.getMessage().contains("Cannot apply 'EARLIEST_BY' to arguments of type 'EARLIEST_BY(<FLOAT>, <BIGINT>)"));
+    testQuery(
+        "SELECT EARLIEST_BY(m1, l1) FROM druid.numfoo",
+        ImmutableList.of(),
+        ImmutableList.of()
+    );
   }
 
   @Test
@@ -7583,48 +7580,47 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
   @Test
   public void testHighestMaxNumericInFilter()
   {
-    Throwable exception = assertThrows(UOE.class, () -> {
+    expectedException.expect(UOE.class);
+    expectedException.expectMessage("Expected parameter[maxNumericInFilters] cannot exceed system set value of [100]");
 
-      testQuery(
-          PLANNER_CONFIG_MAX_NUMERIC_IN_FILTER,
-          ImmutableMap.of(QueryContexts.MAX_NUMERIC_IN_FILTERS, 20000),
-          "SELECT COUNT(*)\n"
-              + "FROM druid.numfoo\n"
-              + "WHERE dim6 IN (\n"
-              + "1,2,3\n"
-              + ")\n",
-          CalciteTests.REGULAR_USER_AUTH_RESULT,
-          ImmutableList.of(),
-          ImmutableList.of()
-      );
-    });
-    assertTrue(exception.getMessage().contains("Expected parameter[maxNumericInFilters] cannot exceed system set value of [100]"));
+    testQuery(
+        PLANNER_CONFIG_MAX_NUMERIC_IN_FILTER,
+        ImmutableMap.of(QueryContexts.MAX_NUMERIC_IN_FILTERS, 20000),
+        "SELECT COUNT(*)\n"
+        + "FROM druid.numfoo\n"
+        + "WHERE dim6 IN (\n"
+        + "1,2,3\n"
+        + ")\n",
+        CalciteTests.REGULAR_USER_AUTH_RESULT,
+        ImmutableList.of(),
+        ImmutableList.of()
+    );
   }
 
   @Test
   public void testQueryWithMoreThanMaxNumericInFilter()
   {
-    Throwable exception = assertThrows(UOE.class, () -> {
-      if (NullHandling.sqlCompatible()) {
-        // skip in sql compatible mode, this plans to an OR filter with equality filter children...
-        return;
-      }
-      msqIncompatible();
+    if (NullHandling.sqlCompatible()) {
+      // skip in sql compatible mode, this plans to an OR filter with equality filter children...
+      return;
+    }
+    msqIncompatible();
+    expectedException.expect(UOE.class);
+    expectedException.expectMessage(
+        "The number of values in the IN clause for [dim6] in query exceeds configured maxNumericFilter limit of [2] for INs. Cast [3] values of IN clause to String");
 
-      testQuery(
-          PLANNER_CONFIG_MAX_NUMERIC_IN_FILTER,
-          ImmutableMap.of(QueryContexts.MAX_NUMERIC_IN_FILTERS, 2),
-          "SELECT COUNT(*)\n"
-              + "FROM druid.numfoo\n"
-              + "WHERE dim6 IN (\n"
-              + "1,2,3\n"
-              + ")\n",
-          CalciteTests.REGULAR_USER_AUTH_RESULT,
-          ImmutableList.of(),
-          ImmutableList.of()
-      );
-    });
-    assertTrue(exception.getMessage().contains("The number of values in the IN clause for [dim6] in query exceeds configured maxNumericFilter limit of [2] for INs. Cast [3] values of IN clause to String"));
+    testQuery(
+        PLANNER_CONFIG_MAX_NUMERIC_IN_FILTER,
+        ImmutableMap.of(QueryContexts.MAX_NUMERIC_IN_FILTERS, 2),
+        "SELECT COUNT(*)\n"
+        + "FROM druid.numfoo\n"
+        + "WHERE dim6 IN (\n"
+        + "1,2,3\n"
+        + ")\n",
+        CalciteTests.REGULAR_USER_AUTH_RESULT,
+        ImmutableList.of(),
+        ImmutableList.of()
+    );
   }
 
   @Test
@@ -8082,20 +8078,22 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
   @Test
   public void testRegexpExtractWithBadRegexPattern()
   {
-    Throwable exception = assertThrows(DruidException.class, () -> {
-      // Cannot vectorize due to extractionFn in dimension spec.
-      cannotVectorize();
+    // Cannot vectorize due to extractionFn in dimension spec.
+    cannotVectorize();
 
-      testQuery(
-          "SELECT DISTINCT\n"
-              + "  REGEXP_EXTRACT(dim1, '^(.))', 1)\n"
-              + "FROM foo",
-          ImmutableList.of(),
-          ImmutableList.of()
-      );
-    });
-    assertTrue(exception.getMessage().contains("An invalid pattern [^(.))] was provided for the REGEXP_EXTRACT function, " +
-        "error: [Unmatched closing ')' near index 3\n^(.))\n   ^]"));
+    expectedException.expect(DruidException.class);
+    expectedException.expectMessage(
+        "An invalid pattern [^(.))] was provided for the REGEXP_EXTRACT function, " +
+        "error: [Unmatched closing ')' near index 3\n^(.))\n   ^]"
+    );
+
+    testQuery(
+        "SELECT DISTINCT\n"
+        + "  REGEXP_EXTRACT(dim1, '^(.))', 1)\n"
+        + "FROM foo",
+        ImmutableList.of(),
+        ImmutableList.of()
+    );
   }
 
   @Test
@@ -12322,64 +12320,61 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
   @Test
   public void testRequireTimeConditionSimpleQueryNegative()
   {
-    Throwable exception = assertThrows(CannotBuildQueryException.class, () -> {
-      msqIncompatible();
+    msqIncompatible();
+    expectedException.expect(CannotBuildQueryException.class);
+    expectedException.expectMessage("__time column");
 
-      testQuery(
-          PLANNER_CONFIG_REQUIRE_TIME_CONDITION,
-          "SELECT SUM(cnt), gran FROM (\n"
-              + "  SELECT __time as t, floor(__time TO month) AS gran,\n"
-              + "  cnt FROM druid.foo\n"
-              + ") AS x\n"
-              + "GROUP BY gran\n"
-              + "ORDER BY gran",
-          CalciteTests.REGULAR_USER_AUTH_RESULT,
-          ImmutableList.of(),
-          ImmutableList.of()
-      );
-    });
-    assertTrue(exception.getMessage().contains("__time column"));
+    testQuery(
+        PLANNER_CONFIG_REQUIRE_TIME_CONDITION,
+        "SELECT SUM(cnt), gran FROM (\n"
+        + "  SELECT __time as t, floor(__time TO month) AS gran,\n"
+        + "  cnt FROM druid.foo\n"
+        + ") AS x\n"
+        + "GROUP BY gran\n"
+        + "ORDER BY gran",
+        CalciteTests.REGULAR_USER_AUTH_RESULT,
+        ImmutableList.of(),
+        ImmutableList.of()
+    );
   }
 
   @Test
   public void testRequireTimeConditionSubQueryNegative()
   {
-    Throwable exception = assertThrows(CannotBuildQueryException.class, () -> {
-      msqIncompatible();
+    msqIncompatible();
+    expectedException.expect(CannotBuildQueryException.class);
+    expectedException.expectMessage("__time column");
 
-      testQuery(
-          PLANNER_CONFIG_REQUIRE_TIME_CONDITION,
-          "SELECT\n"
-              + "  SUM(cnt),\n"
-              + "  COUNT(*)\n"
-              + "FROM (SELECT dim2, SUM(cnt) AS cnt FROM druid.foo GROUP BY dim2)",
-          CalciteTests.REGULAR_USER_AUTH_RESULT,
-          ImmutableList.of(),
-          ImmutableList.of()
-      );
-    });
-    assertTrue(exception.getMessage().contains("__time column"));
+    testQuery(
+        PLANNER_CONFIG_REQUIRE_TIME_CONDITION,
+        "SELECT\n"
+        + "  SUM(cnt),\n"
+        + "  COUNT(*)\n"
+        + "FROM (SELECT dim2, SUM(cnt) AS cnt FROM druid.foo GROUP BY dim2)",
+        CalciteTests.REGULAR_USER_AUTH_RESULT,
+        ImmutableList.of(),
+        ImmutableList.of()
+    );
   }
 
   @Test
   public void testRequireTimeConditionSemiJoinNegative()
   {
-    Throwable exception = assertThrows(CannotBuildQueryException.class, () -> {
-      msqIncompatible();
+    msqIncompatible();
+    expectedException.expect(CannotBuildQueryException.class);
+    expectedException.expectMessage("__time column");
 
-      testQuery(
-          PLANNER_CONFIG_REQUIRE_TIME_CONDITION,
-          "SELECT COUNT(*) FROM druid.foo\n"
-              + "WHERE SUBSTRING(dim2, 1, 1) IN (\n"
-              + "  SELECT SUBSTRING(dim1, 1, 1) FROM druid.foo\n"
-              + "  WHERE dim1 <> '' AND __time >= '2000-01-01'\n"
-              + ")",
-          CalciteTests.REGULAR_USER_AUTH_RESULT,
-          ImmutableList.of(),
-          ImmutableList.of()
-      );
-    });
-    assertTrue(exception.getMessage().contains("__time column"));
+    testQuery(
+        PLANNER_CONFIG_REQUIRE_TIME_CONDITION,
+        "SELECT COUNT(*) FROM druid.foo\n"
+        + "WHERE SUBSTRING(dim2, 1, 1) IN (\n"
+        + "  SELECT SUBSTRING(dim1, 1, 1) FROM druid.foo\n"
+        + "  WHERE dim1 <> '' AND __time >= '2000-01-01'\n"
+        + ")",
+        CalciteTests.REGULAR_USER_AUTH_RESULT,
+        ImmutableList.of(),
+        ImmutableList.of()
+    );
   }
 
   @Test
@@ -12875,43 +12870,37 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
   @Test
   public void testValidationErrorNullLiteralIllegal()
   {
-    Throwable exception = assertThrows(Exception.class, () -> {
+    expectedException.expectMessage("Illegal use of 'NULL'");
 
-      testQuery(
-          "SELECT REGEXP_LIKE('x', NULL)",
-          ImmutableList.of(),
-          ImmutableList.of()
-      );
-    });
-    assertTrue(exception.getMessage().contains("Illegal use of 'NULL'"));
+    testQuery(
+        "SELECT REGEXP_LIKE('x', NULL)",
+        ImmutableList.of(),
+        ImmutableList.of()
+    );
   }
 
   @Test
   public void testValidationErrorNonLiteralIllegal()
   {
-    Throwable exception = assertThrows(Exception.class, () -> {
+    expectedException.expectMessage("Argument to function 'REGEXP_LIKE' must be a literal");
 
-      testQuery(
-          "SELECT REGEXP_LIKE('x', dim1) FROM foo",
-          ImmutableList.of(),
-          ImmutableList.of()
-      );
-    });
-    assertTrue(exception.getMessage().contains("Argument to function 'REGEXP_LIKE' must be a literal"));
+    testQuery(
+        "SELECT REGEXP_LIKE('x', dim1) FROM foo",
+        ImmutableList.of(),
+        ImmutableList.of()
+    );
   }
 
   @Test
   public void testValidationErrorWrongTypeLiteral()
   {
-    Throwable exception = assertThrows(Exception.class, () -> {
+    expectedException.expectMessage("Cannot apply 'REGEXP_LIKE' to arguments");
 
-      testQuery(
-          "SELECT REGEXP_LIKE('x', 1) FROM foo",
-          ImmutableList.of(),
-          ImmutableList.of()
-      );
-    });
-    assertTrue(exception.getMessage().contains("Cannot apply 'REGEXP_LIKE' to arguments"));
+    testQuery(
+        "SELECT REGEXP_LIKE('x', 1) FROM foo",
+        ImmutableList.of(),
+        ImmutableList.of()
+    );
   }
 
   @Test
@@ -14107,40 +14096,47 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
   @Test
   public void testHumanReadableFormatFunctionExceptionWithWrongNumberType()
   {
-    Throwable exception = assertThrows(DruidException.class, () -> {
-      testQuery(
-          "SELECT HUMAN_READABLE_BINARY_BYTE_FORMAT('45678')",
-          Collections.emptyList(),
-          Collections.emptyList()
-      );
-    });
-    assertTrue(exception.getMessage().contains("Supported form(s): HUMAN_READABLE_BINARY_BYTE_FORMAT(Number, [Precision])"));
+    this.expectedException.expect(DruidException.class);
+    this.expectedException.expectMessage("Supported form(s): HUMAN_READABLE_BINARY_BYTE_FORMAT(Number, [Precision])");
+    testQuery(
+        "SELECT HUMAN_READABLE_BINARY_BYTE_FORMAT('45678')",
+        Collections.emptyList(),
+        Collections.emptyList()
+    );
   }
 
   @Test
   public void testHumanReadableFormatFunctionWithWrongPrecisionType()
   {
-    Throwable exception = assertThrows(DruidException.class, () -> {
-      testQuery(
-          "SELECT HUMAN_READABLE_BINARY_BYTE_FORMAT(45678, '2')",
-          Collections.emptyList(),
-          Collections.emptyList()
-      );
-    });
-    assertTrue(exception.getMessage().contains("Supported form(s): HUMAN_READABLE_BINARY_BYTE_FORMAT(Number, [Precision])"));
+    this.expectedException.expect(DruidException.class);
+    this.expectedException.expectMessage("Supported form(s): HUMAN_READABLE_BINARY_BYTE_FORMAT(Number, [Precision])");
+    testQuery(
+        "SELECT HUMAN_READABLE_BINARY_BYTE_FORMAT(45678, '2')",
+        Collections.emptyList(),
+        Collections.emptyList()
+    );
   }
 
   @Test
   public void testHumanReadableFormatFunctionWithInvalidNumberOfArguments()
   {
-    Throwable exception = assertThrows(DruidException.class, () -> {
-      testQuery(
-          "SELECT HUMAN_READABLE_BINARY_BYTE_FORMAT(45678, 2, 1)",
-          Collections.emptyList(),
-          Collections.emptyList()
-      );
-    });
-    assertTrue(exception.getMessage().contains("Invalid number of arguments to function 'HUMAN_READABLE_BINARY_BYTE_FORMAT'. Was expecting 1 arguments"));
+    this.expectedException.expect(DruidException.class);
+
+    /*
+     * frankly speaking, the exception message thrown here is a little bit confusing
+     * it says it's 'expecting 1 arguments' but actually HUMAN_READABLE_BINARY_BYTE_FORMAT supports 1 or 2 arguments
+     *
+     * The message is returned from {@link org.apache.calcite.sql.validate.SqlValidatorImpl#handleUnresolvedFunction},
+     * and we can see from its implementation that it gets the min number arguments to format the exception message.
+     *
+     */
+    this.expectedException.expectMessage(
+        "Invalid number of arguments to function 'HUMAN_READABLE_BINARY_BYTE_FORMAT'. Was expecting 1 arguments");
+    testQuery(
+        "SELECT HUMAN_READABLE_BINARY_BYTE_FORMAT(45678, 2, 1)",
+        Collections.emptyList(),
+        Collections.emptyList()
+    );
   }
 
   @Test
