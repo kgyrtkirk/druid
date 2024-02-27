@@ -22,7 +22,6 @@ package org.apache.druid.sql.calcite;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import org.apache.druid.common.config.NullHandling;
-import org.apache.druid.error.DruidException;
 import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.java.util.common.granularity.Granularities;
 import org.apache.druid.math.expr.ExpressionProcessing;
@@ -2044,10 +2043,7 @@ public class CalciteMultiValueStringQueryTest extends BaseCalciteQueryTest
   {
     testQueryThrows(
         "SELECT MV_TO_ARRAY(dim3,dim3) FROM druid.numfoo",
-        exception -> {
-          exception.expect(DruidException.class);
-          exception.expectMessage("Invalid number of arguments to function");
-        }
+        invalidSqlContains("Invalid number of arguments to function")
     );
   }
 
@@ -2056,10 +2052,7 @@ public class CalciteMultiValueStringQueryTest extends BaseCalciteQueryTest
   {
     testQueryThrows(
         "SELECT MV_TO_ARRAY() FROM druid.numfoo",
-        exception -> {
-          exception.expect(DruidException.class);
-          exception.expectMessage("Invalid number of arguments to function");
-        }
+        invalidSqlContains("Invalid number of arguments to function")
     );
   }
 
@@ -2068,7 +2061,8 @@ public class CalciteMultiValueStringQueryTest extends BaseCalciteQueryTest
   {
     testQueryThrows(
         "SELECT MV_TO_ARRAY(concat(dim3,'c')) FROM druid.numfoo",
-        exception -> exception.expect(RuntimeException.class)
+        RuntimeException.class,
+        "Function[mv_to_array] argument (concat [dim3, c]) should be an identifier expression. Use array() instead"
     );
   }
 
@@ -2077,7 +2071,8 @@ public class CalciteMultiValueStringQueryTest extends BaseCalciteQueryTest
   {
     testQueryThrows(
         "SELECT MV_TO_ARRAY(concat(dim1,'c')) FROM druid.numfoo",
-        exception -> exception.expect(RuntimeException.class)
+        RuntimeException.class,
+        "Function[mv_to_array] argument (concat [dim1, c]) should be an identifier expression. Use array() instead"
     );
   }
 
@@ -2086,7 +2081,8 @@ public class CalciteMultiValueStringQueryTest extends BaseCalciteQueryTest
   {
     testQueryThrows(
         "SELECT MV_TO_ARRAY(concat(dim1,'c')) FROM druid.numfoo",
-        exception -> exception.expect(RuntimeException.class)
+        RuntimeException.class,
+        "Function[mv_to_array] argument (concat [dim1, c]) should be an identifier expression. Use array() instead"
     );
   }
 
@@ -2095,7 +2091,8 @@ public class CalciteMultiValueStringQueryTest extends BaseCalciteQueryTest
   {
     testQueryThrows(
         "SELECT MV_TO_ARRAY(Array[1,2]) FROM druid.numfoo",
-        exception -> exception.expect(RuntimeException.class)
+        RuntimeException.class,
+        "Function[mv_to_array] argument (array [1, 2]) should be an identifier expression. Use array() instead"
     );
   }
 

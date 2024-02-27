@@ -22,7 +22,6 @@ package org.apache.druid.sql.calcite;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.apache.druid.common.config.NullHandling;
-import org.apache.druid.error.DruidException;
 import org.apache.druid.java.util.common.DateTimes;
 import org.apache.druid.java.util.common.Intervals;
 import org.apache.druid.java.util.common.granularity.Granularities;
@@ -1030,12 +1029,7 @@ public class CalciteSelectQueryTest extends BaseCalciteQueryTest
   {
     testQueryThrows(
         "SELECT CURRENT_TIMESTAMP(4)",
-        expectedException -> {
-          expectedException.expect(DruidException.class);
-          expectedException.expectMessage(
-              "Argument to function 'CURRENT_TIMESTAMP' must be a valid precision between '0' and '3'"
-          );
-        }
+        invalidSqlContains("Argument to function 'CURRENT_TIMESTAMP' must be a valid precision between '0' and '3'")
     );
   }
 

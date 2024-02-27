@@ -113,6 +113,7 @@ import org.apache.druid.sql.calcite.util.SqlTestFramework.StandardComponentSuppl
 import org.apache.druid.sql.calcite.util.SqlTestFramework.StandardPlannerComponentSupplier;
 import org.apache.druid.sql.calcite.view.ViewManager;
 import org.apache.druid.sql.http.SqlParameter;
+import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matcher;
 import org.hamcrest.MatcherAssert;
 import org.joda.time.DateTime;
@@ -123,6 +124,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Rule;
+import org.junit.internal.matchers.ThrowableMessageMatcher;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
 
@@ -1234,6 +1236,19 @@ public class BaseCalciteQueryTest extends CalciteTestBase
 
   {
     testQueryThrows(sql, null, null, DruidException.class, exceptionMatcher);
+  }
+
+  public <T extends Exception> void testQueryThrows(
+      final String sql,
+      final Class<T> exceptionType,
+      final String exceptionMessage)
+
+  {
+    testQueryThrows(
+        sql, null, null, exceptionType, ThrowableMessageMatcher.hasMessage(
+            CoreMatchers.equalTo(exceptionMessage)
+        )
+    );
   }
 
   public <T extends Exception>void testQueryThrows(
