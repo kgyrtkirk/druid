@@ -2245,10 +2245,7 @@ public class CalciteMultiValueStringQueryTest extends BaseCalciteQueryTest
     testQueryThrows(
         "SELECT COALESCE(dim3, 'other') FROM druid.numfoo "
         + "WHERE MV_OVERLAP(COALESCE(dim3, ARRAY['other']), ARRAY['a', 'b', 'other']) LIMIT 5",
-        e -> {
-          e.expect(invalidSqlContains("Illegal mixing of types in CASE or COALESCE statement"));
-        }
-
+        invalidSqlContains("Illegal mixing of types in CASE or COALESCE statement")
     );
   }
 
