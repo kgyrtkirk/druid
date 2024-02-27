@@ -4570,18 +4570,15 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
   @Test
   public void testGroupByInvalidPath()
   {
+    DruidExceptionMatcher expectMessageIs = DruidExceptionMatcher
+        .invalidInput()
+        .expectMessageIs("JSONPath [.array.[1]] is invalid, it must start with '$'");
     testQueryThrows(
         "SELECT "
         + "JSON_VALUE(nester, '.array.[1]'), "
         + "SUM(cnt) "
         + "FROM druid.nested GROUP BY 1",
-        (expected) -> {
-          expected.expect(
-              DruidExceptionMatcher
-                  .invalidInput()
-                  .expectMessageIs("JSONPath [.array.[1]] is invalid, it must start with '$'")
-          );
-        }
+        expectMessageIs
     );
   }
 

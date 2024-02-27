@@ -6130,12 +6130,13 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     msqIncompatible();
     testQueryThrows(
         "SELECT COUNT(*) FROM druid.foo "
-        + "WHERE TIME_IN_INTERVAL(__time, dim1)",
-        expected -> {
-          expected.expect(CoreMatchers.instanceOf(DruidException.class));
-          expected.expect(ThrowableMessageMatcher.hasMessage(CoreMatchers.containsString(
-              "Argument to function 'TIME_IN_INTERVAL' must be a literal (line [1], column [63])")));
-        }
+            + "WHERE TIME_IN_INTERVAL(__time, dim1)",
+        DruidException.class,
+        ThrowableMessageMatcher.hasMessage(
+            CoreMatchers.containsString(
+                "Argument to function 'TIME_IN_INTERVAL' must be a literal (line [1], column [63])"
+            )
+        )
     );
   }
 

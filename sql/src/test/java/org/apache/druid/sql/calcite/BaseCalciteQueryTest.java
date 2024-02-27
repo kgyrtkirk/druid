@@ -1215,6 +1215,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
     Assert.assertEquals(expectedResults.size(), results.size());
   }
 
+  @Deprecated
   public void testQueryThrows(
       final String sql,
       Consumer<ExpectedException> expectedExceptionInitializer)
@@ -1227,6 +1228,15 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   }
 
 
+  public <T extends Throwable>void testQueryThrows(
+      final String sql,
+      final DruidExceptionMatcher exceptionMatcher)
+
+  {
+    Matcher<DruidException> m =null;//exceptionMatcher;
+    testQueryThrows(sql, null, null, DruidException.class, m);
+  }
+
   public <T extends Exception>void testQueryThrows(
       final String sql,
       final Class<T> exceptionType,
@@ -1235,6 +1245,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   {
     testQueryThrows(sql, null, null, exceptionType, exceptionMatcher);
   }
+
 
   public <T extends Exception> void testQueryThrows(
       final String sql,
