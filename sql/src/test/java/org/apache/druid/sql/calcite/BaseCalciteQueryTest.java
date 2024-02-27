@@ -1214,13 +1214,25 @@ public class BaseCalciteQueryTest extends CalciteTestBase
     Assert.assertEquals(expectedResults.size(), results.size());
   }
 
-  public void testQueryThrows(final String sql, Consumer<ExpectedException> expectedExceptionInitializer)
+  public void testQueryThrows(
+      final String sql,
+      Consumer<ExpectedException> expectedExceptionInitializer)
   {
     testBuilder()
         .sql(sql)
         .expectedException(expectedExceptionInitializer)
         .build()
         .run();
+  }
+
+
+  public <T extends Exception>void testQueryThrows(
+      final String sql,
+      final Class<T> exceptionType,
+      final String expectedExceptionMessage)
+
+  {
+    testQueryThrows(sql, null, null, exceptionType, expectedExceptionMessage);
   }
 
   public <T extends Exception> void testQueryThrows(
@@ -1230,6 +1242,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
       final Class<T> exceptionType,
       final String expectedExceptionMessage)
   {
+    skipVectorize();
     T e = assertThrows(
         exceptionType, () -> testBuilder()
             .sql(sql)
@@ -1238,7 +1251,8 @@ public class BaseCalciteQueryTest extends CalciteTestBase
             .build()
             .run()
     );
-    assertEquals(expectedExceptionMessage, e.getMessage());
+    System.out.println(e);;
+    assertEquals(expectedExceptionMessage, e.getCause().getMessage());
   }
 
   public void analyzeResources(

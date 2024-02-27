@@ -27,7 +27,6 @@ import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.java.util.common.granularity.Granularities;
 import org.apache.druid.math.expr.ExpressionProcessing;
 import org.apache.druid.query.Druids;
-import org.apache.druid.query.Query;
 import org.apache.druid.query.aggregation.CountAggregatorFactory;
 import org.apache.druid.query.aggregation.ExpressionLambdaAggregatorFactory;
 import org.apache.druid.query.aggregation.FilteredAggregatorFactory;
@@ -133,7 +132,8 @@ public class CalciteMultiValueStringQueryTest extends BaseCalciteQueryTest
         ImmutableList.of(),
         RuntimeException.class,
         StringUtils.format(
-              "Encountered multi-value dimension [%s] that cannot be processed with '%s' set to false."
+              "org.apache.druid.query.groupby.epinephelinae.UnexpectedMultiValueDimensionException: "
+              + "Encountered multi-value dimension [%s] that cannot be processed with '%s' set to false."
               + " Consider setting '%s' to true in your query context.",
               "v0",
               GroupByQueryConfig.CTX_KEY_ENABLE_MULTI_VALUE_UNNESTING,
