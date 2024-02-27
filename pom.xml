@@ -1350,9 +1350,9 @@
       <version>5.23.1</version>
       <configuration>
         <activeRecipes>
-          <recipe>org.openrewrite.java.testing.junit5.JUnit4to5Migration</recipe>
-          <recipe>org.openrewrite.java.testing.junit5.ExpectedExceptionToAssertThrows</recipe>
+          <recipe>org.apache.druid.RewriteRules</recipe>
         </activeRecipes>
+        <configLocation>${maven.multiModuleProjectDirectory}/rewrite.yml</configLocation>
       </configuration>
       <dependencies>
         <dependency>

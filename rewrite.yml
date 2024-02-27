@@ -1,0 +1,9 @@
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: org.apache.druid.RewriteRules
+preconditions:
+  - org.openrewrite.FindSourceFiles
+    filePattern '**/*Calcite*Test.java'
+recipeList:
+  - org.openrewrite.java.testing.junit5.JUnit4to5Migration
+  - org.openrewrite.java.testing.junit5.StaticImports
