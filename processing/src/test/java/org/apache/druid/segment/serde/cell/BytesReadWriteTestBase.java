@@ -21,10 +21,10 @@ package org.apache.druid.segment.serde.cell;
 
 import org.apache.druid.collections.ResourceHolder;
 import org.apache.druid.segment.data.CompressionStrategy;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Assume;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -57,7 +57,7 @@ public abstract class BytesReadWriteTestBase implements BytesReadWriteTest
     return testHelper;
   }
 
-  @BeforeEach
+  @Before
   public void setup()
   {
     testHelper = new ByteWriterTestHelper(bytesWriterBuilder, validationFunctionBuilder);
@@ -67,7 +67,7 @@ public abstract class BytesReadWriteTestBase implements BytesReadWriteTest
   @Override
   public void testSingleWriteBytes() throws Exception
   {
-    Assumptions.assumeTrue(testCases.isCurrentTestEnabled());
+    Assume.assumeTrue(testCases.isCurrentTestEnabled());
 
     ByteBuffer payload = testHelper.generateBufferWithLongs(1024);
 
@@ -78,7 +78,7 @@ public abstract class BytesReadWriteTestBase implements BytesReadWriteTest
   @Override
   public void testSingleMultiBlockWriteBytes() throws Exception
   {
-    Assumptions.assumeTrue(testCases.isCurrentTestEnabled());
+    Assume.assumeTrue(testCases.isCurrentTestEnabled());
 
     ByteBuffer payload = testHelper.generateBufferWithLongs(256 * 1024); // 2mb
 
@@ -89,7 +89,7 @@ public abstract class BytesReadWriteTestBase implements BytesReadWriteTest
   @Override
   public void testSingleMultiBlockWriteBytesWithPrelude() throws Exception
   {
-    Assumptions.assumeTrue(testCases.isCurrentTestEnabled());
+    Assume.assumeTrue(testCases.isCurrentTestEnabled());
     ByteBuffer payload1 = testHelper.generateBufferWithLongs(1024); // 8 kb
     ByteBuffer payload2 = testHelper.generateBufferWithLongs(256 * 1024); // 256kb * 8 = 2mb
 
@@ -100,7 +100,7 @@ public abstract class BytesReadWriteTestBase implements BytesReadWriteTest
   @Override
   public void testEmptyByteArray() throws Exception
   {
-    Assumptions.assumeTrue(testCases.isCurrentTestEnabled());
+    Assume.assumeTrue(testCases.isCurrentTestEnabled());
     // no-op
     ByteBuffer payload = ByteBuffer.wrap(new byte[0]);
     // block index size: "8" : 4 bytes
@@ -114,7 +114,7 @@ public abstract class BytesReadWriteTestBase implements BytesReadWriteTest
   @Override
   public void testNull() throws Exception
   {
-    Assumptions.assumeTrue(testCases.isCurrentTestEnabled());
+    Assume.assumeTrue(testCases.isCurrentTestEnabled());
     TestCaseResult testCaseResult = testCases.currentTestValue();
 
     runTestWithExceptionHandling(Collections.singletonList(null), testCaseResult);
@@ -124,7 +124,7 @@ public abstract class BytesReadWriteTestBase implements BytesReadWriteTest
   @Override
   public void testSingleLong() throws Exception
   {
-    Assumptions.assumeTrue(testCases.isCurrentTestEnabled());
+    Assume.assumeTrue(testCases.isCurrentTestEnabled());
     ByteBuffer payload = testHelper.generateBufferWithLongs(1);
     // block index size: "8" : 4 bytes
     // block index entry 0: "0": 4 bytes
@@ -138,7 +138,7 @@ public abstract class BytesReadWriteTestBase implements BytesReadWriteTest
   @Override
   public void testVariableSizedCompressablePayloads() throws Exception
   {
-    Assumptions.assumeTrue(testCases.isCurrentTestEnabled());
+    Assume.assumeTrue(testCases.isCurrentTestEnabled());
 
     List<ByteBuffer> bufferList = testHelper.generateRaggedPayloadBuffer(100, 1024, 10, 0, 0, 10);
 
@@ -149,7 +149,7 @@ public abstract class BytesReadWriteTestBase implements BytesReadWriteTest
   @Override
   public void testOutliersInNormalDataUncompressablePayloads() throws Exception
   {
-    Assumptions.assumeTrue(testCases.isCurrentTestEnabled());
+    Assume.assumeTrue(testCases.isCurrentTestEnabled());
 
     // every integer within a payload is unique
     List<ByteBuffer> bufferList = testHelper.generateRaggedPayloadBuffer(100, 1024, 10, 64 * 1024, 2);
@@ -161,7 +161,7 @@ public abstract class BytesReadWriteTestBase implements BytesReadWriteTest
   @Override
   public void testOutliersInNormalDataCompressablePayloads() throws Exception
   {
-    Assumptions.assumeTrue(testCases.isCurrentTestEnabled());
+    Assume.assumeTrue(testCases.isCurrentTestEnabled());
 
     // same # of payloads and size of payloads as testOutliersInNormalDataUncompressablePayloads()
     // integer values range 0-9
@@ -174,12 +174,12 @@ public abstract class BytesReadWriteTestBase implements BytesReadWriteTest
   @Override
   public void testSingleUncompressableBlock() throws Exception
   {
-    Assumptions.assumeTrue(testCases.isCurrentTestEnabled());
+    Assume.assumeTrue(testCases.isCurrentTestEnabled());
 
     // every integer within a payload is unique
     ByteBuffer byteBuffer = testHelper.generateIntPayloads(16 * 1024);
 
-    Assertions.assertEquals(64 * 1024, byteBuffer.limit());
+    Assert.assertEquals(64 * 1024, byteBuffer.limit());
     // uncompressable 64k block size
     runTestWithExceptionHandling(Collections.singletonList(byteBuffer), testCases.currentTestValue());
 
@@ -189,7 +189,7 @@ public abstract class BytesReadWriteTestBase implements BytesReadWriteTest
   @Override
   public void testSingleWriteByteBufferZSTD() throws Exception
   {
-    Assumptions.assumeTrue(testCases.isCurrentTestEnabled());
+    Assume.assumeTrue(testCases.isCurrentTestEnabled());
 
     ByteBuffer sourcePayLoad = testHelper.generateBufferWithLongs(1024); // 8k
 
@@ -202,7 +202,7 @@ public abstract class BytesReadWriteTestBase implements BytesReadWriteTest
   @Override
   public void testSingleWriteByteBufferAlternateByteBufferProvider() throws Exception
   {
-    Assumptions.assumeTrue(testCases.isCurrentTestEnabled());
+    Assume.assumeTrue(testCases.isCurrentTestEnabled());
 
     List<ByteBuffer> bufferList = testHelper.generateRaggedPayloadBuffer(100, 1024, 10, 0, 0, 10);
 
@@ -226,7 +226,7 @@ public abstract class BytesReadWriteTestBase implements BytesReadWriteTest
   @Override
   public void testRandomBlockAccess() throws Exception
   {
-    Assumptions.assumeTrue(testCases.isCurrentTestEnabled());
+    Assume.assumeTrue(testCases.isCurrentTestEnabled());
     //verified that blocks are accessed in random order and the same block is even returned to
     List<ByteBuffer> bufferList = testHelper.generateRaggedPayloadBuffer(8192, 32 * 1024, 256, 256 * 1024, 3, 1024);
 
@@ -240,12 +240,12 @@ public abstract class BytesReadWriteTestBase implements BytesReadWriteTest
       testHelper.validateReadAndSize(bufferList, testCaseResult.size);
 
       if (testCaseResult.exception != null) {
-        Assertions.fail("expected exception " + testCaseResult.exception.getClass().getName());
+        Assert.fail("expected exception " + testCaseResult.exception.getClass().getName());
       }
     }
     catch (Exception e) {
       if (testCaseResult.exception != null) {
-        Assertions.assertTrue(testCaseResult.exception.getClass().isAssignableFrom(e.getClass()));
+        Assert.assertTrue(testCaseResult.exception.getClass().isAssignableFrom(e.getClass()));
       } else {
         throw e;
       }

@@ -26,6 +26,7 @@ import nl.jqno.equalsverifier.EqualsVerifier;
 import org.apache.druid.jackson.DefaultObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Test;
 
 import java.security.KeyStore;
 import java.util.Arrays;

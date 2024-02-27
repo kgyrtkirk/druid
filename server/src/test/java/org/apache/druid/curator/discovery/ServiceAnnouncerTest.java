@@ -27,18 +27,16 @@ import org.apache.curator.x.discovery.ServiceDiscoveryBuilder;
 import org.apache.curator.x.discovery.ServiceInstance;
 import org.apache.druid.curator.CuratorTestBase;
 import org.apache.druid.java.util.common.ISE;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 public class ServiceAnnouncerTest extends CuratorTestBase
 {
-  @BeforeEach
+  @Before
   public void setUp() throws Exception
   {
     setupServerAndCurator();
@@ -55,7 +53,7 @@ public class ServiceAnnouncerTest extends CuratorTestBase
         "druid/firehose/tranquility_test-50-0000-0000"
     );
     final ServiceDiscovery serviceDiscovery = createAndAnnounceServices(serviceNames);
-    Assertions.assertTrue(
+    Assert.assertTrue(
         Iterators.all(
             serviceNames.iterator(),
             new Predicate<String>()
@@ -78,14 +76,12 @@ public class ServiceAnnouncerTest extends CuratorTestBase
     );
   }
 
-  @Test
+  @Test (expected = IllegalArgumentException.class)
   public void testServiceAnnouncementFail() throws Exception
   {
-    assertThrows(IllegalArgumentException.class, () -> {
-      curator.start();
-      curator.blockUntilConnected();
-      createAndAnnounceServices(ImmutableList.of("placeholder/\u0001"));
-    });
+    curator.start();
+    curator.blockUntilConnected();
+    createAndAnnounceServices(ImmutableList.of("placeholder/\u0001"));
   }
 
   private ServiceDiscovery createAndAnnounceServices(List<String> serviceNames) throws Exception
@@ -108,7 +104,7 @@ public class ServiceAnnouncerTest extends CuratorTestBase
     return serviceDiscovery;
   }
 
-  @AfterEach
+  @After
   public void tearDown()
   {
     tearDownServerAndCurator();

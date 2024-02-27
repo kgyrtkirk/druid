@@ -23,28 +23,28 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.apache.druid.common.config.NullHandling;
 import org.apache.druid.jackson.DefaultObjectMapper;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class StrlenExtractionFnTest
 {
   @Test
   public void testApply()
   {
-    Assertions.assertEquals(NullHandling.replaceWithDefault() ? "0" : null, StrlenExtractionFn.instance().apply(null));
-    Assertions.assertEquals("0", StrlenExtractionFn.instance().apply(""));
-    Assertions.assertEquals("1", StrlenExtractionFn.instance().apply("x"));
-    Assertions.assertEquals("3", StrlenExtractionFn.instance().apply("foo"));
-    Assertions.assertEquals("3", StrlenExtractionFn.instance().apply("föo"));
-    Assertions.assertEquals("2", StrlenExtractionFn.instance().apply("\uD83D\uDE02"));
-    Assertions.assertEquals("1", StrlenExtractionFn.instance().apply(1));
-    Assertions.assertEquals("2", StrlenExtractionFn.instance().apply(-1));
+    Assert.assertEquals(NullHandling.replaceWithDefault() ? "0" : null, StrlenExtractionFn.instance().apply(null));
+    Assert.assertEquals("0", StrlenExtractionFn.instance().apply(""));
+    Assert.assertEquals("1", StrlenExtractionFn.instance().apply("x"));
+    Assert.assertEquals("3", StrlenExtractionFn.instance().apply("foo"));
+    Assert.assertEquals("3", StrlenExtractionFn.instance().apply("föo"));
+    Assert.assertEquals("2", StrlenExtractionFn.instance().apply("\uD83D\uDE02"));
+    Assert.assertEquals("1", StrlenExtractionFn.instance().apply(1));
+    Assert.assertEquals("2", StrlenExtractionFn.instance().apply(-1));
   }
 
   @Test
   public void testGetCacheKey()
   {
-    Assertions.assertArrayEquals(StrlenExtractionFn.instance().getCacheKey(), StrlenExtractionFn.instance().getCacheKey());
+    Assert.assertArrayEquals(StrlenExtractionFn.instance().getCacheKey(), StrlenExtractionFn.instance().getCacheKey());
   }
 
   @Test
@@ -61,8 +61,8 @@ public class StrlenExtractionFnTest
     );
 
     // Should all actually be the same instance.
-    Assertions.assertTrue(extractionFn == extractionFnRoundTrip);
-    Assertions.assertTrue(extractionFn == StrlenExtractionFn.instance());
+    Assert.assertTrue(extractionFn == extractionFnRoundTrip);
+    Assert.assertTrue(extractionFn == StrlenExtractionFn.instance());
   }
 
   @Test

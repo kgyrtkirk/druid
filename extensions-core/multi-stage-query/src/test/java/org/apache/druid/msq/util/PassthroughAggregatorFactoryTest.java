@@ -27,6 +27,7 @@ import org.apache.druid.jackson.DefaultObjectMapper;
 import org.apache.druid.query.aggregation.AggregatorFactory;
 import org.apache.druid.query.aggregation.AggregatorFactoryNotMergeableException;
 import org.junit.Assert;
+import org.junit.Test;
 
 public class PassthroughAggregatorFactoryTest
 {

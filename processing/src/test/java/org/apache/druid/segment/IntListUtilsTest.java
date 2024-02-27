@@ -20,29 +20,23 @@
 package org.apache.druid.segment;
 
 import it.unimi.dsi.fastutil.ints.IntList;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class IntListUtilsTest
 {
-  @Test
+  @Test(expected = IndexOutOfBoundsException.class)
   public void testEmptyRangeIntList()
   {
-    assertThrows(IndexOutOfBoundsException.class, () -> {
-      final IntList list = IntListUtils.fromTo(10, 10);
-      Assertions.assertEquals(0, list.size());
-      list.getInt(0);
-    });
+    final IntList list = IntListUtils.fromTo(10, 10);
+    Assert.assertEquals(0, list.size());
+    list.getInt(0);
   }
 
-  @Test
+  @Test(expected = IllegalArgumentException.class)
   public void testRangeIntListWithSmallEndIndex()
   {
-    assertThrows(IllegalArgumentException.class, () -> {
-      IntListUtils.fromTo(10, 5);
-    });
+    IntListUtils.fromTo(10, 5);
   }
 
   @Test
@@ -50,7 +44,7 @@ public class IntListUtilsTest
   {
     final IntList list = IntListUtils.fromTo(20, 120);
     for (int i = 0; i < 100; i++) {
-      Assertions.assertEquals(i + 20, list.getInt(i));
+      Assert.assertEquals(i + 20, list.getInt(i));
     }
   }
 }

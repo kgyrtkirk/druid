@@ -45,41 +45,42 @@ import org.apache.druid.segment.TestHelper;
 import org.apache.druid.segment.VirtualColumns;
 import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.column.RowSignature;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
 
+@RunWith(Parameterized.class)
 public class TimeseriesQueryQueryToolChestTest
 {
   private static final String TIMESTAMP_RESULT_FIELD_NAME = "d0";
   private static final TimeseriesQueryQueryToolChest TOOL_CHEST = new TimeseriesQueryQueryToolChest(null);
 
-  @BeforeAll
+  @BeforeClass
   public static void setUpClass()
   {
     NullHandling.initializeForTests();
   }
 
+  @Parameterized.Parameters(name = "descending={0}")
   public static Iterable<Object[]> constructorFeeder()
   {
     return QueryRunnerTestHelper.transformToConstructionFeeder(Arrays.asList(false, true));
   }
 
-  private boolean descending;
+  private final boolean descending;
 
-  public void initTimeseriesQueryQueryToolChestTest(boolean descending)
+  public TimeseriesQueryQueryToolChestTest(boolean descending)
   {
     this.descending = descending;
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "descending={0}")
-  public void testCacheStrategy(boolean descending) throws Exception
+  @Test
+  public void testCacheStrategy() throws Exception
   {
-    initTimeseriesQueryQueryToolChestTest(descending);
     CacheStrategy<Result<TimeseriesResultValue>, Object, TimeseriesQuery> strategy =
         TOOL_CHEST.getCacheStrategy(
             new TimeseriesQuery(
@@ -122,7 +123,7 @@ public class TimeseriesQueryQueryToolChestTest
 
     Result<TimeseriesResultValue> fromCacheResult = strategy.pullFromSegmentLevelCache().apply(fromCacheValue);
 
-    Assertions.assertEquals(result1, fromCacheResult);
+    Assert.assertEquals(result1, fromCacheResult);
 
     final Result<TimeseriesResultValue> result2 = new Result<>(
         // test timestamps that result in integer size millis
@@ -145,7 +146,7 @@ public class TimeseriesQueryQueryToolChestTest
 
     Result<TimeseriesResultValue> fromResultLevelCacheRes = strategy.pullFromCache(true)
                                                                     .apply(fromResultLevelCacheValue);
-    Assertions.assertEquals(result2, fromResultLevelCacheRes);
+    Assert.assertEquals(result2, fromResultLevelCacheRes);
 
     final Result<TimeseriesResultValue> result3 = new Result<>(
         // null timestamp similar to grandTotal
@@ -162,14 +163,12 @@ public class TimeseriesQueryQueryToolChestTest
     );
 
     fromResultLevelCacheRes = strategy.pullFromCache(true).apply(fromResultLevelCacheValue);
-    Assertions.assertEquals(result3, fromResultLevelCacheRes);
+    Assert.assertEquals(result3, fromResultLevelCacheRes);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "descending={0}")
-  public void testCacheKey(boolean descending)
+  @Test
+  public void testCacheKey()
   {
-    initTimeseriesQueryQueryToolChestTest(descending);
     final TimeseriesQuery query1 = Druids.newTimeseriesQueryBuilder()
                                          .dataSource("dummy")
                                          .intervals("2015-01-01/2015-01-02")
@@ -197,7 +196,7 @@ public class TimeseriesQueryQueryToolChestTest
                                          .build();
 
     // Test for https://github.com/apache/druid/issues/4093.
-    Assertions.assertFalse(
+    Assert.assertFalse(
         Arrays.equals(
             TOOL_CHEST.getCacheStrategy(query1).computeCacheKey(query1),
             TOOL_CHEST.getCacheStrategy(query2).computeCacheKey(query2)
@@ -205,11 +204,9 @@ public class TimeseriesQueryQueryToolChestTest
     );
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "descending={0}")
-  public void testResultLevelCacheKey(boolean descending)
+  @Test
+  public void testResultLevelCacheKey()
   {
-    initTimeseriesQueryQueryToolChestTest(descending);
     final TimeseriesQuery query1 = Druids.newTimeseriesQueryBuilder()
                                          .dataSource("dummy")
                                          .intervals("2015-01-01/2015-01-02")
@@ -272,13 +269,13 @@ public class TimeseriesQueryQueryToolChestTest
                                          )
                                          .build();
 
-    Assertions.assertTrue(
+    Assert.assertTrue(
         Arrays.equals(
             TOOL_CHEST.getCacheStrategy(query1).computeCacheKey(query1),
             TOOL_CHEST.getCacheStrategy(query2).computeCacheKey(query2)
         )
     );
-    Assertions.assertFalse(
+    Assert.assertFalse(
         Arrays.equals(
             TOOL_CHEST.getCacheStrategy(query1).computeResultLevelCacheKey(query1),
             TOOL_CHEST.getCacheStrategy(query2).computeResultLevelCacheKey(query2)
@@ -286,11 +283,9 @@ public class TimeseriesQueryQueryToolChestTest
     );
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "descending={0}")
-  public void testResultLevelCacheKeyWithGrandTotal(boolean descending)
+  @Test
+  public void testResultLevelCacheKeyWithGrandTotal()
   {
-    initTimeseriesQueryQueryToolChestTest(descending);
     final TimeseriesQuery query1 = Druids.newTimeseriesQueryBuilder()
                                          .dataSource("dummy")
                                          .intervals("2015-01-01/2015-01-02")
@@ -355,13 +350,13 @@ public class TimeseriesQueryQueryToolChestTest
                                          .context(ImmutableMap.of(TimeseriesQuery.CTX_GRAND_TOTAL, true))
                                          .build();
 
-    Assertions.assertTrue(
+    Assert.assertTrue(
         Arrays.equals(
             TOOL_CHEST.getCacheStrategy(query1).computeCacheKey(query1),
             TOOL_CHEST.getCacheStrategy(query2).computeCacheKey(query2)
         )
     );
-    Assertions.assertFalse(
+    Assert.assertFalse(
         Arrays.equals(
             TOOL_CHEST.getCacheStrategy(query1).computeResultLevelCacheKey(query1),
             TOOL_CHEST.getCacheStrategy(query2).computeResultLevelCacheKey(query2)
@@ -369,11 +364,9 @@ public class TimeseriesQueryQueryToolChestTest
     );
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "descending={0}")
-  public void testResultArraySignatureWithoutTimestampResultField(boolean descending)
+  @Test
+  public void testResultArraySignatureWithoutTimestampResultField()
   {
-    initTimeseriesQueryQueryToolChestTest(descending);
     final TimeseriesQuery query =
         Druids.newTimeseriesQueryBuilder()
               .dataSource("dummy")
@@ -384,7 +377,7 @@ public class TimeseriesQueryQueryToolChestTest
               .postAggregators(QueryRunnerTestHelper.CONSTANT)
               .build();
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         RowSignature.builder()
                     .addTimeColumn()
                     .add("rows", ColumnType.LONG)
@@ -396,11 +389,9 @@ public class TimeseriesQueryQueryToolChestTest
     );
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "descending={0}")
-  public void testResultArraySignatureWithTimestampResultField(boolean descending)
+  @Test
+  public void testResultArraySignatureWithTimestampResultField()
   {
-    initTimeseriesQueryQueryToolChestTest(descending);
     final TimeseriesQuery query =
         Druids.newTimeseriesQueryBuilder()
               .dataSource("dummy")
@@ -412,7 +403,7 @@ public class TimeseriesQueryQueryToolChestTest
               .context(ImmutableMap.of(TimeseriesQuery.CTX_TIMESTAMP_RESULT_FIELD, TIMESTAMP_RESULT_FIELD_NAME))
               .build();
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         RowSignature.builder()
                     .addTimeColumn()
                     .add(TIMESTAMP_RESULT_FIELD_NAME, ColumnType.LONG)
@@ -425,11 +416,9 @@ public class TimeseriesQueryQueryToolChestTest
     );
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "descending={0}")
-  public void testResultsAsArrays(boolean descending)
+  @Test
+  public void testResultsAsArrays()
   {
-    initTimeseriesQueryQueryToolChestTest(descending);
     final TimeseriesQuery query =
         Druids.newTimeseriesQueryBuilder()
               .dataSource("dummy")

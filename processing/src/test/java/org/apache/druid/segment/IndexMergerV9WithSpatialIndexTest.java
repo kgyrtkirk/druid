@@ -51,8 +51,9 @@ import org.apache.druid.segment.incremental.OnheapIncrementalIndex;
 import org.apache.druid.segment.writeout.SegmentWriteOutMediumFactory;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.joda.time.Interval;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.io.File;
 import java.io.IOException;
@@ -66,6 +67,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 /**
  */
+@RunWith(Parameterized.class)
 public class IndexMergerV9WithSpatialIndexTest extends InitializedNullHandlingTest
 {
 
@@ -79,6 +81,7 @@ public class IndexMergerV9WithSpatialIndexTest extends InitializedNullHandlingTe
 
   private static List<String> DIMS = Lists.newArrayList("dim", "lat", "long", "lat2", "long2");
 
+  @Parameterized.Parameters
   public static Collection<?> constructorFeeder() throws IOException
   {
     List<Object[]> argumentArrays = new ArrayList<>();
@@ -522,18 +525,16 @@ public class IndexMergerV9WithSpatialIndexTest extends InitializedNullHandlingTe
     }
   }
 
-  private Segment segment;
+  private final Segment segment;
 
-  public void initIndexMergerV9WithSpatialIndexTest(Segment segment)
+  public IndexMergerV9WithSpatialIndexTest(Segment segment)
   {
     this.segment = segment;
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest
-  public void testSpatialQuery(Segment segment)
+  @Test
+  public void testSpatialQuery()
   {
-    initIndexMergerV9WithSpatialIndexTest(segment);
     TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
                                   .dataSource("test")
                                   .granularity(Granularities.ALL)
@@ -583,11 +584,9 @@ public class IndexMergerV9WithSpatialIndexTest extends InitializedNullHandlingTe
   }
 
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest
-  public void testSpatialQueryWithOtherSpatialDim(Segment segment)
+  @Test
+  public void testSpatialQueryWithOtherSpatialDim()
   {
-    initIndexMergerV9WithSpatialIndexTest(segment);
     TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
                                   .dataSource("test")
                                   .granularity(Granularities.ALL)
@@ -636,11 +635,9 @@ public class IndexMergerV9WithSpatialIndexTest extends InitializedNullHandlingTe
     }
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest
-  public void testSpatialQueryMorePoints(Segment segment)
+  @Test
+  public void testSpatialQueryMorePoints()
   {
-    initIndexMergerV9WithSpatialIndexTest(segment);
     TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
                                   .dataSource("test")
                                   .granularity(Granularities.DAY)

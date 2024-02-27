@@ -40,6 +40,7 @@ import org.apache.druid.segment.generator.DataGenerator;
 import org.apache.druid.segment.generator.GeneratorBasicSchemas;
 import org.apache.druid.segment.generator.GeneratorColumnSchema;
 import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.IOException;
 

@@ -53,6 +53,7 @@ import org.apache.druid.segment.incremental.IncrementalIndexSchema;
 import org.apache.druid.segment.transform.ExpressionTransform;
 import org.apache.druid.segment.transform.TransformSpec;
 import org.apache.druid.timeline.SegmentId;
+import org.junit.rules.TemporaryFolder;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -169,7 +170,7 @@ public class NestedDataTestUtils
   }
 
   public static List<Segment> createSimpleSegmentsTsv(
-      File tempFolder,
+      TemporaryFolder tempFolder,
       Closer closer
   )
       throws Exception
@@ -184,7 +185,7 @@ public class NestedDataTestUtils
   }
 
   public static List<Segment> createSimpleSegmentsTsvV4(
-      File tempFolder,
+      TemporaryFolder tempFolder,
       Closer closer
   )
       throws Exception
@@ -199,7 +200,7 @@ public class NestedDataTestUtils
   }
 
   public static List<Segment> createSimpleNestedTestDataTsvSegments(
-      File tempFolder,
+      TemporaryFolder tempFolder,
       Closer closer,
       Granularity granularity,
       DimensionsSpec dimensionsSpec,
@@ -221,7 +222,7 @@ public class NestedDataTestUtils
     );
   }
 
-  public static Segment createSimpleNestedTestDataIncrementalIndex(File tempFolder) throws Exception
+  public static Segment createSimpleNestedTestDataIncrementalIndex(TemporaryFolder tempFolder) throws Exception
   {
     return createIncrementalIndexForJsonInput(
         tempFolder,
@@ -232,7 +233,7 @@ public class NestedDataTestUtils
   }
 
   public static List<Segment> createSimpleNestedTestDataSegments(
-      File tempFolder,
+      TemporaryFolder tempFolder,
       Closer closer
   )
       throws Exception
@@ -247,7 +248,7 @@ public class NestedDataTestUtils
     );
   }
 
-  public static Segment createIncrementalIndexForJsonInput(File tempFolder, String fileName)
+  public static Segment createIncrementalIndexForJsonInput(TemporaryFolder tempFolder, String fileName)
       throws Exception
   {
     return createIncrementalIndexForJsonInput(
@@ -259,7 +260,7 @@ public class NestedDataTestUtils
   }
 
   public static Segment createIncrementalIndexForJsonInput(
-      File tempFolder,
+      TemporaryFolder tempFolder,
       String file,
       Granularity granularity,
       boolean rollup
@@ -280,7 +281,7 @@ public class NestedDataTestUtils
   }
 
   public static List<Segment> createSegmentsForJsonInput(
-      File tempFolder,
+      TemporaryFolder tempFolder,
       Closer closer,
       String inputFile,
       Granularity granularity,
@@ -304,7 +305,7 @@ public class NestedDataTestUtils
   }
 
   public static List<Segment> createSegmentsWithConcatenatedJsonInput(
-      File tempFolder,
+      TemporaryFolder tempFolder,
       Closer closer,
       String inputFile,
       Granularity granularity,
@@ -334,7 +335,7 @@ public class NestedDataTestUtils
   }
 
   public static List<Segment> createSegmentsForJsonInput(
-      File tempFolder,
+      TemporaryFolder tempFolder,
       Closer closer,
       String inputFile,
       IndexSpec indexSpec
@@ -352,7 +353,7 @@ public class NestedDataTestUtils
   }
 
   public static Segment createIncrementalIndex(
-      File tempFolder,
+      TemporaryFolder tempFolder,
       String inputFileName,
       InputFormat inputFormat,
       TimestampSpec timestampSpec,
@@ -383,13 +384,13 @@ public class NestedDataTestUtils
                                    )
                                    .inputFormat(inputFormat)
                                    .transform(transformSpec)
-                                   .inputTmpDir(newFolder(tempFolder, "junit"));
+                                   .inputTmpDir(tempFolder.newFolder());
 
     return new IncrementalIndexSegment(bob.buildIncrementalIndex(), SegmentId.dummy("test_datasource"));
   }
 
   public static List<Segment> createSegments(
-      File tempFolder,
+      TemporaryFolder tempFolder,
       Closer closer,
       String input,
       InputFormat inputFormat,
@@ -418,7 +419,7 @@ public class NestedDataTestUtils
   }
 
   public static List<Segment> createSegments(
-      File tempFolder,
+      TemporaryFolder tempFolder,
       Closer closer,
       List<InputSource> inputs,
       InputFormat inputFormat,
@@ -433,7 +434,7 @@ public class NestedDataTestUtils
   {
     final List<Segment> segments = Lists.newArrayListWithCapacity(inputs.size());
     for (InputSource inputSource : inputs) {
-      final File segmentDir = newFolder(tempFolder, "junit");
+      final File segmentDir = tempFolder.newFolder();
       IndexBuilder bob = IndexBuilder.create()
                                      .tmpDir(segmentDir)
                                      .schema(
@@ -450,7 +451,7 @@ public class NestedDataTestUtils
                                      .inputSource(inputSource)
                                      .inputFormat(inputFormat)
                                      .transform(transformSpec)
-                                     .inputTmpDir(newFolder(tempFolder, "junit"));
+                                     .inputTmpDir(tempFolder.newFolder());
       segments.add(
           new QueryableIndexSegment(
               closer.register(bob.buildMMappedIndex()),
@@ -466,7 +467,7 @@ public class NestedDataTestUtils
    * turn a small file into bigger file with a bunch of copies of itself
    */
   public static File selfConcatenateResourceFile(
-      File tempFolder,
+      TemporaryFolder tempFolder,
       String inputFileName,
       int numCopies
   ) throws IOException
@@ -479,7 +480,7 @@ public class NestedDataTestUtils
         inputStreams.add(new ByteArrayInputStream(StringUtils.toUtf8("\n")));
       }
     }
-    File tmpFile = File.createTempFile("junit", null, tempFolder);
+    File tmpFile = tempFolder.newFile();
     try (
         SequenceInputStream inputDataStream = new SequenceInputStream(Collections.enumeration(inputStreams));
         OutputStream outStream = Files.newOutputStream(tmpFile.toPath())
@@ -494,16 +495,16 @@ public class NestedDataTestUtils
     return tmpFile;
   }
 
-  public static List<BiFunction<File, Closer, List<Segment>>> getSegmentGenerators(
+  public static List<BiFunction<TemporaryFolder, Closer, List<Segment>>> getSegmentGenerators(
       String jsonInputFile
   )
   {
-    final List<BiFunction<File, Closer, List<Segment>>> segmentsGenerators =
+    final List<BiFunction<TemporaryFolder, Closer, List<Segment>>> segmentsGenerators =
         new ArrayList<>();
-    segmentsGenerators.add(new BiFunction<File, Closer, List<Segment>>()
+    segmentsGenerators.add(new BiFunction<TemporaryFolder, Closer, List<Segment>>()
     {
       @Override
-      public List<Segment> apply(File tempFolder, Closer closer)
+      public List<Segment> apply(TemporaryFolder tempFolder, Closer closer)
       {
         try {
           return ImmutableList.<Segment>builder()
@@ -529,10 +530,10 @@ public class NestedDataTestUtils
         return MIX_SEGMENTS_NAME;
       }
     });
-    segmentsGenerators.add(new BiFunction<File, Closer, List<Segment>>()
+    segmentsGenerators.add(new BiFunction<TemporaryFolder, Closer, List<Segment>>()
     {
       @Override
-      public List<Segment> apply(File tempFolder, Closer closer)
+      public List<Segment> apply(TemporaryFolder tempFolder, Closer closer)
       {
         try {
           return ImmutableList.of(
@@ -551,10 +552,10 @@ public class NestedDataTestUtils
         return INCREMENTAL_SEGMENTS_NAME;
       }
     });
-    segmentsGenerators.add(new BiFunction<File, Closer, List<Segment>>()
+    segmentsGenerators.add(new BiFunction<TemporaryFolder, Closer, List<Segment>>()
     {
       @Override
-      public List<Segment> apply(File tempFolder, Closer closer)
+      public List<Segment> apply(TemporaryFolder tempFolder, Closer closer)
       {
         try {
           return ImmutableList.<Segment>builder()
@@ -587,10 +588,10 @@ public class NestedDataTestUtils
         return DEFAULT_SEGMENTS_NAME;
       }
     });
-    segmentsGenerators.add(new BiFunction<File, Closer, List<Segment>>()
+    segmentsGenerators.add(new BiFunction<TemporaryFolder, Closer, List<Segment>>()
     {
       @Override
-      public List<Segment> apply(File tempFolder, Closer closer)
+      public List<Segment> apply(TemporaryFolder tempFolder, Closer closer)
       {
         try {
           return ImmutableList.<Segment>builder()
@@ -637,14 +638,5 @@ public class NestedDataTestUtils
   public static boolean expectSegmentGeneratorCanVectorize(String name)
   {
     return DEFAULT_SEGMENTS_NAME.equals(name) || FRONT_CODED_SEGMENTS_NAME.equals(name);
-  }
-
-  private static File newFolder(File root, String... subDirs) throws IOException {
-    String subFolder = String.join("/", subDirs);
-    File result = new File(root, subFolder);
-    if (!result.mkdirs()) {
-      throw new IOException("Couldn't create folders " + root);
-    }
-    return result;
   }
 }

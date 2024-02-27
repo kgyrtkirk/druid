@@ -34,17 +34,16 @@ import org.apache.druid.query.lookup.LookupExtractionFn;
 import org.apache.druid.query.lookup.LookupExtractor;
 import org.apache.druid.segment.IndexBuilder;
 import org.apache.druid.segment.StorageAdapter;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.io.Closeable;
 import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @RunWith(Parameterized.class)
 public class JavaScriptFilterTest extends BaseFilterTest
@@ -60,7 +59,10 @@ public class JavaScriptFilterTest extends BaseFilterTest
     super(testName, DEFAULT_ROWS, indexBuilder, finisher, cnf, optimize);
   }
 
-  @AfterAll
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
+
+  @AfterClass
   public static void tearDown() throws Exception
   {
     BaseFilterTest.tearDown(JavaScriptFilterTest.class.getName());
@@ -243,12 +245,12 @@ public class JavaScriptFilterTest extends BaseFilterTest
   @Test
   public void testRequiredColumnRewrite()
   {
-    Throwable exception = assertThrows(UnsupportedOperationException.class, () -> {
-      Filter filter = newJavaScriptDimFilter("dim3", jsValueFilter("a"), null).toFilter();
-      Assertions.assertFalse(filter.supportsRequiredColumnRewrite());
-      filter.rewriteRequiredColumns(ImmutableMap.of("invalidName", "dim1"));
-    });
-    assertTrue(exception.getMessage().contains("Required column rewrite is not supported by this filter."));
+    Filter filter = newJavaScriptDimFilter("dim3", jsValueFilter("a"), null).toFilter();
+    Assert.assertFalse(filter.supportsRequiredColumnRewrite());
+
+    expectedException.expect(UnsupportedOperationException.class);
+    expectedException.expectMessage("Required column rewrite is not supported by this filter.");
+    filter.rewriteRequiredColumns(ImmutableMap.of("invalidName", "dim1"));
   }
 
   private JavaScriptDimFilter newJavaScriptDimFilter(

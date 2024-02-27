@@ -47,8 +47,8 @@ import org.apache.druid.timeline.LogicalSegment;
 import org.apache.druid.timeline.SegmentId;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -69,7 +69,7 @@ public class DataSourceMetadataQueryTest
     String json = JSON_MAPPER.writeValueAsString(query);
     Query<?> serdeQuery = JSON_MAPPER.readValue(json, Query.class);
 
-    Assertions.assertEquals(query, serdeQuery);
+    Assert.assertEquals(query, serdeQuery);
   }
 
   @Test
@@ -104,13 +104,13 @@ public class DataSourceMetadataQueryTest
     );
 
     final QueryContext queryContext = serdeQuery.context();
-    Assertions.assertEquals(1, (int) queryContext.getInt(QueryContexts.PRIORITY_KEY));
-    Assertions.assertEquals(true, queryContext.getBoolean(QueryContexts.USE_CACHE_KEY));
-    Assertions.assertEquals("true", queryContext.getString(QueryContexts.POPULATE_CACHE_KEY));
-    Assertions.assertEquals(true, queryContext.getBoolean(QueryContexts.FINALIZE_KEY));
-    Assertions.assertEquals(true, queryContext.getBoolean(QueryContexts.USE_CACHE_KEY, false));
-    Assertions.assertEquals(true, queryContext.getBoolean(QueryContexts.POPULATE_CACHE_KEY, false));
-    Assertions.assertEquals(true, queryContext.getBoolean(QueryContexts.FINALIZE_KEY, false));
+    Assert.assertEquals(1, (int) queryContext.getInt(QueryContexts.PRIORITY_KEY));
+    Assert.assertEquals(true, queryContext.getBoolean(QueryContexts.USE_CACHE_KEY));
+    Assert.assertEquals("true", queryContext.getString(QueryContexts.POPULATE_CACHE_KEY));
+    Assert.assertEquals(true, queryContext.getBoolean(QueryContexts.FINALIZE_KEY));
+    Assert.assertEquals(true, queryContext.getBoolean(QueryContexts.USE_CACHE_KEY, false));
+    Assert.assertEquals(true, queryContext.getBoolean(QueryContexts.POPULATE_CACHE_KEY, false));
+    Assert.assertEquals(true, queryContext.getBoolean(QueryContexts.FINALIZE_KEY, false));
   }
 
   @Test
@@ -147,7 +147,7 @@ public class DataSourceMetadataQueryTest
     DataSourceMetadataResultValue val = results.iterator().next().getValue();
     DateTime maxIngestedEventTime = val.getMaxIngestedEventTime();
 
-    Assertions.assertEquals(timestamp, maxIngestedEventTime);
+    Assert.assertEquals(timestamp, maxIngestedEventTime);
   }
 
   @Test
@@ -232,7 +232,7 @@ public class DataSourceMetadataQueryTest
             )
         );
 
-    Assertions.assertEquals(segments.size(), 2);
+    Assert.assertEquals(segments.size(), 2);
     // should only have the latest segments.
     List<LogicalSegment> expected = Arrays.asList(
         new LogicalSegment()
@@ -266,7 +266,7 @@ public class DataSourceMetadataQueryTest
     );
 
     for (int i = 0; i < segments.size(); i++) {
-      Assertions.assertEquals(expected.get(i).getInterval(), segments.get(i).getInterval());
+      Assert.assertEquals(expected.get(i).getInterval(), segments.get(i).getInterval());
     }
   }
 
@@ -399,11 +399,11 @@ public class DataSourceMetadataQueryTest
         }
     );
 
-    Assertions.assertEquals(expected.size(), segments.size());
+    Assert.assertEquals(expected.size(), segments.size());
 
     for (int i = 0; i < expected.size(); i++) {
-      Assertions.assertEquals(expected.get(i).getInterval(), segments.get(i).getInterval());
-      Assertions.assertEquals(expected.get(i).getTrueInterval(), segments.get(i).getTrueInterval());
+      Assert.assertEquals(expected.get(i).getInterval(), segments.get(i).getInterval());
+      Assert.assertEquals(expected.get(i).getTrueInterval(), segments.get(i).getTrueInterval());
     }
   }
 
@@ -415,7 +415,7 @@ public class DataSourceMetadataQueryTest
         resultValue,
         JacksonUtils.TYPE_REFERENCE_MAP_STRING_OBJECT
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableMap.<String, Object>of("maxIngestedEventTime", "2000-01-01T00:00:00.000Z"),
         resultValueMap
     );
@@ -432,7 +432,7 @@ public class DataSourceMetadataQueryTest
         resultValueMap,
         DataSourceMetadataResultValue.class
     );
-    Assertions.assertEquals(DateTimes.of("2000"), resultValue.getMaxIngestedEventTime());
+    Assert.assertEquals(DateTimes.of("2000"), resultValue.getMaxIngestedEventTime());
   }
 
 }

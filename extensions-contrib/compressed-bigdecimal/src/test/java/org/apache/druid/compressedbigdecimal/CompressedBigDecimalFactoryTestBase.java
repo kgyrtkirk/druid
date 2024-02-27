@@ -29,6 +29,7 @@ import org.apache.druid.query.aggregation.AggregatorFactory;
 import org.apache.druid.query.aggregation.BufferAggregator;
 import org.apache.druid.segment.selector.TestColumnValueSelector;
 import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.math.BigDecimal;

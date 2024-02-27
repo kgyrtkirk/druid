@@ -51,6 +51,7 @@ import org.joda.time.Duration;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Test;
 
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;

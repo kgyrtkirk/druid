@@ -28,6 +28,7 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.junit.Assert;
+import org.junit.Test;
 
 import javax.annotation.Nullable;
 import java.io.File;

@@ -27,8 +27,8 @@ import org.apache.druid.query.timeseries.TimeseriesQuery;
 import org.apache.druid.query.timeseries.TimeseriesQueryQueryToolChest;
 import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.column.RowSignature;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Comparator;
 
@@ -42,11 +42,11 @@ public class ConstantPostAggregatorTest
     ConstantPostAggregator constantPostAggregator;
 
     constantPostAggregator = new ConstantPostAggregator("shichi", 7);
-    Assertions.assertEquals(7, constantPostAggregator.compute(null));
+    Assert.assertEquals(7, constantPostAggregator.compute(null));
     constantPostAggregator = new ConstantPostAggregator("rei", 0.0);
-    Assertions.assertEquals(0.0, constantPostAggregator.compute(null));
+    Assert.assertEquals(0.0, constantPostAggregator.compute(null));
     constantPostAggregator = new ConstantPostAggregator("ichi", 1.0);
-    Assertions.assertNotSame(1, constantPostAggregator.compute(null));
+    Assert.assertNotSame(1, constantPostAggregator.compute(null));
   }
 
   @Test
@@ -55,9 +55,9 @@ public class ConstantPostAggregatorTest
     ConstantPostAggregator constantPostAggregator =
         new ConstantPostAggregator("thistestbasicallydoesnothing unhappyface", 1);
     Comparator comp = constantPostAggregator.getComparator();
-    Assertions.assertEquals(0, comp.compare(0, constantPostAggregator.compute(null)));
-    Assertions.assertEquals(0, comp.compare(0, 1));
-    Assertions.assertEquals(0, comp.compare(1, 0));
+    Assert.assertEquals(0, comp.compare(0, constantPostAggregator.compute(null)));
+    Assert.assertEquals(0, comp.compare(0, 1));
+    Assert.assertEquals(0, comp.compare(1, 0));
   }
 
   @Test
@@ -69,7 +69,7 @@ public class ConstantPostAggregatorTest
         mapper.writeValueAsString(aggregator),
         ConstantPostAggregator.class
     );
-    Assertions.assertEquals(aggregator, aggregator1);
+    Assert.assertEquals(aggregator, aggregator1);
   }
 
   @Test
@@ -90,7 +90,7 @@ public class ConstantPostAggregatorTest
               )
               .build();
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         RowSignature.builder()
                     .addTimeColumn()
                     .add("count", ColumnType.LONG)

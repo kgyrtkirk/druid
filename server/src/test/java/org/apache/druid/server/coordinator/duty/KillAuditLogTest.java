@@ -25,16 +25,16 @@ import org.apache.druid.server.coordinator.TestDruidCoordinatorConfig;
 import org.apache.druid.server.coordinator.stats.CoordinatorRunStats;
 import org.apache.druid.server.coordinator.stats.Stats;
 import org.joda.time.Duration;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.MockitoJUnitRunner;
 
-@ExtendWith(MockitoExtension.class)
+@RunWith(MockitoJUnitRunner.class)
 public class KillAuditLogTest
 {
   @Mock
@@ -46,7 +46,7 @@ public class KillAuditLogTest
   private KillAuditLog killAuditLog;
   private CoordinatorRunStats runStats;
 
-  @BeforeEach
+  @Before
   public void setup()
   {
     runStats = new CoordinatorRunStats();
@@ -81,7 +81,7 @@ public class KillAuditLogTest
     killAuditLog = new KillAuditLog(druidCoordinatorConfig, mockAuditManager);
     killAuditLog.run(mockDruidCoordinatorRuntimeParams);
     Mockito.verify(mockAuditManager).removeAuditLogsOlderThan(ArgumentMatchers.anyLong());
-    Assertions.assertTrue(runStats.hasStat(Stats.Kill.AUDIT_LOGS));
+    Assert.assertTrue(runStats.hasStat(Stats.Kill.AUDIT_LOGS));
   }
 
   @Test
@@ -95,11 +95,11 @@ public class KillAuditLogTest
         .withCoordinatorKillIgnoreDurationToRetain(false)
         .build();
 
-    final IllegalArgumentException exception = Assertions.assertThrows(
+    final IllegalArgumentException exception = Assert.assertThrows(
         IllegalArgumentException.class,
         () -> killAuditLog = new KillAuditLog(druidCoordinatorConfig, mockAuditManager)
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         "[druid.coordinator.kill.audit.period] must be greater than"
         + " [druid.coordinator.period.metadataStoreManagementPeriod]",
         exception.getMessage()
@@ -116,11 +116,11 @@ public class KillAuditLogTest
         .withCoordinatorKillMaxSegments(10)
         .withCoordinatorKillIgnoreDurationToRetain(false)
         .build();
-    final IllegalArgumentException exception = Assertions.assertThrows(
+    final IllegalArgumentException exception = Assert.assertThrows(
         IllegalArgumentException.class,
         () -> killAuditLog = new KillAuditLog(druidCoordinatorConfig, mockAuditManager)
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         "[druid.coordinator.kill.audit.durationToRetain] must be 0 milliseconds or higher",
         exception.getMessage()
     );

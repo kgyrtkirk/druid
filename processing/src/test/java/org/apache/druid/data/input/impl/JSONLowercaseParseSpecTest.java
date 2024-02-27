@@ -19,13 +19,12 @@
 
 package org.apache.druid.data.input.impl;
 
+import junit.framework.Assert;
 import org.apache.druid.java.util.common.parsers.Parser;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JSONLowercaseParseSpecTest
 {
@@ -42,6 +41,6 @@ public class JSONLowercaseParseSpecTest
     );
     Parser parser = spec.makeParser();
     Map<String, Object> event = parser.parseToMap("{\"timestamp\":\"2015-01-01\",\"A\":\"foo\"}");
-    assertEquals("foo", event.get("a"));
+    Assert.assertEquals("foo", event.get("a"));
   }
 }

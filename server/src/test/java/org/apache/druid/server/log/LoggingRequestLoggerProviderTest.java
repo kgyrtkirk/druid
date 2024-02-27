@@ -32,13 +32,11 @@ import org.apache.druid.guice.ManageLifecycle;
 import org.apache.druid.guice.QueryableModule;
 import org.apache.druid.initialization.Initialization;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Properties;
 import java.util.UUID;
-
-import static org.hamcrest.MatcherAssert.assertThat;
 
 public class LoggingRequestLoggerProviderTest
 {
@@ -56,8 +54,8 @@ public class LoggingRequestLoggerProviderTest
     properties.put(propertyPrefix + ".type", "slf4j");
     provider.inject(properties, injector.getInstance(JsonConfigurator.class));
     final LoggingRequestLogger requestLogger = (LoggingRequestLogger) provider.get().get();
-    Assertions.assertFalse(requestLogger.isSetContextMDC());
-    Assertions.assertFalse(requestLogger.isSetMDC());
+    Assert.assertFalse(requestLogger.isSetContextMDC());
+    Assert.assertFalse(requestLogger.isSetMDC());
   }
 
   @Test
@@ -69,8 +67,8 @@ public class LoggingRequestLoggerProviderTest
     properties.put(propertyPrefix + ".setContextMDC", "true");
     provider.inject(properties, injector.getInstance(JsonConfigurator.class));
     final LoggingRequestLogger requestLogger = (LoggingRequestLogger) provider.get().get();
-    Assertions.assertTrue(requestLogger.isSetContextMDC());
-    Assertions.assertTrue(requestLogger.isSetMDC());
+    Assert.assertTrue(requestLogger.isSetContextMDC());
+    Assert.assertTrue(requestLogger.isSetMDC());
   }
 
   @Test
@@ -79,7 +77,7 @@ public class LoggingRequestLoggerProviderTest
     final Properties properties = new Properties();
     properties.put(propertyPrefix + ".type", "noop");
     provider.inject(properties, injector.getInstance(JsonConfigurator.class));
-    assertThat(provider.get().get(), Matchers.instanceOf(NoopRequestLogger.class));
+    Assert.assertThat(provider.get().get(), Matchers.instanceOf(NoopRequestLogger.class));
   }
 
   private Injector makeInjector()

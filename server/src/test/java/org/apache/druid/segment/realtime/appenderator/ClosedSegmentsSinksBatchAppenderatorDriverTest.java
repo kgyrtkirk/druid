@@ -37,11 +37,10 @@ import org.apache.druid.timeline.partition.NumberedShardSpec;
 import org.easymock.EasyMock;
 import org.easymock.EasyMockSupport;
 import org.joda.time.DateTime;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -87,7 +86,7 @@ public class ClosedSegmentsSinksBatchAppenderatorDriverTest extends EasyMockSupp
     NullHandling.initializeForTests();
   }
 
-  @BeforeEach
+  @Before
   public void setup()
   {
     appenderatorTester = new ClosedSegmensSinksBatchAppenderatorTester(MAX_ROWS_IN_MEMORY);
@@ -103,7 +102,7 @@ public class ClosedSegmentsSinksBatchAppenderatorDriverTest extends EasyMockSupp
     EasyMock.replay(dataSegmentKiller);
   }
 
-  @AfterEach
+  @After
   public void tearDown() throws Exception
   {
     EasyMock.verify(dataSegmentKiller);
@@ -115,10 +114,10 @@ public class ClosedSegmentsSinksBatchAppenderatorDriverTest extends EasyMockSupp
   @Test
   public void testSimple() throws Exception
   {
-    Assertions.assertNull(driver.startJob(null));
+    Assert.assertNull(driver.startJob(null));
 
     for (InputRow row : ROWS) {
-      Assertions.assertTrue(driver.add(row, "dummy").isOk());
+      Assert.assertTrue(driver.add(row, "dummy").isOk());
     }
 
     checkSegmentStates(2, SegmentState.APPENDING);
@@ -131,7 +130,7 @@ public class ClosedSegmentsSinksBatchAppenderatorDriverTest extends EasyMockSupp
         driver.publishAll(null, Collections.emptySet(), makeOkPublisher(), Function.identity())
               .get(TIMEOUT, TimeUnit.MILLISECONDS);
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableSet.of(
             new SegmentIdWithShardSpec(DATA_SOURCE, Intervals.of("2000/PT1H"), VERSION, new NumberedShardSpec(0, 0)),
             new SegmentIdWithShardSpec(DATA_SOURCE, Intervals.of("2000T01/PT1H"), VERSION, new NumberedShardSpec(0, 0))
@@ -142,18 +141,17 @@ public class ClosedSegmentsSinksBatchAppenderatorDriverTest extends EasyMockSupp
                  .collect(Collectors.toSet())
     );
 
-    Assertions.assertNull(published.getCommitMetadata());
+    Assert.assertNull(published.getCommitMetadata());
   }
 
-  @Test
-  @Timeout(value = 5000L, unit = TimeUnit.MILLISECONDS)
+  @Test(timeout = 5000L)
   public void testIncrementalPush() throws Exception
   {
-    Assertions.assertNull(driver.startJob(null));
+    Assert.assertNull(driver.startJob(null));
 
     int i = 0;
     for (InputRow row : ROWS) {
-      Assertions.assertTrue(driver.add(row, "dummy").isOk());
+      Assert.assertTrue(driver.add(row, "dummy").isOk());
 
       checkSegmentStates(1, SegmentState.APPENDING);
       checkSegmentStates(i, SegmentState.PUSHED_AND_DROPPED);
@@ -167,7 +165,7 @@ public class ClosedSegmentsSinksBatchAppenderatorDriverTest extends EasyMockSupp
         driver.publishAll(null, Collections.emptySet(), makeOkPublisher(), Function.identity())
               .get(TIMEOUT, TimeUnit.MILLISECONDS);
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableSet.of(
             new SegmentIdWithShardSpec(DATA_SOURCE, Intervals.of("2000/PT1H"), VERSION, new NumberedShardSpec(0, 0)),
             new SegmentIdWithShardSpec(DATA_SOURCE, Intervals.of("2000T01/PT1H"), VERSION, new NumberedShardSpec(0, 0)),
@@ -179,29 +177,29 @@ public class ClosedSegmentsSinksBatchAppenderatorDriverTest extends EasyMockSupp
                  .collect(Collectors.toSet())
     );
 
-    Assertions.assertNull(published.getCommitMetadata());
+    Assert.assertNull(published.getCommitMetadata());
   }
 
   @Test
   public void testRestart()
   {
-    Assertions.assertNull(driver.startJob(null));
+    Assert.assertNull(driver.startJob(null));
     driver.close();
     appenderatorTester.getAppenderator().close();
 
-    Assertions.assertNull(driver.startJob(null));
+    Assert.assertNull(driver.startJob(null));
   }
 
   private void checkSegmentStates(int expectedNumSegmentsInState, SegmentState expectedState)
   {
     final SegmentsForSequence segmentsForSequence = driver.getSegments().get("dummy");
-    Assertions.assertNotNull(segmentsForSequence);
+    Assert.assertNotNull(segmentsForSequence);
     final List<SegmentWithState> segmentWithStates = segmentsForSequence
         .allSegmentStateStream()
         .filter(segmentWithState -> segmentWithState.getState() == expectedState)
         .collect(Collectors.toList());
 
-    Assertions.assertEquals(expectedNumSegmentsInState, segmentWithStates.size());
+    Assert.assertEquals(expectedNumSegmentsInState, segmentWithStates.size());
   }
 
   static TransactionalSegmentPublisher makeOkPublisher()

@@ -21,6 +21,7 @@ package org.apache.druid.compressedbigdecimal;
 
 import org.apache.druid.java.util.common.IAE;
 import org.junit.Assert;
+import org.junit.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

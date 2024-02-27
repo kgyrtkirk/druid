@@ -24,16 +24,18 @@ import com.google.common.collect.ImmutableMap;
 import org.apache.druid.java.util.common.HumanReadableBytes;
 import org.apache.druid.java.util.common.Intervals;
 import org.apache.druid.query.spec.MultipleIntervalSegmentSpec;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 public class QueryContextsTest
 {
+  @Rule
+  public final ExpectedException exception = ExpectedException.none();
 
   @Test
   public void testDefaultQueryTimeout()
@@ -44,7 +46,7 @@ public class QueryContextsTest
         false,
         new HashMap<>()
     );
-    Assertions.assertEquals(300_000, query.context().getDefaultTimeout());
+    Assert.assertEquals(300_000, query.context().getDefaultTimeout());
   }
 
   @Test
@@ -56,10 +58,10 @@ public class QueryContextsTest
         false,
         new HashMap<>()
     );
-    Assertions.assertEquals(300_000, query.context().getTimeout());
+    Assert.assertEquals(300_000, query.context().getTimeout());
 
     query = Queries.withDefaultTimeout(query, 60_000);
-    Assertions.assertEquals(60_000, query.context().getTimeout());
+    Assert.assertEquals(60_000, query.context().getTimeout());
   }
 
   @Test
@@ -71,42 +73,40 @@ public class QueryContextsTest
         false,
         ImmutableMap.of(QueryContexts.TIMEOUT_KEY, 1000)
     );
-    Assertions.assertEquals(1000, query.context().getTimeout());
+    Assert.assertEquals(1000, query.context().getTimeout());
 
     query = Queries.withDefaultTimeout(query, 1_000_000);
-    Assertions.assertEquals(1000, query.context().getTimeout());
+    Assert.assertEquals(1000, query.context().getTimeout());
   }
 
   @Test
   public void testQueryMaxTimeout()
   {
-    Throwable exception = assertThrows(BadQueryContextException.class, () -> {
-      Query<?> query = new TestQuery(
-          new TableDataSource("test"),
-          new MultipleIntervalSegmentSpec(ImmutableList.of(Intervals.of("0/100"))),
-          false,
-          ImmutableMap.of(QueryContexts.TIMEOUT_KEY, 1000)
-      );
+    exception.expect(BadQueryContextException.class);
+    exception.expectMessage("Configured timeout = 1000 is more than enforced limit of 100.");
+    Query<?> query = new TestQuery(
+        new TableDataSource("test"),
+        new MultipleIntervalSegmentSpec(ImmutableList.of(Intervals.of("0/100"))),
+        false,
+        ImmutableMap.of(QueryContexts.TIMEOUT_KEY, 1000)
+    );
 
-      query.context().verifyMaxQueryTimeout(100);
-    });
-    assertTrue(exception.getMessage().contains("Configured timeout = 1000 is more than enforced limit of 100."));
+    query.context().verifyMaxQueryTimeout(100);
   }
 
   @Test
   public void testMaxScatterGatherBytes()
   {
-    Throwable exception = assertThrows(BadQueryContextException.class, () -> {
-      Query<?> query = new TestQuery(
-          new TableDataSource("test"),
-          new MultipleIntervalSegmentSpec(ImmutableList.of(Intervals.of("0/100"))),
-          false,
-          ImmutableMap.of(QueryContexts.MAX_SCATTER_GATHER_BYTES_KEY, 1000)
-      );
+    exception.expect(BadQueryContextException.class);
+    exception.expectMessage("Configured maxScatterGatherBytes = 1000 is more than enforced limit of 100.");
+    Query<?> query = new TestQuery(
+        new TableDataSource("test"),
+        new MultipleIntervalSegmentSpec(ImmutableList.of(Intervals.of("0/100"))),
+        false,
+        ImmutableMap.of(QueryContexts.MAX_SCATTER_GATHER_BYTES_KEY, 1000)
+    );
 
-      Queries.withMaxScatterGatherBytes(query, 100);
-    });
-    assertTrue(exception.getMessage().contains("Configured maxScatterGatherBytes = 1000 is more than enforced limit of 100."));
+    Queries.withMaxScatterGatherBytes(query, 100);
   }
 
   @Test
@@ -118,7 +118,7 @@ public class QueryContextsTest
         false,
         ImmutableMap.of(QueryContexts.SECONDARY_PARTITION_PRUNING_KEY, false)
     );
-    Assertions.assertFalse(query.context().isSecondaryPartitionPruningEnabled());
+    Assert.assertFalse(query.context().isSecondaryPartitionPruningEnabled());
   }
 
   @Test
@@ -130,13 +130,13 @@ public class QueryContextsTest
         false,
         ImmutableMap.of()
     );
-    Assertions.assertTrue(query.context().isSecondaryPartitionPruningEnabled());
+    Assert.assertTrue(query.context().isSecondaryPartitionPruningEnabled());
   }
 
   @Test
   public void testDefaultInSubQueryThreshold()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         QueryContexts.DEFAULT_IN_SUB_QUERY_THRESHOLD,
         QueryContext.empty().getInSubQueryThreshold()
     );
@@ -145,7 +145,7 @@ public class QueryContextsTest
   @Test
   public void testDefaultPlanTimeBoundarySql()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         QueryContexts.DEFAULT_ENABLE_TIME_BOUNDARY_PLANNING,
         QueryContext.empty().isTimeBoundaryPlanningEnabled()
     );
@@ -154,7 +154,7 @@ public class QueryContextsTest
   @Test
   public void testDefaultWindowingStrictValidation()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         QueryContexts.DEFAULT_WINDOWING_STRICT_VALIDATION,
         QueryContext.empty().isWindowingStrictValidation()
     );
@@ -163,12 +163,12 @@ public class QueryContextsTest
   @Test
   public void testGetEnableJoinLeftScanDirect()
   {
-    Assertions.assertFalse(QueryContext.empty().getEnableJoinLeftScanDirect());
-    Assertions.assertTrue(QueryContext.of(ImmutableMap.of(
+    Assert.assertFalse(QueryContext.empty().getEnableJoinLeftScanDirect());
+    Assert.assertTrue(QueryContext.of(ImmutableMap.of(
         QueryContexts.SQL_JOIN_LEFT_SCAN_DIRECT,
         true
     )).getEnableJoinLeftScanDirect());
-    Assertions.assertFalse(QueryContext.of(ImmutableMap.of(
+    Assert.assertFalse(QueryContext.of(ImmutableMap.of(
         QueryContexts.SQL_JOIN_LEFT_SCAN_DIRECT,
         false
     )).getEnableJoinLeftScanDirect());
@@ -178,84 +178,84 @@ public class QueryContextsTest
   public void testGetBrokerServiceName()
   {
     Map<String, Object> queryContext = new HashMap<>();
-    Assertions.assertNull(QueryContext.of(queryContext).getBrokerServiceName());
+    Assert.assertNull(QueryContext.of(queryContext).getBrokerServiceName());
 
     queryContext.put(QueryContexts.BROKER_SERVICE_NAME, "hotBroker");
-    Assertions.assertEquals("hotBroker", QueryContext.of(queryContext).getBrokerServiceName());
+    Assert.assertEquals("hotBroker", QueryContext.of(queryContext).getBrokerServiceName());
   }
 
   @Test
   public void testGetBrokerServiceName_withNonStringValue()
   {
-    assertThrows(BadQueryContextException.class, () -> {
-      Map<String, Object> queryContext = new HashMap<>();
-      queryContext.put(QueryContexts.BROKER_SERVICE_NAME, 100);
-      QueryContext.of(queryContext).getBrokerServiceName();
-    });
+    Map<String, Object> queryContext = new HashMap<>();
+    queryContext.put(QueryContexts.BROKER_SERVICE_NAME, 100);
+
+    exception.expect(BadQueryContextException.class);
+    QueryContext.of(queryContext).getBrokerServiceName();
   }
 
   @Test
   public void testGetTimeout_withNonNumericValue()
   {
-    assertThrows(BadQueryContextException.class, () -> {
-      Map<String, Object> queryContext = new HashMap<>();
-      queryContext.put(QueryContexts.TIMEOUT_KEY, "2000'");
-      new TestQuery(
-          new TableDataSource("test"),
-          new MultipleIntervalSegmentSpec(ImmutableList.of(Intervals.of("0/100"))),
-          false,
-          queryContext
-      ).context().getTimeout();
-    });
+    Map<String, Object> queryContext = new HashMap<>();
+    queryContext.put(QueryContexts.TIMEOUT_KEY, "2000'");
+
+    exception.expect(BadQueryContextException.class);
+    new TestQuery(
+        new TableDataSource("test"),
+        new MultipleIntervalSegmentSpec(ImmutableList.of(Intervals.of("0/100"))),
+        false,
+        queryContext
+    ).context().getTimeout();
   }
 
   @Test
   public void testGetAs()
   {
-    Assertions.assertNull(QueryContexts.getAsString("foo", null, null));
-    Assertions.assertEquals("default", QueryContexts.getAsString("foo", null, "default"));
-    Assertions.assertEquals("value", QueryContexts.getAsString("foo", "value", "default"));
+    Assert.assertNull(QueryContexts.getAsString("foo", null, null));
+    Assert.assertEquals("default", QueryContexts.getAsString("foo", null, "default"));
+    Assert.assertEquals("value", QueryContexts.getAsString("foo", "value", "default"));
     try {
       QueryContexts.getAsString("foo", 10, null);
-      Assertions.fail();
+      Assert.fail();
     }
     catch (BadQueryContextException e) {
       // Expected
     }
 
-    Assertions.assertFalse(QueryContexts.getAsBoolean("foo", null, false));
-    Assertions.assertTrue(QueryContexts.getAsBoolean("foo", null, true));
-    Assertions.assertTrue(QueryContexts.getAsBoolean("foo", "true", false));
-    Assertions.assertTrue(QueryContexts.getAsBoolean("foo", true, false));
+    Assert.assertFalse(QueryContexts.getAsBoolean("foo", null, false));
+    Assert.assertTrue(QueryContexts.getAsBoolean("foo", null, true));
+    Assert.assertTrue(QueryContexts.getAsBoolean("foo", "true", false));
+    Assert.assertTrue(QueryContexts.getAsBoolean("foo", true, false));
     try {
       QueryContexts.getAsBoolean("foo", 10, false);
-      Assertions.fail();
+      Assert.fail();
     }
     catch (BadQueryContextException e) {
       // Expected
     }
 
-    Assertions.assertEquals(10, QueryContexts.getAsInt("foo", null, 10));
-    Assertions.assertEquals(20, QueryContexts.getAsInt("foo", "20", 10));
-    Assertions.assertEquals(20, QueryContexts.getAsInt("foo", 20, 10));
-    Assertions.assertEquals(20, QueryContexts.getAsInt("foo", 20L, 10));
-    Assertions.assertEquals(20, QueryContexts.getAsInt("foo", 20D, 10));
+    Assert.assertEquals(10, QueryContexts.getAsInt("foo", null, 10));
+    Assert.assertEquals(20, QueryContexts.getAsInt("foo", "20", 10));
+    Assert.assertEquals(20, QueryContexts.getAsInt("foo", 20, 10));
+    Assert.assertEquals(20, QueryContexts.getAsInt("foo", 20L, 10));
+    Assert.assertEquals(20, QueryContexts.getAsInt("foo", 20D, 10));
     try {
       QueryContexts.getAsInt("foo", true, 20);
-      Assertions.fail();
+      Assert.fail();
     }
     catch (BadQueryContextException e) {
       // Expected
     }
 
-    Assertions.assertEquals(10L, QueryContexts.getAsLong("foo", null, 10));
-    Assertions.assertEquals(20L, QueryContexts.getAsLong("foo", "20", 10));
-    Assertions.assertEquals(20L, QueryContexts.getAsLong("foo", 20, 10));
-    Assertions.assertEquals(20L, QueryContexts.getAsLong("foo", 20L, 10));
-    Assertions.assertEquals(20L, QueryContexts.getAsLong("foo", 20D, 10));
+    Assert.assertEquals(10L, QueryContexts.getAsLong("foo", null, 10));
+    Assert.assertEquals(20L, QueryContexts.getAsLong("foo", "20", 10));
+    Assert.assertEquals(20L, QueryContexts.getAsLong("foo", 20, 10));
+    Assert.assertEquals(20L, QueryContexts.getAsLong("foo", 20L, 10));
+    Assert.assertEquals(20L, QueryContexts.getAsLong("foo", 20D, 10));
     try {
       QueryContexts.getAsLong("foo", true, 20);
-      Assertions.fail();
+      Assert.fail();
     }
     catch (BadQueryContextException e) {
       // Expected
@@ -265,17 +265,17 @@ public class QueryContextsTest
   @Test
   public void testGetAsHumanReadableBytes()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new HumanReadableBytes("500M").getBytes(),
         QueryContexts.getAsHumanReadableBytes("maxOnDiskStorage", 500_000_000, HumanReadableBytes.ZERO)
                      .getBytes()
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new HumanReadableBytes("500M").getBytes(),
         QueryContexts.getAsHumanReadableBytes("maxOnDiskStorage", "500000000", HumanReadableBytes.ZERO)
                      .getBytes()
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new HumanReadableBytes("500M").getBytes(),
         QueryContexts.getAsHumanReadableBytes("maxOnDiskStorage", "500M", HumanReadableBytes.ZERO)
                      .getBytes()
@@ -294,12 +294,12 @@ public class QueryContextsTest
         )
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         QueryContexts.Vectorize.FORCE,
         query.context().getEnum("e1", QueryContexts.Vectorize.class, QueryContexts.Vectorize.FALSE)
     );
 
-    Assertions.assertThrows(
+    Assert.assertThrows(
         BadQueryContextException.class,
         () -> query.context().getEnum("e2", QueryContexts.Vectorize.class, QueryContexts.Vectorize.FALSE)
     );
@@ -315,12 +315,12 @@ public class QueryContextsTest
         ImmutableMap.of(QueryContexts.CTX_EXECUTION_MODE, "SYNC", QueryContexts.CTX_EXECUTION_MODE + "_1", "ASYNC")
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ExecutionMode.SYNC,
         query.context().getEnum(QueryContexts.CTX_EXECUTION_MODE, ExecutionMode.class, ExecutionMode.ASYNC)
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ExecutionMode.ASYNC,
         query.context().getEnum(QueryContexts.CTX_EXECUTION_MODE + "_1", ExecutionMode.class, ExecutionMode.SYNC)
     );

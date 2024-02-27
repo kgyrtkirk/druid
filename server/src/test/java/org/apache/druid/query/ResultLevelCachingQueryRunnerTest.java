@@ -28,10 +28,10 @@ import org.apache.druid.java.util.common.guava.Sequence;
 import org.apache.druid.query.timeseries.TimeseriesResultValue;
 import org.apache.druid.timeline.DataSegment;
 import org.joda.time.Interval;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.util.List;
@@ -40,13 +40,13 @@ public class ResultLevelCachingQueryRunnerTest extends QueryRunnerBasedOnCluster
 {
   private Cache cache;
 
-  @BeforeEach
+  @Before
   public void setup()
   {
     cache = MapCache.create(1024);
   }
 
-  @AfterEach
+  @After
   public void tearDown() throws IOException
   {
     cache.close();
@@ -67,9 +67,9 @@ public class ResultLevelCachingQueryRunnerTest extends QueryRunnerBasedOnCluster
         responseContext()
     );
     final List<Result<TimeseriesResultValue>> results1 = sequence1.toList();
-    Assertions.assertEquals(0, cache.getStats().getNumHits());
-    Assertions.assertEquals(0, cache.getStats().getNumEntries());
-    Assertions.assertEquals(0, cache.getStats().getNumMisses());
+    Assert.assertEquals(0, cache.getStats().getNumHits());
+    Assert.assertEquals(0, cache.getStats().getNumEntries());
+    Assert.assertEquals(0, cache.getStats().getNumMisses());
 
     final ResultLevelCachingQueryRunner<Result<TimeseriesResultValue>> queryRunner2 = createQueryRunner(
         newCacheConfig(false, false),
@@ -81,10 +81,10 @@ public class ResultLevelCachingQueryRunnerTest extends QueryRunnerBasedOnCluster
         responseContext()
     );
     final List<Result<TimeseriesResultValue>> results2 = sequence2.toList();
-    Assertions.assertEquals(results1, results2);
-    Assertions.assertEquals(0, cache.getStats().getNumHits());
-    Assertions.assertEquals(0, cache.getStats().getNumEntries());
-    Assertions.assertEquals(0, cache.getStats().getNumMisses());
+    Assert.assertEquals(results1, results2);
+    Assert.assertEquals(0, cache.getStats().getNumHits());
+    Assert.assertEquals(0, cache.getStats().getNumEntries());
+    Assert.assertEquals(0, cache.getStats().getNumMisses());
   }
 
   @Test
@@ -102,9 +102,9 @@ public class ResultLevelCachingQueryRunnerTest extends QueryRunnerBasedOnCluster
         responseContext()
     );
     final List<Result<TimeseriesResultValue>> results1 = sequence1.toList();
-    Assertions.assertEquals(0, cache.getStats().getNumHits());
-    Assertions.assertEquals(1, cache.getStats().getNumEntries());
-    Assertions.assertEquals(0, cache.getStats().getNumMisses());
+    Assert.assertEquals(0, cache.getStats().getNumHits());
+    Assert.assertEquals(1, cache.getStats().getNumEntries());
+    Assert.assertEquals(0, cache.getStats().getNumMisses());
 
     final ResultLevelCachingQueryRunner<Result<TimeseriesResultValue>> queryRunner2 = createQueryRunner(
         newCacheConfig(true, false),
@@ -116,10 +116,10 @@ public class ResultLevelCachingQueryRunnerTest extends QueryRunnerBasedOnCluster
         responseContext()
     );
     final List<Result<TimeseriesResultValue>> results2 = sequence2.toList();
-    Assertions.assertEquals(results1, results2);
-    Assertions.assertEquals(0, cache.getStats().getNumHits());
-    Assertions.assertEquals(1, cache.getStats().getNumEntries());
-    Assertions.assertEquals(0, cache.getStats().getNumMisses());
+    Assert.assertEquals(results1, results2);
+    Assert.assertEquals(0, cache.getStats().getNumHits());
+    Assert.assertEquals(1, cache.getStats().getNumEntries());
+    Assert.assertEquals(0, cache.getStats().getNumMisses());
   }
 
   @Test
@@ -137,9 +137,9 @@ public class ResultLevelCachingQueryRunnerTest extends QueryRunnerBasedOnCluster
         responseContext()
     );
     final List<Result<TimeseriesResultValue>> results1 = sequence1.toList();
-    Assertions.assertEquals(0, cache.getStats().getNumHits());
-    Assertions.assertEquals(0, cache.getStats().getNumEntries());
-    Assertions.assertEquals(0, cache.getStats().getNumMisses());
+    Assert.assertEquals(0, cache.getStats().getNumHits());
+    Assert.assertEquals(0, cache.getStats().getNumEntries());
+    Assert.assertEquals(0, cache.getStats().getNumMisses());
 
     final ResultLevelCachingQueryRunner<Result<TimeseriesResultValue>> queryRunner2 = createQueryRunner(
         newCacheConfig(false, true),
@@ -151,10 +151,10 @@ public class ResultLevelCachingQueryRunnerTest extends QueryRunnerBasedOnCluster
         responseContext()
     );
     final List<Result<TimeseriesResultValue>> results2 = sequence2.toList();
-    Assertions.assertEquals(results1, results2);
-    Assertions.assertEquals(0, cache.getStats().getNumHits());
-    Assertions.assertEquals(0, cache.getStats().getNumEntries());
-    Assertions.assertEquals(1, cache.getStats().getNumMisses());
+    Assert.assertEquals(results1, results2);
+    Assert.assertEquals(0, cache.getStats().getNumHits());
+    Assert.assertEquals(0, cache.getStats().getNumEntries());
+    Assert.assertEquals(1, cache.getStats().getNumMisses());
   }
 
   @Test
@@ -172,9 +172,9 @@ public class ResultLevelCachingQueryRunnerTest extends QueryRunnerBasedOnCluster
         responseContext()
     );
     final List<Result<TimeseriesResultValue>> results1 = sequence1.toList();
-    Assertions.assertEquals(0, cache.getStats().getNumHits());
-    Assertions.assertEquals(1, cache.getStats().getNumEntries());
-    Assertions.assertEquals(1, cache.getStats().getNumMisses());
+    Assert.assertEquals(0, cache.getStats().getNumHits());
+    Assert.assertEquals(1, cache.getStats().getNumEntries());
+    Assert.assertEquals(1, cache.getStats().getNumMisses());
 
     final ResultLevelCachingQueryRunner<Result<TimeseriesResultValue>> queryRunner2 = createQueryRunner(
         newCacheConfig(true, true),
@@ -186,10 +186,10 @@ public class ResultLevelCachingQueryRunnerTest extends QueryRunnerBasedOnCluster
         responseContext()
     );
     final List<Result<TimeseriesResultValue>> results2 = sequence2.toList();
-    Assertions.assertEquals(results1, results2);
-    Assertions.assertEquals(1, cache.getStats().getNumHits());
-    Assertions.assertEquals(1, cache.getStats().getNumEntries());
-    Assertions.assertEquals(1, cache.getStats().getNumMisses());
+    Assert.assertEquals(results1, results2);
+    Assert.assertEquals(1, cache.getStats().getNumHits());
+    Assert.assertEquals(1, cache.getStats().getNumEntries());
+    Assert.assertEquals(1, cache.getStats().getNumMisses());
   }
 
   @Test
@@ -216,15 +216,15 @@ public class ResultLevelCachingQueryRunnerTest extends QueryRunnerBasedOnCluster
     );
     try {
       sequence.toList();
-      Assertions.fail("Expected to throw an exception");
+      Assert.fail("Expected to throw an exception");
     }
     catch (RuntimeException e) {
-      Assertions.assertEquals("Exception for testing", e.getMessage());
+      Assert.assertEquals("Exception for testing", e.getMessage());
     }
     finally {
-      Assertions.assertEquals(0, cache.getStats().getNumHits());
-      Assertions.assertEquals(0, cache.getStats().getNumEntries());
-      Assertions.assertEquals(0, cache.getStats().getNumMisses());
+      Assert.assertEquals(0, cache.getStats().getNumHits());
+      Assert.assertEquals(0, cache.getStats().getNumEntries());
+      Assert.assertEquals(0, cache.getStats().getNumMisses());
     }
   }
 

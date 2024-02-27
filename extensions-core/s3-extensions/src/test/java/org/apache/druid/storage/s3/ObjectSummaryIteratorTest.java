@@ -25,6 +25,7 @@ import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import org.junit.Assert;
+import org.junit.Test;
 
 import java.net.URI;
 import java.util.ArrayList;

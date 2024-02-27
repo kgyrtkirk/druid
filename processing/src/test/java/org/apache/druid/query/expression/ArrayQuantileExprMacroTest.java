@@ -27,8 +27,8 @@ import org.apache.druid.math.expr.Expr;
 import org.apache.druid.math.expr.ExprEval;
 import org.apache.druid.math.expr.InputBindings;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class ArrayQuantileExprMacroTest extends InitializedNullHandlingTest
 {
@@ -42,7 +42,7 @@ public class ArrayQuantileExprMacroTest extends InitializedNullHandlingTest
         )
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         2.0,
         result.eval(InputBindings.nilBindings()).asDouble(),
         0.0
@@ -59,7 +59,7 @@ public class ArrayQuantileExprMacroTest extends InitializedNullHandlingTest
         )
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         2.0,
         result.eval(InputBindings.nilBindings()).asDouble(),
         0.0
@@ -76,7 +76,7 @@ public class ArrayQuantileExprMacroTest extends InitializedNullHandlingTest
         )
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         2.0,
         result.eval(InputBindings.nilBindings()).asDouble(),
         0.0
@@ -93,7 +93,7 @@ public class ArrayQuantileExprMacroTest extends InitializedNullHandlingTest
         )
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         2.0,
         result.eval(InputBindings.nilBindings()).asDouble(),
         0.0
@@ -111,10 +111,10 @@ public class ArrayQuantileExprMacroTest extends InitializedNullHandlingTest
     );
 
     if (NullHandling.sqlCompatible()) {
-      Assertions.assertTrue(result.eval(InputBindings.nilBindings()).isNumericNull());
+      Assert.assertTrue(result.eval(InputBindings.nilBindings()).isNumericNull());
     } else {
-      Assertions.assertFalse(result.eval(InputBindings.nilBindings()).isNumericNull());
-      Assertions.assertEquals(0, result.eval(InputBindings.nilBindings()).asDouble(), 0);
+      Assert.assertFalse(result.eval(InputBindings.nilBindings()).isNumericNull());
+      Assert.assertEquals(0, result.eval(InputBindings.nilBindings()).asDouble(), 0);
     }
   }
 
@@ -129,10 +129,10 @@ public class ArrayQuantileExprMacroTest extends InitializedNullHandlingTest
     );
 
     if (NullHandling.sqlCompatible()) {
-      Assertions.assertTrue(result.eval(InputBindings.nilBindings()).isNumericNull());
+      Assert.assertTrue(result.eval(InputBindings.nilBindings()).isNumericNull());
     } else {
-      Assertions.assertFalse(result.eval(InputBindings.nilBindings()).isNumericNull());
-      Assertions.assertEquals(0, result.eval(InputBindings.nilBindings()).asDouble(), 0);
+      Assert.assertFalse(result.eval(InputBindings.nilBindings()).isNumericNull());
+      Assert.assertEquals(0, result.eval(InputBindings.nilBindings()).asDouble(), 0);
     }
   }
 
@@ -168,21 +168,21 @@ public class ArrayQuantileExprMacroTest extends InitializedNullHandlingTest
         96.84202159588680
     );
 
-    Assertions.assertEquals(Double.NaN, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, -0.1), 0.0000001);
-    Assertions.assertEquals(1.748945667, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0), 0.0000001);
-    Assertions.assertEquals(1.748963413, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.000001), 0.0000001);
-    Assertions.assertEquals(12.45021723, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.1), 0.0000001);
-    Assertions.assertEquals(21.67577451, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.2), 0.0000001);
-    Assertions.assertEquals(30.44964132, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.3), 0.0000001);
-    Assertions.assertEquals(35.44337814, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.4), 0.0000001);
-    Assertions.assertEquals(38.4706171, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.5), 0.0000001);
-    Assertions.assertEquals(41.73995751, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.6), 0.0000001);
-    Assertions.assertEquals(57.25176603, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.7), 0.0000001);
-    Assertions.assertEquals(77.96955453, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.8), 0.0000001);
-    Assertions.assertEquals(85.52305771, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.9), 0.0000001);
-    Assertions.assertEquals(96.84185513, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.999999), 0.0000001);
-    Assertions.assertEquals(96.8420216, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 1), 0.0000001);
-    Assertions.assertEquals(Double.NaN, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 1.1), 0.0000001);
+    Assert.assertEquals(Double.NaN, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, -0.1), 0.0000001);
+    Assert.assertEquals(1.748945667, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0), 0.0000001);
+    Assert.assertEquals(1.748963413, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.000001), 0.0000001);
+    Assert.assertEquals(12.45021723, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.1), 0.0000001);
+    Assert.assertEquals(21.67577451, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.2), 0.0000001);
+    Assert.assertEquals(30.44964132, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.3), 0.0000001);
+    Assert.assertEquals(35.44337814, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.4), 0.0000001);
+    Assert.assertEquals(38.4706171, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.5), 0.0000001);
+    Assert.assertEquals(41.73995751, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.6), 0.0000001);
+    Assert.assertEquals(57.25176603, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.7), 0.0000001);
+    Assert.assertEquals(77.96955453, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.8), 0.0000001);
+    Assert.assertEquals(85.52305771, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.9), 0.0000001);
+    Assert.assertEquals(96.84185513, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.999999), 0.0000001);
+    Assert.assertEquals(96.8420216, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 1), 0.0000001);
+    Assert.assertEquals(Double.NaN, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 1.1), 0.0000001);
   }
 
   @Test
@@ -190,21 +190,21 @@ public class ArrayQuantileExprMacroTest extends InitializedNullHandlingTest
   {
     final DoubleList doubles = DoubleList.of(1.748945667);
 
-    Assertions.assertEquals(Double.NaN, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, -0.1), 0);
-    Assertions.assertEquals(1.748945667, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0), 0);
-    Assertions.assertEquals(1.748945667, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.000001), 0);
-    Assertions.assertEquals(1.748945667, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.1), 0);
-    Assertions.assertEquals(1.748945667, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.2), 0);
-    Assertions.assertEquals(1.748945667, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.3), 0);
-    Assertions.assertEquals(1.748945667, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.4), 0);
-    Assertions.assertEquals(1.748945667, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.5), 0);
-    Assertions.assertEquals(1.748945667, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.6), 0);
-    Assertions.assertEquals(1.748945667, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.7), 0);
-    Assertions.assertEquals(1.748945667, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.8), 0);
-    Assertions.assertEquals(1.748945667, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.9), 0);
-    Assertions.assertEquals(1.748945667, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.999999), 0);
-    Assertions.assertEquals(1.748945667, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 1), 0);
-    Assertions.assertEquals(Double.NaN, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 1.1), 0);
+    Assert.assertEquals(Double.NaN, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, -0.1), 0);
+    Assert.assertEquals(1.748945667, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0), 0);
+    Assert.assertEquals(1.748945667, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.000001), 0);
+    Assert.assertEquals(1.748945667, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.1), 0);
+    Assert.assertEquals(1.748945667, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.2), 0);
+    Assert.assertEquals(1.748945667, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.3), 0);
+    Assert.assertEquals(1.748945667, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.4), 0);
+    Assert.assertEquals(1.748945667, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.5), 0);
+    Assert.assertEquals(1.748945667, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.6), 0);
+    Assert.assertEquals(1.748945667, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.7), 0);
+    Assert.assertEquals(1.748945667, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.8), 0);
+    Assert.assertEquals(1.748945667, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.9), 0);
+    Assert.assertEquals(1.748945667, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.999999), 0);
+    Assert.assertEquals(1.748945667, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 1), 0);
+    Assert.assertEquals(Double.NaN, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 1.1), 0);
   }
 
   @Test
@@ -212,20 +212,20 @@ public class ArrayQuantileExprMacroTest extends InitializedNullHandlingTest
   {
     final DoubleList doubles = DoubleLists.emptyList();
 
-    Assertions.assertEquals(Double.NaN, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, -0.1), 0);
-    Assertions.assertEquals(Double.NaN, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0), 0);
-    Assertions.assertEquals(Double.NaN, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.000001), 0);
-    Assertions.assertEquals(Double.NaN, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.1), 0);
-    Assertions.assertEquals(Double.NaN, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.2), 0);
-    Assertions.assertEquals(Double.NaN, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.3), 0);
-    Assertions.assertEquals(Double.NaN, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.4), 0);
-    Assertions.assertEquals(Double.NaN, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.5), 0);
-    Assertions.assertEquals(Double.NaN, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.6), 0);
-    Assertions.assertEquals(Double.NaN, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.7), 0);
-    Assertions.assertEquals(Double.NaN, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.8), 0);
-    Assertions.assertEquals(Double.NaN, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.9), 0);
-    Assertions.assertEquals(Double.NaN, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.999999), 0);
-    Assertions.assertEquals(Double.NaN, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 1), 0);
-    Assertions.assertEquals(Double.NaN, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 1.1), 0);
+    Assert.assertEquals(Double.NaN, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, -0.1), 0);
+    Assert.assertEquals(Double.NaN, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0), 0);
+    Assert.assertEquals(Double.NaN, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.000001), 0);
+    Assert.assertEquals(Double.NaN, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.1), 0);
+    Assert.assertEquals(Double.NaN, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.2), 0);
+    Assert.assertEquals(Double.NaN, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.3), 0);
+    Assert.assertEquals(Double.NaN, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.4), 0);
+    Assert.assertEquals(Double.NaN, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.5), 0);
+    Assert.assertEquals(Double.NaN, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.6), 0);
+    Assert.assertEquals(Double.NaN, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.7), 0);
+    Assert.assertEquals(Double.NaN, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.8), 0);
+    Assert.assertEquals(Double.NaN, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.9), 0);
+    Assert.assertEquals(Double.NaN, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 0.999999), 0);
+    Assert.assertEquals(Double.NaN, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 1), 0);
+    Assert.assertEquals(Double.NaN, ArrayQuantileExprMacro.quantileFromSortedArray(doubles, 1.1), 0);
   }
 }

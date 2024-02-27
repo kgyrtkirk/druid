@@ -25,8 +25,8 @@ import nl.jqno.equalsverifier.EqualsVerifier;
 import org.apache.druid.jackson.DefaultObjectMapper;
 import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.nested.NestedPathFinder;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class NestedFieldVirtualColumnTest
 {
@@ -38,7 +38,7 @@ public class NestedFieldVirtualColumnTest
     NestedFieldVirtualColumn there = new NestedFieldVirtualColumn("nested", "$.x.y.z", "v0", ColumnType.LONG);
     String json = JSON_MAPPER.writeValueAsString(there);
     NestedFieldVirtualColumn andBackAgain = JSON_MAPPER.readValue(json, NestedFieldVirtualColumn.class);
-    Assertions.assertEquals(there, andBackAgain);
+    Assert.assertEquals(there, andBackAgain);
   }
 
   @Test
@@ -47,13 +47,14 @@ public class NestedFieldVirtualColumnTest
     NestedFieldVirtualColumn there = new NestedFieldVirtualColumn("nested", "$.x.y.z[1]", "v0", ColumnType.LONG);
     String json = JSON_MAPPER.writeValueAsString(there);
     NestedFieldVirtualColumn andBackAgain = JSON_MAPPER.readValue(json, NestedFieldVirtualColumn.class);
-    Assertions.assertEquals(there, andBackAgain);
+    Assert.assertEquals(there, andBackAgain);
   }
 
   @Test
   public void testBothPathAndPartsDefined()
   {
-    Assertions.assertThrows(
+    Assert.assertThrows(
+        "Cannot define both 'path' and 'pathParts'",
         IllegalArgumentException.class,
         () -> new NestedFieldVirtualColumn(
             "nested",
@@ -63,15 +64,15 @@ public class NestedFieldVirtualColumnTest
             false,
             "$.x.y.z",
             false
-        ),
-        "Cannot define both 'path' and 'pathParts'"
+        )
     );
   }
 
   @Test
   public void testNoPathAndPartsDefined()
   {
-    Assertions.assertThrows(
+    Assert.assertThrows(
+        "Must define exactly one of 'path' or 'pathParts'",
         IllegalArgumentException.class,
         () -> new NestedFieldVirtualColumn(
             "nested",
@@ -81,8 +82,7 @@ public class NestedFieldVirtualColumnTest
             null,
             null,
             null
-        ),
-        "Must define exactly one of 'path' or 'pathParts'"
+        )
     );
   }
 

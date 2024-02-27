@@ -52,17 +52,17 @@ import org.apache.druid.segment.incremental.IncrementalIndexStorageAdapter;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.apache.druid.utils.CloseableUtils;
 import org.hamcrest.CoreMatchers;
+import org.hamcrest.MatcherAssert;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.internal.matchers.ThrowableMessageMatcher;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Timeout;
-import org.junit.jupiter.api.io.TempDir;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.io.File;
 import java.io.IOException;
@@ -84,24 +84,22 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-
-
-
+@RunWith(Enclosed.class)
 public class FrameProcessorExecutorTest
 {
-  @Nested
-  public class SuperBlasterTests extends BaseFrameProcessorExecutorTestSuite
+  @RunWith(Parameterized.class)
+  public static class SuperBlasterTests extends BaseFrameProcessorExecutorTestSuite
   {
     // Tests in this class use SuperBlasterFrameProcessor, which can exercise various kinds of await styles.
-    private SuperBlasterFrameProcessor.AwaitStyle awaitStyle;
+    private final SuperBlasterFrameProcessor.AwaitStyle awaitStyle;
 
-    public void initSuperBlasterTests(int numThreads, SuperBlasterFrameProcessor.AwaitStyle awaitStyle)
+    public SuperBlasterTests(int numThreads, SuperBlasterFrameProcessor.AwaitStyle awaitStyle)
     {
       super(numThreads);
       this.awaitStyle = awaitStyle;
     }
 
+    @Parameterized.Parameters(name = "numThreads = {0}, awaitStyle = {1}")
     public static Collection<Object[]> constructorFeeder()
     {
       final List<Object[]> constructors = new ArrayList<>();
@@ -115,17 +113,15 @@ public class FrameProcessorExecutorTest
       return constructors;
     }
 
-    @MethodSource("constructorFeeder")
-    @ParameterizedTest(name = "numThreads = {0}, awaitStyle = {1}")
-    public void test_runFully(int numThreads, SuperBlasterFrameProcessor.AwaitStyle awaitStyle) throws Exception
+    @Test
+    public void test_runFully() throws Exception
     {
-      initSuperBlasterTests(numThreads, awaitStyle);
       // 3 input files blasted to 2 outputs (2 copies of the data), then muxed to one file.
 
       final IncrementalIndexStorageAdapter adapter =
           new IncrementalIndexStorageAdapter(TestIndex.getIncrementalTestIndex());
       final List<File> inFiles = writeToNFiles(adapter, 3);
-      final File outFile = File.createTempFile("junit", null, temporaryFolder);
+      final File outFile = temporaryFolder.newFile();
 
       final BlockingQueueFrameChannel memoryChannel1 = BlockingQueueFrameChannel.minimal();
       final BlockingQueueFrameChannel memoryChannel2 = BlockingQueueFrameChannel.minimal();
@@ -150,10 +146,10 @@ public class FrameProcessorExecutorTest
       final ListenableFuture<Long> blasterFuture = exec.runFully(blaster, null);
       final ListenableFuture<Long> muxerFuture = exec.runFully(muxer, null);
 
-      Assertions.assertEquals(adapter.getNumRows(), (long) blasterFuture.get());
-      Assertions.assertEquals(adapter.getNumRows() * 2, (long) muxerFuture.get());
+      Assert.assertEquals(adapter.getNumRows(), (long) blasterFuture.get());
+      Assert.assertEquals(adapter.getNumRows() * 2, (long) muxerFuture.get());
 
-      Assertions.assertEquals(
+      Assert.assertEquals(
           adapter.getNumRows() * 2,
           FrameTestUtil.readRowsFromFrameChannel(
               new ReadableFileFrameChannel(FrameFile.open(outFile, null)),
@@ -163,14 +159,15 @@ public class FrameProcessorExecutorTest
     }
   }
 
-  @Nested
-  public class MiscTests extends BaseFrameProcessorExecutorTestSuite
+  @RunWith(Parameterized.class)
+  public static class MiscTests extends BaseFrameProcessorExecutorTestSuite
   {
-    public void initMiscTests(int numThreads)
+    public MiscTests(int numThreads)
     {
       super(numThreads);
     }
 
+    @Parameterized.Parameters(name = "numThreads = {0}")
     public static Collection<Object[]> constructorFeeder()
     {
       final List<Object[]> constructors = new ArrayList<>();
@@ -182,11 +179,9 @@ public class FrameProcessorExecutorTest
       return constructors;
     }
 
-    @MethodSource("constructorFeeder")
-    @ParameterizedTest(name = "numThreads = {0}")
-    public void test_runFully_errors(int numThreads) throws Exception
+    @Test
+    public void test_runFully_errors() throws Exception
     {
-      initMiscTests(numThreads);
       final IncrementalIndexStorageAdapter adapter =
           new IncrementalIndexStorageAdapter(TestIndex.getIncrementalTestIndex());
       final File inFile = Iterables.getOnlyElement(writeToNFiles(adapter, 1));
@@ -196,54 +191,50 @@ public class FrameProcessorExecutorTest
       final FailingFrameProcessor failer = new FailingFrameProcessor(inChannel, outChannel.writable(), 0);
       final ListenableFuture<Long> failerFuture = exec.runFully(failer, null);
 
-      final ExecutionException e = Assertions.assertThrows(
+      final ExecutionException e = Assert.assertThrows(
           ExecutionException.class,
           failerFuture::get
       );
 
-      assertThat(
+      MatcherAssert.assertThat(
           e.getCause().getCause(),
           ThrowableMessageMatcher.hasMessage(CoreMatchers.containsString("failure!"))
       );
 
       final ReadableFrameChannel outReadableChannel = outChannel.readable();
-      Assertions.assertTrue(outReadableChannel.canRead());
+      Assert.assertTrue(outReadableChannel.canRead());
 
-      final RuntimeException readException = Assertions.assertThrows(
+      final RuntimeException readException = Assert.assertThrows(
           RuntimeException.class,
           outReadableChannel::read
       );
 
-      assertThat(
+      MatcherAssert.assertThat(
           readException.getCause(),
           ThrowableMessageMatcher.hasMessage(CoreMatchers.containsString("failure!"))
       );
 
-      Assertions.assertTrue(outReadableChannel.isFinished()); // Finished now that we read the error
+      Assert.assertTrue(outReadableChannel.isFinished()); // Finished now that we read the error
     }
 
-    @MethodSource("constructorFeeder")
-    @ParameterizedTest(name = "numThreads = {0}")
-    public void test_registerCancelableFuture(int numThreads) throws InterruptedException
+    @Test
+    public void test_registerCancelableFuture() throws InterruptedException
     {
-      initMiscTests(numThreads);
       final SettableFuture<Object> future = SettableFuture.create();
       final String cancellationId = "xyzzy";
 
-      Assertions.assertSame(future, exec.registerCancelableFuture(future, false, cancellationId));
+      Assert.assertSame(future, exec.registerCancelableFuture(future, false, cancellationId));
       exec.cancel(cancellationId);
 
       // Don't wait for the future to resolve, because exec.cancel should have done that.
       // If we see an unresolved future here, it's a bug in exec.cancel.
-      Assertions.assertTrue(future.isDone());
-      Assertions.assertTrue(future.isCancelled());
+      Assert.assertTrue(future.isDone());
+      Assert.assertTrue(future.isCancelled());
     }
 
-    @MethodSource("constructorFeeder")
-    @ParameterizedTest(name = "numThreads = {0}")
-    public void test_cancel_sleepy(int numThreads) throws Exception
+    @Test
+    public void test_cancel_sleepy() throws Exception
     {
-      initMiscTests(numThreads);
       final SleepyFrameProcessor processor = new SleepyFrameProcessor();
       final String cancellationId = "xyzzy";
       final ListenableFuture<Long> future = exec.runFully(processor, cancellationId);
@@ -253,37 +244,32 @@ public class FrameProcessorExecutorTest
 
       // Don't wait for the future to resolve, because exec.cancel should have done that.
       // If we see an unresolved future here, it's a bug in exec.cancel.
-      Assertions.assertTrue(future.isDone());
-      Assertions.assertTrue(future.isCancelled());
-      Assertions.assertTrue(processor.didGetInterrupt());
-      Assertions.assertTrue(processor.didCleanup());
+      Assert.assertTrue(future.isDone());
+      Assert.assertTrue(future.isCancelled());
+      Assert.assertTrue(processor.didGetInterrupt());
+      Assert.assertTrue(processor.didCleanup());
     }
 
-    @MethodSource("constructorFeeder")
-    @ParameterizedTest(name = "numThreads = {0}")
-    @Timeout(value = 30_000L, unit = TimeUnit.MILLISECONDS)
-    public void test_futureCancel_sleepy(int numThreads) throws Exception
+    @Test(timeout = 30_000L)
+    public void test_futureCancel_sleepy() throws Exception
     {
-      initMiscTests(numThreads);
       final SleepyFrameProcessor processor = new SleepyFrameProcessor();
       final String cancellationId = "xyzzy";
       final ListenableFuture<Long> future = exec.runFully(processor, cancellationId);
 
       processor.awaitRun();
-      Assertions.assertTrue(future.cancel(true));
-      Assertions.assertTrue(future.isDone());
-      Assertions.assertTrue(future.isCancelled());
+      Assert.assertTrue(future.cancel(true));
+      Assert.assertTrue(future.isDone());
+      Assert.assertTrue(future.isCancelled());
 
       processor.awaitCleanup(); // If this times out, it's a bug that means cancellation didn't happen as expected.
-      Assertions.assertTrue(processor.didGetInterrupt());
-      Assertions.assertTrue(processor.didCleanup());
+      Assert.assertTrue(processor.didGetInterrupt());
+      Assert.assertTrue(processor.didCleanup());
     }
 
-    @MethodSource("constructorFeeder")
-    @ParameterizedTest(name = "numThreads = {0}")
-    public void test_cancel_concurrency(int numThreads) throws Exception
+    @Test
+    public void test_cancel_concurrency() throws Exception
     {
-      initMiscTests(numThreads);
       final int numSystems = 1000;
       final int numGeneratorsPerSystem = 8;
 
@@ -364,15 +350,15 @@ public class FrameProcessorExecutorTest
           // Verify numFrames on each generator.
           for (final InfiniteFrameProcessor generator : generators) {
             final Long retVal = processorFutureMap.get(generator).get();
-            Assertions.assertNotNull(retVal);
-            Assertions.assertEquals(generator.getNumFrames(), (long) retVal);
+            Assert.assertNotNull(retVal);
+            Assert.assertEquals(generator.getNumFrames(), (long) retVal);
             systemFrameCount += retVal;
           }
 
           // Verify return value of the chomper.
           final Long retVal = processorFutureMap.get(chomper).get();
-          Assertions.assertNotNull(retVal);
-          Assertions.assertEquals(systemFrameCount, (long) retVal);
+          Assert.assertNotNull(retVal);
+          Assert.assertEquals(systemFrameCount, (long) retVal);
         } else {
           // Check for cancellation.
           final List<FrameProcessor<?>> allProcessors =
@@ -383,28 +369,26 @@ public class FrameProcessorExecutorTest
 
             // Don't wait for the future to resolve, because exec.cancel should have done that.
             // If we see an unresolved future here, it's a bug in exec.cancel.
-            Assertions.assertTrue(future.isDone());
-            Assertions.assertTrue(future.isCancelled());
+            Assert.assertTrue(future.isDone());
+            Assert.assertTrue(future.isCancelled());
 
-            final Exception e = Assertions.assertThrows(Exception.class, future::get);
-            assertThat(e, CoreMatchers.instanceOf(CancellationException.class));
+            final Exception e = Assert.assertThrows(Exception.class, future::get);
+            MatcherAssert.assertThat(e, CoreMatchers.instanceOf(CancellationException.class));
           }
         }
 
         // In both cases, check for cleanup.
         for (final InfiniteFrameProcessor generator : generators) {
-          Assertions.assertTrue(generator.didCleanup());
+          Assert.assertTrue(generator.didCleanup());
         }
 
-        Assertions.assertTrue(chomper.didCleanup());
+        Assert.assertTrue(chomper.didCleanup());
       }
     }
 
-    @MethodSource("constructorFeeder")
-    @ParameterizedTest(name = "numThreads = {0}")
-    public void test_cancel_nonexistentCancellationId(int numThreads) throws InterruptedException
+    @Test
+    public void test_cancel_nonexistentCancellationId() throws InterruptedException
     {
-      initMiscTests(numThreads);
       // Just making sure no error is thrown when we refer to a nonexistent cancellationId.
       exec.cancel("nonexistent");
     }
@@ -412,8 +396,8 @@ public class FrameProcessorExecutorTest
 
   public abstract static class BaseFrameProcessorExecutorTestSuite extends InitializedNullHandlingTest
   {
-    @TempDir
-    public File temporaryFolder;
+    @Rule
+    public final TemporaryFolder temporaryFolder = new TemporaryFolder();
     public final int numThreads;
 
     FrameProcessorExecutor exec;
@@ -423,7 +407,7 @@ public class FrameProcessorExecutorTest
       this.numThreads = numThreads;
     }
 
-    @BeforeEach
+    @Before
     public void setUp() throws Exception
     {
       exec = new FrameProcessorExecutor(
@@ -436,7 +420,7 @@ public class FrameProcessorExecutorTest
       );
     }
 
-    @AfterEach
+    @After
     public void tearDown() throws Exception
     {
       exec.getExecutorService().shutdownNow();
@@ -453,7 +437,7 @@ public class FrameProcessorExecutorTest
       try {
         // Set up input files.
         for (int i = 0; i < numFiles; i++) {
-          files.add(File.createTempFile("junit", null, temporaryFolder));
+          files.add(temporaryFolder.newFile());
           writers.add(
               FrameFileWriter.open(
                   Channels.newChannel(Files.newOutputStream(files.get(i).toPath())),

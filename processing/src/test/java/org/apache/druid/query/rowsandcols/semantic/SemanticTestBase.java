@@ -26,6 +26,8 @@ import org.apache.druid.query.rowsandcols.MapOfColumnsRowsAndColumns;
 import org.apache.druid.query.rowsandcols.NoAsRowsAndColumns;
 import org.apache.druid.query.rowsandcols.RowsAndColumns;
 import org.apache.druid.query.rowsandcols.RowsAndColumnsTestBase;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
 import java.util.function.Function;
@@ -36,12 +38,14 @@ import java.util.function.Function;
  * needs with the RowsAndColumns.  By extending this base class, the test will end up running against every
  * independent implementation of RowsAndColumns that has been registered with {@link RowsAndColumnsTestBase}.
  */
+@RunWith(Parameterized.class)
 public abstract class SemanticTestBase
 {
   static {
     NullHandling.initializeForTests();
   }
 
+  @Parameterized.Parameters(name = "{0}")
   public static Iterable<Object[]> parameterFeed()
   {
     return FluentIterable.from(RowsAndColumnsTestBase.makerFeeder())
@@ -54,10 +58,10 @@ public abstract class SemanticTestBase
                          });
   }
 
-  private String name;
-  private Function<MapOfColumnsRowsAndColumns, RowsAndColumns> fn;
+  private final String name;
+  private final Function<MapOfColumnsRowsAndColumns, RowsAndColumns> fn;
 
-  public void initSemanticTestBase(
+  public SemanticTestBase(
       String name,
       Function<MapOfColumnsRowsAndColumns, RowsAndColumns> fn
   )

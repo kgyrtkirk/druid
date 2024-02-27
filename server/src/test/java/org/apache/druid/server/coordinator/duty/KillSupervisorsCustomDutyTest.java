@@ -25,16 +25,16 @@ import org.apache.druid.server.coordinator.DruidCoordinatorRuntimeParams;
 import org.apache.druid.server.coordinator.stats.CoordinatorRunStats;
 import org.apache.druid.server.coordinator.stats.Stats;
 import org.joda.time.Duration;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.MockitoJUnitRunner;
 
-@ExtendWith(MockitoExtension.class)
+@RunWith(MockitoJUnitRunner.class)
 public class KillSupervisorsCustomDutyTest
 {
   @Mock
@@ -48,7 +48,7 @@ public class KillSupervisorsCustomDutyTest
 
   private KillSupervisorsCustomDuty killSupervisors;
 
-  @BeforeEach
+  @Before
   public void setup()
   {
     Mockito.when(coordinatorConfig.getCoordinatorMetadataStoreManagementPeriod())
@@ -58,11 +58,11 @@ public class KillSupervisorsCustomDutyTest
   @Test
   public void testConstructorFailIfRetainDurationNull()
   {
-    final IllegalArgumentException exception = Assertions.assertThrows(
+    final IllegalArgumentException exception = Assert.assertThrows(
         IllegalArgumentException.class,
         () -> killSupervisors = new KillSupervisorsCustomDuty(null, mockMetadataSupervisorManager, coordinatorConfig)
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         "[KillSupervisorsCustomDuty.durationToRetain] must be 0 milliseconds or higher",
         exception.getMessage()
     );
@@ -71,7 +71,7 @@ public class KillSupervisorsCustomDutyTest
   @Test
   public void testConstructorFailIfRetainDurationInvalid()
   {
-    final IllegalArgumentException exception = Assertions.assertThrows(
+    final IllegalArgumentException exception = Assert.assertThrows(
         IllegalArgumentException.class,
         () -> killSupervisors = new KillSupervisorsCustomDuty(
             new Duration("PT-1S"),
@@ -79,7 +79,7 @@ public class KillSupervisorsCustomDutyTest
             coordinatorConfig
         )
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         "[KillSupervisorsCustomDuty.durationToRetain] must be 0 milliseconds or higher",
         exception.getMessage()
     );
@@ -93,7 +93,7 @@ public class KillSupervisorsCustomDutyTest
         mockMetadataSupervisorManager,
         coordinatorConfig
     );
-    Assertions.assertNotNull(killSupervisors);
+    Assert.assertNotNull(killSupervisors);
   }
 
   @Test
@@ -108,6 +108,6 @@ public class KillSupervisorsCustomDutyTest
     );
     killSupervisors.run(mockDruidCoordinatorRuntimeParams);
     Mockito.verify(mockMetadataSupervisorManager).removeTerminatedSupervisorsOlderThan(ArgumentMatchers.anyLong());
-    Assertions.assertTrue(runStats.hasStat(Stats.Kill.SUPERVISOR_SPECS));
+    Assert.assertTrue(runStats.hasStat(Stats.Kill.SUPERVISOR_SPECS));
   }
 }

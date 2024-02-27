@@ -38,8 +38,8 @@ import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.segment.nested.NestedDataComplexTypeSerde;
 import org.apache.druid.segment.nested.StructuredData;
 import org.apache.druid.segment.serde.ComplexMetrics;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -85,7 +85,7 @@ public class ScanQueryQueryToolChestTest
               .intervals(new MultipleIntervalSegmentSpec(ImmutableList.of(Intervals.of("2000/3000"))))
               .build();
 
-    Assertions.assertEquals(RowSignature.empty(), toolChest.resultArraySignature(scanQuery));
+    Assert.assertEquals(RowSignature.empty(), toolChest.resultArraySignature(scanQuery));
   }
 
   @Test
@@ -98,7 +98,7 @@ public class ScanQueryQueryToolChestTest
               .legacy(true)
               .build();
 
-    Assertions.assertEquals(RowSignature.empty(), toolChest.resultArraySignature(scanQuery));
+    Assert.assertEquals(RowSignature.empty(), toolChest.resultArraySignature(scanQuery));
   }
 
   @Test
@@ -111,7 +111,7 @@ public class ScanQueryQueryToolChestTest
               .columns("foo", "bar")
               .build();
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         RowSignature.builder().add("foo", null).add("bar", null).build(),
         toolChest.resultArraySignature(scanQuery)
     );
@@ -128,7 +128,7 @@ public class ScanQueryQueryToolChestTest
               .legacy(true)
               .build();
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         RowSignature.builder().add("timestamp", null).add("foo", null).add("bar", null).build(),
         toolChest.resultArraySignature(scanQuery)
     );
@@ -221,7 +221,7 @@ public class ScanQueryQueryToolChestTest
         ).get().toList();
 
 
-    Assertions.assertEquals(3, frames.size());
+    Assert.assertEquals(3, frames.size());
 
     RowSignature resultRowSignature = RowSignature.builder()
                                                   .add("foo", null)
@@ -276,7 +276,7 @@ public class ScanQueryQueryToolChestTest
         ).get().toList();
 
 
-    Assertions.assertEquals(5, frames.size());
+    Assert.assertEquals(5, frames.size());
 
     RowSignature resultRowSignature = RowSignature.builder()
                                                   .add("foo", null)
@@ -339,7 +339,7 @@ public class ScanQueryQueryToolChestTest
         ).get().toList();
 
 
-    Assertions.assertEquals(1, frames.size());
+    Assert.assertEquals(1, frames.size());
 
     RowSignature resultRowSignature = RowSignature.builder()
                                                   .add("foo", null)

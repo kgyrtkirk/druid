@@ -40,8 +40,8 @@ import org.apache.druid.segment.indexing.granularity.UniformGranularitySpec;
 import org.apache.druid.segment.join.NoopJoinableFactory;
 import org.apache.druid.segment.realtime.plumber.RealtimePlumberSchool;
 import org.apache.druid.segment.writeout.OffHeapMemorySegmentWriteOutMediumFactory;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.File;
 import java.util.Arrays;
@@ -129,7 +129,7 @@ public class FireDepartmentTest
 
     FireDepartment newSchema = jsonMapper.readValue(json, FireDepartment.class);
 
-    Assertions.assertEquals(schema.getDataSchema().getDataSource(), newSchema.getDataSchema().getDataSource());
-    Assertions.assertEquals("/tmp/nonexistent", schema.getTuningConfig().getBasePersistDirectory().toString());
+    Assert.assertEquals(schema.getDataSchema().getDataSource(), newSchema.getDataSchema().getDataSource());
+    Assert.assertEquals("/tmp/nonexistent", schema.getTuningConfig().getBasePersistDirectory().toString());
   }
 }

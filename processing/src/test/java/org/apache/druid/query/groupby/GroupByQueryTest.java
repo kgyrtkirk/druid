@@ -44,8 +44,8 @@ import org.apache.druid.segment.TestHelper;
 import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.data.ComparableStringArray;
 import org.apache.druid.segment.virtual.ExpressionVirtualColumn;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -87,7 +87,7 @@ public class GroupByQueryTest
     String json = JSON_MAPPER.writeValueAsString(query);
     Query serdeQuery = JSON_MAPPER.readValue(json, Query.class);
 
-    Assertions.assertEquals(query, serdeQuery);
+    Assert.assertEquals(query, serdeQuery);
   }
 
   @Test
@@ -114,7 +114,7 @@ public class GroupByQueryTest
         )
         .build();
 
-    Assertions.assertEquals(ImmutableSet.of("__time", "quality", "other", "index"), query.getRequiredColumns());
+    Assert.assertEquals(ImmutableSet.of("__time", "quality", "other", "index"), query.getRequiredColumns());
   }
 
   @Test
@@ -135,7 +135,7 @@ public class GroupByQueryTest
         ResultRow.of(1, 1f, "a", ComparableStringArray.of("1", "2")),
         ResultRow.of(1L, 1d, "b", ComparableStringArray.of("3"))
     );
-    Assertions.assertEquals(-1, compare);
+    Assert.assertEquals(-1, compare);
   }
 
   @Test
@@ -159,7 +159,7 @@ public class GroupByQueryTest
         .setAggregatorSpecs(aggs)
         .setGranularity(Granularities.DAY)
         .build();
-    Assertions.assertEquals(innerQuerySegmentSpec, BaseQuery.getQuerySegmentSpecForLookUp(query));
+    Assert.assertEquals(innerQuerySegmentSpec, BaseQuery.getQuerySegmentSpecForLookUp(query));
   }
 
   @Test

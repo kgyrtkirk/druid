@@ -45,9 +45,10 @@ import org.apache.druid.segment.data.GenericIndexed;
 import org.apache.druid.segment.data.RoaringBitmapSerdeFactory;
 import org.apache.druid.segment.serde.StringUtf8ColumnIndexSupplier;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
@@ -57,12 +58,14 @@ import java.util.Map;
 /**
  *
  */
+@RunWith(Parameterized.class)
 public class ExtractionDimFilterTest extends InitializedNullHandlingTest
 {
   private static final Map<String, String> EXTRACTION_VALUES = ImmutableMap.of(
       "foo1", "extractDimVal"
   );
 
+  @Parameterized.Parameters
   public static Iterable<Object[]> constructorFeeder()
   {
     return ImmutableList.of(
@@ -71,7 +74,7 @@ public class ExtractionDimFilterTest extends InitializedNullHandlingTest
     );
   }
 
-  public void initExtractionDimFilterTest(BitmapFactory bitmapFactory, BitmapSerdeFactory bitmapSerdeFactory)
+  public ExtractionDimFilterTest(BitmapFactory bitmapFactory, BitmapSerdeFactory bitmapSerdeFactory)
   {
     final MutableBitmap mutableBitmap = bitmapFactory.makeEmptyMutableBitmap();
     mutableBitmap.add(1);
@@ -80,9 +83,9 @@ public class ExtractionDimFilterTest extends InitializedNullHandlingTest
     this.serdeFactory = bitmapSerdeFactory;
   }
 
-  private BitmapFactory factory;
-  private BitmapSerdeFactory serdeFactory;
-  private ImmutableBitmap foo1BitMap;
+  private final BitmapFactory factory;
+  private final BitmapSerdeFactory serdeFactory;
+  private final ImmutableBitmap foo1BitMap;
 
   private final ColumnIndexSelector BITMAP_INDEX_SELECTOR = new ColumnIndexSelector()
   {
@@ -163,42 +166,34 @@ public class ExtractionDimFilterTest extends InitializedNullHandlingTest
     }
   };
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest
-  public void testEmpty(BitmapFactory bitmapFactory, BitmapSerdeFactory bitmapSerdeFactory)
+  @Test
+  public void testEmpty()
   {
-    initExtractionDimFilterTest(bitmapFactory, bitmapSerdeFactory);
     Filter extractionFilter = new SelectorDimFilter("foo", "NFDJUKFNDSJFNS", DIM_EXTRACTION_FN).toFilter();
     ImmutableBitmap immutableBitmap = Filters.computeDefaultBitmapResults(extractionFilter, BITMAP_INDEX_SELECTOR);
-    Assertions.assertEquals(0, immutableBitmap.size());
+    Assert.assertEquals(0, immutableBitmap.size());
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest
-  public void testNull(BitmapFactory bitmapFactory, BitmapSerdeFactory bitmapSerdeFactory)
+  @Test
+  public void testNull()
   {
-    initExtractionDimFilterTest(bitmapFactory, bitmapSerdeFactory);
     Filter extractionFilter = new SelectorDimFilter("FDHJSFFHDS", "extractDimVal", DIM_EXTRACTION_FN).toFilter();
     ImmutableBitmap immutableBitmap = Filters.computeDefaultBitmapResults(extractionFilter, BITMAP_INDEX_SELECTOR);
-    Assertions.assertEquals(0, immutableBitmap.size());
+    Assert.assertEquals(0, immutableBitmap.size());
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest
-  public void testNormal(BitmapFactory bitmapFactory, BitmapSerdeFactory bitmapSerdeFactory)
+  @Test
+  public void testNormal()
   {
-    initExtractionDimFilterTest(bitmapFactory, bitmapSerdeFactory);
     Filter extractionFilter = new SelectorDimFilter("foo", "extractDimVal", DIM_EXTRACTION_FN).toFilter();
     ImmutableBitmap immutableBitmap = Filters.computeDefaultBitmapResults(extractionFilter, BITMAP_INDEX_SELECTOR);
-    Assertions.assertEquals(1, immutableBitmap.size());
+    Assert.assertEquals(1, immutableBitmap.size());
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest
-  public void testOr(BitmapFactory bitmapFactory, BitmapSerdeFactory bitmapSerdeFactory)
+  @Test
+  public void testOr()
   {
-    initExtractionDimFilterTest(bitmapFactory, bitmapSerdeFactory);
-    Assertions.assertEquals(
+    Assert.assertEquals(
         1,
         Filters.computeDefaultBitmapResults(
             Filters.toFilter(DimFilters.or(new ExtractionDimFilter("foo", "extractDimVal", DIM_EXTRACTION_FN, null))),
@@ -206,7 +201,7 @@ public class ExtractionDimFilterTest extends InitializedNullHandlingTest
         ).size()
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         1,
         Filters.computeDefaultBitmapResults(
             Filters.toFilter(
@@ -220,12 +215,10 @@ public class ExtractionDimFilterTest extends InitializedNullHandlingTest
     );
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest
-  public void testAnd(BitmapFactory bitmapFactory, BitmapSerdeFactory bitmapSerdeFactory)
+  @Test
+  public void testAnd()
   {
-    initExtractionDimFilterTest(bitmapFactory, bitmapSerdeFactory);
-    Assertions.assertEquals(
+    Assert.assertEquals(
         1,
         Filters.computeDefaultBitmapResults(
             Filters.toFilter(DimFilters.or(new ExtractionDimFilter("foo", "extractDimVal", DIM_EXTRACTION_FN, null))),
@@ -233,7 +226,7 @@ public class ExtractionDimFilterTest extends InitializedNullHandlingTest
         ).size()
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         1,
         Filters.computeDefaultBitmapResults(
             Filters.toFilter(
@@ -247,14 +240,11 @@ public class ExtractionDimFilterTest extends InitializedNullHandlingTest
     );
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest
-  public void testNot(BitmapFactory bitmapFactory, BitmapSerdeFactory bitmapSerdeFactory)
+  @Test
+  public void testNot()
   {
 
-    initExtractionDimFilterTest(bitmapFactory, bitmapSerdeFactory);
-
-    Assertions.assertEquals(
+    Assert.assertEquals(
         1,
         Filters.computeDefaultBitmapResults(
             Filters.toFilter(DimFilters.or(new ExtractionDimFilter("foo", "extractDimVal", DIM_EXTRACTION_FN, null))),
@@ -262,7 +252,7 @@ public class ExtractionDimFilterTest extends InitializedNullHandlingTest
         ).size()
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         1,
         Filters.computeDefaultBitmapResults(
             Filters.toFilter(DimFilters.not(new ExtractionDimFilter("foo", "DOES NOT EXIST", DIM_EXTRACTION_FN, null))),

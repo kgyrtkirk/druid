@@ -94,11 +94,11 @@ import org.apache.druid.utils.Streams;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.Period;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
@@ -116,6 +116,7 @@ import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+@RunWith(Parameterized.class)
 public class CompactSegmentsTest
 {
   private static final ObjectMapper JSON_MAPPER = new DefaultObjectMapper();
@@ -129,6 +130,7 @@ public class CompactSegmentsTest
   private static final int MAXIMUM_CAPACITY_WITH_AUTO_SCALE = 10;
   private static final NewestSegmentFirstPolicy SEARCH_POLICY = new NewestSegmentFirstPolicy(JSON_MAPPER);
 
+  @Parameterized.Parameters(name = "{0}")
   public static Collection<Object[]> constructorFeeder()
   {
     final MutableInt nextRangePartitionBoundary = new MutableInt(0);
@@ -162,19 +164,19 @@ public class CompactSegmentsTest
     );
   }
 
-  private PartitionsSpec partitionsSpec;
-  private BiFunction<Integer, Integer, ShardSpec> shardSpecFactory;
+  private final PartitionsSpec partitionsSpec;
+  private final BiFunction<Integer, Integer, ShardSpec> shardSpecFactory;
 
   private DataSourcesSnapshot dataSources;
   Map<String, List<DataSegment>> datasourceToSegments = new HashMap<>();
 
-  public void initCompactSegmentsTest(PartitionsSpec partitionsSpec, BiFunction<Integer, Integer, ShardSpec> shardSpecFactory)
+  public CompactSegmentsTest(PartitionsSpec partitionsSpec, BiFunction<Integer, Integer, ShardSpec> shardSpecFactory)
   {
     this.partitionsSpec = partitionsSpec;
     this.shardSpecFactory = shardSpecFactory;
   }
 
-  @BeforeEach
+  @Before
   public void setup()
   {
     List<DataSegment> allSegments = new ArrayList<>();
@@ -226,11 +228,9 @@ public class CompactSegmentsTest
     );
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testSerde(PartitionsSpec partitionsSpec, BiFunction<Integer, Integer, ShardSpec> shardSpecFactory) throws Exception
+  @Test
+  public void testSerde() throws Exception
   {
-    initCompactSegmentsTest(partitionsSpec, shardSpecFactory);
     final TestOverlordClient overlordClient = new TestOverlordClient(JSON_MAPPER);
 
     JSON_MAPPER.setInjectableValues(
@@ -244,15 +244,13 @@ public class CompactSegmentsTest
     String compactSegmentString = JSON_MAPPER.writeValueAsString(compactSegments);
     CompactSegments serdeCompactSegments = JSON_MAPPER.readValue(compactSegmentString, CompactSegments.class);
 
-    Assertions.assertNotNull(serdeCompactSegments);
-    Assertions.assertSame(overlordClient, serdeCompactSegments.getOverlordClient());
+    Assert.assertNotNull(serdeCompactSegments);
+    Assert.assertSame(overlordClient, serdeCompactSegments.getOverlordClient());
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testRun(PartitionsSpec partitionsSpec, BiFunction<Integer, Integer, ShardSpec> shardSpecFactory)
+  @Test
+  public void testRun()
   {
-    initCompactSegmentsTest(partitionsSpec, shardSpecFactory);
     final TestOverlordClient overlordClient = new TestOverlordClient(JSON_MAPPER);
     final CompactSegments compactSegments = new CompactSegments(SEARCH_POLICY, overlordClient);
 
@@ -326,24 +324,22 @@ public class CompactSegmentsTest
     assertLastSegmentNotCompacted(compactSegments);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testMakeStats(PartitionsSpec partitionsSpec, BiFunction<Integer, Integer, ShardSpec> shardSpecFactory)
+  @Test
+  public void testMakeStats()
   {
-    initCompactSegmentsTest(partitionsSpec, shardSpecFactory);
     final TestOverlordClient overlordClient = new TestOverlordClient(JSON_MAPPER);
     final CompactSegments compactSegments = new CompactSegments(SEARCH_POLICY, overlordClient);
 
     // Before any compaction, we do not have any snapshot of compactions
     Map<String, AutoCompactionSnapshot> autoCompactionSnapshots = compactSegments.getAutoCompactionSnapshot();
-    Assertions.assertEquals(0, autoCompactionSnapshots.size());
+    Assert.assertEquals(0, autoCompactionSnapshots.size());
 
     for (int compactionRunCount = 0; compactionRunCount < 11; compactionRunCount++) {
       doCompactionAndAssertCompactSegmentStatistics(compactSegments, compactionRunCount);
     }
     // Test that stats does not change (and is still correct) when auto compaction runs with everything is fully compacted
     final CoordinatorRunStats stats = doCompactSegments(compactSegments);
-    Assertions.assertEquals(
+    Assert.assertEquals(
         0,
         stats.get(Stats.Compaction.SUBMITTED_TASKS)
     );
@@ -389,20 +385,18 @@ public class CompactSegmentsTest
     // Run auto compaction without any dataSource in the compaction config
     // Snapshot should be empty
     doCompactSegments(compactSegments, new ArrayList<>());
-    Assertions.assertEquals(
+    Assert.assertEquals(
         0,
         stats.get(Stats.Compaction.SUBMITTED_TASKS)
     );
-    Assertions.assertTrue(compactSegments.getAutoCompactionSnapshot().isEmpty());
+    Assert.assertTrue(compactSegments.getAutoCompactionSnapshot().isEmpty());
 
     assertLastSegmentNotCompacted(compactSegments);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testMakeStatsForDataSourceWithCompactedIntervalBetweenNonCompactedIntervals(PartitionsSpec partitionsSpec, BiFunction<Integer, Integer, ShardSpec> shardSpecFactory)
+  @Test
+  public void testMakeStatsForDataSourceWithCompactedIntervalBetweenNonCompactedIntervals()
   {
-    initCompactSegmentsTest(partitionsSpec, shardSpecFactory);
     // Only test and validate for one datasource for simplicity.
     // This dataSource has three intervals already compacted (3 intervals, 120 byte, 12 segments already compacted)
     String dataSourceName = DATA_SOURCE_PREFIX + 1;
@@ -432,13 +426,13 @@ public class CompactSegmentsTest
 
     // Before any compaction, we do not have any snapshot of compactions
     Map<String, AutoCompactionSnapshot> autoCompactionSnapshots = compactSegments.getAutoCompactionSnapshot();
-    Assertions.assertEquals(0, autoCompactionSnapshots.size());
+    Assert.assertEquals(0, autoCompactionSnapshots.size());
 
     // 3 intervals, 120 byte, 12 segments already compacted before the run
     for (int compactionRunCount = 0; compactionRunCount < 8; compactionRunCount++) {
       // Do a cycle of auto compaction which creates one compaction task
       final CoordinatorRunStats stats = doCompactSegments(compactSegments);
-      Assertions.assertEquals(
+      Assert.assertEquals(
           1,
           stats.get(Stats.Compaction.SUBMITTED_TASKS)
       );
@@ -464,7 +458,7 @@ public class CompactSegmentsTest
 
     // Test that stats does not change (and is still correct) when auto compaction runs with everything is fully compacted
     final CoordinatorRunStats stats = doCompactSegments(compactSegments);
-    Assertions.assertEquals(
+    Assert.assertEquals(
         0,
         stats.get(Stats.Compaction.SUBMITTED_TASKS)
     );
@@ -486,24 +480,22 @@ public class CompactSegmentsTest
     );
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testMakeStatsWithDeactivatedDatasource(PartitionsSpec partitionsSpec, BiFunction<Integer, Integer, ShardSpec> shardSpecFactory)
+  @Test
+  public void testMakeStatsWithDeactivatedDatasource()
   {
-    initCompactSegmentsTest(partitionsSpec, shardSpecFactory);
     final TestOverlordClient overlordClient = new TestOverlordClient(JSON_MAPPER);
     final CompactSegments compactSegments = new CompactSegments(SEARCH_POLICY, overlordClient);
 
     // Before any compaction, we do not have any snapshot of compactions
     Map<String, AutoCompactionSnapshot> autoCompactionSnapshots = compactSegments.getAutoCompactionSnapshot();
-    Assertions.assertEquals(0, autoCompactionSnapshots.size());
+    Assert.assertEquals(0, autoCompactionSnapshots.size());
 
     for (int compactionRunCount = 0; compactionRunCount < 11; compactionRunCount++) {
       doCompactionAndAssertCompactSegmentStatistics(compactSegments, compactionRunCount);
     }
     // Test that stats does not change (and is still correct) when auto compaction runs with everything is fully compacted
     final CoordinatorRunStats stats = doCompactSegments(compactSegments);
-    Assertions.assertEquals(
+    Assert.assertEquals(
         0,
         stats.get(Stats.Compaction.SUBMITTED_TASKS)
     );
@@ -548,17 +540,15 @@ public class CompactSegmentsTest
       );
     }
 
-    Assertions.assertEquals(2, compactSegments.getAutoCompactionSnapshot().size());
-    Assertions.assertTrue(compactSegments.getAutoCompactionSnapshot().containsKey(DATA_SOURCE_PREFIX + 1));
-    Assertions.assertTrue(compactSegments.getAutoCompactionSnapshot().containsKey(DATA_SOURCE_PREFIX + 2));
-    Assertions.assertFalse(compactSegments.getAutoCompactionSnapshot().containsKey(DATA_SOURCE_PREFIX + 0));
+    Assert.assertEquals(2, compactSegments.getAutoCompactionSnapshot().size());
+    Assert.assertTrue(compactSegments.getAutoCompactionSnapshot().containsKey(DATA_SOURCE_PREFIX + 1));
+    Assert.assertTrue(compactSegments.getAutoCompactionSnapshot().containsKey(DATA_SOURCE_PREFIX + 2));
+    Assert.assertFalse(compactSegments.getAutoCompactionSnapshot().containsKey(DATA_SOURCE_PREFIX + 0));
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testMakeStatsForDataSourceWithSkipped(PartitionsSpec partitionsSpec, BiFunction<Integer, Integer, ShardSpec> shardSpecFactory)
+  @Test
+  public void testMakeStatsForDataSourceWithSkipped()
   {
-    initCompactSegmentsTest(partitionsSpec, shardSpecFactory);
     // Only test and validate for one datasource for simplicity.
     // This dataSource has three intervals skipped (3 intervals, 1200 byte, 12 segments skipped by auto compaction)
     // Note that these segment used to be 10 bytes each in other tests, we are increasing it to 100 bytes each here
@@ -590,13 +580,13 @@ public class CompactSegmentsTest
 
     // Before any compaction, we do not have any snapshot of compactions
     Map<String, AutoCompactionSnapshot> autoCompactionSnapshots = compactSegments.getAutoCompactionSnapshot();
-    Assertions.assertEquals(0, autoCompactionSnapshots.size());
+    Assert.assertEquals(0, autoCompactionSnapshots.size());
 
     // 3 intervals, 1200 byte (each segment is 100 bytes), 12 segments will be skipped by auto compaction
     for (int compactionRunCount = 0; compactionRunCount < 8; compactionRunCount++) {
       // Do a cycle of auto compaction which creates one compaction task
       final CoordinatorRunStats stats = doCompactSegments(compactSegments);
-      Assertions.assertEquals(
+      Assert.assertEquals(
           1,
           stats.get(Stats.Compaction.SUBMITTED_TASKS)
       );
@@ -620,7 +610,7 @@ public class CompactSegmentsTest
 
     // Test that stats does not change (and is still correct) when auto compaction runs with everything is fully compacted
     final CoordinatorRunStats stats = doCompactSegments(compactSegments);
-    Assertions.assertEquals(
+    Assert.assertEquals(
         0,
         stats.get(Stats.Compaction.SUBMITTED_TASKS)
     );
@@ -641,57 +631,49 @@ public class CompactSegmentsTest
     );
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testRunMultipleCompactionTaskSlots(PartitionsSpec partitionsSpec, BiFunction<Integer, Integer, ShardSpec> shardSpecFactory)
+  @Test
+  public void testRunMultipleCompactionTaskSlots()
   {
-    initCompactSegmentsTest(partitionsSpec, shardSpecFactory);
     final TestOverlordClient overlordClient = new TestOverlordClient(JSON_MAPPER);
     final CompactSegments compactSegments = new CompactSegments(SEARCH_POLICY, overlordClient);
 
     final CoordinatorRunStats stats = doCompactSegments(compactSegments, 3);
-    Assertions.assertEquals(3, stats.get(Stats.Compaction.AVAILABLE_SLOTS));
-    Assertions.assertEquals(3, stats.get(Stats.Compaction.MAX_SLOTS));
-    Assertions.assertEquals(3, stats.get(Stats.Compaction.SUBMITTED_TASKS));
+    Assert.assertEquals(3, stats.get(Stats.Compaction.AVAILABLE_SLOTS));
+    Assert.assertEquals(3, stats.get(Stats.Compaction.MAX_SLOTS));
+    Assert.assertEquals(3, stats.get(Stats.Compaction.SUBMITTED_TASKS));
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testRunMultipleCompactionTaskSlotsWithUseAutoScaleSlotsOverMaxSlot(PartitionsSpec partitionsSpec, BiFunction<Integer, Integer, ShardSpec> shardSpecFactory)
+  @Test
+  public void testRunMultipleCompactionTaskSlotsWithUseAutoScaleSlotsOverMaxSlot()
   {
-    initCompactSegmentsTest(partitionsSpec, shardSpecFactory);
     int maxCompactionSlot = 3;
-    Assertions.assertTrue(maxCompactionSlot < MAXIMUM_CAPACITY_WITH_AUTO_SCALE);
+    Assert.assertTrue(maxCompactionSlot < MAXIMUM_CAPACITY_WITH_AUTO_SCALE);
     final TestOverlordClient overlordClient = new TestOverlordClient(JSON_MAPPER);
     final CompactSegments compactSegments = new CompactSegments(SEARCH_POLICY, overlordClient);
     final CoordinatorRunStats stats =
         doCompactSegments(compactSegments, createCompactionConfigs(), maxCompactionSlot, true);
-    Assertions.assertEquals(maxCompactionSlot, stats.get(Stats.Compaction.AVAILABLE_SLOTS));
-    Assertions.assertEquals(maxCompactionSlot, stats.get(Stats.Compaction.MAX_SLOTS));
-    Assertions.assertEquals(maxCompactionSlot, stats.get(Stats.Compaction.SUBMITTED_TASKS));
+    Assert.assertEquals(maxCompactionSlot, stats.get(Stats.Compaction.AVAILABLE_SLOTS));
+    Assert.assertEquals(maxCompactionSlot, stats.get(Stats.Compaction.MAX_SLOTS));
+    Assert.assertEquals(maxCompactionSlot, stats.get(Stats.Compaction.SUBMITTED_TASKS));
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testRunMultipleCompactionTaskSlotsWithUseAutoScaleSlotsUnderMaxSlot(PartitionsSpec partitionsSpec, BiFunction<Integer, Integer, ShardSpec> shardSpecFactory)
+  @Test
+  public void testRunMultipleCompactionTaskSlotsWithUseAutoScaleSlotsUnderMaxSlot()
   {
-    initCompactSegmentsTest(partitionsSpec, shardSpecFactory);
     int maxCompactionSlot = 100;
-    Assertions.assertFalse(maxCompactionSlot < MAXIMUM_CAPACITY_WITH_AUTO_SCALE);
+    Assert.assertFalse(maxCompactionSlot < MAXIMUM_CAPACITY_WITH_AUTO_SCALE);
     final TestOverlordClient overlordClient = new TestOverlordClient(JSON_MAPPER);
     final CompactSegments compactSegments = new CompactSegments(SEARCH_POLICY, overlordClient);
     final CoordinatorRunStats stats =
         doCompactSegments(compactSegments, createCompactionConfigs(), maxCompactionSlot, true);
-    Assertions.assertEquals(MAXIMUM_CAPACITY_WITH_AUTO_SCALE, stats.get(Stats.Compaction.AVAILABLE_SLOTS));
-    Assertions.assertEquals(MAXIMUM_CAPACITY_WITH_AUTO_SCALE, stats.get(Stats.Compaction.MAX_SLOTS));
-    Assertions.assertEquals(MAXIMUM_CAPACITY_WITH_AUTO_SCALE, stats.get(Stats.Compaction.SUBMITTED_TASKS));
+    Assert.assertEquals(MAXIMUM_CAPACITY_WITH_AUTO_SCALE, stats.get(Stats.Compaction.AVAILABLE_SLOTS));
+    Assert.assertEquals(MAXIMUM_CAPACITY_WITH_AUTO_SCALE, stats.get(Stats.Compaction.MAX_SLOTS));
+    Assert.assertEquals(MAXIMUM_CAPACITY_WITH_AUTO_SCALE, stats.get(Stats.Compaction.SUBMITTED_TASKS));
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testCompactWithoutGranularitySpec(PartitionsSpec partitionsSpec, BiFunction<Integer, Integer, ShardSpec> shardSpecFactory)
+  @Test
+  public void testCompactWithoutGranularitySpec()
   {
-    initCompactSegmentsTest(partitionsSpec, shardSpecFactory);
     final OverlordClient mockClient = Mockito.mock(OverlordClient.class);
     final ArgumentCaptor<Object> payloadCaptor = setUpMockClient(mockClient);
     final CompactSegments compactSegments = new CompactSegments(SEARCH_POLICY, mockClient);
@@ -737,20 +719,18 @@ public class CompactSegmentsTest
 
     ClientCompactionTaskQuery taskPayload = (ClientCompactionTaskQuery) payloadCaptor.getValue();
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Intervals.of("2017-01-09T12:00:00.000Z/2017-01-10T00:00:00.000Z"),
         taskPayload.getIoConfig().getInputSpec().getInterval()
     );
-    Assertions.assertNull(taskPayload.getGranularitySpec().getSegmentGranularity());
-    Assertions.assertNull(taskPayload.getGranularitySpec().getQueryGranularity());
-    Assertions.assertNull(taskPayload.getGranularitySpec().isRollup());
+    Assert.assertNull(taskPayload.getGranularitySpec().getSegmentGranularity());
+    Assert.assertNull(taskPayload.getGranularitySpec().getQueryGranularity());
+    Assert.assertNull(taskPayload.getGranularitySpec().isRollup());
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testCompactWithNotNullIOConfig(PartitionsSpec partitionsSpec, BiFunction<Integer, Integer, ShardSpec> shardSpecFactory)
+  @Test
+  public void testCompactWithNotNullIOConfig()
   {
-    initCompactSegmentsTest(partitionsSpec, shardSpecFactory);
     final OverlordClient mockClient = Mockito.mock(OverlordClient.class);
     final ArgumentCaptor<Object> payloadCaptor = setUpMockClient(mockClient);
     final CompactSegments compactSegments = new CompactSegments(SEARCH_POLICY, mockClient);
@@ -794,14 +774,12 @@ public class CompactSegmentsTest
     );
     doCompactSegments(compactSegments, compactionConfigs);
     ClientCompactionTaskQuery taskPayload = (ClientCompactionTaskQuery) payloadCaptor.getValue();
-    Assertions.assertTrue(taskPayload.getIoConfig().isDropExisting());
+    Assert.assertTrue(taskPayload.getIoConfig().isDropExisting());
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testCompactWithNullIOConfig(PartitionsSpec partitionsSpec, BiFunction<Integer, Integer, ShardSpec> shardSpecFactory)
+  @Test
+  public void testCompactWithNullIOConfig()
   {
-    initCompactSegmentsTest(partitionsSpec, shardSpecFactory);
     final OverlordClient mockClient = Mockito.mock(OverlordClient.class);
     final ArgumentCaptor<Object> payloadCaptor = setUpMockClient(mockClient);
     final CompactSegments compactSegments = new CompactSegments(SEARCH_POLICY, mockClient);
@@ -845,14 +823,12 @@ public class CompactSegmentsTest
     );
     doCompactSegments(compactSegments, compactionConfigs);
     ClientCompactionTaskQuery taskPayload = (ClientCompactionTaskQuery) payloadCaptor.getValue();
-    Assertions.assertEquals(BatchIOConfig.DEFAULT_DROP_EXISTING, taskPayload.getIoConfig().isDropExisting());
+    Assert.assertEquals(BatchIOConfig.DEFAULT_DROP_EXISTING, taskPayload.getIoConfig().isDropExisting());
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testCompactWithGranularitySpec(PartitionsSpec partitionsSpec, BiFunction<Integer, Integer, ShardSpec> shardSpecFactory)
+  @Test
+  public void testCompactWithGranularitySpec()
   {
-    initCompactSegmentsTest(partitionsSpec, shardSpecFactory);
     final OverlordClient mockClient = Mockito.mock(OverlordClient.class);
     final ArgumentCaptor<Object> payloadCaptor = setUpMockClient(mockClient);
     final CompactSegments compactSegments = new CompactSegments(SEARCH_POLICY, mockClient);
@@ -900,21 +876,19 @@ public class CompactSegmentsTest
 
     // All segments is compact at the same time since we changed the segment granularity to YEAR and all segment
     // are within the same year
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ClientCompactionIntervalSpec.fromSegments(datasourceToSegments.get(dataSource), Granularities.YEAR),
         taskPayload.getIoConfig().getInputSpec()
     );
 
     ClientCompactionTaskGranularitySpec expectedGranularitySpec =
         new ClientCompactionTaskGranularitySpec(Granularities.YEAR, null, null);
-    Assertions.assertEquals(expectedGranularitySpec, taskPayload.getGranularitySpec());
+    Assert.assertEquals(expectedGranularitySpec, taskPayload.getGranularitySpec());
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testCompactWithDimensionSpec(PartitionsSpec partitionsSpec, BiFunction<Integer, Integer, ShardSpec> shardSpecFactory)
+  @Test
+  public void testCompactWithDimensionSpec()
   {
-    initCompactSegmentsTest(partitionsSpec, shardSpecFactory);
     final OverlordClient mockClient = Mockito.mock(OverlordClient.class);
     final ArgumentCaptor<Object> payloadCaptor = setUpMockClient(mockClient);
     final CompactSegments compactSegments = new CompactSegments(SEARCH_POLICY, mockClient);
@@ -958,17 +932,15 @@ public class CompactSegmentsTest
     );
     doCompactSegments(compactSegments, compactionConfigs);
     ClientCompactionTaskQuery taskPayload = (ClientCompactionTaskQuery) payloadCaptor.getValue();
-    Assertions.assertEquals(
+    Assert.assertEquals(
         DimensionsSpec.getDefaultSchemas(ImmutableList.of("bar", "foo")),
         taskPayload.getDimensionsSpec().getDimensions()
     );
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testCompactWithoutDimensionSpec(PartitionsSpec partitionsSpec, BiFunction<Integer, Integer, ShardSpec> shardSpecFactory)
+  @Test
+  public void testCompactWithoutDimensionSpec()
   {
-    initCompactSegmentsTest(partitionsSpec, shardSpecFactory);
     final OverlordClient mockClient = Mockito.mock(OverlordClient.class);
     final ArgumentCaptor<Object> payloadCaptor = setUpMockClient(mockClient);
     final CompactSegments compactSegments = new CompactSegments(SEARCH_POLICY, mockClient);
@@ -1012,14 +984,12 @@ public class CompactSegmentsTest
     );
     doCompactSegments(compactSegments, compactionConfigs);
     ClientCompactionTaskQuery taskPayload = (ClientCompactionTaskQuery) payloadCaptor.getValue();
-    Assertions.assertNull(taskPayload.getDimensionsSpec());
+    Assert.assertNull(taskPayload.getDimensionsSpec());
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testCompactWithRollupInGranularitySpec(PartitionsSpec partitionsSpec, BiFunction<Integer, Integer, ShardSpec> shardSpecFactory)
+  @Test
+  public void testCompactWithRollupInGranularitySpec()
   {
-    initCompactSegmentsTest(partitionsSpec, shardSpecFactory);
     final OverlordClient mockClient = Mockito.mock(OverlordClient.class);
     final ArgumentCaptor<Object> payloadCaptor = setUpMockClient(mockClient);
     final CompactSegments compactSegments = new CompactSegments(SEARCH_POLICY, mockClient);
@@ -1066,21 +1036,19 @@ public class CompactSegmentsTest
 
     // All segments is compact at the same time since we changed the segment granularity to YEAR and all segment
     // are within the same year
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ClientCompactionIntervalSpec.fromSegments(datasourceToSegments.get(dataSource), Granularities.YEAR),
         taskPayload.getIoConfig().getInputSpec()
     );
 
     ClientCompactionTaskGranularitySpec expectedGranularitySpec =
         new ClientCompactionTaskGranularitySpec(Granularities.YEAR, null, true);
-    Assertions.assertEquals(expectedGranularitySpec, taskPayload.getGranularitySpec());
+    Assert.assertEquals(expectedGranularitySpec, taskPayload.getGranularitySpec());
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testCompactWithGranularitySpecConflictWithActiveCompactionTask(PartitionsSpec partitionsSpec, BiFunction<Integer, Integer, ShardSpec> shardSpecFactory)
+  @Test
+  public void testCompactWithGranularitySpecConflictWithActiveCompactionTask()
   {
-    initCompactSegmentsTest(partitionsSpec, shardSpecFactory);
     final String dataSource = DATA_SOURCE_PREFIX + 0;
     final String conflictTaskId = "taskIdDummy";
     final TaskStatusPlus runningConflictCompactionTask = new TaskStatusPlus(
@@ -1182,35 +1150,31 @@ public class CompactSegmentsTest
 
     // All segments is compact at the same time since we changed the segment granularity to YEAR and all segment
     // are within the same year
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ClientCompactionIntervalSpec.fromSegments(datasourceToSegments.get(dataSource), Granularities.YEAR),
         taskPayload.getIoConfig().getInputSpec()
     );
 
     ClientCompactionTaskGranularitySpec expectedGranularitySpec =
         new ClientCompactionTaskGranularitySpec(Granularities.YEAR, null, null);
-    Assertions.assertEquals(expectedGranularitySpec, taskPayload.getGranularitySpec());
+    Assert.assertEquals(expectedGranularitySpec, taskPayload.getGranularitySpec());
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testRunParallelCompactionMultipleCompactionTaskSlots(PartitionsSpec partitionsSpec, BiFunction<Integer, Integer, ShardSpec> shardSpecFactory)
+  @Test
+  public void testRunParallelCompactionMultipleCompactionTaskSlots()
   {
-    initCompactSegmentsTest(partitionsSpec, shardSpecFactory);
     final TestOverlordClient overlordClient = new TestOverlordClient(JSON_MAPPER);
     final CompactSegments compactSegments = new CompactSegments(SEARCH_POLICY, overlordClient);
 
     final CoordinatorRunStats stats = doCompactSegments(compactSegments, createCompactionConfigs(2), 4);
-    Assertions.assertEquals(4, stats.get(Stats.Compaction.AVAILABLE_SLOTS));
-    Assertions.assertEquals(4, stats.get(Stats.Compaction.MAX_SLOTS));
-    Assertions.assertEquals(2, stats.get(Stats.Compaction.SUBMITTED_TASKS));
+    Assert.assertEquals(4, stats.get(Stats.Compaction.AVAILABLE_SLOTS));
+    Assert.assertEquals(4, stats.get(Stats.Compaction.MAX_SLOTS));
+    Assert.assertEquals(2, stats.get(Stats.Compaction.SUBMITTED_TASKS));
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testRunWithLockedIntervals(PartitionsSpec partitionsSpec, BiFunction<Integer, Integer, ShardSpec> shardSpecFactory)
+  @Test
+  public void testRunWithLockedIntervals()
   {
-    initCompactSegmentsTest(partitionsSpec, shardSpecFactory);
     final TestOverlordClient overlordClient = new TestOverlordClient(JSON_MAPPER);
 
     // Lock all intervals for dataSource_1 and dataSource_2
@@ -1235,22 +1199,20 @@ public class CompactSegmentsTest
     CompactSegments compactSegments = new CompactSegments(SEARCH_POLICY, overlordClient);
     final CoordinatorRunStats stats =
         doCompactSegments(compactSegments, createCompactionConfigs(2), 4);
-    Assertions.assertEquals(1, stats.get(Stats.Compaction.SUBMITTED_TASKS));
-    Assertions.assertEquals(1, overlordClient.submittedCompactionTasks.size());
+    Assert.assertEquals(1, stats.get(Stats.Compaction.SUBMITTED_TASKS));
+    Assert.assertEquals(1, overlordClient.submittedCompactionTasks.size());
 
     final ClientCompactionTaskQuery compactionTask = overlordClient.submittedCompactionTasks.get(0);
-    Assertions.assertEquals(datasource0, compactionTask.getDataSource());
-    Assertions.assertEquals(
+    Assert.assertEquals(datasource0, compactionTask.getDataSource());
+    Assert.assertEquals(
         Intervals.of("2017-01-01T00:00:00/2017-01-01T12:00:00"),
         compactionTask.getIoConfig().getInputSpec().getInterval()
     );
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testCompactWithTransformSpec(PartitionsSpec partitionsSpec, BiFunction<Integer, Integer, ShardSpec> shardSpecFactory)
+  @Test
+  public void testCompactWithTransformSpec()
   {
-    initCompactSegmentsTest(partitionsSpec, shardSpecFactory);
     NullHandling.initializeForTests();
     final OverlordClient mockClient = Mockito.mock(OverlordClient.class);
     final ArgumentCaptor<Object> payloadCaptor = setUpMockClient(mockClient);
@@ -1295,15 +1257,13 @@ public class CompactSegmentsTest
     );
     doCompactSegments(compactSegments, compactionConfigs);
     ClientCompactionTaskQuery taskPayload = (ClientCompactionTaskQuery) payloadCaptor.getValue();
-    Assertions.assertNotNull(taskPayload.getTransformSpec());
-    Assertions.assertEquals(new SelectorDimFilter("dim1", "foo", null), taskPayload.getTransformSpec().getFilter());
+    Assert.assertNotNull(taskPayload.getTransformSpec());
+    Assert.assertEquals(new SelectorDimFilter("dim1", "foo", null), taskPayload.getTransformSpec().getFilter());
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testCompactWithoutCustomSpecs(PartitionsSpec partitionsSpec, BiFunction<Integer, Integer, ShardSpec> shardSpecFactory)
+  @Test
+  public void testCompactWithoutCustomSpecs()
   {
-    initCompactSegmentsTest(partitionsSpec, shardSpecFactory);
     final OverlordClient mockClient = Mockito.mock(OverlordClient.class);
     final ArgumentCaptor<Object> payloadCaptor = setUpMockClient(mockClient);
     final CompactSegments compactSegments = new CompactSegments(SEARCH_POLICY, mockClient);
@@ -1347,15 +1307,13 @@ public class CompactSegmentsTest
     );
     doCompactSegments(compactSegments, compactionConfigs);
     ClientCompactionTaskQuery taskPayload = (ClientCompactionTaskQuery) payloadCaptor.getValue();
-    Assertions.assertNull(taskPayload.getTransformSpec());
-    Assertions.assertNull(taskPayload.getMetricsSpec());
+    Assert.assertNull(taskPayload.getTransformSpec());
+    Assert.assertNull(taskPayload.getMetricsSpec());
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testCompactWithMetricsSpec(PartitionsSpec partitionsSpec, BiFunction<Integer, Integer, ShardSpec> shardSpecFactory)
+  @Test
+  public void testCompactWithMetricsSpec()
   {
-    initCompactSegmentsTest(partitionsSpec, shardSpecFactory);
     NullHandling.initializeForTests();
     AggregatorFactory[] aggregatorFactories = new AggregatorFactory[] {new CountAggregatorFactory("cnt")};
     final OverlordClient mockClient = Mockito.mock(OverlordClient.class);
@@ -1402,15 +1360,13 @@ public class CompactSegmentsTest
     doCompactSegments(compactSegments, compactionConfigs);
     ClientCompactionTaskQuery taskPayload = (ClientCompactionTaskQuery) payloadCaptor.getValue();
     AggregatorFactory[] actual = taskPayload.getMetricsSpec();
-    Assertions.assertNotNull(actual);
-    Assertions.assertArrayEquals(aggregatorFactories, actual);
+    Assert.assertNotNull(actual);
+    Assert.assertArrayEquals(aggregatorFactories, actual);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testDetermineSegmentGranularityFromSegmentsToCompact(PartitionsSpec partitionsSpec, BiFunction<Integer, Integer, ShardSpec> shardSpecFactory)
+  @Test
+  public void testDetermineSegmentGranularityFromSegmentsToCompact()
   {
-    initCompactSegmentsTest(partitionsSpec, shardSpecFactory);
     String dataSourceName = DATA_SOURCE_PREFIX + 1;
     List<DataSegment> segments = new ArrayList<>();
     segments.add(
@@ -1484,21 +1440,19 @@ public class CompactSegmentsTest
     doCompactSegments(compactSegments, compactionConfigs);
     ClientCompactionTaskQuery taskPayload = (ClientCompactionTaskQuery) payloadCaptor.getValue();
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ClientCompactionIntervalSpec.fromSegments(segments, Granularities.DAY),
         taskPayload.getIoConfig().getInputSpec()
     );
 
     ClientCompactionTaskGranularitySpec expectedGranularitySpec =
         new ClientCompactionTaskGranularitySpec(Granularities.DAY, null, null);
-    Assertions.assertEquals(expectedGranularitySpec, taskPayload.getGranularitySpec());
+    Assert.assertEquals(expectedGranularitySpec, taskPayload.getGranularitySpec());
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testDetermineSegmentGranularityFromSegmentGranularityInCompactionConfig(PartitionsSpec partitionsSpec, BiFunction<Integer, Integer, ShardSpec> shardSpecFactory)
+  @Test
+  public void testDetermineSegmentGranularityFromSegmentGranularityInCompactionConfig()
   {
-    initCompactSegmentsTest(partitionsSpec, shardSpecFactory);
     String dataSourceName = DATA_SOURCE_PREFIX + 1;
     List<DataSegment> segments = new ArrayList<>();
     segments.add(
@@ -1572,21 +1526,19 @@ public class CompactSegmentsTest
     doCompactSegments(compactSegments, compactionConfigs);
     ClientCompactionTaskQuery taskPayload = (ClientCompactionTaskQuery) payloadCaptor.getValue();
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ClientCompactionIntervalSpec.fromSegments(segments, Granularities.YEAR),
         taskPayload.getIoConfig().getInputSpec()
     );
 
     ClientCompactionTaskGranularitySpec expectedGranularitySpec =
         new ClientCompactionTaskGranularitySpec(Granularities.YEAR, null, null);
-    Assertions.assertEquals(expectedGranularitySpec, taskPayload.getGranularitySpec());
+    Assert.assertEquals(expectedGranularitySpec, taskPayload.getGranularitySpec());
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testCompactWithMetricsSpecShouldSetPreserveExistingMetricsTrue(PartitionsSpec partitionsSpec, BiFunction<Integer, Integer, ShardSpec> shardSpecFactory)
+  @Test
+  public void testCompactWithMetricsSpecShouldSetPreserveExistingMetricsTrue()
   {
-    initCompactSegmentsTest(partitionsSpec, shardSpecFactory);
     final OverlordClient mockClient = Mockito.mock(OverlordClient.class);
     final ArgumentCaptor<Object> payloadCaptor = setUpMockClient(mockClient);
     final CompactSegments compactSegments = new CompactSegments(SEARCH_POLICY, mockClient);
@@ -1630,17 +1582,15 @@ public class CompactSegmentsTest
     );
     doCompactSegments(compactSegments, compactionConfigs);
     ClientCompactionTaskQuery taskPayload = (ClientCompactionTaskQuery) payloadCaptor.getValue();
-    Assertions.assertNotNull(taskPayload.getTuningConfig());
-    Assertions.assertNotNull(taskPayload.getTuningConfig().getAppendableIndexSpec());
-    Assertions.assertTrue(((OnheapIncrementalIndex.Spec) taskPayload.getTuningConfig()
+    Assert.assertNotNull(taskPayload.getTuningConfig());
+    Assert.assertNotNull(taskPayload.getTuningConfig().getAppendableIndexSpec());
+    Assert.assertTrue(((OnheapIncrementalIndex.Spec) taskPayload.getTuningConfig()
                                                                 .getAppendableIndexSpec()).isPreserveExistingMetrics());
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testCompactWithoutMetricsSpecShouldSetPreserveExistingMetricsFalse(PartitionsSpec partitionsSpec, BiFunction<Integer, Integer, ShardSpec> shardSpecFactory)
+  @Test
+  public void testCompactWithoutMetricsSpecShouldSetPreserveExistingMetricsFalse()
   {
-    initCompactSegmentsTest(partitionsSpec, shardSpecFactory);
     final OverlordClient mockClient = Mockito.mock(OverlordClient.class);
     final ArgumentCaptor<Object> payloadCaptor = setUpMockClient(mockClient);
     final CompactSegments compactSegments = new CompactSegments(SEARCH_POLICY, mockClient);
@@ -1684,9 +1634,9 @@ public class CompactSegmentsTest
     );
     doCompactSegments(compactSegments, compactionConfigs);
     ClientCompactionTaskQuery taskPayload = (ClientCompactionTaskQuery) payloadCaptor.getValue();
-    Assertions.assertNotNull(taskPayload.getTuningConfig());
-    Assertions.assertNotNull(taskPayload.getTuningConfig().getAppendableIndexSpec());
-    Assertions.assertFalse(((OnheapIncrementalIndex.Spec) taskPayload.getTuningConfig()
+    Assert.assertNotNull(taskPayload.getTuningConfig());
+    Assert.assertNotNull(taskPayload.getTuningConfig().getAppendableIndexSpec());
+    Assert.assertFalse(((OnheapIncrementalIndex.Spec) taskPayload.getTuningConfig()
                                                                  .getAppendableIndexSpec()).isPreserveExistingMetrics());
   }
 
@@ -1707,17 +1657,17 @@ public class CompactSegmentsTest
   {
     Map<String, AutoCompactionSnapshot> autoCompactionSnapshots = compactSegments.getAutoCompactionSnapshot();
     AutoCompactionSnapshot snapshot = autoCompactionSnapshots.get(dataSourceName);
-    Assertions.assertEquals(dataSourceName, snapshot.getDataSource());
-    Assertions.assertEquals(scheduleStatus, snapshot.getScheduleStatus());
-    Assertions.assertEquals(expectedByteCountAwaitingCompaction, snapshot.getBytesAwaitingCompaction());
-    Assertions.assertEquals(expectedByteCountCompressed, snapshot.getBytesCompacted());
-    Assertions.assertEquals(expectedByteCountSkipped, snapshot.getBytesSkipped());
-    Assertions.assertEquals(expectedIntervalCountAwaitingCompaction, snapshot.getIntervalCountAwaitingCompaction());
-    Assertions.assertEquals(expectedIntervalCountCompressed, snapshot.getIntervalCountCompacted());
-    Assertions.assertEquals(expectedIntervalCountSkipped, snapshot.getIntervalCountSkipped());
-    Assertions.assertEquals(expectedSegmentCountAwaitingCompaction, snapshot.getSegmentCountAwaitingCompaction());
-    Assertions.assertEquals(expectedSegmentCountCompressed, snapshot.getSegmentCountCompacted());
-    Assertions.assertEquals(expectedSegmentCountSkipped, snapshot.getSegmentCountSkipped());
+    Assert.assertEquals(dataSourceName, snapshot.getDataSource());
+    Assert.assertEquals(scheduleStatus, snapshot.getScheduleStatus());
+    Assert.assertEquals(expectedByteCountAwaitingCompaction, snapshot.getBytesAwaitingCompaction());
+    Assert.assertEquals(expectedByteCountCompressed, snapshot.getBytesCompacted());
+    Assert.assertEquals(expectedByteCountSkipped, snapshot.getBytesSkipped());
+    Assert.assertEquals(expectedIntervalCountAwaitingCompaction, snapshot.getIntervalCountAwaitingCompaction());
+    Assert.assertEquals(expectedIntervalCountCompressed, snapshot.getIntervalCountCompacted());
+    Assert.assertEquals(expectedIntervalCountSkipped, snapshot.getIntervalCountSkipped());
+    Assert.assertEquals(expectedSegmentCountAwaitingCompaction, snapshot.getSegmentCountAwaitingCompaction());
+    Assert.assertEquals(expectedSegmentCountCompressed, snapshot.getSegmentCountCompacted());
+    Assert.assertEquals(expectedSegmentCountSkipped, snapshot.getSegmentCountSkipped());
   }
 
   private void doCompactionAndAssertCompactSegmentStatistics(CompactSegments compactSegments, int compactionRunCount)
@@ -1725,7 +1675,7 @@ public class CompactSegmentsTest
     for (int dataSourceIndex = 0; dataSourceIndex < 3; dataSourceIndex++) {
       // One compaction task triggered
       final CoordinatorRunStats stats = doCompactSegments(compactSegments);
-      Assertions.assertEquals(
+      Assert.assertEquals(
           1,
           stats.get(Stats.Compaction.SUBMITTED_TASKS)
       );
@@ -1848,7 +1798,7 @@ public class CompactSegmentsTest
   {
     for (int i = 0; i < 3; i++) {
       final CoordinatorRunStats stats = doCompactSegments(compactSegments);
-      Assertions.assertEquals(
+      Assert.assertEquals(
           expectedCompactTaskCount,
           stats.get(Stats.Compaction.SUBMITTED_TASKS)
       );
@@ -1867,9 +1817,9 @@ public class CompactSegmentsTest
       );
 
       if (expectedRemainingSegments > 0) {
-        Assertions.assertEquals(i + 1, numDatasources.get());
+        Assert.assertEquals(i + 1, numDatasources.get());
       } else {
-        Assertions.assertEquals(2 - i, numDatasources.get());
+        Assert.assertEquals(2 - i, numDatasources.get());
       }
     }
 
@@ -1878,13 +1828,13 @@ public class CompactSegmentsTest
     for (int i = 0; i < 3; i++) {
       final String dataSource = DATA_SOURCE_PREFIX + i;
       List<TimelineObjectHolder<String, DataSegment>> holders = dataSourceToTimeline.get(dataSource).lookup(expectedInterval);
-      Assertions.assertEquals(1, holders.size());
+      Assert.assertEquals(1, holders.size());
       List<PartitionChunk<DataSegment>> chunks = Lists.newArrayList(holders.get(0).getObject());
-      Assertions.assertEquals(2, chunks.size());
+      Assert.assertEquals(2, chunks.size());
       final String expectedVersion = expectedVersionSupplier.get();
       for (PartitionChunk<DataSegment> chunk : chunks) {
-        Assertions.assertEquals(expectedInterval, chunk.getObject().getInterval());
-        Assertions.assertEquals(expectedVersion, chunk.getObject().getVersion());
+        Assert.assertEquals(expectedInterval, chunk.getObject().getInterval());
+        Assert.assertEquals(expectedVersion, chunk.getObject().getVersion());
       }
     }
   }
@@ -1898,14 +1848,14 @@ public class CompactSegmentsTest
       final String dataSource = DATA_SOURCE_PREFIX + i;
       final Interval interval = Intervals.of(StringUtils.format("2017-01-09T12:00:00/2017-01-10"));
       List<TimelineObjectHolder<String, DataSegment>> holders = dataSourceToTimeline.get(dataSource).lookup(interval);
-      Assertions.assertEquals(1, holders.size());
+      Assert.assertEquals(1, holders.size());
       for (TimelineObjectHolder<String, DataSegment> holder : holders) {
         List<PartitionChunk<DataSegment>> chunks = Lists.newArrayList(holder.getObject());
-        Assertions.assertEquals(4, chunks.size());
+        Assert.assertEquals(4, chunks.size());
         for (PartitionChunk<DataSegment> chunk : chunks) {
           DataSegment segment = chunk.getObject();
-          Assertions.assertEquals(interval, segment.getInterval());
-          Assertions.assertEquals("version", segment.getVersion());
+          Assert.assertEquals(interval, segment.getInterval());
+          Assert.assertEquals("version", segment.getVersion());
         }
       }
     }
@@ -1915,7 +1865,7 @@ public class CompactSegmentsTest
     addMoreData(dataSource, 9);
 
     CoordinatorRunStats stats = doCompactSegments(compactSegments);
-    Assertions.assertEquals(
+    Assert.assertEquals(
         1,
         stats.get(Stats.Compaction.SUBMITTED_TASKS)
     );
@@ -1923,7 +1873,7 @@ public class CompactSegmentsTest
     addMoreData(dataSource, 10);
 
     stats = doCompactSegments(compactSegments);
-    Assertions.assertEquals(
+    Assert.assertEquals(
         1,
         stats.get(Stats.Compaction.SUBMITTED_TASKS)
     );
@@ -2011,7 +1961,7 @@ public class CompactSegmentsTest
 
     private int compactVersionSuffix = 0;
 
-    private void initCompactSegmentsTest(ObjectMapper jsonMapper)
+    private TestOverlordClient(ObjectMapper jsonMapper)
     {
       this.jsonMapper = jsonMapper;
     }
@@ -2168,83 +2118,70 @@ public class CompactSegmentsTest
     }
   }
 
-  @Nested
-  public class StaticUtilsTest
+  public static class StaticUtilsTest
   {
-    @MethodSource("constructorFeeder")
-    @ParameterizedTest(name = "{0}")
-    public void testIsParalleModeNullTuningConfigReturnFalse(PartitionsSpec partitionsSpec, BiFunction<Integer, Integer, ShardSpec> shardSpecFactory)
+    @Test
+    public void testIsParalleModeNullTuningConfigReturnFalse()
     {
-      initCompactSegmentsTest(partitionsSpec, shardSpecFactory);
-      Assertions.assertFalse(CompactSegments.isParallelMode(null));
+      Assert.assertFalse(CompactSegments.isParallelMode(null));
     }
 
-    @MethodSource("constructorFeeder")
-    @ParameterizedTest(name = "{0}")
-    public void testIsParallelModeNullPartitionsSpecReturnFalse(PartitionsSpec partitionsSpec, BiFunction<Integer, Integer, ShardSpec> shardSpecFactory)
+    @Test
+    public void testIsParallelModeNullPartitionsSpecReturnFalse()
     {
-      initCompactSegmentsTest(partitionsSpec, shardSpecFactory);
       ClientCompactionTaskQueryTuningConfig tuningConfig = Mockito.mock(ClientCompactionTaskQueryTuningConfig.class);
       Mockito.when(tuningConfig.getPartitionsSpec()).thenReturn(null);
-      Assertions.assertFalse(CompactSegments.isParallelMode(tuningConfig));
+      Assert.assertFalse(CompactSegments.isParallelMode(tuningConfig));
     }
 
-    @MethodSource("constructorFeeder")
-    @ParameterizedTest(name = "{0}")
-    public void testIsParallelModeNonRangePartitionVaryingMaxNumConcurrentSubTasks(PartitionsSpec partitionsSpec, BiFunction<Integer, Integer, ShardSpec> shardSpecFactory)
+    @Test
+    public void testIsParallelModeNonRangePartitionVaryingMaxNumConcurrentSubTasks()
     {
-      initCompactSegmentsTest(partitionsSpec, shardSpecFactory);
       ClientCompactionTaskQueryTuningConfig tuningConfig = Mockito.mock(ClientCompactionTaskQueryTuningConfig.class);
       Mockito.when(tuningConfig.getPartitionsSpec()).thenReturn(Mockito.mock(PartitionsSpec.class));
 
       Mockito.when(tuningConfig.getMaxNumConcurrentSubTasks()).thenReturn(null);
-      Assertions.assertFalse(CompactSegments.isParallelMode(tuningConfig));
+      Assert.assertFalse(CompactSegments.isParallelMode(tuningConfig));
 
       Mockito.when(tuningConfig.getMaxNumConcurrentSubTasks()).thenReturn(1);
-      Assertions.assertFalse(CompactSegments.isParallelMode(tuningConfig));
+      Assert.assertFalse(CompactSegments.isParallelMode(tuningConfig));
 
       Mockito.when(tuningConfig.getMaxNumConcurrentSubTasks()).thenReturn(2);
-      Assertions.assertTrue(CompactSegments.isParallelMode(tuningConfig));
+      Assert.assertTrue(CompactSegments.isParallelMode(tuningConfig));
     }
 
-    @MethodSource("constructorFeeder")
-    @ParameterizedTest(name = "{0}")
-    public void testIsParallelModeRangePartitionVaryingMaxNumConcurrentSubTasks(PartitionsSpec partitionsSpec, BiFunction<Integer, Integer, ShardSpec> shardSpecFactory)
+    @Test
+    public void testIsParallelModeRangePartitionVaryingMaxNumConcurrentSubTasks()
     {
-      initCompactSegmentsTest(partitionsSpec, shardSpecFactory);
       ClientCompactionTaskQueryTuningConfig tuningConfig = Mockito.mock(ClientCompactionTaskQueryTuningConfig.class);
       Mockito.when(tuningConfig.getPartitionsSpec()).thenReturn(Mockito.mock(SingleDimensionPartitionsSpec.class));
 
       Mockito.when(tuningConfig.getMaxNumConcurrentSubTasks()).thenReturn(null);
-      Assertions.assertFalse(CompactSegments.isParallelMode(tuningConfig));
+      Assert.assertFalse(CompactSegments.isParallelMode(tuningConfig));
 
       Mockito.when(tuningConfig.getMaxNumConcurrentSubTasks()).thenReturn(1);
-      Assertions.assertTrue(CompactSegments.isParallelMode(tuningConfig));
+      Assert.assertTrue(CompactSegments.isParallelMode(tuningConfig));
 
       Mockito.when(tuningConfig.getMaxNumConcurrentSubTasks()).thenReturn(2);
-      Assertions.assertTrue(CompactSegments.isParallelMode(tuningConfig));
+      Assert.assertTrue(CompactSegments.isParallelMode(tuningConfig));
     }
 
-    @MethodSource("constructorFeeder")
-    @ParameterizedTest(name = "{0}")
-    public void testFindMaxNumTaskSlotsUsedByOneCompactionTaskWhenIsParallelMode(PartitionsSpec partitionsSpec, BiFunction<Integer, Integer, ShardSpec> shardSpecFactory)
+    @Test
+    public void testFindMaxNumTaskSlotsUsedByOneCompactionTaskWhenIsParallelMode()
     {
-      initCompactSegmentsTest(partitionsSpec, shardSpecFactory);
       ClientCompactionTaskQueryTuningConfig tuningConfig = Mockito.mock(ClientCompactionTaskQueryTuningConfig.class);
       Mockito.when(tuningConfig.getPartitionsSpec()).thenReturn(Mockito.mock(PartitionsSpec.class));
       Mockito.when(tuningConfig.getMaxNumConcurrentSubTasks()).thenReturn(2);
-      Assertions.assertEquals(3, CompactSegments.findMaxNumTaskSlotsUsedByOneCompactionTask(tuningConfig));
+      Assert.assertEquals(3, CompactSegments.findMaxNumTaskSlotsUsedByOneCompactionTask(tuningConfig));
     }
 
-    @MethodSource("constructorFeeder")
-    @ParameterizedTest(name = "{0}")
-    public void testFindMaxNumTaskSlotsUsedByOneCompactionTaskWhenIsSequentialMode(PartitionsSpec partitionsSpec, BiFunction<Integer, Integer, ShardSpec> shardSpecFactory)
+    @Test
+    public void testFindMaxNumTaskSlotsUsedByOneCompactionTaskWhenIsSequentialMode()
     {
-      initCompactSegmentsTest(partitionsSpec, shardSpecFactory);
       ClientCompactionTaskQueryTuningConfig tuningConfig = Mockito.mock(ClientCompactionTaskQueryTuningConfig.class);
       Mockito.when(tuningConfig.getPartitionsSpec()).thenReturn(Mockito.mock(PartitionsSpec.class));
       Mockito.when(tuningConfig.getMaxNumConcurrentSubTasks()).thenReturn(1);
-      Assertions.assertEquals(1, CompactSegments.findMaxNumTaskSlotsUsedByOneCompactionTask(tuningConfig));
+      Assert.assertEquals(1, CompactSegments.findMaxNumTaskSlotsUsedByOneCompactionTask(tuningConfig));
     }
   }
 

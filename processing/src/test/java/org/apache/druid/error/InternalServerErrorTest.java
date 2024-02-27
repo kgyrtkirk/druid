@@ -20,11 +20,10 @@
 package org.apache.druid.error;
 
 import org.apache.druid.matchers.DruidMatchers;
-import org.junit.jupiter.api.Test;
+import org.hamcrest.MatcherAssert;
+import org.junit.Test;
 
 import java.util.Map;
-
-import static org.hamcrest.MatcherAssert.assertThat;
 
 public class InternalServerErrorTest
 {
@@ -35,7 +34,7 @@ public class InternalServerErrorTest
     ErrorResponse errorResponse = new ErrorResponse(InternalServerError.exception("runtimeFailure", "Internal Server Error"));
     final Map<String, Object> asMap = errorResponse.getAsMap();
 
-    assertThat(
+    MatcherAssert.assertThat(
         asMap,
         DruidMatchers.mapMatcher(
             "error", "druidException",
@@ -48,7 +47,7 @@ public class InternalServerErrorTest
 
     ErrorResponse recomposed = ErrorResponse.fromMap(asMap);
 
-    assertThat(
+    MatcherAssert.assertThat(
         recomposed.getUnderlyingException(),
         new DruidExceptionMatcher(
             DruidException.Persona.OPERATOR,

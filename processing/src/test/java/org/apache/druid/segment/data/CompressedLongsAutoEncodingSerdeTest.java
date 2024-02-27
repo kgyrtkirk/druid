@@ -21,9 +21,10 @@ package org.apache.druid.segment.data;
 
 import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.segment.writeout.OffHeapMemorySegmentWriteOutMedium;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.ByteBuffer;
@@ -33,8 +34,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
+@RunWith(Parameterized.class)
 public class CompressedLongsAutoEncodingSerdeTest
 {
+  @Parameterized.Parameters(name = "{0} {1} {2}")
   public static Iterable<Object[]> compressionStrategies()
   {
     List<Object[]> data = new ArrayList<>();
@@ -50,11 +53,11 @@ public class CompressedLongsAutoEncodingSerdeTest
   private static final long[] BITS_PER_VALUE_PARAMETERS = new long[]{1, 2, 4, 7, 11, 14, 18, 23, 31, 39, 46, 55, 62};
 
   protected final CompressionFactory.LongEncodingStrategy encodingStrategy = CompressionFactory.LongEncodingStrategy.AUTO;
-  protected CompressionStrategy compressionStrategy;
-  protected ByteOrder order;
-  protected long bitsPerValue;
+  protected final CompressionStrategy compressionStrategy;
+  protected final ByteOrder order;
+  protected final long bitsPerValue;
 
-  public void initCompressedLongsAutoEncodingSerdeTest(
+  public CompressedLongsAutoEncodingSerdeTest(
       long bitsPerValue,
       CompressionStrategy compressionStrategy,
       ByteOrder order
@@ -65,11 +68,9 @@ public class CompressedLongsAutoEncodingSerdeTest
     this.order = order;
   }
 
-  @MethodSource("compressionStrategies")
-  @ParameterizedTest(name = "{0} {1} {2}")
-  public void testFidelity(long bitsPerValue, CompressionStrategy compressionStrategy, ByteOrder order) throws Exception
+  @Test
+  public void testFidelity() throws Exception
   {
-    initCompressedLongsAutoEncodingSerdeTest(bitsPerValue, compressionStrategy, order);
     final long bound = 1L << bitsPerValue;
     // big enough to have at least 2 blocks, and a handful of sizes offset by 1 from each other
     int blockSize = 1 << 16;
@@ -107,11 +108,11 @@ public class CompressedLongsAutoEncodingSerdeTest
     for (long value : values) {
       serializer.add(value);
     }
-    Assertions.assertEquals(values.length, serializer.size());
+    Assert.assertEquals(values.length, serializer.size());
 
     final ByteArrayOutputStream baos = new ByteArrayOutputStream();
     serializer.writeTo(Channels.newChannel(baos), null);
-    Assertions.assertEquals(baos.size(), serializer.getSerializedSize());
+    Assert.assertEquals(baos.size(), serializer.getSerializedSize());
     CompressedColumnarLongsSupplier supplier =
         CompressedColumnarLongsSupplier.fromByteBuffer(ByteBuffer.wrap(baos.toByteArray()), order);
     ColumnarLongs longs = supplier.get();
@@ -122,17 +123,17 @@ public class CompressedLongsAutoEncodingSerdeTest
 
   private void assertIndexMatchesVals(ColumnarLongs indexed, long[] vals)
   {
-    Assertions.assertEquals(vals.length, indexed.size());
+    Assert.assertEquals(vals.length, indexed.size());
     for (int i = 0; i < indexed.size(); ++i) {
-      Assertions.assertEquals(
-          vals[i],
-          indexed.get(i),
+      Assert.assertEquals(
           StringUtils.format(
               "Value [%d] at row '%d' does not match [%d]",
               indexed.get(i),
               i,
               vals[i]
-          )
+          ),
+          vals[i],
+          indexed.get(i)
       );
     }
   }

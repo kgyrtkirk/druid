@@ -66,10 +66,10 @@ import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.apache.druid.timeline.DataSegment;
 import org.apache.druid.timeline.partition.LinearShardSpec;
 import org.apache.druid.utils.CloseableUtils;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -97,7 +97,7 @@ public class ExpressionSelectorsTest extends InitializedNullHandlingTest
                                                                                   .setHasMultipleValues(true)
                                                                                   .setHasNulls(true);
 
-  @BeforeAll
+  @BeforeClass
   public static void setup()
   {
     CLOSER = Closer.create();
@@ -126,7 +126,7 @@ public class ExpressionSelectorsTest extends InitializedNullHandlingTest
     ADAPTERS = ImmutableList.of(INCREMENTAL_INDEX_STORAGE_ADAPTER, QUERYABLE_INDEX_STORAGE_ADAPTER);
   }
 
-  @AfterAll
+  @AfterClass
   public static void teardown()
   {
     CloseableUtils.closeAndSuppressExceptions(CLOSER, throwable -> {
@@ -177,26 +177,26 @@ public class ExpressionSelectorsTest extends InitializedNullHandlingTest
           Object bindingVal = bindings.get(columnName);
           Object bindingVal2 = bindings2.get(columnName);
           if (dimSelectorVal == null) {
-            Assertions.assertNull(dimSelectorVal);
-            Assertions.assertNull(valueSelectorVal);
-            Assertions.assertNull(bindingVal);
+            Assert.assertNull(dimSelectorVal);
+            Assert.assertNull(valueSelectorVal);
+            Assert.assertNull(bindingVal);
             if (isMultiVal) {
-              Assertions.assertNull(((Object[]) bindingVal2)[0]);
+              Assert.assertNull(((Object[]) bindingVal2)[0]);
             } else {
-              Assertions.assertNull(bindingVal2);
+              Assert.assertNull(bindingVal2);
             }
 
           } else {
             if (isMultiVal) {
-              Assertions.assertEquals(dimSelectorVal, ((Object[]) bindingVal)[0]);
-              Assertions.assertEquals(valueSelectorVal, ((Object[]) bindingVal)[0]);
-              Assertions.assertEquals(dimSelectorVal, ((Object[]) bindingVal2)[0]);
-              Assertions.assertEquals(valueSelectorVal, ((Object[]) bindingVal2)[0]);
+              Assert.assertEquals(dimSelectorVal, ((Object[]) bindingVal)[0]);
+              Assert.assertEquals(valueSelectorVal, ((Object[]) bindingVal)[0]);
+              Assert.assertEquals(dimSelectorVal, ((Object[]) bindingVal2)[0]);
+              Assert.assertEquals(valueSelectorVal, ((Object[]) bindingVal2)[0]);
             } else {
-              Assertions.assertEquals(dimSelectorVal, bindingVal);
-              Assertions.assertEquals(valueSelectorVal, bindingVal);
-              Assertions.assertEquals(dimSelectorVal, bindingVal2);
-              Assertions.assertEquals(valueSelectorVal, bindingVal2);
+              Assert.assertEquals(dimSelectorVal, bindingVal);
+              Assert.assertEquals(valueSelectorVal, bindingVal);
+              Assert.assertEquals(dimSelectorVal, bindingVal2);
+              Assert.assertEquals(valueSelectorVal, bindingVal2);
             }
           }
 
@@ -271,20 +271,20 @@ public class ExpressionSelectorsTest extends InitializedNullHandlingTest
           Object bindingVal4 = bindings4.get(columnName);
 
           if (dimSelectorVal == null) {
-            Assertions.assertNull(dimSelectorVal);
-            Assertions.assertNull(valueSelectorVal);
-            Assertions.assertNull(bindingVal);
-            Assertions.assertNull(bindingVal2);
-            Assertions.assertNull(bindingVal3);
+            Assert.assertNull(dimSelectorVal);
+            Assert.assertNull(valueSelectorVal);
+            Assert.assertNull(bindingVal);
+            Assert.assertNull(bindingVal2);
+            Assert.assertNull(bindingVal3);
             // binding4 has null coercion
-            Assertions.assertArrayEquals(new Object[]{null}, (Object[]) bindingVal4);
+            Assert.assertArrayEquals(new Object[]{null}, (Object[]) bindingVal4);
           } else {
-            Assertions.assertArrayEquals(((List) dimSelectorVal).toArray(), (Object[]) bindingVal);
-            Assertions.assertArrayEquals(((List) valueSelectorVal).toArray(), (Object[]) bindingVal);
-            Assertions.assertArrayEquals(((List) dimSelectorVal).toArray(), (Object[]) bindingVal2);
-            Assertions.assertArrayEquals(((List) valueSelectorVal).toArray(), (Object[]) bindingVal2);
-            Assertions.assertArrayEquals(((List) dimSelectorVal).toArray(), (Object[]) bindingVal3);
-            Assertions.assertArrayEquals(((List) valueSelectorVal).toArray(), (Object[]) bindingVal3);
+            Assert.assertArrayEquals(((List) dimSelectorVal).toArray(), (Object[]) bindingVal);
+            Assert.assertArrayEquals(((List) valueSelectorVal).toArray(), (Object[]) bindingVal);
+            Assert.assertArrayEquals(((List) dimSelectorVal).toArray(), (Object[]) bindingVal2);
+            Assert.assertArrayEquals(((List) valueSelectorVal).toArray(), (Object[]) bindingVal2);
+            Assert.assertArrayEquals(((List) dimSelectorVal).toArray(), (Object[]) bindingVal3);
+            Assert.assertArrayEquals(((List) valueSelectorVal).toArray(), (Object[]) bindingVal3);
           }
 
           cursor.advance();
@@ -332,14 +332,14 @@ public class ExpressionSelectorsTest extends InitializedNullHandlingTest
           Object bindingVal = bindings.get(columnName);
           Object bindingVal2 = bindings2.get(columnName);
           if (valueSelector.isNull()) {
-            Assertions.assertNull(valueSelector.getObject());
-            Assertions.assertNull(bindingVal);
-            Assertions.assertNull(bindingVal2);
+            Assert.assertNull(valueSelector.getObject());
+            Assert.assertNull(bindingVal);
+            Assert.assertNull(bindingVal2);
           } else {
-            Assertions.assertEquals(valueSelector.getObject(), bindingVal);
-            Assertions.assertEquals(valueSelector.getLong(), bindingVal);
-            Assertions.assertEquals(valueSelector.getObject(), bindingVal2);
-            Assertions.assertEquals(valueSelector.getLong(), bindingVal2);
+            Assert.assertEquals(valueSelector.getObject(), bindingVal);
+            Assert.assertEquals(valueSelector.getLong(), bindingVal);
+            Assert.assertEquals(valueSelector.getObject(), bindingVal2);
+            Assert.assertEquals(valueSelector.getLong(), bindingVal2);
           }
           cursor.advance();
         }
@@ -388,14 +388,14 @@ public class ExpressionSelectorsTest extends InitializedNullHandlingTest
           Object bindingVal = bindings.get(columnName);
           Object bindingVal2 = bindings2.get(columnName);
           if (valueSelector.isNull()) {
-            Assertions.assertNull(valueSelector.getObject());
-            Assertions.assertNull(bindingVal);
-            Assertions.assertNull(bindingVal2);
+            Assert.assertNull(valueSelector.getObject());
+            Assert.assertNull(bindingVal);
+            Assert.assertNull(bindingVal2);
           } else {
-            Assertions.assertEquals(valueSelector.getObject(), bindingVal);
-            Assertions.assertEquals(valueSelector.getDouble(), bindingVal);
-            Assertions.assertEquals(valueSelector.getObject(), bindingVal2);
-            Assertions.assertEquals(valueSelector.getDouble(), bindingVal2);
+            Assert.assertEquals(valueSelector.getObject(), bindingVal);
+            Assert.assertEquals(valueSelector.getDouble(), bindingVal);
+            Assert.assertEquals(valueSelector.getObject(), bindingVal2);
+            Assert.assertEquals(valueSelector.getDouble(), bindingVal2);
           }
           cursor.advance();
         }
@@ -408,7 +408,7 @@ public class ExpressionSelectorsTest extends InitializedNullHandlingTest
   @Test
   public void test_canMapOverDictionary_oneSingleValueInput()
   {
-    Assertions.assertTrue(
+    Assert.assertTrue(
         ExpressionSelectors.canMapOverDictionary(
             Parser.parse("dim1 == 2", ExprMacroTable.nil()).analyzeInputs(),
             SINGLE_VALUE
@@ -419,7 +419,7 @@ public class ExpressionSelectorsTest extends InitializedNullHandlingTest
   @Test
   public void test_canMapOverDictionary_oneSingleValueInputSpecifiedTwice()
   {
-    Assertions.assertTrue(
+    Assert.assertTrue(
         ExpressionSelectors.canMapOverDictionary(
             Parser.parse("concat(dim1, dim1) == 2", ExprMacroTable.nil()).analyzeInputs(),
             SINGLE_VALUE
@@ -430,7 +430,7 @@ public class ExpressionSelectorsTest extends InitializedNullHandlingTest
   @Test
   public void test_canMapOverDictionary_oneMultiValueInput()
   {
-    Assertions.assertTrue(
+    Assert.assertTrue(
         ExpressionSelectors.canMapOverDictionary(
             Parser.parse("dim1 == 2", ExprMacroTable.nil()).analyzeInputs(),
             MULTI_VAL
@@ -441,7 +441,7 @@ public class ExpressionSelectorsTest extends InitializedNullHandlingTest
   @Test
   public void test_canMapOverDictionary_oneUnknownInput()
   {
-    Assertions.assertFalse(
+    Assert.assertFalse(
         ExpressionSelectors.canMapOverDictionary(
             Parser.parse("dim1 == 2", ExprMacroTable.nil()).analyzeInputs(),
             new ColumnCapabilitiesImpl()
@@ -452,7 +452,7 @@ public class ExpressionSelectorsTest extends InitializedNullHandlingTest
   @Test
   public void test_canMapOverDictionary_oneSingleValueInputInArrayContext()
   {
-    Assertions.assertFalse(
+    Assert.assertFalse(
         ExpressionSelectors.canMapOverDictionary(
             Parser.parse("array_contains(dim1, 2)", ExprMacroTable.nil()).analyzeInputs(),
             ColumnCapabilitiesImpl.createDefault().setType(ColumnType.STRING_ARRAY)
@@ -463,7 +463,7 @@ public class ExpressionSelectorsTest extends InitializedNullHandlingTest
   @Test
   public void test_canMapOverDictionary_oneMultiValueInputInArrayContext()
   {
-    Assertions.assertFalse(
+    Assert.assertFalse(
         ExpressionSelectors.canMapOverDictionary(
             Parser.parse("array_contains(dim1, 2)", ExprMacroTable.nil()).analyzeInputs(),
             MULTI_VAL
@@ -474,7 +474,7 @@ public class ExpressionSelectorsTest extends InitializedNullHandlingTest
   @Test
   public void test_canMapOverDictionary_oneUnknownInputInArrayContext()
   {
-    Assertions.assertFalse(
+    Assert.assertFalse(
         ExpressionSelectors.canMapOverDictionary(
             Parser.parse("array_contains(dim1, 2)", ExprMacroTable.nil()).analyzeInputs(),
             new ColumnCapabilitiesImpl()
@@ -485,7 +485,7 @@ public class ExpressionSelectorsTest extends InitializedNullHandlingTest
   @Test
   public void test_canMapOverDictionary()
   {
-    Assertions.assertTrue(
+    Assert.assertTrue(
         ExpressionSelectors.canMapOverDictionary(
             Parser.parse("dim1 == 2", ExprMacroTable.nil()).analyzeInputs(),
             SINGLE_VALUE
@@ -503,14 +503,14 @@ public class ExpressionSelectorsTest extends InitializedNullHandlingTest
         false
     );
 
-    Assertions.assertNotNull(supplier);
-    Assertions.assertEquals(null, supplier.get());
+    Assert.assertNotNull(supplier);
+    Assert.assertEquals(null, supplier.get());
 
     settableSupplier.set(null);
-    Assertions.assertEquals(null, supplier.get());
+    Assert.assertEquals(null, supplier.get());
 
     settableSupplier.set("1234");
-    Assertions.assertEquals("1234", supplier.get());
+    Assert.assertEquals("1234", supplier.get());
   }
 
   @Test
@@ -522,20 +522,20 @@ public class ExpressionSelectorsTest extends InitializedNullHandlingTest
         true
     );
 
-    Assertions.assertNotNull(supplier);
-    Assertions.assertEquals(null, supplier.get());
+    Assert.assertNotNull(supplier);
+    Assert.assertEquals(null, supplier.get());
 
     settableSupplier.set(1.1f);
-    Assertions.assertEquals(1.1f, supplier.get());
+    Assert.assertEquals(1.1f, supplier.get());
 
     settableSupplier.set(1L);
-    Assertions.assertEquals(1L, supplier.get());
+    Assert.assertEquals(1L, supplier.get());
 
     settableSupplier.set("1234");
-    Assertions.assertEquals("1234", supplier.get());
+    Assert.assertEquals("1234", supplier.get());
 
     settableSupplier.set("1.234");
-    Assertions.assertEquals("1.234", supplier.get());
+    Assert.assertEquals("1.234", supplier.get());
   }
 
   @Test
@@ -548,14 +548,14 @@ public class ExpressionSelectorsTest extends InitializedNullHandlingTest
     );
 
 
-    Assertions.assertNotNull(supplier);
-    Assertions.assertEquals(null, supplier.get());
+    Assert.assertNotNull(supplier);
+    Assert.assertEquals(null, supplier.get());
 
     settableSupplier.set(1.1f);
-    Assertions.assertEquals(1.1f, supplier.get());
+    Assert.assertEquals(1.1f, supplier.get());
 
     settableSupplier.set(1L);
-    Assertions.assertEquals(1L, supplier.get());
+    Assert.assertEquals(1L, supplier.get());
   }
 
   @Test
@@ -567,14 +567,14 @@ public class ExpressionSelectorsTest extends InitializedNullHandlingTest
         true
     );
 
-    Assertions.assertNotNull(supplier);
-    Assertions.assertEquals(null, supplier.get());
+    Assert.assertNotNull(supplier);
+    Assert.assertEquals(null, supplier.get());
 
     settableSupplier.set("1.1");
-    Assertions.assertEquals("1.1", supplier.get());
+    Assert.assertEquals("1.1", supplier.get());
 
     settableSupplier.set("1");
-    Assertions.assertEquals("1", supplier.get());
+    Assert.assertEquals("1", supplier.get());
   }
 
   @Test
@@ -586,28 +586,28 @@ public class ExpressionSelectorsTest extends InitializedNullHandlingTest
         true
     );
 
-    Assertions.assertNotNull(supplier);
-    Assertions.assertEquals(null, supplier.get());
+    Assert.assertNotNull(supplier);
+    Assert.assertEquals(null, supplier.get());
 
     settableSupplier.set(ImmutableList.of("1", "2", "3"));
-    Assertions.assertArrayEquals(new String[]{"1", "2", "3"}, (Object[]) supplier.get());
+    Assert.assertArrayEquals(new String[]{"1", "2", "3"}, (Object[]) supplier.get());
 
   }
 
   @Test
   public void test_coerceEvalToSelectorObject()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableList.of(1L, 2L, 3L),
         ExpressionSelectors.coerceEvalToObjectOrList(ExprEval.ofLongArray(new Long[]{1L, 2L, 3L}))
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableList.of(1.0, 2.0, 3.0),
         ExpressionSelectors.coerceEvalToObjectOrList(ExprEval.ofDoubleArray(new Double[]{1.0, 2.0, 3.0}))
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableList.of("a", "b", "c"),
         ExpressionSelectors.coerceEvalToObjectOrList(ExprEval.ofStringArray(new String[]{"a", "b", "c"}))
     );
@@ -616,19 +616,19 @@ public class ExpressionSelectorsTest extends InitializedNullHandlingTest
     withNulls.add("a");
     withNulls.add(null);
     withNulls.add("c");
-    Assertions.assertEquals(
+    Assert.assertEquals(
         withNulls,
         ExpressionSelectors.coerceEvalToObjectOrList(ExprEval.ofStringArray(new String[]{"a", null, "c"}))
     );
 
-    Assertions.assertNull(
+    Assert.assertNull(
         ExpressionSelectors.coerceEvalToObjectOrList(ExprEval.ofLongArray(null))
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         1L,
         ExpressionSelectors.coerceEvalToObjectOrList(ExprEval.ofLongArray(new Long[]{1L}))
     );
-    Assertions.assertNull(
+    Assert.assertNull(
         ExpressionSelectors.coerceEvalToObjectOrList(ExprEval.ofLongArray(new Long[]{null}))
     );
   }
@@ -698,11 +698,11 @@ public class ExpressionSelectorsTest extends InitializedNullHandlingTest
                                     ? Collections.singletonList("foo")
                                     : Collections.singletonList(null);
         if (rowCount == 0) {
-          Assertions.assertEquals(expectedFoo, x);
-          Assertions.assertEquals(expectedNull, y);
+          Assert.assertEquals(expectedFoo, x);
+          Assert.assertEquals(expectedNull, y);
         } else {
-          Assertions.assertEquals(expectedNull, x);
-          Assertions.assertEquals(expectedFoo, y);
+          Assert.assertEquals(expectedNull, x);
+          Assert.assertEquals(expectedFoo, y);
         }
         rowCount++;
         cursor.advance();
@@ -710,7 +710,7 @@ public class ExpressionSelectorsTest extends InitializedNullHandlingTest
       return rowCount;
     }).accumulate(0, (in, acc) -> in + acc);
 
-    Assertions.assertEquals(2, rowsProcessed);
+    Assert.assertEquals(2, rowsProcessed);
   }
 
   private static DimensionSelector dimensionSelectorFromSupplier(

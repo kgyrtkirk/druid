@@ -23,8 +23,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.apache.druid.js.JavaScriptConfig;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import javax.validation.Validation;
 import javax.validation.Validator;
@@ -36,7 +36,7 @@ public class JavaScriptModuleTest
   public void testInjectionDefault()
   {
     JavaScriptConfig config = makeInjectorWithProperties(new Properties()).getInstance(JavaScriptConfig.class);
-    Assertions.assertFalse(config.isEnabled());
+    Assert.assertFalse(config.isEnabled());
   }
 
   @Test
@@ -45,7 +45,7 @@ public class JavaScriptModuleTest
     final Properties props = new Properties();
     props.setProperty("druid.javascript.enabled", "true");
     JavaScriptConfig config = makeInjectorWithProperties(props).getInstance(JavaScriptConfig.class);
-    Assertions.assertTrue(config.isEnabled());
+    Assert.assertTrue(config.isEnabled());
   }
 
   private Injector makeInjectorWithProperties(final Properties props)

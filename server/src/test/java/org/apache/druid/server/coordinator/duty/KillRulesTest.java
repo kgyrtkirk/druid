@@ -25,16 +25,16 @@ import org.apache.druid.server.coordinator.TestDruidCoordinatorConfig;
 import org.apache.druid.server.coordinator.stats.CoordinatorRunStats;
 import org.apache.druid.server.coordinator.stats.Stats;
 import org.joda.time.Duration;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.MockitoJUnitRunner;
 
-@ExtendWith(MockitoExtension.class)
+@RunWith(MockitoJUnitRunner.class)
 public class KillRulesTest
 {
   @Mock
@@ -46,7 +46,7 @@ public class KillRulesTest
   private KillRules killRules;
   private CoordinatorRunStats runStats;
 
-  @BeforeEach
+  @Before
   public void setup()
   {
     runStats = new CoordinatorRunStats();
@@ -81,7 +81,7 @@ public class KillRulesTest
     killRules = new KillRules(druidCoordinatorConfig, mockRuleManager);
     killRules.run(mockDruidCoordinatorRuntimeParams);
     Mockito.verify(mockRuleManager).removeRulesForEmptyDatasourcesOlderThan(ArgumentMatchers.anyLong());
-    Assertions.assertTrue(runStats.hasStat(Stats.Kill.RULES));
+    Assert.assertTrue(runStats.hasStat(Stats.Kill.RULES));
   }
 
   @Test
@@ -94,11 +94,11 @@ public class KillRulesTest
         .withCoordinatorKillMaxSegments(10)
         .withCoordinatorKillIgnoreDurationToRetain(false)
         .build();
-    final IllegalArgumentException exception = Assertions.assertThrows(
+    final IllegalArgumentException exception = Assert.assertThrows(
         IllegalArgumentException.class,
         () -> killRules = new KillRules(druidCoordinatorConfig, mockRuleManager)
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         "[druid.coordinator.kill.rule.period] must be greater than"
         + " [druid.coordinator.period.metadataStoreManagementPeriod]",
         exception.getMessage()
@@ -115,11 +115,11 @@ public class KillRulesTest
         .withCoordinatorKillMaxSegments(10)
         .withCoordinatorKillIgnoreDurationToRetain(false)
         .build();
-    final IllegalArgumentException exception = Assertions.assertThrows(
+    final IllegalArgumentException exception = Assert.assertThrows(
         IllegalArgumentException.class,
         () -> killRules = new KillRules(druidCoordinatorConfig, mockRuleManager)
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         "[druid.coordinator.kill.rule.durationToRetain] must be 0 milliseconds or higher",
         exception.getMessage()
     );

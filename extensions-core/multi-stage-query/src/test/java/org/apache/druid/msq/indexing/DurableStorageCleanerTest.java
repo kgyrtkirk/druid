@@ -34,6 +34,7 @@ import org.easymock.Capture;
 import org.easymock.EasyMock;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Test;
 
 import java.util.Collection;
 import java.util.Set;

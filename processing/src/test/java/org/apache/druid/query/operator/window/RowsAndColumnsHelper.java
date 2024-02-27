@@ -27,7 +27,7 @@ import org.apache.druid.query.rowsandcols.RowsAndColumns;
 import org.apache.druid.query.rowsandcols.column.Column;
 import org.apache.druid.query.rowsandcols.column.ColumnAccessor;
 import org.apache.druid.segment.column.ColumnType;
-import org.junit.jupiter.api.Assertions;
+import org.junit.Assert;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -40,33 +40,33 @@ public class RowsAndColumnsHelper
   public static void assertEquals(RowsAndColumns rac, String name, int[] expectedResults)
   {
     final Column column = rac.findColumn(name);
-    Assertions.assertNotNull(column);
+    Assert.assertNotNull(column);
     final ColumnAccessor accessor = column.toAccessor();
-    Assertions.assertEquals(expectedResults.length, accessor.numRows());
+    Assert.assertEquals(expectedResults.length, accessor.numRows());
     for (int i = 0; i < expectedResults.length; ++i) {
-      Assertions.assertEquals(expectedResults[i], accessor.getInt(i), StringUtils.format("%s[%s]", name, i));
+      Assert.assertEquals(StringUtils.format("%s[%s]", name, i), expectedResults[i], accessor.getInt(i));
     }
   }
 
   public static void assertEquals(RowsAndColumns rac, String name, long[] expectedResults)
   {
     final Column column = rac.findColumn(name);
-    Assertions.assertNotNull(column);
+    Assert.assertNotNull(column);
     final ColumnAccessor accessor = column.toAccessor();
-    Assertions.assertEquals(expectedResults.length, accessor.numRows());
+    Assert.assertEquals(expectedResults.length, accessor.numRows());
     for (int i = 0; i < expectedResults.length; ++i) {
-      Assertions.assertEquals(expectedResults[i], accessor.getLong(i), StringUtils.format("%s[%s]", name, i));
+      Assert.assertEquals(StringUtils.format("%s[%s]", name, i), expectedResults[i], accessor.getLong(i));
     }
   }
 
   public static void assertEquals(RowsAndColumns rac, String name, double[] expectedResults)
   {
     final Column column = rac.findColumn(name);
-    Assertions.assertNotNull(column);
+    Assert.assertNotNull(column);
     final ColumnAccessor accessor = column.toAccessor();
-    Assertions.assertEquals(expectedResults.length, accessor.numRows());
+    Assert.assertEquals(expectedResults.length, accessor.numRows());
     for (int i = 0; i < expectedResults.length; ++i) {
-      Assertions.assertEquals(expectedResults[i], accessor.getDouble(i), 0.0d, StringUtils.format("%s[%s]", name, i));
+      Assert.assertEquals(StringUtils.format("%s[%s]", name, i), expectedResults[i], accessor.getDouble(i), 0.0d);
     }
   }
 
@@ -126,7 +126,7 @@ public class RowsAndColumnsHelper
     if (this.expectedSize.get() == null) {
       this.expectedSize.set(expectedSize);
     }
-    Assertions.assertEquals(this.expectedSize.get().intValue(), expectedSize, "Columns should be defined with same size");
+    Assert.assertEquals("Columns should be defined with same size", this.expectedSize.get().intValue(), expectedSize);
     ColumnHelper retVal = helpers.get(column);
     if (retVal == null) {
       retVal = new ColumnHelper(expectedSize, expectedType);
@@ -163,13 +163,13 @@ public class RowsAndColumnsHelper
   {
     if (fullColumnSet != null) {
       final Collection<String> columnNames = rac.getColumnNames();
-      Assertions.assertEquals(fullColumnSet.size(), columnNames.size(), name);
-      Assertions.assertTrue(fullColumnSet.containsAll(columnNames), name);
+      Assert.assertEquals(name, fullColumnSet.size(), columnNames.size());
+      Assert.assertTrue(name, fullColumnSet.containsAll(columnNames));
     }
 
     for (Map.Entry<String, ColumnHelper> entry : helpers.entrySet()) {
       final Column racColumn = rac.findColumn(entry.getKey());
-      Assertions.assertNotNull(racColumn);
+      Assert.assertNotNull(racColumn);
       entry.getValue().validate(StringUtils.format("%s.%s", name, entry.getKey()), racColumn);
     }
   }
@@ -237,53 +237,53 @@ public class RowsAndColumnsHelper
     {
       final ColumnAccessor accessor = col.toAccessor();
 
-      Assertions.assertEquals(expectedType, accessor.getType(), msgBase);
-      Assertions.assertEquals(expectedVals.length, accessor.numRows(), msgBase);
+      Assert.assertEquals(msgBase, expectedType, accessor.getType());
+      Assert.assertEquals(msgBase, expectedVals.length, accessor.numRows());
       for (int i = 0; i < accessor.numRows(); ++i) {
         final String msg = StringUtils.format("%s[%s]", msgBase, i);
         Object expectedVal = expectedVals[i];
         if (expectedVal == null) {
-          Assertions.assertTrue(expectedNulls[i], msg);
-          Assertions.assertTrue(accessor.isNull(i), msg);
-          Assertions.assertNull(accessor.getObject(i), msg);
+          Assert.assertTrue(msg, expectedNulls[i]);
+          Assert.assertTrue(msg, accessor.isNull(i));
+          Assert.assertNull(msg, accessor.getObject(i));
         }
 
-        Assertions.assertEquals(expectedNulls[i], accessor.isNull(i), msg + " is null?");
+        Assert.assertEquals(msg + " is null?", expectedNulls[i], accessor.isNull(i));
         if (expectedVal instanceof Float) {
           if (expectedNulls[i]) {
-            Assertions.assertEquals(0.0f, accessor.getFloat(i), 0.0, msg);
+            Assert.assertEquals(msg, 0.0f, accessor.getFloat(i), 0.0);
           } else {
-            Assertions.assertEquals((Float) expectedVal, accessor.getFloat(i), 0.0, msg);
+            Assert.assertEquals(msg, (Float) expectedVal, accessor.getFloat(i), 0.0);
           }
         } else if (expectedVal instanceof Double) {
           if (expectedNulls[i]) {
-            Assertions.assertEquals(0.0d, accessor.getDouble(i), 0.0, msg);
+            Assert.assertEquals(msg, 0.0d, accessor.getDouble(i), 0.0);
           } else {
-            Assertions.assertEquals((Double) expectedVal, accessor.getDouble(i), 0.0, msg);
+            Assert.assertEquals(msg, (Double) expectedVal, accessor.getDouble(i), 0.0);
           }
         } else if (expectedVal instanceof Integer) {
           if (expectedNulls[i]) {
-            Assertions.assertEquals(0, accessor.getInt(i), msg);
+            Assert.assertEquals(msg, 0, accessor.getInt(i));
           } else {
-            Assertions.assertEquals(((Integer) expectedVal).intValue(), accessor.getInt(i), msg);
+            Assert.assertEquals(msg, ((Integer) expectedVal).intValue(), accessor.getInt(i));
           }
         } else if (expectedVal instanceof Long) {
           if (expectedNulls[i]) {
-            Assertions.assertEquals(0, accessor.getLong(i), msg);
+            Assert.assertEquals(msg, 0, accessor.getLong(i));
           } else {
-            Assertions.assertEquals(((Long) expectedVal).longValue(), accessor.getLong(i), msg);
+            Assert.assertEquals(msg, ((Long) expectedVal).longValue(), accessor.getLong(i));
           }
         } else {
           if (expectedNulls[i]) {
-            Assertions.assertNull(accessor.getObject(i), msg);
+            Assert.assertNull(msg, accessor.getObject(i));
             // asserting null on the expected value is here for consistency in the tests.  If it fails, it's most
             // likely indicative of something wrong with the test setup than the actual logic, we keep it for
             // sanity's sake to things consistent.
-            Assertions.assertNull(expectedVal, msg);
+            Assert.assertNull(msg, expectedVal);
           } else {
             final Object obj = accessor.getObject(i);
-            Assertions.assertNotNull(obj, msg);
-            Assertions.assertEquals(expectedVal, obj, msg);
+            Assert.assertNotNull(msg, obj);
+            Assert.assertEquals(msg, expectedVal, obj);
           }
         }
       }

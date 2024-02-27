@@ -48,11 +48,10 @@ import org.apache.druid.server.initialization.BatchDataSegmentAnnouncerConfig;
 import org.apache.druid.server.initialization.ZkPathsConfig;
 import org.apache.druid.timeline.DataSegment;
 import org.joda.time.Interval;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -66,7 +65,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -93,7 +91,7 @@ public class BatchDataSegmentAnnouncerTest
 
   private ExecutorService exec;
 
-  @BeforeEach
+  @Before
   public void setUp() throws Exception
   {
     testingCluster = new TestingCluster(1);
@@ -175,7 +173,7 @@ public class BatchDataSegmentAnnouncerTest
     exec = Execs.multiThreaded(NUM_THREADS, "BatchDataSegmentAnnouncerTest-%d");
   }
 
-  @AfterEach
+  @After
   public void tearDown() throws Exception
   {
     announcer.stop();
@@ -197,44 +195,44 @@ public class BatchDataSegmentAnnouncerTest
 
     for (String zNode : zNodes) {
       Set<DataSegment> segments = segmentReader.read(JOINER.join(TEST_SEGMENTS_PATH, zNode));
-      Assertions.assertEquals(segments.iterator().next(), firstSegment);
+      Assert.assertEquals(segments.iterator().next(), firstSegment);
     }
 
     segmentAnnouncer.announceSegment(secondSegment);
 
     for (String zNode : zNodes) {
       Set<DataSegment> segments = segmentReader.read(JOINER.join(TEST_SEGMENTS_PATH, zNode));
-      Assertions.assertEquals(Sets.newHashSet(firstSegment, secondSegment), segments);
+      Assert.assertEquals(Sets.newHashSet(firstSegment, secondSegment), segments);
     }
 
     ChangeRequestsSnapshot<DataSegmentChangeRequest> snapshot = segmentAnnouncer.getSegmentChangesSince(
         new ChangeRequestHistory.Counter(-1, -1)
     ).get();
-    Assertions.assertEquals(2, snapshot.getRequests().size());
-    Assertions.assertEquals(2, snapshot.getCounter().getCounter());
+    Assert.assertEquals(2, snapshot.getRequests().size());
+    Assert.assertEquals(2, snapshot.getCounter().getCounter());
 
     segmentAnnouncer.unannounceSegment(firstSegment);
 
     for (String zNode : zNodes) {
       Set<DataSegment> segments = segmentReader.read(JOINER.join(TEST_SEGMENTS_PATH, zNode));
-      Assertions.assertEquals(segments.iterator().next(), secondSegment);
+      Assert.assertEquals(segments.iterator().next(), secondSegment);
     }
 
     segmentAnnouncer.unannounceSegment(secondSegment);
 
-    Assertions.assertTrue(cf.getChildren().forPath(TEST_SEGMENTS_PATH).isEmpty());
+    Assert.assertTrue(cf.getChildren().forPath(TEST_SEGMENTS_PATH).isEmpty());
 
     snapshot = segmentAnnouncer.getSegmentChangesSince(
         snapshot.getCounter()
     ).get();
-    Assertions.assertEquals(2, snapshot.getRequests().size());
-    Assertions.assertEquals(4, snapshot.getCounter().getCounter());
+    Assert.assertEquals(2, snapshot.getRequests().size());
+    Assert.assertEquals(4, snapshot.getCounter().getCounter());
 
     snapshot = segmentAnnouncer.getSegmentChangesSince(
         new ChangeRequestHistory.Counter(-1, -1)
     ).get();
-    Assertions.assertEquals(0, snapshot.getRequests().size());
-    Assertions.assertEquals(4, snapshot.getCounter().getCounter());
+    Assert.assertEquals(0, snapshot.getRequests().size());
+    Assert.assertEquals(4, snapshot.getCounter().getCounter());
   }
 
   @Test
@@ -248,30 +246,30 @@ public class BatchDataSegmentAnnouncerTest
 
     for (String zNode : zNodes) {
       Set<DataSegment> segments = segmentReader.read(JOINER.join(TEST_SEGMENTS_PATH, zNode));
-      Assertions.assertEquals(segments.iterator().next(), firstSegment);
+      Assert.assertEquals(segments.iterator().next(), firstSegment);
     }
 
     ChangeRequestsSnapshot<DataSegmentChangeRequest> snapshot = segmentAnnouncer.getSegmentChangesSince(
         new ChangeRequestHistory.Counter(-1, -1)
     ).get();
-    Assertions.assertEquals(1, snapshot.getRequests().size());
-    Assertions.assertEquals(1, snapshot.getCounter().getCounter());
+    Assert.assertEquals(1, snapshot.getRequests().size());
+    Assert.assertEquals(1, snapshot.getCounter().getCounter());
 
     segmentAnnouncer.unannounceSegment(firstSegment);
 
-    Assertions.assertTrue(cf.getChildren().forPath(TEST_SEGMENTS_PATH).isEmpty());
+    Assert.assertTrue(cf.getChildren().forPath(TEST_SEGMENTS_PATH).isEmpty());
 
     snapshot = segmentAnnouncer.getSegmentChangesSince(
         snapshot.getCounter()
     ).get();
-    Assertions.assertEquals(1, snapshot.getRequests().size());
-    Assertions.assertEquals(2, snapshot.getCounter().getCounter());
+    Assert.assertEquals(1, snapshot.getRequests().size());
+    Assert.assertEquals(2, snapshot.getCounter().getCounter());
 
     snapshot = segmentAnnouncer.getSegmentChangesSince(
         new ChangeRequestHistory.Counter(-1, -1)
     ).get();
-    Assertions.assertEquals(0, snapshot.getRequests().size());
-    Assertions.assertEquals(2, snapshot.getCounter().getCounter());
+    Assert.assertEquals(0, snapshot.getRequests().size());
+    Assert.assertEquals(2, snapshot.getCounter().getCounter());
   }
 
   @Test
@@ -287,14 +285,14 @@ public class BatchDataSegmentAnnouncerTest
 
     for (String zNode : zNodes) {
       DataSegment announcedSegment = Iterables.getOnlyElement(segmentReader.read(JOINER.join(TEST_SEGMENTS_PATH, zNode)));
-      Assertions.assertEquals(announcedSegment, firstSegment);
-      Assertions.assertTrue(announcedSegment.getDimensions().isEmpty());
-      Assertions.assertTrue(announcedSegment.getMetrics().isEmpty());
+      Assert.assertEquals(announcedSegment, firstSegment);
+      Assert.assertTrue(announcedSegment.getDimensions().isEmpty());
+      Assert.assertTrue(announcedSegment.getMetrics().isEmpty());
     }
 
     segmentAnnouncer.unannounceSegment(firstSegment);
 
-    Assertions.assertTrue(cf.getChildren().forPath(TEST_SEGMENTS_PATH).isEmpty());
+    Assert.assertTrue(cf.getChildren().forPath(TEST_SEGMENTS_PATH).isEmpty());
   }
 
   @Test
@@ -310,13 +308,13 @@ public class BatchDataSegmentAnnouncerTest
 
     for (String zNode : zNodes) {
       DataSegment announcedSegment = Iterables.getOnlyElement(segmentReader.read(JOINER.join(TEST_SEGMENTS_PATH, zNode)));
-      Assertions.assertEquals(announcedSegment, firstSegment);
-      Assertions.assertNull(announcedSegment.getLoadSpec());
+      Assert.assertEquals(announcedSegment, firstSegment);
+      Assert.assertNull(announcedSegment.getLoadSpec());
     }
 
     segmentAnnouncer.unannounceSegment(firstSegment);
 
-    Assertions.assertTrue(cf.getChildren().forPath(TEST_SEGMENTS_PATH).isEmpty());
+    Assert.assertTrue(cf.getChildren().forPath(TEST_SEGMENTS_PATH).isEmpty());
   }
 
   @Test
@@ -336,15 +334,15 @@ public class BatchDataSegmentAnnouncerTest
     }
 
     List<String> zNodes = cf.getChildren().forPath(TEST_SEGMENTS_PATH);
-    Assertions.assertEquals(20, zNodes.size());
+    Assert.assertEquals(20, zNodes.size());
 
     Set<DataSegment> segments = Sets.newHashSet(testSegments);
     for (String zNode : zNodes) {
       for (DataSegment segment : segmentReader.read(JOINER.join(TEST_SEGMENTS_PATH, zNode))) {
-        Assertions.assertTrue(segments.remove(segment), "Invalid segment " + segment);
+        Assert.assertTrue("Invalid segment " + segment, segments.remove(segment));
       }
     }
-    Assertions.assertTrue(segments.isEmpty(), "Failed to find segments " + segments);
+    Assert.assertTrue("Failed to find segments " + segments, segments.isEmpty());
   }
 
   @Test
@@ -411,10 +409,10 @@ public class BatchDataSegmentAnnouncerTest
     snapshot = segmentAnnouncer.getSegmentChangesSince(
         new ChangeRequestHistory.Counter(-1, -1)
     ).get();
-    Assertions.assertEquals(1, snapshot.getRequests().size());
-    Assertions.assertEquals(1, snapshot.getCounter().getCounter());
+    Assert.assertEquals(1, snapshot.getRequests().size());
+    Assert.assertEquals(1, snapshot.getCounter().getCounter());
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         absoluteSchema1,
         ((SegmentSchemasChangeRequest) snapshot.getRequests().get(0))
             .getSegmentSchemas()
@@ -429,28 +427,28 @@ public class BatchDataSegmentAnnouncerTest
 
     snapshot = segmentAnnouncer.getSegmentChangesSince(snapshot.getCounter()).get();
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         deltaSchema,
         ((SegmentSchemasChangeRequest) snapshot.getRequests().get(0))
             .getSegmentSchemas()
             .getSegmentSchemaList()
             .get(0)
     );
-    Assertions.assertEquals(1, snapshot.getRequests().size());
-    Assertions.assertEquals(2, snapshot.getCounter().getCounter());
+    Assert.assertEquals(1, snapshot.getRequests().size());
+    Assert.assertEquals(2, snapshot.getCounter().getCounter());
 
     snapshot = segmentAnnouncer.getSegmentChangesSince(
         new ChangeRequestHistory.Counter(-1, -1)
     ).get();
-    Assertions.assertEquals(
+    Assert.assertEquals(
         absoluteSchema2,
         ((SegmentSchemasChangeRequest) snapshot.getRequests().get(0))
             .getSegmentSchemas()
             .getSegmentSchemaList()
             .get(0)
     );
-    Assertions.assertEquals(1, snapshot.getRequests().size());
-    Assertions.assertEquals(2, snapshot.getCounter().getCounter());
+    Assert.assertEquals(1, snapshot.getRequests().size());
+    Assert.assertEquals(2, snapshot.getCounter().getCounter());
   }
 
   private void testBatchAnnounce(boolean testHistory) throws Exception
@@ -459,13 +457,13 @@ public class BatchDataSegmentAnnouncerTest
 
     List<String> zNodes = cf.getChildren().forPath(TEST_SEGMENTS_PATH);
 
-    Assertions.assertEquals(2, zNodes.size());
+    Assert.assertEquals(2, zNodes.size());
 
     Set<DataSegment> allSegments = new HashSet<>();
     for (String zNode : zNodes) {
       allSegments.addAll(segmentReader.read(JOINER.join(TEST_SEGMENTS_PATH, zNode)));
     }
-    Assertions.assertEquals(allSegments, testSegments);
+    Assert.assertEquals(allSegments, testSegments);
 
     ChangeRequestsSnapshot<DataSegmentChangeRequest> snapshot = null;
 
@@ -473,31 +471,30 @@ public class BatchDataSegmentAnnouncerTest
       snapshot = segmentAnnouncer.getSegmentChangesSince(
           new ChangeRequestHistory.Counter(-1, -1)
       ).get();
-      Assertions.assertEquals(testSegments.size(), snapshot.getRequests().size());
-      Assertions.assertEquals(testSegments.size(), snapshot.getCounter().getCounter());
+      Assert.assertEquals(testSegments.size(), snapshot.getRequests().size());
+      Assert.assertEquals(testSegments.size(), snapshot.getCounter().getCounter());
     }
 
     segmentAnnouncer.unannounceSegments(testSegments);
 
-    Assertions.assertTrue(cf.getChildren().forPath(TEST_SEGMENTS_PATH).isEmpty());
+    Assert.assertTrue(cf.getChildren().forPath(TEST_SEGMENTS_PATH).isEmpty());
 
     if (testHistory) {
       snapshot = segmentAnnouncer.getSegmentChangesSince(
           snapshot.getCounter()
       ).get();
-      Assertions.assertEquals(testSegments.size(), snapshot.getRequests().size());
-      Assertions.assertEquals(2 * testSegments.size(), snapshot.getCounter().getCounter());
+      Assert.assertEquals(testSegments.size(), snapshot.getRequests().size());
+      Assert.assertEquals(2 * testSegments.size(), snapshot.getCounter().getCounter());
 
       snapshot = segmentAnnouncer.getSegmentChangesSince(
           new ChangeRequestHistory.Counter(-1, -1)
       ).get();
-      Assertions.assertEquals(0, snapshot.getRequests().size());
-      Assertions.assertEquals(2 * testSegments.size(), snapshot.getCounter().getCounter());
+      Assert.assertEquals(0, snapshot.getRequests().size());
+      Assert.assertEquals(2 * testSegments.size(), snapshot.getCounter().getCounter());
     }
   }
 
-  @Test
-  @Timeout(value = 5000L, unit = TimeUnit.MILLISECONDS)
+  @Test(timeout = 5000L)
   public void testAnnounceSegmentsWithSameSegmentConcurrently() throws ExecutionException, InterruptedException
   {
     final List<Future> futures = new ArrayList<>(NUM_THREADS);
@@ -520,16 +517,15 @@ public class BatchDataSegmentAnnouncerTest
     }
 
     // Announcing 100 segments requires 2 nodes because of maxBytesPerNode configuration.
-    Assertions.assertEquals(2, announcer.numPathAnnounced.size());
+    Assert.assertEquals(2, announcer.numPathAnnounced.size());
     for (ConcurrentHashMap<byte[], AtomicInteger> eachMap : announcer.numPathAnnounced.values()) {
       for (Entry<byte[], AtomicInteger> entry : eachMap.entrySet()) {
-        Assertions.assertEquals(1, entry.getValue().get());
+        Assert.assertEquals(1, entry.getValue().get());
       }
     }
   }
 
-  @Test
-  @Timeout(value = 5000L, unit = TimeUnit.MILLISECONDS)
+  @Test(timeout = 5000L)
   public void testAnnounceSegmentWithSameSegmentConcurrently() throws ExecutionException, InterruptedException
   {
     final List<Future> futures = new ArrayList<>(NUM_THREADS);
@@ -559,10 +555,10 @@ public class BatchDataSegmentAnnouncerTest
       future.get();
     }
 
-    Assertions.assertEquals(1, announcer.numPathAnnounced.size());
+    Assert.assertEquals(1, announcer.numPathAnnounced.size());
     for (ConcurrentHashMap<byte[], AtomicInteger> eachMap : announcer.numPathAnnounced.values()) {
       for (Entry<byte[], AtomicInteger> entry : eachMap.entrySet()) {
-        Assertions.assertEquals(1, entry.getValue().get());
+        Assert.assertEquals(1, entry.getValue().get());
       }
     }
   }

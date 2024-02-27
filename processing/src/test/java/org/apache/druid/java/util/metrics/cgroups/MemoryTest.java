@@ -21,29 +21,32 @@ package org.apache.druid.java.util.metrics.cgroups;
 
 import com.google.common.collect.ImmutableMap;
 import org.apache.druid.java.util.common.FileUtils;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 public class MemoryTest
 {
-  @TempDir
-  public File temporaryFolder;
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
+  @Rule
+  public TemporaryFolder temporaryFolder = new TemporaryFolder();
   private File procDir;
   private File cgroupDir;
   private CgroupDiscoverer discoverer;
 
-  @BeforeEach
+  @Before
   public void setUp() throws Exception
   {
-    cgroupDir = newFolder(temporaryFolder, "junit");
-    procDir = newFolder(temporaryFolder, "junit");
+    cgroupDir = temporaryFolder.newFolder();
+    procDir = temporaryFolder.newFolder();
     discoverer = new ProcCgroupDiscoverer(procDir.toPath());
     TestUtils.setUpCgroups(procDir, cgroupDir);
     final File memoryDir = new File(
@@ -63,8 +66,8 @@ public class MemoryTest
       throw new RuntimeException("shouldContinue");
     });
     final Memory.MemoryStat stat = memory.snapshot();
-    Assertions.assertEquals(ImmutableMap.of(), stat.getNumaMemoryStats());
-    Assertions.assertEquals(ImmutableMap.of(), stat.getMemoryStats());
+    Assert.assertEquals(ImmutableMap.of(), stat.getNumaMemoryStats());
+    Assert.assertEquals(ImmutableMap.of(), stat.getMemoryStats());
   }
 
   @Test
@@ -109,7 +112,7 @@ public class MemoryTest
     expectedMemoryStats.put("pgpgout", 5975L);
     expectedMemoryStats.put("total_pgmajfault", 120L);
     expectedMemoryStats.put("total_writeback", 0L);
-    Assertions.assertEquals(expectedMemoryStats, stat.getMemoryStats());
+    Assert.assertEquals(expectedMemoryStats, stat.getMemoryStats());
 
     final Map<Long, Map<String, Long>> expectedMemoryNumaStats = new HashMap<>();
     final Map<String, Long> expectedNumaNode0Stats = new HashMap<>();
@@ -122,15 +125,6 @@ public class MemoryTest
     expectedNumaNode0Stats.put("hierarchical_anon", 432L);
     expectedNumaNode0Stats.put("hierarchical_unevictable", 0L);
     expectedMemoryNumaStats.put(0L, expectedNumaNode0Stats);
-    Assertions.assertEquals(expectedMemoryNumaStats, stat.getNumaMemoryStats());
-  }
-
-  private static File newFolder(File root, String... subDirs) throws IOException {
-    String subFolder = String.join("/", subDirs);
-    File result = new File(root, subFolder);
-    if (!result.mkdirs()) {
-      throw new IOException("Couldn't create folders " + root);
-    }
-    return result;
+    Assert.assertEquals(expectedMemoryNumaStats, stat.getNumaMemoryStats());
   }
 }

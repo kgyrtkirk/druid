@@ -30,13 +30,12 @@ import org.apache.druid.java.util.common.parsers.JSONPathFieldType;
 import org.apache.druid.java.util.common.parsers.JSONPathSpec;
 import org.apache.druid.utils.CompressionUtils;
 import org.hamcrest.CoreMatchers;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.hamcrest.MatcherAssert;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.util.Arrays;
-
-import static org.hamcrest.MatcherAssert.assertThat;
 
 public class JsonInputFormatTest
 {
@@ -65,7 +64,7 @@ public class JsonInputFormatTest
     );
     final byte[] bytes = mapper.writeValueAsBytes(format);
     final JsonInputFormat fromJson = (JsonInputFormat) mapper.readValue(bytes, InputFormat.class);
-    Assertions.assertEquals(format, fromJson);
+    Assert.assertEquals(format, fromJson);
   }
 
   @Test
@@ -91,8 +90,8 @@ public class JsonInputFormatTest
         false
     );
 
-    Assertions.assertTrue(format.isLineSplittable());
-    Assertions.assertFalse(format.withLineSplittable(false).isLineSplittable());
+    Assert.assertTrue(format.isLineSplittable());
+    Assert.assertFalse(format.withLineSplittable(false).isLineSplittable());
   }
 
   @Test
@@ -118,12 +117,12 @@ public class JsonInputFormatTest
         false
     );
 
-    Assertions.assertTrue(format.isLineSplittable());
-    Assertions.assertFalse(((JsonInputFormat) JsonInputFormat.withLineSplittable(format, false)).isLineSplittable());
+    Assert.assertTrue(format.isLineSplittable());
+    Assert.assertFalse(((JsonInputFormat) JsonInputFormat.withLineSplittable(format, false)).isLineSplittable());
 
     // Other formats than json are passed-through unchanged
     final InputFormat noopInputFormat = JsonInputFormat.withLineSplittable(new NoopInputFormat(), false);
-    assertThat(noopInputFormat, CoreMatchers.instanceOf(NoopInputFormat.class));
+    MatcherAssert.assertThat(noopInputFormat, CoreMatchers.instanceOf(NoopInputFormat.class));
   }
 
   @Test
@@ -150,7 +149,7 @@ public class JsonInputFormatTest
         null,
         null
     );
-    Assertions.assertFalse(format.isKeepNullColumns());
+    Assert.assertFalse(format.isKeepNullColumns());
   }
 
   @Test
@@ -163,7 +162,7 @@ public class JsonInputFormatTest
         null,
         null
     );
-    Assertions.assertTrue(format.isKeepNullColumns());
+    Assert.assertTrue(format.isKeepNullColumns());
   }
 
   @Test
@@ -176,7 +175,7 @@ public class JsonInputFormatTest
         null,
         null
     );
-    Assertions.assertFalse(format.isKeepNullColumns());
+    Assert.assertFalse(format.isKeepNullColumns());
   }
 
   @Test
@@ -190,7 +189,7 @@ public class JsonInputFormatTest
         null
     );
     final long unweightedSize = 100L;
-    Assertions.assertEquals(unweightedSize, format.getWeightedSize("file.json", unweightedSize));
+    Assert.assertEquals(unweightedSize, format.getWeightedSize("file.json", unweightedSize));
   }
 
   @Test
@@ -204,7 +203,7 @@ public class JsonInputFormatTest
         null
     );
     final long unweightedSize = 100L;
-    Assertions.assertEquals(
+    Assert.assertEquals(
         unweightedSize * CompressionUtils.COMPRESSED_TEXT_WEIGHT_FACTOR,
         format.getWeightedSize("file.json.gz", unweightedSize)
     );

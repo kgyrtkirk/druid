@@ -38,6 +38,7 @@ import org.apache.druid.storage.s3.output.S3StorageConnector;
 import org.apache.druid.storage.s3.output.S3StorageConnectorModule;
 import org.apache.druid.storage.s3.output.S3StorageConnectorProvider;
 import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.File;
 import java.util.Properties;

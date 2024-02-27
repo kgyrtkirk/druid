@@ -19,8 +19,8 @@
 
 package org.apache.druid.segment.column;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class ColumnBuilderTest
 {
@@ -32,7 +32,7 @@ public class ColumnBuilderTest
         .setComplexTypeName("testType")
         .build();
 
-    Assertions.assertEquals("testType", holder.getCapabilities().getComplexTypeName());
+    Assert.assertEquals("testType", holder.getCapabilities().getComplexTypeName());
 
   }
 }

@@ -29,22 +29,22 @@ import org.apache.druid.segment.TestIndex;
 import org.apache.druid.segment.incremental.IncrementalIndexStorageAdapter;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.hamcrest.CoreMatchers;
+import org.hamcrest.MatcherAssert;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.internal.matchers.ThrowableMessageMatcher;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
+import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-
 public class FrameFileWriterTest extends InitializedNullHandlingTest
 {
-  @TempDir
-  public File temporaryFolder;
+  @Rule
+  public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
   @Test
   public void test_abort_afterAllFrames() throws IOException
@@ -54,7 +54,7 @@ public class FrameFileWriterTest extends InitializedNullHandlingTest
                                                        .frameType(FrameType.ROW_BASED)
                                                        .frames();
 
-    final File file = File.createTempFile("junit", null, temporaryFolder);
+    final File file = temporaryFolder.newFile();
     final FrameFileWriter fileWriter = FrameFileWriter.open(Files.newByteChannel(
         file.toPath(),
         StandardOpenOption.WRITE
@@ -71,9 +71,9 @@ public class FrameFileWriterTest extends InitializedNullHandlingTest
 
     fileWriter.abort();
 
-    final IllegalStateException e = Assertions.assertThrows(IllegalStateException.class, () -> FrameFile.open(file, null));
+    final IllegalStateException e = Assert.assertThrows(IllegalStateException.class, () -> FrameFile.open(file, null));
 
-    assertThat(
+    MatcherAssert.assertThat(
         e,
         ThrowableMessageMatcher.hasMessage(CoreMatchers.containsString("Corrupt or truncated file?"))
     );

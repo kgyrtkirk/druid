@@ -24,8 +24,8 @@ import org.apache.druid.segment.DimensionSelector;
 import org.apache.druid.segment.TestHelper;
 import org.apache.druid.segment.data.IndexedInts;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Arrays;
 
@@ -58,7 +58,7 @@ public class RegexFilteredDimensionSpecTest extends InitializedNullHandlingTest
         "xxx"
     );
 
-    Assertions.assertEquals(expected, actual);
+    Assert.assertEquals(expected, actual);
   }
 
   @Test
@@ -74,7 +74,7 @@ public class RegexFilteredDimensionSpecTest extends InitializedNullHandlingTest
         "xyz"
     );
 
-    Assertions.assertFalse(Arrays.equals(spec1.getCacheKey(), spec2.getCacheKey()));
+    Assert.assertFalse(Arrays.equals(spec1.getCacheKey(), spec2.getCacheKey()));
   }
 
   @Test
@@ -87,17 +87,17 @@ public class RegexFilteredDimensionSpecTest extends InitializedNullHandlingTest
 
     DimensionSelector selector = spec.decorate(TestDimensionSelector.INSTANCE);
 
-    Assertions.assertEquals(2, selector.getValueCardinality());
+    Assert.assertEquals(2, selector.getValueCardinality());
 
     IndexedInts row = selector.getRow();
-    Assertions.assertEquals(2, row.size());
-    Assertions.assertEquals(0, row.get(0));
-    Assertions.assertEquals(1, row.get(1));
+    Assert.assertEquals(2, row.size());
+    Assert.assertEquals(0, row.get(0));
+    Assert.assertEquals(1, row.get(1));
 
-    Assertions.assertEquals("c", selector.lookupName(0));
-    Assertions.assertEquals("g", selector.lookupName(1));
+    Assert.assertEquals("c", selector.lookupName(0));
+    Assert.assertEquals("g", selector.lookupName(1));
 
-    Assertions.assertEquals(0, selector.idLookup().lookupId("c"));
-    Assertions.assertEquals(1, selector.idLookup().lookupId("g"));
+    Assert.assertEquals(0, selector.idLookup().lookupId("c"));
+    Assert.assertEquals(1, selector.idLookup().lookupId("g"));
   }
 }

@@ -35,13 +35,13 @@ import org.apache.druid.segment.data.IncrementalIndexTest;
 import org.apache.druid.segment.incremental.IncrementalIndex;
 import org.apache.druid.segment.writeout.OffHeapMemorySegmentWriteOutMediumFactory;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
-import java.io.IOException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,10 +56,10 @@ public class IndexMergerRollupTest extends InitializedNullHandlingTest
   private IndexIO indexIO;
   private IndexSpec indexSpec;
 
-  @TempDir
-  public File temporaryFolder;
+  @Rule
+  public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-  @BeforeEach
+  @Before
   public void setUp()
   {
     indexMerger = TestHelper
@@ -91,7 +91,7 @@ public class IndexMergerRollupTest extends InitializedNullHandlingTest
             ))
     );
 
-    final File tempDir = newFolder(temporaryFolder, "junit");
+    final File tempDir = temporaryFolder.newFolder();
 
     List<QueryableIndex> indexes = new ArrayList<>();
     Instant time = Instant.now();
@@ -106,7 +106,7 @@ public class IndexMergerRollupTest extends InitializedNullHandlingTest
     File indexFile = indexMerger
         .mergeQueryableIndex(indexes, true, aggregatorFactories, tempDir, indexSpec, null, -1);
     try (QueryableIndex mergedIndex = indexIO.loadIndex(indexFile)) {
-      Assertions.assertEquals(1, mergedIndex.getNumRows(), "Number of rows should be 1");
+      Assert.assertEquals("Number of rows should be 1", 1, mergedIndex.getNumRows());
     }
   }
 
@@ -132,14 +132,5 @@ public class IndexMergerRollupTest extends InitializedNullHandlingTest
         new DoubleLastAggregatorFactory("dl", "dl", null),
     };
     testFirstLastRollup(aggregatorFactories);
-  }
-
-  private static File newFolder(File root, String... subDirs) throws IOException {
-    String subFolder = String.join("/", subDirs);
-    File result = new File(root, subFolder);
-    if (!result.mkdirs()) {
-      throw new IOException("Couldn't create folders " + root);
-    }
-    return result;
   }
 }

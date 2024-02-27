@@ -35,9 +35,9 @@ import org.apache.druid.query.QueryContext;
 import org.apache.druid.sql.calcite.planner.DruidTypeSystem;
 import org.apache.druid.sql.calcite.planner.JoinAlgorithm;
 import org.apache.druid.sql.calcite.planner.PlannerContext;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.math.BigDecimal;
@@ -67,7 +67,7 @@ public class DruidJoinRuleTest
 
   private DruidJoinRule druidJoinRule;
 
-  @BeforeEach
+  @Before
   public void setup()
   {
     NullHandling.initializeForTests();
@@ -80,7 +80,7 @@ public class DruidJoinRuleTest
   @Test
   public void test_canHandleCondition_leftEqRight()
   {
-    Assertions.assertTrue(
+    Assert.assertTrue(
         druidJoinRule.canHandleCondition(
             rexBuilder.makeCall(
                 SqlStdOperatorTable.EQUALS,
@@ -99,7 +99,7 @@ public class DruidJoinRuleTest
   @Test
   public void test_canHandleCondition_leftFnEqRight()
   {
-    Assertions.assertTrue(
+    Assert.assertTrue(
         druidJoinRule.canHandleCondition(
             rexBuilder.makeCall(
                 SqlStdOperatorTable.EQUALS,
@@ -122,7 +122,7 @@ public class DruidJoinRuleTest
   @Test
   public void test_canHandleCondition_leftEqRightFn()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         NullHandling.sqlCompatible(), // We don't handle non-equi join conditions for non-sql compatible mode.
         druidJoinRule.canHandleCondition(
             rexBuilder.makeCall(
@@ -147,7 +147,7 @@ public class DruidJoinRuleTest
   public void test_canHandleCondition_leftEqLeft()
   {
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         NullHandling.sqlCompatible(), // We don't handle non-equi join conditions for non-sql compatible mode.
         druidJoinRule.canHandleCondition(
             rexBuilder.makeCall(
@@ -167,7 +167,7 @@ public class DruidJoinRuleTest
   @Test
   public void test_canHandleCondition_rightEqRight()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         NullHandling.sqlCompatible(), // We don't handle non-equi join conditions for non-sql compatible mode.
         druidJoinRule.canHandleCondition(
             rexBuilder.makeCall(
@@ -187,7 +187,7 @@ public class DruidJoinRuleTest
   @Test
   public void test_canHandleCondition_leftEqRightFn_leftJoin()
   {
-    Assertions.assertFalse(
+    Assert.assertFalse(
         druidJoinRule.canHandleCondition(
             rexBuilder.makeCall(
                 SqlStdOperatorTable.EQUALS,
@@ -210,7 +210,7 @@ public class DruidJoinRuleTest
   @Test
   public void test_canHandleCondition_leftEqRightFn_systemFields()
   {
-    Assertions.assertFalse(
+    Assert.assertFalse(
         druidJoinRule.canHandleCondition(
             rexBuilder.makeCall(
                 SqlStdOperatorTable.EQUALS,
@@ -233,7 +233,7 @@ public class DruidJoinRuleTest
   @Test
   public void test_canHandleCondition_true()
   {
-    Assertions.assertTrue(
+    Assert.assertTrue(
         druidJoinRule.canHandleCondition(
             rexBuilder.makeLiteral(true),
             leftType,
@@ -248,7 +248,7 @@ public class DruidJoinRuleTest
   @Test
   public void test_canHandleCondition_false()
   {
-    Assertions.assertTrue(
+    Assert.assertTrue(
         druidJoinRule.canHandleCondition(
             rexBuilder.makeLiteral(false),
             leftType,
@@ -265,8 +265,8 @@ public class DruidJoinRuleTest
   {
     final List<RexNode> rexNodes = DruidJoinRule.decomposeAnd(rexBuilder.makeInputRef(leftType, 0));
 
-    Assertions.assertEquals(1, rexNodes.size());
-    Assertions.assertEquals(rexBuilder.makeInputRef(leftType, 0), Iterables.getOnlyElement(rexNodes));
+    Assert.assertEquals(1, rexNodes.size());
+    Assert.assertEquals(rexBuilder.makeInputRef(leftType, 0), Iterables.getOnlyElement(rexNodes));
   }
 
   @Test
@@ -288,7 +288,7 @@ public class DruidJoinRuleTest
         )
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableList.of(
             rexBuilder.makeExactLiteral(BigDecimal.valueOf(1)),
             rexBuilder.makeExactLiteral(BigDecimal.valueOf(2)),

@@ -27,8 +27,8 @@ import org.apache.druid.segment.column.ColumnCapabilities;
 import org.apache.druid.segment.data.Indexed;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import javax.annotation.Nullable;
 
@@ -130,7 +130,7 @@ public class TombstoneSegmentStorageAdapterTest
 
     };
 
-    Assertions.assertFalse(sa.isFromTombstone());
+    Assert.assertFalse(sa.isFromTombstone());
   }
 
 }

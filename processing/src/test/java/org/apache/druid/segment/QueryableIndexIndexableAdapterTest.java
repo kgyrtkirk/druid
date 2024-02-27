@@ -30,16 +30,17 @@ import org.apache.druid.segment.incremental.IncrementalIndex;
 import org.apache.druid.segment.writeout.OffHeapMemorySegmentWriteOutMediumFactory;
 import org.apache.druid.segment.writeout.SegmentWriteOutMediumFactory;
 import org.apache.druid.segment.writeout.TmpFileSegmentWriteOutMediumFactory;
+import org.junit.Assert;
 import org.junit.Rule;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.io.TempDir;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Collection;
 
+@RunWith(Parameterized.class)
 public class QueryableIndexIndexableAdapterTest
 {
   private static final IndexSpec INDEX_SPEC = IndexSpec.builder()
@@ -49,6 +50,7 @@ public class QueryableIndexIndexableAdapterTest
                                                        .withLongEncoding(CompressionFactory.LongEncodingStrategy.LONGS)
                                                        .build();
 
+  @Parameterized.Parameters
   public static Collection<?> constructorFeeder()
   {
     return ImmutableList.of(
@@ -57,30 +59,28 @@ public class QueryableIndexIndexableAdapterTest
     );
   }
 
-  @TempDir
-  public File temporaryFolder;
+  @Rule
+  public final TemporaryFolder temporaryFolder = new TemporaryFolder();
   @Rule
   public final CloserRule closer = new CloserRule(false);
 
-  private IndexMerger indexMerger;
-  private IndexIO indexIO;
+  private final IndexMerger indexMerger;
+  private final IndexIO indexIO;
 
-  public void initQueryableIndexIndexableAdapterTest(SegmentWriteOutMediumFactory segmentWriteOutMediumFactory)
+  public QueryableIndexIndexableAdapterTest(SegmentWriteOutMediumFactory segmentWriteOutMediumFactory)
   {
     indexMerger = TestHelper.getTestIndexMergerV9(segmentWriteOutMediumFactory);
     indexIO = TestHelper.getTestIndexIO();
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest
-  public void testGetBitmapIndex(SegmentWriteOutMediumFactory segmentWriteOutMediumFactory) throws Exception
+  @Test
+  public void testGetBitmapIndex() throws Exception
   {
-    initQueryableIndexIndexableAdapterTest(segmentWriteOutMediumFactory);
     final long timestamp = System.currentTimeMillis();
     IncrementalIndex toPersist = IncrementalIndexTest.createIndex(null);
     IncrementalIndexTest.populateIndex(timestamp, toPersist);
 
-    final File tempDir = newFolder(temporaryFolder, "junit");
+    final File tempDir = temporaryFolder.newFolder();
     QueryableIndex index = closer.closeLater(
         indexIO.loadIndex(
             indexMerger.persist(
@@ -99,17 +99,8 @@ public class QueryableIndexIndexableAdapterTest
     try (CloseableIndexed<String> dimValueLookup = adapter.getDimValueLookup(dimension)) {
       for (int i = 0; i < dimValueLookup.size(); i++) {
         bitmapValues = adapter.getBitmapValues(dimension, i);
-        Assertions.assertEquals(1, bitmapValues.size());
+        Assert.assertEquals(1, bitmapValues.size());
       }
     }
-  }
-
-  private static File newFolder(File root, String... subDirs) throws IOException {
-    String subFolder = String.join("/", subDirs);
-    File result = new File(root, subFolder);
-    if (!result.mkdirs()) {
-      throw new IOException("Couldn't create folders " + root);
-    }
-    return result;
   }
 }

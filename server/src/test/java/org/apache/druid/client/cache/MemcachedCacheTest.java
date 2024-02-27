@@ -58,9 +58,9 @@ import org.apache.druid.java.util.emitter.core.Event;
 import org.apache.druid.java.util.emitter.service.ServiceEmitter;
 import org.apache.druid.java.util.metrics.AbstractMonitor;
 import org.apache.druid.java.util.metrics.StubServiceEmitter;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.net.SocketAddress;
 import java.security.KeyManagementException;
@@ -121,7 +121,7 @@ public class MemcachedCacheTest
     }
   };
 
-  @BeforeEach
+  @Before
   public void setUp()
   {
     cache = new MemcachedCache(
@@ -165,7 +165,7 @@ public class MemcachedCacheTest
     lifecycle.start();
     try {
       Cache cache = injector.getInstance(Cache.class);
-      Assertions.assertEquals(MemcachedCache.class, cache.getClass());
+      Assert.assertEquals(MemcachedCache.class, cache.getClass());
     }
     finally {
       lifecycle.stop();
@@ -196,8 +196,8 @@ public class MemcachedCacheTest
         )
     );
     final CacheProvider memcachedCacheProvider = injector.getInstance(CacheProvider.class);
-    Assertions.assertNotNull(memcachedCacheProvider);
-    Assertions.assertEquals(MemcachedCacheProvider.class, memcachedCacheProvider.getClass());
+    Assert.assertNotNull(memcachedCacheProvider);
+    Assert.assertEquals(MemcachedCacheProvider.class, memcachedCacheProvider.getClass());
   }
 
   @Test
@@ -211,7 +211,7 @@ public class MemcachedCacheTest
       cache.doMonitor(serviceEmitter);
     }
 
-    Assertions.assertFalse(serviceEmitter.getEvents().isEmpty());
+    Assert.assertFalse(serviceEmitter.getEvents().isEmpty());
     ObjectMapper mapper = new DefaultObjectMapper();
     for (Event event : serviceEmitter.getEvents()) {
       log.debug("Found event `%s`", mapper.writeValueAsString(event.toMap()));
@@ -223,8 +223,8 @@ public class MemcachedCacheTest
   {
     ConnectionFactory connectionFactory = MemcachedCache.createConnectionFactory(memcachedCacheConfig, null, null, null);
     // Ensure that clientMode is set to Static by default
-    Assertions.assertEquals(connectionFactory.getClientMode(), ClientMode.Static);
-    Assertions.assertNull(connectionFactory.getSSLContext());
+    Assert.assertEquals(connectionFactory.getClientMode(), ClientMode.Static);
+    Assert.assertNull(connectionFactory.getSSLContext());
   }
   @Test
   public void testConnectionFactory() throws KeyStoreException, NoSuchAlgorithmException, KeyManagementException
@@ -251,9 +251,9 @@ public class MemcachedCacheTest
     // Dynamic mode
     ConnectionFactory connectionFactoryDynamic = MemcachedCache.createConnectionFactory(config, null, null, null);
     // Ensure client mode is set to the value passed in config.
-    Assertions.assertEquals(connectionFactoryDynamic.getClientMode(), ClientMode.Dynamic);
+    Assert.assertEquals(connectionFactoryDynamic.getClientMode(), ClientMode.Dynamic);
     //enableTls is true so sslContext is not null
-    Assertions.assertNotNull(connectionFactoryDynamic.getSSLContext());
+    Assert.assertNotNull(connectionFactoryDynamic.getSSLContext());
   }
 
   @Test
@@ -268,32 +268,32 @@ public class MemcachedCacheTest
         return "invalid-name";
       }
     };
-    RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> {
+    RuntimeException exception = Assert.assertThrows(RuntimeException.class, () -> {
       MemcachedCache.createConnectionFactory(config, null, null, null);
     });
-    Assertions.assertEquals(exception.getMessage(), "Invalid value provided for `druid.cache.clientMode`. Value must be 'static' or 'dynamic'.");
+    Assert.assertEquals(exception.getMessage(), "Invalid value provided for `druid.cache.clientMode`. Value must be 'static' or 'dynamic'.");
   }
   @Test
   public void testSanity()
   {
-    Assertions.assertNull(cache.get(new Cache.NamedKey("a", HI)));
+    Assert.assertNull(cache.get(new Cache.NamedKey("a", HI)));
     put(cache, "a", HI, 1);
-    Assertions.assertEquals(1, get(cache, "a", HI));
-    Assertions.assertNull(cache.get(new Cache.NamedKey("the", HI)));
+    Assert.assertEquals(1, get(cache, "a", HI));
+    Assert.assertNull(cache.get(new Cache.NamedKey("the", HI)));
 
     put(cache, "the", HI, 2);
-    Assertions.assertEquals(1, get(cache, "a", HI));
-    Assertions.assertEquals(2, get(cache, "the", HI));
+    Assert.assertEquals(1, get(cache, "a", HI));
+    Assert.assertEquals(2, get(cache, "the", HI));
 
     put(cache, "the", HO, 10);
-    Assertions.assertEquals(1, get(cache, "a", HI));
-    Assertions.assertNull(cache.get(new Cache.NamedKey("a", HO)));
-    Assertions.assertEquals(2, get(cache, "the", HI));
-    Assertions.assertEquals(10, get(cache, "the", HO));
+    Assert.assertEquals(1, get(cache, "a", HI));
+    Assert.assertNull(cache.get(new Cache.NamedKey("a", HO)));
+    Assert.assertEquals(2, get(cache, "the", HI));
+    Assert.assertEquals(10, get(cache, "the", HO));
 
     cache.close("the");
-    Assertions.assertEquals(1, get(cache, "a", HI));
-    Assertions.assertNull(cache.get(new Cache.NamedKey("a", HO)));
+    Assert.assertEquals(1, get(cache, "a", HI));
+    Assert.assertNull(cache.get(new Cache.NamedKey("a", HO)));
 
     cache.close("a");
   }
@@ -301,7 +301,7 @@ public class MemcachedCacheTest
   @Test
   public void testGetBulk()
   {
-    Assertions.assertNull(cache.get(new Cache.NamedKey("the", HI)));
+    Assert.assertNull(cache.get(new Cache.NamedKey("the", HI)));
 
     put(cache, "the", HI, 2);
     put(cache, "the", HO, 10);
@@ -316,8 +316,8 @@ public class MemcachedCacheTest
         )
     );
 
-    Assertions.assertEquals(2, Ints.fromByteArray(result.get(key1)));
-    Assertions.assertEquals(10, Ints.fromByteArray(result.get(key2)));
+    Assert.assertEquals(2, Ints.fromByteArray(result.get(key1)));
+    Assert.assertEquals(10, Ints.fromByteArray(result.get(key2)));
   }
 
   public void put(Cache cache, String namespace, byte[] key, Integer value)

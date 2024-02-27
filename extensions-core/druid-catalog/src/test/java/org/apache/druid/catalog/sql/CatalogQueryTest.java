@@ -34,6 +34,7 @@ import org.apache.druid.sql.calcite.planner.CatalogResolver;
 import org.apache.druid.sql.calcite.util.SqlTestFramework;
 import org.junit.After;
 import org.junit.Rule;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Collections;

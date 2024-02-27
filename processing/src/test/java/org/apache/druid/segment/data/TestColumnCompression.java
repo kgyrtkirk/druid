@@ -23,10 +23,11 @@ import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import org.apache.druid.java.util.common.ByteBufferUtils;
 import org.apache.druid.java.util.common.io.Closer;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -40,10 +41,11 @@ import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
+@RunWith(Parameterized.class)
 public class TestColumnCompression
 {
 
-  private CompressionStrategy compressionType;
+  private final CompressionStrategy compressionType;
   private ColumnarMultiInts compressed;
   int bytes = 1;
   int valuesPerRowBound = 5;
@@ -51,11 +53,12 @@ public class TestColumnCompression
   private BitSet filter;
   private ByteBuffer buffer;
 
-  public void initTestColumnCompression(CompressionStrategy strategy)
+  public TestColumnCompression(CompressionStrategy strategy)
   {
     compressionType = strategy;
   }
 
+  @Parameterized.Parameters
   public static Iterable<Object[]> compressionStrategies()
   {
     return Arrays.stream(CompressionStrategy.values())
@@ -63,7 +66,7 @@ public class TestColumnCompression
                  .map(strategy -> new Object[]{strategy}).collect(Collectors.toList());
   }
 
-  @BeforeEach
+  @Before
   public void setUp() throws Exception
   {
     Random rand = ThreadLocalRandom.current();
@@ -103,7 +106,7 @@ public class TestColumnCompression
     }
   }
 
-  @AfterEach
+  @After
   public void tearDown() throws IOException
   {
     ByteBufferUtils.free(buffer);
@@ -141,11 +144,9 @@ public class TestColumnCompression
     return buffer;
   }
 
-  @MethodSource("compressionStrategies")
-  @ParameterizedTest
-  public void testCompressed(CompressionStrategy strategy)
+  @Test
+  public void testCompressed()
   {
-    initTestColumnCompression(strategy);
     for (int i = filter.nextSetBit(0); i >= 0; i = filter.nextSetBit(i + 1)) {
       IndexedInts row = compressed.get(i);
       for (int j = 0, rowSize = row != null ? row.size() : 0; j < rowSize; j++) {

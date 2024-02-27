@@ -106,10 +106,12 @@ import org.apache.druid.segment.writeout.OffHeapMemorySegmentWriteOutMediumFacto
 import org.apache.druid.segment.writeout.SegmentWriteOutMediumFactory;
 import org.apache.druid.segment.writeout.TmpFileSegmentWriteOutMediumFactory;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.io.TempDir;
+import org.junit.Assert;
+import org.junit.Assume;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.rules.TemporaryFolder;
+import org.junit.runners.Parameterized;
 
 import javax.annotation.Nullable;
 import java.io.Closeable;
@@ -394,21 +396,21 @@ public abstract class BaseFilterTest extends InitializedNullHandlingTest
   }
 
 
-  @TempDir
-  public File temporaryFolder;
+  @Rule
+  public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-  private List<InputRow> rows;
+  private final List<InputRow> rows;
 
-  protected IndexBuilder indexBuilder;
-  protected Function<IndexBuilder, Pair<StorageAdapter, Closeable>> finisher;
-  protected boolean cnf;
-  protected boolean optimize;
-  protected String testName;
+  protected final IndexBuilder indexBuilder;
+  protected final Function<IndexBuilder, Pair<StorageAdapter, Closeable>> finisher;
+  protected final boolean cnf;
+  protected final boolean optimize;
+  protected final String testName;
 
   // 'rowBasedWithoutTypeSignature' does not handle numeric null default values correctly, is equivalent to
   // druid.generic.useDefaultValueForNull being set to false, regardless of how it is actually set.
   // In other words, numeric null values will be treated as nulls instead of the default value
-  protected boolean canTestNumericNullsAsDefaultValues;
+  protected final boolean canTestNumericNullsAsDefaultValues;
 
   protected StorageAdapter adapter;
 
@@ -419,7 +421,7 @@ public abstract class BaseFilterTest extends InitializedNullHandlingTest
   private static ThreadLocal<Map<String, Map<String, Pair<StorageAdapter, Closeable>>>> adapterCache =
       ThreadLocal.withInitial(HashMap::new);
 
-  public void initBaseFilterTest(
+  public BaseFilterTest(
       String testName,
       List<InputRow> rows,
       IndexBuilder indexBuilder,
@@ -438,7 +440,7 @@ public abstract class BaseFilterTest extends InitializedNullHandlingTest
         NullHandling.replaceWithDefault() && !testName.contains("finisher[rowBasedWithoutTypeSignature]");
   }
 
-  @BeforeEach
+  @Before
   public void setUp() throws Exception
   {
     NestedDataModule.registerHandlersAndSerde();
@@ -452,7 +454,7 @@ public abstract class BaseFilterTest extends InitializedNullHandlingTest
     Pair<StorageAdapter, Closeable> pair = adaptersForClass.get(testName);
     if (pair == null) {
       pair = finisher.apply(
-          indexBuilder.tmpDir(newFolder(temporaryFolder, "junit")).rows(rows)
+          indexBuilder.tmpDir(temporaryFolder.newFolder()).rows(rows)
       );
       adaptersForClass.put(testName, pair);
     }
@@ -474,6 +476,7 @@ public abstract class BaseFilterTest extends InitializedNullHandlingTest
     }
   }
 
+  @Parameterized.Parameters(name = "{0}")
   public static Collection<Object[]> constructorFeeder()
   {
     return makeConstructors();
@@ -611,18 +614,18 @@ public abstract class BaseFilterTest extends InitializedNullHandlingTest
                         "mmappedWithSqlCompatibleNulls",
                         input -> {
                           // Build mmapped index in SQL-compatible null handling mode; read it in default-value mode.
-                          Assumptions.assumeTrue(NullHandling.replaceWithDefault());
+                          Assume.assumeTrue(NullHandling.replaceWithDefault());
                           final File file;
                           try {
                             NullHandling.initializeForTestsWithValues(false, null);
-                            Assertions.assertTrue(NullHandling.sqlCompatible());
+                            Assert.assertTrue(NullHandling.sqlCompatible());
                             file = input.buildMMappedIndexFile();
                           }
                           finally {
                             NullHandling.initializeForTests();
                           }
 
-                          Assertions.assertTrue(NullHandling.replaceWithDefault());
+                          Assert.assertTrue(NullHandling.replaceWithDefault());
                           try {
                             final QueryableIndex index = input.getIndexIO().loadIndex(file);
                             return Pair.of(new QueryableIndexStorageAdapter(index), index);
@@ -1154,11 +1157,11 @@ public abstract class BaseFilterTest extends InitializedNullHandlingTest
         && !(adapter instanceof FrameStorageAdapter);
 
     if (isAutoSchema()) {
-      Throwable t = Assertions.assertThrows(
+      Throwable t = Assert.assertThrows(
           Throwable.class,
           () -> assertFilterMatches(filter, expectedRows, testVectorized)
       );
-      Assertions.assertTrue(t.getMessage().contains("ARRAY"));
+      Assert.assertTrue(t.getMessage().contains("ARRAY"));
     } else {
       assertFilterMatches(filter, expectedRows, testVectorized);
       // test double inverted
@@ -1186,62 +1189,53 @@ public abstract class BaseFilterTest extends InitializedNullHandlingTest
       final boolean testVectorized
   )
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
+        "Cursor: " + filter,
         expectedRows,
-        selectColumnValuesMatchingFilter(filter, "dim0"),
-        "Cursor: " + filter
+        selectColumnValuesMatchingFilter(filter, "dim0")
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
+        "Cursor with postFiltering: " + filter,
         expectedRows,
-        selectColumnValuesMatchingFilterUsingPostFiltering(filter, "dim0"),
-        "Cursor with postFiltering: " + filter
+        selectColumnValuesMatchingFilterUsingPostFiltering(filter, "dim0")
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
+        "Filtered aggregator: " + filter,
         expectedRows.size(),
-        selectCountUsingFilteredAggregator(filter),
-        "Filtered aggregator: " + filter
+        selectCountUsingFilteredAggregator(filter)
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
+        "RowBasedColumnSelectorFactory: " + filter,
         expectedRows,
-        selectColumnValuesMatchingFilterUsingRowBasedColumnSelectorFactory(filter, "dim0"),
-        "RowBasedColumnSelectorFactory: " + filter
+        selectColumnValuesMatchingFilterUsingRowBasedColumnSelectorFactory(filter, "dim0")
     );
 
     if (testVectorized) {
-      Assertions.assertEquals(
+      Assert.assertEquals(
+          "Cursor (vectorized): " + filter,
           expectedRows,
-          selectColumnValuesMatchingFilterUsingVectorCursor(filter, "dim0"),
-          "Cursor (vectorized): " + filter
+          selectColumnValuesMatchingFilterUsingVectorCursor(filter, "dim0")
       );
 
-      Assertions.assertEquals(
+      Assert.assertEquals(
+          "Cursor Virtual Column (vectorized): " + filter,
           expectedRows,
-          selectColumnValuesMatchingFilterUsingVectorVirtualColumnCursor(filter, "vdim0", "dim0"),
-          "Cursor Virtual Column (vectorized): " + filter
+          selectColumnValuesMatchingFilterUsingVectorVirtualColumnCursor(filter, "vdim0", "dim0")
       );
 
-      Assertions.assertEquals(
+      Assert.assertEquals(
+          "Cursor with postFiltering (vectorized): " + filter,
           expectedRows,
-          selectColumnValuesMatchingFilterUsingVectorizedPostFiltering(filter, "dim0"),
-          "Cursor with postFiltering (vectorized): " + filter
+          selectColumnValuesMatchingFilterUsingVectorizedPostFiltering(filter, "dim0")
       );
-      Assertions.assertEquals(
+      Assert.assertEquals(
+          "Filtered aggregator (vectorized): " + filter,
           expectedRows.size(),
-          selectCountUsingVectorizedFilteredAggregator(filter),
-          "Filtered aggregator (vectorized): " + filter
+          selectCountUsingVectorizedFilteredAggregator(filter)
       );
     }
-  }
-
-  private static File newFolder(File root, String... subDirs) throws IOException {
-    String subFolder = String.join("/", subDirs);
-    File result = new File(root, subFolder);
-    if (!result.mkdirs()) {
-      throw new IOException("Couldn't create folders " + root);
-    }
-    return result;
   }
 }

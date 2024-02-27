@@ -20,6 +20,7 @@
 package org.apache.druid.indexer;
 
 import org.junit.Assert;
+import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;

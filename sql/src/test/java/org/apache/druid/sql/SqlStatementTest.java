@@ -61,38 +61,37 @@ import org.apache.druid.sql.calcite.util.CalciteTests;
 import org.apache.druid.sql.calcite.util.QueryLogHook;
 import org.apache.druid.sql.http.SqlQuery;
 import org.easymock.EasyMock;
+import org.hamcrest.MatcherAssert;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Rule;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import javax.servlet.http.HttpServletRequest;
-
-import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class SqlStatementTest
 {
   private static QueryRunnerFactoryConglomerate conglomerate;
   private static SpecificSegmentsQuerySegmentWalker walker;
   private static Closer resourceCloser;
-  @TempDir
-  public static File temporaryFolder;
+  @ClassRule
+  public static TemporaryFolder temporaryFolder = new TemporaryFolder();
   @Rule
   public QueryLogHook queryLogHook = QueryLogHook.create();
   private TestRequestLogger testRequestLogger;
@@ -101,7 +100,7 @@ public class SqlStatementTest
   private final DefaultQueryConfig defaultQueryConfig = new DefaultQueryConfig(
       ImmutableMap.of("DEFAULT_KEY", "DEFAULT_VALUE"));
 
-  @BeforeAll
+  @BeforeClass
   public static void setUpClass() throws Exception
   {
     resourceCloser = Closer.create();
@@ -124,17 +123,17 @@ public class SqlStatementTest
       }
     };
 
-    walker = CalciteTests.createMockWalker(conglomerate, newFolder(temporaryFolder, "junit"), scheduler);
+    walker = CalciteTests.createMockWalker(conglomerate, temporaryFolder.newFolder(), scheduler);
     resourceCloser.register(walker);
   }
 
-  @AfterAll
+  @AfterClass
   public static void tearDownClass() throws IOException
   {
     resourceCloser.close();
   }
 
-  @BeforeEach
+  @Before
   public void setUp()
   {
     executorService = MoreExecutors.listeningDecorator(Execs.multiThreaded(8, "test_sql_resource_%s"));
@@ -179,7 +178,7 @@ public class SqlStatementTest
     );
   }
 
-  @AfterEach
+  @After
   public void tearDown() throws Exception
   {
     executorService.shutdownNow();
@@ -291,7 +290,7 @@ public class SqlStatementTest
       fail();
     }
     catch (DruidException e) {
-      assertThat(
+      MatcherAssert.assertThat(
           e,
           DruidExceptionMatcher
               .invalidSqlInput()
@@ -313,7 +312,7 @@ public class SqlStatementTest
       fail();
     }
     catch (DruidException e) {
-      assertThat(
+      MatcherAssert.assertThat(
           e,
           DruidExceptionMatcher
               .invalidSqlInput()
@@ -380,7 +379,7 @@ public class SqlStatementTest
       fail();
     }
     catch (DruidException e) {
-      assertThat(
+      MatcherAssert.assertThat(
           e,
           DruidExceptionMatcher
               .invalidSqlInput()
@@ -401,7 +400,7 @@ public class SqlStatementTest
       fail();
     }
     catch (DruidException e) {
-      assertThat(
+      MatcherAssert.assertThat(
           e,
           DruidExceptionMatcher
               .invalidSqlInput()
@@ -473,7 +472,7 @@ public class SqlStatementTest
       fail();
     }
     catch (DruidException e) {
-      assertThat(
+      MatcherAssert.assertThat(
           e,
           DruidExceptionMatcher
               .invalidSqlInput()
@@ -495,7 +494,7 @@ public class SqlStatementTest
       fail();
     }
     catch (DruidException e) {
-      assertThat(
+      MatcherAssert.assertThat(
           e,
           DruidExceptionMatcher
               .invalidSqlInput()
@@ -534,9 +533,9 @@ public class SqlStatementTest
         .build();
     DirectStatement stmt = sqlStatementFactory.directStatement(sqlReq);
     Map<String, Object> context = stmt.context();
-    Assertions.assertEquals(2, context.size());
+    Assert.assertEquals(2, context.size());
     // should contain only query id, not bySegment since it is not valid for SQL
-    Assertions.assertTrue(context.containsKey(QueryContexts.CTX_SQL_QUERY_ID));
+    Assert.assertTrue(context.containsKey(QueryContexts.CTX_SQL_QUERY_ID));
   }
 
   @Test
@@ -549,19 +548,10 @@ public class SqlStatementTest
         .build();
     DirectStatement stmt = sqlStatementFactory.directStatement(sqlReq);
     Map<String, Object> context = stmt.context();
-    Assertions.assertEquals(2, context.size());
+    Assert.assertEquals(2, context.size());
     // Statement should contain default query context values
     for (String defaultContextKey : defaultQueryConfig.getContext().keySet()) {
-      Assertions.assertTrue(context.containsKey(defaultContextKey));
+      Assert.assertTrue(context.containsKey(defaultContextKey));
     }
-  }
-
-  private static File newFolder(File root, String... subDirs) throws IOException {
-    String subFolder = String.join("/", subDirs);
-    File result = new File(root, subFolder);
-    if (!result.mkdirs()) {
-      throw new IOException("Couldn't create folders " + root);
-    }
-    return result;
   }
 }

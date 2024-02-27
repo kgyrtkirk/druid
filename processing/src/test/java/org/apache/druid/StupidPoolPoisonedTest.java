@@ -20,14 +20,14 @@
 package org.apache.druid;
 
 import org.apache.druid.collections.StupidPool;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class StupidPoolPoisonedTest
 {
   @Test
   public void testStupidPoolPoisoned()
   {
-    Assertions.assertTrue(StupidPool.isPoisoned(), "StupidPool should've been poisoned, it wasn't");
+    Assert.assertTrue("StupidPool should've been poisoned, it wasn't", StupidPool.isPoisoned());
   }
 }

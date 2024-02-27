@@ -25,6 +25,7 @@ import org.apache.druid.msq.indexing.error.MSQFault;
 import org.apache.druid.msq.indexing.error.NotEnoughMemoryFault;
 import org.apache.druid.msq.indexing.error.TooManyWorkersFault;
 import org.junit.Assert;
+import org.junit.Test;
 
 public class WorkerMemoryParametersTest
 {

@@ -41,9 +41,9 @@ import org.apache.druid.segment.IndexBuilder;
 import org.apache.druid.segment.StorageAdapter;
 import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.column.RowSignature;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -91,7 +91,7 @@ public class LikeFilterTest extends BaseFilterTest
     super(testName, ROWS, indexBuilder, finisher, cnf, optimize);
   }
 
-  @AfterAll
+  @AfterClass
   public static void tearDown() throws Exception
   {
     BaseFilterTest.tearDown(LikeFilterTest.class.getName());
@@ -391,14 +391,14 @@ public class LikeFilterTest extends BaseFilterTest
     Filter filter = new LikeDimFilter("dim0", "e%", null, new SubstringDimExtractionFn(1, 100)).toFilter();
     Filter filter2 = new LikeDimFilter("dim1", "e%", null, new SubstringDimExtractionFn(1, 100)).toFilter();
 
-    Assertions.assertTrue(filter.supportsRequiredColumnRewrite());
-    Assertions.assertTrue(filter2.supportsRequiredColumnRewrite());
+    Assert.assertTrue(filter.supportsRequiredColumnRewrite());
+    Assert.assertTrue(filter2.supportsRequiredColumnRewrite());
 
     Filter rewrittenFilter = filter.rewriteRequiredColumns(ImmutableMap.of("dim0", "dim1"));
-    Assertions.assertEquals(filter2, rewrittenFilter);
+    Assert.assertEquals(filter2, rewrittenFilter);
 
-    Throwable t = Assertions.assertThrows(IAE.class, () -> filter.rewriteRequiredColumns(ImmutableMap.of("invalidName", "dim1")));
-    Assertions.assertEquals("Received a non-applicable rewrite: {invalidName=dim1}, filter's dimension: dim0", t.getMessage());
+    Throwable t = Assert.assertThrows(IAE.class, () -> filter.rewriteRequiredColumns(ImmutableMap.of("invalidName", "dim1")));
+    Assert.assertEquals("Received a non-applicable rewrite: {invalidName=dim1}, filter's dimension: dim0", t.getMessage());
   }
 
   @Test

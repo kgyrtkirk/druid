@@ -19,27 +19,18 @@
 
 package org.apache.druid.frame.processor;
 
-import org.junit.jupiter.api.io.TempDir;
+import org.junit.ClassRule;
+import org.junit.rules.TemporaryFolder;
 
-import java.io.File;
 import java.io.IOException;
 
 public class FileOutputChannelFactoryTest extends OutputChannelFactoryTest
 {
-  @TempDir
-  public static File folder;
+  @ClassRule
+  public static TemporaryFolder folder = new TemporaryFolder();
 
   public FileOutputChannelFactoryTest() throws IOException
   {
-    super(new FileOutputChannelFactory(newFolder(folder, "junit"), 100, null), 100);
-  }
-
-  private static File newFolder(File root, String... subDirs) throws IOException {
-    String subFolder = String.join("/", subDirs);
-    File result = new File(root, subFolder);
-    if (!result.mkdirs()) {
-      throw new IOException("Couldn't create folders " + root);
-    }
-    return result;
+    super(new FileOutputChannelFactory(folder.newFolder(), 100, null), 100);
   }
 }

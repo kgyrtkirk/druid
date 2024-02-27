@@ -36,6 +36,7 @@ import org.apache.druid.sql.calcite.QueryTestBuilder;
 import org.apache.druid.sql.calcite.run.SqlEngine;
 import org.junit.Assert;
 import org.junit.Ignore;
+import org.junit.Test;
 
 /**
  * Runs {@link CalciteQueryTest} but with MSQ engine

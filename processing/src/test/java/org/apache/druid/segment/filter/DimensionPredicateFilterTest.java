@@ -20,7 +20,7 @@
 package org.apache.druid.segment.filter;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 public class DimensionPredicateFilterTest
 {

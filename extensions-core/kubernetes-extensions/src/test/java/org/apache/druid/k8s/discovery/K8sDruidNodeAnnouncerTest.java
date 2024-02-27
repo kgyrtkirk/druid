@@ -30,6 +30,7 @@ import org.apache.druid.server.DruidNode;
 import org.easymock.Capture;
 import org.easymock.EasyMock;
 import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.List;
 import java.util.Map;

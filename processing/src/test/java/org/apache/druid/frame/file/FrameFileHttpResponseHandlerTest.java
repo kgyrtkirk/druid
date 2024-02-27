@@ -36,6 +36,7 @@ import org.apache.druid.segment.TestIndex;
 import org.apache.druid.segment.incremental.IncrementalIndexStorageAdapter;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.hamcrest.CoreMatchers;
+import org.hamcrest.MatcherAssert;
 import org.jboss.netty.buffer.ByteBufferBackedChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.handler.codec.http.DefaultHttpChunk;
@@ -44,12 +45,14 @@ import org.jboss.netty.handler.codec.http.HttpChunk;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.HttpVersion;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.internal.matchers.ThrowableMessageMatcher;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.io.TempDir;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.io.File;
 import java.io.IOException;
@@ -59,25 +62,25 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-
+@RunWith(Parameterized.class)
 public class FrameFileHttpResponseHandlerTest extends InitializedNullHandlingTest
 {
-  @TempDir
-  public File temporaryFolder;
+  @Rule
+  public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-  private int maxRowsPerFrame;
+  private final int maxRowsPerFrame;
 
   private StorageAdapter adapter;
   private File file;
   private ReadableByteChunksFrameChannel channel;
   private FrameFileHttpResponseHandler handler;
 
-  public void initFrameFileHttpResponseHandlerTest(final int maxRowsPerFrame)
+  public FrameFileHttpResponseHandlerTest(final int maxRowsPerFrame)
   {
     this.maxRowsPerFrame = maxRowsPerFrame;
   }
 
+  @Parameterized.Parameters(name = "maxRowsPerFrame = {0}")
   public static Iterable<Object[]> constructorFeeder()
   {
     final List<Object[]> constructors = new ArrayList<>();
@@ -89,7 +92,7 @@ public class FrameFileHttpResponseHandlerTest extends InitializedNullHandlingTes
     return constructors;
   }
 
-  @BeforeEach
+  @Before
   public void setUp() throws IOException
   {
     adapter = new IncrementalIndexStorageAdapter(TestIndex.getIncrementalTestIndex());
@@ -98,37 +101,35 @@ public class FrameFileHttpResponseHandlerTest extends InitializedNullHandlingTes
                             .maxRowsPerFrame(maxRowsPerFrame)
                             .frameType(FrameType.ROW_BASED) // No particular reason to test with both frame types
                             .frames(),
-        File.createTempFile("junit", null, temporaryFolder)
+        temporaryFolder.newFile()
     );
 
     channel = ReadableByteChunksFrameChannel.create("test", false);
     handler = new FrameFileHttpResponseHandler(channel);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "maxRowsPerFrame = {0}")
-  public void testNonChunkedResponse(final int maxRowsPerFrame) throws Exception
+  @Test
+  public void testNonChunkedResponse() throws Exception
   {
-    initFrameFileHttpResponseHandlerTest(maxRowsPerFrame);
     final ClientResponse<FrameFilePartialFetch> response1 = handler.handleResponse(
         makeResponse(HttpResponseStatus.OK, Files.readAllBytes(file.toPath())),
         null
     );
 
-    Assertions.assertFalse(response1.isFinished());
-    Assertions.assertTrue(response1.isContinueReading());
-    Assertions.assertFalse(response1.getObj().isExceptionCaught());
-    Assertions.assertFalse(response1.getObj().isLastFetch());
+    Assert.assertFalse(response1.isFinished());
+    Assert.assertTrue(response1.isContinueReading());
+    Assert.assertFalse(response1.getObj().isExceptionCaught());
+    Assert.assertFalse(response1.getObj().isLastFetch());
 
     final ClientResponse<FrameFilePartialFetch> response2 = handler.done(response1);
 
-    Assertions.assertTrue(response2.isFinished());
-    Assertions.assertTrue(response2.isContinueReading());
-    Assertions.assertFalse(response2.getObj().isExceptionCaught());
-    Assertions.assertFalse(response2.getObj().isLastFetch());
+    Assert.assertTrue(response2.isFinished());
+    Assert.assertTrue(response2.isContinueReading());
+    Assert.assertFalse(response2.getObj().isExceptionCaught());
+    Assert.assertFalse(response2.getObj().isLastFetch());
 
     final ListenableFuture<?> backpressureFuture = response2.getObj().backpressureFuture();
-    Assertions.assertFalse(backpressureFuture.isDone());
+    Assert.assertFalse(backpressureFuture.isDone());
 
     channel.doneWriting();
 
@@ -138,38 +139,34 @@ public class FrameFileHttpResponseHandlerTest extends InitializedNullHandlingTes
     );
 
     // Backpressure future resolves once channel is read.
-    Assertions.assertTrue(backpressureFuture.isDone());
+    Assert.assertTrue(backpressureFuture.isDone());
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "maxRowsPerFrame = {0}")
-  public void testEmptyResponseWithoutLastFetchHeader(final int maxRowsPerFrame)
+  @Test
+  public void testEmptyResponseWithoutLastFetchHeader()
   {
-    initFrameFileHttpResponseHandlerTest(maxRowsPerFrame);
     final ClientResponse<FrameFilePartialFetch> response1 = handler.handleResponse(
         makeResponse(HttpResponseStatus.OK, ByteArrays.EMPTY_ARRAY),
         null
     );
 
-    Assertions.assertFalse(response1.isFinished());
-    Assertions.assertTrue(response1.isContinueReading());
-    Assertions.assertFalse(response1.getObj().isExceptionCaught());
-    Assertions.assertFalse(response1.getObj().isLastFetch());
+    Assert.assertFalse(response1.isFinished());
+    Assert.assertTrue(response1.isContinueReading());
+    Assert.assertFalse(response1.getObj().isExceptionCaught());
+    Assert.assertFalse(response1.getObj().isLastFetch());
 
     final ClientResponse<FrameFilePartialFetch> response2 = handler.done(response1);
 
-    Assertions.assertTrue(response2.isFinished());
-    Assertions.assertTrue(response2.isContinueReading());
-    Assertions.assertFalse(response2.getObj().isExceptionCaught());
-    Assertions.assertFalse(response2.getObj().isLastFetch());
-    Assertions.assertTrue(response2.getObj().backpressureFuture().isDone());
+    Assert.assertTrue(response2.isFinished());
+    Assert.assertTrue(response2.isContinueReading());
+    Assert.assertFalse(response2.getObj().isExceptionCaught());
+    Assert.assertFalse(response2.getObj().isLastFetch());
+    Assert.assertTrue(response2.getObj().backpressureFuture().isDone());
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "maxRowsPerFrame = {0}")
-  public void testEmptyResponseWithLastFetchHeader(final int maxRowsPerFrame)
+  @Test
+  public void testEmptyResponseWithLastFetchHeader()
   {
-    initFrameFileHttpResponseHandlerTest(maxRowsPerFrame);
     final HttpResponse serverResponse = makeResponse(HttpResponseStatus.OK, ByteArrays.EMPTY_ARRAY);
     serverResponse.headers().set(
         FrameFileHttpResponseHandler.HEADER_LAST_FETCH_NAME,
@@ -181,25 +178,23 @@ public class FrameFileHttpResponseHandlerTest extends InitializedNullHandlingTes
         null
     );
 
-    Assertions.assertFalse(response1.isFinished());
-    Assertions.assertTrue(response1.isContinueReading());
-    Assertions.assertFalse(response1.getObj().isExceptionCaught());
-    Assertions.assertTrue(response1.getObj().isLastFetch());
+    Assert.assertFalse(response1.isFinished());
+    Assert.assertTrue(response1.isContinueReading());
+    Assert.assertFalse(response1.getObj().isExceptionCaught());
+    Assert.assertTrue(response1.getObj().isLastFetch());
 
     final ClientResponse<FrameFilePartialFetch> response2 = handler.done(response1);
 
-    Assertions.assertTrue(response2.isFinished());
-    Assertions.assertTrue(response2.isContinueReading());
-    Assertions.assertFalse(response2.getObj().isExceptionCaught());
-    Assertions.assertTrue(response2.getObj().isLastFetch());
-    Assertions.assertTrue(response2.getObj().backpressureFuture().isDone());
+    Assert.assertTrue(response2.isFinished());
+    Assert.assertTrue(response2.isContinueReading());
+    Assert.assertFalse(response2.getObj().isExceptionCaught());
+    Assert.assertTrue(response2.getObj().isLastFetch());
+    Assert.assertTrue(response2.getObj().backpressureFuture().isDone());
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "maxRowsPerFrame = {0}")
-  public void testChunkedResponse(final int maxRowsPerFrame) throws Exception
+  @Test
+  public void testChunkedResponse() throws Exception
   {
-    initFrameFileHttpResponseHandlerTest(maxRowsPerFrame);
     final int chunkSize = 99;
     final byte[] allBytes = Files.readAllBytes(file.toPath());
 
@@ -208,7 +203,7 @@ public class FrameFileHttpResponseHandlerTest extends InitializedNullHandlingTes
         null
     );
 
-    Assertions.assertFalse(response.isFinished());
+    Assert.assertFalse(response.isFinished());
 
     for (int p = chunkSize; p < allBytes.length; p += chunkSize) {
       response = handler.handleChunk(
@@ -217,20 +212,20 @@ public class FrameFileHttpResponseHandlerTest extends InitializedNullHandlingTes
           p / chunkSize
       );
 
-      Assertions.assertFalse(response.isFinished());
-      Assertions.assertFalse(response.getObj().isExceptionCaught());
-      Assertions.assertFalse(response.getObj().isLastFetch());
+      Assert.assertFalse(response.isFinished());
+      Assert.assertFalse(response.getObj().isExceptionCaught());
+      Assert.assertFalse(response.getObj().isLastFetch());
     }
 
     final ClientResponse<FrameFilePartialFetch> finalResponse = handler.done(response);
 
-    Assertions.assertTrue(finalResponse.isFinished());
-    Assertions.assertTrue(finalResponse.isContinueReading());
-    Assertions.assertFalse(response.getObj().isExceptionCaught());
-    Assertions.assertFalse(response.getObj().isLastFetch());
+    Assert.assertTrue(finalResponse.isFinished());
+    Assert.assertTrue(finalResponse.isContinueReading());
+    Assert.assertFalse(response.getObj().isExceptionCaught());
+    Assert.assertFalse(response.getObj().isLastFetch());
 
     final ListenableFuture<?> backpressureFuture = response.getObj().backpressureFuture();
-    Assertions.assertFalse(backpressureFuture.isDone());
+    Assert.assertFalse(backpressureFuture.isDone());
 
     channel.doneWriting();
 
@@ -240,28 +235,26 @@ public class FrameFileHttpResponseHandlerTest extends InitializedNullHandlingTes
     );
 
     // Backpressure future resolves after channel is read.
-    Assertions.assertTrue(backpressureFuture.isDone());
+    Assert.assertTrue(backpressureFuture.isDone());
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "maxRowsPerFrame = {0}")
-  public void testServerErrorResponse(final int maxRowsPerFrame)
+  @Test
+  public void testServerErrorResponse()
   {
-    initFrameFileHttpResponseHandlerTest(maxRowsPerFrame);
     ClientResponse<FrameFilePartialFetch> response = handler.handleResponse(
         makeResponse(HttpResponseStatus.INTERNAL_SERVER_ERROR, StringUtils.toUtf8("Oh no!")),
         null
     );
 
     final ClientResponse<FrameFilePartialFetch> finalResponse = handler.done(response);
-    Assertions.assertTrue(finalResponse.isFinished());
-    Assertions.assertTrue(finalResponse.isContinueReading());
+    Assert.assertTrue(finalResponse.isFinished());
+    Assert.assertTrue(finalResponse.isContinueReading());
 
     // Verify that the exception handler was called.
-    Assertions.assertTrue(finalResponse.getObj().isExceptionCaught());
+    Assert.assertTrue(finalResponse.getObj().isExceptionCaught());
     final Throwable e = finalResponse.getObj().getExceptionCaught();
-    assertThat(e, CoreMatchers.instanceOf(IllegalStateException.class));
-    assertThat(
+    MatcherAssert.assertThat(e, CoreMatchers.instanceOf(IllegalStateException.class));
+    MatcherAssert.assertThat(
         e,
         ThrowableMessageMatcher.hasMessage(
             CoreMatchers.equalTo("Server for [test] returned [500 Internal Server Error]")
@@ -269,14 +262,12 @@ public class FrameFileHttpResponseHandlerTest extends InitializedNullHandlingTes
     );
 
     // Verify that the channel has not had an error state set. This enables reconnection later.
-    Assertions.assertFalse(channel.isErrorOrFinished());
+    Assert.assertFalse(channel.isErrorOrFinished());
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "maxRowsPerFrame = {0}")
-  public void testChunkedServerErrorResponse(final int maxRowsPerFrame)
+  @Test
+  public void testChunkedServerErrorResponse()
   {
-    initFrameFileHttpResponseHandlerTest(maxRowsPerFrame);
     ClientResponse<FrameFilePartialFetch> response = handler.handleResponse(
         makeResponse(HttpResponseStatus.INTERNAL_SERVER_ERROR, StringUtils.toUtf8("Oh ")),
         null
@@ -285,14 +276,14 @@ public class FrameFileHttpResponseHandlerTest extends InitializedNullHandlingTes
     response = handler.handleChunk(response, makeChunk(StringUtils.toUtf8("no!")), 1);
 
     final ClientResponse<FrameFilePartialFetch> finalResponse = handler.done(response);
-    Assertions.assertTrue(finalResponse.isFinished());
-    Assertions.assertTrue(finalResponse.isContinueReading());
+    Assert.assertTrue(finalResponse.isFinished());
+    Assert.assertTrue(finalResponse.isContinueReading());
 
     // Verify that the exception handler was called.
-    Assertions.assertTrue(finalResponse.getObj().isExceptionCaught());
+    Assert.assertTrue(finalResponse.getObj().isExceptionCaught());
     final Throwable e = finalResponse.getObj().getExceptionCaught();
-    assertThat(e, CoreMatchers.instanceOf(IllegalStateException.class));
-    assertThat(
+    MatcherAssert.assertThat(e, CoreMatchers.instanceOf(IllegalStateException.class));
+    MatcherAssert.assertThat(
         e,
         ThrowableMessageMatcher.hasMessage(
             CoreMatchers.equalTo("Server for [test] returned [500 Internal Server Error]")
@@ -300,14 +291,12 @@ public class FrameFileHttpResponseHandlerTest extends InitializedNullHandlingTes
     );
 
     // Verify that the channel has not had an error state set. This enables reconnection later.
-    Assertions.assertFalse(channel.isErrorOrFinished());
+    Assert.assertFalse(channel.isErrorOrFinished());
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "maxRowsPerFrame = {0}")
-  public void testCaughtExceptionDuringChunkedResponse(final int maxRowsPerFrame) throws Exception
+  @Test
+  public void testCaughtExceptionDuringChunkedResponse() throws Exception
   {
-    initFrameFileHttpResponseHandlerTest(maxRowsPerFrame);
     // Split file into 4 quarters.
     final int chunkSize = Ints.checkedCast(LongMath.divide(file.length(), 4, RoundingMode.CEILING));
     final byte[] allBytes = Files.readAllBytes(file.toPath());
@@ -317,7 +306,7 @@ public class FrameFileHttpResponseHandlerTest extends InitializedNullHandlingTes
         null
     );
 
-    Assertions.assertFalse(response.isFinished());
+    Assert.assertFalse(response.isFinished());
 
     // Add next chunk.
     response = handler.handleChunk(
@@ -337,18 +326,18 @@ public class FrameFileHttpResponseHandlerTest extends InitializedNullHandlingTes
     );
 
     // Verify that the exception handler was called.
-    Assertions.assertTrue(response.getObj().isExceptionCaught());
+    Assert.assertTrue(response.getObj().isExceptionCaught());
     final Throwable e = response.getObj().getExceptionCaught();
-    assertThat(e, CoreMatchers.instanceOf(IllegalStateException.class));
-    assertThat(e, ThrowableMessageMatcher.hasMessage(CoreMatchers.equalTo("Oh no!")));
+    MatcherAssert.assertThat(e, CoreMatchers.instanceOf(IllegalStateException.class));
+    MatcherAssert.assertThat(e, ThrowableMessageMatcher.hasMessage(CoreMatchers.equalTo("Oh no!")));
 
     // Verify that the channel has not had an error state set.
-    Assertions.assertFalse(channel.isErrorOrFinished());
+    Assert.assertFalse(channel.isErrorOrFinished());
 
     // Simulate successful reconnection with a different handler: add the rest of the data directly to the channel.
     channel.addChunk(byteSlice(allBytes, chunkSize * 2, chunkSize));
     channel.addChunk(byteSlice(allBytes, chunkSize * 3, chunkSize));
-    Assertions.assertEquals(allBytes.length, channel.getBytesAdded());
+    Assert.assertEquals(allBytes.length, channel.getBytesAdded());
     channel.doneWriting();
 
     FrameTestUtil.assertRowsEqual(
@@ -357,11 +346,9 @@ public class FrameFileHttpResponseHandlerTest extends InitializedNullHandlingTes
     );
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "maxRowsPerFrame = {0}")
-  public void testCaughtExceptionDuringChunkedResponseRetryWithSameHandler(final int maxRowsPerFrame) throws Exception
+  @Test
+  public void testCaughtExceptionDuringChunkedResponseRetryWithSameHandler() throws Exception
   {
-    initFrameFileHttpResponseHandlerTest(maxRowsPerFrame);
     // Split file into 12 chunks after the first 100 bytes.
     final int firstPart = 100;
     final int chunkSize = Ints.checkedCast(LongMath.divide(file.length() - firstPart, 12, RoundingMode.CEILING));
@@ -375,8 +362,8 @@ public class FrameFileHttpResponseHandlerTest extends InitializedNullHandlingTes
         )
     );
 
-    Assertions.assertEquals(firstPart, channel.getBytesAdded());
-    Assertions.assertTrue(response.isFinished());
+    Assert.assertEquals(firstPart, channel.getBytesAdded());
+    Assert.assertTrue(response.isFinished());
 
     // Add first quarter after firstPart using a new handler.
     handler = new FrameFileHttpResponseHandler(channel);
@@ -396,10 +383,10 @@ public class FrameFileHttpResponseHandlerTest extends InitializedNullHandlingTes
     );
 
     // Verify that the exception handler was called.
-    Assertions.assertTrue(response.getObj().isExceptionCaught());
+    Assert.assertTrue(response.getObj().isExceptionCaught());
     final Throwable e = response.getObj().getExceptionCaught();
-    assertThat(e, CoreMatchers.instanceOf(IllegalStateException.class));
-    assertThat(e, ThrowableMessageMatcher.hasMessage(CoreMatchers.equalTo("Oh no!")));
+    MatcherAssert.assertThat(e, CoreMatchers.instanceOf(IllegalStateException.class));
+    MatcherAssert.assertThat(e, ThrowableMessageMatcher.hasMessage(CoreMatchers.equalTo("Oh no!")));
 
     // Retry connection with the same handler and same initial offset firstPart (don't recreate handler), but now use
     // thirds instead of quarters as chunks. (ServiceClientImpl would retry from the same offset with the same handler
@@ -409,8 +396,8 @@ public class FrameFileHttpResponseHandlerTest extends InitializedNullHandlingTes
         null
     );
 
-    Assertions.assertEquals(firstPart + chunkSize * 4L, channel.getBytesAdded());
-    Assertions.assertFalse(response.isFinished());
+    Assert.assertEquals(firstPart + chunkSize * 4L, channel.getBytesAdded());
+    Assert.assertFalse(response.isFinished());
 
     // Send the rest of the data.
     response = handler.handleChunk(
@@ -418,7 +405,7 @@ public class FrameFileHttpResponseHandlerTest extends InitializedNullHandlingTes
         makeChunk(byteSlice(allBytes, firstPart + chunkSize * 4, chunkSize * 4)),
         1
     );
-    Assertions.assertEquals(firstPart + chunkSize * 8L, channel.getBytesAdded());
+    Assert.assertEquals(firstPart + chunkSize * 8L, channel.getBytesAdded());
 
     response = handler.handleChunk(
         response,
@@ -427,11 +414,11 @@ public class FrameFileHttpResponseHandlerTest extends InitializedNullHandlingTes
     );
     response = handler.done(response);
 
-    Assertions.assertTrue(response.isFinished());
-    Assertions.assertFalse(response.getObj().isExceptionCaught());
+    Assert.assertTrue(response.isFinished());
+    Assert.assertFalse(response.getObj().isExceptionCaught());
 
     // Verify channel.
-    Assertions.assertEquals(allBytes.length, channel.getBytesAdded());
+    Assert.assertEquals(allBytes.length, channel.getBytesAdded());
     channel.doneWriting();
     FrameTestUtil.assertRowsEqual(
         FrameTestUtil.readRowsFromAdapter(adapter, null, false),

@@ -34,15 +34,17 @@ import org.apache.druid.segment.writeout.SegmentWriteOutMedium;
 import org.apache.druid.segment.writeout.TmpFileSegmentWriteOutMediumFactory;
 import org.apache.druid.segment.writeout.WriteOutBytes;
 import org.apache.druid.utils.CloseableUtils;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.io.TempDir;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
@@ -52,8 +54,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.IntStream;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
+@RunWith(Parameterized.class)
 public class V3CompressedVSizeColumnarMultiIntsSerializerTest
 {
   private static final String TEST_COLUMN_NAME = "test";
@@ -64,15 +65,18 @@ public class V3CompressedVSizeColumnarMultiIntsSerializerTest
       CompressedColumnarIntsSupplier.MAX_INTS_IN_BUFFER
   };
   private static final int[] MAX_VALUES = new int[]{0xFF, 0xFFFF, 0xFFFFFF, 0x0FFFFFFF};
-  private CompressionStrategy compressionStrategy;
-  private ByteOrder byteOrder;
+  private final CompressionStrategy compressionStrategy;
+  private final ByteOrder byteOrder;
   private final Random rand = new Random(0);
   private List<int[]> vals;
 
-  @TempDir
-  public File temporaryFolder;
+  @Rule
+  public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-  public void initV3CompressedVSizeColumnarMultiIntsSerializerTest(
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
+
+  public V3CompressedVSizeColumnarMultiIntsSerializerTest(
       CompressionStrategy compressionStrategy,
       ByteOrder byteOrder
   )
@@ -81,6 +85,7 @@ public class V3CompressedVSizeColumnarMultiIntsSerializerTest
     this.byteOrder = byteOrder;
   }
 
+  @Parameterized.Parameters(name = "{index}: compression={0}, byteOrder={1}")
   public static Iterable<Object[]> compressionStrategiesAndByteOrders()
   {
     Set<List<Object>> combinations = Sets.cartesianProduct(
@@ -94,17 +99,15 @@ public class V3CompressedVSizeColumnarMultiIntsSerializerTest
     );
   }
 
-  @BeforeEach
+  @Before
   public void setUp()
   {
     vals = null;
   }
 
-  @MethodSource("compressionStrategiesAndByteOrders")
-  @ParameterizedTest(name = "{index}: compression={0}, byteOrder={1}")
-  public void testSmallData(CompressionStrategy compressionStrategy, ByteOrder byteOrder) throws Exception
+  @Test
+  public void testSmallData() throws Exception
   {
-    initV3CompressedVSizeColumnarMultiIntsSerializerTest(compressionStrategy, byteOrder);
     // less than one chunk
     for (int offsetChunk : OFFSET_CHUNK_FACTORS) {
       for (int maxValue : MAX_VALUES) {
@@ -115,11 +118,9 @@ public class V3CompressedVSizeColumnarMultiIntsSerializerTest
     }
   }
 
-  @MethodSource("compressionStrategiesAndByteOrders")
-  @ParameterizedTest(name = "{index}: compression={0}, byteOrder={1}")
-  public void testLargeData(CompressionStrategy compressionStrategy, ByteOrder byteOrder) throws Exception
+  @Test
+  public void testLargeData() throws Exception
   {
-    initV3CompressedVSizeColumnarMultiIntsSerializerTest(compressionStrategy, byteOrder);
     // more than one chunk
     for (int offsetChunk : OFFSET_CHUNK_FACTORS) {
       for (int maxValue : MAX_VALUES) {
@@ -130,20 +131,16 @@ public class V3CompressedVSizeColumnarMultiIntsSerializerTest
     }
   }
 
-  @MethodSource("compressionStrategiesAndByteOrders")
-  @ParameterizedTest(name = "{index}: compression={0}, byteOrder={1}")
-  public void testEmpty(CompressionStrategy compressionStrategy, ByteOrder byteOrder) throws Exception
+  @Test
+  public void testEmpty() throws Exception
   {
-    initV3CompressedVSizeColumnarMultiIntsSerializerTest(compressionStrategy, byteOrder);
     vals = new ArrayList<>();
     checkSerializedSizeAndData(1, 2);
   }
 
-  @MethodSource("compressionStrategiesAndByteOrders")
-  @ParameterizedTest(name = "{index}: compression={0}, byteOrder={1}")
-  public void testMultiValueFileLargeData(CompressionStrategy compressionStrategy, ByteOrder byteOrder) throws Exception
+  @Test
+  public void testMultiValueFileLargeData() throws Exception
   {
-    initV3CompressedVSizeColumnarMultiIntsSerializerTest(compressionStrategy, byteOrder);
     // more than one chunk
     for (int offsetChunk : OFFSET_CHUNK_FACTORS) {
       for (int maxValue : MAX_VALUES) {
@@ -155,22 +152,19 @@ public class V3CompressedVSizeColumnarMultiIntsSerializerTest
   }
 
   // this test takes ~30 minutes to run
-  @Disabled
-  @MethodSource("compressionStrategiesAndByteOrders")
-  @ParameterizedTest(name = "{index}: compression={0}, byteOrder={1}")
-  public void testTooManyValues(CompressionStrategy compressionStrategy, ByteOrder byteOrder) throws Exception
+  @Ignore
+  @Test
+  public void testTooManyValues() throws Exception
   {
-    Throwable exception = assertThrows(ColumnCapacityExceededException.class, () -> {
-      initV3CompressedVSizeColumnarMultiIntsSerializerTest(compressionStrategy, byteOrder);
-      // more than one chunk
-      final int offsetChunk = CompressedColumnarIntsSupplier.MAX_INTS_IN_BUFFER;
-      final int maxValue = 0x0FFFFFFF;
-      final int valueChunk = CompressedVSizeColumnarIntsSupplier.maxIntsInBufferForValue(maxValue);
-      final int numRows = 10000000;
-      final int maxValuesPerRow = 1000;
-      generateV2SerializedSizeAndData(numRows, maxValue, maxValuesPerRow, offsetChunk, valueChunk);
-    });
-    assertTrue(exception.getMessage().contains(ColumnCapacityExceededException.formatMessage("test")));
+    expectedException.expect(ColumnCapacityExceededException.class);
+    expectedException.expectMessage(ColumnCapacityExceededException.formatMessage("test"));
+    // more than one chunk
+    final int offsetChunk = CompressedColumnarIntsSupplier.MAX_INTS_IN_BUFFER;
+    final int maxValue = 0x0FFFFFFF;
+    final int valueChunk = CompressedVSizeColumnarIntsSupplier.maxIntsInBufferForValue(maxValue);
+    final int numRows = 10000000;
+    final int maxValuesPerRow = 1000;
+    generateV2SerializedSizeAndData(numRows, maxValue, maxValuesPerRow, offsetChunk, valueChunk);
   }
 
   private void generateVals(final int rowCount, final int maxValue, final int numValuesPerRow)
@@ -202,7 +196,7 @@ public class V3CompressedVSizeColumnarMultiIntsSerializerTest
 
   private void checkSerializedSizeAndData(int offsetChunkFactor, int valueChunkFactor) throws Exception
   {
-    FileSmoosher smoosher = new FileSmoosher(newFolder(temporaryFolder, "junit"));
+    FileSmoosher smoosher = new FileSmoosher(temporaryFolder.newFolder());
 
     try (SegmentWriteOutMedium segmentWriteOutMedium = new OffHeapMemorySegmentWriteOutMedium()) {
       int maxValue = vals.size() > 0 ? getMaxValue(vals) : 0;
@@ -243,7 +237,7 @@ public class V3CompressedVSizeColumnarMultiIntsSerializerTest
       writer.writeTo(writeOutBytes, smoosher);
       smoosher.close();
 
-      Assertions.assertEquals(writtenLength, supplierFromIterable.getSerializedSize());
+      Assert.assertEquals(writtenLength, supplierFromIterable.getSerializedSize());
 
       // read from ByteBuffer and check values
       V3CompressedVSizeColumnarMultiIntsSupplier supplierFromByteBuffer = V3CompressedVSizeColumnarMultiIntsSupplier.fromByteBuffer(
@@ -252,12 +246,12 @@ public class V3CompressedVSizeColumnarMultiIntsSerializerTest
       );
 
       try (final ColumnarMultiInts columnarMultiInts = supplierFromByteBuffer.get()) {
-        Assertions.assertEquals(columnarMultiInts.size(), vals.size());
+        Assert.assertEquals(columnarMultiInts.size(), vals.size());
         for (int i = 0; i < vals.size(); ++i) {
           IndexedInts subVals = columnarMultiInts.get(i);
-          Assertions.assertEquals(subVals.size(), vals.get(i).length);
+          Assert.assertEquals(subVals.size(), vals.get(i).length);
           for (int j = 0, size = subVals.size(); j < size; ++j) {
-            Assertions.assertEquals(subVals.get(j), vals.get(i)[j]);
+            Assert.assertEquals(subVals.get(j), vals.get(i)[j]);
           }
         }
       }
@@ -320,12 +314,12 @@ public class V3CompressedVSizeColumnarMultiIntsSerializerTest
       V3CompressedVSizeColumnarMultiIntsSupplier supplierFromByteBuffer =
           V3CompressedVSizeColumnarMultiIntsSupplier.fromByteBuffer(mapper.mapFile("test"), byteOrder);
       ColumnarMultiInts columnarMultiInts = supplierFromByteBuffer.get();
-      Assertions.assertEquals(columnarMultiInts.size(), vals.size());
+      Assert.assertEquals(columnarMultiInts.size(), vals.size());
       for (int i = 0; i < vals.size(); ++i) {
         IndexedInts subVals = columnarMultiInts.get(i);
-        Assertions.assertEquals(subVals.size(), vals.get(i).length);
+        Assert.assertEquals(subVals.size(), vals.get(i).length);
         for (int j = 0, size = subVals.size(); j < size; ++j) {
-          Assertions.assertEquals(subVals.get(j), vals.get(i)[j]);
+          Assert.assertEquals(subVals.get(j), vals.get(i)[j]);
         }
       }
       CloseableUtils.closeAll(columnarMultiInts, mapper);
@@ -349,7 +343,7 @@ public class V3CompressedVSizeColumnarMultiIntsSerializerTest
 
     try (
         SegmentWriteOutMedium segmentWriteOutMedium =
-            TmpFileSegmentWriteOutMediumFactory.instance().makeSegmentWriteOutMedium(newFolder(temporaryFolder, "junit"))
+            TmpFileSegmentWriteOutMediumFactory.instance().makeSegmentWriteOutMedium(temporaryFolder.newFolder())
     ) {
       CompressedColumnarIntsSerializer offsetWriter = new CompressedColumnarIntsSerializer(
           TEST_COLUMN_NAME,
@@ -396,26 +390,17 @@ public class V3CompressedVSizeColumnarMultiIntsSerializerTest
       V3CompressedVSizeColumnarMultiIntsSupplier supplierFromByteBuffer =
           V3CompressedVSizeColumnarMultiIntsSupplier.fromByteBuffer(mapper.mapFile("test"), byteOrder, mapper);
       ColumnarMultiInts columnarMultiInts = supplierFromByteBuffer.get();
-      Assertions.assertEquals(columnarMultiInts.size(), numRows);
+      Assert.assertEquals(columnarMultiInts.size(), numRows);
       Random verifier = new Random(0);
       for (int i = 0; i < numRows; ++i) {
         IndexedInts subVals = columnarMultiInts.get(i);
         int[] expected = generateRow(verifier, maxValue, maxValuesPerRow);
-        Assertions.assertEquals(subVals.size(), expected.length);
+        Assert.assertEquals(subVals.size(), expected.length);
         for (int j = 0, size = subVals.size(); j < size; ++j) {
-          Assertions.assertEquals(subVals.get(j), expected[j]);
+          Assert.assertEquals(subVals.get(j), expected[j]);
         }
       }
       CloseableUtils.closeAll(columnarMultiInts, mapper);
     }
-  }
-
-  private static File newFolder(File root, String... subDirs) throws IOException {
-    String subFolder = String.join("/", subDirs);
-    File result = new File(root, subFolder);
-    if (!result.mkdirs()) {
-      throw new IOException("Couldn't create folders " + root);
-    }
-    return result;
   }
 }

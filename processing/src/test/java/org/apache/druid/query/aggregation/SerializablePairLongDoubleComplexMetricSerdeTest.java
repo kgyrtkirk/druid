@@ -30,8 +30,8 @@ import org.apache.druid.segment.column.ValueType;
 import org.apache.druid.segment.writeout.HeapByteBufferWriteOutBytes;
 import org.apache.druid.segment.writeout.OnHeapMemorySegmentWriteOutMedium;
 import org.apache.druid.segment.writeout.SegmentWriteOutMedium;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -154,7 +154,7 @@ public class SerializablePairLongDoubleComplexMetricSerdeTest
     try (ComplexColumn compressedCol = createComplexColumn(compressedBuffer)
     ) {
       for (int i = 0; i < expected.size(); i++) {
-        Assertions.assertEquals(expected.get(i), compressedCol.getRowValue(i));
+        Assert.assertEquals(expected.get(i), compressedCol.getRowValue(i));
       }
     }
     return compressedBuffer;
@@ -173,10 +173,10 @@ public class SerializablePairLongDoubleComplexMetricSerdeTest
 
     final ComplexColumn col = (ComplexColumn) columnHolder.getColumn();
     if (col instanceof SerializablePairLongDoubleComplexColumn) {
-      Assertions.assertEquals(serializedSize, col.getLength());
+      Assert.assertEquals(serializedSize, col.getLength());
     }
-    Assertions.assertEquals("serializablePairLongDouble", col.getTypeName());
-    Assertions.assertEquals(SerializablePairLongDouble.class, col.getClazz());
+    Assert.assertEquals("serializablePairLongDouble", col.getTypeName());
+    Assert.assertEquals(SerializablePairLongDouble.class, col.getClazz());
 
     return col;
   }
@@ -228,10 +228,10 @@ public class SerializablePairLongDoubleComplexMetricSerdeTest
     byteBuffer.flip();
 
     if (expectedSize > -1) {
-      Assertions.assertEquals(expectedSize, serializer.getSerializedSize());
+      Assert.assertEquals(expectedSize, serializer.getSerializedSize());
     }
 
-    Assertions.assertEquals(serializer.getSerializedSize(), byteBuffer.limit());
+    Assert.assertEquals(serializer.getSerializedSize(), byteBuffer.limit());
 
     return byteBuffer;
   }

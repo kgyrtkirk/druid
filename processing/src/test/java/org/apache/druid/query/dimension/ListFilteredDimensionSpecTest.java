@@ -25,8 +25,8 @@ import nl.jqno.equalsverifier.EqualsVerifier;
 import org.apache.druid.segment.DimensionSelector;
 import org.apache.druid.segment.TestHelper;
 import org.apache.druid.segment.data.IndexedInts;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Arrays;
 
@@ -61,7 +61,7 @@ public class ListFilteredDimensionSpecTest
         true
     );
 
-    Assertions.assertEquals(expected, actual);
+    Assert.assertEquals(expected, actual);
 
     //isWhitelist = false
     jsonStr = "{\n"
@@ -85,7 +85,7 @@ public class ListFilteredDimensionSpecTest
         false
     );
 
-    Assertions.assertEquals(expected, actual);
+    Assert.assertEquals(expected, actual);
   }
 
   @Test
@@ -103,7 +103,7 @@ public class ListFilteredDimensionSpecTest
         null
     );
 
-    Assertions.assertFalse(Arrays.equals(spec1.getCacheKey(), spec2.getCacheKey()));
+    Assert.assertFalse(Arrays.equals(spec1.getCacheKey(), spec2.getCacheKey()));
 
     ListFilteredDimensionSpec spec3 = new ListFilteredDimensionSpec(
         new DefaultDimensionSpec("foo", "bar"),
@@ -111,7 +111,7 @@ public class ListFilteredDimensionSpecTest
         false
     );
 
-    Assertions.assertFalse(Arrays.equals(spec1.getCacheKey(), spec3.getCacheKey()));
+    Assert.assertFalse(Arrays.equals(spec1.getCacheKey(), spec3.getCacheKey()));
   }
 
   @Test
@@ -125,18 +125,18 @@ public class ListFilteredDimensionSpecTest
 
     DimensionSelector selector = spec.decorate(TestDimensionSelector.INSTANCE);
 
-    Assertions.assertEquals(2, selector.getValueCardinality());
+    Assert.assertEquals(2, selector.getValueCardinality());
 
     IndexedInts row = selector.getRow();
-    Assertions.assertEquals(2, row.size());
-    Assertions.assertEquals(0, row.get(0));
-    Assertions.assertEquals(1, row.get(1));
+    Assert.assertEquals(2, row.size());
+    Assert.assertEquals(0, row.get(0));
+    Assert.assertEquals(1, row.get(1));
 
-    Assertions.assertEquals("c", selector.lookupName(0));
-    Assertions.assertEquals("g", selector.lookupName(1));
+    Assert.assertEquals("c", selector.lookupName(0));
+    Assert.assertEquals("g", selector.lookupName(1));
 
-    Assertions.assertEquals(0, selector.idLookup().lookupId("c"));
-    Assertions.assertEquals(1, selector.idLookup().lookupId("g"));
+    Assert.assertEquals(0, selector.idLookup().lookupId("c"));
+    Assert.assertEquals(1, selector.idLookup().lookupId("g"));
   }
 
   @Test
@@ -150,17 +150,17 @@ public class ListFilteredDimensionSpecTest
 
     DimensionSelector selector = spec.decorate(TestDimensionSelector.INSTANCE);
 
-    Assertions.assertEquals(24, selector.getValueCardinality());
+    Assert.assertEquals(24, selector.getValueCardinality());
 
     IndexedInts row = selector.getRow();
-    Assertions.assertEquals(1, row.size());
-    Assertions.assertEquals(3, row.get(0));
+    Assert.assertEquals(1, row.size());
+    Assert.assertEquals(3, row.get(0));
 
-    Assertions.assertEquals("a", selector.lookupName(0));
-    Assertions.assertEquals("z", selector.lookupName(23));
+    Assert.assertEquals("a", selector.lookupName(0));
+    Assert.assertEquals("z", selector.lookupName(23));
 
-    Assertions.assertEquals(0, selector.idLookup().lookupId("a"));
-    Assertions.assertEquals(23, selector.idLookup().lookupId("z"));
+    Assert.assertEquals(0, selector.idLookup().lookupId("a"));
+    Assert.assertEquals(23, selector.idLookup().lookupId("z"));
   }
 
   @Test
@@ -174,21 +174,21 @@ public class ListFilteredDimensionSpecTest
 
     DimensionSelector selector = spec.decorate(TestDimensionSelector.INSTANCE);
 
-    Assertions.assertEquals(25, selector.getValueCardinality());
+    Assert.assertEquals(25, selector.getValueCardinality());
 
     IndexedInts row = selector.getRow();
-    Assertions.assertEquals(2, row.size());
-    Assertions.assertEquals(3, row.get(0));
-    Assertions.assertEquals(5, row.get(1));
+    Assert.assertEquals(2, row.size());
+    Assert.assertEquals(3, row.get(0));
+    Assert.assertEquals(5, row.get(1));
 
-    Assertions.assertEquals("e", selector.lookupName(row.get(0)));
-    Assertions.assertEquals("g", selector.lookupName(row.get(1)));
+    Assert.assertEquals("e", selector.lookupName(row.get(0)));
+    Assert.assertEquals("g", selector.lookupName(row.get(1)));
 
-    Assertions.assertEquals("a", selector.lookupName(0));
-    Assertions.assertEquals("z", selector.lookupName(24));
+    Assert.assertEquals("a", selector.lookupName(0));
+    Assert.assertEquals("z", selector.lookupName(24));
 
-    Assertions.assertEquals(0, selector.idLookup().lookupId("a"));
-    Assertions.assertEquals(24, selector.idLookup().lookupId("z"));
+    Assert.assertEquals(0, selector.idLookup().lookupId("a"));
+    Assert.assertEquals(24, selector.idLookup().lookupId("z"));
   }
 
   @Test

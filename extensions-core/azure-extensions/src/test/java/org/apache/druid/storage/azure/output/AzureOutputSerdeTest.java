@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.exc.ValueInstantiationException;
 import org.apache.druid.java.util.common.HumanReadableBytes;
 import org.apache.druid.java.util.common.StringUtils;
 import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;

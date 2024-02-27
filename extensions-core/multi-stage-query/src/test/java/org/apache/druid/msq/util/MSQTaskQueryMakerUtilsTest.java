@@ -21,6 +21,7 @@ package org.apache.druid.msq.util;
 
 import com.google.common.collect.ImmutableList;
 import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Collections;
 

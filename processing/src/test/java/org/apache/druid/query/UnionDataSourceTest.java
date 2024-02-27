@@ -24,17 +24,18 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.apache.druid.segment.TestHelper;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 public class UnionDataSourceTest
 {
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
 
   private final UnionDataSource unionDataSource = new UnionDataSource(
       ImmutableList.of(
@@ -54,30 +55,29 @@ public class UnionDataSourceTest
   @Test
   public void test_constructor_empty()
   {
-    Throwable exception = assertThrows(IllegalStateException.class, () -> {
+    expectedException.expect(IllegalStateException.class);
+    expectedException.expectMessage("'dataSources' must be non-null and non-empty for 'union'");
 
-      //noinspection ResultOfObjectAllocationIgnored
-      new UnionDataSource(Collections.emptyList());
-    });
-    assertTrue(exception.getMessage().contains("'dataSources' must be non-null and non-empty for 'union'"));
+    //noinspection ResultOfObjectAllocationIgnored
+    new UnionDataSource(Collections.emptyList());
   }
 
   @Test
   public void test_getTableNames()
   {
-    Assertions.assertEquals(ImmutableSet.of("foo", "bar"), unionDataSource.getTableNames());
+    Assert.assertEquals(ImmutableSet.of("foo", "bar"), unionDataSource.getTableNames());
   }
 
   @Test
   public void test_getTableNames_withDuplicates()
   {
-    Assertions.assertEquals(ImmutableSet.of("foo", "bar"), unionDataSourceWithDuplicates.getTableNames());
+    Assert.assertEquals(ImmutableSet.of("foo", "bar"), unionDataSourceWithDuplicates.getTableNames());
   }
 
   @Test
   public void test_getChildren()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableList.of(new TableDataSource("foo"), new TableDataSource("bar")),
         unionDataSource.getChildren()
     );
@@ -86,7 +86,7 @@ public class UnionDataSourceTest
   @Test
   public void test_getChildren_withDuplicates()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableList.of(new TableDataSource("bar"), new TableDataSource("foo"), new TableDataSource("bar")),
         unionDataSourceWithDuplicates.getChildren()
     );
@@ -95,30 +95,29 @@ public class UnionDataSourceTest
   @Test
   public void test_isCacheable()
   {
-    Assertions.assertFalse(unionDataSource.isCacheable(true));
-    Assertions.assertFalse(unionDataSource.isCacheable(false));
+    Assert.assertFalse(unionDataSource.isCacheable(true));
+    Assert.assertFalse(unionDataSource.isCacheable(false));
   }
 
   @Test
   public void test_isGlobal()
   {
-    Assertions.assertFalse(unionDataSource.isGlobal());
+    Assert.assertFalse(unionDataSource.isGlobal());
   }
 
   @Test
   public void test_isConcrete()
   {
-    Assertions.assertTrue(unionDataSource.isConcrete());
+    Assert.assertTrue(unionDataSource.isConcrete());
   }
 
   @Test
   public void test_withChildren_empty()
   {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
+    expectedException.expect(IllegalArgumentException.class);
+    expectedException.expectMessage("Expected [2] children, got [0]");
 
-      unionDataSource.withChildren(Collections.emptyList());
-    });
-    assertTrue(exception.getMessage().contains("Expected [2] children, got [0]"));
+    unionDataSource.withChildren(Collections.emptyList());
   }
 
   @Test
@@ -130,7 +129,7 @@ public class UnionDataSourceTest
     );
 
     //noinspection unchecked
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new UnionDataSource(newDataSources),
         unionDataSource.withChildren((List) newDataSources)
     );
@@ -151,6 +150,6 @@ public class UnionDataSourceTest
         DataSource.class
     );
 
-    Assertions.assertEquals(unionDataSource, deserialized);
+    Assert.assertEquals(unionDataSource, deserialized);
   }
 }

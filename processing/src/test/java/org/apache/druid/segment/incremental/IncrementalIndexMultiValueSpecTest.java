@@ -33,10 +33,11 @@ import org.apache.druid.query.aggregation.AggregatorFactory;
 import org.apache.druid.segment.CloserRule;
 import org.apache.druid.segment.VirtualColumns;
 import org.apache.druid.testing.InitializedNullHandlingTest;
+import org.junit.Assert;
 import org.junit.Rule;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -45,14 +46,15 @@ import java.util.Map;
 
 /**
  */
+@RunWith(Parameterized.class)
 public class IncrementalIndexMultiValueSpecTest extends InitializedNullHandlingTest
 {
-  public IncrementalIndexCreator indexCreator;
+  public final IncrementalIndexCreator indexCreator;
 
   @Rule
   public final CloserRule closer = new CloserRule(false);
 
-  public void initIncrementalIndexMultiValueSpecTest(String indexType) throws JsonProcessingException
+  public IncrementalIndexMultiValueSpecTest(String indexType) throws JsonProcessingException
   {
     NestedDataModule.registerHandlersAndSerde();
     indexCreator = closer.closeLater(new IncrementalIndexCreator(indexType, (builder, args) -> builder
@@ -62,16 +64,15 @@ public class IncrementalIndexMultiValueSpecTest extends InitializedNullHandlingT
     ));
   }
 
+  @Parameterized.Parameters(name = "{index}: {0}")
   public static Collection<?> constructorFeeder()
   {
     return IncrementalIndexCreator.getAppendableIndexTypes();
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{index}: {0}")
-  public void test(String indexType) throws IndexSizeExceededException
+  @Test
+  public void test() throws IndexSizeExceededException
   {
-    initIncrementalIndexMultiValueSpecTest(indexType);
     DimensionsSpec dimensionsSpec = new DimensionsSpec(
         Arrays.asList(
             new StringDimensionSchema("string1", DimensionSchema.MultiValueHandling.ARRAY, true),
@@ -115,8 +116,8 @@ public class IncrementalIndexMultiValueSpecTest extends InitializedNullHandlingT
     );
 
     Row row = index.iterator().next();
-    Assertions.assertEquals(Lists.newArrayList("xsd", "aba", "fds", "aba"), row.getRaw("string1"));
-    Assertions.assertEquals(Lists.newArrayList("aba", "aba", "fds", "xsd"), row.getRaw("string2"));
-    Assertions.assertEquals(Lists.newArrayList("aba", "fds", "xsd"), row.getRaw("string3"));
+    Assert.assertEquals(Lists.newArrayList("xsd", "aba", "fds", "aba"), row.getRaw("string1"));
+    Assert.assertEquals(Lists.newArrayList("aba", "aba", "fds", "xsd"), row.getRaw("string2"));
+    Assert.assertEquals(Lists.newArrayList("aba", "fds", "xsd"), row.getRaw("string3"));
   }
 }

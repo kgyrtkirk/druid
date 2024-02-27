@@ -51,7 +51,7 @@ import org.apache.druid.segment.data.IndexedInts;
 import org.apache.druid.segment.vector.VectorColumnSelectorFactory;
 import org.apache.druid.segment.vector.VectorCursor;
 import org.apache.druid.timeline.SegmentId;
-import org.junit.jupiter.api.Assertions;
+import org.junit.Assert;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -129,7 +129,7 @@ public class FrameTestUtil
     final List<List<Object>> expectedRows = expected.toList();
     final List<List<Object>> actualRows = actual.toList();
 
-    Assertions.assertEquals(expectedRows.size(), actualRows.size(), "number of rows");
+    Assert.assertEquals("number of rows", expectedRows.size(), actualRows.size());
 
     for (int i = 0; i < expectedRows.size(); i++) {
       assertRowEqual("row #" + i, expectedRows.get(i), actualRows.get(i));
@@ -169,14 +169,14 @@ public class FrameTestUtil
 
     if (!ok) {
       // Call Assert.assertEquals, which we expect to fail, to get a nice failure message
-      Assertions.assertEquals(
+      Assert.assertEquals(
+          message,
           Arrays.deepToString(expected.toArray()),
-          Arrays.deepToString(actual.toArray()),
-          message
+          Arrays.deepToString(actual.toArray())
       );
 
       // Just in case it doesn't fail for some reason, fail anyway.
-      Assertions.fail(message);
+      Assert.fail(message);
     }
   }
 

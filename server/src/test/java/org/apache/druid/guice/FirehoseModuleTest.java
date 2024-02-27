@@ -28,8 +28,8 @@ import com.google.common.reflect.ClassPath;
 import org.apache.druid.data.input.FirehoseFactory;
 import org.apache.druid.segment.realtime.firehose.ClippedFirehoseFactory;
 import org.apache.druid.utils.JvmUtils;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.lang.reflect.Modifier;
@@ -52,7 +52,7 @@ public class FirehoseModuleTest
     Set<Class> registeredSubtypeClasses = getFirehoseFactorySubtypeClasses(objectMapper);
     String packageName = ClippedFirehoseFactory.class.getPackage().getName();
     Set<Class> expectedSubtypeClasses = getFirehoseFactoryClassesInPackage(packageName);
-    Assertions.assertEquals(expectedSubtypeClasses, registeredSubtypeClasses);
+    Assert.assertEquals(expectedSubtypeClasses, registeredSubtypeClasses);
   }
 
   private static ObjectMapper createObjectMapper()
@@ -70,7 +70,7 @@ public class FirehoseModuleTest
     MapperConfig config = objectMapper.getDeserializationConfig();
     AnnotatedClass ac = AnnotatedClass.constructWithoutSuperTypes(parentClass, config);
     Collection<NamedType> subtypes = objectMapper.getSubtypeResolver().collectAndResolveSubtypesByClass(config, ac);
-    Assertions.assertNotNull(subtypes);
+    Assert.assertNotNull(subtypes);
     return subtypes.stream()
                    .map(NamedType::getType)
                    .filter(c -> !c.equals(parentClass))

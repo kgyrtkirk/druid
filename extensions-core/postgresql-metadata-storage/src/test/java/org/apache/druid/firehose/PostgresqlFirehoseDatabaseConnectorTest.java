@@ -30,6 +30,7 @@ import org.apache.druid.metadata.storage.postgresql.PostgreSQLMetadataStorageMod
 import org.apache.druid.server.initialization.JdbcAccessSecurityConfig;
 import org.junit.Assert;
 import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import java.util.Set;

@@ -26,9 +26,9 @@ import org.easymock.EasyMock;
 import org.easymock.EasyMockRunner;
 import org.easymock.EasyMockSupport;
 import org.easymock.Mock;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(EasyMockRunner.class)
@@ -50,7 +50,7 @@ public class ServiceAnnouncingChatHandlerProviderTest extends EasyMockSupport
   @Mock
   private ServiceAnnouncer serviceAnnouncer;
 
-  @BeforeEach
+  @Before
   public void setUp()
   {
     chatHandlerProvider = new ServiceAnnouncingChatHandlerProvider(node, serviceAnnouncer);
@@ -73,14 +73,14 @@ public class ServiceAnnouncingChatHandlerProviderTest extends EasyMockSupport
   {
     ChatHandler testChatHandler = new TestChatHandler();
 
-    Assertions.assertFalse(chatHandlerProvider.get(TEST_SERVICE_NAME).isPresent(), "bad initial state");
+    Assert.assertFalse("bad initial state", chatHandlerProvider.get(TEST_SERVICE_NAME).isPresent());
 
     chatHandlerProvider.register(TEST_SERVICE_NAME, testChatHandler, false);
-    Assertions.assertTrue(chatHandlerProvider.get(TEST_SERVICE_NAME).isPresent(), "chatHandler did not register");
-    Assertions.assertEquals(testChatHandler, chatHandlerProvider.get(TEST_SERVICE_NAME).get());
+    Assert.assertTrue("chatHandler did not register", chatHandlerProvider.get(TEST_SERVICE_NAME).isPresent());
+    Assert.assertEquals(testChatHandler, chatHandlerProvider.get(TEST_SERVICE_NAME).get());
 
     chatHandlerProvider.unregister(TEST_SERVICE_NAME);
-    Assertions.assertFalse(chatHandlerProvider.get(TEST_SERVICE_NAME).isPresent(), "chatHandler did not deregister");
+    Assert.assertFalse("chatHandler did not deregister", chatHandlerProvider.get(TEST_SERVICE_NAME).isPresent());
   }
 
   private void testRegistrationWithAnnounce(boolean useThreeArgConstructor)
@@ -97,7 +97,7 @@ public class ServiceAnnouncingChatHandlerProviderTest extends EasyMockSupport
     serviceAnnouncer.announce(EasyMock.capture(captured));
     replayAll();
 
-    Assertions.assertFalse(chatHandlerProvider.get(TEST_SERVICE_NAME).isPresent(), "bad initial state");
+    Assert.assertFalse("bad initial state", chatHandlerProvider.get(TEST_SERVICE_NAME).isPresent());
 
     if (useThreeArgConstructor) {
       chatHandlerProvider.register(TEST_SERVICE_NAME, testChatHandler, true);
@@ -107,13 +107,13 @@ public class ServiceAnnouncingChatHandlerProviderTest extends EasyMockSupport
     verifyAll();
 
     DruidNode param = captured.getValues().get(0);
-    Assertions.assertEquals(TEST_SERVICE_NAME, param.getServiceName());
-    Assertions.assertEquals(TEST_HOST, param.getHost());
-    Assertions.assertEquals(TEST_PORT, param.getPlaintextPort());
-    Assertions.assertEquals(-1, param.getTlsPort());
-    Assertions.assertEquals(null, param.getHostAndTlsPort());
-    Assertions.assertTrue(chatHandlerProvider.get(TEST_SERVICE_NAME).isPresent(), "chatHandler did not register");
-    Assertions.assertEquals(testChatHandler, chatHandlerProvider.get(TEST_SERVICE_NAME).get());
+    Assert.assertEquals(TEST_SERVICE_NAME, param.getServiceName());
+    Assert.assertEquals(TEST_HOST, param.getHost());
+    Assert.assertEquals(TEST_PORT, param.getPlaintextPort());
+    Assert.assertEquals(-1, param.getTlsPort());
+    Assert.assertEquals(null, param.getHostAndTlsPort());
+    Assert.assertTrue("chatHandler did not register", chatHandlerProvider.get(TEST_SERVICE_NAME).isPresent());
+    Assert.assertEquals(testChatHandler, chatHandlerProvider.get(TEST_SERVICE_NAME).get());
 
     captured.reset();
     resetAll();
@@ -130,11 +130,11 @@ public class ServiceAnnouncingChatHandlerProviderTest extends EasyMockSupport
     verifyAll();
 
     param = captured.getValues().get(0);
-    Assertions.assertEquals(TEST_SERVICE_NAME, param.getServiceName());
-    Assertions.assertEquals(TEST_HOST, param.getHost());
-    Assertions.assertEquals(TEST_PORT, param.getPlaintextPort());
-    Assertions.assertEquals(-1, param.getTlsPort());
-    Assertions.assertEquals(null, param.getHostAndTlsPort());
-    Assertions.assertFalse(chatHandlerProvider.get(TEST_SERVICE_NAME).isPresent(), "chatHandler did not deregister");
+    Assert.assertEquals(TEST_SERVICE_NAME, param.getServiceName());
+    Assert.assertEquals(TEST_HOST, param.getHost());
+    Assert.assertEquals(TEST_PORT, param.getPlaintextPort());
+    Assert.assertEquals(-1, param.getTlsPort());
+    Assert.assertEquals(null, param.getHostAndTlsPort());
+    Assert.assertFalse("chatHandler did not deregister", chatHandlerProvider.get(TEST_SERVICE_NAME).isPresent());
   }
 }

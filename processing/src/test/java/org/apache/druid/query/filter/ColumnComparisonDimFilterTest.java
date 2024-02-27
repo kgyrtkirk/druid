@@ -22,8 +22,8 @@ package org.apache.druid.query.filter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import org.apache.druid.query.dimension.DefaultDimensionSpec;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Arrays;
 
@@ -47,11 +47,11 @@ public class ColumnComparisonDimFilterTest
         )
     );
 
-    Assertions.assertTrue(Arrays.equals(
+    Assert.assertTrue(Arrays.equals(
         columnComparisonDimFilter.getCacheKey(),
         columnComparisonDimFilter2.getCacheKey()
     ));
-    Assertions.assertFalse(Arrays.equals(
+    Assert.assertFalse(Arrays.equals(
         columnComparisonDimFilter2.getCacheKey(),
         columnComparisonDimFilter3.getCacheKey()
     ));
@@ -79,11 +79,11 @@ public class ColumnComparisonDimFilterTest
         )
     );
 
-    Assertions.assertNotEquals(
+    Assert.assertNotEquals(
         columnComparisonDimFilter.hashCode(),
         columnComparisonDimFilter2.hashCode()
     );
-    Assertions.assertNotEquals(
+    Assert.assertNotEquals(
         columnComparisonDimFilter2.hashCode(),
         columnComparisonDimFilter3.hashCode()
     );
@@ -98,6 +98,6 @@ public class ColumnComparisonDimFilterTest
             DefaultDimensionSpec.of("d")
         )
     );
-    Assertions.assertEquals(columnComparisonDimFilter.getRequiredColumns(), Sets.newHashSet("abc", "d"));
+    Assert.assertEquals(columnComparisonDimFilter.getRequiredColumns(), Sets.newHashSet("abc", "d"));
   }
 }

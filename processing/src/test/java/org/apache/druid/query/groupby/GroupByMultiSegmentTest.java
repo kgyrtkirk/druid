@@ -70,10 +70,10 @@ import org.apache.druid.segment.incremental.IncrementalIndexSchema;
 import org.apache.druid.segment.incremental.OnheapIncrementalIndex;
 import org.apache.druid.segment.writeout.OffHeapMemorySegmentWriteOutMediumFactory;
 import org.apache.druid.timeline.SegmentId;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -134,7 +134,7 @@ public class GroupByMultiSegmentTest
         .build();
   }
 
-  @BeforeEach
+  @Before
   public void setup() throws Exception
   {
     tmpDir = FileUtils.createTempDir();
@@ -201,8 +201,8 @@ public class GroupByMultiSegmentTest
 
     resourceCloser.register(() -> {
       // Verify that all objects have been returned to the pools.
-      Assertions.assertEquals(0, bufferPool.getOutstandingObjectCount());
-      Assertions.assertEquals(0, mergePool.getOutstandingObjectCount());
+      Assert.assertEquals(0, bufferPool.getOutstandingObjectCount());
+      Assert.assertEquals(0, mergePool.getOutstandingObjectCount());
     });
 
     final GroupByQueryConfig config = new GroupByQueryConfig()
@@ -255,7 +255,7 @@ public class GroupByMultiSegmentTest
     );
   }
 
-  @AfterEach
+  @After
   public void tearDown() throws Exception
   {
     for (IncrementalIndex incrementalIndex : incrementalIndices) {
@@ -315,8 +315,8 @@ public class GroupByMultiSegmentTest
         "metA", 150L
     );
 
-    Assertions.assertEquals(1, results.size());
-    Assertions.assertEquals(expectedRow, results.get(0));
+    Assert.assertEquals(1, results.size());
+    Assert.assertEquals(expectedRow, results.get(0));
   }
 
   private List<QueryRunner<ResultRow>> makeGroupByMultiRunners()

@@ -38,8 +38,8 @@ import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
 import org.joda.time.Duration;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.After;
+import org.junit.Before;
 
 import javax.net.ssl.SSLContext;
 import javax.servlet.Filter;
@@ -83,7 +83,7 @@ public abstract class BaseJettyTest
     System.setProperty("druid.global.http.readTimeout", "PT1S");
   }
 
-  @BeforeEach
+  @Before
   public void setup() throws Exception
   {
     setProperties();
@@ -101,7 +101,7 @@ public abstract class BaseJettyTest
 
   protected abstract Injector setupInjector();
 
-  @AfterEach
+  @After
   public void teardown()
   {
     lifecycle.stop();

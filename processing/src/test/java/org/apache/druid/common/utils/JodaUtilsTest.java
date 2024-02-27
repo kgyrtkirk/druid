@@ -27,16 +27,14 @@ import org.apache.druid.java.util.common.guava.Comparators;
 import org.joda.time.Duration;
 import org.joda.time.Interval;
 import org.joda.time.Period;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  *
@@ -58,18 +56,16 @@ public class JodaUtilsTest
         Intervals.of("2011-02-01/2011-02-02")
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Intervals.of("2011-01-01/2011-03-06"),
         JodaUtils.umbrellaInterval(intervals)
     );
   }
 
-  @Test
+  @Test(expected = IllegalArgumentException.class)
   public void testUmbrellaIntervalsNull()
   {
-    assertThrows(IllegalArgumentException.class, () -> {
-      JodaUtils.umbrellaInterval(Collections.emptyList());
-    });
+    JodaUtils.umbrellaInterval(Collections.emptyList());
   }
 
   @Test
@@ -96,7 +92,7 @@ public class JodaUtilsTest
 
     List<Interval> actual = JodaUtils.condenseIntervals(intervals);
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         expected,
         actual
     );
@@ -120,7 +116,7 @@ public class JodaUtilsTest
     intervals.sort(Comparators.intervalsByStartThenEnd());
 
     List<Interval> actual = ImmutableList.copyOf(JodaUtils.condensedIntervalsIterator(intervals.iterator()));
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Arrays.asList(
             Intervals.of("2011-01-01/2011-01-03"),
             Intervals.of("2011-02-01/2011-02-08"),
@@ -147,7 +143,7 @@ public class JodaUtilsTest
 
     intervals.sort(Comparators.intervalsByStartThenEnd());
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Collections.singletonList(
             Intervals.of("2011-01-01/2015-01-19")
         ),
@@ -155,68 +151,60 @@ public class JodaUtilsTest
     );
   }
 
-  @Test
+  @Test(expected = IAE.class)
   public void testCondenseIntervalsSimplSortedIteratorOverlappingWithNullsShouldThrow()
   {
-    assertThrows(IAE.class, () -> {
-      List<Interval> intervals = Arrays.asList(
-          Intervals.of("2011-01-02/2011-02-03"),
-          Intervals.of("2011-02-01/2011-03-10"),
-          null,
-          Intervals.of("2011-03-07/2011-04-19"),
-          Intervals.of("2011-04-01/2015-01-19"),
-          null
-      );
-      ImmutableList.copyOf(JodaUtils.condensedIntervalsIterator(intervals.iterator()));
-    });
+    List<Interval> intervals = Arrays.asList(
+        Intervals.of("2011-01-02/2011-02-03"),
+        Intervals.of("2011-02-01/2011-03-10"),
+        null,
+        Intervals.of("2011-03-07/2011-04-19"),
+        Intervals.of("2011-04-01/2015-01-19"),
+        null
+    );
+    ImmutableList.copyOf(JodaUtils.condensedIntervalsIterator(intervals.iterator()));
   }
 
-  @Test
+  @Test(expected = IAE.class)
   public void testCondenseIntervalsSimplSortedIteratorOverlappingWithNullFirstAndLastshouldThrow()
   {
-    assertThrows(IAE.class, () -> {
-      List<Interval> intervals = Arrays.asList(
-          null,
-          Intervals.of("2011-01-02/2011-02-03"),
-          Intervals.of("2011-02-01/2011-03-10"),
-          Intervals.of("2011-03-07/2011-04-19"),
-          Intervals.of("2011-04-01/2015-01-19"),
-          null
-      );
-      ImmutableList.copyOf(JodaUtils.condensedIntervalsIterator(intervals.iterator()));
-    });
+    List<Interval> intervals = Arrays.asList(
+        null,
+        Intervals.of("2011-01-02/2011-02-03"),
+        Intervals.of("2011-02-01/2011-03-10"),
+        Intervals.of("2011-03-07/2011-04-19"),
+        Intervals.of("2011-04-01/2015-01-19"),
+        null
+    );
+    ImmutableList.copyOf(JodaUtils.condensedIntervalsIterator(intervals.iterator()));
   }
 
-  @Test
+  @Test(expected = IllegalArgumentException.class)
   public void testCondenseIntervalsSimpleUnsortedIterator()
   {
-    assertThrows(IllegalArgumentException.class, () -> {
-      List<Interval> intervals = Arrays.asList(
-          Intervals.of("2011-01-01/2011-01-02"),
-          Intervals.of("2011-01-02/2011-01-03"),
-          Intervals.of("2011-02-03/2011-02-08"),
-          Intervals.of("2011-02-01/2011-02-02"),
-          Intervals.of("2011-02-01/2011-02-05"),
-          Intervals.of("2011-03-01/2011-03-02"),
-          Intervals.of("2011-03-03/2011-03-04"),
-          Intervals.of("2011-03-05/2011-03-06")
-      );
-      ImmutableList.copyOf(JodaUtils.condensedIntervalsIterator(intervals.iterator()));
-    });
+    List<Interval> intervals = Arrays.asList(
+        Intervals.of("2011-01-01/2011-01-02"),
+        Intervals.of("2011-01-02/2011-01-03"),
+        Intervals.of("2011-02-03/2011-02-08"),
+        Intervals.of("2011-02-01/2011-02-02"),
+        Intervals.of("2011-02-01/2011-02-05"),
+        Intervals.of("2011-03-01/2011-03-02"),
+        Intervals.of("2011-03-03/2011-03-04"),
+        Intervals.of("2011-03-05/2011-03-06")
+    );
+    ImmutableList.copyOf(JodaUtils.condensedIntervalsIterator(intervals.iterator()));
   }
 
-  @Test
+  @Test(expected = IllegalArgumentException.class)
   public void testCondenseIntervalsSimpleUnsortedIteratorSmallestAtEnd()
   {
-    assertThrows(IllegalArgumentException.class, () -> {
-      List<Interval> intervals = Arrays.asList(
-          Intervals.of("2011-01-01/2011-01-02"),
-          Intervals.of("2011-02-01/2011-02-04"),
-          Intervals.of("2011-03-01/2011-03-04"),
-          Intervals.of("2010-01-01/2010-03-04")
-      );
-      ImmutableList.copyOf(JodaUtils.condensedIntervalsIterator(intervals.iterator()));
-    });
+    List<Interval> intervals = Arrays.asList(
+        Intervals.of("2011-01-01/2011-01-02"),
+        Intervals.of("2011-02-01/2011-02-04"),
+        Intervals.of("2011-03-01/2011-03-04"),
+        Intervals.of("2010-01-01/2010-03-04")
+    );
+    ImmutableList.copyOf(JodaUtils.condensedIntervalsIterator(intervals.iterator()));
   }
 
   @Test
@@ -237,7 +225,7 @@ public class JodaUtilsTest
     );
     intervals.sort(Comparators.intervalsByStartThenEnd());
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Arrays.asList(
             Intervals.of("2011-01-01/2011-01-03"),
             Intervals.of("2011-02-01/2011-02-08"),
@@ -269,7 +257,7 @@ public class JodaUtilsTest
 
     for (int i = 0; i < 20; ++i) {
       Collections.shuffle(intervals);
-      Assertions.assertEquals(
+      Assert.assertEquals(
           Arrays.asList(
               Intervals.of("2011-01-01/2011-01-03"),
               Intervals.of("2011-02-01/2011-02-08"),
@@ -306,7 +294,7 @@ public class JodaUtilsTest
         )
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Arrays.asList(
             Intervals.of("2011-01-01/2011-01-03"),
             Intervals.of("2011-02-01/2011-02-08"),
@@ -343,7 +331,7 @@ public class JodaUtilsTest
 
     for (int i = 0; i < 20; ++i) {
       Collections.shuffle(intervals);
-      Assertions.assertEquals(
+      Assert.assertEquals(
           Arrays.asList(
               Intervals.of("2011-01-01/2011-01-03"),
               Intervals.of("2011-02-01/2011-02-08"),
@@ -361,24 +349,22 @@ public class JodaUtilsTest
   @Test
   public void testMinMaxInterval()
   {
-    Assertions.assertEquals(Long.MAX_VALUE, Intervals.ETERNITY.toDuration().getMillis());
+    Assert.assertEquals(Long.MAX_VALUE, Intervals.ETERNITY.toDuration().getMillis());
   }
 
   @Test
   public void testMinMaxDuration()
   {
     final Duration duration = Intervals.ETERNITY.toDuration();
-    Assertions.assertEquals(Long.MAX_VALUE, duration.getMillis());
-    Assertions.assertEquals("PT9223372036854775.807S", duration.toString());
+    Assert.assertEquals(Long.MAX_VALUE, duration.getMillis());
+    Assert.assertEquals("PT9223372036854775.807S", duration.toString());
   }
 
   // new Period(Long.MAX_VALUE) throws ArithmeticException
-  @Test
+  @Test(expected = ArithmeticException.class)
   public void testMinMaxPeriod()
   {
-    assertThrows(ArithmeticException.class, () -> {
-      final Period period = Intervals.ETERNITY.toDuration().toPeriod();
-      Assertions.assertEquals(Long.MAX_VALUE, period.getMinutes());
-    });
+    final Period period = Intervals.ETERNITY.toDuration().toPeriod();
+    Assert.assertEquals(Long.MAX_VALUE, period.getMinutes());
   }
 }

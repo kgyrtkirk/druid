@@ -19,6 +19,8 @@
 
 package org.apache.druid.cli;
 
+import org.junit.Test;
+
 public class CliMainTest
 {
   @Test

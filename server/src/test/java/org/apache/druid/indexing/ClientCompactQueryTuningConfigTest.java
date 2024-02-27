@@ -23,7 +23,7 @@ import nl.jqno.equalsverifier.EqualsVerifier;
 import org.apache.druid.client.indexing.ClientCompactionTaskQueryTuningConfig;
 import org.apache.druid.segment.IndexSpec;
 import org.apache.druid.segment.data.CompressionStrategy;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 public class ClientCompactQueryTuningConfigTest
 {

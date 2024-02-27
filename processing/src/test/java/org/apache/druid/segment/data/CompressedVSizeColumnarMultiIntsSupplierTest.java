@@ -21,8 +21,6 @@ package org.apache.druid.segment.data;
 
 import com.google.common.collect.Iterables;
 import org.apache.druid.java.util.common.io.Closer;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -39,7 +37,6 @@ public class CompressedVSizeColumnarMultiIntsSupplierTest extends CompressedVSiz
   private List<int[]> vals;
   private WritableSupplier<ColumnarMultiInts> columnarMultiIntsSupplier;
 
-  @BeforeEach
   @Override
   public void setUpSimple()
   {
@@ -63,7 +60,6 @@ public class CompressedVSizeColumnarMultiIntsSupplierTest extends CompressedVSiz
     );
   }
 
-  @AfterEach
   @Override
   public void teardown() throws IOException
   {

@@ -21,8 +21,8 @@ package org.apache.druid.query.filter;
 
 import org.apache.druid.query.extraction.IdentityExtractionFn;
 import org.apache.druid.query.extraction.RegexDimExtractionFn;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Arrays;
 
@@ -45,7 +45,7 @@ public class ExtractionDimFilterTest
         null
     );
 
-    Assertions.assertFalse(Arrays.equals(extractionDimFilter.getCacheKey(), extractionDimFilter2.getCacheKey()));
+    Assert.assertFalse(Arrays.equals(extractionDimFilter.getCacheKey(), extractionDimFilter2.getCacheKey()));
 
     ExtractionDimFilter extractionDimFilter3 = new ExtractionDimFilter(
         "ab",
@@ -54,8 +54,8 @@ public class ExtractionDimFilterTest
         null
     );
 
-    Assertions.assertFalse(Arrays.equals(extractionDimFilter2.getCacheKey(), extractionDimFilter3.getCacheKey()));
+    Assert.assertFalse(Arrays.equals(extractionDimFilter2.getCacheKey(), extractionDimFilter3.getCacheKey()));
 
-    Assertions.assertNotNull(new ExtractionDimFilter("foo", null, new RegexDimExtractionFn("xx", null, null), null).getCacheKey());
+    Assert.assertNotNull(new ExtractionDimFilter("foo", null, new RegexDimExtractionFn("xx", null, null), null).getCacheKey());
   }
 }

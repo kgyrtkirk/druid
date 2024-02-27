@@ -21,9 +21,9 @@ package org.apache.druid.server.http;
 
 import org.apache.druid.server.coordinator.DruidCoordinator;
 import org.easymock.EasyMock;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.net.URL;
 
@@ -32,7 +32,7 @@ public class CoordinatorRedirectInfoTest
   private DruidCoordinator druidCoordinator;
   private CoordinatorRedirectInfo coordinatorRedirectInfo;
 
-  @BeforeEach
+  @Before
   public void setUp()
   {
     druidCoordinator = EasyMock.createMock(DruidCoordinator.class);
@@ -44,10 +44,10 @@ public class CoordinatorRedirectInfoTest
   {
     EasyMock.expect(druidCoordinator.isLeader()).andReturn(true).anyTimes();
     EasyMock.replay(druidCoordinator);
-    Assertions.assertTrue(coordinatorRedirectInfo.doLocal(null));
-    Assertions.assertTrue(coordinatorRedirectInfo.doLocal("/druid/coordinator/v1/leader"));
-    Assertions.assertTrue(coordinatorRedirectInfo.doLocal("/druid/coordinator/v1/isLeader"));
-    Assertions.assertTrue(coordinatorRedirectInfo.doLocal("/druid/coordinator/v1/other/path"));
+    Assert.assertTrue(coordinatorRedirectInfo.doLocal(null));
+    Assert.assertTrue(coordinatorRedirectInfo.doLocal("/druid/coordinator/v1/leader"));
+    Assert.assertTrue(coordinatorRedirectInfo.doLocal("/druid/coordinator/v1/isLeader"));
+    Assert.assertTrue(coordinatorRedirectInfo.doLocal("/druid/coordinator/v1/other/path"));
     EasyMock.verify(druidCoordinator);
   }
 
@@ -56,10 +56,10 @@ public class CoordinatorRedirectInfoTest
   {
     EasyMock.expect(druidCoordinator.isLeader()).andReturn(false).anyTimes();
     EasyMock.replay(druidCoordinator);
-    Assertions.assertFalse(coordinatorRedirectInfo.doLocal(null));
-    Assertions.assertTrue(coordinatorRedirectInfo.doLocal("/druid/coordinator/v1/leader"));
-    Assertions.assertTrue(coordinatorRedirectInfo.doLocal("/druid/coordinator/v1/isLeader"));
-    Assertions.assertFalse(coordinatorRedirectInfo.doLocal("/druid/coordinator/v1/other/path"));
+    Assert.assertFalse(coordinatorRedirectInfo.doLocal(null));
+    Assert.assertTrue(coordinatorRedirectInfo.doLocal("/druid/coordinator/v1/leader"));
+    Assert.assertTrue(coordinatorRedirectInfo.doLocal("/druid/coordinator/v1/isLeader"));
+    Assert.assertFalse(coordinatorRedirectInfo.doLocal("/druid/coordinator/v1/other/path"));
     EasyMock.verify(druidCoordinator);
   }
 
@@ -69,7 +69,7 @@ public class CoordinatorRedirectInfoTest
     EasyMock.expect(druidCoordinator.getCurrentLeader()).andReturn(null).anyTimes();
     EasyMock.replay(druidCoordinator);
     URL url = coordinatorRedirectInfo.getRedirectURL("query", "/request");
-    Assertions.assertNull(url);
+    Assert.assertNull(url);
     EasyMock.verify(druidCoordinator);
   }
 
@@ -81,7 +81,7 @@ public class CoordinatorRedirectInfoTest
     EasyMock.expect(druidCoordinator.getCurrentLeader()).andReturn("http://localhost").anyTimes();
     EasyMock.replay(druidCoordinator);
     URL url = coordinatorRedirectInfo.getRedirectURL(query, request);
-    Assertions.assertEquals("http://localhost/request?foo=bar&x=y", url.toString());
+    Assert.assertEquals("http://localhost/request?foo=bar&x=y", url.toString());
     EasyMock.verify(druidCoordinator);
   }
 }

@@ -35,6 +35,7 @@ import org.apache.druid.java.util.common.jackson.JacksonUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;

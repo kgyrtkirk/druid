@@ -28,9 +28,10 @@ import org.apache.druid.frame.processor.OutputChannel;
 import org.apache.druid.java.util.common.ISE;
 import org.apache.druid.query.ResourceLimitExceededException;
 import org.hamcrest.CoreMatchers;
+import org.hamcrest.MatcherAssert;
+import org.junit.Assert;
+import org.junit.Test;
 import org.junit.internal.matchers.ThrowableMessageMatcher;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import javax.annotation.Nullable;
@@ -39,8 +40,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.function.Supplier;
-
-import static org.hamcrest.MatcherAssert.assertThat;
 
 
 public class ComposingWritableFrameChannelTest
@@ -89,25 +88,25 @@ public class ComposingWritableFrameChannelTest
     composingWritableFrameChannel.write(new FrameWithPartition(Mockito.mock(Frame.class), 3));
 
     // Assert the location of the channels where the frames have been written to
-    Assertions.assertEquals(ImmutableSet.of(0), partitionToChannelMap.get(1));
-    Assertions.assertEquals(ImmutableSet.of(0), partitionToChannelMap.get(2));
-    Assertions.assertEquals(ImmutableSet.of(1), partitionToChannelMap.get(3));
+    Assert.assertEquals(ImmutableSet.of(0), partitionToChannelMap.get(1));
+    Assert.assertEquals(ImmutableSet.of(0), partitionToChannelMap.get(2));
+    Assert.assertEquals(ImmutableSet.of(1), partitionToChannelMap.get(3));
 
 
     // Test if the older channel has been converted to read only
-    Assertions.assertThrows(ISE.class, outputChannel1::getWritableChannel);
+    Assert.assertThrows(ISE.class, outputChannel1::getWritableChannel);
     composingWritableFrameChannel.close();
 
-    Exception ise1 = Assertions.assertThrows(IllegalStateException.class, () -> outputChannel1.getFrameMemoryAllocator());
-    assertThat(
+    Exception ise1 = Assert.assertThrows(IllegalStateException.class, () -> outputChannel1.getFrameMemoryAllocator());
+    MatcherAssert.assertThat(
         ise1,
         ThrowableMessageMatcher.hasMessage(CoreMatchers.equalTo(
             "Frame allocator is not available. The output channel might be marked as read-only, hence memory allocator is not required."))
     );
 
 
-    Exception ise2 = Assertions.assertThrows(IllegalStateException.class, () -> outputChannel2.getFrameMemoryAllocator());
-    assertThat(
+    Exception ise2 = Assert.assertThrows(IllegalStateException.class, () -> outputChannel2.getFrameMemoryAllocator());
+    MatcherAssert.assertThat(
         ise2,
         ThrowableMessageMatcher.hasMessage(CoreMatchers.equalTo(
             "Frame allocator is not available. The output channel might be marked as read-only, hence memory allocator is not required."))

@@ -21,16 +21,15 @@ package org.apache.druid.java.util.common;
 
 import com.google.common.collect.ImmutableList;
 import org.apache.druid.collections.ResourceHolder;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.io.UnsupportedEncodingException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  *
@@ -55,14 +54,17 @@ public class StringUtilsTest
       "fox"
   );
 
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
+
   @Test
   public void fromUtf8ConversionTest() throws UnsupportedEncodingException
   {
     byte[] bytes = new byte[]{'a', 'b', 'c', 'd'};
-    Assertions.assertEquals("abcd", StringUtils.fromUtf8(bytes));
+    Assert.assertEquals("abcd", StringUtils.fromUtf8(bytes));
 
     String abcd = "abcd";
-    Assertions.assertEquals(abcd, StringUtils.fromUtf8(abcd.getBytes(StringUtils.UTF8_STRING)));
+    Assert.assertEquals(abcd, StringUtils.fromUtf8(abcd.getBytes(StringUtils.UTF8_STRING)));
   }
 
   @Test
@@ -71,7 +73,7 @@ public class StringUtilsTest
     byte[] bytes = new byte[]{'a', 'b', 'c', 'd'};
     byte[] strBytes = StringUtils.toUtf8("abcd");
     for (int i = 0; i < bytes.length; ++i) {
-      Assertions.assertEquals(bytes[i], strBytes[i]);
+      Assert.assertEquals(bytes[i], strBytes[i]);
     }
   }
 
@@ -83,31 +85,31 @@ public class StringUtilsTest
     final ByteBuffer bigBuffer = ByteBuffer.allocate(8);
 
     final int smallBufferResult = StringUtils.toUtf8WithLimit("🚀🌔", smallBuffer);
-    Assertions.assertEquals(4, smallBufferResult);
+    Assert.assertEquals(4, smallBufferResult);
     final byte[] smallBufferByteArray = new byte[smallBufferResult];
     smallBuffer.get(smallBufferByteArray);
-    Assertions.assertEquals("🚀", StringUtils.fromUtf8(smallBufferByteArray));
+    Assert.assertEquals("🚀", StringUtils.fromUtf8(smallBufferByteArray));
 
     final int mediumBufferResult = StringUtils.toUtf8WithLimit("🚀🌔", mediumBuffer);
-    Assertions.assertEquals(4, mediumBufferResult);
+    Assert.assertEquals(4, mediumBufferResult);
     final byte[] mediumBufferByteArray = new byte[mediumBufferResult];
     mediumBuffer.get(mediumBufferByteArray);
-    Assertions.assertEquals("🚀", StringUtils.fromUtf8(mediumBufferByteArray));
+    Assert.assertEquals("🚀", StringUtils.fromUtf8(mediumBufferByteArray));
 
     final int bigBufferResult = StringUtils.toUtf8WithLimit("🚀🌔", bigBuffer);
-    Assertions.assertEquals(8, bigBufferResult);
+    Assert.assertEquals(8, bigBufferResult);
     final byte[] bigBufferByteArray = new byte[bigBufferResult];
     bigBuffer.get(bigBufferByteArray);
-    Assertions.assertEquals("🚀🌔", StringUtils.fromUtf8(bigBufferByteArray));
+    Assert.assertEquals("🚀🌔", StringUtils.fromUtf8(bigBufferByteArray));
   }
 
   @Test
   public void fromUtf8ByteBufferHeap()
   {
     ByteBuffer bytes = ByteBuffer.wrap(new byte[]{'a', 'b', 'c', 'd'});
-    Assertions.assertEquals("abcd", StringUtils.fromUtf8(bytes, 4));
+    Assert.assertEquals("abcd", StringUtils.fromUtf8(bytes, 4));
     bytes.rewind();
-    Assertions.assertEquals("abcd", StringUtils.fromUtf8(bytes));
+    Assert.assertEquals("abcd", StringUtils.fromUtf8(bytes));
   }
 
   @Test
@@ -115,36 +117,30 @@ public class StringUtilsTest
   {
     ByteBuffer bytes = ByteBuffer.wrap(new byte[]{'a', 'b', 'c', 'd'});
     bytes.position(1).limit(3);
-    Assertions.assertEquals("bc", StringUtils.fromUtf8(bytes, 2));
+    Assert.assertEquals("bc", StringUtils.fromUtf8(bytes, 2));
     bytes.position(1);
-    Assertions.assertEquals("bc", StringUtils.fromUtf8(bytes));
+    Assert.assertEquals("bc", StringUtils.fromUtf8(bytes));
   }
 
 
-  @Test
+  @Test(expected = BufferUnderflowException.class)
   public void testOutOfBounds()
   {
-    assertThrows(BufferUnderflowException.class, () -> {
-      ByteBuffer bytes = ByteBuffer.wrap(new byte[]{'a', 'b', 'c', 'd'});
-      bytes.position(1).limit(3);
-      StringUtils.fromUtf8(bytes, 3);
-    });
+    ByteBuffer bytes = ByteBuffer.wrap(new byte[]{'a', 'b', 'c', 'd'});
+    bytes.position(1).limit(3);
+    StringUtils.fromUtf8(bytes, 3);
   }
 
-  @Test
+  @Test(expected = NullPointerException.class)
   public void testNullPointerByteBuffer()
   {
-    assertThrows(NullPointerException.class, () -> {
-      StringUtils.fromUtf8((ByteBuffer) null);
-    });
+    StringUtils.fromUtf8((ByteBuffer) null);
   }
 
-  @Test
+  @Test(expected = NullPointerException.class)
   public void testNullPointerByteArray()
   {
-    assertThrows(NullPointerException.class, () -> {
-      StringUtils.fromUtf8((byte[]) null);
-    });
+    StringUtils.fromUtf8((byte[]) null);
   }
 
   @Test
@@ -154,9 +150,9 @@ public class StringUtilsTest
       final ByteBuffer bytes = bufferHolder.get();
       bytes.put(new byte[]{'a', 'b', 'c', 'd'});
       bytes.rewind();
-      Assertions.assertEquals("abcd", StringUtils.fromUtf8(bytes, 4));
+      Assert.assertEquals("abcd", StringUtils.fromUtf8(bytes, 4));
       bytes.rewind();
-      Assertions.assertEquals("abcd", StringUtils.fromUtf8(bytes));
+      Assert.assertEquals("abcd", StringUtils.fromUtf8(bytes));
     }
   }
 
@@ -164,155 +160,155 @@ public class StringUtilsTest
   @Test
   public void testNonStrictFormat()
   {
-    Assertions.assertEquals("test%d; format", StringUtils.nonStrictFormat("test%d", "format"));
-    Assertions.assertEquals("test%s%s; format", StringUtils.nonStrictFormat("test%s%s", "format"));
+    Assert.assertEquals("test%d; format", StringUtils.nonStrictFormat("test%d", "format"));
+    Assert.assertEquals("test%s%s; format", StringUtils.nonStrictFormat("test%s%s", "format"));
   }
 
   @Test
   public void testRemoveChar()
   {
-    Assertions.assertEquals("123", StringUtils.removeChar("123", ','));
-    Assertions.assertEquals("123", StringUtils.removeChar("123,", ','));
-    Assertions.assertEquals("123", StringUtils.removeChar(",1,,2,3,", ','));
-    Assertions.assertEquals("", StringUtils.removeChar(",,", ','));
+    Assert.assertEquals("123", StringUtils.removeChar("123", ','));
+    Assert.assertEquals("123", StringUtils.removeChar("123,", ','));
+    Assert.assertEquals("123", StringUtils.removeChar(",1,,2,3,", ','));
+    Assert.assertEquals("", StringUtils.removeChar(",,", ','));
   }
 
   @Test
   public void testReplaceChar()
   {
-    Assertions.assertEquals("123", StringUtils.replaceChar("123", ',', "x"));
-    Assertions.assertEquals("12345", StringUtils.replaceChar("123,", ',', "45"));
-    Assertions.assertEquals("", StringUtils.replaceChar("", 'a', "bb"));
-    Assertions.assertEquals("bb", StringUtils.replaceChar("a", 'a', "bb"));
-    Assertions.assertEquals("bbbb", StringUtils.replaceChar("aa", 'a', "bb"));
+    Assert.assertEquals("123", StringUtils.replaceChar("123", ',', "x"));
+    Assert.assertEquals("12345", StringUtils.replaceChar("123,", ',', "45"));
+    Assert.assertEquals("", StringUtils.replaceChar("", 'a', "bb"));
+    Assert.assertEquals("bb", StringUtils.replaceChar("a", 'a', "bb"));
+    Assert.assertEquals("bbbb", StringUtils.replaceChar("aa", 'a', "bb"));
   }
 
   @Test
   public void testReplace()
   {
-    Assertions.assertEquals("x1x2x3x", StringUtils.replace("123", "", "x"));
-    Assertions.assertEquals("12345", StringUtils.replace("123,", ",", "45"));
-    Assertions.assertEquals("", StringUtils.replace("", "a", "bb"));
-    Assertions.assertEquals("bb", StringUtils.replace("a", "a", "bb"));
-    Assertions.assertEquals("bba", StringUtils.replace("aaa", "aa", "bb"));
-    Assertions.assertEquals("bcb", StringUtils.replace("aacaa", "aa", "b"));
-    Assertions.assertEquals("bb", StringUtils.replace("aaaa", "aa", "b"));
-    Assertions.assertEquals("", StringUtils.replace("aaaa", "aa", ""));
+    Assert.assertEquals("x1x2x3x", StringUtils.replace("123", "", "x"));
+    Assert.assertEquals("12345", StringUtils.replace("123,", ",", "45"));
+    Assert.assertEquals("", StringUtils.replace("", "a", "bb"));
+    Assert.assertEquals("bb", StringUtils.replace("a", "a", "bb"));
+    Assert.assertEquals("bba", StringUtils.replace("aaa", "aa", "bb"));
+    Assert.assertEquals("bcb", StringUtils.replace("aacaa", "aa", "b"));
+    Assert.assertEquals("bb", StringUtils.replace("aaaa", "aa", "b"));
+    Assert.assertEquals("", StringUtils.replace("aaaa", "aa", ""));
   }
 
   @Test
   public void testEncodeForFormat()
   {
-    Assertions.assertEquals("x %% a %%s", StringUtils.encodeForFormat("x % a %s"));
-    Assertions.assertEquals("", StringUtils.encodeForFormat(""));
-    Assertions.assertNull(StringUtils.encodeForFormat(null));
+    Assert.assertEquals("x %% a %%s", StringUtils.encodeForFormat("x % a %s"));
+    Assert.assertEquals("", StringUtils.encodeForFormat(""));
+    Assert.assertNull(StringUtils.encodeForFormat(null));
   }
 
   @Test
   public void testURLEncodeSpace()
   {
     String s1 = StringUtils.urlEncode("aaa bbb");
-    Assertions.assertEquals(s1, "aaa%20bbb");
-    Assertions.assertEquals("aaa bbb", StringUtils.urlDecode(s1));
+    Assert.assertEquals(s1, "aaa%20bbb");
+    Assert.assertEquals("aaa bbb", StringUtils.urlDecode(s1));
 
     String s2 = StringUtils.urlEncode("fff+ggg");
-    Assertions.assertEquals(s2, "fff%2Bggg");
-    Assertions.assertEquals("fff+ggg", StringUtils.urlDecode(s2));
+    Assert.assertEquals(s2, "fff%2Bggg");
+    Assert.assertEquals("fff+ggg", StringUtils.urlDecode(s2));
   }
 
   @Test
   public void testRepeat()
   {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
-      Assertions.assertEquals("", StringUtils.repeat("foo", 0));
-      Assertions.assertEquals("foo", StringUtils.repeat("foo", 1));
-      Assertions.assertEquals("foofoofoo", StringUtils.repeat("foo", 3));
+    Assert.assertEquals("", StringUtils.repeat("foo", 0));
+    Assert.assertEquals("foo", StringUtils.repeat("foo", 1));
+    Assert.assertEquals("foofoofoo", StringUtils.repeat("foo", 3));
 
-      Assertions.assertEquals("", StringUtils.repeat("", 0));
-      Assertions.assertEquals("", StringUtils.repeat("", 1));
-      Assertions.assertEquals("", StringUtils.repeat("", 3));
-      Assertions.assertEquals("", StringUtils.repeat("foo", -1));
-    });
-    assertTrue(exception.getMessage().contains("count is negative, -1"));
+    Assert.assertEquals("", StringUtils.repeat("", 0));
+    Assert.assertEquals("", StringUtils.repeat("", 1));
+    Assert.assertEquals("", StringUtils.repeat("", 3));
+
+    expectedException.expect(IllegalArgumentException.class);
+    expectedException.expectMessage("count is negative, -1");
+    Assert.assertEquals("", StringUtils.repeat("foo", -1));
   }
 
   @Test
   public void testLpad()
   {
     String lpad = StringUtils.lpad("abc", 7, "de");
-    Assertions.assertEquals("dedeabc", lpad);
+    Assert.assertEquals("dedeabc", lpad);
 
     lpad = StringUtils.lpad("abc", 6, "de");
-    Assertions.assertEquals("dedabc", lpad);
+    Assert.assertEquals("dedabc", lpad);
 
     lpad = StringUtils.lpad("abc", 2, "de");
-    Assertions.assertEquals("ab", lpad);
+    Assert.assertEquals("ab", lpad);
 
     lpad = StringUtils.lpad("abc", 0, "de");
-    Assertions.assertEquals("", lpad);
+    Assert.assertEquals("", lpad);
 
     lpad = StringUtils.lpad("abc", -1, "de");
-    Assertions.assertEquals("", lpad);
+    Assert.assertEquals("", lpad);
 
     lpad = StringUtils.lpad("abc", 10, "");
-    Assertions.assertEquals("abc", lpad);
+    Assert.assertEquals("abc", lpad);
 
     lpad = StringUtils.lpad("abc", 1, "");
-    Assertions.assertEquals("a", lpad);
+    Assert.assertEquals("a", lpad);
   }
 
   @Test
   public void testRpad()
   {
     String rpad = StringUtils.rpad("abc", 7, "de");
-    Assertions.assertEquals("abcdede", rpad);
+    Assert.assertEquals("abcdede", rpad);
 
     rpad = StringUtils.rpad("abc", 6, "de");
-    Assertions.assertEquals("abcded", rpad);
+    Assert.assertEquals("abcded", rpad);
 
     rpad = StringUtils.rpad("abc", 2, "de");
-    Assertions.assertEquals("ab", rpad);
+    Assert.assertEquals("ab", rpad);
 
     rpad = StringUtils.rpad("abc", 0, "de");
-    Assertions.assertEquals("", rpad);
+    Assert.assertEquals("", rpad);
 
     rpad = StringUtils.rpad("abc", -1, "de");
-    Assertions.assertEquals("", rpad);
+    Assert.assertEquals("", rpad);
 
     rpad = StringUtils.rpad("abc", 10, "");
-    Assertions.assertEquals("abc", rpad);
+    Assert.assertEquals("abc", rpad);
 
     rpad = StringUtils.rpad("abc", 1, "");
-    Assertions.assertEquals("a", rpad);
+    Assert.assertEquals("a", rpad);
   }
 
   @Test
   public void testChop()
   {
-    Assertions.assertEquals("foo", StringUtils.chop("foo", 5));
-    Assertions.assertEquals("fo", StringUtils.chop("foo", 2));
-    Assertions.assertEquals("", StringUtils.chop("foo", 0));
-    Assertions.assertEquals("smile 🙂 for", StringUtils.chop("smile 🙂 for the camera", 14));
-    Assertions.assertEquals("smile 🙂", StringUtils.chop("smile 🙂 for the camera", 10));
-    Assertions.assertEquals("smile ", StringUtils.chop("smile 🙂 for the camera", 9));
-    Assertions.assertEquals("smile ", StringUtils.chop("smile 🙂 for the camera", 8));
-    Assertions.assertEquals("smile ", StringUtils.chop("smile 🙂 for the camera", 7));
-    Assertions.assertEquals("smile ", StringUtils.chop("smile 🙂 for the camera", 6));
-    Assertions.assertEquals("smile", StringUtils.chop("smile 🙂 for the camera", 5));
+    Assert.assertEquals("foo", StringUtils.chop("foo", 5));
+    Assert.assertEquals("fo", StringUtils.chop("foo", 2));
+    Assert.assertEquals("", StringUtils.chop("foo", 0));
+    Assert.assertEquals("smile 🙂 for", StringUtils.chop("smile 🙂 for the camera", 14));
+    Assert.assertEquals("smile 🙂", StringUtils.chop("smile 🙂 for the camera", 10));
+    Assert.assertEquals("smile ", StringUtils.chop("smile 🙂 for the camera", 9));
+    Assert.assertEquals("smile ", StringUtils.chop("smile 🙂 for the camera", 8));
+    Assert.assertEquals("smile ", StringUtils.chop("smile 🙂 for the camera", 7));
+    Assert.assertEquals("smile ", StringUtils.chop("smile 🙂 for the camera", 6));
+    Assert.assertEquals("smile", StringUtils.chop("smile 🙂 for the camera", 5));
   }
 
   @Test
   public void testFastLooseChop()
   {
-    Assertions.assertEquals("foo", StringUtils.fastLooseChop("foo", 5));
-    Assertions.assertEquals("fo", StringUtils.fastLooseChop("foo", 2));
-    Assertions.assertEquals("", StringUtils.fastLooseChop("foo", 0));
-    Assertions.assertEquals("smile 🙂 for", StringUtils.fastLooseChop("smile 🙂 for the camera", 12));
-    Assertions.assertEquals("smile 🙂 ", StringUtils.fastLooseChop("smile 🙂 for the camera", 9));
-    Assertions.assertEquals("smile 🙂", StringUtils.fastLooseChop("smile 🙂 for the camera", 8));
-    Assertions.assertEquals("smile \uD83D", StringUtils.fastLooseChop("smile 🙂 for the camera", 7));
-    Assertions.assertEquals("smile ", StringUtils.fastLooseChop("smile 🙂 for the camera", 6));
-    Assertions.assertEquals("smile", StringUtils.fastLooseChop("smile 🙂 for the camera", 5));
+    Assert.assertEquals("foo", StringUtils.fastLooseChop("foo", 5));
+    Assert.assertEquals("fo", StringUtils.fastLooseChop("foo", 2));
+    Assert.assertEquals("", StringUtils.fastLooseChop("foo", 0));
+    Assert.assertEquals("smile 🙂 for", StringUtils.fastLooseChop("smile 🙂 for the camera", 12));
+    Assert.assertEquals("smile 🙂 ", StringUtils.fastLooseChop("smile 🙂 for the camera", 9));
+    Assert.assertEquals("smile 🙂", StringUtils.fastLooseChop("smile 🙂 for the camera", 8));
+    Assert.assertEquals("smile \uD83D", StringUtils.fastLooseChop("smile 🙂 for the camera", 7));
+    Assert.assertEquals("smile ", StringUtils.fastLooseChop("smile 🙂 for the camera", 6));
+    Assert.assertEquals("smile", StringUtils.fastLooseChop("smile 🙂 for the camera", 5));
   }
 
   @Test
@@ -326,14 +322,14 @@ public class StringUtilsTest
             StringUtils.toUtf8(string2)
         );
 
-        Assertions.assertEquals(
-            (int) Math.signum(compareUtf8),
-            (int) Math.signum(compareUnicode),
+        Assert.assertEquals(
             StringUtils.format(
                 "compareUnicode (actual) matches compareUtf8 (expected) for [%s] vs [%s]",
                 string1,
                 string2
-            )
+            ),
+            (int) Math.signum(compareUtf8),
+            (int) Math.signum(compareUnicode)
         );
       }
     }
@@ -366,41 +362,41 @@ public class StringUtilsTest
             utf8Bytes2.length
         );
 
-        Assertions.assertEquals(
-            (int) Math.signum(compareJavaString),
-            (int) Math.signum(compareByteArrayUtf8UsingJavaStringOrdering),
+        Assert.assertEquals(
             StringUtils.format(
                 "compareUtf8UsingJavaStringOrdering(byte[]) (actual) "
                 + "matches compareJavaString (expected) for [%s] vs [%s]",
                 string1,
                 string2
-            )
+            ),
+            (int) Math.signum(compareJavaString),
+            (int) Math.signum(compareByteArrayUtf8UsingJavaStringOrdering)
         );
 
-        Assertions.assertEquals(
-            (int) Math.signum(compareJavaString),
-            (int) Math.signum(compareByteBufferUtf8UsingJavaStringOrdering),
+        Assert.assertEquals(
             StringUtils.format(
                 "compareByteBufferUtf8UsingJavaStringOrdering(ByteBuffer) (actual) "
                 + "matches compareJavaString (expected) for [%s] vs [%s]",
                 string1,
                 string2
-            )
+            ),
+            (int) Math.signum(compareJavaString),
+            (int) Math.signum(compareByteBufferUtf8UsingJavaStringOrdering)
         );
       }
     }
   }
 
-  @Test
+  @Test()
   public void testNonStrictFormatWithNullMessage()
   {
-    Assertions.assertThrows(NullPointerException.class, () -> StringUtils.nonStrictFormat(null, 1, 2));
+    Assert.assertThrows(NullPointerException.class, () -> StringUtils.nonStrictFormat(null, 1, 2));
   }
 
   @Test
   public void testNonStrictFormatWithStringContainingPercent()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         "some string containing % %s %d %f",
         StringUtils.nonStrictFormat("%s", "some string containing % %s %d %f")
     );

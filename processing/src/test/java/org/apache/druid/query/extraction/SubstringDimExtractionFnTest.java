@@ -21,12 +21,10 @@ package org.apache.druid.query.extraction;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.druid.jackson.DefaultObjectMapper;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Arrays;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  */
@@ -37,19 +35,17 @@ public class SubstringDimExtractionFnTest
   {
     ExtractionFn extractionFn = new SubstringDimExtractionFn(1, 3);
 
-    Assertions.assertEquals("ppl", extractionFn.apply("apple"));
-    Assertions.assertEquals("e", extractionFn.apply("be"));
-    Assertions.assertEquals("ool", extractionFn.apply("cool"));
-    Assertions.assertEquals(null, extractionFn.apply("a"));
+    Assert.assertEquals("ppl", extractionFn.apply("apple"));
+    Assert.assertEquals("e", extractionFn.apply("be"));
+    Assert.assertEquals("ool", extractionFn.apply("cool"));
+    Assert.assertEquals(null, extractionFn.apply("a"));
   }
 
-  @Test
+  @Test (expected = IllegalArgumentException.class)
   public void testZeroLength()
   {
-    assertThrows(IllegalArgumentException.class, () -> {
-      @SuppressWarnings("unused") // expected exception
-      ExtractionFn extractionFnNoLength = new SubstringDimExtractionFn(1, 0);
-    });
+    @SuppressWarnings("unused") // expected exception
+    ExtractionFn extractionFnNoLength = new SubstringDimExtractionFn(1, 0);
   }
 
   @Test
@@ -58,10 +54,10 @@ public class SubstringDimExtractionFnTest
     ExtractionFn extractionFnNoLength = new SubstringDimExtractionFn(1, null);
 
     // 0 length substring returns remainder
-    Assertions.assertEquals("abcdef", extractionFnNoLength.apply("/abcdef"));
+    Assert.assertEquals("abcdef", extractionFnNoLength.apply("/abcdef"));
 
     // 0 length substring empty result is null
-    Assertions.assertEquals(null, extractionFnNoLength.apply("/"));
+    Assert.assertEquals(null, extractionFnNoLength.apply("/"));
   }
 
   @Test
@@ -71,9 +67,9 @@ public class SubstringDimExtractionFnTest
     ExtractionFn extractionFn2 = new SubstringDimExtractionFn(2, 4);
     ExtractionFn extractionFn3 = new SubstringDimExtractionFn(1, 4);
 
-    Assertions.assertArrayEquals(extractionFn1.getCacheKey(), extractionFn2.getCacheKey());
+    Assert.assertArrayEquals(extractionFn1.getCacheKey(), extractionFn2.getCacheKey());
 
-    Assertions.assertFalse(Arrays.equals(extractionFn1.getCacheKey(), extractionFn3.getCacheKey()));
+    Assert.assertFalse(Arrays.equals(extractionFn1.getCacheKey(), extractionFn3.getCacheKey()));
   }
 
   @Test
@@ -83,9 +79,9 @@ public class SubstringDimExtractionFnTest
     ExtractionFn extractionFn2 = new SubstringDimExtractionFn(2, 4);
     ExtractionFn extractionFn3 = new SubstringDimExtractionFn(1, 4);
 
-    Assertions.assertEquals(extractionFn1.hashCode(), extractionFn2.hashCode());
+    Assert.assertEquals(extractionFn1.hashCode(), extractionFn2.hashCode());
 
-    Assertions.assertNotEquals(extractionFn1.hashCode(), extractionFn3.hashCode());
+    Assert.assertNotEquals(extractionFn1.hashCode(), extractionFn3.hashCode());
   }
 
   @Test
@@ -93,11 +89,11 @@ public class SubstringDimExtractionFnTest
   {
     ExtractionFn extractionFn = new SubstringDimExtractionFn(2, 4);
     // no match, map empty input value to null
-    Assertions.assertEquals(null, extractionFn.apply(""));
+    Assert.assertEquals(null, extractionFn.apply(""));
     // null value, returns null
-    Assertions.assertEquals(null, extractionFn.apply(null));
+    Assert.assertEquals(null, extractionFn.apply(null));
     // empty match, map empty result to null
-    Assertions.assertEquals(null, extractionFn.apply("/a"));
+    Assert.assertEquals(null, extractionFn.apply("/a"));
   }
 
   @Test
@@ -111,13 +107,13 @@ public class SubstringDimExtractionFnTest
     SubstringDimExtractionFn extractionFn = (SubstringDimExtractionFn) objectMapper.readValue(json, ExtractionFn.class);
     SubstringDimExtractionFn extractionFnNoLength = (SubstringDimExtractionFn) objectMapper.readValue(jsonNoLength, ExtractionFn.class);
 
-    Assertions.assertEquals(1, extractionFn.getIndex());
-    Assertions.assertEquals(new Integer(3), extractionFn.getLength());
-    Assertions.assertEquals(1, extractionFnNoLength.getIndex());
-    Assertions.assertEquals(null, extractionFnNoLength.getLength());
+    Assert.assertEquals(1, extractionFn.getIndex());
+    Assert.assertEquals(new Integer(3), extractionFn.getLength());
+    Assert.assertEquals(1, extractionFnNoLength.getIndex());
+    Assert.assertEquals(null, extractionFnNoLength.getLength());
 
     // round trip
-    Assertions.assertEquals(
+    Assert.assertEquals(
         extractionFn,
         objectMapper.readValue(
             objectMapper.writeValueAsBytes(extractionFn),
@@ -125,7 +121,7 @@ public class SubstringDimExtractionFnTest
         )
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         extractionFnNoLength,
         objectMapper.readValue(
             objectMapper.writeValueAsBytes(extractionFnNoLength),

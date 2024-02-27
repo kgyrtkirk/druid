@@ -28,6 +28,7 @@ import org.apache.logging.log4j.core.appender.HttpAppender;
 import org.apache.logging.log4j.core.config.ConfigurationSource;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

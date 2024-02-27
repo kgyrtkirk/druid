@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableSet;
 import org.apache.druid.java.util.common.jackson.JacksonUtils;
 import org.apache.druid.segment.TestHelper;
 import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Comparator;
 import java.util.Map;

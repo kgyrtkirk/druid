@@ -27,6 +27,7 @@ import org.apache.druid.jackson.DefaultObjectMapper;
 import org.apache.druid.java.util.common.Intervals;
 import org.joda.time.Interval;
 import org.junit.Assert;
+import org.junit.Test;
 
 import javax.annotation.Nullable;
 import java.io.IOException;

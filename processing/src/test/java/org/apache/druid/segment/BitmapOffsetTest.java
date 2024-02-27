@@ -30,19 +30,22 @@ import org.apache.druid.collections.bitmap.ImmutableBitmap;
 import org.apache.druid.collections.bitmap.MutableBitmap;
 import org.apache.druid.collections.bitmap.RoaringBitmapFactory;
 import org.apache.druid.segment.data.Offset;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.util.List;
 
 /**
  */
+@RunWith(Parameterized.class)
 public class BitmapOffsetTest
 {
   private static final int[] TEST_VALS = {1, 2, 4, 291, 27412, 49120, 212312, 2412101};
   private static final int[] TEST_VALS_FLIP = {2412101, 212312, 49120, 27412, 291, 4, 2, 1};
 
+  @Parameterized.Parameters
   public static Iterable<Object[]> constructorFeeder()
   {
     return Iterables.transform(
@@ -61,20 +64,18 @@ public class BitmapOffsetTest
     );
   }
 
-  private BitmapFactory factory;
-  private boolean descending;
+  private final BitmapFactory factory;
+  private final boolean descending;
 
-  public void initBitmapOffsetTest(BitmapFactory factory, boolean descending)
+  public BitmapOffsetTest(BitmapFactory factory, boolean descending)
   {
     this.factory = factory;
     this.descending = descending;
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest
-  public void testSanity(BitmapFactory factory, boolean descending)
+  @Test
+  public void testSanity()
   {
-    initBitmapOffsetTest(factory, descending);
     MutableBitmap mutable = factory.makeEmptyMutableBitmap();
     for (int val : TEST_VALS) {
       mutable.add(val);
@@ -86,12 +87,12 @@ public class BitmapOffsetTest
 
     int count = 0;
     while (offset.withinBounds()) {
-      Assertions.assertEquals(expected[count], offset.getOffset());
+      Assert.assertEquals(expected[count], offset.getOffset());
 
       int cloneCount = count;
       Offset clonedOffset = offset.clone();
       while (clonedOffset.withinBounds()) {
-        Assertions.assertEquals(expected[cloneCount], clonedOffset.getOffset());
+        Assert.assertEquals(expected[cloneCount], clonedOffset.getOffset());
 
         ++cloneCount;
         clonedOffset.increment();
@@ -100,6 +101,6 @@ public class BitmapOffsetTest
       ++count;
       offset.increment();
     }
-    Assertions.assertEquals(count, expected.length);
+    Assert.assertEquals(count, expected.length);
   }
 }

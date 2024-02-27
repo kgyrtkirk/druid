@@ -27,8 +27,8 @@ import org.apache.druid.query.filter.DimFilter;
 import org.apache.druid.query.spec.MultipleSpecificSegmentSpec;
 import org.apache.druid.query.spec.QuerySegmentSpec;
 import org.joda.time.Interval;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -46,8 +46,8 @@ public class ReportTimelineMissingSegmentQueryRunnerTest
         = new ReportTimelineMissingSegmentQueryRunner<>(missingSegment);
     final ResponseContext responseContext = DefaultResponseContext.createEmpty();
     runner.run(QueryPlus.wrap(new TestQuery()), responseContext);
-    Assertions.assertNotNull(responseContext.getMissingSegments());
-    Assertions.assertEquals(Collections.singletonList(missingSegment), responseContext.getMissingSegments());
+    Assert.assertNotNull(responseContext.getMissingSegments());
+    Assert.assertEquals(Collections.singletonList(missingSegment), responseContext.getMissingSegments());
   }
 
   @Test
@@ -62,8 +62,8 @@ public class ReportTimelineMissingSegmentQueryRunnerTest
         = new ReportTimelineMissingSegmentQueryRunner<>(missingSegments);
     final ResponseContext responseContext = DefaultResponseContext.createEmpty();
     runner.run(QueryPlus.wrap(new TestQuery()), responseContext);
-    Assertions.assertNotNull(responseContext.getMissingSegments());
-    Assertions.assertEquals(missingSegments, responseContext.getMissingSegments());
+    Assert.assertNotNull(responseContext.getMissingSegments());
+    Assert.assertEquals(missingSegments, responseContext.getMissingSegments());
   }
 
   private static class TestQuery extends BaseQuery<Object>

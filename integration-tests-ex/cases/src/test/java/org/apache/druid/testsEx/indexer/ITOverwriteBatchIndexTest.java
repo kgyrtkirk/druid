@@ -25,6 +25,7 @@ import org.apache.druid.java.util.common.Pair;
 import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.testsEx.categories.BatchIndex;
 import org.apache.druid.testsEx.config.DruidTestRunner;
+import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 

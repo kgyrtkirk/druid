@@ -30,6 +30,7 @@ import org.apache.druid.segment.TestHelper;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.joda.time.Interval;
 import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.List;
 import java.util.Set;

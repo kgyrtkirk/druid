@@ -42,6 +42,7 @@ import org.apache.druid.segment.loading.SegmentLoadingException;
 import org.apache.druid.timeline.DataSegment;
 import org.apache.druid.timeline.partition.NoneShardSpec;
 import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.File;
 import java.util.HashMap;

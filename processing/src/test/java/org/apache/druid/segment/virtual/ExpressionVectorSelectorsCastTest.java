@@ -38,10 +38,10 @@ import org.apache.druid.segment.vector.VectorObjectSelector;
 import org.apache.druid.segment.vector.VectorValueSelector;
 import org.apache.druid.timeline.DataSegment;
 import org.apache.druid.timeline.partition.LinearShardSpec;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.io.IOException;
 
@@ -52,7 +52,7 @@ public class ExpressionVectorSelectorsCastTest
   private static QueryableIndex INDEX;
   private static Closer CLOSER;
 
-  @BeforeAll
+  @BeforeClass
   public static void setupClass()
   {
     CLOSER = Closer.create();
@@ -73,7 +73,7 @@ public class ExpressionVectorSelectorsCastTest
     );
   }
 
-  @AfterAll
+  @AfterClass
   public static void teardownClass() throws IOException
   {
     CLOSER.close();
@@ -158,9 +158,9 @@ public class ExpressionVectorSelectorsCastTest
           long[] castLongs = castSelector.getLongVector();
           for (int i = 0; i < selector.getCurrentVectorSize(); i++) {
             if (nulls != null) {
-              Assertions.assertEquals(nulls[i], castNulls[i]);
+              Assert.assertEquals(nulls[i], castNulls[i]);
             }
-            Assertions.assertEquals(longs[i], castLongs[i]);
+            Assert.assertEquals(longs[i], castLongs[i]);
           }
           break;
         case DOUBLE:
@@ -170,9 +170,9 @@ public class ExpressionVectorSelectorsCastTest
           double[] castDoubles = castSelector.getDoubleVector();
           for (int i = 0; i < selector.getCurrentVectorSize(); i++) {
             if (nulls != null) {
-              Assertions.assertEquals(nulls[i], castNulls[i]);
+              Assert.assertEquals(nulls[i], castNulls[i]);
             }
-            Assertions.assertEquals(doubles[i], castDoubles[i], 0.0);
+            Assert.assertEquals(doubles[i], castDoubles[i], 0.0);
           }
           break;
 
@@ -183,13 +183,13 @@ public class ExpressionVectorSelectorsCastTest
           float[] castFloats = castSelector.getFloatVector();
           for (int i = 0; i < selector.getCurrentVectorSize(); i++) {
             if (nulls != null) {
-              Assertions.assertEquals(nulls[i], castNulls[i]);
+              Assert.assertEquals(nulls[i], castNulls[i]);
             }
-            Assertions.assertEquals(floats[i], castFloats[i], 0.0);
+            Assert.assertEquals(floats[i], castFloats[i], 0.0);
           }
           break;
         default:
-          Assertions.fail("this shouldn't happen");
+          Assert.fail("this shouldn't happen");
           return;
       }
 
@@ -212,13 +212,13 @@ public class ExpressionVectorSelectorsCastTest
         case STRING:
           Object[] objects = objectSelector.getObjectVector();
           Object[] otherObjects = castSelector.getObjectVector();
-          Assertions.assertEquals(objectSelector.getCurrentVectorSize(), castSelector.getCurrentVectorSize());
+          Assert.assertEquals(objectSelector.getCurrentVectorSize(), castSelector.getCurrentVectorSize());
           for (int i = 0; i < objectSelector.getCurrentVectorSize(); i++) {
-            Assertions.assertEquals(objects[i], otherObjects[i]);
+            Assert.assertEquals(objects[i], otherObjects[i]);
           }
           break;
         default:
-          Assertions.fail("this shouldn't happen");
+          Assert.fail("this shouldn't happen");
           return;
       }
 

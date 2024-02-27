@@ -22,8 +22,8 @@ package org.apache.druid.query.aggregation.any;
 import com.google.common.collect.Lists;
 import org.apache.druid.query.aggregation.BufferAggregator;
 import org.apache.druid.query.aggregation.TestObjectColumnSelector;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -72,7 +72,7 @@ public class StringAnyBufferAggregatorTest
 
     String result = ((String) agg.get(buf, position));
 
-    Assertions.assertEquals(strings[0], result);
+    Assert.assertEquals(strings[0], result);
   }
 
   @Test
@@ -102,7 +102,7 @@ public class StringAnyBufferAggregatorTest
     String result = ((String) agg.get(buf, position));
 
 
-    Assertions.assertEquals(strings[0], result);
+    Assert.assertEquals(strings[0], result);
   }
 
   @Test
@@ -131,7 +131,7 @@ public class StringAnyBufferAggregatorTest
 
     String result = ((String) agg.get(buf, position));
 
-    Assertions.assertEquals(strings[0], result);
+    Assert.assertEquals(strings[0], result);
   }
 
   @Test
@@ -159,7 +159,7 @@ public class StringAnyBufferAggregatorTest
 
     String result = ((String) agg.get(buf, position));
 
-    Assertions.assertNull(result);
+    Assert.assertNull(result);
   }
 
   @Test
@@ -187,7 +187,7 @@ public class StringAnyBufferAggregatorTest
 
     String result = ((String) agg.get(buf, position));
 
-    Assertions.assertEquals("1.0", result);
+    Assert.assertEquals("1.0", result);
   }
 
   @Test
@@ -215,13 +215,13 @@ public class StringAnyBufferAggregatorTest
       aggregateBuffer(objectColumnSelector, agg, buf, positions[i]);
     }
     String result = ((String) agg.get(buf, position));
-    Assertions.assertNull(result);
+    Assert.assertNull(result);
 
     for (int i = 0; i < positions.length; i++) {
       if (i == 2) {
-        Assertions.assertEquals(mvd.toString(), agg.get(buf, positions[2]));
+        Assert.assertEquals(mvd.toString(), agg.get(buf, positions[2]));
       } else {
-        Assertions.assertEquals(mvds[i], agg.get(buf, positions[i]));
+        Assert.assertEquals(mvds[i], agg.get(buf, positions[i]));
       }
     }
   }
@@ -251,14 +251,14 @@ public class StringAnyBufferAggregatorTest
       aggregateBuffer(objectColumnSelector, agg, buf, positions[i]);
     }
     String result = ((String) agg.get(buf, position));
-    Assertions.assertNull(result);
+    Assert.assertNull(result);
 
     for (int i = 0; i < positions.length; i++) {
       if (i == 2) {
         // takes first in case of mvds
-        Assertions.assertEquals(mvd.get(0), agg.get(buf, positions[2]));
+        Assert.assertEquals(mvd.get(0), agg.get(buf, positions[2]));
       } else {
-        Assertions.assertEquals(mvds[i], agg.get(buf, positions[i]));
+        Assert.assertEquals(mvds[i], agg.get(buf, positions[i]));
       }
     }
   }

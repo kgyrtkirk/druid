@@ -31,13 +31,13 @@ import org.apache.druid.query.spec.MultipleSpecificSegmentSpec;
 import org.apache.druid.query.spec.QuerySegmentSpec;
 import org.apache.druid.query.timeboundary.TimeBoundaryQuery;
 import org.apache.druid.query.timeseries.TimeseriesQuery;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.experimental.runners.Enclosed;
+import org.junit.runner.RunWith;
 
-
-
+@RunWith(Enclosed.class)
 public class DruidsTest
 {
   private static final String DATASOURCE = "datasource";
@@ -48,12 +48,11 @@ public class DruidsTest
       )
   );
 
-  @Nested
-  public class TimeseriesQueryBuilderTest
+  public static class TimeseriesQueryBuilderTest
   {
     private TimeseriesQueryBuilder builder;
 
-    @BeforeEach
+    @Before
     public void setup()
     {
       builder = Druids.newTimeseriesQueryBuilder()
@@ -68,7 +67,7 @@ public class DruidsTest
       final TimeseriesQuery query = builder
           .queryId("queryId")
           .build();
-      Assertions.assertEquals(ImmutableMap.of(BaseQuery.QUERY_ID, "queryId"), query.getContext());
+      Assert.assertEquals(ImmutableMap.of(BaseQuery.QUERY_ID, "queryId"), query.getContext());
     }
 
     @Test
@@ -78,7 +77,7 @@ public class DruidsTest
           .context(ImmutableMap.of("my", "context"))
           .queryId("queryId")
           .build();
-      Assertions.assertEquals(ImmutableMap.of(BaseQuery.QUERY_ID, "queryId", "my", "context"), query.getContext());
+      Assert.assertEquals(ImmutableMap.of(BaseQuery.QUERY_ID, "queryId", "my", "context"), query.getContext());
     }
 
     @Test
@@ -88,7 +87,7 @@ public class DruidsTest
           .context(ImmutableMap.of("my", "context", BaseQuery.QUERY_ID, "queryId"))
           .queryId("realQueryId")
           .build();
-      Assertions.assertEquals(ImmutableMap.of(BaseQuery.QUERY_ID, "realQueryId", "my", "context"), query.getContext());
+      Assert.assertEquals(ImmutableMap.of(BaseQuery.QUERY_ID, "realQueryId", "my", "context"), query.getContext());
     }
 
     @Test
@@ -98,7 +97,7 @@ public class DruidsTest
           .queryId("queryId")
           .context(ImmutableMap.of("my", "context"))
           .build();
-      Assertions.assertEquals(ImmutableMap.of("my", "context"), query.getContext());
+      Assert.assertEquals(ImmutableMap.of("my", "context"), query.getContext());
     }
 
     @Test
@@ -108,16 +107,15 @@ public class DruidsTest
           .queryId("queryId")
           .context(ImmutableMap.of("my", "context", BaseQuery.QUERY_ID, "realQueryId"))
           .build();
-      Assertions.assertEquals(ImmutableMap.of(BaseQuery.QUERY_ID, "realQueryId", "my", "context"), query.getContext());
+      Assert.assertEquals(ImmutableMap.of(BaseQuery.QUERY_ID, "realQueryId", "my", "context"), query.getContext());
     }
   }
 
-  @Nested
-  public class SearchQueryBuilderTest
+  public static class SearchQueryBuilderTest
   {
     private SearchQueryBuilder builder;
 
-    @BeforeEach
+    @Before
     public void setup()
     {
       builder = Druids.newSearchQueryBuilder()
@@ -132,7 +130,7 @@ public class DruidsTest
       final SearchQuery query = builder
           .queryId("queryId")
           .build();
-      Assertions.assertEquals(ImmutableMap.of(BaseQuery.QUERY_ID, "queryId"), query.getContext());
+      Assert.assertEquals(ImmutableMap.of(BaseQuery.QUERY_ID, "queryId"), query.getContext());
     }
 
     @Test
@@ -142,7 +140,7 @@ public class DruidsTest
           .context(ImmutableMap.of("my", "context"))
           .queryId("queryId")
           .build();
-      Assertions.assertEquals(ImmutableMap.of(BaseQuery.QUERY_ID, "queryId", "my", "context"), query.getContext());
+      Assert.assertEquals(ImmutableMap.of(BaseQuery.QUERY_ID, "queryId", "my", "context"), query.getContext());
     }
 
     @Test
@@ -152,7 +150,7 @@ public class DruidsTest
           .context(ImmutableMap.of("my", "context", BaseQuery.QUERY_ID, "queryId"))
           .queryId("realQueryId")
           .build();
-      Assertions.assertEquals(ImmutableMap.of(BaseQuery.QUERY_ID, "realQueryId", "my", "context"), query.getContext());
+      Assert.assertEquals(ImmutableMap.of(BaseQuery.QUERY_ID, "realQueryId", "my", "context"), query.getContext());
     }
 
     @Test
@@ -162,7 +160,7 @@ public class DruidsTest
           .queryId("queryId")
           .context(ImmutableMap.of("my", "context"))
           .build();
-      Assertions.assertEquals(ImmutableMap.of("my", "context"), query.getContext());
+      Assert.assertEquals(ImmutableMap.of("my", "context"), query.getContext());
     }
 
     @Test
@@ -172,16 +170,15 @@ public class DruidsTest
           .queryId("queryId")
           .context(ImmutableMap.of("my", "context", BaseQuery.QUERY_ID, "realQueryId"))
           .build();
-      Assertions.assertEquals(ImmutableMap.of(BaseQuery.QUERY_ID, "realQueryId", "my", "context"), query.getContext());
+      Assert.assertEquals(ImmutableMap.of(BaseQuery.QUERY_ID, "realQueryId", "my", "context"), query.getContext());
     }
   }
 
-  @Nested
-  public class TimeBoundaryBuilderTest
+  public static class TimeBoundaryBuilderTest
   {
     private TimeBoundaryQueryBuilder builder;
 
-    @BeforeEach
+    @Before
     public void setup()
     {
       builder = Druids.newTimeBoundaryQueryBuilder()
@@ -195,7 +192,7 @@ public class DruidsTest
       final TimeBoundaryQuery query = builder
           .queryId("queryId")
           .build();
-      Assertions.assertEquals(ImmutableMap.of(BaseQuery.QUERY_ID, "queryId"), query.getContext());
+      Assert.assertEquals(ImmutableMap.of(BaseQuery.QUERY_ID, "queryId"), query.getContext());
     }
 
     @Test
@@ -205,7 +202,7 @@ public class DruidsTest
           .context(ImmutableMap.of("my", "context"))
           .queryId("queryId")
           .build();
-      Assertions.assertEquals(ImmutableMap.of(BaseQuery.QUERY_ID, "queryId", "my", "context"), query.getContext());
+      Assert.assertEquals(ImmutableMap.of(BaseQuery.QUERY_ID, "queryId", "my", "context"), query.getContext());
     }
 
     @Test
@@ -215,7 +212,7 @@ public class DruidsTest
           .context(ImmutableMap.of("my", "context", BaseQuery.QUERY_ID, "queryId"))
           .queryId("realQueryId")
           .build();
-      Assertions.assertEquals(ImmutableMap.of(BaseQuery.QUERY_ID, "realQueryId", "my", "context"), query.getContext());
+      Assert.assertEquals(ImmutableMap.of(BaseQuery.QUERY_ID, "realQueryId", "my", "context"), query.getContext());
     }
 
     @Test
@@ -225,7 +222,7 @@ public class DruidsTest
           .queryId("queryId")
           .context(ImmutableMap.of("my", "context"))
           .build();
-      Assertions.assertEquals(ImmutableMap.of("my", "context"), query.getContext());
+      Assert.assertEquals(ImmutableMap.of("my", "context"), query.getContext());
     }
 
     @Test
@@ -235,7 +232,7 @@ public class DruidsTest
           .queryId("queryId")
           .context(ImmutableMap.of("my", "context", BaseQuery.QUERY_ID, "realQueryId"))
           .build();
-      Assertions.assertEquals(ImmutableMap.of(BaseQuery.QUERY_ID, "realQueryId", "my", "context"), query.getContext());
+      Assert.assertEquals(ImmutableMap.of(BaseQuery.QUERY_ID, "realQueryId", "my", "context"), query.getContext());
     }
   }
 }

@@ -65,12 +65,13 @@ import org.apache.druid.segment.writeout.SegmentWriteOutMediumFactory;
 import org.apache.druid.segment.writeout.TmpFileSegmentWriteOutMediumFactory;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.apache.druid.utils.CompressionUtils;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -91,8 +92,8 @@ public class NestedDataColumnSupplierV4Test extends InitializedNullHandlingTest
 {
   private static final ObjectMapper JSON_MAPPER = TestHelper.makeJsonMapper();
   private static final String NO_MATCH = "no";
-  @TempDir
-  public File tempFolder;
+  @Rule
+  public final TemporaryFolder tempFolder = new TemporaryFolder();
   DefaultBitmapResultFactory resultFactory = new DefaultBitmapResultFactory(new RoaringBitmapFactory());
   List<Map<String, Object>> data = ImmutableList.of(
       TestHelper.makeMap("x", 1L, "y", 1.0, "z", "a", "v", "100", "nullish", "notnull"),
@@ -136,20 +137,20 @@ public class NestedDataColumnSupplierV4Test extends InitializedNullHandlingTest
 
   ByteBuffer arrayBaseBuffer;
 
-  @BeforeAll
+  @BeforeClass
   public static void staticSetup()
   {
     NestedDataModule.registerHandlersAndSerde();
   }
 
-  @BeforeEach
+  @Before
   public void setup() throws IOException
   {
     final String fileNameBase = "test";
     final String arrayFileNameBase = "array";
-    fileMapper = smooshify(fileNameBase, newFolder(tempFolder, "junit"), data);
+    fileMapper = smooshify(fileNameBase, tempFolder.newFolder(), data);
     baseBuffer = fileMapper.mapFile(fileNameBase);
-    arrayFileMapper = smooshify(arrayFileNameBase, newFolder(tempFolder, "junit"), arrayTestData);
+    arrayFileMapper = smooshify(arrayFileNameBase, tempFolder.newFolder(), arrayTestData);
     arrayBaseBuffer = arrayFileMapper.mapFile(arrayFileNameBase);
   }
 
@@ -165,7 +166,7 @@ public class NestedDataColumnSupplierV4Test extends InitializedNullHandlingTest
       NestedDataColumnSerializerV4 serializer = new NestedDataColumnSerializerV4(
           fileNameBase,
           IndexSpec.DEFAULT,
-          writeOutMediumFactory.makeSegmentWriteOutMedium(newFolder(tempFolder, "junit")),
+          writeOutMediumFactory.makeSegmentWriteOutMedium(tempFolder.newFolder()),
           closer
       );
 
@@ -209,7 +210,7 @@ public class NestedDataColumnSupplierV4Test extends InitializedNullHandlingTest
     }
   }
 
-  @AfterEach
+  @After
   public void teardown() throws IOException
   {
     closer.close();
@@ -225,11 +226,11 @@ public class NestedDataColumnSupplierV4Test extends InitializedNullHandlingTest
     deserializer.read(baseBuffer, bob, NestedFieldColumnIndexSupplierTest.ALWAYS_USE_INDEXES);
     final ColumnHolder holder = bob.build();
     final ColumnCapabilities capabilities = holder.getCapabilities();
-    Assertions.assertEquals(ColumnType.NESTED_DATA, capabilities.toColumnType());
-    Assertions.assertTrue(holder.getColumnFormat() instanceof NestedDataComplexTypeSerde.NestedColumnFormatV4);
-    Assertions.assertTrue(holder.getColumnFormat().getColumnHandler("test") instanceof NestedDataColumnHandlerV4);
+    Assert.assertEquals(ColumnType.NESTED_DATA, capabilities.toColumnType());
+    Assert.assertTrue(holder.getColumnFormat() instanceof NestedDataComplexTypeSerde.NestedColumnFormatV4);
+    Assert.assertTrue(holder.getColumnFormat().getColumnHandler("test") instanceof NestedDataColumnHandlerV4);
     NestedDataColumnSchema schema = (NestedDataColumnSchema) holder.getColumnFormat().getColumnSchema("test");
-    Assertions.assertEquals(4, schema.getFormatVersion());
+    Assert.assertEquals(4, schema.getFormatVersion());
     try (NestedDataComplexColumn column = (NestedDataComplexColumn) holder.getColumn()) {
       smokeTest(column);
     }
@@ -275,7 +276,7 @@ public class NestedDataColumnSupplierV4Test extends InitializedNullHandlingTest
     }
     threadsStartLatch.countDown();
     Futures.allAsList(futures).get();
-    Assertions.assertEquals(expectedReason, failureReason.get());
+    Assert.assertEquals(expectedReason, failureReason.get());
   }
 
   @Test
@@ -283,7 +284,7 @@ public class NestedDataColumnSupplierV4Test extends InitializedNullHandlingTest
   {
     String columnName = "shipTo";
     String firstValue = "Cole";
-    File tmpLocation = newFolder(tempFolder, "junit");
+    File tmpLocation = tempFolder.newFolder();
     CompressionUtils.unzip(
         NestedDataColumnSupplierV4Test.class.getClassLoader().getResourceAsStream("nested_segment_v3/index.zip"),
         tmpLocation
@@ -291,27 +292,27 @@ public class NestedDataColumnSupplierV4Test extends InitializedNullHandlingTest
     try (Closer closer = Closer.create()) {
       QueryableIndex theIndex = closer.register(TestHelper.getTestIndexIO().loadIndex(tmpLocation));
       ColumnHolder holder = theIndex.getColumnHolder(columnName);
-      Assertions.assertNotNull(holder);
-      Assertions.assertEquals(ColumnType.NESTED_DATA, holder.getCapabilities().toColumnType());
+      Assert.assertNotNull(holder);
+      Assert.assertEquals(ColumnType.NESTED_DATA, holder.getCapabilities().toColumnType());
       NestedDataColumnV3<?> v3 = closer.register((NestedDataColumnV3<?>) holder.getColumn());
-      Assertions.assertNotNull(v3);
+      Assert.assertNotNull(v3);
       List<NestedPathPart> path = ImmutableList.of(new NestedPathField("lastName"));
       ColumnHolder nestedColumnHolder = v3.getColumnHolder(path);
-      Assertions.assertNotNull(nestedColumnHolder);
-      Assertions.assertEquals(ColumnType.STRING, nestedColumnHolder.getCapabilities().toColumnType());
+      Assert.assertNotNull(nestedColumnHolder);
+      Assert.assertEquals(ColumnType.STRING, nestedColumnHolder.getCapabilities().toColumnType());
       NestedFieldDictionaryEncodedColumn<?> nestedColumn =
           (NestedFieldDictionaryEncodedColumn<?>) nestedColumnHolder.getColumn();
-      Assertions.assertNotNull(nestedColumn);
+      Assert.assertNotNull(nestedColumn);
       ColumnValueSelector<?> selector = nestedColumn.makeColumnValueSelector(
           new SimpleAscendingOffset(theIndex.getNumRows())
       );
       ColumnIndexSupplier indexSupplier = v3.getColumnIndexSupplier(path);
-      Assertions.assertNotNull(indexSupplier);
+      Assert.assertNotNull(indexSupplier);
       StringValueSetIndexes valueSetIndex = indexSupplier.as(StringValueSetIndexes.class);
-      Assertions.assertNotNull(valueSetIndex);
+      Assert.assertNotNull(valueSetIndex);
       BitmapColumnIndex indexForValue = valueSetIndex.forValue(firstValue);
-      Assertions.assertEquals(firstValue, selector.getObject());
-      Assertions.assertTrue(indexForValue.computeBitmapResult(resultFactory, false).get(0));
+      Assert.assertEquals(firstValue, selector.getObject());
+      Assert.assertTrue(indexForValue.computeBitmapResult(resultFactory, false).get(0));
     }
   }
   @Test
@@ -320,7 +321,7 @@ public class NestedDataColumnSupplierV4Test extends InitializedNullHandlingTest
     String columnName = "shipTo";
     // i accidentally didn't use same segment granularity for v3 and v4 segments... so they have different first value
     String firstValue = "Beatty";
-    File tmpLocation = newFolder(tempFolder, "junit");
+    File tmpLocation = tempFolder.newFolder();
     CompressionUtils.unzip(
         NestedDataColumnSupplierV4Test.class.getClassLoader().getResourceAsStream("nested_segment_v4/index.zip"),
         tmpLocation
@@ -328,27 +329,27 @@ public class NestedDataColumnSupplierV4Test extends InitializedNullHandlingTest
     try (Closer closer = Closer.create()) {
       QueryableIndex theIndex = closer.register(TestHelper.getTestIndexIO().loadIndex(tmpLocation));
       ColumnHolder holder = theIndex.getColumnHolder(columnName);
-      Assertions.assertNotNull(holder);
-      Assertions.assertEquals(ColumnType.NESTED_DATA, holder.getCapabilities().toColumnType());
+      Assert.assertNotNull(holder);
+      Assert.assertEquals(ColumnType.NESTED_DATA, holder.getCapabilities().toColumnType());
       NestedDataColumnV4<?> v4 = closer.register((NestedDataColumnV4<?>) holder.getColumn());
-      Assertions.assertNotNull(v4);
+      Assert.assertNotNull(v4);
       List<NestedPathPart> path = ImmutableList.of(new NestedPathField("lastName"));
       ColumnHolder nestedColumnHolder = v4.getColumnHolder(path);
-      Assertions.assertNotNull(nestedColumnHolder);
-      Assertions.assertEquals(ColumnType.STRING, nestedColumnHolder.getCapabilities().toColumnType());
+      Assert.assertNotNull(nestedColumnHolder);
+      Assert.assertEquals(ColumnType.STRING, nestedColumnHolder.getCapabilities().toColumnType());
       NestedFieldDictionaryEncodedColumn<?> nestedColumn =
           (NestedFieldDictionaryEncodedColumn<?>) nestedColumnHolder.getColumn();
-      Assertions.assertNotNull(nestedColumn);
+      Assert.assertNotNull(nestedColumn);
       ColumnValueSelector<?> selector = nestedColumn.makeColumnValueSelector(
           new SimpleAscendingOffset(theIndex.getNumRows())
       );
       ColumnIndexSupplier indexSupplier = v4.getColumnIndexSupplier(path);
-      Assertions.assertNotNull(indexSupplier);
+      Assert.assertNotNull(indexSupplier);
       StringValueSetIndexes valueSetIndex = indexSupplier.as(StringValueSetIndexes.class);
-      Assertions.assertNotNull(valueSetIndex);
+      Assert.assertNotNull(valueSetIndex);
       BitmapColumnIndex indexForValue = valueSetIndex.forValue(firstValue);
-      Assertions.assertEquals(firstValue, selector.getObject());
-      Assertions.assertTrue(indexForValue.computeBitmapResult(resultFactory, false).get(0));
+      Assert.assertEquals(firstValue, selector.getObject());
+      Assert.assertTrue(indexForValue.computeBitmapResult(resultFactory, false).get(0));
     }
   }
   private void smokeTest(NestedDataComplexColumn column) throws IOException
@@ -356,62 +357,62 @@ public class NestedDataColumnSupplierV4Test extends InitializedNullHandlingTest
     SimpleAscendingOffset offset = new SimpleAscendingOffset(data.size());
     ColumnValueSelector<?> rawSelector = column.makeColumnValueSelector(offset);
     final List<NestedPathPart> xPath = NestedPathFinder.parseJsonPath("$.x");
-    Assertions.assertEquals(ImmutableSet.of(ColumnType.LONG), column.getColumnTypes(xPath));
-    Assertions.assertEquals(ColumnType.LONG, column.getColumnHolder(xPath).getCapabilities().toColumnType());
+    Assert.assertEquals(ImmutableSet.of(ColumnType.LONG), column.getColumnTypes(xPath));
+    Assert.assertEquals(ColumnType.LONG, column.getColumnHolder(xPath).getCapabilities().toColumnType());
     ColumnValueSelector<?> xSelector = column.makeColumnValueSelector(xPath, offset);
     DimensionSelector xDimSelector = column.makeDimensionSelector(xPath, offset, null);
     ColumnIndexSupplier xIndexSupplier = column.getColumnIndexSupplier(xPath);
-    Assertions.assertNotNull(xIndexSupplier);
+    Assert.assertNotNull(xIndexSupplier);
     StringValueSetIndexes xValueIndex = xIndexSupplier.as(StringValueSetIndexes.class);
     DruidPredicateIndexes xPredicateIndex = xIndexSupplier.as(DruidPredicateIndexes.class);
     NullValueIndex xNulls = xIndexSupplier.as(NullValueIndex.class);
     final List<NestedPathPart> yPath = NestedPathFinder.parseJsonPath("$.y");
-    Assertions.assertEquals(ImmutableSet.of(ColumnType.DOUBLE), column.getColumnTypes(yPath));
-    Assertions.assertEquals(ColumnType.DOUBLE, column.getColumnHolder(yPath).getCapabilities().toColumnType());
+    Assert.assertEquals(ImmutableSet.of(ColumnType.DOUBLE), column.getColumnTypes(yPath));
+    Assert.assertEquals(ColumnType.DOUBLE, column.getColumnHolder(yPath).getCapabilities().toColumnType());
     ColumnValueSelector<?> ySelector = column.makeColumnValueSelector(yPath, offset);
     DimensionSelector yDimSelector = column.makeDimensionSelector(yPath, offset, null);
     ColumnIndexSupplier yIndexSupplier = column.getColumnIndexSupplier(yPath);
-    Assertions.assertNotNull(yIndexSupplier);
+    Assert.assertNotNull(yIndexSupplier);
     StringValueSetIndexes yValueIndex = yIndexSupplier.as(StringValueSetIndexes.class);
     DruidPredicateIndexes yPredicateIndex = yIndexSupplier.as(DruidPredicateIndexes.class);
     NullValueIndex yNulls = yIndexSupplier.as(NullValueIndex.class);
     final List<NestedPathPart> zPath = NestedPathFinder.parseJsonPath("$.z");
-    Assertions.assertEquals(ImmutableSet.of(ColumnType.STRING), column.getColumnTypes(zPath));
-    Assertions.assertEquals(ColumnType.STRING, column.getColumnHolder(zPath).getCapabilities().toColumnType());
+    Assert.assertEquals(ImmutableSet.of(ColumnType.STRING), column.getColumnTypes(zPath));
+    Assert.assertEquals(ColumnType.STRING, column.getColumnHolder(zPath).getCapabilities().toColumnType());
     ColumnValueSelector<?> zSelector = column.makeColumnValueSelector(zPath, offset);
     DimensionSelector zDimSelector = column.makeDimensionSelector(zPath, offset, null);
     ColumnIndexSupplier zIndexSupplier = column.getColumnIndexSupplier(zPath);
-    Assertions.assertNotNull(zIndexSupplier);
+    Assert.assertNotNull(zIndexSupplier);
     StringValueSetIndexes zValueIndex = zIndexSupplier.as(StringValueSetIndexes.class);
     DruidPredicateIndexes zPredicateIndex = zIndexSupplier.as(DruidPredicateIndexes.class);
     NullValueIndex zNulls = zIndexSupplier.as(NullValueIndex.class);
     final List<NestedPathPart> vPath = NestedPathFinder.parseJsonPath("$.v");
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableSet.of(ColumnType.STRING, ColumnType.LONG, ColumnType.DOUBLE),
         column.getColumnTypes(vPath)
     );
-    Assertions.assertEquals(ColumnType.STRING, column.getColumnHolder(vPath).getCapabilities().toColumnType());
+    Assert.assertEquals(ColumnType.STRING, column.getColumnHolder(vPath).getCapabilities().toColumnType());
     ColumnValueSelector<?> vSelector = column.makeColumnValueSelector(vPath, offset);
     DimensionSelector vDimSelector = column.makeDimensionSelector(vPath, offset, null);
     ColumnIndexSupplier vIndexSupplier = column.getColumnIndexSupplier(vPath);
-    Assertions.assertNotNull(vIndexSupplier);
+    Assert.assertNotNull(vIndexSupplier);
     StringValueSetIndexes vValueIndex = vIndexSupplier.as(StringValueSetIndexes.class);
     DruidPredicateIndexes vPredicateIndex = vIndexSupplier.as(DruidPredicateIndexes.class);
     NullValueIndex vNulls = vIndexSupplier.as(NullValueIndex.class);
     final List<NestedPathPart> nullishPath = NestedPathFinder.parseJsonPath("$.nullish");
-    Assertions.assertEquals(ImmutableSet.of(ColumnType.STRING), column.getColumnTypes(nullishPath));
-    Assertions.assertEquals(ColumnType.STRING, column.getColumnHolder(nullishPath).getCapabilities().toColumnType());
+    Assert.assertEquals(ImmutableSet.of(ColumnType.STRING), column.getColumnTypes(nullishPath));
+    Assert.assertEquals(ColumnType.STRING, column.getColumnHolder(nullishPath).getCapabilities().toColumnType());
     ColumnValueSelector<?> nullishSelector = column.makeColumnValueSelector(nullishPath, offset);
     DimensionSelector nullishDimSelector = column.makeDimensionSelector(nullishPath, offset, null);
     ColumnIndexSupplier nullishIndexSupplier = column.getColumnIndexSupplier(nullishPath);
-    Assertions.assertNotNull(nullishIndexSupplier);
+    Assert.assertNotNull(nullishIndexSupplier);
     StringValueSetIndexes nullishValueIndex = nullishIndexSupplier.as(StringValueSetIndexes.class);
     DruidPredicateIndexes nullishPredicateIndex = nullishIndexSupplier.as(DruidPredicateIndexes.class);
     NullValueIndex nullishNulls = nullishIndexSupplier.as(NullValueIndex.class);
-    Assertions.assertEquals(ImmutableList.of(nullishPath, vPath, xPath, yPath, zPath), column.getNestedFields());
+    Assert.assertEquals(ImmutableList.of(nullishPath, vPath, xPath, yPath, zPath), column.getNestedFields());
     for (int i = 0; i < data.size(); i++) {
       Map row = data.get(i);
-      Assertions.assertEquals(
+      Assert.assertEquals(
           JSON_MAPPER.writeValueAsString(row),
           JSON_MAPPER.writeValueAsString(StructuredData.unwrap(rawSelector.getObject()))
       );
@@ -451,58 +452,58 @@ public class NestedDataColumnSupplierV4Test extends InitializedNullHandlingTest
     final boolean isStringAndNullEquivalent =
         inputValue instanceof String && NullHandling.isNullOrEquivalent((String) inputValue);
     if (row.containsKey(path) && inputValue != null && !isStringAndNullEquivalent) {
-      Assertions.assertEquals(inputValue, valueSelector.getObject());
+      Assert.assertEquals(inputValue, valueSelector.getObject());
       if (ColumnType.LONG.equals(singleType)) {
-        Assertions.assertEquals(inputValue, valueSelector.getLong());
-        Assertions.assertFalse(valueSelector.isNull(), path + " is not null");
+        Assert.assertEquals(inputValue, valueSelector.getLong());
+        Assert.assertFalse(path + " is not null", valueSelector.isNull());
       } else if (ColumnType.DOUBLE.equals(singleType)) {
-        Assertions.assertEquals((double) inputValue, valueSelector.getDouble(), 0.0);
-        Assertions.assertFalse(valueSelector.isNull(), path + " is not null");
+        Assert.assertEquals((double) inputValue, valueSelector.getDouble(), 0.0);
+        Assert.assertFalse(path + " is not null", valueSelector.isNull());
       }
       final String theString = String.valueOf(inputValue);
-      Assertions.assertEquals(theString, dimSelector.getObject());
+      Assert.assertEquals(theString, dimSelector.getObject());
       String dimSelectorLookupVal = dimSelector.lookupName(dimSelector.getRow().get(0));
-      Assertions.assertEquals(theString, dimSelectorLookupVal);
-      Assertions.assertEquals(dimSelector.idLookup().lookupId(dimSelectorLookupVal), dimSelector.getRow().get(0));
-      Assertions.assertTrue(valueSetIndex.forValue(theString).computeBitmapResult(resultFactory, false).get(rowNumber));
-      Assertions.assertTrue(valueSetIndex.forSortedValues(new TreeSet<>(ImmutableSet.of(theString)))
+      Assert.assertEquals(theString, dimSelectorLookupVal);
+      Assert.assertEquals(dimSelector.idLookup().lookupId(dimSelectorLookupVal), dimSelector.getRow().get(0));
+      Assert.assertTrue(valueSetIndex.forValue(theString).computeBitmapResult(resultFactory, false).get(rowNumber));
+      Assert.assertTrue(valueSetIndex.forSortedValues(new TreeSet<>(ImmutableSet.of(theString)))
                                      .computeBitmapResult(resultFactory, false)
                                      .get(rowNumber));
-      Assertions.assertTrue(predicateIndex.forPredicate(new SelectorPredicateFactory(theString))
+      Assert.assertTrue(predicateIndex.forPredicate(new SelectorPredicateFactory(theString))
                                       .computeBitmapResult(resultFactory, false)
                                       .get(rowNumber));
-      Assertions.assertFalse(valueSetIndex.forValue(NO_MATCH).computeBitmapResult(resultFactory, false).get(rowNumber));
-      Assertions.assertFalse(valueSetIndex.forSortedValues(new TreeSet<>(ImmutableSet.of(NO_MATCH)))
+      Assert.assertFalse(valueSetIndex.forValue(NO_MATCH).computeBitmapResult(resultFactory, false).get(rowNumber));
+      Assert.assertFalse(valueSetIndex.forSortedValues(new TreeSet<>(ImmutableSet.of(NO_MATCH)))
                                       .computeBitmapResult(resultFactory, false)
                                       .get(rowNumber));
-      Assertions.assertFalse(predicateIndex.forPredicate(new SelectorPredicateFactory(NO_MATCH))
+      Assert.assertFalse(predicateIndex.forPredicate(new SelectorPredicateFactory(NO_MATCH))
                                        .computeBitmapResult(resultFactory, false)
                                        .get(rowNumber));
-      Assertions.assertFalse(nullValueIndex.get().computeBitmapResult(resultFactory, false).get(rowNumber));
-      Assertions.assertTrue(dimSelector.makeValueMatcher(theString).matches(false));
-      Assertions.assertFalse(dimSelector.makeValueMatcher(NO_MATCH).matches(false));
-      Assertions.assertTrue(dimSelector.makeValueMatcher(StringPredicateDruidPredicateFactory.equalTo(theString)).matches(false));
-      Assertions.assertFalse(dimSelector.makeValueMatcher(StringPredicateDruidPredicateFactory.equalTo(NO_MATCH)).matches(false));
+      Assert.assertFalse(nullValueIndex.get().computeBitmapResult(resultFactory, false).get(rowNumber));
+      Assert.assertTrue(dimSelector.makeValueMatcher(theString).matches(false));
+      Assert.assertFalse(dimSelector.makeValueMatcher(NO_MATCH).matches(false));
+      Assert.assertTrue(dimSelector.makeValueMatcher(StringPredicateDruidPredicateFactory.equalTo(theString)).matches(false));
+      Assert.assertFalse(dimSelector.makeValueMatcher(StringPredicateDruidPredicateFactory.equalTo(NO_MATCH)).matches(false));
     } else {
-      Assertions.assertNull(valueSelector.getObject());
-      Assertions.assertTrue(valueSelector.isNull(), path);
-      Assertions.assertEquals(0, dimSelector.getRow().get(0));
-      Assertions.assertNull(dimSelector.getObject());
-      Assertions.assertNull(dimSelector.lookupName(dimSelector.getRow().get(0)));
-      Assertions.assertTrue(valueSetIndex.forValue(null).computeBitmapResult(resultFactory, false).get(rowNumber));
-      Assertions.assertTrue(nullValueIndex.get().computeBitmapResult(resultFactory, false).get(rowNumber));
-      Assertions.assertTrue(predicateIndex.forPredicate(new SelectorPredicateFactory(null))
+      Assert.assertNull(valueSelector.getObject());
+      Assert.assertTrue(path, valueSelector.isNull());
+      Assert.assertEquals(0, dimSelector.getRow().get(0));
+      Assert.assertNull(dimSelector.getObject());
+      Assert.assertNull(dimSelector.lookupName(dimSelector.getRow().get(0)));
+      Assert.assertTrue(valueSetIndex.forValue(null).computeBitmapResult(resultFactory, false).get(rowNumber));
+      Assert.assertTrue(nullValueIndex.get().computeBitmapResult(resultFactory, false).get(rowNumber));
+      Assert.assertTrue(predicateIndex.forPredicate(new SelectorPredicateFactory(null))
                                       .computeBitmapResult(resultFactory, false)
                                       .get(rowNumber));
-      Assertions.assertFalse(valueSetIndex.forValue(NO_MATCH).computeBitmapResult(resultFactory, false).get(rowNumber));
-      Assertions.assertFalse(valueSetIndex.forValue(NO_MATCH).computeBitmapResult(resultFactory, false).get(rowNumber));
-      Assertions.assertFalse(predicateIndex.forPredicate(new SelectorPredicateFactory(NO_MATCH))
+      Assert.assertFalse(valueSetIndex.forValue(NO_MATCH).computeBitmapResult(resultFactory, false).get(rowNumber));
+      Assert.assertFalse(valueSetIndex.forValue(NO_MATCH).computeBitmapResult(resultFactory, false).get(rowNumber));
+      Assert.assertFalse(predicateIndex.forPredicate(new SelectorPredicateFactory(NO_MATCH))
                                        .computeBitmapResult(resultFactory, false)
                                        .get(rowNumber));
-      Assertions.assertTrue(dimSelector.makeValueMatcher((String) null).matches(false));
-      Assertions.assertFalse(dimSelector.makeValueMatcher(NO_MATCH).matches(false));
-      Assertions.assertTrue(dimSelector.makeValueMatcher(StringPredicateDruidPredicateFactory.equalTo(null)).matches(false));
-      Assertions.assertFalse(dimSelector.makeValueMatcher(StringPredicateDruidPredicateFactory.equalTo(NO_MATCH)).matches(false));
+      Assert.assertTrue(dimSelector.makeValueMatcher((String) null).matches(false));
+      Assert.assertFalse(dimSelector.makeValueMatcher(NO_MATCH).matches(false));
+      Assert.assertTrue(dimSelector.makeValueMatcher(StringPredicateDruidPredicateFactory.equalTo(null)).matches(false));
+      Assert.assertFalse(dimSelector.makeValueMatcher(StringPredicateDruidPredicateFactory.equalTo(NO_MATCH)).matches(false));
     }
   }
 
@@ -532,15 +533,6 @@ public class NestedDataColumnSupplierV4Test extends InitializedNullHandlingTest
     public void inspectRuntimeShape(RuntimeShapeInspector inspector)
     {
 
-    }
-
-    private static File newFolder(File root, String... subDirs) throws IOException {
-      String subFolder = String.join("/", subDirs);
-      File result = new File(root, subFolder);
-      if (!result.mkdirs()) {
-        throw new IOException("Couldn't create folders " + root);
-      }
-      return result;
     }
   }
 
@@ -594,23 +586,5 @@ public class NestedDataColumnSupplierV4Test extends InitializedNullHandlingTest
     {
       return delegate.compare(o1, o2);
     }
-
-    private static File newFolder(File root, String... subDirs) throws IOException {
-      String subFolder = String.join("/", subDirs);
-      File result = new File(root, subFolder);
-      if (!result.mkdirs()) {
-        throw new IOException("Couldn't create folders " + root);
-      }
-      return result;
-    }
-  }
-
-  private static File newFolder(File root, String... subDirs) throws IOException {
-    String subFolder = String.join("/", subDirs);
-    File result = new File(root, subFolder);
-    if (!result.mkdirs()) {
-      throw new IOException("Couldn't create folders " + root);
-    }
-    return result;
   }
 }

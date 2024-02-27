@@ -23,16 +23,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.apache.druid.segment.TestHelper;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.util.Collections;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 public class TableDataSourceTest
 {
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
 
   private final TableDataSource fooDataSource = new TableDataSource("foo");
   private final TableDataSource barDataSource = new TableDataSource("bar");
@@ -40,48 +41,47 @@ public class TableDataSourceTest
   @Test
   public void test_getTableNames()
   {
-    Assertions.assertEquals(Collections.singleton("foo"), fooDataSource.getTableNames());
+    Assert.assertEquals(Collections.singleton("foo"), fooDataSource.getTableNames());
   }
 
   @Test
   public void test_getChildren()
   {
-    Assertions.assertEquals(Collections.emptyList(), fooDataSource.getChildren());
+    Assert.assertEquals(Collections.emptyList(), fooDataSource.getChildren());
   }
 
   @Test
   public void test_isCacheable()
   {
-    Assertions.assertTrue(fooDataSource.isCacheable(true));
-    Assertions.assertTrue(fooDataSource.isCacheable(false));
+    Assert.assertTrue(fooDataSource.isCacheable(true));
+    Assert.assertTrue(fooDataSource.isCacheable(false));
   }
 
   @Test
   public void test_isGlobal()
   {
-    Assertions.assertFalse(fooDataSource.isGlobal());
+    Assert.assertFalse(fooDataSource.isGlobal());
   }
 
   @Test
   public void test_isConcrete()
   {
-    Assertions.assertTrue(fooDataSource.isConcrete());
+    Assert.assertTrue(fooDataSource.isConcrete());
   }
 
   @Test
   public void test_withChildren_empty()
   {
-    Assertions.assertSame(fooDataSource, fooDataSource.withChildren(Collections.emptyList()));
+    Assert.assertSame(fooDataSource, fooDataSource.withChildren(Collections.emptyList()));
   }
 
   @Test
   public void test_withChildren_nonEmpty()
   {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
+    expectedException.expect(IllegalArgumentException.class);
+    expectedException.expectMessage("Cannot accept children");
 
-      fooDataSource.withChildren(ImmutableList.of(new TableDataSource("bar")));
-    });
-    assertTrue(exception.getMessage().contains("Cannot accept children"));
+    fooDataSource.withChildren(ImmutableList.of(new TableDataSource("bar")));
   }
 
   @Test
@@ -99,8 +99,8 @@ public class TableDataSourceTest
         DataSource.class
     );
 
-    Assertions.assertEquals(fooDataSource, deserialized);
-    Assertions.assertNotEquals(barDataSource, deserialized);
+    Assert.assertEquals(fooDataSource, deserialized);
+    Assert.assertNotEquals(barDataSource, deserialized);
   }
 
   @Test
@@ -112,8 +112,8 @@ public class TableDataSourceTest
         DataSource.class
     );
 
-    Assertions.assertEquals(fooDataSource, deserialized);
-    Assertions.assertNotEquals(barDataSource, deserialized);
+    Assert.assertEquals(fooDataSource, deserialized);
+    Assert.assertNotEquals(barDataSource, deserialized);
   }
 
   @Test
@@ -125,8 +125,8 @@ public class TableDataSourceTest
         DataSource.class
     );
 
-    Assertions.assertEquals(fooDataSource, deserialized);
-    Assertions.assertNotEquals(barDataSource, deserialized);
+    Assert.assertEquals(fooDataSource, deserialized);
+    Assert.assertNotEquals(barDataSource, deserialized);
   }
 
   @Test
@@ -134,6 +134,6 @@ public class TableDataSourceTest
   {
     final ObjectMapper jsonMapper = TestHelper.makeJsonMapper();
     final String s = jsonMapper.writeValueAsString(fooDataSource);
-    Assertions.assertEquals("{\"type\":\"table\",\"name\":\"foo\"}", s);
+    Assert.assertEquals("{\"type\":\"table\",\"name\":\"foo\"}", s);
   }
 }

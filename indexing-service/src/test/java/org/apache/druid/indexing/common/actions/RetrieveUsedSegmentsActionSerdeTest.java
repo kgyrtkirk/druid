@@ -26,6 +26,7 @@ import org.apache.druid.java.util.common.Intervals;
 import org.apache.druid.segment.TestHelper;
 import org.joda.time.Interval;
 import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.List;
 

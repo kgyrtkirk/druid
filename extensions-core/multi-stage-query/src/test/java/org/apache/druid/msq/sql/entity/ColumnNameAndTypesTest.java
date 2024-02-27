@@ -22,6 +22,7 @@ package org.apache.druid.msq.sql.entity;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
+import org.junit.Test;
 
 public class ColumnNameAndTypesTest
 {

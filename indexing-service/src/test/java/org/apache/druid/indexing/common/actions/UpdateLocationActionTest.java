@@ -24,6 +24,7 @@ import org.apache.druid.indexer.TaskLocation;
 import org.apache.druid.indexing.common.task.NoopTask;
 import org.apache.druid.indexing.common.task.Task;
 import org.apache.druid.indexing.overlord.TaskRunner;
+import org.junit.Test;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;

@@ -19,9 +19,8 @@
 
 package org.apache.druid.concurrent;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -29,8 +28,7 @@ import java.util.concurrent.TimeUnit;
 public class ConcurrentAwaitableCounterTest
 {
 
-  @Test
-  @Timeout(value = 60_000L, unit = TimeUnit.MILLISECONDS)
+  @Test(timeout = 60_000L)
   public void smokeTest() throws InterruptedException
   {
     ConcurrentAwaitableCounter counter = new ConcurrentAwaitableCounter();
@@ -74,8 +72,8 @@ public class ConcurrentAwaitableCounterTest
     ConcurrentAwaitableCounter counter = new ConcurrentAwaitableCounter();
     Thread t = new Thread(() -> {
       try {
-        Assertions.assertTrue(counter.awaitFirstIncrement(10, TimeUnit.SECONDS));
-        Assertions.assertEquals(1, value[0]);
+        Assert.assertTrue(counter.awaitFirstIncrement(10, TimeUnit.SECONDS));
+        Assert.assertEquals(1, value[0]);
       }
       catch (InterruptedException e) {
         throw new RuntimeException(e);

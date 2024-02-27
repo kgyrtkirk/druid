@@ -20,6 +20,7 @@
 package org.apache.druid.query.aggregation.momentsketch;
 
 import org.junit.Assert;
+import org.junit.Test;
 
 public class MomentSketchWrapperTest
 {

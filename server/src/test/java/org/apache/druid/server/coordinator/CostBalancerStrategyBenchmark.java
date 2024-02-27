@@ -30,9 +30,10 @@ import org.apache.druid.server.coordination.ServerType;
 import org.apache.druid.server.coordinator.balancer.CostBalancerStrategy;
 import org.apache.druid.timeline.DataSegment;
 import org.joda.time.Interval;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,9 +42,11 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-@Disabled
+@Ignore
+@RunWith(Parameterized.class)
 public class CostBalancerStrategyBenchmark extends AbstractBenchmark
 {
+  @Parameterized.Parameters
   public static List<CostBalancerStrategy[]> factoryClasses()
   {
     return Arrays.asList(
@@ -58,10 +61,10 @@ public class CostBalancerStrategyBenchmark extends AbstractBenchmark
     );
   }
 
-  private CostBalancerStrategy strategy;
-  private List<ServerHolder> serverHolderList;
+  private final CostBalancerStrategy strategy;
+  private final List<ServerHolder> serverHolderList;
 
-  public void initCostBalancerStrategyBenchmark(CostBalancerStrategy costBalancerStrategy)
+  public CostBalancerStrategyBenchmark(CostBalancerStrategy costBalancerStrategy)
   {
     this.strategy = costBalancerStrategy;
     this.serverHolderList = initServers();
@@ -98,12 +101,10 @@ public class CostBalancerStrategyBenchmark extends AbstractBenchmark
 
   volatile ServerHolder selected;
 
-  @ParameterizedTest
+  @Test
   @BenchmarkOptions(warmupRounds = 10, benchmarkRounds = 1000)
-  @MethodSource("factoryClasses")
-  public void testBenchmark(CostBalancerStrategy costBalancerStrategy)
+  public void testBenchmark()
   {
-    initCostBalancerStrategyBenchmark(costBalancerStrategy);
     DataSegment segment = DataSegment.builder().dataSource("testds").version("1000")
                                      .interval(interval1).size(100L).build();
     Iterator<ServerHolder> candidates = strategy.findServersToLoadSegment(segment, serverHolderList);
@@ -116,11 +117,9 @@ public class CostBalancerStrategyBenchmark extends AbstractBenchmark
   volatile Long sum;
 
   @BenchmarkOptions(warmupRounds = 1000, benchmarkRounds = 1000000)
-  @MethodSource("factoryClasses")
-  @ParameterizedTest
-  public void testJodaGap(CostBalancerStrategy costBalancerStrategy)
+  @Test
+  public void testJodaGap()
   {
-    initCostBalancerStrategyBenchmark(costBalancerStrategy);
     long diff = 0;
     for (int i = 0; i < 1000; i++) {
       diff = diff + interval1.gap(interval2).toDurationMillis();

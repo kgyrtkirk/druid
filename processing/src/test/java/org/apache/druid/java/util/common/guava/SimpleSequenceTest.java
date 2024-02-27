@@ -19,8 +19,8 @@
 
 package org.apache.druid.java.util.common.guava;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -46,13 +46,13 @@ public class SimpleSequenceTest
   public void testGetIterable()
   {
     final List<Integer> vals = Collections.singletonList(1);
-    Assertions.assertSame(vals, ((SimpleSequence<Integer>) Sequences.simple(vals)).getIterable());
+    Assert.assertSame(vals, ((SimpleSequence<Integer>) Sequences.simple(vals)).getIterable());
   }
 
   @Test
   public void testToList()
   {
     final List<Integer> vals = Arrays.asList(1, 2);
-    Assertions.assertEquals(vals, Sequences.simple(vals).toList());
+    Assert.assertEquals(vals, Sequences.simple(vals).toList());
   }
 }

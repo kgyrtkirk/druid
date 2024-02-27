@@ -24,6 +24,7 @@ import org.apache.druid.java.util.common.ISE;
 import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.msq.kernel.worker.WorkerStagePhase;
 import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Set;
 

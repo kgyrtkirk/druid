@@ -26,6 +26,7 @@ import org.apache.druid.error.ErrorResponse;
 import org.apache.druid.indexer.TaskState;
 import org.apache.druid.segment.TestHelper;
 import org.junit.Assert;
+import org.junit.Test;
 
 public class SqlTaskStatusTest
 {

@@ -30,9 +30,10 @@ import org.apache.druid.segment.data.FrontCodedIntArrayIndexedWriter;
 import org.apache.druid.segment.writeout.SegmentWriteOutMedium;
 import org.apache.druid.segment.writeout.TmpFileSegmentWriteOutMediumFactory;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,8 +42,8 @@ import java.nio.file.Path;
 
 public class DictionaryIdLookupTest extends InitializedNullHandlingTest
 {
-  @TempDir
-  public File temp;
+  @Rule
+  public final TemporaryFolder temp = new TemporaryFolder();
 
   @Test
   public void testIdLookup() throws IOException
@@ -65,7 +66,7 @@ public class DictionaryIdLookupTest extends InitializedNullHandlingTest
 
     // setup dictionary writers
     SegmentWriteOutMedium medium = TmpFileSegmentWriteOutMediumFactory.instance()
-                                                                      .makeSegmentWriteOutMedium(newFolder(temp, "junit"));
+                                                                      .makeSegmentWriteOutMedium(temp.newFolder());
     DictionaryWriter<String> stringWriter = StringEncodingStrategies.getStringDictionaryWriter(
         new StringEncodingStrategy.FrontCoded(4, (byte) 1),
         medium,
@@ -91,7 +92,7 @@ public class DictionaryIdLookupTest extends InitializedNullHandlingTest
         4
     );
 
-    Path dictTempPath = newFolder(temp, "junit").toPath();
+    Path dictTempPath = temp.newFolder().toPath();
 
     // make lookup with references to writers
     DictionaryIdLookup idLookup = new DictionaryIdLookup(
@@ -110,7 +111,7 @@ public class DictionaryIdLookupTest extends InitializedNullHandlingTest
     arrayWriter.open();
 
     File tempDir = dictTempPath.toFile();
-    Assertions.assertEquals(0, tempDir.listFiles().length);
+    Assert.assertEquals(0, tempDir.listFiles().length);
 
     for (String s : sortedValueDictionary.getSortedStrings()) {
       stringWriter.write(s);
@@ -127,59 +128,50 @@ public class DictionaryIdLookupTest extends InitializedNullHandlingTest
         idLookup
     );
 
-    Assertions.assertEquals(0, tempDir.listFiles().length);
+    Assert.assertEquals(0, tempDir.listFiles().length);
 
     // looking up some values pulls in string dictionary and long dictionary
-    Assertions.assertEquals(0, idLookup.lookupString(null));
-    Assertions.assertEquals(1, idLookup.lookupString("hello"));
-    Assertions.assertEquals(2, idLookup.lookupString("world"));
-    Assertions.assertEquals(3, idLookup.lookupLong(-123L));
+    Assert.assertEquals(0, idLookup.lookupString(null));
+    Assert.assertEquals(1, idLookup.lookupString("hello"));
+    Assert.assertEquals(2, idLookup.lookupString("world"));
+    Assert.assertEquals(3, idLookup.lookupLong(-123L));
 
-    Assertions.assertEquals(2, tempDir.listFiles().length);
+    Assert.assertEquals(2, tempDir.listFiles().length);
 
     // writing arrays needs to use the lookups for lower value dictionaries, so will create string, long, and double
     // temp dictionary files
     for (int[] arr : sortedArrays) {
       arrayWriter.write(arr);
     }
-    Assertions.assertEquals(3, tempDir.listFiles().length);
+    Assert.assertEquals(3, tempDir.listFiles().length);
 
     if (NullHandling.sqlCompatible()) {
-      Assertions.assertEquals(8, idLookup.lookupDouble(-1.234));
-      Assertions.assertEquals(11, idLookup.lookupDouble(1.234));
+      Assert.assertEquals(8, idLookup.lookupDouble(-1.234));
+      Assert.assertEquals(11, idLookup.lookupDouble(1.234));
 
-      Assertions.assertEquals(3, tempDir.listFiles().length);
+      Assert.assertEquals(3, tempDir.listFiles().length);
 
       // looking up arrays pulls in array file
-      Assertions.assertEquals(12, idLookup.lookupArray(new int[]{1, 2}));
-      Assertions.assertEquals(13, idLookup.lookupArray(new int[]{4, 5, 6}));
-      Assertions.assertEquals(14, idLookup.lookupArray(new int[]{10, 8, 9, 11}));
-      Assertions.assertEquals(4, tempDir.listFiles().length);
+      Assert.assertEquals(12, idLookup.lookupArray(new int[]{1, 2}));
+      Assert.assertEquals(13, idLookup.lookupArray(new int[]{4, 5, 6}));
+      Assert.assertEquals(14, idLookup.lookupArray(new int[]{10, 8, 9, 11}));
+      Assert.assertEquals(4, tempDir.listFiles().length);
     } else {
       // default value mode sticks zeros in dictionary even if not present in column because of .. reasons
-      Assertions.assertEquals(9, idLookup.lookupDouble(-1.234));
-      Assertions.assertEquals(13, idLookup.lookupDouble(1.234));
+      Assert.assertEquals(9, idLookup.lookupDouble(-1.234));
+      Assert.assertEquals(13, idLookup.lookupDouble(1.234));
 
-      Assertions.assertEquals(3, tempDir.listFiles().length);
+      Assert.assertEquals(3, tempDir.listFiles().length);
 
       // looking up arrays pulls in array file
-      Assertions.assertEquals(14, idLookup.lookupArray(new int[]{1, 2}));
-      Assertions.assertEquals(15, idLookup.lookupArray(new int[]{5, 6, 7}));
-      Assertions.assertEquals(16, idLookup.lookupArray(new int[]{12, 9, 11, 13}));
-      Assertions.assertEquals(4, tempDir.listFiles().length);
+      Assert.assertEquals(14, idLookup.lookupArray(new int[]{1, 2}));
+      Assert.assertEquals(15, idLookup.lookupArray(new int[]{5, 6, 7}));
+      Assert.assertEquals(16, idLookup.lookupArray(new int[]{12, 9, 11, 13}));
+      Assert.assertEquals(4, tempDir.listFiles().length);
     }
 
     // close it removes all the temp files
     idLookup.close();
-    Assertions.assertEquals(0, tempDir.listFiles().length);
-  }
-
-  private static File newFolder(File root, String... subDirs) throws IOException {
-    String subFolder = String.join("/", subDirs);
-    File result = new File(root, subFolder);
-    if (!result.mkdirs()) {
-      throw new IOException("Couldn't create folders " + root);
-    }
-    return result;
+    Assert.assertEquals(0, tempDir.listFiles().length);
   }
 }

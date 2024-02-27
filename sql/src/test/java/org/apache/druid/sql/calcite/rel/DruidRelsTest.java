@@ -28,8 +28,8 @@ import org.apache.calcite.util.mapping.MappingType;
 import org.apache.calcite.util.mapping.Mappings;
 import org.apache.druid.sql.calcite.table.DruidTable;
 import org.easymock.EasyMock;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -41,8 +41,8 @@ public class DruidRelsTest
   public void test_isScanOrMapping_scan()
   {
     final DruidRel<?> rel = mockDruidRel(DruidQueryRel.class, PartialDruidQuery.Stage.SCAN, null, null, null);
-    Assertions.assertTrue(DruidRels.isScanOrMapping(rel, true));
-    Assertions.assertTrue(DruidRels.isScanOrMapping(rel, false));
+    Assert.assertTrue(DruidRels.isScanOrMapping(rel, true));
+    Assert.assertTrue(DruidRels.isScanOrMapping(rel, false));
     EasyMock.verify(rel, rel.getPartialDruidQuery());
   }
 
@@ -50,8 +50,8 @@ public class DruidRelsTest
   public void test_isScanOrMapping_scanJoin()
   {
     final DruidRel<?> rel = mockDruidRel(DruidJoinQueryRel.class, PartialDruidQuery.Stage.SCAN, null, null, null);
-    Assertions.assertTrue(DruidRels.isScanOrMapping(rel, true));
-    Assertions.assertFalse(DruidRels.isScanOrMapping(rel, false));
+    Assert.assertTrue(DruidRels.isScanOrMapping(rel, true));
+    Assert.assertFalse(DruidRels.isScanOrMapping(rel, false));
     EasyMock.verify(rel, rel.getPartialDruidQuery());
   }
 
@@ -59,8 +59,8 @@ public class DruidRelsTest
   public void test_isScanOrMapping_scanUnion()
   {
     final DruidRel<?> rel = mockDruidRel(DruidUnionDataSourceRel.class, PartialDruidQuery.Stage.SCAN, null, null, null);
-    Assertions.assertTrue(DruidRels.isScanOrMapping(rel, true));
-    Assertions.assertFalse(DruidRels.isScanOrMapping(rel, false));
+    Assert.assertTrue(DruidRels.isScanOrMapping(rel, true));
+    Assert.assertFalse(DruidRels.isScanOrMapping(rel, false));
     EasyMock.verify(rel, rel.getPartialDruidQuery());
   }
 
@@ -68,8 +68,8 @@ public class DruidRelsTest
   public void test_isScanOrMapping_scanQuery()
   {
     final DruidRel<?> rel = mockDruidRel(DruidOuterQueryRel.class, PartialDruidQuery.Stage.SCAN, null, null, null);
-    Assertions.assertFalse(DruidRels.isScanOrMapping(rel, true));
-    Assertions.assertFalse(DruidRels.isScanOrMapping(rel, false));
+    Assert.assertFalse(DruidRels.isScanOrMapping(rel, true));
+    Assert.assertFalse(DruidRels.isScanOrMapping(rel, false));
     EasyMock.verify(rel, rel.getPartialDruidQuery());
   }
 
@@ -84,8 +84,8 @@ public class DruidRelsTest
         project,
         null
     );
-    Assertions.assertTrue(DruidRels.isScanOrMapping(rel, true));
-    Assertions.assertTrue(DruidRels.isScanOrMapping(rel, false));
+    Assert.assertTrue(DruidRels.isScanOrMapping(rel, true));
+    Assert.assertTrue(DruidRels.isScanOrMapping(rel, false));
 
     EasyMock.verify(rel, rel.getPartialDruidQuery(), project);
   }
@@ -101,8 +101,8 @@ public class DruidRelsTest
         project,
         null
     );
-    Assertions.assertTrue(DruidRels.isScanOrMapping(rel, true));
-    Assertions.assertFalse(DruidRels.isScanOrMapping(rel, false));
+    Assert.assertTrue(DruidRels.isScanOrMapping(rel, true));
+    Assert.assertFalse(DruidRels.isScanOrMapping(rel, false));
 
     EasyMock.verify(rel, rel.getPartialDruidQuery(), project);
   }
@@ -118,8 +118,8 @@ public class DruidRelsTest
         project,
         null
     );
-    Assertions.assertTrue(DruidRels.isScanOrMapping(rel, true));
-    Assertions.assertFalse(DruidRels.isScanOrMapping(rel, false));
+    Assert.assertTrue(DruidRels.isScanOrMapping(rel, true));
+    Assert.assertFalse(DruidRels.isScanOrMapping(rel, false));
 
     EasyMock.verify(rel, rel.getPartialDruidQuery(), project);
   }
@@ -135,8 +135,8 @@ public class DruidRelsTest
         project,
         null
     );
-    Assertions.assertFalse(DruidRels.isScanOrMapping(rel, true));
-    Assertions.assertFalse(DruidRels.isScanOrMapping(rel, false));
+    Assert.assertFalse(DruidRels.isScanOrMapping(rel, true));
+    Assert.assertFalse(DruidRels.isScanOrMapping(rel, false));
 
     EasyMock.verify(rel, rel.getPartialDruidQuery(), project);
   }
@@ -152,8 +152,8 @@ public class DruidRelsTest
         project,
         null
     );
-    Assertions.assertFalse(DruidRels.isScanOrMapping(rel, true));
-    Assertions.assertFalse(DruidRels.isScanOrMapping(rel, false));
+    Assert.assertFalse(DruidRels.isScanOrMapping(rel, true));
+    Assert.assertFalse(DruidRels.isScanOrMapping(rel, false));
 
     EasyMock.verify(rel, rel.getPartialDruidQuery(), project);
   }
@@ -169,8 +169,8 @@ public class DruidRelsTest
         project,
         null
     );
-    Assertions.assertFalse(DruidRels.isScanOrMapping(rel, true));
-    Assertions.assertFalse(DruidRels.isScanOrMapping(rel, false));
+    Assert.assertFalse(DruidRels.isScanOrMapping(rel, true));
+    Assert.assertFalse(DruidRels.isScanOrMapping(rel, false));
 
     EasyMock.verify(rel, rel.getPartialDruidQuery(), project);
   }
@@ -186,8 +186,8 @@ public class DruidRelsTest
         project,
         null
     );
-    Assertions.assertFalse(DruidRels.isScanOrMapping(rel, true));
-    Assertions.assertFalse(DruidRels.isScanOrMapping(rel, false));
+    Assert.assertFalse(DruidRels.isScanOrMapping(rel, true));
+    Assert.assertFalse(DruidRels.isScanOrMapping(rel, false));
 
     EasyMock.verify(rel, rel.getPartialDruidQuery(), project);
   }
@@ -203,8 +203,8 @@ public class DruidRelsTest
         project,
         mockFilter()
     );
-    Assertions.assertFalse(DruidRels.isScanOrMapping(rel, true));
-    Assertions.assertFalse(DruidRels.isScanOrMapping(rel, false));
+    Assert.assertFalse(DruidRels.isScanOrMapping(rel, true));
+    Assert.assertFalse(DruidRels.isScanOrMapping(rel, false));
 
     EasyMock.verify(rel, rel.getPartialDruidQuery(), project);
   }
@@ -220,8 +220,8 @@ public class DruidRelsTest
         project,
         mockFilter()
     );
-    Assertions.assertFalse(DruidRels.isScanOrMapping(rel, true));
-    Assertions.assertFalse(DruidRels.isScanOrMapping(rel, false));
+    Assert.assertFalse(DruidRels.isScanOrMapping(rel, true));
+    Assert.assertFalse(DruidRels.isScanOrMapping(rel, false));
 
     EasyMock.verify(rel, rel.getPartialDruidQuery(), project);
   }
@@ -237,8 +237,8 @@ public class DruidRelsTest
         project,
         mockFilter()
     );
-    Assertions.assertFalse(DruidRels.isScanOrMapping(rel, true));
-    Assertions.assertFalse(DruidRels.isScanOrMapping(rel, false));
+    Assert.assertFalse(DruidRels.isScanOrMapping(rel, true));
+    Assert.assertFalse(DruidRels.isScanOrMapping(rel, false));
 
     EasyMock.verify(rel, rel.getPartialDruidQuery(), project);
   }
@@ -253,8 +253,8 @@ public class DruidRelsTest
         null,
         mockFilter()
     );
-    Assertions.assertFalse(DruidRels.isScanOrMapping(rel, true));
-    Assertions.assertFalse(DruidRels.isScanOrMapping(rel, false));
+    Assert.assertFalse(DruidRels.isScanOrMapping(rel, true));
+    Assert.assertFalse(DruidRels.isScanOrMapping(rel, false));
 
     EasyMock.verify(rel, rel.getPartialDruidQuery());
   }
@@ -269,8 +269,8 @@ public class DruidRelsTest
         null,
         mockFilter()
     );
-    Assertions.assertFalse(DruidRels.isScanOrMapping(rel, true));
-    Assertions.assertFalse(DruidRels.isScanOrMapping(rel, false));
+    Assert.assertFalse(DruidRels.isScanOrMapping(rel, true));
+    Assert.assertFalse(DruidRels.isScanOrMapping(rel, false));
 
     EasyMock.verify(rel, rel.getPartialDruidQuery());
   }
@@ -293,8 +293,8 @@ public class DruidRelsTest
           null
       );
 
-      Assertions.assertEquals(okStages.contains(stage), DruidRels.isScanOrMapping(rel, true), stage.toString());
-      Assertions.assertEquals(okStages.contains(stage), DruidRels.isScanOrMapping(rel, false), stage.toString());
+      Assert.assertEquals(stage.toString(), okStages.contains(stage), DruidRels.isScanOrMapping(rel, true));
+      Assert.assertEquals(stage.toString(), okStages.contains(stage), DruidRels.isScanOrMapping(rel, false));
 
       EasyMock.verify(rel, rel.getPartialDruidQuery(), project);
     }

@@ -21,20 +21,22 @@ package org.apache.druid.data.input.impl;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.druid.common.config.NullHandling;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.NoSuchElementException;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 public class FastLineIteratorTest
 {
+  @Rule
+  public final ExpectedException expectedException = ExpectedException.none();
 
-  @BeforeAll
+  @BeforeClass
   public static void setup()
   {
     NullHandling.initializeForTests();
@@ -43,22 +45,21 @@ public class FastLineIteratorTest
   @Test
   public void testNullInputThrows()
   {
-    assertThrows(NullPointerException.class, () -> {
-      //noinspection ResultOfObjectAllocationIgnored
-      new FastLineIterator.Strings(null);
-    });
+    expectedException.expect(NullPointerException.class);
+    //noinspection ResultOfObjectAllocationIgnored
+    new FastLineIterator.Strings(null);
   }
 
   @Test
   public void testEmptyInput()
   {
-    assertThrows(NoSuchElementException.class, () -> {
-      byte[] input = new byte[0];
-      FastLineIterator<String> iterator = new FastLineIterator.Strings(new ByteArrayInputStream(input));
+    byte[] input = new byte[0];
+    FastLineIterator<String> iterator = new FastLineIterator.Strings(new ByteArrayInputStream(input));
 
-      Assertions.assertFalse(iterator.hasNext());
-      iterator.next();
-    });
+    Assert.assertFalse(iterator.hasNext());
+
+    expectedException.expect(NoSuchElementException.class);
+    iterator.next();
   }
 
   @Test
@@ -72,9 +73,9 @@ public class FastLineIteratorTest
     input = "\r".getBytes(StandardCharsets.UTF_8);
     iterator = new FastLineIterator.Strings(new ByteArrayInputStream(input));
 
-    Assertions.assertTrue(iterator.hasNext());
-    Assertions.assertEquals("\r", iterator.next());
-    Assertions.assertFalse(iterator.hasNext());
+    Assert.assertTrue(iterator.hasNext());
+    Assert.assertEquals("\r", iterator.next());
+    Assert.assertFalse(iterator.hasNext());
   }
 
   @Test
@@ -88,9 +89,9 @@ public class FastLineIteratorTest
     input = "\n".getBytes(StandardCharsets.UTF_8);
     iterator = new FastLineIterator.Strings(new ByteArrayInputStream(input));
 
-    Assertions.assertTrue(iterator.hasNext());
-    Assertions.assertEquals("", iterator.next());
-    Assertions.assertFalse(iterator.hasNext());
+    Assert.assertTrue(iterator.hasNext());
+    Assert.assertEquals("", iterator.next());
+    Assert.assertFalse(iterator.hasNext());
   }
 
   @Test
@@ -105,11 +106,11 @@ public class FastLineIteratorTest
     input = "\n\r".getBytes(StandardCharsets.UTF_8);
     iterator = new FastLineIterator.Strings(new ByteArrayInputStream(input));
 
-    Assertions.assertTrue(iterator.hasNext());
-    Assertions.assertEquals("", iterator.next());
-    Assertions.assertTrue(iterator.hasNext());
-    Assertions.assertEquals("\r", iterator.next());
-    Assertions.assertFalse(iterator.hasNext());
+    Assert.assertTrue(iterator.hasNext());
+    Assert.assertEquals("", iterator.next());
+    Assert.assertTrue(iterator.hasNext());
+    Assert.assertEquals("\r", iterator.next());
+    Assert.assertFalse(iterator.hasNext());
   }
 
   @Test
@@ -122,9 +123,9 @@ public class FastLineIteratorTest
     input = "\r\n".getBytes(StandardCharsets.UTF_8);
     iterator = new FastLineIterator.Strings(new ByteArrayInputStream(input));
 
-    Assertions.assertTrue(iterator.hasNext());
-    Assertions.assertEquals("", iterator.next());
-    Assertions.assertFalse(iterator.hasNext());
+    Assert.assertTrue(iterator.hasNext());
+    Assert.assertEquals("", iterator.next());
+    Assert.assertFalse(iterator.hasNext());
   }
 
   @Test
@@ -137,25 +138,25 @@ public class FastLineIteratorTest
     input = "abcd".getBytes(StandardCharsets.UTF_8);
     iterator = new FastLineIterator.Strings(new ByteArrayInputStream(input));
 
-    Assertions.assertTrue(iterator.hasNext());
-    Assertions.assertEquals("abcd", iterator.next());
-    Assertions.assertFalse(iterator.hasNext());
+    Assert.assertTrue(iterator.hasNext());
+    Assert.assertEquals("abcd", iterator.next());
+    Assert.assertFalse(iterator.hasNext());
 
     // with an end
     input = "abcd\n".getBytes(StandardCharsets.UTF_8);
     iterator = new FastLineIterator.Strings(new ByteArrayInputStream(input));
 
-    Assertions.assertTrue(iterator.hasNext());
-    Assertions.assertEquals("abcd", iterator.next());
-    Assertions.assertFalse(iterator.hasNext());
+    Assert.assertTrue(iterator.hasNext());
+    Assert.assertEquals("abcd", iterator.next());
+    Assert.assertFalse(iterator.hasNext());
 
     // with an end
     input = "abcd\r\n".getBytes(StandardCharsets.UTF_8);
     iterator = new FastLineIterator.Strings(new ByteArrayInputStream(input));
 
-    Assertions.assertTrue(iterator.hasNext());
-    Assertions.assertEquals("abcd", iterator.next());
-    Assertions.assertFalse(iterator.hasNext());
+    Assert.assertTrue(iterator.hasNext());
+    Assert.assertEquals("abcd", iterator.next());
+    Assert.assertFalse(iterator.hasNext());
   }
 
   @Test
@@ -167,11 +168,11 @@ public class FastLineIteratorTest
     input = "abcd\ndefg\nhijk".getBytes(StandardCharsets.UTF_8);
     iterator = new FastLineIterator.Strings(new ByteArrayInputStream(input));
 
-    Assertions.assertTrue(iterator.hasNext());
-    Assertions.assertEquals("abcd", iterator.next());
-    Assertions.assertEquals("defg", iterator.next());
-    Assertions.assertEquals("hijk", iterator.next());
-    Assertions.assertFalse(iterator.hasNext());
+    Assert.assertTrue(iterator.hasNext());
+    Assert.assertEquals("abcd", iterator.next());
+    Assert.assertEquals("defg", iterator.next());
+    Assert.assertEquals("hijk", iterator.next());
+    Assert.assertFalse(iterator.hasNext());
   }
 
   @Test
@@ -183,11 +184,11 @@ public class FastLineIteratorTest
     input = "abcd\n\nhijk\n".getBytes(StandardCharsets.UTF_8);
     iterator = new FastLineIterator.Strings(new ByteArrayInputStream(input));
 
-    Assertions.assertTrue(iterator.hasNext());
-    Assertions.assertEquals("abcd", iterator.next());
-    Assertions.assertEquals("", iterator.next());
-    Assertions.assertEquals("hijk", iterator.next());
-    Assertions.assertFalse(iterator.hasNext());
+    Assert.assertTrue(iterator.hasNext());
+    Assert.assertEquals("abcd", iterator.next());
+    Assert.assertEquals("", iterator.next());
+    Assert.assertEquals("hijk", iterator.next());
+    Assert.assertFalse(iterator.hasNext());
   }
 
   @Test
@@ -199,11 +200,11 @@ public class FastLineIteratorTest
     input = "abcd\ndefg\nhijk\n".getBytes(StandardCharsets.UTF_8);
     iterator = new FastLineIterator.Strings(new ByteArrayInputStream(input));
 
-    Assertions.assertTrue(iterator.hasNext());
-    Assertions.assertEquals("abcd", iterator.next());
-    Assertions.assertEquals("defg", iterator.next());
-    Assertions.assertEquals("hijk", iterator.next());
-    Assertions.assertFalse(iterator.hasNext());
+    Assert.assertTrue(iterator.hasNext());
+    Assert.assertEquals("abcd", iterator.next());
+    Assert.assertEquals("defg", iterator.next());
+    Assert.assertEquals("hijk", iterator.next());
+    Assert.assertFalse(iterator.hasNext());
   }
 
   @Test
@@ -219,11 +220,11 @@ public class FastLineIteratorTest
     input = (line1 + "\n" + line2 + "\n" + line3 + "\n").getBytes(StandardCharsets.UTF_8);
     iterator = new FastLineIterator.Strings(new ByteArrayInputStream(input));
 
-    Assertions.assertTrue(iterator.hasNext());
-    Assertions.assertEquals(line1, iterator.next());
-    Assertions.assertEquals(line2, iterator.next());
-    Assertions.assertEquals(line3, iterator.next());
-    Assertions.assertFalse(iterator.hasNext());
+    Assert.assertTrue(iterator.hasNext());
+    Assert.assertEquals(line1, iterator.next());
+    Assert.assertEquals(line2, iterator.next());
+    Assert.assertEquals(line3, iterator.next());
+    Assert.assertFalse(iterator.hasNext());
   }
 
   @Test
@@ -240,11 +241,11 @@ public class FastLineIteratorTest
     input = (line1 + "\r\n" + line2 + "\r\n" + line3 + "\r\n").getBytes(StandardCharsets.UTF_8);
     iterator = new FastLineIterator.Strings(new ByteArrayInputStream(input));
 
-    Assertions.assertTrue(iterator.hasNext());
-    Assertions.assertEquals(line1, iterator.next());
-    Assertions.assertEquals(line2, iterator.next());
-    Assertions.assertEquals(line3, iterator.next());
-    Assertions.assertFalse(iterator.hasNext());
+    Assert.assertTrue(iterator.hasNext());
+    Assert.assertEquals(line1, iterator.next());
+    Assert.assertEquals(line2, iterator.next());
+    Assert.assertEquals(line3, iterator.next());
+    Assert.assertFalse(iterator.hasNext());
   }
 
   /**

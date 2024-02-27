@@ -25,8 +25,8 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import org.apache.druid.java.util.common.concurrent.Execs;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,23 +50,23 @@ public class GuavaUtilsTest
   @Test
   public void testParseLong()
   {
-    Assertions.assertNull(Longs.tryParse("+100"));
-    Assertions.assertNull(GuavaUtils.tryParseLong(""));
-    Assertions.assertNull(GuavaUtils.tryParseLong(null));
-    Assertions.assertNull(GuavaUtils.tryParseLong("+"));
-    Assertions.assertNull(GuavaUtils.tryParseLong("++100"));
-    Assertions.assertEquals((Object) Long.parseLong("+100"), GuavaUtils.tryParseLong("+100"));
-    Assertions.assertEquals((Object) Long.parseLong("-100"), GuavaUtils.tryParseLong("-100"));
-    Assertions.assertNotEquals(new Long(100), GuavaUtils.tryParseLong("+101"));
+    Assert.assertNull(Longs.tryParse("+100"));
+    Assert.assertNull(GuavaUtils.tryParseLong(""));
+    Assert.assertNull(GuavaUtils.tryParseLong(null));
+    Assert.assertNull(GuavaUtils.tryParseLong("+"));
+    Assert.assertNull(GuavaUtils.tryParseLong("++100"));
+    Assert.assertEquals((Object) Long.parseLong("+100"), GuavaUtils.tryParseLong("+100"));
+    Assert.assertEquals((Object) Long.parseLong("-100"), GuavaUtils.tryParseLong("-100"));
+    Assert.assertNotEquals(new Long(100), GuavaUtils.tryParseLong("+101"));
   }
 
   @Test
   public void testGetEnumIfPresent()
   {
-    Assertions.assertEquals(MyEnum.ONE, GuavaUtils.getEnumIfPresent(MyEnum.class, "ONE"));
-    Assertions.assertEquals(MyEnum.TWO, GuavaUtils.getEnumIfPresent(MyEnum.class, "TWO"));
-    Assertions.assertEquals(MyEnum.BUCKLE_MY_SHOE, GuavaUtils.getEnumIfPresent(MyEnum.class, "BUCKLE_MY_SHOE"));
-    Assertions.assertEquals(null, GuavaUtils.getEnumIfPresent(MyEnum.class, "buckle_my_shoe"));
+    Assert.assertEquals(MyEnum.ONE, GuavaUtils.getEnumIfPresent(MyEnum.class, "ONE"));
+    Assert.assertEquals(MyEnum.TWO, GuavaUtils.getEnumIfPresent(MyEnum.class, "TWO"));
+    Assert.assertEquals(MyEnum.BUCKLE_MY_SHOE, GuavaUtils.getEnumIfPresent(MyEnum.class, "BUCKLE_MY_SHOE"));
+    Assert.assertEquals(null, GuavaUtils.getEnumIfPresent(MyEnum.class, "buckle_my_shoe"));
   }
 
   @Test
@@ -100,19 +100,19 @@ public class GuavaUtilsTest
     };
 
     List<ListenableFuture<Object>> futures = function.apply(tasks);
-    Assertions.assertEquals(tasks, futures.stream().filter(f -> !f.isDone()).count());
+    Assert.assertEquals(tasks, futures.stream().filter(f -> !f.isDone()).count());
     // "release" the last tasks, which will cause it to fail as someoneFailed will still be false
     latches.get(tasks - 1).countDown();
 
     ListenableFuture<List<Object>> future = Futures.allAsList(futures);
 
-    ExecutionException thrown = Assertions.assertThrows(
+    ExecutionException thrown = Assert.assertThrows(
         ExecutionException.class,
         future::get
     );
-    Assertions.assertEquals("This exception simulates an error", thrown.getCause().getMessage());
+    Assert.assertEquals("This exception simulates an error", thrown.getCause().getMessage());
     GuavaUtils.cancelAll(true, future, futures);
-    Assertions.assertEquals(0, futures.stream().filter(f -> !f.isDone()).count());
+    Assert.assertEquals(0, futures.stream().filter(f -> !f.isDone()).count());
     for (CountDownLatch latch : latches) {
       latch.countDown();
     }

@@ -24,19 +24,19 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import org.apache.druid.query.groupby.epinephelinae.Grouper;
 import org.apache.druid.query.ordering.StringComparators;
 import org.apache.druid.segment.column.ColumnCapabilities;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.nio.ByteBuffer;
 import java.util.function.IntFunction;
 
-@ExtendWith(MockitoExtension.class)
+@RunWith(MockitoJUnitRunner.class)
 public class StringGroupByColumnSelectorStrategyTest
 {
   // The dictionary has been constructed such that the values are not sorted lexicographically
@@ -55,7 +55,7 @@ public class StringGroupByColumnSelectorStrategyTest
 
   private StringGroupByColumnSelectorStrategy target;
 
-  @BeforeEach
+  @Before
   public void setUp()
   {
     lhsBuffer.putInt(1);
@@ -72,35 +72,35 @@ public class StringGroupByColumnSelectorStrategyTest
     Mockito.when(capabilities.areDictionaryValuesSorted()).thenReturn(ColumnCapabilities.Capable.FALSE);
     // The comparator is not using the short circuit so it isn't comparing indexes.
     Grouper.BufferComparator comparator = target.bufferComparator(0, null);
-    Assertions.assertTrue(comparator.compare(lhsBuffer, rhsBuffer, 0, 0) > 0);
-    Assertions.assertTrue(comparator.compare(rhsBuffer, lhsBuffer, 0, 0) < 0);
+    Assert.assertTrue(comparator.compare(lhsBuffer, rhsBuffer, 0, 0) > 0);
+    Assert.assertTrue(comparator.compare(rhsBuffer, lhsBuffer, 0, 0) < 0);
   }
 
   @Test
   public void testBufferComparatorCanCompareIntsAndNullStringComparatorShouldUseLexicographicComparator()
   {
     Grouper.BufferComparator comparator = target.bufferComparator(0, null);
-    Assertions.assertTrue(comparator.compare(lhsBuffer, rhsBuffer, 0, 0) < 0);
-    Assertions.assertTrue(comparator.compare(rhsBuffer, lhsBuffer, 0, 0) > 0);
+    Assert.assertTrue(comparator.compare(lhsBuffer, rhsBuffer, 0, 0) < 0);
+    Assert.assertTrue(comparator.compare(rhsBuffer, lhsBuffer, 0, 0) > 0);
   }
 
   @Test
   public void testBufferComparatorCanCompareIntsAndLexicographicStringComparatorShouldUseLexicographicComparator()
   {
     Grouper.BufferComparator comparator = target.bufferComparator(0, StringComparators.LEXICOGRAPHIC);
-    Assertions.assertTrue(comparator.compare(lhsBuffer, rhsBuffer, 0, 0) < 0);
-    Assertions.assertTrue(comparator.compare(rhsBuffer, lhsBuffer, 0, 0) > 0);
+    Assert.assertTrue(comparator.compare(lhsBuffer, rhsBuffer, 0, 0) < 0);
+    Assert.assertTrue(comparator.compare(rhsBuffer, lhsBuffer, 0, 0) > 0);
   }
 
   @Test
   public void testBufferComparatorCanCompareIntsAndStrLenStringComparatorShouldUseLexicographicComparator()
   {
     Grouper.BufferComparator comparator = target.bufferComparator(0, StringComparators.STRLEN);
-    Assertions.assertTrue(comparator.compare(lhsBuffer, rhsBuffer, 0, 0) > 0);
-    Assertions.assertTrue(comparator.compare(rhsBuffer, lhsBuffer, 0, 0) < 0);
+    Assert.assertTrue(comparator.compare(lhsBuffer, rhsBuffer, 0, 0) > 0);
+    Assert.assertTrue(comparator.compare(rhsBuffer, lhsBuffer, 0, 0) < 0);
   }
 
-  @AfterEach
+  @After
   public void tearDown()
   {
     lhsBuffer.clear();

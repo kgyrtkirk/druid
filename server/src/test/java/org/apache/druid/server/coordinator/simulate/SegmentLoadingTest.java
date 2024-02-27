@@ -22,9 +22,8 @@ package org.apache.druid.server.coordinator.simulate;
 import org.apache.druid.client.DruidServer;
 import org.apache.druid.server.coordinator.CoordinatorDynamicConfig;
 import org.apache.druid.timeline.DataSegment;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Collections;
 import java.util.List;
@@ -43,7 +42,6 @@ public class SegmentLoadingTest extends CoordinatorSimulationBaseTest
   private final String datasource = DS.WIKI;
   private final List<DataSegment> segments = Segments.WIKI_10X1D;
 
-  @BeforeEach
   @Override
   public void setUp()
   {
@@ -79,8 +77,8 @@ public class SegmentLoadingTest extends CoordinatorSimulationBaseTest
     verifyValue(Metric.ASSIGNED_COUNT, 2L);
 
     loadQueuedSegments();
-    Assertions.assertEquals(10, historicalT11.getTotalSegments());
-    Assertions.assertEquals(2, historicalT12.getTotalSegments());
+    Assert.assertEquals(10, historicalT11.getTotalSegments());
+    Assert.assertEquals(2, historicalT12.getTotalSegments());
   }
 
   @Test
@@ -106,7 +104,7 @@ public class SegmentLoadingTest extends CoordinatorSimulationBaseTest
     // Verify that the number of segments assigned is within the historical capacity
     verifyValue(Metric.ASSIGNED_COUNT, 2L);
     loadQueuedSegments();
-    Assertions.assertEquals(2, historicalT11.getTotalSegments());
+    Assert.assertEquals(2, historicalT11.getTotalSegments());
   }
 
   @Test
@@ -142,8 +140,8 @@ public class SegmentLoadingTest extends CoordinatorSimulationBaseTest
     verifyValue(Metric.ASSIGNED_COUNT, filterByTier(Tier.T2), 0L);
 
     loadQueuedSegments();
-    Assertions.assertEquals(2, getNumLoadedSegments(historicalT21, historicalT22));
-    Assertions.assertEquals(2, getNumLoadedSegments(historicalT11, historicalT12));
+    Assert.assertEquals(2, getNumLoadedSegments(historicalT21, historicalT22));
+    Assert.assertEquals(2, getNumLoadedSegments(historicalT11, historicalT12));
 
     // Run 3: total loaded replicas (4) > total required replicas (3) > total loadable replicas (2)
     // no server to assign third replica in T2, but all replicas are dropped from T1
@@ -153,8 +151,8 @@ public class SegmentLoadingTest extends CoordinatorSimulationBaseTest
     verifyValue(Metric.ASSIGNED_COUNT, filterByTier(Tier.T2), 0L);
 
     loadQueuedSegments();
-    Assertions.assertEquals(2, getNumLoadedSegments(historicalT21, historicalT22));
-    Assertions.assertEquals(0, getNumLoadedSegments(historicalT11, historicalT12));
+    Assert.assertEquals(2, getNumLoadedSegments(historicalT21, historicalT22));
+    Assert.assertEquals(0, getNumLoadedSegments(historicalT11, historicalT12));
 
     // Run 4: Add 3rd server to T2, third replica can now be assigned
     // Add 3rd server to T1 with replica loaded, but it will not be dropped
@@ -168,8 +166,8 @@ public class SegmentLoadingTest extends CoordinatorSimulationBaseTest
     verifyValue(Metric.ASSIGNED_COUNT, filterByTier(Tier.T2), 1L);
 
     loadQueuedSegments();
-    Assertions.assertEquals(3, getNumLoadedSegments(historicalT21, historicalT22, historicalT23));
-    Assertions.assertEquals(1, historicalT13.getTotalSegments());
+    Assert.assertEquals(3, getNumLoadedSegments(historicalT21, historicalT22, historicalT23));
+    Assert.assertEquals(1, historicalT13.getTotalSegments());
 
     // Run 5: segment is fully replicated on T2, remaining replica will now be dropped from T1
     runCoordinatorCycle();
@@ -178,8 +176,8 @@ public class SegmentLoadingTest extends CoordinatorSimulationBaseTest
     verifyNotEmitted(Metric.ASSIGNED_COUNT);
 
     loadQueuedSegments();
-    Assertions.assertEquals(3, getNumLoadedSegments(historicalT21, historicalT22, historicalT23));
-    Assertions.assertEquals(0, getNumLoadedSegments(historicalT11, historicalT12, historicalT13));
+    Assert.assertEquals(3, getNumLoadedSegments(historicalT21, historicalT22, historicalT23));
+    Assert.assertEquals(0, getNumLoadedSegments(historicalT11, historicalT12, historicalT13));
     verifyDatasourceIsFullyLoaded(datasource);
   }
 
@@ -217,8 +215,8 @@ public class SegmentLoadingTest extends CoordinatorSimulationBaseTest
     verifyNotEmitted(Metric.ASSIGNED_COUNT);
 
     loadQueuedSegments();
-    Assertions.assertEquals(1, getNumLoadedSegments(historicalT21));
-    Assertions.assertEquals(2, getNumLoadedSegments(historicalT11, historicalT12));
+    Assert.assertEquals(1, getNumLoadedSegments(historicalT21));
+    Assert.assertEquals(2, getNumLoadedSegments(historicalT11, historicalT12));
 
     // Run 3: total loaded replicas (3) > total required replicas (2)
     // one replica is dropped from T1
@@ -227,8 +225,8 @@ public class SegmentLoadingTest extends CoordinatorSimulationBaseTest
     verifyValue(Metric.DROPPED_COUNT, filterByTier(Tier.T1), 1L);
 
     loadQueuedSegments();
-    Assertions.assertEquals(1, getNumLoadedSegments(historicalT21));
-    Assertions.assertEquals(1, getNumLoadedSegments(historicalT11, historicalT12));
+    Assert.assertEquals(1, getNumLoadedSegments(historicalT21));
+    Assert.assertEquals(1, getNumLoadedSegments(historicalT11, historicalT12));
   }
 
   @Test
@@ -253,7 +251,7 @@ public class SegmentLoadingTest extends CoordinatorSimulationBaseTest
 
     // The historical is only assigned segments that it can load
     verifyValue(Metric.ASSIGNED_COUNT, 2L);
-    Assertions.assertEquals(2, historicalT11.getTotalSegments());
+    Assert.assertEquals(2, historicalT11.getTotalSegments());
   }
 
   @Test
@@ -326,8 +324,8 @@ public class SegmentLoadingTest extends CoordinatorSimulationBaseTest
     loadQueuedSegments();
 
     verifyDatasourceIsFullyLoaded(datasource);
-    Assertions.assertEquals(10, historicalT11.getTotalSegments());
-    Assertions.assertEquals(10, historicalT21.getTotalSegments());
+    Assert.assertEquals(10, historicalT11.getTotalSegments());
+    Assert.assertEquals(10, historicalT21.getTotalSegments());
   }
 
   @Test
@@ -353,8 +351,8 @@ public class SegmentLoadingTest extends CoordinatorSimulationBaseTest
     // Verify that number of replicas does not exceed the replicationThrottleLimit
     verifyValue(Metric.ASSIGNED_COUNT, 2L);
 
-    Assertions.assertEquals(10, historicalT11.getTotalSegments());
-    Assertions.assertEquals(2, historicalT12.getTotalSegments());
+    Assert.assertEquals(10, historicalT11.getTotalSegments());
+    Assert.assertEquals(2, historicalT12.getTotalSegments());
   }
 
   @Test
@@ -444,8 +442,8 @@ public class SegmentLoadingTest extends CoordinatorSimulationBaseTest
     runCoordinatorCycle();
     verifyValue(Metric.ASSIGNED_COUNT, 5L);
 
-    Assertions.assertEquals(10, historicalT11.getTotalSegments());
-    Assertions.assertEquals(5, historicalT12.getTotalSegments());
+    Assert.assertEquals(10, historicalT11.getTotalSegments());
+    Assert.assertEquals(5, historicalT12.getTotalSegments());
   }
 
   @Test
@@ -480,8 +478,8 @@ public class SegmentLoadingTest extends CoordinatorSimulationBaseTest
     verifyValue(Metric.CANCELLED_ACTIONS, 10L);
 
     loadQueuedSegments();
-    Assertions.assertEquals(10, historicalT11.getTotalSegments());
-    Assertions.assertEquals(0, historicalT12.getTotalSegments());
+    Assert.assertEquals(10, historicalT11.getTotalSegments());
+    Assert.assertEquals(0, historicalT12.getTotalSegments());
   }
 
   @Test
@@ -540,7 +538,7 @@ public class SegmentLoadingTest extends CoordinatorSimulationBaseTest
     verifyValue(Metric.DROP_QUEUE_COUNT, filterByServer(historicalT12), 4L);
 
     loadQueuedSegments();
-    Assertions.assertEquals(historicalT11.getCurrSize(), historicalT12.getCurrSize());
+    Assert.assertEquals(historicalT11.getCurrSize(), historicalT12.getCurrSize());
   }
 
   private int getNumLoadedSegments(DruidServer... servers)

@@ -26,13 +26,12 @@ import org.apache.druid.error.DruidException;
 import org.apache.druid.error.DruidExceptionMatcher;
 import org.apache.druid.jackson.DefaultObjectMapper;
 import org.apache.druid.java.util.common.Intervals;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.hamcrest.MatcherAssert;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * Unit tests for {@link IntervalLoadRule}
@@ -52,7 +51,7 @@ public class IntervalLoadRuleTest
 
     Rule reread = OBJECT_MAPPER.readValue(OBJECT_MAPPER.writeValueAsString(rule), Rule.class);
 
-    Assertions.assertEquals(rule, reread);
+    Assert.assertEquals(rule, reread);
   }
 
   @Test
@@ -64,15 +63,15 @@ public class IntervalLoadRuleTest
 
     Rule reread = OBJECT_MAPPER.readValue(OBJECT_MAPPER.writeValueAsString(rule), Rule.class);
 
-    Assertions.assertEquals(rule, reread);
-    Assertions.assertEquals(ImmutableMap.of(), rule.getTieredReplicants());
+    Assert.assertEquals(rule, reread);
+    Assert.assertEquals(ImmutableMap.of(), rule.getTieredReplicants());
   }
 
   @Test
   public void testCreatingNegativeTieredReplicants()
   {
-    assertThat(
-        Assertions.assertThrows(DruidException.class, () ->
+    MatcherAssert.assertThat(
+        Assert.assertThrows(DruidException.class, () ->
             new IntervalLoadRule(
                 Intervals.of("0/3000"),
                 ImmutableMap.of(DruidServer.DEFAULT_TIER, -1),
@@ -92,8 +91,8 @@ public class IntervalLoadRuleTest
     Map<String, Integer> tieredReplicants = new HashMap<>();
     tieredReplicants.put("tier", null);
 
-    assertThat(
-        Assertions.assertThrows(DruidException.class, () ->
+    MatcherAssert.assertThat(
+        Assert.assertThrows(DruidException.class, () ->
             new IntervalLoadRule(
                 Intervals.of("0/3000"),
                 tieredReplicants,
@@ -114,7 +113,7 @@ public class IntervalLoadRuleTest
                        + "      \"type\": \"loadByInterval\"\n"
                        + "   }";
     IntervalLoadRule inputIntervalLoadRule = OBJECT_MAPPER.readValue(inputJson, IntervalLoadRule.class);
-    Assertions.assertEquals(ImmutableMap.of(DruidServer.DEFAULT_TIER, DruidServer.DEFAULT_NUM_REPLICANTS), inputIntervalLoadRule.getTieredReplicants());
+    Assert.assertEquals(ImmutableMap.of(DruidServer.DEFAULT_TIER, DruidServer.DEFAULT_NUM_REPLICANTS), inputIntervalLoadRule.getTieredReplicants());
   }
 
   @Test
@@ -126,7 +125,7 @@ public class IntervalLoadRuleTest
                        + "      \"useDefaultTierForNull\": \"true\"\n"
                        + "   }";
     IntervalLoadRule inputIntervalLoadRule = OBJECT_MAPPER.readValue(inputJson, IntervalLoadRule.class);
-    Assertions.assertEquals(ImmutableMap.of(DruidServer.DEFAULT_TIER, DruidServer.DEFAULT_NUM_REPLICANTS), inputIntervalLoadRule.getTieredReplicants());
+    Assert.assertEquals(ImmutableMap.of(DruidServer.DEFAULT_TIER, DruidServer.DEFAULT_NUM_REPLICANTS), inputIntervalLoadRule.getTieredReplicants());
   }
 
   @Test
@@ -138,6 +137,6 @@ public class IntervalLoadRuleTest
                        + "      \"useDefaultTierForNull\": \"false\"\n"
                        + "   }";
     IntervalLoadRule inputIntervalLoadRule = OBJECT_MAPPER.readValue(inputJson, IntervalLoadRule.class);
-    Assertions.assertEquals(ImmutableMap.of(), inputIntervalLoadRule.getTieredReplicants());
+    Assert.assertEquals(ImmutableMap.of(), inputIntervalLoadRule.getTieredReplicants());
   }
 }

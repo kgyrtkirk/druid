@@ -29,10 +29,10 @@ import org.apache.druid.curator.CuratorTestBase;
 import org.apache.druid.java.util.common.concurrent.Execs;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.Watcher;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.Map;
 import java.util.TreeMap;
@@ -45,14 +45,14 @@ public class CuratorInventoryManagerTest extends CuratorTestBase
 {
   private ExecutorService exec;
 
-  @BeforeEach
+  @Before
   public void setUp() throws Exception
   {
     setupServerAndCurator();
     exec = Execs.singleThreaded("curator-inventory-manager-test-%s");
   }
 
-  @AfterEach
+  @After
   public void tearDown()
   {
     tearDownServerAndCurator();
@@ -74,24 +74,24 @@ public class CuratorInventoryManagerTest extends CuratorTestBase
 
     manager.start();
 
-    Assertions.assertTrue(Iterables.isEmpty(manager.getInventory()));
+    Assert.assertTrue(Iterables.isEmpty(manager.getInventory()));
 
     CountDownLatch containerLatch = new CountDownLatch(1);
     strategy.setNewContainerLatch(containerLatch);
     curator.create().creatingParentsIfNeeded().withMode(CreateMode.EPHEMERAL).forPath("/container/billy", new byte[]{});
 
-    Assertions.assertTrue(timing.awaitLatch(containerLatch));
+    Assert.assertTrue(timing.awaitLatch(containerLatch));
     strategy.setNewContainerLatch(null);
 
     final Iterable<Map<String, Integer>> inventory = manager.getInventory();
-    Assertions.assertTrue(Iterables.getOnlyElement(inventory).isEmpty());
+    Assert.assertTrue(Iterables.getOnlyElement(inventory).isEmpty());
 
     CountDownLatch inventoryLatch = new CountDownLatch(2);
     strategy.setNewInventoryLatch(inventoryLatch);
     curator.create().creatingParentsIfNeeded().withMode(CreateMode.EPHEMERAL).forPath("/inventory/billy/1", Ints.toByteArray(100));
     curator.create().withMode(CreateMode.EPHEMERAL).forPath("/inventory/billy/bob", Ints.toByteArray(2287));
 
-    Assertions.assertTrue(timing.awaitLatch(inventoryLatch));
+    Assert.assertTrue(timing.awaitLatch(inventoryLatch));
     strategy.setNewInventoryLatch(null);
 
     verifyInventory(manager);
@@ -100,17 +100,17 @@ public class CuratorInventoryManagerTest extends CuratorTestBase
     strategy.setDeadInventoryLatch(deleteLatch);
     curator.delete().forPath("/inventory/billy/1");
 
-    Assertions.assertTrue(timing.awaitLatch(deleteLatch));
+    Assert.assertTrue(timing.awaitLatch(deleteLatch));
     strategy.setDeadInventoryLatch(null);
 
-    Assertions.assertEquals(1, manager.getInventoryValue("billy").size());
-    Assertions.assertEquals(2287, manager.getInventoryValue("billy").get("bob").intValue());
+    Assert.assertEquals(1, manager.getInventoryValue("billy").size());
+    Assert.assertEquals(2287, manager.getInventoryValue("billy").get("bob").intValue());
 
     inventoryLatch = new CountDownLatch(1);
     strategy.setNewInventoryLatch(inventoryLatch);
     curator.create().withMode(CreateMode.EPHEMERAL).forPath("/inventory/billy/1", Ints.toByteArray(100));
 
-    Assertions.assertTrue(timing.awaitLatch(inventoryLatch));
+    Assert.assertTrue(timing.awaitLatch(inventoryLatch));
     strategy.setNewInventoryLatch(null);
 
     verifyInventory(manager);
@@ -130,7 +130,7 @@ public class CuratorInventoryManagerTest extends CuratorTestBase
     );
 
     server.stop();
-    Assertions.assertTrue(timing.awaitLatch(latch));
+    Assert.assertTrue(timing.awaitLatch(latch));
 
     verifyInventory(manager);
 
@@ -142,9 +142,9 @@ public class CuratorInventoryManagerTest extends CuratorTestBase
   private void verifyInventory(CuratorInventoryManager<Map<String, Integer>, Integer> manager)
   {
     final Map<String, Integer> vals = manager.getInventoryValue("billy");
-    Assertions.assertEquals(2, vals.size());
-    Assertions.assertEquals(100, vals.get("1").intValue());
-    Assertions.assertEquals(2287, vals.get("bob").intValue());
+    Assert.assertEquals(2, vals.size());
+    Assert.assertEquals(100, vals.get("1").intValue());
+    Assert.assertEquals(2287, vals.get("bob").intValue());
   }
 
   private static class StringInventoryManagerConfig implements InventoryManagerConfig

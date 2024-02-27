@@ -23,15 +23,15 @@ import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.segment.column.ValueType;
 import org.apache.druid.segment.data.ListIndexed;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Collections;
 
 import static org.apache.druid.common.config.NullHandling.defaultValueForClass;
 import static org.apache.druid.common.config.NullHandling.defaultValueForType;
 import static org.apache.druid.common.config.NullHandling.replaceWithDefault;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 public final class NullHandlingTest extends InitializedNullHandlingTest
 {
@@ -56,7 +56,7 @@ public final class NullHandlingTest extends InitializedNullHandlingTest
   @Test
   public void test_defaultValueForClass_integer()
   {
-    Assertions.assertNull(NullHandling.defaultValueForClass(Integer.class));
+    Assert.assertNull(NullHandling.defaultValueForClass(Integer.class));
   }
 
   @Test
@@ -89,7 +89,7 @@ public final class NullHandlingTest extends InitializedNullHandlingTest
   @Test
   public void test_defaultValueForClass_object()
   {
-    Assertions.assertNull(NullHandling.defaultValueForClass(Object.class));
+    Assert.assertNull(NullHandling.defaultValueForClass(Object.class));
   }
 
   @Test
@@ -108,10 +108,10 @@ public final class NullHandlingTest extends InitializedNullHandlingTest
   {
     try {
       NullHandling.initializeForTestsWithValues(false, true);
-      Assertions.assertFalse(NullHandling.ignoreNullsForStringCardinality());
+      Assert.assertFalse(NullHandling.ignoreNullsForStringCardinality());
 
       NullHandling.initializeForTestsWithValues(true, false);
-      Assertions.assertFalse(NullHandling.ignoreNullsForStringCardinality());
+      Assert.assertFalse(NullHandling.ignoreNullsForStringCardinality());
     }
     finally {
       NullHandling.initializeForTests();
@@ -121,38 +121,38 @@ public final class NullHandlingTest extends InitializedNullHandlingTest
   @Test
   public void test_mustCombineNullAndEmptyInDictionary()
   {
-    Assertions.assertFalse(
+    Assert.assertFalse(
         NullHandling.mustCombineNullAndEmptyInDictionary(
             new ListIndexed<>(Collections.singletonList(null))
         )
     );
 
-    Assertions.assertFalse(
+    Assert.assertFalse(
         NullHandling.mustCombineNullAndEmptyInDictionary(
             new ListIndexed<>(StringUtils.toUtf8ByteBuffer("foo"))
         )
     );
 
-    Assertions.assertFalse(
+    Assert.assertFalse(
         NullHandling.mustCombineNullAndEmptyInDictionary(
             new ListIndexed<>(StringUtils.toUtf8ByteBuffer(""))
         )
     );
 
-    Assertions.assertFalse(
+    Assert.assertFalse(
         NullHandling.mustCombineNullAndEmptyInDictionary(
             new ListIndexed<>(StringUtils.toUtf8ByteBuffer(""), StringUtils.toUtf8ByteBuffer("foo"))
         )
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         NullHandling.replaceWithDefault(),
         NullHandling.mustCombineNullAndEmptyInDictionary(
             new ListIndexed<>(null, StringUtils.toUtf8ByteBuffer(""))
         )
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         NullHandling.replaceWithDefault(),
         NullHandling.mustCombineNullAndEmptyInDictionary(
             new ListIndexed<>(null, StringUtils.toUtf8ByteBuffer(""), StringUtils.toUtf8ByteBuffer("foo")))
@@ -162,39 +162,39 @@ public final class NullHandlingTest extends InitializedNullHandlingTest
   @Test
   public void test_mustReplaceFirstValueWithNullInDictionary()
   {
-    Assertions.assertFalse(
+    Assert.assertFalse(
         NullHandling.mustReplaceFirstValueWithNullInDictionary(
             new ListIndexed<>(Collections.singletonList(null))
         )
     );
 
-    Assertions.assertFalse(
+    Assert.assertFalse(
         NullHandling.mustReplaceFirstValueWithNullInDictionary(
             new ListIndexed<>(StringUtils.toUtf8ByteBuffer("foo"))
         )
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         NullHandling.replaceWithDefault(),
         NullHandling.mustReplaceFirstValueWithNullInDictionary(
             new ListIndexed<>(StringUtils.toUtf8ByteBuffer(""))
         )
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         NullHandling.replaceWithDefault(),
         NullHandling.mustReplaceFirstValueWithNullInDictionary(
             new ListIndexed<>(StringUtils.toUtf8ByteBuffer(""), StringUtils.toUtf8ByteBuffer("foo"))
         )
     );
 
-    Assertions.assertFalse(
+    Assert.assertFalse(
         NullHandling.mustReplaceFirstValueWithNullInDictionary(
             new ListIndexed<>(null, StringUtils.toUtf8ByteBuffer(""))
         )
     );
 
-    Assertions.assertFalse(
+    Assert.assertFalse(
         NullHandling.mustReplaceFirstValueWithNullInDictionary(
             new ListIndexed<>(null, StringUtils.toUtf8ByteBuffer(""), StringUtils.toUtf8ByteBuffer("foo")))
     );

@@ -28,6 +28,7 @@ import org.apache.druid.java.util.emitter.service.AlertBuilder;
 import org.apache.druid.java.util.emitter.service.AlertEvent;
 import org.apache.druid.java.util.emitter.service.ServiceMetricEvent;
 import org.junit.Assert;
+import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
 import static org.mockito.ArgumentMatchers.eq;

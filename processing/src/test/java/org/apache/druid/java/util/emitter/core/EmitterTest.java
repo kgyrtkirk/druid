@@ -38,11 +38,10 @@ import org.asynchttpclient.Response;
 import org.asynchttpclient.netty.EagerResponseBodyPart;
 import org.asynchttpclient.netty.NettyResponseStatus;
 import org.asynchttpclient.uri.Uri;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -53,7 +52,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
@@ -100,13 +98,13 @@ public class EmitterTest
     return OK_RESPONSE;
   }
 
-  @BeforeEach
+  @Before
   public void setUp()
   {
     httpClient = new MockHttpClient();
   }
 
-  @AfterEach
+  @After
   public void tearDown() throws Exception
   {
     if (emitter != null) {
@@ -160,10 +158,10 @@ public class EmitterTest
 
     Lifecycle lifecycle = new Lifecycle();
     Emitter emitter = Emitters.create(props, httpClient, JSON_MAPPER, lifecycle);
-    Assertions.assertTrue(emitter instanceof HttpPostEmitter, StringUtils.format(
+    Assert.assertTrue(StringUtils.format(
         "HttpPostEmitter emitter should be created, but found %s",
         emitter.getClass().getName()
-    ));
+    ), emitter instanceof HttpPostEmitter);
     emitter.start();
     return (HttpPostEmitter) emitter;
   }
@@ -236,12 +234,12 @@ public class EmitterTest
           @Override
           protected ListenableFuture<Response> go(Request request) throws JsonProcessingException
           {
-            Assertions.assertEquals(TARGET_URL, request.getUrl());
-            Assertions.assertEquals(
+            Assert.assertEquals(TARGET_URL, request.getUrl());
+            Assert.assertEquals(
                 "application/json",
                 request.getHeaders().get(HttpHeaders.Names.CONTENT_TYPE)
             );
-            Assertions.assertEquals(
+            Assert.assertEquals(
                 JSON_MAPPER.readTree(StringUtils.format(
                     "[%s,%s]\n",
                     JSON_MAPPER.writeValueAsString(events.get(0)),
@@ -262,7 +260,7 @@ public class EmitterTest
     }
     waitForEmission(emitter, 1);
     closeNoFlush(emitter);
-    Assertions.assertTrue(httpClient.succeeded());
+    Assert.assertTrue(httpClient.succeeded());
   }
 
   @Test
@@ -280,12 +278,12 @@ public class EmitterTest
           @Override
           protected ListenableFuture<Response> go(Request request) throws JsonProcessingException
           {
-            Assertions.assertEquals(TARGET_URL, request.getUrl());
-            Assertions.assertEquals(
+            Assert.assertEquals(TARGET_URL, request.getUrl());
+            Assert.assertEquals(
                 "application/json",
                 request.getHeaders().get(HttpHeaders.Names.CONTENT_TYPE)
             );
-            Assertions.assertEquals(
+            Assert.assertEquals(
                 JSON_MAPPER.readTree(StringUtils.format(
                     "[%s,%s]\n",
                     JSON_MAPPER.writeValueAsString(events.get(0)),
@@ -306,7 +304,7 @@ public class EmitterTest
     }
     waitForEmission(emitter, 1);
     closeNoFlush(emitter);
-    Assertions.assertTrue(httpClient.succeeded());
+    Assert.assertTrue(httpClient.succeeded());
   }
 
   @Test
@@ -327,7 +325,7 @@ public class EmitterTest
     emitter.emit(new UnitEvent("test", 5));
 
     closeAndExpectFlush(emitter);
-    Assertions.assertTrue(httpClient.succeeded());
+    Assert.assertTrue(httpClient.succeeded());
   }
 
   @Test
@@ -355,9 +353,9 @@ public class EmitterTest
 
     latch.await();
     long timeWaited = System.currentTimeMillis() - emitTime;
-    Assertions.assertTrue(
-        timeWaited < timeBetweenEmissions * 2,
-        StringUtils.format("timeWaited[%s] !< %s", timeWaited, timeBetweenEmissions * 2)
+    Assert.assertTrue(
+        StringUtils.format("timeWaited[%s] !< %s", timeWaited, timeBetweenEmissions * 2),
+        timeWaited < timeBetweenEmissions * 2
     );
 
     waitForEmission(emitter, 1);
@@ -380,26 +378,25 @@ public class EmitterTest
 
     thisLatch.await();
     timeWaited = System.currentTimeMillis() - emitTime;
-    Assertions.assertTrue(
-        timeWaited < timeBetweenEmissions * 2,
-        StringUtils.format("timeWaited[%s] !< %s", timeWaited, timeBetweenEmissions * 2)
+    Assert.assertTrue(
+        StringUtils.format("timeWaited[%s] !< %s", timeWaited, timeBetweenEmissions * 2),
+        timeWaited < timeBetweenEmissions * 2
     );
 
     waitForEmission(emitter, 2);
     closeNoFlush(emitter);
-    Assertions.assertTrue(httpClient.succeeded(), "httpClient.succeeded()");
+    Assert.assertTrue("httpClient.succeeded()", httpClient.succeeded());
   }
 
-  @Test
-  @Timeout(value = 60_000L, unit = TimeUnit.MILLISECONDS)
+  @Test(timeout = 60_000L)
   public void testFailedEmission() throws Exception
   {
     final UnitEvent event1 = new UnitEvent("test", 1);
     final UnitEvent event2 = new UnitEvent("test", 2);
     emitter = sizeBasedEmitter(1);
-    Assertions.assertEquals(0, emitter.getTotalEmittedEvents());
-    Assertions.assertEquals(0, emitter.getSuccessfulSendingTimeCounter().getTimeSumAndCount());
-    Assertions.assertEquals(0, emitter.getFailedSendingTimeCounter().getTimeSumAndCount());
+    Assert.assertEquals(0, emitter.getTotalEmittedEvents());
+    Assert.assertEquals(0, emitter.getSuccessfulSendingTimeCounter().getTimeSumAndCount());
+    Assert.assertEquals(0, emitter.getFailedSendingTimeCounter().getTimeSumAndCount());
 
     httpClient.setGoHandler(
         new GoHandler()
@@ -415,12 +412,12 @@ public class EmitterTest
     emitter.emit(event1);
     emitter.flush();
     waitForEmission(emitter, 1);
-    Assertions.assertTrue(httpClient.succeeded());
+    Assert.assertTrue(httpClient.succeeded());
 
     // Failed to emit the first event.
-    Assertions.assertEquals(0, emitter.getTotalEmittedEvents());
-    Assertions.assertEquals(0, emitter.getSuccessfulSendingTimeCounter().getTimeSumAndCount());
-    Assertions.assertTrue(emitter.getFailedSendingTimeCounter().getTimeSumAndCount() > 0);
+    Assert.assertEquals(0, emitter.getTotalEmittedEvents());
+    Assert.assertEquals(0, emitter.getSuccessfulSendingTimeCounter().getTimeSumAndCount());
+    Assert.assertTrue(emitter.getFailedSendingTimeCounter().getTimeSumAndCount() > 0);
 
     httpClient.setGoHandler(
         new GoHandler()
@@ -442,11 +439,11 @@ public class EmitterTest
     emitter.joinEmitterThread();
 
     // Succeed to emit both events.
-    Assertions.assertEquals(2, emitter.getTotalEmittedEvents());
-    Assertions.assertTrue(emitter.getSuccessfulSendingTimeCounter().getTimeSumAndCount() > 0);
-    Assertions.assertTrue(emitter.getFailedSendingTimeCounter().getTimeSumAndCount() > 0);
+    Assert.assertEquals(2, emitter.getTotalEmittedEvents());
+    Assert.assertTrue(emitter.getSuccessfulSendingTimeCounter().getTimeSumAndCount() > 0);
+    Assert.assertTrue(emitter.getFailedSendingTimeCounter().getTimeSumAndCount() > 0);
 
-    Assertions.assertTrue(httpClient.succeeded());
+    Assert.assertTrue(httpClient.succeeded());
   }
 
   @Test
@@ -464,16 +461,16 @@ public class EmitterTest
           @Override
           protected ListenableFuture<Response> go(Request request) throws JsonProcessingException
           {
-            Assertions.assertEquals(TARGET_URL, request.getUrl());
-            Assertions.assertEquals(
+            Assert.assertEquals(TARGET_URL, request.getUrl());
+            Assert.assertEquals(
                 "application/json",
                 request.getHeaders().get(HttpHeaders.Names.CONTENT_TYPE)
             );
-            Assertions.assertEquals(
+            Assert.assertEquals(
                 "Basic " + StringUtils.encodeBase64String(StringUtils.toUtf8("foo:bar")),
                 request.getHeaders().get(HttpHeaders.Names.AUTHORIZATION)
             );
-            Assertions.assertEquals(
+            Assert.assertEquals(
                 JSON_MAPPER.readTree(StringUtils.format(
                     "%s\n%s\n",
                     JSON_MAPPER.writeValueAsString(events.get(0)),
@@ -495,7 +492,7 @@ public class EmitterTest
     emitter.flush();
     waitForEmission(emitter, 1);
     closeNoFlush(emitter);
-    Assertions.assertTrue(httpClient.succeeded());
+    Assert.assertTrue(httpClient.succeeded());
   }
 
   @Test
@@ -514,9 +511,9 @@ public class EmitterTest
     );
     final AtomicInteger counter = new AtomicInteger();
     emitter = manualFlushEmitterWithBatchSize(1024 * 1024);
-    Assertions.assertEquals(0, emitter.getTotalEmittedEvents());
-    Assertions.assertEquals(0, emitter.getSuccessfulSendingTimeCounter().getTimeSumAndCount());
-    Assertions.assertEquals(0, emitter.getFailedSendingTimeCounter().getTimeSumAndCount());
+    Assert.assertEquals(0, emitter.getTotalEmittedEvents());
+    Assert.assertEquals(0, emitter.getSuccessfulSendingTimeCounter().getTimeSumAndCount());
+    Assert.assertEquals(0, emitter.getFailedSendingTimeCounter().getTimeSumAndCount());
 
     httpClient.setGoHandler(
         new GoHandler()
@@ -524,12 +521,12 @@ public class EmitterTest
           @Override
           protected ListenableFuture<Response> go(Request request) throws JsonProcessingException
           {
-            Assertions.assertEquals(TARGET_URL, request.getUrl());
-            Assertions.assertEquals(
+            Assert.assertEquals(TARGET_URL, request.getUrl());
+            Assert.assertEquals(
                 "application/json",
                 request.getHeaders().get(HttpHeaders.Names.CONTENT_TYPE)
             );
-            Assertions.assertEquals(
+            Assert.assertEquals(
                 JSON_MAPPER.readTree(StringUtils.format(
                     "[%s,%s]\n",
                     JSON_MAPPER.writeValueAsString(events.get(counter.getAndIncrement())),
@@ -549,17 +546,17 @@ public class EmitterTest
       emitter.emit(event);
     }
     waitForEmission(emitter, 1);
-    Assertions.assertEquals(2, emitter.getTotalEmittedEvents());
-    Assertions.assertTrue(emitter.getSuccessfulSendingTimeCounter().getTimeSumAndCount() > 0);
-    Assertions.assertEquals(0, emitter.getFailedSendingTimeCounter().getTimeSumAndCount());
+    Assert.assertEquals(2, emitter.getTotalEmittedEvents());
+    Assert.assertTrue(emitter.getSuccessfulSendingTimeCounter().getTimeSumAndCount() > 0);
+    Assert.assertEquals(0, emitter.getFailedSendingTimeCounter().getTimeSumAndCount());
 
     emitter.flush();
     waitForEmission(emitter, 2);
-    Assertions.assertEquals(4, emitter.getTotalEmittedEvents());
-    Assertions.assertTrue(emitter.getSuccessfulSendingTimeCounter().getTimeSumAndCount() > 0);
-    Assertions.assertEquals(0, emitter.getFailedSendingTimeCounter().getTimeSumAndCount());
+    Assert.assertEquals(4, emitter.getTotalEmittedEvents());
+    Assert.assertTrue(emitter.getSuccessfulSendingTimeCounter().getTimeSumAndCount() > 0);
+    Assert.assertEquals(0, emitter.getFailedSendingTimeCounter().getTimeSumAndCount());
     closeNoFlush(emitter);
-    Assertions.assertTrue(httpClient.succeeded());
+    Assert.assertTrue(httpClient.succeeded());
   }
 
   @Test
@@ -578,12 +575,12 @@ public class EmitterTest
           @Override
           protected ListenableFuture<Response> go(Request request) throws IOException
           {
-            Assertions.assertEquals(TARGET_URL, request.getUrl());
-            Assertions.assertEquals(
+            Assert.assertEquals(TARGET_URL, request.getUrl());
+            Assert.assertEquals(
                 "application/json",
                 request.getHeaders().get(HttpHeaders.Names.CONTENT_TYPE)
             );
-            Assertions.assertEquals(
+            Assert.assertEquals(
                 HttpHeaders.Values.GZIP,
                 request.getHeaders().get(HttpHeaders.Names.CONTENT_ENCODING)
             );
@@ -594,7 +591,7 @@ public class EmitterTest
             data.get(dataArray);
             CompressionUtils.gunzip(new ByteArrayInputStream(dataArray), baos);
 
-            Assertions.assertEquals(
+            Assert.assertEquals(
                 JSON_MAPPER.readTree(StringUtils.format(
                     "[%s,%s]\n",
                     JSON_MAPPER.writeValueAsString(events.get(0)),
@@ -615,7 +612,7 @@ public class EmitterTest
     }
     waitForEmission(emitter, 1);
     closeNoFlush(emitter);
-    Assertions.assertTrue(httpClient.succeeded());
+    Assert.assertTrue(httpClient.succeeded());
   }
 
   private void closeAndExpectFlush(Emitter emitter) throws IOException

@@ -35,8 +35,8 @@ import org.apache.druid.query.timeseries.TimeseriesQueryQueryToolChest;
 import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Comparator;
 import java.util.HashMap;
@@ -76,23 +76,23 @@ public class ArithmeticPostAggregatorTest extends InitializedNullHandlingTest
 
     arithmeticPostAggregator = new ArithmeticPostAggregator("add", "+", postAggregatorList);
     expressionPostAggregator = new ExpressionPostAggregator("add", "roku + rows", null, null, TestExprMacroTable.INSTANCE);
-    Assertions.assertEquals(9.0, arithmeticPostAggregator.compute(metricValues));
-    Assertions.assertEquals(9.0, expressionPostAggregator.compute(metricValues));
+    Assert.assertEquals(9.0, arithmeticPostAggregator.compute(metricValues));
+    Assert.assertEquals(9.0, expressionPostAggregator.compute(metricValues));
 
     arithmeticPostAggregator = new ArithmeticPostAggregator("subtract", "-", postAggregatorList);
     expressionPostAggregator = new ExpressionPostAggregator("add", "roku - rows", null, null, TestExprMacroTable.INSTANCE);
-    Assertions.assertEquals(3.0, arithmeticPostAggregator.compute(metricValues));
-    Assertions.assertEquals(3.0, expressionPostAggregator.compute(metricValues));
+    Assert.assertEquals(3.0, arithmeticPostAggregator.compute(metricValues));
+    Assert.assertEquals(3.0, expressionPostAggregator.compute(metricValues));
 
     arithmeticPostAggregator = new ArithmeticPostAggregator("multiply", "*", postAggregatorList);
     expressionPostAggregator = new ExpressionPostAggregator("add", "roku * rows", null, null, TestExprMacroTable.INSTANCE);
-    Assertions.assertEquals(18.0, arithmeticPostAggregator.compute(metricValues));
-    Assertions.assertEquals(18.0, expressionPostAggregator.compute(metricValues));
+    Assert.assertEquals(18.0, arithmeticPostAggregator.compute(metricValues));
+    Assert.assertEquals(18.0, expressionPostAggregator.compute(metricValues));
 
     arithmeticPostAggregator = new ArithmeticPostAggregator("divide", "/", postAggregatorList);
     expressionPostAggregator = new ExpressionPostAggregator("add", "roku / rows", null, null, TestExprMacroTable.INSTANCE);
-    Assertions.assertEquals(2.0, arithmeticPostAggregator.compute(metricValues));
-    Assertions.assertEquals(2.0, expressionPostAggregator.compute(metricValues));
+    Assert.assertEquals(2.0, arithmeticPostAggregator.compute(metricValues));
+    Assert.assertEquals(2.0, expressionPostAggregator.compute(metricValues));
   }
 
   @Test
@@ -125,10 +125,10 @@ public class ArithmeticPostAggregatorTest extends InitializedNullHandlingTest
     metricValues.put(aggName, agg.get());
     Object after = arithmeticPostAggregator.compute(metricValues);
 
-    Assertions.assertEquals(-1, comp.compare(before, after));
-    Assertions.assertEquals(0, comp.compare(before, before));
-    Assertions.assertEquals(0, comp.compare(after, after));
-    Assertions.assertEquals(1, comp.compare(after, before));
+    Assert.assertEquals(-1, comp.compare(before, after));
+    Assert.assertEquals(0, comp.compare(before, before));
+    Assert.assertEquals(0, comp.compare(after, after));
+    Assert.assertEquals(1, comp.compare(after, before));
   }
 
   @Test
@@ -158,10 +158,10 @@ public class ArithmeticPostAggregatorTest extends InitializedNullHandlingTest
     metricValues.put(aggName, 1.0);
     Object after = arithmeticPostAggregator.compute(metricValues);
 
-    Assertions.assertEquals(-1, comp.compare(before, after));
-    Assertions.assertEquals(0, comp.compare(before, before));
-    Assertions.assertEquals(0, comp.compare(after, after));
-    Assertions.assertEquals(1, comp.compare(after, before));
+    Assert.assertEquals(-1, comp.compare(before, after));
+    Assert.assertEquals(0, comp.compare(before, before));
+    Assert.assertEquals(0, comp.compare(after, after));
+    Assert.assertEquals(1, comp.compare(after, before));
   }
 
   @Test
@@ -178,10 +178,10 @@ public class ArithmeticPostAggregatorTest extends InitializedNullHandlingTest
     );
 
 
-    Assertions.assertEquals(Double.NaN, agg.compute(ImmutableMap.of("value", 0)));
-    Assertions.assertEquals(Double.NaN, agg.compute(ImmutableMap.of("value", Double.NaN)));
-    Assertions.assertEquals(Double.POSITIVE_INFINITY, agg.compute(ImmutableMap.of("value", 1)));
-    Assertions.assertEquals(Double.NEGATIVE_INFINITY, agg.compute(ImmutableMap.of("value", -1)));
+    Assert.assertEquals(Double.NaN, agg.compute(ImmutableMap.of("value", 0)));
+    Assert.assertEquals(Double.NaN, agg.compute(ImmutableMap.of("value", Double.NaN)));
+    Assert.assertEquals(Double.POSITIVE_INFINITY, agg.compute(ImmutableMap.of("value", 1)));
+    Assert.assertEquals(Double.NEGATIVE_INFINITY, agg.compute(ImmutableMap.of("value", -1)));
   }
   @Test
   public void testPow()
@@ -195,7 +195,7 @@ public class ArithmeticPostAggregatorTest extends InitializedNullHandlingTest
             ),
             "numericFirst"
     );
-    Assertions.assertEquals(2.0, agg.compute(ImmutableMap.of("value", 0)));
+    Assert.assertEquals(2.0, agg.compute(ImmutableMap.of("value", 0)));
 
     agg = new ArithmeticPostAggregator(
             null,
@@ -207,11 +207,11 @@ public class ArithmeticPostAggregatorTest extends InitializedNullHandlingTest
             "numericFirst"
     );
 
-    Assertions.assertEquals(1.0, agg.compute(ImmutableMap.of("value", 0)));
-    Assertions.assertEquals(1.0, agg.compute(ImmutableMap.of("value", Double.NaN)));
-    Assertions.assertEquals(1.0, agg.compute(ImmutableMap.of("value", 1)));
-    Assertions.assertEquals(1.0, agg.compute(ImmutableMap.of("value", -1)));
-    Assertions.assertEquals(1.0, agg.compute(ImmutableMap.of("value", .5)));
+    Assert.assertEquals(1.0, agg.compute(ImmutableMap.of("value", 0)));
+    Assert.assertEquals(1.0, agg.compute(ImmutableMap.of("value", Double.NaN)));
+    Assert.assertEquals(1.0, agg.compute(ImmutableMap.of("value", 1)));
+    Assert.assertEquals(1.0, agg.compute(ImmutableMap.of("value", -1)));
+    Assert.assertEquals(1.0, agg.compute(ImmutableMap.of("value", .5)));
   }
   @Test
   public void testDiv()
@@ -225,10 +225,10 @@ public class ArithmeticPostAggregatorTest extends InitializedNullHandlingTest
         )
     );
 
-    Assertions.assertEquals(0.0, agg.compute(ImmutableMap.of("value", 0)));
-    Assertions.assertEquals(0.0, agg.compute(ImmutableMap.of("value", Double.NaN)));
-    Assertions.assertEquals(0.0, agg.compute(ImmutableMap.of("value", 1)));
-    Assertions.assertEquals(0.0, agg.compute(ImmutableMap.of("value", -1)));
+    Assert.assertEquals(0.0, agg.compute(ImmutableMap.of("value", 0)));
+    Assert.assertEquals(0.0, agg.compute(ImmutableMap.of("value", Double.NaN)));
+    Assert.assertEquals(0.0, agg.compute(ImmutableMap.of("value", 1)));
+    Assert.assertEquals(0.0, agg.compute(ImmutableMap.of("value", -1)));
   }
 
   @Test
@@ -244,19 +244,19 @@ public class ArithmeticPostAggregatorTest extends InitializedNullHandlingTest
         "numericFirst"
     );
     final Comparator numericFirst = agg.getComparator();
-    Assertions.assertTrue(numericFirst.compare(Double.NaN, 0.0) < 0);
-    Assertions.assertTrue(numericFirst.compare(Double.POSITIVE_INFINITY, 0.0) < 0);
-    Assertions.assertTrue(numericFirst.compare(Double.NEGATIVE_INFINITY, 0.0) < 0);
-    Assertions.assertTrue(numericFirst.compare(0.0, Double.NaN) > 0);
-    Assertions.assertTrue(numericFirst.compare(0.0, Double.POSITIVE_INFINITY) > 0);
-    Assertions.assertTrue(numericFirst.compare(0.0, Double.NEGATIVE_INFINITY) > 0);
+    Assert.assertTrue(numericFirst.compare(Double.NaN, 0.0) < 0);
+    Assert.assertTrue(numericFirst.compare(Double.POSITIVE_INFINITY, 0.0) < 0);
+    Assert.assertTrue(numericFirst.compare(Double.NEGATIVE_INFINITY, 0.0) < 0);
+    Assert.assertTrue(numericFirst.compare(0.0, Double.NaN) > 0);
+    Assert.assertTrue(numericFirst.compare(0.0, Double.POSITIVE_INFINITY) > 0);
+    Assert.assertTrue(numericFirst.compare(0.0, Double.NEGATIVE_INFINITY) > 0);
 
-    Assertions.assertTrue(numericFirst.compare(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY) < 0);
-    Assertions.assertTrue(numericFirst.compare(Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY) > 0);
-    Assertions.assertTrue(numericFirst.compare(Double.NaN, Double.POSITIVE_INFINITY) > 0);
-    Assertions.assertTrue(numericFirst.compare(Double.NaN, Double.NEGATIVE_INFINITY) > 0);
-    Assertions.assertTrue(numericFirst.compare(Double.POSITIVE_INFINITY, Double.NaN) < 0);
-    Assertions.assertTrue(numericFirst.compare(Double.NEGATIVE_INFINITY, Double.NaN) < 0);
+    Assert.assertTrue(numericFirst.compare(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY) < 0);
+    Assert.assertTrue(numericFirst.compare(Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY) > 0);
+    Assert.assertTrue(numericFirst.compare(Double.NaN, Double.POSITIVE_INFINITY) > 0);
+    Assert.assertTrue(numericFirst.compare(Double.NaN, Double.NEGATIVE_INFINITY) > 0);
+    Assert.assertTrue(numericFirst.compare(Double.POSITIVE_INFINITY, Double.NaN) < 0);
+    Assert.assertTrue(numericFirst.compare(Double.NEGATIVE_INFINITY, Double.NaN) < 0);
   }
 
   @Test
@@ -283,7 +283,7 @@ public class ArithmeticPostAggregatorTest extends InitializedNullHandlingTest
               )
               .build();
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         RowSignature.builder()
                     .addTimeColumn()
                     .add("sum", ColumnType.LONG)

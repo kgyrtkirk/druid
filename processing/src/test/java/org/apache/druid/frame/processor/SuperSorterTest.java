@@ -57,14 +57,15 @@ import org.apache.druid.segment.TestIndex;
 import org.apache.druid.segment.column.ColumnHolder;
 import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.experimental.runners.Enclosed;
+import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.io.File;
 import java.io.IOException;
@@ -78,8 +79,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-
-
+@RunWith(Enclosed.class)
 public class SuperSorterTest
 {
   private static final Logger log = new Logger(SuperSorterTest.class);
@@ -87,18 +87,17 @@ public class SuperSorterTest
   /**
    * Non-parameterized test cases that
    */
-  @Nested
-  public class NonParameterizedCasesTest extends InitializedNullHandlingTest
+  public static class NonParameterizedCasesTest extends InitializedNullHandlingTest
   {
     private static final int NUM_THREADS = 1;
     private static final int FRAME_SIZE = 1_000_000;
 
-    @TempDir
-    public File temporaryFolder;
+    @Rule
+    public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     private FrameProcessorExecutor exec;
 
-    @BeforeEach
+    @Before
     public void setUp()
     {
       exec = new FrameProcessorExecutor(
@@ -106,7 +105,7 @@ public class SuperSorterTest
       );
     }
 
-    @AfterEach
+    @After
     public void tearDown()
     {
       exec.getExecutorService().shutdownNow();
@@ -121,7 +120,7 @@ public class SuperSorterTest
       final SettableFuture<ClusterByPartitions> outputPartitionsFuture = SettableFuture.create();
       final SuperSorterProgressTracker superSorterProgressTracker = new SuperSorterProgressTracker();
 
-      final File tempFolder = newFolder(temporaryFolder, "junit");
+      final File tempFolder = temporaryFolder.newFolder();
       final SuperSorter superSorter = new SuperSorter(
           Collections.singletonList(inputChannel.readable()),
           FrameReader.create(RowSignature.empty()),
@@ -139,21 +138,12 @@ public class SuperSorterTest
 
       superSorter.setNoWorkRunnable(() -> outputPartitionsFuture.set(ClusterByPartitions.oneUniversalPartition()));
       final OutputChannels channels = superSorter.run().get();
-      Assertions.assertEquals(1, channels.getAllChannels().size());
+      Assert.assertEquals(1, channels.getAllChannels().size());
 
       final ReadableFrameChannel channel = Iterables.getOnlyElement(channels.getAllChannels()).getReadableChannel();
-      Assertions.assertTrue(channel.isFinished());
-      Assertions.assertEquals(1.0, superSorterProgressTracker.snapshot().getProgressDigest(), 0.0f);
+      Assert.assertTrue(channel.isFinished());
+      Assert.assertEquals(1.0, superSorterProgressTracker.snapshot().getProgressDigest(), 0.0f);
       channel.close();
-    }
-
-    private static File newFolder(File root, String... subDirs) throws IOException {
-      String subFolder = String.join("/", subDirs);
-      File result = new File(root, subFolder);
-      if (!result.mkdirs()) {
-        throw new IOException("Couldn't create folders " + root);
-      }
-      return result;
     }
   }
 
@@ -161,19 +151,19 @@ public class SuperSorterTest
    * Parameterized test cases that use {@link TestIndex#getNoRollupIncrementalTestIndex} with various frame sizes,
    * numbers of channels, and worker configurations.
    */
-  @Nested
-  public class ParameterizedCasesTest extends InitializedNullHandlingTest
+  @RunWith(Parameterized.class)
+  public static class ParameterizedCasesTest extends InitializedNullHandlingTest
   {
-    @TempDir
-    public File temporaryFolder;
+    @Rule
+    public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-    private int maxRowsPerFrame;
-    private int maxBytesPerFrame;
-    private int numChannels;
-    private int maxActiveProcessors;
-    private int maxChannelsPerProcessor;
-    private int numThreads;
-    private boolean isComposedStorage;
+    private final int maxRowsPerFrame;
+    private final int maxBytesPerFrame;
+    private final int numChannels;
+    private final int maxActiveProcessors;
+    private final int maxChannelsPerProcessor;
+    private final int numThreads;
+    private final boolean isComposedStorage;
 
     private StorageAdapter adapter;
     private RowSignature signature;
@@ -181,7 +171,7 @@ public class SuperSorterTest
     private List<ReadableFrameChannel> inputChannels;
     private FrameReader frameReader;
 
-    public void initParameterizedCasesTest(
+    public ParameterizedCasesTest(
         int maxRowsPerFrame,
         int maxBytesPerFrame,
         int numChannels,
@@ -200,6 +190,15 @@ public class SuperSorterTest
       this.isComposedStorage = isComposedStorage;
     }
 
+    @Parameterized.Parameters(
+        name = "maxRowsPerFrame = {0}, "
+               + "maxBytesPerFrame = {1}, "
+               + "numChannels = {2}, "
+               + "maxActiveProcessors = {3}, "
+               + "maxChannelsPerProcessor = {4}, "
+               + "numThreads = {5}, "
+               + "isComposedStorage = {6}"
+    )
     public static Iterable<Object[]> constructorFeeder()
     {
       final List<Object[]> constructors = new ArrayList<>();
@@ -235,7 +234,7 @@ public class SuperSorterTest
       return constructors;
     }
 
-    @BeforeEach
+    @Before
     public void setUp()
     {
       exec = new FrameProcessorExecutor(
@@ -244,7 +243,7 @@ public class SuperSorterTest
       adapter = new QueryableIndexStorageAdapter(TestIndex.getNoRollupMMappedTestIndex());
     }
 
-    @AfterEach
+    @After
     public void tearDown() throws Exception
     {
       if (exec != null) {
@@ -274,7 +273,7 @@ public class SuperSorterTest
                               .frameType(FrameType.ROW_BASED)
                               .populateRowNumber();
 
-      inputChannels = makeFileChannels(frameSequenceBuilder.frames(), newFolder(temporaryFolder, "junit"), numChannels);
+      inputChannels = makeFileChannels(frameSequenceBuilder.frames(), temporaryFolder.newFolder(), numChannels);
       signature = frameSequenceBuilder.signature();
       frameReader = FrameReader.create(signature);
     }
@@ -284,7 +283,7 @@ public class SuperSorterTest
         final ClusterByPartitions clusterByPartitions
     ) throws Exception
     {
-      final File tempFolder = newFolder(temporaryFolder, "junit");
+      final File tempFolder = temporaryFolder.newFolder();
       final OutputChannelFactory outputChannelFactory = isComposedStorage ? new ComposingOutputChannelFactory(
           ImmutableList.of(
               new FileOutputChannelFactory(new File(tempFolder, "1"), maxBytesPerFrame, null),
@@ -314,8 +313,8 @@ public class SuperSorterTest
 
       superSorter.setNoWorkRunnable(() -> clusterByPartitionsFuture.set(clusterByPartitions));
       final OutputChannels outputChannels = superSorter.run().get();
-      Assertions.assertEquals(clusterByPartitions.size(), outputChannels.getAllChannels().size());
-      Assertions.assertEquals(1.0, superSorterProgressTracker.snapshot().getProgressDigest(), 0.0f);
+      Assert.assertEquals(clusterByPartitions.size(), outputChannels.getAllChannels().size());
+      Assert.assertEquals(1.0, superSorterProgressTracker.snapshot().getProgressDigest(), 0.0f);
 
       final int[] clusterByPartColumns = clusterBy.getColumns().stream().mapToInt(
           part -> signature.indexOf(part.columnName())
@@ -341,24 +340,24 @@ public class SuperSorterTest
 
               final RowKey key = createKey(clusterBy, array);
 
-              Assertions.assertTrue(
-                  partition.getStart() == null || keyComparator.compare(key, partition.getStart()) >= 0,
+              Assert.assertTrue(
                   StringUtils.format(
                       "Key %s >= partition %,d start %s",
                       keyReader.read(key),
                       partitionNumber,
                       partition.getStart() == null ? null : keyReader.read(partition.getStart())
-                  )
+                  ),
+                  partition.getStart() == null || keyComparator.compare(key, partition.getStart()) >= 0
               );
 
-              Assertions.assertTrue(
-                  partition.getEnd() == null || keyComparator.compare(key, partition.getEnd()) < 0,
+              Assert.assertTrue(
                   StringUtils.format(
                       "Key %s < partition %,d end %s",
                       keyReader.read(key),
                       partitionNumber,
                       partition.getEnd() == null ? null : keyReader.read(partition.getEnd())
-                  )
+                  ),
+                  partition.getEnd() == null || keyComparator.compare(key, partition.getEnd()) < 0
               );
             }
         );
@@ -392,17 +391,9 @@ public class SuperSorterTest
       return outputChannels;
     }
 
-    @MethodSource("constructorFeeder")
-    @ParameterizedTest(name = "maxRowsPerFrame = {0}, "
-        + "maxBytesPerFrame = {1}, "
-        + "numChannels = {2}, "
-        + "maxActiveProcessors = {3}, "
-        + "maxChannelsPerProcessor = {4}, "
-        + "numThreads = {5}, "
-        + "isComposedStorage = {6}")
-    public void test_clusterByQualityLongAscRowNumberAsc_onePartition(int maxRowsPerFrame, int maxBytesPerFrame, int numChannels, int maxActiveProcessors, int maxChannelsPerProcessor, int numThreads, boolean isComposedStorage) throws Exception
+    @Test
+    public void test_clusterByQualityLongAscRowNumberAsc_onePartition() throws Exception
     {
-      initParameterizedCasesTest(maxRowsPerFrame, maxBytesPerFrame, numChannels, maxActiveProcessors, maxChannelsPerProcessor, numThreads, isComposedStorage);
       final ClusterBy clusterBy = new ClusterBy(
           ImmutableList.of(
               new KeyColumn("qualityLong", KeyOrder.ASCENDING),
@@ -415,17 +406,9 @@ public class SuperSorterTest
       verifySuperSorter(clusterBy, ClusterByPartitions.oneUniversalPartition());
     }
 
-    @MethodSource("constructorFeeder")
-    @ParameterizedTest(name = "maxRowsPerFrame = {0}, "
-        + "maxBytesPerFrame = {1}, "
-        + "numChannels = {2}, "
-        + "maxActiveProcessors = {3}, "
-        + "maxChannelsPerProcessor = {4}, "
-        + "numThreads = {5}, "
-        + "isComposedStorage = {6}")
-    public void test_clusterByQualityLongAscRowNumberAsc_twoPartitionsOneEmpty(int maxRowsPerFrame, int maxBytesPerFrame, int numChannels, int maxActiveProcessors, int maxChannelsPerProcessor, int numThreads, boolean isComposedStorage) throws Exception
+    @Test
+    public void test_clusterByQualityLongAscRowNumberAsc_twoPartitionsOneEmpty() throws Exception
     {
-      initParameterizedCasesTest(maxRowsPerFrame, maxBytesPerFrame, numChannels, maxActiveProcessors, maxChannelsPerProcessor, numThreads, isComposedStorage);
       final ClusterBy clusterBy = new ClusterBy(
           ImmutableList.of(
               new KeyColumn("qualityLong", KeyOrder.ASCENDING),
@@ -448,7 +431,7 @@ public class SuperSorterTest
       );
 
       // Verify that one of the partitions is actually empty.
-      Assertions.assertEquals(
+      Assert.assertEquals(
           0,
           countSequence(
               FrameTestUtil.readRowsFromFrameChannel(
@@ -459,7 +442,7 @@ public class SuperSorterTest
       );
 
       // Verify that the other partition has all data in it.
-      Assertions.assertEquals(
+      Assert.assertEquals(
           adapter.getNumRows(),
           countSequence(
               FrameTestUtil.readRowsFromFrameChannel(
@@ -470,17 +453,9 @@ public class SuperSorterTest
       );
     }
 
-    @MethodSource("constructorFeeder")
-    @ParameterizedTest(name = "maxRowsPerFrame = {0}, "
-        + "maxBytesPerFrame = {1}, "
-        + "numChannels = {2}, "
-        + "maxActiveProcessors = {3}, "
-        + "maxChannelsPerProcessor = {4}, "
-        + "numThreads = {5}, "
-        + "isComposedStorage = {6}")
-    public void test_clusterByQualityDescRowNumberAsc_fourPartitions(int maxRowsPerFrame, int maxBytesPerFrame, int numChannels, int maxActiveProcessors, int maxChannelsPerProcessor, int numThreads, boolean isComposedStorage) throws Exception
+    @Test
+    public void test_clusterByQualityDescRowNumberAsc_fourPartitions() throws Exception
     {
-      initParameterizedCasesTest(maxRowsPerFrame, maxBytesPerFrame, numChannels, maxActiveProcessors, maxChannelsPerProcessor, numThreads, isComposedStorage);
       final ClusterBy clusterBy = new ClusterBy(
           ImmutableList.of(
               new KeyColumn("quality", KeyOrder.DESCENDING),
@@ -512,22 +487,14 @@ public class SuperSorterTest
           )
       );
 
-      Assertions.assertEquals(4, partitions.size());
+      Assert.assertEquals(4, partitions.size());
 
       verifySuperSorter(clusterBy, partitions);
     }
 
-    @MethodSource("constructorFeeder")
-    @ParameterizedTest(name = "maxRowsPerFrame = {0}, "
-        + "maxBytesPerFrame = {1}, "
-        + "numChannels = {2}, "
-        + "maxActiveProcessors = {3}, "
-        + "maxChannelsPerProcessor = {4}, "
-        + "numThreads = {5}, "
-        + "isComposedStorage = {6}")
-    public void test_clusterByTimeAscMarketAscRowNumberAsc_fourPartitions(int maxRowsPerFrame, int maxBytesPerFrame, int numChannels, int maxActiveProcessors, int maxChannelsPerProcessor, int numThreads, boolean isComposedStorage) throws Exception
+    @Test
+    public void test_clusterByTimeAscMarketAscRowNumberAsc_fourPartitions() throws Exception
     {
-      initParameterizedCasesTest(maxRowsPerFrame, maxBytesPerFrame, numChannels, maxActiveProcessors, maxChannelsPerProcessor, numThreads, isComposedStorage);
       final ClusterBy clusterBy = new ClusterBy(
           ImmutableList.of(
               new KeyColumn(ColumnHolder.TIME_COLUMN_NAME, KeyOrder.ASCENDING),
@@ -560,22 +527,14 @@ public class SuperSorterTest
           )
       );
 
-      Assertions.assertEquals(4, partitions.size());
+      Assert.assertEquals(4, partitions.size());
 
       verifySuperSorter(clusterBy, partitions);
     }
 
-    @MethodSource("constructorFeeder")
-    @ParameterizedTest(name = "maxRowsPerFrame = {0}, "
-        + "maxBytesPerFrame = {1}, "
-        + "numChannels = {2}, "
-        + "maxActiveProcessors = {3}, "
-        + "maxChannelsPerProcessor = {4}, "
-        + "numThreads = {5}, "
-        + "isComposedStorage = {6}")
-    public void test_clusterByPlacementishDescRowNumberAsc_fourPartitions(int maxRowsPerFrame, int maxBytesPerFrame, int numChannels, int maxActiveProcessors, int maxChannelsPerProcessor, int numThreads, boolean isComposedStorage) throws Exception
+    @Test
+    public void test_clusterByPlacementishDescRowNumberAsc_fourPartitions() throws Exception
     {
-      initParameterizedCasesTest(maxRowsPerFrame, maxBytesPerFrame, numChannels, maxActiveProcessors, maxChannelsPerProcessor, numThreads, isComposedStorage);
       final ClusterBy clusterBy = new ClusterBy(
           ImmutableList.of(
               new KeyColumn("placementish", KeyOrder.DESCENDING),
@@ -607,22 +566,14 @@ public class SuperSorterTest
           )
       );
 
-      Assertions.assertEquals(4, partitions.size());
+      Assert.assertEquals(4, partitions.size());
 
       verifySuperSorter(clusterBy, partitions);
     }
 
-    @MethodSource("constructorFeeder")
-    @ParameterizedTest(name = "maxRowsPerFrame = {0}, "
-        + "maxBytesPerFrame = {1}, "
-        + "numChannels = {2}, "
-        + "maxActiveProcessors = {3}, "
-        + "maxChannelsPerProcessor = {4}, "
-        + "numThreads = {5}, "
-        + "isComposedStorage = {6}")
-    public void test_clusterByQualityLongDescRowNumberAsc_fourPartitions(int maxRowsPerFrame, int maxBytesPerFrame, int numChannels, int maxActiveProcessors, int maxChannelsPerProcessor, int numThreads, boolean isComposedStorage) throws Exception
+    @Test
+    public void test_clusterByQualityLongDescRowNumberAsc_fourPartitions() throws Exception
     {
-      initParameterizedCasesTest(maxRowsPerFrame, maxBytesPerFrame, numChannels, maxActiveProcessors, maxChannelsPerProcessor, numThreads, isComposedStorage);
       final ClusterBy clusterBy = new ClusterBy(
           ImmutableList.of(
               new KeyColumn("qualityLong", KeyOrder.DESCENDING),
@@ -654,22 +605,14 @@ public class SuperSorterTest
           )
       );
 
-      Assertions.assertEquals(4, partitions.size());
+      Assert.assertEquals(4, partitions.size());
 
       verifySuperSorter(clusterBy, partitions);
     }
 
-    @MethodSource("constructorFeeder")
-    @ParameterizedTest(name = "maxRowsPerFrame = {0}, "
-        + "maxBytesPerFrame = {1}, "
-        + "numChannels = {2}, "
-        + "maxActiveProcessors = {3}, "
-        + "maxChannelsPerProcessor = {4}, "
-        + "numThreads = {5}, "
-        + "isComposedStorage = {6}")
-    public void test_clusterByQualityLongDescRowNumberAsc_fourPartitions_durableStorage(int maxRowsPerFrame, int maxBytesPerFrame, int numChannels, int maxActiveProcessors, int maxChannelsPerProcessor, int numThreads, boolean isComposedStorage) throws Exception
+    @Test
+    public void test_clusterByQualityLongDescRowNumberAsc_fourPartitions_durableStorage() throws Exception
     {
-      initParameterizedCasesTest(maxRowsPerFrame, maxBytesPerFrame, numChannels, maxActiveProcessors, maxChannelsPerProcessor, numThreads, isComposedStorage);
       final ClusterBy clusterBy = new ClusterBy(
           ImmutableList.of(
               new KeyColumn("qualityLong", KeyOrder.DESCENDING),
@@ -701,7 +644,7 @@ public class SuperSorterTest
           )
       );
 
-      Assertions.assertEquals(4, partitions.size());
+      Assert.assertEquals(4, partitions.size());
 
       verifySuperSorter(clusterBy, partitions);
     }
@@ -710,15 +653,6 @@ public class SuperSorterTest
     {
       final RowSignature keySignature = KeyTestUtils.createKeySignature(clusterBy.getColumns(), signature);
       return KeyTestUtils.createKey(keySignature, objects);
-    }
-
-    private static File newFolder(File root, String... subDirs) throws IOException {
-      String subFolder = String.join("/", subDirs);
-      File result = new File(root, subFolder);
-      if (!result.mkdirs()) {
-        throw new IOException("Couldn't create folders " + root);
-      }
-      return result;
     }
   }
 
@@ -787,14 +721,5 @@ public class SuperSorterTest
         0L,
         (accumulated, in) -> accumulated + 1
     );
-  }
-
-  private static File newFolder(File root, String... subDirs) throws IOException {
-    String subFolder = String.join("/", subDirs);
-    File result = new File(root, subFolder);
-    if (!result.mkdirs()) {
-      throw new IOException("Couldn't create folders " + root);
-    }
-    return result;
   }
 }

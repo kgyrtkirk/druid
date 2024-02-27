@@ -28,17 +28,17 @@ import org.apache.druid.query.ordering.StringComparators;
 import org.apache.druid.segment.ColumnValueSelector;
 import org.apache.druid.segment.data.ComparableIntArray;
 import org.apache.druid.segment.data.ComparableStringArray;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.nio.ByteBuffer;
 
-@ExtendWith(MockitoExtension.class)
+@RunWith(MockitoJUnitRunner.class)
 public class ArrayStringGroupByColumnSelectorStrategyTest
 {
   private final BiMap<String, Integer> dictionaryInt = HashBiMap.create();
@@ -52,7 +52,7 @@ public class ArrayStringGroupByColumnSelectorStrategyTest
 
   private ArrayStringGroupByColumnSelectorStrategy strategy;
 
-  @BeforeEach
+  @Before
   public void setup()
   {
     strategy = new ArrayStringGroupByColumnSelectorStrategy(dictionaryInt, indexedIntArrays);
@@ -71,14 +71,14 @@ public class ArrayStringGroupByColumnSelectorStrategyTest
   @Test
   public void testKeySize()
   {
-    Assertions.assertEquals(Integer.BYTES, strategy.getGroupingKeySize());
+    Assert.assertEquals(Integer.BYTES, strategy.getGroupingKeySize());
   }
 
   @Test
   public void testWriteKey()
   {
     strategy.writeToKeyBuffer(0, 1, buffer1);
-    Assertions.assertEquals(1, buffer1.getInt(0));
+    Assert.assertEquals(1, buffer1.getInt(0));
   }
 
   @Test
@@ -87,8 +87,8 @@ public class ArrayStringGroupByColumnSelectorStrategyTest
     buffer1.putInt(1);
     buffer2.putInt(2);
     Grouper.BufferComparator comparator = strategy.bufferComparator(0, null);
-    Assertions.assertTrue(comparator.compare(buffer1, buffer2, 0, 0) > 0);
-    Assertions.assertTrue(comparator.compare(buffer2, buffer1, 0, 0) < 0);
+    Assert.assertTrue(comparator.compare(buffer1, buffer2, 0, 0) > 0);
+    Assert.assertTrue(comparator.compare(buffer2, buffer1, 0, 0) < 0);
   }
 
   @Test
@@ -97,8 +97,8 @@ public class ArrayStringGroupByColumnSelectorStrategyTest
     buffer1.putInt(1);
     buffer2.putInt(2);
     Grouper.BufferComparator comparator = strategy.bufferComparator(0, StringComparators.LEXICOGRAPHIC);
-    Assertions.assertTrue(comparator.compare(buffer1, buffer2, 0, 0) > 0);
-    Assertions.assertTrue(comparator.compare(buffer2, buffer1, 0, 0) < 0);
+    Assert.assertTrue(comparator.compare(buffer1, buffer2, 0, 0) > 0);
+    Assert.assertTrue(comparator.compare(buffer2, buffer1, 0, 0) < 0);
   }
 
   @Test
@@ -107,8 +107,8 @@ public class ArrayStringGroupByColumnSelectorStrategyTest
     buffer1.putInt(1);
     buffer2.putInt(2);
     Grouper.BufferComparator comparator = strategy.bufferComparator(0, StringComparators.STRLEN);
-    Assertions.assertTrue(comparator.compare(buffer1, buffer2, 0, 0) > 0);
-    Assertions.assertTrue(comparator.compare(buffer2, buffer1, 0, 0) < 0);
+    Assert.assertTrue(comparator.compare(buffer1, buffer2, 0, 0) > 0);
+    Assert.assertTrue(comparator.compare(buffer2, buffer1, 0, 0) < 0);
   }
 
   @Test
@@ -116,7 +116,7 @@ public class ArrayStringGroupByColumnSelectorStrategyTest
   {
     ColumnValueSelector columnValueSelector = Mockito.mock(ColumnValueSelector.class);
     Mockito.when(columnValueSelector.getObject()).thenReturn(ImmutableList.of("a", "b"));
-    Assertions.assertEquals(0, strategy.computeDictionaryId(columnValueSelector));
+    Assert.assertEquals(0, strategy.computeDictionaryId(columnValueSelector));
 
     GroupByColumnSelectorPlus groupByColumnSelectorPlus = Mockito.mock(GroupByColumnSelectorPlus.class);
     Mockito.when(groupByColumnSelectorPlus.getResultRowPosition()).thenReturn(0);
@@ -124,7 +124,7 @@ public class ArrayStringGroupByColumnSelectorStrategyTest
 
     buffer1.putInt(0);
     strategy.processValueFromGroupingKey(groupByColumnSelectorPlus, buffer1, row, 0);
-    Assertions.assertEquals(ComparableStringArray.of("a", "b"), row.get(0));
+    Assert.assertEquals(ComparableStringArray.of("a", "b"), row.get(0));
   }
 
 
@@ -133,7 +133,7 @@ public class ArrayStringGroupByColumnSelectorStrategyTest
   {
     ColumnValueSelector columnValueSelector = Mockito.mock(ColumnValueSelector.class);
     Mockito.when(columnValueSelector.getObject()).thenReturn(ImmutableList.of("f", "a"));
-    Assertions.assertEquals(3, strategy.computeDictionaryId(columnValueSelector));
+    Assert.assertEquals(3, strategy.computeDictionaryId(columnValueSelector));
 
     GroupByColumnSelectorPlus groupByColumnSelectorPlus = Mockito.mock(GroupByColumnSelectorPlus.class);
     Mockito.when(groupByColumnSelectorPlus.getResultRowPosition()).thenReturn(0);
@@ -141,7 +141,7 @@ public class ArrayStringGroupByColumnSelectorStrategyTest
 
     buffer1.putInt(3);
     strategy.processValueFromGroupingKey(groupByColumnSelectorPlus, buffer1, row, 0);
-    Assertions.assertEquals(ComparableStringArray.of("f", "a"), row.get(0));
+    Assert.assertEquals(ComparableStringArray.of("f", "a"), row.get(0));
   }
 
   @Test
@@ -149,7 +149,7 @@ public class ArrayStringGroupByColumnSelectorStrategyTest
   {
     ColumnValueSelector columnValueSelector = Mockito.mock(ColumnValueSelector.class);
     Mockito.when(columnValueSelector.getObject()).thenReturn(new Object[]{"f", "a"});
-    Assertions.assertEquals(3, strategy.computeDictionaryId(columnValueSelector));
+    Assert.assertEquals(3, strategy.computeDictionaryId(columnValueSelector));
 
     GroupByColumnSelectorPlus groupByColumnSelectorPlus = Mockito.mock(GroupByColumnSelectorPlus.class);
     Mockito.when(groupByColumnSelectorPlus.getResultRowPosition()).thenReturn(0);
@@ -157,10 +157,10 @@ public class ArrayStringGroupByColumnSelectorStrategyTest
 
     buffer1.putInt(3);
     strategy.processValueFromGroupingKey(groupByColumnSelectorPlus, buffer1, row, 0);
-    Assertions.assertEquals(ComparableStringArray.of("f", "a"), row.get(0));
+    Assert.assertEquals(ComparableStringArray.of("f", "a"), row.get(0));
   }
 
-  @AfterEach
+  @After
   public void tearDown()
   {
     buffer1.clear();

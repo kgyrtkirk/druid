@@ -33,16 +33,20 @@ import org.apache.druid.server.QueryPrioritizationStrategy;
 import org.easymock.EasyMock;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public class ThresholdBasedQueryPrioritizationStrategyTest
 {
   private final Integer adjustment = 10;
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
   private Druids.TimeseriesQueryBuilder queryBuilder;
 
-  @BeforeEach
+  @Before
   public void setup()
   {
     this.queryBuilder = Druids.newTimeseriesQueryBuilder()
@@ -63,7 +67,7 @@ public class ThresholdBasedQueryPrioritizationStrategyTest
                                         .context(ImmutableMap.of())
                                         .build();
 
-    Assertions.assertFalse(
+    Assert.assertFalse(
         strategy.computePriority(QueryPlus.wrap(query), ImmutableSet.of()).isPresent()
     );
   }
@@ -84,7 +88,7 @@ public class ThresholdBasedQueryPrioritizationStrategyTest
                                         .context(ImmutableMap.of())
                                         .build();
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         -adjustment,
         (int) strategy.computePriority(QueryPlus.wrap(query), ImmutableSet.of()).get()
     );
@@ -106,7 +110,7 @@ public class ThresholdBasedQueryPrioritizationStrategyTest
                                         .context(ImmutableMap.of())
                                         .build();
 
-    Assertions.assertFalse(
+    Assert.assertFalse(
         strategy.computePriority(QueryPlus.wrap(query), ImmutableSet.of()).isPresent()
     );
   }
@@ -127,7 +131,7 @@ public class ThresholdBasedQueryPrioritizationStrategyTest
                                         .context(ImmutableMap.of())
                                         .build();
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         -adjustment,
         (int) strategy.computePriority(QueryPlus.wrap(query), ImmutableSet.of()).get()
     );
@@ -149,7 +153,7 @@ public class ThresholdBasedQueryPrioritizationStrategyTest
                                         .context(ImmutableMap.of())
                                         .build();
 
-    Assertions.assertFalse(
+    Assert.assertFalse(
         strategy.computePriority(
             QueryPlus.wrap(query),
             ImmutableSet.of(EasyMock.createMock(SegmentServerSelector.class))
@@ -173,7 +177,7 @@ public class ThresholdBasedQueryPrioritizationStrategyTest
                                         .context(ImmutableMap.of())
                                         .build();
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         -adjustment,
         (int) strategy.computePriority(
             QueryPlus.wrap(query),

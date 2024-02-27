@@ -23,16 +23,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.apache.druid.segment.TestHelper;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.util.Collections;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 public class FilteredDataSourceTest
 {
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
 
   private final TableDataSource fooDataSource = new TableDataSource("foo");
   private final TableDataSource barDataSource = new TableDataSource("bar");
@@ -42,52 +43,51 @@ public class FilteredDataSourceTest
   @Test
   public void test_getTableNames()
   {
-    Assertions.assertEquals(Collections.singleton("foo"), filteredFooDataSource.getTableNames());
+    Assert.assertEquals(Collections.singleton("foo"), filteredFooDataSource.getTableNames());
   }
 
   @Test
   public void test_getChildren()
   {
-    Assertions.assertEquals(Collections.singletonList(fooDataSource), filteredFooDataSource.getChildren());
+    Assert.assertEquals(Collections.singletonList(fooDataSource), filteredFooDataSource.getChildren());
   }
 
   @Test
   public void test_isCacheable()
   {
-    Assertions.assertFalse(filteredFooDataSource.isCacheable(true));
+    Assert.assertFalse(filteredFooDataSource.isCacheable(true));
   }
 
   @Test
   public void test_isGlobal()
   {
-    Assertions.assertFalse(filteredFooDataSource.isGlobal());
+    Assert.assertFalse(filteredFooDataSource.isGlobal());
   }
 
   @Test
   public void test_isConcrete()
   {
-    Assertions.assertTrue(filteredFooDataSource.isConcrete());
+    Assert.assertTrue(filteredFooDataSource.isConcrete());
   }
 
   @Test
   public void test_withChildren_empty()
   {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
-      Assertions.assertSame(filteredFooDataSource, filteredFooDataSource.withChildren(Collections.emptyList()));
-    });
-    assertTrue(exception.getMessage().contains("Expected [1] child"));
+    expectedException.expect(IllegalArgumentException.class);
+    expectedException.expectMessage("Expected [1] child");
+    Assert.assertSame(filteredFooDataSource, filteredFooDataSource.withChildren(Collections.emptyList()));
   }
 
   @Test
   public void test_withChildren_nonEmpty()
   {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
-      FilteredDataSource newFilteredDataSource = (FilteredDataSource) filteredFooDataSource.withChildren(ImmutableList.of(
-          new TableDataSource("bar")));
-      Assertions.assertTrue(newFilteredDataSource.getBase().equals(barDataSource));
-      filteredFooDataSource.withChildren(ImmutableList.of(fooDataSource, barDataSource));
-    });
-    assertTrue(exception.getMessage().contains("Expected [1] child"));
+    FilteredDataSource newFilteredDataSource = (FilteredDataSource) filteredFooDataSource.withChildren(ImmutableList.of(
+        new TableDataSource("bar")));
+    Assert.assertTrue(newFilteredDataSource.getBase().equals(barDataSource));
+
+    expectedException.expect(IllegalArgumentException.class);
+    expectedException.expectMessage("Expected [1] child");
+    filteredFooDataSource.withChildren(ImmutableList.of(fooDataSource, barDataSource));
   }
 
   @Test
@@ -95,13 +95,13 @@ public class FilteredDataSourceTest
   {
     FilteredDataSource newFilteredDataSource = (FilteredDataSource) filteredFooDataSource.withUpdatedDataSource(
         new TableDataSource("bar"));
-    Assertions.assertTrue(newFilteredDataSource.getBase().equals(barDataSource));
+    Assert.assertTrue(newFilteredDataSource.getBase().equals(barDataSource));
   }
 
   @Test
   public void test_withAnalysis()
   {
-    Assertions.assertTrue(filteredFooDataSource.getAnalysis().equals(fooDataSource.getAnalysis()));
+    Assert.assertTrue(filteredFooDataSource.getAnalysis().equals(fooDataSource.getAnalysis()));
   }
 
   @Test
@@ -119,8 +119,8 @@ public class FilteredDataSourceTest
         DataSource.class
     );
 
-    Assertions.assertEquals(filteredFooDataSource, deserialized);
-    Assertions.assertNotEquals(fooDataSource, deserialized);
+    Assert.assertEquals(filteredFooDataSource, deserialized);
+    Assert.assertNotEquals(fooDataSource, deserialized);
   }
 
   @Test
@@ -133,8 +133,8 @@ public class FilteredDataSourceTest
         FilteredDataSource.class
     );
 
-    Assertions.assertEquals(filteredFooDataSource, deserializedFilteredDataSource);
-    Assertions.assertNotEquals(fooDataSource, deserializedFilteredDataSource);
+    Assert.assertEquals(filteredFooDataSource, deserializedFilteredDataSource);
+    Assert.assertNotEquals(fooDataSource, deserializedFilteredDataSource);
   }
 
   @Test
@@ -142,12 +142,12 @@ public class FilteredDataSourceTest
   {
     final ObjectMapper jsonMapper = TestHelper.makeJsonMapper();
     final String s = jsonMapper.writeValueAsString(filteredFooDataSource);
-    Assertions.assertEquals("{\"type\":\"filter\",\"base\":{\"type\":\"table\",\"name\":\"foo\"},\"filter\":null}", s);
+    Assert.assertEquals("{\"type\":\"filter\",\"base\":{\"type\":\"table\",\"name\":\"foo\"},\"filter\":null}", s);
   }
 
   @Test
   public void testStringRep()
   {
-    Assertions.assertFalse(filteredFooDataSource.toString().equals(filteredBarDataSource.toString()));
+    Assert.assertFalse(filteredFooDataSource.toString().equals(filteredBarDataSource.toString()));
   }
 }

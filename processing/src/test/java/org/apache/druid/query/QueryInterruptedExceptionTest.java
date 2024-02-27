@@ -23,8 +23,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.druid.java.util.common.ISE;
 import org.apache.druid.java.util.common.UOE;
 import org.apache.druid.segment.TestHelper;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.concurrent.CancellationException;
 
@@ -35,16 +35,16 @@ public class QueryInterruptedExceptionTest
   @Test
   public void testErrorCode()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         "Query cancelled",
         new QueryInterruptedException(new QueryInterruptedException(new CancellationException())).getErrorCode()
     );
-    Assertions.assertEquals("Query cancelled", new QueryInterruptedException(new CancellationException()).getErrorCode());
-    Assertions.assertEquals("Query interrupted", new QueryInterruptedException(new InterruptedException()).getErrorCode());
-    Assertions.assertEquals("Unsupported operation", new QueryInterruptedException(new UOE("Unsupported")).getErrorCode());
-    Assertions.assertEquals("Unknown exception", new QueryInterruptedException(null).getErrorCode());
-    Assertions.assertEquals("Unknown exception", new QueryInterruptedException(new ISE("Something bad!")).getErrorCode());
-    Assertions.assertEquals(
+    Assert.assertEquals("Query cancelled", new QueryInterruptedException(new CancellationException()).getErrorCode());
+    Assert.assertEquals("Query interrupted", new QueryInterruptedException(new InterruptedException()).getErrorCode());
+    Assert.assertEquals("Unsupported operation", new QueryInterruptedException(new UOE("Unsupported")).getErrorCode());
+    Assert.assertEquals("Unknown exception", new QueryInterruptedException(null).getErrorCode());
+    Assert.assertEquals("Unknown exception", new QueryInterruptedException(new ISE("Something bad!")).getErrorCode());
+    Assert.assertEquals(
         "Unknown exception",
         new QueryInterruptedException(new QueryInterruptedException(new ISE("Something bad!"))).getErrorCode()
     );
@@ -53,27 +53,27 @@ public class QueryInterruptedExceptionTest
   @Test
   public void testErrorMessage()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         null,
         new QueryInterruptedException(new QueryInterruptedException(new CancellationException())).getMessage()
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         null,
         new QueryInterruptedException(new CancellationException()).getMessage()
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         null,
         new QueryInterruptedException(new InterruptedException()).getMessage()
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         null,
         new QueryInterruptedException(null).getMessage()
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         "Something bad!",
         new QueryInterruptedException(new ISE("Something bad!")).getMessage()
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         "Something bad!",
         new QueryInterruptedException(new QueryInterruptedException(new ISE("Something bad!"))).getMessage()
     );
@@ -82,27 +82,27 @@ public class QueryInterruptedExceptionTest
   @Test
   public void testErrorClass()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         "java.util.concurrent.CancellationException",
         new QueryInterruptedException(new QueryInterruptedException(new CancellationException())).getErrorClass()
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         "java.util.concurrent.CancellationException",
         new QueryInterruptedException(new CancellationException()).getErrorClass()
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         "java.lang.InterruptedException",
         new QueryInterruptedException(new InterruptedException()).getErrorClass()
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         null,
         new QueryInterruptedException(null).getErrorClass()
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         "org.apache.druid.java.util.common.ISE",
         new QueryInterruptedException(new ISE("Something bad!")).getErrorClass()
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         "org.apache.druid.java.util.common.ISE",
         new QueryInterruptedException(new QueryInterruptedException(new ISE("Something bad!"))).getErrorClass()
     );
@@ -111,7 +111,7 @@ public class QueryInterruptedExceptionTest
   @Test
   public void testHost()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         "myhost",
         new QueryInterruptedException(new QueryInterruptedException(new CancellationException(), "myhost")).getHost()
     );
@@ -120,51 +120,51 @@ public class QueryInterruptedExceptionTest
   @Test
   public void testSerde()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         "Query cancelled",
         roundTrip(new QueryInterruptedException(new QueryInterruptedException(new CancellationException()))).getErrorCode()
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         "java.util.concurrent.CancellationException",
         roundTrip(new QueryInterruptedException(new QueryInterruptedException(new CancellationException()))).getErrorClass()
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         null,
         roundTrip(new QueryInterruptedException(new QueryInterruptedException(new CancellationException()))).getMessage()
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         "java.util.concurrent.CancellationException",
         roundTrip(new QueryInterruptedException(new CancellationException())).getErrorClass()
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         "java.lang.InterruptedException",
         roundTrip(new QueryInterruptedException(new InterruptedException())).getErrorClass()
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         null,
         roundTrip(new QueryInterruptedException(null)).getErrorClass()
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         "org.apache.druid.java.util.common.ISE",
         roundTrip(new QueryInterruptedException(new ISE("Something bad!"))).getErrorClass()
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         "org.apache.druid.java.util.common.ISE",
         roundTrip(new QueryInterruptedException(new QueryInterruptedException(new ISE("Something bad!")))).getErrorClass()
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         "Something bad!",
         roundTrip(new QueryInterruptedException(new ISE("Something bad!"))).getMessage()
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         "Something bad!",
         roundTrip(new QueryInterruptedException(new QueryInterruptedException(new ISE("Something bad!")))).getMessage()
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         "Unknown exception",
         roundTrip(new QueryInterruptedException(new ISE("Something bad!"))).getErrorCode()
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         "Unknown exception",
         roundTrip(new QueryInterruptedException(new QueryInterruptedException(new ISE("Something bad!")))).getErrorCode()
     );
@@ -180,11 +180,11 @@ public class QueryInterruptedExceptionTest
         "host"
     );
     String exceptionString = exception.toString();
-    Assertions.assertTrue(exceptionString.startsWith(QueryInterruptedException.class.getSimpleName()));
-    Assertions.assertTrue(exceptionString.contains("code=" + "error"));
-    Assertions.assertTrue(exceptionString.contains("msg=" + "error messagez"));
-    Assertions.assertTrue(exceptionString.contains("class=" + "error class"));
-    Assertions.assertTrue(exceptionString.contains("host=" + "host"));
+    Assert.assertTrue(exceptionString.startsWith(QueryInterruptedException.class.getSimpleName()));
+    Assert.assertTrue(exceptionString.contains("code=" + "error"));
+    Assert.assertTrue(exceptionString.contains("msg=" + "error messagez"));
+    Assert.assertTrue(exceptionString.contains("class=" + "error class"));
+    Assert.assertTrue(exceptionString.contains("host=" + "host"));
 
   }
 

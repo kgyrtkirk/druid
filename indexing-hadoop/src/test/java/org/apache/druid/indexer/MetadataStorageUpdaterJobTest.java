@@ -21,6 +21,7 @@ package org.apache.druid.indexer;
 
 import com.google.common.collect.ImmutableList;
 import org.apache.druid.indexer.updater.MetadataStorageUpdaterJobSpec;
+import org.junit.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 

@@ -23,13 +23,12 @@ import org.apache.druid.frame.allocation.HeapMemoryAllocator;
 import org.apache.druid.frame.channel.BlockingQueueFrameChannel;
 import org.apache.druid.frame.channel.WritableFrameFileChannel;
 import org.hamcrest.CoreMatchers;
+import org.hamcrest.MatcherAssert;
+import org.junit.Assert;
+import org.junit.Test;
 import org.junit.internal.matchers.ThrowableMessageMatcher;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-
-import static org.hamcrest.MatcherAssert.assertThat;
 
 public class OutputChannelTest
 {
@@ -38,27 +37,27 @@ public class OutputChannelTest
   {
     final OutputChannel channel = OutputChannel.nil(1);
 
-    Assertions.assertEquals(1, channel.getPartitionNumber());
-    Assertions.assertTrue(channel.getReadableChannel().isFinished());
+    Assert.assertEquals(1, channel.getPartitionNumber());
+    Assert.assertTrue(channel.getReadableChannel().isFinished());
 
     // No writable channel: cannot call getWritableChannel.
-    final IllegalStateException e1 = Assertions.assertThrows(IllegalStateException.class, channel::getWritableChannel);
-    assertThat(
+    final IllegalStateException e1 = Assert.assertThrows(IllegalStateException.class, channel::getWritableChannel);
+    MatcherAssert.assertThat(
         e1,
         ThrowableMessageMatcher.hasMessage(CoreMatchers.equalTo(
         "Writable channel is not available. The output channel might be marked as read-only, hence no writes are allowed."))
     );
 
     // No writable channel: cannot call getFrameMemoryAllocator.
-    final IllegalStateException e2 = Assertions.assertThrows(IllegalStateException.class, channel::getFrameMemoryAllocator);
-    assertThat(
+    final IllegalStateException e2 = Assert.assertThrows(IllegalStateException.class, channel::getFrameMemoryAllocator);
+    MatcherAssert.assertThat(
         e2,
         ThrowableMessageMatcher.hasMessage(CoreMatchers.equalTo(
             "Frame allocator is not available. The output channel might be marked as read-only, hence memory allocator is not required."))
     );
 
     // Mapping the writable channel of a nil channel has no effect, because there is no writable channel.
-    Assertions.assertSame(
+    Assert.assertSame(
         channel,
         channel.mapWritableChannel(c -> BlockingQueueFrameChannel.minimal().writable())
     );
@@ -76,39 +75,39 @@ public class OutputChannelTest
         1
     );
 
-    Assertions.assertEquals(1, channel.getPartitionNumber());
-    final IllegalStateException e1 = Assertions.assertThrows(
+    Assert.assertEquals(1, channel.getPartitionNumber());
+    final IllegalStateException e1 = Assert.assertThrows(
         IllegalStateException.class,
         channel::getReadableChannel
     );
-    Assertions.assertEquals("Readable channel is not ready", e1.getMessage());
-    Assertions.assertSame(theChannel.writable(), channel.getWritableChannel());
-    Assertions.assertSame(allocator, channel.getFrameMemoryAllocator());
-    Assertions.assertFalse(channel.isReadableChannelReady());
+    Assert.assertEquals("Readable channel is not ready", e1.getMessage());
+    Assert.assertSame(theChannel.writable(), channel.getWritableChannel());
+    Assert.assertSame(allocator, channel.getFrameMemoryAllocator());
+    Assert.assertFalse(channel.isReadableChannelReady());
 
     // Close writable channel; now readable channel is ready.
     theChannel.writable().close();
-    Assertions.assertTrue(channel.isReadableChannelReady());
+    Assert.assertTrue(channel.isReadableChannelReady());
 
-    Assertions.assertEquals(1, channel.getPartitionNumber());
-    Assertions.assertSame(theChannel.readable(), channel.getReadableChannel());
-    Assertions.assertSame(theChannel.writable(), channel.getWritableChannel());
-    Assertions.assertSame(allocator, channel.getFrameMemoryAllocator());
-    Assertions.assertTrue(channel.isReadableChannelReady());
+    Assert.assertEquals(1, channel.getPartitionNumber());
+    Assert.assertSame(theChannel.readable(), channel.getReadableChannel());
+    Assert.assertSame(theChannel.writable(), channel.getWritableChannel());
+    Assert.assertSame(allocator, channel.getFrameMemoryAllocator());
+    Assert.assertTrue(channel.isReadableChannelReady());
 
     // Use mapWritableChannel to replace the writable channel with an open one; readable channel is no longer ready.
     final WritableFrameFileChannel otherWritableChannel = new WritableFrameFileChannel(null);
     final OutputChannel mappedChannel = channel.mapWritableChannel(c -> otherWritableChannel);
 
-    Assertions.assertEquals(1, mappedChannel.getPartitionNumber());
-    final IllegalStateException e2 = Assertions.assertThrows(
+    Assert.assertEquals(1, mappedChannel.getPartitionNumber());
+    final IllegalStateException e2 = Assert.assertThrows(
         IllegalStateException.class,
         mappedChannel::getReadableChannel
     );
-    Assertions.assertEquals("Readable channel is not ready", e2.getMessage());
-    Assertions.assertSame(otherWritableChannel, mappedChannel.getWritableChannel());
-    Assertions.assertSame(allocator, mappedChannel.getFrameMemoryAllocator());
-    Assertions.assertFalse(mappedChannel.isReadableChannelReady());
+    Assert.assertEquals("Readable channel is not ready", e2.getMessage());
+    Assert.assertSame(otherWritableChannel, mappedChannel.getWritableChannel());
+    Assert.assertSame(allocator, mappedChannel.getFrameMemoryAllocator());
+    Assert.assertFalse(mappedChannel.isReadableChannelReady());
   }
 
   @Test
@@ -123,20 +122,20 @@ public class OutputChannelTest
         1
     );
 
-    Assertions.assertEquals(1, channel.getPartitionNumber());
-    Assertions.assertSame(theChannel.readable(), channel.getReadableChannel());
-    Assertions.assertSame(theChannel.writable(), channel.getWritableChannel());
-    Assertions.assertSame(allocator, channel.getFrameMemoryAllocator());
-    Assertions.assertTrue(channel.isReadableChannelReady());
+    Assert.assertEquals(1, channel.getPartitionNumber());
+    Assert.assertSame(theChannel.readable(), channel.getReadableChannel());
+    Assert.assertSame(theChannel.writable(), channel.getWritableChannel());
+    Assert.assertSame(allocator, channel.getFrameMemoryAllocator());
+    Assert.assertTrue(channel.isReadableChannelReady());
 
     // Use mapWritableChannel to replace the writable channel.
     final WritableFrameFileChannel otherWritableChannel = new WritableFrameFileChannel(null);
     final OutputChannel mappedChannel = channel.mapWritableChannel(c -> otherWritableChannel);
 
-    Assertions.assertEquals(1, mappedChannel.getPartitionNumber());
-    Assertions.assertSame(theChannel.readable(), mappedChannel.getReadableChannel());
-    Assertions.assertSame(otherWritableChannel, mappedChannel.getWritableChannel());
-    Assertions.assertSame(allocator, mappedChannel.getFrameMemoryAllocator());
-    Assertions.assertTrue(channel.isReadableChannelReady());
+    Assert.assertEquals(1, mappedChannel.getPartitionNumber());
+    Assert.assertSame(theChannel.readable(), mappedChannel.getReadableChannel());
+    Assert.assertSame(otherWritableChannel, mappedChannel.getWritableChannel());
+    Assert.assertSame(allocator, mappedChannel.getFrameMemoryAllocator());
+    Assert.assertTrue(channel.isReadableChannelReady());
   }
 }

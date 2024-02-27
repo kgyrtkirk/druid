@@ -22,8 +22,8 @@ package org.apache.druid.rpc;
 import com.google.common.collect.ImmutableSet;
 import org.apache.druid.server.coordination.DruidServerMetadata;
 import org.apache.druid.server.coordination.ServerType;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.concurrent.ExecutionException;
 
@@ -45,7 +45,7 @@ public class FixedSetServiceLocatorTest
     FixedSetServiceLocator serviceLocator
         = FixedSetServiceLocator.forDruidServerMetadata(null);
 
-    Assertions.assertTrue(serviceLocator.locate().get().isClosed());
+    Assert.assertTrue(serviceLocator.locate().get().isClosed());
   }
 
 
@@ -55,7 +55,7 @@ public class FixedSetServiceLocatorTest
     FixedSetServiceLocator serviceLocator
         = FixedSetServiceLocator.forDruidServerMetadata(ImmutableSet.of(DATA_SERVER_1));
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ServiceLocations.forLocation(ServiceLocation.fromDruidServerMetadata(DATA_SERVER_1)),
         serviceLocator.locate().get()
     );

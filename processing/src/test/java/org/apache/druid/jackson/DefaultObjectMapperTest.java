@@ -30,8 +30,8 @@ import org.apache.druid.java.util.common.guava.Yielders;
 import org.apache.druid.query.Query;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Arrays;
 
@@ -47,7 +47,7 @@ public class DefaultObjectMapperTest
   {
     final DateTime time = DateTimes.nowUtc();
 
-    Assertions.assertEquals(StringUtils.format("\"%s\"", time), mapper.writeValueAsString(time));
+    Assert.assertEquals(StringUtils.format("\"%s\"", time), mapper.writeValueAsString(time));
   }
 
   @Test
@@ -65,7 +65,7 @@ public class DefaultObjectMapperTest
         )
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         "[\"a\",\"b\",null,\"1970-01-01T00:00:00.002Z\",5,\"UTC\",\"c\"]",
         mapper.writeValueAsString(Yielders.each(sequence))
     );
@@ -80,11 +80,11 @@ public class DefaultObjectMapperTest
     }
     catch (InvalidTypeIdException e) {
       String message = e.getMessage();
-      Assertions.assertTrue(message.startsWith("Please make sure to load all the necessary extensions and " +
-          "jars with type 'random' on 'testService' service."), message);
+      Assert.assertTrue(message, message.startsWith("Please make sure to load all the necessary extensions and " +
+          "jars with type 'random' on 'testService' service."));
       return;
     }
-    Assertions.fail("We expect InvalidTypeIdException to be thrown");
+    Assert.fail("We expect InvalidTypeIdException to be thrown");
   }
 
   @Test
@@ -96,10 +96,10 @@ public class DefaultObjectMapperTest
     }
     catch (InvalidTypeIdException e) {
       String message = e.getMessage();
-      Assertions.assertTrue(message.startsWith("Please make sure to load all the necessary extensions and " +
-          "jars with type 'random'."), message);
+      Assert.assertTrue(message, message.startsWith("Please make sure to load all the necessary extensions and " +
+          "jars with type 'random'."));
       return;
     }
-    Assertions.fail("We expect InvalidTypeIdException to be thrown");
+    Assert.fail("We expect InvalidTypeIdException to be thrown");
   }
 }

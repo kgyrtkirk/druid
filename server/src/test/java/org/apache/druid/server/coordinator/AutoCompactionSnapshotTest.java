@@ -19,8 +19,8 @@
 
 package org.apache.druid.server.coordinator;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class AutoCompactionSnapshotTest
 {
@@ -48,18 +48,18 @@ public class AutoCompactionSnapshotTest
 
     AutoCompactionSnapshot actual = builder.build();
 
-    Assertions.assertNotNull(actual);
-    Assertions.assertEquals(26, actual.getSegmentCountSkipped());
-    Assertions.assertEquals(26, actual.getIntervalCountSkipped());
-    Assertions.assertEquals(26, actual.getBytesSkipped());
-    Assertions.assertEquals(26, actual.getBytesCompacted());
-    Assertions.assertEquals(26, actual.getIntervalCountCompacted());
-    Assertions.assertEquals(26, actual.getSegmentCountCompacted());
-    Assertions.assertEquals(26, actual.getBytesAwaitingCompaction());
-    Assertions.assertEquals(26, actual.getIntervalCountAwaitingCompaction());
-    Assertions.assertEquals(26, actual.getSegmentCountAwaitingCompaction());
-    Assertions.assertEquals(AutoCompactionSnapshot.AutoCompactionScheduleStatus.RUNNING, actual.getScheduleStatus());
-    Assertions.assertEquals(expectedDataSource, actual.getDataSource());
+    Assert.assertNotNull(actual);
+    Assert.assertEquals(26, actual.getSegmentCountSkipped());
+    Assert.assertEquals(26, actual.getIntervalCountSkipped());
+    Assert.assertEquals(26, actual.getBytesSkipped());
+    Assert.assertEquals(26, actual.getBytesCompacted());
+    Assert.assertEquals(26, actual.getIntervalCountCompacted());
+    Assert.assertEquals(26, actual.getSegmentCountCompacted());
+    Assert.assertEquals(26, actual.getBytesAwaitingCompaction());
+    Assert.assertEquals(26, actual.getIntervalCountAwaitingCompaction());
+    Assert.assertEquals(26, actual.getSegmentCountAwaitingCompaction());
+    Assert.assertEquals(AutoCompactionSnapshot.AutoCompactionScheduleStatus.RUNNING, actual.getScheduleStatus());
+    Assert.assertEquals(expectedDataSource, actual.getDataSource());
 
     AutoCompactionSnapshot expected = new AutoCompactionSnapshot(
         expectedDataSource,
@@ -74,6 +74,6 @@ public class AutoCompactionSnapshotTest
         26,
         26
     );
-    Assertions.assertEquals(expected, actual);
+    Assert.assertEquals(expected, actual);
   }
 }

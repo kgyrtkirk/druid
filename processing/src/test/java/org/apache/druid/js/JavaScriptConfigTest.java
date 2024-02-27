@@ -20,8 +20,8 @@
 package org.apache.druid.js;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class JavaScriptConfigTest
 {
@@ -41,7 +41,7 @@ public class JavaScriptConfigTest
         ), JavaScriptConfig.class
     );
 
-    Assertions.assertTrue(config.isEnabled());
+    Assert.assertTrue(config.isEnabled());
   }
 
   @Test
@@ -58,6 +58,6 @@ public class JavaScriptConfigTest
         ), JavaScriptConfig.class
     );
 
-    Assertions.assertFalse(config.isEnabled());
+    Assert.assertFalse(config.isEnabled());
   }
 }

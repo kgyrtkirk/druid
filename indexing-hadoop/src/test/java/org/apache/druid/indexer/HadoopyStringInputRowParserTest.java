@@ -22,6 +22,7 @@ package org.apache.druid.indexer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.druid.data.input.impl.InputRowParser;
 import org.junit.Assert;
+import org.junit.Test;
 
 
 /**

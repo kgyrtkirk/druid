@@ -28,8 +28,8 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.google.common.collect.ImmutableMap;
 import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.java.util.common.jackson.JacksonUtils;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -61,7 +61,7 @@ public class JacksonUtilsTest
         new TypeReference<List<SerializableClass>>() {}
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Arrays.asList(new SerializableClass(2), null, new SerializableClass(3)),
         deserializedValues
     );
@@ -88,7 +88,7 @@ public class JacksonUtilsTest
         new TypeReference<List<Object>>() {}
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Arrays.asList("foo", null, 1.23),
         deserializedValues
     );
@@ -101,22 +101,22 @@ public class JacksonUtilsTest
     final byte[] bytes = StringUtils.toUtf8("{\"foo\":\"bar\"}");
     final Map<String, Object> expected = ImmutableMap.of("foo", "bar");
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
+        "readValue(Class)",
         expected,
-        JacksonUtils.readValue(objectMapper, bytes, Map.class),
-        "readValue(Class)"
+        JacksonUtils.readValue(objectMapper, bytes, Map.class)
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
+        "readValue(JavaType)",
         expected,
-        JacksonUtils.readValue(objectMapper, bytes, objectMapper.constructType(Map.class)),
-        "readValue(JavaType)"
+        JacksonUtils.readValue(objectMapper, bytes, objectMapper.constructType(Map.class))
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
+        "readValue(TypeReference)",
         expected,
-        JacksonUtils.readValue(objectMapper, bytes, JacksonUtils.TYPE_REFERENCE_MAP_STRING_STRING),
-        "readValue(TypeReference)"
+        JacksonUtils.readValue(objectMapper, bytes, JacksonUtils.TYPE_REFERENCE_MAP_STRING_STRING)
     );
   }
 

@@ -24,6 +24,7 @@ import org.apache.druid.indexing.overlord.TaskMaster;
 import org.easymock.EasyMock;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URL;

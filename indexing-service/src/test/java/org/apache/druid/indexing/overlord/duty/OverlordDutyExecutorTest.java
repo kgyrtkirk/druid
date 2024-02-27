@@ -21,6 +21,7 @@ package org.apache.druid.indexing.overlord.duty;
 
 import com.google.common.collect.ImmutableSet;
 import org.apache.druid.java.util.common.concurrent.ScheduledExecutorFactory;
+import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 

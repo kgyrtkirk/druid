@@ -24,9 +24,9 @@ import it.unimi.dsi.fastutil.ints.IntList;
 import org.apache.druid.common.config.NullHandling;
 import org.apache.druid.segment.DimensionSelector;
 import org.apache.druid.segment.data.IndexedInts;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 public class PossiblyNullDimensionSelectorTest
 {
@@ -35,7 +35,7 @@ public class PossiblyNullDimensionSelectorTest
   private final DimensionSelector onNullSelector = makeSelector(DimensionSelector.constant(null));
   private final DimensionSelector onNonnullSelector = makeSelector(DimensionSelector.constant("foo"));
 
-  @BeforeAll
+  @BeforeClass
   public static void setUpClass()
   {
     NullHandling.initializeForTests();
@@ -72,51 +72,51 @@ public class PossiblyNullDimensionSelectorTest
   @Test
   public void test_getValueCardinality_onNullSelector()
   {
-    Assertions.assertEquals(1, onNullSelector.getValueCardinality());
+    Assert.assertEquals(1, onNullSelector.getValueCardinality());
   }
 
   @Test
   public void test_getValueCardinality_onNonnullSelector()
   {
-    Assertions.assertEquals(2, onNonnullSelector.getValueCardinality());
+    Assert.assertEquals(2, onNonnullSelector.getValueCardinality());
   }
 
   @Test
   public void test_lookupName_onNullSelector()
   {
-    Assertions.assertNull(onNullSelector.lookupName(0));
+    Assert.assertNull(onNullSelector.lookupName(0));
   }
 
   @Test
   public void test_lookupName_onNonnullSelector()
   {
-    Assertions.assertNull(onNonnullSelector.lookupName(0));
-    Assertions.assertEquals("foo", onNonnullSelector.lookupName(1));
+    Assert.assertNull(onNonnullSelector.lookupName(0));
+    Assert.assertEquals("foo", onNonnullSelector.lookupName(1));
   }
 
   @Test
   public void test_lookupId_onNullSelector()
   {
-    Assertions.assertEquals(0, onNullSelector.idLookup().lookupId(null));
+    Assert.assertEquals(0, onNullSelector.idLookup().lookupId(null));
   }
 
   @Test
   public void test_lookupId_onNonnullSelector()
   {
-    Assertions.assertEquals(0, onNonnullSelector.idLookup().lookupId(null));
-    Assertions.assertEquals(1, onNonnullSelector.idLookup().lookupId("foo"));
+    Assert.assertEquals(0, onNonnullSelector.idLookup().lookupId(null));
+    Assert.assertEquals(1, onNonnullSelector.idLookup().lookupId("foo"));
   }
 
   @Test
   public void test_nameLookupPossibleInAdvance_onNullSelector()
   {
-    Assertions.assertTrue(onNonnullSelector.nameLookupPossibleInAdvance());
+    Assert.assertTrue(onNonnullSelector.nameLookupPossibleInAdvance());
   }
 
   @Test
   public void test_nameLookupPossibleInAdvance_onNonnullSelector()
   {
-    Assertions.assertTrue(onNonnullSelector.nameLookupPossibleInAdvance());
+    Assert.assertTrue(onNonnullSelector.nameLookupPossibleInAdvance());
   }
 
   private DimensionSelector makeSelector(final DimensionSelector baseSelector)
@@ -126,7 +126,7 @@ public class PossiblyNullDimensionSelectorTest
 
   private static void assertRowsEqual(final int[] expected, final IndexedInts actual)
   {
-    Assertions.assertEquals(IntArrayList.wrap(expected), toList(actual));
+    Assert.assertEquals(IntArrayList.wrap(expected), toList(actual));
   }
 
   private static IntList toList(final IndexedInts ints)

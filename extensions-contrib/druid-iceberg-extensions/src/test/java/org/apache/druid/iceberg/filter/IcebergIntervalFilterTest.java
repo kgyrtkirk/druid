@@ -26,6 +26,7 @@ import org.apache.iceberg.expressions.Literal;
 import org.apache.iceberg.types.Types;
 import org.joda.time.Interval;
 import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.List;

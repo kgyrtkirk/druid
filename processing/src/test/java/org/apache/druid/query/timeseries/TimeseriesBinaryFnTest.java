@@ -27,8 +27,8 @@ import org.apache.druid.query.aggregation.AggregatorFactory;
 import org.apache.druid.query.aggregation.CountAggregatorFactory;
 import org.apache.druid.query.aggregation.LongSumAggregatorFactory;
 import org.joda.time.DateTime;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.List;
@@ -84,7 +84,7 @@ public class TimeseriesBinaryFnTest
         result1,
         result2
     );
-    Assertions.assertEquals(expected, actual);
+    Assert.assertEquals(expected, actual);
   }
 
   @Test
@@ -126,7 +126,7 @@ public class TimeseriesBinaryFnTest
         result1,
         result2
     );
-    Assertions.assertEquals(expected, actual);
+    Assert.assertEquals(expected, actual);
   }
 
   @Test
@@ -152,7 +152,7 @@ public class TimeseriesBinaryFnTest
         result1,
         result2
     );
-    Assertions.assertEquals(expected, actual);
+    Assert.assertEquals(expected, actual);
   }
 
   @Test
@@ -194,6 +194,6 @@ public class TimeseriesBinaryFnTest
         result1,
         result2
     );
-    Assertions.assertEquals(expected, actual);
+    Assert.assertEquals(expected, actual);
   }
 }

@@ -28,8 +28,8 @@ import org.apache.druid.guice.Binders;
 import org.apache.druid.guice.GuiceInjectors;
 import org.apache.druid.guice.LazySingleton;
 import org.apache.druid.timeline.DataSegment;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 import org.mockito.Mockito;
 
 import javax.annotation.Nullable;
@@ -59,10 +59,10 @@ public class OmniDataSegmentMoverTest
 
     final Injector injector = createInjector(null);
     final OmniDataSegmentMover segmentMover = injector.getInstance(OmniDataSegmentMover.class);
-    Assertions.assertThrows(
+    Assert.assertThrows(
+        "Unknown loader type[unknown-type]. Known types are [explode]",
         SegmentLoadingException.class,
-        () -> segmentMover.move(segment, ImmutableMap.of()),
-        "Unknown loader type[unknown-type]. Known types are [explode]"
+        () -> segmentMover.move(segment, ImmutableMap.of())
     );
   }
 
@@ -74,10 +74,10 @@ public class OmniDataSegmentMoverTest
 
     final Injector injector = createInjector(null);
     final OmniDataSegmentMover segmentMover = injector.getInstance(OmniDataSegmentMover.class);
-    Assertions.assertThrows(
+    Assert.assertThrows(
+        "BadSegmentMover must not have been initialized",
         RuntimeException.class,
-        () -> segmentMover.move(segment, null),
-        "BadSegmentMover must not have been initialized"
+        () -> segmentMover.move(segment, null)
     );
   }
 

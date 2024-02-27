@@ -74,10 +74,10 @@ import org.apache.druid.segment.incremental.OnheapIncrementalIndex;
 import org.apache.druid.segment.writeout.OffHeapMemorySegmentWriteOutMediumFactory;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.apache.druid.timeline.SegmentId;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -142,7 +142,7 @@ public class GroupByLimitPushDownInsufficientBufferTest extends InitializedNullH
         .build();
   }
 
-  @BeforeEach
+  @Before
   public void setup() throws Exception
   {
     tmpDir = FileUtils.createTempDir();
@@ -265,8 +265,8 @@ public class GroupByLimitPushDownInsufficientBufferTest extends InitializedNullH
 
     resourceCloser.register(() -> {
       // Verify that all objects have been returned to the pools.
-      Assertions.assertEquals(0, mergePool.getOutstandingObjectCount());
-      Assertions.assertEquals(0, tooSmallMergePool.getOutstandingObjectCount());
+      Assert.assertEquals(0, mergePool.getOutstandingObjectCount());
+      Assert.assertEquals(0, tooSmallMergePool.getOutstandingObjectCount());
     });
 
     final GroupByQueryConfig config = new GroupByQueryConfig()
@@ -356,7 +356,7 @@ public class GroupByLimitPushDownInsufficientBufferTest extends InitializedNullH
     );
   }
 
-  @AfterEach
+  @After
   public void tearDown() throws Exception
   {
     for (IncrementalIndex incrementalIndex : incrementalIndices) {
@@ -456,10 +456,10 @@ public class GroupByLimitPushDownInsufficientBufferTest extends InitializedNullH
         "metA", 150L
     );
 
-    Assertions.assertEquals(3, results.size());
-    Assertions.assertEquals(expectedRow0, results.get(0));
-    Assertions.assertEquals(expectedRow1, results.get(1));
-    Assertions.assertEquals(expectedRow2, results.get(2));
+    Assert.assertEquals(3, results.size());
+    Assert.assertEquals(expectedRow0, results.get(0));
+    Assert.assertEquals(expectedRow1, results.get(1));
+    Assert.assertEquals(expectedRow2, results.get(2));
   }
 
   @Test
@@ -553,10 +553,10 @@ public class GroupByLimitPushDownInsufficientBufferTest extends InitializedNullH
         "metA", 190L
     );
 
-    Assertions.assertEquals(3, results.size());
-    Assertions.assertEquals(expectedRow0, results.get(0));
-    Assertions.assertEquals(expectedRow1, results.get(1));
-    Assertions.assertEquals(expectedRow2, results.get(2));
+    Assert.assertEquals(3, results.size());
+    Assert.assertEquals(expectedRow0, results.get(0));
+    Assert.assertEquals(expectedRow1, results.get(1));
+    Assert.assertEquals(expectedRow2, results.get(2));
   }
 
   private List<QueryRunner<ResultRow>> getRunner1()

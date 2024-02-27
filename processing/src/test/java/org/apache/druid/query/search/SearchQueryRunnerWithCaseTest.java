@@ -37,9 +37,10 @@ import org.apache.druid.segment.TestIndex;
 import org.apache.druid.segment.incremental.IncrementalIndex;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.apache.druid.timeline.SegmentId;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,8 +51,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+@RunWith(Parameterized.class)
 public class SearchQueryRunnerWithCaseTest extends InitializedNullHandlingTest
 {
+  @Parameterized.Parameters
   public static Iterable<Object[]> constructorFeeder()
   {
     final SearchQueryConfig[] configs = new SearchQueryConfig[3];
@@ -118,9 +121,9 @@ public class SearchQueryRunnerWithCaseTest extends InitializedNullHandlingTest
     );
   }
 
-  private QueryRunner runner;
+  private final QueryRunner runner;
 
-  public void initSearchQueryRunnerWithCaseTest(
+  public SearchQueryRunnerWithCaseTest(
       QueryRunner runner
   )
   {
@@ -135,11 +138,9 @@ public class SearchQueryRunnerWithCaseTest extends InitializedNullHandlingTest
                  .intervals(QueryRunnerTestHelper.FULL_ON_INTERVAL_SPEC);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest
-  public void testSearch(QueryRunner runner)
+  @Test
+  public void testSearch()
   {
-    initSearchQueryRunnerWithCaseTest(runner);
     Druids.SearchQueryBuilder builder = testBuilder();
     Map<String, Set<String>> expectedResults = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
     SearchQuery searchQuery;
@@ -157,11 +158,9 @@ public class SearchQueryRunnerWithCaseTest extends InitializedNullHandlingTest
     checkSearchQuery(searchQuery, expectedResults);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest
-  public void testSearchSameValueInMultiDims(QueryRunner runner)
+  @Test
+  public void testSearchSameValueInMultiDims()
   {
-    initSearchQueryRunnerWithCaseTest(runner);
     SearchQuery searchQuery;
     Druids.SearchQueryBuilder builder = testBuilder()
         .dimensions(Arrays.asList(
@@ -184,11 +183,9 @@ public class SearchQueryRunnerWithCaseTest extends InitializedNullHandlingTest
     checkSearchQuery(searchQuery, expectedResults);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest
-  public void testSearchIntervals(QueryRunner runner)
+  @Test
+  public void testSearchIntervals()
   {
-    initSearchQueryRunnerWithCaseTest(runner);
     SearchQuery searchQuery;
     Druids.SearchQueryBuilder builder = testBuilder()
         .dimensions(Collections.singletonList(QueryRunnerTestHelper.QUALITY_DIMENSION))
@@ -200,11 +197,9 @@ public class SearchQueryRunnerWithCaseTest extends InitializedNullHandlingTest
     checkSearchQuery(searchQuery, expectedResults);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest
-  public void testSearchNoOverrappingIntervals(QueryRunner runner)
+  @Test
+  public void testSearchNoOverrappingIntervals()
   {
-    initSearchQueryRunnerWithCaseTest(runner);
     SearchQuery searchQuery;
     Druids.SearchQueryBuilder builder = testBuilder()
         .dimensions(Collections.singletonList(QueryRunnerTestHelper.QUALITY_DIMENSION))
@@ -216,11 +211,9 @@ public class SearchQueryRunnerWithCaseTest extends InitializedNullHandlingTest
     checkSearchQuery(searchQuery, expectedResults);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest
-  public void testFragmentSearch(QueryRunner runner)
+  @Test
+  public void testFragmentSearch()
   {
-    initSearchQueryRunnerWithCaseTest(runner);
     Druids.SearchQueryBuilder builder = testBuilder();
     Map<String, Set<String>> expectedResults = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
     SearchQuery searchQuery;
@@ -234,11 +227,9 @@ public class SearchQueryRunnerWithCaseTest extends InitializedNullHandlingTest
     checkSearchQuery(searchQuery, expectedResults);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest
-  public void testFallbackToCursorBasedPlan(QueryRunner runner)
+  @Test
+  public void testFallbackToCursorBasedPlan()
   {
-    initSearchQueryRunnerWithCaseTest(runner);
     final SearchQueryBuilder builder = testBuilder();
     final SearchQuery query = builder.filters("qualityLong", "1000").build();
     final Map<String, Set<String>> expectedResults = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
@@ -261,31 +252,31 @@ public class SearchQueryRunnerWithCaseTest extends InitializedNullHandlingTest
     Iterable<Result<SearchResultValue>> results = runner.run(QueryPlus.wrap(searchQuery)).toList();
 
     for (Result<SearchResultValue> result : results) {
-      Assertions.assertEquals(DateTimes.of("2011-01-12T00:00:00.000Z"), result.getTimestamp());
-      Assertions.assertNotNull(result.getValue());
+      Assert.assertEquals(DateTimes.of("2011-01-12T00:00:00.000Z"), result.getTimestamp());
+      Assert.assertNotNull(result.getValue());
 
       Iterable<SearchHit> resultValues = result.getValue();
       for (SearchHit resultValue : resultValues) {
         String dimension = resultValue.getDimension();
         String theValue = resultValue.getValue();
-        Assertions.assertTrue(
-            expectedResults.containsKey(dimension),
-            StringUtils.format("Result had unknown dimension[%s]", dimension)
+        Assert.assertTrue(
+            StringUtils.format("Result had unknown dimension[%s]", dimension),
+            expectedResults.containsKey(dimension)
         );
 
         Set<String> expectedSet = expectedResults.get(dimension);
-        Assertions.assertTrue(
-            expectedSet.remove(theValue), StringUtils.format("Couldn't remove dim[%s], value[%s]", dimension, theValue)
+        Assert.assertTrue(
+            StringUtils.format("Couldn't remove dim[%s], value[%s]", dimension, theValue), expectedSet.remove(theValue)
         );
       }
     }
 
     for (Map.Entry<String, Set<String>> entry : expectedResults.entrySet()) {
-      Assertions.assertTrue(
-          entry.getValue().isEmpty(),
+      Assert.assertTrue(
           StringUtils.format(
               "Dimension[%s] should have had everything removed, still has[%s]", entry.getKey(), entry.getValue()
-          )
+          ),
+          entry.getValue().isEmpty()
       );
     }
     expectedResults.clear();

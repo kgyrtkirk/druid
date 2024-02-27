@@ -40,8 +40,9 @@ import org.apache.druid.segment.incremental.IncrementalIndex;
 import org.apache.druid.segment.virtual.ExpressionVirtualColumn;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.joda.time.DateTime;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -49,6 +50,7 @@ import java.util.List;
 import java.util.Map;
 
 
+@RunWith(Parameterized.class)
 public class UnnestScanQueryRunnerTest extends InitializedNullHandlingTest
 {
   public static final QuerySegmentSpec I_0112_0114 = ScanQueryRunnerTest.I_0112_0114;
@@ -61,15 +63,16 @@ public class UnnestScanQueryRunnerTest extends InitializedNullHandlingTest
       new ScanQueryEngine(),
       new ScanQueryConfig()
   );
-  private IncrementalIndex index;
-  private boolean legacy;
+  private final IncrementalIndex index;
+  private final boolean legacy;
 
-  public void initUnnestScanQueryRunnerTest(final IncrementalIndex index, final boolean legacy)
+  public UnnestScanQueryRunnerTest(final IncrementalIndex index, final boolean legacy)
   {
     this.index = index;
     this.legacy = legacy;
   }
 
+  @Parameterized.Parameters(name = "{0}")
   public static Iterable<Object[]> constructorFeeder()
   {
     NullHandling.initializeForTests();
@@ -100,11 +103,9 @@ public class UnnestScanQueryRunnerTest extends InitializedNullHandlingTest
                  .legacy(legacy);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testScanOnUnnest(final IncrementalIndex index, final boolean legacy)
+  @Test
+  public void testScanOnUnnest()
   {
-    initUnnestScanQueryRunnerTest(index, legacy);
     ScanQuery query = newTestUnnestQuery()
         .intervals(I_0112_0114)
         .columns(QueryRunnerTestHelper.PLACEMENTISH_DIMENSION_UNNEST)
@@ -160,11 +161,9 @@ public class UnnestScanQueryRunnerTest extends InitializedNullHandlingTest
     ScanQueryRunnerTest.verify(expectedResults, results);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testScanOnUnnestFilterDataSource(final IncrementalIndex index, final boolean legacy)
+  @Test
+  public void testScanOnUnnestFilterDataSource()
   {
-    initUnnestScanQueryRunnerTest(index, legacy);
     ScanQuery query = newTestUnnestQueryWithFilterDataSource()
         .intervals(I_0112_0114)
         .columns(QueryRunnerTestHelper.PLACEMENTISH_DIMENSION_UNNEST)
@@ -220,11 +219,9 @@ public class UnnestScanQueryRunnerTest extends InitializedNullHandlingTest
     ScanQueryRunnerTest.verify(expectedResults, results);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testUnnestRunnerVirtualColumnsUsingSingleColumn(final IncrementalIndex index, final boolean legacy)
+  @Test
+  public void testUnnestRunnerVirtualColumnsUsingSingleColumn()
   {
-    initUnnestScanQueryRunnerTest(index, legacy);
     ScanQuery query =
         Druids.newScanQueryBuilder()
               .intervals(I_0112_0114)
@@ -292,11 +289,9 @@ public class UnnestScanQueryRunnerTest extends InitializedNullHandlingTest
     ScanQueryRunnerTest.verify(expectedResults, results);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testUnnestRunnerVirtualColumnsUsingMultipleColumn(final IncrementalIndex index, final boolean legacy)
+  @Test
+  public void testUnnestRunnerVirtualColumnsUsingMultipleColumn()
   {
-    initUnnestScanQueryRunnerTest(index, legacy);
     ScanQuery query =
         Druids.newScanQueryBuilder()
               .intervals(I_0112_0114)
@@ -376,11 +371,9 @@ public class UnnestScanQueryRunnerTest extends InitializedNullHandlingTest
     ScanQueryRunnerTest.verify(expectedResults, results);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testUnnestRunnerWithFilter(final IncrementalIndex index, final boolean legacy)
+  @Test
+  public void testUnnestRunnerWithFilter()
   {
-    initUnnestScanQueryRunnerTest(index, legacy);
     ScanQuery query = newTestUnnestQuery()
         .intervals(I_0112_0114)
         .columns(QueryRunnerTestHelper.PLACEMENTISH_DIMENSION_UNNEST)
@@ -437,11 +430,9 @@ public class UnnestScanQueryRunnerTest extends InitializedNullHandlingTest
     ScanQueryRunnerTest.verify(expectedResults, results);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testUnnestRunnerWithOrdering(final IncrementalIndex index, final boolean legacy)
+  @Test
+  public void testUnnestRunnerWithOrdering()
   {
-    initUnnestScanQueryRunnerTest(index, legacy);
     ScanQuery query = newTestUnnestQuery()
         .intervals(I_0112_0114)
         .columns(QueryRunnerTestHelper.TIME_DIMENSION, QueryRunnerTestHelper.PLACEMENTISH_DIMENSION_UNNEST)

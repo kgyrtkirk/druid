@@ -35,9 +35,9 @@ import org.apache.druid.segment.IncrementalIndexSegment;
 import org.apache.druid.segment.QueryableIndexSegment;
 import org.apache.druid.segment.TestIndex;
 import org.apache.druid.timeline.SegmentId;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import java.nio.ByteBuffer;
 import java.util.HashMap;
@@ -79,7 +79,7 @@ public class TopNQueryRunnerBenchmark extends AbstractBenchmark
       .build();
   private static final Map<TestCases, QueryRunner> TEST_CASE_MAP = new HashMap<>();
 
-  @BeforeAll
+  @BeforeClass
   public static void setUp()
   {
     QueryRunnerFactory factory = new TopNQueryRunnerFactory(
@@ -133,7 +133,7 @@ public class TopNQueryRunnerBenchmark extends AbstractBenchmark
     TEST_CASE_MAP.get(TestCases.mMappedTestIndex).run(QueryPlus.wrap(QUERY));
   }
 
-  @Disabled
+  @Ignore
   @BenchmarkOptions(warmupRounds = 10000, benchmarkRounds = 10000)
   @Test
   public void testrtIndex()
@@ -141,7 +141,7 @@ public class TopNQueryRunnerBenchmark extends AbstractBenchmark
     TEST_CASE_MAP.get(TestCases.rtIndex).run(QueryPlus.wrap(QUERY));
   }
 
-  @Disabled
+  @Ignore
   @BenchmarkOptions(warmupRounds = 10000, benchmarkRounds = 10000)
   @Test
   public void testMerged()
@@ -149,7 +149,7 @@ public class TopNQueryRunnerBenchmark extends AbstractBenchmark
     TEST_CASE_MAP.get(TestCases.mergedRealtimeIndex).run(QueryPlus.wrap(QUERY));
   }
 
-  @Disabled
+  @Ignore
   @BenchmarkOptions(warmupRounds = 10000, benchmarkRounds = 10000)
   @Test
   public void testOffHeap()

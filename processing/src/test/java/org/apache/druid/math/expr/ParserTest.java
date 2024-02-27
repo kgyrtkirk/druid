@@ -28,9 +28,12 @@ import org.apache.druid.segment.column.TypeStrategiesTest;
 import org.apache.druid.segment.column.TypeStrategy;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.hamcrest.CoreMatchers;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.hamcrest.MatcherAssert;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
@@ -39,18 +42,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 /**
  *
  */
 public class ParserTest extends InitializedNullHandlingTest
 {
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
 
   VectorExprSanityTest.SettableVectorInputBinding emptyBinding = new VectorExprSanityTest.SettableVectorInputBinding(8);
 
-  @BeforeAll
+  @BeforeClass
   public static void setup()
   {
     TypeStrategies.registerComplex(
@@ -64,7 +66,7 @@ public class ParserTest extends InitializedNullHandlingTest
   {
     String actual = Parser.parse("1", ExprMacroTable.nil()).toString();
     String expected = "1";
-    Assertions.assertEquals(expected, actual);
+    Assert.assertEquals(expected, actual);
   }
 
   @Test
@@ -101,38 +103,38 @@ public class ParserTest extends InitializedNullHandlingTest
 
     // When not flattening, the "out of long range" error happens during eval.
     final Expr expr = Parser.parse(s, ExprMacroTable.nil(), false);
-    final ArithmeticException e = Assertions.assertThrows(
+    final ArithmeticException e = Assert.assertThrows(
         ArithmeticException.class,
         () -> expr.eval(InputBindings.nilBindings())
     );
-    assertThat(e.getMessage(), CoreMatchers.containsString("BigInteger out of long range"));
+    MatcherAssert.assertThat(e.getMessage(), CoreMatchers.containsString("BigInteger out of long range"));
 
     // When flattening, the "out of long range" error happens during parse, not eval.
-    final ArithmeticException e2 = Assertions.assertThrows(
+    final ArithmeticException e2 = Assert.assertThrows(
         ArithmeticException.class,
         () -> Parser.parse(s, ExprMacroTable.nil(), true)
     );
-    assertThat(e2.getMessage(), CoreMatchers.containsString("BigInteger out of long range"));
+    MatcherAssert.assertThat(e2.getMessage(), CoreMatchers.containsString("BigInteger out of long range"));
   }
 
   @Test
   public void testFlattenBinaryOpConstantConstant()
   {
     final Expr expr = Parser.parse("(2 + -3)", ExprMacroTable.nil(), true);
-    Assertions.assertTrue(expr.isLiteral());
-    Assertions.assertEquals(-1L, expr.getLiteralValue());
+    Assert.assertTrue(expr.isLiteral());
+    Assert.assertEquals(-1L, expr.getLiteralValue());
   }
 
   @Test
   public void testFlattenBinaryOpIdentifierConstant()
   {
     final Expr expr = Parser.parse("(s + -3)", ExprMacroTable.nil(), true);
-    Assertions.assertFalse(expr.isLiteral());
-    assertThat(expr, CoreMatchers.instanceOf(BinPlusExpr.class));
+    Assert.assertFalse(expr.isLiteral());
+    MatcherAssert.assertThat(expr, CoreMatchers.instanceOf(BinPlusExpr.class));
 
     final Expr right = ((BinPlusExpr) expr).right;
-    Assertions.assertTrue(right.isLiteral());
-    Assertions.assertEquals(-3L, right.getLiteralValue());
+    Assert.assertTrue(right.isLiteral());
+    Assert.assertEquals(-3L, right.getLiteralValue());
   }
 
   @Test
@@ -140,11 +142,11 @@ public class ParserTest extends InitializedNullHandlingTest
   {
     String actual = Parser.parse("-x", ExprMacroTable.nil()).toString();
     String expected = "-x";
-    Assertions.assertEquals(expected, actual);
+    Assert.assertEquals(expected, actual);
 
     actual = Parser.parse("!x", ExprMacroTable.nil()).toString();
     expected = "!x";
-    Assertions.assertEquals(expected, actual);
+    Assert.assertEquals(expected, actual);
   }
 
   @Test
@@ -395,8 +397,8 @@ public class ParserTest extends InitializedNullHandlingTest
     int w1 = byteStrategy.write(bb1, l1, b1.length);
     int w2 = byteStrategy.write(bb2, l2, b2.length);
 
-    Assertions.assertTrue(w1 > 0);
-    Assertions.assertTrue(w2 > 0);
+    Assert.assertTrue(w1 > 0);
+    Assert.assertTrue(w2 > 0);
     String l1String = StringUtils.format(
         "complex_decode_base64('%s', '%s')",
         TypeStrategiesTest.NULLABLE_TEST_PAIR_TYPE.getComplexTypeName(),
@@ -421,28 +423,28 @@ public class ParserTest extends InitializedNullHandlingTest
   @Test
   public void testLiteralArrayImplicitStringParseException()
   {
-    Throwable exception = assertThrows(RE.class, () -> {
-      validateConstantExpression("['1', null, 2000, 1.1]", new Object[]{"1", null, "2000", "1.1"});
-    });
-    assertTrue(exception.getMessage().contains("Failed to parse array: element 2000 is not a string"));
+    // implicit typed string array cannot handle literals thate are not null or string
+    expectedException.expect(RE.class);
+    expectedException.expectMessage("Failed to parse array: element 2000 is not a string");
+    validateConstantExpression("['1', null, 2000, 1.1]", new Object[]{"1", null, "2000", "1.1"});
   }
 
   @Test
   public void testLiteralArraysExplicitLongParseException()
   {
-    Throwable exception = assertThrows(RE.class, () -> {
-      validateConstantExpression("<LONG>[1, null, '2000']", new Object[]{1L, null, 2000L});
-    });
-    assertTrue(exception.getMessage().contains("Failed to parse array element '2000' as a long"));
+    // explicit typed long arrays only handle numeric types
+    expectedException.expect(RE.class);
+    expectedException.expectMessage("Failed to parse array element '2000' as a long");
+    validateConstantExpression("<LONG>[1, null, '2000']", new Object[]{1L, null, 2000L});
   }
 
   @Test
   public void testLiteralArraysExplicitDoubleParseException()
   {
-    Throwable exception = assertThrows(RE.class, () -> {
-      validateConstantExpression("<DOUBLE>[1.0, null, '2000.0']", new Object[]{1.0, null, 2000.0});
-    });
-    assertTrue(exception.getMessage().contains("Failed to parse array element '2000.0' as a double"));
+    // explicit typed double arrays only handle numeric types
+    expectedException.expect(RE.class);
+    expectedException.expectMessage("Failed to parse array element '2000.0' as a double");
+    validateConstantExpression("<DOUBLE>[1.0, null, '2000.0']", new Object[]{1.0, null, 2000.0});
   }
 
   @Test
@@ -761,20 +763,20 @@ public class ParserTest extends InitializedNullHandlingTest
   {
     Expr parsed = Parser.parse(expr, ExprMacroTable.nil(), false);
     Expr parsedFlat = Parser.parse(expr, ExprMacroTable.nil(), true);
-    Assertions.assertTrue(parsed.isLiteral());
-    Assertions.assertTrue(parsedFlat.isLiteral());
-    Assertions.assertFalse(parsed.isIdentifier());
-    Assertions.assertEquals(type, parsed.getOutputType(emptyBinding));
-    Assertions.assertEquals(type, parsedFlat.getOutputType(emptyBinding));
-    Assertions.assertEquals(expected, parsed.getLiteralValue());
-    Assertions.assertEquals(
+    Assert.assertTrue(parsed.isLiteral());
+    Assert.assertTrue(parsedFlat.isLiteral());
+    Assert.assertFalse(parsed.isIdentifier());
+    Assert.assertEquals(type, parsed.getOutputType(emptyBinding));
+    Assert.assertEquals(type, parsedFlat.getOutputType(emptyBinding));
+    Assert.assertEquals(expected, parsed.getLiteralValue());
+    Assert.assertEquals(
         // Special case comparison: literal integers start life as BigIntegerExpr; converted to LongExpr later.
         expected instanceof BigInteger ? ((BigInteger) expected).longValueExact() : expected,
         parsedFlat.getLiteralValue()
     );
     if (roundTrip) {
-      Assertions.assertEquals(expr, parsed.stringify());
-      Assertions.assertEquals(expr, parsedFlat.stringify());
+      Assert.assertEquals(expr, parsed.stringify());
+      Assert.assertEquals(expr, parsedFlat.stringify());
     }
   }
 
@@ -782,15 +784,15 @@ public class ParserTest extends InitializedNullHandlingTest
   {
     Expr notFlat = Parser.parse(expression, ExprMacroTable.nil(), false);
     Expr flat = Parser.parse(expression, ExprMacroTable.nil(), true);
-    Assertions.assertEquals(withoutFlatten, notFlat.toString(), expression);
-    Assertions.assertEquals(withFlatten, flat.toString(), expression);
+    Assert.assertEquals(expression, withoutFlatten, notFlat.toString());
+    Assert.assertEquals(expression, withFlatten, flat.toString());
 
     Expr notFlatRoundTrip = Parser.parse(notFlat.stringify(), ExprMacroTable.nil(), false);
     Expr flatRoundTrip = Parser.parse(flat.stringify(), ExprMacroTable.nil(), true);
-    Assertions.assertEquals(withoutFlatten, notFlatRoundTrip.toString(), expression);
-    Assertions.assertEquals(withFlatten, flatRoundTrip.toString(), expression);
-    Assertions.assertEquals(notFlat.stringify(), notFlatRoundTrip.stringify());
-    Assertions.assertEquals(flat.stringify(), flatRoundTrip.stringify());
+    Assert.assertEquals(expression, withoutFlatten, notFlatRoundTrip.toString());
+    Assert.assertEquals(expression, withFlatten, flatRoundTrip.toString());
+    Assert.assertEquals(notFlat.stringify(), notFlatRoundTrip.stringify());
+    Assert.assertEquals(flat.stringify(), flatRoundTrip.stringify());
   }
 
   private void validateParser(String expression, String expected, List<String> identifiers)
@@ -813,23 +815,23 @@ public class ParserTest extends InitializedNullHandlingTest
   {
     final Expr parsed = Parser.parse(expression, ExprMacroTable.nil());
     if (parsed instanceof IdentifierExpr) {
-      Assertions.assertTrue(parsed.isIdentifier());
+      Assert.assertTrue(parsed.isIdentifier());
     } else {
-      Assertions.assertFalse(parsed.isIdentifier());
+      Assert.assertFalse(parsed.isIdentifier());
     }
     final Expr.BindingAnalysis deets = parsed.analyzeInputs();
-    Assertions.assertEquals(expected, parsed.toString(), expression);
-    Assertions.assertEquals(new HashSet<>(identifiers), deets.getRequiredBindings(), expression);
-    Assertions.assertEquals(scalars, deets.getScalarVariables(), expression);
-    Assertions.assertEquals(arrays, deets.getArrayVariables(), expression);
+    Assert.assertEquals(expression, expected, parsed.toString());
+    Assert.assertEquals(expression, new HashSet<>(identifiers), deets.getRequiredBindings());
+    Assert.assertEquals(expression, scalars, deets.getScalarVariables());
+    Assert.assertEquals(expression, arrays, deets.getArrayVariables());
 
     final Expr parsedNoFlatten = Parser.parse(expression, ExprMacroTable.nil(), false);
     final Expr roundTrip = Parser.parse(parsedNoFlatten.stringify(), ExprMacroTable.nil());
-    Assertions.assertEquals(parsed.stringify(), roundTrip.stringify());
+    Assert.assertEquals(parsed.stringify(), roundTrip.stringify());
     final Expr.BindingAnalysis roundTripDeets = roundTrip.analyzeInputs();
-    Assertions.assertEquals(new HashSet<>(identifiers), roundTripDeets.getRequiredBindings(), expression);
-    Assertions.assertEquals(scalars, roundTripDeets.getScalarVariables(), expression);
-    Assertions.assertEquals(arrays, roundTripDeets.getArrayVariables(), expression);
+    Assert.assertEquals(expression, new HashSet<>(identifiers), roundTripDeets.getRequiredBindings());
+    Assert.assertEquals(expression, scalars, roundTripDeets.getScalarVariables());
+    Assert.assertEquals(expression, arrays, roundTripDeets.getArrayVariables());
   }
 
   private void validateApplyUnapplied(
@@ -843,19 +845,19 @@ public class ParserTest extends InitializedNullHandlingTest
     Expr.BindingAnalysis deets = parsed.analyzeInputs();
     Parser.validateExpr(parsed, deets);
     final Expr transformed = Parser.applyUnappliedBindings(parsed, deets, identifiers);
-    Assertions.assertEquals(unapplied, parsed.toString(), expression);
-    Assertions.assertEquals(applied, transformed.toString(), applied);
+    Assert.assertEquals(expression, unapplied, parsed.toString());
+    Assert.assertEquals(applied, applied, transformed.toString());
 
     final Expr parsedNoFlatten = Parser.parse(expression, ExprMacroTable.nil(), false);
     final Expr parsedRoundTrip = Parser.parse(parsedNoFlatten.stringify(), ExprMacroTable.nil());
     Expr.BindingAnalysis roundTripDeets = parsedRoundTrip.analyzeInputs();
     Parser.validateExpr(parsedRoundTrip, roundTripDeets);
     final Expr transformedRoundTrip = Parser.applyUnappliedBindings(parsedRoundTrip, roundTripDeets, identifiers);
-    Assertions.assertEquals(unapplied, parsedRoundTrip.toString(), expression);
-    Assertions.assertEquals(applied, transformedRoundTrip.toString(), applied);
+    Assert.assertEquals(expression, unapplied, parsedRoundTrip.toString());
+    Assert.assertEquals(applied, applied, transformedRoundTrip.toString());
 
-    Assertions.assertEquals(parsed.stringify(), parsedRoundTrip.stringify());
-    Assertions.assertEquals(transformed.stringify(), transformedRoundTrip.stringify());
+    Assert.assertEquals(parsed.stringify(), parsedRoundTrip.stringify());
+    Assert.assertEquals(transformed.stringify(), transformedRoundTrip.stringify());
   }
 
   private void validateFoldUnapplied(
@@ -870,58 +872,58 @@ public class ParserTest extends InitializedNullHandlingTest
     Expr.BindingAnalysis deets = parsed.analyzeInputs();
     Parser.validateExpr(parsed, deets);
     final Expr transformed = Parser.foldUnappliedBindings(parsed, deets, identifiers, accumulator);
-    Assertions.assertEquals(unapplied, parsed.toString(), expression);
-    Assertions.assertEquals(applied, transformed.toString(), applied);
+    Assert.assertEquals(expression, unapplied, parsed.toString());
+    Assert.assertEquals(applied, applied, transformed.toString());
 
     final Expr parsedNoFlatten = Parser.parse(expression, ExprMacroTable.nil(), false);
     final Expr parsedRoundTrip = Parser.parse(parsedNoFlatten.stringify(), ExprMacroTable.nil());
     Expr.BindingAnalysis roundTripDeets = parsedRoundTrip.analyzeInputs();
     Parser.validateExpr(parsedRoundTrip, roundTripDeets);
     final Expr transformedRoundTrip = Parser.foldUnappliedBindings(parsedRoundTrip, roundTripDeets, identifiers, accumulator);
-    Assertions.assertEquals(unapplied, parsedRoundTrip.toString(), expression);
-    Assertions.assertEquals(applied, transformedRoundTrip.toString(), applied);
+    Assert.assertEquals(expression, unapplied, parsedRoundTrip.toString());
+    Assert.assertEquals(applied, applied, transformedRoundTrip.toString());
 
-    Assertions.assertEquals(parsed.stringify(), parsedRoundTrip.stringify());
-    Assertions.assertEquals(transformed.stringify(), transformedRoundTrip.stringify());
+    Assert.assertEquals(parsed.stringify(), parsedRoundTrip.stringify());
+    Assert.assertEquals(transformed.stringify(), transformedRoundTrip.stringify());
   }
 
   private void validateConstantExpression(String expression, Object expected)
   {
     Expr parsed = Parser.parse(expression, ExprMacroTable.nil());
-    Assertions.assertEquals(
+    Assert.assertEquals(
+        expression,
         expected,
-        parsed.eval(InputBindings.nilBindings()).value(),
-        expression
+        parsed.eval(InputBindings.nilBindings()).value()
     );
 
     final Expr parsedNoFlatten = Parser.parse(expression, ExprMacroTable.nil(), false);
     Expr parsedRoundTrip = Parser.parse(parsedNoFlatten.stringify(), ExprMacroTable.nil());
-    Assertions.assertEquals(
+    Assert.assertEquals(
+        expression,
         expected,
-        parsedRoundTrip.eval(InputBindings.nilBindings()).value(),
-        expression
+        parsedRoundTrip.eval(InputBindings.nilBindings()).value()
     );
-    Assertions.assertEquals(parsed.stringify(), parsedRoundTrip.stringify());
+    Assert.assertEquals(parsed.stringify(), parsedRoundTrip.stringify());
   }
 
   private void validateConstantExpression(String expression, Object[] expected)
   {
     Expr parsed = Parser.parse(expression, ExprMacroTable.nil());
     Object evaluated = parsed.eval(InputBindings.nilBindings()).value();
-    Assertions.assertArrayEquals(
+    Assert.assertArrayEquals(
+        expression,
         expected,
-        (Object[]) evaluated,
-        expression
+        (Object[]) evaluated
     );
 
-    Assertions.assertEquals(expected.getClass(), evaluated.getClass());
+    Assert.assertEquals(expected.getClass(), evaluated.getClass());
     final Expr parsedNoFlatten = Parser.parse(expression, ExprMacroTable.nil(), false);
     Expr roundTrip = Parser.parse(parsedNoFlatten.stringify(), ExprMacroTable.nil());
-    Assertions.assertArrayEquals(
+    Assert.assertArrayEquals(
+        expression,
         expected,
-        (Object[]) roundTrip.eval(InputBindings.nilBindings()).value(),
-        expression
+        (Object[]) roundTrip.eval(InputBindings.nilBindings()).value()
     );
-    Assertions.assertEquals(parsed.stringify(), roundTrip.stringify());
+    Assert.assertEquals(parsed.stringify(), roundTrip.stringify());
   }
 }

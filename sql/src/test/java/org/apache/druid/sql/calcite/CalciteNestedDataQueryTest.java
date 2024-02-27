@@ -74,9 +74,8 @@ import org.apache.druid.sql.calcite.filtration.Filtration;
 import org.apache.druid.sql.calcite.util.TestDataBuilder;
 import org.apache.druid.timeline.DataSegment;
 import org.apache.druid.timeline.partition.LinearShardSpec;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -194,7 +193,7 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
     NestedDataModule.registerHandlersAndSerde();
     final QueryableIndex index =
         IndexBuilder.create()
-                    .tmpDir(newFolder(temporaryFolder, "junit"))
+                    .tmpDir(temporaryFolder.newFolder())
                     .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
                     .schema(
                         new IncrementalIndexSchema.Builder()
@@ -210,7 +209,7 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
 
     final QueryableIndex indexMix11 =
         IndexBuilder.create()
-                    .tmpDir(newFolder(temporaryFolder, "junit"))
+                    .tmpDir(temporaryFolder.newFolder())
                     .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
                     .schema(
                         new IncrementalIndexSchema.Builder()
@@ -227,7 +226,7 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
 
     final QueryableIndex indexMix12 =
         IndexBuilder.create()
-                    .tmpDir(newFolder(temporaryFolder, "junit"))
+                    .tmpDir(temporaryFolder.newFolder())
                     .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
                     .schema(
                         new IncrementalIndexSchema.Builder()
@@ -243,7 +242,7 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
 
     final QueryableIndex indexMix21 =
         IndexBuilder.create()
-                    .tmpDir(newFolder(temporaryFolder, "junit"))
+                    .tmpDir(temporaryFolder.newFolder())
                     .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
                     .schema(
                         new IncrementalIndexSchema.Builder()
@@ -259,7 +258,7 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
 
     final QueryableIndex indexMix22 =
         IndexBuilder.create()
-                    .tmpDir(newFolder(temporaryFolder, "junit"))
+                    .tmpDir(temporaryFolder.newFolder())
                     .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
                     .schema(
                         new IncrementalIndexSchema.Builder()
@@ -275,7 +274,7 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
 
     final QueryableIndex indexArrays =
         IndexBuilder.create()
-                    .tmpDir(newFolder(temporaryFolder, "junit"))
+                    .tmpDir(temporaryFolder.newFolder())
                     .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
                     .schema(
                         new IncrementalIndexSchema.Builder()
@@ -294,12 +293,12 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
                         )
                     )
                     .inputFormat(TestDataBuilder.DEFAULT_JSON_INPUT_FORMAT)
-                    .inputTmpDir(newFolder(temporaryFolder, "junit"))
+                    .inputTmpDir(temporaryFolder.newFolder())
                     .buildMMappedIndex();
 
     final QueryableIndex indexAllTypesAuto =
         IndexBuilder.create()
-                    .tmpDir(newFolder(temporaryFolder, "junit"))
+                    .tmpDir(temporaryFolder.newFolder())
                     .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
                     .schema(
                         new IncrementalIndexSchema.Builder()
@@ -318,7 +317,7 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
                         )
                     )
                     .inputFormat(TestDataBuilder.DEFAULT_JSON_INPUT_FORMAT)
-                    .inputTmpDir(newFolder(temporaryFolder, "junit"))
+                    .inputTmpDir(temporaryFolder.newFolder())
                     .buildMMappedIndex();
 
 
@@ -6847,14 +6846,5 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
                     .add("EXPR$0", ColumnType.STRING)
                     .build()
     );
-  }
-
-  private static File newFolder(File root, String... subDirs) throws IOException {
-    String subFolder = String.join("/", subDirs);
-    File result = new File(root, subFolder);
-    if (!result.mkdirs()) {
-      throw new IOException("Couldn't create folders " + root);
-    }
-    return result;
   }
 }

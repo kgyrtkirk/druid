@@ -23,8 +23,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -75,7 +75,7 @@ public class ByteBufferMinMaxOffsetHeapTest
       actual.add(min);
     }
 
-    Assertions.assertEquals(expected, actual);
+    Assert.assertEquals(expected, actual);
   }
 
 
@@ -97,7 +97,7 @@ public class ByteBufferMinMaxOffsetHeapTest
 
     for (int i = 0; i < values.size(); i++) {
       int droppedOffset = heap.addOffset(values.get(i));
-      Assertions.assertTrue(heap.isIntact());
+      Assert.assertTrue(heap.isIntact());
 
       if (droppedOffset > 0) {
         deletedValues.add(droppedOffset);
@@ -109,7 +109,7 @@ public class ByteBufferMinMaxOffsetHeapTest
         if (deleteRoll > 0.15) {
           int indexToRemove = rng.nextInt(heap.getHeapSize());
           int deadOffset = heap.removeAt(indexToRemove);
-          Assertions.assertTrue(heap.isIntact());
+          Assert.assertTrue(heap.isIntact());
           deletedValues.add(deadOffset);
         }
       }
@@ -122,7 +122,7 @@ public class ByteBufferMinMaxOffsetHeapTest
       values.remove((Integer) deletedValue);
     }
 
-    Assertions.assertTrue(heap.getHeapSize() <= limit);
+    Assert.assertTrue(heap.getHeapSize() <= limit);
     List<Integer> expected = values.subList(0, heap.getHeapSize());
 
     List<Integer> actual = new ArrayList<>();
@@ -132,7 +132,7 @@ public class ByteBufferMinMaxOffsetHeapTest
       actual.add(min);
     }
 
-    Assertions.assertEquals(expected, actual);
+    Assert.assertEquals(expected, actual);
   }
 
   @Test
@@ -153,7 +153,7 @@ public class ByteBufferMinMaxOffsetHeapTest
 
     for (int i = 0; i < values.size(); i++) {
       int droppedOffset = heap.addOffset(values.get(i));
-      Assertions.assertTrue(heap.isIntact());
+      Assert.assertTrue(heap.isIntact());
 
       if (droppedOffset > 0) {
         deletedValues.add(droppedOffset);
@@ -165,7 +165,7 @@ public class ByteBufferMinMaxOffsetHeapTest
         if (deleteRoll > 0.15) {
           int indexToRemove = rng.nextInt(heap.getHeapSize());
           int deadOffset = heap.removeAt(indexToRemove);
-          Assertions.assertTrue(heap.isIntact());
+          Assert.assertTrue(heap.isIntact());
           deletedValues.add(deadOffset);
         }
       }
@@ -178,7 +178,7 @@ public class ByteBufferMinMaxOffsetHeapTest
       values.remove((Integer) deletedValue);
     }
 
-    Assertions.assertTrue(heap.getHeapSize() <= limit);
+    Assert.assertTrue(heap.getHeapSize() <= limit);
     List<Integer> expected = values.subList(0, heap.getHeapSize());
 
     List<Integer> actual = new ArrayList<>();
@@ -188,7 +188,7 @@ public class ByteBufferMinMaxOffsetHeapTest
       actual.add(min);
     }
 
-    Assertions.assertEquals(expected, actual);
+    Assert.assertEquals(expected, actual);
   }
 
 
@@ -206,12 +206,12 @@ public class ByteBufferMinMaxOffsetHeapTest
 
     for (Integer value : values) {
       heap.addOffset(value);
-      Assertions.assertTrue(heap.isIntact());
+      Assert.assertTrue(heap.isIntact());
     }
 
     heap.removeOffset(12);
 
-    Assertions.assertTrue(heap.isIntact());
+    Assert.assertTrue(heap.isIntact());
 
     Collections.sort(values);
     values.rem(12);
@@ -222,7 +222,7 @@ public class ByteBufferMinMaxOffsetHeapTest
       actual.add(min);
     }
 
-    Assertions.assertEquals(values, actual);
+    Assert.assertEquals(values, actual);
   }
 
   @Test
@@ -241,14 +241,14 @@ public class ByteBufferMinMaxOffsetHeapTest
     for (Integer value : values) {
       heap.addOffset(value);
     }
-    Assertions.assertTrue(heap.isIntact());
+    Assert.assertTrue(heap.isIntact());
 
     heap.removeOffset(2);
-    Assertions.assertTrue(heap.isIntact());
+    Assert.assertTrue(heap.isIntact());
 
     Collections.sort(values);
     values.rem(2);
-    Assertions.assertTrue(heap.isIntact());
+    Assert.assertTrue(heap.isIntact());
 
     List<Integer> actual = new ArrayList<>();
     for (int i = 0; i < values.size(); i++) {
@@ -256,8 +256,8 @@ public class ByteBufferMinMaxOffsetHeapTest
       actual.add(min);
     }
 
-    Assertions.assertTrue(heap.isIntact());
+    Assert.assertTrue(heap.isIntact());
 
-    Assertions.assertEquals(values, actual);
+    Assert.assertEquals(values, actual);
   }
 }

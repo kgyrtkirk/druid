@@ -46,17 +46,15 @@ import org.apache.druid.segment.column.ColumnCapabilities;
 import org.apache.druid.segment.column.ColumnCapabilitiesImpl;
 import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.timeline.SegmentId;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.rules.TemporaryFolder;
 
-import java.io.File;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class VectorizedVirtualColumnTest
 {
@@ -88,14 +86,17 @@ public class VectorizedVirtualColumnTest
       "false"
   );
 
-  @TempDir
-  public File tmpFolder;
+  @Rule
+  public final TemporaryFolder tmpFolder = new TemporaryFolder();
+
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
 
   private AggregationTestHelper groupByTestHelper;
   private AggregationTestHelper timeseriesTestHelper;
   private List<Segment> segments = null;
 
-  @BeforeEach
+  @Before
   public void setup()
   {
     groupByTestHelper = AggregationTestHelper.createGroupByQueryAggregationTestHelper(
@@ -612,15 +613,13 @@ public class VectorizedVirtualColumnTest
 
   private void expectNonvectorized()
   {
-    Throwable exception = assertThrows(RuntimeException.class, () -> {
-    });
-    assertTrue(exception.getMessage().contains(AlwaysTwoVectorizedVirtualColumn.DONT_CALL_THIS));
+    expectedException.expect(RuntimeException.class);
+    expectedException.expectMessage(AlwaysTwoVectorizedVirtualColumn.DONT_CALL_THIS);
   }
 
   private void cannotVectorize()
   {
-    Throwable exception = assertThrows(RuntimeException.class, () -> {
-    });
-    assertTrue(exception.getMessage().contains("Cannot vectorize!"));
+    expectedException.expect(RuntimeException.class);
+    expectedException.expectMessage("Cannot vectorize!");
   }
 }

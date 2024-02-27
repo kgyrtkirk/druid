@@ -25,6 +25,7 @@ import org.apache.druid.java.util.emitter.core.Event;
 import org.apache.druid.java.util.emitter.service.ServiceMetricEvent;
 import org.apache.druid.java.util.metrics.StubServiceEmitter;
 import org.junit.Assert;
+import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.util.List;

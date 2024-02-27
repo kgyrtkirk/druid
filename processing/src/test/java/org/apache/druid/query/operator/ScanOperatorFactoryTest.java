@@ -39,8 +39,8 @@ import org.apache.druid.query.rowsandcols.semantic.TestRowsAndColumnsDecorator;
 import org.apache.druid.segment.VirtualColumns;
 import org.apache.druid.segment.virtual.ExpressionVirtualColumn;
 import org.joda.time.Interval;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import javax.annotation.Nullable;
 import java.io.Closeable;
@@ -67,15 +67,15 @@ public class ScanOperatorFactoryTest
     bob.ordering = Collections.singletonList(ColumnWithDirection.ascending("a"));
     ScanOperatorFactory factory = bob.build();
 
-    Assertions.assertEquals(factory, factory);
-    Assertions.assertNotEquals(factory, new Object());
+    Assert.assertEquals(factory, factory);
+    Assert.assertNotEquals(factory, new Object());
 
-    Assertions.assertNotEquals(factory, bob.copy().setTimeRange(null).build());
-    Assertions.assertNotEquals(factory, bob.copy().setFilter(null).build());
-    Assertions.assertNotEquals(factory, bob.copy().setOffsetLimit(null).build());
-    Assertions.assertNotEquals(factory, bob.copy().setProjectedColumns(null).build());
-    Assertions.assertNotEquals(factory, bob.copy().setVirtualColumns(null).build());
-    Assertions.assertNotEquals(factory, bob.copy().setOrdering(null).build());
+    Assert.assertNotEquals(factory, bob.copy().setTimeRange(null).build());
+    Assert.assertNotEquals(factory, bob.copy().setFilter(null).build());
+    Assert.assertNotEquals(factory, bob.copy().setOffsetLimit(null).build());
+    Assert.assertNotEquals(factory, bob.copy().setProjectedColumns(null).build());
+    Assert.assertNotEquals(factory, bob.copy().setVirtualColumns(null).build());
+    Assert.assertNotEquals(factory, bob.copy().setOrdering(null).build());
   }
 
   @Test
@@ -150,8 +150,8 @@ public class ScanOperatorFactoryTest
                 final String asString = mapper.writeValueAsString(factory);
                 final ScanOperatorFactory deserialized = mapper.readValue(asString, ScanOperatorFactory.class);
 
-                Assertions.assertEquals(factory, deserialized, msg);
-                Assertions.assertEquals(factory.hashCode(), deserialized.hashCode(), msg);
+                Assert.assertEquals(msg, factory, deserialized);
+                Assert.assertEquals(msg, factory.hashCode(), deserialized.hashCode());
 
                 final ScanOperator wrapped = (ScanOperator) factory.wrap(new Operator()
                 {
@@ -181,16 +181,16 @@ public class ScanOperatorFactoryTest
                         TestRowsAndColumnsDecorator.DecoratedRowsAndColumns rac =
                             (TestRowsAndColumnsDecorator.DecoratedRowsAndColumns) inRac;
 
-                        Assertions.assertEquals(factory.getTimeRange(), rac.getTimeRange(), msg);
-                        Assertions.assertEquals(factory.getOffsetLimit(), rac.getOffsetLimit(), msg);
-                        Assertions.assertEquals(factory.getVirtualColumns(), rac.getVirtualColumns(), msg);
+                        Assert.assertEquals(msg, factory.getTimeRange(), rac.getTimeRange());
+                        Assert.assertEquals(msg, factory.getOffsetLimit(), rac.getOffsetLimit());
+                        Assert.assertEquals(msg, factory.getVirtualColumns(), rac.getVirtualColumns());
                         validateList(msg, factory.getOrdering(), rac.getOrdering());
                         validateList(msg, factory.getProjectedColumns(), rac.getProjectedColumns());
 
-                        Assertions.assertEquals(
+                        Assert.assertEquals(
+                            msg,
                             factory.getFilter() == null ? null : factory.getFilter().toFilter(),
-                            rac.getFilter(),
-                            msg
+                            rac.getFilter()
                         );
 
                         return Operator.Signal.GO;
@@ -218,9 +218,9 @@ public class ScanOperatorFactoryTest
   )
   {
     if (expectedList != null && expectedList.isEmpty()) {
-      Assertions.assertNull(actualList, msg);
+      Assert.assertNull(msg, actualList);
     } else {
-      Assertions.assertEquals(expectedList, actualList, msg);
+      Assert.assertEquals(msg, expectedList, actualList);
     }
   }
 

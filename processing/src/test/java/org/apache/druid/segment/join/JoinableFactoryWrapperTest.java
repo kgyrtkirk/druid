@@ -41,19 +41,18 @@ import org.apache.druid.segment.join.table.IndexedTable;
 import org.apache.druid.segment.join.table.IndexedTableJoinable;
 import org.apache.druid.segment.join.table.RowBasedIndexedTable;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.rules.TemporaryFolder;
 
-import java.io.File;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class JoinableFactoryWrapperTest extends InitializedNullHandlingTest
 {
@@ -148,8 +147,11 @@ public class JoinableFactoryWrapperTest extends InitializedNullHandlingTest
       DateTimes.nowUtc().toString()
   );
 
-  @TempDir
-  public File temporaryFolder;
+  @Rule
+  public TemporaryFolder temporaryFolder = new TemporaryFolder();
+
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
 
   @Test
   public void test_checkClausePrefixesForDuplicatesAndShadowing_noConflicts()
@@ -170,36 +172,34 @@ public class JoinableFactoryWrapperTest extends InitializedNullHandlingTest
   @Test
   public void test_checkClausePrefixesForDuplicatesAndShadowing_duplicate()
   {
-    Throwable exception = assertThrows(IAE.class, () -> {
+    expectedException.expect(IAE.class);
+    expectedException.expectMessage("Detected duplicate prefix in join clauses: [AA]");
 
-      List<String> prefixes = Arrays.asList(
-          "AA",
-          "AA",
-          "ABCD"
-      );
+    List<String> prefixes = Arrays.asList(
+        "AA",
+        "AA",
+        "ABCD"
+    );
 
-      JoinPrefixUtils.checkPrefixesForDuplicatesAndShadowing(prefixes);
-    });
-    assertTrue(exception.getMessage().contains("Detected duplicate prefix in join clauses: [AA]"));
+    JoinPrefixUtils.checkPrefixesForDuplicatesAndShadowing(prefixes);
   }
 
   @Test
   public void test_checkClausePrefixesForDuplicatesAndShadowing_shadowing()
   {
-    Throwable exception = assertThrows(IAE.class, () -> {
+    expectedException.expect(IAE.class);
+    expectedException.expectMessage("Detected conflicting prefixes in join clauses: [ABC.DEF, ABC.]");
 
-      List<String> prefixes = Arrays.asList(
-          "BASE.",
-          "BASEBALL",
-          "123.456",
-          "23.45",
-          "ABC.",
-          "ABC.DEF"
-      );
+    List<String> prefixes = Arrays.asList(
+        "BASE.",
+        "BASEBALL",
+        "123.456",
+        "23.45",
+        "ABC.",
+        "ABC.DEF"
+    );
 
-      JoinPrefixUtils.checkPrefixesForDuplicatesAndShadowing(prefixes);
-    });
-    assertTrue(exception.getMessage().contains("Detected conflicting prefixes in join clauses: [ABC.DEF, ABC.]"));
+    JoinPrefixUtils.checkPrefixesForDuplicatesAndShadowing(prefixes);
   }
 
   @Test
@@ -218,7 +218,7 @@ public class JoinableFactoryWrapperTest extends InitializedNullHandlingTest
         Integer.MAX_VALUE
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Pair.of(
             ImmutableList.of(new InDimFilter("x", TEST_LOOKUP_KEYS)),
             ImmutableList.of()
@@ -242,7 +242,7 @@ public class JoinableFactoryWrapperTest extends InitializedNullHandlingTest
         Integer.MAX_VALUE
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Pair.of(
             ImmutableList.of(new InDimFilter(
                                  "x",
@@ -274,7 +274,7 @@ public class JoinableFactoryWrapperTest extends InitializedNullHandlingTest
     // Although the filter created was an In Filter in equijoin (here inFilter = IN (Mexico))
     // We should receive a SelectorFilter for Filters.toFilter(inFilter) call
     // and should receive a SelectorFilter with x = Mexico
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Pair.of(
             ImmutableList.of(new SelectorFilter("x", "Mexico", null)),
             ImmutableList.of()
@@ -313,7 +313,7 @@ public class JoinableFactoryWrapperTest extends InitializedNullHandlingTest
         Integer.MAX_VALUE
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Pair.of(
             ImmutableList.of(new InDimFilter("x", TEST_LOOKUP_KEYS), new InDimFilter("x", TEST_LOOKUP_KEYS)),
             ImmutableList.of(clauses.get(2))
@@ -352,7 +352,7 @@ public class JoinableFactoryWrapperTest extends InitializedNullHandlingTest
         Integer.MAX_VALUE
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Pair.of(
             ImmutableList.of(
                 new InDimFilter("x", TEST_LOOKUP_KEYS),
@@ -385,7 +385,7 @@ public class JoinableFactoryWrapperTest extends InitializedNullHandlingTest
         2
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Pair.of(
             ImmutableList.of(),
             ImmutableList.of(clause)
@@ -410,7 +410,7 @@ public class JoinableFactoryWrapperTest extends InitializedNullHandlingTest
         Integer.MAX_VALUE
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Pair.of(
             ImmutableList.of(),
             ImmutableList.of(clause)
@@ -435,7 +435,7 @@ public class JoinableFactoryWrapperTest extends InitializedNullHandlingTest
         Integer.MAX_VALUE
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Pair.of(
             ImmutableList.of(new InDimFilter("x", TEST_LOOKUP_KEYS)),
             ImmutableList.of(clause)
@@ -460,7 +460,7 @@ public class JoinableFactoryWrapperTest extends InitializedNullHandlingTest
         Integer.MAX_VALUE
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Pair.of(
             ImmutableList.of(FalseFilter.instance()),
             ImmutableList.of()
@@ -485,7 +485,7 @@ public class JoinableFactoryWrapperTest extends InitializedNullHandlingTest
         Integer.MAX_VALUE
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Pair.of(
             ImmutableList.of(),
             ImmutableList.of(clause)
@@ -510,7 +510,7 @@ public class JoinableFactoryWrapperTest extends InitializedNullHandlingTest
         Integer.MAX_VALUE
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Pair.of(
             ImmutableList.of(),
             ImmutableList.of(clause)
@@ -535,7 +535,7 @@ public class JoinableFactoryWrapperTest extends InitializedNullHandlingTest
         Integer.MAX_VALUE
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Pair.of(
             ImmutableList.of(),
             ImmutableList.of(clause)
@@ -571,7 +571,7 @@ public class JoinableFactoryWrapperTest extends InitializedNullHandlingTest
         Integer.MAX_VALUE
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Pair.of(
             ImmutableList.of(new InDimFilter("x", TEST_LOOKUP_KEYS)),
             clauses
@@ -610,7 +610,7 @@ public class JoinableFactoryWrapperTest extends InitializedNullHandlingTest
         Integer.MAX_VALUE
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Pair.of(
             ImmutableList.of(new InDimFilter("x", TEST_LOOKUP_KEYS)),
             clauses
@@ -649,7 +649,7 @@ public class JoinableFactoryWrapperTest extends InitializedNullHandlingTest
         Integer.MAX_VALUE
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Pair.of(
             ImmutableList.of(new InDimFilter("x", TEST_LOOKUP_KEYS), new InDimFilter("x", TEST_LOOKUP_KEYS)),
             clauses.subList(1, clauses.size())
@@ -684,7 +684,7 @@ public class JoinableFactoryWrapperTest extends InitializedNullHandlingTest
         Integer.MAX_VALUE
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Pair.of(
             ImmutableList.of(),
             clauses
@@ -709,7 +709,7 @@ public class JoinableFactoryWrapperTest extends InitializedNullHandlingTest
     );
 
     // Optimization does not kick in as there are > 1 equijoins
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Pair.of(
             ImmutableList.of(),
             ImmutableList.of(joinableClause)

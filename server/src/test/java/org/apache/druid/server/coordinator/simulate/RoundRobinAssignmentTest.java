@@ -22,9 +22,8 @@ package org.apache.druid.server.coordinator.simulate;
 import org.apache.druid.client.DruidServer;
 import org.apache.druid.server.coordinator.CoordinatorDynamicConfig;
 import org.apache.druid.timeline.DataSegment;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +34,6 @@ public class RoundRobinAssignmentTest extends CoordinatorSimulationBaseTest
 
   private List<DruidServer> historicals;
 
-  @BeforeEach
   @Override
   public void setUp()
   {
@@ -72,7 +70,7 @@ public class RoundRobinAssignmentTest extends CoordinatorSimulationBaseTest
     verifyValue(Metric.ASSIGNED_COUNT, 2000L);
 
     for (DruidServer historical : historicals) {
-      Assertions.assertEquals(200, historical.getTotalSegments());
+      Assert.assertEquals(200, historical.getTotalSegments());
     }
   }
 
@@ -108,7 +106,7 @@ public class RoundRobinAssignmentTest extends CoordinatorSimulationBaseTest
     verifyValue(Metric.ASSIGNED_COUNT, filterByDatasource(DS.WIKI), 3000L);
 
     for (DruidServer historical : historicals) {
-      Assertions.assertEquals(1300, historical.getTotalSegments());
+      Assert.assertEquals(1300, historical.getTotalSegments());
     }
   }
 

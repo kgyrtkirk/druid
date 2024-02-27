@@ -20,61 +20,58 @@
 package org.apache.druid.segment.join;
 
 import org.apache.druid.segment.column.ColumnHolder;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public class JoinPrefixUtilsTest
 {
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
 
   @Test
   public void test_validatePrefix_null()
   {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
+    expectedException.expect(IllegalArgumentException.class);
+    expectedException.expectMessage("Join clause cannot have null or empty prefix");
 
-      JoinPrefixUtils.validatePrefix(null);
-    });
-    assertTrue(exception.getMessage().contains("Join clause cannot have null or empty prefix"));
+    JoinPrefixUtils.validatePrefix(null);
   }
 
   @Test
   public void test_validatePrefix_empty()
   {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
+    expectedException.expect(IllegalArgumentException.class);
+    expectedException.expectMessage("Join clause cannot have null or empty prefix");
 
-      JoinPrefixUtils.validatePrefix("");
-    });
-    assertTrue(exception.getMessage().contains("Join clause cannot have null or empty prefix"));
+    JoinPrefixUtils.validatePrefix("");
   }
 
   @Test
   public void test_validatePrefix_underscore()
   {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
+    expectedException.expect(IllegalArgumentException.class);
+    expectedException.expectMessage("Join clause cannot have prefix[_]");
 
-      JoinPrefixUtils.validatePrefix("_");
-    });
-    assertTrue(exception.getMessage().contains("Join clause cannot have prefix[_]"));
+    JoinPrefixUtils.validatePrefix("_");
   }
 
   @Test
   public void test_validatePrefix_timeColumn()
   {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
+    expectedException.expect(IllegalArgumentException.class);
+    expectedException.expectMessage("Join clause cannot have prefix[__time]");
 
-      JoinPrefixUtils.validatePrefix(ColumnHolder.TIME_COLUMN_NAME);
-    });
-    assertTrue(exception.getMessage().contains("Join clause cannot have prefix[__time]"));
+    JoinPrefixUtils.validatePrefix(ColumnHolder.TIME_COLUMN_NAME);
   }
 
   @Test
   public void test_isPrefixedBy()
   {
-    Assertions.assertTrue(JoinPrefixUtils.isPrefixedBy("foo", ""));
-    Assertions.assertTrue(JoinPrefixUtils.isPrefixedBy("foo", "f"));
-    Assertions.assertTrue(JoinPrefixUtils.isPrefixedBy("foo", "fo"));
-    Assertions.assertFalse(JoinPrefixUtils.isPrefixedBy("foo", "foo"));
+    Assert.assertTrue(JoinPrefixUtils.isPrefixedBy("foo", ""));
+    Assert.assertTrue(JoinPrefixUtils.isPrefixedBy("foo", "f"));
+    Assert.assertTrue(JoinPrefixUtils.isPrefixedBy("foo", "fo"));
+    Assert.assertFalse(JoinPrefixUtils.isPrefixedBy("foo", "foo"));
   }
 }

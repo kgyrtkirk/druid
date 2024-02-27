@@ -24,6 +24,7 @@ import org.apache.druid.jackson.DefaultObjectMapper;
 import org.apache.druid.query.aggregation.PostAggregator;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Comparator;
 import java.util.HashMap;

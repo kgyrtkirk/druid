@@ -32,20 +32,18 @@ import org.apache.druid.segment.data.ArrayBasedIndexedInts;
 import org.apache.druid.segment.data.SingleIndexedInt;
 import org.apache.druid.segment.join.JoinConditionAnalysis;
 import org.apache.druid.segment.join.lookup.LookupJoinMatcher;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
-@ExtendWith(MockitoExtension.class)
+@RunWith(MockitoJUnitRunner.class)
 public class LookupJoinMatcherTest
 {
   private final Map<String, String> lookupMap =
@@ -63,7 +61,7 @@ public class LookupJoinMatcherTest
 
   private LookupJoinMatcher target;
 
-  @BeforeEach
+  @Before
   public void setUp()
   {
     Mockito.doReturn(true).when(extractor).supportsAsMap();
@@ -75,9 +73,9 @@ public class LookupJoinMatcherTest
   {
     JoinConditionAnalysis condition = JoinConditionAnalysis.forExpression("0", PREFIX, ExprMacroTable.nil());
     target = LookupJoinMatcher.create(extractor, leftSelectorFactory, condition, false);
-    Assertions.assertNotNull(target);
+    Assert.assertNotNull(target);
     target = LookupJoinMatcher.create(extractor, leftSelectorFactory, condition, true);
-    Assertions.assertNotNull(target);
+    Assert.assertNotNull(target);
   }
 
   @Test
@@ -86,9 +84,9 @@ public class LookupJoinMatcherTest
     JoinConditionAnalysis condition = JoinConditionAnalysis.forExpression("1", PREFIX, ExprMacroTable.nil());
     Mockito.doReturn(true).when(extractor).supportsAsMap();
     target = LookupJoinMatcher.create(extractor, leftSelectorFactory, condition, false);
-    Assertions.assertNotNull(target);
+    Assert.assertNotNull(target);
     target = LookupJoinMatcher.create(extractor, leftSelectorFactory, condition, true);
-    Assertions.assertNotNull(target);
+    Assert.assertNotNull(target);
   }
 
   @Test
@@ -98,23 +96,23 @@ public class LookupJoinMatcherTest
     target = LookupJoinMatcher.create(extractor, leftSelectorFactory, condition, true);
     // Test match first
     target.matchCondition();
-    Assertions.assertTrue(target.hasMatch());
+    Assert.assertTrue(target.hasMatch());
     verifyMatch("foo", "bar");
     // Test match second
     target.nextMatch();
-    Assertions.assertTrue(target.hasMatch());
+    Assert.assertTrue(target.hasMatch());
     verifyMatch("null", "");
     // Test match third
     target.nextMatch();
-    Assertions.assertTrue(target.hasMatch());
+    Assert.assertTrue(target.hasMatch());
     verifyMatch("empty String", "");
     // Test match forth
     target.nextMatch();
-    Assertions.assertTrue(target.hasMatch());
+    Assert.assertTrue(target.hasMatch());
     verifyMatch("", "empty_string");
     // Test no more
     target.nextMatch();
-    Assertions.assertFalse(target.hasMatch());
+    Assert.assertFalse(target.hasMatch());
   }
 
   @Test
@@ -124,7 +122,7 @@ public class LookupJoinMatcherTest
     target = LookupJoinMatcher.create(extractor, leftSelectorFactory, condition, true);
     // Test match first
     target.matchCondition();
-    Assertions.assertFalse(target.hasMatch());
+    Assert.assertFalse(target.hasMatch());
     verifyMatch(null, null);
   }
 
@@ -147,30 +145,28 @@ public class LookupJoinMatcherTest
     target = LookupJoinMatcher.create(extractor, leftSelectorFactory, condition, true);
     // Test match
     target.matchCondition();
-    Assertions.assertTrue(target.hasMatch());
+    Assert.assertTrue(target.hasMatch());
     verifyMatch("foo", "bar");
     // Test no more
     target.nextMatch();
-    Assertions.assertFalse(target.hasMatch());
+    Assert.assertFalse(target.hasMatch());
   }
 
-  @Test
+  @Test(expected = QueryUnsupportedException.class)
   public void testMatchMultiValuedRowShouldThrowException()
   {
-    assertThrows(QueryUnsupportedException.class, () -> {
-      ArrayBasedIndexedInts row = new ArrayBasedIndexedInts(new int[]{2, 4, 6});
-      Mockito.doReturn(dimensionSelector).when(leftSelectorFactory).makeDimensionSelector(ArgumentMatchers.any(DimensionSpec.class));
-      Mockito.doReturn(row).when(dimensionSelector).getRow();
+    ArrayBasedIndexedInts row = new ArrayBasedIndexedInts(new int[]{2, 4, 6});
+    Mockito.doReturn(dimensionSelector).when(leftSelectorFactory).makeDimensionSelector(ArgumentMatchers.any(DimensionSpec.class));
+    Mockito.doReturn(row).when(dimensionSelector).getRow();
 
-      JoinConditionAnalysis condition = JoinConditionAnalysis.forExpression(
-          StringUtils.format("\"%sk\" == foo", PREFIX),
-          PREFIX,
-          ExprMacroTable.nil()
-      );
-      target = LookupJoinMatcher.create(extractor, leftSelectorFactory, condition, true);
-      // Test match should throw exception
-      target.matchCondition();
-    });
+    JoinConditionAnalysis condition = JoinConditionAnalysis.forExpression(
+        StringUtils.format("\"%sk\" == foo", PREFIX),
+        PREFIX,
+        ExprMacroTable.nil()
+    );
+    target = LookupJoinMatcher.create(extractor, leftSelectorFactory, condition, true);
+    // Test match should throw exception
+    target.matchCondition();
   }
 
   @Test
@@ -187,23 +183,23 @@ public class LookupJoinMatcherTest
     );
     target = LookupJoinMatcher.create(extractor, leftSelectorFactory, condition, true);
     target.matchCondition();
-    Assertions.assertFalse(target.hasMatch());
+    Assert.assertFalse(target.hasMatch());
   }
 
   private void verifyMatch(String expectedKey, String expectedValue)
   {
     DimensionSelector selector = target.getColumnSelectorFactory()
                                              .makeDimensionSelector(DefaultDimensionSpec.of("k"));
-    Assertions.assertEquals(-1, selector.getValueCardinality());
-    Assertions.assertEquals(expectedKey, selector.lookupName(0));
-    Assertions.assertEquals(expectedKey, selector.lookupName(0));
-    Assertions.assertNull(selector.idLookup());
+    Assert.assertEquals(-1, selector.getValueCardinality());
+    Assert.assertEquals(expectedKey, selector.lookupName(0));
+    Assert.assertEquals(expectedKey, selector.lookupName(0));
+    Assert.assertNull(selector.idLookup());
 
     selector = target.getColumnSelectorFactory()
                                              .makeDimensionSelector(DefaultDimensionSpec.of("v"));
-    Assertions.assertEquals(-1, selector.getValueCardinality());
-    Assertions.assertEquals(expectedValue, selector.lookupName(0));
-    Assertions.assertEquals(expectedValue, selector.lookupName(0));
-    Assertions.assertNull(selector.idLookup());
+    Assert.assertEquals(-1, selector.getValueCardinality());
+    Assert.assertEquals(expectedValue, selector.lookupName(0));
+    Assert.assertEquals(expectedValue, selector.lookupName(0));
+    Assert.assertNull(selector.idLookup());
   }
 }

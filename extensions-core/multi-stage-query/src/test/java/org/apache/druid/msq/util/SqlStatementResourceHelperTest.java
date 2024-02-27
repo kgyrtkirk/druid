@@ -37,6 +37,7 @@ import org.apache.druid.msq.indexing.report.MSQTaskReportTest;
 import org.apache.druid.msq.sql.entity.PageInformation;
 import org.easymock.EasyMock;
 import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;

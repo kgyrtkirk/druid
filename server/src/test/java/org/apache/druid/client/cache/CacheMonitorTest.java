@@ -29,8 +29,8 @@ import org.apache.druid.guice.JsonConfigProvider;
 import org.apache.druid.guice.annotations.Self;
 import org.apache.druid.initialization.Initialization;
 import org.apache.druid.server.DruidNode;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class CacheMonitorTest
 {
@@ -52,7 +52,7 @@ public class CacheMonitorTest
     ));
 
     CacheMonitor monitor = injector.getInstance(CacheMonitor.class);
-    Assertions.assertNull(monitor.cache);
+    Assert.assertNull(monitor.cache);
   }
 
   @Test
@@ -74,6 +74,6 @@ public class CacheMonitorTest
     ));
 
     CacheMonitor monitor = injector.getInstance(CacheMonitor.class);
-    Assertions.assertNotNull(monitor.cache);
+    Assert.assertNotNull(monitor.cache);
   }
 }

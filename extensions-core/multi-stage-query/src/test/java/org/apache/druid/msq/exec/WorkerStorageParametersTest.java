@@ -22,6 +22,7 @@ package org.apache.druid.msq.exec;
 import org.apache.druid.msq.indexing.error.MSQException;
 import org.apache.druid.msq.indexing.error.NotEnoughTemporaryStorageFault;
 import org.junit.Assert;
+import org.junit.Test;
 
 public class WorkerStorageParametersTest
 {

@@ -37,6 +37,7 @@ import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.orc.mapred.OrcInputFormat;
 import org.apache.orc.mapred.OrcStruct;
 import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;

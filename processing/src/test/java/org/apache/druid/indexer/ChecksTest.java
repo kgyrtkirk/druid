@@ -22,14 +22,13 @@ package org.apache.druid.indexer;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import org.apache.druid.java.util.common.StringUtils;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.util.Collections;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ChecksTest
 {
@@ -39,44 +38,48 @@ public class ChecksTest
   private static final Integer VALUE2 = 2;
   private static final Integer NULL = null;
 
+  @Rule
+  public ExpectedException exception = ExpectedException.none();
+
   @Test
   public void checkAtMostOneNotNullFirstNull()
   {
     Property<Integer> result = Checks.checkAtMostOneNotNull(NAME1, NULL, NAME2, VALUE2);
-    Assertions.assertEquals(NAME2, result.getName());
-    Assertions.assertEquals(VALUE2, result.getValue());
+    Assert.assertEquals(NAME2, result.getName());
+    Assert.assertEquals(VALUE2, result.getValue());
   }
 
   @Test
   public void checkAtMostOneNotNullSecondNull()
   {
     Property<Integer> result = Checks.checkAtMostOneNotNull(NAME1, VALUE1, NAME2, NULL);
-    Assertions.assertEquals(NAME1, result.getName());
-    Assertions.assertEquals(VALUE1, result.getValue());
+    Assert.assertEquals(NAME1, result.getName());
+    Assert.assertEquals(VALUE1, result.getValue());
   }
 
   @Test
   public void checkAtMostOneNotNullBothNull()
   {
     Property<Integer> result = Checks.checkAtMostOneNotNull(NAME1, NULL, NAME2, NULL);
-    Assertions.assertEquals(NAME1, result.getName());
-    Assertions.assertEquals(NULL, result.getValue());
+    Assert.assertEquals(NAME1, result.getName());
+    Assert.assertEquals(NULL, result.getValue());
   }
 
   @Test
   public void checkAtMostOneNotNullNeitherNull()
   {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
+    exception.expect(IllegalArgumentException.class);
+    exception.expectMessage(
+        StringUtils.format(
+            "[Property{name='%s', value=%s}] or [Property{name='%s', value=%s}]",
+            NAME1,
+            VALUE1,
+            NAME2,
+            VALUE2
+        )
+    );
 
-      Checks.checkAtMostOneNotNull(NAME1, VALUE1, NAME2, VALUE2);
-    });
-    assertTrue(exception.getMessage().contains(StringUtils.format(
-        "[Property{name='%s', value=%s}] or [Property{name='%s', value=%s}]",
-        NAME1,
-        VALUE1,
-        NAME2,
-        VALUE2
-    )));
+    Checks.checkAtMostOneNotNull(NAME1, VALUE1, NAME2, VALUE2);
   }
 
   @Test
@@ -89,51 +92,48 @@ public class ChecksTest
         new Property<>("p4", Collections.emptyList())
     );
     final Property<Object> property = Checks.checkOneNotNullOrEmpty(properties);
-    Assertions.assertEquals(new Property<>("p2", 2), property);
+    Assert.assertEquals(new Property<>("p2", 2), property);
   }
 
   @Test
   public void testCheckOneNotNullOrEmptyWithTwoNonNulls()
   {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
-      final List<Property<Object>> properties = ImmutableList.of(
-          new Property<>("p1", null),
-          new Property<>("p2", 2),
-          new Property<>("p3", 3),
-          new Property<>("p4", Collections.emptyList())
-      );
-      Checks.checkOneNotNullOrEmpty(properties);
-    });
-    assertTrue(exception.getMessage().contains("At most one of properties[[p1, p2, p3, p4]] must be present"));
+    final List<Property<Object>> properties = ImmutableList.of(
+        new Property<>("p1", null),
+        new Property<>("p2", 2),
+        new Property<>("p3", 3),
+        new Property<>("p4", Collections.emptyList())
+    );
+    exception.expect(IllegalArgumentException.class);
+    exception.expectMessage("At most one of properties[[p1, p2, p3, p4]] must be present");
+    Checks.checkOneNotNullOrEmpty(properties);
   }
 
   @Test
   public void testCheckOneNotNullOrEmptyWithNonNullAndNonEmpty()
   {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
-      final List<Property<Object>> properties = ImmutableList.of(
-          new Property<>("p1", null),
-          new Property<>("p2", 2),
-          new Property<>("p3", null),
-          new Property<>("p4", Lists.newArrayList(1, 2))
-      );
-      Checks.checkOneNotNullOrEmpty(properties);
-    });
-    assertTrue(exception.getMessage().contains("At most one of properties[[p1, p2, p3, p4]] must be present"));
+    final List<Property<Object>> properties = ImmutableList.of(
+        new Property<>("p1", null),
+        new Property<>("p2", 2),
+        new Property<>("p3", null),
+        new Property<>("p4", Lists.newArrayList(1, 2))
+    );
+    exception.expect(IllegalArgumentException.class);
+    exception.expectMessage("At most one of properties[[p1, p2, p3, p4]] must be present");
+    Checks.checkOneNotNullOrEmpty(properties);
   }
 
   @Test
   public void testCheckOneNotNullOrEmptyWithAllNulls()
   {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
-      final List<Property<Object>> properties = ImmutableList.of(
-          new Property<>("p1", null),
-          new Property<>("p2", null),
-          new Property<>("p3", null),
-          new Property<>("p4", null)
-      );
-      Checks.checkOneNotNullOrEmpty(properties);
-    });
-    assertTrue(exception.getMessage().contains("At least one of properties[[p1, p2, p3, p4]] must be present"));
+    final List<Property<Object>> properties = ImmutableList.of(
+        new Property<>("p1", null),
+        new Property<>("p2", null),
+        new Property<>("p3", null),
+        new Property<>("p4", null)
+    );
+    exception.expect(IllegalArgumentException.class);
+    exception.expectMessage("At least one of properties[[p1, p2, p3, p4]] must be present");
+    Checks.checkOneNotNullOrEmpty(properties);
   }
 }

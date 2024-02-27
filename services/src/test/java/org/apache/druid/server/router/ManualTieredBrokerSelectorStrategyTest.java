@@ -30,6 +30,7 @@ import org.apache.druid.query.aggregation.CountAggregatorFactory;
 import org.apache.druid.query.spec.MultipleIntervalSegmentSpec;
 import org.apache.druid.sql.http.SqlQuery;
 import org.junit.Before;
+import org.junit.Test;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;

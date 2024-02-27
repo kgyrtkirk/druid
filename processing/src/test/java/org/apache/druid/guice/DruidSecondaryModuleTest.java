@@ -30,9 +30,10 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.experimental.runners.Enclosed;
+import org.junit.runner.RunWith;
 
 import javax.annotation.Nullable;
 import javax.validation.Validation;
@@ -42,15 +43,13 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 
-
-
+@RunWith(Enclosed.class)
 public class DruidSecondaryModuleTest
 {
   private static final String PROPERTY_NAME = "druid.injected.val";
   private static final String PROPERTY_VALUE = "this is the legit val";
 
-  @Nested
-  public class ConstructorWithJacksonInjectTest
+  public static class ConstructorWithJacksonInjectTest
   {
     @Test
     public void testInjectWithAnEmptyPropertyNotOverrideInjection() throws JsonProcessingException
@@ -62,8 +61,8 @@ public class DruidSecondaryModuleTest
       final ObjectMapper mapper = makeObjectMapper(injector);
       final String json = "{\"test\": \"this is an injection test\", \"\": \"nice try\" }";
       final ClassWithJacksonInject object = mapper.readValue(json, ClassWithJacksonInject.class);
-      Assertions.assertEquals("this is an injection test", object.test);
-      Assertions.assertEquals(PROPERTY_VALUE, object.injected.val);
+      Assert.assertEquals("this is an injection test", object.test);
+      Assert.assertEquals(PROPERTY_VALUE, object.injected.val);
     }
 
     @Test
@@ -76,8 +75,8 @@ public class DruidSecondaryModuleTest
       final ObjectMapper mapper = makeObjectMapper(injector);
       final String json = "{\"test\": \"this is an injection test\" }";
       final ClassWithJacksonInject object = mapper.readValue(json, ClassWithJacksonInject.class);
-      Assertions.assertEquals("this is an injection test", object.test);
-      Assertions.assertEquals(PROPERTY_VALUE, object.injected.val);
+      Assert.assertEquals("this is an injection test", object.test);
+      Assert.assertEquals(PROPERTY_VALUE, object.injected.val);
     }
 
     @Test
@@ -90,8 +89,8 @@ public class DruidSecondaryModuleTest
       final ObjectMapper mapper = makeObjectMapper(injector);
       final String json = "{\"test\": \"this is an injection test\", \"\": \"nice try\" }";
       final ClassWithEmptyProperty object = mapper.readValue(json, ClassWithEmptyProperty.class);
-      Assertions.assertEquals("this is an injection test", object.test);
-      Assertions.assertEquals(PROPERTY_VALUE, object.injected.val);
+      Assert.assertEquals("this is an injection test", object.test);
+      Assert.assertEquals(PROPERTY_VALUE, object.injected.val);
     }
 
     @Test
@@ -121,10 +120,10 @@ public class DruidSecondaryModuleTest
           "", new ClassWithJacksonInject("value2", injector.getInstance(InjectedParameter.class)))
       );
       final String jsonWritten = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(object);
-      Assertions.assertEquals(json, jsonWritten);
+      Assert.assertEquals(json, jsonWritten);
       final ClassWithMapAndJacksonInject objectRead = mapper.readValue(json, ClassWithMapAndJacksonInject.class);
-      Assertions.assertEquals(object, objectRead);
-      Assertions.assertEquals("empty", objectRead.getStringStringMap().get(""));
+      Assert.assertEquals(object, objectRead);
+      Assert.assertEquals("empty", objectRead.getStringStringMap().get(""));
     }
 
     @Test
@@ -171,10 +170,10 @@ public class DruidSecondaryModuleTest
                           "", new ClassWithJacksonInject("value2", injector.getInstance(InjectedParameter.class)))
       );
       final String jsonWritten = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(object);
-      Assertions.assertEquals(expectedSerializedJson, jsonWritten);
+      Assert.assertEquals(expectedSerializedJson, jsonWritten);
       final ClassWithMapAndJacksonInject objectRead = mapper.readValue(json, ClassWithMapAndJacksonInject.class);
-      Assertions.assertEquals(object, objectRead);
-      Assertions.assertEquals("empty", objectRead.getStringStringMap().get(""));
+      Assert.assertEquals(object, objectRead);
+      Assert.assertEquals("empty", objectRead.getStringStringMap().get(""));
     }
 
     private static class ClassWithJacksonInject
@@ -293,8 +292,7 @@ public class DruidSecondaryModuleTest
     }
   }
 
-  @Nested
-  public class ConstructorWithoutJacksonInjectTest
+  public static class ConstructorWithoutJacksonInjectTest
   {
     @Test
     public void testInjectionWithEmptyPropertyName() throws JsonProcessingException
@@ -305,7 +303,7 @@ public class DruidSecondaryModuleTest
       final ObjectMapper mapper = makeObjectMapper(injector);
       final String json = "[\"this is\", \"an injection test\"]";
       final ClassWithConstructorOfEmptyName object = mapper.readValue(json, ClassWithConstructorOfEmptyName.class);
-      Assertions.assertEquals(ImmutableList.of("this is", "an injection test"), object.getTest());
+      Assert.assertEquals(ImmutableList.of("this is", "an injection test"), object.getTest());
     }
 
     @Test
@@ -317,7 +315,7 @@ public class DruidSecondaryModuleTest
       final ObjectMapper mapper = makeObjectMapper(injector);
       final String json = "[]";
       final ClassWithConstructorOfEmptyName object = mapper.readValue(json, ClassWithConstructorOfEmptyName.class);
-      Assertions.assertEquals(ImmutableList.of(), object.getTest());
+      Assert.assertEquals(ImmutableList.of(), object.getTest());
     }
 
     @Test
@@ -329,7 +327,7 @@ public class DruidSecondaryModuleTest
       final ObjectMapper mapper = makeObjectMapper(injector);
       final String json = "[\"this is\", \"an injection test\"]";
       final ClassWithFactoryMethodOfEmptyName object = mapper.readValue(json, ClassWithFactoryMethodOfEmptyName.class);
-      Assertions.assertEquals(ImmutableList.of("this is", "an injection test"), object.getTest());
+      Assert.assertEquals(ImmutableList.of("this is", "an injection test"), object.getTest());
     }
 
     @Test
@@ -341,7 +339,7 @@ public class DruidSecondaryModuleTest
       final ObjectMapper mapper = makeObjectMapper(injector);
       final String json = "[]";
       final ClassWithFactoryMethodOfEmptyName object = mapper.readValue(json, ClassWithFactoryMethodOfEmptyName.class);
-      Assertions.assertEquals(ImmutableList.of(), object.getTest());
+      Assert.assertEquals(ImmutableList.of(), object.getTest());
     }
 
     @Test
@@ -354,7 +352,7 @@ public class DruidSecondaryModuleTest
       final ObjectMapper mapper = makeObjectMapper(injector);
       final String json = "{}";
       final ClassOfEmptyConstructor object = mapper.readValue(json, ClassOfEmptyConstructor.class);
-      Assertions.assertEquals("empty constructor", object.val);
+      Assert.assertEquals("empty constructor", object.val);
     }
 
     private static class ClassWithConstructorOfEmptyName
@@ -408,8 +406,7 @@ public class DruidSecondaryModuleTest
     }
   }
 
-  @Nested
-  public class ClassOfMultipleJsonCreatorsTest
+  public static class ClassOfMultipleJsonCreatorsTest
   {
     @Test
     public void testDeserializeUsingMultiArgumentsConstructor() throws JsonProcessingException
@@ -421,10 +418,10 @@ public class DruidSecondaryModuleTest
       final ObjectMapper mapper = makeObjectMapper(injector);
       final String json = "{\"val\": \"this is an injection test\", \"valLen\": 5, \"\": \"nice try\" }";
       final ClassOfMultipleJsonCreators object = mapper.readValue(json, ClassOfMultipleJsonCreators.class);
-      Assertions.assertEquals("this is an injection test", object.val);
-      Assertions.assertEquals(5, object.valLen);
-      Assertions.assertNotNull(object.injected);
-      Assertions.assertEquals(PROPERTY_VALUE, object.injected.val);
+      Assert.assertEquals("this is an injection test", object.val);
+      Assert.assertEquals(5, object.valLen);
+      Assert.assertNotNull(object.injected);
+      Assert.assertEquals(PROPERTY_VALUE, object.injected.val);
     }
 
     @Test
@@ -437,9 +434,9 @@ public class DruidSecondaryModuleTest
       final ObjectMapper mapper = makeObjectMapper(injector);
       final String json = "\"this is an injection test\"";
       final ClassOfMultipleJsonCreators object = mapper.readValue(json, ClassOfMultipleJsonCreators.class);
-      Assertions.assertEquals("this is an injection test", object.val);
-      Assertions.assertEquals(object.val.length(), object.valLen);
-      Assertions.assertNull(object.injected);
+      Assert.assertEquals("this is an injection test", object.val);
+      Assert.assertEquals(object.val.length(), object.valLen);
+      Assert.assertNull(object.injected);
     }
 
     private static class ClassOfMultipleJsonCreators

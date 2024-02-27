@@ -23,19 +23,19 @@ import com.google.common.base.Function;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import org.apache.druid.common.config.NullHandling;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import javax.annotation.Nullable;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
+@RunWith(Parameterized.class)
 public class FunctionalExtractionTest
 {
   private static class SimpleFunctionExtraction extends FunctionalExtraction
   {
-    public void initFunctionalExtractionTest(
+    public SimpleFunctionExtraction(
         Function<String, String> extractionFunction,
         Boolean retainMissingValue,
         String replaceMissingValueWith,
@@ -106,6 +106,7 @@ public class FunctionalExtractionTest
   private static String MISSING = "missing";
 
 
+  @Parameterized.Parameters(name = "{0}")
   public static Iterable<Object[]> constructorFeeder()
   {
     return ImmutableList.of(
@@ -117,18 +118,16 @@ public class FunctionalExtractionTest
     );
   }
 
-  private Function<String, String> fn;
+  private final Function<String, String> fn;
 
-  public void initFunctionalExtractionTest(String label, Function<String, String> fn)
+  public FunctionalExtractionTest(String label, Function<String, String> fn)
   {
     this.fn = fn;
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testRetainMissing(String label, Function<String, String> fn)
+  @Test
+  public void testRetainMissing()
   {
-    initFunctionalExtractionTest(label, fn);
     final String in = "NOT PRESENT";
     final FunctionalExtraction exFn = new SimpleFunctionExtraction(
         fn,
@@ -137,14 +136,12 @@ public class FunctionalExtractionTest
         false
     );
     final String out = fn.apply(in);
-    Assertions.assertEquals(NullHandling.isNullOrEquivalent(out) ? in : out, exFn.apply(in));
+    Assert.assertEquals(NullHandling.isNullOrEquivalent(out) ? in : out, exFn.apply(in));
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testRetainMissingButFound(String label, Function<String, String> fn)
+  @Test
+  public void testRetainMissingButFound()
   {
-    initFunctionalExtractionTest(label, fn);
     final String in = PRESENT_KEY;
     final FunctionalExtraction exFn = new SimpleFunctionExtraction(
         fn,
@@ -153,14 +150,12 @@ public class FunctionalExtractionTest
         false
     );
     final String out = fn.apply(in);
-    Assertions.assertEquals(NullHandling.isNullOrEquivalent(out) ? in : out, exFn.apply(in));
+    Assert.assertEquals(NullHandling.isNullOrEquivalent(out) ? in : out, exFn.apply(in));
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testReplaceMissing(String label, Function<String, String> fn)
+  @Test
+  public void testReplaceMissing()
   {
-    initFunctionalExtractionTest(label, fn);
     final String in = "NOT PRESENT";
     final FunctionalExtraction exFn = new SimpleFunctionExtraction(
         fn,
@@ -170,18 +165,16 @@ public class FunctionalExtractionTest
     );
     final String out = fn.apply(in);
     if (NullHandling.replaceWithDefault()) {
-      Assertions.assertEquals(NullHandling.isNullOrEquivalent(out) ? MISSING : out, exFn.apply(in));
+      Assert.assertEquals(NullHandling.isNullOrEquivalent(out) ? MISSING : out, exFn.apply(in));
     } else {
-      Assertions.assertEquals(out == null ? MISSING : out, exFn.apply(in));
+      Assert.assertEquals(out == null ? MISSING : out, exFn.apply(in));
     }
   }
 
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testReplaceMissingBlank(String label, Function<String, String> fn)
+  @Test
+  public void testReplaceMissingBlank()
   {
-    initFunctionalExtractionTest(label, fn);
     final String in = "NOT PRESENT";
     final FunctionalExtraction exFn = new SimpleFunctionExtraction(
         fn,
@@ -191,17 +184,15 @@ public class FunctionalExtractionTest
     );
     final String out = fn.apply(in);
     if (NullHandling.replaceWithDefault()) {
-      Assertions.assertEquals(Strings.isNullOrEmpty(out) ? null : out, exFn.apply(in));
+      Assert.assertEquals(Strings.isNullOrEmpty(out) ? null : out, exFn.apply(in));
     } else {
-      Assertions.assertEquals(out == null ? "" : out, exFn.apply(in));
+      Assert.assertEquals(out == null ? "" : out, exFn.apply(in));
     }
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testOnlyOneValuePresent(String label, Function<String, String> fn)
+  @Test
+  public void testOnlyOneValuePresent()
   {
-    initFunctionalExtractionTest(label, fn);
     final String in = PRESENT_KEY;
     final FunctionalExtraction exFn = new SimpleFunctionExtraction(
         fn,
@@ -211,17 +202,15 @@ public class FunctionalExtractionTest
     );
     final String out = fn.apply(in);
     if (NullHandling.replaceWithDefault()) {
-      Assertions.assertEquals(Strings.isNullOrEmpty(out) ? null : out, exFn.apply(in));
+      Assert.assertEquals(Strings.isNullOrEmpty(out) ? null : out, exFn.apply(in));
     } else {
-      Assertions.assertEquals(Strings.isNullOrEmpty(out) ? "" : out, exFn.apply(in));
+      Assert.assertEquals(Strings.isNullOrEmpty(out) ? "" : out, exFn.apply(in));
     }
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testNullInputs(String label, Function<String, String> fn)
+  @Test
+  public void testNullInputs()
   {
-    initFunctionalExtractionTest(label, fn);
     final FunctionalExtraction exFn = new SimpleFunctionExtraction(
         fn,
         true,
@@ -229,32 +218,26 @@ public class FunctionalExtractionTest
         false
     );
     if (NullHandling.isNullOrEquivalent(fn.apply(null))) {
-      Assertions.assertEquals(null, exFn.apply(null));
+      Assert.assertEquals(null, exFn.apply(null));
     }
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testBadConfig(String label, Function<String, String> fn)
+  @Test(expected = IllegalArgumentException.class)
+  public void testBadConfig()
   {
-    initFunctionalExtractionTest(label, fn);
-    assertThrows(IllegalArgumentException.class, () -> {
-      @SuppressWarnings("unused") // expected exception
-      final FunctionalExtraction exFn = new SimpleFunctionExtraction(
-          fn,
-          true,
-          MISSING,
-          false
-      );
-    });
+    @SuppressWarnings("unused") // expected exception
+    final FunctionalExtraction exFn = new SimpleFunctionExtraction(
+        fn,
+        true,
+        MISSING,
+        false
+    );
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testUniqueProjections(String label, Function<String, String> fn)
+  @Test
+  public void testUniqueProjections()
   {
-    initFunctionalExtractionTest(label, fn);
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ExtractionFn.ExtractionType.MANY_TO_ONE,
         new SimpleFunctionExtraction(
             fn,
@@ -263,7 +246,7 @@ public class FunctionalExtractionTest
             false
         ).getExtractionType()
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ExtractionFn.ExtractionType.MANY_TO_ONE,
         new SimpleFunctionExtraction(
             fn,
@@ -272,7 +255,7 @@ public class FunctionalExtractionTest
             false
         ).getExtractionType()
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ExtractionFn.ExtractionType.ONE_TO_ONE,
         new SimpleFunctionExtraction(
             fn,

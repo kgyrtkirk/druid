@@ -37,26 +37,28 @@ import org.apache.druid.sql.calcite.planner.PlannerContext;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.experimental.runners.Enclosed;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 import org.mockito.Mockito;
 
 import java.math.BigDecimal;
 
-
-
+@RunWith(Enclosed.class)
 public class DruidLogicalValuesRuleTest
 {
   private static final PlannerContext DEFAULT_CONTEXT = Mockito.mock(PlannerContext.class);
 
-  @Nested
-  public class GetValueFromLiteralSimpleTypesTest extends InitializedNullHandlingTest
+  @RunWith(Parameterized.class)
+  public static class GetValueFromLiteralSimpleTypesTest extends InitializedNullHandlingTest
   {
+    @Parameters(name = "{1}, {2}")
     public static Iterable<Object[]> constructorFeeder()
     {
       return ImmutableList.of(
@@ -72,26 +74,24 @@ public class DruidLogicalValuesRuleTest
       );
     }
 
-    private Comparable<?> val;
-    private SqlTypeName sqlTypeName;
-    private Class<?> javaType;
+    private final Comparable<?> val;
+    private final SqlTypeName sqlTypeName;
+    private final Class<?> javaType;
 
-    public void initGetValueFromLiteralSimpleTypesTest(Comparable<?> val, SqlTypeName sqlTypeName, Class<?> javaType)
+    public GetValueFromLiteralSimpleTypesTest(Comparable<?> val, SqlTypeName sqlTypeName, Class<?> javaType)
     {
       this.val = val;
       this.sqlTypeName = sqlTypeName;
       this.javaType = javaType;
     }
 
-    @MethodSource("constructorFeeder")
-    @ParameterizedTest(name = "{1}, {2}")
-    public void testGetValueFromLiteral(Comparable<?> val, SqlTypeName sqlTypeName, Class<?> javaType)
+    @Test
+    public void testGetValueFromLiteral()
     {
-      initGetValueFromLiteralSimpleTypesTest(val, sqlTypeName, javaType);
       final RexLiteral literal = Mockito.spy(makeLiteral(val, sqlTypeName, javaType));
       final Object fromLiteral = DruidLogicalValuesRule.getValueFromLiteral(literal, DEFAULT_CONTEXT);
-      Assertions.assertSame(javaType, fromLiteral.getClass());
-      Assertions.assertEquals(val, fromLiteral);
+      Assert.assertSame(javaType, fromLiteral.getClass());
+      Assert.assertEquals(val, fromLiteral);
       Mockito.verify(literal, Mockito.times(1)).getType();
     }
 
@@ -105,15 +105,17 @@ public class DruidLogicalValuesRuleTest
     }
   }
 
-  @Nested
-  public class GetValueFromLiteralOtherTypesTest
+  public static class GetValueFromLiteralOtherTypesTest
   {
     private static final PlannerContext DEFAULT_CONTEXT = Mockito.mock(PlannerContext.class);
     private static final DateTimeZone TIME_ZONE = DateTimes.inferTzFromString("Asia/Seoul");
     private static final RelDataTypeFactory TYPE_FACTORY = new SqlTypeFactoryImpl(DruidTypeSystem.INSTANCE);
     private static final RexBuilder REX_BUILDER = new RexBuilder(TYPE_FACTORY);
 
-    @BeforeAll
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
+
+    @BeforeClass
     public static void setup()
     {
       Mockito.when(DEFAULT_CONTEXT.getTimeZone()).thenReturn(TIME_ZONE);
@@ -125,8 +127,8 @@ public class DruidLogicalValuesRuleTest
       RexLiteral literal = REX_BUILDER.makeLiteral(true);
 
       final Object fromLiteral = DruidLogicalValuesRule.getValueFromLiteral(literal, DEFAULT_CONTEXT);
-      Assertions.assertSame(Long.class, fromLiteral.getClass());
-      Assertions.assertEquals(1L, fromLiteral);
+      Assert.assertSame(Long.class, fromLiteral.getClass());
+      Assert.assertEquals(1L, fromLiteral);
     }
 
     @Test
@@ -135,8 +137,8 @@ public class DruidLogicalValuesRuleTest
       RexLiteral literal = REX_BUILDER.makeLiteral(false);
 
       final Object fromLiteral = DruidLogicalValuesRule.getValueFromLiteral(literal, DEFAULT_CONTEXT);
-      Assertions.assertSame(Long.class, fromLiteral.getClass());
-      Assertions.assertEquals(0L, fromLiteral);
+      Assert.assertSame(Long.class, fromLiteral.getClass());
+      Assert.assertEquals(0L, fromLiteral);
     }
 
     @Test
@@ -146,11 +148,11 @@ public class DruidLogicalValuesRuleTest
 
       if (NullHandling.sqlCompatible() && ExpressionProcessing.useStrictBooleans()) {
         final Object fromLiteral = DruidLogicalValuesRule.getValueFromLiteral(literal, DEFAULT_CONTEXT);
-        Assertions.assertNull(fromLiteral);
+        Assert.assertNull(fromLiteral);
       } else {
         final Object fromLiteralNonStrict = DruidLogicalValuesRule.getValueFromLiteral(literal, DEFAULT_CONTEXT);
-        Assertions.assertSame(Long.class, fromLiteralNonStrict.getClass());
-        Assertions.assertEquals(0L, fromLiteralNonStrict);
+        Assert.assertSame(Long.class, fromLiteralNonStrict.getClass());
+        Assert.assertEquals(0L, fromLiteralNonStrict);
       }
     }
 
@@ -160,8 +162,8 @@ public class DruidLogicalValuesRuleTest
       RexLiteral literal = REX_BUILDER.makeTimestampLiteral(new TimestampString("2021-04-01 16:54:31"), 0);
 
       final Object fromLiteral = DruidLogicalValuesRule.getValueFromLiteral(literal, DEFAULT_CONTEXT);
-      Assertions.assertSame(Long.class, fromLiteral.getClass());
-      Assertions.assertEquals(new DateTime("2021-04-01T16:54:31", TIME_ZONE).getMillis(), fromLiteral);
+      Assert.assertSame(Long.class, fromLiteral.getClass());
+      Assert.assertEquals(new DateTime("2021-04-01T16:54:31", TIME_ZONE).getMillis(), fromLiteral);
     }
 
     @Test
@@ -170,8 +172,8 @@ public class DruidLogicalValuesRuleTest
       RexLiteral literal = REX_BUILDER.makeDateLiteral(new DateString("2021-04-01"));
 
       final Object fromLiteral = DruidLogicalValuesRule.getValueFromLiteral(literal, DEFAULT_CONTEXT);
-      Assertions.assertSame(Long.class, fromLiteral.getClass());
-      Assertions.assertEquals(new DateTime("2021-04-01", TIME_ZONE).getMillis(), fromLiteral);
+      Assert.assertSame(Long.class, fromLiteral.getClass());
+      Assert.assertEquals(new DateTime("2021-04-01", TIME_ZONE).getMillis(), fromLiteral);
     }
 
     @Test
@@ -227,7 +229,7 @@ public class DruidLogicalValuesRuleTest
           TYPE_FACTORY.createSqlType(SqlTypeName.INTEGER)
       );
       Object value = DruidLogicalValuesRule.getValueFromLiteral(literal, DEFAULT_CONTEXT);
-      Assertions.assertEquals(value, 123L);
+      Assert.assertEquals(value, 123L);
     }
   }
 }

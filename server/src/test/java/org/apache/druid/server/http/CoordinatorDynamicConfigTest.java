@@ -25,8 +25,8 @@ import com.google.common.collect.ImmutableSet;
 import org.apache.druid.segment.TestHelper;
 import org.apache.druid.server.coordinator.CoordinatorDynamicConfig;
 import org.apache.druid.utils.JvmUtils;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import javax.annotation.Nullable;
 import java.util.Set;
@@ -241,7 +241,7 @@ public class CoordinatorDynamicConfigTest
 
     CoordinatorDynamicConfig dynamicConfig
         = mapper.readValue(jsonStr, CoordinatorDynamicConfig.class);
-    Assertions.assertEquals(15, dynamicConfig.getMaxSegmentsInNodeLoadingQueue());
+    Assert.assertEquals(15, dynamicConfig.getMaxSegmentsInNodeLoadingQueue());
   }
 
   @Test
@@ -267,8 +267,8 @@ public class CoordinatorDynamicConfigTest
         false,
         null
     );
-    Assertions.assertTrue(config.isKillUnusedSegmentsInAllDataSources());
-    Assertions.assertTrue(config.getSpecificDataSourcesToKillUnusedSegmentsIn().isEmpty());
+    Assert.assertTrue(config.isKillUnusedSegmentsInAllDataSources());
+    Assert.assertTrue(config.getSpecificDataSourcesToKillUnusedSegmentsIn().isEmpty());
   }
 
   @Test
@@ -294,8 +294,8 @@ public class CoordinatorDynamicConfigTest
         false,
         null
     );
-    Assertions.assertFalse(config.isKillUnusedSegmentsInAllDataSources());
-    Assertions.assertEquals(ImmutableSet.of("test1"), config.getSpecificDataSourcesToKillUnusedSegmentsIn());
+    Assert.assertFalse(config.isKillUnusedSegmentsInAllDataSources());
+    Assert.assertEquals(ImmutableSet.of("test1"), config.getSpecificDataSourcesToKillUnusedSegmentsIn());
   }
 
   @Test
@@ -522,8 +522,8 @@ public class CoordinatorDynamicConfigTest
               + "}\n";
     actual = mapper.readValue(jsonStr, CoordinatorDynamicConfig.class);
 
-    Assertions.assertFalse(actual.isKillUnusedSegmentsInAllDataSources());
-    Assertions.assertEquals(2, actual.getSpecificDataSourcesToKillUnusedSegmentsIn().size());
+    Assert.assertFalse(actual.isKillUnusedSegmentsInAllDataSources());
+    Assert.assertEquals(2, actual.getSpecificDataSourcesToKillUnusedSegmentsIn().size());
   }
 
   @Test
@@ -628,7 +628,7 @@ public class CoordinatorDynamicConfigTest
         .withSpecificDataSourcesToKillUnusedSegmentsIn(ImmutableSet.of("x"))
         .build();
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         current,
         new CoordinatorDynamicConfig.Builder(
             null,
@@ -655,7 +655,7 @@ public class CoordinatorDynamicConfigTest
 
   private void assertThatDeserializationFailsWithMessage(String json, String message)
   {
-    JsonMappingException e = Assertions.assertThrows(
+    JsonMappingException e = Assert.assertThrows(
         JsonMappingException.class,
         () -> mapper.readValue(
             mapper.writeValueAsString(
@@ -664,9 +664,9 @@ public class CoordinatorDynamicConfigTest
             CoordinatorDynamicConfig.class
         )
     );
-    Assertions.assertTrue(e.getCause() instanceof IllegalArgumentException);
+    Assert.assertTrue(e.getCause() instanceof IllegalArgumentException);
     IllegalArgumentException cause = (IllegalArgumentException) e.getCause();
-    Assertions.assertEquals(message, cause.getMessage());
+    Assert.assertEquals(message, cause.getMessage());
   }
 
   @Test
@@ -674,8 +674,8 @@ public class CoordinatorDynamicConfigTest
   {
     CoordinatorDynamicConfig config1 = CoordinatorDynamicConfig.builder().build();
     CoordinatorDynamicConfig config2 = CoordinatorDynamicConfig.builder().build();
-    Assertions.assertEquals(config1, config2);
-    Assertions.assertEquals(config1.hashCode(), config2.hashCode());
+    Assert.assertEquals(config1, config2);
+    Assert.assertEquals(config1.hashCode(), config2.hashCode());
   }
 
   private void assertConfig(
@@ -697,27 +697,27 @@ public class CoordinatorDynamicConfigTest
       boolean replicateAfterLoadTimeout
   )
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         expectedLeadingTimeMillisBeforeCanMarkAsUnusedOvershadowedSegments,
         config.getMarkSegmentAsUnusedDelayMillis()
     );
-    Assertions.assertEquals(expectedMergeBytesLimit, config.getMergeBytesLimit());
-    Assertions.assertEquals(expectedMergeSegmentsLimit, config.getMergeSegmentsLimit());
-    Assertions.assertEquals(expectedMaxSegmentsToMove, config.getMaxSegmentsToMove());
-    Assertions.assertEquals(expectedReplicantLifetime, config.getReplicantLifetime());
-    Assertions.assertEquals(expectedReplicationThrottleLimit, config.getReplicationThrottleLimit());
-    Assertions.assertEquals(expectedBalancerComputeThreads, config.getBalancerComputeThreads());
-    Assertions.assertEquals(
+    Assert.assertEquals(expectedMergeBytesLimit, config.getMergeBytesLimit());
+    Assert.assertEquals(expectedMergeSegmentsLimit, config.getMergeSegmentsLimit());
+    Assert.assertEquals(expectedMaxSegmentsToMove, config.getMaxSegmentsToMove());
+    Assert.assertEquals(expectedReplicantLifetime, config.getReplicantLifetime());
+    Assert.assertEquals(expectedReplicationThrottleLimit, config.getReplicationThrottleLimit());
+    Assert.assertEquals(expectedBalancerComputeThreads, config.getBalancerComputeThreads());
+    Assert.assertEquals(
         expectedSpecificDataSourcesToKillUnusedSegmentsIn,
         config.getSpecificDataSourcesToKillUnusedSegmentsIn()
     );
-    Assertions.assertEquals(expectedKillUnusedSegmentsInAllDataSources, config.isKillUnusedSegmentsInAllDataSources());
-    Assertions.assertEquals(expectedKillTaskSlotRatio, config.getKillTaskSlotRatio(), 0.001);
-    Assertions.assertEquals((int) expectedMaxKillTaskSlots, config.getMaxKillTaskSlots());
-    Assertions.assertEquals(expectedMaxSegmentsInNodeLoadingQueue, config.getMaxSegmentsInNodeLoadingQueue());
-    Assertions.assertEquals(decommissioningNodes, config.getDecommissioningNodes());
-    Assertions.assertEquals(pauseCoordination, config.getPauseCoordination());
-    Assertions.assertEquals(replicateAfterLoadTimeout, config.getReplicateAfterLoadTimeout());
+    Assert.assertEquals(expectedKillUnusedSegmentsInAllDataSources, config.isKillUnusedSegmentsInAllDataSources());
+    Assert.assertEquals(expectedKillTaskSlotRatio, config.getKillTaskSlotRatio(), 0.001);
+    Assert.assertEquals((int) expectedMaxKillTaskSlots, config.getMaxKillTaskSlots());
+    Assert.assertEquals(expectedMaxSegmentsInNodeLoadingQueue, config.getMaxSegmentsInNodeLoadingQueue());
+    Assert.assertEquals(decommissioningNodes, config.getDecommissioningNodes());
+    Assert.assertEquals(pauseCoordination, config.getPauseCoordination());
+    Assert.assertEquals(replicateAfterLoadTimeout, config.getReplicateAfterLoadTimeout());
   }
 
   private static int getDefaultNumBalancerThreads()

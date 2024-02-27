@@ -29,10 +29,11 @@ import net.spy.memcached.MemcachedNode;
 import net.spy.memcached.util.DefaultKetamaNodeLocatorConfiguration;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.easymock.EasyMock;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -44,10 +45,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
+@RunWith(Parameterized.class)
 public class CacheDistributionTest
 {
   public static final int KEY_COUNT = 1_000_000;
 
+  @Parameterized.Parameters(name = "repetitions={0}, hash={1}")
   public static Iterable<Object[]> data()
   {
     List<HashAlgorithm> hash = ImmutableList.of(
@@ -64,10 +67,10 @@ public class CacheDistributionTest
     return Iterables.transform(values, List::toArray);
   }
 
-  HashAlgorithm hash;
-  int reps;
+  final HashAlgorithm hash;
+  final int reps;
 
-  @BeforeAll
+  @BeforeClass
   public static void header()
   {
     System.out.printf(
@@ -77,7 +80,7 @@ public class CacheDistributionTest
     );
   }
 
-  public void initCacheDistributionTest(final HashAlgorithm hash, final int reps)
+  public CacheDistributionTest(final HashAlgorithm hash, final int reps)
   {
     this.hash = hash;
     this.reps = reps;
@@ -86,12 +89,10 @@ public class CacheDistributionTest
   // Run to get a sense of cache key distribution for different ketama reps / hash functions
   // This test is disabled by default because it's a qualitative test not an unit test and thus it have a meaning only
   // when being run and checked by humans.
-  @Disabled
-  @MethodSource("data")
-  @ParameterizedTest(name = "repetitions={0}, hash={1}")
-  public void testDistribution(final HashAlgorithm hash, final int reps)
+  @Ignore
+  @Test
+  public void testDistribution()
   {
-    initCacheDistributionTest(hash, reps);
     KetamaNodeLocator locator = new KetamaNodeLocator(
         ImmutableList.of(
             dummyNode("druid-cache.0001", 11211),

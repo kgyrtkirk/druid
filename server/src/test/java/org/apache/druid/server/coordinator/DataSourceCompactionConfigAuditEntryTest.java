@@ -19,15 +19,15 @@
 
 package org.apache.druid.server.coordinator;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.MockitoJUnitRunner;
 
-@ExtendWith(MockitoExtension.class)
+@RunWith(MockitoJUnitRunner.class)
 public class DataSourceCompactionConfigAuditEntryTest
 {
   private static final double COMPACTION_TASK_SLOT_RATIO = 0.1;
@@ -37,7 +37,7 @@ public class DataSourceCompactionConfigAuditEntryTest
   @Mock
   private CoordinatorCompactionConfig coordinatorCompactionConfig;
 
-  @BeforeEach
+  @Before
   public void setUp()
   {
     Mockito.when(coordinatorCompactionConfig.getCompactionTaskSlotRatio()).thenReturn(COMPACTION_TASK_SLOT_RATIO);
@@ -55,7 +55,7 @@ public class DataSourceCompactionConfigAuditEntryTest
             USE_AUTO_SCALE_SLOTS
         );
 
-    Assertions.assertTrue(config.hasSameConfig(coordinatorCompactionConfig));
+    Assert.assertTrue(config.hasSameConfig(coordinatorCompactionConfig));
   }
 
   @Test
@@ -68,7 +68,7 @@ public class DataSourceCompactionConfigAuditEntryTest
             !USE_AUTO_SCALE_SLOTS
         );
 
-    Assertions.assertFalse(config.hasSameConfig(coordinatorCompactionConfig));
+    Assert.assertFalse(config.hasSameConfig(coordinatorCompactionConfig));
   }
 
   @Test
@@ -81,7 +81,7 @@ public class DataSourceCompactionConfigAuditEntryTest
             USE_AUTO_SCALE_SLOTS
         );
 
-    Assertions.assertFalse(config.hasSameConfig(coordinatorCompactionConfig));
+    Assert.assertFalse(config.hasSameConfig(coordinatorCompactionConfig));
   }
 
   @Test
@@ -94,6 +94,6 @@ public class DataSourceCompactionConfigAuditEntryTest
             USE_AUTO_SCALE_SLOTS
         );
 
-    Assertions.assertFalse(config.hasSameConfig(coordinatorCompactionConfig));
+    Assert.assertFalse(config.hasSameConfig(coordinatorCompactionConfig));
   }
 }

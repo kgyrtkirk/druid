@@ -43,10 +43,10 @@ import org.apache.druid.segment.TestHelper;
 import org.apache.druid.segment.incremental.IncrementalIndex;
 import org.apache.druid.segment.incremental.OnheapIncrementalIndex;
 import org.apache.druid.timeline.SegmentId;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -63,7 +63,7 @@ public class GroupByQueryRunnerFactoryTest
   private GroupByQueryRunnerFactory factory;
   private Closer resourceCloser;
 
-  @BeforeEach
+  @Before
   public void setup()
   {
     this.resourceCloser = Closer.create();
@@ -71,7 +71,7 @@ public class GroupByQueryRunnerFactoryTest
     this.factory = GroupByQueryRunnerTest.makeQueryRunnerFactory(new GroupByQueryConfig(), buffers);
   }
 
-  @AfterEach
+  @After
   public void teardown() throws IOException
   {
     factory = null;

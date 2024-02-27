@@ -21,8 +21,8 @@ package org.apache.druid.data.input.impl;
 
 import com.google.common.collect.ImmutableSet;
 import nl.jqno.equalsverifier.EqualsVerifier;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class HttpInputSourceConfigTest
 {
@@ -36,20 +36,20 @@ public class HttpInputSourceConfigTest
   public void testNullAllowedProtocolsUseDefault()
   {
     HttpInputSourceConfig config = new HttpInputSourceConfig(null);
-    Assertions.assertEquals(HttpInputSourceConfig.DEFAULT_ALLOWED_PROTOCOLS, config.getAllowedProtocols());
+    Assert.assertEquals(HttpInputSourceConfig.DEFAULT_ALLOWED_PROTOCOLS, config.getAllowedProtocols());
   }
 
   @Test
   public void testEmptyAllowedProtocolsUseDefault()
   {
     HttpInputSourceConfig config = new HttpInputSourceConfig(ImmutableSet.of());
-    Assertions.assertEquals(HttpInputSourceConfig.DEFAULT_ALLOWED_PROTOCOLS, config.getAllowedProtocols());
+    Assert.assertEquals(HttpInputSourceConfig.DEFAULT_ALLOWED_PROTOCOLS, config.getAllowedProtocols());
   }
 
   @Test
   public void testCustomAllowedProtocols()
   {
     HttpInputSourceConfig config = new HttpInputSourceConfig(ImmutableSet.of("druid"));
-    Assertions.assertEquals(ImmutableSet.of("druid"), config.getAllowedProtocols());
+    Assert.assertEquals(ImmutableSet.of("druid"), config.getAllowedProtocols());
   }
 }

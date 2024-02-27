@@ -20,7 +20,7 @@
 package org.apache.druid.segment.serde;
 
 import org.apache.druid.segment.data.ArrayBasedIndexedInts;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 /**
  * Test for {@link CombineFirstTwoValuesColumnarInts}.

@@ -26,9 +26,9 @@ import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.vector.VectorColumnSelectorFactory;
 import org.apache.druid.segment.vector.VectorValueSelector;
 import org.easymock.EasyMock;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.nio.ByteBuffer;
 
@@ -47,7 +47,7 @@ public class FloatMaxAggregationTest
     floatMaxAggregatorFactory = TestHelper.makeJsonMapper().readValue(vectorAggSpecJson, FloatMaxAggregatorFactory.class);
   }
 
-  @BeforeEach
+  @Before
   public void setup()
   {
     NullHandling.initializeForTests();
@@ -68,27 +68,27 @@ public class FloatMaxAggregationTest
   public void testFloatMaxVectorAggregator()
   {
     // Some sanity.
-    Assertions.assertTrue(floatMaxAggregatorFactory.canVectorize(vectorColumnSelectorFactory));
+    Assert.assertTrue(floatMaxAggregatorFactory.canVectorize(vectorColumnSelectorFactory));
     VectorValueSelector vectorValueSelector = floatMaxAggregatorFactory.vectorSelector(vectorColumnSelectorFactory);
-    Assertions.assertEquals(floatValues1, vectorValueSelector.getFloatVector());
+    Assert.assertEquals(floatValues1, vectorValueSelector.getFloatVector());
 
     VectorAggregator vectorAggregator = floatMaxAggregatorFactory.factorizeVector(vectorColumnSelectorFactory);
 
     final ByteBuffer buf = ByteBuffer.allocate(floatMaxAggregatorFactory.getMaxIntermediateSizeWithNulls() * 3);
     vectorAggregator.init(buf, 0);
     vectorAggregator.aggregate(buf, 0, 0, 3);
-    Assertions.assertEquals(floatValues1[0], vectorAggregator.get(buf, 0));
+    Assert.assertEquals(floatValues1[0], vectorAggregator.get(buf, 0));
 
     vectorAggregator.init(buf, 4);
     vectorAggregator.aggregate(buf, 4, 0, 3);
-    Assertions.assertEquals(floatValues1[0], vectorAggregator.get(buf, 4));
+    Assert.assertEquals(floatValues1[0], vectorAggregator.get(buf, 4));
 
     vectorAggregator.init(buf, 8);
     vectorAggregator.aggregate(buf, 8, 4, 7);
-    Assertions.assertEquals(floatValues1[5], vectorAggregator.get(buf, 8));
+    Assert.assertEquals(floatValues1[5], vectorAggregator.get(buf, 8));
 
     vectorAggregator.init(buf, 0);
     vectorAggregator.aggregate(buf, 0, 0, 10);
-    Assertions.assertEquals(floatValues1[3], vectorAggregator.get(buf, 0));
+    Assert.assertEquals(floatValues1[3], vectorAggregator.get(buf, 0));
   }
 }

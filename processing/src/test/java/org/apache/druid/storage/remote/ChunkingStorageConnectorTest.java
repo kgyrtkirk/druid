@@ -22,12 +22,12 @@ package org.apache.druid.storage.remote;
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.io.IOUtils;
 import org.apache.druid.storage.StorageConnector;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -36,15 +36,15 @@ import java.util.List;
 public class ChunkingStorageConnectorTest
 {
 
-  @TempDir
-  public File temporaryFolder;
+  @Rule
+  public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
   private StorageConnector storageConnector;
 
-  @BeforeEach
+  @Before
   public void setup() throws IOException
   {
-    storageConnector = new TestStorageConnector(newFolder(temporaryFolder, "junit"));
+    storageConnector = new TestStorageConnector(temporaryFolder.newFolder());
   }
 
   @Test
@@ -52,7 +52,7 @@ public class ChunkingStorageConnectorTest
   {
     InputStream is = storageConnector.read("");
     byte[] dataBytes = IOUtils.toByteArray(is);
-    Assertions.assertEquals(TestStorageConnector.DATA, new String(dataBytes, StandardCharsets.UTF_8));
+    Assert.assertEquals(TestStorageConnector.DATA, new String(dataBytes, StandardCharsets.UTF_8));
   }
 
   @Test
@@ -77,20 +77,11 @@ public class ChunkingStorageConnectorTest
                            : range;
         InputStream is = storageConnector.readRange("", startPosition, limitedRange);
         byte[] dataBytes = IOUtils.toByteArray(is);
-        Assertions.assertEquals(
+        Assert.assertEquals(
             TestStorageConnector.DATA.substring(startPosition, startPosition + limitedRange),
             new String(dataBytes, StandardCharsets.UTF_8)
         );
       }
     }
-  }
-
-  private static File newFolder(File root, String... subDirs) throws IOException {
-    String subFolder = String.join("/", subDirs);
-    File result = new File(root, subFolder);
-    if (!result.mkdirs()) {
-      throw new IOException("Couldn't create folders " + root);
-    }
-    return result;
   }
 }

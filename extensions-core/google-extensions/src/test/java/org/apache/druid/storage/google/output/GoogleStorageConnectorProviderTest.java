@@ -36,6 +36,7 @@ import org.apache.druid.storage.google.GoogleStorage;
 import org.apache.druid.storage.google.GoogleStorageDruidModule;
 import org.easymock.EasyMock;
 import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.File;
 import java.util.Properties;

@@ -30,8 +30,8 @@ import org.apache.druid.segment.data.CompressionStrategy;
 import org.apache.druid.segment.incremental.OnheapIncrementalIndex;
 import org.apache.druid.segment.writeout.TmpFileSegmentWriteOutMediumFactory;
 import org.joda.time.Duration;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.IOException;
 
@@ -66,10 +66,10 @@ public class UserCompactionTaskQueryTuningConfigTest
         );
     final String json = OBJECT_MAPPER.writeValueAsString(config);
     // Check maxRowsPerSegment doesn't exist in the JSON string
-    Assertions.assertFalse(json.contains("maxRowsPerSegment"));
+    Assert.assertFalse(json.contains("maxRowsPerSegment"));
     final UserCompactionTaskQueryTuningConfig fromJson =
         OBJECT_MAPPER.readValue(json, UserCompactionTaskQueryTuningConfig.class);
-    Assertions.assertEquals(config, fromJson);
+    Assert.assertEquals(config, fromJson);
   }
 
   @Test
@@ -108,6 +108,6 @@ public class UserCompactionTaskQueryTuningConfigTest
     final String json = OBJECT_MAPPER.writeValueAsString(tuningConfig);
     final UserCompactionTaskQueryTuningConfig fromJson =
         OBJECT_MAPPER.readValue(json, UserCompactionTaskQueryTuningConfig.class);
-    Assertions.assertEquals(tuningConfig, fromJson);
+    Assert.assertEquals(tuningConfig, fromJson);
   }
 }

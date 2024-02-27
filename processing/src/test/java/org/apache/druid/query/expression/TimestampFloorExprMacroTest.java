@@ -20,7 +20,7 @@
 package org.apache.druid.query.expression;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 public class TimestampFloorExprMacroTest
 {

@@ -28,8 +28,8 @@ import org.apache.druid.java.util.common.DateTimes;
 import org.apache.druid.java.util.common.Intervals;
 import org.apache.druid.java.util.common.granularity.Granularities;
 import org.joda.time.Interval;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.List;
 import java.util.Map;
@@ -51,7 +51,7 @@ public class ArbitraryGranularityTest
             Intervals.of("2012-01-01T00Z/2012-01-03T00Z")
         )
     );
-    Assertions.assertNotNull(spec.getQueryGranularity());
+    Assert.assertNotNull(spec.getQueryGranularity());
   }
 
   @Test
@@ -68,9 +68,9 @@ public class ArbitraryGranularityTest
         )
     );
 
-    Assertions.assertTrue(spec.isRollup());
+    Assert.assertTrue(spec.isRollup());
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Lists.newArrayList(
             Intervals.of("2012-01-01T00Z/2012-01-03T00Z"),
             Intervals.of("2012-01-03T00Z/2012-01-04T00Z"),
@@ -81,56 +81,56 @@ public class ArbitraryGranularityTest
         Lists.newArrayList(spec.sortedBucketIntervals())
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Optional.of(Intervals.of("2012-01-01T00Z/2012-01-03T00Z")),
         spec.bucketInterval(DateTimes.of("2012-01-01T00Z"))
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Optional.of(Intervals.of("2012-01-08T00Z/2012-01-11T00Z")),
         spec.bucketInterval(DateTimes.of("2012-01-08T00Z"))
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
+        "2012-01-03T00Z",
         Optional.of(Intervals.of("2012-01-03T00Z/2012-01-04T00Z")),
-        spec.bucketInterval(DateTimes.of("2012-01-03T00Z")),
-        "2012-01-03T00Z"
+        spec.bucketInterval(DateTimes.of("2012-01-03T00Z"))
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
+        "2012-01-03T01Z",
         Optional.of(Intervals.of("2012-01-03T00Z/2012-01-04T00Z")),
-        spec.bucketInterval(DateTimes.of("2012-01-03T01Z")),
-        "2012-01-03T01Z"
+        spec.bucketInterval(DateTimes.of("2012-01-03T01Z"))
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
+        "2012-01-04T01Z",
         Optional.<Interval>absent(),
-        spec.bucketInterval(DateTimes.of("2012-01-04T01Z")),
-        "2012-01-04T01Z"
+        spec.bucketInterval(DateTimes.of("2012-01-04T01Z"))
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
+        "2012-01-07T23:59:59.999Z",
         Optional.of(Intervals.of("2012-01-07T00Z/2012-01-08T00Z")),
-        spec.bucketInterval(DateTimes.of("2012-01-07T23:59:59.999Z")),
-        "2012-01-07T23:59:59.999Z"
+        spec.bucketInterval(DateTimes.of("2012-01-07T23:59:59.999Z"))
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
+        "2012-01-08T01Z",
         Optional.of(Intervals.of("2012-01-08T00Z/2012-01-11T00Z")),
-        spec.bucketInterval(DateTimes.of("2012-01-08T01Z")),
-        "2012-01-08T01Z"
+        spec.bucketInterval(DateTimes.of("2012-01-08T01Z"))
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
+        "2012-01-04T00Z",
         Optional.absent(),
-        spec.bucketInterval(DateTimes.of("2012-01-04T00Z")),
-        "2012-01-04T00Z"
+        spec.bucketInterval(DateTimes.of("2012-01-04T00Z"))
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
+        "2012-01-05T00Z",
         Optional.absent(),
-        spec.bucketInterval(DateTimes.of("2012-01-05T00Z")),
-        "2012-01-05T00Z"
+        spec.bucketInterval(DateTimes.of("2012-01-05T00Z"))
     );
 
   }
@@ -152,7 +152,7 @@ public class ArbitraryGranularityTest
       thrown = true;
     }
 
-    Assertions.assertTrue(thrown, "Exception thrown");
+    Assert.assertTrue("Exception thrown", thrown);
   }
 
   @Test
@@ -167,7 +167,7 @@ public class ArbitraryGranularityTest
     );
     final GranularitySpec spec = new ArbitraryGranularitySpec(Granularities.NONE, false, intervals);
 
-    Assertions.assertFalse(spec.isRollup());
+    Assert.assertFalse(spec.isRollup());
   }
 
   @Test
@@ -186,7 +186,7 @@ public class ArbitraryGranularityTest
       thrown = true;
     }
 
-    Assertions.assertTrue(thrown, "Exception thrown");
+    Assert.assertTrue("Exception thrown", thrown);
   }
 
   @Test
@@ -202,15 +202,15 @@ public class ArbitraryGranularityTest
 
     try {
       final GranularitySpec rtSpec = JSON_MAPPER.readValue(JSON_MAPPER.writeValueAsString(spec), GranularitySpec.class);
-      Assertions.assertEquals(
+      Assert.assertEquals(
+          "Round-trip",
           ImmutableList.copyOf(spec.sortedBucketIntervals()),
-          ImmutableList.copyOf(rtSpec.sortedBucketIntervals()),
-          "Round-trip"
+          ImmutableList.copyOf(rtSpec.sortedBucketIntervals())
       );
-      Assertions.assertEquals(
+      Assert.assertEquals(
+          "Round-trip",
           ImmutableList.copyOf(spec.inputIntervals()),
-          ImmutableList.copyOf(rtSpec.inputIntervals()),
-          "Round-trip"
+          ImmutableList.copyOf(rtSpec.inputIntervals())
       );
     }
     catch (Exception e) {
@@ -231,23 +231,23 @@ public class ArbitraryGranularityTest
 
     Map<String, Object> map = spec.asMap(JSON_MAPPER);
     final GranularitySpec rtSpec = JSON_MAPPER.convertValue(map, GranularitySpec.class);
-    Assertions.assertEquals(
+    Assert.assertEquals(
+        "Round-trip",
         ImmutableList.copyOf(spec.sortedBucketIntervals()),
-        ImmutableList.copyOf(rtSpec.sortedBucketIntervals()),
-        "Round-trip"
+        ImmutableList.copyOf(rtSpec.sortedBucketIntervals())
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
+        "Round-trip",
         ImmutableList.copyOf(spec.inputIntervals()),
-        ImmutableList.copyOf(rtSpec.inputIntervals()),
-        "Round-trip"
+        ImmutableList.copyOf(rtSpec.inputIntervals())
     );
-    Assertions.assertEquals(spec, rtSpec);
+    Assert.assertEquals(spec, rtSpec);
   }
 
   @Test
   public void testNullInputIntervals()
   {
     final GranularitySpec spec = new ArbitraryGranularitySpec(Granularities.NONE, null);
-    Assertions.assertFalse(spec.sortedBucketIntervals().iterator().hasNext());
+    Assert.assertFalse(spec.sortedBucketIntervals().iterator().hasNext());
   }
 }

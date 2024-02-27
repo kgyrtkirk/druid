@@ -27,8 +27,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.apache.druid.java.util.common.StringUtils;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -50,14 +50,14 @@ public class JSONFlattenerMakerTest
     String s1 = "hello";
     node = OBJECT_MAPPER.readTree(OBJECT_MAPPER.writeValueAsString(s1));
     result = FLATTENER_MAKER.finalizeConversionForMap(node);
-    Assertions.assertEquals(s1, result);
+    Assert.assertEquals(s1, result);
 
     String s2 = "hello \uD900";
     String s2Json = "\"hello \uD900\"";
     node = OBJECT_MAPPER.readTree(s2Json);
     result = FLATTENER_MAKER.finalizeConversionForMap(node);
     // normal equals doesn't pass for this, so check using the same
-    Assertions.assertArrayEquals(StringUtils.toUtf8(s2), StringUtils.toUtf8((String) result));
+    Assert.assertArrayEquals(StringUtils.toUtf8(s2), StringUtils.toUtf8((String) result));
   }
 
   @Test
@@ -67,35 +67,35 @@ public class JSONFlattenerMakerTest
     Object result;
     Integer i1 = 123;
     node = OBJECT_MAPPER.readTree(OBJECT_MAPPER.writeValueAsString(i1));
-    Assertions.assertTrue(node.isInt());
+    Assert.assertTrue(node.isInt());
     result = FLATTENER_MAKER.finalizeConversionForMap(node);
-    Assertions.assertEquals(i1.longValue(), result);
+    Assert.assertEquals(i1.longValue(), result);
 
     Long l1 = 1L + Integer.MAX_VALUE;
     node = OBJECT_MAPPER.readTree(OBJECT_MAPPER.writeValueAsString(l1));
-    Assertions.assertTrue(node.isLong());
+    Assert.assertTrue(node.isLong());
     result = FLATTENER_MAKER.finalizeConversionForMap(node);
-    Assertions.assertEquals(l1, result);
+    Assert.assertEquals(l1, result);
 
     Float f1 = 230.333f;
     node = OBJECT_MAPPER.readTree(OBJECT_MAPPER.writeValueAsString(f1));
-    Assertions.assertTrue(node.isNumber());
+    Assert.assertTrue(node.isNumber());
     result = FLATTENER_MAKER.finalizeConversionForMap(node);
-    Assertions.assertEquals(230.333, result);
+    Assert.assertEquals(230.333, result);
 
     // float.max value plus some (using float max constant, even in a comment makes checkstyle sad)
     Double d1 = 0x1.fffffeP+127 + 100.0;
     node = OBJECT_MAPPER.readTree(OBJECT_MAPPER.writeValueAsString(d1));
-    Assertions.assertTrue(node.isDouble());
+    Assert.assertTrue(node.isDouble());
     result = FLATTENER_MAKER.finalizeConversionForMap(node);
-    Assertions.assertEquals(d1, result);
+    Assert.assertEquals(d1, result);
 
     BigInteger bigInt = new BigInteger(String.valueOf(Long.MAX_VALUE));
     BigInteger bigInt2 = new BigInteger(String.valueOf(Long.MAX_VALUE));
     node = OBJECT_MAPPER.readTree(OBJECT_MAPPER.writeValueAsString(bigInt.add(bigInt2)));
-    Assertions.assertTrue(node.isBigInteger());
+    Assert.assertTrue(node.isBigInteger());
     result = FLATTENER_MAKER.finalizeConversionForMap(node);
-    Assertions.assertEquals(bigInt.add(bigInt).doubleValue(), result);
+    Assert.assertEquals(bigInt.add(bigInt).doubleValue(), result);
   }
 
   @Test
@@ -103,9 +103,9 @@ public class JSONFlattenerMakerTest
   {
     Boolean bool = true;
     JsonNode node = OBJECT_MAPPER.readTree(OBJECT_MAPPER.writeValueAsString(bool));
-    Assertions.assertTrue(node.isBoolean());
+    Assert.assertTrue(node.isBoolean());
     Object result = FLATTENER_MAKER.finalizeConversionForMap(node);
-    Assertions.assertEquals(bool, result);
+    Assert.assertEquals(bool, result);
   }
 
   @Test
@@ -115,7 +115,7 @@ public class JSONFlattenerMakerTest
     // make binary node directly for test, object mapper used in tests deserializes to TextNode with base64 string
     JsonNode node = new BinaryNode(data);
     Object result = FLATTENER_MAKER.finalizeConversionForMap(node);
-    Assertions.assertEquals(data, result);
+    Assert.assertEquals(data, result);
   }
 
   @Test
@@ -126,9 +126,9 @@ public class JSONFlattenerMakerTest
     List<Integer> intArray = ImmutableList.of(1, 2, 3);
     List<Long> expectedIntArray = ImmutableList.of(1L, 2L, 3L);
     node = OBJECT_MAPPER.readTree(OBJECT_MAPPER.writeValueAsString(intArray));
-    Assertions.assertTrue(node.isArray());
+    Assert.assertTrue(node.isArray());
     result = FLATTENER_MAKER.finalizeConversionForMap(node);
-    Assertions.assertEquals(expectedIntArray, result);
+    Assert.assertEquals(expectedIntArray, result);
 
     Map<String, Object> theMap =
         ImmutableMap.<String, Object>builder()
@@ -154,9 +154,9 @@ public class JSONFlattenerMakerTest
                     .put("anotherList", expectedIntArray)
                     .build();
     node = OBJECT_MAPPER.readTree(OBJECT_MAPPER.writeValueAsString(theMap));
-    Assertions.assertTrue(node.isObject());
+    Assert.assertTrue(node.isObject());
     result = FLATTENER_MAKER.finalizeConversionForMap(node);
-    Assertions.assertEquals(expectedMap, result);
+    Assert.assertEquals(expectedMap, result);
 
     List<?> theList = ImmutableList.of(
         theMap,
@@ -167,9 +167,9 @@ public class JSONFlattenerMakerTest
         expectedMap
     );
     node = OBJECT_MAPPER.readTree(OBJECT_MAPPER.writeValueAsString(theList));
-    Assertions.assertTrue(node.isArray());
+    Assert.assertTrue(node.isArray());
     result = FLATTENER_MAKER.finalizeConversionForMap(node);
-    Assertions.assertEquals(expectedList, result);
+    Assert.assertEquals(expectedList, result);
   }
 
   @Test
@@ -189,12 +189,12 @@ public class JSONFlattenerMakerTest
                     .build();
 
     JsonNode node = OBJECT_MAPPER.readTree(OBJECT_MAPPER.writeValueAsString(theMap));
-    Assertions.assertTrue(node.isObject());
-    Assertions.assertEquals(
+    Assert.assertTrue(node.isObject());
+    Assert.assertEquals(
         ImmutableSet.of("bool", "int", "long", "float", "double", "binary", "list", "anotherList"),
         ImmutableSet.copyOf(FLATTENER_MAKER.discoverRootFields(node))
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableSet.of("bool", "int", "long", "float", "double", "binary", "list", "anotherList", "nested"),
         ImmutableSet.copyOf(FLATTENER_MAKER_NESTED.discoverRootFields(node))
     );

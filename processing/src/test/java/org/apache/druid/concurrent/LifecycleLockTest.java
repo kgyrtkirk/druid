@@ -19,13 +19,11 @@
 
 package org.apache.druid.concurrent;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class LifecycleLockTest
 {
@@ -66,7 +64,7 @@ public class LifecycleLockTest
     }
     startLatch.countDown();
     finishLatch.await();
-    Assertions.assertEquals(1, successful.get());
+    Assert.assertEquals(1, successful.get());
   }
 
   @Test
@@ -80,7 +78,7 @@ public class LifecycleLockTest
   private void testOnlyOneCanStopRun() throws InterruptedException
   {
     final LifecycleLock lifecycleLock = new LifecycleLock();
-    Assertions.assertTrue(lifecycleLock.canStart());
+    Assert.assertTrue(lifecycleLock.canStart());
     lifecycleLock.started();
     lifecycleLock.exitStart();
     final CountDownLatch startLatch = new CountDownLatch(1);
@@ -108,73 +106,67 @@ public class LifecycleLockTest
     }
     startLatch.countDown();
     finishLatch.await();
-    Assertions.assertEquals(1, successful.get());
+    Assert.assertEquals(1, successful.get());
   }
 
   @Test
   public void testNoStartAfterStop()
   {
     LifecycleLock lifecycleLock = new LifecycleLock();
-    Assertions.assertTrue(lifecycleLock.canStart());
+    Assert.assertTrue(lifecycleLock.canStart());
     lifecycleLock.started();
     lifecycleLock.exitStart();
-    Assertions.assertTrue(lifecycleLock.canStop());
-    Assertions.assertFalse(lifecycleLock.canStart());
+    Assert.assertTrue(lifecycleLock.canStop());
+    Assert.assertFalse(lifecycleLock.canStart());
   }
 
   @Test
   public void testNotStarted()
   {
     LifecycleLock lifecycleLock = new LifecycleLock();
-    Assertions.assertTrue(lifecycleLock.canStart());
+    Assert.assertTrue(lifecycleLock.canStart());
     lifecycleLock.exitStart();
-    Assertions.assertFalse(lifecycleLock.awaitStarted());
-    Assertions.assertFalse(lifecycleLock.canStop());
+    Assert.assertFalse(lifecycleLock.awaitStarted());
+    Assert.assertFalse(lifecycleLock.canStop());
   }
 
   @Test
   public void testRestart()
   {
     LifecycleLock lifecycleLock = new LifecycleLock();
-    Assertions.assertTrue(lifecycleLock.canStart());
+    Assert.assertTrue(lifecycleLock.canStart());
     lifecycleLock.started();
     lifecycleLock.exitStart();
-    Assertions.assertTrue(lifecycleLock.canStop());
+    Assert.assertTrue(lifecycleLock.canStop());
     lifecycleLock.exitStopAndReset();
-    Assertions.assertTrue(lifecycleLock.canStart());
+    Assert.assertTrue(lifecycleLock.canStart());
   }
 
-  @Test
+  @Test(expected = IllegalMonitorStateException.class)
   public void testDoubleStarted()
   {
-    assertThrows(IllegalMonitorStateException.class, () -> {
-      LifecycleLock lifecycleLock = new LifecycleLock();
-      lifecycleLock.canStart();
-      lifecycleLock.started();
-      lifecycleLock.started();
-    });
+    LifecycleLock lifecycleLock = new LifecycleLock();
+    lifecycleLock.canStart();
+    lifecycleLock.started();
+    lifecycleLock.started();
   }
 
-  @Test
+  @Test(expected = IllegalMonitorStateException.class)
   public void testDoubleExitStart()
   {
-    assertThrows(IllegalMonitorStateException.class, () -> {
-      LifecycleLock lifecycleLock = new LifecycleLock();
-      lifecycleLock.canStart();
-      lifecycleLock.started();
-      lifecycleLock.exitStart();
-      lifecycleLock.exitStart();
-    });
+    LifecycleLock lifecycleLock = new LifecycleLock();
+    lifecycleLock.canStart();
+    lifecycleLock.started();
+    lifecycleLock.exitStart();
+    lifecycleLock.exitStart();
   }
 
-  @Test
+  @Test(expected = IllegalMonitorStateException.class)
   public void testCanStopNotExitedStart()
   {
-    assertThrows(IllegalMonitorStateException.class, () -> {
-      LifecycleLock lifecycleLock = new LifecycleLock();
-      lifecycleLock.canStart();
-      lifecycleLock.started();
-      lifecycleLock.canStop();
-    });
+    LifecycleLock lifecycleLock = new LifecycleLock();
+    lifecycleLock.canStart();
+    lifecycleLock.started();
+    lifecycleLock.canStop();
   }
 }

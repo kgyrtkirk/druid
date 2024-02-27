@@ -23,6 +23,7 @@ import nl.jqno.equalsverifier.EqualsVerifier;
 import org.apache.druid.java.util.common.guava.Comparators;
 import org.apache.druid.query.aggregation.PostAggregator;
 import org.junit.Assert;
+import org.junit.Test;
 
 
 public class ArrayOfDoublesSketchConstantPostAggregatorTest

@@ -27,21 +27,19 @@ import org.apache.druid.query.aggregation.constant.LongConstantBufferAggregator;
 import org.apache.druid.query.aggregation.constant.LongConstantVectorAggregator;
 import org.apache.druid.segment.ColumnSelectorFactory;
 import org.easymock.EasyMock;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.experimental.runners.Enclosed;
+import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
 import java.util.Collection;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-
-
+@RunWith(Enclosed.class)
 public class GroupingAggregatorFactoryTest
 {
   public static GroupingAggregatorFactory makeFactory(String[] groupings, @Nullable String[] keyDims)
@@ -53,12 +51,11 @@ public class GroupingAggregatorFactoryTest
     return factory;
   }
 
-  @Nested
-  public class NewAggregatorTests
+  public static class NewAggregatorTests
   {
     private ColumnSelectorFactory metricFactory;
 
-    @BeforeEach
+    @Before
     public void setup()
     {
       metricFactory = EasyMock.mock(ColumnSelectorFactory.class);
@@ -69,8 +66,8 @@ public class GroupingAggregatorFactoryTest
     {
       GroupingAggregatorFactory factory = makeFactory(new String[]{"a", "b"}, new String[]{"a"});
       Aggregator aggregator = factory.factorize(metricFactory);
-      Assertions.assertEquals(LongConstantAggregator.class, aggregator.getClass());
-      Assertions.assertEquals(1, aggregator.getLong());
+      Assert.assertEquals(LongConstantAggregator.class, aggregator.getClass());
+      Assert.assertEquals(1, aggregator.getLong());
     }
 
     @Test
@@ -78,18 +75,18 @@ public class GroupingAggregatorFactoryTest
     {
       GroupingAggregatorFactory factory = makeFactory(new String[]{"a", "b"}, new String[]{"a"});
       BufferAggregator aggregator = factory.factorizeBuffered(metricFactory);
-      Assertions.assertEquals(LongConstantBufferAggregator.class, aggregator.getClass());
-      Assertions.assertEquals(1, aggregator.getLong(null, 0));
+      Assert.assertEquals(LongConstantBufferAggregator.class, aggregator.getClass());
+      Assert.assertEquals(1, aggregator.getLong(null, 0));
     }
 
     @Test
     public void testNewVectorAggregator()
     {
       GroupingAggregatorFactory factory = makeFactory(new String[]{"a", "b"}, new String[]{"a"});
-      Assertions.assertTrue(factory.canVectorize(metricFactory));
+      Assert.assertTrue(factory.canVectorize(metricFactory));
       VectorAggregator aggregator = factory.factorizeVector(null);
-      Assertions.assertEquals(LongConstantVectorAggregator.class, aggregator.getClass());
-      Assertions.assertEquals(1L, aggregator.get(null, 0));
+      Assert.assertEquals(LongConstantVectorAggregator.class, aggregator.getClass());
+      Assert.assertEquals(1L, aggregator.get(null, 0));
     }
 
     @Test
@@ -97,61 +94,60 @@ public class GroupingAggregatorFactoryTest
     {
       GroupingAggregatorFactory factory = makeFactory(new String[]{"a", "b"}, new String[]{"a"});
       Aggregator aggregator = factory.factorize(metricFactory);
-      Assertions.assertEquals(1, aggregator.getLong());
+      Assert.assertEquals(1, aggregator.getLong());
       factory = factory.withKeyDimensions(Sets.newHashSet("b"));
       aggregator = factory.factorize(metricFactory);
-      Assertions.assertEquals(2, aggregator.getLong());
+      Assert.assertEquals(2, aggregator.getLong());
     }
   }
 
-  @Nested
-  public class GroupingDimensionsTest
+  public static class GroupingDimensionsTest
   {
+    @Rule
+    public ExpectedException exception = ExpectedException.none();
 
     @Test
     public void testFactory_nullGroupingDimensions()
     {
-      Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
-        GroupingAggregatorFactory factory = new GroupingAggregatorFactory("name", null, Sets.newHashSet("b"));
-      });
-      assertTrue(exception.getMessage().contains("Must have a non-empty grouping dimensions"));
+      exception.expect(IllegalArgumentException.class);
+      exception.expectMessage("Must have a non-empty grouping dimensions");
+      GroupingAggregatorFactory factory = new GroupingAggregatorFactory("name", null, Sets.newHashSet("b"));
     }
 
     @Test
     public void testFactory_emptyGroupingDimensions()
     {
-      Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
-        makeFactory(new String[0], null);
-      });
-      assertTrue(exception.getMessage().contains("Must have a non-empty grouping dimensions"));
+      exception.expect(IllegalArgumentException.class);
+      exception.expectMessage("Must have a non-empty grouping dimensions");
+      makeFactory(new String[0], null);
     }
 
     @Test
     public void testFactory_highNumberOfGroupingDimensions()
     {
-      Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
-        makeFactory(new String[Long.SIZE], null);
-      });
-      assertTrue(exception.getMessage().contains(StringUtils.format(
+      exception.expect(IllegalArgumentException.class);
+      exception.expectMessage(StringUtils.format(
           "Number of dimensions %d is more than supported %d",
           Long.SIZE,
           Long.SIZE - 1
-      )));
+      ));
+      makeFactory(new String[Long.SIZE], null);
     }
   }
 
-  @Nested
-  public class ValueTests
+  @RunWith(Parameterized.class)
+  public static class ValueTests
   {
-    private GroupingAggregatorFactory factory;
-    private long value;
+    private final GroupingAggregatorFactory factory;
+    private final long value;
 
-    public void initValueTests(String[] groupings, @Nullable String[] keyDimensions, long value)
+    public ValueTests(String[] groupings, @Nullable String[] keyDimensions, long value)
     {
       factory = makeFactory(groupings, keyDimensions);
       this.value = value;
     }
 
+    @Parameterized.Parameters
     public static Collection arguments()
     {
       String[] maxGroupingList = new String[Long.SIZE - 1];
@@ -170,12 +166,10 @@ public class GroupingAggregatorFactoryTest
       });
     }
 
-    @MethodSource("arguments")
-    @ParameterizedTest
-    public void testValue(String[] groupings, @Nullable String[] keyDimensions, long value)
+    @Test
+    public void testValue()
     {
-      initValueTests(groupings, keyDimensions, value);
-      Assertions.assertEquals(value, factory.factorize(null).getLong());
+      Assert.assertEquals(value, factory.factorize(null).getLong());
     }
   }
 }

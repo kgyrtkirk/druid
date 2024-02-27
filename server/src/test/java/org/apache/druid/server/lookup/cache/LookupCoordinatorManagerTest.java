@@ -42,12 +42,11 @@ import org.apache.druid.java.util.metrics.StubServiceEmitter;
 import org.apache.druid.query.lookup.LookupsState;
 import org.apache.druid.server.http.HostAndPortWithScheme;
 import org.easymock.EasyMock;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import javax.ws.rs.core.Response;
 import java.io.ByteArrayInputStream;
@@ -57,7 +56,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -109,14 +107,14 @@ public class LookupCoordinatorManagerTest
   private final AuditInfo auditInfo = new AuditInfo("author", "identify", "comment", "127.0.0.1");
   private static StubServiceEmitter SERVICE_EMITTER;
 
-  @BeforeAll
+  @BeforeClass
   public static void setUpStatic()
   {
     SERVICE_EMITTER = new StubServiceEmitter("", "");
     EmittingLogger.registerEmitter(SERVICE_EMITTER);
   }
 
-  @BeforeEach
+  @Before
   public void setUp()
   {
     SERVICE_EMITTER.flush();
@@ -141,10 +139,10 @@ public class LookupCoordinatorManagerTest
     EasyMock.replay(configManager);
   }
 
-  @AfterEach
+  @After
   public void tearDown()
   {
-    Assertions.assertEquals(0, SERVICE_EMITTER.getEvents().size());
+    Assert.assertEquals(0, SERVICE_EMITTER.getEvents().size());
     SERVICE_EMITTER.flush();
   }
 
@@ -192,7 +190,7 @@ public class LookupCoordinatorManagerTest
     );
 
     EasyMock.verify(client, responseHandler);
-    Assertions.assertEquals(resp, LOOKUPS_STATE);
+    Assert.assertEquals(resp, LOOKUPS_STATE);
   }
 
   @Test
@@ -230,7 +228,7 @@ public class LookupCoordinatorManagerTest
           HostAndPortWithScheme.fromString("localhost"),
           LOOKUPS_STATE
       );
-      Assertions.fail();
+      Assert.fail();
     }
     catch (IOException ex) {
     }
@@ -273,7 +271,7 @@ public class LookupCoordinatorManagerTest
           HostAndPortWithScheme.fromString("localhost"),
           LOOKUPS_STATE
       );
-      Assertions.fail();
+      Assert.fail();
     }
     catch (IOException ex) {
     }
@@ -316,7 +314,7 @@ public class LookupCoordinatorManagerTest
           HostAndPortWithScheme.fromString("localhost"),
           LOOKUPS_STATE
       );
-      Assertions.fail();
+      Assert.fail();
     }
     catch (InterruptedException ex) {
     }
@@ -372,7 +370,7 @@ public class LookupCoordinatorManagerTest
     );
 
     EasyMock.verify(client, responseHandler);
-    Assertions.assertEquals(resp, LOOKUPS_STATE);
+    Assert.assertEquals(resp, LOOKUPS_STATE);
   }
 
 
@@ -410,7 +408,7 @@ public class LookupCoordinatorManagerTest
       lookupsCommunicator.getLookupStateForNode(
           HostAndPortWithScheme.fromString("localhost")
       );
-      Assertions.fail();
+      Assert.fail();
     }
     catch (IOException ex) {
     }
@@ -452,7 +450,7 @@ public class LookupCoordinatorManagerTest
       lookupsCommunicator.getLookupStateForNode(
           HostAndPortWithScheme.fromString("localhost")
       );
-      Assertions.fail();
+      Assert.fail();
     }
     catch (IOException ex) {
     }
@@ -495,7 +493,7 @@ public class LookupCoordinatorManagerTest
       lookupsCommunicator.getLookupStateForNode(
           HostAndPortWithScheme.fromString("localhost")
       );
-      Assertions.fail();
+      Assert.fail();
     }
     catch (InterruptedException ex) {
     }
@@ -525,7 +523,7 @@ public class LookupCoordinatorManagerTest
       }
     };
     manager.start();
-    Assertions.assertThrows(ISE.class, () -> manager.updateLookups(TIERED_LOOKUP_MAP_V0, auditInfo));
+    Assert.assertThrows(ISE.class, () -> manager.updateLookups(TIERED_LOOKUP_MAP_V0, auditInfo));
   }
 
   @Test
@@ -640,7 +638,7 @@ public class LookupCoordinatorManagerTest
         )
     ).andReturn(SetResult.ok()).once();
     EasyMock.replay(configManager);
-    Assertions.assertTrue(
+    Assert.assertTrue(
         manager.updateLookups(
             ImmutableMap.of(
                 LOOKUP_TIER + "1", ImmutableMap.of(
@@ -699,7 +697,7 @@ public class LookupCoordinatorManagerTest
         )
     ).andReturn(SetResult.ok()).once();
     EasyMock.replay(configManager);
-    Assertions.assertTrue(
+    Assert.assertTrue(
         manager.updateLookups(
             ImmutableMap.of(
                 LOOKUP_TIER + "1", ImmutableMap.of(
@@ -760,7 +758,7 @@ public class LookupCoordinatorManagerTest
 
     try {
       manager.updateLookups(TIERED_LOOKUP_MAP_V0, auditInfo);
-      Assertions.fail();
+      Assert.fail();
     }
     catch (IAE ex) {
     }
@@ -808,7 +806,7 @@ public class LookupCoordinatorManagerTest
         )
     ).andReturn(SetResult.ok()).once();
     EasyMock.replay(configManager);
-    Assertions.assertTrue(manager.updateLookups(ImmutableMap.of(
+    Assert.assertTrue(manager.updateLookups(ImmutableMap.of(
                                                 LOOKUP_TIER + "1", ImmutableMap.of(
                                                     "foo",
                                                     newSpec
@@ -858,7 +856,7 @@ public class LookupCoordinatorManagerTest
         )
     ).andReturn(SetResult.ok()).once();
     EasyMock.replay(configManager);
-    Assertions.assertTrue(manager.deleteTier(LOOKUP_TIER, auditInfo));
+    Assert.assertTrue(manager.deleteTier(LOOKUP_TIER, auditInfo));
     EasyMock.verify(configManager);
   }
 
@@ -907,7 +905,7 @@ public class LookupCoordinatorManagerTest
         )
     ).andReturn(SetResult.ok()).once();
     EasyMock.replay(configManager);
-    Assertions.assertTrue(manager.deleteLookup(LOOKUP_TIER, "foo", auditInfo));
+    Assert.assertTrue(manager.deleteLookup(LOOKUP_TIER, "foo", auditInfo));
     EasyMock.verify(configManager);
   }
 
@@ -947,7 +945,7 @@ public class LookupCoordinatorManagerTest
         )
     ).andReturn(SetResult.ok()).once();
     EasyMock.replay(configManager);
-    Assertions.assertTrue(manager.deleteLookup(LOOKUP_TIER, "foo", auditInfo));
+    Assert.assertTrue(manager.deleteLookup(LOOKUP_TIER, "foo", auditInfo));
     EasyMock.verify(configManager);
   }
 
@@ -976,7 +974,7 @@ public class LookupCoordinatorManagerTest
       }
     };
     manager.start();
-    Assertions.assertFalse(manager.deleteLookup(LOOKUP_TIER, "foo", auditInfo));
+    Assert.assertFalse(manager.deleteLookup(LOOKUP_TIER, "foo", auditInfo));
   }
 
   @Test
@@ -997,7 +995,7 @@ public class LookupCoordinatorManagerTest
       }
     };
     manager.start();
-    Assertions.assertFalse(manager.deleteLookup(LOOKUP_TIER, "foo", auditInfo));
+    Assert.assertFalse(manager.deleteLookup(LOOKUP_TIER, "foo", auditInfo));
   }
 
   @Test
@@ -1024,9 +1022,9 @@ public class LookupCoordinatorManagerTest
         ));
       }
     };
-    Assertions.assertEquals(lookup, manager.getLookup(LOOKUP_TIER, "foo"));
-    Assertions.assertNull(manager.getLookup(LOOKUP_TIER, "does not exit"));
-    Assertions.assertNull(manager.getLookup("not a tier", "foo"));
+    Assert.assertEquals(lookup, manager.getLookup(LOOKUP_TIER, "foo"));
+    Assert.assertNull(manager.getLookup(LOOKUP_TIER, "does not exit"));
+    Assert.assertNull(manager.getLookup("not a tier", "foo"));
   }
 
   @Test
@@ -1053,9 +1051,9 @@ public class LookupCoordinatorManagerTest
         ));
       }
     };
-    Assertions.assertEquals(lookup, manager.getLookup(LOOKUP_TIER, "foo"));
-    Assertions.assertNull(manager.getLookup(LOOKUP_TIER, "does not exit"));
-    Assertions.assertNull(manager.getLookup("not a tier", "foo"));
+    Assert.assertEquals(lookup, manager.getLookup(LOOKUP_TIER, "foo"));
+    Assert.assertNull(manager.getLookup(LOOKUP_TIER, "does not exit"));
+    Assert.assertNull(manager.getLookup("not a tier", "foo"));
   }
 
   @Test
@@ -1075,12 +1073,11 @@ public class LookupCoordinatorManagerTest
         return null;
       }
     };
-    Assertions.assertNull(manager.getLookup(LOOKUP_TIER, "foo"));
+    Assert.assertNull(manager.getLookup(LOOKUP_TIER, "foo"));
   }
 
 
-  @Test
-  @Timeout(value = 60_000L, unit = TimeUnit.MILLISECONDS)
+  @Test(timeout = 60_000L)
   public void testLookupManagementLoop() throws Exception
   {
     Map<String, LookupExtractorFactoryMapContainer> lookup1 = ImmutableMap.of(
@@ -1182,7 +1179,7 @@ public class LookupCoordinatorManagerTest
         lookupNodeDiscovery
     );
 
-    Assertions.assertTrue(manager.knownOldState.get().isEmpty());
+    Assert.assertTrue(manager.knownOldState.get().isEmpty());
 
     manager.start();
 
@@ -1227,7 +1224,7 @@ public class LookupCoordinatorManagerTest
         "lookup2", new LookupExtractorFactoryMapContainer("v1", ImmutableMap.of("k2", "v2"))
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableMap.of(
             "lookup1", new LookupExtractorFactoryMapContainer("v2", ImmutableMap.of("k1", "v1")),
             "lookup2", new LookupExtractorFactoryMapContainer("v1", ImmutableMap.of("k2", "v2"))
@@ -1261,7 +1258,7 @@ public class LookupCoordinatorManagerTest
         "lookup0", new LookupExtractorFactoryMapContainer("v1", ImmutableMap.of("k0", "v0"))
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableSet.of("lookup1", "lookup3"),
         manager.getToBeDroppedFromNode(currNodeState, stateToBe)
     );
@@ -1294,17 +1291,17 @@ public class LookupCoordinatorManagerTest
         lookupCoordinatorManagerConfig
     );
 
-    Assertions.assertFalse(manager.isStarted());
+    Assert.assertFalse(manager.isStarted());
 
     manager.start();
-    Assertions.assertTrue(manager.awaitStarted(1));
-    Assertions.assertTrue(manager.backgroundManagerIsRunning());
-    Assertions.assertFalse(manager.waitForBackgroundTermination(10));
+    Assert.assertTrue(manager.awaitStarted(1));
+    Assert.assertTrue(manager.backgroundManagerIsRunning());
+    Assert.assertFalse(manager.waitForBackgroundTermination(10));
 
     manager.stop();
-    Assertions.assertFalse(manager.awaitStarted(1));
-    Assertions.assertTrue(manager.waitForBackgroundTermination(10));
-    Assertions.assertFalse(manager.backgroundManagerIsRunning());
+    Assert.assertFalse(manager.awaitStarted(1));
+    Assert.assertTrue(manager.waitForBackgroundTermination(10));
+    Assert.assertFalse(manager.backgroundManagerIsRunning());
 
     EasyMock.verify(configManager);
   }
@@ -1331,37 +1328,37 @@ public class LookupCoordinatorManagerTest
         lookupCoordinatorManagerConfig
     );
 
-    Assertions.assertFalse(manager.awaitStarted(1));
+    Assert.assertFalse(manager.awaitStarted(1));
 
     manager.start();
-    Assertions.assertTrue(manager.awaitStarted(1));
-    Assertions.assertTrue(manager.backgroundManagerIsRunning());
-    Assertions.assertFalse(manager.waitForBackgroundTermination(10));
+    Assert.assertTrue(manager.awaitStarted(1));
+    Assert.assertTrue(manager.backgroundManagerIsRunning());
+    Assert.assertFalse(manager.waitForBackgroundTermination(10));
 
     manager.stop();
-    Assertions.assertFalse(manager.awaitStarted(1));
-    Assertions.assertTrue(manager.waitForBackgroundTermination(10));
-    Assertions.assertFalse(manager.backgroundManagerIsRunning());
+    Assert.assertFalse(manager.awaitStarted(1));
+    Assert.assertTrue(manager.waitForBackgroundTermination(10));
+    Assert.assertFalse(manager.backgroundManagerIsRunning());
 
     manager.start();
-    Assertions.assertTrue(manager.awaitStarted(1));
-    Assertions.assertTrue(manager.backgroundManagerIsRunning());
-    Assertions.assertFalse(manager.waitForBackgroundTermination(10));
+    Assert.assertTrue(manager.awaitStarted(1));
+    Assert.assertTrue(manager.backgroundManagerIsRunning());
+    Assert.assertFalse(manager.waitForBackgroundTermination(10));
 
     manager.stop();
-    Assertions.assertFalse(manager.awaitStarted(1));
-    Assertions.assertTrue(manager.waitForBackgroundTermination(10));
-    Assertions.assertFalse(manager.backgroundManagerIsRunning());
+    Assert.assertFalse(manager.awaitStarted(1));
+    Assert.assertTrue(manager.waitForBackgroundTermination(10));
+    Assert.assertFalse(manager.backgroundManagerIsRunning());
 
     manager.start();
-    Assertions.assertTrue(manager.awaitStarted(1));
-    Assertions.assertTrue(manager.backgroundManagerIsRunning());
-    Assertions.assertFalse(manager.waitForBackgroundTermination(10));
+    Assert.assertTrue(manager.awaitStarted(1));
+    Assert.assertTrue(manager.backgroundManagerIsRunning());
+    Assert.assertFalse(manager.waitForBackgroundTermination(10));
 
     manager.stop();
-    Assertions.assertFalse(manager.awaitStarted(1));
-    Assertions.assertTrue(manager.waitForBackgroundTermination(10));
-    Assertions.assertFalse(manager.backgroundManagerIsRunning());
+    Assert.assertFalse(manager.awaitStarted(1));
+    Assert.assertTrue(manager.waitForBackgroundTermination(10));
+    Assert.assertFalse(manager.backgroundManagerIsRunning());
 
     EasyMock.verify(configManager);
   }
@@ -1385,7 +1382,7 @@ public class LookupCoordinatorManagerTest
     );
 
     manager.start();
-    Assertions.assertEquals(fakeChildren, manager.discoverTiers());
+    Assert.assertEquals(fakeChildren, manager.discoverTiers());
     EasyMock.verify(lookupNodeDiscovery);
   }
 
@@ -1412,7 +1409,7 @@ public class LookupCoordinatorManagerTest
     );
 
     manager.start();
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableSet.of(
             HostAndPort.fromParts("h1", 8080),
             HostAndPort.fromParts("h2", 8080)

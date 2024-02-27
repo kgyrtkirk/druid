@@ -47,10 +47,11 @@ import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.column.ValueType;
 import org.apache.druid.timeline.LogicalSegment;
 import org.apache.druid.timeline.SegmentId;
+import org.hamcrest.MatcherAssert;
 import org.joda.time.Interval;
 import org.joda.time.Period;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -58,8 +59,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import static org.hamcrest.MatcherAssert.assertThat;
 
 public class SegmentMetadataQueryQueryToolChestTest
 {
@@ -98,7 +97,7 @@ public class SegmentMetadataQueryQueryToolChestTest
     // Test cache key generation
     byte[] expectedKey = {0x04, 0x09, 0x01, 0x0A, 0x00, 0x00, 0x00, 0x03, 0x00, 0x02, 0x04};
     byte[] actualKey = strategy.computeCacheKey(query);
-    Assertions.assertArrayEquals(expectedKey, actualKey);
+    Assert.assertArrayEquals(expectedKey, actualKey);
 
     SegmentAnalysis result = new SegmentAnalysis(
         TEST_SEGMENT_ID1.toString(),
@@ -137,7 +136,7 @@ public class SegmentMetadataQueryQueryToolChestTest
 
     SegmentAnalysis fromCacheResult = strategy.pullFromSegmentLevelCache().apply(fromCacheValue);
 
-    Assertions.assertEquals(result, fromCacheResult);
+    Assert.assertEquals(result, fromCacheResult);
   }
 
   @Test
@@ -172,7 +171,7 @@ public class SegmentMetadataQueryQueryToolChestTest
         null
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new SegmentAnalysis(
             "dummy_2021-01-01T00:00:00.000Z_2021-01-02T00:00:00.000Z_merged",
             null,
@@ -191,7 +190,7 @@ public class SegmentMetadataQueryQueryToolChestTest
         mergeStrict(analysis1, analysis2)
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new SegmentAnalysis(
             "dummy_2021-01-01T00:00:00.000Z_2021-01-02T00:00:00.000Z_merged",
             null,
@@ -210,7 +209,7 @@ public class SegmentMetadataQueryQueryToolChestTest
         mergeLenient(analysis1, analysis2)
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new SegmentAnalysis(
             "dummy_2021-01-01T00:00:00.000Z_2021-01-02T00:00:00.000Z_merged",
             null,
@@ -229,7 +228,7 @@ public class SegmentMetadataQueryQueryToolChestTest
         mergeEarliest(analysis1, analysis2)
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new SegmentAnalysis(
             "dummy_2021-01-01T00:00:00.000Z_2021-01-02T00:00:00.000Z_merged",
             null,
@@ -285,7 +284,7 @@ public class SegmentMetadataQueryQueryToolChestTest
     expectedIntervals.addAll(analysis1.getIntervals());
     expectedIntervals.addAll(analysis2.getIntervals());
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new SegmentAnalysis(
             "dummy_2021-01-01T00:00:00.000Z_2021-01-02T00:00:00.000Z_merged",
             expectedIntervals,
@@ -304,7 +303,7 @@ public class SegmentMetadataQueryQueryToolChestTest
         mergeStrict(analysis1, analysis2)
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new SegmentAnalysis(
             "dummy_2021-01-01T00:00:00.000Z_2021-01-02T00:00:00.000Z_merged",
             expectedIntervals,
@@ -323,7 +322,7 @@ public class SegmentMetadataQueryQueryToolChestTest
         mergeLenient(analysis1, analysis2)
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new SegmentAnalysis(
             "dummy_2021-01-01T00:00:00.000Z_2021-01-02T00:00:00.000Z_merged",
             expectedIntervals,
@@ -342,7 +341,7 @@ public class SegmentMetadataQueryQueryToolChestTest
         mergeEarliest(analysis1, analysis2)
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new SegmentAnalysis(
             "dummy_2021-01-01T00:00:00.000Z_2021-01-02T00:00:00.000Z_merged",
             expectedIntervals,
@@ -391,7 +390,7 @@ public class SegmentMetadataQueryQueryToolChestTest
         null
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new SegmentAnalysis(
             "dummy_2021-01-01T00:00:00.000Z_2021-01-02T00:00:00.000Z_merged",
             null,
@@ -406,7 +405,7 @@ public class SegmentMetadataQueryQueryToolChestTest
         mergeStrict(analysis1, analysis2)
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new SegmentAnalysis(
             "dummy_2021-01-01T00:00:00.000Z_2021-01-02T00:00:00.000Z_merged",
             null,
@@ -424,7 +423,7 @@ public class SegmentMetadataQueryQueryToolChestTest
         mergeLenient(analysis1, analysis2)
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new SegmentAnalysis(
             "dummy_2021-01-01T00:00:00.000Z_2021-01-02T00:00:00.000Z_merged",
             null,
@@ -442,7 +441,7 @@ public class SegmentMetadataQueryQueryToolChestTest
         mergeEarliest(analysis1, analysis2)
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new SegmentAnalysis(
             "dummy_2021-01-01T00:00:00.000Z_2021-01-02T00:00:00.000Z_merged",
             null,
@@ -487,7 +486,7 @@ public class SegmentMetadataQueryQueryToolChestTest
         null
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new SegmentAnalysis(
             "dummy_2021-01-01T00:00:00.000Z_2021-01-02T00:00:00.000Z_merged",
             null,
@@ -502,7 +501,7 @@ public class SegmentMetadataQueryQueryToolChestTest
         mergeStrict(analysis1, analysis2)
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new SegmentAnalysis(
             "dummy_2021-01-01T00:00:00.000Z_2021-01-02T00:00:00.000Z_merged",
             null,
@@ -517,7 +516,7 @@ public class SegmentMetadataQueryQueryToolChestTest
         mergeLenient(analysis1, analysis2)
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new SegmentAnalysis(
             "dummy_2021-01-01T00:00:00.000Z_2021-01-02T00:00:00.000Z_merged",
             null,
@@ -532,7 +531,7 @@ public class SegmentMetadataQueryQueryToolChestTest
         mergeEarliest(analysis1, analysis2)
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new SegmentAnalysis(
             "dummy_2021-01-01T00:00:00.000Z_2021-01-02T00:00:00.000Z_merged",
             null,
@@ -586,7 +585,7 @@ public class SegmentMetadataQueryQueryToolChestTest
     expectedLenient.put("bar", null);
     expectedLenient.put("baz", new LongMaxAggregatorFactory("baz", "baz"));
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new SegmentAnalysis(
             "dummy_2021-01-01T00:00:00.000Z_2021-01-02T00:00:00.000Z_merged",
             null,
@@ -601,7 +600,7 @@ public class SegmentMetadataQueryQueryToolChestTest
         mergeStrict(analysis1, analysis2)
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new SegmentAnalysis(
             "dummy_2021-01-01T00:00:00.000Z_2021-01-02T00:00:00.000Z_merged",
             null,
@@ -617,7 +616,7 @@ public class SegmentMetadataQueryQueryToolChestTest
     );
 
     // Simulate multi-level lenient merge
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new SegmentAnalysis(
             "dummy_2021-01-01T00:00:00.000Z_2021-01-02T00:00:00.000Z_merged",
             null,
@@ -636,7 +635,7 @@ public class SegmentMetadataQueryQueryToolChestTest
     );
 
     // Simulate multi-level lenient merge (unmerged first)
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new SegmentAnalysis(
             "dummy_2021-01-01T00:00:00.000Z_2021-01-02T00:00:00.000Z_merged",
             null,
@@ -655,7 +654,7 @@ public class SegmentMetadataQueryQueryToolChestTest
     );
 
     // Simulate multi-level lenient merge (unmerged second)
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new SegmentAnalysis(
             "dummy_2021-01-01T00:00:00.000Z_2021-01-02T00:00:00.000Z_merged",
             null,
@@ -673,7 +672,7 @@ public class SegmentMetadataQueryQueryToolChestTest
         )
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new SegmentAnalysis(
             "dummy_2021-01-01T00:00:00.000Z_2021-01-02T00:00:00.000Z_merged",
             null,
@@ -693,7 +692,7 @@ public class SegmentMetadataQueryQueryToolChestTest
     );
 
     // Simulate multi-level earliest merge
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new SegmentAnalysis(
             "dummy_2021-01-01T00:00:00.000Z_2021-01-02T00:00:00.000Z_merged",
             null,
@@ -715,7 +714,7 @@ public class SegmentMetadataQueryQueryToolChestTest
         )
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new SegmentAnalysis(
             "dummy_2021-01-01T00:00:00.000Z_2021-01-02T00:00:00.000Z_merged",
             null,
@@ -735,7 +734,7 @@ public class SegmentMetadataQueryQueryToolChestTest
     );
 
     // Simulate multi-level latest merge
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new SegmentAnalysis(
             "dummy_2021-01-01T00:00:00.000Z_2021-01-02T00:00:00.000Z_merged",
             null,
@@ -797,7 +796,7 @@ public class SegmentMetadataQueryQueryToolChestTest
     expectedLenient.put("bar", null);
     expectedLenient.put("baz", new LongMaxAggregatorFactory("baz", "baz"));
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new SegmentAnalysis(
             "dummy_2021-01-01T00:00:00.000Z_2021-01-02T00:00:00.000Z_merged",
             null,
@@ -812,7 +811,7 @@ public class SegmentMetadataQueryQueryToolChestTest
         mergeStrict(analysis1, analysis2)
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new SegmentAnalysis(
             "dummy_2021-01-01T00:00:00.000Z_2021-01-02T00:00:00.000Z_merged",
             null,
@@ -828,7 +827,7 @@ public class SegmentMetadataQueryQueryToolChestTest
     );
 
     // Simulate multi-level lenient merge
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new SegmentAnalysis(
             "dummy_2021-01-01T00:00:00.000Z_2021-01-02T00:00:00.000Z_merged",
             null,
@@ -846,7 +845,7 @@ public class SegmentMetadataQueryQueryToolChestTest
         )
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new SegmentAnalysis(
             "dummy_2021-01-01T00:00:00.000Z_2021-01-02T00:00:00.000Z_merged",
             null,
@@ -866,7 +865,7 @@ public class SegmentMetadataQueryQueryToolChestTest
     );
 
     // Simulate multi-level earliest merge
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new SegmentAnalysis(
             "dummy_2021-01-01T00:00:00.000Z_2021-01-02T00:00:00.000Z_merged",
             null,
@@ -888,7 +887,7 @@ public class SegmentMetadataQueryQueryToolChestTest
         )
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new SegmentAnalysis(
             "dummy_2021-01-01T00:00:00.000Z_2021-01-02T00:00:00.000Z_merged",
             null,
@@ -908,7 +907,7 @@ public class SegmentMetadataQueryQueryToolChestTest
     );
 
     // Simulate multi-level latest merge
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new SegmentAnalysis(
             "dummy_2021-01-01T00:00:00.000Z_2021-01-02T00:00:00.000Z_merged",
             null,
@@ -983,7 +982,7 @@ public class SegmentMetadataQueryQueryToolChestTest
     expectedLenient.put("bar", null);
     expectedLenient.put("baz", new LongMaxAggregatorFactory("baz", "baz"));
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new SegmentAnalysis(
             "dummy_2023-01-01T00:00:00.000Z_2023-01-02T00:00:00.000Z_merged_2",
             null,
@@ -998,7 +997,7 @@ public class SegmentMetadataQueryQueryToolChestTest
         mergeStrict(analysis1, analysis2)
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new SegmentAnalysis(
             "dummy_2023-01-01T00:00:00.000Z_2023-01-02T00:00:00.000Z_merged_2",
             null,
@@ -1014,7 +1013,7 @@ public class SegmentMetadataQueryQueryToolChestTest
     );
 
     // Simulate multi-level lenient merge
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new SegmentAnalysis(
             "dummy_2023-01-01T00:00:00.000Z_2023-01-02T00:00:00.000Z_merged_2",
             null,
@@ -1032,7 +1031,7 @@ public class SegmentMetadataQueryQueryToolChestTest
         )
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new SegmentAnalysis(
             "dummy_2023-01-01T00:00:00.000Z_2023-01-02T00:00:00.000Z_merged_2",
             null,
@@ -1052,7 +1051,7 @@ public class SegmentMetadataQueryQueryToolChestTest
     );
 
     // Simulate multi-level earliest merge
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new SegmentAnalysis(
             "dummy_2023-01-01T00:00:00.000Z_2023-01-02T00:00:00.000Z_merged_2",
             null,
@@ -1074,7 +1073,7 @@ public class SegmentMetadataQueryQueryToolChestTest
         )
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new SegmentAnalysis(
             "dummy_2023-01-01T00:00:00.000Z_2023-01-02T00:00:00.000Z_merged_2",
             null,
@@ -1094,7 +1093,7 @@ public class SegmentMetadataQueryQueryToolChestTest
     );
 
     // Simulate multi-level latest merge
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new SegmentAnalysis(
             "dummy_2023-01-01T00:00:00.000Z_2023-01-02T00:00:00.000Z_merged_2",
             null,
@@ -1150,8 +1149,8 @@ public class SegmentMetadataQueryQueryToolChestTest
             .collect(Collectors.toList())
     );
 
-    Assertions.assertEquals(Period.weeks(1), config.getDefaultHistory());
-    Assertions.assertEquals(
+    Assert.assertEquals(Period.weeks(1), config.getDefaultHistory());
+    Assert.assertEquals(
         ImmutableList.of(
             Intervals.of("2000-01-04/P1D"),
             Intervals.of("2000-01-09/P1D"),
@@ -1221,29 +1220,29 @@ public class SegmentMetadataQueryQueryToolChestTest
         true
     );
 
-    Assertions.assertNull(mergeStrict(analysis1, analysis2).isRollup());
-    Assertions.assertNull(mergeStrict(analysis1, analysis4).isRollup());
-    Assertions.assertNull(mergeStrict(analysis2, analysis4).isRollup());
-    Assertions.assertFalse(mergeStrict(analysis2, analysis3).isRollup());
-    Assertions.assertTrue(mergeStrict(analysis4, analysis5).isRollup());
+    Assert.assertNull(mergeStrict(analysis1, analysis2).isRollup());
+    Assert.assertNull(mergeStrict(analysis1, analysis4).isRollup());
+    Assert.assertNull(mergeStrict(analysis2, analysis4).isRollup());
+    Assert.assertFalse(mergeStrict(analysis2, analysis3).isRollup());
+    Assert.assertTrue(mergeStrict(analysis4, analysis5).isRollup());
 
-    Assertions.assertNull(mergeLenient(analysis1, analysis2).isRollup());
-    Assertions.assertNull(mergeLenient(analysis1, analysis4).isRollup());
-    Assertions.assertNull(mergeLenient(analysis2, analysis4).isRollup());
-    Assertions.assertFalse(mergeLenient(analysis2, analysis3).isRollup());
-    Assertions.assertTrue(mergeLenient(analysis4, analysis5).isRollup());
+    Assert.assertNull(mergeLenient(analysis1, analysis2).isRollup());
+    Assert.assertNull(mergeLenient(analysis1, analysis4).isRollup());
+    Assert.assertNull(mergeLenient(analysis2, analysis4).isRollup());
+    Assert.assertFalse(mergeLenient(analysis2, analysis3).isRollup());
+    Assert.assertTrue(mergeLenient(analysis4, analysis5).isRollup());
 
-    Assertions.assertNull(mergeEarliest(analysis1, analysis2).isRollup());
-    Assertions.assertNull(mergeEarliest(analysis1, analysis4).isRollup());
-    Assertions.assertNull(mergeEarliest(analysis2, analysis4).isRollup());
-    Assertions.assertFalse(mergeEarliest(analysis2, analysis3).isRollup());
-    Assertions.assertTrue(mergeEarliest(analysis4, analysis5).isRollup());
+    Assert.assertNull(mergeEarliest(analysis1, analysis2).isRollup());
+    Assert.assertNull(mergeEarliest(analysis1, analysis4).isRollup());
+    Assert.assertNull(mergeEarliest(analysis2, analysis4).isRollup());
+    Assert.assertFalse(mergeEarliest(analysis2, analysis3).isRollup());
+    Assert.assertTrue(mergeEarliest(analysis4, analysis5).isRollup());
 
-    Assertions.assertNull(mergeLatest(analysis1, analysis2).isRollup());
-    Assertions.assertNull(mergeLatest(analysis1, analysis4).isRollup());
-    Assertions.assertNull(mergeLatest(analysis2, analysis4).isRollup());
-    Assertions.assertFalse(mergeLatest(analysis2, analysis3).isRollup());
-    Assertions.assertTrue(mergeLatest(analysis4, analysis5).isRollup());
+    Assert.assertNull(mergeLatest(analysis1, analysis2).isRollup());
+    Assert.assertNull(mergeLatest(analysis1, analysis4).isRollup());
+    Assert.assertNull(mergeLatest(analysis2, analysis4).isRollup());
+    Assert.assertFalse(mergeLatest(analysis2, analysis3).isRollup());
+    Assert.assertTrue(mergeLatest(analysis4, analysis5).isRollup());
   }
 
   @Test
@@ -1272,8 +1271,8 @@ public class SegmentMetadataQueryQueryToolChestTest
         false
     );
 
-    assertThat(
-        Assertions.assertThrows(
+    MatcherAssert.assertThat(
+        Assert.assertThrows(
             DruidException.class,
             () -> SegmentMetadataQueryQueryToolChest.mergeAnalyses(
                 null,
@@ -1288,8 +1287,8 @@ public class SegmentMetadataQueryQueryToolChestTest
                 "SegementMetadata queries require at least one datasource.")
     );
 
-    assertThat(
-        Assertions.assertThrows(
+    MatcherAssert.assertThat(
+        Assert.assertThrows(
             DruidException.class,
             () -> SegmentMetadataQueryQueryToolChest.mergeAnalyses(
                 ImmutableSet.of(),
@@ -1355,7 +1354,7 @@ public class SegmentMetadataQueryQueryToolChestTest
         null
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         expectedMergedAnalysis,
         SegmentMetadataQueryQueryToolChest.finalizeAnalysis(
             SegmentMetadataQueryQueryToolChest.mergeAnalyses(
@@ -1372,7 +1371,7 @@ public class SegmentMetadataQueryQueryToolChestTest
         )
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         expectedMergedAnalysis,
         SegmentMetadataQueryQueryToolChest.finalizeAnalysis(
             SegmentMetadataQueryQueryToolChest.mergeAnalyses(
@@ -1417,29 +1416,29 @@ public class SegmentMetadataQueryQueryToolChestTest
         false
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         analysis1,
         SegmentMetadataQueryQueryToolChest
             .mergeAnalyses(TEST_DATASOURCE.getTableNames(), analysis1, null, AggregatorMergeStrategy.STRICT)
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         analysis2,
         SegmentMetadataQueryQueryToolChest
             .mergeAnalyses(TEST_DATASOURCE.getTableNames(), null, analysis2, AggregatorMergeStrategy.STRICT)
     );
-    Assertions.assertNull(
+    Assert.assertNull(
         SegmentMetadataQueryQueryToolChest
             .mergeAnalyses(TEST_DATASOURCE.getTableNames(), null, null, AggregatorMergeStrategy.STRICT)
     );
-    Assertions.assertNull(
+    Assert.assertNull(
         SegmentMetadataQueryQueryToolChest
             .mergeAnalyses(TEST_DATASOURCE.getTableNames(), null, null, AggregatorMergeStrategy.LENIENT)
     );
-    Assertions.assertNull(
+    Assert.assertNull(
         SegmentMetadataQueryQueryToolChest
             .mergeAnalyses(TEST_DATASOURCE.getTableNames(), null, null, AggregatorMergeStrategy.EARLIEST)
     );
-    Assertions.assertNull(
+    Assert.assertNull(
         SegmentMetadataQueryQueryToolChest
             .mergeAnalyses(TEST_DATASOURCE.getTableNames(), null, null, AggregatorMergeStrategy.LATEST)
     );

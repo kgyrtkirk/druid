@@ -44,6 +44,7 @@ import org.apache.druid.sql.calcite.filtration.Filtration;
 import org.apache.druid.sql.calcite.run.SqlEngine;
 import org.apache.druid.sql.calcite.util.CalciteTests;
 import org.junit.Ignore;
+import org.junit.Test;
 
 /**
  * Runs {@link CalciteUnionQueryTest} but with MSQ engine

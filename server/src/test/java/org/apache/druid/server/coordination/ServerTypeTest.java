@@ -19,45 +19,41 @@
 
 package org.apache.druid.server.coordination;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class ServerTypeTest
 {
   @Test
   public void testAssignable()
   {
-    Assertions.assertTrue(ServerType.HISTORICAL.isSegmentReplicationTarget());
-    Assertions.assertTrue(ServerType.BRIDGE.isSegmentReplicationTarget());
-    Assertions.assertFalse(ServerType.REALTIME.isSegmentReplicationTarget());
-    Assertions.assertFalse(ServerType.INDEXER_EXECUTOR.isSegmentReplicationTarget());
+    Assert.assertTrue(ServerType.HISTORICAL.isSegmentReplicationTarget());
+    Assert.assertTrue(ServerType.BRIDGE.isSegmentReplicationTarget());
+    Assert.assertFalse(ServerType.REALTIME.isSegmentReplicationTarget());
+    Assert.assertFalse(ServerType.INDEXER_EXECUTOR.isSegmentReplicationTarget());
   }
 
   @Test
   public void testFromString()
   {
-    Assertions.assertEquals(ServerType.HISTORICAL, ServerType.fromString("historical"));
-    Assertions.assertEquals(ServerType.BRIDGE, ServerType.fromString("bridge"));
-    Assertions.assertEquals(ServerType.REALTIME, ServerType.fromString("realtime"));
-    Assertions.assertEquals(ServerType.INDEXER_EXECUTOR, ServerType.fromString("indexer-executor"));
+    Assert.assertEquals(ServerType.HISTORICAL, ServerType.fromString("historical"));
+    Assert.assertEquals(ServerType.BRIDGE, ServerType.fromString("bridge"));
+    Assert.assertEquals(ServerType.REALTIME, ServerType.fromString("realtime"));
+    Assert.assertEquals(ServerType.INDEXER_EXECUTOR, ServerType.fromString("indexer-executor"));
   }
 
   @Test
   public void testToString()
   {
-    Assertions.assertEquals(ServerType.HISTORICAL.toString(), "historical");
-    Assertions.assertEquals(ServerType.BRIDGE.toString(), "bridge");
-    Assertions.assertEquals(ServerType.REALTIME.toString(), "realtime");
-    Assertions.assertEquals(ServerType.INDEXER_EXECUTOR.toString(), "indexer-executor");
+    Assert.assertEquals(ServerType.HISTORICAL.toString(), "historical");
+    Assert.assertEquals(ServerType.BRIDGE.toString(), "bridge");
+    Assert.assertEquals(ServerType.REALTIME.toString(), "realtime");
+    Assert.assertEquals(ServerType.INDEXER_EXECUTOR.toString(), "indexer-executor");
   }
 
-  @Test
+  @Test(expected = IllegalArgumentException.class)
   public void testInvalidName()
   {
-    assertThrows(IllegalArgumentException.class, () -> {
-      ServerType.fromString("invalid");
-    });
+    ServerType.fromString("invalid");
   }
 }

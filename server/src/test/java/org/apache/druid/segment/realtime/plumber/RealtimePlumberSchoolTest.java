@@ -65,16 +65,16 @@ import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.easymock.EasyMock;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Timeout;
-import org.junit.jupiter.api.io.TempDir;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -86,8 +86,10 @@ import java.util.concurrent.TimeUnit;
 /**
  *
  */
+@RunWith(Parameterized.class)
 public class RealtimePlumberSchoolTest extends InitializedNullHandlingTest
 {
+  @Parameterized.Parameters(name = "rejectionPolicy = {0}, segmentWriteOutMediumFactory = {1}")
   public static Collection<?> constructorFeeder()
   {
     final RejectionPolicyFactory[] rejectionPolicies = new RejectionPolicyFactory[]{
@@ -103,8 +105,8 @@ public class RealtimePlumberSchoolTest extends InitializedNullHandlingTest
     return constructors;
   }
 
-  private RejectionPolicyFactory rejectionPolicy;
-  private SegmentWriteOutMediumFactory segmentWriteOutMediumFactory;
+  private final RejectionPolicyFactory rejectionPolicy;
+  private final SegmentWriteOutMediumFactory segmentWriteOutMediumFactory;
   private RealtimePlumber plumber;
   private RealtimePlumberSchool realtimePlumberSchool;
   private DataSegmentAnnouncer announcer;
@@ -119,10 +121,10 @@ public class RealtimePlumberSchoolTest extends InitializedNullHandlingTest
   private FireDepartmentMetrics metrics;
   private File tmpDir;
 
-  @TempDir
-  public File temporaryFolder;
+  @Rule
+  public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-  public void initRealtimePlumberSchoolTest(
+  public RealtimePlumberSchoolTest(
       RejectionPolicyFactory rejectionPolicy,
       SegmentWriteOutMediumFactory segmentWriteOutMediumFactory
   )
@@ -131,7 +133,7 @@ public class RealtimePlumberSchoolTest extends InitializedNullHandlingTest
     this.segmentWriteOutMediumFactory = segmentWriteOutMediumFactory;
   }
 
-  @BeforeEach
+  @Before
   public void setUp() throws Exception
   {
     tmpDir = FileUtils.createTempDir();
@@ -210,7 +212,7 @@ public class RealtimePlumberSchoolTest extends InitializedNullHandlingTest
         null,
         null,
         null,
-        newFolder(temporaryFolder, "junit"),
+        temporaryFolder.newFolder(),
         new IntervalStartVersioningPolicy(),
         rejectionPolicy,
         null,
@@ -248,7 +250,7 @@ public class RealtimePlumberSchoolTest extends InitializedNullHandlingTest
     plumber = (RealtimePlumber) realtimePlumberSchool.findPlumber(schema, tuningConfig, metrics);
   }
 
-  @AfterEach
+  @After
   public void tearDown() throws Exception
   {
     EasyMock.verify(announcer, segmentPublisher, dataSegmentPusher, handoffNotifierFactory, handoffNotifier, emitter);
@@ -261,26 +263,20 @@ public class RealtimePlumberSchoolTest extends InitializedNullHandlingTest
     FileUtils.deleteDirectory(tmpDir);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "rejectionPolicy = {0}, segmentWriteOutMediumFactory = {1}")
-  @Timeout(value = 60_000L, unit = TimeUnit.MILLISECONDS)
-  public void testPersist(RejectionPolicyFactory rejectionPolicy, SegmentWriteOutMediumFactory segmentWriteOutMediumFactory) throws Exception
+  @Test(timeout = 60_000L)
+  public void testPersist() throws Exception
   {
-    initRealtimePlumberSchoolTest(rejectionPolicy, segmentWriteOutMediumFactory);
     testPersist(null);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "rejectionPolicy = {0}, segmentWriteOutMediumFactory = {1}")
-  @Timeout(value = 60_000L, unit = TimeUnit.MILLISECONDS)
-  public void testPersistWithCommitMetadata(RejectionPolicyFactory rejectionPolicy, SegmentWriteOutMediumFactory segmentWriteOutMediumFactory) throws Exception
+  @Test(timeout = 60_000L)
+  public void testPersistWithCommitMetadata() throws Exception
   {
-    initRealtimePlumberSchoolTest(rejectionPolicy, segmentWriteOutMediumFactory);
     final Object commitMetadata = "dummyCommitMetadata";
     testPersist(commitMetadata);
 
     plumber = (RealtimePlumber) realtimePlumberSchool.findPlumber(schema, tuningConfig, metrics);
-    Assertions.assertEquals(commitMetadata, plumber.startJob());
+    Assert.assertEquals(commitMetadata, plumber.startJob());
   }
 
   private void testPersist(final Object commitMetadata) throws Exception
@@ -297,7 +293,7 @@ public class RealtimePlumberSchoolTest extends InitializedNullHandlingTest
         tuningConfig.getDedupColumn()
     );
     plumber.getSinks().put(0L, sink);
-    Assertions.assertNull(plumber.startJob());
+    Assert.assertNull(plumber.startJob());
 
     final InputRow row = EasyMock.createNiceMock(InputRow.class);
     EasyMock.expect(row.getTimestampFromEpoch()).andReturn(0L);
@@ -329,12 +325,9 @@ public class RealtimePlumberSchoolTest extends InitializedNullHandlingTest
     plumber.finishJob();
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "rejectionPolicy = {0}, segmentWriteOutMediumFactory = {1}")
-  @Timeout(value = 60_000L, unit = TimeUnit.MILLISECONDS)
-  public void testPersistFails(RejectionPolicyFactory rejectionPolicy, SegmentWriteOutMediumFactory segmentWriteOutMediumFactory) throws Exception
+  @Test(timeout = 60_000L)
+  public void testPersistFails() throws Exception
   {
-    initRealtimePlumberSchoolTest(rejectionPolicy, segmentWriteOutMediumFactory);
     Sink sink = new Sink(
         Intervals.utc(0, TimeUnit.HOURS.toMillis(1)),
         schema,
@@ -372,15 +365,12 @@ public class RealtimePlumberSchoolTest extends InitializedNullHandlingTest
       Thread.sleep(100);
     }
 
-    Assertions.assertEquals(1, metrics.failedPersists());
+    Assert.assertEquals(1, metrics.failedPersists());
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "rejectionPolicy = {0}, segmentWriteOutMediumFactory = {1}")
-  @Timeout(value = 60_000L, unit = TimeUnit.MILLISECONDS)
-  public void testPersistHydrantGaps(RejectionPolicyFactory rejectionPolicy, SegmentWriteOutMediumFactory segmentWriteOutMediumFactory) throws Exception
+  @Test(timeout = 60_000L)
+  public void testPersistHydrantGaps() throws Exception
   {
-    initRealtimePlumberSchoolTest(rejectionPolicy, segmentWriteOutMediumFactory);
     final Object commitMetadata = "dummyCommitMetadata";
     testPersistHydrantGapsHelper(commitMetadata);
   }
@@ -402,7 +392,7 @@ public class RealtimePlumberSchoolTest extends InitializedNullHandlingTest
         tuningConfig.getDedupColumn()
     );
     plumber2.getSinks().put(0L, sink);
-    Assertions.assertNull(plumber2.startJob());
+    Assert.assertNull(plumber2.startJob());
     final CountDownLatch doneSignal = new CountDownLatch(1);
     final Committer committer = new Committer()
     {
@@ -434,7 +424,7 @@ public class RealtimePlumberSchoolTest extends InitializedNullHandlingTest
 
     /* Check that all hydrants were persisted */
     for (int i = 0; i < 5; i++) {
-      Assertions.assertTrue(new File(persistDir, String.valueOf(i)).exists());
+      Assert.assertTrue(new File(persistDir, String.valueOf(i)).exists());
     }
 
     /* Create some gaps in the persisted hydrants and reload */
@@ -448,24 +438,24 @@ public class RealtimePlumberSchoolTest extends InitializedNullHandlingTest
     restoredPlumber.bootstrapSinksFromDisk();
 
     Map<Long, Sink> sinks = restoredPlumber.getSinks();
-    Assertions.assertEquals(1, sinks.size());
+    Assert.assertEquals(1, sinks.size());
 
 
     List<FireHydrant> hydrants = Lists.newArrayList(sinks.get(new Long(0)));
     DateTime startTime = DateTimes.of("1970-01-01T00:00:00.000Z");
     Interval expectedInterval = new Interval(startTime, DateTimes.of("1971-01-01T00:00:00.000Z"));
-    Assertions.assertEquals(0, hydrants.get(0).getCount());
-    Assertions.assertEquals(
+    Assert.assertEquals(0, hydrants.get(0).getCount());
+    Assert.assertEquals(
         expectedInterval,
         hydrants.get(0).getSegmentDataInterval()
     );
-    Assertions.assertEquals(2, hydrants.get(1).getCount());
-    Assertions.assertEquals(
+    Assert.assertEquals(2, hydrants.get(1).getCount());
+    Assert.assertEquals(
         expectedInterval,
         hydrants.get(1).getSegmentDataInterval()
     );
-    Assertions.assertEquals(4, hydrants.get(2).getCount());
-    Assertions.assertEquals(
+    Assert.assertEquals(4, hydrants.get(2).getCount());
+    Assert.assertEquals(
         expectedInterval,
         hydrants.get(2).getSegmentDataInterval()
     );
@@ -481,15 +471,12 @@ public class RealtimePlumberSchoolTest extends InitializedNullHandlingTest
     );
     restoredPlumber2.bootstrapSinksFromDisk();
 
-    Assertions.assertEquals(0, restoredPlumber2.getSinks().size());
+    Assert.assertEquals(0, restoredPlumber2.getSinks().size());
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "rejectionPolicy = {0}, segmentWriteOutMediumFactory = {1}")
-  @Timeout(value = 60_000L, unit = TimeUnit.MILLISECONDS)
-  public void testDimOrderInheritance(RejectionPolicyFactory rejectionPolicy, SegmentWriteOutMediumFactory segmentWriteOutMediumFactory) throws Exception
+  @Test(timeout = 60_000L)
+  public void testDimOrderInheritance() throws Exception
   {
-    initRealtimePlumberSchoolTest(rejectionPolicy, segmentWriteOutMediumFactory);
     final Object commitMetadata = "dummyCommitMetadata";
     testDimOrderInheritanceHelper(commitMetadata);
   }
@@ -510,7 +497,7 @@ public class RealtimePlumberSchoolTest extends InitializedNullHandlingTest
     Map<Long, Sink> sinks;
 
     RealtimePlumber plumber = (RealtimePlumber) realtimePlumberSchool.findPlumber(schema2, tuningConfig, metrics);
-    Assertions.assertNull(plumber.startJob());
+    Assert.assertNull(plumber.startJob());
 
     final CountDownLatch doneSignal = new CountDownLatch(1);
 
@@ -593,7 +580,7 @@ public class RealtimePlumberSchoolTest extends InitializedNullHandlingTest
     restoredPlumber.bootstrapSinksFromDisk();
 
     sinks = restoredPlumber.getSinks();
-    Assertions.assertEquals(1, sinks.size());
+    Assert.assertEquals(1, sinks.size());
     List<FireHydrant> hydrants = Lists.newArrayList(sinks.get(0L));
 
     for (int i = 0; i < hydrants.size(); i++) {
@@ -601,8 +588,8 @@ public class RealtimePlumberSchoolTest extends InitializedNullHandlingTest
       ReferenceCountingSegment segment = hydrant.getIncrementedSegment();
       try {
         qindex = segment.asQueryableIndex();
-        Assertions.assertEquals(i, hydrant.getCount());
-        Assertions.assertEquals(expectedDims.get(i), ImmutableList.copyOf(qindex.getAvailableDimensions()));
+        Assert.assertEquals(i, hydrant.getCount());
+        Assert.assertEquals(expectedDims.get(i), ImmutableList.copyOf(qindex.getAvailableDimensions()));
       }
       finally {
         segment.decrement();
@@ -723,14 +710,5 @@ public class RealtimePlumberSchoolTest extends InitializedNullHandlingTest
       }
     };
     return Suppliers.ofInstance(committer);
-  }
-
-  private static File newFolder(File root, String... subDirs) throws IOException {
-    String subFolder = String.join("/", subDirs);
-    File result = new File(root, subFolder);
-    if (!result.mkdirs()) {
-      throw new IOException("Couldn't create folders " + root);
-    }
-    return result;
   }
 }

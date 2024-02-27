@@ -20,10 +20,11 @@
 package org.apache.druid.java.util.metrics.cgroups;
 
 import org.apache.druid.java.util.common.FileUtils;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,15 +32,15 @@ import java.io.IOException;
 
 public class CpuTest
 {
-  @TempDir
-  public File temporaryFolder;
+  @Rule
+  public TemporaryFolder temporaryFolder = new TemporaryFolder();
   private CgroupDiscoverer discoverer;
 
-  @BeforeEach
+  @Before
   public void setUp() throws IOException
   {
-    File cgroupDir = newFolder(temporaryFolder, "junit");
-    File procDir = newFolder(temporaryFolder, "junit");
+    File cgroupDir = temporaryFolder.newFolder();
+    File procDir = temporaryFolder.newFolder();
     discoverer = new ProcCgroupDiscoverer(procDir.toPath());
     TestUtils.setUpCgroups(procDir, cgroupDir);
     final File cpuDir = new File(
@@ -60,9 +61,9 @@ public class CpuTest
       throw new RuntimeException("Should still continue");
     });
     final Cpu.CpuAllocationMetric metric = cpu.snapshot();
-    Assertions.assertEquals(-1L, metric.getShares());
-    Assertions.assertEquals(0, metric.getQuotaUs());
-    Assertions.assertEquals(0, metric.getPeriodUs());
+    Assert.assertEquals(-1L, metric.getShares());
+    Assert.assertEquals(0, metric.getQuotaUs());
+    Assert.assertEquals(0, metric.getPeriodUs());
   }
 
   @Test
@@ -70,17 +71,8 @@ public class CpuTest
   {
     final Cpu cpu = new Cpu(discoverer);
     final Cpu.CpuAllocationMetric snapshot = cpu.snapshot();
-    Assertions.assertEquals(1024, snapshot.getShares());
-    Assertions.assertEquals(300000, snapshot.getQuotaUs());
-    Assertions.assertEquals(100000, snapshot.getPeriodUs());
-  }
-
-  private static File newFolder(File root, String... subDirs) throws IOException {
-    String subFolder = String.join("/", subDirs);
-    File result = new File(root, subFolder);
-    if (!result.mkdirs()) {
-      throw new IOException("Couldn't create folders " + root);
-    }
-    return result;
+    Assert.assertEquals(1024, snapshot.getShares());
+    Assert.assertEquals(300000, snapshot.getQuotaUs());
+    Assert.assertEquals(100000, snapshot.getPeriodUs());
   }
 }

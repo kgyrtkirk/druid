@@ -21,30 +21,31 @@ package org.apache.druid.java.util.metrics.cgroups;
 
 import com.google.common.collect.ImmutableSet;
 import org.apache.druid.java.util.common.FileUtils;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Paths;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ProcCgroupDiscovererTest
 {
-  @TempDir
-  public File temporaryFolder;
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
+  @Rule
+  public TemporaryFolder temporaryFolder = new TemporaryFolder();
   private File procDir;
   private File cgroupDir;
   private CgroupDiscoverer discoverer;
 
-  @BeforeEach
+  @Before
   public void setUp() throws Exception
   {
-    cgroupDir = newFolder(temporaryFolder, "junit");
-    procDir = newFolder(temporaryFolder, "junit");
+    cgroupDir = temporaryFolder.newFolder();
+    procDir = temporaryFolder.newFolder();
     discoverer = new ProcCgroupDiscoverer(procDir.toPath());
     TestUtils.setUpCgroups(procDir, cgroupDir);
   }
@@ -52,7 +53,7 @@ public class ProcCgroupDiscovererTest
   @Test
   public void testSimpleProc()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new File(
             cgroupDir,
             "cpu,cpuacct/system.slice/some.service/f12ba7e0-fa16-462e-bb9d-652ccc27f0ee"
@@ -67,10 +68,10 @@ public class ProcCgroupDiscovererTest
     final ProcCgroupDiscoverer.ProcMountsEntry entry = ProcCgroupDiscoverer.ProcMountsEntry.parse(
         "/dev/md126 /ebs xfs rw,seclabel,noatime,attr2,inode64,sunit=1024,swidth=16384,noquota 0 0"
     );
-    Assertions.assertEquals("/dev/md126", entry.dev);
-    Assertions.assertEquals(Paths.get("/ebs"), entry.path);
-    Assertions.assertEquals("xfs", entry.type);
-    Assertions.assertEquals(ImmutableSet.of(
+    Assert.assertEquals("/dev/md126", entry.dev);
+    Assert.assertEquals(Paths.get("/ebs"), entry.path);
+    Assert.assertEquals("xfs", entry.type);
+    Assert.assertEquals(ImmutableSet.of(
         "rw",
         "seclabel",
         "noatime",
@@ -85,17 +86,17 @@ public class ProcCgroupDiscovererTest
   @Test
   public void testNullCgroup()
   {
-    assertThrows(NullPointerException.class, () -> {
-      Assertions.assertNull(new ProcCgroupDiscoverer(procDir.toPath()).discover(null));
-    });
+    expectedException.expect(NullPointerException.class);
+    Assert.assertNull(new ProcCgroupDiscoverer(procDir.toPath()).discover(null));
   }
 
   @Test
   public void testFallBack() throws Exception
   {
-    File temporaryFolder = new File();
-    File cgroupDir = newFolder(temporaryFolder, "junit");
-    File procDir = newFolder(temporaryFolder, "junit");
+    TemporaryFolder temporaryFolder = new TemporaryFolder();
+    temporaryFolder.create();
+    File cgroupDir = temporaryFolder.newFolder();
+    File procDir = temporaryFolder.newFolder();
     TestUtils.setUpCgroups(procDir, cgroupDir);
 
     // Swap out the cgroup path with a default path
@@ -104,26 +105,17 @@ public class ProcCgroupDiscovererTest
         "cpu,cpuacct/"
     ));
 
-    Assertions.assertTrue(new File(
+    Assert.assertTrue(new File(
         cgroupDir,
         "cpu,cpuacct/"
     ).mkdir());
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new File(
             cgroupDir,
             "cpu,cpuacct"
         ).toPath(),
         new ProcCgroupDiscoverer(procDir.toPath()).discover("cpu")
     );
-  }
-
-  private static File newFolder(File root, String... subDirs) throws IOException {
-    String subFolder = String.join("/", subDirs);
-    File result = new File(root, subFolder);
-    if (!result.mkdirs()) {
-      throw new IOException("Couldn't create folders " + root);
-    }
-    return result;
   }
 }

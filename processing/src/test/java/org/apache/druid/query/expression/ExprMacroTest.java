@@ -26,9 +26,11 @@ import org.apache.druid.math.expr.Expr;
 import org.apache.druid.math.expr.ExpressionType;
 import org.apache.druid.math.expr.InputBindings;
 import org.apache.druid.math.expr.Parser;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public class ExprMacroTest
 {
@@ -62,11 +64,14 @@ public class ExprMacroTest
                   .build()
   );
 
-  @BeforeAll
+  @BeforeClass
   public static void setUpClass()
   {
     NullHandling.initializeForTests();
   }
+
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
 
   @Test
   public void testLike()
@@ -226,14 +231,14 @@ public class ExprMacroTest
   private void assertExpr(final String expression, final Object expectedResult)
   {
     final Expr expr = Parser.parse(expression, TestExprMacroTable.INSTANCE);
-    Assertions.assertEquals(expectedResult, expr.eval(BINDINGS).value(), expression);
+    Assert.assertEquals(expression, expectedResult, expr.eval(BINDINGS).value());
 
     final Expr exprNotFlattened = Parser.parse(expression, TestExprMacroTable.INSTANCE, false);
     final Expr roundTripNotFlattened =
         Parser.parse(exprNotFlattened.stringify(), TestExprMacroTable.INSTANCE);
-    Assertions.assertEquals(expectedResult, roundTripNotFlattened.eval(BINDINGS).value(), exprNotFlattened.stringify());
+    Assert.assertEquals(exprNotFlattened.stringify(), expectedResult, roundTripNotFlattened.eval(BINDINGS).value());
 
     final Expr roundTrip = Parser.parse(expr.stringify(), TestExprMacroTable.INSTANCE);
-    Assertions.assertEquals(expectedResult, roundTrip.eval(BINDINGS).value(), exprNotFlattened.stringify());
+    Assert.assertEquals(exprNotFlattened.stringify(), expectedResult, roundTrip.eval(BINDINGS).value());
   }
 }

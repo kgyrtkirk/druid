@@ -30,20 +30,21 @@ import org.apache.druid.query.lookup.LookupExtractorFactoryContainerProvider;
 import org.apache.druid.query.lookup.MapLookupExtractorFactory;
 import org.apache.druid.segment.join.lookup.LookupJoinable;
 import org.hamcrest.CoreMatchers;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.io.IOException;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 public class LookupJoinableFactoryTest
 {
   private static final String PREFIX = "j.";
+
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
 
   private final LookupJoinableFactory factory;
   private final LookupDataSource lookupDataSource = new LookupDataSource("country_code_to_name");
@@ -89,17 +90,16 @@ public class LookupJoinableFactoryTest
   @Test
   public void testBuildNonLookup()
   {
-    Throwable exception = assertThrows(ClassCastException.class, () -> {
+    expectedException.expect(ClassCastException.class);
+    expectedException.expectMessage("TableDataSource cannot be cast");
 
-      final Optional<Joinable> ignored = factory.build(new TableDataSource("foo"), makeCondition("x == \"j.k\""));
-    });
-    assertTrue(exception.getMessage().contains("TableDataSource cannot be cast"));
+    final Optional<Joinable> ignored = factory.build(new TableDataSource("foo"), makeCondition("x == \"j.k\""));
   }
 
   @Test
   public void testBuildNonHashJoin()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Optional.empty(),
         factory.build(lookupDataSource, makeCondition("x > \"j.k\""))
     );
@@ -108,7 +108,7 @@ public class LookupJoinableFactoryTest
   @Test
   public void testBuildDifferentLookup()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Optional.empty(),
         factory.build(new LookupDataSource("beep"), makeCondition("x == \"j.k\""))
     );
@@ -119,17 +119,17 @@ public class LookupJoinableFactoryTest
   {
     final Joinable joinable = factory.build(lookupDataSource, makeCondition("x == \"j.k\"")).get();
 
-    assertThat(joinable, CoreMatchers.instanceOf(LookupJoinable.class));
-    Assertions.assertEquals(ImmutableList.of("k", "v"), joinable.getAvailableColumns());
-    Assertions.assertEquals(Joinable.CARDINALITY_UNKNOWN, joinable.getCardinality("k"));
-    Assertions.assertEquals(Joinable.CARDINALITY_UNKNOWN, joinable.getCardinality("v"));
+    Assert.assertThat(joinable, CoreMatchers.instanceOf(LookupJoinable.class));
+    Assert.assertEquals(ImmutableList.of("k", "v"), joinable.getAvailableColumns());
+    Assert.assertEquals(Joinable.CARDINALITY_UNKNOWN, joinable.getCardinality("k"));
+    Assert.assertEquals(Joinable.CARDINALITY_UNKNOWN, joinable.getCardinality("v"));
   }
 
   @Test
   public void testIsDirectlyJoinable()
   {
-    Assertions.assertTrue(factory.isDirectlyJoinable(lookupDataSource));
-    Assertions.assertFalse(factory.isDirectlyJoinable(new TableDataSource("foo")));
+    Assert.assertTrue(factory.isDirectlyJoinable(lookupDataSource));
+    Assert.assertFalse(factory.isDirectlyJoinable(new TableDataSource("foo")));
   }
 
   private static JoinConditionAnalysis makeCondition(final String condition)

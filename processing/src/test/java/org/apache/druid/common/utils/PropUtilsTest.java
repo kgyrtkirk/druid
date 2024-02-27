@@ -20,22 +20,18 @@
 package org.apache.druid.common.utils;
 
 import org.apache.druid.java.util.common.ISE;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Properties;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 public class PropUtilsTest
 {
-  @Test
+  @Test(expected = ISE.class)
   public void testNotSpecifiedGetProperty()
   {
-    assertThrows(ISE.class, () -> {
-      Properties prop = new Properties();
-      PropUtils.getProperty(prop, "");
-    });
+    Properties prop = new Properties();
+    PropUtils.getProperty(prop, "");
   }
 
   @Test
@@ -43,16 +39,14 @@ public class PropUtilsTest
   {
     Properties prop = new Properties();
     prop.setProperty("key", "value");
-    Assertions.assertEquals("value", PropUtils.getProperty(prop, "key"));
+    Assert.assertEquals("value", PropUtils.getProperty(prop, "key"));
   }
 
-  @Test
+  @Test(expected = ISE.class)
   public void testNotSpecifiedGetPropertyAsInt()
   {
-    assertThrows(ISE.class, () -> {
-      Properties prop = new Properties();
-      PropUtils.getPropertyAsInt(prop, "", null);
-    });
+    Properties prop = new Properties();
+    PropUtils.getPropertyAsInt(prop, "", null);
   }
 
   @Test
@@ -61,7 +55,7 @@ public class PropUtilsTest
     Properties prop = new Properties();
     int defaultValue = 1;
     int result = PropUtils.getPropertyAsInt(prop, "", defaultValue);
-    Assertions.assertEquals(defaultValue, result);
+    Assert.assertEquals(defaultValue, result);
   }
 
   @Test
@@ -71,16 +65,14 @@ public class PropUtilsTest
     int expectedValue = 1;
     prop.setProperty("key", Integer.toString(expectedValue));
     int result = PropUtils.getPropertyAsInt(prop, "key");
-    Assertions.assertEquals(expectedValue, result);
+    Assert.assertEquals(expectedValue, result);
   }
 
-  @Test
+  @Test(expected = ISE.class)
   public void testFormatExceptionGetPropertyAsInt()
   {
-    assertThrows(ISE.class, () -> {
-      Properties prop = new Properties();
-      prop.setProperty("key", "1-value");
-      PropUtils.getPropertyAsInt(prop, "key", null);
-    });
+    Properties prop = new Properties();
+    prop.setProperty("key", "1-value");
+    PropUtils.getPropertyAsInt(prop, "key", null);
   }
 }

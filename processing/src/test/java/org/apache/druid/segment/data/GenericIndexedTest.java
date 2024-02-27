@@ -20,8 +20,8 @@
 package org.apache.druid.segment.data;
 
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -31,30 +31,24 @@ import java.nio.channels.WritableByteChannel;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 /**
  */
 public class GenericIndexedTest extends InitializedNullHandlingTest
 {
-  @Test
+  @Test(expected = UnsupportedOperationException.class)
   public void testNotSortedNoIndexOf()
   {
-    assertThrows(UnsupportedOperationException.class, () -> {
-      GenericIndexed.fromArray(new String[]{"a", "c", "b"}, GenericIndexed.STRING_STRATEGY).indexOf("a");
-    });
+    GenericIndexed.fromArray(new String[]{"a", "c", "b"}, GenericIndexed.STRING_STRATEGY).indexOf("a");
   }
 
-  @Test
+  @Test(expected = UnsupportedOperationException.class)
   public void testSerializationNotSortedNoIndexOf() throws Exception
   {
-    assertThrows(UnsupportedOperationException.class, () -> {
-      serializeAndDeserialize(
-          GenericIndexed.fromArray(
-              new String[]{"a", "c", "b"}, GenericIndexed.STRING_STRATEGY
-          )
-      ).indexOf("a");
-    });
+    serializeAndDeserialize(
+        GenericIndexed.fromArray(
+            new String[]{"a", "c", "b"}, GenericIndexed.STRING_STRATEGY
+        )
+    ).indexOf("a");
   }
 
   @Test
@@ -65,9 +59,9 @@ public class GenericIndexedTest extends InitializedNullHandlingTest
 
     checkBasicAPIs(strings, indexed, true);
 
-    Assertions.assertEquals(-13, indexed.indexOf("q"));
-    Assertions.assertEquals(-9, indexed.indexOf("howdydo"));
-    Assertions.assertEquals(-1, indexed.indexOf("1111"));
+    Assert.assertEquals(-13, indexed.indexOf("q"));
+    Assert.assertEquals(-9, indexed.indexOf("howdydo"));
+    Assert.assertEquals(-1, indexed.indexOf("1111"));
   }
 
   @Test
@@ -81,9 +75,9 @@ public class GenericIndexedTest extends InitializedNullHandlingTest
 
     checkBasicAPIs(strings, deserialized, true);
 
-    Assertions.assertEquals(-13, deserialized.indexOf("q"));
-    Assertions.assertEquals(-9, deserialized.indexOf("howdydo"));
-    Assertions.assertEquals(-1, deserialized.indexOf("1111"));
+    Assert.assertEquals(-13, deserialized.indexOf("q"));
+    Assert.assertEquals(-9, deserialized.indexOf("howdydo"));
+    Assert.assertEquals(-1, deserialized.indexOf("1111"));
   }
 
   @Test
@@ -99,9 +93,9 @@ public class GenericIndexedTest extends InitializedNullHandlingTest
 
   private void checkBasicAPIs(String[] strings, Indexed<String> index, boolean allowReverseLookup)
   {
-    Assertions.assertEquals(strings.length, index.size());
+    Assert.assertEquals(strings.length, index.size());
     for (int i = 0; i < strings.length; i++) {
-      Assertions.assertEquals(strings[i], index.get(i));
+      Assert.assertEquals(strings[i], index.get(i));
     }
 
     if (allowReverseLookup) {
@@ -110,12 +104,12 @@ public class GenericIndexedTest extends InitializedNullHandlingTest
         mixedUp.put(strings[i], i);
       }
       for (Map.Entry<String, Integer> entry : mixedUp.entrySet()) {
-        Assertions.assertEquals(entry.getValue().intValue(), index.indexOf(entry.getKey()));
+        Assert.assertEquals(entry.getValue().intValue(), index.indexOf(entry.getKey()));
       }
     } else {
       try {
         index.indexOf("xxx");
-        Assertions.fail("should throw exception");
+        Assert.fail("should throw exception");
       }
       catch (UnsupportedOperationException e) {
         // not supported
@@ -131,9 +125,9 @@ public class GenericIndexedTest extends InitializedNullHandlingTest
     channel.close();
 
     final ByteBuffer byteBuffer = ByteBuffer.wrap(baos.toByteArray());
-    Assertions.assertEquals(indexed.getSerializedSize(), byteBuffer.remaining());
+    Assert.assertEquals(indexed.getSerializedSize(), byteBuffer.remaining());
     GenericIndexed<String> deserialized = GenericIndexed.read(byteBuffer, GenericIndexed.STRING_STRATEGY);
-    Assertions.assertEquals(0, byteBuffer.remaining());
+    Assert.assertEquals(0, byteBuffer.remaining());
     return deserialized;
   }
 }

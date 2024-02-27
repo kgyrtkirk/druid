@@ -27,8 +27,8 @@ import org.apache.druid.query.SegmentDescriptor;
 import org.easymock.EasyMock;
 import org.joda.time.Duration;
 import org.joda.time.Interval;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -68,9 +68,9 @@ public class CoordinatorBasedSegmentHandoffNotifierTest
     );
     notifier.checkForSegmentHandoffs();
     // callback should have registered
-    Assertions.assertEquals(1, notifier.getHandOffCallbacks().size());
-    Assertions.assertTrue(notifier.getHandOffCallbacks().containsKey(descriptor));
-    Assertions.assertFalse(callbackCalled.get());
+    Assert.assertEquals(1, notifier.getHandOffCallbacks().size());
+    Assert.assertTrue(notifier.getHandOffCallbacks().containsKey(descriptor));
+    Assert.assertFalse(callbackCalled.get());
     EasyMock.verify(coordinatorClient);
   }
 
@@ -97,12 +97,12 @@ public class CoordinatorBasedSegmentHandoffNotifierTest
         Execs.directExecutor(),
         () -> callbackCalled.set(true)
     );
-    Assertions.assertEquals(1, notifier.getHandOffCallbacks().size());
-    Assertions.assertTrue(notifier.getHandOffCallbacks().containsKey(descriptor));
+    Assert.assertEquals(1, notifier.getHandOffCallbacks().size());
+    Assert.assertTrue(notifier.getHandOffCallbacks().containsKey(descriptor));
     notifier.checkForSegmentHandoffs();
     // callback should have been removed
-    Assertions.assertTrue(notifier.getHandOffCallbacks().isEmpty());
-    Assertions.assertTrue(callbackCalled.get());
+    Assert.assertTrue(notifier.getHandOffCallbacks().isEmpty());
+    Assert.assertTrue(callbackCalled.get());
     EasyMock.verify(coordinatorClient);
   }
 }

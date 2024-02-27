@@ -20,8 +20,8 @@
 package org.apache.druid.indexer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.IOException;
 
@@ -41,7 +41,7 @@ public class TaskStatusTest
     );
 
     final String json = mapper.writeValueAsString(status);
-    Assertions.assertEquals(status, mapper.readValue(json, TaskStatus.class));
+    Assert.assertEquals(status, mapper.readValue(json, TaskStatus.class));
 
     final String jsonNoLocation = "{\n"
                                   + "\"id\": \"testId\",\n"
@@ -57,11 +57,11 @@ public class TaskStatusTest
         "hello",
         null
     );
-    Assertions.assertEquals(statusNoLocation, mapper.readValue(jsonNoLocation, TaskStatus.class));
+    Assert.assertEquals(statusNoLocation, mapper.readValue(jsonNoLocation, TaskStatus.class));
 
     TaskStatus success = TaskStatus.success("forkTaskID", TaskLocation.create("localhost", 0, 1));
-    Assertions.assertEquals(success.getLocation().getHost(), "localhost");
-    Assertions.assertEquals(success.getLocation().getPort(), 0);
-    Assertions.assertEquals(success.getLocation().getTlsPort(), 1);
+    Assert.assertEquals(success.getLocation().getHost(), "localhost");
+    Assert.assertEquals(success.getLocation().getPort(), 0);
+    Assert.assertEquals(success.getLocation().getTlsPort(), 1);
   }
 }

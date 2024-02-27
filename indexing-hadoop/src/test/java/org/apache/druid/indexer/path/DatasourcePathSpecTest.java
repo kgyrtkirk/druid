@@ -55,6 +55,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapreduce.Job;
 import org.easymock.EasyMock;
 import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Collections;
 import java.util.List;

@@ -26,9 +26,9 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.apache.druid.discovery.NodeRole;
 import org.apache.druid.java.util.metrics.StubServiceEmitter;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import javax.annotation.Nullable;
 
@@ -41,7 +41,7 @@ public class WorkerTaskCountStatsMonitorTest
   private WorkerTaskCountStatsProvider statsProvider;
   private WorkerTaskCountStatsProvider nullStatsProvider;
 
-  @BeforeEach
+  @Before
   public void setUp()
   {
     statsProvider = new WorkerTaskCountStatsProvider()
@@ -165,7 +165,7 @@ public class WorkerTaskCountStatsMonitorTest
         new WorkerTaskCountStatsMonitor(injectorForMiddleManager, ImmutableSet.of(NodeRole.MIDDLE_MANAGER));
     final StubServiceEmitter emitter = new StubServiceEmitter("service", "host");
     monitor.doMonitor(emitter);
-    Assertions.assertEquals(5, emitter.getEvents().size());
+    Assert.assertEquals(5, emitter.getEvents().size());
     emitter.verifyValue(
         "worker/task/failed/count",
         ImmutableMap.of("category", "workerCategory", "workerVersion", "workerVersion"),
@@ -200,7 +200,7 @@ public class WorkerTaskCountStatsMonitorTest
         new WorkerTaskCountStatsMonitor(injectorForMiddleManagerNullStats, ImmutableSet.of(NodeRole.MIDDLE_MANAGER));
     final StubServiceEmitter emitter = new StubServiceEmitter("service", "host");
     monitor.doMonitor(emitter);
-    Assertions.assertEquals(0, emitter.getEvents().size());
+    Assert.assertEquals(0, emitter.getEvents().size());
   }
 
   @Test
@@ -210,6 +210,6 @@ public class WorkerTaskCountStatsMonitorTest
         new WorkerTaskCountStatsMonitor(injectorForPeon, ImmutableSet.of(NodeRole.PEON));
     final StubServiceEmitter emitter = new StubServiceEmitter("service", "host");
     monitor.doMonitor(emitter);
-    Assertions.assertEquals(0, emitter.getEvents().size());
+    Assert.assertEquals(0, emitter.getEvents().size());
   }
 }

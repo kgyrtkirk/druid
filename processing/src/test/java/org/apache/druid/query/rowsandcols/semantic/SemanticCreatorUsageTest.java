@@ -21,8 +21,10 @@ package org.apache.druid.query.rowsandcols.semantic;
 
 import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.query.rowsandcols.SemanticCreator;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 import org.reflections.Reflections;
 import org.reflections.scanners.MethodAnnotationsScanner;
 
@@ -33,17 +35,19 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Ensures that the usage of the {@link SemanticCreator} annotations follows some basic rules.
  */
+@RunWith(Parameterized.class)
 public class SemanticCreatorUsageTest
 {
 
-  private Method method;
+  private final Method method;
 
+  @Parameters(name = "{0}")
   public static List<Object[]> getParameters()
   {
     List<Object[]> params = new ArrayList<Object[]>();
@@ -59,7 +63,7 @@ public class SemanticCreatorUsageTest
     return params;
   }
 
-  public void initSemanticCreatorUsageTest(@SuppressWarnings("unused") String simpleMethodName, Method method)
+  public SemanticCreatorUsageTest(@SuppressWarnings("unused") String simpleMethodName, Method method)
   {
     this.method = method;
   }
@@ -67,13 +71,11 @@ public class SemanticCreatorUsageTest
   /**
    * {@link SemanticCreator} methods must be public to be accessible by the creator.
    */
-  @MethodSource("getParameters")
-  @ParameterizedTest(name = "{0}")
-  public void testPublic(@SuppressWarnings("unused") String simpleMethodName, Method method)
+  @Test
+  public void testPublic()
   {
-    initSemanticCreatorUsageTest(simpleMethodName, method);
     int modifiers = method.getModifiers();
-    assertTrue(Modifier.isPublic(modifiers), StringUtils.format("method [%s] is not public", method));
+    assertTrue(StringUtils.format("method [%s] is not public", method), Modifier.isPublic(modifiers));
   }
 
   /**
@@ -81,15 +83,13 @@ public class SemanticCreatorUsageTest
    *
    * An exact implementation may indicate that some interface methods might be missing.
    */
-  @MethodSource("getParameters")
-  @ParameterizedTest(name = "{0}")
-  public void testReturnType(@SuppressWarnings("unused") String simpleMethodName, Method method)
+  @Test
+  public void testReturnType()
   {
-    initSemanticCreatorUsageTest(simpleMethodName, method);
     Class<?> returnType = method.getReturnType();
     assertTrue(
-        returnType.isInterface(),
-        returnType + " is not an interface; this method must return with an interface; "
+        returnType + " is not an interface; this method must return with an interface; ",
+        returnType.isInterface()
     );
   }
 
@@ -98,15 +98,13 @@ public class SemanticCreatorUsageTest
    *
    * For example: a method returning with a type of Ball should be named as "toBall"
    */
-  @MethodSource("getParameters")
-  @ParameterizedTest(name = "{0}")
-  public void testMethodName(@SuppressWarnings("unused") String simpleMethodName, Method method)
+  @Test
+  public void testMethodName()
   {
-    initSemanticCreatorUsageTest(simpleMethodName, method);
     Class<?> returnType = method.getReturnType();
 
     String desiredMethodName = "to" + returnType.getSimpleName();
-    assertEquals(desiredMethodName, method.getName(), "should be named as " + desiredMethodName);
+    assertEquals("should be named as " + desiredMethodName, desiredMethodName, method.getName());
 
   }
 }

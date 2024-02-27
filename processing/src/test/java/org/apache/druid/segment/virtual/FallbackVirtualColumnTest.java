@@ -45,8 +45,8 @@ import org.apache.druid.segment.vector.SingleValueDimensionVectorSelector;
 import org.apache.druid.segment.vector.TestVectorColumnSelectorFactory;
 import org.apache.druid.segment.vector.VectorObjectSelector;
 import org.apache.druid.segment.vector.VectorValueSelector;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -62,13 +62,13 @@ public class FallbackVirtualColumnTest
   @Test
   public void testGetOutputName()
   {
-    Assertions.assertEquals("slimshady", makeCol("slimshady", "test1", "test2").getOutputName());
+    Assert.assertEquals("slimshady", makeCol("slimshady", "test1", "test2").getOutputName());
   }
 
   @Test
   public void testGetColumns()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Arrays.asList(DefaultDimensionSpec.of("test1"), DefaultDimensionSpec.of("test2")),
         makeCol("slimshady", "test1", "test2").getColumns()
     );
@@ -77,7 +77,7 @@ public class FallbackVirtualColumnTest
   @Test
   public void testGetCacheKey()
   {
-    Assertions.assertArrayEquals(
+    Assert.assertArrayEquals(
         new CacheKeyBuilder((byte) 0x3)
             .appendString("slimshady")
             .appendCacheable(DefaultDimensionSpec.of("test1"))
@@ -104,16 +104,16 @@ public class FallbackVirtualColumnTest
         .addCapabilities("colB", ColumnCapabilitiesImpl.createDefault())
         .addCapabilities("colC", ColumnCapabilitiesImpl.createDefault());
 
-    Assertions.assertSame(colA, col.makeDimensionSelector(new IgnoredDimensionSpec(), selectorFactory));
+    Assert.assertSame(colA, col.makeDimensionSelector(new IgnoredDimensionSpec(), selectorFactory));
 
     selectorFactory.addCapabilities("colA", null);
-    Assertions.assertSame(colB, col.makeDimensionSelector(new IgnoredDimensionSpec(), selectorFactory));
+    Assert.assertSame(colB, col.makeDimensionSelector(new IgnoredDimensionSpec(), selectorFactory));
 
     selectorFactory.addCapabilities("colB", null);
-    Assertions.assertSame(colC, col.makeDimensionSelector(new IgnoredDimensionSpec(), selectorFactory));
+    Assert.assertSame(colC, col.makeDimensionSelector(new IgnoredDimensionSpec(), selectorFactory));
 
     selectorFactory.addCapabilities("colC", null);
-    Assertions.assertSame(colA, col.makeDimensionSelector(new IgnoredDimensionSpec(), selectorFactory));
+    Assert.assertSame(colA, col.makeDimensionSelector(new IgnoredDimensionSpec(), selectorFactory));
   }
 
   @Test
@@ -132,23 +132,23 @@ public class FallbackVirtualColumnTest
         .addCapabilities("colB", ColumnCapabilitiesImpl.createDefault())
         .addCapabilities("colC", ColumnCapabilitiesImpl.createDefault());
 
-    Assertions.assertSame(colA, col.makeColumnValueSelector("abcd", selectorFactory));
+    Assert.assertSame(colA, col.makeColumnValueSelector("abcd", selectorFactory));
 
     selectorFactory.addCapabilities("colA", null);
-    Assertions.assertSame(colB, col.makeColumnValueSelector("abcd", selectorFactory));
+    Assert.assertSame(colB, col.makeColumnValueSelector("abcd", selectorFactory));
 
     selectorFactory.addCapabilities("colB", null);
-    Assertions.assertSame(colC, col.makeColumnValueSelector("abcd", selectorFactory));
+    Assert.assertSame(colC, col.makeColumnValueSelector("abcd", selectorFactory));
 
     selectorFactory.addCapabilities("colC", null);
-    Assertions.assertSame(colA, col.makeColumnValueSelector("abcd", selectorFactory));
+    Assert.assertSame(colA, col.makeColumnValueSelector("abcd", selectorFactory));
   }
 
   @SuppressWarnings("ConstantConditions")
   @Test
   public void testCanVectorize()
   {
-    Assertions.assertTrue(makeCol("slimshady", "test1").canVectorize(null));
+    Assert.assertTrue(makeCol("slimshady", "test1").canVectorize(null));
   }
 
   @Test
@@ -167,16 +167,16 @@ public class FallbackVirtualColumnTest
         .addCapabilities("colB", ColumnCapabilitiesImpl.createDefault())
         .addCapabilities("colC", ColumnCapabilitiesImpl.createDefault());
 
-    Assertions.assertSame(colA, col.makeSingleValueVectorDimensionSelector(new IgnoredDimensionSpec(), selectorFactory));
+    Assert.assertSame(colA, col.makeSingleValueVectorDimensionSelector(new IgnoredDimensionSpec(), selectorFactory));
 
     selectorFactory.addCapabilities("colA", null);
-    Assertions.assertSame(colB, col.makeSingleValueVectorDimensionSelector(new IgnoredDimensionSpec(), selectorFactory));
+    Assert.assertSame(colB, col.makeSingleValueVectorDimensionSelector(new IgnoredDimensionSpec(), selectorFactory));
 
     selectorFactory.addCapabilities("colB", null);
-    Assertions.assertSame(colC, col.makeSingleValueVectorDimensionSelector(new IgnoredDimensionSpec(), selectorFactory));
+    Assert.assertSame(colC, col.makeSingleValueVectorDimensionSelector(new IgnoredDimensionSpec(), selectorFactory));
 
     selectorFactory.addCapabilities("colC", null);
-    Assertions.assertSame(colA, col.makeSingleValueVectorDimensionSelector(new IgnoredDimensionSpec(), selectorFactory));
+    Assert.assertSame(colA, col.makeSingleValueVectorDimensionSelector(new IgnoredDimensionSpec(), selectorFactory));
   }
 
   @Test
@@ -195,16 +195,16 @@ public class FallbackVirtualColumnTest
         .addCapabilities("colB", ColumnCapabilitiesImpl.createDefault())
         .addCapabilities("colC", ColumnCapabilitiesImpl.createDefault());
 
-    Assertions.assertSame(colA, col.makeMultiValueVectorDimensionSelector(new IgnoredDimensionSpec(), selectorFactory));
+    Assert.assertSame(colA, col.makeMultiValueVectorDimensionSelector(new IgnoredDimensionSpec(), selectorFactory));
 
     selectorFactory.addCapabilities("colA", null);
-    Assertions.assertSame(colB, col.makeMultiValueVectorDimensionSelector(new IgnoredDimensionSpec(), selectorFactory));
+    Assert.assertSame(colB, col.makeMultiValueVectorDimensionSelector(new IgnoredDimensionSpec(), selectorFactory));
 
     selectorFactory.addCapabilities("colB", null);
-    Assertions.assertSame(colC, col.makeMultiValueVectorDimensionSelector(new IgnoredDimensionSpec(), selectorFactory));
+    Assert.assertSame(colC, col.makeMultiValueVectorDimensionSelector(new IgnoredDimensionSpec(), selectorFactory));
 
     selectorFactory.addCapabilities("colC", null);
-    Assertions.assertSame(colA, col.makeMultiValueVectorDimensionSelector(new IgnoredDimensionSpec(), selectorFactory));
+    Assert.assertSame(colA, col.makeMultiValueVectorDimensionSelector(new IgnoredDimensionSpec(), selectorFactory));
   }
 
   @Test
@@ -223,16 +223,16 @@ public class FallbackVirtualColumnTest
         .addCapabilities("colB", ColumnCapabilitiesImpl.createDefault())
         .addCapabilities("colC", ColumnCapabilitiesImpl.createDefault());
 
-    Assertions.assertSame(colA, col.makeVectorValueSelector("abcd", selectorFactory));
+    Assert.assertSame(colA, col.makeVectorValueSelector("abcd", selectorFactory));
 
     selectorFactory.addCapabilities("colA", null);
-    Assertions.assertSame(colB, col.makeVectorValueSelector("abcd", selectorFactory));
+    Assert.assertSame(colB, col.makeVectorValueSelector("abcd", selectorFactory));
 
     selectorFactory.addCapabilities("colB", null);
-    Assertions.assertSame(colC, col.makeVectorValueSelector("abcd", selectorFactory));
+    Assert.assertSame(colC, col.makeVectorValueSelector("abcd", selectorFactory));
 
     selectorFactory.addCapabilities("colC", null);
-    Assertions.assertSame(colA, col.makeVectorValueSelector("abcd", selectorFactory));
+    Assert.assertSame(colA, col.makeVectorValueSelector("abcd", selectorFactory));
   }
 
   @Test
@@ -251,16 +251,16 @@ public class FallbackVirtualColumnTest
         .addCapabilities("colB", ColumnCapabilitiesImpl.createDefault())
         .addCapabilities("colC", ColumnCapabilitiesImpl.createDefault());
 
-    Assertions.assertSame(colA, col.makeVectorObjectSelector("abcd", selectorFactory));
+    Assert.assertSame(colA, col.makeVectorObjectSelector("abcd", selectorFactory));
 
     selectorFactory.addCapabilities("colA", null);
-    Assertions.assertSame(colB, col.makeVectorObjectSelector("abcd", selectorFactory));
+    Assert.assertSame(colB, col.makeVectorObjectSelector("abcd", selectorFactory));
 
     selectorFactory.addCapabilities("colB", null);
-    Assertions.assertSame(colC, col.makeVectorObjectSelector("abcd", selectorFactory));
+    Assert.assertSame(colC, col.makeVectorObjectSelector("abcd", selectorFactory));
 
     selectorFactory.addCapabilities("colC", null);
-    Assertions.assertSame(colA, col.makeVectorObjectSelector("abcd", selectorFactory));
+    Assert.assertSame(colA, col.makeVectorObjectSelector("abcd", selectorFactory));
   }
 
   @Test
@@ -276,24 +276,24 @@ public class FallbackVirtualColumnTest
         .addCapabilities("colB", colB)
         .addCapabilities("colC", colC);
 
-    Assertions.assertEquals(ColumnCapabilitiesImpl.createDefault().getType(), col.capabilities("abcd").getType());
+    Assert.assertEquals(ColumnCapabilitiesImpl.createDefault().getType(), col.capabilities("abcd").getType());
 
-    Assertions.assertSame(colA, col.capabilities(selectorFactory, "abcd"));
+    Assert.assertSame(colA, col.capabilities(selectorFactory, "abcd"));
 
     selectorFactory.addCapabilities("colA", null);
-    Assertions.assertSame(colB, col.capabilities(selectorFactory, "abcd"));
+    Assert.assertSame(colB, col.capabilities(selectorFactory, "abcd"));
 
     selectorFactory.addCapabilities("colB", null);
-    Assertions.assertSame(colC, col.capabilities(selectorFactory, "abcd"));
+    Assert.assertSame(colC, col.capabilities(selectorFactory, "abcd"));
 
     selectorFactory.addCapabilities("colC", null);
-    Assertions.assertNull(col.capabilities(selectorFactory, "abcd"));
+    Assert.assertNull(col.capabilities(selectorFactory, "abcd"));
   }
 
   @Test
   public void testRequiredColumns()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Arrays.asList("colA", "colB", "oneMore"),
         makeCol("slimshady", "colA", "colB", "oneMore").requiredColumns()
     );
@@ -302,7 +302,7 @@ public class FallbackVirtualColumnTest
   @Test
   public void testUsesDotNotation()
   {
-    Assertions.assertFalse(makeCol("hi", "my", "name", "is").usesDotNotation());
+    Assert.assertFalse(makeCol("hi", "my", "name", "is").usesDotNotation());
   }
 
   @Test
@@ -326,16 +326,16 @@ public class FallbackVirtualColumnTest
         selectorFactory
     );
 
-    Assertions.assertSame(colA, col.getIndexSupplier("abcd", columnIndexSelector));
+    Assert.assertSame(colA, col.getIndexSupplier("abcd", columnIndexSelector));
 
     selectorFactory.addCapabilities("colA", null);
-    Assertions.assertSame(colB, col.getIndexSupplier("abcd", columnIndexSelector));
+    Assert.assertSame(colB, col.getIndexSupplier("abcd", columnIndexSelector));
 
     selectorFactory.addCapabilities("colB", null);
-    Assertions.assertSame(colC, col.getIndexSupplier("abcd", columnIndexSelector));
+    Assert.assertSame(colC, col.getIndexSupplier("abcd", columnIndexSelector));
 
     selectorFactory.addCapabilities("colC", null);
-    Assertions.assertSame(colA, col.getIndexSupplier("abcd", columnIndexSelector));
+    Assert.assertSame(colA, col.getIndexSupplier("abcd", columnIndexSelector));
 
   }
 

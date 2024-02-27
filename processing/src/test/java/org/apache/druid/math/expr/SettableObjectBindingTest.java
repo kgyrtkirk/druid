@@ -21,8 +21,8 @@ package org.apache.druid.math.expr;
 
 
 import com.google.common.collect.ImmutableMap;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class SettableObjectBindingTest
 {
@@ -30,10 +30,10 @@ public class SettableObjectBindingTest
   public void testSettableBinding()
   {
     SettableObjectBinding binding = new SettableObjectBinding(10);
-    Assertions.assertEquals(0, binding.asMap().size());
+    Assert.assertEquals(0, binding.asMap().size());
     binding = binding.withBinding("x", ExpressionType.LONG);
-    Assertions.assertEquals(ExpressionType.LONG, binding.get("x"));
-    Assertions.assertNull(binding.get("y"));
-    Assertions.assertEquals(ImmutableMap.of("x", ExpressionType.LONG), binding.asMap());
+    Assert.assertEquals(ExpressionType.LONG, binding.get("x"));
+    Assert.assertNull(binding.get("y"));
+    Assert.assertEquals(ImmutableMap.of("x", ExpressionType.LONG), binding.asMap());
   }
 }

@@ -24,9 +24,9 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.apache.druid.utils.JvmUtils;
 import org.apache.druid.utils.RuntimeInfo;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Properties;
 
@@ -54,7 +54,7 @@ public class ParametrizedUriEmitterConfigTest
     );
   }
 
-  @AfterAll
+  @AfterClass
   public static void teardown()
   {
     JvmUtils.resetTestsToDefaultRuntimeInfo();
@@ -66,9 +66,9 @@ public class ParametrizedUriEmitterConfigTest
     final Injector injector = makeInjector(new Properties());
     final HttpEmitterConfig config = injector.getInstance(HttpEmitterConfig.class);
 
-    Assertions.assertEquals(BaseHttpEmittingConfig.DEFAULT_MAX_BATCH_SIZE, config.getMaxBatchSize());
-    Assertions.assertEquals(BaseHttpEmittingConfig.DEFAULT_BATCH_QUEUE_SIZE_LIMIT, config.getBatchQueueSizeLimit());
-    Assertions.assertEquals(Long.MAX_VALUE, config.getFlushTimeOut());
+    Assert.assertEquals(BaseHttpEmittingConfig.DEFAULT_MAX_BATCH_SIZE, config.getMaxBatchSize());
+    Assert.assertEquals(BaseHttpEmittingConfig.DEFAULT_BATCH_QUEUE_SIZE_LIMIT, config.getBatchQueueSizeLimit());
+    Assert.assertEquals(Long.MAX_VALUE, config.getFlushTimeOut());
   }
 
   @Test
@@ -85,12 +85,12 @@ public class ParametrizedUriEmitterConfigTest
     final Injector injector = makeInjector(props);
     final HttpEmitterConfig config = injector.getInstance(HttpEmitterConfig.class);
 
-    Assertions.assertEquals(1, config.getFlushMillis());
-    Assertions.assertEquals(2, config.getFlushCount());
-    Assertions.assertEquals("http://example.com/topic", config.getRecipientBaseUrl());
-    Assertions.assertEquals("a:b", config.getBasicAuthentication().getPassword());
-    Assertions.assertEquals(BatchingStrategy.NEWLINES, config.getBatchingStrategy());
-    Assertions.assertEquals(4, config.getMaxBatchSize());
-    Assertions.assertEquals(1000, config.getFlushTimeOut());
+    Assert.assertEquals(1, config.getFlushMillis());
+    Assert.assertEquals(2, config.getFlushCount());
+    Assert.assertEquals("http://example.com/topic", config.getRecipientBaseUrl());
+    Assert.assertEquals("a:b", config.getBasicAuthentication().getPassword());
+    Assert.assertEquals(BatchingStrategy.NEWLINES, config.getBatchingStrategy());
+    Assert.assertEquals(4, config.getMaxBatchSize());
+    Assert.assertEquals(1000, config.getFlushTimeOut());
   }
 }

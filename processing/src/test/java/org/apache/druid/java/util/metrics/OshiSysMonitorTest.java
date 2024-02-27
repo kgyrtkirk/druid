@@ -24,9 +24,9 @@ import com.google.common.collect.ImmutableMap;
 import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.java.util.emitter.core.Event;
 import org.apache.druid.java.util.emitter.service.ServiceEmitter;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import org.mockito.Mockito;
 import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
@@ -57,7 +57,7 @@ public class OshiSysMonitorTest
     MEM, SWAP, FS, DISK, NET, CPU, SYS, TCP
   }
 
-  @BeforeEach
+  @Before
   public void setUp()
   {
     si = Mockito.mock(SystemInfo.class);
@@ -76,7 +76,7 @@ public class OshiSysMonitorTest
     serviceEmitter.start();
     sysMonitorOshi.monitor(serviceEmitter);
 
-    Assertions.assertTrue(sysMonitorOshi.doMonitor(serviceEmitter));
+    Assert.assertTrue(sysMonitorOshi.doMonitor(serviceEmitter));
 
   }
 
@@ -107,7 +107,7 @@ public class OshiSysMonitorTest
     m.start();
     m.monitorMemStats(emitter);
     m.stop();
-    Assertions.assertEquals(3, emitter.getEvents().size());
+    Assert.assertEquals(3, emitter.getEvents().size());
     emitter.verifyEmitted("sys/mem/max", 1);
     emitter.verifyEmitted("sys/mem/used", 1);
     emitter.verifyEmitted("sys/mem/free", 1);
@@ -132,7 +132,7 @@ public class OshiSysMonitorTest
     OshiSysMonitor m = new OshiSysMonitor(si);
     m.start();
     m.monitorSwapStats(emitter);
-    Assertions.assertEquals(4, emitter.getEvents().size());
+    Assert.assertEquals(4, emitter.getEvents().size());
     emitter.verifyEmitted("sys/swap/pageIn", 1);
     emitter.verifyEmitted("sys/swap/pageOut", 1);
     emitter.verifyEmitted("sys/swap/max", 1);
@@ -180,7 +180,7 @@ public class OshiSysMonitorTest
     OshiSysMonitor m = new OshiSysMonitor(si);
     m.start();
     m.monitorFsStats(emitter);
-    Assertions.assertEquals(8, emitter.getEvents().size());
+    Assert.assertEquals(8, emitter.getEvents().size());
     emitter.verifyEmitted("sys/fs/max", 2);
     emitter.verifyEmitted("sys/fs/used", 2);
     emitter.verifyEmitted("sys/fs/files/count", 2);
@@ -192,17 +192,17 @@ public class OshiSysMonitorTest
         "/System/Volumes/boot1"
     );
     List<Number> metricValues1 = emitter.getMetricValues("sys/fs/max", userDims1);
-    Assertions.assertEquals(1, metricValues1.size());
-    Assertions.assertEquals(300L, metricValues1.get(0));
+    Assert.assertEquals(1, metricValues1.size());
+    Assert.assertEquals(300L, metricValues1.get(0));
     metricValues1 = emitter.getMetricValues("sys/fs/used", userDims1);
-    Assertions.assertEquals(1, metricValues1.size());
-    Assertions.assertEquals(100L, metricValues1.get(0));
+    Assert.assertEquals(1, metricValues1.size());
+    Assert.assertEquals(100L, metricValues1.get(0));
     metricValues1 = emitter.getMetricValues("sys/fs/files/count", userDims1);
-    Assertions.assertEquals(1, metricValues1.size());
-    Assertions.assertEquals(1000L, metricValues1.get(0));
+    Assert.assertEquals(1, metricValues1.size());
+    Assert.assertEquals(1000L, metricValues1.get(0));
     metricValues1 = emitter.getMetricValues("sys/fs/files/free", userDims1);
-    Assertions.assertEquals(1, metricValues1.size());
-    Assertions.assertEquals(700L, metricValues1.get(0));
+    Assert.assertEquals(1, metricValues1.size());
+    Assert.assertEquals(700L, metricValues1.get(0));
 
     Map<String, Object> userDims2 = ImmutableMap.of(
         "fsDevName",
@@ -211,17 +211,17 @@ public class OshiSysMonitorTest
         "/System/Volumes/boot2"
     );
     List<Number> metricValues2 = emitter.getMetricValues("sys/fs/max", userDims2);
-    Assertions.assertEquals(1, metricValues2.size());
-    Assertions.assertEquals(400L, metricValues2.get(0));
+    Assert.assertEquals(1, metricValues2.size());
+    Assert.assertEquals(400L, metricValues2.get(0));
     metricValues2 = emitter.getMetricValues("sys/fs/used", userDims2);
-    Assertions.assertEquals(1, metricValues2.size());
-    Assertions.assertEquals(80L, metricValues2.get(0));
+    Assert.assertEquals(1, metricValues2.size());
+    Assert.assertEquals(80L, metricValues2.get(0));
     metricValues2 = emitter.getMetricValues("sys/fs/files/count", userDims2);
-    Assertions.assertEquals(1, metricValues2.size());
-    Assertions.assertEquals(800L, metricValues2.get(0));
+    Assert.assertEquals(1, metricValues2.size());
+    Assert.assertEquals(800L, metricValues2.get(0));
     metricValues2 = emitter.getMetricValues("sys/fs/files/free", userDims2);
-    Assertions.assertEquals(1, metricValues2.size());
-    Assertions.assertEquals(600L, metricValues2.get(0));
+    Assert.assertEquals(1, metricValues2.size());
+    Assert.assertEquals(600L, metricValues2.get(0));
     m.stop();
   }
 
@@ -251,7 +251,7 @@ public class OshiSysMonitorTest
     OshiSysMonitor m = new OshiSysMonitor(si);
     m.start();
     m.monitorDiskStats(emitter);
-    Assertions.assertEquals(0, emitter.getEvents().size());
+    Assert.assertEquals(0, emitter.getEvents().size());
 
     Mockito.when(disk1.getReadBytes()).thenReturn(400L);
     Mockito.when(disk1.getReads()).thenReturn(220L);
@@ -267,53 +267,53 @@ public class OshiSysMonitorTest
     Mockito.when(disk2.getTransferTime()).thenReturn(1100L);
 
     m.monitorDiskStats(emitter);
-    Assertions.assertEquals(12, emitter.getEvents().size());
+    Assert.assertEquals(12, emitter.getEvents().size());
 
     Map<String, Object> userDims1 = ImmutableMap.of(
         "diskName",
         "disk1"
     );
     List<Number> metricValues1 = emitter.getMetricValues("sys/disk/read/size", userDims1);
-    Assertions.assertEquals(1, metricValues1.size());
-    Assertions.assertEquals(100L, metricValues1.get(0));
+    Assert.assertEquals(1, metricValues1.size());
+    Assert.assertEquals(100L, metricValues1.get(0));
     metricValues1 = emitter.getMetricValues("sys/disk/read/count", userDims1);
-    Assertions.assertEquals(1, metricValues1.size());
-    Assertions.assertEquals(20L, metricValues1.get(0));
+    Assert.assertEquals(1, metricValues1.size());
+    Assert.assertEquals(20L, metricValues1.get(0));
     metricValues1 = emitter.getMetricValues("sys/disk/write/size", userDims1);
-    Assertions.assertEquals(1, metricValues1.size());
-    Assertions.assertEquals(200L, metricValues1.get(0));
+    Assert.assertEquals(1, metricValues1.size());
+    Assert.assertEquals(200L, metricValues1.get(0));
     metricValues1 = emitter.getMetricValues("sys/disk/write/count", userDims1);
-    Assertions.assertEquals(1, metricValues1.size());
-    Assertions.assertEquals(80L, metricValues1.get(0));
+    Assert.assertEquals(1, metricValues1.size());
+    Assert.assertEquals(80L, metricValues1.get(0));
     metricValues1 = emitter.getMetricValues("sys/disk/queue", userDims1);
-    Assertions.assertEquals(1, metricValues1.size());
-    Assertions.assertEquals(200L, metricValues1.get(0));
+    Assert.assertEquals(1, metricValues1.size());
+    Assert.assertEquals(200L, metricValues1.get(0));
     metricValues1 = emitter.getMetricValues("sys/disk/transferTime", userDims1);
-    Assertions.assertEquals(1, metricValues1.size());
-    Assertions.assertEquals(100L, metricValues1.get(0));
+    Assert.assertEquals(1, metricValues1.size());
+    Assert.assertEquals(100L, metricValues1.get(0));
 
     Map<String, Object> userDims2 = ImmutableMap.of(
         "diskName",
         "disk2"
     );
     List<Number> metricValues2 = emitter.getMetricValues("sys/disk/read/size", userDims2);
-    Assertions.assertEquals(1, metricValues2.size());
-    Assertions.assertEquals(2500L, metricValues2.get(0));
+    Assert.assertEquals(1, metricValues2.size());
+    Assert.assertEquals(2500L, metricValues2.get(0));
     metricValues2 = emitter.getMetricValues("sys/disk/read/count", userDims2);
-    Assertions.assertEquals(1, metricValues2.size());
-    Assertions.assertEquals(500L, metricValues2.get(0));
+    Assert.assertEquals(1, metricValues2.size());
+    Assert.assertEquals(500L, metricValues2.get(0));
     metricValues2 = emitter.getMetricValues("sys/disk/write/size", userDims2);
-    Assertions.assertEquals(1, metricValues2.size());
-    Assertions.assertEquals(1300L, metricValues2.get(0));
+    Assert.assertEquals(1, metricValues2.size());
+    Assert.assertEquals(1300L, metricValues2.get(0));
     metricValues2 = emitter.getMetricValues("sys/disk/write/count", userDims2);
-    Assertions.assertEquals(1, metricValues2.size());
-    Assertions.assertEquals(1000L, metricValues2.get(0));
+    Assert.assertEquals(1, metricValues2.size());
+    Assert.assertEquals(1000L, metricValues2.get(0));
     metricValues2 = emitter.getMetricValues("sys/disk/queue", userDims2);
-    Assertions.assertEquals(1, metricValues2.size());
-    Assertions.assertEquals(150L, metricValues2.get(0));
+    Assert.assertEquals(1, metricValues2.size());
+    Assert.assertEquals(150L, metricValues2.get(0));
     metricValues2 = emitter.getMetricValues("sys/disk/transferTime", userDims2);
-    Assertions.assertEquals(1, metricValues2.size());
-    Assertions.assertEquals(300L, metricValues2.get(0));
+    Assert.assertEquals(1, metricValues2.size());
+    Assert.assertEquals(300L, metricValues2.get(0));
 
     m.stop();
   }
@@ -341,7 +341,7 @@ public class OshiSysMonitorTest
     OshiSysMonitor m = new OshiSysMonitor(si);
     m.start();
     m.monitorNetStats(emitter);
-    Assertions.assertEquals(0, emitter.getEvents().size());
+    Assert.assertEquals(0, emitter.getEvents().size());
 
     Mockito.when(net1.getBytesRecv()).thenReturn(400L);
     Mockito.when(net1.getPacketsRecv()).thenReturn(220L);
@@ -354,7 +354,7 @@ public class OshiSysMonitorTest
 
 
     m.monitorNetStats(emitter);
-    Assertions.assertEquals(16, emitter.getEvents().size()); // 8 * 2 whitelisted ips
+    Assert.assertEquals(16, emitter.getEvents().size()); // 8 * 2 whitelisted ips
 
     Map<String, Object> userDims1 = ImmutableMap.of(
         "netName",
@@ -373,54 +373,54 @@ public class OshiSysMonitorTest
         "ha:rd:wa:re:add"
     );
     List<Number> metricValues1 = emitter.getMetricValues("sys/net/read/size", userDims1);
-    Assertions.assertEquals(1, metricValues1.size());
-    Assertions.assertEquals(100L, metricValues1.get(0));
+    Assert.assertEquals(1, metricValues1.size());
+    Assert.assertEquals(100L, metricValues1.get(0));
     metricValues1 = emitter.getMetricValues("sys/net/read/packets", userDims1);
-    Assertions.assertEquals(1, metricValues1.size());
-    Assertions.assertEquals(20L, metricValues1.get(0));
+    Assert.assertEquals(1, metricValues1.size());
+    Assert.assertEquals(20L, metricValues1.get(0));
     metricValues1 = emitter.getMetricValues("sys/net/read/errors", userDims1);
-    Assertions.assertEquals(1, metricValues1.size());
-    Assertions.assertEquals(200L, metricValues1.get(0));
+    Assert.assertEquals(1, metricValues1.size());
+    Assert.assertEquals(200L, metricValues1.get(0));
     metricValues1 = emitter.getMetricValues("sys/net/read/dropped", userDims1);
-    Assertions.assertEquals(1, metricValues1.size());
-    Assertions.assertEquals(80L, metricValues1.get(0));
+    Assert.assertEquals(1, metricValues1.size());
+    Assert.assertEquals(80L, metricValues1.get(0));
     metricValues1 = emitter.getMetricValues("sys/net/write/size", userDims1);
-    Assertions.assertEquals(1, metricValues1.size());
-    Assertions.assertEquals(200L, metricValues1.get(0));
+    Assert.assertEquals(1, metricValues1.size());
+    Assert.assertEquals(200L, metricValues1.get(0));
     metricValues1 = emitter.getMetricValues("sys/net/write/packets", userDims1);
-    Assertions.assertEquals(1, metricValues1.size());
-    Assertions.assertEquals(100L, metricValues1.get(0));
+    Assert.assertEquals(1, metricValues1.size());
+    Assert.assertEquals(100L, metricValues1.get(0));
     metricValues1 = emitter.getMetricValues("sys/net/write/errors", userDims1);
-    Assertions.assertEquals(1, metricValues1.size());
-    Assertions.assertEquals(130L, metricValues1.get(0));
+    Assert.assertEquals(1, metricValues1.size());
+    Assert.assertEquals(130L, metricValues1.get(0));
     metricValues1 = emitter.getMetricValues("sys/net/write/collisions", userDims1);
-    Assertions.assertEquals(1, metricValues1.size());
-    Assertions.assertEquals(220L, metricValues1.get(0));
+    Assert.assertEquals(1, metricValues1.size());
+    Assert.assertEquals(220L, metricValues1.get(0));
 
     metricValues1 = emitter.getMetricValues("sys/net/read/size", userDims2);
-    Assertions.assertEquals(1, metricValues1.size());
-    Assertions.assertEquals(100L, metricValues1.get(0));
+    Assert.assertEquals(1, metricValues1.size());
+    Assert.assertEquals(100L, metricValues1.get(0));
     metricValues1 = emitter.getMetricValues("sys/net/read/packets", userDims2);
-    Assertions.assertEquals(1, metricValues1.size());
-    Assertions.assertEquals(20L, metricValues1.get(0));
+    Assert.assertEquals(1, metricValues1.size());
+    Assert.assertEquals(20L, metricValues1.get(0));
     metricValues1 = emitter.getMetricValues("sys/net/read/errors", userDims2);
-    Assertions.assertEquals(1, metricValues1.size());
-    Assertions.assertEquals(200L, metricValues1.get(0));
+    Assert.assertEquals(1, metricValues1.size());
+    Assert.assertEquals(200L, metricValues1.get(0));
     metricValues1 = emitter.getMetricValues("sys/net/read/dropped", userDims2);
-    Assertions.assertEquals(1, metricValues1.size());
-    Assertions.assertEquals(80L, metricValues1.get(0));
+    Assert.assertEquals(1, metricValues1.size());
+    Assert.assertEquals(80L, metricValues1.get(0));
     metricValues1 = emitter.getMetricValues("sys/net/write/size", userDims2);
-    Assertions.assertEquals(1, metricValues1.size());
-    Assertions.assertEquals(200L, metricValues1.get(0));
+    Assert.assertEquals(1, metricValues1.size());
+    Assert.assertEquals(200L, metricValues1.get(0));
     metricValues1 = emitter.getMetricValues("sys/net/write/packets", userDims2);
-    Assertions.assertEquals(1, metricValues1.size());
-    Assertions.assertEquals(100L, metricValues1.get(0));
+    Assert.assertEquals(1, metricValues1.size());
+    Assert.assertEquals(100L, metricValues1.get(0));
     metricValues1 = emitter.getMetricValues("sys/net/write/errors", userDims2);
-    Assertions.assertEquals(1, metricValues1.size());
-    Assertions.assertEquals(130L, metricValues1.get(0));
+    Assert.assertEquals(1, metricValues1.size());
+    Assert.assertEquals(130L, metricValues1.get(0));
     metricValues1 = emitter.getMetricValues("sys/net/write/collisions", userDims2);
-    Assertions.assertEquals(1, metricValues1.size());
-    Assertions.assertEquals(220L, metricValues1.get(0));
+    Assert.assertEquals(1, metricValues1.size());
+    Assert.assertEquals(220L, metricValues1.get(0));
     m.stop();
   }
 
@@ -439,7 +439,7 @@ public class OshiSysMonitorTest
     OshiSysMonitor m = new OshiSysMonitor(si);
     m.start();
     m.monitorCpuStats(emitter);
-    Assertions.assertEquals(0, emitter.getEvents().size());
+    Assert.assertEquals(0, emitter.getEvents().size());
 
     long[][] procTicks2 = new long[][]{
         {4L, 5L, 6L, 8L, 9L, 7L, 10L, 12L},     // Δtick1 {3,3,3,4,4,1,3,4} _total = 25, emitted percentage
@@ -449,76 +449,76 @@ public class OshiSysMonitorTest
 
     m.monitorCpuStats(emitter);
     m.stop();
-    Assertions.assertEquals(16, emitter.getEvents().size()); // 8 ticktype * 2 processors
+    Assert.assertEquals(16, emitter.getEvents().size()); // 8 ticktype * 2 processors
 
     Map<String, Object> userDims = new HashMap<String, Object>();
     userDims.put("cpuName", "0");
     userDims.put("cpuTime", "user");
     List<Number> metricValues1 = emitter.getMetricValues("sys/cpu", userDims);
-    Assertions.assertEquals(1, metricValues1.size());
-    Assertions.assertEquals(12L, metricValues1.get(0));
+    Assert.assertEquals(1, metricValues1.size());
+    Assert.assertEquals(12L, metricValues1.get(0));
     userDims.replace("cpuTime", "nice");
     metricValues1 = emitter.getMetricValues("sys/cpu", userDims);
-    Assertions.assertEquals(1, metricValues1.size());
-    Assertions.assertEquals(12L, metricValues1.get(0));
+    Assert.assertEquals(1, metricValues1.size());
+    Assert.assertEquals(12L, metricValues1.get(0));
     userDims.replace("cpuTime", "sys");
     metricValues1 = emitter.getMetricValues("sys/cpu", userDims);
-    Assertions.assertEquals(1, metricValues1.size());
-    Assertions.assertEquals(12L, metricValues1.get(0));
+    Assert.assertEquals(1, metricValues1.size());
+    Assert.assertEquals(12L, metricValues1.get(0));
     userDims.replace("cpuTime", "idle");
     metricValues1 = emitter.getMetricValues("sys/cpu", userDims);
-    Assertions.assertEquals(1, metricValues1.size());
-    Assertions.assertEquals(16L, metricValues1.get(0));
+    Assert.assertEquals(1, metricValues1.size());
+    Assert.assertEquals(16L, metricValues1.get(0));
     userDims.replace("cpuTime", "wait");
     metricValues1 = emitter.getMetricValues("sys/cpu", userDims);
-    Assertions.assertEquals(1, metricValues1.size());
-    Assertions.assertEquals(16L, metricValues1.get(0));
+    Assert.assertEquals(1, metricValues1.size());
+    Assert.assertEquals(16L, metricValues1.get(0));
     userDims.replace("cpuTime", "irq");
     metricValues1 = emitter.getMetricValues("sys/cpu", userDims);
-    Assertions.assertEquals(1, metricValues1.size());
-    Assertions.assertEquals(4L, metricValues1.get(0));
+    Assert.assertEquals(1, metricValues1.size());
+    Assert.assertEquals(4L, metricValues1.get(0));
     userDims.replace("cpuTime", "softIrq");
     metricValues1 = emitter.getMetricValues("sys/cpu", userDims);
-    Assertions.assertEquals(1, metricValues1.size());
-    Assertions.assertEquals(12L, metricValues1.get(0));
+    Assert.assertEquals(1, metricValues1.size());
+    Assert.assertEquals(12L, metricValues1.get(0));
     userDims.replace("cpuTime", "stolen");
     metricValues1 = emitter.getMetricValues("sys/cpu", userDims);
-    Assertions.assertEquals(1, metricValues1.size());
-    Assertions.assertEquals(16L, metricValues1.get(0));
+    Assert.assertEquals(1, metricValues1.size());
+    Assert.assertEquals(16L, metricValues1.get(0));
 
     userDims.replace("cpuName", "1");
     userDims.replace("cpuTime", "user");
     metricValues1 = emitter.getMetricValues("sys/cpu", userDims);
-    Assertions.assertEquals(1, metricValues1.size());
-    Assertions.assertEquals(10L, metricValues1.get(0));
+    Assert.assertEquals(1, metricValues1.size());
+    Assert.assertEquals(10L, metricValues1.get(0));
     userDims.replace("cpuTime", "nice");
     metricValues1 = emitter.getMetricValues("sys/cpu", userDims);
-    Assertions.assertEquals(1, metricValues1.size());
-    Assertions.assertEquals(14L, metricValues1.get(0));
+    Assert.assertEquals(1, metricValues1.size());
+    Assert.assertEquals(14L, metricValues1.get(0));
     userDims.replace("cpuTime", "sys");
     metricValues1 = emitter.getMetricValues("sys/cpu", userDims);
-    Assertions.assertEquals(1, metricValues1.size());
-    Assertions.assertEquals(7L, metricValues1.get(0));
+    Assert.assertEquals(1, metricValues1.size());
+    Assert.assertEquals(7L, metricValues1.get(0));
     userDims.replace("cpuTime", "idle");
     metricValues1 = emitter.getMetricValues("sys/cpu", userDims);
-    Assertions.assertEquals(1, metricValues1.size());
-    Assertions.assertEquals(7L, metricValues1.get(0));
+    Assert.assertEquals(1, metricValues1.size());
+    Assert.assertEquals(7L, metricValues1.get(0));
     userDims.replace("cpuTime", "wait");
     metricValues1 = emitter.getMetricValues("sys/cpu", userDims);
-    Assertions.assertEquals(1, metricValues1.size());
-    Assertions.assertEquals(17L, metricValues1.get(0));
+    Assert.assertEquals(1, metricValues1.size());
+    Assert.assertEquals(17L, metricValues1.get(0));
     userDims.replace("cpuTime", "irq");
     metricValues1 = emitter.getMetricValues("sys/cpu", userDims);
-    Assertions.assertEquals(1, metricValues1.size());
-    Assertions.assertEquals(7L, metricValues1.get(0));
+    Assert.assertEquals(1, metricValues1.size());
+    Assert.assertEquals(7L, metricValues1.get(0));
     userDims.replace("cpuTime", "softIrq");
     metricValues1 = emitter.getMetricValues("sys/cpu", userDims);
-    Assertions.assertEquals(1, metricValues1.size());
-    Assertions.assertEquals(14L, metricValues1.get(0));
+    Assert.assertEquals(1, metricValues1.size());
+    Assert.assertEquals(14L, metricValues1.get(0));
     userDims.replace("cpuTime", "stolen");
     metricValues1 = emitter.getMetricValues("sys/cpu", userDims);
-    Assertions.assertEquals(1, metricValues1.size());
-    Assertions.assertEquals(21L, metricValues1.get(0));
+    Assert.assertEquals(1, metricValues1.size());
+    Assert.assertEquals(21L, metricValues1.get(0));
 
   }
 
@@ -536,7 +536,7 @@ public class OshiSysMonitorTest
     OshiSysMonitor m = new OshiSysMonitor(si);
     m.start();
     m.monitorSysStats(emitter);
-    Assertions.assertEquals(4, emitter.getEvents().size());
+    Assert.assertEquals(4, emitter.getEvents().size());
     m.stop();
     emitter.verifyEmitted("sys/uptime", 1);
     emitter.verifyEmitted("sys/la/1", 1);
@@ -571,7 +571,7 @@ public class OshiSysMonitorTest
     m.start();
     m.monitorTcpStats(emitter);
 
-    Assertions.assertEquals(0, emitter.getEvents().size());
+    Assert.assertEquals(0, emitter.getEvents().size());
     Mockito.when(tcpv4.getConnectionsActive()).thenReturn(20L);
     Mockito.when(tcpv4.getConnectionsPassive()).thenReturn(25L);
     Mockito.when(tcpv4.getConnectionFailures()).thenReturn(8L);
@@ -583,7 +583,7 @@ public class OshiSysMonitorTest
     Mockito.when(tcpv4.getSegmentsRetransmitted()).thenReturn(8L);
     m.monitorTcpStats(emitter);
     m.stop();
-    Assertions.assertEquals(9, emitter.getEvents().size());
+    Assert.assertEquals(9, emitter.getEvents().size());
     emitter.verifyValue("sys/tcpv4/activeOpens", 10L);
     emitter.verifyValue("sys/tcpv4/passiveOpens", 5L);
     emitter.verifyValue("sys/tcpv4/attemptFails", 3L);
@@ -598,11 +598,11 @@ public class OshiSysMonitorTest
 
   private void checkEvents(List<Event> events, String expectedFeed)
   {
-    Assertions.assertFalse(events.isEmpty(), "no events emitted");
+    Assert.assertFalse("no events emitted", events.isEmpty());
     for (Event e : events) {
       if (!expectedFeed.equals(e.getFeed())) {
         String message = StringUtils.format("\"feed\" in event: %s", e.toMap().toString());
-        Assertions.assertEquals(expectedFeed, e.getFeed(), message);
+        Assert.assertEquals(message, expectedFeed, e.getFeed());
       }
     }
   }

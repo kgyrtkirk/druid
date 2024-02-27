@@ -31,6 +31,7 @@ import org.apache.druid.java.util.common.logger.Logger;
 import org.apache.druid.server.DruidNode;
 import org.easymock.EasyMock;
 import org.junit.Assert;
+import org.junit.Test;
 
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;

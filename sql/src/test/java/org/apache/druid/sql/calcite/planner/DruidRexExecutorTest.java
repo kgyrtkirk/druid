@@ -56,8 +56,8 @@ import org.apache.druid.sql.calcite.util.CalciteTestBase;
 import org.apache.druid.sql.calcite.util.CalciteTests;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.easymock.EasyMock;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -132,9 +132,9 @@ public class DruidRexExecutorTest extends InitializedNullHandlingTest
     DruidRexExecutor rexy = new DruidRexExecutor(PLANNER_CONTEXT);
     List<RexNode> reduced = new ArrayList<>();
     rexy.reduce(rexBuilder, ImmutableList.of(call), reduced);
-    Assertions.assertEquals(1, reduced.size());
-    Assertions.assertEquals(SqlKind.LITERAL, reduced.get(0).getKind());
-    Assertions.assertEquals(new BigDecimal(30L), ((RexLiteral) reduced.get(0)).getValue());
+    Assert.assertEquals(1, reduced.size());
+    Assert.assertEquals(SqlKind.LITERAL, reduced.get(0).getKind());
+    Assert.assertEquals(new BigDecimal(30L), ((RexLiteral) reduced.get(0)).getValue());
   }
 
   @Test
@@ -144,9 +144,9 @@ public class DruidRexExecutorTest extends InitializedNullHandlingTest
     RexNode call = rexBuilder.makeCall(OPERATOR);
     List<RexNode> reduced = new ArrayList<>();
     rexy.reduce(rexBuilder, ImmutableList.of(call), reduced);
-    Assertions.assertEquals(1, reduced.size());
-    Assertions.assertEquals(SqlKind.OTHER_FUNCTION, reduced.get(0).getKind());
-    Assertions.assertEquals(
+    Assert.assertEquals(1, reduced.size());
+    Assert.assertEquals(SqlKind.OTHER_FUNCTION, reduced.get(0).getKind());
+    Assert.assertEquals(
         CalciteTestBase.makeExpression(ColumnType.ofComplex("hyperUnique"), "hyper_unique()"),
         Expressions.toDruidExpression(
             PLANNER_CONTEXT,
@@ -166,8 +166,8 @@ public class DruidRexExecutorTest extends InitializedNullHandlingTest
     List<BigDecimal> elements = ImmutableList.of(BigDecimal.valueOf(50.12), BigDecimal.valueOf(12.1));
     RexNode literal = rexBuilder.makeLiteral(elements, arraySqlType, true);
     rexy.reduce(rexBuilder, ImmutableList.of(literal), reduced);
-    Assertions.assertEquals(1, reduced.size());
-    Assertions.assertEquals(
+    Assert.assertEquals(1, reduced.size());
+    Assert.assertEquals(
         DruidExpression.ofExpression(
             ColumnType.DOUBLE_ARRAY,
             DruidExpression.functionCall("array"),
@@ -194,8 +194,8 @@ public class DruidRexExecutorTest extends InitializedNullHandlingTest
     List<BigDecimal> elements = ImmutableList.of(BigDecimal.valueOf(50), BigDecimal.valueOf(12));
     RexNode literal = rexBuilder.makeLiteral(elements, arraySqlType, true);
     rexy.reduce(rexBuilder, ImmutableList.of(literal), reduced);
-    Assertions.assertEquals(1, reduced.size());
-    Assertions.assertEquals(
+    Assert.assertEquals(1, reduced.size());
+    Assert.assertEquals(
         DruidExpression.ofExpression(
             ColumnType.LONG_ARRAY,
             DruidExpression.functionCall("array"),
@@ -223,9 +223,9 @@ public class DruidRexExecutorTest extends InitializedNullHandlingTest
     );
     List<RexNode> reduced = new ArrayList<>();
     rexy.reduce(rexBuilder, ImmutableList.of(call), reduced);
-    Assertions.assertEquals(1, reduced.size());
-    Assertions.assertEquals(SqlKind.OTHER_FUNCTION, reduced.get(0).getKind());
-    Assertions.assertEquals(
+    Assert.assertEquals(1, reduced.size());
+    Assert.assertEquals(SqlKind.OTHER_FUNCTION, reduced.get(0).getKind());
+    Assert.assertEquals(
         DruidExpression.ofExpression(
             ColumnType.STRING,
             DruidExpression.functionCall("string_to_array"),

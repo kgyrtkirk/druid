@@ -25,8 +25,8 @@ import org.apache.druid.query.extraction.MatchingDimExtractionFn;
 import org.apache.druid.query.extraction.RegexDimExtractionFn;
 import org.apache.druid.query.extraction.StrlenExtractionFn;
 import org.apache.druid.segment.column.ColumnType;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class ExtractionDimensionSpecTest
 {
@@ -47,13 +47,13 @@ public class ExtractionDimensionSpecTest
 
     final ExtractionDimensionSpec extractionDimensionSpec = (ExtractionDimensionSpec) objectMapper.readValue(oldJson, DimensionSpec.class);
 
-    Assertions.assertEquals("first3Letters", extractionDimensionSpec.getOutputName());
-    Assertions.assertEquals("myDim", extractionDimensionSpec.getDimension());
-    Assertions.assertNotNull(extractionDimensionSpec.getExtractionFn());
-    Assertions.assertEquals(ColumnType.STRING, extractionDimensionSpec.getOutputType());
-    Assertions.assertTrue(extractionDimensionSpec.getExtractionFn() instanceof RegexDimExtractionFn);
+    Assert.assertEquals("first3Letters", extractionDimensionSpec.getOutputName());
+    Assert.assertEquals("myDim", extractionDimensionSpec.getDimension());
+    Assert.assertNotNull(extractionDimensionSpec.getExtractionFn());
+    Assert.assertEquals(ColumnType.STRING, extractionDimensionSpec.getOutputType());
+    Assert.assertTrue(extractionDimensionSpec.getExtractionFn() instanceof RegexDimExtractionFn);
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         extractionDimensionSpec,
         objectMapper.readValue(
             objectMapper.writeValueAsBytes(extractionDimensionSpec),
@@ -80,13 +80,13 @@ public class ExtractionDimensionSpecTest
 
     final ExtractionDimensionSpec extractionDimensionSpec = (ExtractionDimensionSpec) objectMapper.readValue(oldJson, DimensionSpec.class);
 
-    Assertions.assertEquals("first3Letters", extractionDimensionSpec.getOutputName());
-    Assertions.assertEquals("myDim", extractionDimensionSpec.getDimension());
-    Assertions.assertNotNull(extractionDimensionSpec.getExtractionFn());
-    Assertions.assertEquals(ColumnType.LONG, extractionDimensionSpec.getOutputType());
-    Assertions.assertTrue(extractionDimensionSpec.getExtractionFn() instanceof RegexDimExtractionFn);
+    Assert.assertEquals("first3Letters", extractionDimensionSpec.getOutputName());
+    Assert.assertEquals("myDim", extractionDimensionSpec.getDimension());
+    Assert.assertNotNull(extractionDimensionSpec.getExtractionFn());
+    Assert.assertEquals(ColumnType.LONG, extractionDimensionSpec.getOutputType());
+    Assert.assertTrue(extractionDimensionSpec.getExtractionFn() instanceof RegexDimExtractionFn);
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         extractionDimensionSpec,
         objectMapper.readValue(
             objectMapper.writeValueAsBytes(extractionDimensionSpec),
@@ -112,12 +112,12 @@ public class ExtractionDimensionSpecTest
 
     final ExtractionDimensionSpec extractionDimensionSpec = (ExtractionDimensionSpec) objectMapper.readValue(oldJson, DimensionSpec.class);
 
-    Assertions.assertEquals("first3Letters", extractionDimensionSpec.getOutputName());
-    Assertions.assertEquals("myDim", extractionDimensionSpec.getDimension());
-    Assertions.assertNotNull(extractionDimensionSpec.getExtractionFn());
-    Assertions.assertTrue(extractionDimensionSpec.getExtractionFn() instanceof RegexDimExtractionFn);
+    Assert.assertEquals("first3Letters", extractionDimensionSpec.getOutputName());
+    Assert.assertEquals("myDim", extractionDimensionSpec.getDimension());
+    Assert.assertNotNull(extractionDimensionSpec.getExtractionFn());
+    Assert.assertTrue(extractionDimensionSpec.getExtractionFn() instanceof RegexDimExtractionFn);
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         extractionDimensionSpec,
         objectMapper.readValue(
             objectMapper.writeValueAsBytes(extractionDimensionSpec),
@@ -140,7 +140,7 @@ public class ExtractionDimensionSpecTest
                            + "    }\n"
                            + "}";
 
-    Assertions.assertTrue(
+    Assert.assertTrue(
         objectMapper.readValue(oldAndNewJson, DimensionSpec.class)
                     .getExtractionFn() instanceof MatchingDimExtractionFn
     );
@@ -156,6 +156,6 @@ public class ExtractionDimensionSpecTest
         StrlenExtractionFn.instance()
     );
     final byte[] expected = new byte[]{1, 7, 102, 111, 111, 9, 14, 7, 76, 79, 78, 71};
-    Assertions.assertArrayEquals(expected, dimensionSpec.getCacheKey());
+    Assert.assertArrayEquals(expected, dimensionSpec.getCacheKey());
   }
 }

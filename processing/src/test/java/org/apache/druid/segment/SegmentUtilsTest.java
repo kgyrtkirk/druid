@@ -27,45 +27,42 @@ import org.apache.druid.java.util.common.Intervals;
 import org.apache.druid.timeline.DataSegment;
 import org.apache.druid.timeline.partition.NumberedShardSpec;
 import org.joda.time.Interval;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 /**
  */
 public class SegmentUtilsTest
 {
-  @TempDir
-  public File tempFolder;
+  @Rule
+  public final TemporaryFolder tempFolder = new TemporaryFolder();
 
   @Test
   public void testVersionBin() throws Exception
   {
-    File dir = newFolder(tempFolder, "junit");
+    File dir = tempFolder.newFolder();
     FileUtils.writeByteArrayToFile(new File(dir, "version.bin"), Ints.toByteArray(9));
-    Assertions.assertEquals(9, SegmentUtils.getVersionFromDir(dir));
+    Assert.assertEquals(9, SegmentUtils.getVersionFromDir(dir));
   }
 
   @Test
   public void testIndexDrd() throws Exception
   {
-    File dir = newFolder(tempFolder, "junit");
+    File dir = tempFolder.newFolder();
     FileUtils.writeByteArrayToFile(new File(dir, "index.drd"), new byte[]{(byte) 0x8});
-    Assertions.assertEquals(8, SegmentUtils.getVersionFromDir(dir));
+    Assert.assertEquals(8, SegmentUtils.getVersionFromDir(dir));
   }
 
-  @Test
+  @Test(expected = IOException.class)
   public void testException() throws Exception
   {
-    assertThrows(IOException.class, () -> {
-      SegmentUtils.getVersionFromDir(newFolder(tempFolder, "junit"));
-    });
+    SegmentUtils.getVersionFromDir(tempFolder.newFolder());
   }
 
   @Test
@@ -79,7 +76,7 @@ public class SegmentUtilsTest
         newSegment(Intervals.of("2020-01-02/P1D"), 1),
         newSegment(Intervals.of("2020-01-02/P1D"), 2)
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableMap.of(
             Intervals.of("2020-01-01/P1D"),
             ImmutableList.of(
@@ -113,14 +110,5 @@ public class SegmentUtilsTest
         9,
         10L
     );
-  }
-
-  private static File newFolder(File root, String... subDirs) throws IOException {
-    String subFolder = String.join("/", subDirs);
-    File result = new File(root, subFolder);
-    if (!result.mkdirs()) {
-      throw new IOException("Couldn't create folders " + root);
-    }
-    return result;
   }
 }

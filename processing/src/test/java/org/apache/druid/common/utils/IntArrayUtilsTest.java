@@ -19,8 +19,8 @@
 
 package org.apache.druid.common.utils;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Collections;
 import java.util.List;
@@ -49,7 +49,7 @@ public class IntArrayUtilsTest
     IntArrayUtils.inverse(inverted);
 
     for (int i = 0; i < numVals; i++) {
-      Assertions.assertEquals(i, inverted[original[i]]);
+      Assert.assertEquals(i, inverted[original[i]]);
     }
   }
 }

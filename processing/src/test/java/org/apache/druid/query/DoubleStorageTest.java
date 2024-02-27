@@ -62,11 +62,12 @@ import org.apache.druid.segment.writeout.OffHeapMemorySegmentWriteOutMediumFacto
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.apache.druid.timeline.SegmentId;
 import org.joda.time.Interval;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.io.File;
 import java.io.IOException;
@@ -80,6 +81,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+@RunWith(Parameterized.class)
 public class DoubleStorageTest extends InitializedNullHandlingTest
 {
 
@@ -135,10 +137,10 @@ public class DoubleStorageTest extends InitializedNullHandlingTest
   );
 
   private QueryableIndex index;
-  private SegmentAnalysis expectedSegmentAnalysis;
-  private String storeDoubleAs;
+  private final SegmentAnalysis expectedSegmentAnalysis;
+  private final String storeDoubleAs;
 
-  public void initDoubleStorageTest(
+  public DoubleStorageTest(
       String storeDoubleAs,
       SegmentAnalysis expectedSegmentAnalysis
   )
@@ -147,6 +149,7 @@ public class DoubleStorageTest extends InitializedNullHandlingTest
     this.expectedSegmentAnalysis = expectedSegmentAnalysis;
   }
 
+  @Parameterized.Parameters
   public static Collection<?> dataFeeder()
   {
     SegmentAnalysis expectedSegmentAnalysisDouble = new SegmentAnalysis(
@@ -256,17 +259,15 @@ public class DoubleStorageTest extends InitializedNullHandlingTest
     );
   }
 
-  @BeforeEach
+  @Before
   public void setup() throws IOException
   {
     index = buildIndex(storeDoubleAs);
   }
 
-  @MethodSource("dataFeeder")
-  @ParameterizedTest
-  public void testMetaDataAnalysis(String storeDoubleAs, SegmentAnalysis expectedSegmentAnalysis)
+  @Test
+  public void testMetaDataAnalysis()
   {
-    initDoubleStorageTest(storeDoubleAs, expectedSegmentAnalysis);
     QueryRunner runner = QueryRunnerTestHelper.makeQueryRunner(
         METADATA_QR_FACTORY,
         SEGMENT_ID,
@@ -293,15 +294,13 @@ public class DoubleStorageTest extends InitializedNullHandlingTest
                                                       .build();
     List<SegmentAnalysis> results = runner.run(QueryPlus.wrap(segmentMetadataQuery)).toList();
 
-    Assertions.assertEquals(Collections.singletonList(expectedSegmentAnalysis), results);
+    Assert.assertEquals(Collections.singletonList(expectedSegmentAnalysis), results);
 
   }
 
-  @MethodSource("dataFeeder")
-  @ParameterizedTest
-  public void testSelectValues(String storeDoubleAs, SegmentAnalysis expectedSegmentAnalysis)
+  @Test
+  public void testSelectValues()
   {
-    initDoubleStorageTest(storeDoubleAs, expectedSegmentAnalysis);
     QueryRunner runner = QueryRunnerTestHelper.makeQueryRunner(
         SCAN_QUERY_RUNNER_FACTORY,
         SEGMENT_ID,
@@ -365,7 +364,7 @@ public class DoubleStorageTest extends InitializedNullHandlingTest
     return INDEX_IO.loadIndex(someTmpFile);
   }
 
-  @AfterEach
+  @After
   public void cleanUp()
   {
     index.close();

@@ -22,8 +22,8 @@ package org.apache.druid.java.util.common.parsers;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.apache.druid.java.util.common.StringUtils;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.util.Collection;
@@ -64,16 +64,16 @@ public class FlattenerJsonProviderTest
   {
     Object aMap = jsonProvider.createMap();
     jsonProvider.setProperty(aMap, "key", "value");
-    Assertions.assertEquals(ImmutableMap.of("key", "value"), aMap);
+    Assert.assertEquals(ImmutableMap.of("key", "value"), aMap);
     jsonProvider.removeProperty(aMap, "key");
-    Assertions.assertEquals(ImmutableMap.of(), aMap);
-    Assertions.assertEquals(aMap, jsonProvider.unwrap(aMap));
+    Assert.assertEquals(ImmutableMap.of(), aMap);
+    Assert.assertEquals(aMap, jsonProvider.unwrap(aMap));
 
-    Assertions.assertThrows(
+    Assert.assertThrows(
         UnsupportedOperationException.class,
         () -> jsonProvider.setProperty(jsonProvider.createArray(), "key", "value")
     );
-    Assertions.assertThrows(
+    Assert.assertThrows(
         UnsupportedOperationException.class,
         () -> jsonProvider.removeProperty(jsonProvider.createArray(), "key")
     );
@@ -86,29 +86,29 @@ public class FlattenerJsonProviderTest
     jsonProvider.setArrayIndex(aList, 0, "a");
     jsonProvider.setArrayIndex(aList, 1, "b");
     jsonProvider.setArrayIndex(aList, 2, "c");
-    Assertions.assertEquals(3, jsonProvider.length(aList));
-    Assertions.assertEquals("a", jsonProvider.getArrayIndex(aList, 0));
-    Assertions.assertEquals("b", jsonProvider.getArrayIndex(aList, 1));
-    Assertions.assertEquals("c", jsonProvider.getArrayIndex(aList, 2));
+    Assert.assertEquals(3, jsonProvider.length(aList));
+    Assert.assertEquals("a", jsonProvider.getArrayIndex(aList, 0));
+    Assert.assertEquals("b", jsonProvider.getArrayIndex(aList, 1));
+    Assert.assertEquals("c", jsonProvider.getArrayIndex(aList, 2));
     List<String> expected = ImmutableList.of("a", "b", "c");
-    Assertions.assertEquals(expected, aList);
+    Assert.assertEquals(expected, aList);
     Iterator<?> iter = jsonProvider.toIterable(aList).iterator();
     Iterator<String> expectedIter = expected.iterator();
     while (iter.hasNext()) {
-      Assertions.assertEquals(expectedIter.next(), iter.next());
+      Assert.assertEquals(expectedIter.next(), iter.next());
     }
-    Assertions.assertFalse(expectedIter.hasNext());
-    Assertions.assertEquals(aList, jsonProvider.unwrap(aList));
+    Assert.assertFalse(expectedIter.hasNext());
+    Assert.assertEquals(aList, jsonProvider.unwrap(aList));
 
-    Assertions.assertThrows(
+    Assert.assertThrows(
         UnsupportedOperationException.class,
         () -> jsonProvider.getArrayIndex(jsonProvider.createMap(), 0)
     );
-    Assertions.assertThrows(
+    Assert.assertThrows(
         UnsupportedOperationException.class,
         () -> jsonProvider.setArrayIndex(jsonProvider.createMap(), 0, "a")
     );
-    Assertions.assertThrows(
+    Assert.assertThrows(
         UnsupportedOperationException.class,
         () -> jsonProvider.toIterable(jsonProvider.createMap())
     );
@@ -118,29 +118,29 @@ public class FlattenerJsonProviderTest
   public void testNotImplementedOnPurpose()
   {
     Object aList = jsonProvider.createArray();
-    Throwable t = Assertions.assertThrows(
+    Throwable t = Assert.assertThrows(
         UnsupportedOperationException.class,
         () -> jsonProvider.toJson(aList)
     );
-    Assertions.assertEquals("Unused", t.getMessage());
+    Assert.assertEquals("Unused", t.getMessage());
 
-    t = Assertions.assertThrows(
+    t = Assert.assertThrows(
         UnsupportedOperationException.class,
         () -> jsonProvider.parse("{}")
     );
-    Assertions.assertEquals("Unused", t.getMessage());
+    Assert.assertEquals("Unused", t.getMessage());
 
 
-    t = Assertions.assertThrows(
+    t = Assert.assertThrows(
         UnsupportedOperationException.class,
         () -> jsonProvider.parse(new ByteArrayInputStream(StringUtils.toUtf8("{}")), "UTF-8")
     );
-    Assertions.assertEquals("Unused", t.getMessage());
+    Assert.assertEquals("Unused", t.getMessage());
 
-    t = Assertions.assertThrows(
+    t = Assert.assertThrows(
         UnsupportedOperationException.class,
         () -> jsonProvider.getArrayIndex(aList, 0, false)
     );
-    Assertions.assertEquals("Deprecated", t.getMessage());
+    Assert.assertEquals("Deprecated", t.getMessage());
   }
 }

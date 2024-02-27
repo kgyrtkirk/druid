@@ -23,10 +23,10 @@ import nl.jqno.equalsverifier.EqualsVerifier;
 import org.apache.druid.java.util.common.DateTimes;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 public class ClientKillUnusedSegmentsTaskQueryTest
 {
@@ -39,7 +39,7 @@ public class ClientKillUnusedSegmentsTaskQueryTest
 
   ClientKillUnusedSegmentsTaskQuery clientKillUnusedSegmentsQuery;
 
-  @BeforeEach
+  @Before
   public void setUp()
   {
     clientKillUnusedSegmentsQuery = new ClientKillUnusedSegmentsTaskQuery(
@@ -53,7 +53,7 @@ public class ClientKillUnusedSegmentsTaskQueryTest
     );
   }
 
-  @AfterEach
+  @After
   public void tearDown()
   {
     clientKillUnusedSegmentsQuery = null;
@@ -62,37 +62,37 @@ public class ClientKillUnusedSegmentsTaskQueryTest
   @Test
   public void testGetType()
   {
-    Assertions.assertEquals("kill", clientKillUnusedSegmentsQuery.getType());
+    Assert.assertEquals("kill", clientKillUnusedSegmentsQuery.getType());
   }
 
   @Test
   public void testGetDataSource()
   {
-    Assertions.assertEquals(DATA_SOURCE, clientKillUnusedSegmentsQuery.getDataSource());
+    Assert.assertEquals(DATA_SOURCE, clientKillUnusedSegmentsQuery.getDataSource());
   }
 
   @Test
   public void testGetInterval()
   {
-    Assertions.assertEquals(INTERVAL, clientKillUnusedSegmentsQuery.getInterval());
+    Assert.assertEquals(INTERVAL, clientKillUnusedSegmentsQuery.getInterval());
   }
 
   @Test
   public void testGetMarkUnused()
   {
-    Assertions.assertEquals(MARK_UNUSED, clientKillUnusedSegmentsQuery.getMarkAsUnused());
+    Assert.assertEquals(MARK_UNUSED, clientKillUnusedSegmentsQuery.getMarkAsUnused());
   }
 
   @Test
   public void testGetBatchSize()
   {
-    Assertions.assertEquals(BATCH_SIZE, clientKillUnusedSegmentsQuery.getBatchSize());
+    Assert.assertEquals(BATCH_SIZE, clientKillUnusedSegmentsQuery.getBatchSize());
   }
 
   @Test
   public void testGetLimit()
   {
-    Assertions.assertEquals(LIMIT, clientKillUnusedSegmentsQuery.getLimit());
+    Assert.assertEquals(LIMIT, clientKillUnusedSegmentsQuery.getLimit());
   }
 
   @Test

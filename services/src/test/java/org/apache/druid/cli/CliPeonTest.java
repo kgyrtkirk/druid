@@ -24,6 +24,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.druid.guice.GuiceInjectors;
 import org.junit.Assert;
 import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;

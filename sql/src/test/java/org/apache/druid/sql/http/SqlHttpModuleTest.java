@@ -39,9 +39,9 @@ import org.apache.druid.sql.calcite.run.NativeSqlEngine;
 import org.easymock.EasyMock;
 import org.easymock.EasyMockRunner;
 import org.easymock.Mock;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.Collections;
@@ -56,7 +56,7 @@ public class SqlHttpModuleTest
   private SqlHttpModule target;
   private Injector injector;
 
-  @BeforeEach
+  @Before
   public void setUp()
   {
     target = new SqlHttpModule();
@@ -81,9 +81,9 @@ public class SqlHttpModuleTest
   public void testSqlResourceIsInjectedAndSingleton()
   {
     SqlResource sqlResource = injector.getInstance(SqlResource.class);
-    Assertions.assertNotNull(sqlResource);
+    Assert.assertNotNull(sqlResource);
     SqlResource other = injector.getInstance(SqlResource.class);
-    Assertions.assertSame(other, sqlResource);
+    Assert.assertSame(other, sqlResource);
   }
 
   @Test
@@ -93,7 +93,7 @@ public class SqlHttpModuleTest
         injector.getInstance(Key.get(new TypeLiteral<Set<Class<?>>>()
         {
         }, JSR311Resource.class));
-    Assertions.assertEquals(1, jerseyResourceClasses.size());
-    Assertions.assertEquals(SqlResource.class, jerseyResourceClasses.iterator().next());
+    Assert.assertEquals(1, jerseyResourceClasses.size());
+    Assert.assertEquals(SqlResource.class, jerseyResourceClasses.iterator().next());
   }
 }

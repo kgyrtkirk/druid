@@ -26,18 +26,18 @@ import org.apache.druid.segment.column.ColumnCapabilities;
 import org.apache.druid.segment.vector.VectorColumnSelectorFactory;
 import org.apache.druid.segment.vector.VectorValueSelector;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.nio.ByteBuffer;
 
-@ExtendWith(MockitoExtension.class)
+@RunWith(MockitoJUnitRunner.class)
 public class LongAnyAggregatorFactoryTest extends InitializedNullHandlingTest
 {
   private static final String NAME = "NAME";
@@ -56,7 +56,7 @@ public class LongAnyAggregatorFactoryTest extends InitializedNullHandlingTest
 
   private LongAnyAggregatorFactory target;
 
-  @BeforeEach
+  @Before
   public void setUp()
   {
     Mockito.doReturn(null).when(selectorFactory).getColumnCapabilities(FIELD_NAME);
@@ -67,15 +67,15 @@ public class LongAnyAggregatorFactoryTest extends InitializedNullHandlingTest
   @Test
   public void canVectorizeShouldReturnTrue()
   {
-    Assertions.assertTrue(target.canVectorize(columnInspector));
+    Assert.assertTrue(target.canVectorize(columnInspector));
   }
 
   @Test
   public void factorizeVectorShouldReturnLongVectorAggregator()
   {
     VectorAggregator aggregator = target.factorizeVector(selectorFactory);
-    Assertions.assertNotNull(aggregator);
-    Assertions.assertEquals(LongAnyVectorAggregator.class, aggregator.getClass());
+    Assert.assertNotNull(aggregator);
+    Assert.assertEquals(LongAnyVectorAggregator.class, aggregator.getClass());
   }
 
   @Test
@@ -84,8 +84,8 @@ public class LongAnyAggregatorFactoryTest extends InitializedNullHandlingTest
     Mockito.doReturn(capabilities).when(selectorFactory).getColumnCapabilities(FIELD_NAME);
     Mockito.doReturn(true).when(capabilities).isNumeric();
     VectorAggregator aggregator = target.factorizeVector(selectorFactory);
-    Assertions.assertNotNull(aggregator);
-    Assertions.assertEquals(LongAnyVectorAggregator.class, aggregator.getClass());
+    Assert.assertNotNull(aggregator);
+    Assert.assertEquals(LongAnyVectorAggregator.class, aggregator.getClass());
   }
 
   @Test
@@ -94,7 +94,7 @@ public class LongAnyAggregatorFactoryTest extends InitializedNullHandlingTest
     Mockito.doReturn(capabilities).when(selectorFactory).getColumnCapabilities(FIELD_NAME);
     Mockito.doReturn(false).when(capabilities).isNumeric();
     VectorAggregator aggregator = target.factorizeVector(selectorFactory);
-    Assertions.assertNotNull(aggregator);
-    Assertions.assertEquals(NullHandling.defaultLongValue(), aggregator.get(BUFFER, POSITION));
+    Assert.assertNotNull(aggregator);
+    Assert.assertEquals(NullHandling.defaultLongValue(), aggregator.get(BUFFER, POSITION));
   }
 }

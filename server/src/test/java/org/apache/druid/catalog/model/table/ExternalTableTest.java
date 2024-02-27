@@ -33,8 +33,8 @@ import org.apache.druid.data.input.impl.LocalInputSource;
 import org.apache.druid.java.util.common.IAE;
 import org.apache.druid.java.util.common.logger.Logger;
 import org.apache.druid.metadata.DefaultPasswordProvider;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import java.io.File;
 import java.net.URI;
@@ -42,7 +42,7 @@ import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.Assert.assertThrows;
 
 public class ExternalTableTest extends BaseExternTableTest
 {
@@ -138,7 +138,7 @@ public class ExternalTableTest extends BaseExternTableTest
    * and pieces in multiple places.
    */
   @Test
-  @Disabled
+  @Ignore
   public void wikipediaDocExample()
   {
     JsonInputFormat format = new JsonInputFormat(null, null, true, true, false);
@@ -162,7 +162,7 @@ public class ExternalTableTest extends BaseExternTableTest
   }
 
   @Test
-  @Disabled
+  @Ignore
   public void httpDocExample() throws URISyntaxException
   {
     HttpInputSource inputSource = new HttpInputSource(
@@ -187,7 +187,7 @@ public class ExternalTableTest extends BaseExternTableTest
   }
 
   @Test
-  @Disabled
+  @Ignore
   public void httpConnDocExample() throws URISyntaxException
   {
     HttpInputSource inputSource = new HttpInputSource(
@@ -205,7 +205,7 @@ public class ExternalTableTest extends BaseExternTableTest
   }
 
   @Test
-  @Disabled
+  @Ignore
   public void localDocExample()
   {
     Map<String, Object> sourceMap = ImmutableMap.of(

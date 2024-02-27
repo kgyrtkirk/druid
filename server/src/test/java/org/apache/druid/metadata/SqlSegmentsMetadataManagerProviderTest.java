@@ -23,9 +23,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Suppliers;
 import org.apache.druid.java.util.common.lifecycle.Lifecycle;
 import org.apache.druid.segment.TestHelper;
+import org.junit.Assert;
 import org.junit.Rule;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import java.util.Locale;
 
@@ -52,21 +52,21 @@ public class SqlSegmentsMetadataManagerProviderTest
         lifecycle
     );
     SegmentsMetadataManager manager = provider.get();
-    Assertions.assertTrue(manager instanceof SqlSegmentsMetadataManager);
+    Assert.assertTrue(manager instanceof SqlSegmentsMetadataManager);
 
     final MetadataStorageTablesConfig storageConfig = derbyConnectorRule.metadataTablesConfigSupplier().get();
     final String segmentsTable = storageConfig.getSegmentsTable();
     final String upgradeSegmentsTable = storageConfig.getUpgradeSegmentsTable();
 
     // Verify that the tables do not exist yet
-    Assertions.assertFalse(tableExists(segmentsTable, connector));
-    Assertions.assertFalse(tableExists(upgradeSegmentsTable, connector));
+    Assert.assertFalse(tableExists(segmentsTable, connector));
+    Assert.assertFalse(tableExists(upgradeSegmentsTable, connector));
 
     lifecycle.start();
 
     // Verify that tables have now been created
-    Assertions.assertTrue(tableExists(segmentsTable, connector));
-    Assertions.assertTrue(tableExists(upgradeSegmentsTable, connector));
+    Assert.assertTrue(tableExists(segmentsTable, connector));
+    Assert.assertTrue(tableExists(upgradeSegmentsTable, connector));
 
     lifecycle.stop();
   }

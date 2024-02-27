@@ -22,6 +22,7 @@ package org.apache.druid.emitter.prometheus;
 import io.prometheus.client.CollectorRegistry;
 import org.apache.druid.error.DruidException;
 import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;

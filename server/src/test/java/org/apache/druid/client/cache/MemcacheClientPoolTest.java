@@ -21,8 +21,8 @@ package org.apache.druid.client.cache;
 
 import com.google.common.base.Suppliers;
 import net.spy.memcached.MemcachedClientIF;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class MemcacheClientPoolTest
 {
@@ -33,20 +33,20 @@ public class MemcacheClientPoolTest
     MemcacheClientPool pool = new MemcacheClientPool(3, Suppliers.ofInstance((MemcachedClientIF) null));
     // First round
     MemcacheClientPool.IdempotentCloseableHolder first = pool.get();
-    Assertions.assertEquals(1, first.count());
+    Assert.assertEquals(1, first.count());
     MemcacheClientPool.IdempotentCloseableHolder second = pool.get();
-    Assertions.assertEquals(1, second.count());
+    Assert.assertEquals(1, second.count());
     MemcacheClientPool.IdempotentCloseableHolder third = pool.get();
-    Assertions.assertEquals(1, third.count());
+    Assert.assertEquals(1, third.count());
     // Second round
     MemcacheClientPool.IdempotentCloseableHolder firstClientSecondRound = pool.get();
-    Assertions.assertEquals(2, firstClientSecondRound.count());
+    Assert.assertEquals(2, firstClientSecondRound.count());
     MemcacheClientPool.IdempotentCloseableHolder secondClientSecondRound = pool.get();
-    Assertions.assertEquals(2, secondClientSecondRound.count());
+    Assert.assertEquals(2, secondClientSecondRound.count());
     first.close();
     firstClientSecondRound.close();
     MemcacheClientPool.IdempotentCloseableHolder firstAgain = pool.get();
-    Assertions.assertEquals(1, firstAgain.count());
+    Assert.assertEquals(1, firstAgain.count());
     
     firstAgain.close();
     second.close();
@@ -65,7 +65,7 @@ public class MemcacheClientPoolTest
       byte[] garbage = new byte[10_000_000];
       Thread.sleep(10);
     }
-    Assertions.assertEquals(initialLeakedClients + 1, MemcacheClientPool.leakedClients());
+    Assert.assertEquals(initialLeakedClients + 1, MemcacheClientPool.leakedClients());
   }
 
   private void createDanglingClient()

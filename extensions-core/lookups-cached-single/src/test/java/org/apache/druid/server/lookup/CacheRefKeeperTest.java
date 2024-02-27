@@ -22,6 +22,7 @@ package org.apache.druid.server.lookup;
 import org.apache.druid.server.lookup.cache.polling.PollingCache;
 import org.easymock.EasyMock;
 import org.junit.Assert;
+import org.junit.Test;
 
 public class CacheRefKeeperTest
 {

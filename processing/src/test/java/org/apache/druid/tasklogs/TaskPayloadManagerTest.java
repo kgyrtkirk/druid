@@ -20,15 +20,15 @@
 package org.apache.druid.tasklogs;
 
 import org.apache.commons.lang.NotImplementedException;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class TaskPayloadManagerTest implements TaskPayloadManager
 {
   @Test
   public void test_streamTaskPayload()
   {
-    Assertions.assertThrows(NotImplementedException.class,
+    Assert.assertThrows(NotImplementedException.class,
         () -> this.streamTaskPayload("id")
     );
   }
@@ -36,7 +36,7 @@ public class TaskPayloadManagerTest implements TaskPayloadManager
   @Test
   public void test_pushTaskPayload()
   {
-    Assertions.assertThrows(NotImplementedException.class,
+    Assert.assertThrows(NotImplementedException.class,
         () -> this.pushTaskPayload("id", null)
     );
   }

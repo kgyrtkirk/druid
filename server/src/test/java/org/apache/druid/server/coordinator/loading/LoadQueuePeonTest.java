@@ -43,10 +43,10 @@ import org.apache.druid.timeline.DataSegment;
 import org.apache.druid.timeline.SegmentId;
 import org.apache.druid.timeline.partition.NoneShardSpec;
 import org.joda.time.Duration;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -63,7 +63,7 @@ public class LoadQueuePeonTest extends CuratorTestBase
   private LoadQueuePeon loadQueuePeon;
   private PathChildrenCache loadQueueCache;
 
-  @BeforeEach
+  @Before
   public void setUp() throws Exception
   {
     setupServerAndCurator();
@@ -218,22 +218,22 @@ public class LoadQueuePeonTest extends CuratorTestBase
       );
     }
 
-    Assertions.assertEquals(6000, loadQueuePeon.getSizeOfSegmentsToLoad());
-    Assertions.assertEquals(5, loadQueuePeon.getSegmentsToLoad().size());
-    Assertions.assertEquals(5, loadQueuePeon.getSegmentsToDrop().size());
-    Assertions.assertEquals(0, loadQueuePeon.getTimedOutSegments().size());
+    Assert.assertEquals(6000, loadQueuePeon.getSizeOfSegmentsToLoad());
+    Assert.assertEquals(5, loadQueuePeon.getSegmentsToLoad().size());
+    Assert.assertEquals(5, loadQueuePeon.getSegmentsToDrop().size());
+    Assert.assertEquals(0, loadQueuePeon.getTimedOutSegments().size());
 
     for (DataSegment segment : segmentToDrop) {
       String dropRequestPath = ZKPaths.makePath(LOAD_QUEUE_PATH, segment.getId().toString());
-      Assertions.assertTrue(
-          dropRequestSignals.get(segment.getId()).await(10, TimeUnit.SECONDS),
-          "Latch not counted down for " + dropRequestSignals.get(segment.getId())
+      Assert.assertTrue(
+          "Latch not counted down for " + dropRequestSignals.get(segment.getId()),
+          dropRequestSignals.get(segment.getId()).await(10, TimeUnit.SECONDS)
       );
-      Assertions.assertNotNull(
-          curator.checkExists().forPath(dropRequestPath),
-          "Path " + dropRequestPath + " doesn't exist"
+      Assert.assertNotNull(
+          "Path " + dropRequestPath + " doesn't exist",
+          curator.checkExists().forPath(dropRequestPath)
       );
-      Assertions.assertEquals(
+      Assert.assertEquals(
           segment,
           ((SegmentChangeRequestDrop) jsonMapper.readValue(
               curator.getData()
@@ -244,14 +244,14 @@ public class LoadQueuePeonTest extends CuratorTestBase
 
       // simulate completion of drop request by historical
       curator.delete().guaranteed().forPath(dropRequestPath);
-      Assertions.assertTrue(timing.forWaiting().awaitLatch(segmentDroppedSignals.get(segment.getId())));
+      Assert.assertTrue(timing.forWaiting().awaitLatch(segmentDroppedSignals.get(segment.getId())));
     }
 
     for (DataSegment segment : expectedLoadOrder) {
       String loadRequestPath = ZKPaths.makePath(LOAD_QUEUE_PATH, segment.getId().toString());
-      Assertions.assertTrue(timing.forWaiting().awaitLatch(loadRequestSignals.get(segment.getId())));
-      Assertions.assertNotNull(curator.checkExists().forPath(loadRequestPath));
-      Assertions.assertEquals(
+      Assert.assertTrue(timing.forWaiting().awaitLatch(loadRequestSignals.get(segment.getId())));
+      Assert.assertNotNull(curator.checkExists().forPath(loadRequestPath));
+      Assert.assertEquals(
           segment,
           ((SegmentChangeRequestLoad) jsonMapper
               .readValue(curator.getData().decompressed().forPath(loadRequestPath), DataSegmentChangeRequest.class))
@@ -260,7 +260,7 @@ public class LoadQueuePeonTest extends CuratorTestBase
 
       // simulate completion of load request by historical
       curator.delete().guaranteed().forPath(loadRequestPath);
-      Assertions.assertTrue(timing.forWaiting().awaitLatch(segmentLoadedSignals.get(segment.getId())));
+      Assert.assertTrue(timing.forWaiting().awaitLatch(segmentLoadedSignals.get(segment.getId())));
     }
   }
 
@@ -296,10 +296,10 @@ public class LoadQueuePeonTest extends CuratorTestBase
         success -> segmentLoadedSignal.countDown()
     );
 
-    Assertions.assertTrue(timing.forWaiting().awaitLatch(segmentLoadedSignal));
-    Assertions.assertEquals(0, loadQueuePeon.getSegmentsToLoad().size());
-    Assertions.assertEquals(0L, loadQueuePeon.getSizeOfSegmentsToLoad());
-    Assertions.assertEquals(0, loadQueuePeon.getTimedOutSegments().size());
+    Assert.assertTrue(timing.forWaiting().awaitLatch(segmentLoadedSignal));
+    Assert.assertEquals(0, loadQueuePeon.getSegmentsToLoad().size());
+    Assert.assertEquals(0L, loadQueuePeon.getSizeOfSegmentsToLoad());
+    Assert.assertEquals(0, loadQueuePeon.getTimedOutSegments().size());
 
   }
 
@@ -363,9 +363,9 @@ public class LoadQueuePeonTest extends CuratorTestBase
 
     String loadRequestPath = ZKPaths.makePath(LOAD_QUEUE_PATH, segment.getId().toString());
 
-    Assertions.assertTrue(timing.forWaiting().awaitLatch(loadRequestSignal));
-    Assertions.assertNotNull(curator.checkExists().forPath(loadRequestPath));
-    Assertions.assertEquals(
+    Assert.assertTrue(timing.forWaiting().awaitLatch(loadRequestSignal));
+    Assert.assertNotNull(curator.checkExists().forPath(loadRequestPath));
+    Assert.assertEquals(
         segment,
         ((SegmentChangeRequestLoad) jsonMapper
             .readValue(curator.getData().decompressed().forPath(loadRequestPath), DataSegmentChangeRequest.class))
@@ -373,18 +373,18 @@ public class LoadQueuePeonTest extends CuratorTestBase
     );
 
     // simulate incompletion of load request since request has timed out
-    Assertions.assertTrue(timing.forWaiting().awaitLatch(segmentLoadedSignal));
-    Assertions.assertEquals(1, loadQueuePeon.getSegmentsToLoad().size());
-    Assertions.assertEquals(1200L, loadQueuePeon.getSizeOfSegmentsToLoad());
-    Assertions.assertEquals(1, loadQueuePeon.getTimedOutSegments().size());
+    Assert.assertTrue(timing.forWaiting().awaitLatch(segmentLoadedSignal));
+    Assert.assertEquals(1, loadQueuePeon.getSegmentsToLoad().size());
+    Assert.assertEquals(1200L, loadQueuePeon.getSizeOfSegmentsToLoad());
+    Assert.assertEquals(1, loadQueuePeon.getTimedOutSegments().size());
 
     // simulate completion of load request by historical after time out on coordinator
     curator.delete().guaranteed().forPath(loadRequestPath);
-    Assertions.assertTrue(timing.forWaiting().awaitLatch(delayedSegmentLoadedSignal));
-    Assertions.assertTrue(timing.forWaiting().awaitLatch(loadRequestRemoveSignal));
-    Assertions.assertEquals(0, loadQueuePeon.getSegmentsToLoad().size());
-    Assertions.assertEquals(0L, loadQueuePeon.getSizeOfSegmentsToLoad());
-    Assertions.assertEquals(0, loadQueuePeon.getTimedOutSegments().size());
+    Assert.assertTrue(timing.forWaiting().awaitLatch(delayedSegmentLoadedSignal));
+    Assert.assertTrue(timing.forWaiting().awaitLatch(loadRequestRemoveSignal));
+    Assert.assertEquals(0, loadQueuePeon.getSegmentsToLoad().size());
+    Assert.assertEquals(0L, loadQueuePeon.getSizeOfSegmentsToLoad());
+    Assert.assertEquals(0, loadQueuePeon.getTimedOutSegments().size());
 
   }
 
@@ -403,7 +403,7 @@ public class LoadQueuePeonTest extends CuratorTestBase
                       .build();
   }
 
-  @AfterEach
+  @After
   public void tearDown() throws Exception
   {
     loadQueueCache.close();

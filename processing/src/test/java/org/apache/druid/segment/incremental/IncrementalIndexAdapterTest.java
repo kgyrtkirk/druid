@@ -33,16 +33,18 @@ import org.apache.druid.segment.data.CompressionStrategy;
 import org.apache.druid.segment.data.ConciseBitmapSerdeFactory;
 import org.apache.druid.segment.data.IncrementalIndexTest;
 import org.apache.druid.testing.InitializedNullHandlingTest;
+import org.junit.Assert;
 import org.junit.Rule;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 
+@RunWith(Parameterized.class)
 public class IncrementalIndexAdapterTest extends InitializedNullHandlingTest
 {
   private static final IndexSpec INDEX_SPEC =
@@ -53,12 +55,12 @@ public class IncrementalIndexAdapterTest extends InitializedNullHandlingTest
                .withLongEncoding(CompressionFactory.LongEncodingStrategy.LONGS)
                .build();
 
-  public IncrementalIndexCreator indexCreator;
+  public final IncrementalIndexCreator indexCreator;
 
   @Rule
   public final CloserRule closer = new CloserRule(false);
 
-  public void initIncrementalIndexAdapterTest(String indexType) throws JsonProcessingException
+  public IncrementalIndexAdapterTest(String indexType) throws JsonProcessingException
   {
     indexCreator = closer.closeLater(new IncrementalIndexCreator(indexType, (builder, args) -> builder
         .setSimpleTestingIndexSchema("rollup".equals(args[0]), null, new CountAggregatorFactory("count"))
@@ -67,16 +69,15 @@ public class IncrementalIndexAdapterTest extends InitializedNullHandlingTest
     ));
   }
 
+  @Parameterized.Parameters(name = "{index}: {0}")
   public static Collection<?> constructorFeeder()
   {
     return IncrementalIndexCreator.getAppendableIndexTypes();
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{index}: {0}")
-  public void testGetBitmapIndex(String indexType) throws Exception
+  @Test
+  public void testGetBitmapIndex() throws Exception
   {
-    initIncrementalIndexAdapterTest(indexType);
     final long timestamp = System.currentTimeMillis();
     IncrementalIndex incrementalIndex = indexCreator.createIndex("rollup");
     IncrementalIndexTest.populateIndex(timestamp, incrementalIndex);
@@ -89,16 +90,14 @@ public class IncrementalIndexAdapterTest extends InitializedNullHandlingTest
     try (CloseableIndexed<String> dimValueLookup = adapter.getDimValueLookup(dimension)) {
       for (int i = 0; i < dimValueLookup.size(); i++) {
         BitmapValues bitmapValues = adapter.getBitmapValues(dimension, i);
-        Assertions.assertEquals(1, bitmapValues.size());
+        Assert.assertEquals(1, bitmapValues.size());
       }
     }
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{index}: {0}")
-  public void testGetRowsIterable(String indexType) throws Exception
+  @Test
+  public void testGetRowsIterable() throws Exception
   {
-    initIncrementalIndexAdapterTest(indexType);
     final long timestamp = System.currentTimeMillis();
     IncrementalIndex toPersist1 = indexCreator.createIndex("rollup");
     IncrementalIndexTest.populateIndex(timestamp, toPersist1);
@@ -115,16 +114,14 @@ public class IncrementalIndexAdapterTest extends InitializedNullHandlingTest
     while (rows.moveToNext()) {
       rowNums.add(rows.getPointer().getRowNum());
     }
-    Assertions.assertEquals(2, rowNums.size());
-    Assertions.assertEquals(0, (long) rowNums.get(0));
-    Assertions.assertEquals(1, (long) rowNums.get(1));
+    Assert.assertEquals(2, rowNums.size());
+    Assert.assertEquals(0, (long) rowNums.get(0));
+    Assert.assertEquals(1, (long) rowNums.get(1));
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{index}: {0}")
-  public void testGetRowsIterableNoRollup(String indexType) throws Exception
+  @Test
+  public void testGetRowsIterableNoRollup() throws Exception
   {
-    initIncrementalIndexAdapterTest(indexType);
     final long timestamp = System.currentTimeMillis();
     IncrementalIndex toPersist1 = indexCreator.createIndex("plain");
     IncrementalIndexTest.populateIndex(timestamp, toPersist1);
@@ -186,16 +183,16 @@ public class IncrementalIndexAdapterTest extends InitializedNullHandlingTest
     //    RowPointer{indexNum=0, rowNumber=4, timestamp=1533347361396, dimensions={dim1=3, dim2=4}, metrics={count=1}}
     //    RowPointer{indexNum=0, rowNumber=5, timestamp=1533347361396, dimensions={dim1=3, dim2=4}, metrics={count=1}}
 
-    Assertions.assertEquals(6, rowStrings.size());
+    Assert.assertEquals(6, rowStrings.size());
     for (int i = 0; i < 6; i++) {
       if (i % 2 == 0) {
-        Assertions.assertEquals(0, (long) dim1Vals.get(i));
-        Assertions.assertEquals(0, (long) dim2Vals.get(i));
+        Assert.assertEquals(0, (long) dim1Vals.get(i));
+        Assert.assertEquals(0, (long) dim2Vals.get(i));
       } else {
-        Assertions.assertEquals(1, (long) dim1Vals.get(i));
-        Assertions.assertEquals(1, (long) dim2Vals.get(i));
+        Assert.assertEquals(1, (long) dim1Vals.get(i));
+        Assert.assertEquals(1, (long) dim2Vals.get(i));
       }
-      Assertions.assertEquals(getExpected.apply(i), rowStrings.get(i));
+      Assert.assertEquals(getExpected.apply(i), rowStrings.get(i));
     }
   }
 }

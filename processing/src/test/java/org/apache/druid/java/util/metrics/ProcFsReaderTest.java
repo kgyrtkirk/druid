@@ -21,10 +21,11 @@ package org.apache.druid.java.util.metrics;
 
 import org.apache.druid.java.util.common.FileUtils;
 import org.apache.druid.java.util.metrics.cgroups.TestUtils;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,14 +33,14 @@ import java.nio.file.Paths;
 
 public class ProcFsReaderTest
 {
-  @TempDir
-  public File temporaryFolder;
+  @Rule
+  public TemporaryFolder temporaryFolder = new TemporaryFolder();
   private File procDir;
 
-  @BeforeEach
+  @Before
   public void setUp() throws IOException
   {
-    procDir = newFolder(temporaryFolder, "junit");
+    procDir = temporaryFolder.newFolder();
     File kernelDir = new File(
         procDir,
         "sys/kernel/random"
@@ -53,7 +54,7 @@ public class ProcFsReaderTest
   @Test
   public void testUtilThrowsOnBadDir()
   {
-    Assertions.assertThrows(
+    Assert.assertThrows(
         IllegalArgumentException.class,
         () -> new ProcFsReader(Paths.get(procDir + "_dummy"))
     );
@@ -63,22 +64,13 @@ public class ProcFsReaderTest
   public void testBootId()
   {
     final ProcFsReader fetcher = new ProcFsReader(procDir.toPath());
-    Assertions.assertEquals("ad1f0a5c-55ea-4a49-9db8-bbb0f22e2ba6", fetcher.getBootId().toString());
+    Assert.assertEquals("ad1f0a5c-55ea-4a49-9db8-bbb0f22e2ba6", fetcher.getBootId().toString());
   }
 
   @Test
   public void testProcessorCount()
   {
     final ProcFsReader fetcher = new ProcFsReader(procDir.toPath());
-    Assertions.assertEquals(8, fetcher.getProcessorCount());
-  }
-
-  private static File newFolder(File root, String... subDirs) throws IOException {
-    String subFolder = String.join("/", subDirs);
-    File result = new File(root, subFolder);
-    if (!result.mkdirs()) {
-      throw new IOException("Couldn't create folders " + root);
-    }
-    return result;
+    Assert.assertEquals(8, fetcher.getProcessorCount());
   }
 }

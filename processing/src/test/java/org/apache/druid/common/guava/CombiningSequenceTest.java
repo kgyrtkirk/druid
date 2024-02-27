@@ -33,10 +33,11 @@ import org.apache.druid.java.util.common.guava.Sequences;
 import org.apache.druid.java.util.common.guava.Yielder;
 import org.apache.druid.java.util.common.guava.YieldingAccumulator;
 import org.hamcrest.CoreMatchers;
+import org.junit.Assert;
+import org.junit.Test;
 import org.junit.internal.matchers.ThrowableMessageMatcher;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import javax.annotation.Nullable;
 import java.io.Closeable;
@@ -49,10 +50,10 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-
+@RunWith(Parameterized.class)
 public class CombiningSequenceTest
 {
+  @Parameterized.Parameters
   public static Collection<Object[]> valuesToTry()
   {
     return Arrays.asList(new Object[][]{
@@ -60,18 +61,16 @@ public class CombiningSequenceTest
     });
   }
 
-  private int yieldEvery;
+  private final int yieldEvery;
 
-  public void initCombiningSequenceTest(int yieldEvery)
+  public CombiningSequenceTest(int yieldEvery)
   {
     this.yieldEvery = yieldEvery;
   }
 
-  @MethodSource("valuesToTry")
-  @ParameterizedTest
-  public void testMerge(int yieldEvery) throws Exception
+  @Test
+  public void testMerge() throws Exception
   {
-    initCombiningSequenceTest(yieldEvery);
     List<Pair<Integer, Integer>> pairs = Arrays.asList(
         Pair.of(0, 1),
         Pair.of(0, 2),
@@ -95,11 +94,9 @@ public class CombiningSequenceTest
     testCombining(pairs, expected);
   }
 
-  @MethodSource("valuesToTry")
-  @ParameterizedTest
-  public void testNoMergeOne(int yieldEvery) throws Exception
+  @Test
+  public void testNoMergeOne() throws Exception
   {
-    initCombiningSequenceTest(yieldEvery);
     List<Pair<Integer, Integer>> pairs = Collections.singletonList(
         Pair.of(0, 1)
     );
@@ -111,11 +108,9 @@ public class CombiningSequenceTest
     testCombining(pairs, expected);
   }
 
-  @MethodSource("valuesToTry")
-  @ParameterizedTest
-  public void testMergeMany(int yieldEvery) throws Exception
+  @Test
+  public void testMergeMany() throws Exception
   {
-    initCombiningSequenceTest(yieldEvery);
     List<Pair<Integer, Integer>> pairs = Arrays.asList(
         Pair.of(0, 6),
         Pair.of(1, 1),
@@ -137,11 +132,9 @@ public class CombiningSequenceTest
     testCombining(pairs, expected);
   }
 
-  @MethodSource("valuesToTry")
-  @ParameterizedTest
-  public void testNoMergeTwo(int yieldEvery) throws Exception
+  @Test
+  public void testNoMergeTwo() throws Exception
   {
-    initCombiningSequenceTest(yieldEvery);
     List<Pair<Integer, Integer>> pairs = Arrays.asList(
         Pair.of(0, 1),
         Pair.of(1, 1)
@@ -155,11 +148,9 @@ public class CombiningSequenceTest
     testCombining(pairs, expected);
   }
 
-  @MethodSource("valuesToTry")
-  @ParameterizedTest
-  public void testMergeTwo(int yieldEvery) throws Exception
+  @Test
+  public void testMergeTwo() throws Exception
   {
-    initCombiningSequenceTest(yieldEvery);
     List<Pair<Integer, Integer>> pairs = Arrays.asList(
         Pair.of(0, 1),
         Pair.of(0, 1)
@@ -172,11 +163,9 @@ public class CombiningSequenceTest
     testCombining(pairs, expected);
   }
 
-  @MethodSource("valuesToTry")
-  @ParameterizedTest
-  public void testMergeSomeThingsMergedAtEnd(int yieldEvery) throws Exception
+  @Test
+  public void testMergeSomeThingsMergedAtEnd() throws Exception
   {
-    initCombiningSequenceTest(yieldEvery);
     List<Pair<Integer, Integer>> pairs = Arrays.asList(
         Pair.of(0, 1),
         Pair.of(0, 2),
@@ -205,19 +194,15 @@ public class CombiningSequenceTest
     testCombining(pairs, expected);
   }
 
-  @MethodSource("valuesToTry")
-  @ParameterizedTest
-  public void testNothing(int yieldEvery) throws Exception
+  @Test
+  public void testNothing() throws Exception
   {
-    initCombiningSequenceTest(yieldEvery);
     testCombining(Collections.emptyList(), Collections.emptyList());
   }
 
-  @MethodSource("valuesToTry")
-  @ParameterizedTest
-  public void testExplodingSequence(int yieldEvery)
+  @Test
+  public void testExplodingSequence()
   {
-    initCombiningSequenceTest(yieldEvery);
     final ExplodingSequence<Integer> bomb =
         new ExplodingSequence<>(Sequences.simple(ImmutableList.of(1, 2, 2)), false, true);
 
@@ -240,13 +225,13 @@ public class CombiningSequenceTest
             }
           }
       );
-      Assertions.fail("Expected exception");
+      Assert.fail("Expected exception");
     }
     catch (Exception e) {
-      assertThat(e, ThrowableMessageMatcher.hasMessage(CoreMatchers.equalTo("boom")));
+      Assert.assertThat(e, ThrowableMessageMatcher.hasMessage(CoreMatchers.equalTo("boom")));
     }
 
-    Assertions.assertEquals(1, bomb.getCloseCount(), "Closes resources");
+    Assert.assertEquals("Closes resources", 1, bomb.getCloseCount());
   }
 
   private void testCombining(List<Pair<Integer, Integer>> pairs, List<Pair<Integer, Integer>> expected)
@@ -294,7 +279,7 @@ public class CombiningSequenceTest
 
     List<Pair<Integer, Integer>> merged = seq.toList();
 
-    Assertions.assertEquals(expected, merged, prefix);
+    Assert.assertEquals(prefix, expected, merged);
 
     Yielder<Pair<Integer, Integer>> yielder = seq.toYielder(
         null,
@@ -341,14 +326,14 @@ public class CombiningSequenceTest
       while (!yielder.isDone()) {
         final Pair<Integer, Integer> expectedVal = expectedVals.next();
         final Pair<Integer, Integer> actual = yielder.get();
-        Assertions.assertEquals(expectedVal, actual, StringUtils.format("%s, i[%s]", prefix, i++));
+        Assert.assertEquals(StringUtils.format("%s, i[%s]", prefix, i++), expectedVal, actual);
         yielder = yielder.next(actual);
       }
     }
-    Assertions.assertTrue(yielder.isDone(), prefix);
-    Assertions.assertFalse(expectedVals.hasNext(), prefix);
+    Assert.assertTrue(prefix, yielder.isDone());
+    Assert.assertFalse(prefix, expectedVals.hasNext());
     yielder.close();
 
-    Assertions.assertTrue(closed.await(10000, TimeUnit.MILLISECONDS), "resource closed");
+    Assert.assertTrue("resource closed", closed.await(10000, TimeUnit.MILLISECONDS));
   }
 }

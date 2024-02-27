@@ -41,10 +41,10 @@ import org.apache.druid.server.coordinator.rules.Rule;
 import org.apache.druid.server.metrics.NoopServiceEmitter;
 import org.apache.druid.timeline.DataSegment;
 import org.apache.druid.timeline.partition.NoneShardSpec;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.Collections;
 import java.util.List;
@@ -65,7 +65,7 @@ public class SQLMetadataRuleManagerTest
   private SQLMetadataSegmentPublisher publisher;
   private final ObjectMapper mapper = new DefaultObjectMapper();
 
-  @BeforeEach
+  @Before
   public void setUp()
   {
     connector = derbyConnectorRule.getConnector();
@@ -116,23 +116,23 @@ public class SQLMetadataRuleManagerTest
     ruleManager.overrideRule(DATASOURCE, rules, createAuditInfo("override rule"));
     // New rule should be be reflected in the in memory rules map immediately after being set by user
     Map<String, List<Rule>> allRules = ruleManager.getAllRules();
-    Assertions.assertEquals(1, allRules.size());
-    Assertions.assertEquals(1, allRules.get(DATASOURCE).size());
-    Assertions.assertEquals(rules.get(0), allRules.get(DATASOURCE).get(0));
+    Assert.assertEquals(1, allRules.size());
+    Assert.assertEquals(1, allRules.get(DATASOURCE).size());
+    Assert.assertEquals(rules.get(0), allRules.get(DATASOURCE).get(0));
   }
 
   @Test
   public void testOverrideRuleWithNull()
   {
     // Datasource level rules cannot be null
-    IAE exception = Assertions.assertThrows(
+    IAE exception = Assert.assertThrows(
         IAE.class,
         () -> ruleManager.overrideRule(DATASOURCE, null, createAuditInfo("null rule"))
     );
-    Assertions.assertEquals("Rules cannot be null.", exception.getMessage());
+    Assert.assertEquals("Rules cannot be null.", exception.getMessage());
 
     // Cluster level rules cannot be null
-    exception = Assertions.assertThrows(
+    exception = Assert.assertThrows(
         IAE.class,
         () -> ruleManager.overrideRule(
             managerConfig.getDefaultRule(),
@@ -140,14 +140,14 @@ public class SQLMetadataRuleManagerTest
             createAuditInfo("null cluster rule")
         )
     );
-    Assertions.assertEquals("Rules cannot be null.", exception.getMessage());
+    Assert.assertEquals("Rules cannot be null.", exception.getMessage());
   }
 
   @Test
   public void testOverrideRuleWithEmpty()
   {
     // Cluster level rules cannot be empty
-    IAE exception = Assertions.assertThrows(
+    IAE exception = Assert.assertThrows(
         IAE.class,
         () -> ruleManager.overrideRule(
             managerConfig.getDefaultRule(),
@@ -155,10 +155,10 @@ public class SQLMetadataRuleManagerTest
             createAuditInfo("empty cluster rule")
         )
     );
-    Assertions.assertEquals("Cluster-level rules cannot be empty.", exception.getMessage());
+    Assert.assertEquals("Cluster-level rules cannot be empty.", exception.getMessage());
 
     // Datasource level rules can be empty
-    Assertions.assertTrue(
+    Assert.assertTrue(
         ruleManager.overrideRule(
             DATASOURCE,
             Collections.emptyList(),
@@ -182,19 +182,19 @@ public class SQLMetadataRuleManagerTest
     // fetch rules from metadata storage
     ruleManager.poll();
 
-    Assertions.assertEquals(rules, ruleManager.getRules(DATASOURCE));
+    Assert.assertEquals(rules, ruleManager.getRules(DATASOURCE));
 
     // verify audit entry is created
     List<AuditEntry> auditEntries = auditManager.fetchAuditHistory(DATASOURCE, "rules", null);
-    Assertions.assertEquals(1, auditEntries.size());
+    Assert.assertEquals(1, auditEntries.size());
     AuditEntry entry = auditEntries.get(0);
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         rules,
         mapper.readValue(entry.getPayload().serialized(), new TypeReference<List<Rule>>() {})
     );
-    Assertions.assertEquals(auditInfo, entry.getAuditInfo());
-    Assertions.assertEquals(DATASOURCE, entry.getKey());
+    Assert.assertEquals(auditInfo, entry.getAuditInfo());
+    Assert.assertEquals(DATASOURCE, entry.getKey());
   }
 
   @Test
@@ -215,18 +215,18 @@ public class SQLMetadataRuleManagerTest
     // fetch rules from metadata storage
     ruleManager.poll();
 
-    Assertions.assertEquals(rules, ruleManager.getRules(DATASOURCE));
-    Assertions.assertEquals(rules, ruleManager.getRules("test_dataSource2"));
+    Assert.assertEquals(rules, ruleManager.getRules(DATASOURCE));
+    Assert.assertEquals(rules, ruleManager.getRules("test_dataSource2"));
 
     // test fetch audit entries
     List<AuditEntry> auditEntries = auditManager.fetchAuditHistory("rules", null);
-    Assertions.assertEquals(2, auditEntries.size());
+    Assert.assertEquals(2, auditEntries.size());
     for (AuditEntry entry : auditEntries) {
-      Assertions.assertEquals(
+      Assert.assertEquals(
           rules,
           mapper.readValue(entry.getPayload().serialized(), new TypeReference<List<Rule>>() {})
       );
-      Assertions.assertEquals(auditInfo, entry.getAuditInfo());
+      Assert.assertEquals(auditInfo, entry.getAuditInfo());
     }
   }
 
@@ -245,8 +245,8 @@ public class SQLMetadataRuleManagerTest
     // Verify that the rule was added
     ruleManager.poll();
     Map<String, List<Rule>> allRules = ruleManager.getAllRules();
-    Assertions.assertEquals(1, allRules.size());
-    Assertions.assertEquals(1, allRules.get(DATASOURCE).size());
+    Assert.assertEquals(1, allRules.size());
+    Assert.assertEquals(1, allRules.get(DATASOURCE).size());
 
     // Now delete rules
     ruleManager.removeRulesForEmptyDatasourcesOlderThan(System.currentTimeMillis());
@@ -254,7 +254,7 @@ public class SQLMetadataRuleManagerTest
     // Verify that rule was deleted
     ruleManager.poll();
     allRules = ruleManager.getAllRules();
-    Assertions.assertEquals(0, allRules.size());
+    Assert.assertEquals(0, allRules.size());
   }
 
   @Test
@@ -272,8 +272,8 @@ public class SQLMetadataRuleManagerTest
     // Verify that rule was added
     ruleManager.poll();
     Map<String, List<Rule>> allRules = ruleManager.getAllRules();
-    Assertions.assertEquals(1, allRules.size());
-    Assertions.assertEquals(1, allRules.get(DATASOURCE).size());
+    Assert.assertEquals(1, allRules.size());
+    Assert.assertEquals(1, allRules.get(DATASOURCE).size());
 
     // This will not delete the rule as the rule was created just now so it will have the created timestamp later than
     // the timestamp 2012-01-01T00:00:00Z
@@ -282,8 +282,8 @@ public class SQLMetadataRuleManagerTest
     // Verify that rule was not deleted
     ruleManager.poll();
     allRules = ruleManager.getAllRules();
-    Assertions.assertEquals(1, allRules.size());
-    Assertions.assertEquals(1, allRules.get(DATASOURCE).size());
+    Assert.assertEquals(1, allRules.size());
+    Assert.assertEquals(1, allRules.get(DATASOURCE).size());
   }
 
   @Test
@@ -301,8 +301,8 @@ public class SQLMetadataRuleManagerTest
     // Verify that rule was added
     ruleManager.poll();
     Map<String, List<Rule>> allRules = ruleManager.getAllRules();
-    Assertions.assertEquals(1, allRules.size());
-    Assertions.assertEquals(1, allRules.get(DATASOURCE).size());
+    Assert.assertEquals(1, allRules.size());
+    Assert.assertEquals(1, allRules.get(DATASOURCE).size());
 
     // Add segment metadata to segment table so that the datasource is considered active
     DataSegment dataSegment = new DataSegment(
@@ -328,8 +328,8 @@ public class SQLMetadataRuleManagerTest
     // Verify that rule was not deleted
     ruleManager.poll();
     allRules = ruleManager.getAllRules();
-    Assertions.assertEquals(1, allRules.size());
-    Assertions.assertEquals(1, allRules.get(DATASOURCE).size());
+    Assert.assertEquals(1, allRules.size());
+    Assert.assertEquals(1, allRules.get(DATASOURCE).size());
   }
 
   @Test
@@ -340,18 +340,18 @@ public class SQLMetadataRuleManagerTest
     // Verify the default rule
     ruleManager.poll();
     Map<String, List<Rule>> allRules = ruleManager.getAllRules();
-    Assertions.assertEquals(1, allRules.size());
-    Assertions.assertEquals(1, allRules.get("_default").size());
+    Assert.assertEquals(1, allRules.size());
+    Assert.assertEquals(1, allRules.get("_default").size());
     // Delete everything
     ruleManager.removeRulesForEmptyDatasourcesOlderThan(System.currentTimeMillis());
     // Verify the default rule was not deleted
     ruleManager.poll();
     allRules = ruleManager.getAllRules();
-    Assertions.assertEquals(1, allRules.size());
-    Assertions.assertEquals(1, allRules.get("_default").size());
+    Assert.assertEquals(1, allRules.size());
+    Assert.assertEquals(1, allRules.get("_default").size());
   }
 
-  @AfterEach
+  @After
   public void cleanup()
   {
     dropTable(tablesConfig.getAuditTable());

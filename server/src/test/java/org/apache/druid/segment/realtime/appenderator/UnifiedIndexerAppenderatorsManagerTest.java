@@ -55,9 +55,11 @@ import org.apache.druid.server.metrics.NoopServiceEmitter;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.easymock.EasyMock;
 import org.joda.time.Interval;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -65,11 +67,10 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 public class UnifiedIndexerAppenderatorsManagerTest extends InitializedNullHandlingTest
 {
+  @Rule
+  public final ExpectedException expectedException = ExpectedException.none();
 
   private final WorkerConfig workerConfig = new WorkerConfig();
   private final UnifiedIndexerAppenderatorsManager manager = new UnifiedIndexerAppenderatorsManager(
@@ -87,7 +88,7 @@ public class UnifiedIndexerAppenderatorsManagerTest extends InitializedNullHandl
   private AppenderatorConfig appenderatorConfig;
   private Appenderator appenderator;
 
-  @BeforeEach
+  @Before
   public void setup()
   {
     appenderatorConfig = EasyMock.createMock(AppenderatorConfig.class);
@@ -126,29 +127,29 @@ public class UnifiedIndexerAppenderatorsManagerTest extends InitializedNullHandl
               .build()
     );
 
-    Assertions.assertEquals("myDataSource", bundle.getWalker().getDataSource());
+    Assert.assertEquals("myDataSource", bundle.getWalker().getDataSource());
   }
 
   @Test
   public void test_getBundle_unknownDataSource()
   {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
-      final ScanQuery query = Druids.newScanQueryBuilder()
-          .dataSource("unknown")
-          .intervals(new MultipleIntervalSegmentSpec(Intervals.ONLY_ETERNITY))
-          .build();
+    final ScanQuery query = Druids.newScanQueryBuilder()
+                                  .dataSource("unknown")
+                                  .intervals(new MultipleIntervalSegmentSpec(Intervals.ONLY_ETERNITY))
+                                  .build();
 
-      manager.getBundle(query);
-    });
-    assertTrue(exception.getMessage().contains("Could not find segment walker for datasource"));
+    expectedException.expect(IllegalArgumentException.class);
+    expectedException.expectMessage("Could not find segment walker for datasource");
+
+    manager.getBundle(query);
   }
 
   @Test
   public void test_removeAppenderatorsForTask()
   {
-    Assertions.assertEquals(ImmutableSet.of("myDataSource"), manager.getDatasourceBundles().keySet());
+    Assert.assertEquals(ImmutableSet.of("myDataSource"), manager.getDatasourceBundles().keySet());
     manager.removeAppenderatorsForTask("taskId", "myDataSource");
-    Assertions.assertTrue(manager.getDatasourceBundles().isEmpty());
+    Assert.assertTrue(manager.getDatasourceBundles().isEmpty());
   }
 
   @Test
@@ -159,7 +160,7 @@ public class UnifiedIndexerAppenderatorsManagerTest extends InitializedNullHandl
     manager.removeAppenderatorsForTask("someOtherTaskId", "myDataSource");
 
     // Should be no change.
-    Assertions.assertEquals(ImmutableSet.of("myDataSource"), manager.getDatasourceBundles().keySet());
+    Assert.assertEquals(ImmutableSet.of("myDataSource"), manager.getDatasourceBundles().keySet());
   }
 
   @Test
@@ -175,14 +176,14 @@ public class UnifiedIndexerAppenderatorsManagerTest extends InitializedNullHandl
 
     // Three forms of persist.
 
-    Assertions.assertEquals(file, limitedPoolIndexMerger.persist(null, null, file, null, null, null));
-    Assertions.assertEquals(file, limitedPoolIndexMerger.persist(null, null, file, null, null));
+    Assert.assertEquals(file, limitedPoolIndexMerger.persist(null, null, file, null, null, null));
+    Assert.assertEquals(file, limitedPoolIndexMerger.persist(null, null, file, null, null));
 
     // Need a mocked index for this test, since getInterval is called on it.
     final IncrementalIndex index = EasyMock.createMock(IncrementalIndex.class);
     EasyMock.expect(index.getInterval()).andReturn(null);
     EasyMock.replay(index);
-    Assertions.assertEquals(file, limitedPoolIndexMerger.persist(index, file, null, null));
+    Assert.assertEquals(file, limitedPoolIndexMerger.persist(index, file, null, null));
     EasyMock.verify(index);
   }
 
@@ -197,10 +198,10 @@ public class UnifiedIndexerAppenderatorsManagerTest extends InitializedNullHandl
 
     final File file = new File("xyz");
 
-    Assertions.assertThrows(
+    Assert.assertThrows(
+        "failed",
         RuntimeException.class, // Wrapped IOException
-        () -> limitedPoolIndexMerger.persist(null, null, file, null, null, null), // Wrapped IOException
-        "failed"
+        () -> limitedPoolIndexMerger.persist(null, null, file, null, null, null)
     );
   }
 
@@ -215,7 +216,8 @@ public class UnifiedIndexerAppenderatorsManagerTest extends InitializedNullHandl
 
     final File file = new File("xyz");
 
-    Assertions.assertThrows(
+    Assert.assertThrows(
+        "failed",
         RuntimeException.class, // Wrapped IOException
         () -> limitedPoolIndexMerger.mergeQueryableIndex(
             null,
@@ -228,8 +230,7 @@ public class UnifiedIndexerAppenderatorsManagerTest extends InitializedNullHandl
             null,
             null,
             -1
-        ), // Wrapped IOException
-        "failed"
+        )
     );
   }
 
@@ -245,8 +246,8 @@ public class UnifiedIndexerAppenderatorsManagerTest extends InitializedNullHandl
     final File file = new File("xyz");
 
     // Two forms of mergeQueryableIndex
-    Assertions.assertEquals(file, limitedPoolIndexMerger.mergeQueryableIndex(null, false, null, file, null, null, -1));
-    Assertions.assertEquals(
+    Assert.assertEquals(file, limitedPoolIndexMerger.mergeQueryableIndex(null, false, null, file, null, null, -1));
+    Assert.assertEquals(
         file,
         limitedPoolIndexMerger.mergeQueryableIndex(
             null,
@@ -266,22 +267,23 @@ public class UnifiedIndexerAppenderatorsManagerTest extends InitializedNullHandl
   @Test
   public void test_limitedPool_merge()
   {
-    assertThrows(UnsupportedOperationException.class, () -> {
-      final UnifiedIndexerAppenderatorsManager.LimitedPoolIndexMerger limitedPoolIndexMerger =
-          new UnifiedIndexerAppenderatorsManager.LimitedPoolIndexMerger(
-              new NoopIndexMerger(),
-              DirectQueryProcessingPool.INSTANCE
-          );
+    final UnifiedIndexerAppenderatorsManager.LimitedPoolIndexMerger limitedPoolIndexMerger =
+        new UnifiedIndexerAppenderatorsManager.LimitedPoolIndexMerger(
+            new NoopIndexMerger(),
+            DirectQueryProcessingPool.INSTANCE
+        );
 
-      final File file = new File("xyz");
-      Assertions.assertEquals(file, limitedPoolIndexMerger.merge(null, false, null, file, null, null, -1));
-    });
+    final File file = new File("xyz");
+
+    // "merge" is neither necessary nor implemented
+    expectedException.expect(UnsupportedOperationException.class);
+    Assert.assertEquals(file, limitedPoolIndexMerger.merge(null, false, null, file, null, null, -1));
   }
 
   @Test
   public void test_getWorkerConfig()
   {
-    Assertions.assertSame(workerConfig, manager.getWorkerConfig());
+    Assert.assertSame(workerConfig, manager.getWorkerConfig());
   }
 
   /**

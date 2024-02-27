@@ -57,10 +57,10 @@ import org.apache.druid.timeline.partition.NoneShardSpec;
 import org.apache.druid.timeline.partition.SingleElementPartitionChunk;
 import org.easymock.EasyMock;
 import org.joda.time.Interval;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -88,13 +88,13 @@ public class CachingClusteredClientFunctionalityTest
   private TimelineServerView serverView;
   private Cache cache;
 
-  @AfterAll
+  @AfterClass
   public static void tearDownClass() throws IOException
   {
     RESOURCE_CLOSER.close();
   }
 
-  @BeforeEach
+  @Before
   public void setUp()
   {
     timeline = new VersionedIntervalTimeline<>(Ordering.natural());
@@ -126,7 +126,7 @@ public class CachingClusteredClientFunctionalityTest
 
     ResponseContext responseContext = ResponseContext.createEmpty();
     runQuery(client, builder.build(), responseContext);
-    Assertions.assertNull(responseContext.getUncoveredIntervals());
+    Assert.assertNull(responseContext.getUncoveredIntervals());
 
     builder.intervals("2015-01-01/2015-01-03");
     responseContext = ResponseContext.createEmpty();
@@ -175,8 +175,8 @@ public class CachingClusteredClientFunctionalityTest
     for (String interval : intervals) {
       expectedList.add(Intervals.of(interval));
     }
-    Assertions.assertEquals((Object) expectedList, context.getUncoveredIntervals());
-    Assertions.assertEquals(uncoveredIntervalsOverflowed, context.get(ResponseContext.Keys.UNCOVERED_INTERVALS_OVERFLOWED));
+    Assert.assertEquals((Object) expectedList, context.getUncoveredIntervals());
+    Assert.assertEquals(uncoveredIntervalsOverflowed, context.get(ResponseContext.Keys.UNCOVERED_INTERVALS_OVERFLOWED));
   }
 
   private void addToTimeline(Interval interval, String version)

@@ -20,7 +20,7 @@
 package org.apache.druid.server.security;
 
 import org.easymock.EasyMock;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;

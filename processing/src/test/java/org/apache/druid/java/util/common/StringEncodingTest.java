@@ -20,8 +20,8 @@
 package org.apache.druid.java.util.common;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -33,12 +33,12 @@ public class StringEncodingTest
   {
     final ObjectMapper mapper = new ObjectMapper();
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         StringEncoding.UTF16LE,
         mapper.readValue(mapper.writeValueAsString(StringEncoding.UTF16LE), StringEncoding.class)
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         StringEncoding.UTF8,
         mapper.readValue(mapper.writeValueAsString(StringEncoding.UTF8), StringEncoding.class)
     );
@@ -47,7 +47,7 @@ public class StringEncodingTest
   @Test
   public void testGetCacheKey()
   {
-    Assertions.assertFalse(
+    Assert.assertFalse(
         Arrays.equals(
             StringEncoding.UTF8.getCacheKey(),
             StringEncoding.UTF16LE.getCacheKey()

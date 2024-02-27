@@ -32,9 +32,10 @@ import org.apache.druid.query.aggregation.DoubleMaxAggregatorFactory;
 import org.apache.druid.query.aggregation.DoubleMinAggregatorFactory;
 import org.apache.druid.segment.TestHelper;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.AfterClass;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -42,35 +43,35 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+@RunWith(Parameterized.class)
 public class TopNUnionQueryTest extends InitializedNullHandlingTest
 {
   private static final Closer RESOURCE_CLOSER = Closer.create();
 
-  @AfterAll
+  @AfterClass
   public static void teardown() throws IOException
   {
     RESOURCE_CLOSER.close();
   }
 
+  @Parameterized.Parameters(name = "{0}")
   public static Iterable<Object[]> constructorFeeder()
   {
     return QueryRunnerTestHelper.transformToConstructionFeeder(TopNQueryRunnerTest.queryRunners());
   }
 
-  private QueryRunner runner;
+  private final QueryRunner runner;
 
-  public void initTopNUnionQueryTest(
+  public TopNUnionQueryTest(
       QueryRunner runner
   )
   {
     this.runner = runner;
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testTopNUnionQuery(QueryRunner runner)
+  @Test
+  public void testTopNUnionQuery()
   {
-    initTopNUnionQueryTest(runner);
     TopNQuery query = new TopNQueryBuilder()
         .dataSource(QueryRunnerTestHelper.UNION_DATA_SOURCE)
         .granularity(QueryRunnerTestHelper.ALL_GRAN)

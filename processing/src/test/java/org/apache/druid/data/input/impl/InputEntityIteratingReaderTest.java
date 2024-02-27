@@ -34,9 +34,10 @@ import org.apache.druid.java.util.common.DateTimes;
 import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.java.util.common.parsers.CloseableIterator;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,8 +52,8 @@ import java.util.List;
 
 public class InputEntityIteratingReaderTest extends InitializedNullHandlingTest
 {
-  @TempDir
-  public File temporaryFolder;
+  @Rule
+  public final TemporaryFolder temporaryFolder = new TemporaryFolder();
 
   @Test
   public void test() throws IOException
@@ -61,7 +62,7 @@ public class InputEntityIteratingReaderTest extends InitializedNullHandlingTest
     final List<File> files = new ArrayList<>();
     long totalFileSize = 0;
     for (int i = 0; i < numFiles; i++) {
-      final File file = File.createTempFile("test_" + i, null, temporaryFolder);
+      final File file = temporaryFolder.newFile("test_" + i);
       files.add(file);
       try (Writer writer = Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8)) {
         writer.write(StringUtils.format("%d,%s,%d\n", 20190101 + i, "name_" + i, i));
@@ -89,7 +90,7 @@ public class InputEntityIteratingReaderTest extends InitializedNullHandlingTest
             files.stream().flatMap(file -> ImmutableList.of(new FileEntity(file)).stream()).iterator()
         ),
         SystemFieldDecoratorFactory.NONE,
-        newFolder(temporaryFolder, "junit")
+        temporaryFolder.newFolder()
     );
 
     final InputStats inputStats = new InputStatsImpl();
@@ -97,19 +98,19 @@ public class InputEntityIteratingReaderTest extends InitializedNullHandlingTest
       int i = 0;
       while (iterator.hasNext()) {
         InputRow row = iterator.next();
-        Assertions.assertEquals(DateTimes.of(StringUtils.format("2019-01-%02d", i + 1)), row.getTimestamp());
-        Assertions.assertEquals(StringUtils.format("name_%d", i), Iterables.getOnlyElement(row.getDimension("name")));
-        Assertions.assertEquals(Integer.toString(i), Iterables.getOnlyElement(row.getDimension("score")));
+        Assert.assertEquals(DateTimes.of(StringUtils.format("2019-01-%02d", i + 1)), row.getTimestamp());
+        Assert.assertEquals(StringUtils.format("name_%d", i), Iterables.getOnlyElement(row.getDimension("name")));
+        Assert.assertEquals(Integer.toString(i), Iterables.getOnlyElement(row.getDimension("score")));
 
-        Assertions.assertTrue(iterator.hasNext());
+        Assert.assertTrue(iterator.hasNext());
         row = iterator.next();
-        Assertions.assertEquals(DateTimes.of(StringUtils.format("2019-01-%02d", i + 2)), row.getTimestamp());
-        Assertions.assertEquals(StringUtils.format("name_%d", i + 1), Iterables.getOnlyElement(row.getDimension("name")));
-        Assertions.assertEquals(Integer.toString(i + 1), Iterables.getOnlyElement(row.getDimension("score")));
+        Assert.assertEquals(DateTimes.of(StringUtils.format("2019-01-%02d", i + 2)), row.getTimestamp());
+        Assert.assertEquals(StringUtils.format("name_%d", i + 1), Iterables.getOnlyElement(row.getDimension("name")));
+        Assert.assertEquals(Integer.toString(i + 1), Iterables.getOnlyElement(row.getDimension("score")));
         i++;
       }
-      Assertions.assertEquals(numFiles, i);
-      Assertions.assertEquals(totalFileSize, inputStats.getProcessedBytes());
+      Assert.assertEquals(numFiles, i);
+      Assert.assertEquals(totalFileSize, inputStats.getProcessedBytes());
     }
   }
 
@@ -119,7 +120,7 @@ public class InputEntityIteratingReaderTest extends InitializedNullHandlingTest
     final int numFiles = 5;
     final List<File> files = new ArrayList<>();
     for (int i = 0; i < numFiles; i++) {
-      final File file = File.createTempFile("test_" + i, null, temporaryFolder);
+      final File file = temporaryFolder.newFile("test_" + i);
       files.add(file);
       try (Writer writer = Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8)) {
         writer.write(StringUtils.format("%d,%s,%d\n", 20190101 + i, "name_" + i, i));
@@ -128,7 +129,7 @@ public class InputEntityIteratingReaderTest extends InitializedNullHandlingTest
     }
 
     LocalInputSource inputSource = new LocalInputSource(
-        temporaryFolder,
+        temporaryFolder.getRoot(),
         "test_*",
         null,
         new SystemFields(EnumSet.of(SystemField.URI, SystemField.PATH)));
@@ -157,29 +158,29 @@ public class InputEntityIteratingReaderTest extends InitializedNullHandlingTest
             files.stream().flatMap(file -> ImmutableList.of(new FileEntity(file)).stream()).iterator()
         ),
         SystemFieldDecoratorFactory.fromInputSource(inputSource),
-        newFolder(temporaryFolder, "junit")
+        temporaryFolder.newFolder()
     );
 
     try (CloseableIterator<InputRowListPlusRawValues> iterator = reader.sample()) {
       int i = 0;
       while (iterator.hasNext()) {
         InputRow row = iterator.next().getInputRows().get(0);
-        Assertions.assertEquals(DateTimes.of(StringUtils.format("2019-01-%02d", i + 1)), row.getTimestamp());
-        Assertions.assertEquals(StringUtils.format("name_%d", i), Iterables.getOnlyElement(row.getDimension("name")));
-        Assertions.assertEquals(Integer.toString(i), Iterables.getOnlyElement(row.getDimension("score")));
-        Assertions.assertEquals(files.get(i).toURI().toString(), row.getDimension(SystemField.URI.getFieldName()).get(0));
-        Assertions.assertEquals(files.get(i).getAbsolutePath(), row.getDimension(SystemField.PATH.getFieldName()).get(0));
+        Assert.assertEquals(DateTimes.of(StringUtils.format("2019-01-%02d", i + 1)), row.getTimestamp());
+        Assert.assertEquals(StringUtils.format("name_%d", i), Iterables.getOnlyElement(row.getDimension("name")));
+        Assert.assertEquals(Integer.toString(i), Iterables.getOnlyElement(row.getDimension("score")));
+        Assert.assertEquals(files.get(i).toURI().toString(), row.getDimension(SystemField.URI.getFieldName()).get(0));
+        Assert.assertEquals(files.get(i).getAbsolutePath(), row.getDimension(SystemField.PATH.getFieldName()).get(0));
 
-        Assertions.assertTrue(iterator.hasNext());
+        Assert.assertTrue(iterator.hasNext());
         row = iterator.next().getInputRows().get(0);
-        Assertions.assertEquals(DateTimes.of(StringUtils.format("2019-01-%02d", i + 2)), row.getTimestamp());
-        Assertions.assertEquals(StringUtils.format("name_%d", i + 1), Iterables.getOnlyElement(row.getDimension("name")));
-        Assertions.assertEquals(Integer.toString(i + 1), Iterables.getOnlyElement(row.getDimension("score")));
-        Assertions.assertEquals(files.get(i).toURI().toString(), row.getDimension(SystemField.URI.getFieldName()).get(0));
-        Assertions.assertEquals(files.get(i).getAbsolutePath(), row.getDimension(SystemField.PATH.getFieldName()).get(0));
+        Assert.assertEquals(DateTimes.of(StringUtils.format("2019-01-%02d", i + 2)), row.getTimestamp());
+        Assert.assertEquals(StringUtils.format("name_%d", i + 1), Iterables.getOnlyElement(row.getDimension("name")));
+        Assert.assertEquals(Integer.toString(i + 1), Iterables.getOnlyElement(row.getDimension("score")));
+        Assert.assertEquals(files.get(i).toURI().toString(), row.getDimension(SystemField.URI.getFieldName()).get(0));
+        Assert.assertEquals(files.get(i).getAbsolutePath(), row.getDimension(SystemField.PATH.getFieldName()).get(0));
         i++;
       }
-      Assertions.assertEquals(numFiles, i);
+      Assert.assertEquals(numFiles, i);
     }
   }
 
@@ -216,22 +217,13 @@ public class InputEntityIteratingReaderTest extends InitializedNullHandlingTest
             ).iterator()
         ),
         SystemFieldDecoratorFactory.NONE,
-        newFolder(temporaryFolder, "junit")
+        temporaryFolder.newFolder()
     );
 
     try (CloseableIterator<InputRow> readIterator = firehose.read()) {
       String expectedMessage = "Error occurred while trying to read uri: testscheme://some/path";
-      Exception exception = Assertions.assertThrows(RuntimeException.class, readIterator::hasNext);
-      Assertions.assertTrue(exception.getMessage().contains(expectedMessage));
+      Exception exception = Assert.assertThrows(RuntimeException.class, readIterator::hasNext);
+      Assert.assertTrue(exception.getMessage().contains(expectedMessage));
     }
-  }
-
-  private static File newFolder(File root, String... subDirs) throws IOException {
-    String subFolder = String.join("/", subDirs);
-    File result = new File(root, subFolder);
-    if (!result.mkdirs()) {
-      throw new IOException("Couldn't create folders " + root);
-    }
-    return result;
   }
 }

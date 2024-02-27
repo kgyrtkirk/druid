@@ -29,10 +29,11 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.apache.druid.java.util.common.StringUtils;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.Assert;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -51,8 +52,10 @@ import java.util.concurrent.atomic.AtomicReference;
 
 
 // AbstractBenchmark makes this ignored unless explicitly run
+@RunWith(Parameterized.class)
 public class BenchmarkIndexibleWrites extends AbstractBenchmark
 {
+  @Parameterized.Parameters
   public static Collection<Object[]> getParameters()
   {
     return ImmutableList.of(
@@ -61,7 +64,7 @@ public class BenchmarkIndexibleWrites extends AbstractBenchmark
     );
   }
 
-  public void initBenchmarkIndexibleWrites(ConcurrentIndexible<Integer> concurrentIndexible)
+  public BenchmarkIndexibleWrites(ConcurrentIndexible<Integer> concurrentIndexible)
   {
     this.concurrentIndexible = concurrentIndexible;
   }
@@ -105,13 +108,13 @@ public class BenchmarkIndexibleWrites extends AbstractBenchmark
     private final AtomicLong resizeCount = new AtomicLong(0);
     private final Integer initSize;
 
-    public void initBenchmarkIndexibleWrites()
+    public ConcurrentExpandable()
     {
       this(INIT_SIZE);
     }
 
     @SuppressWarnings("unchecked")
-    public void initBenchmarkIndexibleWrites(Integer initSize)
+    public ConcurrentExpandable(Integer initSize)
     {
       reference.set((V[]) new Object[initSize]);
       this.initSize = initSize;
@@ -168,14 +171,12 @@ public class BenchmarkIndexibleWrites extends AbstractBenchmark
     }
   }
 
-  private ConcurrentIndexible<Integer> concurrentIndexible;
+  private final ConcurrentIndexible<Integer> concurrentIndexible;
   private final Integer concurrentThreads = 1 << 2;
   private final Integer totalIndexSize = 1 << 20;
 
   @BenchmarkOptions(warmupRounds = 100, benchmarkRounds = 100, clock = Clock.REAL_TIME, callgc = true)
-  @Disabled
-  @MethodSource("getParameters")
-  @ParameterizedTest
+  @Ignore @Test
   /**
    * CALLEN - 2015-01-15 - OSX - Java 1.7.0_71-b14
    BenchmarkIndexibleWrites.testConcurrentWrites[0]: [measured 100 out of 200 rounds, threads: 1 (sequential)]
@@ -183,9 +184,8 @@ public class BenchmarkIndexibleWrites extends AbstractBenchmark
    BenchmarkIndexibleWrites.testConcurrentWrites[1]: [measured 100 out of 200 rounds, threads: 1 (sequential)]
    round: 0.15 [+- 0.01], round.block: 0.00 [+- 0.00], round.gc: 0.02 [+- 0.00], GC.calls: 396, GC.time: 2.11, time.total: 33.14, time.warmup: 16.09, time.bench: 17.05
    */
-  public void testConcurrentWrites(ConcurrentIndexible<Integer> concurrentIndexible) throws ExecutionException, InterruptedException
+  public void testConcurrentWrites() throws ExecutionException, InterruptedException
   {
-    initBenchmarkIndexibleWrites(concurrentIndexible);
     final ListeningExecutorService executorService = MoreExecutors.listeningDecorator(
         Executors.newFixedThreadPool(
             concurrentThreads,
@@ -218,9 +218,9 @@ public class BenchmarkIndexibleWrites extends AbstractBenchmark
       );
     }
     Futures.allAsList(futures).get();
-    Assertions.assertTrue(index.get() >= totalIndexSize, StringUtils.format("Index too small %d, expected %d across %d loops", index.get(), totalIndexSize, loops));
+    Assert.assertTrue(StringUtils.format("Index too small %d, expected %d across %d loops", index.get(), totalIndexSize, loops), index.get() >= totalIndexSize);
     for (int i = 0; i < index.get(); ++i) {
-      Assertions.assertEquals(i, concurrentIndexible.get(i).intValue());
+      Assert.assertEquals(i, concurrentIndexible.get(i).intValue());
     }
     concurrentIndexible.clear();
     futures.clear();
@@ -235,12 +235,9 @@ public class BenchmarkIndexibleWrites extends AbstractBenchmark
 
    */
   @BenchmarkOptions(warmupRounds = 100, benchmarkRounds = 100, clock = Clock.REAL_TIME, callgc = true)
-  @Disabled
-  @MethodSource("getParameters")
-  @ParameterizedTest
-  public void testConcurrentReads(ConcurrentIndexible<Integer> concurrentIndexible) throws ExecutionException, InterruptedException
+  @Ignore @Test
+  public void testConcurrentReads() throws ExecutionException, InterruptedException
   {
-    initBenchmarkIndexibleWrites(concurrentIndexible);
     final ListeningExecutorService executorService = MoreExecutors.listeningDecorator(
         Executors.newFixedThreadPool(
             concurrentThreads,
@@ -277,7 +274,7 @@ public class BenchmarkIndexibleWrites extends AbstractBenchmark
                   final Random rndGen = ThreadLocalRandom.current();
                   while (!done.get()) {
                     Integer idx = rndGen.nextInt(queryableIndex.get() + 1);
-                    Assertions.assertEquals(idx, concurrentIndexible.get(idx));
+                    Assert.assertEquals(idx, concurrentIndexible.get(idx));
                   }
                 }
               }
@@ -300,9 +297,9 @@ public class BenchmarkIndexibleWrites extends AbstractBenchmark
     Futures.allAsList(futures).get();
     executorService.shutdown();
 
-    Assertions.assertTrue(index.get() >= totalIndexSize, StringUtils.format("Index too small %d, expected %d across %d loops", index.get(), totalIndexSize, loops));
+    Assert.assertTrue(StringUtils.format("Index too small %d, expected %d across %d loops", index.get(), totalIndexSize, loops), index.get() >= totalIndexSize);
     for (int i = 0; i < index.get(); ++i) {
-      Assertions.assertEquals(i, concurrentIndexible.get(i).intValue());
+      Assert.assertEquals(i, concurrentIndexible.get(i).intValue());
     }
     concurrentIndexible.clear();
     futures.clear();

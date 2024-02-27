@@ -26,10 +26,10 @@ import org.apache.druid.query.monomorphicprocessing.StringRuntimeShape;
 import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.virtual.ExpressionVirtualColumn;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,13 +40,13 @@ public class UnnestColumnValueSelectorCursorTest extends InitializedNullHandling
 {
   private static String OUTPUT_NAME = "unnested-column";
 
-  @BeforeAll
+  @BeforeClass
   public static void setUpClass()
   {
     NullHandling.initializeForTests();
   }
 
-  @AfterAll
+  @AfterClass
   public static void tearDownClass()
   {
   }
@@ -74,11 +74,11 @@ public class UnnestColumnValueSelectorCursorTest extends InitializedNullHandling
     int j = 0;
     while (!unnestCursor.isDone()) {
       Object colSelectorVal = unnestColumnValueSelector.getObject();
-      Assertions.assertEquals(String.valueOf(j), colSelectorVal.toString());
+      Assert.assertEquals(String.valueOf(j), colSelectorVal.toString());
       j++;
       unnestCursor.advance();
     }
-    Assertions.assertEquals(j, 4);
+    Assert.assertEquals(j, 4);
   }
 
   @Test
@@ -107,11 +107,11 @@ public class UnnestColumnValueSelectorCursorTest extends InitializedNullHandling
     int k = 0;
     while (!unnestCursor.isDone()) {
       Object valueSelectorVal = unnestColumnValueSelector.getObject();
-      Assertions.assertEquals(expectedResults.get(k), valueSelectorVal.toString());
+      Assert.assertEquals(expectedResults.get(k), valueSelectorVal.toString());
       k++;
       unnestCursor.advance();
     }
-    Assertions.assertEquals(k, 9);
+    Assert.assertEquals(k, 9);
   }
 
   @Test
@@ -139,13 +139,13 @@ public class UnnestColumnValueSelectorCursorTest extends InitializedNullHandling
     int k = 0;
     while (!unnestCursor.isDone()) {
       Object valueSelectorVal = unnestColumnValueSelector.getObject();
-      Assertions.assertNull(valueSelectorVal);
+      Assert.assertNull(valueSelectorVal);
       k++;
       unnestCursor.advance();
     }
     // since type is 'STRING', it follows multi-value string rules so single element arrays become scalar values,
     // so [null] becomes null, meaning we only have 2 rows
-    Assertions.assertEquals(k, 2);
+    Assert.assertEquals(k, 2);
   }
 
   @Test
@@ -173,13 +173,13 @@ public class UnnestColumnValueSelectorCursorTest extends InitializedNullHandling
     int k = 0;
     while (!unnestCursor.isDone()) {
       Object valueSelectorVal = unnestColumnValueSelector.getObject();
-      Assertions.assertNull(valueSelectorVal);
+      Assert.assertNull(valueSelectorVal);
       k++;
       unnestCursor.advance();
     }
     // since type is 'STRING', it follows multi-value string rules so single element arrays become scalar values,
     // so [null] becomes null, meaning we only have 2 rows
-    Assertions.assertEquals(k, 2);
+    Assert.assertEquals(k, 2);
   }
 
   @Test
@@ -207,11 +207,11 @@ public class UnnestColumnValueSelectorCursorTest extends InitializedNullHandling
     int k = 0;
     while (!unnestCursor.isDone()) {
       Object valueSelectorVal = unnestColumnValueSelector.getObject();
-      Assertions.assertNull(valueSelectorVal);
+      Assert.assertNull(valueSelectorVal);
       k++;
       unnestCursor.advance();
     }
-    Assertions.assertEquals(k, 4);
+    Assert.assertEquals(k, 4);
   }
 
   @Test
@@ -247,16 +247,16 @@ public class UnnestColumnValueSelectorCursorTest extends InitializedNullHandling
     while (!unnestCursor.isDone()) {
       Object valueSelectorVal = unnestColumnValueSelector.getObject();
       if (valueSelectorVal == null) {
-        Assertions.assertNull(expectedResults.get(k));
+        Assert.assertNull(expectedResults.get(k));
       } else {
-        Assertions.assertEquals(expectedResults.get(k), valueSelectorVal.toString());
+        Assert.assertEquals(expectedResults.get(k), valueSelectorVal.toString());
       }
       k++;
       unnestCursor.advance();
     }
     // since type is 'STRING', it follows multi-value string rules so single element arrays become scalar values,
     // so [null] becomes null, meaning we only have 7 rows
-    Assertions.assertEquals(k, 7);
+    Assert.assertEquals(k, 7);
   }
 
   @Test
@@ -292,14 +292,14 @@ public class UnnestColumnValueSelectorCursorTest extends InitializedNullHandling
     while (!unnestCursor.isDone()) {
       Object valueSelectorVal = unnestColumnValueSelector.getObject();
       if (valueSelectorVal == null) {
-        Assertions.assertNull(expectedResults.get(k));
+        Assert.assertNull(expectedResults.get(k));
       } else {
-        Assertions.assertEquals(expectedResults.get(k), valueSelectorVal.toString());
+        Assert.assertEquals(expectedResults.get(k), valueSelectorVal.toString());
       }
       k++;
       unnestCursor.advance();
     }
-    Assertions.assertEquals(k, 8);
+    Assert.assertEquals(k, 8);
   }
 
   @Test
@@ -324,11 +324,11 @@ public class UnnestColumnValueSelectorCursorTest extends InitializedNullHandling
     int k = 0;
     while (!unnestCursor.isDone()) {
       Object valueSelectorVal = unnestColumnValueSelector.getObject();
-      Assertions.assertEquals(expectedResults.get(k), valueSelectorVal.toString());
+      Assert.assertEquals(expectedResults.get(k), valueSelectorVal.toString());
       k++;
       unnestCursor.advance();
     }
-    Assertions.assertEquals(k, 9);
+    Assert.assertEquals(k, 9);
   }
 
   @Test
@@ -353,11 +353,11 @@ public class UnnestColumnValueSelectorCursorTest extends InitializedNullHandling
     int k = 0;
     while (!unnestCursor.isDone()) {
       Object valueSelectorVal = unnestColumnValueSelector.getObject();
-      Assertions.assertEquals(expectedResults.get(k), valueSelectorVal.toString());
+      Assert.assertEquals(expectedResults.get(k), valueSelectorVal.toString());
       k++;
       unnestCursor.advance();
     }
-    Assertions.assertEquals(k, 9);
+    Assert.assertEquals(k, 9);
   }
 
   @Test
@@ -387,11 +387,11 @@ public class UnnestColumnValueSelectorCursorTest extends InitializedNullHandling
     int k = 0;
     while (!unnestCursor.isDone()) {
       Object valueSelectorVal = unnestColumnValueSelector.getObject();
-      Assertions.assertEquals(expectedResults.get(k).toString(), valueSelectorVal.toString());
+      Assert.assertEquals(expectedResults.get(k).toString(), valueSelectorVal.toString());
       k++;
       unnestCursor.advance();
     }
-    Assertions.assertEquals(k, 10);
+    Assert.assertEquals(k, 10);
   }
 
   @Test
@@ -426,11 +426,11 @@ public class UnnestColumnValueSelectorCursorTest extends InitializedNullHandling
     int k = 0;
     while (!parentCursor.isDone()) {
       Object valueSelectorVal = unnestColumnValueSelector.getObject();
-      Assertions.assertEquals(expectedResults.get(k).toString(), valueSelectorVal.toString());
+      Assert.assertEquals(expectedResults.get(k).toString(), valueSelectorVal.toString());
       k++;
       parentCursor.advance();
     }
-    Assertions.assertEquals(k, 11);
+    Assert.assertEquals(k, 11);
   }
 
   @Test
@@ -461,14 +461,14 @@ public class UnnestColumnValueSelectorCursorTest extends InitializedNullHandling
     while (!unnestCursor.isDone()) {
       Object valueSelectorVal = unnestColumnValueSelector.getObject();
       if (valueSelectorVal == null) {
-        Assertions.assertEquals(null, expectedResults.get(k));
+        Assert.assertEquals(null, expectedResults.get(k));
       } else {
-        Assertions.assertEquals(expectedResults.get(k), valueSelectorVal.toString());
+        Assert.assertEquals(expectedResults.get(k), valueSelectorVal.toString());
       }
       k++;
       unnestCursor.advance();
     }
-    Assertions.assertEquals(expectedResults.size(), k);
+    Assert.assertEquals(expectedResults.size(), k);
   }
 
   @Test
@@ -498,14 +498,14 @@ public class UnnestColumnValueSelectorCursorTest extends InitializedNullHandling
     while (!unnestCursor.isDone()) {
       Object valueSelectorVal = unnestColumnValueSelector.getObject();
       if (valueSelectorVal == null) {
-        Assertions.assertEquals(null, expectedResults.get(k));
+        Assert.assertEquals(null, expectedResults.get(k));
       } else {
-        Assertions.assertEquals(expectedResults.get(k), valueSelectorVal.toString());
+        Assert.assertEquals(expectedResults.get(k), valueSelectorVal.toString());
       }
       k++;
       unnestCursor.advance();
     }
-    Assertions.assertEquals(k, 10);
+    Assert.assertEquals(k, 10);
   }
 
   @Test
@@ -534,11 +534,11 @@ public class UnnestColumnValueSelectorCursorTest extends InitializedNullHandling
     int k = 0;
     while (!unnestCursor.isDone()) {
       Double valueSelectorVal = unnestColumnValueSelector.getDouble();
-      Assertions.assertEquals(expectedResults.get(k), valueSelectorVal);
+      Assert.assertEquals(expectedResults.get(k), valueSelectorVal);
       k++;
       unnestCursor.advance();
     }
-    Assertions.assertEquals(k, 9);
+    Assert.assertEquals(k, 9);
   }
 
   @Test
@@ -567,11 +567,11 @@ public class UnnestColumnValueSelectorCursorTest extends InitializedNullHandling
     int k = 0;
     while (!unnestCursor.isDone()) {
       Float valueSelectorVal = unnestColumnValueSelector.getFloat();
-      Assertions.assertEquals(expectedResults.get(k), valueSelectorVal);
+      Assert.assertEquals(expectedResults.get(k), valueSelectorVal);
       k++;
       unnestCursor.advance();
     }
-    Assertions.assertEquals(k, 9);
+    Assert.assertEquals(k, 9);
   }
 
   @Test
@@ -601,13 +601,13 @@ public class UnnestColumnValueSelectorCursorTest extends InitializedNullHandling
     int k = 0;
     while (!unnestCursor.isDone()) {
       Object obj = unnestColumnValueSelector.getObject();
-      Assertions.assertNotNull(obj);
+      Assert.assertNotNull(obj);
       Long valueSelectorVal = unnestColumnValueSelector.getLong();
-      Assertions.assertEquals(expectedResults.get(k), valueSelectorVal);
+      Assert.assertEquals(expectedResults.get(k), valueSelectorVal);
       k++;
       unnestCursor.advance();
     }
-    Assertions.assertEquals(k, 9);
+    Assert.assertEquals(k, 9);
   }
 
   @Test
@@ -637,13 +637,13 @@ public class UnnestColumnValueSelectorCursorTest extends InitializedNullHandling
     int k = 0;
     while (!unnestCursor.isDone()) {
       Object valueSelectorVal = unnestColumnValueSelector.getObject();
-      Assertions.assertEquals(expectedResults.get(k).toString(), valueSelectorVal.toString());
+      Assert.assertEquals(expectedResults.get(k).toString(), valueSelectorVal.toString());
       k++;
       unnestCursor.advance();
     }
-    Assertions.assertEquals(k, 10);
+    Assert.assertEquals(k, 10);
     unnestCursor.reset();
-    Assertions.assertFalse(unnestCursor.isDoneOrInterrupted());
+    Assert.assertFalse(unnestCursor.isDoneOrInterrupted());
   }
 
   @Test
@@ -675,16 +675,16 @@ public class UnnestColumnValueSelectorCursorTest extends InitializedNullHandling
     int k = 0;
     while (!unnestCursor.isDone()) {
       if (k < 8) {
-        Assertions.assertEquals(expectedResults.get(k).toString(), unnestDimSelector.getValue());
+        Assert.assertEquals(expectedResults.get(k).toString(), unnestDimSelector.getValue());
       } else {
-        Assertions.assertNull(unnestDimSelector.getValue());
+        Assert.assertNull(unnestDimSelector.getValue());
       }
       k++;
       unnestCursor.advance();
     }
-    Assertions.assertEquals(k, 8);
+    Assert.assertEquals(k, 8);
     unnestCursor.reset();
-    Assertions.assertNotNull(unnestDimSelector);
+    Assert.assertNotNull(unnestDimSelector);
   }
 
   @Test
@@ -713,11 +713,11 @@ public class UnnestColumnValueSelectorCursorTest extends InitializedNullHandling
     int k = 0;
     while (!unnestCursor.isDone()) {
       Object valueSelectorVal = unnestColumnValueSelector.getObject();
-      Assertions.assertEquals(expectedResults.get(k).toString(), valueSelectorVal.toString());
+      Assert.assertEquals(expectedResults.get(k).toString(), valueSelectorVal.toString());
       k++;
       unnestCursor.advance();
     }
-    Assertions.assertEquals(k, 9);
+    Assert.assertEquals(k, 9);
   }
 }
 

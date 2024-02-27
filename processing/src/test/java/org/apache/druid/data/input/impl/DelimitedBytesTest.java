@@ -22,8 +22,8 @@ package org.apache.druid.data.input.impl;
 import org.apache.druid.common.config.NullHandling;
 import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -35,7 +35,7 @@ public class DelimitedBytesTest extends InitializedNullHandlingTest
   @Test
   public void testEmpty()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Collections.singletonList(NullHandling.sqlCompatible() ? null : ""),
         DelimitedBytes.split(new byte[0], TSV, DelimitedBytes.UNKNOWN_FIELD_COUNT)
     );
@@ -44,7 +44,7 @@ public class DelimitedBytesTest extends InitializedNullHandlingTest
   @Test
   public void testNoDelimiter()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Collections.singletonList("abc"),
         DelimitedBytes.split(StringUtils.toUtf8("abc"), TSV, DelimitedBytes.UNKNOWN_FIELD_COUNT)
     );
@@ -53,7 +53,7 @@ public class DelimitedBytesTest extends InitializedNullHandlingTest
   @Test
   public void testOneDelimiter()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Arrays.asList("a", "bc"),
         DelimitedBytes.split(StringUtils.toUtf8("a\tbc"), TSV, DelimitedBytes.UNKNOWN_FIELD_COUNT)
     );
@@ -62,7 +62,7 @@ public class DelimitedBytesTest extends InitializedNullHandlingTest
   @Test
   public void testDelimiterAtStart()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Arrays.asList(NullHandling.sqlCompatible() ? null : "", "abc"),
         DelimitedBytes.split(StringUtils.toUtf8("\tabc"), TSV, DelimitedBytes.UNKNOWN_FIELD_COUNT)
     );
@@ -71,7 +71,7 @@ public class DelimitedBytesTest extends InitializedNullHandlingTest
   @Test
   public void testDelimiterAtEnd()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Arrays.asList("a", "bc", NullHandling.sqlCompatible() ? null : ""),
         DelimitedBytes.split(StringUtils.toUtf8("a\tbc\t"), TSV, DelimitedBytes.UNKNOWN_FIELD_COUNT)
     );
@@ -80,7 +80,7 @@ public class DelimitedBytesTest extends InitializedNullHandlingTest
   @Test
   public void testMoreFieldsThanHint()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Arrays.asList("a", "b", "c"),
         DelimitedBytes.split(StringUtils.toUtf8("a\tb\tc"), TSV, 1)
     );

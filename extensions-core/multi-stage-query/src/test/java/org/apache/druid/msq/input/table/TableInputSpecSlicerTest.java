@@ -32,6 +32,7 @@ import org.apache.druid.timeline.partition.DimensionRangeShardSpec;
 import org.apache.druid.timeline.partition.TombstoneShardSpec;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Test;
 
 import java.util.Collections;
 import java.util.Optional;

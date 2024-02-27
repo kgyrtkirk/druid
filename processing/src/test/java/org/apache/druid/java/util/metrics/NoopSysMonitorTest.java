@@ -20,9 +20,9 @@
 package org.apache.druid.java.util.metrics;
 
 import org.apache.druid.java.util.emitter.service.ServiceEmitter;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Assume;
+import org.junit.Test;
 import org.mockito.Mockito;
 
 public class NoopSysMonitorTest
@@ -32,11 +32,11 @@ public class NoopSysMonitorTest
   @Test
   public void testDoMonitor()
   {
-    Assumptions.assumeFalse("aarch64".equals(CPU_ARCH));
+    Assume.assumeFalse("aarch64".equals(CPU_ARCH));
 
     ServiceEmitter serviceEmitter = Mockito.mock(ServiceEmitter.class);
     NoopSysMonitor noopSysMonitor = new NoopSysMonitor();
 
-    Assertions.assertFalse(noopSysMonitor.doMonitor(serviceEmitter));
+    Assert.assertFalse(noopSysMonitor.doMonitor(serviceEmitter));
   }
 }

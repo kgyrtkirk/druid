@@ -31,10 +31,11 @@ import org.apache.druid.guice.GuiceAnnotationIntrospector;
 import org.apache.druid.guice.GuiceInjectableValues;
 import org.apache.druid.guice.GuiceInjectors;
 import org.apache.druid.jackson.DefaultObjectMapper;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -42,8 +43,10 @@ import java.util.Collection;
 /**
  *
  */
+@RunWith(Parameterized.class)
 public class LoadSpecTest
 {
+  @Parameterized.Parameters
   public static Collection<Object[]> getParameters()
   {
     return ImmutableList.of(
@@ -51,10 +54,10 @@ public class LoadSpecTest
     );
   }
 
-  private String value;
-  private String expectedId;
+  private final String value;
+  private final String expectedId;
 
-  public void initLoadSpecTest(String value, String expectedId)
+  public LoadSpecTest(String value, String expectedId)
   {
     this.value = value;
     this.expectedId = expectedId;
@@ -62,7 +65,7 @@ public class LoadSpecTest
 
   private static ObjectMapper mapper;
 
-  @BeforeAll
+  @BeforeClass
   public static void setUp()
   {
     final Injector injector = GuiceInjectors.makeStartupInjectorWithModules(
@@ -88,12 +91,10 @@ public class LoadSpecTest
     );
   }
 
-  @MethodSource("getParameters")
-  @ParameterizedTest
-  public void testStringResolve(String value, String expectedId) throws IOException
+  @Test
+  public void testStringResolve() throws IOException
   {
-    initLoadSpecTest(value, expectedId);
     LoadSpec loadSpec = mapper.readValue(value, LoadSpec.class);
-    Assertions.assertEquals(expectedId, loadSpec.getClass().getAnnotation(JsonTypeName.class).value());
+    Assert.assertEquals(expectedId, loadSpec.getClass().getAnnotation(JsonTypeName.class).value());
   }
 }

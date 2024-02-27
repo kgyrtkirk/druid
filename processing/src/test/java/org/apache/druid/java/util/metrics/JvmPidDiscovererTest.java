@@ -19,14 +19,14 @@
 
 package org.apache.druid.java.util.metrics;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class JvmPidDiscovererTest
 {
   @Test
   public void getPid()
   {
-    Assertions.assertNotNull(JvmPidDiscoverer.instance().getPid());
+    Assert.assertNotNull(JvmPidDiscoverer.instance().getPid());
   }
 }

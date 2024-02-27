@@ -27,10 +27,10 @@ import org.apache.druid.segment.StorageAdapter;
 import org.apache.druid.timeline.DataSegment;
 import org.apache.druid.timeline.partition.TombstoneShardSpec;
 import org.joda.time.Interval;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.Assert.assertThrows;
 
 public class TombstoneSegmentizerFactoryTest
 {
@@ -50,12 +50,12 @@ public class TombstoneSegmentizerFactoryTest
         .build();
 
     Segment segment = factory.factorize(tombstone, null, true, null);
-    Assertions.assertNotNull(segment.asStorageAdapter());
-    Assertions.assertEquals("foo_2021-01-01T00:00:00.000Z_2022-01-01T00:00:00.000Z_1", segment.getId().toString());
-    Assertions.assertEquals(expectedInterval, segment.getDataInterval());
+    Assert.assertNotNull(segment.asStorageAdapter());
+    Assert.assertEquals("foo_2021-01-01T00:00:00.000Z_2022-01-01T00:00:00.000Z_1", segment.getId().toString());
+    Assert.assertEquals(expectedInterval, segment.getDataInterval());
 
     QueryableIndex queryableIndex = segment.asQueryableIndex();
-    Assertions.assertNotNull(queryableIndex);
+    Assert.assertNotNull(queryableIndex);
     assertThrows(UnsupportedOperationException.class, queryableIndex::getNumRows);
     assertThrows(UnsupportedOperationException.class, queryableIndex::getAvailableDimensions);
     assertThrows(UnsupportedOperationException.class, queryableIndex::getBitmapFactoryForDimensions);
@@ -65,8 +65,8 @@ public class TombstoneSegmentizerFactoryTest
     assertThrows(UnsupportedOperationException.class, () -> queryableIndex.getColumnHolder(null));
 
     StorageAdapter storageAdapter = segment.asStorageAdapter();
-    Assertions.assertNotNull(storageAdapter);
-    Assertions.assertTrue(storageAdapter.isFromTombstone());
+    Assert.assertNotNull(storageAdapter);
+    Assert.assertTrue(storageAdapter.isFromTombstone());
 
   }
 }

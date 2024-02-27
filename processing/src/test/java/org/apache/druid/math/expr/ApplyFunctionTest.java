@@ -22,17 +22,20 @@ package org.apache.druid.math.expr;
 import com.google.common.collect.ImmutableMap;
 import org.apache.druid.common.config.NullHandling;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public class ApplyFunctionTest extends InitializedNullHandlingTest
 {
   private Expr.ObjectBinding bindings;
 
-  @BeforeEach
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
+
+  @Before
   public void setup()
   {
     ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
@@ -139,84 +142,76 @@ public class ApplyFunctionTest extends InitializedNullHandlingTest
   @Test
   public void testInvalidArgCountFold()
   {
-    Throwable exception = assertThrows(ExpressionValidationException.class, () -> {
-      assertExpr("fold((x, y) -> x + 1, [1, 1, 1, 1, 1])", null);
-    });
-    assertTrue(exception.getMessage().contains("Function[fold] requires 3 arguments"));
+    expectedException.expect(ExpressionValidationException.class);
+    expectedException.expectMessage("Function[fold] requires 3 arguments");
+    assertExpr("fold((x, y) -> x + 1, [1, 1, 1, 1, 1])", null);
   }
 
   @Test
   public void testInvalidArgCountFoldLambda()
   {
-    Throwable exception = assertThrows(ExpressionValidationException.class, () -> {
-      assertExpr("fold(() -> 1, [1, 1, 1, 1, 1], 0)", null);
-
-    });
-    assertTrue(exception.getMessage().contains("Function[fold] lambda expression argument count of 0 does not match the 2 arguments passed to it"));
+    expectedException.expect(ExpressionValidationException.class);
+    expectedException.expectMessage("Function[fold] lambda expression argument count of 0 does not match the 2 arguments passed to it");
+    assertExpr("fold(() -> 1, [1, 1, 1, 1, 1], 0)", null);
 
   }
 
   @Test
   public void testInvalidArgCountCartesianFoldLambda()
   {
-    Throwable exception = assertThrows(ExpressionValidationException.class, () -> {
-      assertExpr("cartesian_fold(() -> 1, [1, 1, 1, 1, 1], [1, 1], 0)", null);
-    });
-    assertTrue(exception.getMessage().contains("Function[cartesian_fold] lambda expression argument count of 0 does not match the 3 arguments passed to it"));
+    expectedException.expect(ExpressionValidationException.class);
+    expectedException.expectMessage("Function[cartesian_fold] lambda expression argument count of 0 does not match the 3 arguments passed to it");
+    assertExpr("cartesian_fold(() -> 1, [1, 1, 1, 1, 1], [1, 1], 0)", null);
   }
 
   @Test
   public void testInvalidArgCountAny()
   {
-    Throwable exception = assertThrows(ExpressionValidationException.class, () -> {
-      assertExpr("any((x) -> 1, [1, 2, 3, 4], y)", null);
-    });
-    assertTrue(exception.getMessage().contains("Function[any] requires 2 arguments"));
+    expectedException.expect(ExpressionValidationException.class);
+    expectedException.expectMessage("Function[any] requires 2 arguments");
+    assertExpr("any((x) -> 1, [1, 2, 3, 4], y)", null);
   }
 
   @Test
   public void testInvalidArgCountAnyLambda()
   {
-    Throwable exception = assertThrows(ExpressionValidationException.class, () -> {
-      assertExpr("any(() -> 1, [1, 2, 3, 4])", null);
-    });
-    assertTrue(exception.getMessage().contains("Function[any] lambda expression argument count of 0 does not match the 1 arguments passed to it"));
+    expectedException.expect(ExpressionValidationException.class);
+    expectedException.expectMessage("Function[any] lambda expression argument count of 0 does not match the 1 arguments passed to it");
+    assertExpr("any(() -> 1, [1, 2, 3, 4])", null);
   }
 
   @Test
   public void testInvalidArgCountAll()
   {
-    Throwable exception = assertThrows(ExpressionValidationException.class, () -> {
-      assertExpr("all((x) -> 0, [1, 2, 3, 4], y)", null);
-    });
-    assertTrue(exception.getMessage().contains("Function[all] requires 2 arguments"));
+    expectedException.expect(ExpressionValidationException.class);
+    expectedException.expectMessage("Function[all] requires 2 arguments");
+    assertExpr("all((x) -> 0, [1, 2, 3, 4], y)", null);
   }
 
   @Test
   public void testInvalidArgCountAllLambda()
   {
-    Throwable exception = assertThrows(ExpressionValidationException.class, () -> {
-      assertExpr("all(() -> 0, [1, 2, 3, 4])", null);
-    });
-    assertTrue(exception.getMessage().contains("Function[all] lambda expression argument count of 0 does not match the 1 arguments passed to it"));
+    expectedException.expect(ExpressionValidationException.class);
+    expectedException.expectMessage("Function[all] lambda expression argument count of 0 does not match the 1 arguments passed to it");
+    assertExpr("all(() -> 0, [1, 2, 3, 4])", null);
   }
 
   private void assertExpr(final String expression, final Object expectedResult)
   {
     final Expr expr = Parser.parse(expression, ExprMacroTable.nil());
-    Assertions.assertEquals(expectedResult, expr.eval(bindings).value(), expression);
+    Assert.assertEquals(expression, expectedResult, expr.eval(bindings).value());
 
     final Expr exprNoFlatten = Parser.parse(expression, ExprMacroTable.nil(), false);
     final Expr roundTrip = Parser.parse(exprNoFlatten.stringify(), ExprMacroTable.nil());
-    Assertions.assertEquals(expectedResult, roundTrip.eval(bindings).value(), expr.stringify());
+    Assert.assertEquals(expr.stringify(), expectedResult, roundTrip.eval(bindings).value());
 
     final Expr roundTripFlatten = Parser.parse(expr.stringify(), ExprMacroTable.nil());
-    Assertions.assertEquals(expectedResult, roundTripFlatten.eval(bindings).value(), expr.stringify());
+    Assert.assertEquals(expr.stringify(), expectedResult, roundTripFlatten.eval(bindings).value());
 
-    Assertions.assertEquals(expr.stringify(), roundTrip.stringify());
-    Assertions.assertEquals(expr.stringify(), roundTripFlatten.stringify());
-    Assertions.assertArrayEquals(expr.getCacheKey(), roundTrip.getCacheKey());
-    Assertions.assertArrayEquals(expr.getCacheKey(), roundTripFlatten.getCacheKey());
+    Assert.assertEquals(expr.stringify(), roundTrip.stringify());
+    Assert.assertEquals(expr.stringify(), roundTripFlatten.stringify());
+    Assert.assertArrayEquals(expr.getCacheKey(), roundTrip.getCacheKey());
+    Assert.assertArrayEquals(expr.getCacheKey(), roundTripFlatten.getCacheKey());
   }
 
   private void assertExpr(final String expression, final Object[] expectedResult)
@@ -224,55 +219,55 @@ public class ApplyFunctionTest extends InitializedNullHandlingTest
     final Expr expr = Parser.parse(expression, ExprMacroTable.nil());
     final Object[] result = expr.eval(bindings).asArray();
     if (expectedResult.length != 0 || result == null || result.length != 0) {
-      Assertions.assertArrayEquals(expectedResult, result, expression);
+      Assert.assertArrayEquals(expression, expectedResult, result);
     }
 
     final Expr exprNoFlatten = Parser.parse(expression, ExprMacroTable.nil(), false);
     final Expr roundTrip = Parser.parse(exprNoFlatten.stringify(), ExprMacroTable.nil());
     final Object[] resultRoundTrip = roundTrip.eval(bindings).asArray();
     if (expectedResult.length != 0 || resultRoundTrip == null || resultRoundTrip.length != 0) {
-      Assertions.assertArrayEquals(expectedResult, resultRoundTrip, expr.stringify());
+      Assert.assertArrayEquals(expr.stringify(), expectedResult, resultRoundTrip);
     }
 
     final Expr roundTripFlatten = Parser.parse(expr.stringify(), ExprMacroTable.nil());
     final Object[] resultRoundTripFlatten = roundTripFlatten.eval(bindings).asArray();
     if (expectedResult.length != 0 || resultRoundTripFlatten == null || resultRoundTripFlatten.length != 0) {
-      Assertions.assertArrayEquals(expectedResult, resultRoundTripFlatten, expr.stringify());
+      Assert.assertArrayEquals(expr.stringify(), expectedResult, resultRoundTripFlatten);
     }
 
-    Assertions.assertEquals(expr.stringify(), roundTrip.stringify());
-    Assertions.assertEquals(expr.stringify(), roundTripFlatten.stringify());
-    Assertions.assertArrayEquals(expr.getCacheKey(), roundTrip.getCacheKey());
-    Assertions.assertArrayEquals(expr.getCacheKey(), roundTripFlatten.getCacheKey());
+    Assert.assertEquals(expr.stringify(), roundTrip.stringify());
+    Assert.assertEquals(expr.stringify(), roundTripFlatten.stringify());
+    Assert.assertArrayEquals(expr.getCacheKey(), roundTrip.getCacheKey());
+    Assert.assertArrayEquals(expr.getCacheKey(), roundTripFlatten.getCacheKey());
   }
 
   private void assertExpr(final String expression, final Double[] expectedResult)
   {
     final Expr expr = Parser.parse(expression, ExprMacroTable.nil());
     Object[] result = expr.eval(bindings).asArray();
-    Assertions.assertEquals(expectedResult.length, result.length);
+    Assert.assertEquals(expectedResult.length, result.length);
     for (int i = 0; i < result.length; i++) {
-      Assertions.assertEquals(expectedResult[i], (Double) result[i], 0.00001, expression); // something is lame somewhere..
+      Assert.assertEquals(expression, expectedResult[i], (Double) result[i], 0.00001); // something is lame somewhere..
     }
 
     final Expr exprNoFlatten = Parser.parse(expression, ExprMacroTable.nil(), false);
     final Expr roundTrip = Parser.parse(exprNoFlatten.stringify(), ExprMacroTable.nil());
     Object[] resultRoundTrip = (Object[]) roundTrip.eval(bindings).value();
-    Assertions.assertEquals(expectedResult.length, resultRoundTrip.length);
+    Assert.assertEquals(expectedResult.length, resultRoundTrip.length);
     for (int i = 0; i < resultRoundTrip.length; i++) {
-      Assertions.assertEquals(expectedResult[i], (Double) resultRoundTrip[i], 0.00001, expression);
+      Assert.assertEquals(expression, expectedResult[i], (Double) resultRoundTrip[i], 0.00001);
     }
 
     final Expr roundTripFlatten = Parser.parse(expr.stringify(), ExprMacroTable.nil());
     Object[] resultRoundTripFlatten = (Object[]) roundTripFlatten.eval(bindings).value();
-    Assertions.assertEquals(expectedResult.length, resultRoundTripFlatten.length);
+    Assert.assertEquals(expectedResult.length, resultRoundTripFlatten.length);
     for (int i = 0; i < resultRoundTripFlatten.length; i++) {
-      Assertions.assertEquals(expectedResult[i], (Double) resultRoundTripFlatten[i], 0.00001, expression);
+      Assert.assertEquals(expression, expectedResult[i], (Double) resultRoundTripFlatten[i], 0.00001);
     }
 
-    Assertions.assertEquals(expr.stringify(), roundTrip.stringify());
-    Assertions.assertEquals(expr.stringify(), roundTripFlatten.stringify());
-    Assertions.assertArrayEquals(expr.getCacheKey(), roundTrip.getCacheKey());
-    Assertions.assertArrayEquals(expr.getCacheKey(), roundTripFlatten.getCacheKey());
+    Assert.assertEquals(expr.stringify(), roundTrip.stringify());
+    Assert.assertEquals(expr.stringify(), roundTripFlatten.stringify());
+    Assert.assertArrayEquals(expr.getCacheKey(), roundTrip.getCacheKey());
+    Assert.assertArrayEquals(expr.getCacheKey(), roundTripFlatten.getCacheKey());
   }
 }

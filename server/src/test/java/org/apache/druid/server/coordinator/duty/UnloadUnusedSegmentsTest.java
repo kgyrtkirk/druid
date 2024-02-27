@@ -44,10 +44,10 @@ import org.apache.druid.timeline.partition.NoneShardSpec;
 import org.easymock.EasyMock;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -75,7 +75,7 @@ public class UnloadUnusedSegmentsTest
   private MetadataRuleManager databaseRuleManager;
   private SegmentLoadQueueManager loadQueueManager;
 
-  @BeforeEach
+  @Before
   public void setUp()
   {
     coordinator = EasyMock.createMock(DruidCoordinator.class);
@@ -177,7 +177,7 @@ public class UnloadUnusedSegmentsTest
     dataSourcesForRealtime = ImmutableList.of(dataSource2ForRealtime, broadcastDatasource);
   }
 
-  @AfterEach
+  @After
   public void tearDown()
   {
     EasyMock.verify(coordinator);
@@ -268,11 +268,11 @@ public class UnloadUnusedSegmentsTest
     CoordinatorRunStats stats = params.getCoordinatorStats();
 
     // We drop segment1 and broadcast1 from all servers, realtimeSegment is not dropped by the indexer
-    Assertions.assertEquals(2L, stats.getSegmentStat(Stats.Segments.UNNEEDED, DruidServer.DEFAULT_TIER, segment1.getDataSource()));
-    Assertions.assertEquals(1L, stats.getSegmentStat(Stats.Segments.UNNEEDED, "tier2", segment1.getDataSource()));
+    Assert.assertEquals(2L, stats.getSegmentStat(Stats.Segments.UNNEEDED, DruidServer.DEFAULT_TIER, segment1.getDataSource()));
+    Assert.assertEquals(1L, stats.getSegmentStat(Stats.Segments.UNNEEDED, "tier2", segment1.getDataSource()));
 
-    Assertions.assertEquals(3L, stats.getSegmentStat(Stats.Segments.UNNEEDED, DruidServer.DEFAULT_TIER, broadcastDatasource));
-    Assertions.assertEquals(1L, stats.getSegmentStat(Stats.Segments.UNNEEDED, "tier2", broadcastDatasource));
+    Assert.assertEquals(3L, stats.getSegmentStat(Stats.Segments.UNNEEDED, DruidServer.DEFAULT_TIER, broadcastDatasource));
+    Assert.assertEquals(1L, stats.getSegmentStat(Stats.Segments.UNNEEDED, "tier2", broadcastDatasource));
   }
 
   private static void mockDruidServer(

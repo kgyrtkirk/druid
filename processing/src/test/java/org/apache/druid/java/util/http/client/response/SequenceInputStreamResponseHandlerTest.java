@@ -25,10 +25,10 @@ import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.HttpVersion;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -38,8 +38,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Random;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 public class SequenceInputStreamResponseHandlerTest
 {
   private static final int TOTAL_BYTES = 1 << 10;
@@ -47,7 +45,7 @@ public class SequenceInputStreamResponseHandlerTest
   private static final Random RANDOM = new Random(378134789L);
   private static byte[] allBytes = new byte[TOTAL_BYTES];
 
-  @BeforeAll
+  @BeforeClass
   public static void setUp()
   {
     final ByteBuffer buffer = ByteBuffer.wrap(allBytes);
@@ -59,7 +57,7 @@ public class SequenceInputStreamResponseHandlerTest
     }
   }
 
-  @AfterAll
+  @AfterClass
   public static void tearDown()
   {
     BYTE_LIST.clear();
@@ -78,73 +76,69 @@ public class SequenceInputStreamResponseHandlerTest
     }
   }
 
-  @Test
+  @Test(expected = TesterException.class)
   public void testExceptionalChunkedStream() throws IOException
   {
-    assertThrows(TesterException.class, () -> {
-      Iterator<byte[]> it = BYTE_LIST.iterator();
+    Iterator<byte[]> it = BYTE_LIST.iterator();
 
-      SequenceInputStreamResponseHandler responseHandler = new SequenceInputStreamResponseHandler();
-      final HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
-      response.setChunked(true);
-      ClientResponse<InputStream> clientResponse = responseHandler.handleResponse(response, null);
-      final int failAt = RANDOM.nextInt(allBytes.length);
-      long chunkNum = 0;
-      while (it.hasNext()) {
-        final DefaultHttpChunk chunk = new DefaultHttpChunk(
-            new BigEndianHeapChannelBuffer(it.next())
-            {
-              @Override
-              public void getBytes(int index, byte[] dst, int dstIndex, int length)
-              {
-                if (dstIndex + length >= failAt) {
-                  throw new TesterException();
-                }
-                super.getBytes(index, dst, dstIndex, length);
-              }
-            }
-        );
-        clientResponse = responseHandler.handleChunk(clientResponse, chunk, ++chunkNum);
-      }
-      clientResponse = responseHandler.done(clientResponse);
-
-      final InputStream stream = clientResponse.getObj();
-      final byte[] buff = new byte[allBytes.length];
-      fillBuff(stream, buff);
-    });
-  }
-
-  public static class TesterException extends RuntimeException
-  {
-  }
-
-  @Test
-  public void testExceptionalSingleStream() throws IOException
-  {
-    assertThrows(TesterException.class, () -> {
-      SequenceInputStreamResponseHandler responseHandler = new SequenceInputStreamResponseHandler();
-      final HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
-      response.setChunked(false);
-      response.setContent(
-          new BigEndianHeapChannelBuffer(allBytes)
+    SequenceInputStreamResponseHandler responseHandler = new SequenceInputStreamResponseHandler();
+    final HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+    response.setChunked(true);
+    ClientResponse<InputStream> clientResponse = responseHandler.handleResponse(response, null);
+    final int failAt = RANDOM.nextInt(allBytes.length);
+    long chunkNum = 0;
+    while (it.hasNext()) {
+      final DefaultHttpChunk chunk = new DefaultHttpChunk(
+          new BigEndianHeapChannelBuffer(it.next())
           {
             @Override
             public void getBytes(int index, byte[] dst, int dstIndex, int length)
             {
-              if (dstIndex + length >= allBytes.length) {
+              if (dstIndex + length >= failAt) {
                 throw new TesterException();
               }
               super.getBytes(index, dst, dstIndex, length);
             }
           }
       );
-      ClientResponse<InputStream> clientResponse = responseHandler.handleResponse(response, null);
-      clientResponse = responseHandler.done(clientResponse);
+      clientResponse = responseHandler.handleChunk(clientResponse, chunk, ++chunkNum);
+    }
+    clientResponse = responseHandler.done(clientResponse);
 
-      final InputStream stream = clientResponse.getObj();
-      final byte[] buff = new byte[allBytes.length];
-      fillBuff(stream, buff);
-    });
+    final InputStream stream = clientResponse.getObj();
+    final byte[] buff = new byte[allBytes.length];
+    fillBuff(stream, buff);
+  }
+
+  public static class TesterException extends RuntimeException
+  {
+  }
+
+  @Test(expected = TesterException.class)
+  public void testExceptionalSingleStream() throws IOException
+  {
+    SequenceInputStreamResponseHandler responseHandler = new SequenceInputStreamResponseHandler();
+    final HttpResponse response = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+    response.setChunked(false);
+    response.setContent(
+        new BigEndianHeapChannelBuffer(allBytes)
+        {
+          @Override
+          public void getBytes(int index, byte[] dst, int dstIndex, int length)
+          {
+            if (dstIndex + length >= allBytes.length) {
+              throw new TesterException();
+            }
+            super.getBytes(index, dst, dstIndex, length);
+          }
+        }
+    );
+    ClientResponse<InputStream> clientResponse = responseHandler.handleResponse(response, null);
+    clientResponse = responseHandler.done(clientResponse);
+
+    final InputStream stream = clientResponse.getObj();
+    final byte[] buff = new byte[allBytes.length];
+    fillBuff(stream, buff);
   }
 
   @Test
@@ -171,10 +165,10 @@ public class SequenceInputStreamResponseHandlerTest
       final byte[] actualBytes = new byte[expectedBytes.length];
       fillBuff(stream, actualBytes);
       fillBuff(expectedStream, expectedBytes);
-      Assertions.assertArrayEquals(expectedBytes, actualBytes);
+      Assert.assertArrayEquals(expectedBytes, actualBytes);
       read += expectedBytes.length;
     }
-    Assertions.assertEquals(allBytes.length, responseHandler.getByteCount());
+    Assert.assertEquals(allBytes.length, responseHandler.getByteCount());
   }
 
 
@@ -202,10 +196,10 @@ public class SequenceInputStreamResponseHandlerTest
       final byte[] actualBytes = new byte[expectedBytes.length];
       fillBuff(stream, actualBytes);
       fillBuff(expectedStream, expectedBytes);
-      Assertions.assertArrayEquals(expectedBytes, actualBytes);
-      Assertions.assertArrayEquals(expectedBytes, bytes);
+      Assert.assertArrayEquals(expectedBytes, actualBytes);
+      Assert.assertArrayEquals(expectedBytes, bytes);
     }
-    Assertions.assertEquals(allBytes.length, responseHandler.getByteCount());
+    Assert.assertEquals(allBytes.length, responseHandler.getByteCount());
   }
 
   @Test
@@ -226,10 +220,10 @@ public class SequenceInputStreamResponseHandlerTest
       final byte[] actualBytes = new byte[expectedBytes.length];
       fillBuff(stream, actualBytes);
       fillBuff(expectedStream, expectedBytes);
-      Assertions.assertArrayEquals(expectedBytes, actualBytes);
+      Assert.assertArrayEquals(expectedBytes, actualBytes);
       read += expectedBytes.length;
     }
-    Assertions.assertEquals(allBytes.length, responseHandler.getByteCount());
+    Assert.assertEquals(allBytes.length, responseHandler.getByteCount());
   }
 
 }

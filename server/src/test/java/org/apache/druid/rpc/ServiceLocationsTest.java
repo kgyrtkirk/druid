@@ -21,8 +21,8 @@ package org.apache.druid.rpc;
 
 import com.google.common.collect.ImmutableSet;
 import nl.jqno.equalsverifier.EqualsVerifier;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Collections;
 
@@ -34,8 +34,8 @@ public class ServiceLocationsTest
     final ServiceLocation location = new ServiceLocation("h", -1, 2, "");
     final ServiceLocations locations = ServiceLocations.forLocation(location);
 
-    Assertions.assertEquals(ImmutableSet.of(location), locations.getLocations());
-    Assertions.assertFalse(locations.isClosed());
+    Assert.assertEquals(ImmutableSet.of(location), locations.getLocations());
+    Assert.assertFalse(locations.isClosed());
   }
 
   @Test
@@ -46,8 +46,8 @@ public class ServiceLocationsTest
 
     final ServiceLocations locations = ServiceLocations.forLocations(ImmutableSet.of(location1, location2));
 
-    Assertions.assertEquals(ImmutableSet.of(location1, location2), locations.getLocations());
-    Assertions.assertFalse(locations.isClosed());
+    Assert.assertEquals(ImmutableSet.of(location1, location2), locations.getLocations());
+    Assert.assertFalse(locations.isClosed());
   }
 
   @Test
@@ -55,8 +55,8 @@ public class ServiceLocationsTest
   {
     final ServiceLocations locations = ServiceLocations.closed();
 
-    Assertions.assertEquals(Collections.emptySet(), locations.getLocations());
-    Assertions.assertTrue(locations.isClosed());
+    Assert.assertEquals(Collections.emptySet(), locations.getLocations());
+    Assert.assertTrue(locations.isClosed());
   }
 
   @Test

@@ -33,6 +33,7 @@ import org.hamcrest.MatcherAssert;
 import org.joda.time.Interval;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Test;
 
 import java.util.List;
 

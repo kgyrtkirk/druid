@@ -25,8 +25,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.NamedType;
 import com.google.common.collect.ImmutableList;
 import nl.jqno.equalsverifier.EqualsVerifier;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class BuildingHashBasedNumberedShardSpecTest
 {
@@ -35,7 +35,7 @@ public class BuildingHashBasedNumberedShardSpecTest
   @Test
   public void testConvert()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new HashBasedNumberedShardSpec(5, 10, 5, 12, ImmutableList.of("dim"), HashPartitionFunction.MURMUR3_32_ABS, mapper),
         new BuildingHashBasedNumberedShardSpec(
             5,
@@ -51,7 +51,7 @@ public class BuildingHashBasedNumberedShardSpecTest
   @Test
   public void testCreateChunk()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new NumberedPartitionChunk<>(5, 0, "test"),
         new BuildingHashBasedNumberedShardSpec(
             5,
@@ -81,9 +81,9 @@ public class BuildingHashBasedNumberedShardSpecTest
     );
     final String json = mapper.writeValueAsString(original);
     ShardSpec shardSpec = mapper.readValue(json, ShardSpec.class);
-    Assertions.assertEquals(ShardSpec.Type.BUILDING_HASHED, shardSpec.getType());
+    Assert.assertEquals(ShardSpec.Type.BUILDING_HASHED, shardSpec.getType());
     final BuildingHashBasedNumberedShardSpec fromJson = (BuildingHashBasedNumberedShardSpec) shardSpec;
-    Assertions.assertEquals(original, fromJson);
+    Assert.assertEquals(original, fromJson);
   }
 
   @Test

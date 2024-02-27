@@ -20,8 +20,8 @@
 package org.apache.druid.server.lookup.cache;
 
 import org.joda.time.Duration;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class LookupCoordinatorManagerConfigTest
 {
@@ -35,19 +35,19 @@ public class LookupCoordinatorManagerConfigTest
     config.setPeriod(funnyDuration.getMillis());
     config.setThreadPoolSize(1200);
 
-    Assertions.assertEquals(funnyDuration, config.getHostTimeout());
-    Assertions.assertEquals(funnyDuration, config.getAllHostTimeout());
-    Assertions.assertEquals(funnyDuration.getMillis(), config.getPeriod());
-    Assertions.assertEquals(1200, config.getThreadPoolSize());
+    Assert.assertEquals(funnyDuration, config.getHostTimeout());
+    Assert.assertEquals(funnyDuration, config.getAllHostTimeout());
+    Assert.assertEquals(funnyDuration.getMillis(), config.getPeriod());
+    Assert.assertEquals(1200, config.getThreadPoolSize());
   }
 
   @Test
   public void testSimpleConfigDefaults()
   {
     final LookupCoordinatorManagerConfig config = new LookupCoordinatorManagerConfig();
-    Assertions.assertEquals(LookupCoordinatorManagerConfig.DEFAULT_HOST_TIMEOUT, config.getHostTimeout());
-    Assertions.assertEquals(LookupCoordinatorManagerConfig.DEFAULT_ALL_HOST_TIMEOUT, config.getAllHostTimeout());
-    Assertions.assertEquals(10, config.getThreadPoolSize());
-    Assertions.assertEquals(120_000, config.getPeriod());
+    Assert.assertEquals(LookupCoordinatorManagerConfig.DEFAULT_HOST_TIMEOUT, config.getHostTimeout());
+    Assert.assertEquals(LookupCoordinatorManagerConfig.DEFAULT_ALL_HOST_TIMEOUT, config.getAllHostTimeout());
+    Assert.assertEquals(10, config.getThreadPoolSize());
+    Assert.assertEquals(120_000, config.getPeriod());
   }
 }

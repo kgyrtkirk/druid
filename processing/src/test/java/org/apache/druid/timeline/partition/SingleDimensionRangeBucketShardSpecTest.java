@@ -29,8 +29,8 @@ import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 import org.apache.druid.data.input.MapBasedInputRow;
 import org.apache.druid.java.util.common.DateTimes;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.List;
 
@@ -39,7 +39,7 @@ public class SingleDimensionRangeBucketShardSpecTest
   @Test
   public void testConvert()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new BuildingSingleDimensionShardSpec(1, "dim", "start", "end", 5),
         new SingleDimensionRangeBucketShardSpec(1, "dim", "start", "end").convert(5)
     );
@@ -48,7 +48,7 @@ public class SingleDimensionRangeBucketShardSpecTest
   @Test
   public void testCreateChunk()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new NumberedPartitionChunk<>(1, 0, "test"),
         new SingleDimensionRangeBucketShardSpec(1, "dim", "start", "end").createChunk("test")
     );
@@ -64,7 +64,7 @@ public class SingleDimensionRangeBucketShardSpecTest
     );
     final ShardSpecLookup lookup = shardSpecs.get(0).getLookup(shardSpecs);
     final long currentTime = DateTimes.nowUtc().getMillis();
-    Assertions.assertEquals(
+    Assert.assertEquals(
         shardSpecs.get(0),
         lookup.getShardSpec(
             currentTime,
@@ -74,7 +74,7 @@ public class SingleDimensionRangeBucketShardSpecTest
             )
         )
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         shardSpecs.get(1),
         lookup.getShardSpec(
             currentTime,
@@ -84,7 +84,7 @@ public class SingleDimensionRangeBucketShardSpecTest
             )
         )
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         shardSpecs.get(2),
         lookup.getShardSpec(
             currentTime,
@@ -105,10 +105,10 @@ public class SingleDimensionRangeBucketShardSpecTest
     final SingleDimensionRangeBucketShardSpec original = new SingleDimensionRangeBucketShardSpec(1, "dim", "start", "end");
     final String json = mapper.writeValueAsString(original);
     ShardSpec shardSpec = mapper.readValue(json, ShardSpec.class);
-    Assertions.assertEquals(ShardSpec.Type.BUCKET_SINGLE_DIM, shardSpec.getType());
+    Assert.assertEquals(ShardSpec.Type.BUCKET_SINGLE_DIM, shardSpec.getType());
 
     final SingleDimensionRangeBucketShardSpec fromJson = (SingleDimensionRangeBucketShardSpec) shardSpec;
-    Assertions.assertEquals(original, fromJson);
+    Assert.assertEquals(original, fromJson);
   }
 
   @Test

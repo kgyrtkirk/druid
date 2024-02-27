@@ -27,8 +27,8 @@ import org.apache.druid.jackson.DefaultObjectMapper;
 import org.apache.druid.storage.StorageConfig;
 import org.apache.druid.storage.StorageConnectorModule;
 import org.apache.druid.storage.local.LocalFileExportStorageProvider;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.IOException;
 
@@ -61,6 +61,6 @@ public class ExportDestinationTest
     byte[] bytes = objectMapper.writeValueAsBytes(exportDestination);
 
     ExportDestination deserialized = objectMapper.readValue(bytes, ExportDestination.class);
-    Assertions.assertEquals(exportDestination, deserialized);
+    Assert.assertEquals(exportDestination, deserialized);
   }
 }

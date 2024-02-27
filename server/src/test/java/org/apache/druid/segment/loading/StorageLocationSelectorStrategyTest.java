@@ -31,14 +31,14 @@ import org.apache.druid.guice.JsonConfigurator;
 import org.apache.druid.guice.LazySingleton;
 import org.apache.druid.guice.StorageNodeModule;
 import org.apache.druid.jackson.DefaultObjectMapper;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import javax.validation.Validation;
 import javax.validation.Validator;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -48,8 +48,8 @@ import java.util.Properties;
 public class StorageLocationSelectorStrategyTest
 {
 
-  @TempDir
-  public File tmpFolder;
+  @Rule
+  public final TemporaryFolder tmpFolder = new TemporaryFolder();
 
   @Test
   public void testLeastBytesUsedLocationSelectorStrategy() throws Exception
@@ -57,9 +57,9 @@ public class StorageLocationSelectorStrategyTest
 
     List<StorageLocation> storageLocations = new ArrayList<>();
 
-    final File localStorageFolder1 = newFolder(tmpFolder, "local_storage_folder_1");
-    final File localStorageFolder2 = newFolder(tmpFolder, "local_storage_folder_2");
-    final File localStorageFolder3 = newFolder(tmpFolder, "local_storage_folder_3");
+    final File localStorageFolder1 = tmpFolder.newFolder("local_storage_folder_1");
+    final File localStorageFolder2 = tmpFolder.newFolder("local_storage_folder_2");
+    final File localStorageFolder3 = tmpFolder.newFolder("local_storage_folder_3");
 
     StorageLocation storageLocation1 = new StorageLocation(localStorageFolder1, 10000000000L,
         null);
@@ -75,13 +75,16 @@ public class StorageLocationSelectorStrategyTest
     Iterator<StorageLocation> locations = leastBytesUsedStrategy.getLocations();
 
     StorageLocation loc1 = locations.next();
-    Assertions.assertEquals(localStorageFolder2, loc1.getPath(), "The next element of the iterator should point to path local_storage_folder_2");
+    Assert.assertEquals("The next element of the iterator should point to path local_storage_folder_2",
+        localStorageFolder2, loc1.getPath());
 
     StorageLocation loc2 = locations.next();
-    Assertions.assertEquals(localStorageFolder3, loc2.getPath(), "The next element of the iterator should point to path local_storage_folder_3");
+    Assert.assertEquals("The next element of the iterator should point to path local_storage_folder_3",
+        localStorageFolder3, loc2.getPath());
 
     StorageLocation loc3 = locations.next();
-    Assertions.assertEquals(localStorageFolder1, loc3.getPath(), "The next element of the iterator should point to path local_storage_folder_1");
+    Assert.assertEquals("The next element of the iterator should point to path local_storage_folder_1",
+        localStorageFolder1, loc3.getPath());
 
   }
 
@@ -89,7 +92,7 @@ public class StorageLocationSelectorStrategyTest
   public void testRoundRobinLocationSelectorStrategySingleLocation() throws Exception
   {
     List<StorageLocation> storageLocations = new ArrayList<>();
-    final File localStorageFolder1 = newFolder(tmpFolder, "local_storage_folder_1");
+    final File localStorageFolder1 = tmpFolder.newFolder("local_storage_folder_1");
     storageLocations.add(new StorageLocation(localStorageFolder1, 10000000000L, null));
     StorageLocationSelectorStrategy roundRobinStrategy =
         new RoundRobinStorageLocationSelectorStrategy(storageLocations);
@@ -97,12 +100,14 @@ public class StorageLocationSelectorStrategyTest
     Iterator<StorageLocation> locations = roundRobinStrategy.getLocations();
 
     StorageLocation loc1 = locations.next();
-    Assertions.assertEquals(localStorageFolder1, loc1.getPath(), "The next element of the iterator should point to path local_storage_folder_1");
+    Assert.assertEquals("The next element of the iterator should point to path local_storage_folder_1",
+        localStorageFolder1, loc1.getPath());
 
     locations = roundRobinStrategy.getLocations();
 
     StorageLocation loc2 = locations.next();
-    Assertions.assertEquals(localStorageFolder1, loc2.getPath(), "The next element of the iterator should point to path local_storage_folder_1");
+    Assert.assertEquals("The next element of the iterator should point to path local_storage_folder_1",
+        localStorageFolder1, loc2.getPath());
   }
 
 
@@ -111,9 +116,9 @@ public class StorageLocationSelectorStrategyTest
   {
     List<StorageLocation> storageLocations = new ArrayList<>();
 
-    final File localStorageFolder1 = newFolder(tmpFolder, "local_storage_folder_1");
-    final File localStorageFolder2 = newFolder(tmpFolder, "local_storage_folder_2");
-    final File localStorageFolder3 = newFolder(tmpFolder, "local_storage_folder_3");
+    final File localStorageFolder1 = tmpFolder.newFolder("local_storage_folder_1");
+    final File localStorageFolder2 = tmpFolder.newFolder("local_storage_folder_2");
+    final File localStorageFolder3 = tmpFolder.newFolder("local_storage_folder_3");
 
     storageLocations.add(new StorageLocation(localStorageFolder1, 10000000000L, null));
     storageLocations.add(new StorageLocation(localStorageFolder2, 10000000000L, null));
@@ -125,26 +130,32 @@ public class StorageLocationSelectorStrategyTest
     Iterator<StorageLocation> locations = roundRobinStrategy.getLocations();
 
     StorageLocation loc1 = locations.next();
-    Assertions.assertEquals(localStorageFolder1, loc1.getPath(), "The next element of the iterator should point to path local_storage_folder_1");
+    Assert.assertEquals("The next element of the iterator should point to path local_storage_folder_1",
+        localStorageFolder1, loc1.getPath());
 
     StorageLocation loc2 = locations.next();
-    Assertions.assertEquals(localStorageFolder2, loc2.getPath(), "The next element of the iterator should point to path local_storage_folder_2");
+    Assert.assertEquals("The next element of the iterator should point to path local_storage_folder_2",
+        localStorageFolder2, loc2.getPath());
 
     StorageLocation loc3 = locations.next();
-    Assertions.assertEquals(localStorageFolder3, loc3.getPath(), "The next element of the iterator should point to path local_storage_folder_3");
+    Assert.assertEquals("The next element of the iterator should point to path local_storage_folder_3",
+        localStorageFolder3, loc3.getPath());
 
 
     // Second call to getLocations()
     locations = roundRobinStrategy.getLocations();
 
     loc2 = locations.next();
-    Assertions.assertEquals(localStorageFolder2, loc2.getPath(), "The next element of the iterator should point to path local_storage_folder_2");
+    Assert.assertEquals("The next element of the iterator should point to path local_storage_folder_2",
+        localStorageFolder2, loc2.getPath());
 
     loc3 = locations.next();
-    Assertions.assertEquals(localStorageFolder3, loc3.getPath(), "The next element of the iterator should point to path local_storage_folder_3");
+    Assert.assertEquals("The next element of the iterator should point to path local_storage_folder_3",
+        localStorageFolder3, loc3.getPath());
 
     loc1 = locations.next();
-    Assertions.assertEquals(localStorageFolder1, loc1.getPath(), "The next element of the iterator should point to path local_storage_folder_1");
+    Assert.assertEquals("The next element of the iterator should point to path local_storage_folder_1",
+        localStorageFolder1, loc1.getPath());
   }
 
   @Test
@@ -152,9 +163,9 @@ public class StorageLocationSelectorStrategyTest
   {
     List<StorageLocation> storageLocations = new ArrayList<>();
 
-    final File localStorageFolder1 = newFolder(tmpFolder, "local_storage_folder_1");
-    final File localStorageFolder2 = newFolder(tmpFolder, "local_storage_folder_2");
-    final File localStorageFolder3 = newFolder(tmpFolder, "local_storage_folder_3");
+    final File localStorageFolder1 = tmpFolder.newFolder("local_storage_folder_1");
+    final File localStorageFolder2 = tmpFolder.newFolder("local_storage_folder_2");
+    final File localStorageFolder3 = tmpFolder.newFolder("local_storage_folder_3");
 
     storageLocations.add(new StorageLocation(localStorageFolder1, 10000000000L, null));
     storageLocations.add(new StorageLocation(localStorageFolder2, 10000000000L, null));
@@ -165,20 +176,24 @@ public class StorageLocationSelectorStrategyTest
     Iterator<StorageLocation> locations = roundRobinStrategy.getLocations();
 
     StorageLocation loc1 = locations.next();
-    Assertions.assertEquals(localStorageFolder1, loc1.getPath(), "The next element of the iterator should point to path local_storage_folder_1");
+    Assert.assertEquals("The next element of the iterator should point to path local_storage_folder_1",
+        localStorageFolder1, loc1.getPath());
 
     locations = roundRobinStrategy.getLocations();
 
     StorageLocation loc2 = locations.next();
-    Assertions.assertEquals(localStorageFolder2, loc2.getPath(), "The next element of the iterator should point to path local_storage_folder_2");
+    Assert.assertEquals("The next element of the iterator should point to path local_storage_folder_2",
+        localStorageFolder2, loc2.getPath());
 
     locations = roundRobinStrategy.getLocations();
 
     StorageLocation loc3 = locations.next();
-    Assertions.assertEquals(localStorageFolder3, loc3.getPath(), "The next element of the iterator should point to path local_storage_folder_3");
+    Assert.assertEquals("The next element of the iterator should point to path local_storage_folder_3",
+        localStorageFolder3, loc3.getPath());
 
     loc1 = locations.next();
-    Assertions.assertEquals(localStorageFolder1, loc1.getPath(), "The next element of the iterator should point to path local_storage_folder_1");
+    Assert.assertEquals("The next element of the iterator should point to path local_storage_folder_1",
+        localStorageFolder1, loc1.getPath());
   }
 
   @Test
@@ -186,9 +201,9 @@ public class StorageLocationSelectorStrategyTest
   {
     List<StorageLocation> storageLocations = new ArrayList<>();
 
-    final File localStorageFolder1 = newFolder(tmpFolder, "local_storage_folder_1");
-    final File localStorageFolder2 = newFolder(tmpFolder, "local_storage_folder_2");
-    final File localStorageFolder3 = newFolder(tmpFolder, "local_storage_folder_3");
+    final File localStorageFolder1 = tmpFolder.newFolder("local_storage_folder_1");
+    final File localStorageFolder2 = tmpFolder.newFolder("local_storage_folder_2");
+    final File localStorageFolder3 = tmpFolder.newFolder("local_storage_folder_3");
 
     storageLocations.add(new StorageLocation(localStorageFolder1, 3000L, null));
     storageLocations.add(new StorageLocation(localStorageFolder2, 2000L, null));
@@ -206,7 +221,7 @@ public class StorageLocationSelectorStrategyTest
 
     File[] result = new File[]{loc1.getPath(), loc2.getPath(), loc3.getPath()};
     Arrays.sort(result);
-    Assertions.assertArrayEquals(new File[]{localStorageFolder1, localStorageFolder2, localStorageFolder3}, result);
+    Assert.assertArrayEquals(new File[]{localStorageFolder1, localStorageFolder2, localStorageFolder3}, result);
   }
 
   @Test
@@ -214,9 +229,9 @@ public class StorageLocationSelectorStrategyTest
   {
     List<StorageLocation> storageLocations = new ArrayList<>();
 
-    final File localStorageFolder1 = newFolder(tmpFolder, "local_storage_folder_1");
-    final File localStorageFolder2 = newFolder(tmpFolder, "local_storage_folder_2");
-    final File localStorageFolder3 = newFolder(tmpFolder, "local_storage_folder_3");
+    final File localStorageFolder1 = tmpFolder.newFolder("local_storage_folder_1");
+    final File localStorageFolder2 = tmpFolder.newFolder("local_storage_folder_2");
+    final File localStorageFolder3 = tmpFolder.newFolder("local_storage_folder_3");
 
     StorageLocation storageLocation1 = new StorageLocation(localStorageFolder1, 10000000000L, null);
     storageLocations.add(storageLocation1);
@@ -230,25 +245,31 @@ public class StorageLocationSelectorStrategyTest
     Iterator<StorageLocation> locations = mostAvailableStrategy.getLocations();
 
     StorageLocation loc1 = locations.next();
-    Assertions.assertEquals(localStorageFolder2, loc1.getPath(), "The next element of the iterator should point to path local_storage_folder_2");
+    Assert.assertEquals("The next element of the iterator should point to path local_storage_folder_2",
+        localStorageFolder2, loc1.getPath());
 
     StorageLocation loc2 = locations.next();
-    Assertions.assertEquals(localStorageFolder3, loc2.getPath(), "The next element of the iterator should point to path local_storage_folder_3");
+    Assert.assertEquals("The next element of the iterator should point to path local_storage_folder_3",
+        localStorageFolder3, loc2.getPath());
 
     StorageLocation loc3 = locations.next();
-    Assertions.assertEquals(localStorageFolder1, loc3.getPath(), "The next element of the iterator should point to path local_storage_folder_1");
+    Assert.assertEquals("The next element of the iterator should point to path local_storage_folder_1",
+        localStorageFolder1, loc3.getPath());
 
     storageLocation2.reserve("tmp_loc2", "__seg2", 6000000000L);
     locations = mostAvailableStrategy.getLocations();
 
     loc1 = locations.next();
-    Assertions.assertEquals(localStorageFolder3, loc1.getPath(), "The next element of the iterator should point to path local_storage_folder_3");
+    Assert.assertEquals("The next element of the iterator should point to path local_storage_folder_3",
+        localStorageFolder3, loc1.getPath());
 
     loc2 = locations.next();
-    Assertions.assertEquals(localStorageFolder2, loc2.getPath(), "The next element of the iterator should point to path local_storage_folder_2");
+    Assert.assertEquals("The next element of the iterator should point to path local_storage_folder_2",
+        localStorageFolder2, loc2.getPath());
 
     loc3 = locations.next();
-    Assertions.assertEquals(localStorageFolder1, loc3.getPath(), "The next element of the iterator should point to path local_storage_folder_1");
+    Assert.assertEquals("The next element of the iterator should point to path local_storage_folder_1",
+        localStorageFolder1, loc3.getPath());
   }
 
   @Test
@@ -259,9 +280,9 @@ public class StorageLocationSelectorStrategyTest
     props.setProperty("druid.segmentCache.locations", "[{\"path\": \"/tmp/druid/indexCache\"}]");
 
     StorageLocationSelectorStrategy strategy = makeInjectorWithProperties(props).getInstance(StorageLocationSelectorStrategy.class);
-    Assertions.assertEquals(LeastBytesUsedStorageLocationSelectorStrategy.class,
+    Assert.assertEquals(LeastBytesUsedStorageLocationSelectorStrategy.class,
                         strategy.getClass());
-    Assertions.assertEquals("/tmp/druid/indexCache", strategy.getLocations().next().getPath().getAbsolutePath());
+    Assert.assertEquals("/tmp/druid/indexCache", strategy.getLocations().next().getPath().getAbsolutePath());
   }
 
   @Test
@@ -274,9 +295,9 @@ public class StorageLocationSelectorStrategyTest
     Injector injector = makeInjectorWithProperties(props);
     StorageLocationSelectorStrategy strategy = injector.getInstance(StorageLocationSelectorStrategy.class);
 
-    Assertions.assertEquals(RoundRobinStorageLocationSelectorStrategy.class,
+    Assert.assertEquals(RoundRobinStorageLocationSelectorStrategy.class,
                         strategy.getClass());
-    Assertions.assertEquals("/tmp/druid/indexCache", strategy.getLocations().next().getPath().getAbsolutePath());
+    Assert.assertEquals("/tmp/druid/indexCache", strategy.getLocations().next().getPath().getAbsolutePath());
   }
 
   @Test
@@ -289,9 +310,9 @@ public class StorageLocationSelectorStrategyTest
     Injector injector = makeInjectorWithProperties(props);
     StorageLocationSelectorStrategy strategy = injector.getInstance(StorageLocationSelectorStrategy.class);
 
-    Assertions.assertEquals(LeastBytesUsedStorageLocationSelectorStrategy.class,
+    Assert.assertEquals(LeastBytesUsedStorageLocationSelectorStrategy.class,
                         strategy.getClass());
-    Assertions.assertEquals("/tmp/druid/indexCache", strategy.getLocations().next().getPath().getAbsolutePath());
+    Assert.assertEquals("/tmp/druid/indexCache", strategy.getLocations().next().getPath().getAbsolutePath());
   }
 
   @Test
@@ -304,9 +325,9 @@ public class StorageLocationSelectorStrategyTest
     Injector injector = makeInjectorWithProperties(props);
     StorageLocationSelectorStrategy strategy = injector.getInstance(StorageLocationSelectorStrategy.class);
 
-    Assertions.assertEquals(RandomStorageLocationSelectorStrategy.class,
+    Assert.assertEquals(RandomStorageLocationSelectorStrategy.class,
                         strategy.getClass());
-    Assertions.assertEquals("/tmp/druid/indexCache", strategy.getLocations().next().getPath().getAbsolutePath());
+    Assert.assertEquals("/tmp/druid/indexCache", strategy.getLocations().next().getPath().getAbsolutePath());
   }
 
   @Test
@@ -319,9 +340,9 @@ public class StorageLocationSelectorStrategyTest
     Injector injector = makeInjectorWithProperties(props);
     StorageLocationSelectorStrategy strategy = injector.getInstance(StorageLocationSelectorStrategy.class);
 
-    Assertions.assertEquals(MostAvailableSizeStorageLocationSelectorStrategy.class,
+    Assert.assertEquals(MostAvailableSizeStorageLocationSelectorStrategy.class,
                         strategy.getClass());
-    Assertions.assertEquals("/tmp/druid/indexCache", strategy.getLocations().next().getPath().getAbsolutePath());
+    Assert.assertEquals("/tmp/druid/indexCache", strategy.getLocations().next().getPath().getAbsolutePath());
   }
 
   private Injector makeInjectorWithProperties(final Properties props)
@@ -352,14 +373,5 @@ public class StorageLocationSelectorStrategyTest
             }
           }
       );
-  }
-
-  private static File newFolder(File root, String... subDirs) throws IOException {
-    String subFolder = String.join("/", subDirs);
-    File result = new File(root, subFolder);
-    if (!result.mkdirs()) {
-      throw new IOException("Couldn't create folders " + root);
-    }
-    return result;
   }
 }

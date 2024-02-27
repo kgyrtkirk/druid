@@ -23,8 +23,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.apache.druid.jackson.DefaultObjectMapper;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class DefaultColumnFormatsConfigTest
 {
@@ -36,8 +36,8 @@ public class DefaultColumnFormatsConfigTest
     DefaultColumnFormatConfig defaultColumnFormatConfig = new DefaultColumnFormatConfig(null);
     String there = MAPPER.writeValueAsString(defaultColumnFormatConfig);
     DefaultColumnFormatConfig andBack = MAPPER.readValue(there, DefaultColumnFormatConfig.class);
-    Assertions.assertEquals(defaultColumnFormatConfig, andBack);
-    Assertions.assertNull(andBack.getNestedColumnFormatVersion());
+    Assert.assertEquals(defaultColumnFormatConfig, andBack);
+    Assert.assertNull(andBack.getNestedColumnFormatVersion());
   }
 
   @Test
@@ -46,8 +46,8 @@ public class DefaultColumnFormatsConfigTest
     DefaultColumnFormatConfig defaultColumnFormatConfig = new DefaultColumnFormatConfig(4);
     String there = MAPPER.writeValueAsString(defaultColumnFormatConfig);
     DefaultColumnFormatConfig andBack = MAPPER.readValue(there, DefaultColumnFormatConfig.class);
-    Assertions.assertEquals(defaultColumnFormatConfig, andBack);
-    Assertions.assertEquals(4, (int) andBack.getNestedColumnFormatVersion());
+    Assert.assertEquals(defaultColumnFormatConfig, andBack);
+    Assert.assertEquals(4, (int) andBack.getNestedColumnFormatVersion());
   }
 
   @Test

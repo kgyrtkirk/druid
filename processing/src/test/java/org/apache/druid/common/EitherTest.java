@@ -23,10 +23,9 @@ import nl.jqno.equalsverifier.EqualsVerifier;
 import org.apache.druid.java.util.common.Either;
 import org.apache.druid.java.util.common.StringUtils;
 import org.hamcrest.CoreMatchers;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
-import static org.hamcrest.MatcherAssert.assertThat;
+import org.hamcrest.MatcherAssert;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class EitherTest
 {
@@ -35,18 +34,18 @@ public class EitherTest
   {
     final Either<String, String> either = Either.value("yay");
 
-    Assertions.assertFalse(either.isError());
-    Assertions.assertTrue(either.isValue());
-    Assertions.assertEquals("yay", either.valueOrThrow());
+    Assert.assertFalse(either.isError());
+    Assert.assertTrue(either.isValue());
+    Assert.assertEquals("yay", either.valueOrThrow());
 
-    final IllegalStateException e = Assertions.assertThrows(IllegalStateException.class, either::error);
-    assertThat(e.getMessage(), CoreMatchers.startsWith("Not an error"));
+    final IllegalStateException e = Assert.assertThrows(IllegalStateException.class, either::error);
+    MatcherAssert.assertThat(e.getMessage(), CoreMatchers.startsWith("Not an error"));
 
     // Test toString.
-    Assertions.assertEquals("Value[yay]", either.toString());
+    Assert.assertEquals("Value[yay]", either.toString());
 
     // Test map.
-    Assertions.assertEquals(Either.value("YAY"), either.map(StringUtils::toUpperCase));
+    Assert.assertEquals(Either.value("YAY"), either.map(StringUtils::toUpperCase));
   }
 
   @Test
@@ -54,18 +53,18 @@ public class EitherTest
   {
     final Either<String, String> either = Either.value(null);
 
-    Assertions.assertFalse(either.isError());
-    Assertions.assertTrue(either.isValue());
-    Assertions.assertNull(either.valueOrThrow());
+    Assert.assertFalse(either.isError());
+    Assert.assertTrue(either.isValue());
+    Assert.assertNull(either.valueOrThrow());
 
-    final IllegalStateException e = Assertions.assertThrows(IllegalStateException.class, either::error);
-    assertThat(e.getMessage(), CoreMatchers.startsWith("Not an error"));
+    final IllegalStateException e = Assert.assertThrows(IllegalStateException.class, either::error);
+    MatcherAssert.assertThat(e.getMessage(), CoreMatchers.startsWith("Not an error"));
 
     // Test toString.
-    Assertions.assertEquals("Value[null]", either.toString());
+    Assert.assertEquals("Value[null]", either.toString());
 
     // Test map.
-    Assertions.assertEquals(Either.value("nullxyz"), either.map(s -> s + "xyz"));
+    Assert.assertEquals(Either.value("nullxyz"), either.map(s -> s + "xyz"));
   }
 
   @Test
@@ -73,18 +72,18 @@ public class EitherTest
   {
     final Either<String, Object> either = Either.error("oh no");
 
-    Assertions.assertTrue(either.isError());
-    Assertions.assertFalse(either.isValue());
-    Assertions.assertEquals("oh no", either.error());
+    Assert.assertTrue(either.isError());
+    Assert.assertFalse(either.isValue());
+    Assert.assertEquals("oh no", either.error());
 
-    final RuntimeException e = Assertions.assertThrows(RuntimeException.class, either::valueOrThrow);
-    assertThat(e.getMessage(), CoreMatchers.equalTo("oh no"));
+    final RuntimeException e = Assert.assertThrows(RuntimeException.class, either::valueOrThrow);
+    MatcherAssert.assertThat(e.getMessage(), CoreMatchers.equalTo("oh no"));
 
     // Test toString.
-    Assertions.assertEquals("Error[oh no]", either.toString());
+    Assert.assertEquals("Error[oh no]", either.toString());
 
     // Test map.
-    Assertions.assertEquals(either, either.map(o -> "this does nothing because the Either is an error"));
+    Assert.assertEquals(either, either.map(o -> "this does nothing because the Either is an error"));
   }
 
   @Test
@@ -92,17 +91,17 @@ public class EitherTest
   {
     final Either<Throwable, Object> either = Either.error(new AssertionError("oh no"));
 
-    Assertions.assertTrue(either.isError());
-    Assertions.assertFalse(either.isValue());
-    assertThat(either.error(), CoreMatchers.instanceOf(AssertionError.class));
-    assertThat(either.error().getMessage(), CoreMatchers.equalTo("oh no"));
+    Assert.assertTrue(either.isError());
+    Assert.assertFalse(either.isValue());
+    MatcherAssert.assertThat(either.error(), CoreMatchers.instanceOf(AssertionError.class));
+    MatcherAssert.assertThat(either.error().getMessage(), CoreMatchers.equalTo("oh no"));
 
-    final RuntimeException e = Assertions.assertThrows(RuntimeException.class, either::valueOrThrow);
-    assertThat(e.getCause(), CoreMatchers.instanceOf(AssertionError.class));
-    assertThat(e.getCause().getMessage(), CoreMatchers.equalTo("oh no"));
+    final RuntimeException e = Assert.assertThrows(RuntimeException.class, either::valueOrThrow);
+    MatcherAssert.assertThat(e.getCause(), CoreMatchers.instanceOf(AssertionError.class));
+    MatcherAssert.assertThat(e.getCause().getMessage(), CoreMatchers.equalTo("oh no"));
 
     // Test toString.
-    Assertions.assertEquals("Error[java.lang.AssertionError: oh no]", either.toString());
+    Assert.assertEquals("Error[java.lang.AssertionError: oh no]", either.toString());
   }
 
   @Test

@@ -21,8 +21,8 @@ package org.apache.druid.query.aggregation.first;
 
 import org.apache.druid.java.util.common.DateTimes;
 import org.apache.druid.query.aggregation.SerializablePairLongString;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.nio.ByteBuffer;
 
@@ -44,7 +44,7 @@ public class StringFirstLastUtilsTest
     ByteBuffer buf = ByteBuffer.allocate(BUFFER_CAPACITY);
     StringFirstLastUtils.writePair(buf, positionAtBeginning, PAIR_TO_WRITE, MAX_BYTE_TO_WRITE);
     SerializablePairLongString actual = StringFirstLastUtils.readPair(buf, positionAtBeginning);
-    Assertions.assertEquals(PAIR_TO_WRITE, actual);
+    Assert.assertEquals(PAIR_TO_WRITE, actual);
   }
 
   @Test
@@ -54,6 +54,6 @@ public class StringFirstLastUtilsTest
     ByteBuffer buf = ByteBuffer.allocate(BUFFER_CAPACITY);
     StringFirstLastUtils.writePair(buf, positionAtMiddle, PAIR_TO_WRITE, MAX_BYTE_TO_WRITE);
     SerializablePairLongString actual = StringFirstLastUtils.readPair(buf, positionAtMiddle);
-    Assertions.assertEquals(PAIR_TO_WRITE, actual);
+    Assert.assertEquals(PAIR_TO_WRITE, actual);
   }
 }

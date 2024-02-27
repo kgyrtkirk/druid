@@ -46,10 +46,11 @@ import org.apache.druid.server.SegmentManager;
 import org.apache.druid.server.metrics.NoopServiceEmitter;
 import org.apache.druid.timeline.DataSegment;
 import org.apache.druid.timeline.partition.NoneShardSpec;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
@@ -72,14 +73,14 @@ public class SegmentLoadDropHandlerCacheTest
 {
   private static final long MAX_SIZE = 1000L;
   private static final long SEGMENT_SIZE = 100L;
-  @TempDir
-  public File temporaryFolder;
+  @Rule
+  public TemporaryFolder temporaryFolder = new TemporaryFolder();
   private SegmentLoadDropHandler loadDropHandler;
   private TestStorageLocation storageLoc;
   private ObjectMapper objectMapper;
   private DataSegmentAnnouncer segmentAnnouncer;
 
-  @BeforeEach
+  @Before
   public void setup() throws IOException
   {
     storageLoc = new TestStorageLocation(temporaryFolder);
@@ -135,7 +136,7 @@ public class SegmentLoadDropHandlerCacheTest
     List<DataSegment> announcedSegments = new ArrayList<>();
     argCaptor.getValue().forEach(announcedSegments::add);
     announcedSegments.sort(Comparator.comparing(DataSegment::getVersion));
-    Assertions.assertEquals(expectedSegments, announcedSegments);
+    Assert.assertEquals(expectedSegments, announcedSegments);
 
     // make sure adding segments beyond allowed size fails
     Mockito.reset(segmentAnnouncer);

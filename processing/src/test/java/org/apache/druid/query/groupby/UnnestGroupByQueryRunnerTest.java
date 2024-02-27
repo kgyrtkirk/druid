@@ -50,11 +50,13 @@ import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.incremental.IncrementalIndex;
 import org.apache.druid.segment.virtual.ExpressionVirtualColumn;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -63,19 +65,20 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
-
+@RunWith(Parameterized.class)
 public class UnnestGroupByQueryRunnerTest extends InitializedNullHandlingTest
 {
   private static TestGroupByBuffers BUFFER_POOLS = null;
 
-  private GroupByQueryRunnerFactory factory;
-  private GroupByQueryConfig config;
-  private boolean vectorize;
+  private final GroupByQueryRunnerFactory factory;
+  private final GroupByQueryConfig config;
+  private final boolean vectorize;
 
-  public void initUnnestGroupByQueryRunnerTest(
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
+
+  public UnnestGroupByQueryRunnerTest(
       GroupByQueryConfig config,
       GroupByQueryRunnerFactory factory,
       boolean vectorize
@@ -168,6 +171,7 @@ public class UnnestGroupByQueryRunnerTest extends InitializedNullHandlingTest
     return new GroupByQueryRunnerFactory(groupingEngine, toolChest);
   }
 
+  @Parameterized.Parameters(name = "{0}")
   public static Collection<Object[]> constructorFeeder()
   {
     NullHandling.initializeForTests();
@@ -187,7 +191,7 @@ public class UnnestGroupByQueryRunnerTest extends InitializedNullHandlingTest
     return constructors;
   }
 
-  @BeforeAll
+  @BeforeClass
   public static void setUpClass()
   {
     if (BUFFER_POOLS == null) {
@@ -195,7 +199,7 @@ public class UnnestGroupByQueryRunnerTest extends InitializedNullHandlingTest
     }
   }
 
-  @AfterAll
+  @AfterClass
   public static void tearDownClass()
   {
     BUFFER_POOLS.close();
@@ -207,11 +211,9 @@ public class UnnestGroupByQueryRunnerTest extends InitializedNullHandlingTest
     return GroupByQueryRunnerTestHelper.createExpectedRow(query, timestamp, vals);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testGroupBy(GroupByQueryConfig config, GroupByQueryRunnerFactory factory, boolean vectorize)
+  @Test
+  public void testGroupBy()
   {
-    initUnnestGroupByQueryRunnerTest(config, factory, vectorize);
     GroupByQuery query = makeQueryBuilder()
         .setDataSource(UnnestDataSource.create(
             new TableDataSource(QueryRunnerTestHelper.DATA_SOURCE),
@@ -420,11 +422,9 @@ public class UnnestGroupByQueryRunnerTest extends InitializedNullHandlingTest
     TestHelper.assertExpectedObjects(expectedResults, results, "groupBy");
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testGroupByOnMissingColumn(GroupByQueryConfig config, GroupByQueryRunnerFactory factory, boolean vectorize)
+  @Test
+  public void testGroupByOnMissingColumn()
   {
-    initUnnestGroupByQueryRunnerTest(config, factory, vectorize);
     // Cannot vectorize due to extraction dimension spec.
     cannotVectorize();
 
@@ -461,11 +461,9 @@ public class UnnestGroupByQueryRunnerTest extends InitializedNullHandlingTest
     TestHelper.assertExpectedObjects(expectedResults, results, "missing-column");
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testGroupByOnUnnestedColumn(GroupByQueryConfig config, GroupByQueryRunnerFactory factory, boolean vectorize)
+  @Test
+  public void testGroupByOnUnnestedColumn()
   {
-    initUnnestGroupByQueryRunnerTest(config, factory, vectorize);
     cannotVectorize();
 
     GroupByQuery query = makeQueryBuilder()
@@ -539,11 +537,9 @@ public class UnnestGroupByQueryRunnerTest extends InitializedNullHandlingTest
     TestHelper.assertExpectedObjects(expectedResults, results, "groupBy-on-unnested-column");
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testGroupByOnUnnestedVirtualColumn(GroupByQueryConfig config, GroupByQueryRunnerFactory factory, boolean vectorize)
+  @Test
+  public void testGroupByOnUnnestedVirtualColumn()
   {
-    initUnnestGroupByQueryRunnerTest(config, factory, vectorize);
     cannotVectorize();
 
     final DataSource unnestDataSource = UnnestDataSource.create(
@@ -630,11 +626,9 @@ public class UnnestGroupByQueryRunnerTest extends InitializedNullHandlingTest
     TestHelper.assertExpectedObjects(expectedResults, results, "groupBy-on-unnested-virtual-column");
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testGroupByOnUnnestedVirtualMultiColumn(GroupByQueryConfig config, GroupByQueryRunnerFactory factory, boolean vectorize)
+  @Test
+  public void testGroupByOnUnnestedVirtualMultiColumn()
   {
-    initUnnestGroupByQueryRunnerTest(config, factory, vectorize);
     cannotVectorize();
 
     final DataSource unnestDataSource = UnnestDataSource.create(
@@ -712,11 +706,9 @@ public class UnnestGroupByQueryRunnerTest extends InitializedNullHandlingTest
     return GroupByQueryRunnerTestHelper.runQuery(factory, queryRunner, query);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testGroupByOnUnnestedFilterMatch(GroupByQueryConfig config, GroupByQueryRunnerFactory factory, boolean vectorize)
+  @Test
+  public void testGroupByOnUnnestedFilterMatch()
   {
-    initUnnestGroupByQueryRunnerTest(config, factory, vectorize);
     // testGroupByOnUnnestedColumn but with filter to match single value
     cannotVectorize();
 
@@ -758,11 +750,9 @@ public class UnnestGroupByQueryRunnerTest extends InitializedNullHandlingTest
     TestHelper.assertExpectedObjects(expectedResults, results, "groupBy-on-unnested-virtual-column");
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testGroupByOnUnnestedNotFilterMatch(GroupByQueryConfig config, GroupByQueryRunnerFactory factory, boolean vectorize)
+  @Test
+  public void testGroupByOnUnnestedNotFilterMatch()
   {
-    initUnnestGroupByQueryRunnerTest(config, factory, vectorize);
     // testGroupByOnUnnestedColumn but with negated filter to match everything except 1 value
     cannotVectorize();
 
@@ -846,11 +836,9 @@ public class UnnestGroupByQueryRunnerTest extends InitializedNullHandlingTest
     TestHelper.assertExpectedObjects(expectedResults, results, "groupBy-on-unnested-virtual-column");
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testGroupByOnUnnestedNotFilterMatchNonexistentValue(GroupByQueryConfig config, GroupByQueryRunnerFactory factory, boolean vectorize)
+  @Test
+  public void testGroupByOnUnnestedNotFilterMatchNonexistentValue()
   {
-    initUnnestGroupByQueryRunnerTest(config, factory, vectorize);
     // testGroupByOnUnnestedColumn but with negated filter on nonexistent value to still match everything
     cannotVectorize();
 
@@ -951,12 +939,9 @@ public class UnnestGroupByQueryRunnerTest extends InitializedNullHandlingTest
 
   private void cannotVectorize()
   {
-    Throwable exception = assertThrows(RuntimeException.class, () -> {
-      if (vectorize) {
-        expectedException.expect(RuntimeException.class);
-        expectedException.expectMessage("Cannot vectorize!");
-      }
-    });
-    assertTrue(exception.getMessage().contains("Cannot vectorize!"));
+    if (vectorize) {
+      expectedException.expect(RuntimeException.class);
+      expectedException.expectMessage("Cannot vectorize!");
+    }
   }
 }

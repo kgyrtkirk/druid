@@ -34,9 +34,10 @@ import org.apache.druid.segment.column.ComplexColumn;
 import org.apache.druid.segment.column.ValueType;
 import org.apache.druid.segment.writeout.OffHeapMemorySegmentWriteOutMedium;
 import org.apache.druid.segment.writeout.SegmentWriteOutMedium;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -47,8 +48,8 @@ public class LargeColumnSupportedComplexColumnSerializerTest
 
   private final HashFunction fn = Hashing.murmur3_128();
 
-  @TempDir
-  public File temporaryFolder;
+  @Rule
+  public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
   @Test
   public void testSanity() throws IOException
@@ -66,7 +67,7 @@ public class LargeColumnSupportedComplexColumnSerializerTest
 
     for (int columnSize : columnSizes) {
       for (int aCase : cases) {
-        File tmpFile = newFolder(temporaryFolder, "junit");
+        File tmpFile = temporaryFolder.newFolder();
         HyperLogLogCollector baseCollector = HyperLogLogCollector.makeLatestCollector();
         try (SegmentWriteOutMedium segmentWriteOutMedium = new OffHeapMemorySegmentWriteOutMedium();
              FileSmoosher v9Smoosher = new FileSmoosher(tmpFile)) {
@@ -125,18 +126,9 @@ public class LargeColumnSupportedComplexColumnSerializerTest
         for (int i = 0; i < aCase; i++) {
           collector.fold((HyperLogLogCollector) complexColumn.getRowValue(i));
         }
-        Assertions.assertEquals(baseCollector.estimateCardinality(), collector.estimateCardinality(), 0.0);
+        Assert.assertEquals(baseCollector.estimateCardinality(), collector.estimateCardinality(), 0.0);
       }
     }
-  }
-
-  private static File newFolder(File root, String... subDirs) throws IOException {
-    String subFolder = String.join("/", subDirs);
-    File result = new File(root, subFolder);
-    if (!result.mkdirs()) {
-      throw new IOException("Couldn't create folders " + root);
-    }
-    return result;
   }
 
 }

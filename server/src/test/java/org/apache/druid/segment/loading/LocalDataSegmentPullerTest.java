@@ -22,11 +22,12 @@ package org.apache.druid.segment.loading;
 import com.google.common.io.Files;
 import org.apache.druid.java.util.common.FileUtils;
 import org.apache.druid.utils.CompressionUtils;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -39,19 +40,19 @@ import java.util.zip.GZIPOutputStream;
  */
 public class LocalDataSegmentPullerTest
 {
-  @TempDir
-  public File temporaryFolder;
+  @Rule
+  public final TemporaryFolder temporaryFolder = new TemporaryFolder();
   private File tmpDir;
   private LocalDataSegmentPuller puller;
 
-  @BeforeEach
+  @Before
   public void setup() throws IOException
   {
-    tmpDir = newFolder(temporaryFolder, "junit");
+    tmpDir = temporaryFolder.newFolder();
     puller = new LocalDataSegmentPuller();
   }
 
-  @AfterEach
+  @After
   public void after() throws IOException
   {
     FileUtils.deleteDirectory(tmpDir);
@@ -61,7 +62,7 @@ public class LocalDataSegmentPullerTest
   public void simpleZipTest() throws IOException, SegmentLoadingException
   {
     File file = new File(tmpDir, "test1data");
-    File zipFile = File.createTempFile("ziptest.zip", null, temporaryFolder);
+    File zipFile = temporaryFolder.newFile("ziptest.zip");
     try (OutputStream outputStream = new FileOutputStream(file)) {
       outputStream.write(new byte[0]);
       outputStream.flush();
@@ -69,10 +70,10 @@ public class LocalDataSegmentPullerTest
     CompressionUtils.zip(tmpDir, zipFile);
     file.delete();
 
-    Assertions.assertFalse(file.exists());
-    Assertions.assertTrue(zipFile.exists());
+    Assert.assertFalse(file.exists());
+    Assert.assertTrue(zipFile.exists());
     puller.getSegmentFiles(zipFile, tmpDir);
-    Assertions.assertTrue(file.exists());
+    Assert.assertTrue(file.exists());
   }
 
   @Test
@@ -94,30 +95,21 @@ public class LocalDataSegmentPullerTest
       }
     }
 
-    Assertions.assertTrue(zipFile.exists());
-    Assertions.assertFalse(unZipFile.exists());
+    Assert.assertTrue(zipFile.exists());
+    Assert.assertFalse(unZipFile.exists());
     puller.getSegmentFiles(zipFile, tmpDir);
-    Assertions.assertTrue(unZipFile.exists());
+    Assert.assertTrue(unZipFile.exists());
   }
 
   @Test
   public void simpleDirectoryTest() throws IOException, SegmentLoadingException
   {
-    File srcDir = newFolder(temporaryFolder, "junit");
+    File srcDir = temporaryFolder.newFolder();
     File tmpFile = File.createTempFile("test", "file", srcDir);
     File expectedOutput = new File(tmpDir, Files.getNameWithoutExtension(tmpFile.getAbsolutePath()));
-    Assertions.assertFalse(expectedOutput.exists());
+    Assert.assertFalse(expectedOutput.exists());
     puller.getSegmentFiles(srcDir, tmpDir);
-    Assertions.assertTrue(expectedOutput.exists());
-  }
-
-  private static File newFolder(File root, String... subDirs) throws IOException {
-    String subFolder = String.join("/", subDirs);
-    File result = new File(root, subFolder);
-    if (!result.mkdirs()) {
-      throw new IOException("Couldn't create folders " + root);
-    }
-    return result;
+    Assert.assertTrue(expectedOutput.exists());
   }
 }
 

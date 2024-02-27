@@ -21,13 +21,11 @@ package org.apache.druid.java.util.common.parsers;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import org.junit.jupiter.api.Test;
+import junit.framework.Assert;
+import org.junit.Test;
 import org.mozilla.javascript.EvaluatorException;
 
 import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  */
@@ -47,10 +45,10 @@ public class JavaScriptParserTest
     ImmutableMap.Builder builder = ImmutableMap.builder();
     builder.put("one", "foo");
     builder.put("two", "val1");
-    assertEquals(
+    Assert.assertEquals(
+        "result",
         builder.build(),
-        parsed,
-        "result"
+        parsed
     );
   }
 
@@ -67,20 +65,18 @@ public class JavaScriptParserTest
     final Map<String, Object> parsed = parser.parseToMap(data);
     ImmutableMap.Builder builder = ImmutableMap.builder();
     builder.put("one", Lists.newArrayList("val1", "val2"));
-    assertEquals(
+    Assert.assertEquals(
+        "result",
         builder.build(),
-        parsed,
-        "result"
+        parsed
     );
   }
 
-  @Test
+  @Test(expected = EvaluatorException.class)
   public void testFailure()
   {
-    assertThrows(EvaluatorException.class, () -> {
-      final String function = "i am bad javascript";
+    final String function = "i am bad javascript";
 
-      new JavaScriptParser(function);
-    });
+    new JavaScriptParser(function);
   }
 }

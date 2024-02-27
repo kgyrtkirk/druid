@@ -22,6 +22,7 @@ package org.apache.druid.security.pac4j;
 import org.easymock.Capture;
 import org.easymock.EasyMock;
 import org.junit.Assert;
+import org.junit.Test;
 import org.pac4j.core.context.Cookie;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.profile.CommonProfile;

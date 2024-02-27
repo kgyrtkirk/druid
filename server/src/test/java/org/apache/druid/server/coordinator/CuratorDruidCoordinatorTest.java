@@ -59,11 +59,11 @@ import org.apache.druid.timeline.SegmentId;
 import org.apache.druid.timeline.partition.NoneShardSpec;
 import org.easymock.EasyMock;
 import org.joda.time.Duration;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Rule;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.junit.rules.TestRule;
 
 import java.util.ArrayList;
@@ -117,7 +117,7 @@ public class CuratorDruidCoordinatorTest extends CuratorTestBase
     zkPathsConfig = new ZkPathsConfig();
   }
 
-  @BeforeEach
+  @Before
   public void setUp() throws Exception
   {
     dataSourcesSnapshot = EasyMock.createNiceMock(DataSourcesSnapshot.class);
@@ -170,7 +170,7 @@ public class CuratorDruidCoordinatorTest extends CuratorTestBase
     );
   }
 
-  @AfterEach
+  @After
   public void tearDown() throws Exception
   {
     baseView.stop();
@@ -188,8 +188,8 @@ public class CuratorDruidCoordinatorTest extends CuratorTestBase
   {
     setupView();
     sourceLoadQueuePeon.stop();
-    Assertions.assertFalse(peonExec.isShutdown());
-    Assertions.assertFalse(callbackExec.isShutdown());
+    Assert.assertFalse(peonExec.isShutdown());
+    Assert.assertFalse(callbackExec.isShutdown());
   }
 
   @Test
@@ -247,8 +247,8 @@ public class CuratorDruidCoordinatorTest extends CuratorTestBase
       announceBatchSegmentsForServer(dest, ImmutableSet.of(segment), zkPathsConfig, jsonMapper);
     }
 
-    Assertions.assertTrue(timing.forWaiting().awaitLatch(segmentViewInitLatch));
-    Assertions.assertTrue(timing.forWaiting().awaitLatch(segmentAddedLatch));
+    Assert.assertTrue(timing.forWaiting().awaitLatch(segmentViewInitLatch));
+    Assert.assertTrue(timing.forWaiting().awaitLatch(segmentAddedLatch));
 
     // these child watchers are used to simulate actions of historicals, announcing a segment on noticing a load queue
     // for the destination and unannouncing from source server when noticing a drop request
@@ -280,8 +280,8 @@ public class CuratorDruidCoordinatorTest extends CuratorTestBase
     sourceLoadQueueChildrenCache.start(PathChildrenCache.StartMode.POST_INITIALIZED_EVENT);
     destinationLoadQueueChildrenCache.start(PathChildrenCache.StartMode.POST_INITIALIZED_EVENT);
 
-    Assertions.assertTrue(timing.forWaiting().awaitLatch(srcCountdown));
-    Assertions.assertTrue(timing.forWaiting().awaitLatch(destCountdown));
+    Assert.assertTrue(timing.forWaiting().awaitLatch(srcCountdown));
+    Assert.assertTrue(timing.forWaiting().awaitLatch(destCountdown));
 
     sourceSegments.forEach(source::addDataSegment);
     destinationSegments.forEach(dest::addDataSegment);
@@ -339,21 +339,21 @@ public class CuratorDruidCoordinatorTest extends CuratorTestBase
     );
 
     // wait for destination server to load segment
-    Assertions.assertTrue(timing.forWaiting().awaitLatch(segmentAddedLatch));
+    Assert.assertTrue(timing.forWaiting().awaitLatch(segmentAddedLatch));
 
     // remove load queue key from destination server to trigger adding drop to load queue
     curator.delete().guaranteed().forPath(ZKPaths.makePath(DESTINATION_LOAD_PATH, segmentToMove.getId().toString()));
 
     // wait for drop
-    Assertions.assertTrue(timing.forWaiting().awaitLatch(segmentRemovedLatch));
+    Assert.assertTrue(timing.forWaiting().awaitLatch(segmentRemovedLatch));
 
     // clean up drop from load queue
     curator.delete().guaranteed().forPath(ZKPaths.makePath(SOURCE_LOAD_PATH, segmentToMove.getId().toString()));
 
     List<DruidServer> servers = new ArrayList<>(serverView.getInventory());
 
-    Assertions.assertEquals(2, servers.get(0).getTotalSegments());
-    Assertions.assertEquals(2, servers.get(1).getTotalSegments());
+    Assert.assertEquals(2, servers.get(0).getTotalSegments());
+    Assert.assertEquals(2, servers.get(1).getTotalSegments());
   }
 
   private void setupView() throws Exception

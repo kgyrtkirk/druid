@@ -21,8 +21,8 @@ package org.apache.druid.server.security;
 
 import com.google.common.base.Function;
 import org.apache.druid.server.mocks.MockHttpServletRequest;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -80,11 +80,11 @@ public class AuthorizationUtilsTest
     Iterator<String> itr = filteredResults.iterator();
     // Validate that resource "filteredResource" is not present because null was returned for it.
     // Also validate that calling the filterAuthorizedResources method doesn't get rid of duplicate resources
-    Assertions.assertTrue(itr.hasNext());
-    Assertions.assertEquals("duplicate", itr.next());
-    Assertions.assertEquals("duplicate", itr.next());
-    Assertions.assertEquals("hello", itr.next());
-    Assertions.assertFalse(itr.hasNext());
+    Assert.assertTrue(itr.hasNext());
+    Assert.assertEquals("duplicate", itr.next());
+    Assert.assertEquals("duplicate", itr.next());
+    Assert.assertEquals("hello", itr.next());
+    Assert.assertFalse(itr.hasNext());
   }
 
   @Test
@@ -96,7 +96,7 @@ public class AuthorizationUtilsTest
     // every type and action should have a wildcard pattern
     for (String type : ResourceType.knownTypes()) {
       for (Action action : Action.values()) {
-        Assertions.assertTrue(
+        Assert.assertTrue(
             permissions.stream()
                        .filter(ra -> Objects.equals(type, ra.getResource().getType()))
                        .anyMatch(ra -> action == ra.getAction() && ".*".equals(ra.getResource().getName()))
@@ -105,7 +105,7 @@ public class AuthorizationUtilsTest
     }
     // custom type should be there too
     for (Action action : Action.values()) {
-      Assertions.assertTrue(
+      Assert.assertTrue(
           permissions.stream()
                      .filter(ra -> Objects.equals(customType, ra.getResource().getType()))
                      .anyMatch(ra -> action == ra.getAction() && ".*".equals(ra.getResource().getName()))
@@ -118,6 +118,6 @@ public class AuthorizationUtilsTest
   {
     MockHttpServletRequest request = new MockHttpServletRequest();
     AuthorizationUtils.setRequestAuthorizationAttributeIfNeeded(request);
-    Assertions.assertEquals(true, request.getAttribute(AuthConfig.DRUID_AUTHORIZATION_CHECKED));
+    Assert.assertEquals(true, request.getAttribute(AuthConfig.DRUID_AUTHORIZATION_CHECKED));
   }
 }

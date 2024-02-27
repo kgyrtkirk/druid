@@ -42,23 +42,20 @@ import org.apache.druid.segment.filter.SelectorFilter;
 import org.apache.druid.segment.join.filter.JoinFilterPreAnalysis;
 import org.apache.druid.segment.join.lookup.LookupJoinable;
 import org.apache.druid.segment.join.table.IndexedTableJoinable;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 public class HashJoinSegmentStorageAdapterTest extends BaseHashJoinSegmentStorageAdapterTest
 {
   @Test
   public void test_getInterval_factToCountry()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Intervals.of("2015-09-12/2015-09-12T05:21:00.060Z"),
         makeFactToCountrySegment().getInterval()
     );
@@ -67,7 +64,7 @@ public class HashJoinSegmentStorageAdapterTest extends BaseHashJoinSegmentStorag
   @Test
   public void test_getAvailableDimensions_factToCountry()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableList.of(
             "channel",
             "regionIsoCode",
@@ -90,7 +87,7 @@ public class HashJoinSegmentStorageAdapterTest extends BaseHashJoinSegmentStorag
   @Test
   public void test_getAvailableMetrics_factToCountry()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableList.of("channel_uniques"),
         Lists.newArrayList(makeFactToCountrySegment().getAvailableMetrics().iterator())
     );
@@ -99,7 +96,7 @@ public class HashJoinSegmentStorageAdapterTest extends BaseHashJoinSegmentStorag
   @Test
   public void test_getDimensionCardinality_factToCountryFactColumn()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         18,
         makeFactToCountrySegment().getDimensionCardinality("countryIsoCode")
     );
@@ -108,7 +105,7 @@ public class HashJoinSegmentStorageAdapterTest extends BaseHashJoinSegmentStorag
   @Test
   public void test_getDimensionCardinality_factToCountryJoinColumn()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         19,
         makeFactToCountrySegment().getDimensionCardinality(FACT_TO_COUNTRY_ON_ISO_CODE_PREFIX + "countryName")
     );
@@ -117,7 +114,7 @@ public class HashJoinSegmentStorageAdapterTest extends BaseHashJoinSegmentStorag
   @Test
   public void test_getDimensionCardinality_factToCountryNonexistentFactColumn()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         1,
         makeFactToCountrySegment().getDimensionCardinality("nonexistent")
     );
@@ -126,7 +123,7 @@ public class HashJoinSegmentStorageAdapterTest extends BaseHashJoinSegmentStorag
   @Test
   public void test_getDimensionCardinality_factToCountryNonexistentJoinColumn()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         1,
         makeFactToCountrySegment().getDimensionCardinality(FACT_TO_COUNTRY_ON_ISO_CODE_PREFIX + "nonexistent")
     );
@@ -135,7 +132,7 @@ public class HashJoinSegmentStorageAdapterTest extends BaseHashJoinSegmentStorag
   @Test
   public void test_getMinTime_factToCountry()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         DateTimes.of("2015-09-12T00:46:58.771Z"),
         makeFactToCountrySegment().getMinTime()
     );
@@ -144,7 +141,7 @@ public class HashJoinSegmentStorageAdapterTest extends BaseHashJoinSegmentStorag
   @Test
   public void test_getMaxTime_factToCountry()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         DateTimes.of("2015-09-12T05:21:00.059Z"),
         makeFactToCountrySegment().getMaxTime()
     );
@@ -153,31 +150,31 @@ public class HashJoinSegmentStorageAdapterTest extends BaseHashJoinSegmentStorag
   @Test
   public void test_getMinValue_factToCountryFactColumn()
   {
-    Assertions.assertNull(makeFactToCountrySegment().getMinValue("countryIsoCode"));
+    Assert.assertNull(makeFactToCountrySegment().getMinValue("countryIsoCode"));
   }
 
   @Test
   public void test_getMinValue_factToCountryJoinColumn()
   {
-    Assertions.assertNull(makeFactToCountrySegment().getMinValue(FACT_TO_COUNTRY_ON_ISO_CODE_PREFIX + "countryIsoCode"));
+    Assert.assertNull(makeFactToCountrySegment().getMinValue(FACT_TO_COUNTRY_ON_ISO_CODE_PREFIX + "countryIsoCode"));
   }
 
   @Test
   public void test_getMinValue_factToCountryNonexistentFactColumn()
   {
-    Assertions.assertNull(makeFactToCountrySegment().getMinValue("nonexistent"));
+    Assert.assertNull(makeFactToCountrySegment().getMinValue("nonexistent"));
   }
 
   @Test
   public void test_getMinValue_factToCountryNonexistentJoinColumn()
   {
-    Assertions.assertNull(makeFactToCountrySegment().getMinValue(FACT_TO_COUNTRY_ON_ISO_CODE_PREFIX + "nonexistent"));
+    Assert.assertNull(makeFactToCountrySegment().getMinValue(FACT_TO_COUNTRY_ON_ISO_CODE_PREFIX + "nonexistent"));
   }
 
   @Test
   public void test_getMaxValue_factToCountryFactColumn()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         "US",
         makeFactToCountrySegment().getMaxValue("countryIsoCode")
     );
@@ -186,19 +183,19 @@ public class HashJoinSegmentStorageAdapterTest extends BaseHashJoinSegmentStorag
   @Test
   public void test_getMaxValue_factToCountryJoinColumn()
   {
-    Assertions.assertNull(makeFactToCountrySegment().getMaxValue(FACT_TO_COUNTRY_ON_ISO_CODE_PREFIX + "countryName"));
+    Assert.assertNull(makeFactToCountrySegment().getMaxValue(FACT_TO_COUNTRY_ON_ISO_CODE_PREFIX + "countryName"));
   }
 
   @Test
   public void test_getMaxValue_factToCountryNonexistentFactColumn()
   {
-    Assertions.assertNull(makeFactToCountrySegment().getMaxValue("nonexistent"));
+    Assert.assertNull(makeFactToCountrySegment().getMaxValue("nonexistent"));
   }
 
   @Test
   public void test_getMaxValue_factToCountryNonexistentJoinColumn()
   {
-    Assertions.assertNull(makeFactToCountrySegment().getMaxValue(FACT_TO_COUNTRY_ON_ISO_CODE_PREFIX + "nonexistent"));
+    Assert.assertNull(makeFactToCountrySegment().getMaxValue(FACT_TO_COUNTRY_ON_ISO_CODE_PREFIX + "nonexistent"));
   }
 
   @Test
@@ -206,11 +203,11 @@ public class HashJoinSegmentStorageAdapterTest extends BaseHashJoinSegmentStorag
   {
     final ColumnCapabilities capabilities = makeFactToCountrySegment().getColumnCapabilities("countryIsoCode");
 
-    Assertions.assertEquals(ValueType.STRING, capabilities.getType());
-    Assertions.assertTrue(capabilities.hasBitmapIndexes());
-    Assertions.assertTrue(capabilities.isDictionaryEncoded().isTrue());
-    Assertions.assertTrue(capabilities.areDictionaryValuesSorted().isTrue());
-    Assertions.assertTrue(capabilities.areDictionaryValuesUnique().isTrue());
+    Assert.assertEquals(ValueType.STRING, capabilities.getType());
+    Assert.assertTrue(capabilities.hasBitmapIndexes());
+    Assert.assertTrue(capabilities.isDictionaryEncoded().isTrue());
+    Assert.assertTrue(capabilities.areDictionaryValuesSorted().isTrue());
+    Assert.assertTrue(capabilities.areDictionaryValuesUnique().isTrue());
   }
 
   @Test
@@ -220,11 +217,11 @@ public class HashJoinSegmentStorageAdapterTest extends BaseHashJoinSegmentStorag
         FACT_TO_COUNTRY_ON_ISO_CODE_PREFIX + "countryIsoCode"
     );
 
-    Assertions.assertEquals(ValueType.STRING, capabilities.getType());
-    Assertions.assertFalse(capabilities.hasBitmapIndexes());
-    Assertions.assertFalse(capabilities.areDictionaryValuesUnique().isTrue());
-    Assertions.assertFalse(capabilities.areDictionaryValuesSorted().isTrue());
-    Assertions.assertTrue(capabilities.isDictionaryEncoded().isTrue());
+    Assert.assertEquals(ValueType.STRING, capabilities.getType());
+    Assert.assertFalse(capabilities.hasBitmapIndexes());
+    Assert.assertFalse(capabilities.areDictionaryValuesUnique().isTrue());
+    Assert.assertFalse(capabilities.areDictionaryValuesSorted().isTrue());
+    Assert.assertTrue(capabilities.isDictionaryEncoded().isTrue());
   }
 
   @Test
@@ -233,7 +230,7 @@ public class HashJoinSegmentStorageAdapterTest extends BaseHashJoinSegmentStorag
     final ColumnCapabilities capabilities = makeFactToCountrySegment()
         .getColumnCapabilities("nonexistent");
 
-    Assertions.assertNull(capabilities);
+    Assert.assertNull(capabilities);
   }
 
   @Test
@@ -242,13 +239,13 @@ public class HashJoinSegmentStorageAdapterTest extends BaseHashJoinSegmentStorag
     final ColumnCapabilities capabilities = makeFactToCountrySegment()
         .getColumnCapabilities(FACT_TO_COUNTRY_ON_ISO_CODE_PREFIX + "nonexistent");
 
-    Assertions.assertNull(capabilities);
+    Assert.assertNull(capabilities);
   }
 
   @Test
   public void test_getColumnCapabilities_complexTypeName_factToCountryFactColumn()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         "hyperUnique",
         makeFactToCountrySegment().getColumnCapabilities("channel_uniques").getComplexTypeName()
     );
@@ -257,7 +254,7 @@ public class HashJoinSegmentStorageAdapterTest extends BaseHashJoinSegmentStorag
   @Test
   public void test_getColumnCapabilities_typeString_factToCountryFactColumn()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         "COMPLEX<hyperUnique>",
         makeFactToCountrySegment().getColumnCapabilities("channel_uniques").asTypeString()
     );
@@ -266,7 +263,7 @@ public class HashJoinSegmentStorageAdapterTest extends BaseHashJoinSegmentStorag
   @Test
   public void test_getColumnCapabilities_typeString_factToCountryJoinColumn()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         "STRING",
         makeFactToCountrySegment().getColumnCapabilities(FACT_TO_COUNTRY_ON_ISO_CODE_PREFIX + "countryName")
                                   .asTypeString()
@@ -276,7 +273,7 @@ public class HashJoinSegmentStorageAdapterTest extends BaseHashJoinSegmentStorag
   @Test
   public void test_getMaxIngestedEventTime_factToCountry()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         DateTimes.of("2015-09-12T05:21:00.059Z"),
         makeFactToCountrySegment().getMaxIngestedEventTime()
     );
@@ -285,21 +282,19 @@ public class HashJoinSegmentStorageAdapterTest extends BaseHashJoinSegmentStorag
   @Test
   public void test_getNumRows_factToCountry()
   {
-    Throwable exception = assertThrows(UnsupportedOperationException.class, () -> {
+    expectedException.expect(UnsupportedOperationException.class);
+    expectedException.expectMessage("Cannot retrieve number of rows from join segment");
 
-      makeFactToCountrySegment().getNumRows();
-    });
-    assertTrue(exception.getMessage().contains("Cannot retrieve number of rows from join segment"));
+    makeFactToCountrySegment().getNumRows();
   }
 
   @Test
   public void test_getMetadata_factToCountry()
   {
-    Throwable exception = assertThrows(UnsupportedOperationException.class, () -> {
+    expectedException.expect(UnsupportedOperationException.class);
+    expectedException.expectMessage("Cannot retrieve metadata from join segment");
 
-      makeFactToCountrySegment().getMetadata();
-    });
-    assertTrue(exception.getMessage().contains("Cannot retrieve metadata from join segment"));
+    makeFactToCountrySegment().getMetadata();
   }
 
   @Test
@@ -1832,172 +1827,169 @@ public class HashJoinSegmentStorageAdapterTest extends BaseHashJoinSegmentStorag
   @Test
   public void test_makeCursors_errorOnNonEquiJoin()
   {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
+    expectedException.expect(IllegalArgumentException.class);
+    expectedException.expectMessage("Cannot build hash-join matcher on non-equi-join condition: x == y");
 
-      List<JoinableClause> joinableClauses = ImmutableList.of(
-          new JoinableClause(
-              FACT_TO_COUNTRY_ON_ISO_CODE_PREFIX,
-              new IndexedTableJoinable(countriesTable),
-              JoinType.LEFT,
-              JoinConditionAnalysis.forExpression(
-                  "x == y",
-                  FACT_TO_COUNTRY_ON_ISO_CODE_PREFIX,
-                  ExprMacroTable.nil()
-              )
-          )
-      );
+    List<JoinableClause> joinableClauses = ImmutableList.of(
+        new JoinableClause(
+            FACT_TO_COUNTRY_ON_ISO_CODE_PREFIX,
+            new IndexedTableJoinable(countriesTable),
+            JoinType.LEFT,
+            JoinConditionAnalysis.forExpression(
+                "x == y",
+                FACT_TO_COUNTRY_ON_ISO_CODE_PREFIX,
+                ExprMacroTable.nil()
+            )
+        )
+    );
 
-      JoinFilterPreAnalysis joinFilterPreAnalysis = makeDefaultConfigPreAnalysis(
-          null,
-          joinableClauses,
-          VirtualColumns.EMPTY
-      );
+    JoinFilterPreAnalysis joinFilterPreAnalysis = makeDefaultConfigPreAnalysis(
+        null,
+        joinableClauses,
+        VirtualColumns.EMPTY
+    );
 
-      JoinTestHelper.readCursors(
-          new HashJoinSegmentStorageAdapter(
-              factSegment.asStorageAdapter(),
-              joinableClauses,
-              joinFilterPreAnalysis
-          ).makeCursors(
-              null,
-              Intervals.ETERNITY,
-              VirtualColumns.EMPTY,
-              Granularities.ALL,
-              false,
-              null
-          ),
-          ImmutableList.of()
-      );
-    });
-    assertTrue(exception.getMessage().contains("Cannot build hash-join matcher on non-equi-join condition: x == y"));
+    JoinTestHelper.readCursors(
+        new HashJoinSegmentStorageAdapter(
+            factSegment.asStorageAdapter(),
+            joinableClauses,
+            joinFilterPreAnalysis
+        ).makeCursors(
+            null,
+            Intervals.ETERNITY,
+            VirtualColumns.EMPTY,
+            Granularities.ALL,
+            false,
+            null
+        ),
+        ImmutableList.of()
+    );
   }
 
   @Test
   public void test_makeCursors_errorOnNonEquiJoinUsingLookup()
   {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
+    expectedException.expect(IllegalArgumentException.class);
+    expectedException.expectMessage("Cannot join lookup with non-equi condition: x == y");
 
-      List<JoinableClause> joinableClauses = ImmutableList.of(
-          new JoinableClause(
-              FACT_TO_COUNTRY_ON_ISO_CODE_PREFIX,
-              LookupJoinable.wrap(countryIsoCodeToNameLookup),
-              JoinType.LEFT,
-              JoinConditionAnalysis.forExpression(
-                  "x == y",
-                  FACT_TO_COUNTRY_ON_ISO_CODE_PREFIX,
-                  ExprMacroTable.nil()
-              )
-          )
-      );
+    List<JoinableClause> joinableClauses = ImmutableList.of(
+        new JoinableClause(
+            FACT_TO_COUNTRY_ON_ISO_CODE_PREFIX,
+            LookupJoinable.wrap(countryIsoCodeToNameLookup),
+            JoinType.LEFT,
+            JoinConditionAnalysis.forExpression(
+                "x == y",
+                FACT_TO_COUNTRY_ON_ISO_CODE_PREFIX,
+                ExprMacroTable.nil()
+            )
+        )
+    );
 
-      JoinFilterPreAnalysis joinFilterPreAnalysis = makeDefaultConfigPreAnalysis(
-          null,
-          joinableClauses,
-          VirtualColumns.EMPTY
-      );
+    JoinFilterPreAnalysis joinFilterPreAnalysis = makeDefaultConfigPreAnalysis(
+        null,
+        joinableClauses,
+        VirtualColumns.EMPTY
+    );
 
-      JoinTestHelper.readCursors(
-          new HashJoinSegmentStorageAdapter(
-              factSegment.asStorageAdapter(),
-              joinableClauses,
-              joinFilterPreAnalysis
-          ).makeCursors(
-              null,
-              Intervals.ETERNITY,
-              VirtualColumns.EMPTY,
-              Granularities.ALL,
-              false,
-              null
-          ),
-          ImmutableList.of()
-      );
-    });
-    assertTrue(exception.getMessage().contains("Cannot join lookup with non-equi condition: x == y"));
+    JoinTestHelper.readCursors(
+        new HashJoinSegmentStorageAdapter(
+            factSegment.asStorageAdapter(),
+            joinableClauses,
+            joinFilterPreAnalysis
+        ).makeCursors(
+            null,
+            Intervals.ETERNITY,
+            VirtualColumns.EMPTY,
+            Granularities.ALL,
+            false,
+            null
+        ),
+        ImmutableList.of()
+    );
   }
 
   @Test
   public void test_makeCursors_errorOnNonKeyBasedJoin()
   {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
-      List<JoinableClause> joinableClauses = ImmutableList.of(
-          new JoinableClause(
-              FACT_TO_COUNTRY_ON_ISO_CODE_PREFIX,
-              new IndexedTableJoinable(countriesTable),
-              JoinType.LEFT,
-              JoinConditionAnalysis.forExpression(
-                  StringUtils.format("x == \"%scountryName\"", FACT_TO_COUNTRY_ON_ISO_CODE_PREFIX),
-                  FACT_TO_COUNTRY_ON_ISO_CODE_PREFIX,
-                  ExprMacroTable.nil()
-              )
-          )
-      );
+    expectedException.expect(IllegalArgumentException.class);
+    expectedException.expectMessage("Cannot build hash-join matcher on non-key-based condition: "
+                                    + "Equality{leftExpr=x, rightColumn='countryName', includeNull=false}");
+    List<JoinableClause> joinableClauses = ImmutableList.of(
+        new JoinableClause(
+            FACT_TO_COUNTRY_ON_ISO_CODE_PREFIX,
+            new IndexedTableJoinable(countriesTable),
+            JoinType.LEFT,
+            JoinConditionAnalysis.forExpression(
+                StringUtils.format("x == \"%scountryName\"", FACT_TO_COUNTRY_ON_ISO_CODE_PREFIX),
+                FACT_TO_COUNTRY_ON_ISO_CODE_PREFIX,
+                ExprMacroTable.nil()
+            )
+        )
+    );
 
-      JoinFilterPreAnalysis joinFilterPreAnalysis = makeDefaultConfigPreAnalysis(
-          null,
-          joinableClauses,
-          VirtualColumns.EMPTY
-      );
+    JoinFilterPreAnalysis joinFilterPreAnalysis = makeDefaultConfigPreAnalysis(
+        null,
+        joinableClauses,
+        VirtualColumns.EMPTY
+    );
 
-      JoinTestHelper.readCursors(
-          new HashJoinSegmentStorageAdapter(
-              factSegment.asStorageAdapter(),
-              joinableClauses,
-              joinFilterPreAnalysis
-          ).makeCursors(
-              null,
-              Intervals.ETERNITY,
-              VirtualColumns.EMPTY,
-              Granularities.ALL,
-              false,
-              null
-          ),
-          ImmutableList.of()
-      );
-    });
-    assertTrue(exception.getMessage().contains("Cannot build hash-join matcher on non-key-based condition: "
-        + "Equality{leftExpr=x, rightColumn='countryName', includeNull=false}"));
+    JoinTestHelper.readCursors(
+        new HashJoinSegmentStorageAdapter(
+            factSegment.asStorageAdapter(),
+            joinableClauses,
+            joinFilterPreAnalysis
+        ).makeCursors(
+            null,
+            Intervals.ETERNITY,
+            VirtualColumns.EMPTY,
+            Granularities.ALL,
+            false,
+            null
+        ),
+        ImmutableList.of()
+    );
   }
 
   @Test
   public void test_makeCursors_errorOnNonKeyBasedJoinUsingLookup()
   {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
-      List<JoinableClause> joinableClauses = ImmutableList.of(
-          new JoinableClause(
-              FACT_TO_COUNTRY_ON_ISO_CODE_PREFIX,
-              LookupJoinable.wrap(countryIsoCodeToNameLookup),
-              JoinType.LEFT,
-              JoinConditionAnalysis.forExpression(
-                  StringUtils.format("x == \"%scountryName\"", FACT_TO_COUNTRY_ON_ISO_CODE_PREFIX),
-                  FACT_TO_COUNTRY_ON_ISO_CODE_PREFIX,
-                  ExprMacroTable.nil()
-              )
-          )
-      );
+    expectedException.expect(IllegalArgumentException.class);
+    expectedException.expectMessage(
+        "Cannot join lookup with condition referring to non-key column: x == \"c1.countryName");
+    List<JoinableClause> joinableClauses = ImmutableList.of(
+        new JoinableClause(
+            FACT_TO_COUNTRY_ON_ISO_CODE_PREFIX,
+            LookupJoinable.wrap(countryIsoCodeToNameLookup),
+            JoinType.LEFT,
+            JoinConditionAnalysis.forExpression(
+                StringUtils.format("x == \"%scountryName\"", FACT_TO_COUNTRY_ON_ISO_CODE_PREFIX),
+                FACT_TO_COUNTRY_ON_ISO_CODE_PREFIX,
+                ExprMacroTable.nil()
+            )
+        )
+    );
 
-      JoinFilterPreAnalysis joinFilterPreAnalysis = makeDefaultConfigPreAnalysis(
-          null,
-          joinableClauses,
-          VirtualColumns.EMPTY
-      );
+    JoinFilterPreAnalysis joinFilterPreAnalysis = makeDefaultConfigPreAnalysis(
+        null,
+        joinableClauses,
+        VirtualColumns.EMPTY
+    );
 
-      JoinTestHelper.readCursors(
-          new HashJoinSegmentStorageAdapter(
-              factSegment.asStorageAdapter(),
-              joinableClauses,
-              joinFilterPreAnalysis
-          ).makeCursors(
-              null,
-              Intervals.ETERNITY,
-              VirtualColumns.EMPTY,
-              Granularities.ALL,
-              false,
-              null
-          ),
-          ImmutableList.of()
-      );
-    });
-    assertTrue(exception.getMessage().contains("Cannot join lookup with condition referring to non-key column: x == \"c1.countryName"));
+    JoinTestHelper.readCursors(
+        new HashJoinSegmentStorageAdapter(
+            factSegment.asStorageAdapter(),
+            joinableClauses,
+            joinFilterPreAnalysis
+        ).makeCursors(
+            null,
+            Intervals.ETERNITY,
+            VirtualColumns.EMPTY,
+            Granularities.ALL,
+            false,
+            null
+        ),
+        ImmutableList.of()
+    );
   }
 
   @Test
@@ -2334,19 +2326,19 @@ public class HashJoinSegmentStorageAdapterTest extends BaseHashJoinSegmentStorag
         actualPostJoin
     );
 
-    Assertions.assertEquals(expectedPreJoin, actualPreJoin);
-    Assertions.assertEquals(expectedPostJoin, actualPostJoin);
+    Assert.assertEquals(expectedPreJoin, actualPreJoin);
+    Assert.assertEquals(expectedPostJoin, actualPostJoin);
   }
 
   @Test
   public void test_hasBuiltInFiltersForSingleJoinableClauseWithVariousJoinTypes()
   {
-    Assertions.assertTrue(makeFactToCountrySegment(JoinType.INNER).hasBuiltInFilters());
-    Assertions.assertFalse(makeFactToCountrySegment(JoinType.LEFT).hasBuiltInFilters());
-    Assertions.assertFalse(makeFactToCountrySegment(JoinType.RIGHT).hasBuiltInFilters());
-    Assertions.assertFalse(makeFactToCountrySegment(JoinType.FULL).hasBuiltInFilters());
+    Assert.assertTrue(makeFactToCountrySegment(JoinType.INNER).hasBuiltInFilters());
+    Assert.assertFalse(makeFactToCountrySegment(JoinType.LEFT).hasBuiltInFilters());
+    Assert.assertFalse(makeFactToCountrySegment(JoinType.RIGHT).hasBuiltInFilters());
+    Assert.assertFalse(makeFactToCountrySegment(JoinType.FULL).hasBuiltInFilters());
     // cross join
-    Assertions.assertFalse(
+    Assert.assertFalse(
         new HashJoinSegmentStorageAdapter(
             factSegment.asStorageAdapter(),
             ImmutableList.of(
@@ -2369,7 +2361,7 @@ public class HashJoinSegmentStorageAdapterTest extends BaseHashJoinSegmentStorag
   @Test
   public void test_hasBuiltInFiltersForEmptyJoinableClause()
   {
-    Assertions.assertFalse(
+    Assert.assertFalse(
         new HashJoinSegmentStorageAdapter(
             factSegment.asStorageAdapter(),
             ImmutableList.of(),
@@ -2381,7 +2373,7 @@ public class HashJoinSegmentStorageAdapterTest extends BaseHashJoinSegmentStorag
   @Test
   public void test_hasBuiltInFiltersForConvertedJoin()
   {
-    Assertions.assertTrue(
+    Assert.assertTrue(
         new HashJoinSegmentStorageAdapter(
             factSegment.asStorageAdapter(),
             new InDimFilter("dim", ImmutableSet.of("foo", "bar")),
@@ -2394,7 +2386,7 @@ public class HashJoinSegmentStorageAdapterTest extends BaseHashJoinSegmentStorag
   @Test
   public void test_hasBuiltInFiltersForMultipleJoinableClausesWithVariousJoinTypes()
   {
-    Assertions.assertTrue(
+    Assert.assertTrue(
         new HashJoinSegmentStorageAdapter(
             factSegment.asStorageAdapter(),
             ImmutableList.of(
@@ -2405,7 +2397,7 @@ public class HashJoinSegmentStorageAdapterTest extends BaseHashJoinSegmentStorag
         ).hasBuiltInFilters()
     );
 
-    Assertions.assertTrue(
+    Assert.assertTrue(
         new HashJoinSegmentStorageAdapter(
             factSegment.asStorageAdapter(),
             ImmutableList.of(
@@ -2417,7 +2409,7 @@ public class HashJoinSegmentStorageAdapterTest extends BaseHashJoinSegmentStorag
         ).hasBuiltInFilters()
     );
 
-    Assertions.assertFalse(
+    Assert.assertFalse(
         new HashJoinSegmentStorageAdapter(
             factSegment.asStorageAdapter(),
             ImmutableList.of(
@@ -2428,7 +2420,7 @@ public class HashJoinSegmentStorageAdapterTest extends BaseHashJoinSegmentStorag
         ).hasBuiltInFilters()
     );
 
-    Assertions.assertFalse(
+    Assert.assertFalse(
         new HashJoinSegmentStorageAdapter(
             factSegment.asStorageAdapter(),
             ImmutableList.of(

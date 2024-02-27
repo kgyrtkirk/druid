@@ -27,17 +27,16 @@ import org.apache.druid.segment.ColumnSelectorFactory;
 import org.apache.druid.segment.ColumnValueSelector;
 import org.apache.druid.segment.DimensionSelector;
 import org.apache.druid.segment.column.ColumnCapabilities;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class JavaScriptAggregatorTest
 {
@@ -74,6 +73,9 @@ public class JavaScriptAggregatorTest
     SCRIPT_DOUBLE_SUM.put("fnReset", "function reset()               { return 0 }");
     SCRIPT_DOUBLE_SUM.put("fnCombine", "function combine(a,b)          { return a + b }");
   }
+
+  @Rule
+  public final ExpectedException expectedException = ExpectedException.none();
 
   private static void aggregate(TestDoubleColumnSelectorImpl selector1, TestDoubleColumnSelectorImpl selector2, Aggregator agg)
   {
@@ -124,21 +126,21 @@ public class JavaScriptAggregatorTest
     );
 
     double val = 10.;
-    Assertions.assertEquals(val, agg.get());
-    Assertions.assertEquals(val, agg.get());
-    Assertions.assertEquals(val, agg.get());
+    Assert.assertEquals(val, agg.get());
+    Assert.assertEquals(val, agg.get());
+    Assert.assertEquals(val, agg.get());
     aggregate(selector1, selector2, agg);
 
     val += Math.log(42.12d) * 2d;
-    Assertions.assertEquals(val, agg.get());
-    Assertions.assertEquals(val, agg.get());
-    Assertions.assertEquals(val, agg.get());
+    Assert.assertEquals(val, agg.get());
+    Assert.assertEquals(val, agg.get());
+    Assert.assertEquals(val, agg.get());
 
     aggregate(selector1, selector2, agg);
     val += Math.log(9d) * 3d;
-    Assertions.assertEquals(val, agg.get());
-    Assertions.assertEquals(val, agg.get());
-    Assertions.assertEquals(val, agg.get());
+    Assert.assertEquals(val, agg.get());
+    Assert.assertEquals(val, agg.get());
+    Assert.assertEquals(val, agg.get());
   }
 
   @Test
@@ -162,21 +164,21 @@ public class JavaScriptAggregatorTest
     agg.init(buf, position);
 
     double val = 10.;
-    Assertions.assertEquals(val, agg.get(buf, position));
-    Assertions.assertEquals(val, agg.get(buf, position));
-    Assertions.assertEquals(val, agg.get(buf, position));
+    Assert.assertEquals(val, agg.get(buf, position));
+    Assert.assertEquals(val, agg.get(buf, position));
+    Assert.assertEquals(val, agg.get(buf, position));
     aggregateBuffer(selector1, selector2, agg, buf, position);
 
     val += Math.log(42.12f) * 2f;
-    Assertions.assertEquals(val, agg.get(buf, position));
-    Assertions.assertEquals(val, agg.get(buf, position));
-    Assertions.assertEquals(val, agg.get(buf, position));
+    Assert.assertEquals(val, agg.get(buf, position));
+    Assert.assertEquals(val, agg.get(buf, position));
+    Assert.assertEquals(val, agg.get(buf, position));
 
     aggregateBuffer(selector1, selector2, agg, buf, position);
     val += Math.log(9f) * 3f;
-    Assertions.assertEquals(val, agg.get(buf, position));
-    Assertions.assertEquals(val, agg.get(buf, position));
-    Assertions.assertEquals(val, agg.get(buf, position));
+    Assert.assertEquals(val, agg.get(buf, position));
+    Assert.assertEquals(val, agg.get(buf, position));
+    Assert.assertEquals(val, agg.get(buf, position));
   }
 
   @Test
@@ -195,19 +197,19 @@ public class JavaScriptAggregatorTest
 
     final double val = 0;
 
-    Assertions.assertEquals(val, agg.get());
-    Assertions.assertEquals(val, agg.get());
-    Assertions.assertEquals(val, agg.get());
+    Assert.assertEquals(val, agg.get());
+    Assert.assertEquals(val, agg.get());
+    Assert.assertEquals(val, agg.get());
 
     agg.aggregate();
-    Assertions.assertEquals(val, agg.get());
-    Assertions.assertEquals(val, agg.get());
-    Assertions.assertEquals(val, agg.get());
+    Assert.assertEquals(val, agg.get());
+    Assert.assertEquals(val, agg.get());
+    Assert.assertEquals(val, agg.get());
 
     agg.aggregate();
-    Assertions.assertEquals(val, agg.get());
-    Assertions.assertEquals(val, agg.get());
-    Assertions.assertEquals(val, agg.get());
+    Assert.assertEquals(val, agg.get());
+    Assert.assertEquals(val, agg.get());
+    Assert.assertEquals(val, agg.get());
   }
 
   @Test
@@ -226,62 +228,62 @@ public class JavaScriptAggregatorTest
     );
 
     double val = 0.;
-    Assertions.assertEquals(val, agg.get());
-    Assertions.assertEquals(val, agg.get());
-    Assertions.assertEquals(val, agg.get());
+    Assert.assertEquals(val, agg.get());
+    Assert.assertEquals(val, agg.get());
+    Assert.assertEquals(val, agg.get());
     aggregate(ocs, agg);
 
     val += 1;
-    Assertions.assertEquals(val, agg.get());
-    Assertions.assertEquals(val, agg.get());
-    Assertions.assertEquals(val, agg.get());
+    Assert.assertEquals(val, agg.get());
+    Assert.assertEquals(val, agg.get());
+    Assert.assertEquals(val, agg.get());
     aggregate(ocs, agg);
 
-    Assertions.assertEquals(val, agg.get());
-    Assertions.assertEquals(val, agg.get());
-    Assertions.assertEquals(val, agg.get());
+    Assert.assertEquals(val, agg.get());
+    Assert.assertEquals(val, agg.get());
+    Assert.assertEquals(val, agg.get());
     aggregate(ocs, agg);
 
     val += 2;
-    Assertions.assertEquals(val, agg.get());
-    Assertions.assertEquals(val, agg.get());
-    Assertions.assertEquals(val, agg.get());
+    Assert.assertEquals(val, agg.get());
+    Assert.assertEquals(val, agg.get());
+    Assert.assertEquals(val, agg.get());
   }
 
   @Test
   public void testJavaScriptDisabledFactorize()
   {
-    Throwable exception = assertThrows(IllegalStateException.class, () -> {
-      final JavaScriptAggregatorFactory factory = new JavaScriptAggregatorFactory(
-          "foo",
-          ImmutableList.of("foo"),
-          SCRIPT_DOUBLE_SUM.get("fnAggregate"),
-          SCRIPT_DOUBLE_SUM.get("fnReset"),
-          SCRIPT_DOUBLE_SUM.get("fnCombine"),
-          new JavaScriptConfig(false)
-      );
-      factory.factorize(DUMMY_COLUMN_SELECTOR_FACTORY);
-      Assertions.assertTrue(false);
-    });
-    assertTrue(exception.getMessage().contains("JavaScript is disabled"));
+    final JavaScriptAggregatorFactory factory = new JavaScriptAggregatorFactory(
+        "foo",
+        ImmutableList.of("foo"),
+        SCRIPT_DOUBLE_SUM.get("fnAggregate"),
+        SCRIPT_DOUBLE_SUM.get("fnReset"),
+        SCRIPT_DOUBLE_SUM.get("fnCombine"),
+        new JavaScriptConfig(false)
+    );
+
+    expectedException.expect(IllegalStateException.class);
+    expectedException.expectMessage("JavaScript is disabled");
+    factory.factorize(DUMMY_COLUMN_SELECTOR_FACTORY);
+    Assert.assertTrue(false);
   }
 
   @Test
   public void testJavaScriptDisabledFactorizeBuffered()
   {
-    Throwable exception = assertThrows(IllegalStateException.class, () -> {
-      final JavaScriptAggregatorFactory factory = new JavaScriptAggregatorFactory(
-          "foo",
-          ImmutableList.of("foo"),
-          SCRIPT_DOUBLE_SUM.get("fnAggregate"),
-          SCRIPT_DOUBLE_SUM.get("fnReset"),
-          SCRIPT_DOUBLE_SUM.get("fnCombine"),
-          new JavaScriptConfig(false)
-      );
-      factory.factorizeBuffered(DUMMY_COLUMN_SELECTOR_FACTORY);
-      Assertions.assertTrue(false);
-    });
-    assertTrue(exception.getMessage().contains("JavaScript is disabled"));
+    final JavaScriptAggregatorFactory factory = new JavaScriptAggregatorFactory(
+        "foo",
+        ImmutableList.of("foo"),
+        SCRIPT_DOUBLE_SUM.get("fnAggregate"),
+        SCRIPT_DOUBLE_SUM.get("fnReset"),
+        SCRIPT_DOUBLE_SUM.get("fnCombine"),
+        new JavaScriptConfig(false)
+    );
+
+    expectedException.expect(IllegalStateException.class);
+    expectedException.expectMessage("JavaScript is disabled");
+    factory.factorizeBuffered(DUMMY_COLUMN_SELECTOR_FACTORY);
+    Assert.assertTrue(false);
   }
 
   public static void main(String... args)

@@ -58,13 +58,15 @@ import org.apache.druid.segment.vector.VectorObjectSelector;
 import org.apache.druid.segment.writeout.SegmentWriteOutMediumFactory;
 import org.apache.druid.segment.writeout.TmpFileSegmentWriteOutMediumFactory;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.io.TempDir;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.io.File;
 import java.io.IOException;
@@ -81,10 +83,11 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 
+@RunWith(Parameterized.class)
 public class VariantColumnSupplierTest extends InitializedNullHandlingTest
 {
-  @TempDir
-  public File tempFolder;
+  @Rule
+  public final TemporaryFolder tempFolder = new TemporaryFolder();
 
   BitmapSerdeFactory bitmapSerdeFactory = RoaringBitmapSerdeFactory.getInstance();
   DefaultBitmapResultFactory resultFactory = new DefaultBitmapResultFactory(bitmapSerdeFactory.getBitmapFactory());
@@ -161,12 +164,13 @@ public class VariantColumnSupplierTest extends InitializedNullHandlingTest
   );
 
 
-  @BeforeAll
+  @BeforeClass
   public static void staticSetup()
   {
     NestedDataModule.registerHandlersAndSerde();
   }
 
+  @Parameterized.Parameters(name = "data = {0}")
   public static Collection<?> constructorFeeder()
   {
     IndexSpec fancy = IndexSpec.builder()
@@ -207,10 +211,10 @@ public class VariantColumnSupplierTest extends InitializedNullHandlingTest
 
   ColumnType expectedLogicalType = null;
 
-  private List<?> data;
-  private IndexSpec indexSpec;
+  private final List<?> data;
+  private final IndexSpec indexSpec;
 
-  public void initVariantColumnSupplierTest(
+  public VariantColumnSupplierTest(
       @SuppressWarnings("unused") String name,
       List<?> data,
       IndexSpec indexSpec
@@ -220,11 +224,11 @@ public class VariantColumnSupplierTest extends InitializedNullHandlingTest
     this.indexSpec = indexSpec;
   }
 
-  @BeforeEach
+  @Before
   public void setup() throws IOException
   {
     final String fileNameBase = "test";
-    fileMapper = smooshify(fileNameBase, newFolder(tempFolder, "junit"));
+    fileMapper = smooshify(fileNameBase, tempFolder.newFolder());
     baseBuffer = fileMapper.mapFile(fileNameBase);
   }
 
@@ -267,7 +271,7 @@ public class VariantColumnSupplierTest extends InitializedNullHandlingTest
           expectedTypes.getSingleType() == null ? null : expectedLogicalType,
           expectedTypes.getSingleType() == null ? expectedTypes.getByteValue() : null,
           indexSpec,
-          writeOutMediumFactory.makeSegmentWriteOutMedium(newFolder(tempFolder, "junit")),
+          writeOutMediumFactory.makeSegmentWriteOutMedium(tempFolder.newFolder()),
           closer
       );
 
@@ -297,17 +301,15 @@ public class VariantColumnSupplierTest extends InitializedNullHandlingTest
     }
   }
 
-  @AfterEach
+  @After
   public void teardown() throws IOException
   {
     closer.close();
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "data = {0}")
-  public void testBasicFunctionality(@SuppressWarnings("unused") String name, List<?> data, IndexSpec indexSpec) throws IOException
+  @Test
+  public void testBasicFunctionality() throws IOException
   {
-    initVariantColumnSupplierTest(name, data, indexSpec);
     ColumnBuilder bob = new ColumnBuilder();
     bob.setFileMapper(fileMapper);
     VariantColumnAndIndexSupplier supplier = VariantColumnAndIndexSupplier.read(
@@ -323,11 +325,9 @@ public class VariantColumnSupplierTest extends InitializedNullHandlingTest
     }
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "data = {0}")
-  public void testConcurrency(@SuppressWarnings("unused") String name, List<?> data, IndexSpec indexSpec) throws ExecutionException, InterruptedException
+  @Test
+  public void testConcurrency() throws ExecutionException, InterruptedException
   {
-    initVariantColumnSupplierTest(name, data, indexSpec);
     // if this test ever starts being to be a flake, there might be thread safety issues
     ColumnBuilder bob = new ColumnBuilder();
     bob.setFileMapper(fileMapper);
@@ -367,7 +367,7 @@ public class VariantColumnSupplierTest extends InitializedNullHandlingTest
     }
     threadsStartLatch.countDown();
     Futures.allAsList(futures).get();
-    Assertions.assertEquals(expectedReason, failureReason.get());
+    Assert.assertEquals(expectedReason, failureReason.get());
   }
 
   private void smokeTest(
@@ -387,24 +387,24 @@ public class VariantColumnSupplierTest extends InitializedNullHandlingTest
         expectedLogicalType.isPrimitive() ? column.makeSingleValueDimensionVectorSelector(vectorOffset) : null;
 
     StringValueSetIndexes valueSetIndex = supplier.as(StringValueSetIndexes.class);
-    Assertions.assertNull(valueSetIndex);
+    Assert.assertNull(valueSetIndex);
     DruidPredicateIndexes predicateIndex = supplier.as(DruidPredicateIndexes.class);
-    Assertions.assertNull(predicateIndex);
+    Assert.assertNull(predicateIndex);
     NullValueIndex nullValueIndex = supplier.as(NullValueIndex.class);
-    Assertions.assertNotNull(nullValueIndex);
+    Assert.assertNotNull(nullValueIndex);
     ValueIndexes valueIndexes = supplier.as(ValueIndexes.class);
     ArrayElementIndexes arrayElementIndexes = supplier.as(ArrayElementIndexes.class);
     if (expectedType.getSingleType() != null && expectedType.getSingleType().isArray()) {
-      Assertions.assertNotNull(valueIndexes);
-      Assertions.assertNotNull(arrayElementIndexes);
+      Assert.assertNotNull(valueIndexes);
+      Assert.assertNotNull(arrayElementIndexes);
     } else {
-      Assertions.assertNull(valueIndexes);
-      Assertions.assertNull(arrayElementIndexes);
+      Assert.assertNull(valueIndexes);
+      Assert.assertNull(arrayElementIndexes);
     }
 
     SortedMap<String, FieldTypeInfo.MutableTypeSet> fields = column.getFieldTypeInfo();
-    Assertions.assertEquals(1, fields.size());
-    Assertions.assertEquals(
+    Assert.assertEquals(1, fields.size());
+    Assert.assertEquals(
         expectedType,
         fields.get(NestedPathFinder.JSON_PATH_ROOT)
     );
@@ -418,25 +418,25 @@ public class VariantColumnSupplierTest extends InitializedNullHandlingTest
 
       if (row != null) {
         if (row instanceof List) {
-          Assertions.assertArrayEquals(((List) row).toArray(), (Object[]) valueSelector.getObject());
+          Assert.assertArrayEquals(((List) row).toArray(), (Object[]) valueSelector.getObject());
           if (expectedType.getSingleType() != null) {
-            Assertions.assertArrayEquals(((List) row).toArray(), (Object[]) vectorObjectSelector.getObjectVector()[0]);
-            Assertions.assertTrue(valueIndexes.forValue(row, expectedType.getSingleType()).computeBitmapResult(resultFactory,
+            Assert.assertArrayEquals(((List) row).toArray(), (Object[]) vectorObjectSelector.getObjectVector()[0]);
+            Assert.assertTrue(valueIndexes.forValue(row, expectedType.getSingleType()).computeBitmapResult(resultFactory,
                                                                                                            false
             ).get(i));
             for (Object o : ((List) row)) {
-              Assertions.assertTrue(arrayElementIndexes.containsValue(o, expectedType.getSingleType().getElementType()).computeBitmapResult(resultFactory,
+              Assert.assertTrue("Failed on row: " + row, arrayElementIndexes.containsValue(o, expectedType.getSingleType().getElementType()).computeBitmapResult(resultFactory,
                                                                                                                                                                  false
-              ).get(i), "Failed on row: " + row);
+              ).get(i));
             }
           } else {
             // mixed type vector object selector coerces to the most common type
-            Assertions.assertArrayEquals(ExprEval.ofType(expressionType, row).asArray(), (Object[]) vectorObjectSelector.getObjectVector()[0]);
+            Assert.assertArrayEquals(ExprEval.ofType(expressionType, row).asArray(), (Object[]) vectorObjectSelector.getObjectVector()[0]);
           }
         } else {
-          Assertions.assertEquals(row, valueSelector.getObject());
+          Assert.assertEquals(row, valueSelector.getObject());
           if (expectedType.getSingleType() != null) {
-            Assertions.assertEquals(
+            Assert.assertEquals(
                 row,
                 vectorObjectSelector.getObjectVector()[0]
             );
@@ -444,50 +444,41 @@ public class VariantColumnSupplierTest extends InitializedNullHandlingTest
             // vector object selector always coerces to the most common type
             ExprEval eval = ExprEval.ofType(expressionType, row);
             if (expectedLogicalType.isArray()) {
-              Assertions.assertArrayEquals(eval.asArray(), (Object[]) vectorObjectSelector.getObjectVector()[0]);
+              Assert.assertArrayEquals(eval.asArray(), (Object[]) vectorObjectSelector.getObjectVector()[0]);
             } else {
-              Assertions.assertEquals(eval.value(), vectorObjectSelector.getObjectVector()[0]);
+              Assert.assertEquals(eval.value(), vectorObjectSelector.getObjectVector()[0]);
             }
           }
           if (dimensionSelector != null) {
-            Assertions.assertEquals(String.valueOf(row), dimensionSelector.lookupName(dimensionSelector.getRow().get(0)));
+            Assert.assertEquals(String.valueOf(row), dimensionSelector.lookupName(dimensionSelector.getRow().get(0)));
             // null is always 0
-            Assertions.assertTrue(dimensionSelector.idLookup().lookupId(String.valueOf(row)) > 0);
+            Assert.assertTrue(dimensionSelector.idLookup().lookupId(String.valueOf(row)) > 0);
             if (dimensionVectorSelector != null) {
               int[] dim = dimensionVectorSelector.getRowVector();
-              Assertions.assertEquals(String.valueOf(row), dimensionVectorSelector.lookupName(dim[0]));
+              Assert.assertEquals(String.valueOf(row), dimensionVectorSelector.lookupName(dim[0]));
             }
           }
         }
-        Assertions.assertFalse(nullValueIndex.get().computeBitmapResult(resultFactory, false).get(i));
+        Assert.assertFalse(nullValueIndex.get().computeBitmapResult(resultFactory, false).get(i));
 
       } else {
-        Assertions.assertNull(valueSelector.getObject());
-        Assertions.assertNull(vectorObjectSelector.getObjectVector()[0]);
+        Assert.assertNull(valueSelector.getObject());
+        Assert.assertNull(vectorObjectSelector.getObjectVector()[0]);
         if (dimensionSelector != null) {
-          Assertions.assertNull(dimensionSelector.lookupName(dimensionSelector.getRow().get(0)));
-          Assertions.assertEquals(0, dimensionSelector.idLookup().lookupId(null));
+          Assert.assertNull(dimensionSelector.lookupName(dimensionSelector.getRow().get(0)));
+          Assert.assertEquals(0, dimensionSelector.idLookup().lookupId(null));
           if (dimensionVectorSelector != null) {
-            Assertions.assertNull(dimensionVectorSelector.lookupName(dimensionVectorSelector.getRowVector()[0]));
+            Assert.assertNull(dimensionVectorSelector.lookupName(dimensionVectorSelector.getRowVector()[0]));
           }
         }
-        Assertions.assertTrue(nullValueIndex.get().computeBitmapResult(resultFactory, false).get(i));
+        Assert.assertTrue(nullValueIndex.get().computeBitmapResult(resultFactory, false).get(i));
         if (expectedType.getSingleType() != null) {
-          Assertions.assertFalse(arrayElementIndexes.containsValue(null, expectedType.getSingleType()).computeBitmapResult(resultFactory, false).get(i));
+          Assert.assertFalse(arrayElementIndexes.containsValue(null, expectedType.getSingleType()).computeBitmapResult(resultFactory, false).get(i));
         }
       }
 
       offset.increment();
       vectorOffset.advance();
     }
-  }
-
-  private static File newFolder(File root, String... subDirs) throws IOException {
-    String subFolder = String.join("/", subDirs);
-    File result = new File(root, subFolder);
-    if (!result.mkdirs()) {
-      throw new IOException("Couldn't create folders " + root);
-    }
-    return result;
   }
 }

@@ -20,7 +20,7 @@
 package org.apache.druid.segment.join.filter.rewrite;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 public class RhsRewriteCandidatesTest
 {

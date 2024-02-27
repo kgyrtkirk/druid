@@ -29,6 +29,7 @@ import org.apache.druid.java.util.common.parsers.Parser;
 import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.HashMap;

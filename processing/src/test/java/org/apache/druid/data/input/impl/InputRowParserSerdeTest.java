@@ -31,8 +31,8 @@ import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.java.util.common.parsers.JSONPathFieldSpec;
 import org.apache.druid.java.util.common.parsers.JSONPathFieldType;
 import org.apache.druid.java.util.common.parsers.JSONPathSpec;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -64,10 +64,10 @@ public class InputRowParserSerdeTest
     final InputRow parsed = parser2.parseBatch(
         ByteBuffer.wrap(StringUtils.toUtf8("{\"foo\":\"x\",\"bar\":\"y\",\"qux\":\"z\",\"timestamp\":\"2000\"}"))
     ).get(0);
-    Assertions.assertEquals(ImmutableList.of("foo", "bar"), parsed.getDimensions());
-    Assertions.assertEquals(ImmutableList.of("x"), parsed.getDimension("foo"));
-    Assertions.assertEquals(ImmutableList.of("y"), parsed.getDimension("bar"));
-    Assertions.assertEquals(DateTimes.of("2000").getMillis(), parsed.getTimestampFromEpoch());
+    Assert.assertEquals(ImmutableList.of("foo", "bar"), parsed.getDimensions());
+    Assert.assertEquals(ImmutableList.of("x"), parsed.getDimension("foo"));
+    Assert.assertEquals(ImmutableList.of("y"), parsed.getDimension("bar"));
+    Assert.assertEquals(DateTimes.of("2000").getMillis(), parsed.getTimestampFromEpoch());
   }
 
   @Test
@@ -80,10 +80,10 @@ public class InputRowParserSerdeTest
 
     for (Charset testCharset : testCharsets) {
       InputRow parsed = testCharsetParseHelper(testCharset);
-      Assertions.assertEquals(ImmutableList.of("foo", "bar"), parsed.getDimensions());
-      Assertions.assertEquals(ImmutableList.of("x"), parsed.getDimension("foo"));
-      Assertions.assertEquals(ImmutableList.of("y"), parsed.getDimension("bar"));
-      Assertions.assertEquals(DateTimes.of("3000").getMillis(), parsed.getTimestampFromEpoch());
+      Assert.assertEquals(ImmutableList.of("foo", "bar"), parsed.getDimensions());
+      Assert.assertEquals(ImmutableList.of("x"), parsed.getDimension("foo"));
+      Assert.assertEquals(ImmutableList.of("y"), parsed.getDimension("bar"));
+      Assert.assertEquals(DateTimes.of("3000").getMillis(), parsed.getTimestampFromEpoch());
     }
   }
 
@@ -114,10 +114,10 @@ public class InputRowParserSerdeTest
             "timeposix", "1"
         )
     ).get(0);
-    Assertions.assertEquals(ImmutableList.of("foo", "bar"), parsed.getDimensions());
-    Assertions.assertEquals(ImmutableList.of("x"), parsed.getDimension("foo"));
-    Assertions.assertEquals(ImmutableList.of("y"), parsed.getDimension("bar"));
-    Assertions.assertEquals(1000, parsed.getTimestampFromEpoch());
+    Assert.assertEquals(ImmutableList.of("foo", "bar"), parsed.getDimensions());
+    Assert.assertEquals(ImmutableList.of("x"), parsed.getDimension("foo"));
+    Assert.assertEquals(ImmutableList.of("y"), parsed.getDimension("bar"));
+    Assert.assertEquals(1000, parsed.getTimestampFromEpoch());
   }
 
   @Test
@@ -148,18 +148,18 @@ public class InputRowParserSerdeTest
             "values", Lists.newArrayList(1412705931123L, 123.456, 123E45, "hello")
         )
     ).get(0);
-    Assertions.assertEquals(ImmutableList.of("foo", "values"), parsed.getDimensions());
-    Assertions.assertEquals(ImmutableList.of(), parsed.getDimension("foo"));
-    Assertions.assertEquals(
+    Assert.assertEquals(ImmutableList.of("foo", "values"), parsed.getDimensions());
+    Assert.assertEquals(ImmutableList.of(), parsed.getDimension("foo"));
+    Assert.assertEquals(
         ImmutableList.of("1412705931123", "123.456", "1.23E47", "hello"),
         parsed.getDimension("values")
     );
-    Assertions.assertEquals(Float.POSITIVE_INFINITY, parsed.getMetric("toobig").floatValue(), 0.0);
-    Assertions.assertEquals(123E64, parsed.getRaw("toobig"));
-    Assertions.assertEquals(123.456f, parsed.getMetric("value").floatValue(), 0.0f);
-    Assertions.assertEquals(123456789000L, parsed.getRaw("long"));
-    Assertions.assertEquals(1.23456791E11f, parsed.getMetric("long").floatValue(), 0.0f);
-    Assertions.assertEquals(1412705931123L, parsed.getTimestampFromEpoch());
+    Assert.assertEquals(Float.POSITIVE_INFINITY, parsed.getMetric("toobig").floatValue(), 0.0);
+    Assert.assertEquals(123E64, parsed.getRaw("toobig"));
+    Assert.assertEquals(123.456f, parsed.getMetric("value").floatValue(), 0.0f);
+    Assert.assertEquals(123456789000L, parsed.getRaw("long"));
+    Assert.assertEquals(1.23456791E11f, parsed.getMetric("long").floatValue(), 0.0f);
+    Assert.assertEquals(1412705931123L, parsed.getTimestampFromEpoch());
   }
 
   private InputRow testCharsetParseHelper(Charset charset) throws Exception
@@ -224,7 +224,7 @@ public class InputRowParserSerdeTest
     final InputRow parsed = parser2.parse(
         "{\"blah\":[4,5,6], \"newmet\":5, \"foo\":{\"bar1\":\"aaa\", \"bar2\":\"bbb\"}, \"baz\":[1,2,3], \"timestamp\":\"2999\", \"foo.bar1\":\"Hello world!\", \"hey\":[{\"barx\":\"asdf\"}], \"met\":{\"a\":456}}"
     );
-    Assertions.assertEquals(ImmutableList.of(
+    Assert.assertEquals(ImmutableList.of(
         "foobar1",
         "foobar2",
         "baz0",
@@ -238,24 +238,24 @@ public class InputRowParserSerdeTest
         "newmet",
         "baz"
     ), parsed.getDimensions());
-    Assertions.assertEquals(ImmutableList.of("aaa"), parsed.getDimension("foobar1"));
-    Assertions.assertEquals(ImmutableList.of("bbb"), parsed.getDimension("foobar2"));
-    Assertions.assertEquals(ImmutableList.of("1"), parsed.getDimension("baz0"));
-    Assertions.assertEquals(ImmutableList.of("2"), parsed.getDimension("baz1"));
-    Assertions.assertEquals(ImmutableList.of("3"), parsed.getDimension("baz2"));
-    Assertions.assertEquals(ImmutableList.of("Hello world!"), parsed.getDimension("foo.bar1"));
-    Assertions.assertEquals(ImmutableList.of("asdf"), parsed.getDimension("hey0barx"));
-    Assertions.assertEquals(ImmutableList.of("456"), parsed.getDimension("metA"));
-    Assertions.assertEquals(ImmutableList.of("5"), parsed.getDimension("newmet"));
-    Assertions.assertEquals(ImmutableList.of(), parsed.getDimension("missing"));
-    Assertions.assertEquals(DateTimes.of("2999").getMillis(), parsed.getTimestampFromEpoch());
+    Assert.assertEquals(ImmutableList.of("aaa"), parsed.getDimension("foobar1"));
+    Assert.assertEquals(ImmutableList.of("bbb"), parsed.getDimension("foobar2"));
+    Assert.assertEquals(ImmutableList.of("1"), parsed.getDimension("baz0"));
+    Assert.assertEquals(ImmutableList.of("2"), parsed.getDimension("baz1"));
+    Assert.assertEquals(ImmutableList.of("3"), parsed.getDimension("baz2"));
+    Assert.assertEquals(ImmutableList.of("Hello world!"), parsed.getDimension("foo.bar1"));
+    Assert.assertEquals(ImmutableList.of("asdf"), parsed.getDimension("hey0barx"));
+    Assert.assertEquals(ImmutableList.of("456"), parsed.getDimension("metA"));
+    Assert.assertEquals(ImmutableList.of("5"), parsed.getDimension("newmet"));
+    Assert.assertEquals(ImmutableList.of(), parsed.getDimension("missing"));
+    Assert.assertEquals(DateTimes.of("2999").getMillis(), parsed.getTimestampFromEpoch());
 
     String testSpec = "{\"enabled\": true,\"useFieldDiscovery\": true, \"fields\": [\"parseThisRootField\"]}";
     final JSONPathSpec parsedSpec = jsonMapper.readValue(testSpec, JSONPathSpec.class);
     List<JSONPathFieldSpec> fieldSpecs = parsedSpec.getFields();
-    Assertions.assertEquals(JSONPathFieldType.ROOT, fieldSpecs.get(0).getType());
-    Assertions.assertEquals("parseThisRootField", fieldSpecs.get(0).getName());
-    Assertions.assertEquals("parseThisRootField", fieldSpecs.get(0).getExpr());
+    Assert.assertEquals(JSONPathFieldType.ROOT, fieldSpecs.get(0).getType());
+    Assert.assertEquals("parseThisRootField", fieldSpecs.get(0).getName());
+    Assert.assertEquals("parseThisRootField", fieldSpecs.get(0).getExpr());
   }
 
 }

@@ -20,7 +20,7 @@
 package org.apache.druid.java.util.metrics;
 
 import org.apache.druid.java.util.common.StringUtils;
-import org.junit.jupiter.api.Assertions;
+import org.junit.Assert;
 
 import java.util.List;
 import java.util.Map;
@@ -52,10 +52,10 @@ public interface MetricsVerifier
    */
   default void verifyEmitted(String metricName, Map<String, Object> dimensionFilters, int times)
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
+        StringUtils.format("Metric [%s] was emitted unexpected number of times.", metricName),
         times,
-        getMetricValues(metricName, dimensionFilters).size(),
-        StringUtils.format("Metric [%s] was emitted unexpected number of times.", metricName)
+        getMetricValues(metricName, dimensionFilters).size()
     );
   }
 
@@ -73,7 +73,7 @@ public interface MetricsVerifier
    */
   default void verifyValue(String metricName, Map<String, Object> dimensionFilters, Number expectedValue)
   {
-    Assertions.assertEquals(expectedValue, getValue(metricName, dimensionFilters));
+    Assert.assertEquals(expectedValue, getValue(metricName, dimensionFilters));
   }
 
   /**
@@ -83,10 +83,10 @@ public interface MetricsVerifier
   default Number getValue(String metricName, Map<String, Object> dimensionFilters)
   {
     List<Number> values = getMetricValues(metricName, dimensionFilters);
-    Assertions.assertEquals(
+    Assert.assertEquals(
+        "Metric must have been emitted exactly once for the given dimensions.",
         1,
-        values.size(),
-        "Metric must have been emitted exactly once for the given dimensions."
+        values.size()
     );
     return values.get(0);
   }

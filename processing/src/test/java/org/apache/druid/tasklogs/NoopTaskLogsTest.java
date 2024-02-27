@@ -19,8 +19,8 @@
 
 package org.apache.druid.tasklogs;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.IOException;
 
@@ -30,13 +30,13 @@ public class NoopTaskLogsTest
   public void test_streamTaskStatus() throws IOException
   {
     TaskLogs taskLogs = new NoopTaskLogs();
-    Assertions.assertFalse(taskLogs.streamTaskStatus("id").isPresent());
+    Assert.assertFalse(taskLogs.streamTaskStatus("id").isPresent());
   }
 
   @Test
   public void test_streamTaskPayload() throws IOException
   {
     TaskLogs taskLogs = new NoopTaskLogs();
-    Assertions.assertFalse(taskLogs.streamTaskPayload("id").isPresent());
+    Assert.assertFalse(taskLogs.streamTaskPayload("id").isPresent());
   }
 }

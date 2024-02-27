@@ -21,8 +21,8 @@ package org.apache.druid.timeline;
 
 import org.apache.druid.java.util.common.Intervals;
 import org.apache.druid.timeline.partition.NumberedShardSpec;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -43,23 +43,23 @@ public class SegmentTimelineTest
         )
     );
 
-    Assertions.assertFalse(
+    Assert.assertFalse(
         timeline.isOvershadowed(createSegment("2022-01-01/2022-01-02", "v1", 1, 3))
     );
-    Assertions.assertFalse(
+    Assert.assertFalse(
         timeline.isOvershadowed(createSegment("2022-01-01/2022-01-02", "v1", 2, 3))
     );
-    Assertions.assertFalse(
+    Assert.assertFalse(
         timeline.isOvershadowed(createSegment("2022-01-01/2022-01-02", "v1", 1, 4))
     );
-    Assertions.assertFalse(
+    Assert.assertFalse(
         timeline.isOvershadowed(createSegment("2022-01-01T00:00:00/2022-01-01T06:00:00", "v1", 1, 4))
     );
 
-    Assertions.assertTrue(
+    Assert.assertTrue(
         timeline.isOvershadowed(createSegment("2022-01-02/2022-01-03", "v1", 2, 4))
     );
-    Assertions.assertTrue(
+    Assert.assertTrue(
         timeline.isOvershadowed(createSegment("2022-01-02/2022-01-03", "v1", 0, 1))
     );
   }

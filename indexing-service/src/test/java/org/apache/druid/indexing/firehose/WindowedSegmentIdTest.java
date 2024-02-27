@@ -20,6 +20,7 @@
 package org.apache.druid.indexing.firehose;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
+import org.junit.Test;
 
 public class WindowedSegmentIdTest
 {

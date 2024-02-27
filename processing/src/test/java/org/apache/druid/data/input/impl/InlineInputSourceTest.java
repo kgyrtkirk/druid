@@ -19,8 +19,8 @@
 
 package org.apache.druid.data.input.impl;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Collections;
 
@@ -30,6 +30,6 @@ public class InlineInputSourceTest
   public void testGetTypes()
   {
     InlineInputSource inputSource = new InlineInputSource("data");
-    Assertions.assertEquals(Collections.singleton(InlineInputSource.TYPE_KEY), inputSource.getTypes());
+    Assert.assertEquals(Collections.singleton(InlineInputSource.TYPE_KEY), inputSource.getTypes());
   }
 }

@@ -22,14 +22,13 @@ package org.apache.druid.data.input.impl;
 import com.fasterxml.jackson.databind.AnnotationIntrospector;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import junit.framework.Assert;
 import org.apache.druid.guice.DruidSecondaryModule;
 import org.apache.druid.guice.GuiceAnnotationIntrospector;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  */
@@ -85,7 +84,7 @@ public class DimensionsSpecSerdeTest
         new SpatialDimensionSchema("IMPR", Arrays.asList("S", "P", "Q", "R"))
     );
 
-    assertEquals(expected, actual);
-    assertEquals(expectedSpatials, actual.getSpatialDimensions());
+    Assert.assertEquals(expected, actual);
+    Assert.assertEquals(expectedSpatials, actual.getSpatialDimensions());
   }
 }

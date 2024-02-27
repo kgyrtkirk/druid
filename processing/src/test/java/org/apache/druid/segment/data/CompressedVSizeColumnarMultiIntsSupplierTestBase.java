@@ -21,10 +21,10 @@ package org.apache.druid.segment.data;
 
 import org.apache.druid.java.util.common.io.Closer;
 import org.apache.druid.java.util.common.io.smoosh.FileSmoosher;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
@@ -35,15 +35,13 @@ import java.nio.channels.WritableByteChannel;
 import java.util.Iterator;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 public abstract class CompressedVSizeColumnarMultiIntsSupplierTestBase
 {
 
-  @BeforeEach
+  @Before
   public abstract void setUpSimple();
 
-  @AfterEach
+  @After
   public abstract void teardown() throws IOException;
 
   public abstract List<int[]> getValsUsed();
@@ -66,19 +64,17 @@ public abstract class CompressedVSizeColumnarMultiIntsSupplierTestBase
     columnarMultiIntsSupplier.writeTo(Channels.newChannel(baos), null);
 
     final byte[] bytes = baos.toByteArray();
-    Assertions.assertEquals(columnarMultiIntsSupplier.getSerializedSize(), bytes.length);
+    Assert.assertEquals(columnarMultiIntsSupplier.getSerializedSize(), bytes.length);
     WritableSupplier<ColumnarMultiInts> deserializedColumnarMultiInts = fromByteBuffer(ByteBuffer.wrap(bytes));
 
     assertSame(getValsUsed(), deserializedColumnarMultiInts.get());
   }
 
 
-  @Test
+  @Test(expected = IllegalArgumentException.class)
   public void testGetInvalidElementInRow()
   {
-    assertThrows(IllegalArgumentException.class, () -> {
-      getColumnarMultiIntsSupplier().get().get(3).get(15);
-    });
+    getColumnarMultiIntsSupplier().get().get(3).get(15);
   }
 
   @Test
@@ -93,9 +89,9 @@ public abstract class CompressedVSizeColumnarMultiIntsSupplierTestBase
       final int[] ints = vals.get(row);
       final IndexedInts vSizeIndexedInts = iterator.next();
 
-      Assertions.assertEquals(ints.length, vSizeIndexedInts.size());
+      Assert.assertEquals(ints.length, vSizeIndexedInts.size());
       for (int i = 0, size = vSizeIndexedInts.size(); i < size; i++) {
-        Assertions.assertEquals(ints[i], vSizeIndexedInts.get(i));
+        Assert.assertEquals(ints[i], vSizeIndexedInts.get(i));
       }
       row++;
     }
@@ -103,14 +99,14 @@ public abstract class CompressedVSizeColumnarMultiIntsSupplierTestBase
 
   private void assertSame(List<int[]> someInts, ColumnarMultiInts columnarMultiInts)
   {
-    Assertions.assertEquals(someInts.size(), columnarMultiInts.size());
+    Assert.assertEquals(someInts.size(), columnarMultiInts.size());
     for (int i = 0; i < columnarMultiInts.size(); ++i) {
       final int[] ints = someInts.get(i);
       final IndexedInts vSizeIndexedInts = columnarMultiInts.get(i);
 
-      Assertions.assertEquals(ints.length, vSizeIndexedInts.size());
+      Assert.assertEquals(ints.length, vSizeIndexedInts.size());
       for (int j = 0; j < ints.length; j++) {
-        Assertions.assertEquals(ints[j], vSizeIndexedInts.get(j));
+        Assert.assertEquals(ints[j], vSizeIndexedInts.get(j));
       }
     }
   }

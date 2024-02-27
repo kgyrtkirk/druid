@@ -20,7 +20,7 @@
 package org.apache.druid.query.operator;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 public class NaivePartitioningOperatorFactoryTest
 {

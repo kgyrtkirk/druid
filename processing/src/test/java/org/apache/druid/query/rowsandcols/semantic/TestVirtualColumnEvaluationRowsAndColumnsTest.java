@@ -31,12 +31,12 @@ import org.apache.druid.segment.VirtualColumns;
 import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.segment.virtual.ExpressionVirtualColumn;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import java.util.function.Function;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assumptions.assumeNotNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeNotNull;
 
 public class TestVirtualColumnEvaluationRowsAndColumnsTest extends SemanticTestBase
 {

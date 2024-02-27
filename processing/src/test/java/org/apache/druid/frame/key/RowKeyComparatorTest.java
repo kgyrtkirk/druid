@@ -25,8 +25,8 @@ import org.apache.druid.java.util.common.guava.Comparators;
 import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -69,7 +69,7 @@ public class RowKeyComparatorTest extends InitializedNullHandlingTest
         new KeyColumn("3", KeyOrder.DESCENDING),
         new KeyColumn("4", KeyOrder.DESCENDING)
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         sortUsingObjectComparator(keyColumns, ALL_KEY_OBJECTS),
         sortUsingKeyComparator(keyColumns, ALL_KEY_OBJECTS)
     );
@@ -84,7 +84,7 @@ public class RowKeyComparatorTest extends InitializedNullHandlingTest
         new KeyColumn("3", KeyOrder.ASCENDING),
         new KeyColumn("4", KeyOrder.ASCENDING)
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         sortUsingObjectComparator(keyColumns, ALL_KEY_OBJECTS),
         sortUsingKeyComparator(keyColumns, ALL_KEY_OBJECTS)
     );
@@ -99,7 +99,7 @@ public class RowKeyComparatorTest extends InitializedNullHandlingTest
         new KeyColumn("3", KeyOrder.DESCENDING),
         new KeyColumn("4", KeyOrder.ASCENDING)
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         sortUsingObjectComparator(keyColumns, ALL_KEY_OBJECTS),
         sortUsingKeyComparator(keyColumns, ALL_KEY_OBJECTS)
     );
@@ -114,7 +114,7 @@ public class RowKeyComparatorTest extends InitializedNullHandlingTest
         new KeyColumn("3", KeyOrder.ASCENDING),
         new KeyColumn("4", KeyOrder.DESCENDING)
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         sortUsingObjectComparator(keyColumns, ALL_KEY_OBJECTS),
         sortUsingKeyComparator(keyColumns, ALL_KEY_OBJECTS)
     );
@@ -129,7 +129,7 @@ public class RowKeyComparatorTest extends InitializedNullHandlingTest
         new KeyColumn("3", KeyOrder.DESCENDING),
         new KeyColumn("4", KeyOrder.ASCENDING)
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         sortUsingObjectComparator(keyColumns, ALL_KEY_OBJECTS),
         sortUsingKeyComparator(keyColumns, ALL_KEY_OBJECTS)
     );

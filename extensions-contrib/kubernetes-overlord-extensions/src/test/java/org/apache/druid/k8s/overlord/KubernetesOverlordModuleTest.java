@@ -37,6 +37,7 @@ import org.apache.druid.server.DruidNode;
 import org.easymock.EasyMockRunner;
 import org.easymock.Mock;
 import org.junit.Assert;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.Properties;

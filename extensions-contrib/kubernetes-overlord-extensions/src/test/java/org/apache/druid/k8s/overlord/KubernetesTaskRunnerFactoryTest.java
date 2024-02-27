@@ -36,6 +36,7 @@ import org.apache.druid.tasklogs.TaskLogs;
 import org.easymock.Mock;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Test;
 
 import java.net.URL;
 import java.util.Properties;

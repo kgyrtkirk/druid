@@ -51,19 +51,21 @@ import org.apache.druid.segment.transform.TransformSpec;
 import org.apache.druid.segment.writeout.OffHeapMemorySegmentWriteOutMediumFactory;
 import org.apache.druid.segment.writeout.SegmentWriteOutMediumFactory;
 import org.apache.druid.segment.writeout.TmpFileSegmentWriteOutMediumFactory;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.io.TempDir;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.List;
 
 /**
  */
+@RunWith(Parameterized.class)
 public class IngestSegmentFirehoseTest
 {
   private static final DimensionsSpec DIMENSIONS_SPEC = new DimensionsSpec(
@@ -90,6 +92,7 @@ public class IngestSegmentFirehoseTest
       new HyperUniquesAggregatorFactory("unique_hosts", "unique_hosts")
   );
 
+  @Parameterized.Parameters
   public static Collection<?> constructorFeeder()
   {
     return ImmutableList.of(
@@ -98,26 +101,24 @@ public class IngestSegmentFirehoseTest
     );
   }
 
-  @TempDir
-  public File tempFolder;
+  @Rule
+  public final TemporaryFolder tempFolder = new TemporaryFolder();
 
-  private IndexIO indexIO;
-  private IndexMerger indexMerger;
+  private final IndexIO indexIO;
+  private final IndexMerger indexMerger;
 
-  public void initIngestSegmentFirehoseTest(SegmentWriteOutMediumFactory segmentWriteOutMediumFactory)
+  public IngestSegmentFirehoseTest(SegmentWriteOutMediumFactory segmentWriteOutMediumFactory)
   {
     indexIO = TestHelper.getTestIndexIO();
     indexMerger = TestHelper.getTestIndexMergerV9(segmentWriteOutMediumFactory);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest
-  public void testReadFromIndexAndWriteAnotherIndex(SegmentWriteOutMediumFactory segmentWriteOutMediumFactory) throws Exception
+  @Test
+  public void testReadFromIndexAndWriteAnotherIndex() throws Exception
   {
-    initIngestSegmentFirehoseTest(segmentWriteOutMediumFactory);
     // Tests a "reindexing" use case that is a common use of ingestSegment.
 
-    File segmentDir = newFolder(tempFolder, "junit");
+    File segmentDir = tempFolder.newFolder();
     createTestIndex(segmentDir);
 
     try (
@@ -145,26 +146,26 @@ public class IngestSegmentFirehoseTest
       int count = 0;
       while (firehose.hasMore()) {
         final InputRow row = firehose.nextRow();
-        Assertions.assertNotNull(row);
+        Assert.assertNotNull(row);
         if (count == 0) {
-          Assertions.assertEquals(DateTimes.of("2014-10-22T00Z"), row.getTimestamp());
-          Assertions.assertEquals("host1", row.getRaw("host"));
-          Assertions.assertEquals("0,1", row.getRaw("spatial"));
-          Assertions.assertEquals(10L, row.getRaw("visited_sum"));
-          Assertions.assertEquals(1.0d, ((HyperLogLogCollector) row.getRaw("unique_hosts")).estimateCardinality(), 0.1);
+          Assert.assertEquals(DateTimes.of("2014-10-22T00Z"), row.getTimestamp());
+          Assert.assertEquals("host1", row.getRaw("host"));
+          Assert.assertEquals("0,1", row.getRaw("spatial"));
+          Assert.assertEquals(10L, row.getRaw("visited_sum"));
+          Assert.assertEquals(1.0d, ((HyperLogLogCollector) row.getRaw("unique_hosts")).estimateCardinality(), 0.1);
         }
         count++;
         index.add(row);
       }
-      Assertions.assertEquals(18, count);
+      Assert.assertEquals(18, count);
 
       // Check the index
-      Assertions.assertEquals(9, index.size());
+      Assert.assertEquals(9, index.size());
       final IncrementalIndexStorageAdapter queryable = new IncrementalIndexStorageAdapter(index);
-      Assertions.assertEquals(2, queryable.getAvailableDimensions().size());
-      Assertions.assertEquals("host", queryable.getAvailableDimensions().get(0));
-      Assertions.assertEquals("spatial", queryable.getAvailableDimensions().get(1));
-      Assertions.assertEquals(ImmutableList.of("visited_sum", "unique_hosts"), queryable.getAvailableMetrics());
+      Assert.assertEquals(2, queryable.getAvailableDimensions().size());
+      Assert.assertEquals("host", queryable.getAvailableDimensions().get(0));
+      Assert.assertEquals("spatial", queryable.getAvailableDimensions().get(1));
+      Assert.assertEquals(ImmutableList.of("visited_sum", "unique_hosts"), queryable.getAvailableMetrics());
 
       // Do a spatial filter
       final IngestSegmentFirehose firehose2 = new IngestSegmentFirehose(
@@ -175,12 +176,12 @@ public class IngestSegmentFirehoseTest
           new SpatialDimFilter("spatial", new RadiusBound(new float[]{1, 0}, 0.1f))
       );
       final InputRow row = firehose2.nextRow();
-      Assertions.assertFalse(firehose2.hasMore());
-      Assertions.assertEquals(DateTimes.of("2014-10-22T00Z"), row.getTimestamp());
-      Assertions.assertEquals("host2", row.getRaw("host"));
-      Assertions.assertEquals("1,0", row.getRaw("spatial"));
-      Assertions.assertEquals(40L, row.getRaw("visited_sum"));
-      Assertions.assertEquals(1.0d, ((HyperLogLogCollector) row.getRaw("unique_hosts")).estimateCardinality(), 0.1);
+      Assert.assertFalse(firehose2.hasMore());
+      Assert.assertEquals(DateTimes.of("2014-10-22T00Z"), row.getTimestamp());
+      Assert.assertEquals("host2", row.getRaw("host"));
+      Assert.assertEquals("1,0", row.getRaw("spatial"));
+      Assert.assertEquals(40L, row.getRaw("visited_sum"));
+      Assert.assertEquals(1.0d, ((HyperLogLogCollector) row.getRaw("unique_hosts")).estimateCardinality(), 0.1);
     }
   }
 
@@ -227,14 +228,5 @@ public class IngestSegmentFirehoseTest
       }
       indexMerger.persist(index, segmentDir, IndexSpec.DEFAULT, null);
     }
-  }
-
-  private static File newFolder(File root, String... subDirs) throws IOException {
-    String subFolder = String.join("/", subDirs);
-    File result = new File(root, subFolder);
-    if (!result.mkdirs()) {
-      throw new IOException("Couldn't create folders " + root);
-    }
-    return result;
   }
 }

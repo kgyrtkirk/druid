@@ -26,8 +26,8 @@ import com.google.inject.Module;
 import org.apache.druid.java.util.common.lifecycle.Lifecycle;
 import org.apache.druid.java.util.common.lifecycle.LifecycleStart;
 import org.apache.druid.java.util.common.lifecycle.LifecycleStop;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 /**
  */
@@ -82,29 +82,29 @@ public class LifecycleScopeTest
   private void testIt(Injector injector, Lifecycle lifecycle, TestInterface instance)
       throws Exception
   {
-    Assertions.assertEquals(0, instance.getStarted());
-    Assertions.assertEquals(0, instance.getStopped());
-    Assertions.assertEquals(0, instance.getRan());
+    Assert.assertEquals(0, instance.getStarted());
+    Assert.assertEquals(0, instance.getStopped());
+    Assert.assertEquals(0, instance.getRan());
 
     instance.run();
-    Assertions.assertEquals(0, instance.getStarted());
-    Assertions.assertEquals(0, instance.getStopped());
-    Assertions.assertEquals(1, instance.getRan());
+    Assert.assertEquals(0, instance.getStarted());
+    Assert.assertEquals(0, instance.getStopped());
+    Assert.assertEquals(1, instance.getRan());
 
     lifecycle.start();
-    Assertions.assertEquals(1, instance.getStarted());
-    Assertions.assertEquals(0, instance.getStopped());
-    Assertions.assertEquals(1, instance.getRan());
+    Assert.assertEquals(1, instance.getStarted());
+    Assert.assertEquals(0, instance.getStopped());
+    Assert.assertEquals(1, instance.getRan());
 
     injector.getInstance(TestInterface.class).run();  // It's a singleton
-    Assertions.assertEquals(1, instance.getStarted());
-    Assertions.assertEquals(0, instance.getStopped());
-    Assertions.assertEquals(2, instance.getRan());
+    Assert.assertEquals(1, instance.getStarted());
+    Assert.assertEquals(0, instance.getStopped());
+    Assert.assertEquals(2, instance.getRan());
 
     lifecycle.stop();
-    Assertions.assertEquals(1, instance.getStarted());
-    Assertions.assertEquals(1, instance.getStopped());
-    Assertions.assertEquals(2, instance.getRan());
+    Assert.assertEquals(1, instance.getStarted());
+    Assert.assertEquals(1, instance.getStopped());
+    Assert.assertEquals(2, instance.getRan());
   }
 
   /**
@@ -133,29 +133,29 @@ public class LifecycleScopeTest
 
     final TestInterface instance = injector.getInstance(TestInterface.class);
 
-    Assertions.assertEquals(0, instance.getStarted());
-    Assertions.assertEquals(0, instance.getStopped());
-    Assertions.assertEquals(0, instance.getRan());
+    Assert.assertEquals(0, instance.getStarted());
+    Assert.assertEquals(0, instance.getStopped());
+    Assert.assertEquals(0, instance.getRan());
 
     instance.run();
-    Assertions.assertEquals(0, instance.getStarted());
-    Assertions.assertEquals(0, instance.getStopped());
-    Assertions.assertEquals(1, instance.getRan());
+    Assert.assertEquals(0, instance.getStarted());
+    Assert.assertEquals(0, instance.getStopped());
+    Assert.assertEquals(1, instance.getRan());
 
     lifecycle.start();
-    Assertions.assertEquals(2, instance.getStarted());
-    Assertions.assertEquals(0, instance.getStopped());
-    Assertions.assertEquals(1, instance.getRan());
+    Assert.assertEquals(2, instance.getStarted());
+    Assert.assertEquals(0, instance.getStopped());
+    Assert.assertEquals(1, instance.getRan());
 
     injector.getInstance(TestInterface.class).run();  // It's a singleton
-    Assertions.assertEquals(2, instance.getStarted());
-    Assertions.assertEquals(0, instance.getStopped());
-    Assertions.assertEquals(2, instance.getRan());
+    Assert.assertEquals(2, instance.getStarted());
+    Assert.assertEquals(0, instance.getStopped());
+    Assert.assertEquals(2, instance.getRan());
 
     lifecycle.stop();
-    Assertions.assertEquals(2, instance.getStarted());
-    Assertions.assertEquals(2, instance.getStopped());
-    Assertions.assertEquals(2, instance.getRan());
+    Assert.assertEquals(2, instance.getStarted());
+    Assert.assertEquals(2, instance.getStopped());
+    Assert.assertEquals(2, instance.getRan());
   }
 
   private interface TestInterface

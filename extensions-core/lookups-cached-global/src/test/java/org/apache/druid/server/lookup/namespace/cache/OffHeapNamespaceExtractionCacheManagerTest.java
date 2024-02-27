@@ -31,6 +31,7 @@ import org.apache.druid.initialization.Initialization;
 import org.apache.druid.server.DruidNode;
 import org.apache.druid.server.lookup.namespace.NamespaceExtractionModule;
 import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Properties;
 

@@ -22,6 +22,7 @@ package org.apache.druid.storage.google;
 import com.google.common.collect.ImmutableList;
 import org.apache.druid.java.util.common.StringUtils;
 import org.junit.Assert;
+import org.junit.Test;
 
 import java.net.URI;
 import java.util.regex.Pattern;

@@ -29,15 +29,13 @@ import org.apache.druid.guice.GuiceInjectors;
 import org.apache.druid.guice.JsonConfigProvider;
 import org.apache.druid.guice.JsonConfigurator;
 import org.apache.druid.initialization.DruidModule;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.util.List;
 import java.util.Properties;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  *
@@ -49,7 +47,7 @@ public class CacheConfigTest
   JsonConfigProvider<CacheConfig> configProvider;
   private static final String PROPERTY_PREFIX = "org.apache.druid.collections.test.cache";
 
-  @BeforeAll
+  @BeforeClass
   public static void populateStatics()
   {
     injector = GuiceInjectors.makeStartupInjectorWithModules(ImmutableList.<com.google.inject.Module>of(new CacheConfigTestModule()));
@@ -74,7 +72,7 @@ public class CacheConfigTest
 
   private Properties properties = new Properties();
 
-  @BeforeEach
+  @Before
   public void setupTest()
   {
     properties.clear();
@@ -93,9 +91,9 @@ public class CacheConfigTest
     CacheConfig config = configProvider.get();
 
     injector.injectMembers(config);
-    Assertions.assertEquals(5, config.getNumBackgroundThreads());
-    Assertions.assertEquals(true, config.isPopulateCache());
-    Assertions.assertEquals(true, config.isUseCache());
+    Assert.assertEquals(5, config.getNumBackgroundThreads());
+    Assert.assertEquals(true, config.isPopulateCache());
+    Assert.assertEquals(true, config.isUseCache());
   }
   @Test
   public void testInjection2()
@@ -107,33 +105,29 @@ public class CacheConfigTest
     configProvider.inject(properties, configurator);
     CacheConfig config = configProvider.get();
 
-    Assertions.assertEquals(99, config.getNumBackgroundThreads());
-    Assertions.assertEquals(false, config.isPopulateCache());
-    Assertions.assertEquals(false, config.isUseCache());
+    Assert.assertEquals(99, config.getNumBackgroundThreads());
+    Assert.assertEquals(false, config.isPopulateCache());
+    Assert.assertEquals(false, config.isUseCache());
   }
 
-  @Test
+  @Test(expected = ProvisionException.class)
   public void testValidationError()
   {
-    assertThrows(ProvisionException.class, () -> {
-      properties.put(PROPERTY_PREFIX + ".numBackgroundThreads", "-1");
+    properties.put(PROPERTY_PREFIX + ".numBackgroundThreads", "-1");
 
-      configProvider.inject(properties, configurator);
-      CacheConfig config = configProvider.get();
-      Assertions.assertNotEquals(-1, config.getNumBackgroundThreads());
-    });
+    configProvider.inject(properties, configurator);
+    CacheConfig config = configProvider.get();
+    Assert.assertNotEquals(-1, config.getNumBackgroundThreads());
   }
 
 
-  @Test
+  @Test(expected = ProvisionException.class)
   public void testValidationInsaneError()
   {
-    assertThrows(ProvisionException.class, () -> {
-      properties.put(PROPERTY_PREFIX + ".numBackgroundThreads", "BABBA YAGA");
-      configProvider.inject(properties, configurator);
-      CacheConfig config = configProvider.get();
-      throw new IllegalStateException("Should have already failed");
-    });
+    properties.put(PROPERTY_PREFIX + ".numBackgroundThreads", "BABBA YAGA");
+    configProvider.inject(properties, configurator);
+    CacheConfig config = configProvider.get();
+    throw new IllegalStateException("Should have already failed");
   }
 
   @Test
@@ -142,7 +136,7 @@ public class CacheConfigTest
     properties.put(PROPERTY_PREFIX + ".populateCache", "TRUE");
     configProvider.inject(properties, configurator);
     CacheConfig config = configProvider.get();
-    Assertions.assertTrue(config.isPopulateCache());
+    Assert.assertTrue(config.isPopulateCache());
   }
 
   @Test
@@ -151,19 +145,17 @@ public class CacheConfigTest
     properties.put(PROPERTY_PREFIX + ".populateCache", "FALSE");
     configProvider.inject(properties, configurator);
     CacheConfig config = configProvider.get();
-    Assertions.assertFalse(config.isPopulateCache());
+    Assert.assertFalse(config.isPopulateCache());
   }
 
 
-  @Test
+  @Test(expected = ProvisionException.class)
   public void testFaLse()
   {
-    assertThrows(ProvisionException.class, () -> {
-      properties.put(PROPERTY_PREFIX + ".populateCache", "FaLse");
-      configProvider.inject(properties, configurator);
-      CacheConfig config = configProvider.get();
-      throw new IllegalStateException("Should have already failed");
-    });
+    properties.put(PROPERTY_PREFIX + ".populateCache", "FaLse");
+    configProvider.inject(properties, configurator);
+    CacheConfig config = configProvider.get();
+    throw new IllegalStateException("Should have already failed");
   }
 
 

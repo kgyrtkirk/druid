@@ -23,6 +23,7 @@ import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.random.JDKRandomGenerator;
 import org.apache.druid.java.util.common.logger.Logger;
 import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Random;
 

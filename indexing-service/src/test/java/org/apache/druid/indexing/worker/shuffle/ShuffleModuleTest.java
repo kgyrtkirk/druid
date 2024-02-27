@@ -28,6 +28,7 @@ import org.apache.druid.guice.LazySingleton;
 import org.apache.druid.java.util.metrics.MonitorScheduler;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 

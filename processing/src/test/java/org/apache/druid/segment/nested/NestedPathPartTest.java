@@ -24,8 +24,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.apache.druid.jackson.DefaultObjectMapper;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.List;
 
@@ -41,7 +41,7 @@ public class NestedPathPartTest
   {
     NestedPathPart fieldPart = new NestedPathField("x");
     String json = JSON_MAPPER.writeValueAsString(fieldPart);
-    Assertions.assertEquals(fieldPart, JSON_MAPPER.readValue(json, NestedPathPart.class));
+    Assert.assertEquals(fieldPart, JSON_MAPPER.readValue(json, NestedPathPart.class));
   }
 
   @Test
@@ -49,7 +49,7 @@ public class NestedPathPartTest
   {
     NestedPathPart arrayElementPart = new NestedPathArrayElement(1);
     String json = JSON_MAPPER.writeValueAsString(arrayElementPart);
-    Assertions.assertEquals(arrayElementPart, JSON_MAPPER.readValue(json, NestedPathPart.class));
+    Assert.assertEquals(arrayElementPart, JSON_MAPPER.readValue(json, NestedPathPart.class));
   }
 
   @Test

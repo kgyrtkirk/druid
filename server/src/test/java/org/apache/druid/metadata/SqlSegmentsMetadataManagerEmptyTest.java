@@ -26,11 +26,11 @@ import com.google.common.collect.ImmutableSet;
 import org.apache.druid.client.ImmutableDruidDataSource;
 import org.apache.druid.segment.TestHelper;
 import org.joda.time.Period;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Rule;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import java.util.stream.Collectors;
 
@@ -47,7 +47,7 @@ public class SqlSegmentsMetadataManagerEmptyTest
   private SqlSegmentsMetadataManager sqlSegmentsMetadataManager;
   private final ObjectMapper jsonMapper = TestHelper.makeJsonMapper();
 
-  @BeforeEach
+  @Before
   public void setUp()
   {
     TestDerbyConnector connector = derbyConnectorRule.getConnector();
@@ -64,7 +64,7 @@ public class SqlSegmentsMetadataManagerEmptyTest
     connector.createSegmentTable();
   }
 
-  @AfterEach
+  @After
   public void teardown()
   {
     if (sqlSegmentsMetadataManager.isPollingDatabasePeriodically()) {
@@ -78,12 +78,12 @@ public class SqlSegmentsMetadataManagerEmptyTest
   {
     sqlSegmentsMetadataManager.startPollingDatabasePeriodically();
     sqlSegmentsMetadataManager.poll();
-    Assertions.assertTrue(sqlSegmentsMetadataManager.isPollingDatabasePeriodically());
-    Assertions.assertEquals(
+    Assert.assertTrue(sqlSegmentsMetadataManager.isPollingDatabasePeriodically());
+    Assert.assertEquals(
         ImmutableSet.of(),
         sqlSegmentsMetadataManager.retrieveAllDataSourceNames()
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableList.of(),
         sqlSegmentsMetadataManager
             .getImmutableDataSourcesWithAllUsedSegments()
@@ -91,11 +91,11 @@ public class SqlSegmentsMetadataManagerEmptyTest
             .map(ImmutableDruidDataSource::getName)
             .collect(Collectors.toList())
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         null,
         sqlSegmentsMetadataManager.getImmutableDataSourceWithUsedSegments("wikipedia")
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableSet.of(),
         ImmutableSet.copyOf(sqlSegmentsMetadataManager.iterateAllUsedSegments())
     );

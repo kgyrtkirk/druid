@@ -21,7 +21,7 @@ package org.apache.druid.indexing;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.apache.druid.client.indexing.IndexingWorker;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 public class IndexingWorkerTest
 {

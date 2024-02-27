@@ -22,8 +22,8 @@ package org.apache.druid.query.extraction;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.druid.common.config.NullHandling;
 import org.apache.druid.jackson.DefaultObjectMapper;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -61,10 +61,10 @@ public class MatchingDimExtractionFnTest
       }
     }
 
-    Assertions.assertEquals(5, extracted.size());
+    Assert.assertEquals(5, extracted.size());
 
     for (String str : extracted) {
-      Assertions.assertTrue(expected.contains(str));
+      Assert.assertTrue(expected.contains(str));
     }
   }
 
@@ -74,9 +74,9 @@ public class MatchingDimExtractionFnTest
     String regex = "^$";
     ExtractionFn extractionFn = new MatchingDimExtractionFn(regex);
 
-    Assertions.assertNull(extractionFn.apply((Object) null));
-    Assertions.assertNull(extractionFn.apply((String) null));
-    Assertions.assertEquals(NullHandling.replaceWithDefault() ? null : "", extractionFn.apply((String) ""));
+    Assert.assertNull(extractionFn.apply((Object) null));
+    Assert.assertNull(extractionFn.apply((String) null));
+    Assert.assertEquals(NullHandling.replaceWithDefault() ? null : "", extractionFn.apply((String) ""));
   }
 
   @Test
@@ -86,10 +86,10 @@ public class MatchingDimExtractionFnTest
     final String json = "{ \"type\" : \"partial\", \"expr\" : \".(...)?\" }";
     MatchingDimExtractionFn extractionFn = (MatchingDimExtractionFn) objectMapper.readValue(json, ExtractionFn.class);
 
-    Assertions.assertEquals(".(...)?", extractionFn.getExpr());
+    Assert.assertEquals(".(...)?", extractionFn.getExpr());
 
     // round trip
-    Assertions.assertEquals(
+    Assert.assertEquals(
         extractionFn,
         objectMapper.readValue(
             objectMapper.writeValueAsBytes(extractionFn),

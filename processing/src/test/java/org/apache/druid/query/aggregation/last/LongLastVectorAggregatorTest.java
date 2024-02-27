@@ -36,9 +36,9 @@ import org.apache.druid.segment.vector.VectorColumnSelectorFactory;
 import org.apache.druid.segment.vector.VectorObjectSelector;
 import org.apache.druid.segment.vector.VectorValueSelector;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
@@ -73,7 +73,7 @@ public class LongLastVectorAggregatorTest extends InitializedNullHandlingTest
   private VectorColumnSelectorFactory selectorFactory;
   private VectorValueSelector nonLongValueSelector;
 
-  @BeforeEach
+  @Before
   public void setup()
   {
     byte[] randomBytes = new byte[1024];
@@ -226,10 +226,10 @@ public class LongLastVectorAggregatorTest extends InitializedNullHandlingTest
   @Test
   public void testFactory()
   {
-    Assertions.assertTrue(longLastAggregatorFactory.canVectorize(selectorFactory));
+    Assert.assertTrue(longLastAggregatorFactory.canVectorize(selectorFactory));
     VectorAggregator vectorAggregator = longLastAggregatorFactory.factorizeVector(selectorFactory);
-    Assertions.assertNotNull(vectorAggregator);
-    Assertions.assertEquals(LongLastVectorAggregator.class, vectorAggregator.getClass());
+    Assert.assertNotNull(vectorAggregator);
+    Assert.assertEquals(LongLastVectorAggregator.class, vectorAggregator.getClass());
   }
 
   @Test
@@ -237,7 +237,7 @@ public class LongLastVectorAggregatorTest extends InitializedNullHandlingTest
   {
     target.initValue(buf, 0);
     long initVal = buf.getLong(0);
-    Assertions.assertEquals(0, initVal);
+    Assert.assertEquals(0, initVal);
   }
 
   @Test
@@ -245,8 +245,8 @@ public class LongLastVectorAggregatorTest extends InitializedNullHandlingTest
   {
     target.aggregate(buf, 0, 0, pairs.length);
     Pair<Long, Long> result = (Pair<Long, Long>) target.get(buf, 0);
-    Assertions.assertEquals(pairs[3].lhs.longValue(), result.lhs.longValue());
-    Assertions.assertEquals(pairs[3].rhs, result.rhs, EPSILON);
+    Assert.assertEquals(pairs[3].lhs.longValue(), result.lhs.longValue());
+    Assert.assertEquals(pairs[3].rhs, result.rhs, EPSILON);
   }
 
   @Test
@@ -254,8 +254,8 @@ public class LongLastVectorAggregatorTest extends InitializedNullHandlingTest
   {
     target.aggregate(buf, 0, 0, pairs.length);
     Pair<Long, Long> result = (Pair<Long, Long>) target.get(buf, 0);
-    Assertions.assertEquals(pairs[3].lhs.longValue(), result.lhs.longValue());
-    Assertions.assertEquals(pairs[3].rhs, result.rhs, EPSILON);
+    Assert.assertEquals(pairs[3].lhs.longValue(), result.lhs.longValue());
+    Assert.assertEquals(pairs[3].rhs, result.rhs, EPSILON);
   }
 
   @Test
@@ -267,11 +267,11 @@ public class LongLastVectorAggregatorTest extends InitializedNullHandlingTest
     target.aggregate(buf, 3, positions, null, positionOffset);
     for (int i = 0; i < positions.length; i++) {
       Pair<Long, Long> result = (Pair<Long, Long>) target.get(buf, positions[i] + positionOffset);
-      Assertions.assertEquals(pairs[i].getLhs().longValue(), result.lhs.longValue());
+      Assert.assertEquals(pairs[i].getLhs().longValue(), result.lhs.longValue());
       if (!NullHandling.replaceWithDefault() && NULLS[i]) {
-        Assertions.assertNull(result.rhs);
+        Assert.assertNull(result.rhs);
       } else {
-        Assertions.assertEquals(pairs[i].rhs, result.rhs, EPSILON);
+        Assert.assertEquals(pairs[i].rhs, result.rhs, EPSILON);
       }
     }
   }
@@ -286,11 +286,11 @@ public class LongLastVectorAggregatorTest extends InitializedNullHandlingTest
     target.aggregate(buf, 3, positions, rows, positionOffset);
     for (int i = 0; i < positions.length; i++) {
       Pair<Long, Long> result = (Pair<Long, Long>) target.get(buf, positions[i] + positionOffset);
-      Assertions.assertEquals(times[rows[i]], result.lhs.longValue());
+      Assert.assertEquals(times[rows[i]], result.lhs.longValue());
       if (!NullHandling.replaceWithDefault() && NULLS[rows[i]]) {
-        Assertions.assertNull(result.rhs);
+        Assert.assertNull(result.rhs);
       } else {
-        Assertions.assertEquals(pairs[rows[i]].rhs, result.rhs, EPSILON);
+        Assert.assertEquals(pairs[rows[i]].rhs, result.rhs, EPSILON);
       }
     }
   }

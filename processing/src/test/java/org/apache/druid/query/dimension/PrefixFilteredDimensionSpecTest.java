@@ -23,8 +23,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.druid.segment.DimensionSelector;
 import org.apache.druid.segment.TestHelper;
 import org.apache.druid.segment.data.IndexedInts;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Arrays;
 
@@ -57,7 +57,7 @@ public class PrefixFilteredDimensionSpecTest
         "xxx"
     );
 
-    Assertions.assertEquals(expected, actual);
+    Assert.assertEquals(expected, actual);
   }
 
   @Test
@@ -73,7 +73,7 @@ public class PrefixFilteredDimensionSpecTest
         "xyz"
     );
 
-    Assertions.assertFalse(Arrays.equals(spec1.getCacheKey(), spec2.getCacheKey()));
+    Assert.assertFalse(Arrays.equals(spec1.getCacheKey(), spec2.getCacheKey()));
   }
 
   @Test
@@ -86,14 +86,14 @@ public class PrefixFilteredDimensionSpecTest
 
     DimensionSelector selector = spec.decorate(TestDimensionSelector.INSTANCE);
 
-    Assertions.assertEquals(1, selector.getValueCardinality());
+    Assert.assertEquals(1, selector.getValueCardinality());
 
     IndexedInts row = selector.getRow();
-    Assertions.assertEquals(1, row.size());
-    Assertions.assertEquals(0, row.get(0));
+    Assert.assertEquals(1, row.size());
+    Assert.assertEquals(0, row.get(0));
 
-    Assertions.assertEquals("c", selector.lookupName(0));
+    Assert.assertEquals("c", selector.lookupName(0));
 
-    Assertions.assertEquals(0, selector.idLookup().lookupId("c"));
+    Assert.assertEquals(0, selector.idLookup().lookupId("c"));
   }
 }

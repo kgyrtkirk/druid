@@ -23,7 +23,8 @@ import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import org.junit.jupiter.api.Test;
+import junit.framework.Assert;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,9 +34,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  */
@@ -130,7 +128,7 @@ public class ConcatSequenceTest
         )
     );
 
-    assertEquals(
+    Assert.assertEquals(
         9,
         seq.accumulate(
             1,
@@ -139,14 +137,14 @@ public class ConcatSequenceTest
               @Override
               public Integer accumulate(Integer accumulated, Integer in)
               {
-                assertEquals(accumulated, in);
+                Assert.assertEquals(accumulated, in);
                 return accumulated + 1;
               }
             }
         ).intValue()
     );
 
-    assertEquals(1, closedCount[0]);
+    Assert.assertEquals(1, closedCount[0]);
 
     final Yielder<Integer> yielder = seq.toYielder(
         1,
@@ -155,16 +153,16 @@ public class ConcatSequenceTest
           @Override
           public Integer accumulate(Integer accumulated, Integer in)
           {
-            assertEquals(accumulated, in);
+            Assert.assertEquals(accumulated, in);
             return accumulated + 1;
           }
         }
     );
-    assertEquals(9, yielder.get().intValue());
+    Assert.assertEquals(9, yielder.get().intValue());
 
-    assertEquals(1, closedCount[0]);
+    Assert.assertEquals(1, closedCount[0]);
     yielder.close();
-    assertEquals(2, closedCount[0]);
+    Assert.assertEquals(2, closedCount[0]);
   }
 
   @Test
@@ -278,7 +276,7 @@ public class ConcatSequenceTest
     }
     yielder.close();
 
-    assertEquals(ImmutableList.of(1, 2, 3, 4, 5, 6), result);
+    Assert.assertEquals(ImmutableList.of(1, 2, 3, 4, 5, 6), result);
   }
 
   @SuppressWarnings("unchecked")
@@ -304,7 +302,7 @@ public class ConcatSequenceTest
     );
 
     for (TestSequence<Integer> sequence : accumulationSeqs) {
-      assertTrue(sequence.isClosed());
+      Assert.assertTrue(sequence.isClosed());
     }
 
     List<TestSequence<Integer>> yieldSeqs = Lists.newArrayList(theSequences);
@@ -315,7 +313,7 @@ public class ConcatSequenceTest
     );
 
     for (TestSequence<Integer> sequence : yieldSeqs) {
-      assertTrue(sequence.isClosed());
+      Assert.assertTrue(sequence.isClosed());
     }
   }
 }

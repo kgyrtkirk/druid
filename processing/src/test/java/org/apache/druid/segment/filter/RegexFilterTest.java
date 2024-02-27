@@ -33,16 +33,15 @@ import org.apache.druid.query.filter.Filter;
 import org.apache.druid.query.filter.RegexDimFilter;
 import org.apache.druid.segment.IndexBuilder;
 import org.apache.druid.segment.StorageAdapter;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.io.Closeable;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @RunWith(Parameterized.class)
 public class RegexFilterTest extends BaseFilterTest
@@ -58,7 +57,10 @@ public class RegexFilterTest extends BaseFilterTest
     super(testName, DEFAULT_ROWS, indexBuilder, finisher, cnf, optimize);
   }
 
-  @AfterAll
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
+
+  @AfterClass
   public static void tearDown() throws Exception
   {
     BaseFilterTest.tearDown(RegexFilterTest.class.getName());
@@ -172,17 +174,17 @@ public class RegexFilterTest extends BaseFilterTest
   @Test
   public void testRequiredColumnRewrite()
   {
-    Throwable exception = assertThrows(IAE.class, () -> {
-      Filter filter = new RegexDimFilter("dim0", ".*", null).toFilter();
-      Filter filter2 = new RegexDimFilter("dim1", ".*", null).toFilter();
+    Filter filter = new RegexDimFilter("dim0", ".*", null).toFilter();
+    Filter filter2 = new RegexDimFilter("dim1", ".*", null).toFilter();
 
-      Assertions.assertTrue(filter.supportsRequiredColumnRewrite());
-      Assertions.assertTrue(filter2.supportsRequiredColumnRewrite());
+    Assert.assertTrue(filter.supportsRequiredColumnRewrite());
+    Assert.assertTrue(filter2.supportsRequiredColumnRewrite());
 
-      Filter rewrittenFilter = filter.rewriteRequiredColumns(ImmutableMap.of("dim0", "dim1"));
-      Assertions.assertEquals(filter2, rewrittenFilter);
-      filter.rewriteRequiredColumns(ImmutableMap.of("invalidName", "dim1"));
-    });
-    assertTrue(exception.getMessage().contains("Received a non-applicable rewrite: {invalidName=dim1}, filter's dimension: dim0"));
+    Filter rewrittenFilter = filter.rewriteRequiredColumns(ImmutableMap.of("dim0", "dim1"));
+    Assert.assertEquals(filter2, rewrittenFilter);
+
+    expectedException.expect(IAE.class);
+    expectedException.expectMessage("Received a non-applicable rewrite: {invalidName=dim1}, filter's dimension: dim0");
+    filter.rewriteRequiredColumns(ImmutableMap.of("invalidName", "dim1"));
   }
 }

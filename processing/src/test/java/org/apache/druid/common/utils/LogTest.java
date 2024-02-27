@@ -21,8 +21,9 @@ package org.apache.druid.common.utils;
 
 import org.apache.druid.java.util.common.ISE;
 import org.apache.druid.java.util.common.logger.Logger;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import org.junit.Ignore;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 // The issue here is that parameters to the logging system are evaluated eagerly
@@ -30,32 +31,30 @@ import org.junit.rules.ExpectedException;
 public class LogTest
 {
   private static final Logger LOG = new Logger(LogTest.class);
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
 
   @Test
   public void testGoodLog()
   {
-    assertThrows(ISE.class, () -> {
-      final ExpensiveClass expensiveClass = new ExpensiveClass();
-      if (LOG.isDebugEnabled()) {
-        expectedException.expect(ISE.class);
-      }
-      if (LOG.isDebugEnabled()) {
-        LOG.debug("Some error %s", expensiveClass.expensiveMethod());
-      }
-    });
+    final ExpensiveClass expensiveClass = new ExpensiveClass();
+    if (LOG.isDebugEnabled()) {
+      expectedException.expect(ISE.class);
+    }
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("Some error %s", expensiveClass.expensiveMethod());
+    }
   }
 
   @Test
-  @Disabled
+  @Ignore
   public void testBadLog()
   {
-    assertThrows(ISE.class, () -> {
-      final ExpensiveClass expensiveClass = new ExpensiveClass();
-      if (LOG.isDebugEnabled()) {
-        expectedException.expect(ISE.class);
-      }
-      LOG.debug("Some error %s", expensiveClass.expensiveMethod());
-    });
+    final ExpensiveClass expensiveClass = new ExpensiveClass();
+    if (LOG.isDebugEnabled()) {
+      expectedException.expect(ISE.class);
+    }
+    LOG.debug("Some error %s", expensiveClass.expensiveMethod());
   }
 }
 

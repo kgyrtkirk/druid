@@ -44,9 +44,10 @@ import org.apache.druid.segment.writeout.OffHeapMemorySegmentWriteOutMediumFacto
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.apache.druid.timeline.DataSegment;
 import org.joda.time.Interval;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.io.IOException;
@@ -59,8 +60,8 @@ public class BroadcastJoinableMMappedQueryableSegmentizerFactoryTest extends Ini
   private static final Set<String> KEY_COLUMNS =
       ImmutableSet.of("market", "longNumericNull", "doubleNumericNull", "floatNumericNull", "partial_null_column");
 
-  @TempDir
-  public File temporaryFolder;
+  @Rule
+  public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
   @Test
   public void testSegmentizer() throws IOException, SegmentLoadingException
@@ -86,7 +87,7 @@ public class BroadcastJoinableMMappedQueryableSegmentizerFactoryTest extends Ini
     IncrementalIndex data = TestIndex.makeRealtimeIndex("druid.sample.numeric.tsv");
 
     List<String> columnNames = data.getColumnNames();
-    File segment = new File(newFolder(temporaryFolder, "junit"), "segment");
+    File segment = new File(temporaryFolder.newFolder(), "segment");
     File persistedSegmentRoot = indexMerger.persist(
         data,
         testInterval,
@@ -96,10 +97,10 @@ public class BroadcastJoinableMMappedQueryableSegmentizerFactoryTest extends Ini
     );
 
     File factoryJson = new File(persistedSegmentRoot, "factory.json");
-    Assertions.assertTrue(factoryJson.exists());
+    Assert.assertTrue(factoryJson.exists());
     SegmentizerFactory factory = mapper.readValue(factoryJson, SegmentizerFactory.class);
-    Assertions.assertTrue(factory instanceof BroadcastJoinableMMappedQueryableSegmentizerFactory);
-    Assertions.assertEquals(expectedFactory, factory);
+    Assert.assertTrue(factory instanceof BroadcastJoinableMMappedQueryableSegmentizerFactory);
+    Assert.assertEquals(expectedFactory, factory);
 
     // load a segment
     final DataSegment dataSegment = new DataSegment(
@@ -116,15 +117,6 @@ public class BroadcastJoinableMMappedQueryableSegmentizerFactoryTest extends Ini
     final Segment loaded = factory.factorize(dataSegment, persistedSegmentRoot, false, SegmentLazyLoadFailCallback.NOOP);
 
     final BroadcastSegmentIndexedTable table = (BroadcastSegmentIndexedTable) loaded.as(IndexedTable.class);
-    Assertions.assertNotNull(table);
-  }
-
-  private static File newFolder(File root, String... subDirs) throws IOException {
-    String subFolder = String.join("/", subDirs);
-    File result = new File(root, subFolder);
-    if (!result.mkdirs()) {
-      throw new IOException("Couldn't create folders " + root);
-    }
-    return result;
+    Assert.assertNotNull(table);
   }
 }

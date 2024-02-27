@@ -22,10 +22,11 @@ package org.apache.druid.data.input;
 import org.apache.druid.data.input.HandlingInputRowIterator.InputRowHandler;
 import org.apache.druid.java.util.common.CloseableIterators;
 import org.apache.druid.java.util.common.parsers.CloseableIterator;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.experimental.runners.Enclosed;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
 import javax.annotation.Nullable;
@@ -36,17 +37,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-
-
+@RunWith(Enclosed.class)
 public class HandlingInputRowIteratorTest
 {
-  @Nested
-  public class AbsentRowTest
+  public static class AbsentRowTest
   {
     private static final CloseableIterator<InputRow> EMPTY_ITERATOR = CloseableIterators.withEmptyBaggage(
         new Iterator<InputRow>()
@@ -67,7 +65,7 @@ public class HandlingInputRowIteratorTest
 
     private HandlingInputRowIterator target;
 
-    @BeforeEach
+    @Before
     public void setup()
     {
       target = new HandlingInputRowIterator(EMPTY_ITERATOR, Collections.emptyList());
@@ -76,20 +74,17 @@ public class HandlingInputRowIteratorTest
     @Test
     public void doesNotHaveNext()
     {
-      Assertions.assertFalse(target.hasNext());
+      Assert.assertFalse(target.hasNext());
     }
 
-    @Test
+    @Test(expected = NoSuchElementException.class)
     public void throwsExceptionWhenYieldingNext()
     {
-      assertThrows(NoSuchElementException.class, () -> {
-        target.next();
-      });
+      target.next();
     }
   }
 
-  @Nested
-  public class PresentRowTest
+  public static class PresentRowTest
   {
 
     private static final InputRow INPUT_ROW1 = mock(InputRow.class);
@@ -99,7 +94,7 @@ public class HandlingInputRowIteratorTest
     private InputRowHandler successfulHandler;
     private InputRowHandler unsuccessfulHandler;
 
-    @BeforeEach
+    @Before
     public void setup()
     {
       // Construct mock object
@@ -116,7 +111,7 @@ public class HandlingInputRowIteratorTest
     public void hasNext()
     {
       HandlingInputRowIterator target = createInputRowIterator(unsuccessfulHandler, unsuccessfulHandler);
-      Assertions.assertTrue(target.hasNext());
+      Assert.assertTrue(target.hasNext());
       Mockito.verify(unsuccessfulHandler, Mockito.never()).handle(INPUT_ROW1);
     }
 
@@ -124,7 +119,7 @@ public class HandlingInputRowIteratorTest
     public void yieldsNextIfUnhandled()
     {
       HandlingInputRowIterator target = createInputRowIterator(unsuccessfulHandler, unsuccessfulHandler);
-      Assertions.assertEquals(INPUT_ROW1, target.next());
+      Assert.assertEquals(INPUT_ROW1, target.next());
       Mockito.verify(unsuccessfulHandler, Mockito.times(2)).handle(INPUT_ROW1);
     }
 
@@ -132,7 +127,7 @@ public class HandlingInputRowIteratorTest
     public void yieldsNullIfHandledByFirst()
     {
       HandlingInputRowIterator target = createInputRowIterator(successfulHandler, unsuccessfulHandler);
-      Assertions.assertNull(target.next());
+      Assert.assertNull(target.next());
       Mockito.verify(successfulHandler, Mockito.times(1)).handle(INPUT_ROW1);
       Mockito.verify(unsuccessfulHandler, Mockito.never()).handle(INPUT_ROW1);
     }
@@ -141,7 +136,7 @@ public class HandlingInputRowIteratorTest
     public void yieldsNullIfHandledBySecond()
     {
       HandlingInputRowIterator target = createInputRowIterator(unsuccessfulHandler, successfulHandler);
-      Assertions.assertNull(target.next());
+      Assert.assertNull(target.next());
       Mockito.verify(unsuccessfulHandler, Mockito.times(1)).handle(INPUT_ROW1);
       Mockito.verify(successfulHandler, Mockito.times(1)).handle(INPUT_ROW1);
     }

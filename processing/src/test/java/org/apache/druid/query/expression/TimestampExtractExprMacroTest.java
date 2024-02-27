@@ -27,9 +27,9 @@ import org.apache.druid.math.expr.ExprEval;
 import org.apache.druid.math.expr.ExpressionType;
 import org.apache.druid.math.expr.InputBindings;
 import org.apache.druid.math.expr.Parser;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * These tests are copied from examples here -
@@ -43,7 +43,7 @@ public class TimestampExtractExprMacroTest
 
   private TimestampExtractExprMacro target;
 
-  @BeforeEach
+  @Before
   public void setUp()
   {
     target = new TimestampExtractExprMacro();
@@ -57,7 +57,7 @@ public class TimestampExtractExprMacroTest
             ExprEval.of("2001-02-16").toExpr(),
             ExprEval.of(TimestampExtractExprMacro.Unit.DECADE.toString()).toExpr()
         ));
-    Assertions.assertEquals(200, expression.eval(InputBindings.nilBindings()).asInt());
+    Assert.assertEquals(200, expression.eval(InputBindings.nilBindings()).asInt());
   }
 
   @Test
@@ -68,7 +68,7 @@ public class TimestampExtractExprMacroTest
             ExprEval.of("2000-12-16").toExpr(),
             ExprEval.of(TimestampExtractExprMacro.Unit.CENTURY.toString()).toExpr()
         ));
-    Assertions.assertEquals(20, expression.eval(InputBindings.nilBindings()).asInt());
+    Assert.assertEquals(20, expression.eval(InputBindings.nilBindings()).asInt());
   }
 
   @Test
@@ -79,7 +79,7 @@ public class TimestampExtractExprMacroTest
             ExprEval.of("2001-02-16").toExpr(),
             ExprEval.of(TimestampExtractExprMacro.Unit.CENTURY.toString()).toExpr()
         ));
-    Assertions.assertEquals(21, expression.eval(InputBindings.nilBindings()).asInt());
+    Assert.assertEquals(21, expression.eval(InputBindings.nilBindings()).asInt());
   }
 
   @Test
@@ -90,7 +90,7 @@ public class TimestampExtractExprMacroTest
             ExprEval.of("2000-12-16").toExpr(),
             ExprEval.of(TimestampExtractExprMacro.Unit.MILLENNIUM.toString()).toExpr()
         ));
-    Assertions.assertEquals(2, expression.eval(InputBindings.nilBindings()).asInt());
+    Assert.assertEquals(2, expression.eval(InputBindings.nilBindings()).asInt());
   }
 
   @Test
@@ -101,7 +101,7 @@ public class TimestampExtractExprMacroTest
             ExprEval.of("2001-02-16").toExpr(),
             ExprEval.of(TimestampExtractExprMacro.Unit.MILLENNIUM.toString()).toExpr()
         ));
-    Assertions.assertEquals(3, expression.eval(InputBindings.nilBindings()).asInt());
+    Assert.assertEquals(3, expression.eval(InputBindings.nilBindings()).asInt());
   }
 
   @Test
@@ -113,7 +113,7 @@ public class TimestampExtractExprMacroTest
             ExprEval.of(TimestampExtractExprMacro.Unit.DOW.toString()).toExpr(),
             ExprEval.of("UTC").toExpr()
         ));
-    Assertions.assertEquals(5, expression.eval(InputBindings.nilBindings()).asInt());
+    Assert.assertEquals(5, expression.eval(InputBindings.nilBindings()).asInt());
   }
 
   @Test
@@ -126,6 +126,6 @@ public class TimestampExtractExprMacroTest
             "timezone", InputBindings.inputSupplier(ExpressionType.STRING, () -> "UTC")
         )
     );
-    Assertions.assertEquals(5, expression.eval(bindings).asInt());
+    Assert.assertEquals(5, expression.eval(bindings).asInt());
   }
 }

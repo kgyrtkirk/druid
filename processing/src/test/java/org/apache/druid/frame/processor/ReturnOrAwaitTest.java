@@ -21,17 +21,17 @@ package org.apache.druid.frame.processor;
 
 import it.unimi.dsi.fastutil.ints.IntSet;
 import nl.jqno.equalsverifier.EqualsVerifier;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class ReturnOrAwaitTest
 {
   @Test
   public void testToString()
   {
-    Assertions.assertEquals("await=any{0, 1}", ReturnOrAwait.awaitAny(IntSet.of(0, 1)).toString());
-    Assertions.assertEquals("await=all{0, 1}", ReturnOrAwait.awaitAll(2).toString());
-    Assertions.assertEquals("return=xyzzy", ReturnOrAwait.returnObject("xyzzy").toString());
+    Assert.assertEquals("await=any{0, 1}", ReturnOrAwait.awaitAny(IntSet.of(0, 1)).toString());
+    Assert.assertEquals("await=all{0, 1}", ReturnOrAwait.awaitAll(2).toString());
+    Assert.assertEquals("return=xyzzy", ReturnOrAwait.returnObject("xyzzy").toString());
   }
 
   @Test

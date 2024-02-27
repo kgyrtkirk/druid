@@ -20,7 +20,7 @@
 package org.apache.druid.query.groupby.epinephelinae;
 
 import org.apache.druid.java.util.common.StringUtils;
-import org.junit.jupiter.api.Assertions;
+import org.junit.Assert;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -79,11 +79,11 @@ public class GrouperTestUtil
     }
 
     if (expectedEntries.hasNext()) {
-      Assertions.fail(StringUtils.format("expected additional entry [%,d]", i));
+      Assert.fail(StringUtils.format("expected additional entry [%,d]", i));
     }
 
     if (actualEntries.hasNext()) {
-      Assertions.fail(StringUtils.format("encountered too many entries [%,d]", i));
+      Assert.fail(StringUtils.format("encountered too many entries [%,d]", i));
     }
   }
 
@@ -101,12 +101,12 @@ public class GrouperTestUtil
       final Grouper.Entry<T> actualEntry
   )
   {
-    Assertions.assertEquals(expectedEntry.getKey(), actualEntry.getKey(), StringUtils.format("%s: key", message));
+    Assert.assertEquals(StringUtils.format("%s: key", message), expectedEntry.getKey(), actualEntry.getKey());
 
-    Assertions.assertArrayEquals(
+    Assert.assertArrayEquals(
+        StringUtils.format("%s: values", message),
         expectedEntry.getValues(),
-        actualEntry.getValues(),
-        StringUtils.format("%s: values", message)
+        actualEntry.getValues()
     );
   }
 }

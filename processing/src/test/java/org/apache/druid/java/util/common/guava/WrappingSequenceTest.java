@@ -19,8 +19,8 @@
 
 package org.apache.druid.java.util.common.guava;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.Closeable;
 import java.util.Arrays;
@@ -41,7 +41,7 @@ public class WrappingSequenceTest
 
     SequenceTestHelper.testAll(Sequences.simple(nums).withBaggage(closeable), nums);
 
-    Assertions.assertEquals(3, closedCounter.get());
+    Assert.assertEquals(3, closedCounter.get());
 
     closedCounter.set(0);
     SequenceTestHelper.testClosed(closedCounter, new UnsupportedSequence().withBaggage(closeable));
@@ -60,13 +60,13 @@ public class WrappingSequenceTest
         .withBaggage(() -> closed2.set(counter.incrementAndGet()));
     // Run sequence via accumulate
     sequence.toList();
-    Assertions.assertEquals(1, closed1.get());
-    Assertions.assertEquals(2, closed2.get());
+    Assert.assertEquals(1, closed1.get());
+    Assert.assertEquals(2, closed2.get());
 
     // Ensure sequence runs via Yielder, because LimitedSequence extends YieldingSequenceBase
     Sequence<Integer> yieldingSequence = sequence.limit(1);
     yieldingSequence.toList();
-    Assertions.assertEquals(3, closed1.get());
-    Assertions.assertEquals(4, closed2.get());
+    Assert.assertEquals(3, closed1.get());
+    Assert.assertEquals(4, closed2.get());
   }
 }

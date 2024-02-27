@@ -42,6 +42,7 @@ import org.easymock.EasyMockSupport;
 import org.easymock.Mock;
 import org.junit.Assert;
 import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 

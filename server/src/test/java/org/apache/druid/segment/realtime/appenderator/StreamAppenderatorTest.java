@@ -54,15 +54,12 @@ import org.apache.druid.server.coordination.DataSegmentAnnouncer;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.apache.druid.timeline.DataSegment;
 import org.apache.druid.timeline.partition.LinearShardSpec;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
-import org.junit.jupiter.api.io.TempDir;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import javax.annotation.Nullable;
-
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -75,8 +72,6 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 public class StreamAppenderatorTest extends InitializedNullHandlingTest
 {
   private static final List<SegmentIdWithShardSpec> IDENTIFIERS = ImmutableList.of(
@@ -85,8 +80,8 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
       si("2001/2002", "A", 0)
   );
 
-  @TempDir
-  public File temporaryFolder;
+  @Rule
+  public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
   @Test
   public void testSimpleIngestion() throws Exception
@@ -94,7 +89,7 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
     try (final StreamAppenderatorTester tester =
              new StreamAppenderatorTester.Builder().maxRowsInMemory(2)
                                                    .enablePushFailure(true)
-                                                   .basePersistDirectory(newFolder(temporaryFolder, "junit"))
+                                                   .basePersistDirectory(temporaryFolder.newFolder())
                                                    .build()) {
       final Appenderator appenderator = tester.getAppenderator();
       boolean thrown;
@@ -103,39 +98,39 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
       final Supplier<Committer> committerSupplier = committerSupplierFromConcurrentMap(commitMetadata);
 
       // startJob
-      Assertions.assertEquals(null, appenderator.startJob());
+      Assert.assertEquals(null, appenderator.startJob());
 
       // getDataSource
-      Assertions.assertEquals(StreamAppenderatorTester.DATASOURCE, appenderator.getDataSource());
+      Assert.assertEquals(StreamAppenderatorTester.DATASOURCE, appenderator.getDataSource());
 
       // add
       commitMetadata.put("x", "1");
-      Assertions.assertEquals(
+      Assert.assertEquals(
           1,
           appenderator.add(IDENTIFIERS.get(0), ir("2000", "foo", 1), committerSupplier)
                       .getNumRowsInSegment()
       );
 
       commitMetadata.put("x", "2");
-      Assertions.assertEquals(
+      Assert.assertEquals(
           2,
           appenderator.add(IDENTIFIERS.get(0), ir("2000", "bar", 2), committerSupplier)
                       .getNumRowsInSegment()
       );
 
       commitMetadata.put("x", "3");
-      Assertions.assertEquals(
+      Assert.assertEquals(
           1,
           appenderator.add(IDENTIFIERS.get(1), ir("2000", "qux", 4), committerSupplier)
                       .getNumRowsInSegment()
       );
 
       // getSegments
-      Assertions.assertEquals(IDENTIFIERS.subList(0, 2), sorted(appenderator.getSegments()));
+      Assert.assertEquals(IDENTIFIERS.subList(0, 2), sorted(appenderator.getSegments()));
 
       // getRowCount
-      Assertions.assertEquals(2, appenderator.getRowCount(IDENTIFIERS.get(0)));
-      Assertions.assertEquals(1, appenderator.getRowCount(IDENTIFIERS.get(1)));
+      Assert.assertEquals(2, appenderator.getRowCount(IDENTIFIERS.get(0)));
+      Assert.assertEquals(1, appenderator.getRowCount(IDENTIFIERS.get(1)));
       thrown = false;
       try {
         appenderator.getRowCount(IDENTIFIERS.get(2));
@@ -143,7 +138,7 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
       catch (IllegalStateException e) {
         thrown = true;
       }
-      Assertions.assertTrue(thrown);
+      Assert.assertTrue(thrown);
 
       // push all
       final SegmentsAndCommitMetadata segmentsAndCommitMetadata = appenderator.push(
@@ -151,11 +146,11 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
           committerSupplier.get(),
           false
       ).get();
-      Assertions.assertEquals(
+      Assert.assertEquals(
           ImmutableMap.of("x", "3"),
           (Map<String, String>) segmentsAndCommitMetadata.getCommitMetadata()
       );
-      Assertions.assertEquals(
+      Assert.assertEquals(
           IDENTIFIERS.subList(0, 2),
           sorted(
               Lists.transform(
@@ -171,11 +166,11 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
               )
           )
       );
-      Assertions.assertEquals(sorted(tester.getPushedSegments()), sorted(segmentsAndCommitMetadata.getSegments()));
+      Assert.assertEquals(sorted(tester.getPushedSegments()), sorted(segmentsAndCommitMetadata.getSegments()));
 
       // clear
       appenderator.clear();
-      Assertions.assertTrue(appenderator.getSegments().isEmpty());
+      Assert.assertTrue(appenderator.getSegments().isEmpty());
     }
   }
 
@@ -186,7 +181,7 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
         final StreamAppenderatorTester tester =
             new StreamAppenderatorTester.Builder().maxRowsInMemory(100)
                                                   .maxSizeInBytes(1024)
-                                                  .basePersistDirectory(newFolder(temporaryFolder, "junit"))
+                                                  .basePersistDirectory(temporaryFolder.newFolder())
                                                   .enablePushFailure(true)
                                                   .skipBytesInMemoryOverheadCheck(true)
                                                   .build()) {
@@ -215,17 +210,17 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
       appenderator.add(IDENTIFIERS.get(0), ir("2000", "foo", 1), committerSupplier);
       //expectedSizeInBytes = 44(map overhead) + 28 (TimeAndDims overhead) + 56 (aggregator metrics) + 54 (dimsKeySize) = 182 + 1 byte when null handling is enabled
       int nullHandlingOverhead = NullHandling.sqlCompatible() ? 1 : 0;
-      Assertions.assertEquals(
+      Assert.assertEquals(
           182 + nullHandlingOverhead,
           ((StreamAppenderator) appenderator).getBytesInMemory(IDENTIFIERS.get(0))
       );
       appenderator.add(IDENTIFIERS.get(1), ir("2000", "bar", 1), committerSupplier);
-      Assertions.assertEquals(
+      Assert.assertEquals(
           182 + nullHandlingOverhead,
           ((StreamAppenderator) appenderator).getBytesInMemory(IDENTIFIERS.get(1))
       );
       appenderator.close();
-      Assertions.assertEquals(0, ((StreamAppenderator) appenderator).getRowsInMemory());
+      Assert.assertEquals(0, ((StreamAppenderator) appenderator).getRowsInMemory());
     }
   }
 
@@ -236,7 +231,7 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
         final StreamAppenderatorTester tester =
             new StreamAppenderatorTester.Builder().maxRowsInMemory(100)
                                                   .maxSizeInBytes(1024)
-                                                  .basePersistDirectory(newFolder(temporaryFolder, "junit"))
+                                                  .basePersistDirectory(temporaryFolder.newFolder())
                                                   .enablePushFailure(true)
                                                   .skipBytesInMemoryOverheadCheck(true)
                                                   .build()) {
@@ -265,14 +260,14 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
       appenderator.add(IDENTIFIERS.get(0), ir("2000", "foo", 1), committerSupplier);
       //expectedSizeInBytes = 44(map overhead) + 28 (TimeAndDims overhead) + 56 (aggregator metrics) + 54 (dimsKeySize) = 182
       int nullHandlingOverhead = NullHandling.sqlCompatible() ? 1 : 0;
-      Assertions.assertEquals(182 + nullHandlingOverhead, ((StreamAppenderator) appenderator).getBytesCurrentlyInMemory());
+      Assert.assertEquals(182 + nullHandlingOverhead, ((StreamAppenderator) appenderator).getBytesCurrentlyInMemory());
       appenderator.add(IDENTIFIERS.get(1), ir("2000", "bar", 1), committerSupplier);
-      Assertions.assertEquals(
+      Assert.assertEquals(
           364 + 2 * nullHandlingOverhead,
           ((StreamAppenderator) appenderator).getBytesCurrentlyInMemory()
       );
       appenderator.close();
-      Assertions.assertEquals(0, ((StreamAppenderator) appenderator).getRowsInMemory());
+      Assert.assertEquals(0, ((StreamAppenderator) appenderator).getRowsInMemory());
     }
   }
 
@@ -283,7 +278,7 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
         final StreamAppenderatorTester tester =
             new StreamAppenderatorTester.Builder().maxRowsInMemory(100)
                                                   .maxSizeInBytes(15000)
-                                                  .basePersistDirectory(newFolder(temporaryFolder, "junit"))
+                                                  .basePersistDirectory(temporaryFolder.newFolder())
                                                   .enablePushFailure(true)
                                                   .build()) {
       final Appenderator appenderator = tester.getAppenderator();
@@ -315,11 +310,11 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
       int currentInMemoryIndexSize = 182 + nullHandlingOverhead;
       int sinkSizeOverhead = 1 * StreamAppenderator.ROUGH_OVERHEAD_PER_SINK;
       // currHydrant in the sink still has > 0 bytesInMemory since we do not persist yet
-      Assertions.assertEquals(
+      Assert.assertEquals(
           currentInMemoryIndexSize,
           ((StreamAppenderator) appenderator).getBytesInMemory(IDENTIFIERS.get(0))
       );
-      Assertions.assertEquals(
+      Assert.assertEquals(
           currentInMemoryIndexSize + sinkSizeOverhead,
           ((StreamAppenderator) appenderator).getBytesCurrentlyInMemory()
       );
@@ -333,7 +328,7 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
       currentInMemoryIndexSize = 0;
       // We are now over maxSizeInBytes after the add. Hence, we do a persist.
       // currHydrant in the sink has 0 bytesInMemory since we just did a persist
-      Assertions.assertEquals(
+      Assert.assertEquals(
           currentInMemoryIndexSize,
           ((StreamAppenderator) appenderator).getBytesInMemory(IDENTIFIERS.get(0))
       );
@@ -342,7 +337,7 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
       int mappedIndexSize = 1012 + (2 * StreamAppenderator.ROUGH_OVERHEAD_PER_METRIC_COLUMN_HOLDER) +
                             StreamAppenderator.ROUGH_OVERHEAD_PER_DIMENSION_COLUMN_HOLDER +
                             StreamAppenderator.ROUGH_OVERHEAD_PER_TIME_COLUMN_HOLDER;
-      Assertions.assertEquals(
+      Assert.assertEquals(
           currentInMemoryIndexSize + sinkSizeOverhead + mappedIndexSize,
           ((StreamAppenderator) appenderator).getBytesCurrentlyInMemory()
       );
@@ -351,11 +346,11 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
       appenderator.add(IDENTIFIERS.get(0), ir("2000", "bob", 1), committerSupplier);
       // currHydrant in the sink still has > 0 bytesInMemory since we do not persist yet
       currentInMemoryIndexSize = 182 + nullHandlingOverhead;
-      Assertions.assertEquals(
+      Assert.assertEquals(
           currentInMemoryIndexSize,
           ((StreamAppenderator) appenderator).getBytesInMemory(IDENTIFIERS.get(0))
       );
-      Assertions.assertEquals(
+      Assert.assertEquals(
           currentInMemoryIndexSize + sinkSizeOverhead + mappedIndexSize,
           ((StreamAppenderator) appenderator).getBytesCurrentlyInMemory()
       );
@@ -368,7 +363,7 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
       currentInMemoryIndexSize = 0;
       // We are now over maxSizeInBytes after the add. Hence, we do a persist.
       // currHydrant in the sink has 0 bytesInMemory since we just did a persist
-      Assertions.assertEquals(
+      Assert.assertEquals(
           currentInMemoryIndexSize,
           ((StreamAppenderator) appenderator).getBytesInMemory(IDENTIFIERS.get(0))
       );
@@ -378,52 +373,50 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
       mappedIndexSize = 2 * (1012 + (2 * StreamAppenderator.ROUGH_OVERHEAD_PER_METRIC_COLUMN_HOLDER) +
                              StreamAppenderator.ROUGH_OVERHEAD_PER_DIMENSION_COLUMN_HOLDER +
                              StreamAppenderator.ROUGH_OVERHEAD_PER_TIME_COLUMN_HOLDER);
-      Assertions.assertEquals(
+      Assert.assertEquals(
           currentInMemoryIndexSize + sinkSizeOverhead + mappedIndexSize,
           ((StreamAppenderator) appenderator).getBytesCurrentlyInMemory()
       );
       appenderator.close();
-      Assertions.assertEquals(0, ((StreamAppenderator) appenderator).getRowsInMemory());
-      Assertions.assertEquals(0, ((StreamAppenderator) appenderator).getBytesCurrentlyInMemory());
+      Assert.assertEquals(0, ((StreamAppenderator) appenderator).getRowsInMemory());
+      Assert.assertEquals(0, ((StreamAppenderator) appenderator).getBytesCurrentlyInMemory());
     }
   }
 
-  @Test
+  @Test(expected = RuntimeException.class)
   public void testTaskFailAsPersistCannotFreeAnyMoreMemory() throws Exception
   {
-    assertThrows(RuntimeException.class, () -> {
-      try (
+    try (
         final StreamAppenderatorTester tester =
-              new StreamAppenderatorTester.Builder().maxRowsInMemory(100)
-                  .maxSizeInBytes(5180)
-                  .basePersistDirectory(newFolder(temporaryFolder, "junit"))
-                  .enablePushFailure(true)
-                  .build()) {
-        final Appenderator appenderator = tester.getAppenderator();
-        final AtomicInteger eventCount = new AtomicInteger(0);
-        final Supplier<Committer> committerSupplier = () -> {
-          final Object metadata = ImmutableMap.of(eventCount, eventCount.get());
+            new StreamAppenderatorTester.Builder().maxRowsInMemory(100)
+                                                  .maxSizeInBytes(5180)
+                                                  .basePersistDirectory(temporaryFolder.newFolder())
+                                                  .enablePushFailure(true)
+                                                  .build()) {
+      final Appenderator appenderator = tester.getAppenderator();
+      final AtomicInteger eventCount = new AtomicInteger(0);
+      final Supplier<Committer> committerSupplier = () -> {
+        final Object metadata = ImmutableMap.of(eventCount, eventCount.get());
 
-          return new Committer()
+        return new Committer()
+        {
+          @Override
+          public Object getMetadata()
           {
-            @Override
-            public Object getMetadata()
-            {
-              return metadata;
-            }
+            return metadata;
+          }
 
-            @Override
-            public void run()
-            {
-              //Do nothing
-            }
-          };
+          @Override
+          public void run()
+          {
+            //Do nothing
+          }
         };
+      };
 
-        appenderator.startJob();
-        appenderator.add(IDENTIFIERS.get(0), ir("2000", "foo", 1), committerSupplier);
-      }
-    });
+      appenderator.startJob();
+      appenderator.add(IDENTIFIERS.get(0), ir("2000", "foo", 1), committerSupplier);
+    }
   }
 
   @Test
@@ -433,7 +426,7 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
         final StreamAppenderatorTester tester =
             new StreamAppenderatorTester.Builder().maxRowsInMemory(100)
                                                   .maxSizeInBytes(10)
-                                                  .basePersistDirectory(newFolder(temporaryFolder, "junit"))
+                                                  .basePersistDirectory(temporaryFolder.newFolder())
                                                   .enablePushFailure(true)
                                                   .skipBytesInMemoryOverheadCheck(true)
                                                   .build()) {
@@ -461,13 +454,13 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
       appenderator.startJob();
       appenderator.add(IDENTIFIERS.get(0), ir("2000", "foo", 1), committerSupplier);
       // Expected 0 since we persisted after the add
-      Assertions.assertEquals(
+      Assert.assertEquals(
           0,
           ((StreamAppenderator) appenderator).getBytesCurrentlyInMemory()
       );
       appenderator.add(IDENTIFIERS.get(0), ir("2000", "foo", 1), committerSupplier);
       // Expected 0 since we persisted after the add
-      Assertions.assertEquals(
+      Assert.assertEquals(
           0,
           ((StreamAppenderator) appenderator).getBytesCurrentlyInMemory()
       );
@@ -481,7 +474,7 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
         final StreamAppenderatorTester tester =
             new StreamAppenderatorTester.Builder().maxRowsInMemory(100)
                                                   .maxSizeInBytes(10000)
-                                                  .basePersistDirectory(newFolder(temporaryFolder, "junit"))
+                                                  .basePersistDirectory(temporaryFolder.newFolder())
                                                   .enablePushFailure(true)
                                                   .build()) {
       final Appenderator appenderator = tester.getAppenderator();
@@ -512,7 +505,7 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
       int nullHandlingOverhead = NullHandling.sqlCompatible() ? 1 : 0;
       int currentInMemoryIndexSize = 182 + nullHandlingOverhead;
       int sinkSizeOverhead = 1 * StreamAppenderator.ROUGH_OVERHEAD_PER_SINK;
-      Assertions.assertEquals(
+      Assert.assertEquals(
           currentInMemoryIndexSize + sinkSizeOverhead,
           ((StreamAppenderator) appenderator).getBytesCurrentlyInMemory()
       );
@@ -520,8 +513,8 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
       // Close with row still in memory (no persist)
       appenderator.close();
 
-      Assertions.assertEquals(0, ((StreamAppenderator) appenderator).getRowsInMemory());
-      Assertions.assertEquals(0, ((StreamAppenderator) appenderator).getBytesCurrentlyInMemory());
+      Assert.assertEquals(0, ((StreamAppenderator) appenderator).getRowsInMemory());
+      Assert.assertEquals(0, ((StreamAppenderator) appenderator).getBytesCurrentlyInMemory());
     }
   }
 
@@ -532,7 +525,7 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
         final StreamAppenderatorTester tester =
             new StreamAppenderatorTester.Builder().maxRowsInMemory(100)
                                                   .maxSizeInBytes(31100)
-                                                  .basePersistDirectory(newFolder(temporaryFolder, "junit"))
+                                                  .basePersistDirectory(temporaryFolder.newFolder())
                                                   .enablePushFailure(true)
                                                   .build()) {
       final Appenderator appenderator = tester.getAppenderator();
@@ -566,15 +559,15 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
       int currentInMemoryIndexSize = 182 + nullHandlingOverhead;
       int sinkSizeOverhead = 2 * StreamAppenderator.ROUGH_OVERHEAD_PER_SINK;
       // currHydrant in the sink still has > 0 bytesInMemory since we do not persist yet
-      Assertions.assertEquals(
+      Assert.assertEquals(
           currentInMemoryIndexSize,
           ((StreamAppenderator) appenderator).getBytesInMemory(IDENTIFIERS.get(0))
       );
-      Assertions.assertEquals(
+      Assert.assertEquals(
           currentInMemoryIndexSize,
           ((StreamAppenderator) appenderator).getBytesInMemory(IDENTIFIERS.get(1))
       );
-      Assertions.assertEquals(
+      Assert.assertEquals(
           (2 * currentInMemoryIndexSize) + sinkSizeOverhead,
           ((StreamAppenderator) appenderator).getBytesCurrentlyInMemory()
       );
@@ -589,11 +582,11 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
       currentInMemoryIndexSize = 0;
       // We are now over maxSizeInBytes after the add. Hence, we do a persist.
       // currHydrant in the sink has 0 bytesInMemory since we just did a persist
-      Assertions.assertEquals(
+      Assert.assertEquals(
           currentInMemoryIndexSize,
           ((StreamAppenderator) appenderator).getBytesInMemory(IDENTIFIERS.get(0))
       );
-      Assertions.assertEquals(
+      Assert.assertEquals(
           currentInMemoryIndexSize,
           ((StreamAppenderator) appenderator).getBytesInMemory(IDENTIFIERS.get(1))
       );
@@ -602,7 +595,7 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
       int mappedIndexSize = 2 * (1012 + (2 * StreamAppenderator.ROUGH_OVERHEAD_PER_METRIC_COLUMN_HOLDER) +
                                  StreamAppenderator.ROUGH_OVERHEAD_PER_DIMENSION_COLUMN_HOLDER +
                                  StreamAppenderator.ROUGH_OVERHEAD_PER_TIME_COLUMN_HOLDER);
-      Assertions.assertEquals(
+      Assert.assertEquals(
           currentInMemoryIndexSize + sinkSizeOverhead + mappedIndexSize,
           ((StreamAppenderator) appenderator).getBytesCurrentlyInMemory()
       );
@@ -611,29 +604,29 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
       appenderator.add(IDENTIFIERS.get(0), ir("2000", "bob", 1), committerSupplier);
       // currHydrant in the sink still has > 0 bytesInMemory since we do not persist yet
       currentInMemoryIndexSize = 182 + nullHandlingOverhead;
-      Assertions.assertEquals(
+      Assert.assertEquals(
           currentInMemoryIndexSize,
           ((StreamAppenderator) appenderator).getBytesInMemory(IDENTIFIERS.get(0))
       );
-      Assertions.assertEquals(
+      Assert.assertEquals(
           0,
           ((StreamAppenderator) appenderator).getBytesInMemory(IDENTIFIERS.get(1))
       );
-      Assertions.assertEquals(
+      Assert.assertEquals(
           currentInMemoryIndexSize + sinkSizeOverhead + mappedIndexSize,
           ((StreamAppenderator) appenderator).getBytesCurrentlyInMemory()
       );
       // Now add a single row to sink 1
       appenderator.add(IDENTIFIERS.get(1), ir("2000", "bob", 1), committerSupplier);
-      Assertions.assertEquals(
+      Assert.assertEquals(
           currentInMemoryIndexSize,
           ((StreamAppenderator) appenderator).getBytesInMemory(IDENTIFIERS.get(0))
       );
-      Assertions.assertEquals(
+      Assert.assertEquals(
           currentInMemoryIndexSize,
           ((StreamAppenderator) appenderator).getBytesInMemory(IDENTIFIERS.get(1))
       );
-      Assertions.assertEquals(
+      Assert.assertEquals(
           (2 * currentInMemoryIndexSize) + sinkSizeOverhead + mappedIndexSize,
           ((StreamAppenderator) appenderator).getBytesCurrentlyInMemory()
       );
@@ -647,11 +640,11 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
       currentInMemoryIndexSize = 0;
       // We are now over maxSizeInBytes after the add. Hence, we do a persist.
       // currHydrant in the sink has 0 bytesInMemory since we just did a persist
-      Assertions.assertEquals(
+      Assert.assertEquals(
           currentInMemoryIndexSize,
           ((StreamAppenderator) appenderator).getBytesInMemory(IDENTIFIERS.get(0))
       );
-      Assertions.assertEquals(
+      Assert.assertEquals(
           currentInMemoryIndexSize,
           ((StreamAppenderator) appenderator).getBytesInMemory(IDENTIFIERS.get(1))
       );
@@ -661,13 +654,13 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
       mappedIndexSize = 2 * (2 * (1012 + (2 * StreamAppenderator.ROUGH_OVERHEAD_PER_METRIC_COLUMN_HOLDER) +
                                   StreamAppenderator.ROUGH_OVERHEAD_PER_DIMENSION_COLUMN_HOLDER +
                                   StreamAppenderator.ROUGH_OVERHEAD_PER_TIME_COLUMN_HOLDER));
-      Assertions.assertEquals(
+      Assert.assertEquals(
           currentInMemoryIndexSize + sinkSizeOverhead + mappedIndexSize,
           ((StreamAppenderator) appenderator).getBytesCurrentlyInMemory()
       );
       appenderator.close();
-      Assertions.assertEquals(0, ((StreamAppenderator) appenderator).getRowsInMemory());
-      Assertions.assertEquals(0, ((StreamAppenderator) appenderator).getBytesCurrentlyInMemory());
+      Assert.assertEquals(0, ((StreamAppenderator) appenderator).getRowsInMemory());
+      Assert.assertEquals(0, ((StreamAppenderator) appenderator).getBytesCurrentlyInMemory());
     }
   }
 
@@ -678,7 +671,7 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
         final StreamAppenderatorTester tester =
             new StreamAppenderatorTester.Builder().maxRowsInMemory(100)
                                                   .maxSizeInBytes(-1)
-                                                  .basePersistDirectory(newFolder(temporaryFolder, "junit"))
+                                                  .basePersistDirectory(temporaryFolder.newFolder())
                                                   .enablePushFailure(true)
                                                   .build()) {
       final Appenderator appenderator = tester.getAppenderator();
@@ -702,26 +695,26 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
         };
       };
 
-      Assertions.assertEquals(0, ((StreamAppenderator) appenderator).getRowsInMemory());
+      Assert.assertEquals(0, ((StreamAppenderator) appenderator).getRowsInMemory());
       appenderator.startJob();
-      Assertions.assertEquals(0, ((StreamAppenderator) appenderator).getRowsInMemory());
+      Assert.assertEquals(0, ((StreamAppenderator) appenderator).getRowsInMemory());
       appenderator.add(IDENTIFIERS.get(0), ir("2000", "foo", 1), committerSupplier);
       //we still calculate the size even when ignoring it to make persist decision
       int nullHandlingOverhead = NullHandling.sqlCompatible() ? 1 : 0;
-      Assertions.assertEquals(
+      Assert.assertEquals(
           182 + nullHandlingOverhead,
           ((StreamAppenderator) appenderator).getBytesInMemory(IDENTIFIERS.get(0))
       );
-      Assertions.assertEquals(1, ((StreamAppenderator) appenderator).getRowsInMemory());
+      Assert.assertEquals(1, ((StreamAppenderator) appenderator).getRowsInMemory());
       appenderator.add(IDENTIFIERS.get(1), ir("2000", "bar", 1), committerSupplier);
       int sinkSizeOverhead = 2 * StreamAppenderator.ROUGH_OVERHEAD_PER_SINK;
-      Assertions.assertEquals(
+      Assert.assertEquals(
           (364 + 2 * nullHandlingOverhead) + sinkSizeOverhead,
           ((StreamAppenderator) appenderator).getBytesCurrentlyInMemory()
       );
-      Assertions.assertEquals(2, ((StreamAppenderator) appenderator).getRowsInMemory());
+      Assert.assertEquals(2, ((StreamAppenderator) appenderator).getRowsInMemory());
       appenderator.close();
-      Assertions.assertEquals(0, ((StreamAppenderator) appenderator).getRowsInMemory());
+      Assert.assertEquals(0, ((StreamAppenderator) appenderator).getRowsInMemory());
     }
   }
 
@@ -731,7 +724,7 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
     try (
         final StreamAppenderatorTester tester =
             new StreamAppenderatorTester.Builder().maxRowsInMemory(3)
-                                                  .basePersistDirectory(newFolder(temporaryFolder, "junit"))
+                                                  .basePersistDirectory(temporaryFolder.newFolder())
                                                   .enablePushFailure(true)
                                                   .build()) {
       final Appenderator appenderator = tester.getAppenderator();
@@ -760,23 +753,23 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
         }
       };
 
-      Assertions.assertEquals(0, ((StreamAppenderator) appenderator).getRowsInMemory());
+      Assert.assertEquals(0, ((StreamAppenderator) appenderator).getRowsInMemory());
       appenderator.startJob();
-      Assertions.assertEquals(0, ((StreamAppenderator) appenderator).getRowsInMemory());
+      Assert.assertEquals(0, ((StreamAppenderator) appenderator).getRowsInMemory());
       appenderator.add(IDENTIFIERS.get(0), ir("2000", "foo", 1), committerSupplier);
-      Assertions.assertEquals(1, ((StreamAppenderator) appenderator).getRowsInMemory());
+      Assert.assertEquals(1, ((StreamAppenderator) appenderator).getRowsInMemory());
       appenderator.add(IDENTIFIERS.get(1), ir("2000", "bar", 1), committerSupplier);
-      Assertions.assertEquals(2, ((StreamAppenderator) appenderator).getRowsInMemory());
+      Assert.assertEquals(2, ((StreamAppenderator) appenderator).getRowsInMemory());
       appenderator.add(IDENTIFIERS.get(1), ir("2000", "bar", 1), committerSupplier);
-      Assertions.assertEquals(2, ((StreamAppenderator) appenderator).getRowsInMemory());
+      Assert.assertEquals(2, ((StreamAppenderator) appenderator).getRowsInMemory());
       appenderator.add(IDENTIFIERS.get(0), ir("2000", "baz", 1), committerSupplier);
-      Assertions.assertEquals(0, ((StreamAppenderator) appenderator).getRowsInMemory());
+      Assert.assertEquals(0, ((StreamAppenderator) appenderator).getRowsInMemory());
       appenderator.add(IDENTIFIERS.get(1), ir("2000", "qux", 1), committerSupplier);
-      Assertions.assertEquals(1, ((StreamAppenderator) appenderator).getRowsInMemory());
+      Assert.assertEquals(1, ((StreamAppenderator) appenderator).getRowsInMemory());
       appenderator.add(IDENTIFIERS.get(0), ir("2000", "bob", 1), committerSupplier);
-      Assertions.assertEquals(2, ((StreamAppenderator) appenderator).getRowsInMemory());
+      Assert.assertEquals(2, ((StreamAppenderator) appenderator).getRowsInMemory());
       appenderator.persistAll(committerSupplier.get());
-      Assertions.assertEquals(0, ((StreamAppenderator) appenderator).getRowsInMemory());
+      Assert.assertEquals(0, ((StreamAppenderator) appenderator).getRowsInMemory());
       appenderator.close();
     }
   }
@@ -787,7 +780,7 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
     try (
         final StreamAppenderatorTester tester =
             new StreamAppenderatorTester.Builder().maxRowsInMemory(3)
-                                                  .basePersistDirectory(newFolder(temporaryFolder, "junit"))
+                                                  .basePersistDirectory(temporaryFolder.newFolder())
                                                   .build()) {
       final Appenderator appenderator = tester.getAppenderator();
       final AtomicInteger eventCount = new AtomicInteger(0);
@@ -810,23 +803,23 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
         };
       };
 
-      Assertions.assertEquals(0, ((StreamAppenderator) appenderator).getRowsInMemory());
+      Assert.assertEquals(0, ((StreamAppenderator) appenderator).getRowsInMemory());
       appenderator.startJob();
-      Assertions.assertEquals(0, ((StreamAppenderator) appenderator).getRowsInMemory());
+      Assert.assertEquals(0, ((StreamAppenderator) appenderator).getRowsInMemory());
       appenderator.add(IDENTIFIERS.get(0), ir("2000", "foo", 1), committerSupplier, false);
-      Assertions.assertEquals(1, ((StreamAppenderator) appenderator).getRowsInMemory());
+      Assert.assertEquals(1, ((StreamAppenderator) appenderator).getRowsInMemory());
       appenderator.add(IDENTIFIERS.get(1), ir("2000", "bar", 1), committerSupplier, false);
-      Assertions.assertEquals(2, ((StreamAppenderator) appenderator).getRowsInMemory());
+      Assert.assertEquals(2, ((StreamAppenderator) appenderator).getRowsInMemory());
       appenderator.add(IDENTIFIERS.get(1), ir("2000", "bar", 1), committerSupplier, false);
-      Assertions.assertEquals(2, ((StreamAppenderator) appenderator).getRowsInMemory());
+      Assert.assertEquals(2, ((StreamAppenderator) appenderator).getRowsInMemory());
       appenderator.add(IDENTIFIERS.get(0), ir("2000", "baz", 1), committerSupplier, false);
-      Assertions.assertEquals(3, ((StreamAppenderator) appenderator).getRowsInMemory());
+      Assert.assertEquals(3, ((StreamAppenderator) appenderator).getRowsInMemory());
       appenderator.add(IDENTIFIERS.get(1), ir("2000", "qux", 1), committerSupplier, false);
-      Assertions.assertEquals(4, ((StreamAppenderator) appenderator).getRowsInMemory());
+      Assert.assertEquals(4, ((StreamAppenderator) appenderator).getRowsInMemory());
       appenderator.add(IDENTIFIERS.get(0), ir("2000", "bob", 1), committerSupplier, false);
-      Assertions.assertEquals(5, ((StreamAppenderator) appenderator).getRowsInMemory());
+      Assert.assertEquals(5, ((StreamAppenderator) appenderator).getRowsInMemory());
       appenderator.persistAll(committerSupplier.get());
-      Assertions.assertEquals(0, ((StreamAppenderator) appenderator).getRowsInMemory());
+      Assert.assertEquals(0, ((StreamAppenderator) appenderator).getRowsInMemory());
       appenderator.close();
     }
   }
@@ -838,7 +831,7 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
     try (
         final StreamAppenderatorTester tester =
             new StreamAppenderatorTester.Builder().maxRowsInMemory(2)
-                                                  .basePersistDirectory(newFolder(temporaryFolder, "junit"))
+                                                  .basePersistDirectory(temporaryFolder.newFolder())
                                                   .enablePushFailure(true)
                                                   .build()) {
       final Appenderator appenderator = tester.getAppenderator();
@@ -889,58 +882,57 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
                                                     .enablePushFailure(true)
                                                     .build()) {
         final Appenderator appenderator2 = tester2.getAppenderator();
-        Assertions.assertEquals(ImmutableMap.of("eventCount", 4), appenderator2.startJob());
-        Assertions.assertEquals(ImmutableList.of(IDENTIFIERS.get(0)), appenderator2.getSegments());
-        Assertions.assertEquals(4, appenderator2.getRowCount(IDENTIFIERS.get(0)));
+        Assert.assertEquals(ImmutableMap.of("eventCount", 4), appenderator2.startJob());
+        Assert.assertEquals(ImmutableList.of(IDENTIFIERS.get(0)), appenderator2.getSegments());
+        Assert.assertEquals(4, appenderator2.getRowCount(IDENTIFIERS.get(0)));
       }
     }
   }
 
-  @Test
-  @Timeout(value = 60_000L, unit = TimeUnit.MILLISECONDS)
+  @Test(timeout = 60_000L)
   public void testTotalRowCount() throws Exception
   {
     try (
         final StreamAppenderatorTester tester =
             new StreamAppenderatorTester.Builder().maxRowsInMemory(3)
-                                                  .basePersistDirectory(newFolder(temporaryFolder, "junit"))
+                                                  .basePersistDirectory(temporaryFolder.newFolder())
                                                   .enablePushFailure(true)
                                                   .build()) {
       final Appenderator appenderator = tester.getAppenderator();
       final ConcurrentMap<String, String> commitMetadata = new ConcurrentHashMap<>();
       final Supplier<Committer> committerSupplier = committerSupplierFromConcurrentMap(commitMetadata);
 
-      Assertions.assertEquals(0, appenderator.getTotalRowCount());
+      Assert.assertEquals(0, appenderator.getTotalRowCount());
       appenderator.startJob();
-      Assertions.assertEquals(0, appenderator.getTotalRowCount());
+      Assert.assertEquals(0, appenderator.getTotalRowCount());
       appenderator.add(IDENTIFIERS.get(0), ir("2000", "foo", 1), committerSupplier);
-      Assertions.assertEquals(1, appenderator.getTotalRowCount());
+      Assert.assertEquals(1, appenderator.getTotalRowCount());
       appenderator.add(IDENTIFIERS.get(1), ir("2000", "bar", 1), committerSupplier);
-      Assertions.assertEquals(2, appenderator.getTotalRowCount());
+      Assert.assertEquals(2, appenderator.getTotalRowCount());
 
       appenderator.persistAll(committerSupplier.get()).get();
-      Assertions.assertEquals(2, appenderator.getTotalRowCount());
+      Assert.assertEquals(2, appenderator.getTotalRowCount());
       appenderator.drop(IDENTIFIERS.get(0)).get();
-      Assertions.assertEquals(1, appenderator.getTotalRowCount());
+      Assert.assertEquals(1, appenderator.getTotalRowCount());
       appenderator.drop(IDENTIFIERS.get(1)).get();
-      Assertions.assertEquals(0, appenderator.getTotalRowCount());
+      Assert.assertEquals(0, appenderator.getTotalRowCount());
 
       appenderator.add(IDENTIFIERS.get(2), ir("2001", "bar", 1), committerSupplier);
-      Assertions.assertEquals(1, appenderator.getTotalRowCount());
+      Assert.assertEquals(1, appenderator.getTotalRowCount());
       appenderator.add(IDENTIFIERS.get(2), ir("2001", "baz", 1), committerSupplier);
-      Assertions.assertEquals(2, appenderator.getTotalRowCount());
+      Assert.assertEquals(2, appenderator.getTotalRowCount());
       appenderator.add(IDENTIFIERS.get(2), ir("2001", "qux", 1), committerSupplier);
-      Assertions.assertEquals(3, appenderator.getTotalRowCount());
+      Assert.assertEquals(3, appenderator.getTotalRowCount());
       appenderator.add(IDENTIFIERS.get(2), ir("2001", "bob", 1), committerSupplier);
-      Assertions.assertEquals(4, appenderator.getTotalRowCount());
+      Assert.assertEquals(4, appenderator.getTotalRowCount());
 
       appenderator.persistAll(committerSupplier.get()).get();
-      Assertions.assertEquals(4, appenderator.getTotalRowCount());
+      Assert.assertEquals(4, appenderator.getTotalRowCount());
       appenderator.drop(IDENTIFIERS.get(2)).get();
-      Assertions.assertEquals(0, appenderator.getTotalRowCount());
+      Assert.assertEquals(0, appenderator.getTotalRowCount());
 
       appenderator.close();
-      Assertions.assertEquals(0, appenderator.getTotalRowCount());
+      Assert.assertEquals(0, appenderator.getTotalRowCount());
     }
   }
 
@@ -952,7 +944,7 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
         final StreamAppenderatorTester tester =
             new StreamAppenderatorTester.Builder().maxRowsInMemory(5)
                                                   .maxSizeInBytes(10000L)
-                                                  .basePersistDirectory(newFolder(temporaryFolder, "junit"))
+                                                  .basePersistDirectory(temporaryFolder.newFolder())
                                                   .rowIngestionMeters(rowIngestionMeters)
                                                   .build()) {
       final Appenderator appenderator = tester.getAppenderator();
@@ -960,10 +952,10 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
       appenderator.add(IDENTIFIERS.get(0), ir("2000", "foo", "invalid_met"), Committers.nilSupplier());
       appenderator.add(IDENTIFIERS.get(0), ir("2000", "foo", 1), Committers.nilSupplier());
 
-      Assertions.assertEquals(1, rowIngestionMeters.getProcessed());
-      Assertions.assertEquals(1, rowIngestionMeters.getProcessedWithError());
-      Assertions.assertEquals(0, rowIngestionMeters.getUnparseable());
-      Assertions.assertEquals(0, rowIngestionMeters.getThrownAway());
+      Assert.assertEquals(1, rowIngestionMeters.getProcessed());
+      Assert.assertEquals(1, rowIngestionMeters.getProcessedWithError());
+      Assert.assertEquals(0, rowIngestionMeters.getUnparseable());
+      Assert.assertEquals(0, rowIngestionMeters.getThrownAway());
     }
   }
 
@@ -994,21 +986,12 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
       {
         return scheduledFuture;
       }
-
-      private static File newFolder(File root, String... subDirs) throws IOException {
-        String subFolder = String.join("/", subDirs);
-        File result = new File(root, subFolder);
-        if (!result.mkdirs()) {
-          throw new IOException("Couldn't create folders " + root);
-        }
-        return result;
-      }
     }
 
     try (
         final StreamAppenderatorTester tester =
             new StreamAppenderatorTester.Builder().maxRowsInMemory(2)
-                                                  .basePersistDirectory(newFolder(temporaryFolder, "junit"))
+                                                  .basePersistDirectory(temporaryFolder.newFolder())
                                                   .enablePushFailure(true)
                                                   .withSegmentDropDelayInMilli(1000)
                                                   .build()) {
@@ -1043,15 +1026,15 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
       // segment 0 won't be dropped immediately
       final List<Result<TimeseriesResultValue>> results1 =
           QueryPlus.wrap(query1).run(appenderator, ResponseContext.createEmpty()).toList();
-      Assertions.assertEquals(
+      Assert.assertEquals(
+          "query1",
           ImmutableList.of(
               new Result<>(
                   DateTimes.of("2000"),
                   new TimeseriesResultValue(ImmutableMap.of("count", 3L, "met", 7L))
               )
           ),
-          results1,
-          "query1"
+          results1
       );
 
       // segment 0 would eventually be dropped at some time after 1 secs drop delay
@@ -1067,7 +1050,7 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
                   new TimeseriesResultValue(ImmutableMap.of("count", 1L, "met", 4L))
               )
           );
-      Assertions.assertEquals(expectedResults, results, "query after dropped");
+      Assert.assertEquals("query after dropped", expectedResults, results);
     }
   }
 
@@ -1077,7 +1060,7 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
     try (
         final StreamAppenderatorTester tester =
             new StreamAppenderatorTester.Builder().maxRowsInMemory(2)
-                                                  .basePersistDirectory(newFolder(temporaryFolder, "junit"))
+                                                  .basePersistDirectory(temporaryFolder.newFolder())
                                                   .enablePushFailure(true)
                                                   .build()) {
       final Appenderator appenderator = tester.getAppenderator();
@@ -1106,15 +1089,15 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
 
       final List<Result<TimeseriesResultValue>> results1 =
           QueryPlus.wrap(query1).run(appenderator, ResponseContext.createEmpty()).toList();
-      Assertions.assertEquals(
+      Assert.assertEquals(
+          "query1",
           ImmutableList.of(
               new Result<>(
                   DateTimes.of("2000"),
                   new TimeseriesResultValue(ImmutableMap.of("count", 3L, "met", 7L))
               )
           ),
-          results1,
-          "query1"
+          results1
       );
 
       // Query2: 2000/2002
@@ -1132,7 +1115,8 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
 
       final List<Result<TimeseriesResultValue>> results2 =
           QueryPlus.wrap(query2).run(appenderator, ResponseContext.createEmpty()).toList();
-      Assertions.assertEquals(
+      Assert.assertEquals(
+          "query2",
           ImmutableList.of(
               new Result<>(
                   DateTimes.of("2000"),
@@ -1143,8 +1127,7 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
                   new TimeseriesResultValue(ImmutableMap.of("count", 4L, "met", 120L))
               )
           ),
-          results2,
-          "query2"
+          results2
       );
 
       // Query3: 2000/2001T01
@@ -1162,7 +1145,7 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
 
       final List<Result<TimeseriesResultValue>> results3 =
           QueryPlus.wrap(query3).run(appenderator, ResponseContext.createEmpty()).toList();
-      Assertions.assertEquals(
+      Assert.assertEquals(
           ImmutableList.of(
               new Result<>(
                   DateTimes.of("2000"),
@@ -1196,7 +1179,7 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
 
       final List<Result<TimeseriesResultValue>> results4 =
           QueryPlus.wrap(query4).run(appenderator, ResponseContext.createEmpty()).toList();
-      Assertions.assertEquals(
+      Assert.assertEquals(
           ImmutableList.of(
               new Result<>(
                   DateTimes.of("2000"),
@@ -1218,7 +1201,7 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
     try (
         final StreamAppenderatorTester tester =
             new StreamAppenderatorTester.Builder().maxRowsInMemory(2)
-                                                  .basePersistDirectory(newFolder(temporaryFolder, "junit"))
+                                                  .basePersistDirectory(temporaryFolder.newFolder())
                                                   .enablePushFailure(true)
                                                   .build()) {
       final Appenderator appenderator = tester.getAppenderator();
@@ -1257,15 +1240,15 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
 
       final List<Result<TimeseriesResultValue>> results1 =
           QueryPlus.wrap(query1).run(appenderator, ResponseContext.createEmpty()).toList();
-      Assertions.assertEquals(
+      Assert.assertEquals(
+          "query1",
           ImmutableList.of(
               new Result<>(
                   DateTimes.of("2001"),
                   new TimeseriesResultValue(ImmutableMap.of("count", 4L, "met", 120L))
               )
           ),
-          results1,
-          "query1"
+          results1
       );
 
       // Query2: segment #2, partial
@@ -1293,15 +1276,15 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
 
       final List<Result<TimeseriesResultValue>> results2 =
           QueryPlus.wrap(query2).run(appenderator, ResponseContext.createEmpty()).toList();
-      Assertions.assertEquals(
+      Assert.assertEquals(
+          "query2",
           ImmutableList.of(
               new Result<>(
                   DateTimes.of("2001"),
                   new TimeseriesResultValue(ImmutableMap.of("count", 1L, "met", 8L))
               )
           ),
-          results2,
-          "query2"
+          results2
       );
 
       // Query3: segment #2, two disjoint intervals
@@ -1334,15 +1317,15 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
 
       final List<Result<TimeseriesResultValue>> results3 =
           QueryPlus.wrap(query3).run(appenderator, ResponseContext.createEmpty()).toList();
-      Assertions.assertEquals(
+      Assert.assertEquals(
+          "query3",
           ImmutableList.of(
               new Result<>(
                   DateTimes.of("2001"),
                   new TimeseriesResultValue(ImmutableMap.of("count", 2L, "met", 72L))
               )
           ),
-          results3,
-          "query3"
+          results3
       );
 
       final ScanQuery query4 = Druids.newScanQueryBuilder()
@@ -1369,14 +1352,14 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
                                      .build();
       final List<ScanResultValue> results4 =
           QueryPlus.wrap(query4).run(appenderator, ResponseContext.createEmpty()).toList();
-      Assertions.assertEquals(2, results4.size()); // 2 segments, 1 row per segment
-      Assertions.assertArrayEquals(new String[]{"__time", "dim", "count", "met"}, results4.get(0).getColumns().toArray());
-      Assertions.assertArrayEquals(
+      Assert.assertEquals(2, results4.size()); // 2 segments, 1 row per segment
+      Assert.assertArrayEquals(new String[]{"__time", "dim", "count", "met"}, results4.get(0).getColumns().toArray());
+      Assert.assertArrayEquals(
           new Object[]{DateTimes.of("2001").getMillis(), "foo", 1L, 8L},
           ((List<Object>) ((List<Object>) results4.get(0).getEvents()).get(0)).toArray()
       );
-      Assertions.assertArrayEquals(new String[]{"__time", "dim", "count", "met"}, results4.get(0).getColumns().toArray());
-      Assertions.assertArrayEquals(
+      Assert.assertArrayEquals(new String[]{"__time", "dim", "count", "met"}, results4.get(0).getColumns().toArray());
+      Assert.assertArrayEquals(
           new Object[]{DateTimes.of("2001T03").getMillis(), "foo", 1L, 64L},
           ((List<Object>) ((List<Object>) results4.get(1).getEvents()).get(0)).toArray()
       );
@@ -1391,7 +1374,7 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
     try (final StreamAppenderatorTester tester =
              new StreamAppenderatorTester.Builder().maxRowsInMemory(2)
                                                    .enablePushFailure(true)
-                                                   .basePersistDirectory(newFolder(temporaryFolder, "junit"))
+                                                   .basePersistDirectory(temporaryFolder.newFolder())
                                                    .build(dataSegmentAnnouncer, CentralizedDatasourceSchemaConfig.create())) {
       final StreamAppenderator appenderator = (StreamAppenderator) tester.getAppenderator();
 
@@ -1400,10 +1383,10 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
       StreamAppenderator.SinkSchemaAnnouncer sinkSchemaAnnouncer = appenderator.getSinkSchemaAnnouncer();
 
       // startJob
-      Assertions.assertEquals(null, appenderator.startJob());
+      Assert.assertEquals(null, appenderator.startJob());
 
       // getDataSource
-      Assertions.assertEquals(StreamAppenderatorTester.DATASOURCE, appenderator.getDataSource());
+      Assert.assertEquals(StreamAppenderatorTester.DATASOURCE, appenderator.getDataSource());
 
       // add first row
       commitMetadata.put("x", "1");
@@ -1416,35 +1399,35 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
       List<Pair<String, SegmentSchemas>> announcedAbsoluteSchema = dataSegmentAnnouncer.getAnnouncedAbsoluteSchema();
       List<Pair<String, SegmentSchemas>> announcedDeltaSchema = dataSegmentAnnouncer.getAnnouncedDeltaSchema();
 
-      Assertions.assertEquals(1, announcedAbsoluteSchema.size());
-      Assertions.assertEquals(1, announcedDeltaSchema.size());
+      Assert.assertEquals(1, announcedAbsoluteSchema.size());
+      Assert.assertEquals(1, announcedDeltaSchema.size());
 
       // verify absolute schema
-      Assertions.assertEquals(appenderator.getId(), announcedAbsoluteSchema.get(0).lhs);
+      Assert.assertEquals(appenderator.getId(), announcedAbsoluteSchema.get(0).lhs);
       List<SegmentSchemas.SegmentSchema> segmentSchemas = announcedAbsoluteSchema.get(0).rhs.getSegmentSchemaList();
-      Assertions.assertEquals(1, segmentSchemas.size());
+      Assert.assertEquals(1, segmentSchemas.size());
       SegmentSchemas.SegmentSchema absoluteSchemaId1Row1 = segmentSchemas.get(0);
-      Assertions.assertEquals(IDENTIFIERS.get(0).asSegmentId().toString(), absoluteSchemaId1Row1.getSegmentId());
-      Assertions.assertEquals(1, absoluteSchemaId1Row1.getNumRows().intValue());
-      Assertions.assertFalse(absoluteSchemaId1Row1.isDelta());
-      Assertions.assertEquals(Collections.emptyList(), absoluteSchemaId1Row1.getUpdatedColumns());
-      Assertions.assertEquals(Lists.newArrayList("__time", "dim", "count", "met"), absoluteSchemaId1Row1.getNewColumns());
-      Assertions.assertEquals(
+      Assert.assertEquals(IDENTIFIERS.get(0).asSegmentId().toString(), absoluteSchemaId1Row1.getSegmentId());
+      Assert.assertEquals(1, absoluteSchemaId1Row1.getNumRows().intValue());
+      Assert.assertFalse(absoluteSchemaId1Row1.isDelta());
+      Assert.assertEquals(Collections.emptyList(), absoluteSchemaId1Row1.getUpdatedColumns());
+      Assert.assertEquals(Lists.newArrayList("__time", "dim", "count", "met"), absoluteSchemaId1Row1.getNewColumns());
+      Assert.assertEquals(
           ImmutableMap.of("__time", ColumnType.LONG, "count", ColumnType.LONG, "dim", ColumnType.STRING, "met", ColumnType.LONG),
           absoluteSchemaId1Row1.getColumnTypeMap());
 
       // verify delta schema
-      Assertions.assertEquals(appenderator.getId(), announcedDeltaSchema.get(0).lhs);
+      Assert.assertEquals(appenderator.getId(), announcedDeltaSchema.get(0).lhs);
       segmentSchemas = announcedDeltaSchema.get(0).rhs.getSegmentSchemaList();
       SegmentSchemas.SegmentSchema deltaSchemaId1Row1 = segmentSchemas.get(0);
-      Assertions.assertEquals(1, segmentSchemas.size());
-      Assertions.assertEquals(IDENTIFIERS.get(0).asSegmentId().toString(), deltaSchemaId1Row1.getSegmentId());
-      Assertions.assertEquals(1, deltaSchemaId1Row1.getNumRows().intValue());
+      Assert.assertEquals(1, segmentSchemas.size());
+      Assert.assertEquals(IDENTIFIERS.get(0).asSegmentId().toString(), deltaSchemaId1Row1.getSegmentId());
+      Assert.assertEquals(1, deltaSchemaId1Row1.getNumRows().intValue());
       // absolute schema is sent for a new sink
-      Assertions.assertFalse(deltaSchemaId1Row1.isDelta());
-      Assertions.assertEquals(Collections.emptyList(), deltaSchemaId1Row1.getUpdatedColumns());
-      Assertions.assertEquals(Lists.newArrayList("__time", "dim", "count", "met"), deltaSchemaId1Row1.getNewColumns());
-      Assertions.assertEquals(
+      Assert.assertFalse(deltaSchemaId1Row1.isDelta());
+      Assert.assertEquals(Collections.emptyList(), deltaSchemaId1Row1.getUpdatedColumns());
+      Assert.assertEquals(Lists.newArrayList("__time", "dim", "count", "met"), deltaSchemaId1Row1.getNewColumns());
+      Assert.assertEquals(
           ImmutableMap.of("__time", ColumnType.LONG, "count", ColumnType.LONG, "dim", ColumnType.STRING, "met", ColumnType.LONG),
           deltaSchemaId1Row1.getColumnTypeMap());
 
@@ -1461,34 +1444,34 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
       announcedAbsoluteSchema = dataSegmentAnnouncer.getAnnouncedAbsoluteSchema();
       announcedDeltaSchema = dataSegmentAnnouncer.getAnnouncedDeltaSchema();
 
-      Assertions.assertEquals(1, announcedAbsoluteSchema.size());
-      Assertions.assertEquals(1, announcedDeltaSchema.size());
+      Assert.assertEquals(1, announcedAbsoluteSchema.size());
+      Assert.assertEquals(1, announcedDeltaSchema.size());
 
       // verify absolute schema
-      Assertions.assertEquals(appenderator.getId(), announcedAbsoluteSchema.get(0).lhs);
+      Assert.assertEquals(appenderator.getId(), announcedAbsoluteSchema.get(0).lhs);
       segmentSchemas = announcedAbsoluteSchema.get(0).rhs.getSegmentSchemaList();
-      Assertions.assertEquals(1, segmentSchemas.size());
+      Assert.assertEquals(1, segmentSchemas.size());
       SegmentSchemas.SegmentSchema absoluteSchemaId1Row2 = segmentSchemas.get(0);
-      Assertions.assertEquals(IDENTIFIERS.get(0).asSegmentId().toString(), absoluteSchemaId1Row2.getSegmentId());
-      Assertions.assertEquals(2, absoluteSchemaId1Row2.getNumRows().intValue());
-      Assertions.assertFalse(absoluteSchemaId1Row2.isDelta());
-      Assertions.assertEquals(Collections.emptyList(), absoluteSchemaId1Row2.getUpdatedColumns());
-      Assertions.assertEquals(Lists.newArrayList("__time", "dim", "count", "met"), absoluteSchemaId1Row2.getNewColumns());
-      Assertions.assertEquals(
+      Assert.assertEquals(IDENTIFIERS.get(0).asSegmentId().toString(), absoluteSchemaId1Row2.getSegmentId());
+      Assert.assertEquals(2, absoluteSchemaId1Row2.getNumRows().intValue());
+      Assert.assertFalse(absoluteSchemaId1Row2.isDelta());
+      Assert.assertEquals(Collections.emptyList(), absoluteSchemaId1Row2.getUpdatedColumns());
+      Assert.assertEquals(Lists.newArrayList("__time", "dim", "count", "met"), absoluteSchemaId1Row2.getNewColumns());
+      Assert.assertEquals(
           ImmutableMap.of("__time", ColumnType.LONG, "count", ColumnType.LONG, "dim", ColumnType.STRING, "met", ColumnType.LONG),
           absoluteSchemaId1Row2.getColumnTypeMap());
 
       // verify delta
-      Assertions.assertEquals(appenderator.getId(), announcedDeltaSchema.get(0).lhs);
+      Assert.assertEquals(appenderator.getId(), announcedDeltaSchema.get(0).lhs);
       segmentSchemas = announcedDeltaSchema.get(0).rhs.getSegmentSchemaList();
       SegmentSchemas.SegmentSchema deltaSchemaId1Row2 = segmentSchemas.get(0);
-      Assertions.assertEquals(1, segmentSchemas.size());
-      Assertions.assertEquals(IDENTIFIERS.get(0).asSegmentId().toString(), deltaSchemaId1Row2.getSegmentId());
-      Assertions.assertEquals(2, deltaSchemaId1Row2.getNumRows().intValue());
-      Assertions.assertTrue(deltaSchemaId1Row2.isDelta());
-      Assertions.assertEquals(Collections.emptyList(), deltaSchemaId1Row2.getUpdatedColumns());
-      Assertions.assertEquals(Collections.emptyList(), deltaSchemaId1Row2.getNewColumns());
-      Assertions.assertEquals(Collections.emptyMap(), deltaSchemaId1Row2.getColumnTypeMap());
+      Assert.assertEquals(1, segmentSchemas.size());
+      Assert.assertEquals(IDENTIFIERS.get(0).asSegmentId().toString(), deltaSchemaId1Row2.getSegmentId());
+      Assert.assertEquals(2, deltaSchemaId1Row2.getNumRows().intValue());
+      Assert.assertTrue(deltaSchemaId1Row2.isDelta());
+      Assert.assertEquals(Collections.emptyList(), deltaSchemaId1Row2.getUpdatedColumns());
+      Assert.assertEquals(Collections.emptyList(), deltaSchemaId1Row2.getNewColumns());
+      Assert.assertEquals(Collections.emptyMap(), deltaSchemaId1Row2.getColumnTypeMap());
 
       dataSegmentAnnouncer.clear();
 
@@ -1502,42 +1485,42 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
       announcedAbsoluteSchema = dataSegmentAnnouncer.getAnnouncedAbsoluteSchema();
       announcedDeltaSchema = dataSegmentAnnouncer.getAnnouncedDeltaSchema();
 
-      Assertions.assertEquals(1, announcedAbsoluteSchema.size());
-      Assertions.assertEquals(1, announcedDeltaSchema.size());
+      Assert.assertEquals(1, announcedAbsoluteSchema.size());
+      Assert.assertEquals(1, announcedDeltaSchema.size());
 
       // verify absolute schema
-      Assertions.assertEquals(appenderator.getId(), announcedAbsoluteSchema.get(0).lhs);
+      Assert.assertEquals(appenderator.getId(), announcedAbsoluteSchema.get(0).lhs);
       segmentSchemas = announcedAbsoluteSchema.get(0).rhs.getSegmentSchemaList();
-      Assertions.assertEquals(2, segmentSchemas.size());
+      Assert.assertEquals(2, segmentSchemas.size());
       SegmentSchemas.SegmentSchema absoluteSchemaId2Row1 =
           segmentSchemas.stream()
                         .filter(v -> v.getSegmentId().equals(IDENTIFIERS.get(1).asSegmentId().toString()))
                         .findFirst()
                         .get();
-      Assertions.assertEquals(IDENTIFIERS.get(1).asSegmentId().toString(), absoluteSchemaId2Row1.getSegmentId());
-      Assertions.assertEquals(1, absoluteSchemaId2Row1.getNumRows().intValue());
-      Assertions.assertFalse(absoluteSchemaId2Row1.isDelta());
-      Assertions.assertEquals(Collections.emptyList(), absoluteSchemaId2Row1.getUpdatedColumns());
-      Assertions.assertEquals(Lists.newArrayList("__time", "dim", "count", "met"), absoluteSchemaId2Row1.getNewColumns());
-      Assertions.assertEquals(
+      Assert.assertEquals(IDENTIFIERS.get(1).asSegmentId().toString(), absoluteSchemaId2Row1.getSegmentId());
+      Assert.assertEquals(1, absoluteSchemaId2Row1.getNumRows().intValue());
+      Assert.assertFalse(absoluteSchemaId2Row1.isDelta());
+      Assert.assertEquals(Collections.emptyList(), absoluteSchemaId2Row1.getUpdatedColumns());
+      Assert.assertEquals(Lists.newArrayList("__time", "dim", "count", "met"), absoluteSchemaId2Row1.getNewColumns());
+      Assert.assertEquals(
           ImmutableMap.of("__time", ColumnType.LONG, "count", ColumnType.LONG, "dim", ColumnType.STRING, "met", ColumnType.LONG),
           absoluteSchemaId2Row1.getColumnTypeMap());
 
       // verify delta
-      Assertions.assertEquals(appenderator.getId(), announcedDeltaSchema.get(0).lhs);
+      Assert.assertEquals(appenderator.getId(), announcedDeltaSchema.get(0).lhs);
       segmentSchemas = announcedDeltaSchema.get(0).rhs.getSegmentSchemaList();
       SegmentSchemas.SegmentSchema deltaSchemaId2Row1 =
           segmentSchemas.stream()
                         .filter(v -> v.getSegmentId().equals(IDENTIFIERS.get(1).asSegmentId().toString()))
                         .findFirst()
                         .get();
-      Assertions.assertEquals(1, segmentSchemas.size());
-      Assertions.assertEquals(IDENTIFIERS.get(1).asSegmentId().toString(), deltaSchemaId2Row1.getSegmentId());
-      Assertions.assertEquals(1, deltaSchemaId2Row1.getNumRows().intValue());
-      Assertions.assertFalse(deltaSchemaId2Row1.isDelta());
-      Assertions.assertEquals(Collections.emptyList(), deltaSchemaId2Row1.getUpdatedColumns());
-      Assertions.assertEquals(Lists.newArrayList("__time", "dim", "count", "met"), deltaSchemaId2Row1.getNewColumns());
-      Assertions.assertEquals(
+      Assert.assertEquals(1, segmentSchemas.size());
+      Assert.assertEquals(IDENTIFIERS.get(1).asSegmentId().toString(), deltaSchemaId2Row1.getSegmentId());
+      Assert.assertEquals(1, deltaSchemaId2Row1.getNumRows().intValue());
+      Assert.assertFalse(deltaSchemaId2Row1.isDelta());
+      Assert.assertEquals(Collections.emptyList(), deltaSchemaId2Row1.getUpdatedColumns());
+      Assert.assertEquals(Lists.newArrayList("__time", "dim", "count", "met"), deltaSchemaId2Row1.getNewColumns());
+      Assert.assertEquals(
           ImmutableMap.of("__time", ColumnType.LONG, "count", ColumnType.LONG, "dim", ColumnType.STRING, "met", ColumnType.LONG),
           deltaSchemaId2Row1.getColumnTypeMap());
     }
@@ -1680,23 +1663,5 @@ public class StreamAppenderatorTest extends InitializedNullHandlingTest
       announcedDeltaSchema.clear();
       unnanouncementEvents.clear();
     }
-
-    private static File newFolder(File root, String... subDirs) throws IOException {
-      String subFolder = String.join("/", subDirs);
-      File result = new File(root, subFolder);
-      if (!result.mkdirs()) {
-        throw new IOException("Couldn't create folders " + root);
-      }
-      return result;
-    }
-  }
-
-  private static File newFolder(File root, String... subDirs) throws IOException {
-    String subFolder = String.join("/", subDirs);
-    File result = new File(root, subFolder);
-    if (!result.mkdirs()) {
-      throw new IOException("Couldn't create folders " + root);
-    }
-    return result;
   }
 }

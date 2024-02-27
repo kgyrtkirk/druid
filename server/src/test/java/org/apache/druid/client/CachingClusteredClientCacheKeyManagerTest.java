@@ -38,10 +38,10 @@ import org.apache.druid.timeline.partition.NumberedShardSpec;
 import org.easymock.EasyMockRunner;
 import org.easymock.EasyMockSupport;
 import org.easymock.Mock;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.Set;
@@ -67,14 +67,14 @@ public class CachingClusteredClientCacheKeyManagerTest extends EasyMockSupport
   private static final byte[] QUERY_CACHE_KEY = new byte[]{1, 2, 3};
   private static final byte[] JOIN_KEY = new byte[]{4, 5};
 
-  @BeforeEach
+  @Before
   public void setup()
   {
     expect(strategy.computeCacheKey(query)).andReturn(QUERY_CACHE_KEY).anyTimes();
     expect(query.context()).andReturn(QueryContext.of(ImmutableMap.of(QueryContexts.BY_SEGMENT_KEY, false))).anyTimes();
   }
 
-  @AfterEach
+  @After
   public void teardown()
   {
     verifyAllUnexpectedCalls();
@@ -90,7 +90,7 @@ public class CachingClusteredClientCacheKeyManagerTest extends EasyMockSupport
         makeRealtimeServerSelector(1)
     );
     String actual = keyManager.computeResultLevelCachingEtag(selectors, QUERY_CACHE_KEY);
-    Assertions.assertNull(actual);
+    Assert.assertNull(actual);
   }
 
   @Test
@@ -103,23 +103,23 @@ public class CachingClusteredClientCacheKeyManagerTest extends EasyMockSupport
         makeHistoricalServerSelector(1)
     );
     String actual1 = keyManager.computeResultLevelCachingEtag(selectors, QUERY_CACHE_KEY);
-    Assertions.assertNotNull(actual1);
+    Assert.assertNotNull(actual1);
 
     selectors = ImmutableSet.of(
         makeHistoricalServerSelector(1),
         makeHistoricalServerSelector(1)
     );
     String actual2 = keyManager.computeResultLevelCachingEtag(selectors, QUERY_CACHE_KEY);
-    Assertions.assertNotNull(actual2);
-    Assertions.assertEquals(actual1, actual2, "cache key should not change for same server selectors");
+    Assert.assertNotNull(actual2);
+    Assert.assertEquals("cache key should not change for same server selectors", actual1, actual2);
 
     selectors = ImmutableSet.of(
         makeHistoricalServerSelector(2),
         makeHistoricalServerSelector(1)
     );
     String actual3 = keyManager.computeResultLevelCachingEtag(selectors, QUERY_CACHE_KEY);
-    Assertions.assertNotNull(actual3);
-    Assertions.assertNotEquals(actual1, actual3);
+    Assert.assertNotNull(actual3);
+    Assert.assertNotEquals(actual1, actual3);
   }
 
   @Test
@@ -132,11 +132,11 @@ public class CachingClusteredClientCacheKeyManagerTest extends EasyMockSupport
         makeHistoricalServerSelector(1)
     );
     String actual1 = keyManager.computeResultLevelCachingEtag(selectors, new byte[]{1, 2});
-    Assertions.assertNotNull(actual1);
+    Assert.assertNotNull(actual1);
 
     String actual2 = keyManager.computeResultLevelCachingEtag(selectors, new byte[]{3, 4});
-    Assertions.assertNotNull(actual2);
-    Assertions.assertNotEquals(actual1, actual2);
+    Assert.assertNotNull(actual2);
+    Assert.assertNotEquals(actual1, actual2);
   }
 
   @Test
@@ -150,15 +150,15 @@ public class CachingClusteredClientCacheKeyManagerTest extends EasyMockSupport
         makeHistoricalServerSelector(1)
     );
     String actual1 = keyManager.computeResultLevelCachingEtag(selectors, QUERY_CACHE_KEY);
-    Assertions.assertNotNull(actual1);
+    Assert.assertNotNull(actual1);
 
     selectors = ImmutableSet.of(
         makeHistoricalServerSelector(1),
         makeHistoricalServerSelector(1)
     );
     String actual2 = keyManager.computeResultLevelCachingEtag(selectors, null);
-    Assertions.assertNotNull(actual2);
-    Assertions.assertEquals(actual1, actual2);
+    Assert.assertNotNull(actual2);
+    Assert.assertEquals(actual1, actual2);
   }
 
   @Test
@@ -173,7 +173,7 @@ public class CachingClusteredClientCacheKeyManagerTest extends EasyMockSupport
         makeHistoricalServerSelector(1)
     );
     String actual = keyManager.computeResultLevelCachingEtag(selectors, null);
-    Assertions.assertNull(actual);
+    Assert.assertNull(actual);
   }
 
   @Test
@@ -192,7 +192,7 @@ public class CachingClusteredClientCacheKeyManagerTest extends EasyMockSupport
         makeHistoricalServerSelector(1)
     );
     String actual = keyManager.computeResultLevelCachingEtag(selectors, null);
-    Assertions.assertNotNull(actual);
+    Assert.assertNotNull(actual);
   }
 
   @Test
@@ -212,7 +212,7 @@ public class CachingClusteredClientCacheKeyManagerTest extends EasyMockSupport
         makeHistoricalServerSelector(1)
     );
     String actual = keyManager.computeResultLevelCachingEtag(selectors, null);
-    Assertions.assertNotNull(actual);
+    Assert.assertNotNull(actual);
   }
 
   @Test
@@ -222,7 +222,7 @@ public class CachingClusteredClientCacheKeyManagerTest extends EasyMockSupport
     replayAll();
     CachingClusteredClient.CacheKeyManager<Object> keyManager = makeKeyManager();
     byte[] cacheKey = keyManager.computeSegmentLevelQueryCacheKey();
-    Assertions.assertArrayEquals(QUERY_CACHE_KEY, cacheKey);
+    Assert.assertArrayEquals(QUERY_CACHE_KEY, cacheKey);
   }
 
   @Test
@@ -232,7 +232,7 @@ public class CachingClusteredClientCacheKeyManagerTest extends EasyMockSupport
     replayAll();
     CachingClusteredClient.CacheKeyManager<Object> keyManager = makeKeyManager();
     byte[] cacheKey = keyManager.computeSegmentLevelQueryCacheKey();
-    Assertions.assertNotNull(cacheKey);
+    Assert.assertNotNull(cacheKey);
   }
 
   @Test
@@ -243,7 +243,7 @@ public class CachingClusteredClientCacheKeyManagerTest extends EasyMockSupport
     replayAll();
     CachingClusteredClient.CacheKeyManager<Object> keyManager = makeKeyManager();
     byte[] cacheKey = keyManager.computeSegmentLevelQueryCacheKey();
-    Assertions.assertArrayEquals(Bytes.concat(JOIN_KEY, QUERY_CACHE_KEY), cacheKey);
+    Assert.assertArrayEquals(Bytes.concat(JOIN_KEY, QUERY_CACHE_KEY), cacheKey);
   }
 
   @Test
@@ -253,14 +253,14 @@ public class CachingClusteredClientCacheKeyManagerTest extends EasyMockSupport
     expect(query.context()).andReturn(QueryContext.of(ImmutableMap.of(QueryContexts.BY_SEGMENT_KEY, true))).anyTimes();
     replayAll();
     byte[] cacheKey = makeKeyManager().computeSegmentLevelQueryCacheKey();
-    Assertions.assertNull(cacheKey);
+    Assert.assertNull(cacheKey);
   }
 
   @Test
   public void testSegmentQueryCacheKey_useAndPopulateCacheFalse()
   {
     replayAll();
-    Assertions.assertNull(new CachingClusteredClient.CacheKeyManager<>(
+    Assert.assertNull(new CachingClusteredClient.CacheKeyManager<>(
         query,
         strategy,
         false,

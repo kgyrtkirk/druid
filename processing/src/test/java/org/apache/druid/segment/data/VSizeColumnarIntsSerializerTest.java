@@ -24,10 +24,10 @@ import org.apache.commons.io.IOUtils;
 import org.apache.druid.segment.writeout.OffHeapMemorySegmentWriteOutMedium;
 import org.apache.druid.segment.writeout.SegmentWriteOutMedium;
 import org.apache.druid.segment.writeout.WriteOutBytes;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.nio.ByteBuffer;
 import java.util.Random;
@@ -40,13 +40,13 @@ public class VSizeColumnarIntsSerializerTest
   private final Random rand = new Random(0);
   private int[] vals;
 
-  @BeforeEach
+  @Before
   public void setUp()
   {
     vals = null;
   }
 
-  @AfterEach
+  @After
   public void tearDown() throws Exception
   {
     segmentWriteOutMedium.close();
@@ -74,15 +74,15 @@ public class VSizeColumnarIntsSerializerTest
     WriteOutBytes writeOutBytes = segmentWriteOutMedium.makeWriteOutBytes();
     writer.writeTo(writeOutBytes, null);
 
-    Assertions.assertEquals(writtenLength, intsFromList.getSerializedSize());
+    Assert.assertEquals(writtenLength, intsFromList.getSerializedSize());
 
     // read from ByteBuffer and check values
     VSizeColumnarInts intsFromByteBuffer = VSizeColumnarInts.readFromByteBuffer(
         ByteBuffer.wrap(IOUtils.toByteArray(writeOutBytes.asInputStream()))
     );
-    Assertions.assertEquals(vals.length, intsFromByteBuffer.size());
+    Assert.assertEquals(vals.length, intsFromByteBuffer.size());
     for (int i = 0; i < vals.length; ++i) {
-      Assertions.assertEquals(vals[i], intsFromByteBuffer.get(i));
+      Assert.assertEquals(vals[i], intsFromByteBuffer.get(i));
     }
   }
 

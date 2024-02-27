@@ -23,8 +23,8 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import org.apache.druid.java.util.emitter.service.AlertEvent.Severity;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Map;
 
@@ -40,7 +40,7 @@ public class AlertEventTest
                                    .addData("something2", "b")
                                    .build("test", "localhost");
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableMap.<String, Object>builder()
             .put("feed", "alerts")
             .put("timestamp", event.getCreatedTime().toString())
@@ -63,7 +63,7 @@ public class AlertEventTest
                                    .addData("something2", "b")
                                    .build("test", "localhost");
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableMap.<String, Object>builder()
             .put("feed", "alerts")
             .put("timestamp", event.getCreatedTime().toString())
@@ -86,7 +86,7 @@ public class AlertEventTest
                                    .addData("something2", "b")
                                    .build("test", "localhost");
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableMap.<String, Object>builder()
             .put("feed", "alerts")
             .put("timestamp", event.getCreatedTime().toString())
@@ -109,7 +109,7 @@ public class AlertEventTest
                                    .addData("something2", "b")
                                    .build("test", "localhost");
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableMap.<String, Object>builder()
             .put("feed", "alerts")
             .put("timestamp", event.getCreatedTime().toString())
@@ -131,27 +131,27 @@ public class AlertEventTest
     final String desc = "some description";
     final Map<String, Object> data = ImmutableMap.<String, Object>builder().put("a", "1").put("b", "2").build();
     for (Severity severity : new Severity[]{Severity.ANOMALY, Severity.COMPONENT_FAILURE, Severity.SERVICE_FAILURE}) {
-      Assertions.assertEquals(
+      Assert.assertEquals(
           contents(new AlertEvent(service, host, desc, data)),
           contents(new AlertEvent(service, host, Severity.COMPONENT_FAILURE, desc, data))
       );
 
-      Assertions.assertEquals(
+      Assert.assertEquals(
           contents(new AlertEvent(service, host, desc)),
           contents(new AlertEvent(service, host, Severity.COMPONENT_FAILURE, desc, ImmutableMap.of()))
       );
 
-      Assertions.assertEquals(
+      Assert.assertEquals(
           contents(AlertBuilder.create(desc).addData("a", "1").addData("b", "2").build(service, host)),
           contents(new AlertEvent(service, host, Severity.COMPONENT_FAILURE, desc, data))
       );
 
-      Assertions.assertEquals(
+      Assert.assertEquals(
           contents(AlertBuilder.create(desc).addData(data).build(service, host)),
           contents(new AlertEvent(service, host, Severity.COMPONENT_FAILURE, desc, data))
       );
 
-      Assertions.assertEquals(
+      Assert.assertEquals(
           contents(AlertBuilder.create(desc)
                                .severity(severity)
                                .addData("a", "1")
@@ -160,7 +160,7 @@ public class AlertEventTest
           contents(new AlertEvent(service, host, severity, desc, data))
       );
 
-      Assertions.assertEquals(
+      Assert.assertEquals(
           contents(AlertBuilder.create(desc).severity(severity).addData(data).build(service, host)),
           contents(new AlertEvent(service, host, severity, desc, data))
       );

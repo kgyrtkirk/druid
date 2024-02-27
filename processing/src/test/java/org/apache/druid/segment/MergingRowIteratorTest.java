@@ -23,8 +23,8 @@ import com.google.common.primitives.Longs;
 import org.apache.druid.java.util.common.collect.Utils;
 import org.apache.druid.segment.selector.settable.SettableLongColumnValueSelector;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -128,14 +128,14 @@ public class MergingRowIteratorTest extends InitializedNullHandlingTest
       boolean iterated = false;
       while (mergedTimestamps.hasNext()) {
         currentTimestamp = mergedTimestamps.next();
-        Assertions.assertTrue(mergingRowIterator.moveToNext(), message);
+        Assert.assertTrue(message, mergingRowIterator.moveToNext());
         iterated = true;
-        Assertions.assertEquals(currentTimestamp, mergingRowIterator.getPointer().timestampSelector.getLong(), message);
+        Assert.assertEquals(message, currentTimestamp, mergingRowIterator.getPointer().timestampSelector.getLong());
         if (marked) {
-          Assertions.assertEquals(
+          Assert.assertEquals(
+              message,
               markedTimestamp != currentTimestamp,
-              mergingRowIterator.hasTimeAndDimsChangedSinceMark(),
-              message
+              mergingRowIterator.hasTimeAndDimsChangedSinceMark()
           );
         }
         if (i == markIteration) {
@@ -145,9 +145,9 @@ public class MergingRowIteratorTest extends InitializedNullHandlingTest
         }
         i++;
       }
-      Assertions.assertFalse(mergingRowIterator.moveToNext(), message);
+      Assert.assertFalse(message, mergingRowIterator.moveToNext());
       if (iterated) {
-        Assertions.assertEquals(currentTimestamp, mergingRowIterator.getPointer().timestampSelector.getLong(), message);
+        Assert.assertEquals(message, currentTimestamp, mergingRowIterator.getPointer().timestampSelector.getLong());
       }
     }
   }

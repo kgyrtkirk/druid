@@ -25,9 +25,11 @@ import com.google.common.collect.Sets;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.apache.druid.timeline.partition.OvershadowableManager.RootPartitionRange;
 import org.apache.druid.timeline.partition.OvershadowableManager.State;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,12 +40,12 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 public class OvershadowableManagerTest
 {
   private static final String MAJOR_VERSION = "version";
+
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
 
   private OvershadowableManager<OvershadowableInteger> manager;
   private int nextRootPartitionId;
@@ -52,7 +54,7 @@ public class OvershadowableManagerTest
   private List<PartitionChunk<OvershadowableInteger>> expectedOvershadowedChunks;
   private List<PartitionChunk<OvershadowableInteger>> expectedStandbyChunks;
 
-  @BeforeEach
+  @Before
   public void setup()
   {
     manager = new OvershadowableManager<>();
@@ -83,9 +85,9 @@ public class OvershadowableManagerTest
     manager.addChunk(newNonRootChunk(2, 4, 1, 3));
 
     OvershadowableManager<OvershadowableInteger> copy = OvershadowableManager.copyVisible(manager);
-    Assertions.assertTrue(copy.getOvershadowedChunks().isEmpty());
-    Assertions.assertTrue(copy.getStandbyChunks().isEmpty());
-    Assertions.assertEquals(
+    Assert.assertTrue(copy.getOvershadowedChunks().isEmpty());
+    Assert.assertTrue(copy.getStandbyChunks().isEmpty());
+    Assert.assertEquals(
         Lists.newArrayList(manager.visibleChunksIterator()),
         Lists.newArrayList(copy.visibleChunksIterator())
     );
@@ -111,7 +113,7 @@ public class OvershadowableManagerTest
     manager.addChunk(newNonRootChunk(2, 4, 1, 3));
 
     OvershadowableManager<OvershadowableInteger> copy = OvershadowableManager.deepCopy(manager);
-    Assertions.assertEquals(manager, copy);
+    Assert.assertEquals(manager, copy);
   }
 
   @Test
@@ -147,7 +149,7 @@ public class OvershadowableManagerTest
         (short) 10,
         State.OVERSHADOWED
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         expectedOvershadowedChunks.stream().map(AtomicUpdateGroup::new).collect(Collectors.toList()),
         overshadowedGroups
     );
@@ -157,7 +159,7 @@ public class OvershadowableManagerTest
         (short) 10,
         State.VISIBLE
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Collections.emptyList(),
         overshadowedGroups
     );
@@ -179,7 +181,7 @@ public class OvershadowableManagerTest
         (short) 1,
         State.OVERSHADOWED
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Collections.emptyList(),
         overshadowingGroups
     );
@@ -188,7 +190,7 @@ public class OvershadowableManagerTest
         (short) 1,
         State.VISIBLE
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableList.of(new AtomicUpdateGroup<>(visibleChunk)),
         overshadowingGroups
     );
@@ -198,7 +200,7 @@ public class OvershadowableManagerTest
         (short) 1,
         State.OVERSHADOWED
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Collections.emptyList(),
         overshadowingGroups
     );
@@ -207,7 +209,7 @@ public class OvershadowableManagerTest
         (short) 1,
         State.VISIBLE
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableList.of(new AtomicUpdateGroup<>(visibleChunk)),
         overshadowingGroups
     );
@@ -216,53 +218,54 @@ public class OvershadowableManagerTest
   @Test
   public void testAddRootChunkToEmptyManager()
   {
-    Assertions.assertTrue(manager.isEmpty());
+    Assert.assertTrue(manager.isEmpty());
     // Add a new one
     PartitionChunk<OvershadowableInteger> chunk = newRootChunk();
-    Assertions.assertTrue(addVisibleToManager(chunk));
+    Assert.assertTrue(addVisibleToManager(chunk));
     assertManagerState();
-    Assertions.assertTrue(manager.isComplete());
+    Assert.assertTrue(manager.isComplete());
     // Add a duplicate
-    Assertions.assertFalse(manager.addChunk(chunk));
+    Assert.assertFalse(manager.addChunk(chunk));
     // Add a new one
     chunk = newRootChunk();
-    Assertions.assertTrue(addVisibleToManager(chunk));
+    Assert.assertTrue(addVisibleToManager(chunk));
     assertManagerState();
-    Assertions.assertTrue(manager.isComplete());
+    Assert.assertTrue(manager.isComplete());
   }
 
   @Test
   public void testAddNonRootChunkToEmptyManager()
   {
-    Throwable exception = assertThrows(IllegalStateException.class, () -> {
-      Assertions.assertTrue(manager.isEmpty());
-      // Add a new one, atomicUpdateGroup is not full
-      PartitionChunk<OvershadowableInteger> chunk = newNonRootChunk(10, 12, 1, 3);
-      Assertions.assertTrue(addVisibleToManager(chunk));
-      assertManagerState();
-      Assertions.assertFalse(manager.isComplete());
-      // Add a new one, atomicUpdateGroup is still not full
-      chunk = newNonRootChunk(10, 12, 1, 3);
-      Assertions.assertTrue(addVisibleToManager(chunk));
-      assertManagerState();
-      Assertions.assertFalse(manager.isComplete());
-      // Add a new one, now atomicUpdateGroup is full
-      chunk = newNonRootChunk(10, 12, 1, 3);
-      Assertions.assertTrue(addVisibleToManager(chunk));
-      assertManagerState();
-      Assertions.assertTrue(manager.isComplete());
-      chunk = newNonRootChunk(10, 12, 1, 3);
-      addVisibleToManager(chunk);
-    });
-    assertTrue(exception.getMessage().contains("Can't add chunk"));
+    Assert.assertTrue(manager.isEmpty());
+    // Add a new one, atomicUpdateGroup is not full
+    PartitionChunk<OvershadowableInteger> chunk = newNonRootChunk(10, 12, 1, 3);
+    Assert.assertTrue(addVisibleToManager(chunk));
+    assertManagerState();
+    Assert.assertFalse(manager.isComplete());
+    // Add a new one, atomicUpdateGroup is still not full
+    chunk = newNonRootChunk(10, 12, 1, 3);
+    Assert.assertTrue(addVisibleToManager(chunk));
+    assertManagerState();
+    Assert.assertFalse(manager.isComplete());
+    // Add a new one, now atomicUpdateGroup is full
+    chunk = newNonRootChunk(10, 12, 1, 3);
+    Assert.assertTrue(addVisibleToManager(chunk));
+    assertManagerState();
+    Assert.assertTrue(manager.isComplete());
+
+    // Add a new one to the full group
+    expectedException.expect(IllegalStateException.class);
+    expectedException.expectMessage("Can't add chunk");
+    chunk = newNonRootChunk(10, 12, 1, 3);
+    addVisibleToManager(chunk);
   }
 
   @Test
   public void testRemoveFromEmptyManager()
   {
-    Assertions.assertTrue(manager.isEmpty());
+    Assert.assertTrue(manager.isEmpty());
     PartitionChunk<OvershadowableInteger> chunk = newRootChunk();
-    Assertions.assertNull(manager.removeChunk(chunk));
+    Assert.assertNull(manager.removeChunk(chunk));
   }
 
   @Test
@@ -270,18 +273,18 @@ public class OvershadowableManagerTest
   {
     // Start with a non-root incomplete partitionChunk
     PartitionChunk<OvershadowableInteger> chunk = newNonRootChunk(0, 3, 1, 2);
-    Assertions.assertTrue(addVisibleToManager(chunk));
+    Assert.assertTrue(addVisibleToManager(chunk));
     assertManagerState();
 
     // Add a visible root chunk, now this group is complete
     chunk = newNonRootChunk(0, 3, 1, 2);
-    Assertions.assertTrue(addVisibleToManager(chunk));
+    Assert.assertTrue(addVisibleToManager(chunk));
     assertManagerState();
 
     // Add an overshadowed chunk
     nextRootPartitionId = 1;
     chunk = newRootChunk();
-    Assertions.assertTrue(manager.addChunk(chunk));
+    Assert.assertTrue(manager.addChunk(chunk));
     expectedOvershadowedChunks.add(chunk);
     assertManagerState();
   }
@@ -291,14 +294,14 @@ public class OvershadowableManagerTest
   {
     // Start with a non-root partitionChunk. This group is incomplete.
     PartitionChunk<OvershadowableInteger> chunk = newNonRootChunk(0, 3, 1, 2);
-    Assertions.assertTrue(addVisibleToManager(chunk));
+    Assert.assertTrue(addVisibleToManager(chunk));
     assertManagerState();
 
     // Add an overshadowed chunk
     nextRootPartitionId = 1;
     chunk = newRootChunk();
     expectedOvershadowedChunks.add(chunk);
-    Assertions.assertTrue(manager.addChunk(chunk));
+    Assert.assertTrue(manager.addChunk(chunk));
     assertManagerState();
   }
 
@@ -309,14 +312,14 @@ public class OvershadowableManagerTest
     PartitionChunk<OvershadowableInteger> chunk;
     for (int i = 0; i < 3; i++) {
       chunk = newRootChunk();
-      Assertions.assertTrue(addVisibleToManager(chunk));
+      Assert.assertTrue(addVisibleToManager(chunk));
       assertManagerState();
     }
 
     // Add a chunk of an incomplete group
     chunk = newNonRootChunk(0, 3, 1, 2);
     expectedStandbyChunks.add(chunk);
-    Assertions.assertTrue(manager.addChunk(chunk));
+    Assert.assertTrue(manager.addChunk(chunk));
     assertManagerState();
 
     // This group is now full
@@ -325,7 +328,7 @@ public class OvershadowableManagerTest
     expectedVisibleChunks.clear();
     expectedVisibleChunks.addAll(expectedStandbyChunks);
     expectedStandbyChunks.clear();
-    Assertions.assertTrue(addVisibleToManager(chunk));
+    Assert.assertTrue(addVisibleToManager(chunk));
     assertManagerState();
   }
 
@@ -334,17 +337,17 @@ public class OvershadowableManagerTest
   {
     // Add a chunk of an incomplete group
     PartitionChunk<OvershadowableInteger> chunk = newNonRootChunk(0, 3, 1, 2);
-    Assertions.assertTrue(addVisibleToManager(chunk));
+    Assert.assertTrue(addVisibleToManager(chunk));
     assertManagerState();
 
     // Add chunks of an incomplete group overshadowing the previous one
     chunk = newNonRootChunk(0, 3, 2, 3);
     expectedOvershadowedChunks.add(expectedVisibleChunks.remove(0));
-    Assertions.assertTrue(addVisibleToManager(chunk));
+    Assert.assertTrue(addVisibleToManager(chunk));
     assertManagerState();
 
     chunk = newNonRootChunk(0, 3, 2, 3);
-    Assertions.assertTrue(addVisibleToManager(chunk));
+    Assert.assertTrue(addVisibleToManager(chunk));
     assertManagerState();
   }
 
@@ -352,11 +355,11 @@ public class OvershadowableManagerTest
   public void testRemoveUnknownChunk()
   {
     PartitionChunk<OvershadowableInteger> chunk = newRootChunk();
-    Assertions.assertTrue(addVisibleToManager(chunk));
+    Assert.assertTrue(addVisibleToManager(chunk));
     assertManagerState();
 
     chunk = newRootChunk();
-    Assertions.assertNull(manager.removeChunk(chunk));
+    Assert.assertNull(manager.removeChunk(chunk));
     assertManagerState();
   }
 
@@ -366,17 +369,17 @@ public class OvershadowableManagerTest
     PartitionChunk<OvershadowableInteger> chunk;
     for (int i = 0; i < 10; i++) {
       chunk = newRootChunk();
-      Assertions.assertTrue(addVisibleToManager(chunk));
+      Assert.assertTrue(addVisibleToManager(chunk));
       assertManagerState();
     }
 
     while (expectedVisibleChunks.size() > 0) {
       chunk = expectedVisibleChunks.remove(ThreadLocalRandom.current().nextInt(expectedVisibleChunks.size()));
-      Assertions.assertEquals(chunk, manager.removeChunk(chunk));
+      Assert.assertEquals(chunk, manager.removeChunk(chunk));
       assertManagerState();
     }
 
-    Assertions.assertTrue(manager.isEmpty());
+    Assert.assertTrue(manager.isEmpty());
   }
 
   @Test
@@ -386,23 +389,23 @@ public class OvershadowableManagerTest
     PartitionChunk<OvershadowableInteger> chunk;
     for (int i = 0; i < 3; i++) {
       chunk = newRootChunk();
-      Assertions.assertTrue(addVisibleToManager(chunk));
+      Assert.assertTrue(addVisibleToManager(chunk));
       assertManagerState();
     }
 
     // Add two chunks of an incomplete group overshadowing the previous one
     chunk = newNonRootChunk(0, 3, 1, 3);
     expectedStandbyChunks.add(chunk);
-    Assertions.assertTrue(manager.addChunk(chunk));
+    Assert.assertTrue(manager.addChunk(chunk));
     assertManagerState();
     chunk = newNonRootChunk(0, 3, 1, 3);
     expectedStandbyChunks.add(chunk);
-    Assertions.assertTrue(manager.addChunk(chunk));
+    Assert.assertTrue(manager.addChunk(chunk));
     assertManagerState();
 
     // Remove one standby chunk
     chunk = expectedStandbyChunks.remove(0);
-    Assertions.assertEquals(chunk, manager.removeChunk(chunk));
+    Assert.assertEquals(chunk, manager.removeChunk(chunk));
     assertManagerState();
   }
 
@@ -411,25 +414,25 @@ public class OvershadowableManagerTest
   {
     // Add two complete groups
     PartitionChunk<OvershadowableInteger> chunk = newRootChunk();
-    Assertions.assertTrue(addVisibleToManager(chunk));
+    Assert.assertTrue(addVisibleToManager(chunk));
     assertManagerState();
     chunk = newRootChunk();
-    Assertions.assertTrue(addVisibleToManager(chunk));
+    Assert.assertTrue(addVisibleToManager(chunk));
     assertManagerState();
 
     // Add two chunks of an incomplete group
     chunk = newNonRootChunk(0, 2, 1, 3);
     expectedStandbyChunks.add(chunk);
-    Assertions.assertTrue(manager.addChunk(chunk));
+    Assert.assertTrue(manager.addChunk(chunk));
     assertManagerState();
     chunk = newNonRootChunk(0, 2, 1, 3);
     expectedStandbyChunks.add(chunk);
-    Assertions.assertTrue(manager.addChunk(chunk));
+    Assert.assertTrue(manager.addChunk(chunk));
     assertManagerState();
 
     // Remove a chunk of the incomplete group
     chunk = expectedVisibleChunks.remove(0);
-    Assertions.assertEquals(chunk, manager.removeChunk(chunk));
+    Assert.assertEquals(chunk, manager.removeChunk(chunk));
     expectedOvershadowedChunks.addAll(expectedVisibleChunks);
     expectedVisibleChunks.clear();
     expectedVisibleChunks.addAll(expectedStandbyChunks);
@@ -442,22 +445,22 @@ public class OvershadowableManagerTest
   {
     // Add an incomplete group
     PartitionChunk<OvershadowableInteger> chunk = newNonRootChunk(0, 2, 1, 3);
-    Assertions.assertTrue(addVisibleToManager(chunk));
+    Assert.assertTrue(addVisibleToManager(chunk));
     assertManagerState();
     chunk = newNonRootChunk(0, 2, 1, 3);
-    Assertions.assertTrue(addVisibleToManager(chunk));
+    Assert.assertTrue(addVisibleToManager(chunk));
     assertManagerState();
 
     // Add a complete overshadowed group
     chunk = newRootChunk();
     expectedOvershadowedChunks.add(chunk);
-    Assertions.assertTrue(manager.addChunk(chunk));
+    Assert.assertTrue(manager.addChunk(chunk));
     assertManagerState();
     chunk = newRootChunk();
     expectedStandbyChunks.addAll(expectedVisibleChunks);
     expectedVisibleChunks.clear();
     expectedVisibleChunks.add(expectedOvershadowedChunks.remove(0));
-    Assertions.assertTrue(addVisibleToManager(chunk));
+    Assert.assertTrue(addVisibleToManager(chunk));
     assertManagerState();
   }
 
@@ -466,20 +469,20 @@ public class OvershadowableManagerTest
   {
     // Add a complete group
     PartitionChunk<OvershadowableInteger> chunk = newNonRootChunk(0, 2, 1, 2);
-    Assertions.assertTrue(addVisibleToManager(chunk));
+    Assert.assertTrue(addVisibleToManager(chunk));
     assertManagerState();
     chunk = newNonRootChunk(0, 2, 1, 2);
-    Assertions.assertTrue(addVisibleToManager(chunk));
+    Assert.assertTrue(addVisibleToManager(chunk));
     assertManagerState();
 
     // Add a complete overshadowed group
     chunk = newRootChunk();
     expectedOvershadowedChunks.add(chunk);
-    Assertions.assertTrue(manager.addChunk(chunk));
+    Assert.assertTrue(manager.addChunk(chunk));
     assertManagerState();
     chunk = newRootChunk();
     expectedOvershadowedChunks.add(chunk);
-    Assertions.assertTrue(manager.addChunk(chunk));
+    Assert.assertTrue(manager.addChunk(chunk));
     assertManagerState();
   }
 
@@ -489,18 +492,18 @@ public class OvershadowableManagerTest
     // Add a complete group
     nextRootPartitionId = 1;
     PartitionChunk<OvershadowableInteger> chunk = newRootChunk();
-    Assertions.assertTrue(addVisibleToManager(chunk));
+    Assert.assertTrue(addVisibleToManager(chunk));
     assertManagerState();
 
     // Add an incomplete group of a larger partition range
     chunk = newNonRootChunk(0, 2, 1, 2);
     expectedOvershadowedChunks.add(expectedVisibleChunks.remove(0));
-    Assertions.assertTrue(addVisibleToManager(chunk));
+    Assert.assertTrue(addVisibleToManager(chunk));
     assertManagerState();
 
     // Remove an overshadowed chunk
     chunk = expectedOvershadowedChunks.remove(0);
-    Assertions.assertEquals(chunk, manager.removeChunk(chunk));
+    Assert.assertEquals(chunk, manager.removeChunk(chunk));
     assertManagerState();
   }
 
@@ -510,28 +513,28 @@ public class OvershadowableManagerTest
     // Add a complete group
     nextRootPartitionId = 1;
     PartitionChunk<OvershadowableInteger> chunk = newRootChunk();
-    Assertions.assertTrue(addVisibleToManager(chunk));
+    Assert.assertTrue(addVisibleToManager(chunk));
     assertManagerState();
 
     // Add a complete group overshadowing the previous
     chunk = newNonRootChunk(0, 2, 1, 2);
     expectedOvershadowedChunks.add(expectedVisibleChunks.remove(0));
-    Assertions.assertTrue(addVisibleToManager(chunk));
+    Assert.assertTrue(addVisibleToManager(chunk));
     assertManagerState();
     chunk = newNonRootChunk(0, 2, 1, 2);
-    Assertions.assertTrue(addVisibleToManager(chunk));
+    Assert.assertTrue(addVisibleToManager(chunk));
     assertManagerState();
 
     // Remove a chunk from the visible group
     chunk = expectedVisibleChunks.remove(0);
-    Assertions.assertEquals(chunk, manager.removeChunk(chunk));
+    Assert.assertEquals(chunk, manager.removeChunk(chunk));
     assertManagerState();
 
     // Remove another chunk from the visible group. Now the overshadowed group should be visible.
     chunk = expectedVisibleChunks.remove(0);
     expectedVisibleChunks.addAll(expectedOvershadowedChunks);
     expectedOvershadowedChunks.clear();
-    Assertions.assertEquals(chunk, manager.removeChunk(chunk));
+    Assert.assertEquals(chunk, manager.removeChunk(chunk));
     assertManagerState();
   }
 
@@ -540,23 +543,23 @@ public class OvershadowableManagerTest
   {
     // Add complete groups
     PartitionChunk<OvershadowableInteger> chunk = newRootChunk();
-    Assertions.assertTrue(addVisibleToManager(chunk));
+    Assert.assertTrue(addVisibleToManager(chunk));
     assertManagerState();
     chunk = newRootChunk();
-    Assertions.assertTrue(addVisibleToManager(chunk));
+    Assert.assertTrue(addVisibleToManager(chunk));
     assertManagerState();
 
     // Add a complete group overshadowing the previous
     chunk = newNonRootChunk(0, 2, 1, 2);
     expectedStandbyChunks.add(chunk);
-    Assertions.assertTrue(manager.addChunk(chunk));
+    Assert.assertTrue(manager.addChunk(chunk));
     assertManagerState();
 
     chunk = newNonRootChunk(0, 2, 1, 2);
     expectedOvershadowedChunks.addAll(expectedVisibleChunks);
     expectedVisibleChunks.clear();
     expectedVisibleChunks.add(expectedStandbyChunks.remove(0));
-    Assertions.assertTrue(addVisibleToManager(chunk));
+    Assert.assertTrue(addVisibleToManager(chunk));
     assertManagerState();
 
     // Remove a visible chunk. Should fall back to the complete overshadowed group.
@@ -565,7 +568,7 @@ public class OvershadowableManagerTest
     expectedVisibleChunks.clear();
     expectedVisibleChunks.addAll(expectedOvershadowedChunks);
     expectedOvershadowedChunks.clear();
-    Assertions.assertEquals(chunk, manager.removeChunk(chunk));
+    Assert.assertEquals(chunk, manager.removeChunk(chunk));
     assertManagerState();
   }
 
@@ -638,7 +641,7 @@ public class OvershadowableManagerTest
         iterator.remove();
       }
     }
-    Assertions.assertEquals(chunkToRemove, manager.removeChunk(chunkToRemove));
+    Assert.assertEquals(chunkToRemove, manager.removeChunk(chunkToRemove));
     assertManagerState();
   }
 
@@ -755,7 +758,7 @@ public class OvershadowableManagerTest
       }
     }
 
-    Assertions.assertEquals(chunkToRemove, manager.removeChunk(chunkToRemove));
+    Assert.assertEquals(chunkToRemove, manager.removeChunk(chunkToRemove));
     assertManagerState();
   }
 
@@ -765,7 +768,7 @@ public class OvershadowableManagerTest
     // Start with root partitionChunks
     for (int i = 0; i < 5; i++) {
       PartitionChunk<OvershadowableInteger> chunk = newRootChunk();
-      Assertions.assertTrue(addVisibleToManager(chunk));
+      Assert.assertTrue(addVisibleToManager(chunk));
     }
     assertManagerState();
 
@@ -779,7 +782,7 @@ public class OvershadowableManagerTest
           3,
           2
       );
-      Assertions.assertTrue(manager.addChunk(chunk));
+      Assert.assertTrue(manager.addChunk(chunk));
       if (i == 0) {
         expectedStandbyChunks.add(chunk);
       }
@@ -796,7 +799,7 @@ public class OvershadowableManagerTest
     // Append new visible chunks
     for (int i = 0; i < 3; i++) {
       PartitionChunk<OvershadowableInteger> chunk = newRootChunk();
-      Assertions.assertTrue(addVisibleToManager(chunk));
+      Assert.assertTrue(addVisibleToManager(chunk));
     }
     assertManagerState();
 
@@ -809,7 +812,7 @@ public class OvershadowableManagerTest
           2
       );
       expectedOvershadowedChunks.add(chunk);
-      Assertions.assertTrue(manager.addChunk(chunk));
+      Assert.assertTrue(manager.addChunk(chunk));
       assertManagerState();
     }
   }
@@ -820,7 +823,7 @@ public class OvershadowableManagerTest
     // Start with root partitionChunks
     for (int i = 0; i < 5; i++) {
       PartitionChunk<OvershadowableInteger> chunk = newRootChunk();
-      Assertions.assertTrue(addVisibleToManager(chunk));
+      Assert.assertTrue(addVisibleToManager(chunk));
     }
 
     // Overwrite some partitionChunks with a higher minor version
@@ -833,7 +836,7 @@ public class OvershadowableManagerTest
           1,
           2
       );
-      Assertions.assertTrue(addVisibleToManager(chunk));
+      Assert.assertTrue(addVisibleToManager(chunk));
     }
     expectedOvershadowedChunks.addAll(expectedVisibleChunks.subList(1, 3));
     IntStream.range(0, 2).forEach(i -> expectedVisibleChunks.remove(1));
@@ -841,13 +844,13 @@ public class OvershadowableManagerTest
 
     // Remove an overshadowed chunk
     PartitionChunk<OvershadowableInteger> chunk = expectedOvershadowedChunks.remove(0);
-    Assertions.assertEquals(chunk, manager.removeChunk(chunk));
+    Assert.assertEquals(chunk, manager.removeChunk(chunk));
     assertManagerState();
 
     // Remove a chunk overshadows others
     for (PartitionChunk<OvershadowableInteger> visibleChunk : expectedVisibleChunks) {
       if (visibleChunk.getChunkNumber() >= PartitionIds.NON_ROOT_GEN_START_PARTITION_ID) {
-        Assertions.assertEquals(visibleChunk, removeVisibleFromManager(visibleChunk));
+        Assert.assertEquals(visibleChunk, removeVisibleFromManager(visibleChunk));
         break;
       }
     }
@@ -860,7 +863,7 @@ public class OvershadowableManagerTest
     // Start with root partitionChunks
     for (int i = 0; i < 5; i++) {
       PartitionChunk<OvershadowableInteger> chunk = newRootChunk();
-      Assertions.assertTrue(addVisibleToManager(chunk));
+      Assert.assertTrue(addVisibleToManager(chunk));
     }
 
     // Overwrite some partitionChunks with a higher minor version
@@ -873,7 +876,7 @@ public class OvershadowableManagerTest
           1,
           2
       );
-      Assertions.assertTrue(addVisibleToManager(chunk));
+      Assert.assertTrue(addVisibleToManager(chunk));
     }
     expectedOvershadowedChunks.addAll(expectedVisibleChunks.subList(1, 3));
     IntStream.range(0, 2).forEach(i -> expectedVisibleChunks.remove(1));
@@ -903,26 +906,26 @@ public class OvershadowableManagerTest
   public void testFallBackToStandbyOnRemove()
   {
     PartitionChunk<OvershadowableInteger> chunk = newRootChunk();
-    Assertions.assertTrue(addVisibleToManager(chunk));
+    Assert.assertTrue(addVisibleToManager(chunk));
     assertManagerState();
 
     // Add a chunk of an incomplete atomicUpdateGroup
     chunk = newNonRootChunk(0, 1, 1, 3);
     expectedStandbyChunks.add(chunk);
-    Assertions.assertTrue(manager.addChunk(chunk));
+    Assert.assertTrue(manager.addChunk(chunk));
     assertManagerState();
 
     // Add a chunk of an incomplete atomicUpdateGroup which overshadows the previous one
     chunk = newNonRootChunk(0, 1, 2, 2);
     expectedStandbyChunks.add(chunk);
-    Assertions.assertTrue(manager.addChunk(chunk));
+    Assert.assertTrue(manager.addChunk(chunk));
     assertManagerState();
 
     // Remove the visible chunk
     chunk = expectedVisibleChunks.remove(0);
     expectedVisibleChunks.add(expectedStandbyChunks.remove(1));
     expectedOvershadowedChunks.add(expectedStandbyChunks.remove(0));
-    Assertions.assertEquals(chunk, manager.removeChunk(chunk));
+    Assert.assertEquals(chunk, manager.removeChunk(chunk));
     assertManagerState();
   }
 
@@ -933,7 +936,7 @@ public class OvershadowableManagerTest
     // Add incomplete non-root group
     for (int i = 0; i < 2; i++) {
       chunk = newNonRootChunk(10, 20, 5, 3);
-      Assertions.assertTrue(addVisibleToManager(chunk));
+      Assert.assertTrue(addVisibleToManager(chunk));
     }
     assertManagerState();
 
@@ -941,16 +944,16 @@ public class OvershadowableManagerTest
     for (int i = 0; i < 2; i++) {
       chunk = newNonRootChunk(10, 20, 4, 3);
       expectedOvershadowedChunks.add(chunk);
-      Assertions.assertTrue(manager.addChunk(chunk));
+      Assert.assertTrue(manager.addChunk(chunk));
       chunk = newNonRootChunk(10, 20, 3, 3);
       expectedOvershadowedChunks.add(chunk);
-      Assertions.assertTrue(manager.addChunk(chunk));
+      Assert.assertTrue(manager.addChunk(chunk));
     }
     assertManagerState();
 
     // Remove the visible group one by one
     chunk = expectedVisibleChunks.remove(0);
-    Assertions.assertEquals(chunk, manager.removeChunk(chunk));
+    Assert.assertEquals(chunk, manager.removeChunk(chunk));
     assertManagerState();
 
     chunk = expectedVisibleChunks.remove(0);
@@ -959,7 +962,7 @@ public class OvershadowableManagerTest
         .filter(c -> c.getObject().getMinorVersion() == 4)
         .forEach(c -> expectedVisibleChunks.add(c));
     expectedOvershadowedChunks.removeAll(expectedVisibleChunks);
-    Assertions.assertEquals(chunk, manager.removeChunk(chunk));
+    Assert.assertEquals(chunk, manager.removeChunk(chunk));
     assertManagerState();
   }
 
@@ -968,27 +971,27 @@ public class OvershadowableManagerTest
   {
     // Add an incomplete chunk
     PartitionChunk<OvershadowableInteger> chunk = newNonRootChunk(0, 1, 1, 3);
-    Assertions.assertTrue(addVisibleToManager(chunk));
+    Assert.assertTrue(addVisibleToManager(chunk));
     assertManagerState();
 
     // Add an incomplete chunk overshadowing the previous one. The atomicUpdateGroup of this chunk
     // will be complete later in this test.
     chunk = newNonRootChunk(0, 1, 2, 2);
     expectedOvershadowedChunks.add(expectedVisibleChunks.remove(0));
-    Assertions.assertTrue(addVisibleToManager(chunk));
+    Assert.assertTrue(addVisibleToManager(chunk));
     assertManagerState();
 
     // Add an incomplete chunk overshadowing the previous one
     chunk = newNonRootChunk(0, 1, 3, 5);
     expectedOvershadowedChunks.add(expectedVisibleChunks.remove(0));
-    Assertions.assertTrue(addVisibleToManager(chunk));
+    Assert.assertTrue(addVisibleToManager(chunk));
     assertManagerState();
 
     // Add a chunk to complete the second atomicUpdateGroup overshadowed by the previous one
     chunk = newNonRootChunk(0, 1, 2, 2);
     expectedStandbyChunks.add(expectedVisibleChunks.remove(0));
     expectedVisibleChunks.add(expectedOvershadowedChunks.remove(expectedOvershadowedChunks.size() - 1));
-    Assertions.assertTrue(addVisibleToManager(chunk));
+    Assert.assertTrue(addVisibleToManager(chunk));
     assertManagerState();
   }
 
@@ -998,7 +1001,7 @@ public class OvershadowableManagerTest
     // Simulate the first two chunks are missing at the root level
     nextRootPartitionId = 2;
     PartitionChunk<OvershadowableInteger> chunk = newRootChunk();
-    Assertions.assertTrue(addVisibleToManager(chunk));
+    Assert.assertTrue(addVisibleToManager(chunk));
     assertManagerState();
 
     // Add a new group overshadows the previous one
@@ -1006,14 +1009,14 @@ public class OvershadowableManagerTest
     expectedVisibleChunks.clear();
     for (int i = 0; i < 2; i++) {
       chunk = newNonRootChunk(0, 3, 1, 2);
-      Assertions.assertTrue(addVisibleToManager(chunk));
+      Assert.assertTrue(addVisibleToManager(chunk));
     }
     assertManagerState();
 
     // Remove the visible group
     for (int i = 0; i < 2; i++) {
       chunk = expectedVisibleChunks.remove(0);
-      Assertions.assertEquals(chunk, manager.removeChunk(chunk));
+      Assert.assertEquals(chunk, manager.removeChunk(chunk));
     }
     expectedVisibleChunks.addAll(expectedOvershadowedChunks);
     expectedOvershadowedChunks.clear();
@@ -1034,20 +1037,20 @@ public class OvershadowableManagerTest
 
   private void assertManagerState()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
+        "Mismatched visible chunks",
         new HashSet<>(expectedVisibleChunks),
-        Sets.newHashSet(manager.visibleChunksIterator()),
-        "Mismatched visible chunks"
+        Sets.newHashSet(manager.visibleChunksIterator())
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
+        "Mismatched overshadowed chunks",
         new HashSet<>(expectedOvershadowedChunks),
-        new HashSet<>(manager.getOvershadowedChunks()),
-        "Mismatched overshadowed chunks"
+        new HashSet<>(manager.getOvershadowedChunks())
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
+        "Mismatched standby chunks",
         new HashSet<>(expectedStandbyChunks),
-        new HashSet<>(manager.getStandbyChunks()),
-        "Mismatched standby chunks"
+        new HashSet<>(manager.getStandbyChunks())
     );
   }
 

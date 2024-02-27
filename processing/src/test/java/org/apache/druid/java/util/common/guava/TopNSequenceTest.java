@@ -23,12 +23,11 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
+import org.junit.Assert;
+import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -38,7 +37,7 @@ import java.util.List;
 import java.util.Random;
 
 
-
+@RunWith(Enclosed.class)
 public class TopNSequenceTest
 {
   private static final List<String> EMPTY = Collections.emptyList();
@@ -46,8 +45,8 @@ public class TopNSequenceTest
   private static final List<String> RAW_ASC = Lists.newArrayList(Splitter.fixedLength(1).split("abcdefghijk"));
   private static final List<String> RAW_DESC = Lists.newArrayList(Splitter.fixedLength(1).split("kjihgfedcba"));
 
-  @Nested
-  public class TopNSequenceAscDescTest
+  @RunWith(Parameterized.class)
+  public static class TopNSequenceAscDescTest
   {
     private static final Ordering<String> ASC = Ordering.natural();
     private static final Ordering<String> DESC = Ordering.natural().reverse();
@@ -56,6 +55,7 @@ public class TopNSequenceTest
     private List<String> rawInput;
     private int limit;
 
+    @Parameterized.Parameters(name = "comparator={0}, rawInput={1}, limit={2}")
     public static Collection<Object[]> makeTestData()
     {
       Object[][] data = new Object[][]{
@@ -84,33 +84,31 @@ public class TopNSequenceTest
       return Arrays.asList(data);
     }
 
-    public void initTopNSequenceAscDescTest(Ordering<String> ordering, List<String> rawInput, int limit)
+    public TopNSequenceAscDescTest(Ordering<String> ordering, List<String> rawInput, int limit)
     {
       this.ordering = ordering;
       this.rawInput = rawInput;
       this.limit = limit;
     }
 
-    @MethodSource("makeTestData")
-    @ParameterizedTest(name = "comparator={0}, rawInput={1}, limit={2}")
-    public void testOrderByWithLimit(Ordering<String> ordering, List<String> rawInput, int limit)
+    @Test
+    public void testOrderByWithLimit()
     {
-      initTopNSequenceAscDescTest(ordering, rawInput, limit);
       List<String> expected = rawInput.subList(0, Math.min(limit, rawInput.size()));
       List<String> inputs = Lists.newArrayList(rawInput);
       Collections.shuffle(inputs, new Random(2));
 
       Sequence<String> result = new TopNSequence<>(Sequences.simple(inputs), ordering, limit);
 
-      Assertions.assertEquals(expected, result.toList());
+      Assert.assertEquals(expected, result.toList());
     }
   }
 
   /**
    * This class has test cases using a comparator that sometimes returns zero for unequal things.
    */
-  @Nested
-  public class TopNSequenceEvenOddTest
+  @RunWith(Parameterized.class)
+  public static class TopNSequenceEvenOddTest
   {
     // 'a', 'c', 'e', ... all come before 'b', 'd', 'f', ...
     private static final Ordering<String> EVENODD = Ordering.from(Comparator.comparing(s -> 1 - s.charAt(0) % 2));
@@ -118,6 +116,7 @@ public class TopNSequenceTest
     private String expected;
     private List<String> rawInput;
 
+    @Parameterized.Parameters(name = "rawInput={1}")
     public static Collection<Object[]> makeTestData()
     {
       Object[][] data = new Object[][]{
@@ -128,24 +127,22 @@ public class TopNSequenceTest
       return Arrays.asList(data);
     }
 
-    public void initTopNSequenceEvenOddTest(String expected, List<String> rawInput)
+    public TopNSequenceEvenOddTest(String expected, List<String> rawInput)
     {
       this.expected = expected;
       this.rawInput = rawInput;
     }
 
-    @MethodSource("makeTestData")
-    @ParameterizedTest(name = "rawInput={1}")
-    public void testStability(String expected, List<String> rawInput)
+    @Test
+    public void testStability()
     {
-      initTopNSequenceEvenOddTest(expected, rawInput);
       // Verify that the output of the sequence is stable relative to the input.
       for (int limit = 0; limit < expected.length() + 1; limit++) {
         final TopNSequence<String> sequence = new TopNSequence<>(Sequences.simple(rawInput), EVENODD, limit);
-        Assertions.assertEquals(
+        Assert.assertEquals(
+            "limit = " + limit,
             expected.substring(0, Math.min(limit, expected.length())),
-            Joiner.on("").join(sequence.toList()),
-            "limit = " + limit
+            Joiner.on("").join(sequence.toList())
         );
       }
     }

@@ -20,6 +20,7 @@
 package org.apache.druid.indexing.worker.executor;
 
 import org.junit.Assert;
+import org.junit.Test;
 
 
 public class ExecutorLifecycleConfigTest

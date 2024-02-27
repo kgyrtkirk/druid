@@ -28,8 +28,8 @@ import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.HttpVersion;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -55,8 +55,8 @@ public class ObjectOrErrorResponseHandlerTest
     clientResp = responseHandler.handleChunk(clientResp, chunk, 0);
     clientResp = responseHandler.done(clientResp);
 
-    Assertions.assertTrue(clientResp.isFinished());
-    Assertions.assertEquals(
+    Assert.assertTrue(clientResp.isFinished());
+    Assert.assertEquals(
         "abcdefg",
         IOUtils.toString(clientResp.getObj().valueOrThrow().getContent(), StandardCharsets.UTF_8)
     );
@@ -80,15 +80,15 @@ public class ObjectOrErrorResponseHandlerTest
 
     // Exception after HTTP OK still is handled by the "OK handler"
     // (The handler that starts the request gets to finish it.)
-    Assertions.assertTrue(clientResp.isFinished());
-    Assertions.assertTrue(clientResp.getObj().isValue());
+    Assert.assertTrue(clientResp.isFinished());
+    Assert.assertTrue(clientResp.getObj().isValue());
 
     final InputStream responseStream = clientResp.getObj().valueOrThrow().getContent();
-    final IOException e = Assertions.assertThrows(
+    final IOException e = Assert.assertThrows(
         IOException.class,
         () -> IOUtils.toString(responseStream, StandardCharsets.UTF_8)
     );
-    Assertions.assertEquals("java.lang.RuntimeException: dummy!", e.getMessage());
+    Assert.assertEquals("java.lang.RuntimeException: dummy!", e.getMessage());
   }
 
   @Test
@@ -110,12 +110,12 @@ public class ObjectOrErrorResponseHandlerTest
     clientResp = responseHandler.done(clientResp);
 
     // 5xx HTTP code is handled by the error handler.
-    Assertions.assertTrue(clientResp.isFinished());
-    Assertions.assertTrue(clientResp.getObj().isError());
-    Assertions.assertEquals(
+    Assert.assertTrue(clientResp.isFinished());
+    Assert.assertTrue(clientResp.getObj().isError());
+    Assert.assertEquals(
         HttpResponseStatus.INTERNAL_SERVER_ERROR.getCode(),
         clientResp.getObj().error().getResponse().getStatus().getCode()
     );
-    Assertions.assertEquals("abcdefg", clientResp.getObj().error().getContent());
+    Assert.assertEquals("abcdefg", clientResp.getObj().error().getContent());
   }
 }

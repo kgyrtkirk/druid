@@ -23,6 +23,7 @@ import com.azure.core.http.HttpResponse;
 import com.azure.storage.blob.models.BlobStorageException;
 import org.easymock.EasyMock;
 import org.easymock.EasyMockSupport;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStream;

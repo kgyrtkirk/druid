@@ -42,15 +42,15 @@ import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.joda.time.Interval;
 import org.joda.time.Period;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Answers;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -66,7 +66,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 /**
  *
  */
-@ExtendWith(MockitoExtension.class)
+@RunWith(MockitoJUnitRunner.class)
 public class KillUnusedSegmentsTest
 {
   private static final Duration INDEXING_PERIOD = Duration.standardSeconds(1);
@@ -98,7 +98,7 @@ public class KillUnusedSegmentsTest
 
   private KillUnusedSegments target;
 
-  @BeforeEach
+  @Before
   public void setup()
   {
     Mockito.doReturn(coordinatorDynamicConfig).when(params).getCoordinatorDynamicConfig();
@@ -330,32 +330,32 @@ public class KillUnusedSegmentsTest
   @Test
   public void testGetKillTaskCapacity()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         10,
         KillUnusedSegments.getKillTaskCapacity(10, 1.0, Integer.MAX_VALUE)
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         0,
         KillUnusedSegments.getKillTaskCapacity(10, 0.0, Integer.MAX_VALUE)
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         10,
         KillUnusedSegments.getKillTaskCapacity(10, Double.POSITIVE_INFINITY, Integer.MAX_VALUE)
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         0,
         KillUnusedSegments.getKillTaskCapacity(10, 1.0, 0)
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         1,
         KillUnusedSegments.getKillTaskCapacity(10, 0.1, 3)
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         2,
         KillUnusedSegments.getKillTaskCapacity(10, 0.3, 2)
     );
@@ -397,7 +397,7 @@ public class KillUnusedSegmentsTest
 
   private void verifyState(Map<String, DateTime> expectedDatasourceToLastKillIntervalEnd)
   {
-    Assertions.assertEquals(expectedDatasourceToLastKillIntervalEnd, target.getDatasourceToLastKillIntervalEnd());
+    Assert.assertEquals(expectedDatasourceToLastKillIntervalEnd, target.getDatasourceToLastKillIntervalEnd());
   }
 
   private void runAndVerifyNoKill()

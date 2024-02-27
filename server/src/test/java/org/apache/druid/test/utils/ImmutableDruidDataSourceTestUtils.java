@@ -20,7 +20,7 @@
 package org.apache.druid.test.utils;
 
 import org.apache.druid.client.ImmutableDruidDataSource;
-import org.junit.jupiter.api.Assertions;
+import org.junit.Assert;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -68,7 +68,8 @@ public class ImmutableDruidDataSourceTestUtils
       return actual == null;
     }
 
-    Assertions.assertEquals(expected.size(), actual.size(), "expected and actual ImmutableDruidDataSource lists should be of equal size");
+    Assert.assertEquals("expected and actual ImmutableDruidDataSource lists should be of equal size",
+        expected.size(), actual.size());
 
     for (ImmutableDruidDataSource e : expected) {
       if (!contains(e, actual)) {

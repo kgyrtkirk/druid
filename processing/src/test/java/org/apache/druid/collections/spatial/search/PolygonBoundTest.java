@@ -20,8 +20,8 @@
 package org.apache.druid.collections.spatial.search;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Arrays;
 
@@ -30,19 +30,19 @@ public class PolygonBoundTest
   @Test
   public void testCacheKey()
   {
-    Assertions.assertArrayEquals(
+    Assert.assertArrayEquals(
         PolygonBound.from(new float[]{1F, 2F, 3F}, new float[]{0F, 2F, 0F}, 1).getCacheKey(),
         PolygonBound.from(new float[]{1F, 2F, 3F}, new float[]{0F, 2F, 0F}, 1).getCacheKey()
     );
-    Assertions.assertFalse(Arrays.equals(
+    Assert.assertFalse(Arrays.equals(
         PolygonBound.from(new float[]{1F, 2F, 3F}, new float[]{0F, 2F, 0F}, 1).getCacheKey(),
         PolygonBound.from(new float[]{1F, 2F, 3F}, new float[]{0F, 2F, 1F}, 1).getCacheKey()
     ));
-    Assertions.assertFalse(Arrays.equals(
+    Assert.assertFalse(Arrays.equals(
         PolygonBound.from(new float[]{1F, 2F, 3F}, new float[]{0F, 2F, 0F}, 1).getCacheKey(),
         PolygonBound.from(new float[]{1F, 2F, 2F}, new float[]{0F, 2F, 0F}, 1).getCacheKey()
     ));
-    Assertions.assertFalse(Arrays.equals(
+    Assert.assertFalse(Arrays.equals(
         PolygonBound.from(new float[]{1F, 2F, 3F}, new float[]{0F, 2F, 0F}, 1).getCacheKey(),
         PolygonBound.from(new float[]{1F, 2F, 3F}, new float[]{0F, 2F, 0F}, 2).getCacheKey()
     ));
@@ -54,29 +54,29 @@ public class PolygonBoundTest
     final PolygonBound triangle = PolygonBound.from(new float[]{1f, 4f, 7f}, new float[]{1f, 4f, 1f});
     final float delta = 1e-5f;
 
-    Assertions.assertTrue(triangle.contains(new float[]{1f, 1f}));
-    Assertions.assertFalse(triangle.contains(new float[]{1f, 1f - delta}));
-    Assertions.assertFalse(triangle.contains(new float[]{1f, 1f + delta}));
-    Assertions.assertTrue(triangle.contains(new float[]{1f + delta, 1f}));
-    Assertions.assertFalse(triangle.contains(new float[]{1f - delta, 1f}));
-    Assertions.assertTrue(triangle.contains(new float[]{1f + delta, 1f}));
-    Assertions.assertFalse(triangle.contains(new float[]{1f - delta, 1f}));
-    Assertions.assertTrue(triangle.contains(new float[]{5f, 1f}));
-    Assertions.assertFalse(triangle.contains(new float[]{1f, 5f}));
-    Assertions.assertTrue(triangle.contains(new float[]{3f, 2f}));
+    Assert.assertTrue(triangle.contains(new float[]{1f, 1f}));
+    Assert.assertFalse(triangle.contains(new float[]{1f, 1f - delta}));
+    Assert.assertFalse(triangle.contains(new float[]{1f, 1f + delta}));
+    Assert.assertTrue(triangle.contains(new float[]{1f + delta, 1f}));
+    Assert.assertFalse(triangle.contains(new float[]{1f - delta, 1f}));
+    Assert.assertTrue(triangle.contains(new float[]{1f + delta, 1f}));
+    Assert.assertFalse(triangle.contains(new float[]{1f - delta, 1f}));
+    Assert.assertTrue(triangle.contains(new float[]{5f, 1f}));
+    Assert.assertFalse(triangle.contains(new float[]{1f, 5f}));
+    Assert.assertTrue(triangle.contains(new float[]{3f, 2f}));
 
     final PolygonBound rightTriangle = PolygonBound.from(new float[]{1f, 1f, 5f}, new float[]{1f, 5f, 1f});
 
-    Assertions.assertTrue(rightTriangle.contains(new float[]{1f, 5f}));
-    Assertions.assertTrue(rightTriangle.contains(new float[]{2f, 4f}));
-    Assertions.assertTrue(rightTriangle.contains(new float[]{2f - delta, 4f}));
-    Assertions.assertFalse(rightTriangle.contains(new float[]{2f + delta, 4f}));
-    Assertions.assertTrue(rightTriangle.contains(new float[]{2f, 4f - delta}));
-    Assertions.assertFalse(rightTriangle.contains(new float[]{2f, 4f + delta}));
-    Assertions.assertTrue(rightTriangle.contains(new float[]{3f - delta, 3f}));
-    Assertions.assertFalse(rightTriangle.contains(new float[]{3f + delta, 3f}));
-    Assertions.assertTrue(rightTriangle.contains(new float[]{3f, 3f - delta}));
-    Assertions.assertFalse(rightTriangle.contains(new float[]{3f, 3f + delta}));
+    Assert.assertTrue(rightTriangle.contains(new float[]{1f, 5f}));
+    Assert.assertTrue(rightTriangle.contains(new float[]{2f, 4f}));
+    Assert.assertTrue(rightTriangle.contains(new float[]{2f - delta, 4f}));
+    Assert.assertFalse(rightTriangle.contains(new float[]{2f + delta, 4f}));
+    Assert.assertTrue(rightTriangle.contains(new float[]{2f, 4f - delta}));
+    Assert.assertFalse(rightTriangle.contains(new float[]{2f, 4f + delta}));
+    Assert.assertTrue(rightTriangle.contains(new float[]{3f - delta, 3f}));
+    Assert.assertFalse(rightTriangle.contains(new float[]{3f + delta, 3f}));
+    Assert.assertTrue(rightTriangle.contains(new float[]{3f, 3f - delta}));
+    Assert.assertFalse(rightTriangle.contains(new float[]{3f, 3f + delta}));
   }
 
   @Test

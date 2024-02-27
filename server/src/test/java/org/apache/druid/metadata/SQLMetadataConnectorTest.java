@@ -26,10 +26,10 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.druid.java.util.common.StringUtils;
+import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Rule;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.skife.jdbi.v2.Batch;
 import org.skife.jdbi.v2.DBI;
 import org.skife.jdbi.v2.Handle;
@@ -61,7 +61,7 @@ public class SQLMetadataConnectorTest
   private TestDerbyConnector connector;
   private MetadataStorageTablesConfig tablesConfig;
 
-  @BeforeEach
+  @Before
   public void setUp()
   {
     connector = derbyConnectorRule.getConnector();
@@ -92,17 +92,17 @@ public class SQLMetadataConnectorTest
     connector.getDBI().withHandle(
         handle -> {
           for (String table : tables) {
-            Assertions.assertTrue(
-                connector.tableExists(handle, table),
-                StringUtils.format("table %s was not created!", table)
+            Assert.assertTrue(
+                StringUtils.format("table %s was not created!", table),
+                connector.tableExists(handle, table)
             );
           }
 
           String taskTable = tablesConfig.getTasksTable();
           for (String column : Arrays.asList("type", "group_id")) {
-            Assertions.assertTrue(
-                connector.tableHasColumn(taskTable, column),
-                StringUtils.format("Tasks table column %s was not created!", column)
+            Assert.assertTrue(
+                StringUtils.format("Tasks table column %s was not created!", column),
+                connector.tableHasColumn(taskTable, column)
             );
           }
 
@@ -128,9 +128,9 @@ public class SQLMetadataConnectorTest
     ).stream().map(StringUtils::toUpperCase).collect(Collectors.toSet());
 
     for (String expectedIndex : expectedIndexSet) {
-      Assertions.assertTrue(
-          createdIndexSet.contains(expectedIndex),
-          StringUtils.format("Failed to find the expected Index %s on entry table", expectedIndex)
+      Assert.assertTrue(
+          StringUtils.format("Failed to find the expected Index %s on entry table", expectedIndex),
+          createdIndexSet.contains(expectedIndex)
       );
     }
     connector.createTaskTables();
@@ -150,7 +150,7 @@ public class SQLMetadataConnectorTest
       );
     }
     catch (Exception e) {
-      Assertions.fail("Index creation should never throw an exception");
+      Assert.fail("Index creation should never throw an exception");
     }
   }
 
@@ -160,10 +160,10 @@ public class SQLMetadataConnectorTest
     String tableName = "noTable";
     try {
       Set<String> res = connector.getIndexOnTable(tableName);
-      Assertions.assertEquals(0, res.size());
+      Assert.assertEquals(0, res.size());
     }
     catch (Exception e) {
-      Assertions.fail("getIndexOnTable should never throw an exception");
+      Assert.fail("getIndexOnTable should never throw an exception");
     }
   }
 
@@ -212,7 +212,7 @@ public class SQLMetadataConnectorTest
     final String tableName = "test";
     connector.createConfigTable(tableName);
 
-    Assertions.assertNull(connector.lookup(tableName, "name", "payload", "emperor"));
+    Assert.assertNull(connector.lookup(tableName, "name", "payload", "emperor"));
 
     connector.insertOrUpdate(
         tableName,
@@ -221,7 +221,7 @@ public class SQLMetadataConnectorTest
         "emperor",
         StringUtils.toUtf8("penguin")
     );
-    Assertions.assertArrayEquals(
+    Assert.assertArrayEquals(
         StringUtils.toUtf8("penguin"),
         connector.lookup(tableName, "name", "payload", "emperor")
     );
@@ -234,7 +234,7 @@ public class SQLMetadataConnectorTest
         StringUtils.toUtf8("penguin chick")
     );
 
-    Assertions.assertArrayEquals(
+    Assert.assertArrayEquals(
         StringUtils.toUtf8("penguin chick"),
         connector.lookup(tableName, "name", "payload", "emperor")
     );
@@ -318,8 +318,8 @@ public class SQLMetadataConnectorTest
         Suppliers.ofInstance(tablesConfig)
     );
     BasicDataSource dataSource = testSQLMetadataConnector.getDatasource();
-    Assertions.assertEquals(dataSource.getMaxConnLifetimeMillis(), 1200000);
-    Assertions.assertEquals(dataSource.getDefaultQueryTimeout().intValue(), 30000);
+    Assert.assertEquals(dataSource.getMaxConnLifetimeMillis(), 1200000);
+    Assert.assertEquals(dataSource.getDefaultQueryTimeout().intValue(), 30000);
   }
 
   @Test
@@ -333,40 +333,40 @@ public class SQLMetadataConnectorTest
     );
 
     // Transient exceptions
-    Assertions.assertTrue(metadataConnector.isTransientException(new RetryTransactionException("")));
-    Assertions.assertTrue(metadataConnector.isTransientException(new SQLRecoverableException()));
-    Assertions.assertTrue(metadataConnector.isTransientException(new SQLTransientException()));
-    Assertions.assertTrue(metadataConnector.isTransientException(new SQLTransientConnectionException()));
+    Assert.assertTrue(metadataConnector.isTransientException(new RetryTransactionException("")));
+    Assert.assertTrue(metadataConnector.isTransientException(new SQLRecoverableException()));
+    Assert.assertTrue(metadataConnector.isTransientException(new SQLTransientException()));
+    Assert.assertTrue(metadataConnector.isTransientException(new SQLTransientConnectionException()));
 
     // Non transient exceptions
-    Assertions.assertFalse(metadataConnector.isTransientException(null));
-    Assertions.assertFalse(metadataConnector.isTransientException(new SQLException()));
-    Assertions.assertFalse(metadataConnector.isTransientException(new UnableToExecuteStatementException("")));
+    Assert.assertFalse(metadataConnector.isTransientException(null));
+    Assert.assertFalse(metadataConnector.isTransientException(new SQLException()));
+    Assert.assertFalse(metadataConnector.isTransientException(new UnableToExecuteStatementException("")));
 
     // Nested transient exceptions
-    Assertions.assertTrue(
+    Assert.assertTrue(
         metadataConnector.isTransientException(
             new CallbackFailedException(new SQLTransientException())
         )
     );
-    Assertions.assertTrue(
+    Assert.assertTrue(
         metadataConnector.isTransientException(
             new UnableToObtainConnectionException(new SQLException())
         )
     );
-    Assertions.assertTrue(
+    Assert.assertTrue(
         metadataConnector.isTransientException(
             new UnableToExecuteStatementException(new SQLTransientException())
         )
     );
 
     // Nested non-transient exceptions
-    Assertions.assertFalse(
+    Assert.assertFalse(
         metadataConnector.isTransientException(
             new CallbackFailedException(new SQLException())
         )
     );
-    Assertions.assertFalse(
+    Assert.assertFalse(
         metadataConnector.isTransientException(
             new UnableToExecuteStatementException(new SQLException())
         )

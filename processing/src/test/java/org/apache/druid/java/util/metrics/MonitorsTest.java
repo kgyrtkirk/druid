@@ -22,10 +22,10 @@ package org.apache.druid.java.util.metrics;
 import com.google.common.collect.ImmutableMap;
 import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.java.util.emitter.core.Event;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Assume;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.List;
 
@@ -33,11 +33,11 @@ public class MonitorsTest
 {
   private static final String CPU_ARCH = System.getProperty("os.arch");
 
-  @BeforeEach
+  @Before
   public void before()
   {
     // Do not run the tests on ARM64. Sigar library has no binaries for ARM64
-    Assumptions.assumeFalse("aarch64".equals(CPU_ARCH));
+    Assume.assumeFalse("aarch64".equals(CPU_ARCH));
   }
 
   @Test
@@ -65,11 +65,11 @@ public class MonitorsTest
 
   private void checkEvents(List<Event> events, String expectedFeed)
   {
-    Assertions.assertFalse(events.isEmpty(), "no events emitted");
+    Assert.assertFalse("no events emitted", events.isEmpty());
     for (Event e : events) {
       if (!expectedFeed.equals(e.getFeed())) {
         String message = StringUtils.format("\"feed\" in event: %s", e.toMap().toString());
-        Assertions.assertEquals(expectedFeed, e.getFeed(), message);
+        Assert.assertEquals(message, expectedFeed, e.getFeed());
       }
     }
   }

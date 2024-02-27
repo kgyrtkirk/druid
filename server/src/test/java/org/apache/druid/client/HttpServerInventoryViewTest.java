@@ -53,11 +53,10 @@ import org.apache.druid.server.coordinator.simulate.WrappingScheduledExecutorSer
 import org.apache.druid.timeline.DataSegment;
 import org.easymock.EasyMock;
 import org.joda.time.Period;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -69,7 +68,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class HttpServerInventoryViewTest
@@ -98,7 +96,7 @@ public class HttpServerInventoryViewTest
 
   private AtomicBoolean inventoryInitialized;
 
-  @BeforeEach
+  @Before
   public void setup()
   {
     serviceEmitter = new StubServiceEmitter("test", "localhost");
@@ -123,7 +121,7 @@ public class HttpServerInventoryViewTest
     );
   }
 
-  @AfterEach
+  @After
   public void tearDown()
   {
     EasyMock.verify(druidNodeDiscoveryProvider);
@@ -136,14 +134,14 @@ public class HttpServerInventoryViewTest
   public void testInitHappensAfterNodeViewInit()
   {
     httpServerInventoryView.start();
-    Assertions.assertTrue(httpServerInventoryView.isStarted());
-    Assertions.assertFalse(inventoryInitialized.get());
+    Assert.assertTrue(httpServerInventoryView.isStarted());
+    Assert.assertFalse(inventoryInitialized.get());
 
     druidNodeDiscovery.markNodeViewInitialized();
-    Assertions.assertFalse(inventoryInitialized.get());
+    Assert.assertFalse(inventoryInitialized.get());
 
     execHelper.finishInventoryInitialization();
-    Assertions.assertTrue(inventoryInitialized.get());
+    Assert.assertTrue(inventoryInitialized.get());
 
     httpServerInventoryView.stop();
   }
@@ -152,10 +150,10 @@ public class HttpServerInventoryViewTest
   public void testStopShutsDownExecutors()
   {
     httpServerInventoryView.start();
-    Assertions.assertFalse(execHelper.syncExecutor.isShutdown());
+    Assert.assertFalse(execHelper.syncExecutor.isShutdown());
 
     httpServerInventoryView.stop();
-    Assertions.assertTrue(execHelper.syncExecutor.isShutdown());
+    Assert.assertTrue(execHelper.syncExecutor.isShutdown());
   }
 
   @Test
@@ -170,8 +168,8 @@ public class HttpServerInventoryViewTest
     final DruidServer server = druidNode.toDruidServer();
 
     Collection<DruidServer> inventory = httpServerInventoryView.getInventory();
-    Assertions.assertEquals(1, inventory.size());
-    Assertions.assertTrue(inventory.contains(server));
+    Assert.assertEquals(1, inventory.size());
+    Assert.assertTrue(inventory.contains(server));
 
     execHelper.emitMetrics();
     serviceEmitter.verifyValue(METRIC_SUCCESS, 1);
@@ -184,9 +182,9 @@ public class HttpServerInventoryViewTest
     execHelper.sendSyncRequestAndHandleResponse();
 
     DruidServer inventoryValue = httpServerInventoryView.getInventoryValue(server.getName());
-    Assertions.assertNotNull(inventoryValue);
-    Assertions.assertEquals(1, inventoryValue.getTotalSegments());
-    Assertions.assertNotNull(inventoryValue.getSegment(segment.getId()));
+    Assert.assertNotNull(inventoryValue);
+    Assert.assertEquals(1, inventoryValue.getTotalSegments());
+    Assert.assertNotNull(inventoryValue.getSegment(segment.getId()));
 
     httpServerInventoryView.stop();
   }
@@ -204,7 +202,7 @@ public class HttpServerInventoryViewTest
 
     druidNodeDiscovery.removeNodesAndNotifyListeners(druidNode);
 
-    Assertions.assertNull(httpServerInventoryView.getInventoryValue(server.getName()));
+    Assert.assertNull(httpServerInventoryView.getInventoryValue(server.getName()));
 
     execHelper.emitMetrics();
     serviceEmitter.verifyNotEmitted(METRIC_SUCCESS);
@@ -213,8 +211,7 @@ public class HttpServerInventoryViewTest
     httpServerInventoryView.stop();
   }
 
-  @Test
-  @Timeout(value = 60_000L, unit = TimeUnit.MILLISECONDS)
+  @Test(timeout = 60_000L)
   public void testSyncSegmentLoadAndDrop()
   {
     httpServerInventoryView.start();
@@ -236,7 +233,7 @@ public class HttpServerInventoryViewTest
         snapshotOf(new SegmentChangeRequestLoad(segments[0]))
     );
     execHelper.sendSyncRequestAndHandleResponse();
-    Assertions.assertTrue(isAddedToView(server, segments[0]));
+    Assert.assertTrue(isAddedToView(server, segments[0]));
 
     // Request 2: Drop S1, Load S2, S3
     resetForNextSyncRequest();
@@ -248,9 +245,9 @@ public class HttpServerInventoryViewTest
         )
     );
     execHelper.sendSyncRequestAndHandleResponse();
-    Assertions.assertTrue(isRemovedFromView(server, segments[0]));
-    Assertions.assertTrue(isAddedToView(server, segments[1]));
-    Assertions.assertTrue(isAddedToView(server, segments[2]));
+    Assert.assertTrue(isRemovedFromView(server, segments[0]));
+    Assert.assertTrue(isAddedToView(server, segments[1]));
+    Assert.assertTrue(isAddedToView(server, segments[2]));
 
     // Request 3: reset the counter
     resetForNextSyncRequest();
@@ -263,8 +260,8 @@ public class HttpServerInventoryViewTest
         )
     );
     execHelper.sendSyncRequestAndHandleResponse();
-    Assertions.assertTrue(segmentsAddedToView.isEmpty());
-    Assertions.assertTrue(segmentsRemovedFromView.isEmpty());
+    Assert.assertTrue(segmentsAddedToView.isEmpty());
+    Assert.assertTrue(segmentsRemovedFromView.isEmpty());
 
     // Request 4: Load S3, S4
     resetForNextSyncRequest();
@@ -275,14 +272,14 @@ public class HttpServerInventoryViewTest
         )
     );
     execHelper.sendSyncRequestAndHandleResponse();
-    Assertions.assertTrue(isRemovedFromView(server, segments[1]));
-    Assertions.assertTrue(isAddedToView(server, segments[3]));
+    Assert.assertTrue(isRemovedFromView(server, segments[1]));
+    Assert.assertTrue(isAddedToView(server, segments[3]));
 
     DruidServer inventoryValue = httpServerInventoryView.getInventoryValue(server.getName());
-    Assertions.assertNotNull(inventoryValue);
-    Assertions.assertEquals(2, inventoryValue.getTotalSegments());
-    Assertions.assertNotNull(inventoryValue.getSegment(segments[2].getId()));
-    Assertions.assertNotNull(inventoryValue.getSegment(segments[3].getId()));
+    Assert.assertNotNull(inventoryValue);
+    Assert.assertEquals(2, inventoryValue.getTotalSegments());
+    Assert.assertNotNull(inventoryValue.getSegment(segments[2].getId()));
+    Assert.assertNotNull(inventoryValue.getSegment(segments[3].getId()));
 
     // Verify node removal
     druidNodeDiscovery.removeNodesAndNotifyListeners(druidNode);
@@ -308,8 +305,8 @@ public class HttpServerInventoryViewTest
         )
     );
 
-    Assertions.assertTrue(removedServers.contains(server.getMetadata()));
-    Assertions.assertNull(httpServerInventoryView.getInventoryValue(server.getName()));
+    Assert.assertTrue(removedServers.contains(server.getMetadata()));
+    Assert.assertNull(httpServerInventoryView.getInventoryValue(server.getName()));
 
     httpServerInventoryView.stop();
   }
@@ -371,9 +368,9 @@ public class HttpServerInventoryViewTest
     execHelper.sendSyncRequestAndHandleResponse();
 
     List<AlertEvent> alerts = serviceEmitter.getAlerts();
-    Assertions.assertEquals(1, alerts.size());
+    Assert.assertEquals(1, alerts.size());
     AlertEvent alert = alerts.get(0);
-    Assertions.assertTrue(alert.getDescription().contains("Sync failed for server"));
+    Assert.assertTrue(alert.getDescription().contains("Sync failed for server"));
 
     serviceEmitter.flush();
     execHelper.emitMetrics();
@@ -382,8 +379,7 @@ public class HttpServerInventoryViewTest
     httpServerInventoryView.stop();
   }
 
-  @Test
-  @Timeout(value = 60_000, unit = TimeUnit.MILLISECONDS)
+  @Test(timeout = 60_000)
   public void testInitWaitsForServerToSync()
   {
     httpServerInventoryView.start();
@@ -397,7 +393,7 @@ public class HttpServerInventoryViewTest
 
       // Wait to ensure that init thread is in progress and waiting
       Thread.sleep(1000);
-      Assertions.assertFalse(inventoryInitialized.get());
+      Assert.assertFalse(inventoryInitialized.get());
 
       // Finish sync of server
       httpClient.completeNextRequestWith(snapshotOf());
@@ -405,7 +401,7 @@ public class HttpServerInventoryViewTest
 
       // Wait for 10 seconds to ensure that init thread knows about server sync
       Thread.sleep(10_000);
-      Assertions.assertTrue(inventoryInitialized.get());
+      Assert.assertTrue(inventoryInitialized.get());
     }
     catch (InterruptedException e) {
       throw new ISE(e, "Interrupted");
@@ -415,8 +411,7 @@ public class HttpServerInventoryViewTest
     }
   }
 
-  @Test
-  @Timeout(value = 60_000, unit = TimeUnit.MILLISECONDS)
+  @Test(timeout = 60_000)
   public void testInitDoesNotWaitForRemovedServerToSync()
   {
     httpServerInventoryView.start();
@@ -430,14 +425,14 @@ public class HttpServerInventoryViewTest
 
       // Wait to ensure that init thread is in progress and waiting
       Thread.sleep(1000);
-      Assertions.assertFalse(inventoryInitialized.get());
+      Assert.assertFalse(inventoryInitialized.get());
 
       // Remove the node from discovery
       druidNodeDiscovery.removeNodesAndNotifyListeners(node);
 
       // Wait for 10 seconds to ensure that init thread knows about server removal
       Thread.sleep(10_000);
-      Assertions.assertTrue(inventoryInitialized.get());
+      Assert.assertTrue(inventoryInitialized.get());
     }
     catch (InterruptedException e) {
       throw new ISE(e, "Interrupted");

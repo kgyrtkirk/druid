@@ -41,6 +41,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Test;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;

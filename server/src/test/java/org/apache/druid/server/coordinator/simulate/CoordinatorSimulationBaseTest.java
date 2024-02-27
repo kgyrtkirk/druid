@@ -31,9 +31,9 @@ import org.apache.druid.server.coordinator.rules.ForeverLoadRule;
 import org.apache.druid.server.coordinator.rules.Rule;
 import org.apache.druid.server.coordinator.stats.Dimension;
 import org.apache.druid.timeline.DataSegment;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -61,10 +61,10 @@ public abstract class CoordinatorSimulationBaseTest implements
   private CoordinatorSimulation sim;
   private MetricsVerifier metricsVerifier;
 
-  @BeforeEach
+  @Before
   public abstract void setUp();
 
-  @AfterEach
+  @After
   public void tearDown()
   {
     if (sim != null) {
@@ -152,7 +152,7 @@ public abstract class CoordinatorSimulationBaseTest implements
   // Verification methods
   void verifyDatasourceIsFullyLoaded(String datasource)
   {
-    Assertions.assertEquals(100.0, getLoadPercentage(datasource), DOUBLE_DELTA);
+    Assert.assertEquals(100.0, getLoadPercentage(datasource), DOUBLE_DELTA);
   }
 
   @Override

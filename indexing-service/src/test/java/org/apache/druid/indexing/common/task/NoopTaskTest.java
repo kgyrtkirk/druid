@@ -20,6 +20,7 @@
 package org.apache.druid.indexing.common.task;
 
 import org.junit.Assert;
+import org.junit.Test;
 
 public class NoopTaskTest
 {

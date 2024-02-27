@@ -32,26 +32,26 @@ import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.apache.druid.timeline.SegmentId;
 import org.hamcrest.CoreMatchers;
 import org.joda.time.Interval;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.rules.TemporaryFolder;
 
 import javax.annotation.Nullable;
 import java.io.Closeable;
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 public class HashJoinSegmentTest extends InitializedNullHandlingTest
 {
-  @TempDir
-  public File temporaryFolder;
+  @Rule
+  public TemporaryFolder temporaryFolder = new TemporaryFolder();
+
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
 
   private QueryableIndexSegment baseSegment;
   private ReferenceCountingSegment referencedSegment;
@@ -66,7 +66,7 @@ public class HashJoinSegmentTest extends InitializedNullHandlingTest
   private boolean j0Closed;
   private boolean j1Closed;
 
-  @BeforeEach
+  @Before
   public void setUp() throws IOException
   {
     allReferencesAcquireCount = 0;
@@ -79,7 +79,7 @@ public class HashJoinSegmentTest extends InitializedNullHandlingTest
     j1Closed = false;
 
     baseSegment = new QueryableIndexSegment(
-        JoinTestHelper.createFactIndexBuilder(newFolder(temporaryFolder, "junit")).buildMMappedIndex(),
+        JoinTestHelper.createFactIndexBuilder(temporaryFolder.newFolder()).buildMMappedIndex(),
         SegmentId.dummy("facts")
     );
 
@@ -194,42 +194,41 @@ public class HashJoinSegmentTest extends InitializedNullHandlingTest
   @Test
   public void test_constructor_noClauses()
   {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
+    expectedException.expect(IllegalArgumentException.class);
+    expectedException.expectMessage("'clauses' and 'baseFilter' are both empty, no need to create HashJoinSegment");
 
-      List<JoinableClause> joinableClauses = ImmutableList.of();
+    List<JoinableClause> joinableClauses = ImmutableList.of();
 
-      final HashJoinSegment ignored = new HashJoinSegment(
-          ReferenceCountingSegment.wrapRootGenerationSegment(baseSegment),
-          null,
-          joinableClauses,
-          null
-      );
-    });
-    assertTrue(exception.getMessage().contains("'clauses' and 'baseFilter' are both empty, no need to create HashJoinSegment"));
+    final HashJoinSegment ignored = new HashJoinSegment(
+        ReferenceCountingSegment.wrapRootGenerationSegment(baseSegment),
+        null,
+        joinableClauses,
+        null
+    );
   }
 
   @Test
   public void test_getId()
   {
-    Assertions.assertEquals(baseSegment.getId(), hashJoinSegment.getId());
+    Assert.assertEquals(baseSegment.getId(), hashJoinSegment.getId());
   }
 
   @Test
   public void test_getDataInterval()
   {
-    Assertions.assertEquals(baseSegment.getDataInterval(), hashJoinSegment.getDataInterval());
+    Assert.assertEquals(baseSegment.getDataInterval(), hashJoinSegment.getDataInterval());
   }
 
   @Test
   public void test_asQueryableIndex()
   {
-    Assertions.assertNull(hashJoinSegment.asQueryableIndex());
+    Assert.assertNull(hashJoinSegment.asQueryableIndex());
   }
 
   @Test
   public void test_asStorageAdapter()
   {
-    assertThat(
+    Assert.assertThat(
         hashJoinSegment.asStorageAdapter(),
         CoreMatchers.instanceOf(HashJoinSegmentStorageAdapter.class)
     );
@@ -238,84 +237,75 @@ public class HashJoinSegmentTest extends InitializedNullHandlingTest
   @Test
   public void testJoinableClausesAreClosedWhenReferencesUsed() throws IOException
   {
-    Assertions.assertFalse(referencedSegment.isClosed());
+    Assert.assertFalse(referencedSegment.isClosed());
 
     Optional<Closeable> maybeCloseable = hashJoinSegment.acquireReferences();
-    Assertions.assertTrue(maybeCloseable.isPresent());
+    Assert.assertTrue(maybeCloseable.isPresent());
 
-    Assertions.assertEquals(1, referencedSegmentAcquireCount);
-    Assertions.assertEquals(2, indexedTableJoinableReferenceAcquireCount);
-    Assertions.assertEquals(1, allReferencesAcquireCount);
-    Assertions.assertEquals(0, referencedSegmentClosedCount);
-    Assertions.assertEquals(0, indexedTableJoinableReferenceCloseCount);
-    Assertions.assertEquals(0, allReferencesCloseCount);
+    Assert.assertEquals(1, referencedSegmentAcquireCount);
+    Assert.assertEquals(2, indexedTableJoinableReferenceAcquireCount);
+    Assert.assertEquals(1, allReferencesAcquireCount);
+    Assert.assertEquals(0, referencedSegmentClosedCount);
+    Assert.assertEquals(0, indexedTableJoinableReferenceCloseCount);
+    Assert.assertEquals(0, allReferencesCloseCount);
 
     Closeable closer = maybeCloseable.get();
     closer.close();
 
-    Assertions.assertFalse(referencedSegment.isClosed());
-    Assertions.assertEquals(1, referencedSegmentClosedCount);
-    Assertions.assertEquals(2, indexedTableJoinableReferenceCloseCount);
-    Assertions.assertEquals(1, allReferencesCloseCount);
+    Assert.assertFalse(referencedSegment.isClosed());
+    Assert.assertEquals(1, referencedSegmentClosedCount);
+    Assert.assertEquals(2, indexedTableJoinableReferenceCloseCount);
+    Assert.assertEquals(1, allReferencesCloseCount);
 
   }
 
   @Test
   public void testJoinableClausesClosedIfSegmentIsAlreadyClosed()
   {
-    Assertions.assertFalse(referencedSegment.isClosed());
+    Assert.assertFalse(referencedSegment.isClosed());
 
     referencedSegment.close();
-    Assertions.assertTrue(referencedSegment.isClosed());
+    Assert.assertTrue(referencedSegment.isClosed());
 
     Optional<Closeable> maybeCloseable = hashJoinSegment.acquireReferences();
-    Assertions.assertFalse(maybeCloseable.isPresent());
-    Assertions.assertEquals(0, referencedSegmentAcquireCount);
-    Assertions.assertEquals(0, indexedTableJoinableReferenceAcquireCount);
-    Assertions.assertEquals(0, allReferencesAcquireCount);
-    Assertions.assertEquals(0, referencedSegmentClosedCount);
-    Assertions.assertEquals(0, indexedTableJoinableReferenceCloseCount);
-    Assertions.assertEquals(0, allReferencesCloseCount);
+    Assert.assertFalse(maybeCloseable.isPresent());
+    Assert.assertEquals(0, referencedSegmentAcquireCount);
+    Assert.assertEquals(0, indexedTableJoinableReferenceAcquireCount);
+    Assert.assertEquals(0, allReferencesAcquireCount);
+    Assert.assertEquals(0, referencedSegmentClosedCount);
+    Assert.assertEquals(0, indexedTableJoinableReferenceCloseCount);
+    Assert.assertEquals(0, allReferencesCloseCount);
   }
 
   @Test
   public void testJoinableClausesClosedIfJoinableZeroIsAlreadyClosed()
   {
-    Assertions.assertFalse(referencedSegment.isClosed());
+    Assert.assertFalse(referencedSegment.isClosed());
     j0Closed = true;
 
     Optional<Closeable> maybeCloseable = hashJoinSegment.acquireReferences();
-    Assertions.assertFalse(maybeCloseable.isPresent());
-    Assertions.assertEquals(1, referencedSegmentAcquireCount);
-    Assertions.assertEquals(0, indexedTableJoinableReferenceAcquireCount);
-    Assertions.assertEquals(0, allReferencesAcquireCount);
-    Assertions.assertEquals(1, referencedSegmentClosedCount);
-    Assertions.assertEquals(0, indexedTableJoinableReferenceCloseCount);
-    Assertions.assertEquals(0, allReferencesCloseCount);
+    Assert.assertFalse(maybeCloseable.isPresent());
+    Assert.assertEquals(1, referencedSegmentAcquireCount);
+    Assert.assertEquals(0, indexedTableJoinableReferenceAcquireCount);
+    Assert.assertEquals(0, allReferencesAcquireCount);
+    Assert.assertEquals(1, referencedSegmentClosedCount);
+    Assert.assertEquals(0, indexedTableJoinableReferenceCloseCount);
+    Assert.assertEquals(0, allReferencesCloseCount);
   }
 
   @Test
   public void testJoinableClausesClosedIfJoinableOneIsAlreadyClosed()
   {
-    Assertions.assertFalse(referencedSegment.isClosed());
+    Assert.assertFalse(referencedSegment.isClosed());
     j1Closed = true;
 
     Optional<Closeable> maybeCloseable = hashJoinSegment.acquireReferences();
-    Assertions.assertFalse(maybeCloseable.isPresent());
-    Assertions.assertEquals(1, referencedSegmentAcquireCount);
-    Assertions.assertEquals(1, indexedTableJoinableReferenceAcquireCount);
-    Assertions.assertEquals(0, allReferencesAcquireCount);
-    Assertions.assertEquals(1, referencedSegmentClosedCount);
-    Assertions.assertEquals(1, indexedTableJoinableReferenceCloseCount);
-    Assertions.assertEquals(0, allReferencesCloseCount);
-  }
-
-  private static File newFolder(File root, String... subDirs) throws IOException {
-    String subFolder = String.join("/", subDirs);
-    File result = new File(root, subFolder);
-    if (!result.mkdirs()) {
-      throw new IOException("Couldn't create folders " + root);
-    }
-    return result;
+    Assert.assertFalse(maybeCloseable.isPresent());
+    Assert.assertEquals(1, referencedSegmentAcquireCount);
+    Assert.assertEquals(1, indexedTableJoinableReferenceAcquireCount);
+    Assert.assertEquals(0, allReferencesAcquireCount);
+    Assert.assertEquals(1, referencedSegmentClosedCount);
+    Assert.assertEquals(1, indexedTableJoinableReferenceCloseCount);
+    Assert.assertEquals(0, allReferencesCloseCount);
   }
 }

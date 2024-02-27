@@ -47,14 +47,13 @@ import org.apache.druid.timeline.partition.NumberedShardSpec;
 import org.easymock.EasyMock;
 import org.easymock.EasyMockSupport;
 import org.joda.time.DateTime;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
-import org.junit.jupiter.api.io.TempDir;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -68,8 +67,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class StreamAppenderatorDriverTest extends EasyMockSupport
 {
@@ -105,20 +102,20 @@ public class StreamAppenderatorDriverTest extends EasyMockSupport
   private StreamAppenderatorDriver driver;
   private DataSegmentKiller dataSegmentKiller;
 
-  @TempDir
-  public File temporaryFolder;
+  @Rule
+  public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
   static {
     NullHandling.initializeForTests();
   }
 
-  @BeforeEach
+  @Before
   public void setUp() throws Exception
   {
     streamAppenderatorTester =
         new StreamAppenderatorTester.Builder()
             .maxRowsInMemory(MAX_ROWS_IN_MEMORY)
-            .basePersistDirectory(newFolder(temporaryFolder, "junit"))
+            .basePersistDirectory(temporaryFolder.newFolder())
             .build();
     allocator = new TestSegmentAllocator(DATA_SOURCE, Granularities.HOUR);
     segmentHandoffNotifierFactory = new TestSegmentHandoffNotifierFactory();
@@ -136,7 +133,7 @@ public class StreamAppenderatorDriverTest extends EasyMockSupport
     EasyMock.replay(dataSegmentKiller);
   }
 
-  @AfterEach
+  @After
   public void tearDown() throws Exception
   {
     EasyMock.verify(dataSegmentKiller);
@@ -145,17 +142,16 @@ public class StreamAppenderatorDriverTest extends EasyMockSupport
     driver.close();
   }
 
-  @Test
-  @Timeout(value = 60_000L, unit = TimeUnit.MILLISECONDS)
+  @Test(timeout = 60_000L)
   public void testSimple() throws Exception
   {
     final TestCommitterSupplier<Integer> committerSupplier = new TestCommitterSupplier<>();
 
-    Assertions.assertNull(driver.startJob(null));
+    Assert.assertNull(driver.startJob(null));
 
     for (int i = 0; i < ROWS.size(); i++) {
       committerSupplier.setMetadata(i + 1);
-      Assertions.assertTrue(driver.add(ROWS.get(i), "dummy", committerSupplier, false, true).isOk());
+      Assert.assertTrue(driver.add(ROWS.get(i), "dummy", committerSupplier, false, true).isOk());
     }
 
     final SegmentsAndCommitMetadata published = driver.publish(
@@ -171,7 +167,7 @@ public class StreamAppenderatorDriverTest extends EasyMockSupport
     final SegmentsAndCommitMetadata segmentsAndCommitMetadata = driver.registerHandoff(published)
                                                                       .get(HANDOFF_CONDITION_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableSet.of(
             new SegmentIdWithShardSpec(DATA_SOURCE, Intervals.of("2000/PT1H"), VERSION, new NumberedShardSpec(0, 0)),
             new SegmentIdWithShardSpec(DATA_SOURCE, Intervals.of("2000T01/PT1H"), VERSION, new NumberedShardSpec(0, 0))
@@ -179,7 +175,7 @@ public class StreamAppenderatorDriverTest extends EasyMockSupport
         asIdentifiers(segmentsAndCommitMetadata.getSegments())
     );
 
-    Assertions.assertEquals(3, segmentsAndCommitMetadata.getCommitMetadata());
+    Assert.assertEquals(3, segmentsAndCommitMetadata.getCommitMetadata());
   }
 
   @Test
@@ -187,7 +183,7 @@ public class StreamAppenderatorDriverTest extends EasyMockSupport
   {
     final int numSegments = 3;
     final TestCommitterSupplier<Integer> committerSupplier = new TestCommitterSupplier<>();
-    Assertions.assertNull(driver.startJob(null));
+    Assert.assertNull(driver.startJob(null));
 
     for (int i = 0; i < numSegments * MAX_ROWS_PER_SEGMENT; i++) {
       committerSupplier.setMetadata(i + 1);
@@ -202,7 +198,7 @@ public class StreamAppenderatorDriverTest extends EasyMockSupport
           )
       );
       final AppenderatorDriverAddResult addResult = driver.add(row, "dummy", committerSupplier, false, true);
-      Assertions.assertTrue(addResult.isOk());
+      Assert.assertTrue(addResult.isOk());
       if (addResult.getNumRowsInSegment() > MAX_ROWS_PER_SEGMENT) {
         driver.moveSegmentOut("dummy", ImmutableList.of(addResult.getSegmentIdentifier()));
       }
@@ -220,37 +216,34 @@ public class StreamAppenderatorDriverTest extends EasyMockSupport
 
     final SegmentsAndCommitMetadata segmentsAndCommitMetadata = driver.registerHandoff(published)
                                                                       .get(HANDOFF_CONDITION_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
-    Assertions.assertEquals(numSegments, segmentsAndCommitMetadata.getSegments().size());
-    Assertions.assertEquals(numSegments * MAX_ROWS_PER_SEGMENT, segmentsAndCommitMetadata.getCommitMetadata());
+    Assert.assertEquals(numSegments, segmentsAndCommitMetadata.getSegments().size());
+    Assert.assertEquals(numSegments * MAX_ROWS_PER_SEGMENT, segmentsAndCommitMetadata.getCommitMetadata());
   }
 
-  @Test
-  @Timeout(value = 60_000L, unit = TimeUnit.MILLISECONDS)
+  @Test(timeout = 60_000L, expected = TimeoutException.class)
   public void testHandoffTimeout() throws Exception
   {
-    assertThrows(TimeoutException.class, () -> {
-      final TestCommitterSupplier<Integer> committerSupplier = new TestCommitterSupplier<>();
-      segmentHandoffNotifierFactory.disableHandoff();
+    final TestCommitterSupplier<Integer> committerSupplier = new TestCommitterSupplier<>();
+    segmentHandoffNotifierFactory.disableHandoff();
 
-      Assertions.assertNull(driver.startJob(null));
+    Assert.assertNull(driver.startJob(null));
 
-      for (int i = 0; i < ROWS.size(); i++) {
-        committerSupplier.setMetadata(i + 1);
-        Assertions.assertTrue(driver.add(ROWS.get(i), "dummy", committerSupplier, false, true).isOk());
-      }
+    for (int i = 0; i < ROWS.size(); i++) {
+      committerSupplier.setMetadata(i + 1);
+      Assert.assertTrue(driver.add(ROWS.get(i), "dummy", committerSupplier, false, true).isOk());
+    }
 
-      final SegmentsAndCommitMetadata published = driver.publish(
-          makeOkPublisher(),
-          committerSupplier.get(),
-          ImmutableList.of("dummy")
-      ).get(PUBLISH_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
+    final SegmentsAndCommitMetadata published = driver.publish(
+        makeOkPublisher(),
+        committerSupplier.get(),
+        ImmutableList.of("dummy")
+    ).get(PUBLISH_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
 
-      while (driver.getSegments().containsKey("dummy")) {
-        Thread.sleep(100);
-      }
+    while (driver.getSegments().containsKey("dummy")) {
+      Thread.sleep(100);
+    }
 
-      driver.registerHandoff(published).get(HANDOFF_CONDITION_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
-    });
+    driver.registerHandoff(published).get(HANDOFF_CONDITION_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
   }
 
   @Test
@@ -258,12 +251,12 @@ public class StreamAppenderatorDriverTest extends EasyMockSupport
   {
     final TestCommitterSupplier<Integer> committerSupplier = new TestCommitterSupplier<>();
 
-    Assertions.assertNull(driver.startJob(null));
+    Assert.assertNull(driver.startJob(null));
 
     // Add the first row and publish immediately
     {
       committerSupplier.setMetadata(1);
-      Assertions.assertTrue(driver.add(ROWS.get(0), "dummy", committerSupplier, false, true).isOk());
+      Assert.assertTrue(driver.add(ROWS.get(0), "dummy", committerSupplier, false, true).isOk());
 
       final SegmentsAndCommitMetadata segmentsAndCommitMetadata = driver.publishAndRegisterHandoff(
           makeOkPublisher(),
@@ -271,20 +264,20 @@ public class StreamAppenderatorDriverTest extends EasyMockSupport
           ImmutableList.of("dummy")
       ).get(PUBLISH_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
 
-      Assertions.assertEquals(
+      Assert.assertEquals(
           ImmutableSet.of(
               new SegmentIdWithShardSpec(DATA_SOURCE, Intervals.of("2000/PT1H"), VERSION, new NumberedShardSpec(0, 0))
           ),
           asIdentifiers(segmentsAndCommitMetadata.getSegments())
       );
 
-      Assertions.assertEquals(1, segmentsAndCommitMetadata.getCommitMetadata());
+      Assert.assertEquals(1, segmentsAndCommitMetadata.getCommitMetadata());
     }
 
     // Add the second and third rows and publish immediately
     for (int i = 1; i < ROWS.size(); i++) {
       committerSupplier.setMetadata(i + 1);
-      Assertions.assertTrue(driver.add(ROWS.get(i), "dummy", committerSupplier, false, true).isOk());
+      Assert.assertTrue(driver.add(ROWS.get(i), "dummy", committerSupplier, false, true).isOk());
 
       final SegmentsAndCommitMetadata segmentsAndCommitMetadata = driver.publishAndRegisterHandoff(
           makeOkPublisher(),
@@ -292,7 +285,7 @@ public class StreamAppenderatorDriverTest extends EasyMockSupport
           ImmutableList.of("dummy")
       ).get(PUBLISH_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
 
-      Assertions.assertEquals(
+      Assert.assertEquals(
           ImmutableSet.of(
               // The second and third rows have the same dataSource, interval, and version, but different shardSpec of
               // different partitionNum
@@ -301,7 +294,7 @@ public class StreamAppenderatorDriverTest extends EasyMockSupport
           asIdentifiers(segmentsAndCommitMetadata.getSegments())
       );
 
-      Assertions.assertEquals(i + 1, segmentsAndCommitMetadata.getCommitMetadata());
+      Assert.assertEquals(i + 1, segmentsAndCommitMetadata.getCommitMetadata());
     }
 
     driver.persist(committerSupplier.get());
@@ -313,12 +306,12 @@ public class StreamAppenderatorDriverTest extends EasyMockSupport
         ImmutableList.of("dummy")
     ).get(PUBLISH_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS);
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableSet.of(),
         asIdentifiers(segmentsAndCommitMetadata.getSegments())
     );
 
-    Assertions.assertEquals(3, segmentsAndCommitMetadata.getCommitMetadata());
+    Assert.assertEquals(3, segmentsAndCommitMetadata.getCommitMetadata());
   }
 
   @Test
@@ -326,14 +319,14 @@ public class StreamAppenderatorDriverTest extends EasyMockSupport
   {
     final TestCommitterSupplier<Integer> committerSupplier = new TestCommitterSupplier<>();
 
-    Assertions.assertNull(driver.startJob(null));
+    Assert.assertNull(driver.startJob(null));
 
     committerSupplier.setMetadata(1);
-    Assertions.assertTrue(driver.add(ROWS.get(0), "sequence_0", committerSupplier, false, true).isOk());
+    Assert.assertTrue(driver.add(ROWS.get(0), "sequence_0", committerSupplier, false, true).isOk());
 
     for (int i = 1; i < ROWS.size(); i++) {
       committerSupplier.setMetadata(i + 1);
-      Assertions.assertTrue(driver.add(ROWS.get(i), "sequence_1", committerSupplier, false, true).isOk());
+      Assert.assertTrue(driver.add(ROWS.get(i), "sequence_1", committerSupplier, false, true).isOk());
     }
 
     final ListenableFuture<SegmentsAndCommitMetadata> futureForSequence0 = driver.publishAndRegisterHandoff(
@@ -357,22 +350,22 @@ public class StreamAppenderatorDriverTest extends EasyMockSupport
         TimeUnit.MILLISECONDS
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableSet.of(
             new SegmentIdWithShardSpec(DATA_SOURCE, Intervals.of("2000/PT1H"), VERSION, new NumberedShardSpec(0, 0))
         ),
         asIdentifiers(handedoffFromSequence0.getSegments())
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableSet.of(
             new SegmentIdWithShardSpec(DATA_SOURCE, Intervals.of("2000T01/PT1H"), VERSION, new NumberedShardSpec(0, 0))
         ),
         asIdentifiers(handedoffFromSequence1.getSegments())
     );
 
-    Assertions.assertEquals(3, handedoffFromSequence0.getCommitMetadata());
-    Assertions.assertEquals(3, handedoffFromSequence1.getCommitMetadata());
+    Assert.assertEquals(3, handedoffFromSequence0.getCommitMetadata());
+    Assert.assertEquals(3, handedoffFromSequence1.getCommitMetadata());
   }
 
   private Set<SegmentIdWithShardSpec> asIdentifiers(Iterable<DataSegment> segments)
@@ -425,15 +418,6 @@ public class StreamAppenderatorDriverTest extends EasyMockSupport
         }
       };
     }
-
-    private static File newFolder(File root, String... subDirs) throws IOException {
-      String subFolder = String.join("/", subDirs);
-      File result = new File(root, subFolder);
-      if (!result.mkdirs()) {
-        throw new IOException("Couldn't create folders " + root);
-      }
-      return result;
-    }
   }
 
   static class TestSegmentAllocator implements SegmentAllocator
@@ -468,15 +452,6 @@ public class StreamAppenderatorDriverTest extends EasyMockSupport
             new NumberedShardSpec(partitionNum, 0)
         );
       }
-    }
-
-    private static File newFolder(File root, String... subDirs) throws IOException {
-      String subFolder = String.join("/", subDirs);
-      File result = new File(root, subFolder);
-      if (!result.mkdirs()) {
-        throw new IOException("Couldn't create folders " + root);
-      }
-      return result;
     }
   }
 
@@ -536,23 +511,5 @@ public class StreamAppenderatorDriverTest extends EasyMockSupport
         }
       };
     }
-
-    private static File newFolder(File root, String... subDirs) throws IOException {
-      String subFolder = String.join("/", subDirs);
-      File result = new File(root, subFolder);
-      if (!result.mkdirs()) {
-        throw new IOException("Couldn't create folders " + root);
-      }
-      return result;
-    }
-  }
-
-  private static File newFolder(File root, String... subDirs) throws IOException {
-    String subFolder = String.join("/", subDirs);
-    File result = new File(root, subFolder);
-    if (!result.mkdirs()) {
-      throw new IOException("Couldn't create folders " + root);
-    }
-    return result;
   }
 }

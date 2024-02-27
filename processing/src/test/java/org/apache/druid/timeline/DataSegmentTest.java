@@ -39,9 +39,9 @@ import org.apache.druid.timeline.partition.ShardSpec;
 import org.apache.druid.timeline.partition.ShardSpecLookup;
 import org.apache.druid.timeline.partition.TombstoneShardSpec;
 import org.joda.time.Interval;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -98,7 +98,7 @@ public class DataSegmentTest
     };
   }
 
-  @BeforeEach
+  @Before
   public void setUp()
   {
     InjectableValues.Std injectableValues = new InjectableValues.Std();
@@ -140,39 +140,39 @@ public class DataSegmentTest
         JacksonUtils.TYPE_REFERENCE_MAP_STRING_OBJECT
     );
 
-    Assertions.assertEquals(11, objectMap.size());
-    Assertions.assertEquals("something", objectMap.get("dataSource"));
-    Assertions.assertEquals(interval.toString(), objectMap.get("interval"));
-    Assertions.assertEquals("1", objectMap.get("version"));
-    Assertions.assertEquals(loadSpec, objectMap.get("loadSpec"));
-    Assertions.assertEquals("dim1,dim2", objectMap.get("dimensions"));
-    Assertions.assertEquals("met1,met2", objectMap.get("metrics"));
-    Assertions.assertEquals(ImmutableMap.of("type", "numbered", "partitionNum", 3, "partitions", 0), objectMap.get("shardSpec"));
-    Assertions.assertEquals(TEST_VERSION, objectMap.get("binaryVersion"));
-    Assertions.assertEquals(1, objectMap.get("size"));
-    Assertions.assertEquals(6, ((Map) objectMap.get("lastCompactionState")).size());
+    Assert.assertEquals(11, objectMap.size());
+    Assert.assertEquals("something", objectMap.get("dataSource"));
+    Assert.assertEquals(interval.toString(), objectMap.get("interval"));
+    Assert.assertEquals("1", objectMap.get("version"));
+    Assert.assertEquals(loadSpec, objectMap.get("loadSpec"));
+    Assert.assertEquals("dim1,dim2", objectMap.get("dimensions"));
+    Assert.assertEquals("met1,met2", objectMap.get("metrics"));
+    Assert.assertEquals(ImmutableMap.of("type", "numbered", "partitionNum", 3, "partitions", 0), objectMap.get("shardSpec"));
+    Assert.assertEquals(TEST_VERSION, objectMap.get("binaryVersion"));
+    Assert.assertEquals(1, objectMap.get("size"));
+    Assert.assertEquals(6, ((Map) objectMap.get("lastCompactionState")).size());
 
     DataSegment deserializedSegment = MAPPER.readValue(MAPPER.writeValueAsString(segment), DataSegment.class);
 
-    Assertions.assertEquals(segment.getDataSource(), deserializedSegment.getDataSource());
-    Assertions.assertEquals(segment.getInterval(), deserializedSegment.getInterval());
-    Assertions.assertEquals(segment.getVersion(), deserializedSegment.getVersion());
-    Assertions.assertEquals(segment.getLoadSpec(), deserializedSegment.getLoadSpec());
-    Assertions.assertEquals(segment.getDimensions(), deserializedSegment.getDimensions());
-    Assertions.assertEquals(segment.getMetrics(), deserializedSegment.getMetrics());
-    Assertions.assertEquals(segment.getShardSpec(), deserializedSegment.getShardSpec());
-    Assertions.assertEquals(segment.getSize(), deserializedSegment.getSize());
-    Assertions.assertEquals(segment.getId(), deserializedSegment.getId());
-    Assertions.assertEquals(segment.getLastCompactionState(), deserializedSegment.getLastCompactionState());
+    Assert.assertEquals(segment.getDataSource(), deserializedSegment.getDataSource());
+    Assert.assertEquals(segment.getInterval(), deserializedSegment.getInterval());
+    Assert.assertEquals(segment.getVersion(), deserializedSegment.getVersion());
+    Assert.assertEquals(segment.getLoadSpec(), deserializedSegment.getLoadSpec());
+    Assert.assertEquals(segment.getDimensions(), deserializedSegment.getDimensions());
+    Assert.assertEquals(segment.getMetrics(), deserializedSegment.getMetrics());
+    Assert.assertEquals(segment.getShardSpec(), deserializedSegment.getShardSpec());
+    Assert.assertEquals(segment.getSize(), deserializedSegment.getSize());
+    Assert.assertEquals(segment.getId(), deserializedSegment.getId());
+    Assert.assertEquals(segment.getLastCompactionState(), deserializedSegment.getLastCompactionState());
 
     deserializedSegment = MAPPER.readValue(MAPPER.writeValueAsString(segment), DataSegment.class);
-    Assertions.assertEquals(0, segment.compareTo(deserializedSegment));
+    Assert.assertEquals(0, segment.compareTo(deserializedSegment));
 
     deserializedSegment = MAPPER.readValue(MAPPER.writeValueAsString(segment), DataSegment.class);
-    Assertions.assertEquals(0, deserializedSegment.compareTo(segment));
+    Assert.assertEquals(0, deserializedSegment.compareTo(segment));
 
     deserializedSegment = MAPPER.readValue(MAPPER.writeValueAsString(segment), DataSegment.class);
-    Assertions.assertEquals(segment.hashCode(), deserializedSegment.hashCode());
+    Assert.assertEquals(segment.hashCode(), deserializedSegment.hashCode());
   }
 
   @Test
@@ -234,44 +234,44 @@ public class DataSegmentTest
         lastCompactionStateWithNullSpecs,
         JacksonUtils.TYPE_REFERENCE_MAP_STRING_OBJECT
     );
-    Assertions.assertEquals(11, objectMap.size());
-    Assertions.assertEquals("something", objectMap.get("dataSource"));
-    Assertions.assertEquals(interval.toString(), objectMap.get("interval"));
-    Assertions.assertEquals("1", objectMap.get("version"));
-    Assertions.assertEquals(loadSpec, objectMap.get("loadSpec"));
-    Assertions.assertEquals("dim1,dim2", objectMap.get("dimensions"));
-    Assertions.assertEquals("met1,met2", objectMap.get("metrics"));
-    Assertions.assertEquals(ImmutableMap.of("type", "numbered", "partitionNum", 3, "partitions", 0), objectMap.get("shardSpec"));
-    Assertions.assertEquals(TEST_VERSION, objectMap.get("binaryVersion"));
-    Assertions.assertEquals(1, objectMap.get("size"));
-    Assertions.assertEquals(3, ((Map) objectMap.get("lastCompactionState")).size());
+    Assert.assertEquals(11, objectMap.size());
+    Assert.assertEquals("something", objectMap.get("dataSource"));
+    Assert.assertEquals(interval.toString(), objectMap.get("interval"));
+    Assert.assertEquals("1", objectMap.get("version"));
+    Assert.assertEquals(loadSpec, objectMap.get("loadSpec"));
+    Assert.assertEquals("dim1,dim2", objectMap.get("dimensions"));
+    Assert.assertEquals("met1,met2", objectMap.get("metrics"));
+    Assert.assertEquals(ImmutableMap.of("type", "numbered", "partitionNum", 3, "partitions", 0), objectMap.get("shardSpec"));
+    Assert.assertEquals(TEST_VERSION, objectMap.get("binaryVersion"));
+    Assert.assertEquals(1, objectMap.get("size"));
+    Assert.assertEquals(3, ((Map) objectMap.get("lastCompactionState")).size());
 
     DataSegment deserializedSegment = MAPPER.readValue(lastCompactionStateWithNullSpecs, DataSegment.class);
-    Assertions.assertEquals(segment.getDataSource(), deserializedSegment.getDataSource());
-    Assertions.assertEquals(segment.getInterval(), deserializedSegment.getInterval());
-    Assertions.assertEquals(segment.getVersion(), deserializedSegment.getVersion());
-    Assertions.assertEquals(segment.getLoadSpec(), deserializedSegment.getLoadSpec());
-    Assertions.assertEquals(segment.getDimensions(), deserializedSegment.getDimensions());
-    Assertions.assertEquals(segment.getMetrics(), deserializedSegment.getMetrics());
-    Assertions.assertEquals(segment.getShardSpec(), deserializedSegment.getShardSpec());
-    Assertions.assertEquals(segment.getSize(), deserializedSegment.getSize());
-    Assertions.assertEquals(segment.getId(), deserializedSegment.getId());
-    Assertions.assertEquals(segment.getLastCompactionState(), deserializedSegment.getLastCompactionState());
-    Assertions.assertNotNull(segment.getLastCompactionState());
-    Assertions.assertNull(segment.getLastCompactionState().getDimensionsSpec());
-    Assertions.assertNull(segment.getLastCompactionState().getTransformSpec());
-    Assertions.assertNull(segment.getLastCompactionState().getMetricsSpec());
-    Assertions.assertNotNull(deserializedSegment.getLastCompactionState());
-    Assertions.assertNull(deserializedSegment.getLastCompactionState().getDimensionsSpec());
+    Assert.assertEquals(segment.getDataSource(), deserializedSegment.getDataSource());
+    Assert.assertEquals(segment.getInterval(), deserializedSegment.getInterval());
+    Assert.assertEquals(segment.getVersion(), deserializedSegment.getVersion());
+    Assert.assertEquals(segment.getLoadSpec(), deserializedSegment.getLoadSpec());
+    Assert.assertEquals(segment.getDimensions(), deserializedSegment.getDimensions());
+    Assert.assertEquals(segment.getMetrics(), deserializedSegment.getMetrics());
+    Assert.assertEquals(segment.getShardSpec(), deserializedSegment.getShardSpec());
+    Assert.assertEquals(segment.getSize(), deserializedSegment.getSize());
+    Assert.assertEquals(segment.getId(), deserializedSegment.getId());
+    Assert.assertEquals(segment.getLastCompactionState(), deserializedSegment.getLastCompactionState());
+    Assert.assertNotNull(segment.getLastCompactionState());
+    Assert.assertNull(segment.getLastCompactionState().getDimensionsSpec());
+    Assert.assertNull(segment.getLastCompactionState().getTransformSpec());
+    Assert.assertNull(segment.getLastCompactionState().getMetricsSpec());
+    Assert.assertNotNull(deserializedSegment.getLastCompactionState());
+    Assert.assertNull(deserializedSegment.getLastCompactionState().getDimensionsSpec());
 
     deserializedSegment = MAPPER.readValue(lastCompactionStateWithNullSpecs, DataSegment.class);
-    Assertions.assertEquals(0, segment.compareTo(deserializedSegment));
+    Assert.assertEquals(0, segment.compareTo(deserializedSegment));
 
     deserializedSegment = MAPPER.readValue(lastCompactionStateWithNullSpecs, DataSegment.class);
-    Assertions.assertEquals(0, deserializedSegment.compareTo(segment));
+    Assert.assertEquals(0, deserializedSegment.compareTo(segment));
 
     deserializedSegment = MAPPER.readValue(lastCompactionStateWithNullSpecs, DataSegment.class);
-    Assertions.assertEquals(segment.hashCode(), deserializedSegment.hashCode());
+    Assert.assertEquals(segment.hashCode(), deserializedSegment.hashCode());
   }
 
   @Test
@@ -285,7 +285,7 @@ public class DataSegmentTest
                                            .size(0)
                                            .build();
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         "foo_2012-01-01T00:00:00.000Z_2012-01-02T00:00:00.000Z_2012-01-01T11:22:33.444Z",
         segment.getId().toString()
     );
@@ -302,7 +302,7 @@ public class DataSegmentTest
                                            .size(0)
                                            .build();
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         "foo_2012-01-01T00:00:00.000Z_2012-01-02T00:00:00.000Z_2012-01-01T11:22:33.444Z",
         segment.getId().toString()
     );
@@ -319,7 +319,7 @@ public class DataSegmentTest
                                            .size(0)
                                            .build();
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         "foo_2012-01-01T00:00:00.000Z_2012-01-02T00:00:00.000Z_2012-01-01T11:22:33.444Z_7",
         segment.getId().toString()
     );
@@ -332,8 +332,8 @@ public class DataSegmentTest
         makeDataSegment("foo", "2012-01-01/2012-01-02", DateTimes.of("2012-01-01T11:22:33.444Z").toString());
 
     final DataSegment segment2 = MAPPER.readValue(MAPPER.writeValueAsString(segment), DataSegment.class);
-    Assertions.assertEquals(ImmutableList.of(), segment2.getDimensions(), "empty dimensions");
-    Assertions.assertEquals(ImmutableList.of(), segment2.getMetrics(), "empty metrics");
+    Assert.assertEquals("empty dimensions", ImmutableList.of(), segment2.getDimensions());
+    Assert.assertEquals("empty metrics", ImmutableList.of(), segment2.getMetrics());
   }
 
   @Test
@@ -362,7 +362,7 @@ public class DataSegmentTest
                                            .shardSpec(getShardSpec(7))
                                            .size(0)
                                            .build();
-    Assertions.assertEquals(segment1, segment2.withLastCompactionState(compactionState));
+    Assert.assertEquals(segment1, segment2.withLastCompactionState(compactionState));
   }
 
   @Test
@@ -380,8 +380,8 @@ public class DataSegmentTest
                                             ))
                                             .size(0)
                                             .build();
-    Assertions.assertTrue(segment1.isTombstone());
-    Assertions.assertFalse(segment1.hasData());
+    Assert.assertTrue(segment1.isTombstone());
+    Assert.assertFalse(segment1.hasData());
 
     final DataSegment segment2 = DataSegment.builder()
                                             .dataSource("foo")
@@ -395,8 +395,8 @@ public class DataSegmentTest
                                             .size(0)
                                             .build();
 
-    Assertions.assertFalse(segment2.isTombstone());
-    Assertions.assertTrue(segment2.hasData());
+    Assert.assertFalse(segment2.isTombstone());
+    Assert.assertTrue(segment2.hasData());
 
     final DataSegment segment3 = DataSegment.builder()
                                             .dataSource("foo")
@@ -406,8 +406,8 @@ public class DataSegmentTest
                                             .size(0)
                                             .build();
 
-    Assertions.assertFalse(segment3.isTombstone());
-    Assertions.assertTrue(segment3.hasData());
+    Assert.assertFalse(segment3.isTombstone());
+    Assert.assertTrue(segment3.hasData());
 
   }
 

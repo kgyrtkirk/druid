@@ -24,8 +24,8 @@ import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import org.apache.datasketches.memory.Memory;
 import org.apache.datasketches.memory.WritableMemory;
 import org.apache.druid.java.util.common.StringUtils;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Random;
 
@@ -57,10 +57,10 @@ public class HashTableUtilsTest
     expectedResults.put(Integer.MAX_VALUE, 1073741824);
 
     for (final Int2IntMap.Entry entry : expectedResults.int2IntEntrySet()) {
-      Assertions.assertEquals(
+      Assert.assertEquals(
+          entry.getIntKey() + " => " + entry.getIntValue(),
           entry.getIntValue(),
-          HashTableUtils.previousPowerOfTwo(entry.getIntKey()),
-          entry.getIntKey() + " => " + entry.getIntValue()
+          HashTableUtils.previousPowerOfTwo(entry.getIntKey())
       );
     }
   }
@@ -94,18 +94,18 @@ public class HashTableUtilsTest
 
       // Validate that hashing regionAtEnd is equivalent to hashing the end of a region. This helps validate
       // that using a nonzero position is effective.
-      Assertions.assertEquals(
+      Assert.assertEquals(
+          StringUtils.format("numBytes[%s] nonzero position check", numBytes),
           HashTableUtils.hashMemory(regionToHash, 0, numBytes),
-          HashTableUtils.hashMemory(randomMemory, maxBytes - numBytes, numBytes),
-          StringUtils.format("numBytes[%s] nonzero position check", numBytes)
+          HashTableUtils.hashMemory(randomMemory, maxBytes - numBytes, numBytes)
       );
 
       // Copy the memory and make sure we did it right.
       final WritableMemory copyOfRegion = WritableMemory.allocate(numBytes);
       regionToHash.copyTo(0, copyOfRegion, 0, numBytes);
-      Assertions.assertTrue(
-          regionToHash.equalTo(0, copyOfRegion, 0, numBytes),
-          StringUtils.format("numBytes[%s] copy equality check", numBytes)
+      Assert.assertTrue(
+          StringUtils.format("numBytes[%s] copy equality check", numBytes),
+          regionToHash.equalTo(0, copyOfRegion, 0, numBytes)
       );
 
       // Validate that flipping any bit affects the hash.
@@ -118,10 +118,10 @@ public class HashTableUtilsTest
             (byte) (copyOfRegion.getByte(bytePosition) ^ mask)
         );
 
-        Assertions.assertNotEquals(
+        Assert.assertNotEquals(
+            StringUtils.format("numBytes[%s] bit[%s] flip check", numBytes, bit),
             HashTableUtils.hashMemory(regionToHash, 0, numBytes),
-            HashTableUtils.hashMemory(copyOfRegion, 0, numBytes),
-            StringUtils.format("numBytes[%s] bit[%s] flip check", numBytes, bit)
+            HashTableUtils.hashMemory(copyOfRegion, 0, numBytes)
         );
 
         // Set it back and make sure we did it right.
@@ -130,9 +130,9 @@ public class HashTableUtilsTest
             (byte) (copyOfRegion.getByte(bytePosition) ^ mask)
         );
 
-        Assertions.assertTrue(
-            regionToHash.equalTo(0, copyOfRegion, 0, numBytes),
-            StringUtils.format("numBytes[%s] bit[%s] reset check", numBytes, bit)
+        Assert.assertTrue(
+            StringUtils.format("numBytes[%s] bit[%s] reset check", numBytes, bit),
+            regionToHash.equalTo(0, copyOfRegion, 0, numBytes)
         );
       }
     }
@@ -153,9 +153,9 @@ public class HashTableUtilsTest
       randomMemory.copyTo(maxBytes - numBytes, copyOfRegion, 0, numBytes);
 
       // Compare the two.
-      Assertions.assertTrue(
-          HashTableUtils.memoryEquals(randomMemory, maxBytes - numBytes, copyOfRegion, 0, numBytes),
-          StringUtils.format("numBytes[%s] nonzero position check", numBytes)
+      Assert.assertTrue(
+          StringUtils.format("numBytes[%s] nonzero position check", numBytes),
+          HashTableUtils.memoryEquals(randomMemory, maxBytes - numBytes, copyOfRegion, 0, numBytes)
       );
 
       // Validate that flipping any bit affects equality.
@@ -168,9 +168,9 @@ public class HashTableUtilsTest
             (byte) (copyOfRegion.getByte(bytePosition) ^ mask)
         );
 
-        Assertions.assertFalse(
-            HashTableUtils.memoryEquals(randomMemory, maxBytes - numBytes, copyOfRegion, 0, numBytes),
-            StringUtils.format("numBytes[%s] bit[%s] flip check", numBytes, bit)
+        Assert.assertFalse(
+            StringUtils.format("numBytes[%s] bit[%s] flip check", numBytes, bit),
+            HashTableUtils.memoryEquals(randomMemory, maxBytes - numBytes, copyOfRegion, 0, numBytes)
         );
 
         // Set it back and make sure we did it right.
@@ -179,9 +179,9 @@ public class HashTableUtilsTest
             (byte) (copyOfRegion.getByte(bytePosition) ^ mask)
         );
 
-        Assertions.assertTrue(
-            HashTableUtils.memoryEquals(randomMemory, maxBytes - numBytes, copyOfRegion, 0, numBytes),
-            StringUtils.format("numBytes[%s] bit[%s] reset check", numBytes, bit)
+        Assert.assertTrue(
+            StringUtils.format("numBytes[%s] bit[%s] reset check", numBytes, bit),
+            HashTableUtils.memoryEquals(randomMemory, maxBytes - numBytes, copyOfRegion, 0, numBytes)
         );
       }
     }

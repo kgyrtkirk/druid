@@ -27,9 +27,9 @@ import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.vector.VectorColumnSelectorFactory;
 import org.apache.druid.segment.vector.VectorValueSelector;
 import org.easymock.EasyMock;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.nio.ByteBuffer;
 
@@ -55,7 +55,7 @@ public class LongMinAggregationTest
     longMinVectorAggFactory = TestHelper.makeJsonMapper().readValue(vectorAggSpecJson, LongMinAggregatorFactory.class);
   }
 
-  @BeforeEach
+  @Before
   public void setup()
   {
     NullHandling.initializeForTests();
@@ -87,9 +87,9 @@ public class LongMinAggregationTest
     aggregate(selector, agg);
     aggregate(selector, agg);
 
-    Assertions.assertEquals(values[2], ((Long) agg.get()).longValue());
-    Assertions.assertEquals(values[2], agg.getLong());
-    Assertions.assertEquals((float) values[2], agg.getFloat(), 0.0001);
+    Assert.assertEquals(values[2], ((Long) agg.get()).longValue());
+    Assert.assertEquals(values[2], agg.getLong());
+    Assert.assertEquals((float) values[2], agg.getFloat(), 0.0001);
   }
 
   @Test
@@ -105,18 +105,18 @@ public class LongMinAggregationTest
     aggregate(selector, agg, buffer, 0);
     aggregate(selector, agg, buffer, 0);
 
-    Assertions.assertEquals(values[2], ((Long) agg.get(buffer, 0)).longValue());
-    Assertions.assertEquals(values[2], agg.getLong(buffer, 0));
-    Assertions.assertEquals((float) values[2], agg.getFloat(buffer, 0), 0.0001);
+    Assert.assertEquals(values[2], ((Long) agg.get(buffer, 0)).longValue());
+    Assert.assertEquals(values[2], agg.getLong(buffer, 0));
+    Assert.assertEquals((float) values[2], agg.getFloat(buffer, 0), 0.0001);
   }
 
   @Test
   public void testLongMinVectorAggregator()
   {
     // Some sanity.
-    Assertions.assertTrue(longMinVectorAggFactory.canVectorize(vectorColumnSelectorFactory));
+    Assert.assertTrue(longMinVectorAggFactory.canVectorize(vectorColumnSelectorFactory));
     VectorValueSelector vectorValueSelector = longMinVectorAggFactory.vectorSelector(vectorColumnSelectorFactory);
-    Assertions.assertEquals(longValues1, vectorValueSelector.getLongVector());
+    Assert.assertEquals(longValues1, vectorValueSelector.getLongVector());
 
     VectorAggregator vectorAggregator = longMinVectorAggFactory.factorizeVector(vectorColumnSelectorFactory);
 
@@ -124,23 +124,23 @@ public class LongMinAggregationTest
     vectorAggregator.init(buf, 0);
 
     vectorAggregator.aggregate(buf, 0, 0, 3);
-    Assertions.assertEquals(longValues1[1], (long) vectorAggregator.get(buf, 0));
+    Assert.assertEquals(longValues1[1], (long) vectorAggregator.get(buf, 0));
 
     vectorAggregator.aggregate(buf, 1, 0, 3);
-    Assertions.assertEquals(longValues1[1], (long) vectorAggregator.get(buf, 1));
+    Assert.assertEquals(longValues1[1], (long) vectorAggregator.get(buf, 1));
 
     vectorAggregator.aggregate(buf, 2, 3, 7);
-    Assertions.assertEquals(longValues1[6], (long) vectorAggregator.get(buf, 2));
+    Assert.assertEquals(longValues1[6], (long) vectorAggregator.get(buf, 2));
 
     vectorAggregator.aggregate(buf, 0, 0, 10);
-    Assertions.assertEquals(longValues1[7], (long) vectorAggregator.get(buf, 0));
+    Assert.assertEquals(longValues1[7], (long) vectorAggregator.get(buf, 0));
   }
 
 
   @Test
   public void testCombine()
   {
-    Assertions.assertEquals(-9223372036854775803L, longMinAggFactory.combine(-9223372036854775800L, -9223372036854775803L));
+    Assert.assertEquals(-9223372036854775803L, longMinAggFactory.combine(-9223372036854775800L, -9223372036854775803L));
   }
 
   @Test
@@ -150,10 +150,10 @@ public class LongMinAggregationTest
     LongMinAggregatorFactory oneMore = new LongMinAggregatorFactory("name1", "fieldName1");
     LongMinAggregatorFactory two = new LongMinAggregatorFactory("name2", "fieldName2");
 
-    Assertions.assertEquals(one.hashCode(), oneMore.hashCode());
+    Assert.assertEquals(one.hashCode(), oneMore.hashCode());
 
-    Assertions.assertTrue(one.equals(oneMore));
-    Assertions.assertFalse(one.equals(two));
+    Assert.assertTrue(one.equals(oneMore));
+    Assert.assertFalse(one.equals(two));
   }
 
   private void aggregate(TestLongColumnSelector selector, Aggregator agg)

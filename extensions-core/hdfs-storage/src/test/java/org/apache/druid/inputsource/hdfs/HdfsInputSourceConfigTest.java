@@ -21,6 +21,7 @@ package org.apache.druid.inputsource.hdfs;
 
 import com.google.common.collect.ImmutableSet;
 import org.junit.Assert;
+import org.junit.Test;
 
 public class HdfsInputSourceConfigTest
 {

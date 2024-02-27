@@ -29,6 +29,7 @@ import org.apache.druid.server.lookup.cache.polling.OnHeapPollingCache;
 import org.apache.druid.server.lookup.cache.polling.PollingCacheFactory;
 import org.joda.time.Period;
 import org.junit.Assert;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 

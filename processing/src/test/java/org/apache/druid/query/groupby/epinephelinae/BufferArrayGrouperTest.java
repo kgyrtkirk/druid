@@ -30,16 +30,16 @@ import org.apache.druid.query.aggregation.AggregatorFactory;
 import org.apache.druid.query.aggregation.CountAggregatorFactory;
 import org.apache.druid.query.aggregation.LongSumAggregatorFactory;
 import org.apache.druid.query.groupby.epinephelinae.Grouper.Entry;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.nio.ByteBuffer;
 import java.util.List;
 
 public class BufferArrayGrouperTest
 {
-  @BeforeAll
+  @BeforeClass
   public static void setUpStatic()
   {
     NullHandling.initializeForTests();
@@ -111,10 +111,10 @@ public class BufferArrayGrouperTest
     }
 
     for (int i = 0; i < cardinalityArray.length; i++) {
-      Assertions.assertEquals(
+      Assert.assertEquals(
+          StringUtils.format("cardinality[%d]", cardinalityArray[i]),
           requiredSizes[i],
-          BufferArrayGrouper.requiredBufferCapacity(cardinalityArray[i], aggregatorFactories),
-          StringUtils.format("cardinality[%d]", cardinalityArray[i])
+          BufferArrayGrouper.requiredBufferCapacity(cardinalityArray[i], aggregatorFactories)
       );
     }
   }

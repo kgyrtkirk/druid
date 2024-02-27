@@ -27,8 +27,8 @@ import org.apache.druid.timeline.partition.NoneShardSpec;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
 import org.joda.time.Period;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class PeriodDropBeforeRuleTest
 {
@@ -49,7 +49,7 @@ public class PeriodDropBeforeRuleTest
     ObjectMapper jsonMapper = new DefaultObjectMapper();
     Rule reread = jsonMapper.readValue(jsonMapper.writeValueAsString(rule), Rule.class);
 
-    Assertions.assertEquals(rule.getPeriod(), ((PeriodDropBeforeRule) reread).getPeriod());
+    Assert.assertEquals(rule.getPeriod(), ((PeriodDropBeforeRule) reread).getPeriod());
   }
 
   @Test
@@ -60,25 +60,25 @@ public class PeriodDropBeforeRuleTest
         new Period("P1D")
     );
 
-    Assertions.assertTrue(
+    Assert.assertTrue(
         rule.appliesTo(
             BUILDER.interval(new Interval(now.minusDays(3), now.minusDays(2))).build(),
             now
         )
     );
-    Assertions.assertTrue(
+    Assert.assertTrue(
         rule.appliesTo(
             BUILDER.interval(new Interval(now.minusDays(2), now.minusDays(1))).build(),
             now
         )
     );
-    Assertions.assertFalse(
+    Assert.assertFalse(
         rule.appliesTo(
             BUILDER.interval(new Interval(now.minusDays(1), now)).build(),
             now
         )
     );
-    Assertions.assertFalse(
+    Assert.assertFalse(
         rule.appliesTo(
             BUILDER.interval(new Interval(now, now.plusDays(1))).build(),
             now

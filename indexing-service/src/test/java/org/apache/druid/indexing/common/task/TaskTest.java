@@ -27,6 +27,7 @@ import org.apache.druid.java.util.common.UOE;
 import org.apache.druid.query.Query;
 import org.apache.druid.query.QueryRunner;
 import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Map;
 

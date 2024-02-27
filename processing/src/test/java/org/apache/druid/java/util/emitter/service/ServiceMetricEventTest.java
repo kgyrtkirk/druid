@@ -22,14 +22,12 @@ package org.apache.druid.java.util.emitter.service;
 
 import com.google.common.collect.ImmutableMap;
 import org.apache.druid.java.util.common.DateTimes;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  *
@@ -52,7 +50,7 @@ public class ServiceMetricEventTest
         .setDimension("user10", "j")
         .setMetric("test-metric", 1234)
         .build("test", "localhost");
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableMap.<String, Object>builder()
                     .put("feed", "metrics")
                     .put("timestamp", builderEvent.getCreatedTime().toString())
@@ -89,7 +87,7 @@ public class ServiceMetricEventTest
         .setMetric("test-metric", 1234)
         .build("test", "localhost");
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableMap.<String, Object>builder()
                     .put("feed", "metrics")
                     .put("timestamp", constructorEvent.getCreatedTime().toString())
@@ -125,7 +123,7 @@ public class ServiceMetricEventTest
         .setMetric("test-metric", 1234)
         .build("test", "localhost");
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableMap.<String, Object>builder()
                     .put("feed", "metrics")
                     .put("timestamp", arrayConstructorEvent.getCreatedTime().toString())
@@ -146,7 +144,7 @@ public class ServiceMetricEventTest
                     .build(), arrayConstructorEvent.toMap()
     );
 
-    Assertions.assertNotNull(
+    Assert.assertNotNull(
         new ServiceMetricEvent.Builder()
             .setDimension("user1", "a")
             .setDimension("user2", "b")
@@ -163,7 +161,7 @@ public class ServiceMetricEventTest
             .getCreatedTime()
     );
 
-    Assertions.assertNotNull(
+    Assert.assertNotNull(
         ServiceMetricEvent.builder()
                           .setDimension("user1", new String[]{"a"})
                           .setDimension("user2", new String[]{"b"})
@@ -180,7 +178,7 @@ public class ServiceMetricEventTest
                           .getCreatedTime()
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableMap.<String, Object>builder()
                     .put("feed", "metrics")
                     .put("timestamp", DateTimes.utc(42).toString())
@@ -216,7 +214,7 @@ public class ServiceMetricEventTest
             .toMap()
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableMap.<String, Object>builder()
                     .put("feed", "metrics")
                     .put("timestamp", DateTimes.utc(42).toString())
@@ -252,7 +250,7 @@ public class ServiceMetricEventTest
                           .toMap()
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableMap.<String, Object>builder()
                     .put("feed", "metrics")
                     .put("timestamp", DateTimes.utc(42).toString())
@@ -273,37 +271,29 @@ public class ServiceMetricEventTest
     );
   }
 
-  @Test
+  @Test(expected = IllegalStateException.class)
   public void testInfinite()
   {
-    assertThrows(IllegalStateException.class, () -> {
-      ServiceMetricEvent.builder().setMetric("foo", 1 / 0d);
-    });
+    ServiceMetricEvent.builder().setMetric("foo", 1 / 0d);
   }
 
-  @Test
+  @Test(expected = IllegalStateException.class)
   public void testInfinite2()
   {
-    assertThrows(IllegalStateException.class, () -> {
-      ServiceMetricEvent.builder().setMetric("foo", 1 / 0f);
-    });
+    ServiceMetricEvent.builder().setMetric("foo", 1 / 0f);
   }
 
 
-  @Test
+  @Test(expected = IllegalStateException.class)
   public void testNaN()
   {
-    assertThrows(IllegalStateException.class, () -> {
-      ServiceMetricEvent.builder().setMetric("foo", 0 / 0d);
-    });
+    ServiceMetricEvent.builder().setMetric("foo", 0 / 0d);
   }
 
-  @Test
+  @Test(expected = IllegalStateException.class)
   public void testNaN2()
   {
-    assertThrows(IllegalStateException.class, () -> {
-      ServiceMetricEvent.builder().setMetric("foo", 0 / 0f);
-    });
+    ServiceMetricEvent.builder().setMetric("foo", 0 / 0f);
   }
 
   @Test
@@ -314,7 +304,7 @@ public class ServiceMetricEventTest
                                                   .setDimensionIfNotNull("userDimMap", userDimMap)
                                                   .setMetric("foo", 1)
                                                   .build("service", "host");
-    Assertions.assertEquals(userDimMap, target.getUserDims().get("userDimMap"));
+    Assert.assertEquals(userDimMap, target.getUserDims().get("userDimMap"));
   }
 
   @Test
@@ -324,7 +314,7 @@ public class ServiceMetricEventTest
                                                   .setDimensionIfNotNull("userDimMap", null)
                                                   .setMetric("foo", 1)
                                                   .build("service", "host");
-    Assertions.assertTrue(target.getUserDims().isEmpty());
-    Assertions.assertNull(target.getUserDims().get("userDimMap"));
+    Assert.assertTrue(target.getUserDims().isEmpty());
+    Assert.assertNull(target.getUserDims().get("userDimMap"));
   }
 }

@@ -23,8 +23,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.apache.druid.segment.TestHelper;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class OnheapIncrementalIndexTest
 {
@@ -34,7 +34,7 @@ public class OnheapIncrementalIndexTest
   public void testSerde() throws JsonProcessingException
   {
     OnheapIncrementalIndex.Spec spec = new OnheapIncrementalIndex.Spec(true);
-    Assertions.assertEquals(spec, MAPPER.readValue(MAPPER.writeValueAsString(spec), OnheapIncrementalIndex.Spec.class));
+    Assert.assertEquals(spec, MAPPER.readValue(MAPPER.writeValueAsString(spec), OnheapIncrementalIndex.Spec.class));
   }
   @Test
   public void testSpecEqualsAndHashCode()

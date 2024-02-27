@@ -22,6 +22,7 @@ package org.apache.druid.storage.s3.output;
 import com.google.common.collect.ImmutableList;
 import org.apache.druid.error.DruidException;
 import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.List;
 

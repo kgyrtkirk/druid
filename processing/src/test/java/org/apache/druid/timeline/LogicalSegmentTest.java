@@ -20,8 +20,8 @@
 package org.apache.druid.timeline;
 
 import org.joda.time.Interval;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 
 public class LogicalSegmentTest
@@ -44,7 +44,7 @@ public class LogicalSegmentTest
         return null;
       }
     };
-    Assertions.assertEquals(logicalSegment.getStatus(), LogicalSegment.Status.READY);
+    Assert.assertEquals(logicalSegment.getStatus(), LogicalSegment.Status.READY);
   }
 
   @Test
@@ -69,7 +69,7 @@ public class LogicalSegmentTest
         return Status.EMPTY;
       }
     };
-    Assertions.assertEquals(emptyLogicalSegment.getStatus(), LogicalSegment.Status.EMPTY);
+    Assert.assertEquals(emptyLogicalSegment.getStatus(), LogicalSegment.Status.EMPTY);
   }
 }
 

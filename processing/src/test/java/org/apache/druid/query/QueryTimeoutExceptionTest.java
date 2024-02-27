@@ -23,8 +23,8 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.IOException;
 
@@ -60,20 +60,20 @@ public class QueryTimeoutExceptionTest
     QueryTimeoutException timeoutExceptionWithMsg = mapper.readValue(mapper.writeValueAsBytes(new QueryTimeoutException(
         "Another query timeout")), QueryTimeoutException.class);
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         "Query timeout",
         timeoutException.getErrorCode()
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         "Query did not complete within configured timeout period. You can increase " +
             "query timeout or tune the performance of query.",
         timeoutException.getMessage()
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         "Another query timeout",
         timeoutExceptionWithMsg.getMessage()
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         "org.apache.druid.query.QueryTimeoutException",
         timeoutExceptionWithMsg.getErrorClass()
     );
@@ -82,7 +82,7 @@ public class QueryTimeoutExceptionTest
   @Test
   public void testExceptionHost()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         "timeouthost",
         new QueryTimeoutException("Timed out", "timeouthost").getHost()
     );

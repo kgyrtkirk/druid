@@ -24,8 +24,8 @@ import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.segment.serde.cell.RandomStringUtils;
 import org.apache.druid.segment.serde.cell.StagedSerde;
 import org.apache.druid.segment.serde.cell.StorableBuffer;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
@@ -58,17 +58,17 @@ public class BackwardCompatibleSerializablePairLongStringSimpleStagedSerdeTest
   {
     SerializablePairLongString value = new SerializablePairLongString(Long.MAX_VALUE, null);
     // Write using the older serde, read using the newer serde
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new SerializablePairLongString(Long.MAX_VALUE, null),
         readUsingSerde(writeUsingSerde(value, OLDER_SERDE), SERDE)
     );
     // Write using the newer serde, read using the older serde
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new SerializablePairLongString(Long.MAX_VALUE, null),
         readUsingSerde(writeUsingSerde(value, SERDE), OLDER_SERDE)
     );
     // Compare the length of the serialized bytes for the value
-    Assertions.assertEquals(writeUsingSerde(value, OLDER_SERDE).length, writeUsingSerde(value, SERDE).length);
+    Assert.assertEquals(writeUsingSerde(value, OLDER_SERDE).length, writeUsingSerde(value, SERDE).length);
   }
 
   @Test
@@ -76,17 +76,17 @@ public class BackwardCompatibleSerializablePairLongStringSimpleStagedSerdeTest
   {
     SerializablePairLongString value = new SerializablePairLongString(Long.MAX_VALUE, "");
     // Write using the older serde, read using the newer serde
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new SerializablePairLongString(Long.MAX_VALUE, null),
         readUsingSerde(writeUsingSerde(value, OLDER_SERDE), SERDE)
     );
     // Write using the newer serde, read using the older serde
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new SerializablePairLongString(Long.MAX_VALUE, null),
         readUsingSerde(writeUsingSerde(value, SERDE), OLDER_SERDE)
     );
     // Compare the length of the serialized bytes for the value
-    Assertions.assertEquals(writeUsingSerde(value, OLDER_SERDE).length, writeUsingSerde(value, SERDE).length);
+    Assert.assertEquals(writeUsingSerde(value, OLDER_SERDE).length, writeUsingSerde(value, SERDE).length);
 
   }
 
@@ -99,17 +99,17 @@ public class BackwardCompatibleSerializablePairLongStringSimpleStagedSerdeTest
   private void testValue(@Nullable SerializablePairLongString value)
   {
     // Write using the older serde, read using the newer serde
-    Assertions.assertEquals(
+    Assert.assertEquals(
         value,
         readUsingSerde(writeUsingSerde(value, OLDER_SERDE), SERDE)
     );
     // Write using the newer serde, read using the older serde
-    Assertions.assertEquals(
+    Assert.assertEquals(
         value,
         readUsingSerde(writeUsingSerde(value, SERDE), OLDER_SERDE)
     );
     // Compare the length of the serialized bytes for the value
-    Assertions.assertEquals(writeUsingSerde(value, OLDER_SERDE).length, writeUsingSerde(value, SERDE).length);
+    Assert.assertEquals(writeUsingSerde(value, OLDER_SERDE).length, writeUsingSerde(value, SERDE).length);
   }
 
   private static byte[] writeUsingSerde(

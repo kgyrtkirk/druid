@@ -36,6 +36,7 @@ import org.apache.druid.query.expression.LookupEnabledTestExprMacroTable;
 import org.apache.druid.segment.incremental.RowIngestionMetersFactory;
 import org.apache.druid.server.metrics.NoopServiceEmitter;
 import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.IOException;
 

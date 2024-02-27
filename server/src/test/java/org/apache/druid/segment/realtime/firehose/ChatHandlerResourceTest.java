@@ -27,8 +27,8 @@ import org.easymock.EasyMock;
 import org.easymock.EasyMockRunner;
 import org.easymock.EasyMockSupport;
 import org.easymock.Mock;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(EasyMockRunner.class)
@@ -50,7 +50,7 @@ public class ChatHandlerResourceTest extends EasyMockSupport
 
     replayAll();
     chatHandlerResource = new ChatHandlerResource(handlers, dataSourceTaskIdHolder);
-    Assertions.assertThrows(ServiceUnavailableException.class, () -> chatHandlerResource.doTaskChat(handlerId, null));
+    Assert.assertThrows(ServiceUnavailableException.class, () -> chatHandlerResource.doTaskChat(handlerId, null));
     verifyAll();
   }
 }

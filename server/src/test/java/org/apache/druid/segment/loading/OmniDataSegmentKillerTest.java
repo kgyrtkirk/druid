@@ -31,8 +31,8 @@ import org.apache.druid.guice.LazySingleton;
 import org.apache.druid.java.util.common.Intervals;
 import org.apache.druid.timeline.DataSegment;
 import org.apache.druid.timeline.partition.TombstoneShardSpec;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 import org.mockito.Mockito;
 
 import javax.annotation.Nullable;
@@ -67,10 +67,10 @@ public class OmniDataSegmentKillerTest
 
     final Injector injector = createInjector(null);
     final OmniDataSegmentKiller segmentKiller = injector.getInstance(OmniDataSegmentKiller.class);
-    Assertions.assertThrows(
+    Assert.assertThrows(
+        "Unknown loader type[unknown-type]. Known types are [explode]",
         SegmentLoadingException.class,
-        () -> segmentKiller.kill(segment),
-        "Unknown loader type[unknown-type]. Known types are [explode]"
+        () -> segmentKiller.kill(segment)
     );
   }
 
@@ -82,10 +82,10 @@ public class OmniDataSegmentKillerTest
 
     final Injector injector = createInjector(null);
     final OmniDataSegmentKiller segmentKiller = injector.getInstance(OmniDataSegmentKiller.class);
-    Assertions.assertThrows(
+    Assert.assertThrows(
+        "BadSegmentKiller must not have been initialized",
         RuntimeException.class,
-        () -> segmentKiller.kill(segment),
-        "BadSegmentKiller must not have been initialized"
+        () -> segmentKiller.kill(segment)
     );
   }
 

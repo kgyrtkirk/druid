@@ -28,8 +28,8 @@ import com.google.common.collect.ImmutableMap;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.apache.druid.data.input.MapBasedInputRow;
 import org.apache.druid.java.util.common.DateTimes;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.List;
 
@@ -40,7 +40,7 @@ public class HashBucketShardSpecTest
   @Test
   public void testConvert()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new BuildingHashBasedNumberedShardSpec(
             3,
             5,
@@ -56,7 +56,7 @@ public class HashBucketShardSpecTest
   @Test
   public void testCreateChunk()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new NumberedPartitionChunk<>(5, 0, "test"),
         new HashBucketShardSpec(
             5,
@@ -78,7 +78,7 @@ public class HashBucketShardSpecTest
     );
     final ShardSpecLookup lookup = shardSpecs.get(0).getLookup(shardSpecs);
     final long currentTime = DateTimes.nowUtc().getMillis();
-    Assertions.assertEquals(
+    Assert.assertEquals(
         shardSpecs.get(1),
         lookup.getShardSpec(
             currentTime,
@@ -88,7 +88,7 @@ public class HashBucketShardSpecTest
             )
         )
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         shardSpecs.get(2),
         lookup.getShardSpec(
             currentTime,
@@ -98,7 +98,7 @@ public class HashBucketShardSpecTest
             )
         )
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         shardSpecs.get(0),
         lookup.getShardSpec(
             currentTime,
@@ -125,10 +125,10 @@ public class HashBucketShardSpecTest
     );
     final String json = mapper.writeValueAsString(original);
     ShardSpec shardSpec = mapper.readValue(json, ShardSpec.class);
-    Assertions.assertEquals(ShardSpec.Type.BUCKET_HASH, shardSpec.getType());
+    Assert.assertEquals(ShardSpec.Type.BUCKET_HASH, shardSpec.getType());
 
     final HashBucketShardSpec fromJson = (HashBucketShardSpec) shardSpec;
-    Assertions.assertEquals(original, fromJson);
+    Assert.assertEquals(original, fromJson);
   }
 
   @Test

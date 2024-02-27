@@ -35,9 +35,9 @@ import org.apache.druid.query.lookup.LookupExtractionFn;
 import org.apache.druid.query.lookup.LookupExtractor;
 import org.apache.druid.segment.IndexBuilder;
 import org.apache.druid.segment.StorageAdapter;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -59,7 +59,7 @@ public class SelectorFilterTest extends BaseFilterTest
     super(testName, DEFAULT_ROWS, indexBuilder, finisher, cnf, optimize);
   }
 
-  @AfterAll
+  @AfterClass
   public static void tearDown() throws Exception
   {
     BaseFilterTest.tearDown(SelectorFilterTest.class.getName());
@@ -341,12 +341,12 @@ public class SelectorFilterTest extends BaseFilterTest
     SelectorDimFilter optFilter4Optimized = new SelectorDimFilter("dim0", "5", null);
     SelectorDimFilter optFilter6Optimized = new SelectorDimFilter("dim0", "5", null);
 
-    Assertions.assertEquals(optFilter1, optFilter1.optimize(false));
-    Assertions.assertEquals(optFilter2Optimized, optFilter2.optimize(false));
-    Assertions.assertEquals(optFilter3, optFilter3.optimize(false));
-    Assertions.assertEquals(optFilter4Optimized, optFilter4.optimize(false));
-    Assertions.assertEquals(FalseDimFilter.instance(), optFilter5.optimize(false));
-    Assertions.assertEquals(optFilter6Optimized, optFilter6.optimize(false));
+    Assert.assertEquals(optFilter1, optFilter1.optimize(false));
+    Assert.assertEquals(optFilter2Optimized, optFilter2.optimize(false));
+    Assert.assertEquals(optFilter3, optFilter3.optimize(false));
+    Assert.assertEquals(optFilter4Optimized, optFilter4.optimize(false));
+    Assert.assertEquals(FalseDimFilter.instance(), optFilter5.optimize(false));
+    Assert.assertEquals(optFilter6Optimized, optFilter6.optimize(false));
 
     assertFilterMatches(optFilter1, ImmutableList.of("0", "1", "2", "5"));
     assertFilterMatches(optFilter2, ImmutableList.of("2", "5"));

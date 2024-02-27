@@ -20,8 +20,8 @@
 package org.apache.druid.utils;
 
 import org.apache.druid.java.util.common.ISE;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class ThrowablesTest
 {
@@ -29,14 +29,14 @@ public class ThrowablesTest
   public void testGetCauseOfType_Itself()
   {
     Throwable th = new NoClassDefFoundError();
-    Assertions.assertSame(th, Throwables.getCauseOfType(th, NoClassDefFoundError.class));
+    Assert.assertSame(th, Throwables.getCauseOfType(th, NoClassDefFoundError.class));
   }
 
   @Test
   public void testGetCauseOfType_NestedThrowable()
   {
     Throwable th = new NoClassDefFoundError();
-    Assertions.assertSame(th,
+    Assert.assertSame(th,
         Throwables.getCauseOfType(new RuntimeException(th), NoClassDefFoundError.class)
     );
   }
@@ -45,7 +45,7 @@ public class ThrowablesTest
   public void testGetCauseOfType_NestedThrowableSubclass()
   {
     Throwable th = new ISE("something");
-    Assertions.assertSame(th,
+    Assert.assertSame(th,
         Throwables.getCauseOfType(new RuntimeException(th), IllegalStateException.class)
     );
   }
@@ -53,7 +53,7 @@ public class ThrowablesTest
   @Test
   public void testGetCauseOfType_NonTarget()
   {
-    Assertions.assertNull(
+    Assert.assertNull(
         Throwables.getCauseOfType(new RuntimeException(new ClassNotFoundException()), NoClassDefFoundError.class)
     );
   }

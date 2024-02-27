@@ -37,23 +37,26 @@ import org.apache.druid.query.aggregation.LongSumAggregatorFactory;
 import org.apache.druid.query.context.ResponseContext;
 import org.apache.druid.segment.TestHelper;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
 import java.util.List;
 
+@RunWith(Parameterized.class)
 public class TimeSeriesUnionQueryRunnerTest extends InitializedNullHandlingTest
 {
-  private QueryRunner runner;
-  private boolean descending;
+  private final QueryRunner runner;
+  private final boolean descending;
 
-  public void initTimeSeriesUnionQueryRunnerTest(QueryRunner runner, boolean descending)
+  public TimeSeriesUnionQueryRunnerTest(QueryRunner runner, boolean descending)
   {
     this.runner = runner;
     this.descending = descending;
   }
 
+  @Parameterized.Parameters(name = "{0}:descending={1}")
   public static Iterable<Object[]> constructorFeeder()
   {
     return QueryRunnerTestHelper.cartesian(
@@ -77,11 +80,9 @@ public class TimeSeriesUnionQueryRunnerTest extends InitializedNullHandlingTest
     TestHelper.assertExpectedResults(expectedResults, results);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1}")
-  public void testUnionTimeseries(QueryRunner runner, boolean descending)
+  @Test
+  public void testUnionTimeseries()
   {
-    initTimeSeriesUnionQueryRunnerTest(runner, descending);
     TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
                                   .dataSource(QueryRunnerTestHelper.UNION_DATA_SOURCE)
                                   .granularity(QueryRunnerTestHelper.DAY_GRAN)
@@ -118,11 +119,9 @@ public class TimeSeriesUnionQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, results);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1}")
-  public void testUnionResultMerging(QueryRunner runner, boolean descending)
+  @Test
+  public void testUnionResultMerging()
   {
-    initTimeSeriesUnionQueryRunnerTest(runner, descending);
     TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
                                   .dataSource(
                                       new UnionDataSource(

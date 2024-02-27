@@ -80,10 +80,12 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.joda.time.Period;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -94,15 +96,16 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 /**
  */
+@RunWith(Parameterized.class)
 public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
 {
   private static final String TIMESTAMP_RESULT_FIELD_NAME = "d0";
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
 
+  @Parameterized.Parameters(name = "{0}:descending={1},vectorize={2}")
   public static Iterable<Object[]> constructorFeeder()
   {
     final Iterable<Object[]> baseConstructors = QueryRunnerTestHelper.cartesian(
@@ -145,12 +148,12 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     TestHelper.assertExpectedResults(expectedResults, results);
   }
 
-  protected QueryRunner<Result<TimeseriesResultValue>> runner;
-  protected boolean descending;
-  protected boolean vectorize;
-  protected List<AggregatorFactory> aggregatorFactoryList;
+  protected final QueryRunner<Result<TimeseriesResultValue>> runner;
+  protected final boolean descending;
+  protected final boolean vectorize;
+  protected final List<AggregatorFactory> aggregatorFactoryList;
 
-  public void initTimeseriesQueryRunnerTest(
+  public TimeseriesQueryRunnerTest(
       QueryRunner<Result<TimeseriesResultValue>> runner,
       boolean descending,
       boolean vectorize,
@@ -163,11 +166,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     this.aggregatorFactoryList = aggregatorFactoryList;
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testEmptyTimeseries(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testEmptyTimeseries()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
                                   .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
                                   .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -200,11 +201,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     TestHelper.assertExpectedResults(expectedResults, actualResults);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testFullOnTimeseries(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testFullOnTimeseries()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     Granularity gran = Granularities.DAY;
     TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
                                   .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
@@ -243,67 +242,67 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     Result lastResult = null;
     for (Result<TimeseriesResultValue> result : results) {
       DateTime current = result.getTimestamp();
-      Assertions.assertFalse(
-          descending ? current.isBefore(expectedLast) : current.isAfter(expectedLast),
-          StringUtils.format("Timestamp[%s] > expectedLast[%s]", current, expectedLast)
+      Assert.assertFalse(
+          StringUtils.format("Timestamp[%s] > expectedLast[%s]", current, expectedLast),
+          descending ? current.isBefore(expectedLast) : current.isAfter(expectedLast)
       );
 
       final TimeseriesResultValue value = result.getValue();
 
-      Assertions.assertEquals(
+      Assert.assertEquals(
+          result.toString(),
           QueryRunnerTestHelper.SKIPPED_DAY.equals(current) ? 0L : 13L,
-          value.getLongMetric("rows").longValue(),
-          result.toString()
+          value.getLongMetric("rows").longValue()
       );
 
       if (!QueryRunnerTestHelper.SKIPPED_DAY.equals(current)) {
-        Assertions.assertEquals(
+        Assert.assertEquals(
+            result.toString(),
             Doubles.tryParse(expectedIndex[count]).doubleValue(),
             value.getDoubleMetric("index").doubleValue(),
-            value.getDoubleMetric("index").doubleValue() * 1e-6,
-            result.toString()
+            value.getDoubleMetric("index").doubleValue() * 1e-6
         );
-        Assertions.assertEquals(
+        Assert.assertEquals(
+            result.toString(),
             new Double(expectedIndex[count]) +
             13L + 1L,
             value.getDoubleMetric("addRowsIndexConstant"),
-            value.getDoubleMetric("addRowsIndexConstant") * 1e-6,
-            result.toString()
+            value.getDoubleMetric("addRowsIndexConstant") * 1e-6
         );
-        Assertions.assertEquals(
+        Assert.assertEquals(
             value.getDoubleMetric("uniques"),
             9.0d,
             0.02
         );
       } else {
         if (NullHandling.replaceWithDefault()) {
-          Assertions.assertEquals(
+          Assert.assertEquals(
+              result.toString(),
               0.0D,
               value.getDoubleMetric("index").doubleValue(),
-              value.getDoubleMetric("index").doubleValue() * 1e-6,
-              result.toString()
+              value.getDoubleMetric("index").doubleValue() * 1e-6
           );
-          Assertions.assertEquals(
+          Assert.assertEquals(
+              result.toString(),
               new Double(expectedIndex[count]) + 1L,
               value.getDoubleMetric("addRowsIndexConstant"),
-              value.getDoubleMetric("addRowsIndexConstant") * 1e-6,
-              result.toString()
+              value.getDoubleMetric("addRowsIndexConstant") * 1e-6
           );
-          Assertions.assertEquals(
+          Assert.assertEquals(
               0.0D,
               value.getDoubleMetric("uniques"),
               0.02
           );
         } else {
-          Assertions.assertNull(
-              value.getDoubleMetric("index"),
-              result.toString()
+          Assert.assertNull(
+              result.toString(),
+              value.getDoubleMetric("index")
           );
-          Assertions.assertNull(
-              value.getDoubleMetric("addRowsIndexConstant"),
-              result.toString()
+          Assert.assertNull(
+              result.toString(),
+              value.getDoubleMetric("addRowsIndexConstant")
           );
-          Assertions.assertEquals(
+          Assert.assertEquals(
               value.getDoubleMetric("uniques"),
               0.0d,
               0.02
@@ -316,14 +315,12 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     }
 
     stubServiceEmitter.verifyEmitted("query/wait/time", ImmutableMap.of("vectorized", vectorize), 1);
-    Assertions.assertEquals(expectedLast, lastResult.getTimestamp(), lastResult.toString());
+    Assert.assertEquals(lastResult.toString(), expectedLast, lastResult.getTimestamp());
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeseriesNoAggregators(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeseriesNoAggregators()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     Granularity gran = Granularities.DAY;
     TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
                                   .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
@@ -342,22 +339,20 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     Result lastResult = null;
     for (Result<TimeseriesResultValue> result : results) {
       DateTime current = result.getTimestamp();
-      Assertions.assertFalse(
-          descending ? current.isBefore(expectedLast) : current.isAfter(expectedLast),
-          StringUtils.format("Timestamp[%s] > expectedLast[%s]", current, expectedLast)
+      Assert.assertFalse(
+          StringUtils.format("Timestamp[%s] > expectedLast[%s]", current, expectedLast),
+          descending ? current.isBefore(expectedLast) : current.isAfter(expectedLast)
       );
-      Assertions.assertEquals(ImmutableMap.of(), result.getValue().getBaseObject());
+      Assert.assertEquals(ImmutableMap.of(), result.getValue().getBaseObject());
       lastResult = result;
     }
 
-    Assertions.assertEquals(expectedLast, lastResult.getTimestamp(), lastResult.toString());
+    Assert.assertEquals(lastResult.toString(), expectedLast, lastResult.getTimestamp());
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testFullOnTimeseriesMaxMin(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testFullOnTimeseriesMaxMin()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
                                   .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
                                   .granularity(Granularities.ALL)
@@ -378,23 +373,21 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     Iterable<Result<TimeseriesResultValue>> results = runner.run(QueryPlus.wrap(query)).toList();
     Result<TimeseriesResultValue> result = results.iterator().next();
 
-    Assertions.assertEquals(expectedEarliest, result.getTimestamp());
-    Assertions.assertFalse(
-        result.getTimestamp().isAfter(expectedLast),
-        StringUtils.format("Timestamp[%s] > expectedLast[%s]", result.getTimestamp(), expectedLast)
+    Assert.assertEquals(expectedEarliest, result.getTimestamp());
+    Assert.assertFalse(
+        StringUtils.format("Timestamp[%s] > expectedLast[%s]", result.getTimestamp(), expectedLast),
+        result.getTimestamp().isAfter(expectedLast)
     );
 
     final TimeseriesResultValue value = result.getValue();
 
-    Assertions.assertEquals(1870.061029, value.getDoubleMetric("maxIndex"), 1870.061029 * 1e-6, result.toString());
-    Assertions.assertEquals(59.021022, value.getDoubleMetric("minIndex"), 59.021022 * 1e-6, result.toString());
+    Assert.assertEquals(result.toString(), 1870.061029, value.getDoubleMetric("maxIndex"), 1870.061029 * 1e-6);
+    Assert.assertEquals(result.toString(), 59.021022, value.getDoubleMetric("minIndex"), 59.021022 * 1e-6);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testFullOnTimeseriesMinMaxAggregators(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testFullOnTimeseriesMinMaxAggregators()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
                                   .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
                                   .granularity(Granularities.ALL)
@@ -416,26 +409,23 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
 
     Iterable<Result<TimeseriesResultValue>> results = runner.run(QueryPlus.wrap(query)).toList();
     Result<TimeseriesResultValue> result = results.iterator().next();
-    Assertions.assertEquals(expectedEarliest, result.getTimestamp());
-    Assertions.assertFalse(
-        result.getTimestamp().isAfter(expectedLast),
-        StringUtils.format("Timestamp[%s] > expectedLast[%s]", result.getTimestamp(), expectedLast)
+    Assert.assertEquals(expectedEarliest, result.getTimestamp());
+    Assert.assertFalse(
+        StringUtils.format("Timestamp[%s] > expectedLast[%s]", result.getTimestamp(), expectedLast),
+        result.getTimestamp().isAfter(expectedLast)
     );
 
-    Assertions.assertEquals(59L, (long) result.getValue().getLongMetric(QueryRunnerTestHelper.LONG_MIN_INDEX_METRIC));
-    Assertions.assertEquals(1870, (long) result.getValue().getLongMetric(QueryRunnerTestHelper.LONG_MAX_INDEX_METRIC));
-    Assertions.assertEquals(59.021022D, result.getValue().getDoubleMetric(QueryRunnerTestHelper.DOUBLE_MIN_INDEX_METRIC), 0);
-    Assertions.assertEquals(1870.061029D, result.getValue().getDoubleMetric(QueryRunnerTestHelper.DOUBLE_MAX_INDEX_METRIC), 0);
-    Assertions.assertEquals(59.021023F, result.getValue().getFloatMetric(QueryRunnerTestHelper.FLOAT_MIN_INDEX_METRIC), 0);
-    Assertions.assertEquals(1870.061F, result.getValue().getFloatMetric(QueryRunnerTestHelper.FLOAT_MAX_INDEX_METRIC), 0);
+    Assert.assertEquals(59L, (long) result.getValue().getLongMetric(QueryRunnerTestHelper.LONG_MIN_INDEX_METRIC));
+    Assert.assertEquals(1870, (long) result.getValue().getLongMetric(QueryRunnerTestHelper.LONG_MAX_INDEX_METRIC));
+    Assert.assertEquals(59.021022D, result.getValue().getDoubleMetric(QueryRunnerTestHelper.DOUBLE_MIN_INDEX_METRIC), 0);
+    Assert.assertEquals(1870.061029D, result.getValue().getDoubleMetric(QueryRunnerTestHelper.DOUBLE_MAX_INDEX_METRIC), 0);
+    Assert.assertEquals(59.021023F, result.getValue().getFloatMetric(QueryRunnerTestHelper.FLOAT_MIN_INDEX_METRIC), 0);
+    Assert.assertEquals(1870.061F, result.getValue().getFloatMetric(QueryRunnerTestHelper.FLOAT_MAX_INDEX_METRIC), 0);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testFullOnTimeseriesWithFilter(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testFullOnTimeseriesWithFilter()
   {
-
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
 
     TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
                                   .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
@@ -452,7 +442,7 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
                                   .context(makeContext())
                                   .build();
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new SelectorDimFilter(QueryRunnerTestHelper.MARKET_DIMENSION, "upfront", null),
         query.getDimensionsFilter()
     );
@@ -465,34 +455,32 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
 
     for (Result<TimeseriesResultValue> result : results) {
       DateTime current = result.getTimestamp();
-      Assertions.assertFalse(
-          descending ? current.isBefore(expectedLast) : current.isAfter(expectedLast),
-          StringUtils.format("Timestamp[%s] > expectedLast[%s]", current, expectedLast)
+      Assert.assertFalse(
+          StringUtils.format("Timestamp[%s] > expectedLast[%s]", current, expectedLast),
+          descending ? current.isBefore(expectedLast) : current.isAfter(expectedLast)
       );
 
       final TimeseriesResultValue value = result.getValue();
 
-      Assertions.assertEquals(
+      Assert.assertEquals(
+          result.toString(),
           QueryRunnerTestHelper.SKIPPED_DAY.equals(result.getTimestamp()) ? 0L : 2L,
-          value.getLongMetric("rows").longValue(),
-          result.toString()
+          value.getLongMetric("rows").longValue()
       );
-      Assertions.assertEquals(
+      Assert.assertEquals(
+          result.toString(),
           QueryRunnerTestHelper.SKIPPED_DAY.equals(result.getTimestamp()) ? 0.0d : 2.0d,
           value.getDoubleMetric(
               "uniques"
           ),
-          0.01,
-          result.toString()
+          0.01
       );
     }
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeseries(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeseries()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
                                   .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
                                   .granularity(QueryRunnerTestHelper.DAY_GRAN)
@@ -536,11 +524,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, results);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeseriesGrandTotal(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeseriesGrandTotal()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
                                   .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
                                   .granularity(QueryRunnerTestHelper.DAY_GRAN)
@@ -633,11 +619,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     TestHelper.assertExpectedResults(expectedResults, results);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeseriesIntervalOutOfRanges(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeseriesIntervalOutOfRanges()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
                                   .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
                                   .granularity(QueryRunnerTestHelper.ALL_GRAN)
@@ -701,11 +685,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     TestHelper.assertExpectedResults(expectedResults, results);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeseriesWithVirtualColumn(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeseriesWithVirtualColumn()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
                                   .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
                                   .granularity(QueryRunnerTestHelper.DAY_GRAN)
@@ -749,11 +731,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, results);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeseriesWithTimeZone(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeseriesWithTimeZone()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
                                   .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
                                   .intervals("2011-03-31T00:00:00-07:00/2011-04-02T00:00:00-07:00")
@@ -797,11 +777,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, results);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeseriesWithVaryingGran(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeseriesWithVaryingGran()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     TimeseriesQuery query1 = Druids.newTimeseriesQueryBuilder()
                                    .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
                                    .granularity(new PeriodGranularity(new Period("P1M"), null, null))
@@ -870,11 +848,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults2, results2);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeseriesGranularityNotAlignedOnSegmentBoundariesWithFilter(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeseriesGranularityNotAlignedOnSegmentBoundariesWithFilter()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     TimeseriesQuery query1 = Druids.newTimeseriesQueryBuilder()
                                    .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
                                    .filters(QueryRunnerTestHelper.MARKET_DIMENSION, "spot", "upfront", "total_market")
@@ -922,11 +898,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults1, results1);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeseriesQueryZeroFilling(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeseriesQueryZeroFilling()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     TimeseriesQuery query1 = Druids.newTimeseriesQueryBuilder()
                                    .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
                                    .filters(QueryRunnerTestHelper.MARKET_DIMENSION, "spot", "upfront", "total_market")
@@ -991,11 +965,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults1, results1);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeseriesQueryGranularityNotAlignedWithRollupGranularity(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeseriesQueryGranularityNotAlignedWithRollupGranularity()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     TimeseriesQuery query1 = Druids.newTimeseriesQueryBuilder()
                                    .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
                                    .filters(QueryRunnerTestHelper.MARKET_DIMENSION, "spot", "upfront", "total_market")
@@ -1033,11 +1005,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults1, results1);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeseriesWithVaryingGranWithFilter(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeseriesWithVaryingGranWithFilter()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     TimeseriesQuery query1 = Druids.newTimeseriesQueryBuilder()
                                    .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
                                    .filters(QueryRunnerTestHelper.MARKET_DIMENSION, "spot", "upfront", "total_market")
@@ -1107,11 +1077,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults2, results2);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeseriesQueryBeyondTimeRangeOfData(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeseriesQueryBeyondTimeRangeOfData()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
                                   .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
                                   .granularity(QueryRunnerTestHelper.DAY_GRAN)
@@ -1139,11 +1107,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, results);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeseriesWithOrFilter(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeseriesWithOrFilter()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
                                   .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
                                   .granularity(QueryRunnerTestHelper.DAY_GRAN)
@@ -1188,11 +1154,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, results);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeseriesWithRegexFilter(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeseriesWithRegexFilter()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
                                   .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
                                   .granularity(QueryRunnerTestHelper.DAY_GRAN)
@@ -1241,11 +1205,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, results);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeseriesWithFilter1(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeseriesWithFilter1()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
                                   .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
                                   .granularity(QueryRunnerTestHelper.DAY_GRAN)
@@ -1293,11 +1255,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, results);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeseriesWithFilter2(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeseriesWithFilter2()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
                                   .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
                                   .granularity(QueryRunnerTestHelper.DAY_GRAN)
@@ -1342,11 +1302,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, results);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeseriesWithFilter3(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeseriesWithFilter3()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
                                   .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
                                   .granularity(QueryRunnerTestHelper.DAY_GRAN)
@@ -1391,11 +1349,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, results);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeseriesWithMultiDimFilterAndOr(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeseriesWithMultiDimFilterAndOr()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     AndDimFilter andDimFilter = new AndDimFilter(
         new SelectorDimFilter(QueryRunnerTestHelper.MARKET_DIMENSION, "spot", null),
         new OrDimFilter(QueryRunnerTestHelper.QUALITY_DIMENSION, "automotive", "business")
@@ -1440,11 +1396,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, results);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeseriesWithMultiDimFilter(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeseriesWithMultiDimFilter()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     AndDimFilter andDimFilter = new AndDimFilter(
         new SelectorDimFilter(QueryRunnerTestHelper.MARKET_DIMENSION, "spot", null),
         new SelectorDimFilter(QueryRunnerTestHelper.QUALITY_DIMENSION, "automotive", null)
@@ -1489,11 +1443,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, results);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeseriesWithOtherMultiDimFilter(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeseriesWithOtherMultiDimFilter()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     AndDimFilter andDimFilter = new AndDimFilter(
         new SelectorDimFilter(QueryRunnerTestHelper.MARKET_DIMENSION, "spot", null),
         new SelectorDimFilter(QueryRunnerTestHelper.QUALITY_DIMENSION, "business", null)
@@ -1538,11 +1490,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, results);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeseriesWithNonExistentFilterInOr(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeseriesWithNonExistentFilterInOr()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
                                   .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
                                   .granularity(QueryRunnerTestHelper.DAY_GRAN)
@@ -1594,11 +1544,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
   }
 
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeseriesWithInFilter(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeseriesWithInFilter()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
                                   .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
                                   .granularity(QueryRunnerTestHelper.DAY_GRAN)
@@ -1654,11 +1602,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, results);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeseriesWithNonExistentFilterAndMultiDimAndOr(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeseriesWithNonExistentFilterAndMultiDimAndOr()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     AndDimFilter andDimFilter = new AndDimFilter(
         new SelectorDimFilter(QueryRunnerTestHelper.MARKET_DIMENSION, "spot", null),
         new OrDimFilter(QueryRunnerTestHelper.QUALITY_DIMENSION, "automotive", "business", "billyblank")
@@ -1703,11 +1649,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, results);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeseriesWithFilterOnNonExistentDimension(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeseriesWithFilterOnNonExistentDimension()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
                                   .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
                                   .granularity(QueryRunnerTestHelper.DAY_GRAN)
@@ -1744,11 +1688,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, results);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeseriesWithFilterOnNonExistentDimensionSkipBuckets(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeseriesWithFilterOnNonExistentDimensionSkipBuckets()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
                                   .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
                                   .granularity(QueryRunnerTestHelper.DAY_GRAN)
@@ -1767,11 +1709,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, results);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeseriesWithNullFilterOnNonExistentDimension(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeseriesWithNullFilterOnNonExistentDimension()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
                                   .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
                                   .granularity(QueryRunnerTestHelper.DAY_GRAN)
@@ -1813,11 +1753,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, results);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeseriesWithInvertedFilterOnNonExistentDimension(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeseriesWithInvertedFilterOnNonExistentDimension()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
                                   .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
                                   .granularity(QueryRunnerTestHelper.DAY_GRAN)
@@ -1878,11 +1816,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, results);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeseriesWithNonExistentFilter(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeseriesWithNonExistentFilter()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
                                   .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
                                   .granularity(QueryRunnerTestHelper.DAY_GRAN)
@@ -1918,11 +1854,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, results);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeseriesWithNonExistentFilterAndMultiDim(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeseriesWithNonExistentFilterAndMultiDim()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     AndDimFilter andDimFilter = new AndDimFilter(
         new SelectorDimFilter(QueryRunnerTestHelper.MARKET_DIMENSION, "billy", null),
         new SelectorDimFilter(QueryRunnerTestHelper.QUALITY_DIMENSION, "business", null)
@@ -1962,11 +1896,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, results);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeseriesWithMultiValueFilteringJavascriptAggregator(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeseriesWithMultiValueFilteringJavascriptAggregator()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     // Cannot vectorize due to JavaScript aggregators.
     cannotVectorize();
 
@@ -2002,11 +1934,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, actualResults);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeseriesWithMultiValueFilteringJavascriptAggregatorAndAlsoRegularFilters(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeseriesWithMultiValueFilteringJavascriptAggregatorAndAlsoRegularFilters()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     // Cannot vectorize due to JavaScript aggregators.
     cannotVectorize();
 
@@ -2043,11 +1973,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, actualResults);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeseriesWithFirstLastAggregator(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeseriesWithFirstLastAggregator()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
                                   .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
                                   .granularity(QueryRunnerTestHelper.MONTH_GRAN)
@@ -2151,11 +2079,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     }
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeseriesWithMultiValueDimFilter1(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeseriesWithMultiValueDimFilter1()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     TimeseriesQuery query = Druids
         .newTimeseriesQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
@@ -2183,11 +2109,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     TestHelper.assertExpectedResults(expectedResults, actualResults);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeseriesWithMultiValueDimFilter2(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeseriesWithMultiValueDimFilter2()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     TimeseriesQuery query = Druids
         .newTimeseriesQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
@@ -2216,11 +2140,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     TestHelper.assertExpectedResults(expectedResults, actualResults);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeseriesWithMultiValueDimFilterAndOr1(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeseriesWithMultiValueDimFilterAndOr1()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     AndDimFilter andDimFilter = new AndDimFilter(
         new SelectorDimFilter(QueryRunnerTestHelper.MARKET_DIMENSION, "spot", null),
         new SelectorDimFilter(QueryRunnerTestHelper.PLACEMENTISH_DIMENSION, "a", null)
@@ -2258,11 +2180,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     TestHelper.assertExpectedResults(expectedResults, actualResults);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeseriesWithMultiValueDimFilterAndOr2(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeseriesWithMultiValueDimFilterAndOr2()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     AndDimFilter andDimFilter = new AndDimFilter(
         new SelectorDimFilter(QueryRunnerTestHelper.MARKET_DIMENSION, "spot", null),
         new OrDimFilter(QueryRunnerTestHelper.PLACEMENTISH_DIMENSION, "a", "b")
@@ -2300,11 +2220,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     TestHelper.assertExpectedResults(expectedResults, actualResults);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeSeriesWithFilteredAgg(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeSeriesWithFilteredAgg()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     TimeseriesQuery query = Druids
         .newTimeseriesQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
@@ -2347,11 +2265,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, actualResults);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeSeriesWithFilteredAggAndExpressionFilteredAgg(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeSeriesWithFilteredAggAndExpressionFilteredAgg()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     // can't vectorize if expression
     cannotVectorize();
     TimeseriesQuery query = Druids
@@ -2417,11 +2333,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, actualResults);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeSeriesWithFilteredAggDimensionNotPresentNotNullValue(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeSeriesWithFilteredAggDimensionNotPresentNotNullValue()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     TimeseriesQuery query = Druids
         .newTimeseriesQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
@@ -2465,11 +2379,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, actualResults);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeSeriesWithFilteredAggDimensionNotPresentNullValue(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeSeriesWithFilteredAggDimensionNotPresentNullValue()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     TimeseriesQuery query = Druids
         .newTimeseriesQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
@@ -2513,11 +2425,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, actualResults);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeSeriesWithFilteredAggValueNotPresent(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeSeriesWithFilteredAggValueNotPresent()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     TimeseriesQuery query = Druids
         .newTimeseriesQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
@@ -2562,11 +2472,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, actualResults);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeSeriesWithFilteredAggInvertedNullValue(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeSeriesWithFilteredAggInvertedNullValue()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     TimeseriesQuery query = Druids
         .newTimeseriesQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
@@ -2609,11 +2517,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, actualResults);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeseriesWithTimeColumn(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeseriesWithTimeColumn()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     // Cannot vectorize due to JavaScript aggregators.
     cannotVectorize();
 
@@ -2651,11 +2557,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, actualResults);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeseriesWithBoundFilter1(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeseriesWithBoundFilter1()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
                                   .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
                                   .granularity(QueryRunnerTestHelper.DAY_GRAN)
@@ -2734,11 +2638,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     TestHelper.assertExpectedResults(expectedResults, results);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeseriesWithTimestampResultFieldContextForArrayResponse(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeseriesWithTimestampResultFieldContextForArrayResponse()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     Granularity gran = Granularities.DAY;
     TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
                                   .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
@@ -2761,26 +2663,26 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
                                   )
                                   .build();
 
-    Assertions.assertEquals(TIMESTAMP_RESULT_FIELD_NAME, query.getTimestampResultField());
+    Assert.assertEquals(TIMESTAMP_RESULT_FIELD_NAME, query.getTimestampResultField());
 
     QueryToolChest<Result<TimeseriesResultValue>, TimeseriesQuery> toolChest = new TimeseriesQueryQueryToolChest();
 
     RowSignature rowSignature = toolChest.resultArraySignature(query);
-    Assertions.assertNotNull(rowSignature);
+    Assert.assertNotNull(rowSignature);
     List<String> columnNames = rowSignature.getColumnNames();
-    Assertions.assertNotNull(columnNames);
-    Assertions.assertEquals(6, columnNames.size());
-    Assertions.assertEquals("__time", columnNames.get(0));
-    Assertions.assertEquals(TIMESTAMP_RESULT_FIELD_NAME, columnNames.get(1));
-    Assertions.assertEquals("rows", columnNames.get(2));
-    Assertions.assertEquals("index", columnNames.get(3));
-    Assertions.assertEquals("uniques", columnNames.get(4));
-    Assertions.assertEquals("addRowsIndexConstant", columnNames.get(5));
+    Assert.assertNotNull(columnNames);
+    Assert.assertEquals(6, columnNames.size());
+    Assert.assertEquals("__time", columnNames.get(0));
+    Assert.assertEquals(TIMESTAMP_RESULT_FIELD_NAME, columnNames.get(1));
+    Assert.assertEquals("rows", columnNames.get(2));
+    Assert.assertEquals("index", columnNames.get(3));
+    Assert.assertEquals("uniques", columnNames.get(4));
+    Assert.assertEquals("addRowsIndexConstant", columnNames.get(5));
 
     Sequence<Result<TimeseriesResultValue>> results = runner.run(QueryPlus.wrap(query));
     Sequence<Object[]> resultsAsArrays = toolChest.resultsAsArrays(query, results);
 
-    Assertions.assertNotNull(resultsAsArrays);
+    Assert.assertNotNull(resultsAsArrays);
 
     final String[] expectedIndex = descending ?
                                    QueryRunnerTestHelper.EXPECTED_FULL_ON_INDEX_VALUES_DESC :
@@ -2797,65 +2699,65 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     Object[] lastResult = null;
     for (Object[] result : resultsAsArrays.toList()) {
       Long current = (Long) result[0];
-      Assertions.assertFalse(
-          descending ? current < expectedLast : current > expectedLast,
-          StringUtils.format("Timestamp[%s] > expectedLast[%s]", current, expectedLast)
+      Assert.assertFalse(
+          StringUtils.format("Timestamp[%s] > expectedLast[%s]", current, expectedLast),
+          descending ? current < expectedLast : current > expectedLast
       );
 
-      Assertions.assertEquals(
+      Assert.assertEquals(
           (Long) result[1],
           current,
           0
       );
 
-      Assertions.assertEquals(
+      Assert.assertEquals(
           QueryRunnerTestHelper.SKIPPED_DAY.getMillis() == current ? (Long) 0L : (Long) 13L,
           result[2]
       );
 
       if (QueryRunnerTestHelper.SKIPPED_DAY.getMillis() != current) {
-        Assertions.assertEquals(
+        Assert.assertEquals(
             Doubles.tryParse(expectedIndexToUse[count]).doubleValue(),
             (Double) result[3],
             (Double) result[3] * 1e-6
         );
-        Assertions.assertEquals(
+        Assert.assertEquals(
             (Double) result[4],
             9.0d,
             0.02
         );
-        Assertions.assertEquals(
+        Assert.assertEquals(
             new Double(expectedIndexToUse[count]) + 13L + 1L,
             (Double) result[5],
             (Double) result[5] * 1e-6
         );
       } else {
         if (NullHandling.replaceWithDefault()) {
-          Assertions.assertEquals(
+          Assert.assertEquals(
               0.0D,
               (Double) result[3],
               (Double) result[3] * 1e-6
           );
-          Assertions.assertEquals(
+          Assert.assertEquals(
               0.0D,
               (Double) result[4],
               0.02
           );
-          Assertions.assertEquals(
+          Assert.assertEquals(
               new Double(expectedIndexToUse[count]) + 1L,
               (Double) result[5],
               (Double) result[5] * 1e-6
           );
         } else {
-          Assertions.assertNull(
+          Assert.assertNull(
               result[3]
           );
-          Assertions.assertEquals(
+          Assert.assertEquals(
               (Double) result[4],
               0.0,
               0.02
           );
-          Assertions.assertNull(
+          Assert.assertNull(
               result[5]
           );
         }
@@ -2864,14 +2766,12 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
       lastResult = result;
       ++count;
     }
-    Assertions.assertEquals(expectedLast, lastResult[0]);
+    Assert.assertEquals(expectedLast, lastResult[0]);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeseriesWithTimestampResultFieldContextForMapResponse(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeseriesWithTimestampResultFieldContextForMapResponse()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     Granularity gran = Granularities.DAY;
     TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
                                   .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
@@ -2894,7 +2794,7 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
                                   )
                                   .build();
 
-    Assertions.assertEquals(TIMESTAMP_RESULT_FIELD_NAME, query.getTimestampResultField());
+    Assert.assertEquals(TIMESTAMP_RESULT_FIELD_NAME, query.getTimestampResultField());
 
     Iterable<Result<TimeseriesResultValue>> results = runner.run(QueryPlus.wrap(query)).toList();
 
@@ -2913,73 +2813,73 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     Result lastResult = null;
     for (Result<TimeseriesResultValue> result : results) {
       DateTime current = result.getTimestamp();
-      Assertions.assertFalse(
-          descending ? current.isBefore(expectedLast) : current.isAfter(expectedLast),
-          StringUtils.format("Timestamp[%s] > expectedLast[%s]", current, expectedLast)
+      Assert.assertFalse(
+          StringUtils.format("Timestamp[%s] > expectedLast[%s]", current, expectedLast),
+          descending ? current.isBefore(expectedLast) : current.isAfter(expectedLast)
       );
 
       final TimeseriesResultValue value = result.getValue();
 
-      Assertions.assertEquals(
+      Assert.assertEquals(
           value.getLongMetric(TIMESTAMP_RESULT_FIELD_NAME),
           current.getMillis(),
           0
       );
 
-      Assertions.assertEquals(
+      Assert.assertEquals(
+          result.toString(),
           QueryRunnerTestHelper.SKIPPED_DAY.equals(current) ? 0L : 13L,
-          value.getLongMetric("rows").longValue(),
-          result.toString()
+          value.getLongMetric("rows").longValue()
       );
 
       if (!QueryRunnerTestHelper.SKIPPED_DAY.equals(current)) {
-        Assertions.assertEquals(
+        Assert.assertEquals(
+            result.toString(),
             Doubles.tryParse(expectedIndexToUse[count]).doubleValue(),
             value.getDoubleMetric("index").doubleValue(),
-            value.getDoubleMetric("index").doubleValue() * 1e-6,
-            result.toString()
+            value.getDoubleMetric("index").doubleValue() * 1e-6
         );
-        Assertions.assertEquals(
+        Assert.assertEquals(
+            result.toString(),
             new Double(expectedIndexToUse[count]) +
             13L + 1L,
             value.getDoubleMetric("addRowsIndexConstant"),
-            value.getDoubleMetric("addRowsIndexConstant") * 1e-6,
-            result.toString()
+            value.getDoubleMetric("addRowsIndexConstant") * 1e-6
         );
-        Assertions.assertEquals(
+        Assert.assertEquals(
             value.getDoubleMetric("uniques"),
             9.0d,
             0.02
         );
       } else {
         if (NullHandling.replaceWithDefault()) {
-          Assertions.assertEquals(
+          Assert.assertEquals(
+              result.toString(),
               0.0D,
               value.getDoubleMetric("index").doubleValue(),
-              value.getDoubleMetric("index").doubleValue() * 1e-6,
-              result.toString()
+              value.getDoubleMetric("index").doubleValue() * 1e-6
           );
-          Assertions.assertEquals(
+          Assert.assertEquals(
+              result.toString(),
               new Double(expectedIndexToUse[count]) + 1L,
               value.getDoubleMetric("addRowsIndexConstant"),
-              value.getDoubleMetric("addRowsIndexConstant") * 1e-6,
-              result.toString()
+              value.getDoubleMetric("addRowsIndexConstant") * 1e-6
           );
-          Assertions.assertEquals(
+          Assert.assertEquals(
               0.0D,
               value.getDoubleMetric("uniques"),
               0.02
           );
         } else {
-          Assertions.assertNull(
-              value.getDoubleMetric("index"),
-              result.toString()
+          Assert.assertNull(
+              result.toString(),
+              value.getDoubleMetric("index")
           );
-          Assertions.assertNull(
-              value.getDoubleMetric("addRowsIndexConstant"),
-              result.toString()
+          Assert.assertNull(
+              result.toString(),
+              value.getDoubleMetric("addRowsIndexConstant")
           );
-          Assertions.assertEquals(
+          Assert.assertEquals(
               value.getDoubleMetric("uniques"),
               0.0d,
               0.02
@@ -2991,14 +2891,12 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
       ++count;
     }
 
-    Assertions.assertEquals(expectedLast, lastResult.getTimestamp(), lastResult.toString());
+    Assert.assertEquals(lastResult.toString(), expectedLast, lastResult.getTimestamp());
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeSeriesWithSelectionFilterLookupExtractionFn(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeSeriesWithSelectionFilterLookupExtractionFn()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     Map<String, String> extractionMap = new HashMap<>();
     extractionMap.put("spot", "upfront");
 
@@ -3062,11 +2960,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
 
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeseriesWithLimit(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeseriesWithLimit()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
                                   .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
                                   .granularity(QueryRunnerTestHelper.DAY_GRAN)
@@ -3083,14 +2979,12 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
                                   .build();
 
     final List list = runner.run(QueryPlus.wrap(query)).toList();
-    Assertions.assertEquals(10, list.size());
+    Assert.assertEquals(10, list.size());
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeseriesWithPostAggregatorReferencingTimestampResultField(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeseriesWithPostAggregatorReferencingTimestampResultField()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
                                   .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
                                   .granularity(QueryRunnerTestHelper.DAY_GRAN)
@@ -3135,11 +3029,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, results);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeseriesWithExpressionAggregator(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeseriesWithExpressionAggregator()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     // expression agg cannot vectorize
     cannotVectorize();
     TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
@@ -3247,56 +3139,49 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, results);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeseriesWithExpressionAggregatorTooBig(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeseriesWithExpressionAggregatorTooBig()
   {
-    Throwable exception = assertThrows(Exception.class, () -> {
-      initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
-      // expression agg cannot vectorize
-      cannotVectorize();
-      if (!vectorize) {
-        // size bytes when it overshoots varies slightly between algorithms
-        expectedException.expectMessage("Exceeded memory usage when aggregating type [ARRAY<STRING>]");
-      }
-      TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
-          .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
-          .granularity(Granularities.DAY)
-          .intervals(QueryRunnerTestHelper.FIRST_TO_THIRD)
-          .aggregators(
-              Collections.singletonList(
-                  new ExpressionLambdaAggregatorFactory(
-                      "array_agg_distinct",
-                      ImmutableSet.of(QueryRunnerTestHelper.MARKET_DIMENSION),
-                      "acc",
-                      "[]",
-                      null,
-                      null,
-                      true,
-                      false,
-                      "array_set_add(acc, market)",
-                      "array_set_add_all(acc, array_agg_distinct)",
-                      null,
-                      null,
-                      HumanReadableBytes.valueOf(10),
-                      TestExprMacroTable.INSTANCE
-                  )
-              )
-          )
-          .descending(descending)
-          .context(makeContext())
-          .build();
+    // expression agg cannot vectorize
+    cannotVectorize();
+    if (!vectorize) {
+      // size bytes when it overshoots varies slightly between algorithms
+      expectedException.expectMessage("Exceeded memory usage when aggregating type [ARRAY<STRING>]");
+    }
+    TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
+                                  .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
+                                  .granularity(Granularities.DAY)
+                                  .intervals(QueryRunnerTestHelper.FIRST_TO_THIRD)
+                                  .aggregators(
+                                      Collections.singletonList(
+                                          new ExpressionLambdaAggregatorFactory(
+                                              "array_agg_distinct",
+                                              ImmutableSet.of(QueryRunnerTestHelper.MARKET_DIMENSION),
+                                              "acc",
+                                              "[]",
+                                              null,
+                                              null,
+                                              true,
+                                              false,
+                                              "array_set_add(acc, market)",
+                                              "array_set_add_all(acc, array_agg_distinct)",
+                                              null,
+                                              null,
+                                              HumanReadableBytes.valueOf(10),
+                                              TestExprMacroTable.INSTANCE
+                                          )
+                                      )
+                                  )
+                                  .descending(descending)
+                                  .context(makeContext())
+                                  .build();
 
-      runner.run(QueryPlus.wrap(query)).toList();
-    });
-    assertTrue(exception.getMessage().contains("Exceeded memory usage when aggregating type [ARRAY<STRING>]"));
+    runner.run(QueryPlus.wrap(query)).toList();
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeseriesCardinalityAggOnMultiStringExpression(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeseriesCardinalityAggOnMultiStringExpression()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
         .dataSource(QueryRunnerTestHelper.DATA_SOURCE)
         .intervals(QueryRunnerTestHelper.FIRST_TO_THIRD)
@@ -3332,11 +3217,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
     assertExpectedResults(expectedResults, results);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}:descending={1},vectorize={2}")
-  public void testTimeseriesCardinalityAggOnHyperUnique(QueryRunner<Result<TimeseriesResultValue>> runner, boolean descending, boolean vectorize, List<AggregatorFactory> aggregatorFactoryList)
+  @Test
+  public void testTimeseriesCardinalityAggOnHyperUnique()
   {
-    initTimeseriesQueryRunnerTest(runner, descending, vectorize, aggregatorFactoryList);
     // Cardinality aggregator on complex columns (like hyperUnique) returns 0.
 
     TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
@@ -3391,12 +3274,9 @@ public class TimeseriesQueryRunnerTest extends InitializedNullHandlingTest
 
   protected void cannotVectorize()
   {
-    Throwable exception = assertThrows(RuntimeException.class, () -> {
-      if (vectorize) {
-        expectedException.expect(RuntimeException.class);
-        expectedException.expectMessage("Cannot vectorize!");
-      }
-    });
-    assertTrue(exception.getMessage().contains("Cannot vectorize!"));
+    if (vectorize) {
+      expectedException.expect(RuntimeException.class);
+      expectedException.expectMessage("Cannot vectorize!");
+    }
   }
 }

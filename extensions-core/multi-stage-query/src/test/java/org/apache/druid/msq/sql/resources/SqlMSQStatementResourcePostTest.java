@@ -51,6 +51,7 @@ import org.apache.druid.sql.http.SqlQuery;
 import org.apache.druid.storage.NilStorageConnector;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Test;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;

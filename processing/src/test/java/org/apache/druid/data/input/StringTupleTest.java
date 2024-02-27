@@ -20,15 +20,14 @@
 package org.apache.druid.data.input;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class StringTupleTest
 {
@@ -53,7 +52,7 @@ public class StringTupleTest
   public void testToArray()
   {
     StringTuple tuple = StringTuple.create("a", "b", "c");
-    assertArrayEquals(new String[]{"a", "b", "c"}, tuple.toArray());
+    assertEquals(new String[]{"a", "b", "c"}, tuple.toArray());
   }
 
   @Test

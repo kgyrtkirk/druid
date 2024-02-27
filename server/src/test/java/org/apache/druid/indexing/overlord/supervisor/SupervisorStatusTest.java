@@ -21,8 +21,8 @@ package org.apache.druid.indexing.overlord.supervisor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.druid.jackson.DefaultObjectMapper;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.IOException;
 
@@ -43,7 +43,7 @@ public class SupervisorStatusTest
                                                      .build();
     final String serialized = mapper.writeValueAsString(supervisorStatus);
     final SupervisorStatus deserialized = mapper.readValue(serialized, SupervisorStatus.class);
-    Assertions.assertEquals(supervisorStatus, deserialized);
+    Assert.assertEquals(supervisorStatus, deserialized);
   }
 
   @Test
@@ -60,10 +60,10 @@ public class SupervisorStatusTest
                   + "}";
     final ObjectMapper mapper = new ObjectMapper();
     final SupervisorStatus deserialized = mapper.readValue(json, SupervisorStatus.class);
-    Assertions.assertNotNull(deserialized);
-    Assertions.assertEquals("wikipedia", deserialized.getId());
+    Assert.assertNotNull(deserialized);
+    Assert.assertEquals("wikipedia", deserialized.getId());
     final String serialized = mapper.writeValueAsString(deserialized);
-    Assertions.assertTrue(serialized.contains("\"source\""));
-    Assertions.assertEquals(json, serialized);
+    Assert.assertTrue(serialized.contains("\"source\""));
+    Assert.assertEquals(json, serialized);
   }
 }

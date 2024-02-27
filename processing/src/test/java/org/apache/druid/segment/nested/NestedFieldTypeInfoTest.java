@@ -25,8 +25,8 @@ import nl.jqno.equalsverifier.EqualsVerifier;
 import nl.jqno.equalsverifier.Warning;
 import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.writeout.OnHeapMemorySegmentWriteOutMedium;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -93,15 +93,15 @@ public class NestedFieldTypeInfoTest
   public void testOnlyEmptyType()
   {
     FieldTypeInfo.MutableTypeSet typeSet = new FieldTypeInfo.MutableTypeSet();
-    Assertions.assertNull(typeSet.getSingleType());
-    Assertions.assertTrue(typeSet.isEmpty());
+    Assert.assertNull(typeSet.getSingleType());
+    Assert.assertTrue(typeSet.isEmpty());
 
     typeSet.addUntypedArray();
 
-    Assertions.assertEquals(ColumnType.LONG_ARRAY, typeSet.getSingleType());
+    Assert.assertEquals(ColumnType.LONG_ARRAY, typeSet.getSingleType());
     // no actual types in the type set, only getSingleType
-    Assertions.assertEquals(ImmutableSet.of(), FieldTypeInfo.convertToSet(typeSet.getByteValue()));
-    Assertions.assertTrue(typeSet.hasUntypedArray());
+    Assert.assertEquals(ImmutableSet.of(), FieldTypeInfo.convertToSet(typeSet.getByteValue()));
+    Assert.assertTrue(typeSet.hasUntypedArray());
   }
 
   @Test
@@ -120,31 +120,31 @@ public class NestedFieldTypeInfoTest
   private void testSingleType(ColumnType columnType) throws IOException
   {
     FieldTypeInfo.MutableTypeSet typeSet = new FieldTypeInfo.MutableTypeSet();
-    Assertions.assertNull(typeSet.getSingleType());
-    Assertions.assertTrue(typeSet.isEmpty());
+    Assert.assertNull(typeSet.getSingleType());
+    Assert.assertTrue(typeSet.isEmpty());
 
     typeSet.add(columnType);
 
-    Assertions.assertEquals(columnType, typeSet.getSingleType());
-    Assertions.assertEquals(ImmutableSet.of(columnType), FieldTypeInfo.convertToSet(typeSet.getByteValue()));
+    Assert.assertEquals(columnType, typeSet.getSingleType());
+    Assert.assertEquals(ImmutableSet.of(columnType), FieldTypeInfo.convertToSet(typeSet.getByteValue()));
 
     writeTypeSet(typeSet);
     FieldTypeInfo info = new FieldTypeInfo(BUFFER);
-    Assertions.assertEquals(0, BUFFER.position());
+    Assert.assertEquals(0, BUFFER.position());
 
     FieldTypeInfo.TypeSet roundTrip = info.getTypes(0);
-    Assertions.assertEquals(columnType, roundTrip.getSingleType());
+    Assert.assertEquals(columnType, roundTrip.getSingleType());
 
     FieldTypeInfo info2 = FieldTypeInfo.read(BUFFER, 1);
-    Assertions.assertEquals(info.getTypes(0), info2.getTypes(0));
-    Assertions.assertEquals(1, BUFFER.position());
+    Assert.assertEquals(info.getTypes(0), info2.getTypes(0));
+    Assert.assertEquals(1, BUFFER.position());
   }
 
   private void testMultiType(Set<ColumnType> columnTypes) throws IOException
   {
     FieldTypeInfo.MutableTypeSet typeSet = new FieldTypeInfo.MutableTypeSet();
-    Assertions.assertNull(typeSet.getSingleType());
-    Assertions.assertTrue(typeSet.isEmpty());
+    Assert.assertNull(typeSet.getSingleType());
+    Assert.assertTrue(typeSet.isEmpty());
 
     FieldTypeInfo.MutableTypeSet merge = new FieldTypeInfo.MutableTypeSet();
     for (ColumnType columnType : columnTypes) {
@@ -152,21 +152,21 @@ public class NestedFieldTypeInfoTest
       merge.merge(new FieldTypeInfo.MutableTypeSet().add(columnType).getByteValue(), false);
     }
 
-    Assertions.assertEquals(merge.getByteValue(), typeSet.getByteValue());
-    Assertions.assertNull(typeSet.getSingleType());
-    Assertions.assertEquals(columnTypes, FieldTypeInfo.convertToSet(typeSet.getByteValue()));
+    Assert.assertEquals(merge.getByteValue(), typeSet.getByteValue());
+    Assert.assertNull(typeSet.getSingleType());
+    Assert.assertEquals(columnTypes, FieldTypeInfo.convertToSet(typeSet.getByteValue()));
 
     writeTypeSet(typeSet);
     FieldTypeInfo info = new FieldTypeInfo(BUFFER);
-    Assertions.assertEquals(0, BUFFER.position());
+    Assert.assertEquals(0, BUFFER.position());
 
     FieldTypeInfo.TypeSet roundTrip = info.getTypes(0);
-    Assertions.assertNull(roundTrip.getSingleType());
-    Assertions.assertEquals(columnTypes, FieldTypeInfo.convertToSet(roundTrip.getByteValue()));
+    Assert.assertNull(roundTrip.getSingleType());
+    Assert.assertEquals(columnTypes, FieldTypeInfo.convertToSet(roundTrip.getByteValue()));
 
     FieldTypeInfo info2 = FieldTypeInfo.read(BUFFER, 1);
-    Assertions.assertEquals(info.getTypes(0), info2.getTypes(0));
-    Assertions.assertEquals(1, BUFFER.position());
+    Assert.assertEquals(info.getTypes(0), info2.getTypes(0));
+    Assert.assertEquals(1, BUFFER.position());
   }
 
   private void testSingleTypeWithEmptyArray(ColumnType columnType) throws IOException
@@ -177,40 +177,40 @@ public class NestedFieldTypeInfoTest
 
     if (columnType.isArray()) {
       // arrays with empty arrays are still single type
-      Assertions.assertEquals(columnType, typeSet.getSingleType());
-      Assertions.assertEquals(ImmutableSet.of(columnType), FieldTypeInfo.convertToSet(typeSet.getByteValue()));
+      Assert.assertEquals(columnType, typeSet.getSingleType());
+      Assert.assertEquals(ImmutableSet.of(columnType), FieldTypeInfo.convertToSet(typeSet.getByteValue()));
 
       writeTypeSet(typeSet);
       FieldTypeInfo info = new FieldTypeInfo(BUFFER);
-      Assertions.assertEquals(0, BUFFER.position());
+      Assert.assertEquals(0, BUFFER.position());
 
       FieldTypeInfo.TypeSet roundTrip = info.getTypes(0);
-      Assertions.assertEquals(columnType, roundTrip.getSingleType());
+      Assert.assertEquals(columnType, roundTrip.getSingleType());
 
       FieldTypeInfo info2 = FieldTypeInfo.read(BUFFER, 1);
-      Assertions.assertEquals(info.getTypes(0), info2.getTypes(0));
-      Assertions.assertEquals(1, BUFFER.position());
+      Assert.assertEquals(info.getTypes(0), info2.getTypes(0));
+      Assert.assertEquals(1, BUFFER.position());
     } else {
       // scalar types become multi-type
       Set<ColumnType> columnTypes = ImmutableSet.of(columnType, ColumnType.ofArray(columnType));
       FieldTypeInfo.MutableTypeSet merge = new FieldTypeInfo.MutableTypeSet();
       merge.merge(new FieldTypeInfo.MutableTypeSet().add(columnType).getByteValue(), true);
 
-      Assertions.assertEquals(merge.getByteValue(), typeSet.getByteValue());
-      Assertions.assertNull(typeSet.getSingleType());
-      Assertions.assertEquals(columnTypes, FieldTypeInfo.convertToSet(typeSet.getByteValue()));
+      Assert.assertEquals(merge.getByteValue(), typeSet.getByteValue());
+      Assert.assertNull(typeSet.getSingleType());
+      Assert.assertEquals(columnTypes, FieldTypeInfo.convertToSet(typeSet.getByteValue()));
 
       writeTypeSet(typeSet);
       FieldTypeInfo info = new FieldTypeInfo(BUFFER);
-      Assertions.assertEquals(0, BUFFER.position());
+      Assert.assertEquals(0, BUFFER.position());
 
       FieldTypeInfo.TypeSet roundTrip = info.getTypes(0);
-      Assertions.assertNull(roundTrip.getSingleType());
-      Assertions.assertEquals(columnTypes, FieldTypeInfo.convertToSet(roundTrip.getByteValue()));
+      Assert.assertNull(roundTrip.getSingleType());
+      Assert.assertEquals(columnTypes, FieldTypeInfo.convertToSet(roundTrip.getByteValue()));
 
       FieldTypeInfo info2 = FieldTypeInfo.read(BUFFER, 1);
-      Assertions.assertEquals(info.getTypes(0), info2.getTypes(0));
-      Assertions.assertEquals(1, BUFFER.position());
+      Assert.assertEquals(info.getTypes(0), info2.getTypes(0));
+      Assert.assertEquals(1, BUFFER.position());
     }
   }
 
@@ -220,7 +220,7 @@ public class NestedFieldTypeInfoTest
     FieldTypeInfo.Writer writer = new FieldTypeInfo.Writer(new OnHeapMemorySegmentWriteOutMedium());
     writer.open();
     writer.write(typeSet);
-    Assertions.assertEquals(1, writer.getSerializedSize());
+    Assert.assertEquals(1, writer.getSerializedSize());
 
     WritableByteChannel channel = new WritableByteChannel()
     {
@@ -244,7 +244,7 @@ public class NestedFieldTypeInfoTest
       }
     };
     writer.writeTo(channel, null);
-    Assertions.assertEquals(1, BUFFER.position());
+    Assert.assertEquals(1, BUFFER.position());
 
     BUFFER.position(0);
   }

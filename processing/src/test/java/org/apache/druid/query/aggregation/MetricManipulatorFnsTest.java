@@ -23,18 +23,21 @@ import org.apache.druid.hll.HyperLogLogCollector;
 import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.query.aggregation.hyperloglog.HyperUniquesAggregatorFactory;
 import org.apache.druid.segment.TestLongColumnSelector;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
+@RunWith(Parameterized.class)
 public class MetricManipulatorFnsTest
 {
   private static final String NAME = "name";
   private static final String FIELD = "field";
 
+  @Parameterized.Parameters(name = "{0}")
   public static Iterable<Object[]> constructorFeeder()
   {
     final ArrayList<Object[]> constructorArrays = new ArrayList<>();
@@ -113,25 +116,25 @@ public class MetricManipulatorFnsTest
 
 
     for (Object[] argList : constructorArrays) {
-      Assertions.assertEquals(
-          6, argList.length, StringUtils.format(
+      Assert.assertEquals(
+          StringUtils.format(
               "Arglist %s is too short. Expected 6 found %d",
               Arrays.toString(argList),
               argList.length
-          )
+          ), 6, argList.length
       );
     }
     return constructorArrays;
   }
 
-  private AggregatorFactory aggregatorFactory;
-  private Object agg;
-  private Object identity;
-  private Object finalize;
-  private Object serialForm;
-  private Object deserForm;
+  private final AggregatorFactory aggregatorFactory;
+  private final Object agg;
+  private final Object identity;
+  private final Object finalize;
+  private final Object serialForm;
+  private final Object deserForm;
 
-  public void initMetricManipulatorFnsTest(
+  public MetricManipulatorFnsTest(
       AggregatorFactory aggregatorFactory,
       Object agg,
       Object identity,
@@ -148,30 +151,24 @@ public class MetricManipulatorFnsTest
     this.deserForm = deserForm;
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testIdentity(AggregatorFactory aggregatorFactory, Object agg, Object identity, Object finalize, Object serialForm, Object deserForm)
+  @Test
+  public void testIdentity()
   {
-    initMetricManipulatorFnsTest(aggregatorFactory, agg, identity, finalize, serialForm, deserForm);
-    Assertions.assertEquals(identity, agg);
-    Assertions.assertEquals(identity, MetricManipulatorFns.identity().manipulate(aggregatorFactory, agg));
+    Assert.assertEquals(identity, agg);
+    Assert.assertEquals(identity, MetricManipulatorFns.identity().manipulate(aggregatorFactory, agg));
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testFinalize(AggregatorFactory aggregatorFactory, Object agg, Object identity, Object finalize, Object serialForm, Object deserForm)
+  @Test
+  public void testFinalize()
   {
-    initMetricManipulatorFnsTest(aggregatorFactory, agg, identity, finalize, serialForm, deserForm);
-    Assertions.assertEquals(identity, agg);
-    Assertions.assertEquals(finalize, MetricManipulatorFns.finalizing().manipulate(aggregatorFactory, agg));
+    Assert.assertEquals(identity, agg);
+    Assert.assertEquals(finalize, MetricManipulatorFns.finalizing().manipulate(aggregatorFactory, agg));
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testDeserialize(AggregatorFactory aggregatorFactory, Object agg, Object identity, Object finalize, Object serialForm, Object deserForm)
+  @Test
+  public void testDeserialize()
   {
-    initMetricManipulatorFnsTest(aggregatorFactory, agg, identity, finalize, serialForm, deserForm);
-    Assertions.assertEquals(identity, agg);
-    Assertions.assertEquals(deserForm, MetricManipulatorFns.deserializing().manipulate(aggregatorFactory, serialForm));
+    Assert.assertEquals(identity, agg);
+    Assert.assertEquals(deserForm, MetricManipulatorFns.deserializing().manipulate(aggregatorFactory, serialForm));
   }
 }

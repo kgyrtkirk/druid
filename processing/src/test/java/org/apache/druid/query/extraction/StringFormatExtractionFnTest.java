@@ -23,12 +23,10 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.druid.common.config.NullHandling;
 import org.apache.druid.jackson.DefaultObjectMapper;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.IOException;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  *
@@ -41,36 +39,34 @@ public class StringFormatExtractionFnTest
   {
     StringFormatExtractionFn fn = new StringFormatExtractionFn("[%s]");
     long test = 1000L;
-    Assertions.assertEquals("[1000]", fn.apply(test));
+    Assert.assertEquals("[1000]", fn.apply(test));
   }
 
   @Test
   public void testApplyNull1()
   {
     String test = null;
-    Assertions.assertEquals("[null]", format("[%s]", "nullString").apply(test));
-    Assertions.assertEquals("[]", format("[%s]", "emptyString").apply(test));
-    Assertions.assertNull(format("[%s]", "returnNull").apply(test));
+    Assert.assertEquals("[null]", format("[%s]", "nullString").apply(test));
+    Assert.assertEquals("[]", format("[%s]", "emptyString").apply(test));
+    Assert.assertNull(format("[%s]", "returnNull").apply(test));
   }
 
   @Test
   public void testApplyNull2()
   {
     String test = null;
-    Assertions.assertEquals("null", format("%s", "nullString").apply(test));
-    Assertions.assertEquals(
+    Assert.assertEquals("null", format("%s", "nullString").apply(test));
+    Assert.assertEquals(
         NullHandling.emptyToNullIfNeeded(""),
         format("%s", "emptyString").apply(test)
     );
-    Assertions.assertNull(format("%s", "returnNull").apply(test));
+    Assert.assertNull(format("%s", "returnNull").apply(test));
   }
 
-  @Test
+  @Test(expected = IllegalArgumentException.class)
   public void testInvalidOption1()
   {
-    assertThrows(IllegalArgumentException.class, () -> {
-      new StringFormatExtractionFn("");
-    });
+    new StringFormatExtractionFn("");
   }
 
   @Test
@@ -82,14 +78,12 @@ public class StringFormatExtractionFnTest
     );
   }
 
-  @Test
+  @Test(expected = JsonMappingException.class)
   public void testInvalidOption2() throws Exception
   {
-    assertThrows(JsonMappingException.class, () -> {
-      validateSerde(
-          "{ \"type\" : \"stringFormat\", \"format\" : \"[%s]\", \"nullHandling\" : \"invalid\" }"
-      );
-    });
+    validateSerde(
+        "{ \"type\" : \"stringFormat\", \"format\" : \"[%s]\", \"nullHandling\" : \"invalid\" }"
+    );
   }
 
   public StringFormatExtractionFn format(String format, String nullHandling)
@@ -102,10 +96,10 @@ public class StringFormatExtractionFnTest
     final ObjectMapper objectMapper = new DefaultObjectMapper();
     StringFormatExtractionFn extractionFn = (StringFormatExtractionFn) objectMapper.readValue(json, ExtractionFn.class);
 
-    Assertions.assertEquals("[%s]", extractionFn.getFormat());
+    Assert.assertEquals("[%s]", extractionFn.getFormat());
 
     // round trip
-    Assertions.assertEquals(
+    Assert.assertEquals(
         extractionFn,
         objectMapper.readValue(
             objectMapper.writeValueAsBytes(extractionFn),

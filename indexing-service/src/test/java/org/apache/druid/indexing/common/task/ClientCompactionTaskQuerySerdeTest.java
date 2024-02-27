@@ -67,6 +67,7 @@ import org.apache.druid.server.security.AuthTestUtils;
 import org.apache.druid.server.security.AuthorizerMapper;
 import org.joda.time.Duration;
 import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.util.HashMap;

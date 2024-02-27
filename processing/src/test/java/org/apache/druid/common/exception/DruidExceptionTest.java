@@ -19,22 +19,22 @@
 
 package org.apache.druid.common.exception;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class DruidExceptionTest
 {
   @Test
   public void testExceptionMessageAndResponseCode()
   {
-    DruidException exception = Assertions.assertThrows(
+    DruidException exception = Assert.assertThrows(
         DruidException.class,
         () -> {
           throw new DruidException("an error has occurred", 401, null, true);
         }
     );
-    Assertions.assertEquals("an error has occurred", exception.getMessage());
-    Assertions.assertEquals(401, exception.getResponseCode());
-    Assertions.assertTrue(exception.isTransient());
+    Assert.assertEquals("an error has occurred", exception.getMessage());
+    Assert.assertEquals(401, exception.getResponseCode());
+    Assert.assertTrue(exception.isTransient());
   }
 }

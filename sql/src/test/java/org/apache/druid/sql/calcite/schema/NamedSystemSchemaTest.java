@@ -24,9 +24,9 @@ import org.apache.druid.sql.calcite.planner.PlannerConfig;
 import org.apache.druid.sql.calcite.util.CalciteTestBase;
 import org.easymock.EasyMock;
 import org.easymock.Mock;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 public class NamedSystemSchemaTest extends CalciteTestBase
 {
@@ -39,7 +39,7 @@ public class NamedSystemSchemaTest extends CalciteTestBase
 
   private NamedSystemSchema target;
 
-  @BeforeEach
+  @Before
   public void setUp()
   {
     plannerConfig = EasyMock.createMock(PlannerConfig.class);
@@ -49,13 +49,13 @@ public class NamedSystemSchemaTest extends CalciteTestBase
   @Test
   public void testGetSchemaNameShouldReturnName()
   {
-    Assertions.assertEquals(SCHEMA_NAME, target.getSchemaName());
+    Assert.assertEquals(SCHEMA_NAME, target.getSchemaName());
   }
 
   @Test
   public void testGetSchemaShouldReturnSchema()
   {
-    Assertions.assertEquals(systemSchema, target.getSchema());
+    Assert.assertEquals(systemSchema, target.getSchema());
   }
 
   @Test
@@ -63,7 +63,7 @@ public class NamedSystemSchemaTest extends CalciteTestBase
   {
     EasyMock.expect(plannerConfig.isAuthorizeSystemTablesDirectly()).andReturn(false).once();
     EasyMock.replay(plannerConfig);
-    Assertions.assertNull(target.getSchemaResourceType("servers"));
+    Assert.assertNull(target.getSchemaResourceType("servers"));
     EasyMock.verify(plannerConfig);
   }
 
@@ -72,7 +72,7 @@ public class NamedSystemSchemaTest extends CalciteTestBase
   {
     EasyMock.expect(plannerConfig.isAuthorizeSystemTablesDirectly()).andReturn(true).once();
     EasyMock.replay(plannerConfig);
-    Assertions.assertEquals(ResourceType.SYSTEM_TABLE, target.getSchemaResourceType("servers"));
+    Assert.assertEquals(ResourceType.SYSTEM_TABLE, target.getSchemaResourceType("servers"));
     EasyMock.verify(plannerConfig);
   }
 }

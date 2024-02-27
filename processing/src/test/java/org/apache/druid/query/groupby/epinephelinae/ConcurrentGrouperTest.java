@@ -44,14 +44,16 @@ import org.apache.druid.segment.ColumnValueSelector;
 import org.apache.druid.segment.DimensionSelector;
 import org.apache.druid.segment.column.ColumnCapabilities;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.io.TempDir;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -63,22 +65,24 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+@RunWith(Parameterized.class)
 public class ConcurrentGrouperTest extends InitializedNullHandlingTest
 {
   private static final TestResourceHolder TEST_RESOURCE_HOLDER = new TestResourceHolder(256);
   private static final KeySerdeFactory<LongKey> KEY_SERDE_FACTORY = new TestKeySerdeFactory();
   private static final ColumnSelectorFactory NULL_FACTORY = new TestColumnSelectorFactory();
 
-  @TempDir
-  public File temporaryFolder;
+  @Rule
+  public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-  private Supplier<ByteBuffer> bufferSupplier;
-  private int concurrencyHint;
-  private int parallelCombineThreads;
-  private ExecutorService exec;
-  private boolean mergeThreadLocal;
+  private final Supplier<ByteBuffer> bufferSupplier;
+  private final int concurrencyHint;
+  private final int parallelCombineThreads;
+  private final ExecutorService exec;
+  private final boolean mergeThreadLocal;
   private final Closer closer = Closer.create();
 
+  @Parameters(name = "bufferSize={0}, concurrencyHint={1}, parallelCombineThreads={2}, mergeThreadLocal={3}")
   public static Collection<Object[]> constructorFeeder()
   {
     final List<Object[]> constructors = new ArrayList<>();
@@ -98,20 +102,20 @@ public class ConcurrentGrouperTest extends InitializedNullHandlingTest
     return constructors;
   }
 
-  @BeforeEach
+  @Before
   public void setUp()
   {
     TEST_RESOURCE_HOLDER.taken = false;
   }
 
-  @AfterEach
+  @After
   public void tearDown() throws IOException
   {
     exec.shutdownNow();
     closer.close();
   }
 
-  public void initConcurrentGrouperTest(
+  public ConcurrentGrouperTest(
       int bufferSize,
       int concurrencyHint,
       int parallelCombineThreads,
@@ -139,13 +143,11 @@ public class ConcurrentGrouperTest extends InitializedNullHandlingTest
     this.exec = Execs.multiThreaded(concurrencyHint, "ConcurrentGrouperTest-%d");
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "bufferSize={0}, concurrencyHint={1}, parallelCombineThreads={2}, mergeThreadLocal={3}")
-  public void testAggregate(int bufferSize, int concurrencyHint, int parallelCombineThreads, boolean mergeThreadLocal) throws InterruptedException, ExecutionException, IOException
+  @Test()
+  public void testAggregate() throws InterruptedException, ExecutionException, IOException
   {
-    initConcurrentGrouperTest(bufferSize, concurrencyHint, parallelCombineThreads, mergeThreadLocal);
     final LimitedTemporaryStorage temporaryStorage = new LimitedTemporaryStorage(
-        newFolder(temporaryFolder, "junit"),
+        temporaryFolder.newFolder(),
         1024 * 1024
     );
 
@@ -203,19 +205,17 @@ public class ConcurrentGrouperTest extends InitializedNullHandlingTest
     if (parallelCombineThreads > 1 && (mergeThreadLocal || temporaryStorage.currentSize() > 0)) {
       // Parallel combiner configured, and expected to actually be used due to thread-local merge (either explicitly
       // configured, or due to spilling).
-      Assertions.assertTrue(TEST_RESOURCE_HOLDER.taken);
+      Assert.assertTrue(TEST_RESOURCE_HOLDER.taken);
     } else {
-      Assertions.assertFalse(TEST_RESOURCE_HOLDER.taken);
+      Assert.assertFalse(TEST_RESOURCE_HOLDER.taken);
     }
 
     GrouperTestUtil.assertEntriesEquals(expected.iterator(), iterator);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "bufferSize={0}, concurrencyHint={1}, parallelCombineThreads={2}, mergeThreadLocal={3}")
-  public void testGrouperTimeout(int bufferSize, int concurrencyHint, int parallelCombineThreads, boolean mergeThreadLocal) throws Exception
+  @Test
+  public void testGrouperTimeout() throws Exception
   {
-    initConcurrentGrouperTest(bufferSize, concurrencyHint, parallelCombineThreads, mergeThreadLocal);
     if (concurrencyHint <= 1) {
       // Can't parallel sort. Timeout is only applied during parallel sorting, so this test is not useful. Skip it.
       return;
@@ -231,7 +231,7 @@ public class ConcurrentGrouperTest extends InitializedNullHandlingTest
         1024,
         0.7f,
         1,
-        new LimitedTemporaryStorage(newFolder(temporaryFolder, "junit"), 1024 * 1024),
+        new LimitedTemporaryStorage(temporaryFolder.newFolder(), 1024 * 1024),
         new DefaultObjectMapper(),
         concurrencyHint,
         null,
@@ -265,19 +265,19 @@ public class ConcurrentGrouperTest extends InitializedNullHandlingTest
       eachFuture.get();
     }
 
-    final QueryTimeoutException e = Assertions.assertThrows(
+    final QueryTimeoutException e = Assert.assertThrows(
         QueryTimeoutException.class,
         () -> closer.register(grouper.iterator(true))
     );
 
-    Assertions.assertEquals("Query timeout", e.getErrorCode());
+    Assert.assertEquals("Query timeout", e.getErrorCode());
   }
 
   static class TestResourceHolder extends ReferenceCountingResourceHolder<ByteBuffer>
   {
     private boolean taken;
 
-    void initConcurrentGrouperTest(int bufferSize)
+    TestResourceHolder(int bufferSize)
     {
       super(ByteBuffer.allocate(bufferSize), () -> {});
     }
@@ -288,15 +288,6 @@ public class ConcurrentGrouperTest extends InitializedNullHandlingTest
       taken = true;
       return super.get();
     }
-
-    private static File newFolder(File root, String... subDirs) throws IOException {
-      String subFolder = String.join("/", subDirs);
-      File result = new File(root, subFolder);
-      if (!result.mkdirs()) {
-        throw new IOException("Couldn't create folders " + root);
-      }
-      return result;
-    }
   }
 
   static class LongKey
@@ -304,7 +295,7 @@ public class ConcurrentGrouperTest extends InitializedNullHandlingTest
     private long longValue;
 
     @JsonCreator
-    public void initConcurrentGrouperTest(final long longValue)
+    public LongKey(final long longValue)
     {
       this.longValue = longValue;
     }
@@ -345,15 +336,6 @@ public class ConcurrentGrouperTest extends InitializedNullHandlingTest
       return "LongKey{" +
              "longValue=" + longValue +
              '}';
-    }
-
-    private static File newFolder(File root, String... subDirs) throws IOException {
-      String subFolder = String.join("/", subDirs);
-      File result = new File(root, subFolder);
-      if (!result.mkdirs()) {
-        throw new IOException("Couldn't create folders " + root);
-      }
-      return result;
     }
   }
 
@@ -457,15 +439,6 @@ public class ConcurrentGrouperTest extends InitializedNullHandlingTest
     {
       return Comparator.comparingLong(o -> o.getKey().longValue());
     }
-
-    private static File newFolder(File root, String... subDirs) throws IOException {
-      String subFolder = String.join("/", subDirs);
-      File result = new File(root, subFolder);
-      if (!result.mkdirs()) {
-        throw new IOException("Couldn't create folders " + root);
-      }
-      return result;
-    }
   }
 
   private static class TestColumnSelectorFactory implements ColumnSelectorFactory
@@ -487,23 +460,5 @@ public class ConcurrentGrouperTest extends InitializedNullHandlingTest
     {
       return null;
     }
-
-    private static File newFolder(File root, String... subDirs) throws IOException {
-      String subFolder = String.join("/", subDirs);
-      File result = new File(root, subFolder);
-      if (!result.mkdirs()) {
-        throw new IOException("Couldn't create folders " + root);
-      }
-      return result;
-    }
-  }
-
-  private static File newFolder(File root, String... subDirs) throws IOException {
-    String subFolder = String.join("/", subDirs);
-    File result = new File(root, subFolder);
-    if (!result.mkdirs()) {
-      throw new IOException("Couldn't create folders " + root);
-    }
-    return result;
   }
 }

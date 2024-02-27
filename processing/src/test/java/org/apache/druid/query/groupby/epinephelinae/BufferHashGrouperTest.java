@@ -31,12 +31,11 @@ import org.apache.druid.query.aggregation.CountAggregatorFactory;
 import org.apache.druid.query.aggregation.LongSumAggregatorFactory;
 import org.apache.druid.segment.CloserRule;
 import org.apache.druid.testing.InitializedNullHandlingTest;
+import org.junit.Assert;
 import org.junit.Rule;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
-import java.io.File;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -44,8 +43,8 @@ import java.util.List;
 
 public class BufferHashGrouperTest extends InitializedNullHandlingTest
 {
-  @TempDir
-  public File temporaryFolder;
+  @Rule
+  public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
   @Rule
   public CloserRule closerRule = new CloserRule(true);
@@ -107,16 +106,16 @@ public class BufferHashGrouperTest extends InitializedNullHandlingTest
 
       columnSelectorFactory.setRow(new MapBasedRow(0, ImmutableMap.of("value", 10L)));
       for (int i = 0; i < expectedMaxSize; i++) {
-        Assertions.assertTrue(grouper.aggregate(new IntKey(i)).isOk(), String.valueOf(i));
+        Assert.assertTrue(String.valueOf(i), grouper.aggregate(new IntKey(i)).isOk());
       }
-      Assertions.assertFalse(grouper.aggregate(new IntKey(expectedMaxSize)).isOk());
+      Assert.assertFalse(grouper.aggregate(new IntKey(expectedMaxSize)).isOk());
 
       // Aggregate slightly different row
       columnSelectorFactory.setRow(new MapBasedRow(0, ImmutableMap.of("value", 11L)));
       for (int i = 0; i < expectedMaxSize; i++) {
-        Assertions.assertTrue(grouper.aggregate(new IntKey(i)).isOk(), String.valueOf(i));
+        Assert.assertTrue(String.valueOf(i), grouper.aggregate(new IntKey(i)).isOk());
       }
-      Assertions.assertFalse(grouper.aggregate(new IntKey(expectedMaxSize)).isOk());
+      Assert.assertFalse(grouper.aggregate(new IntKey(expectedMaxSize)).isOk());
 
       final List<Grouper.Entry<IntKey>> expected = new ArrayList<>();
       for (int i = 0; i < expectedMaxSize; i++) {
@@ -141,9 +140,9 @@ public class BufferHashGrouperTest extends InitializedNullHandlingTest
 
         columnSelectorFactory.setRow(new MapBasedRow(0, ImmutableMap.of("value", 10L)));
         for (int i = 0; i < expectedMaxSize; i++) {
-          Assertions.assertTrue(grouper.aggregate(new IntKey(i)).isOk(), String.valueOf(i));
+          Assert.assertTrue(String.valueOf(i), grouper.aggregate(new IntKey(i)).isOk());
         }
-        Assertions.assertFalse(grouper.aggregate(new IntKey(expectedMaxSize)).isOk());
+        Assert.assertFalse(grouper.aggregate(new IntKey(expectedMaxSize)).isOk());
       }
     }
   }
@@ -159,16 +158,16 @@ public class BufferHashGrouperTest extends InitializedNullHandlingTest
 
       columnSelectorFactory.setRow(new MapBasedRow(0, ImmutableMap.of("value", 10L)));
       for (int i = 0; i < expectedMaxSize; i++) {
-        Assertions.assertTrue(grouper.aggregate(new IntKey(i)).isOk(), String.valueOf(i));
+        Assert.assertTrue(String.valueOf(i), grouper.aggregate(new IntKey(i)).isOk());
       }
-      Assertions.assertFalse(grouper.aggregate(new IntKey(expectedMaxSize)).isOk());
+      Assert.assertFalse(grouper.aggregate(new IntKey(expectedMaxSize)).isOk());
 
       // Aggregate slightly different row
       columnSelectorFactory.setRow(new MapBasedRow(0, ImmutableMap.of("value", 11L)));
       for (int i = 0; i < expectedMaxSize; i++) {
-        Assertions.assertTrue(grouper.aggregate(new IntKey(i)).isOk(), String.valueOf(i));
+        Assert.assertTrue(String.valueOf(i), grouper.aggregate(new IntKey(i)).isOk());
       }
-      Assertions.assertFalse(grouper.aggregate(new IntKey(expectedMaxSize)).isOk());
+      Assert.assertFalse(grouper.aggregate(new IntKey(expectedMaxSize)).isOk());
 
       final List<Grouper.Entry<IntKey>> expected = new ArrayList<>();
       for (int i = 0; i < expectedMaxSize; i++) {

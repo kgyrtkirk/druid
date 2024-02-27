@@ -25,19 +25,20 @@ import org.apache.druid.data.input.InputFormat;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.apache.druid.utils.CompressionUtils;
 import org.hamcrest.CoreMatchers;
+import org.hamcrest.MatcherAssert;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.internal.matchers.ThrowableMessageMatcher;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.rules.ExpectedException;
 
 import java.io.IOException;
 import java.util.Collections;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 public class CsvInputFormatTest extends InitializedNullHandlingTest
 {
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
 
   @Test
   public void testSerde() throws IOException
@@ -46,7 +47,7 @@ public class CsvInputFormatTest extends InitializedNullHandlingTest
     final CsvInputFormat format = new CsvInputFormat(Collections.singletonList("a"), "|", null, true, 10);
     final byte[] bytes = mapper.writeValueAsBytes(format);
     final CsvInputFormat fromJson = (CsvInputFormat) mapper.readValue(bytes, InputFormat.class);
-    Assertions.assertEquals(format, fromJson);
+    Assert.assertEquals(format, fromJson);
   }
 
   @Test
@@ -57,7 +58,7 @@ public class CsvInputFormatTest extends InitializedNullHandlingTest
         "{\"type\":\"csv\",\"hasHeaderRow\":true}",
         InputFormat.class
     );
-    Assertions.assertTrue(inputFormat.isFindColumnsFromHeader());
+    Assert.assertTrue(inputFormat.isFindColumnsFromHeader());
   }
 
   @Test
@@ -68,21 +69,21 @@ public class CsvInputFormatTest extends InitializedNullHandlingTest
         "{\"type\":\"csv\",\"findColumnsFromHeader\":true}",
         InputFormat.class
     );
-    Assertions.assertTrue(inputFormat.isFindColumnsFromHeader());
+    Assert.assertTrue(inputFormat.isFindColumnsFromHeader());
   }
 
   @Test
   public void testDeserializeWithoutColumnsWithFindColumnsFromHeaderFalse()
   {
     final ObjectMapper mapper = new ObjectMapper();
-    final JsonProcessingException e = Assertions.assertThrows(
+    final JsonProcessingException e = Assert.assertThrows(
         JsonProcessingException.class,
         () -> mapper.readValue(
             "{\"type\":\"csv\",\"findColumnsFromHeader\":false}",
             InputFormat.class
         )
     );
-    assertThat(
+    MatcherAssert.assertThat(
         e,
         ThrowableMessageMatcher.hasMessage(CoreMatchers.startsWith(
             "Cannot construct instance of `org.apache.druid.data.input.impl.CsvInputFormat`, problem: "
@@ -95,14 +96,14 @@ public class CsvInputFormatTest extends InitializedNullHandlingTest
   public void testDeserializeWithoutColumnsWithBothHeaderProperties()
   {
     final ObjectMapper mapper = new ObjectMapper();
-    final JsonProcessingException e = Assertions.assertThrows(
+    final JsonProcessingException e = Assert.assertThrows(
         JsonProcessingException.class,
         () -> mapper.readValue(
             "{\"type\":\"csv\",\"findColumnsFromHeader\":true,\"hasHeaderRow\":true}",
             InputFormat.class
         )
     );
-    assertThat(
+    MatcherAssert.assertThat(
         e,
         ThrowableMessageMatcher.hasMessage(CoreMatchers.startsWith(
             "Cannot construct instance of `org.apache.druid.data.input.impl.CsvInputFormat`, problem: "
@@ -114,11 +115,11 @@ public class CsvInputFormatTest extends InitializedNullHandlingTest
   public void testDeserializeWithoutAnyProperties()
   {
     final ObjectMapper mapper = new ObjectMapper();
-    final JsonProcessingException e = Assertions.assertThrows(
+    final JsonProcessingException e = Assert.assertThrows(
         JsonProcessingException.class,
         () -> mapper.readValue("{\"type\":\"csv\"}", InputFormat.class)
     );
-    assertThat(
+    MatcherAssert.assertThat(
         e,
         ThrowableMessageMatcher.hasMessage(CoreMatchers.startsWith(
             "Cannot construct instance of `org.apache.druid.data.input.impl.CsvInputFormat`, problem: "
@@ -129,65 +130,61 @@ public class CsvInputFormatTest extends InitializedNullHandlingTest
   @Test
   public void testComma()
   {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
-      new CsvInputFormat(Collections.singletonList("a,"), "|", null, false, 0);
-    });
-    assertTrue(exception.getMessage().contains("Column[a,] cannot have the delimiter[,] in its name"));
+    expectedException.expect(IllegalArgumentException.class);
+    expectedException.expectMessage("Column[a,] cannot have the delimiter[,] in its name");
+    new CsvInputFormat(Collections.singletonList("a,"), "|", null, false, 0);
   }
 
   @Test
   public void testDelimiter()
   {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
-      new CsvInputFormat(Collections.singletonList("a\t"), ",", null, false, 0);
-    });
-    assertTrue(exception.getMessage().contains("Cannot have same delimiter and list delimiter of [,]"));
+    expectedException.expect(IllegalArgumentException.class);
+    expectedException.expectMessage("Cannot have same delimiter and list delimiter of [,]");
+    new CsvInputFormat(Collections.singletonList("a\t"), ",", null, false, 0);
   }
 
   @Test
   public void testFindColumnsFromHeaderWithColumnsReturningItsValue()
   {
     final CsvInputFormat format = new CsvInputFormat(Collections.singletonList("a"), null, null, true, 0);
-    Assertions.assertTrue(format.isFindColumnsFromHeader());
+    Assert.assertTrue(format.isFindColumnsFromHeader());
   }
 
   @Test
   public void testFindColumnsFromHeaderWithMissingColumnsReturningItsValue()
   {
     final CsvInputFormat format = new CsvInputFormat(null, null, null, true, 0);
-    Assertions.assertTrue(format.isFindColumnsFromHeader());
+    Assert.assertTrue(format.isFindColumnsFromHeader());
   }
 
   @Test
   public void testMissingFindColumnsFromHeaderWithMissingColumnsThrowingError()
   {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
-      new CsvInputFormat(null, null, null, null, 0);
-    });
-    assertTrue(exception.getMessage().contains("Either [columns] or [findColumnsFromHeader] must be set"));
+    expectedException.expect(IllegalArgumentException.class);
+    expectedException.expectMessage("Either [columns] or [findColumnsFromHeader] must be set");
+    new CsvInputFormat(null, null, null, null, 0);
   }
 
   @Test
   public void testMissingFindColumnsFromHeaderWithColumnsReturningFalse()
   {
     final CsvInputFormat format = new CsvInputFormat(Collections.singletonList("a"), null, null, null, 0);
-    Assertions.assertFalse(format.isFindColumnsFromHeader());
+    Assert.assertFalse(format.isFindColumnsFromHeader());
   }
 
   @Test
   public void testHasHeaderRowWithMissingFindColumnsThrowingError()
   {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
-      new CsvInputFormat(null, null, true, false, 0);
-    });
-    assertTrue(exception.getMessage().contains("Cannot accept both [findColumnsFromHeader] and [hasHeaderRow]"));
+    expectedException.expect(IllegalArgumentException.class);
+    expectedException.expectMessage("Cannot accept both [findColumnsFromHeader] and [hasHeaderRow]");
+    new CsvInputFormat(null, null, true, false, 0);
   }
 
   @Test
   public void testHasHeaderRowWithMissingColumnsReturningItsValue()
   {
     final CsvInputFormat format = new CsvInputFormat(null, null, true, null, 0);
-    Assertions.assertTrue(format.isFindColumnsFromHeader());
+    Assert.assertTrue(format.isFindColumnsFromHeader());
   }
 
   @Test
@@ -195,7 +192,7 @@ public class CsvInputFormatTest extends InitializedNullHandlingTest
   {
     final CsvInputFormat format = new CsvInputFormat(null, null, true, null, 0);
     final long unweightedSize = 100L;
-    Assertions.assertEquals(unweightedSize, format.getWeightedSize("file.csv", unweightedSize));
+    Assert.assertEquals(unweightedSize, format.getWeightedSize("file.csv", unweightedSize));
   }
 
   @Test
@@ -203,7 +200,7 @@ public class CsvInputFormatTest extends InitializedNullHandlingTest
   {
     final CsvInputFormat format = new CsvInputFormat(null, null, true, null, 0);
     final long unweightedSize = 100L;
-    Assertions.assertEquals(
+    Assert.assertEquals(
         unweightedSize * CompressionUtils.COMPRESSED_TEXT_WEIGHT_FACTOR,
         format.getWeightedSize("file.csv.gz", unweightedSize)
     );

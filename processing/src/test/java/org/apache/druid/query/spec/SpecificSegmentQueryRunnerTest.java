@@ -44,8 +44,8 @@ import org.apache.druid.query.timeseries.TimeseriesQuery;
 import org.apache.druid.query.timeseries.TimeseriesResultBuilder;
 import org.apache.druid.query.timeseries.TimeseriesResultValue;
 import org.apache.druid.segment.SegmentMissingException;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -188,11 +188,11 @@ public class SpecificSegmentQueryRunnerTest
     Sequence results = queryRunner.run(QueryPlus.wrap(query), responseContext);
     List<Result<TimeseriesResultValue>> res = results.toList();
 
-    Assertions.assertEquals(1, res.size());
+    Assert.assertEquals(1, res.size());
 
     Result<TimeseriesResultValue> theVal = res.get(0);
 
-    Assertions.assertTrue(1L == theVal.getValue().getLongMetric("rows"));
+    Assert.assertTrue(1L == theVal.getValue().getLongMetric("rows"));
 
     validate(mapper, descriptor, responseContext);
   }
@@ -201,10 +201,10 @@ public class SpecificSegmentQueryRunnerTest
       throws IOException
   {
     List<SegmentDescriptor> missingSegments = responseContext.getMissingSegments();
-    Assertions.assertTrue(missingSegments != null);
+    Assert.assertTrue(missingSegments != null);
 
     SegmentDescriptor segmentDesc = missingSegments.get(0);
     SegmentDescriptor newDesc = mapper.readValue(mapper.writeValueAsString(segmentDesc), SegmentDescriptor.class);
-    Assertions.assertEquals(descriptor, newDesc);
+    Assert.assertEquals(descriptor, newDesc);
   }
 }

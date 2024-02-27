@@ -39,10 +39,9 @@ import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.segment.column.ValueType;
 import org.apache.druid.segment.virtual.ExpressionVirtualColumn;
 import org.joda.time.Duration;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -54,7 +53,7 @@ import java.util.function.Supplier;
 import java.util.function.ToLongFunction;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.Assert.assertThrows;
 
 public class RowBasedStorageAdapterTest
 {
@@ -92,7 +91,7 @@ public class RowBasedStorageAdapterTest
   // VectorProcessors used by the "allProcessors" tasks.
   private static final LinkedHashMap<String, Function<Cursor, Supplier<Object>>> PROCESSORS = new LinkedHashMap<>();
 
-  @BeforeAll
+  @BeforeClass
   public static void setUpClass()
   {
     NullHandling.initializeForTests();
@@ -225,7 +224,7 @@ public class RowBasedStorageAdapterTest
   public void test_getInterval()
   {
     final RowBasedStorageAdapter<Integer> adapter = createIntAdapter();
-    Assertions.assertEquals(Intervals.ETERNITY, adapter.getInterval());
+    Assert.assertEquals(Intervals.ETERNITY, adapter.getInterval());
   }
 
   @Test
@@ -234,7 +233,7 @@ public class RowBasedStorageAdapterTest
     final RowBasedStorageAdapter<Integer> adapter = createIntAdapter();
 
     // Sort them for comparison purposes.
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ROW_SIGNATURE.getColumnNames().stream().sorted().collect(Collectors.toList()),
         Lists.newArrayList(adapter.getAvailableDimensions()).stream().sorted().collect(Collectors.toList())
     );
@@ -245,7 +244,7 @@ public class RowBasedStorageAdapterTest
   {
     final RowBasedStorageAdapter<Integer> adapter = createIntAdapter();
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Collections.emptyList(),
         Lists.newArrayList(adapter.getAvailableMetrics())
     );
@@ -255,7 +254,7 @@ public class RowBasedStorageAdapterTest
   public void test_getRowSignature()
   {
     final RowBasedStorageAdapter<Integer> adapter = createIntAdapter();
-    Assertions.assertEquals(ROW_SIGNATURE, adapter.getRowSignature());
+    Assert.assertEquals(ROW_SIGNATURE, adapter.getRowSignature());
   }
 
   @Test
@@ -265,7 +264,7 @@ public class RowBasedStorageAdapterTest
 
     // Row based adapters don't know cardinality (they don't walk their Iterables until makeCursors is called).
     for (String column : ROW_SIGNATURE.getColumnNames()) {
-      Assertions.assertEquals(DimensionDictionarySelector.CARDINALITY_UNKNOWN, adapter.getDimensionCardinality(column));
+      Assert.assertEquals(DimensionDictionarySelector.CARDINALITY_UNKNOWN, adapter.getDimensionCardinality(column));
     }
   }
 
@@ -273,28 +272,28 @@ public class RowBasedStorageAdapterTest
   public void test_getDimensionCardinality_unknownColumn()
   {
     final RowBasedStorageAdapter<Integer> adapter = createIntAdapter(0, 1, 2);
-    Assertions.assertEquals(DimensionDictionarySelector.CARDINALITY_UNKNOWN, adapter.getDimensionCardinality("unknown"));
+    Assert.assertEquals(DimensionDictionarySelector.CARDINALITY_UNKNOWN, adapter.getDimensionCardinality("unknown"));
   }
 
   @Test
   public void test_getDimensionCardinality_timeColumn()
   {
     final RowBasedStorageAdapter<Integer> adapter = createIntAdapter(0, 1, 2);
-    Assertions.assertEquals(DimensionDictionarySelector.CARDINALITY_UNKNOWN, adapter.getDimensionCardinality("__time"));
+    Assert.assertEquals(DimensionDictionarySelector.CARDINALITY_UNKNOWN, adapter.getDimensionCardinality("__time"));
   }
 
   @Test
   public void test_getMinTime()
   {
     final RowBasedStorageAdapter<Integer> adapter = createIntAdapter(0, 1, 2);
-    Assertions.assertEquals(Intervals.ETERNITY.getStart(), adapter.getMinTime());
+    Assert.assertEquals(Intervals.ETERNITY.getStart(), adapter.getMinTime());
   }
 
   @Test
   public void test_getMaxTime()
   {
     final RowBasedStorageAdapter<Integer> adapter = createIntAdapter(0, 1, 2);
-    Assertions.assertEquals(Intervals.ETERNITY.getEnd().minus(1), adapter.getMaxTime());
+    Assert.assertEquals(Intervals.ETERNITY.getEnd().minus(1), adapter.getMaxTime());
   }
 
   @Test
@@ -308,7 +307,7 @@ public class RowBasedStorageAdapterTest
         ImmutableList.<String>builder().addAll(ROW_SIGNATURE.getColumnNames()).add("unknown", "__time").build();
 
     for (String column : columns) {
-      Assertions.assertNull(adapter.getMinValue(column), column);
+      Assert.assertNull(column, adapter.getMinValue(column));
     }
   }
 
@@ -323,7 +322,7 @@ public class RowBasedStorageAdapterTest
         ImmutableList.<String>builder().addAll(ROW_SIGNATURE.getColumnNames()).add("unknown", "__time").build();
 
     for (String column : columns) {
-      Assertions.assertNull(adapter.getMaxValue(column), column);
+      Assert.assertNull(column, adapter.getMaxValue(column));
     }
   }
 
@@ -334,7 +333,7 @@ public class RowBasedStorageAdapterTest
 
     // Row based adapters don't know cardinality (they don't walk their Iterables until makeCursors is called).
     for (String column : ROW_SIGNATURE.getColumnNames()) {
-      Assertions.assertEquals(DimensionDictionarySelector.CARDINALITY_UNKNOWN, adapter.getDimensionCardinality(column));
+      Assert.assertEquals(DimensionDictionarySelector.CARDINALITY_UNKNOWN, adapter.getDimensionCardinality(column));
     }
   }
 
@@ -344,8 +343,8 @@ public class RowBasedStorageAdapterTest
     final RowBasedStorageAdapter<Integer> adapter = createIntAdapter(0, 1, 2);
 
     final ColumnCapabilities capabilities = adapter.getColumnCapabilities(ValueType.FLOAT.name());
-    Assertions.assertEquals(ValueType.FLOAT, capabilities.getType());
-    Assertions.assertFalse(capabilities.hasMultipleValues().isMaybeTrue());
+    Assert.assertEquals(ValueType.FLOAT, capabilities.getType());
+    Assert.assertFalse(capabilities.hasMultipleValues().isMaybeTrue());
   }
 
   @Test
@@ -354,8 +353,8 @@ public class RowBasedStorageAdapterTest
     final RowBasedStorageAdapter<Integer> adapter = createIntAdapter(0, 1, 2);
 
     final ColumnCapabilities capabilities = adapter.getColumnCapabilities(ValueType.DOUBLE.name());
-    Assertions.assertEquals(ValueType.DOUBLE, capabilities.getType());
-    Assertions.assertFalse(capabilities.hasMultipleValues().isMaybeTrue());
+    Assert.assertEquals(ValueType.DOUBLE, capabilities.getType());
+    Assert.assertFalse(capabilities.hasMultipleValues().isMaybeTrue());
   }
 
   @Test
@@ -364,8 +363,8 @@ public class RowBasedStorageAdapterTest
     final RowBasedStorageAdapter<Integer> adapter = createIntAdapter(0, 1, 2);
 
     final ColumnCapabilities capabilities = adapter.getColumnCapabilities(ValueType.LONG.name());
-    Assertions.assertEquals(ValueType.LONG, capabilities.getType());
-    Assertions.assertFalse(capabilities.hasMultipleValues().isMaybeTrue());
+    Assert.assertEquals(ValueType.LONG, capabilities.getType());
+    Assert.assertFalse(capabilities.hasMultipleValues().isMaybeTrue());
   }
 
   @Test
@@ -374,12 +373,12 @@ public class RowBasedStorageAdapterTest
     final RowBasedStorageAdapter<Integer> adapter = createIntAdapter(0, 1, 2);
 
     final ColumnCapabilities capabilities = adapter.getColumnCapabilities(ValueType.STRING.name());
-    Assertions.assertEquals(ValueType.STRING, capabilities.getType());
+    Assert.assertEquals(ValueType.STRING, capabilities.getType());
 
     // Note: unlike numeric types, STRING-typed columns might have multiple values, so they report as incomplete. It
     // would be good in the future to support some way of changing this, when it is known ahead of time that
     // multi-valuedness is definitely happening or is definitely impossible.
-    Assertions.assertTrue(capabilities.hasMultipleValues().isUnknown());
+    Assert.assertTrue(capabilities.hasMultipleValues().isUnknown());
   }
 
   @Test
@@ -391,9 +390,9 @@ public class RowBasedStorageAdapterTest
 
     // Note: unlike numeric types, COMPLEX-typed columns report that they are incomplete for everything
     // except hasMultipleValues.
-    Assertions.assertEquals(ColumnType.UNKNOWN_COMPLEX, capabilities.toColumnType());
-    Assertions.assertFalse(capabilities.hasMultipleValues().isTrue());
-    Assertions.assertTrue(capabilities.isDictionaryEncoded().isUnknown());
+    Assert.assertEquals(ColumnType.UNKNOWN_COMPLEX, capabilities.toColumnType());
+    Assert.assertFalse(capabilities.hasMultipleValues().isTrue());
+    Assert.assertTrue(capabilities.isDictionaryEncoded().isUnknown());
   }
 
   @Test
@@ -402,14 +401,14 @@ public class RowBasedStorageAdapterTest
     final RowBasedStorageAdapter<Integer> adapter = createIntAdapter(0, 1, 2);
 
     final ColumnCapabilities capabilities = adapter.getColumnCapabilities(UNKNOWN_TYPE_NAME);
-    Assertions.assertNull(capabilities);
+    Assert.assertNull(capabilities);
   }
 
   @Test
   public void test_getColumnCapabilities_nonexistent()
   {
     final RowBasedStorageAdapter<Integer> adapter = createIntAdapter(0, 1, 2);
-    Assertions.assertNull(adapter.getColumnCapabilities("nonexistent"));
+    Assert.assertNull(adapter.getColumnCapabilities("nonexistent"));
   }
 
   @Test
@@ -419,12 +418,12 @@ public class RowBasedStorageAdapterTest
 
     for (String columnName : ROW_SIGNATURE.getColumnNames()) {
       if (UNKNOWN_TYPE_NAME.equals(columnName)) {
-        Assertions.assertNull(adapter.getColumnCapabilities(columnName), columnName);
+        Assert.assertNull(columnName, adapter.getColumnCapabilities(columnName));
       } else {
-        Assertions.assertEquals(
+        Assert.assertEquals(
+            columnName,
             ValueType.valueOf(columnName).name(),
-            adapter.getColumnCapabilities(columnName).asTypeString(),
-            columnName
+            adapter.getColumnCapabilities(columnName).asTypeString()
         );
       }
     }
@@ -441,7 +440,7 @@ public class RowBasedStorageAdapterTest
   public void test_getMaxIngestedEventTime()
   {
     final RowBasedStorageAdapter<Integer> adapter = createIntAdapter(0, 1, 2);
-    Assertions.assertEquals(Intervals.ETERNITY.getEnd().minus(1), adapter.getMaxIngestedEventTime());
+    Assert.assertEquals(Intervals.ETERNITY.getEnd().minus(1), adapter.getMaxIngestedEventTime());
   }
 
   @Test
@@ -465,14 +464,14 @@ public class RowBasedStorageAdapterTest
         null
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableList.of(
             ImmutableList.of("1")
         ),
         walkCursors(cursors, READ_STRING)
     );
 
-    Assertions.assertEquals(1, numCloses.get());
+    Assert.assertEquals(1, numCloses.get());
   }
 
   @Test
@@ -489,7 +488,7 @@ public class RowBasedStorageAdapterTest
         null
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableList.of(
             ImmutableList.of("0"),
             ImmutableList.of("1")
@@ -497,7 +496,7 @@ public class RowBasedStorageAdapterTest
         walkCursors(cursors, READ_STRING)
     );
 
-    Assertions.assertEquals(1, numCloses.get());
+    Assert.assertEquals(1, numCloses.get());
   }
 
   @Test
@@ -523,14 +522,14 @@ public class RowBasedStorageAdapterTest
         null
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableList.of(
             ImmutableList.of("1")
         ),
         walkCursors(cursors, READ_STRING)
     );
 
-    Assertions.assertEquals(1, numCloses.get());
+    Assert.assertEquals(1, numCloses.get());
   }
 
   @Test
@@ -547,7 +546,7 @@ public class RowBasedStorageAdapterTest
         null
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableList.of(
             ImmutableList.of("2"),
             ImmutableList.of("1"),
@@ -556,7 +555,7 @@ public class RowBasedStorageAdapterTest
         walkCursors(cursors, READ_STRING)
     );
 
-    Assertions.assertEquals(1, numCloses.get());
+    Assert.assertEquals(1, numCloses.get());
   }
 
   @Test
@@ -573,12 +572,12 @@ public class RowBasedStorageAdapterTest
         null
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableList.of(),
         walkCursors(cursors, READ_STRING)
     );
 
-    Assertions.assertEquals(1, numCloses.get());
+    Assert.assertEquals(1, numCloses.get());
   }
 
   @Test
@@ -595,14 +594,14 @@ public class RowBasedStorageAdapterTest
         null
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableList.of(
             ImmutableList.of("1")
         ),
         walkCursors(cursors, READ_STRING)
     );
 
-    Assertions.assertEquals(1, numCloses.get());
+    Assert.assertEquals(1, numCloses.get());
   }
 
   @Test
@@ -619,7 +618,7 @@ public class RowBasedStorageAdapterTest
         null
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableList.of(
             ImmutableList.of(DateTimes.of("1970-01-01T00"), "0"),
             ImmutableList.of(DateTimes.of("1970-01-01T01"), "1"),
@@ -630,7 +629,7 @@ public class RowBasedStorageAdapterTest
         walkCursors(cursors, READ_TIME_AND_STRING)
     );
 
-    Assertions.assertEquals(1, numCloses.get());
+    Assert.assertEquals(1, numCloses.get());
   }
 
   @Test
@@ -647,7 +646,7 @@ public class RowBasedStorageAdapterTest
         null
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableList.of(
             ImmutableList.of(DateTimes.of("1970-01-01T01"), "1"),
             ImmutableList.of(DateTimes.of("1970-01-01T01"), "1"),
@@ -656,7 +655,7 @@ public class RowBasedStorageAdapterTest
         walkCursors(cursors, READ_TIME_AND_STRING)
     );
 
-    Assertions.assertEquals(1, numCloses.get());
+    Assert.assertEquals(1, numCloses.get());
   }
 
   @Test
@@ -673,7 +672,7 @@ public class RowBasedStorageAdapterTest
         null
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableList.of(
             ImmutableList.of(DateTimes.of("1970-01-01T02"), "2"),
             ImmutableList.of(DateTimes.of("1970-01-01T01"), "1"),
@@ -682,7 +681,7 @@ public class RowBasedStorageAdapterTest
         walkCursors(cursors, READ_TIME_AND_STRING)
     );
 
-    Assertions.assertEquals(1, numCloses.get());
+    Assert.assertEquals(1, numCloses.get());
   }
 
   @Test
@@ -699,7 +698,7 @@ public class RowBasedStorageAdapterTest
         null
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableList.of(
             Lists.newArrayList(
                 Intervals.ETERNITY.getStart(),
@@ -795,7 +794,7 @@ public class RowBasedStorageAdapterTest
         walkCursors(cursors, new ArrayList<>(PROCESSORS.values()))
     );
 
-    Assertions.assertEquals(1, numCloses.get());
+    Assert.assertEquals(1, numCloses.get());
   }
 
   @Test
@@ -812,19 +811,19 @@ public class RowBasedStorageAdapterTest
         null
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableList.of(),
         walkCursors(cursors, new ArrayList<>(PROCESSORS.values()))
     );
 
-    Assertions.assertEquals(1, numCloses.get());
+    Assert.assertEquals(1, numCloses.get());
   }
 
   @Test
   public void test_makeCursors_eternityIntervalWithMonthGranularity()
   {
     final RowBasedStorageAdapter<Integer> adapter = createIntAdapter(0, 1);
-    Assertions.assertThrows(IAE.class, () -> {
+    Assert.assertThrows(IAE.class, () -> {
       adapter.makeCursors(
           null,
           Intervals.ETERNITY,

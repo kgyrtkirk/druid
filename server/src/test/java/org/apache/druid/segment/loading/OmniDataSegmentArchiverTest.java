@@ -28,8 +28,8 @@ import org.apache.druid.guice.Binders;
 import org.apache.druid.guice.GuiceInjectors;
 import org.apache.druid.guice.LazySingleton;
 import org.apache.druid.timeline.DataSegment;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 import org.mockito.Mockito;
 
 import javax.annotation.Nullable;
@@ -57,10 +57,10 @@ public class OmniDataSegmentArchiverTest
 
     final Injector injector = createInjector(null);
     final OmniDataSegmentArchiver segmentArchiver = injector.getInstance(OmniDataSegmentArchiver.class);
-    Assertions.assertThrows(
+    Assert.assertThrows(
+        "Unknown loader type[unknown-type]. Known types are [explode]",
         SegmentLoadingException.class,
-        () -> segmentArchiver.archive(segment),
-        "Unknown loader type[unknown-type]. Known types are [explode]"
+        () -> segmentArchiver.archive(segment)
     );
   }
 
@@ -72,10 +72,10 @@ public class OmniDataSegmentArchiverTest
 
     final Injector injector = createInjector(null);
     final OmniDataSegmentArchiver segmentArchiver = injector.getInstance(OmniDataSegmentArchiver.class);
-    Assertions.assertThrows(
+    Assert.assertThrows(
+        "BadSegmentArchiver must not have been initialized",
         RuntimeException.class,
-        () -> segmentArchiver.archive(segment),
-        "BadSegmentArchiver must not have been initialized"
+        () -> segmentArchiver.archive(segment)
     );
   }
 

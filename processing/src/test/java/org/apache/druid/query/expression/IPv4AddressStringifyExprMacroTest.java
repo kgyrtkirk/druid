@@ -23,8 +23,8 @@ import org.apache.druid.common.config.NullHandling;
 import org.apache.druid.math.expr.Expr;
 import org.apache.druid.math.expr.ExprEval;
 import org.apache.druid.math.expr.InputBindings;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -60,89 +60,89 @@ public class IPv4AddressStringifyExprMacroTest extends MacroTestBase
   public void testNullLongArg()
   {
     Expr nullNumeric = ExprEval.ofLong(null).toExpr();
-    Assertions.assertEquals(NULL, eval(nullNumeric));
+    Assert.assertEquals(NULL, eval(nullNumeric));
   }
 
   @Test
   public void testInvalidArgType()
   {
     Expr longArray = ExprEval.ofLongArray(new Long[]{1L, 2L}).toExpr();
-    Assertions.assertNull(eval(longArray));
+    Assert.assertNull(eval(longArray));
   }
 
   @Test
   public void testInvalidLongArgTooSmall()
   {
     Expr tooSmall = ExprEval.ofLong(-1L).toExpr();
-    Assertions.assertNull(eval(tooSmall));
+    Assert.assertNull(eval(tooSmall));
   }
 
   @Test
   public void testValidLongArgLowest()
   {
     Expr tooSmall = ExprEval.ofLong(0L).toExpr();
-    Assertions.assertEquals("0.0.0.0", eval(tooSmall));
+    Assert.assertEquals("0.0.0.0", eval(tooSmall));
   }
 
   @Test
   public void testValidLongArg()
   {
-    Assertions.assertEquals(EXPECTED, eval(VALID));
+    Assert.assertEquals(EXPECTED, eval(VALID));
   }
 
   @Test
   public void testValidLongArgHighest()
   {
     Expr tooSmall = ExprEval.ofLong(0xff_ff_ff_ffL).toExpr();
-    Assertions.assertEquals("255.255.255.255", eval(tooSmall));
+    Assert.assertEquals("255.255.255.255", eval(tooSmall));
   }
 
   @Test
   public void testInvalidLongArgTooLarge()
   {
     Expr tooLarge = ExprEval.ofLong(0x1_00_00_00_00L).toExpr();
-    Assertions.assertNull(eval(tooLarge));
+    Assert.assertNull(eval(tooLarge));
   }
 
   @Test
   public void testNullStringArg()
   {
     Expr nullString = ExprEval.of(null).toExpr();
-    Assertions.assertNull(eval(nullString), NULL);
+    Assert.assertNull(NULL, eval(nullString));
   }
 
   @Test
   public void testInvalidStringArgNotIPAddress()
   {
     Expr notIpAddress = ExprEval.of("druid.apache.org").toExpr();
-    Assertions.assertNull(eval(notIpAddress));
+    Assert.assertNull(eval(notIpAddress));
   }
 
   @Test
   public void testInvalidStringArgIPv6Compatible()
   {
     Expr ipv6Compatible = ExprEval.of("::192.168.0.1").toExpr();
-    Assertions.assertNull(eval(ipv6Compatible));
+    Assert.assertNull(eval(ipv6Compatible));
   }
 
   @Test
   public void testValidStringArgIPv6Mapped()
   {
     Expr ipv6Mapped = ExprEval.of("::ffff:192.168.0.1").toExpr();
-    Assertions.assertNull(eval(ipv6Mapped));
+    Assert.assertNull(eval(ipv6Mapped));
   }
 
   @Test
   public void testValidStringArgIPv4()
   {
-    Assertions.assertEquals(EXPECTED, eval(VALID));
+    Assert.assertEquals(EXPECTED, eval(VALID));
   }
 
   @Test
   public void testValidStringArgUnsignedInt()
   {
     Expr unsignedInt = ExprEval.of("3232235521").toExpr();
-    Assertions.assertNull(eval(unsignedInt));
+    Assert.assertNull(eval(unsignedInt));
   }
 
   private Object eval(Expr arg)

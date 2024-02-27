@@ -21,8 +21,8 @@ package org.apache.druid.java.util.common.parsers;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Collections;
 import java.util.List;
@@ -33,13 +33,13 @@ public class ParserUtilsTest
   public void testFindDuplicatesMixedCases()
   {
     final List<String> fields = ImmutableList.of("f1", "f2", "F1", "F2", "f3");
-    Assertions.assertEquals(Collections.emptySet(), ParserUtils.findDuplicates(fields));
+    Assert.assertEquals(Collections.emptySet(), ParserUtils.findDuplicates(fields));
   }
 
   @Test
   public void testFindDuplicates()
   {
     final List<String> fields = ImmutableList.of("f1", "f2", "F1", "F2", "f1", "F2");
-    Assertions.assertEquals(ImmutableSet.of("f1", "F2"), ParserUtils.findDuplicates(fields));
+    Assert.assertEquals(ImmutableSet.of("f1", "F2"), ParserUtils.findDuplicates(fields));
   }
 }

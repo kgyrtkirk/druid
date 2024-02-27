@@ -22,8 +22,8 @@ package org.apache.druid.segment;
 import org.apache.druid.query.monomorphicprocessing.RuntimeShapeInspector;
 import org.apache.druid.segment.column.NumericColumn;
 import org.apache.druid.segment.data.ReadableOffset;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class QueryableIndexCursorSequenceBuilderTest
 {
@@ -64,52 +64,52 @@ public class QueryableIndexCursorSequenceBuilderTest
       }
     };
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         0,
         QueryableIndexCursorSequenceBuilder.timeSearch(column, 0, 0, values.length)
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         2,
         QueryableIndexCursorSequenceBuilder.timeSearch(column, 0, 2, values.length)
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         0,
         QueryableIndexCursorSequenceBuilder.timeSearch(column, 0, 0, values.length / 2)
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         1,
         QueryableIndexCursorSequenceBuilder.timeSearch(column, 1, 0, values.length)
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         2,
         QueryableIndexCursorSequenceBuilder.timeSearch(column, 1, 2, values.length)
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         1,
         QueryableIndexCursorSequenceBuilder.timeSearch(column, 1, 0, values.length / 2)
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         1,
         QueryableIndexCursorSequenceBuilder.timeSearch(column, 1, 1, 8)
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         8,
         QueryableIndexCursorSequenceBuilder.timeSearch(column, 2, 0, values.length)
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         10,
         QueryableIndexCursorSequenceBuilder.timeSearch(column, 10, 0, values.length)
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         11,
         QueryableIndexCursorSequenceBuilder.timeSearch(column, 15, 0, values.length)
     );

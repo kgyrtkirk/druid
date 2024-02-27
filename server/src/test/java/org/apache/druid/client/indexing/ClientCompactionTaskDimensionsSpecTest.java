@@ -26,12 +26,10 @@ import org.apache.druid.data.input.impl.DimensionSchema;
 import org.apache.druid.data.input.impl.DimensionsSpec;
 import org.apache.druid.data.input.impl.StringDimensionSchema;
 import org.apache.druid.java.util.common.parsers.ParseException;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.IOException;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ClientCompactionTaskDimensionsSpecTest
 {
@@ -60,16 +58,14 @@ public class ClientCompactionTaskDimensionsSpecTest
         json,
         ClientCompactionTaskDimensionsSpec.class
     );
-    Assertions.assertEquals(expected, fromJson);
+    Assert.assertEquals(expected, fromJson);
   }
 
-  @Test
+  @Test(expected = ParseException.class)
   public void testInvalidDimensionsField()
   {
-    assertThrows(ParseException.class, () -> {
-      final ClientCompactionTaskDimensionsSpec expected = new ClientCompactionTaskDimensionsSpec(
-          DimensionsSpec.getDefaultSchemas(ImmutableList.of("ts", "dim", "dim"))
-      );
-    });
+    final ClientCompactionTaskDimensionsSpec expected = new ClientCompactionTaskDimensionsSpec(
+        DimensionsSpec.getDefaultSchemas(ImmutableList.of("ts", "dim", "dim"))
+    );
   }
 }

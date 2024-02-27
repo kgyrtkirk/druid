@@ -19,8 +19,8 @@
 
 package org.apache.druid.crypto;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.nio.charset.StandardCharsets;
 
@@ -44,7 +44,7 @@ public class CryptoServiceTest
 
     byte[] decrypted = cryptoService.decrypt(cryptoService.encrypt(original));
 
-    Assertions.assertArrayEquals(original, decrypted);
+    Assert.assertArrayEquals(original, decrypted);
   }
 
   @Test
@@ -61,7 +61,7 @@ public class CryptoServiceTest
           65536,
           128
       );
-      Assertions.fail("Must Fail!!!");
+      Assert.fail("Must Fail!!!");
     }
     catch (RuntimeException ex) {
       // expected

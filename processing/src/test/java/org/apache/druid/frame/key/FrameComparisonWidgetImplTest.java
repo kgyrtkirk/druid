@@ -31,23 +31,22 @@ import org.apache.druid.segment.StorageAdapter;
 import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.apache.druid.timeline.SegmentId;
+import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-
 public class FrameComparisonWidgetImplTest extends InitializedNullHandlingTest
 {
   private Frame frame;
 
-  @BeforeEach
+  @Before
   public void setUp()
   {
     final StorageAdapter rowBasedAdapter = new RowBasedSegment<>(
@@ -86,7 +85,7 @@ public class FrameComparisonWidgetImplTest extends InitializedNullHandlingTest
     for (int i = 0; i < frame.numRows(); i++) {
       final boolean isPartiallyNull =
           Arrays.stream(RowKeyComparatorTest.ALL_KEY_OBJECTS.get(i)).limit(3).anyMatch(Objects::isNull);
-      Assertions.assertEquals(isPartiallyNull, !widget.isCompletelyNonNullKey(i));
+      Assert.assertEquals(isPartiallyNull, !widget.isCompletelyNonNullKey(i));
     }
   }
 
@@ -105,7 +104,7 @@ public class FrameComparisonWidgetImplTest extends InitializedNullHandlingTest
     for (int i = 0; i < frame.numRows(); i++) {
       final boolean isPartiallyNull =
           Arrays.stream(RowKeyComparatorTest.ALL_KEY_OBJECTS.get(i)).anyMatch(Objects::isNull);
-      Assertions.assertEquals(isPartiallyNull, !widget.isCompletelyNonNullKey(i));
+      Assert.assertEquals(isPartiallyNull, !widget.isCompletelyNonNullKey(i));
     }
   }
 
@@ -130,7 +129,7 @@ public class FrameComparisonWidgetImplTest extends InitializedNullHandlingTest
     for (int i = 0; i < frame.numRows(); i++) {
       final Object[] expectedKeyArray = new Object[keyColumns.size()];
       System.arraycopy(RowKeyComparatorTest.ALL_KEY_OBJECTS.get(i), 0, expectedKeyArray, 0, keyColumns.size());
-      Assertions.assertEquals(
+      Assert.assertEquals(
           KeyTestUtils.createKey(signature, expectedKeyArray),
           widget.readKey(i)
       );
@@ -150,7 +149,7 @@ public class FrameComparisonWidgetImplTest extends InitializedNullHandlingTest
     final FrameComparisonWidget widget = createComparisonWidget(keyColumns);
 
     for (int i = 0; i < frame.numRows(); i++) {
-      Assertions.assertEquals(
+      Assert.assertEquals(
           KeyTestUtils.createKey(RowKeyComparatorTest.SIGNATURE, RowKeyComparatorTest.ALL_KEY_OBJECTS.get(i)),
           widget.readKey(i)
       );
@@ -171,7 +170,7 @@ public class FrameComparisonWidgetImplTest extends InitializedNullHandlingTest
 
     // Compare self-to-self should be equal.
     for (int i = 0; i < frame.numRows(); i++) {
-      Assertions.assertEquals(
+      Assert.assertEquals(
           0,
           widget.compare(
               i,
@@ -189,13 +188,13 @@ public class FrameComparisonWidgetImplTest extends InitializedNullHandlingTest
         RowKeyComparatorTest.ALL_KEY_OBJECTS.get(0)
     );
 
-    assertThat(widget.compare(0, firstKey), Matchers.equalTo(0));
-    assertThat(widget.compare(1, firstKey), Matchers.lessThan(0));
-    assertThat(widget.compare(2, firstKey), Matchers.lessThan(0));
-    assertThat(widget.compare(3, firstKey), Matchers.greaterThan(0));
-    assertThat(widget.compare(4, firstKey), Matchers.greaterThan(0));
-    assertThat(widget.compare(5, firstKey), Matchers.greaterThan(0));
-    assertThat(widget.compare(6, firstKey), Matchers.greaterThan(0));
+    MatcherAssert.assertThat(widget.compare(0, firstKey), Matchers.equalTo(0));
+    MatcherAssert.assertThat(widget.compare(1, firstKey), Matchers.lessThan(0));
+    MatcherAssert.assertThat(widget.compare(2, firstKey), Matchers.lessThan(0));
+    MatcherAssert.assertThat(widget.compare(3, firstKey), Matchers.greaterThan(0));
+    MatcherAssert.assertThat(widget.compare(4, firstKey), Matchers.greaterThan(0));
+    MatcherAssert.assertThat(widget.compare(5, firstKey), Matchers.greaterThan(0));
+    MatcherAssert.assertThat(widget.compare(6, firstKey), Matchers.greaterThan(0));
   }
 
   private FrameComparisonWidget createComparisonWidget(final List<KeyColumn> keyColumns)

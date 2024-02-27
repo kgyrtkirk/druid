@@ -21,6 +21,7 @@ package org.apache.druid.indexing.common.task;
 
 import org.apache.druid.java.util.common.Intervals;
 import org.junit.Assert;
+import org.junit.Test;
 
 public class RestoreTaskTest
 {

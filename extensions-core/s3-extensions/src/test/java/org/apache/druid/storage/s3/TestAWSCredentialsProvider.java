@@ -32,6 +32,7 @@ import org.apache.druid.metadata.DefaultPasswordProvider;
 import org.easymock.EasyMock;
 import org.junit.Assert;
 import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.BufferedWriter;

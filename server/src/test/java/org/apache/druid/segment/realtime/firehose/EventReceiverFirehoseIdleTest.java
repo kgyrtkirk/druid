@@ -31,14 +31,12 @@ import org.apache.druid.server.security.AllowAllAuthenticator;
 import org.apache.druid.server.security.AuthConfig;
 import org.apache.druid.server.security.AuthTestUtils;
 import org.easymock.EasyMock;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Locale;
-import java.util.concurrent.TimeUnit;
 
 public class EventReceiverFirehoseIdleTest
 {
@@ -56,7 +54,7 @@ public class EventReceiverFirehoseIdleTest
   private EventReceiverFirehoseRegister register = new EventReceiverFirehoseRegister();
   private HttpServletRequest req;
 
-  @BeforeEach
+  @Before
   public void setUp()
   {
     req = EasyMock.createMock(HttpServletRequest.class);
@@ -87,8 +85,7 @@ public class EventReceiverFirehoseIdleTest
     );
   }
 
-  @Test
-  @Timeout(value = 40_000L, unit = TimeUnit.MILLISECONDS)
+  @Test(timeout = 40_000L)
   public void testIdle() throws Exception
   {
     awaitFirehoseClosed();
@@ -107,8 +104,7 @@ public class EventReceiverFirehoseIdleTest
     firehose.getDelayedCloseExecutor().join();
   }
 
-  @Test
-  @Timeout(value = 40_000L, unit = TimeUnit.MILLISECONDS)
+  @Test(timeout = 40_000L)
   public void testNotIdle() throws Exception
   {
     EasyMock.expect(req.getAttribute(AuthConfig.DRUID_AUTHORIZATION_CHECKED))
@@ -128,7 +124,7 @@ public class EventReceiverFirehoseIdleTest
 
     final int checks = 5;
     for (int i = 0; i < checks; i++) {
-      Assertions.assertFalse(firehose.isClosed());
+      Assert.assertFalse(firehose.isClosed());
       System.out.printf(Locale.ENGLISH, "Check %d/%d passed\n", i + 1, checks);
       firehose.addAll(IOUtils.toInputStream(inputRow), req);
       Thread.sleep(3_000L);

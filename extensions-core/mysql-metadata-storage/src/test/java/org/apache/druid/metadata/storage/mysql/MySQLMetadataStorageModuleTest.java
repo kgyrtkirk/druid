@@ -36,6 +36,7 @@ import org.apache.druid.guice.security.EscalatorModule;
 import org.apache.druid.java.util.emitter.core.NoopEmitter;
 import org.apache.druid.java.util.emitter.service.ServiceEmitter;
 import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Properties;
 

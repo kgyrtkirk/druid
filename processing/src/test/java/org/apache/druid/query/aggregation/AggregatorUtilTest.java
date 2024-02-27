@@ -26,8 +26,8 @@ import org.apache.druid.query.QueryRunnerTestHelper;
 import org.apache.druid.query.aggregation.post.ArithmeticPostAggregator;
 import org.apache.druid.query.aggregation.post.ConstantPostAggregator;
 import org.apache.druid.query.aggregation.post.FieldAccessPostAggregator;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -69,7 +69,7 @@ public class AggregatorUtilTest
             aggregator
         ), aggregator.getName()
     );
-    Assertions.assertEquals(Lists.newArrayList(dependency1, dependency2, aggregator), prunedAgg);
+    Assert.assertEquals(Lists.newArrayList(dependency1, dependency2, aggregator), prunedAgg);
   }
 
   @Test
@@ -104,7 +104,7 @@ public class AggregatorUtilTest
             dependency2
         ), aggregator.getName()
     );
-    Assertions.assertEquals(Lists.newArrayList(dependency1, aggregator), prunedAgg);
+    Assert.assertEquals(Lists.newArrayList(dependency1, aggregator), prunedAgg);
   }
 
   @Test
@@ -131,11 +131,11 @@ public class AggregatorUtilTest
         QueryRunnerTestHelper.dependentPostAggMetric
     );
     // verify aggregators
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Lists.newArrayList(QueryRunnerTestHelper.ROWS_COUNT, QueryRunnerTestHelper.INDEX_DOUBLE_SUM),
         aggregatorsPair.lhs
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Lists.newArrayList(
             QueryRunnerTestHelper.ADD_ROWS_INDEX_CONSTANT,
             QueryRunnerTestHelper.DEPENDENT_POST_AGG
@@ -161,7 +161,7 @@ public class AggregatorUtilTest
         Lists.newArrayList(new FieldAccessPostAggregator(null, "agg1"), new FieldAccessPostAggregator(null, "agg2"))
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new Pair<>(Lists.newArrayList(agg1, agg2), Collections.singletonList(postAgg2)),
         AggregatorUtil.condensedAggregators(
             Lists.newArrayList(agg1, agg2),
@@ -189,7 +189,7 @@ public class AggregatorUtilTest
         Lists.newArrayList(new FieldAccessPostAggregator(null, "Agg1"), new FieldAccessPostAggregator(null, "Agg2"))
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new Pair<>(Lists.newArrayList(agg1, agg2), Collections.singletonList(postAgg2)),
         AggregatorUtil.condensedAggregators(
             Lists.newArrayList(agg1, agg2),

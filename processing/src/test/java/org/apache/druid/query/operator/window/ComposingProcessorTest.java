@@ -20,8 +20,8 @@
 package org.apache.druid.query.operator.window;
 
 import org.apache.druid.query.rowsandcols.RowsAndColumns;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class ComposingProcessorTest
 {
@@ -34,21 +34,21 @@ public class ComposingProcessorTest
     ComposingProcessor proc = new ComposingProcessor(firstProcessor, secondProcessor);
 
     proc.process(null);
-    Assertions.assertEquals(1, firstProcessor.processCounter);
-    Assertions.assertEquals(1, secondProcessor.processCounter);
+    Assert.assertEquals(1, firstProcessor.processCounter);
+    Assert.assertEquals(1, secondProcessor.processCounter);
 
     proc.process(null);
-    Assertions.assertEquals(2, firstProcessor.processCounter);
-    Assertions.assertEquals(2, secondProcessor.processCounter);
+    Assert.assertEquals(2, firstProcessor.processCounter);
+    Assert.assertEquals(2, secondProcessor.processCounter);
 
-    Assertions.assertTrue(proc.validateEquivalent(proc));
-    Assertions.assertEquals(1, firstProcessor.validateCounter);
-    Assertions.assertEquals(1, secondProcessor.validateCounter);
+    Assert.assertTrue(proc.validateEquivalent(proc));
+    Assert.assertEquals(1, firstProcessor.validateCounter);
+    Assert.assertEquals(1, secondProcessor.validateCounter);
 
     firstProcessor.validationResult = false;
-    Assertions.assertFalse(proc.validateEquivalent(proc));
-    Assertions.assertEquals(2, firstProcessor.validateCounter);
-    Assertions.assertEquals(1, secondProcessor.validateCounter);
+    Assert.assertFalse(proc.validateEquivalent(proc));
+    Assert.assertEquals(2, firstProcessor.validateCounter);
+    Assert.assertEquals(1, secondProcessor.validateCounter);
   }
 
   private static class ProcessorForTesting implements Processor

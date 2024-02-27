@@ -30,10 +30,10 @@ import org.apache.druid.segment.column.ColumnCapabilities;
 import org.apache.druid.segment.column.ValueType;
 import org.apache.druid.segment.join.Joinable;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -51,7 +51,7 @@ public class LookupJoinableTest extends InitializedNullHandlingTest
 
   private LookupJoinable target;
 
-  @BeforeEach
+  @Before
   public void setUp()
   {
     final Map<String, String> lookupMap = new HashMap<>();
@@ -70,8 +70,8 @@ public class LookupJoinableTest extends InitializedNullHandlingTest
   public void getAvailableColumnShouldReturnOnlyTwoColumns()
   {
     List<String> colummns = target.getAvailableColumns();
-    Assertions.assertEquals(2, colummns.size());
-    Assertions.assertEquals(
+    Assert.assertEquals(2, colummns.size());
+    Assert.assertEquals(
         ImmutableList.of(LookupColumnSelectorFactory.KEY_COLUMN, LookupColumnSelectorFactory.VALUE_COLUMN),
         colummns
     );
@@ -81,42 +81,42 @@ public class LookupJoinableTest extends InitializedNullHandlingTest
   public void getCardinalityForUnknownColumnShouldReturnUnknown()
   {
     int cardinality = target.getCardinality(UNKNOWN_COLUMN);
-    Assertions.assertEquals(Joinable.CARDINALITY_UNKNOWN, cardinality);
+    Assert.assertEquals(Joinable.CARDINALITY_UNKNOWN, cardinality);
   }
 
   @Test
   public void getCardinalityForKeyColumnShouldReturnUnknown()
   {
     int cardinality = target.getCardinality(LookupColumnSelectorFactory.KEY_COLUMN);
-    Assertions.assertEquals(Joinable.CARDINALITY_UNKNOWN, cardinality);
+    Assert.assertEquals(Joinable.CARDINALITY_UNKNOWN, cardinality);
   }
 
   @Test
   public void getCardinalityForValueColumnShouldReturnUnknown()
   {
     int cardinality = target.getCardinality(LookupColumnSelectorFactory.VALUE_COLUMN);
-    Assertions.assertEquals(Joinable.CARDINALITY_UNKNOWN, cardinality);
+    Assert.assertEquals(Joinable.CARDINALITY_UNKNOWN, cardinality);
   }
 
   @Test
   public void getColumnCapabilitiesForKeyColumnShouldReturnStringCaps()
   {
     ColumnCapabilities capabilities = target.getColumnCapabilities(LookupColumnSelectorFactory.KEY_COLUMN);
-    Assertions.assertEquals(ValueType.STRING, capabilities.getType());
+    Assert.assertEquals(ValueType.STRING, capabilities.getType());
   }
 
   @Test
   public void getColumnCapabilitiesForValueColumnShouldReturnStringCaps()
   {
     ColumnCapabilities capabilities = target.getColumnCapabilities(LookupColumnSelectorFactory.VALUE_COLUMN);
-    Assertions.assertEquals(ValueType.STRING, capabilities.getType());
+    Assert.assertEquals(ValueType.STRING, capabilities.getType());
   }
 
   @Test
   public void getColumnCapabilitiesForUnknownColumnShouldReturnNull()
   {
     ColumnCapabilities capabilities = target.getColumnCapabilities(UNKNOWN_COLUMN);
-    Assertions.assertNull(capabilities);
+    Assert.assertNull(capabilities);
   }
 
   @Test
@@ -131,7 +131,7 @@ public class LookupJoinableTest extends InitializedNullHandlingTest
             false
         );
 
-    Assertions.assertFalse(correlatedValues.isPresent());
+    Assert.assertFalse(correlatedValues.isPresent());
   }
 
   @Test
@@ -146,7 +146,7 @@ public class LookupJoinableTest extends InitializedNullHandlingTest
             false
         );
 
-    Assertions.assertFalse(correlatedValues.isPresent());
+    Assert.assertFalse(correlatedValues.isPresent());
   }
 
   @Test
@@ -159,7 +159,7 @@ public class LookupJoinableTest extends InitializedNullHandlingTest
         0,
         false
     );
-    Assertions.assertEquals(Optional.of(ImmutableSet.of(SEARCH_KEY_VALUE)), correlatedValues);
+    Assert.assertEquals(Optional.of(ImmutableSet.of(SEARCH_KEY_VALUE)), correlatedValues);
   }
 
   @Test
@@ -172,7 +172,7 @@ public class LookupJoinableTest extends InitializedNullHandlingTest
         0,
         false
     );
-    Assertions.assertEquals(Optional.of(ImmutableSet.of(SEARCH_VALUE_VALUE)), correlatedValues);
+    Assert.assertEquals(Optional.of(ImmutableSet.of(SEARCH_VALUE_VALUE)), correlatedValues);
   }
 
   @Test
@@ -185,7 +185,7 @@ public class LookupJoinableTest extends InitializedNullHandlingTest
         0,
         false
     );
-    Assertions.assertEquals(Optional.of(Collections.singleton(null)), correlatedValues);
+    Assert.assertEquals(Optional.of(Collections.singleton(null)), correlatedValues);
   }
 
   @Test
@@ -198,7 +198,7 @@ public class LookupJoinableTest extends InitializedNullHandlingTest
         10,
         false
     );
-    Assertions.assertEquals(Optional.empty(), correlatedValues);
+    Assert.assertEquals(Optional.empty(), correlatedValues);
     correlatedValues = target.getCorrelatedColumnValues(
         LookupColumnSelectorFactory.VALUE_COLUMN,
         SEARCH_VALUE_VALUE,
@@ -206,7 +206,7 @@ public class LookupJoinableTest extends InitializedNullHandlingTest
         10,
         false
     );
-    Assertions.assertEquals(Optional.empty(), correlatedValues);
+    Assert.assertEquals(Optional.empty(), correlatedValues);
   }
 
   @Test
@@ -219,7 +219,7 @@ public class LookupJoinableTest extends InitializedNullHandlingTest
         0,
         true
     );
-    Assertions.assertEquals(Optional.of(ImmutableSet.of(SEARCH_VALUE_VALUE)), correlatedValues);
+    Assert.assertEquals(Optional.of(ImmutableSet.of(SEARCH_VALUE_VALUE)), correlatedValues);
   }
 
   @Test
@@ -232,11 +232,11 @@ public class LookupJoinableTest extends InitializedNullHandlingTest
         10,
         true
     );
-    Assertions.assertEquals(Optional.of(ImmutableSet.of(SEARCH_KEY_VALUE)), correlatedValues);
+    Assert.assertEquals(Optional.of(ImmutableSet.of(SEARCH_KEY_VALUE)), correlatedValues);
   }
 
   @Test
-  @Disabled
+  @Ignore
   /**
    * See {@link LookupJoinable#getCorrelatedColumnValues(String, String, String, long, boolean)} for implementation
    * details that cause this test to fail.
@@ -250,7 +250,7 @@ public class LookupJoinableTest extends InitializedNullHandlingTest
         0,
         true
     );
-    Assertions.assertEquals(Optional.empty(), correlatedValues);
+    Assert.assertEquals(Optional.empty(), correlatedValues);
   }
 
   @Test
@@ -263,7 +263,7 @@ public class LookupJoinableTest extends InitializedNullHandlingTest
         10,
         true
     );
-    Assertions.assertEquals(Optional.of(ImmutableSet.of()), correlatedValues);
+    Assert.assertEquals(Optional.of(ImmutableSet.of()), correlatedValues);
   }
 
   @Test
@@ -275,7 +275,7 @@ public class LookupJoinableTest extends InitializedNullHandlingTest
         Integer.MAX_VALUE
     );
 
-    Assertions.assertEquals(ImmutableSet.of(), values.getColumnValues());
+    Assert.assertEquals(ImmutableSet.of(), values.getColumnValues());
   }
 
   @Test
@@ -287,7 +287,7 @@ public class LookupJoinableTest extends InitializedNullHandlingTest
         Integer.MAX_VALUE
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         NullHandling.sqlCompatible()
         ? ImmutableSet.of(SEARCH_KEY_VALUE, "foo", "bar", "")
         : ImmutableSet.of(SEARCH_KEY_VALUE, "foo", "bar"),
@@ -304,7 +304,7 @@ public class LookupJoinableTest extends InitializedNullHandlingTest
         Integer.MAX_VALUE
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Sets.newHashSet(SEARCH_KEY_VALUE, "foo", "bar", "", null),
         values.getColumnValues()
     );
@@ -319,6 +319,6 @@ public class LookupJoinableTest extends InitializedNullHandlingTest
         1
     );
 
-    Assertions.assertEquals(ImmutableSet.of(), values.getColumnValues());
+    Assert.assertEquals(ImmutableSet.of(), values.getColumnValues());
   }
 }

@@ -33,17 +33,20 @@ import org.apache.druid.segment.incremental.OnheapIncrementalIndex;
 import org.apache.druid.segment.writeout.OffHeapMemorySegmentWriteOutMediumFactory;
 import org.apache.druid.segment.writeout.SegmentWriteOutMediumFactory;
 import org.apache.druid.segment.writeout.TmpFileSegmentWriteOutMediumFactory;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.io.File;
 import java.util.Collection;
 import java.util.Collections;
 
+@RunWith(Parameterized.class)
 public class EmptyIndexTest
 {
 
+  @Parameterized.Parameters
   public static Collection<?> constructorFeeder()
   {
     return ImmutableList.of(
@@ -52,18 +55,16 @@ public class EmptyIndexTest
     );
   }
 
-  private SegmentWriteOutMediumFactory segmentWriteOutMediumFactory;
+  private final SegmentWriteOutMediumFactory segmentWriteOutMediumFactory;
 
-  public void initEmptyIndexTest(SegmentWriteOutMediumFactory segmentWriteOutMediumFactory)
+  public EmptyIndexTest(SegmentWriteOutMediumFactory segmentWriteOutMediumFactory)
   {
     this.segmentWriteOutMediumFactory = segmentWriteOutMediumFactory;
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest
-  public void testEmptyIndex(SegmentWriteOutMediumFactory segmentWriteOutMediumFactory) throws Exception
+  @Test
+  public void testEmptyIndex() throws Exception
   {
-    initEmptyIndexTest(segmentWriteOutMediumFactory);
     File tmpDir = File.createTempFile("emptyIndex", "");
     if (!tmpDir.delete()) {
       throw new IllegalStateException("tmp delete failed");
@@ -95,13 +96,13 @@ public class EmptyIndexTest
 
       QueryableIndex emptyQueryableIndex = TestHelper.getTestIndexIO().loadIndex(tmpDir);
 
-      Assertions.assertEquals(0, Iterables.size(emptyQueryableIndex.getAvailableDimensions()), "getDimensionNames");
-      Assertions.assertEquals(0, emptyQueryableIndex.getColumnNames().size(), "getMetricNames");
-      Assertions.assertEquals(Intervals.of("2012-08-01/P3D"), emptyQueryableIndex.getDataInterval(), "getDataInterval");
-      Assertions.assertEquals(
+      Assert.assertEquals("getDimensionNames", 0, Iterables.size(emptyQueryableIndex.getAvailableDimensions()));
+      Assert.assertEquals("getMetricNames", 0, emptyQueryableIndex.getColumnNames().size());
+      Assert.assertEquals("getDataInterval", Intervals.of("2012-08-01/P3D"), emptyQueryableIndex.getDataInterval());
+      Assert.assertEquals(
+          "getReadOnlyTimestamps",
           0,
-          emptyQueryableIndex.getColumnHolder(ColumnHolder.TIME_COLUMN_NAME).getLength(),
-          "getReadOnlyTimestamps"
+          emptyQueryableIndex.getColumnHolder(ColumnHolder.TIME_COLUMN_NAME).getLength()
       );
     }
     finally {

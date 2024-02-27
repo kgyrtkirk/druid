@@ -30,17 +30,20 @@ import org.apache.druid.guice.annotations.Json;
 import org.apache.druid.query.extraction.ExtractionFn;
 import org.apache.druid.query.extraction.RegexDimExtractionFn;
 import org.apache.druid.query.ordering.StringComparators;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.io.IOException;
 import java.util.Arrays;
 
+@RunWith(Parameterized.class)
 public class BoundDimFilterTest
 {
   private static final ExtractionFn EXTRACTION_FN = new RegexDimExtractionFn(".*", false, null);
 
+  @Parameterized.Parameters
   public static Iterable<Object[]> constructorFeeder()
   {
 
@@ -66,59 +69,51 @@ public class BoundDimFilterTest
     );
   }
 
-  private BoundDimFilter boundDimFilter;
+  private final BoundDimFilter boundDimFilter;
 
-  public void initBoundDimFilterTest(BoundDimFilter boundDimFilter)
+  public BoundDimFilterTest(BoundDimFilter boundDimFilter)
   {
     this.boundDimFilter = boundDimFilter;
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest
-  public void testSerDesBoundFilter(BoundDimFilter boundDimFilter) throws IOException
+  @Test
+  public void testSerDesBoundFilter() throws IOException
   {
-    initBoundDimFilterTest(boundDimFilter);
     Injector defaultInjector = GuiceInjectors.makeStartupInjector();
     ObjectMapper mapper = defaultInjector.getInstance(Key.get(ObjectMapper.class, Json.class));
     String serBetweenDimFilter = mapper.writeValueAsString(boundDimFilter);
     BoundDimFilter actualBoundDimFilter = mapper.readerFor(DimFilter.class).readValue(serBetweenDimFilter);
-    Assertions.assertEquals(boundDimFilter, actualBoundDimFilter);
+    Assert.assertEquals(boundDimFilter, actualBoundDimFilter);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest
-  public void testGetCacheKey(BoundDimFilter boundDimFilter)
+  @Test
+  public void testGetCacheKey()
   {
-    initBoundDimFilterTest(boundDimFilter);
     BoundDimFilter boundDimFilter = new BoundDimFilter("dimension", "12", "15", null, null, true, null, StringComparators.ALPHANUMERIC);
     BoundDimFilter boundDimFilterCopy = new BoundDimFilter("dimension", "12", "15", false, false, true, null, StringComparators.ALPHANUMERIC);
-    Assertions.assertArrayEquals(boundDimFilter.getCacheKey(), boundDimFilterCopy.getCacheKey());
+    Assert.assertArrayEquals(boundDimFilter.getCacheKey(), boundDimFilterCopy.getCacheKey());
     BoundDimFilter anotherBoundDimFilter = new BoundDimFilter("dimension", "12", "15", true, null, false, null, StringComparators.LEXICOGRAPHIC);
-    Assertions.assertFalse(Arrays.equals(anotherBoundDimFilter.getCacheKey(), boundDimFilter.getCacheKey()));
+    Assert.assertFalse(Arrays.equals(anotherBoundDimFilter.getCacheKey(), boundDimFilter.getCacheKey()));
 
     BoundDimFilter boundDimFilterWithExtract = new BoundDimFilter("dimension", "12", "15", null, null, true, EXTRACTION_FN, StringComparators.ALPHANUMERIC);
     BoundDimFilter boundDimFilterWithExtractCopy = new BoundDimFilter("dimension", "12", "15", false, false, true, EXTRACTION_FN, StringComparators.ALPHANUMERIC);
-    Assertions.assertFalse(Arrays.equals(boundDimFilter.getCacheKey(), boundDimFilterWithExtract.getCacheKey()));
-    Assertions.assertArrayEquals(boundDimFilterWithExtract.getCacheKey(), boundDimFilterWithExtractCopy.getCacheKey());
+    Assert.assertFalse(Arrays.equals(boundDimFilter.getCacheKey(), boundDimFilterWithExtract.getCacheKey()));
+    Assert.assertArrayEquals(boundDimFilterWithExtract.getCacheKey(), boundDimFilterWithExtractCopy.getCacheKey());
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest
-  public void testHashCode(BoundDimFilter boundDimFilter)
+  @Test
+  public void testHashCode()
   {
-    initBoundDimFilterTest(boundDimFilter);
     BoundDimFilter boundDimFilter = new BoundDimFilter("dimension", "12", "15", null, null, true, null, StringComparators.ALPHANUMERIC);
     BoundDimFilter boundDimFilterWithExtract = new BoundDimFilter("dimension", "12", "15", null, null, true, EXTRACTION_FN, StringComparators.ALPHANUMERIC);
 
-    Assertions.assertNotEquals(boundDimFilter.hashCode(), boundDimFilterWithExtract.hashCode());
+    Assert.assertNotEquals(boundDimFilter.hashCode(), boundDimFilterWithExtract.hashCode());
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest
-  public void testGetRequiredColumns(BoundDimFilter boundDimFilter)
+  @Test
+  public void testGetRequiredColumns()
   {
-    initBoundDimFilterTest(boundDimFilter);
     BoundDimFilter boundDimFilter = new BoundDimFilter("dimension", "12", "15", null, null, true, null, StringComparators.ALPHANUMERIC);
-    Assertions.assertEquals(boundDimFilter.getRequiredColumns(), Sets.newHashSet("dimension"));
+    Assert.assertEquals(boundDimFilter.getRequiredColumns(), Sets.newHashSet("dimension"));
   }
 }

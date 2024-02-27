@@ -28,8 +28,8 @@ import com.fasterxml.jackson.dataformat.smile.SmileFactory;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.apache.druid.java.util.common.jackson.JacksonUtils;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -69,6 +69,6 @@ public class JsonIteratorTest
     }
     testJsonIterator.close();
 
-    Assertions.assertEquals(expectedList, actualList);
+    Assert.assertEquals(expectedList, actualList);
   }
 }

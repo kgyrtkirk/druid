@@ -23,25 +23,25 @@ import com.google.common.collect.ImmutableList;
 import org.apache.druid.query.filter.SelectorDimFilter;
 import org.apache.druid.query.filter.TrueDimFilter;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class FilteredAggregatorFactoryTest extends InitializedNullHandlingTest
 {
   @Test
   public void testSimpleNaming()
   {
-    Assertions.assertEquals("overrideName", new FilteredAggregatorFactory(
+    Assert.assertEquals("overrideName", new FilteredAggregatorFactory(
         new CountAggregatorFactory("foo"),
         TrueDimFilter.instance(),
         "overrideName"
     ).getName());
-    Assertions.assertEquals("delegateName", new FilteredAggregatorFactory(
+    Assert.assertEquals("delegateName", new FilteredAggregatorFactory(
         new CountAggregatorFactory("delegateName"),
         TrueDimFilter.instance(),
         ""
     ).getName());
-    Assertions.assertEquals("delegateName", new FilteredAggregatorFactory(
+    Assert.assertEquals("delegateName", new FilteredAggregatorFactory(
         new CountAggregatorFactory("delegateName"),
         TrueDimFilter.instance(),
         null
@@ -51,7 +51,7 @@ public class FilteredAggregatorFactoryTest extends InitializedNullHandlingTest
   @Test
   public void testRequiredFields()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableList.of("x", "y"),
         new FilteredAggregatorFactory(
             new LongSumAggregatorFactory("x", "x"),

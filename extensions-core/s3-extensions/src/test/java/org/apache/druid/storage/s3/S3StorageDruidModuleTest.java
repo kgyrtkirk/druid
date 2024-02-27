@@ -27,6 +27,7 @@ import org.apache.druid.segment.loading.OmniDataSegmentArchiver;
 import org.apache.druid.segment.loading.OmniDataSegmentKiller;
 import org.apache.druid.segment.loading.OmniDataSegmentMover;
 import org.junit.Assert;
+import org.junit.Test;
 
 public class S3StorageDruidModuleTest
 {

@@ -69,10 +69,11 @@ import org.apache.druid.segment.index.BitmapColumnIndex;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
+import org.junit.Assert;
 import org.junit.Rule;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -86,14 +87,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  */
+@RunWith(Parameterized.class)
 public class IncrementalIndexStorageAdapterTest extends InitializedNullHandlingTest
 {
-  public IncrementalIndexCreator indexCreator;
+  public final IncrementalIndexCreator indexCreator;
 
   @Rule
   public final CloserRule closer = new CloserRule(false);
 
-  public void initIncrementalIndexStorageAdapterTest(String indexType) throws JsonProcessingException
+  public IncrementalIndexStorageAdapterTest(String indexType) throws JsonProcessingException
   {
     NestedDataModule.registerHandlersAndSerde();
     indexCreator = closer.closeLater(new IncrementalIndexCreator(indexType, (builder, args) -> builder
@@ -103,16 +105,15 @@ public class IncrementalIndexStorageAdapterTest extends InitializedNullHandlingT
     ));
   }
 
+  @Parameterized.Parameters(name = "{index}: {0}")
   public static Collection<?> constructorFeeder()
   {
     return IncrementalIndexCreator.getAppendableIndexTypes();
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{index}: {0}")
-  public void testSanity(String indexType) throws Exception
+  @Test
+  public void testSanity() throws Exception
   {
-    initIncrementalIndexStorageAdapterTest(indexType);
     IncrementalIndex index = indexCreator.createIndex();
     index.add(
         new MapBasedInputRow(
@@ -162,21 +163,19 @@ public class IncrementalIndexStorageAdapterTest extends InitializedNullHandlingT
 
       final List<ResultRow> results = rows.toList();
 
-      Assertions.assertEquals(2, results.size());
+      Assert.assertEquals(2, results.size());
 
       ResultRow row = results.get(0);
-      Assertions.assertArrayEquals(new Object[]{NullHandling.defaultStringValue(), "bo", 1L}, row.getArray());
+      Assert.assertArrayEquals(new Object[]{NullHandling.defaultStringValue(), "bo", 1L}, row.getArray());
 
       row = results.get(1);
-      Assertions.assertArrayEquals(new Object[]{"hi", NullHandling.defaultStringValue(), 1L}, row.getArray());
+      Assert.assertArrayEquals(new Object[]{"hi", NullHandling.defaultStringValue(), 1L}, row.getArray());
     }
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{index}: {0}")
-  public void testObjectColumnSelectorOnVaryingColumnSchema(String indexType) throws Exception
+  @Test
+  public void testObjectColumnSelectorOnVaryingColumnSchema() throws Exception
   {
-    initIncrementalIndexStorageAdapterTest(indexType);
     IncrementalIndex index = indexCreator.createIndex();
     index.add(
         new MapBasedInputRow(
@@ -240,25 +239,22 @@ public class IncrementalIndexStorageAdapterTest extends InitializedNullHandlingT
 
       final List<ResultRow> results = rows.toList();
 
-      Assertions.assertEquals(2, results.size());
+      Assert.assertEquals(2, results.size());
 
       ResultRow row = results.get(0);
-      Assertions.assertArrayEquals(new Object[]{"hi", NullHandling.defaultStringValue(), 1L, 2.0}, row.getArray());
+      Assert.assertArrayEquals(new Object[]{"hi", NullHandling.defaultStringValue(), 1L, 2.0}, row.getArray());
 
       row = results.get(1);
-      Assertions.assertArrayEquals(
+      Assert.assertArrayEquals(
           new Object[]{"hip", "hop", 1L, 6.0},
           row.getArray()
       );
     }
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{index}: {0}")
-  public void testResetSanity(String indexType) throws IOException
+  @Test
+  public void testResetSanity() throws IOException
   {
-
-    initIncrementalIndexStorageAdapterTest(indexType);
 
     IncrementalIndex index = indexCreator.createIndex();
     DateTime t = DateTimes.nowUtc();
@@ -297,7 +293,7 @@ public class IncrementalIndexStorageAdapterTest extends InitializedNullHandlingT
       dimSelector = cursor
           .getColumnSelectorFactory()
           .makeDimensionSelector(new DefaultDimensionSpec("sally", "sally"));
-      Assertions.assertEquals("bo", dimSelector.lookupName(dimSelector.getRow().get(0)));
+      Assert.assertEquals("bo", dimSelector.lookupName(dimSelector.getRow().get(0)));
 
       index.add(
           new MapBasedInputRow(
@@ -313,15 +309,13 @@ public class IncrementalIndexStorageAdapterTest extends InitializedNullHandlingT
       dimSelector = cursor
           .getColumnSelectorFactory()
           .makeDimensionSelector(new DefaultDimensionSpec("sally", "sally"));
-      Assertions.assertEquals("bo", dimSelector.lookupName(dimSelector.getRow().get(0)));
+      Assert.assertEquals("bo", dimSelector.lookupName(dimSelector.getRow().get(0)));
     }
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{index}: {0}")
-  public void testSingleValueTopN(String indexType) throws IOException
+  @Test
+  public void testSingleValueTopN() throws IOException
   {
-    initIncrementalIndexStorageAdapterTest(indexType);
     IncrementalIndex index = indexCreator.createIndex();
     DateTime t = DateTimes.nowUtc();
     index.add(
@@ -356,16 +350,14 @@ public class IncrementalIndexStorageAdapterTest extends InitializedNullHandlingT
           )
           .toList();
 
-      Assertions.assertEquals(1, Iterables.size(results));
-      Assertions.assertEquals(1, results.iterator().next().getValue().getValue().size());
+      Assert.assertEquals(1, Iterables.size(results));
+      Assert.assertEquals(1, results.iterator().next().getValue().getValue().size());
     }
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{index}: {0}")
-  public void testFilterByNull(String indexType) throws Exception
+  @Test
+  public void testFilterByNull() throws Exception
   {
-    initIncrementalIndexStorageAdapterTest(indexType);
     IncrementalIndex index = indexCreator.createIndex();
     index.add(
         new MapBasedInputRow(
@@ -416,18 +408,16 @@ public class IncrementalIndexStorageAdapterTest extends InitializedNullHandlingT
 
       final List<ResultRow> results = rows.toList();
 
-      Assertions.assertEquals(1, results.size());
+      Assert.assertEquals(1, results.size());
 
       ResultRow row = results.get(0);
-      Assertions.assertArrayEquals(new Object[]{"hi", NullHandling.defaultStringValue(), 1L}, row.getArray());
+      Assert.assertArrayEquals(new Object[]{"hi", NullHandling.defaultStringValue(), 1L}, row.getArray());
     }
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{index}: {0}")
-  public void testCursoringAndIndexUpdationInterleaving(String indexType) throws Exception
+  @Test
+  public void testCursoringAndIndexUpdationInterleaving() throws Exception
   {
-    initIncrementalIndexStorageAdapterTest(indexType);
     final IncrementalIndex index = indexCreator.createIndex();
     final long timestamp = System.currentTimeMillis();
 
@@ -474,24 +464,22 @@ public class IncrementalIndexStorageAdapterTest extends InitializedNullHandlingT
           // and then, cursoring continues in the other thread
           while (!cursor.isDone()) {
             IndexedInts row = dimSelector.getRow();
-            row.forEach(i -> Assertions.assertTrue(i < cardinality));
+            row.forEach(i -> Assert.assertTrue(i < cardinality));
             cursor.advance();
             rowNumInCursor++;
           }
-          Assertions.assertEquals(2, rowNumInCursor);
+          Assert.assertEquals(2, rowNumInCursor);
           assertCursorsNotEmpty.incrementAndGet();
 
           return null;
         })
         .toList();
-    Assertions.assertEquals(1, assertCursorsNotEmpty.get());
+    Assert.assertEquals(1, assertCursorsNotEmpty.get());
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{index}: {0}")
-  public void testCursorDictionaryRaceConditionFix(String indexType) throws Exception
+  @Test
+  public void testCursorDictionaryRaceConditionFix() throws Exception
   {
-    initIncrementalIndexStorageAdapterTest(indexType);
     // Tests the dictionary ID race condition bug described at https://github.com/apache/druid/pull/6340
 
     final IncrementalIndex index = indexCreator.createIndex();
@@ -529,24 +517,22 @@ public class IncrementalIndexStorageAdapterTest extends InitializedNullHandlingT
           int rowNumInCursor = 0;
           while (!cursor.isDone()) {
             IndexedInts row = dimSelector.getRow();
-            row.forEach(i -> Assertions.assertTrue(i < cardinality));
+            row.forEach(i -> Assert.assertTrue(i < cardinality));
             cursor.advance();
             rowNumInCursor++;
           }
-          Assertions.assertEquals(5, rowNumInCursor);
+          Assert.assertEquals(5, rowNumInCursor);
           assertCursorsNotEmpty.incrementAndGet();
 
           return null;
         })
         .toList();
-    Assertions.assertEquals(1, assertCursorsNotEmpty.get());
+    Assert.assertEquals(1, assertCursorsNotEmpty.get());
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{index}: {0}")
-  public void testCursoringAndSnapshot(String indexType) throws Exception
+  @Test
+  public void testCursoringAndSnapshot() throws Exception
   {
-    initIncrementalIndexStorageAdapterTest(indexType);
     final IncrementalIndex index = indexCreator.createIndex();
     final long timestamp = System.currentTimeMillis();
 
@@ -623,32 +609,32 @@ public class IncrementalIndexStorageAdapterTest extends InitializedNullHandlingT
           // and then, cursoring continues in the other thread
           while (!cursor.isDone()) {
             IndexedInts rowA = dimSelector1A.getRow();
-            rowA.forEach(i -> Assertions.assertTrue(i < cardinalityA));
+            rowA.forEach(i -> Assert.assertTrue(i < cardinalityA));
             IndexedInts rowB = dimSelector1B.getRow();
-            rowB.forEach(i -> Assertions.assertTrue(i < cardinalityA));
+            rowB.forEach(i -> Assert.assertTrue(i < cardinalityA));
             IndexedInts rowC = dimSelector1C.getRow();
-            rowC.forEach(i -> Assertions.assertTrue(i < cardinalityA));
+            rowC.forEach(i -> Assert.assertTrue(i < cardinalityA));
             IndexedInts rowD = dimSelector2D.getRow();
             // no null id, so should get empty dims array
-            Assertions.assertEquals(0, rowD.size());
+            Assert.assertEquals(0, rowD.size());
             IndexedInts rowE = dimSelector3E.getRow();
             if (NullHandling.replaceWithDefault()) {
-              Assertions.assertEquals(1, rowE.size());
+              Assert.assertEquals(1, rowE.size());
               // the null id
-              Assertions.assertEquals(0, rowE.get(0));
+              Assert.assertEquals(0, rowE.get(0));
             } else {
-              Assertions.assertEquals(0, rowE.size());
+              Assert.assertEquals(0, rowE.size());
             }
             cursor.advance();
             rowNumInCursor++;
           }
-          Assertions.assertEquals(2, rowNumInCursor);
+          Assert.assertEquals(2, rowNumInCursor);
           assertCursorsNotEmpty.incrementAndGet();
 
           return null;
         })
         .toList();
-    Assertions.assertEquals(1, assertCursorsNotEmpty.get());
+    Assert.assertEquals(1, assertCursorsNotEmpty.get());
   }
 
   private static class DictionaryRaceTestFilter implements Filter
@@ -656,7 +642,7 @@ public class IncrementalIndexStorageAdapterTest extends InitializedNullHandlingT
     private final IncrementalIndex index;
     private final long timestamp;
 
-    private void initIncrementalIndexStorageAdapterTest(
+    private DictionaryRaceTestFilter(
         IncrementalIndex index,
         long timestamp
     )

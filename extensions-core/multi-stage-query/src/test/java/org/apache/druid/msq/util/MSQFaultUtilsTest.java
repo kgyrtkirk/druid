@@ -23,6 +23,7 @@ import org.apache.druid.msq.indexing.error.MSQFaultUtils;
 import org.apache.druid.msq.indexing.error.UnknownFault;
 import org.apache.druid.msq.indexing.error.WorkerFailedFault;
 import org.junit.Assert;
+import org.junit.Test;
 
 public class MSQFaultUtilsTest
 {

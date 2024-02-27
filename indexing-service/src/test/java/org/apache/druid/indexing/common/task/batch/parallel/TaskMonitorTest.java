@@ -38,6 +38,7 @@ import org.apache.druid.java.util.common.concurrent.Execs;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Test;
 
 import javax.annotation.Nullable;
 import java.util.List;

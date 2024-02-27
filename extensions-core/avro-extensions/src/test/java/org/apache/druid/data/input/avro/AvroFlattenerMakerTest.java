@@ -29,6 +29,7 @@ import org.apache.druid.data.input.UnionSubEnum;
 import org.apache.druid.data.input.UnionSubFixed;
 import org.apache.druid.data.input.UnionSubRecord;
 import org.junit.Assert;
+import org.junit.Test;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;

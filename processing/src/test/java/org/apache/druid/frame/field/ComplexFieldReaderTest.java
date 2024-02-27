@@ -32,26 +32,29 @@ import org.apache.druid.segment.serde.ComplexMetricExtractor;
 import org.apache.druid.segment.serde.ComplexMetricSerde;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.hamcrest.CoreMatchers;
+import org.hamcrest.MatcherAssert;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.internal.matchers.ThrowableMessageMatcher;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
+import org.mockito.quality.Strictness;
 
 import javax.annotation.Nullable;
 import java.nio.ByteBuffer;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-
-@ExtendWith(MockitoExtension.class)
 public class ComplexFieldReaderTest extends InitializedNullHandlingTest
 {
   private static final ComplexMetricSerde SERDE = new StringComplexMetricSerde();
   private static final long MEMORY_POSITION = 1;
+
+  @Rule
+  public MockitoRule mockitoRule = MockitoJUnit.rule().strictness(Strictness.STRICT_STUBS);
 
   @Mock
   public BaseObjectColumnValueSelector<String> writeSelector;
@@ -59,14 +62,14 @@ public class ComplexFieldReaderTest extends InitializedNullHandlingTest
   private WritableMemory memory;
   private FieldWriter fieldWriter;
 
-  @BeforeEach
+  @Before
   public void setUp()
   {
     memory = WritableMemory.allocate(1000);
     fieldWriter = new ComplexFieldWriter(SERDE, writeSelector);
   }
 
-  @AfterEach
+  @After
   public void tearDown()
   {
     fieldWriter.close();
@@ -75,12 +78,12 @@ public class ComplexFieldReaderTest extends InitializedNullHandlingTest
   @Test
   public void test_createFromType_notComplex()
   {
-    final IllegalStateException e = Assertions.assertThrows(
+    final IllegalStateException e = Assert.assertThrows(
         IllegalStateException.class,
         () -> ComplexFieldReader.createFromType(ColumnType.LONG)
     );
 
-    assertThat(
+    MatcherAssert.assertThat(
         e,
         ThrowableMessageMatcher.hasMessage(CoreMatchers.containsString("Expected complex type"))
     );
@@ -89,12 +92,12 @@ public class ComplexFieldReaderTest extends InitializedNullHandlingTest
   @Test
   public void test_createFromType_noComplexSerde()
   {
-    final IllegalStateException e = Assertions.assertThrows(
+    final IllegalStateException e = Assert.assertThrows(
         IllegalStateException.class,
         () -> ComplexFieldReader.createFromType(ColumnType.ofComplex("no-serde"))
     );
 
-    assertThat(
+    MatcherAssert.assertThat(
         e,
         ThrowableMessageMatcher.hasMessage(CoreMatchers.containsString("No serde for complexTypeName[no-serde]"))
     );
@@ -104,14 +107,14 @@ public class ComplexFieldReaderTest extends InitializedNullHandlingTest
   public void test_isNull_null()
   {
     writeToMemory(null);
-    Assertions.assertTrue(new ComplexFieldReader(SERDE).isNull(memory, MEMORY_POSITION));
+    Assert.assertTrue(new ComplexFieldReader(SERDE).isNull(memory, MEMORY_POSITION));
   }
 
   @Test
   public void test_isNull_aValue()
   {
     writeToMemory("foo");
-    Assertions.assertFalse(new ComplexFieldReader(SERDE).isNull(memory, MEMORY_POSITION));
+    Assert.assertFalse(new ComplexFieldReader(SERDE).isNull(memory, MEMORY_POSITION));
   }
 
   @Test
@@ -122,7 +125,7 @@ public class ComplexFieldReaderTest extends InitializedNullHandlingTest
     final ColumnValueSelector<?> readSelector =
         new ComplexFieldReader(SERDE).makeColumnValueSelector(memory, new ConstantFieldPointer(MEMORY_POSITION, -1));
 
-    Assertions.assertNull(readSelector.getObject());
+    Assert.assertNull(readSelector.getObject());
   }
 
   @Test
@@ -133,7 +136,7 @@ public class ComplexFieldReaderTest extends InitializedNullHandlingTest
     final ColumnValueSelector<?> readSelector =
         new ComplexFieldReader(SERDE).makeColumnValueSelector(memory, new ConstantFieldPointer(MEMORY_POSITION, -1));
 
-    Assertions.assertEquals("foo", readSelector.getObject());
+    Assert.assertEquals("foo", readSelector.getObject());
   }
 
   private void writeToMemory(final String value)

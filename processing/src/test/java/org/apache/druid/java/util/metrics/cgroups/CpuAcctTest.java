@@ -20,10 +20,12 @@
 package org.apache.druid.java.util.metrics.cgroups;
 
 import org.apache.druid.java.util.common.FileUtils;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,17 +36,19 @@ import java.util.stream.LongStream;
 
 public class CpuAcctTest
 {
-  @TempDir
-  public File temporaryFolder;
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
+  @Rule
+  public TemporaryFolder temporaryFolder = new TemporaryFolder();
   private File procDir;
   private File cgroupDir;
   private CgroupDiscoverer discoverer;
 
-  @BeforeEach
+  @Before
   public void setUp() throws IOException
   {
-    cgroupDir = newFolder(temporaryFolder, "junit");
-    procDir = newFolder(temporaryFolder, "junit");
+    cgroupDir = temporaryFolder.newFolder();
+    procDir = temporaryFolder.newFolder();
     discoverer = new ProcCgroupDiscoverer(procDir.toPath());
     TestUtils.setUpCgroups(procDir, cgroupDir);
     final File cpuacctDir = new File(
@@ -63,9 +67,9 @@ public class CpuAcctTest
       throw new RuntimeException("Should still continue");
     });
     final CpuAcct.CpuAcctMetric metric = cpuAcct.snapshot();
-    Assertions.assertEquals(0L, metric.cpuCount());
-    Assertions.assertEquals(0L, metric.usrTime());
-    Assertions.assertEquals(0L, metric.sysTime());
+    Assert.assertEquals(0L, metric.cpuCount());
+    Assert.assertEquals(0L, metric.usrTime());
+    Assert.assertEquals(0L, metric.sysTime());
   }
 
   @Test
@@ -73,8 +77,8 @@ public class CpuAcctTest
   {
     final CpuAcct cpuAcct = new CpuAcct(discoverer);
     final CpuAcct.CpuAcctMetric snapshot = cpuAcct.snapshot();
-    Assertions.assertEquals(128, snapshot.cpuCount());
-    Assertions.assertArrayEquals(new long[]{
+    Assert.assertEquals(128, snapshot.cpuCount());
+    Assert.assertArrayEquals(new long[]{
         7344294132655L,
         28183572804378L,
         29552215219002L,
@@ -204,7 +208,7 @@ public class CpuAcctTest
         38554167083817L,
         38870461161179L
     }, snapshot.usrTimes());
-    Assertions.assertArrayEquals(new long[]{
+    Assert.assertArrayEquals(new long[]{
         4583688852335L,
         385888457233L,
         370465239852L,
@@ -334,9 +338,9 @@ public class CpuAcctTest
         53593212339L,
         52866253864L
     }, snapshot.sysTimes());
-    Assertions.assertEquals(LongStream.of(snapshot.sysTimes()).sum(), snapshot.sysTime());
-    Assertions.assertEquals(LongStream.of(snapshot.usrTimes()).sum(), snapshot.usrTime());
-    Assertions.assertEquals(
+    Assert.assertEquals(LongStream.of(snapshot.sysTimes()).sum(), snapshot.sysTime());
+    Assert.assertEquals(LongStream.of(snapshot.usrTimes()).sum(), snapshot.usrTime());
+    Assert.assertEquals(
         LongStream.of(snapshot.sysTimes()).sum() + LongStream.of(snapshot.usrTimes()).sum(),
         snapshot.time()
     );
@@ -348,15 +352,15 @@ public class CpuAcctTest
     final long[] usrTime = new long[]{1, 2, 3};
     final long[] sysTime = new long[]{4, 5, 6};
     final CpuAcct.CpuAcctMetric metric = new CpuAcct.CpuAcctMetric(usrTime, sysTime);
-    Assertions.assertEquals(6, metric.usrTime());
-    Assertions.assertEquals(15, metric.sysTime());
-    Assertions.assertArrayEquals(usrTime, metric.usrTimes());
-    Assertions.assertArrayEquals(sysTime, metric.sysTimes());
+    Assert.assertEquals(6, metric.usrTime());
+    Assert.assertEquals(15, metric.sysTime());
+    Assert.assertArrayEquals(usrTime, metric.usrTimes());
+    Assert.assertArrayEquals(sysTime, metric.sysTimes());
     for (int i = 0; i < usrTime.length; ++i) {
-      Assertions.assertEquals(usrTime[i], metric.usrTime(i));
+      Assert.assertEquals(usrTime[i], metric.usrTime(i));
     }
     for (int i = 0; i < sysTime.length; ++i) {
-      Assertions.assertEquals(sysTime[i], metric.sysTime(i));
+      Assert.assertEquals(sysTime[i], metric.sysTime(i));
     }
   }
 
@@ -378,20 +382,11 @@ public class CpuAcctTest
     final CpuAcct.CpuAcctMetric metric0 = new CpuAcct.CpuAcctMetric(zeroes, zeroes);
     final CpuAcct.CpuAcctMetric metric1 = new CpuAcct.CpuAcctMetric(usr, sys);
     final CpuAcct.CpuAcctMetric diff = metric1.cumulativeSince(metric0);
-    Assertions.assertEquals(total, diff.usrTime());
-    Assertions.assertEquals(total << 1, diff.sysTime());
-    Assertions.assertNotEquals(0, total);
+    Assert.assertEquals(total, diff.usrTime());
+    Assert.assertEquals(total << 1, diff.sysTime());
+    Assert.assertNotEquals(0, total);
     final CpuAcct.CpuAcctMetric zeroDiff = metric1.cumulativeSince(metric1);
-    Assertions.assertEquals(0, zeroDiff.usrTime());
-    Assertions.assertEquals(0, zeroDiff.sysTime());
-  }
-
-  private static File newFolder(File root, String... subDirs) throws IOException {
-    String subFolder = String.join("/", subDirs);
-    File result = new File(root, subFolder);
-    if (!result.mkdirs()) {
-      throw new IOException("Couldn't create folders " + root);
-    }
-    return result;
+    Assert.assertEquals(0, zeroDiff.usrTime());
+    Assert.assertEquals(0, zeroDiff.sysTime());
   }
 }

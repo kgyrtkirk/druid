@@ -41,6 +41,7 @@ import org.apache.druid.timeline.partition.HashPartitionFunction;
 import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.junit.Assert;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 

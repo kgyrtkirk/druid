@@ -24,18 +24,18 @@ import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.java.util.common.parsers.ParseException;
 import org.apache.druid.testing.junit.LoggerCaptureRule;
 import org.apache.logging.log4j.core.LogEvent;
+import org.junit.Assert;
 import org.junit.Rule;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.util.List;
 import java.util.stream.IntStream;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 public class ParseExceptionHandlerTest
 {
+  @Rule
+  public final ExpectedException expectedException = ExpectedException.none();
 
   @Rule
   public LoggerCaptureRule logger = new LoggerCaptureRule(ParseExceptionHandler.class);
@@ -54,7 +54,7 @@ public class ParseExceptionHandlerTest
 
     IntStream.range(0, 100).forEach(i -> {
       parseExceptionHandler.handle(parseException);
-      Assertions.assertEquals(i + 1, rowIngestionMeters.getUnparseable());
+      Assert.assertEquals(i + 1, rowIngestionMeters.getUnparseable());
     });
   }
 
@@ -72,9 +72,9 @@ public class ParseExceptionHandlerTest
     parseExceptionHandler.handle(parseException);
 
     List<LogEvent> logEvents = logger.getLogEvents();
-    Assertions.assertEquals(1, logEvents.size());
+    Assert.assertEquals(1, logEvents.size());
     String logMessage = logEvents.get(0).getMessage().getFormattedMessage();
-    Assertions.assertTrue(logMessage.contains("Encountered parse exception"));
+    Assert.assertTrue(logMessage.contains("Encountered parse exception"));
   }
 
   @Test
@@ -86,34 +86,34 @@ public class ParseExceptionHandlerTest
         Integer.MAX_VALUE,
         0
     );
-    Assertions.assertNull(parseExceptionHandler.getSavedParseExceptionReports());
+    Assert.assertNull(parseExceptionHandler.getSavedParseExceptionReports());
   }
 
   @Test
   public void testMaxAllowedParseExceptionsThrowExceptionWhenItHitsMax()
   {
-    Throwable exception = assertThrows(RuntimeException.class, () -> {
-      final ParseException parseException = new ParseException(null, "test");
-      final int maxAllowedParseExceptions = 3;
-      final RowIngestionMeters rowIngestionMeters = new SimpleRowIngestionMeters();
-      final ParseExceptionHandler parseExceptionHandler = new ParseExceptionHandler(
-          rowIngestionMeters,
-          false,
-          maxAllowedParseExceptions,
-          0
-      );
+    final ParseException parseException = new ParseException(null, "test");
+    final int maxAllowedParseExceptions = 3;
+    final RowIngestionMeters rowIngestionMeters = new SimpleRowIngestionMeters();
+    final ParseExceptionHandler parseExceptionHandler = new ParseExceptionHandler(
+        rowIngestionMeters,
+        false,
+        maxAllowedParseExceptions,
+        0
+    );
 
-      IntStream.range(0, maxAllowedParseExceptions).forEach(i -> parseExceptionHandler.handle(parseException));
-      Assertions.assertEquals(3, rowIngestionMeters.getUnparseable());
-      try {
-        parseExceptionHandler.handle(parseException);
-      }
-      catch (RuntimeException e) {
-        Assertions.assertEquals(4, rowIngestionMeters.getUnparseable());
-        throw e;
-      }
-    });
-    assertTrue(exception.getMessage().contains("Max parse exceptions[3] exceeded"));
+    IntStream.range(0, maxAllowedParseExceptions).forEach(i -> parseExceptionHandler.handle(parseException));
+    Assert.assertEquals(3, rowIngestionMeters.getUnparseable());
+
+    expectedException.expect(RuntimeException.class);
+    expectedException.expectMessage("Max parse exceptions[3] exceeded");
+    try {
+      parseExceptionHandler.handle(parseException);
+    }
+    catch (RuntimeException e) {
+      Assert.assertEquals(4, rowIngestionMeters.getUnparseable());
+      throw e;
+    }
   }
 
   @Test
@@ -127,15 +127,15 @@ public class ParseExceptionHandlerTest
         Integer.MAX_VALUE,
         maxSavedParseExceptions
     );
-    Assertions.assertNotNull(parseExceptionHandler.getSavedParseExceptionReports());
+    Assert.assertNotNull(parseExceptionHandler.getSavedParseExceptionReports());
     int exceptionCounter = 0;
     for (; exceptionCounter < maxSavedParseExceptions; exceptionCounter++) {
       parseExceptionHandler.handle(new ParseException(null, StringUtils.format("test %d", exceptionCounter)));
     }
-    Assertions.assertEquals(3, rowIngestionMeters.getUnparseable());
-    Assertions.assertEquals(maxSavedParseExceptions, parseExceptionHandler.getSavedParseExceptionReports().size());
+    Assert.assertEquals(3, rowIngestionMeters.getUnparseable());
+    Assert.assertEquals(maxSavedParseExceptions, parseExceptionHandler.getSavedParseExceptionReports().size());
     for (int i = 0; i < maxSavedParseExceptions; i++) {
-      Assertions.assertEquals(
+      Assert.assertEquals(
           StringUtils.format("test %d", i),
           parseExceptionHandler.getSavedParseExceptionReports().get(i).getDetails().get(0)
       );
@@ -143,11 +143,11 @@ public class ParseExceptionHandlerTest
     for (; exceptionCounter < 5; exceptionCounter++) {
       parseExceptionHandler.handle(new ParseException(null, StringUtils.format("test %d", exceptionCounter)));
     }
-    Assertions.assertEquals(5, rowIngestionMeters.getUnparseable());
+    Assert.assertEquals(5, rowIngestionMeters.getUnparseable());
 
-    Assertions.assertEquals(maxSavedParseExceptions, parseExceptionHandler.getSavedParseExceptionReports().size());
+    Assert.assertEquals(maxSavedParseExceptions, parseExceptionHandler.getSavedParseExceptionReports().size());
     for (int i = 0; i < maxSavedParseExceptions; i++) {
-      Assertions.assertEquals(
+      Assert.assertEquals(
           StringUtils.format("test %d", i + 2),
           parseExceptionHandler.getSavedParseExceptionReports().get(i).getDetails().get(0)
       );

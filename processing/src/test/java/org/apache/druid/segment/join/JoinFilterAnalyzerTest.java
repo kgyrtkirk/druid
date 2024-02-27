@@ -52,15 +52,12 @@ import org.apache.druid.segment.join.filter.rewrite.JoinFilterRewriteConfig;
 import org.apache.druid.segment.join.lookup.LookupJoinable;
 import org.apache.druid.segment.join.table.IndexedTableJoinable;
 import org.apache.druid.segment.virtual.ExpressionVirtualColumn;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class JoinFilterAnalyzerTest extends BaseHashJoinSegmentStorageAdapterTest
 {
@@ -123,7 +120,7 @@ public class JoinFilterAnalyzerTest extends BaseHashJoinSegmentStorageAdapterTes
         ImmutableSet.of()
     );
     JoinFilterSplit actualFilterSplit = JoinFilterAnalyzer.splitFilter(joinFilterPreAnalysis);
-    Assertions.assertEquals(expectedFilterSplit, actualFilterSplit);
+    Assert.assertEquals(expectedFilterSplit, actualFilterSplit);
   }
 
   @Test
@@ -187,7 +184,7 @@ public class JoinFilterAnalyzerTest extends BaseHashJoinSegmentStorageAdapterTes
         ImmutableSet.of()
     );
     JoinFilterSplit actualFilterSplit = JoinFilterAnalyzer.splitFilter(joinFilterPreAnalysis);
-    Assertions.assertEquals(expectedFilterSplit, actualFilterSplit);
+    Assert.assertEquals(expectedFilterSplit, actualFilterSplit);
   }
 
   @Test
@@ -253,7 +250,7 @@ public class JoinFilterAnalyzerTest extends BaseHashJoinSegmentStorageAdapterTes
     );
 
     JoinFilterSplit actualFilterSplit = JoinFilterAnalyzer.splitFilter(joinFilterPreAnalysis);
-    Assertions.assertEquals(expectedFilterSplit, actualFilterSplit);
+    Assert.assertEquals(expectedFilterSplit, actualFilterSplit);
   }
 
   @Test
@@ -324,7 +321,7 @@ public class JoinFilterAnalyzerTest extends BaseHashJoinSegmentStorageAdapterTes
     );
 
     JoinFilterSplit actualFilterSplit = JoinFilterAnalyzer.splitFilter(joinFilterPreAnalysis);
-    Assertions.assertEquals(expectedFilterSplit, actualFilterSplit);
+    Assert.assertEquals(expectedFilterSplit, actualFilterSplit);
   }
 
   @Test
@@ -386,7 +383,7 @@ public class JoinFilterAnalyzerTest extends BaseHashJoinSegmentStorageAdapterTes
     );
 
     JoinFilterSplit actualFilterSplit = JoinFilterAnalyzer.splitFilter(joinFilterPreAnalysis);
-    Assertions.assertEquals(expectedFilterSplit, actualFilterSplit);
+    Assert.assertEquals(expectedFilterSplit, actualFilterSplit);
   }
 
   @Test
@@ -465,7 +462,7 @@ public class JoinFilterAnalyzerTest extends BaseHashJoinSegmentStorageAdapterTes
     );
 
     JoinFilterSplit actualFilterSplit = JoinFilterAnalyzer.splitFilter(joinFilterPreAnalysis);
-    Assertions.assertEquals(expectedFilterSplit, actualFilterSplit);
+    Assert.assertEquals(expectedFilterSplit, actualFilterSplit);
   }
 
   @Test
@@ -525,7 +522,7 @@ public class JoinFilterAnalyzerTest extends BaseHashJoinSegmentStorageAdapterTes
     );
 
     JoinFilterSplit actualFilterSplit = JoinFilterAnalyzer.splitFilter(joinFilterPreAnalysis);
-    Assertions.assertEquals(expectedFilterSplit, actualFilterSplit);
+    Assert.assertEquals(expectedFilterSplit, actualFilterSplit);
   }
 
   @Test
@@ -689,7 +686,7 @@ public class JoinFilterAnalyzerTest extends BaseHashJoinSegmentStorageAdapterTes
     );
 
     JoinFilterSplit actualFilterSplit = JoinFilterAnalyzer.splitFilter(joinFilterPreAnalysis);
-    Assertions.assertEquals(expectedFilterSplit, actualFilterSplit);
+    Assert.assertEquals(expectedFilterSplit, actualFilterSplit);
   }
 
   @Test
@@ -769,11 +766,11 @@ public class JoinFilterAnalyzerTest extends BaseHashJoinSegmentStorageAdapterTes
         ColumnType.STRING,
         ExprMacroTable.nil()
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         expectedFilterSplit.getBaseTableFilter(),
         actualFilterSplit.getBaseTableFilter()
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         expectedFilterSplit.getJoinTableFilter(),
         actualFilterSplit.getJoinTableFilter()
     );
@@ -785,64 +782,64 @@ public class JoinFilterAnalyzerTest extends BaseHashJoinSegmentStorageAdapterTes
   @Test
   public void test_filterPushDown_factToRegionToCountryNotEquiJoinLeftFilterOnChannelAndCountryName()
   {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
-      JoinableClause factExprToRegon = new JoinableClause(
-          FACT_TO_REGION_PREFIX,
-          new IndexedTableJoinable(regionsTable),
-          JoinType.LEFT,
-          JoinConditionAnalysis.forExpression(
-              StringUtils.format(
-                  "\"%sregionIsoCode\" == regionIsoCode && reverse(\"%scountryIsoCode\") == countryIsoCode",
-                  FACT_TO_REGION_PREFIX,
-                  FACT_TO_REGION_PREFIX
-              ),
-              FACT_TO_REGION_PREFIX,
-              ExprMacroTable.nil()
-          )
-      );
-      List<JoinableClause> joinableClauses = ImmutableList.of(
-          factExprToRegon,
-          regionToCountry(JoinType.LEFT)
-      );
+    JoinableClause factExprToRegon = new JoinableClause(
+        FACT_TO_REGION_PREFIX,
+        new IndexedTableJoinable(regionsTable),
+        JoinType.LEFT,
+        JoinConditionAnalysis.forExpression(
+            StringUtils.format(
+                "\"%sregionIsoCode\" == regionIsoCode && reverse(\"%scountryIsoCode\") == countryIsoCode",
+                FACT_TO_REGION_PREFIX,
+                FACT_TO_REGION_PREFIX
+            ),
+            FACT_TO_REGION_PREFIX,
+            ExprMacroTable.nil()
+        )
+    );
+    List<JoinableClause> joinableClauses = ImmutableList.of(
+        factExprToRegon,
+        regionToCountry(JoinType.LEFT)
+    );
 
-      Filter originalFilter = new AndFilter(
-          ImmutableList.of(
-              new SelectorFilter("channel", "#en.wikipedia"),
-              new SelectorFilter("rtc.countryName", "States United")
-          )
-      );
+    Filter originalFilter = new AndFilter(
+        ImmutableList.of(
+            new SelectorFilter("channel", "#en.wikipedia"),
+            new SelectorFilter("rtc.countryName", "States United")
+        )
+    );
 
-      JoinFilterPreAnalysis joinFilterPreAnalysis = makeDefaultConfigPreAnalysis(
-          originalFilter,
-          joinableClauses,
-          VirtualColumns.EMPTY
-      );
+    JoinFilterPreAnalysis joinFilterPreAnalysis = makeDefaultConfigPreAnalysis(
+        originalFilter,
+        joinableClauses,
+        VirtualColumns.EMPTY
+    );
+    expectedException.expect(IllegalArgumentException.class);
+    expectedException.expectMessage(
+        "Cannot build hash-join matcher on non-equi-join condition: \"r1.regionIsoCode\" == regionIsoCode && reverse(\"r1.countryIsoCode\") == countryIsoCode");
 
-      HashJoinSegmentStorageAdapter adapter = new HashJoinSegmentStorageAdapter(
-          factSegment.asStorageAdapter(),
-          joinableClauses,
-          joinFilterPreAnalysis
-      );
-      JoinTestHelper.verifyCursors(
-          adapter.makeCursors(
-              originalFilter,
-              Intervals.ETERNITY,
-              VirtualColumns.EMPTY,
-              Granularities.ALL,
-              false,
-              null
-          ),
-          ImmutableList.of(
-              "page",
-              FACT_TO_REGION_PREFIX + "regionName",
-              REGION_TO_COUNTRY_PREFIX + "countryName"
-          ),
-          ImmutableList.of(
-              new Object[]{"Old Anatolian Turkish", "Ainigriv", "States United"}
-          )
-      );
-    });
-    assertTrue(exception.getMessage().contains("Cannot build hash-join matcher on non-equi-join condition: \"r1.regionIsoCode\" == regionIsoCode && reverse(\"r1.countryIsoCode\") == countryIsoCode"));
+    HashJoinSegmentStorageAdapter adapter = new HashJoinSegmentStorageAdapter(
+        factSegment.asStorageAdapter(),
+        joinableClauses,
+        joinFilterPreAnalysis
+    );
+    JoinTestHelper.verifyCursors(
+        adapter.makeCursors(
+            originalFilter,
+            Intervals.ETERNITY,
+            VirtualColumns.EMPTY,
+            Granularities.ALL,
+            false,
+            null
+        ),
+        ImmutableList.of(
+            "page",
+            FACT_TO_REGION_PREFIX + "regionName",
+            REGION_TO_COUNTRY_PREFIX + "countryName"
+        ),
+        ImmutableList.of(
+            new Object[]{"Old Anatolian Turkish", "Ainigriv", "States United"}
+        )
+    );
   }
 
   @Test
@@ -937,7 +934,7 @@ public class JoinFilterAnalyzerTest extends BaseHashJoinSegmentStorageAdapterTes
     );
 
     JoinFilterSplit actualFilterSplit = JoinFilterAnalyzer.splitFilter(joinFilterPreAnalysis);
-    Assertions.assertEquals(expectedFilterSplit, actualFilterSplit);
+    Assert.assertEquals(expectedFilterSplit, actualFilterSplit);
   }
 
   @Test
@@ -1017,11 +1014,11 @@ public class JoinFilterAnalyzerTest extends BaseHashJoinSegmentStorageAdapterTes
     );
 
     JoinFilterSplit actualFilterSplit = JoinFilterAnalyzer.splitFilter(joinFilterPreAnalysis);
-    Assertions.assertEquals(
+    Assert.assertEquals(
         expectedFilterSplit.getBaseTableFilter(),
         actualFilterSplit.getBaseTableFilter()
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         expectedFilterSplit.getJoinTableFilter(),
         actualFilterSplit.getJoinTableFilter()
     );
@@ -1107,11 +1104,11 @@ public class JoinFilterAnalyzerTest extends BaseHashJoinSegmentStorageAdapterTes
     );
 
     JoinFilterSplit actualFilterSplit = JoinFilterAnalyzer.splitFilter(joinFilterPreAnalysis);
-    Assertions.assertEquals(
+    Assert.assertEquals(
         expectedFilterSplit.getBaseTableFilter(),
         actualFilterSplit.getBaseTableFilter()
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         expectedFilterSplit.getJoinTableFilter(),
         actualFilterSplit.getJoinTableFilter()
     );
@@ -1175,7 +1172,7 @@ public class JoinFilterAnalyzerTest extends BaseHashJoinSegmentStorageAdapterTes
     );
 
     JoinFilterSplit actualFilterSplit = JoinFilterAnalyzer.splitFilter(joinFilterPreAnalysis);
-    Assertions.assertEquals(expectedFilterSplit, actualFilterSplit);
+    Assert.assertEquals(expectedFilterSplit, actualFilterSplit);
   }
 
   @Test
@@ -1232,7 +1229,7 @@ public class JoinFilterAnalyzerTest extends BaseHashJoinSegmentStorageAdapterTes
     );
 
     JoinFilterSplit actualFilterSplit = JoinFilterAnalyzer.splitFilter(joinFilterPreAnalysis);
-    Assertions.assertEquals(expectedFilterSplit, actualFilterSplit);
+    Assert.assertEquals(expectedFilterSplit, actualFilterSplit);
   }
 
   @Test
@@ -1288,7 +1285,7 @@ public class JoinFilterAnalyzerTest extends BaseHashJoinSegmentStorageAdapterTes
     );
 
     JoinFilterSplit actualFilterSplit = JoinFilterAnalyzer.splitFilter(joinFilterPreAnalysis);
-    Assertions.assertEquals(expectedFilterSplit, actualFilterSplit);
+    Assert.assertEquals(expectedFilterSplit, actualFilterSplit);
   }
 
   @Test
@@ -1345,7 +1342,7 @@ public class JoinFilterAnalyzerTest extends BaseHashJoinSegmentStorageAdapterTes
     );
 
     JoinFilterSplit actualFilterSplit = JoinFilterAnalyzer.splitFilter(joinFilterPreAnalysis);
-    Assertions.assertEquals(expectedFilterSplit, actualFilterSplit);
+    Assert.assertEquals(expectedFilterSplit, actualFilterSplit);
   }
 
   @Test
@@ -1400,7 +1397,7 @@ public class JoinFilterAnalyzerTest extends BaseHashJoinSegmentStorageAdapterTes
     );
 
     JoinFilterSplit actualFilterSplit = JoinFilterAnalyzer.splitFilter(joinFilterPreAnalysis);
-    Assertions.assertEquals(expectedFilterSplit, actualFilterSplit);
+    Assert.assertEquals(expectedFilterSplit, actualFilterSplit);
   }
 
   @Test
@@ -1464,7 +1461,7 @@ public class JoinFilterAnalyzerTest extends BaseHashJoinSegmentStorageAdapterTes
     );
 
     JoinFilterSplit actualFilterSplit = JoinFilterAnalyzer.splitFilter(joinFilterPreAnalysis);
-    Assertions.assertEquals(expectedFilterSplit, actualFilterSplit);
+    Assert.assertEquals(expectedFilterSplit, actualFilterSplit);
   }
 
   @Test
@@ -1527,7 +1524,7 @@ public class JoinFilterAnalyzerTest extends BaseHashJoinSegmentStorageAdapterTes
     );
 
     JoinFilterSplit actualFilterSplit = JoinFilterAnalyzer.splitFilter(joinFilterPreAnalysis);
-    Assertions.assertEquals(expectedFilterSplit, actualFilterSplit);
+    Assert.assertEquals(expectedFilterSplit, actualFilterSplit);
   }
 
   @Test
@@ -1582,7 +1579,7 @@ public class JoinFilterAnalyzerTest extends BaseHashJoinSegmentStorageAdapterTes
     );
 
     JoinFilterSplit actualFilterSplit = JoinFilterAnalyzer.splitFilter(joinFilterPreAnalysis);
-    Assertions.assertEquals(expectedFilterSplit, actualFilterSplit);
+    Assert.assertEquals(expectedFilterSplit, actualFilterSplit);
   }
 
   @Test
@@ -1636,7 +1633,7 @@ public class JoinFilterAnalyzerTest extends BaseHashJoinSegmentStorageAdapterTes
     );
 
     JoinFilterSplit actualFilterSplit = JoinFilterAnalyzer.splitFilter(joinFilterPreAnalysis);
-    Assertions.assertEquals(expectedFilterSplit, actualFilterSplit);
+    Assert.assertEquals(expectedFilterSplit, actualFilterSplit);
   }
 
   @Test
@@ -1694,7 +1691,7 @@ public class JoinFilterAnalyzerTest extends BaseHashJoinSegmentStorageAdapterTes
     );
 
     JoinFilterSplit actualFilterSplit = JoinFilterAnalyzer.splitFilter(joinFilterPreAnalysis);
-    Assertions.assertEquals(expectedFilterSplit, actualFilterSplit);
+    Assert.assertEquals(expectedFilterSplit, actualFilterSplit);
   }
 
   @Test
@@ -1751,7 +1748,7 @@ public class JoinFilterAnalyzerTest extends BaseHashJoinSegmentStorageAdapterTes
     );
 
     JoinFilterSplit actualFilterSplit = JoinFilterAnalyzer.splitFilter(joinFilterPreAnalysis);
-    Assertions.assertEquals(expectedFilterSplit, actualFilterSplit);
+    Assert.assertEquals(expectedFilterSplit, actualFilterSplit);
   }
 
   @Test
@@ -1807,7 +1804,7 @@ public class JoinFilterAnalyzerTest extends BaseHashJoinSegmentStorageAdapterTes
     );
 
     JoinFilterSplit actualFilterSplit = JoinFilterAnalyzer.splitFilter(joinFilterPreAnalysis);
-    Assertions.assertEquals(expectedFilterSplit, actualFilterSplit);
+    Assert.assertEquals(expectedFilterSplit, actualFilterSplit);
   }
 
   @Test
@@ -1862,7 +1859,7 @@ public class JoinFilterAnalyzerTest extends BaseHashJoinSegmentStorageAdapterTes
     );
 
     JoinFilterSplit actualFilterSplit = JoinFilterAnalyzer.splitFilter(joinFilterPreAnalysis);
-    Assertions.assertEquals(expectedFilterSplit, actualFilterSplit);
+    Assert.assertEquals(expectedFilterSplit, actualFilterSplit);
   }
 
   @Test
@@ -1928,7 +1925,7 @@ public class JoinFilterAnalyzerTest extends BaseHashJoinSegmentStorageAdapterTes
     );
 
     JoinFilterSplit actualFilterSplit = JoinFilterAnalyzer.splitFilter(joinFilterPreAnalysis);
-    Assertions.assertEquals(expectedFilterSplit, actualFilterSplit);
+    Assert.assertEquals(expectedFilterSplit, actualFilterSplit);
   }
 
   @Test
@@ -1999,82 +1996,86 @@ public class JoinFilterAnalyzerTest extends BaseHashJoinSegmentStorageAdapterTes
     );
 
     JoinFilterSplit actualFilterSplit = JoinFilterAnalyzer.splitFilter(joinFilterPreAnalysis);
-    Assertions.assertEquals(expectedFilterSplit, actualFilterSplit);
+    Assert.assertEquals(expectedFilterSplit, actualFilterSplit);
   }
 
 
   @Test
   public void test_filterPushDown_factToRegionThreeRHSColumnsAllDirectAndFilterOnRHS()
   {
-    Throwable exception = assertThrows(IAE.class, () -> {
-      JoinableClause factExprToRegon = new JoinableClause(
-          FACT_TO_REGION_PREFIX,
-          new IndexedTableJoinable(regionsTable),
-          JoinType.LEFT,
-          JoinConditionAnalysis.forExpression(
-              StringUtils.format(
-                  "\"%sregionIsoCode\" == regionIsoCode && \"%scountryIsoCode\" == regionIsoCode && \"%sregionName\" == user",
-                  FACT_TO_REGION_PREFIX,
-                  FACT_TO_REGION_PREFIX,
-                  FACT_TO_REGION_PREFIX
-              ),
-              FACT_TO_REGION_PREFIX,
-              ExprMacroTable.nil()
-          )
-      );
-      List<JoinableClause> joinableClauses = ImmutableList.of(
-          factExprToRegon
-      );
-      Filter originalFilter = new OrFilter(
-          ImmutableList.of(
-              new SelectorFilter("r1.regionName", "Fourems Province"),
-              new SelectorFilter("r1.regionIsoCode", "AAAA")
-          )
-      );
+    JoinableClause factExprToRegon = new JoinableClause(
+        FACT_TO_REGION_PREFIX,
+        new IndexedTableJoinable(regionsTable),
+        JoinType.LEFT,
+        JoinConditionAnalysis.forExpression(
+            StringUtils.format(
+                "\"%sregionIsoCode\" == regionIsoCode && \"%scountryIsoCode\" == regionIsoCode && \"%sregionName\" == user",
+                FACT_TO_REGION_PREFIX,
+                FACT_TO_REGION_PREFIX,
+                FACT_TO_REGION_PREFIX
+            ),
+            FACT_TO_REGION_PREFIX,
+            ExprMacroTable.nil()
+        )
+    );
+    List<JoinableClause> joinableClauses = ImmutableList.of(
+        factExprToRegon
+    );
+    Filter originalFilter = new OrFilter(
+        ImmutableList.of(
+            new SelectorFilter("r1.regionName", "Fourems Province"),
+            new SelectorFilter("r1.regionIsoCode", "AAAA")
+        )
+    );
 
-      JoinFilterPreAnalysis joinFilterPreAnalysis = makeDefaultConfigPreAnalysis(
-          originalFilter,
-          joinableClauses,
-          VirtualColumns.EMPTY
-      );
-      HashJoinSegmentStorageAdapter adapter = new HashJoinSegmentStorageAdapter(
-          factSegment.asStorageAdapter(),
-          joinableClauses,
-          joinFilterPreAnalysis
-      );
+    JoinFilterPreAnalysis joinFilterPreAnalysis = makeDefaultConfigPreAnalysis(
+        originalFilter,
+        joinableClauses,
+        VirtualColumns.EMPTY
+    );
+    HashJoinSegmentStorageAdapter adapter = new HashJoinSegmentStorageAdapter(
+        factSegment.asStorageAdapter(),
+        joinableClauses,
+        joinFilterPreAnalysis
+    );
 
-      JoinTestHelper.verifyCursors(
-          adapter.makeCursors(
-              originalFilter,
-              Intervals.ETERNITY,
-              VirtualColumns.EMPTY,
-              Granularities.ALL,
-              false,
-              null
-          ),
-          ImmutableList.of(
-              "page",
-              FACT_TO_REGION_PREFIX + "regionName"
-          ),
-          ImmutableList.of()
-      );
+    // This query doesn't execute because regionName is not a key column, but we can still check the
+    // filter rewrites.
+    expectedException.expect(IAE.class);
+    expectedException.expectMessage(
+        "Cannot build hash-join matcher on non-key-based condition: "
+        + "Equality{leftExpr=user, rightColumn='regionName', includeNull=false}"
+    );
 
-      JoinFilterSplit expectedFilterSplit = new JoinFilterSplit(
-          new OrFilter(
-              ImmutableList.of(
-                  new SelectorFilter("user", "Fourems Province"),
-                  new SelectorFilter("regionIsoCode", "AAAA")
-              )
-          ),
-          null,
-          ImmutableSet.of()
-      );
+    JoinTestHelper.verifyCursors(
+        adapter.makeCursors(
+            originalFilter,
+            Intervals.ETERNITY,
+            VirtualColumns.EMPTY,
+            Granularities.ALL,
+            false,
+            null
+        ),
+        ImmutableList.of(
+            "page",
+            FACT_TO_REGION_PREFIX + "regionName"
+        ),
+        ImmutableList.of()
+    );
 
-      JoinFilterSplit actualFilterSplit = JoinFilterAnalyzer.splitFilter(joinFilterPreAnalysis);
-      Assertions.assertEquals(expectedFilterSplit, actualFilterSplit);
-    });
-    assertTrue(exception.getMessage().contains("Cannot build hash-join matcher on non-key-based condition: "
-        + "Equality{leftExpr=user, rightColumn='regionName', includeNull=false}"));
+    JoinFilterSplit expectedFilterSplit = new JoinFilterSplit(
+        new OrFilter(
+            ImmutableList.of(
+                new SelectorFilter("user", "Fourems Province"),
+                new SelectorFilter("regionIsoCode", "AAAA")
+            )
+        ),
+        null,
+        ImmutableSet.of()
+    );
+
+    JoinFilterSplit actualFilterSplit = JoinFilterAnalyzer.splitFilter(joinFilterPreAnalysis);
+    Assert.assertEquals(expectedFilterSplit, actualFilterSplit);
   }
 
   @Test
@@ -2133,7 +2134,7 @@ public class JoinFilterAnalyzerTest extends BaseHashJoinSegmentStorageAdapterTes
     );
 
     JoinFilterSplit actualFilterSplit = JoinFilterAnalyzer.splitFilter(joinFilterPreAnalysis);
-    Assertions.assertEquals(expectedFilterSplit, actualFilterSplit);
+    Assert.assertEquals(expectedFilterSplit, actualFilterSplit);
   }
 
   @Test
@@ -2241,7 +2242,7 @@ public class JoinFilterAnalyzerTest extends BaseHashJoinSegmentStorageAdapterTes
     );
 
     JoinFilterSplit actualFilterSplit = JoinFilterAnalyzer.splitFilter(joinFilterPreAnalysis);
-    Assertions.assertEquals(expectedFilterSplit, actualFilterSplit);
+    Assert.assertEquals(expectedFilterSplit, actualFilterSplit);
   }
 
   @Test
@@ -2494,7 +2495,7 @@ public class JoinFilterAnalyzerTest extends BaseHashJoinSegmentStorageAdapterTes
     );
 
     JoinFilterSplit actualFilterSplit = JoinFilterAnalyzer.splitFilter(joinFilterPreAnalysis);
-    Assertions.assertEquals(expectedFilterSplit, actualFilterSplit);
+    Assert.assertEquals(expectedFilterSplit, actualFilterSplit);
   }
 
   @Test
@@ -2556,7 +2557,7 @@ public class JoinFilterAnalyzerTest extends BaseHashJoinSegmentStorageAdapterTes
     );
 
     JoinFilterSplit actualFilterSplit = JoinFilterAnalyzer.splitFilter(joinFilterPreAnalysis);
-    Assertions.assertEquals(expectedFilterSplit, actualFilterSplit);
+    Assert.assertEquals(expectedFilterSplit, actualFilterSplit);
   }
 
 
@@ -2630,7 +2631,7 @@ public class JoinFilterAnalyzerTest extends BaseHashJoinSegmentStorageAdapterTes
     );
 
     JoinFilterSplit actualFilterSplit = JoinFilterAnalyzer.splitFilter(joinFilterPreAnalysis);
-    Assertions.assertEquals(expectedFilterSplit, actualFilterSplit);
+    Assert.assertEquals(expectedFilterSplit, actualFilterSplit);
   }
 
   @Test
@@ -2674,6 +2675,6 @@ public class JoinFilterAnalyzerTest extends BaseHashJoinSegmentStorageAdapterTes
         ImmutableSet.of()
     );
     JoinFilterSplit actualFilterSplit = JoinFilterAnalyzer.splitFilter(joinFilterPreAnalysis, baseTableFilter);
-    Assertions.assertEquals(expectedFilterSplit, actualFilterSplit);
+    Assert.assertEquals(expectedFilterSplit, actualFilterSplit);
   }
 }

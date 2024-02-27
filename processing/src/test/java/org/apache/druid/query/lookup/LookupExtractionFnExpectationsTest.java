@@ -22,8 +22,8 @@ package org.apache.druid.query.lookup;
 import com.google.common.collect.ImmutableMap;
 import org.apache.druid.common.config.NullHandling;
 import org.apache.druid.query.extraction.MapLookupExtractor;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 /**
  * This test suite clarifies some behavior around specific corner cases
@@ -40,7 +40,7 @@ public class LookupExtractionFnExpectationsTest
         false,
         false
     );
-    Assertions.assertNull(lookupExtractionFn.apply(null));
+    Assert.assertNull(lookupExtractionFn.apply(null));
   }
 
   @Test
@@ -53,7 +53,7 @@ public class LookupExtractionFnExpectationsTest
         false,
         false
     );
-    Assertions.assertEquals("REPLACE", lookupExtractionFn.apply(null));
+    Assert.assertEquals("REPLACE", lookupExtractionFn.apply(null));
   }
 
   @Test
@@ -67,9 +67,9 @@ public class LookupExtractionFnExpectationsTest
         false
     );
     if (NullHandling.replaceWithDefault()) {
-      Assertions.assertEquals("bar", lookupExtractionFn.apply(null));
+      Assert.assertEquals("bar", lookupExtractionFn.apply(null));
     } else {
-      Assertions.assertEquals("REPLACE", lookupExtractionFn.apply(null));
+      Assert.assertEquals("REPLACE", lookupExtractionFn.apply(null));
     }
   }
 
@@ -83,6 +83,6 @@ public class LookupExtractionFnExpectationsTest
         false,
         false
     );
-    Assertions.assertEquals("REPLACE", lookupExtractionFn.apply(null));
+    Assert.assertEquals("REPLACE", lookupExtractionFn.apply(null));
   }
 }

@@ -27,8 +27,8 @@ import org.apache.druid.hll.VersionZeroHyperLogLogCollector;
 import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.query.aggregation.AggregatorFactory;
 import org.apache.druid.segment.TestHelper;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.nio.ByteBuffer;
 import java.util.Comparator;
@@ -48,7 +48,7 @@ public class HyperUniquesAggregatorFactoryTest
   public void testDeserializeV0()
   {
     Object v0 = AGGREGATOR_FACTORY.deserialize(V0_BASE64);
-    Assertions.assertEquals(VersionZeroHyperLogLogCollector.class, v0.getClass(), "deserialized value is VersionZeroHyperLogLogCollector");
+    Assert.assertEquals("deserialized value is VersionZeroHyperLogLogCollector", VersionZeroHyperLogLogCollector.class, v0.getClass());
   }
 
   @Test
@@ -62,8 +62,8 @@ public class HyperUniquesAggregatorFactoryTest
     for (int i = 1; i < 100; i = i + 2) {
       collector1.add(fn.hashLong(i).asBytes());
       collector2.add(fn.hashLong(i + 1).asBytes());
-      Assertions.assertEquals(1, comparator.compare(collector1, collector2));
-      Assertions.assertEquals(1, Double.compare(collector1.estimateCardinality(), collector2.estimateCardinality()));
+      Assert.assertEquals(1, comparator.compare(collector1, collector2));
+      Assert.assertEquals(1, Double.compare(collector1.estimateCardinality(), collector2.estimateCardinality()));
     }
   }
 
@@ -86,7 +86,7 @@ public class HyperUniquesAggregatorFactoryTest
         collector2.add(fn.hashLong(rand.nextLong()).asBytes());
       }
 
-      Assertions.assertEquals(
+      Assert.assertEquals(
           Double.compare(collector1.estimateCardinality(), collector2.estimateCardinality()),
           comparator.compare(collector1, collector2)
       );
@@ -105,7 +105,7 @@ public class HyperUniquesAggregatorFactoryTest
         collector2.add(fn.hashLong(rand.nextLong()).asBytes());
       }
 
-      Assertions.assertEquals(
+      Assert.assertEquals(
           Double.compare(collector1.estimateCardinality(), collector2.estimateCardinality()),
           comparator.compare(collector1, collector2)
       );
@@ -124,7 +124,7 @@ public class HyperUniquesAggregatorFactoryTest
         collector2.add(fn.hashLong(rand.nextLong()).asBytes());
       }
 
-      Assertions.assertEquals(
+      Assert.assertEquals(
           Double.compare(collector1.estimateCardinality(), collector2.estimateCardinality()),
           comparator.compare(collector1, collector2)
       );
@@ -161,15 +161,15 @@ public class HyperUniquesAggregatorFactoryTest
       final int orderedByComparator = comparator.compare(leftCollector, rightCollector);
 
       // then, assert hyperloglog comparator behaves consistently with estimated cardinalities
-      Assertions.assertEquals(
-          orderedByCardinality,
-          orderedByComparator,
+      Assert.assertEquals(
           StringUtils.format("orderedByComparator=%d, orderedByCardinality=%d,\n" +
                              "Left={cardinality=%f, hll=%s},\n" +
                              "Right={cardinality=%f, hll=%s},\n", orderedByComparator, orderedByCardinality,
                              leftCollector.estimateCardinality(), leftCollector,
                              rightCollector.estimateCardinality(), rightCollector
-          )
+          ),
+          orderedByCardinality,
+          orderedByComparator
       );
     }
   }
@@ -182,17 +182,17 @@ public class HyperUniquesAggregatorFactoryTest
         0
     );
 
-    Assertions.assertEquals(0L, HyperUniquesAggregatorFactory.estimateCardinality(null, true));
-    Assertions.assertEquals(0d, HyperUniquesAggregatorFactory.estimateCardinality(null, false));
+    Assert.assertEquals(0L, HyperUniquesAggregatorFactory.estimateCardinality(null, true));
+    Assert.assertEquals(0d, HyperUniquesAggregatorFactory.estimateCardinality(null, false));
 
-    Assertions.assertEquals(0L, HyperUniquesAggregatorFactory.estimateCardinality(emptyHyperLogLogCollector, true));
-    Assertions.assertEquals(0d, HyperUniquesAggregatorFactory.estimateCardinality(emptyHyperLogLogCollector, false));
+    Assert.assertEquals(0L, HyperUniquesAggregatorFactory.estimateCardinality(emptyHyperLogLogCollector, true));
+    Assert.assertEquals(0d, HyperUniquesAggregatorFactory.estimateCardinality(emptyHyperLogLogCollector, false));
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         HyperUniquesAggregatorFactory.estimateCardinality(emptyHyperLogLogCollector, true).getClass(),
         HyperUniquesAggregatorFactory.estimateCardinality(null, true).getClass()
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         HyperUniquesAggregatorFactory.estimateCardinality(emptyHyperLogLogCollector, false).getClass(),
         HyperUniquesAggregatorFactory.estimateCardinality(null, false).getClass()
     );
@@ -214,6 +214,6 @@ public class HyperUniquesAggregatorFactoryTest
         AggregatorFactory.class
     );
 
-    Assertions.assertEquals(factory, factory2);
+    Assert.assertEquals(factory, factory2);
   }
 }

@@ -32,12 +32,11 @@ import org.apache.druid.query.aggregation.CountAggregatorFactory;
 import org.apache.druid.query.timeseries.TimeseriesQuery;
 import org.apache.druid.server.QueryLaningStrategy;
 import org.apache.druid.server.QueryScheduler;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 @SuppressWarnings("ResultOfObjectAllocationIgnored")
 public class ManualQueryLaningStrategyTest
@@ -46,7 +45,10 @@ public class ManualQueryLaningStrategyTest
   private QueryLaningStrategy exactStrategy;
   private QueryLaningStrategy percentStrategy;
 
-  @BeforeEach
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
+
+  @Before
   public void setup()
   {
     this.queryBuilder = Druids.newTimeseriesQueryBuilder()
@@ -63,89 +65,82 @@ public class ManualQueryLaningStrategyTest
   @Test
   public void testLanesMustBeSet()
   {
-    Throwable exception = assertThrows(NullPointerException.class, () -> {
-      new ManualQueryLaningStrategy(null, null);
-    });
-    assertTrue(exception.getMessage().contains("lanes must be set"));
+    expectedException.expect(NullPointerException.class);
+    expectedException.expectMessage("lanes must be set");
+    new ManualQueryLaningStrategy(null, null);
   }
 
   @Test
   public void testMustDefineAtLeastOneLane()
   {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
-      new ManualQueryLaningStrategy(ImmutableMap.of(), null);
-    });
-    assertTrue(exception.getMessage().contains("lanes must define at least one lane"));
+    expectedException.expect(IllegalArgumentException.class);
+    expectedException.expectMessage("lanes must define at least one lane");
+    new ManualQueryLaningStrategy(ImmutableMap.of(), null);
   }
 
   @Test
   public void testMustNotUseTotalName()
   {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
-      new ManualQueryLaningStrategy(ImmutableMap.of(QueryScheduler.TOTAL, 12), null);
-    });
-    assertTrue(exception.getMessage().contains("Lane cannot be named 'total'"));
+    expectedException.expect(IllegalArgumentException.class);
+    expectedException.expectMessage("Lane cannot be named 'total'");
+    new ManualQueryLaningStrategy(ImmutableMap.of(QueryScheduler.TOTAL, 12), null);
   }
 
   @Test
   public void testMustNotUseDefaultName()
   {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
-      new ManualQueryLaningStrategy(ImmutableMap.of("default", 12), null);
-    });
-    assertTrue(exception.getMessage().contains("Lane cannot be named 'default'"));
+    expectedException.expect(IllegalArgumentException.class);
+    expectedException.expectMessage("Lane cannot be named 'default'");
+    new ManualQueryLaningStrategy(ImmutableMap.of("default", 12), null);
   }
 
   @Test
   public void testExactLaneLimitsMustBeAboveZero()
   {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
-      new ManualQueryLaningStrategy(ImmutableMap.of("zero", 0, "one", 1), null);
-    });
-    assertTrue(exception.getMessage().contains("All lane limits must be greater than 0"));
+    expectedException.expect(IllegalArgumentException.class);
+    expectedException.expectMessage("All lane limits must be greater than 0");
+    new ManualQueryLaningStrategy(ImmutableMap.of("zero", 0, "one", 1), null);
   }
 
   @Test
   public void testPercentLaneLimitsMustBeAboveZero()
   {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
-      new ManualQueryLaningStrategy(ImmutableMap.of("zero", 0, "one", 25), true);
-    });
-    assertTrue(exception.getMessage().contains("All lane limits must be in the range 1 to 100"));
+    expectedException.expect(IllegalArgumentException.class);
+    expectedException.expectMessage("All lane limits must be in the range 1 to 100");
+    new ManualQueryLaningStrategy(ImmutableMap.of("zero", 0, "one", 25), true);
   }
 
   @Test
   public void testPercentLaneLimitsMustBeLessThanOneHundred()
   {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
-      new ManualQueryLaningStrategy(ImmutableMap.of("one", 1, "one-hundred-and-one", 101), true);
-    });
-    assertTrue(exception.getMessage().contains("All lane limits must be in the range 1 to 100"));
+    expectedException.expect(IllegalArgumentException.class);
+    expectedException.expectMessage("All lane limits must be in the range 1 to 100");
+    new ManualQueryLaningStrategy(ImmutableMap.of("one", 1, "one-hundred-and-one", 101), true);
   }
 
   @Test
   public void testExactLimits()
   {
     Object2IntMap<String> exactLanes = exactStrategy.getLaneLimits(50);
-    Assertions.assertEquals(1, exactLanes.getInt("one"));
-    Assertions.assertEquals(10, exactLanes.getInt("ten"));
+    Assert.assertEquals(1, exactLanes.getInt("one"));
+    Assert.assertEquals(10, exactLanes.getInt("ten"));
   }
 
   @Test
   public void testPercentLimits()
   {
     Object2IntMap<String> exactLanes = percentStrategy.getLaneLimits(50);
-    Assertions.assertEquals(1, exactLanes.getInt("one"));
-    Assertions.assertEquals(5, exactLanes.getInt("ten"));
-    Assertions.assertEquals(50, exactLanes.getInt("one-hundred"));
+    Assert.assertEquals(1, exactLanes.getInt("one"));
+    Assert.assertEquals(5, exactLanes.getInt("ten"));
+    Assert.assertEquals(50, exactLanes.getInt("one-hundred"));
   }
 
   @Test
   public void testDoesntSetLane()
   {
     TimeseriesQuery query = queryBuilder.context(ImmutableMap.of()).build();
-    Assertions.assertFalse(exactStrategy.computeLane(QueryPlus.wrap(query), ImmutableSet.of()).isPresent());
-    Assertions.assertFalse(percentStrategy.computeLane(QueryPlus.wrap(query), ImmutableSet.of()).isPresent());
+    Assert.assertFalse(exactStrategy.computeLane(QueryPlus.wrap(query), ImmutableSet.of()).isPresent());
+    Assert.assertFalse(percentStrategy.computeLane(QueryPlus.wrap(query), ImmutableSet.of()).isPresent());
   }
 
   @Test
@@ -153,11 +148,11 @@ public class ManualQueryLaningStrategyTest
   {
     final String someLane = "some-lane";
     TimeseriesQuery query = queryBuilder.context(ImmutableMap.of(QueryContexts.LANE_KEY, someLane)).build();
-    Assertions.assertEquals(
+    Assert.assertEquals(
         someLane,
         exactStrategy.computeLane(QueryPlus.wrap(query), ImmutableSet.of()).get()
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         someLane,
         percentStrategy.computeLane(QueryPlus.wrap(query), ImmutableSet.of()).get()
     );
@@ -168,11 +163,11 @@ public class ManualQueryLaningStrategyTest
   {
     final String someLane = "ten";
     TimeseriesQuery query = queryBuilder.context(ImmutableMap.of(QueryContexts.LANE_KEY, someLane)).build();
-    Assertions.assertEquals(
+    Assert.assertEquals(
         someLane,
         exactStrategy.computeLane(QueryPlus.wrap(query), ImmutableSet.of()).get()
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         someLane,
         percentStrategy.computeLane(QueryPlus.wrap(query), ImmutableSet.of()).get()
     );

@@ -49,10 +49,11 @@ import org.apache.druid.segment.incremental.OnheapIncrementalIndex;
 import org.apache.druid.segment.writeout.OffHeapMemorySegmentWriteOutMediumFactory;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.joda.time.Interval;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.io.IOException;
@@ -65,12 +66,12 @@ public class IndexIONullColumnsCompatibilityTest extends InitializedNullHandling
 {
   private static final Interval INTERVAL = Intervals.of("2022-01/P1D");
 
-  @TempDir
-  public File temporaryFolder;
+  @Rule
+  public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
   private File segmentDir;
 
-  @BeforeEach
+  @Before
   public void setup() throws IOException
   {
     final IndexMerger indexMerger = TestHelper.getTestIndexMergerV9(
@@ -98,7 +99,7 @@ public class IndexIONullColumnsCompatibilityTest extends InitializedNullHandling
     );
     segmentDir = indexMerger.persist(
         incrementalIndex,
-        newFolder(temporaryFolder, "junit"),
+        temporaryFolder.newFolder(),
         IndexSpec.DEFAULT,
         OffHeapMemorySegmentWriteOutMediumFactory.instance()
     );
@@ -108,7 +109,7 @@ public class IndexIONullColumnsCompatibilityTest extends InitializedNullHandling
   public void testV9LoaderThatReadsEmptyColumns() throws IOException
   {
     QueryableIndex queryableIndex = TestHelper.getTestIndexIO().loadIndex(segmentDir);
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableList.of("dim1", "unknownDim", "dim2"),
         Lists.newArrayList(queryableIndex.getAvailableDimensions().iterator())
     );
@@ -123,7 +124,7 @@ public class IndexIONullColumnsCompatibilityTest extends InitializedNullHandling
         false,
         SegmentLazyLoadFailCallback.NOOP
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableList.of("dim1", "dim2"),
         Lists.newArrayList(queryableIndex.getAvailableDimensions().iterator())
     );
@@ -268,23 +269,5 @@ public class IndexIONullColumnsCompatibilityTest extends InitializedNullHandling
       );
       return serde.read(byteBuffer, columnConfig, smooshedFiles);
     }
-
-    private static File newFolder(File root, String... subDirs) throws IOException {
-      String subFolder = String.join("/", subDirs);
-      File result = new File(root, subFolder);
-      if (!result.mkdirs()) {
-        throw new IOException("Couldn't create folders " + root);
-      }
-      return result;
-    }
-  }
-
-  private static File newFolder(File root, String... subDirs) throws IOException {
-    String subFolder = String.join("/", subDirs);
-    File result = new File(root, subFolder);
-    if (!result.mkdirs()) {
-      throw new IOException("Couldn't create folders " + root);
-    }
-    return result;
   }
 }

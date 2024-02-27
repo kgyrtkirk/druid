@@ -25,13 +25,12 @@ import org.apache.druid.segment.data.Indexed;
 import org.apache.druid.segment.data.ListIndexed;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.hamcrest.CoreMatchers;
+import org.hamcrest.MatcherAssert;
+import org.junit.Assert;
+import org.junit.Test;
 import org.junit.internal.matchers.ThrowableMessageMatcher;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
-
-import static org.hamcrest.MatcherAssert.assertThat;
 
 /**
  * Test for {@link ReplaceFirstValueWithNullIndexed}.
@@ -41,12 +40,12 @@ public class ReplaceFirstValueWithNullIndexedTest extends InitializedNullHandlin
   @Test
   public void testSizeZero()
   {
-    final IllegalStateException e = Assertions.assertThrows(
+    final IllegalStateException e = Assert.assertThrows(
         IllegalStateException.class,
         () -> new ReplaceFirstValueWithNullIndexed<>(Indexed.empty())
     );
 
-    assertThat(
+    MatcherAssert.assertThat(
         e,
         ThrowableMessageMatcher.hasMessage(CoreMatchers.containsString("Size[0] must be >= 1"))
     );
@@ -58,16 +57,16 @@ public class ReplaceFirstValueWithNullIndexedTest extends InitializedNullHandlin
     final ReplaceFirstValueWithNullIndexed<String> indexed =
         new ReplaceFirstValueWithNullIndexed<>(new ListIndexed<>("bar"));
 
-    Assertions.assertEquals(0, indexed.indexOf(null));
-    Assertions.assertEquals(-2, indexed.indexOf(""));
-    Assertions.assertEquals(-2, indexed.indexOf("foo"));
-    Assertions.assertEquals(-2, indexed.indexOf("bar"));
-    Assertions.assertEquals(-2, indexed.indexOf("baz"));
-    Assertions.assertEquals(-2, indexed.indexOf("qux"));
-    Assertions.assertEquals(1, indexed.size());
-    Assertions.assertNull(indexed.get(0));
-    Assertions.assertFalse(indexed.isSorted()); // Matches delegate. See class doc for ReplaceFirstValueWithNullIndexed.
-    Assertions.assertEquals(Collections.singletonList(null), Lists.newArrayList(indexed));
+    Assert.assertEquals(0, indexed.indexOf(null));
+    Assert.assertEquals(-2, indexed.indexOf(""));
+    Assert.assertEquals(-2, indexed.indexOf("foo"));
+    Assert.assertEquals(-2, indexed.indexOf("bar"));
+    Assert.assertEquals(-2, indexed.indexOf("baz"));
+    Assert.assertEquals(-2, indexed.indexOf("qux"));
+    Assert.assertEquals(1, indexed.size());
+    Assert.assertNull(indexed.get(0));
+    Assert.assertFalse(indexed.isSorted()); // Matches delegate. See class doc for ReplaceFirstValueWithNullIndexed.
+    Assert.assertEquals(Collections.singletonList(null), Lists.newArrayList(indexed));
   }
 
   @Test
@@ -76,17 +75,17 @@ public class ReplaceFirstValueWithNullIndexedTest extends InitializedNullHandlin
     final ReplaceFirstValueWithNullIndexed<String> indexed =
         new ReplaceFirstValueWithNullIndexed<>(new ListIndexed<>("bar", "foo"));
 
-    Assertions.assertEquals(0, indexed.indexOf(null));
-    Assertions.assertEquals(1, indexed.indexOf("foo"));
-    Assertions.assertEquals(-2, indexed.indexOf(""));
-    Assertions.assertEquals(-2, indexed.indexOf("bar"));
-    Assertions.assertEquals(-2, indexed.indexOf("baz"));
-    Assertions.assertEquals(-2, indexed.indexOf("qux"));
-    Assertions.assertEquals(2, indexed.size());
-    Assertions.assertNull(indexed.get(0));
-    Assertions.assertEquals("foo", indexed.get(1));
-    Assertions.assertFalse(indexed.isSorted()); // Matches delegate. See class doc for ReplaceFirstValueWithNullIndexed.
-    Assertions.assertEquals(Lists.newArrayList(null, "foo"), Lists.newArrayList(indexed));
+    Assert.assertEquals(0, indexed.indexOf(null));
+    Assert.assertEquals(1, indexed.indexOf("foo"));
+    Assert.assertEquals(-2, indexed.indexOf(""));
+    Assert.assertEquals(-2, indexed.indexOf("bar"));
+    Assert.assertEquals(-2, indexed.indexOf("baz"));
+    Assert.assertEquals(-2, indexed.indexOf("qux"));
+    Assert.assertEquals(2, indexed.size());
+    Assert.assertNull(indexed.get(0));
+    Assert.assertEquals("foo", indexed.get(1));
+    Assert.assertFalse(indexed.isSorted()); // Matches delegate. See class doc for ReplaceFirstValueWithNullIndexed.
+    Assert.assertEquals(Lists.newArrayList(null, "foo"), Lists.newArrayList(indexed));
   }
 
   @Test
@@ -100,16 +99,16 @@ public class ReplaceFirstValueWithNullIndexedTest extends InitializedNullHandlin
             )
         );
 
-    Assertions.assertEquals(0, indexed.indexOf(null));
-    Assertions.assertEquals(-2, indexed.indexOf(""));
-    Assertions.assertEquals(-2, indexed.indexOf("foo"));
-    Assertions.assertEquals(-2, indexed.indexOf("bar"));
-    Assertions.assertEquals(-2, indexed.indexOf("baz"));
-    Assertions.assertEquals(-2, indexed.indexOf("qux"));
-    Assertions.assertEquals(1, indexed.size());
-    Assertions.assertNull(indexed.get(0));
-    Assertions.assertTrue(indexed.isSorted()); // Matches delegate. See class doc for ReplaceFirstValueWithNullIndexed.
-    Assertions.assertEquals(Collections.singletonList(null), Lists.newArrayList(indexed));
+    Assert.assertEquals(0, indexed.indexOf(null));
+    Assert.assertEquals(-2, indexed.indexOf(""));
+    Assert.assertEquals(-2, indexed.indexOf("foo"));
+    Assert.assertEquals(-2, indexed.indexOf("bar"));
+    Assert.assertEquals(-2, indexed.indexOf("baz"));
+    Assert.assertEquals(-2, indexed.indexOf("qux"));
+    Assert.assertEquals(1, indexed.size());
+    Assert.assertNull(indexed.get(0));
+    Assert.assertTrue(indexed.isSorted()); // Matches delegate. See class doc for ReplaceFirstValueWithNullIndexed.
+    Assert.assertEquals(Collections.singletonList(null), Lists.newArrayList(indexed));
   }
 
   @Test
@@ -123,16 +122,16 @@ public class ReplaceFirstValueWithNullIndexedTest extends InitializedNullHandlin
             )
         );
 
-    Assertions.assertEquals(0, indexed.indexOf(null));
-    Assertions.assertEquals(1, indexed.indexOf("foo"));
-    Assertions.assertEquals(-2, indexed.indexOf(""));
-    Assertions.assertEquals(-2, indexed.indexOf("bar"));
-    Assertions.assertEquals(-2, indexed.indexOf("baz"));
-    Assertions.assertEquals(-3, indexed.indexOf("qux"));
-    Assertions.assertEquals(2, indexed.size());
-    Assertions.assertNull(indexed.get(0));
-    Assertions.assertEquals("foo", indexed.get(1));
-    Assertions.assertTrue(indexed.isSorted()); // Matches delegate. See class doc for ReplaceFirstValueWithNullIndexed.
-    Assertions.assertEquals(Lists.newArrayList(null, "foo"), Lists.newArrayList(indexed));
+    Assert.assertEquals(0, indexed.indexOf(null));
+    Assert.assertEquals(1, indexed.indexOf("foo"));
+    Assert.assertEquals(-2, indexed.indexOf(""));
+    Assert.assertEquals(-2, indexed.indexOf("bar"));
+    Assert.assertEquals(-2, indexed.indexOf("baz"));
+    Assert.assertEquals(-3, indexed.indexOf("qux"));
+    Assert.assertEquals(2, indexed.size());
+    Assert.assertNull(indexed.get(0));
+    Assert.assertEquals("foo", indexed.get(1));
+    Assert.assertTrue(indexed.isSorted()); // Matches delegate. See class doc for ReplaceFirstValueWithNullIndexed.
+    Assert.assertEquals(Lists.newArrayList(null, "foo"), Lists.newArrayList(indexed));
   }
 }

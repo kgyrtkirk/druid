@@ -28,24 +28,24 @@ import com.google.common.collect.Lists;
 import org.apache.druid.java.util.common.jackson.JacksonUtils;
 import org.apache.druid.java.util.common.parsers.ParseException;
 import org.hamcrest.CoreMatchers;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 public class ParseSpecTest
 {
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
 
   private ObjectMapper mapper;
 
-  @BeforeEach
+  @Before
   public void setUp()
   {
     // Similar to configs from DefaultObjectMapper, which we cannot use here since we're in druid-api.
@@ -58,49 +58,45 @@ public class ParseSpecTest
     mapper.configure(MapperFeature.ALLOW_FINAL_FIELDS_AS_MUTATORS, false);
   }
 
-  @Test
+  @Test(expected = ParseException.class)
   public void testDuplicateNames()
   {
-    assertThrows(ParseException.class, () -> {
-      @SuppressWarnings("unused") // expected exception
-      final ParseSpec spec = new DelimitedParseSpec(
-          new TimestampSpec(
-              "timestamp",
-              "auto",
-              null
-          ),
-          new DimensionsSpec(DimensionsSpec.getDefaultSchemas(Arrays.asList("a", "b", "a"))),
-          ",",
-          " ",
-          Arrays.asList("a", "b"),
-          false,
-          0
-      );
-    });
+    @SuppressWarnings("unused") // expected exception
+    final ParseSpec spec = new DelimitedParseSpec(
+        new TimestampSpec(
+            "timestamp",
+            "auto",
+            null
+        ),
+        new DimensionsSpec(DimensionsSpec.getDefaultSchemas(Arrays.asList("a", "b", "a"))),
+        ",",
+        " ",
+        Arrays.asList("a", "b"),
+        false,
+        0
+    );
   }
 
-  @Test
+  @Test(expected = IllegalArgumentException.class)
   public void testDimAndDimExcluOverlap()
   {
-    assertThrows(IllegalArgumentException.class, () -> {
-      @SuppressWarnings("unused") // expected exception
-      final ParseSpec spec = new DelimitedParseSpec(
-          new TimestampSpec(
-              "timestamp",
-              "auto",
-              null
-          ),
-          DimensionsSpec.builder()
-              .setDimensions(DimensionsSpec.getDefaultSchemas(Arrays.asList("a", "B")))
-              .setDimensionExclusions(Collections.singletonList("B"))
-              .build(),
-          ",",
-          null,
-          Arrays.asList("a", "B"),
-          false,
-          0
-      );
-    });
+    @SuppressWarnings("unused") // expected exception
+    final ParseSpec spec = new DelimitedParseSpec(
+        new TimestampSpec(
+            "timestamp",
+            "auto",
+            null
+        ),
+        DimensionsSpec.builder()
+                      .setDimensions(DimensionsSpec.getDefaultSchemas(Arrays.asList("a", "B")))
+                      .setDimensionExclusions(Collections.singletonList("B"))
+                      .build(),
+        ",",
+        null,
+        Arrays.asList("a", "B"),
+        false,
+        0
+    );
   }
 
   @Test
@@ -128,44 +124,42 @@ public class ParseSpecTest
   @Test
   public void testDefaultTimestampSpec()
   {
-    Throwable exception = assertThrows(NullPointerException.class, () -> {
-      @SuppressWarnings("unused") // expected exception
-      final ParseSpec spec = new DelimitedParseSpec(
-          null,
-          DimensionsSpec.builder()
-              .setDimensions(DimensionsSpec.getDefaultSchemas(Collections.singletonList("a")))
-              .setDimensionExclusions(Lists.newArrayList("B", "B"))
-              .build(),
-          ",",
-          null,
-          Arrays.asList("a", "B"),
-          false,
-          0
-      );
-    });
-    assertTrue(exception.getMessage().contains("parseSpec requires timestampSpec"));
+    expectedException.expect(NullPointerException.class);
+    expectedException.expectMessage("parseSpec requires timestampSpec");
+    @SuppressWarnings("unused") // expected exception
+    final ParseSpec spec = new DelimitedParseSpec(
+        null,
+        DimensionsSpec.builder()
+                      .setDimensions(DimensionsSpec.getDefaultSchemas(Collections.singletonList("a")))
+                      .setDimensionExclusions(Lists.newArrayList("B", "B"))
+                      .build(),
+        ",",
+        null,
+        Arrays.asList("a", "B"),
+        false,
+        0
+    );
   }
 
   @Test
   public void testDimensionSpecRequired()
   {
-    Throwable exception = assertThrows(NullPointerException.class, () -> {
-      @SuppressWarnings("unused") // expected exception
-      final ParseSpec spec = new DelimitedParseSpec(
-          new TimestampSpec(
-              "timestamp",
-              "auto",
-              null
-          ),
-          null,
-          ",",
-          null,
-          Arrays.asList("a", "B"),
-          false,
-          0
-      );
-    });
-    assertTrue(exception.getMessage().contains("parseSpec requires dimensionSpec"));
+    expectedException.expect(NullPointerException.class);
+    expectedException.expectMessage("parseSpec requires dimensionSpec");
+    @SuppressWarnings("unused") // expected exception
+    final ParseSpec spec = new DelimitedParseSpec(
+        new TimestampSpec(
+            "timestamp",
+            "auto",
+            null
+        ),
+        null,
+        ",",
+        null,
+        Arrays.asList("a", "B"),
+        false,
+        0
+    );
   }
 
   @Test
@@ -180,12 +174,12 @@ public class ParseSpecTest
     final Object mapValue = mapper.readValue(json, JacksonUtils.TYPE_REFERENCE_MAP_STRING_OBJECT);
     final ParseSpec parseSpec = mapper.convertValue(mapValue, ParseSpec.class);
 
-    Assertions.assertEquals(TimeAndDimsParseSpec.class, parseSpec.getClass());
-    Assertions.assertEquals("timestamp", parseSpec.getTimestampSpec().getTimestampColumn());
-    Assertions.assertEquals(ImmutableList.of(), parseSpec.getDimensionsSpec().getDimensionNames());
+    Assert.assertEquals(TimeAndDimsParseSpec.class, parseSpec.getClass());
+    Assert.assertEquals("timestamp", parseSpec.getTimestampSpec().getTimestampColumn());
+    Assert.assertEquals(ImmutableList.of(), parseSpec.getDimensionsSpec().getDimensionNames());
 
     // Test round-trip.
-    Assertions.assertEquals(
+    Assert.assertEquals(
         parseSpec,
         mapper.readValue(mapper.writeValueAsString(parseSpec), ParseSpec.class)
     );

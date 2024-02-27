@@ -27,6 +27,7 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Test;
 
 public class InfluxdbEmitterTest
 {

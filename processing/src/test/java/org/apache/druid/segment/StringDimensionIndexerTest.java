@@ -22,8 +22,8 @@ package org.apache.druid.segment;
 import org.apache.druid.data.input.impl.DimensionSchema;
 import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Arrays;
 
@@ -83,7 +83,7 @@ public class StringDimensionIndexerTest extends InitializedNullHandlingTest
         94L
     );
 
-    Assertions.assertEquals(306L, totalEstimatedSize);
+    Assert.assertEquals(306L, totalEstimatedSize);
   }
 
   @Test
@@ -137,7 +137,7 @@ public class StringDimensionIndexerTest extends InitializedNullHandlingTest
         162L
     );
 
-    Assertions.assertEquals(328L, totalEstimatedSize);
+    Assert.assertEquals(328L, totalEstimatedSize);
   }
 
   @Test
@@ -178,8 +178,8 @@ public class StringDimensionIndexerTest extends InitializedNullHandlingTest
 
     // If all dimension values are unique (or cardinality is high),
     // estimates with useMaxMemoryEstimates = false tend to be higher
-    Assertions.assertEquals(620L, totalSizeWithMaxEstimates);
-    Assertions.assertEquals(940L, totalSizeWithAvgEstimates);
+    Assert.assertEquals(620L, totalSizeWithMaxEstimates);
+    Assert.assertEquals(940L, totalSizeWithAvgEstimates);
 
     // Verify sizes with repeated dimension values
     for (int i = 0; i < 100; ++i) {
@@ -201,8 +201,8 @@ public class StringDimensionIndexerTest extends InitializedNullHandlingTest
 
     // If dimension values are frequently repeated (cardinality is low),
     // estimates with useMaxMemoryEstimates = false tend to be much lower
-    Assertions.assertEquals(6820L, totalSizeWithMaxEstimates);
-    Assertions.assertEquals(2940L, totalSizeWithAvgEstimates);
+    Assert.assertEquals(6820L, totalSizeWithMaxEstimates);
+    Assert.assertEquals(2940L, totalSizeWithAvgEstimates);
   }
 
   @Test
@@ -216,7 +216,7 @@ public class StringDimensionIndexerTest extends InitializedNullHandlingTest
     );
     final byte[] byteVal = new byte[]{0x01, 0x02, 0x03, 0x04};
     EncodedKeyComponent<int[]> keyComponent = indexer.processRowValsToUnsortedEncodedKeyComponent(byteVal, false);
-    Assertions.assertEquals(
+    Assert.assertEquals(
         StringUtils.encodeBase64String(byteVal),
         indexer.convertUnsortedEncodedKeyComponentToActualList(keyComponent.getComponent())
     );
@@ -231,8 +231,8 @@ public class StringDimensionIndexerTest extends InitializedNullHandlingTest
   {
     EncodedKeyComponent<int[]> encodedKeyComponent = indexer
         .processRowValsToUnsortedEncodedKeyComponent(dimensionValues, false);
-    Assertions.assertArrayEquals(expectedEncodedValues, encodedKeyComponent.getComponent());
-    Assertions.assertEquals(expectedSizeDelta, encodedKeyComponent.getEffectiveSizeBytes());
+    Assert.assertArrayEquals(expectedEncodedValues, encodedKeyComponent.getComponent());
+    Assert.assertEquals(expectedSizeDelta, encodedKeyComponent.getEffectiveSizeBytes());
 
     return encodedKeyComponent.getEffectiveSizeBytes();
   }

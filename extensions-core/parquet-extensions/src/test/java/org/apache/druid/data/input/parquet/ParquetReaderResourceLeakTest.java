@@ -34,6 +34,7 @@ import org.apache.druid.java.util.common.parsers.JSONPathSpec;
 import org.apache.hadoop.conf.Configuration;
 import org.junit.Assert;
 import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;

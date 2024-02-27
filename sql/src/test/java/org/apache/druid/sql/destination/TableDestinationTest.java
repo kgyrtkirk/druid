@@ -21,8 +21,8 @@ package org.apache.druid.sql.destination;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.druid.jackson.DefaultObjectMapper;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.IOException;
 
@@ -37,6 +37,6 @@ public class TableDestinationTest
     byte[] bytes = objectMapper.writeValueAsBytes(tableDestination);
 
     TableDestination deserialized = objectMapper.readValue(bytes, TableDestination.class);
-    Assertions.assertEquals(tableDestination, deserialized);
+    Assert.assertEquals(tableDestination, deserialized);
   }
 }

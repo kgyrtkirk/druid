@@ -24,8 +24,8 @@ import org.apache.druid.data.input.InputRowSchema;
 import org.apache.druid.data.input.InputSource;
 import org.apache.druid.data.input.InputSourceReader;
 import org.apache.druid.java.util.common.UOE;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -60,6 +60,6 @@ public class InputSourceTest
   @Test
   public void testGetTypes()
   {
-    Assertions.assertThrows(UOE.class, () -> INPUT_SOURCE.getTypes());
+    Assert.assertThrows(UOE.class, () -> INPUT_SOURCE.getTypes());
   }
 }

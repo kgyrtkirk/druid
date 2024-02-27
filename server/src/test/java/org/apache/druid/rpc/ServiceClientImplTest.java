@@ -33,21 +33,24 @@ import org.apache.druid.java.util.http.client.Request;
 import org.apache.druid.java.util.http.client.response.ObjectOrErrorResponseHandler;
 import org.apache.druid.java.util.http.client.response.StringFullResponseHolder;
 import org.hamcrest.CoreMatchers;
+import org.hamcrest.MatcherAssert;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.HttpVersion;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.internal.matchers.ThrowableMessageMatcher;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
+import org.mockito.quality.Strictness;
 import org.mockito.stubbing.OngoingStubbing;
 
 import javax.annotation.Nullable;
@@ -59,9 +62,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-
-@ExtendWith(MockitoExtension.class)
 public class ServiceClientImplTest
 {
   private static final String SERVICE_NAME = "test-service";
@@ -75,6 +75,9 @@ public class ServiceClientImplTest
 
   private ScheduledExecutorService exec;
 
+  @Rule
+  public MockitoRule mockitoRule = MockitoJUnit.rule().strictness(Strictness.STRICT_STUBS);
+
   @Mock
   private HttpClient httpClient;
 
@@ -83,13 +86,13 @@ public class ServiceClientImplTest
 
   private ServiceClient serviceClient;
 
-  @BeforeEach
+  @Before
   public void setUp()
   {
     exec = new NoDelayScheduledExecutorService(Execs.directExecutor());
   }
 
-  @AfterEach
+  @After
   public void tearDown() throws Exception
   {
     exec.shutdownNow();
@@ -112,7 +115,7 @@ public class ServiceClientImplTest
     serviceClient = makeServiceClient(StandardRetryPolicy.noRetries());
     final Map<String, String> response = doRequest(serviceClient, requestBuilder);
 
-    Assertions.assertEquals(expectedResponseObject, response);
+    Assert.assertEquals(expectedResponseObject, response);
   }
 
   @Test
@@ -127,16 +130,16 @@ public class ServiceClientImplTest
 
     serviceClient = makeServiceClient(StandardRetryPolicy.builder().maxAttempts(2).build());
 
-    final ExecutionException e = Assertions.assertThrows(
+    final ExecutionException e = Assert.assertThrows(
         ExecutionException.class,
         () -> doRequest(serviceClient, requestBuilder)
     );
 
-    assertThat(e.getCause(), CoreMatchers.instanceOf(HttpResponseException.class));
+    MatcherAssert.assertThat(e.getCause(), CoreMatchers.instanceOf(HttpResponseException.class));
 
     final HttpResponseException httpResponseException = (HttpResponseException) e.getCause();
-    Assertions.assertEquals(HttpResponseStatus.INTERNAL_SERVER_ERROR, httpResponseException.getResponse().getStatus());
-    Assertions.assertEquals("oh no", httpResponseException.getResponse().getContent());
+    Assert.assertEquals(HttpResponseStatus.INTERNAL_SERVER_ERROR, httpResponseException.getResponse().getStatus());
+    Assert.assertEquals("oh no", httpResponseException.getResponse().getContent());
   }
 
   @Test
@@ -153,7 +156,7 @@ public class ServiceClientImplTest
 
     serviceClient = makeServiceClient(StandardRetryPolicy.unlimited());
     final Map<String, String> response = doRequest(serviceClient, requestBuilder);
-    Assertions.assertEquals(expectedResponseObject, response);
+    Assert.assertEquals(expectedResponseObject, response);
   }
 
   @Test
@@ -168,12 +171,12 @@ public class ServiceClientImplTest
 
     serviceClient = makeServiceClient(StandardRetryPolicy.builder().maxAttempts(2).build());
 
-    final ExecutionException e = Assertions.assertThrows(
+    final ExecutionException e = Assert.assertThrows(
         ExecutionException.class,
         () -> doRequest(serviceClient, requestBuilder)
     );
 
-    assertThat(
+    MatcherAssert.assertThat(
         e.getCause(),
         ThrowableMessageMatcher.hasMessage(
             CoreMatchers.containsString(
@@ -181,9 +184,9 @@ public class ServiceClientImplTest
             )
         )
     );
-    assertThat(e.getCause(), CoreMatchers.instanceOf(RpcException.class));
-    assertThat(e.getCause().getCause(), CoreMatchers.instanceOf(IOException.class));
-    assertThat(
+    MatcherAssert.assertThat(e.getCause(), CoreMatchers.instanceOf(RpcException.class));
+    MatcherAssert.assertThat(e.getCause().getCause(), CoreMatchers.instanceOf(IOException.class));
+    MatcherAssert.assertThat(
         e.getCause().getCause(),
         ThrowableMessageMatcher.hasMessage(CoreMatchers.containsString("oh no"))
     );
@@ -204,7 +207,7 @@ public class ServiceClientImplTest
     serviceClient = makeServiceClient(StandardRetryPolicy.unlimited());
     final Map<String, String> response = doRequest(serviceClient, requestBuilder);
 
-    Assertions.assertEquals(expectedResponseObject, response);
+    Assert.assertEquals(expectedResponseObject, response);
   }
 
   @Test
@@ -218,13 +221,13 @@ public class ServiceClientImplTest
 
     serviceClient = makeServiceClient(StandardRetryPolicy.builder().maxAttempts(2).build());
 
-    final ExecutionException e = Assertions.assertThrows(
+    final ExecutionException e = Assert.assertThrows(
         ExecutionException.class,
         () -> doRequest(serviceClient, requestBuilder)
     );
 
-    assertThat(e.getCause(), CoreMatchers.instanceOf(RpcException.class));
-    assertThat(
+    MatcherAssert.assertThat(e.getCause(), CoreMatchers.instanceOf(RpcException.class));
+    MatcherAssert.assertThat(
         e.getCause(),
         ThrowableMessageMatcher.hasMessage(
             CoreMatchers.containsString(
@@ -250,7 +253,7 @@ public class ServiceClientImplTest
     serviceClient = makeServiceClient(StandardRetryPolicy.unlimited());
     final Map<String, String> response = doRequest(serviceClient, requestBuilder);
 
-    Assertions.assertEquals(expectedResponseObject, response);
+    Assert.assertEquals(expectedResponseObject, response);
   }
 
   @Test
@@ -268,7 +271,7 @@ public class ServiceClientImplTest
     serviceClient = makeServiceClient(StandardRetryPolicy.noRetries());
     final Map<String, String> response = doRequest(serviceClient, requestBuilder);
 
-    Assertions.assertEquals(expectedResponseObject, response);
+    Assert.assertEquals(expectedResponseObject, response);
   }
 
   @Test
@@ -286,7 +289,7 @@ public class ServiceClientImplTest
     serviceClient = makeServiceClient(StandardRetryPolicy.noRetries());
     final Map<String, String> response = doRequest(serviceClient, requestBuilder);
 
-    Assertions.assertEquals(expectedResponseObject, response);
+    Assert.assertEquals(expectedResponseObject, response);
   }
 
   @Test
@@ -307,13 +310,13 @@ public class ServiceClientImplTest
 
     serviceClient = makeServiceClient(StandardRetryPolicy.noRetries());
 
-    final ExecutionException e = Assertions.assertThrows(
+    final ExecutionException e = Assert.assertThrows(
         ExecutionException.class,
         () -> doRequest(serviceClient, requestBuilder)
     );
 
-    assertThat(e.getCause(), CoreMatchers.instanceOf(ServiceNotAvailableException.class));
-    assertThat(
+    MatcherAssert.assertThat(e.getCause(), CoreMatchers.instanceOf(ServiceNotAvailableException.class));
+    MatcherAssert.assertThat(
         e.getCause(),
         ThrowableMessageMatcher.hasMessage(CoreMatchers.containsString("issued too many redirects"))
     );
@@ -342,7 +345,7 @@ public class ServiceClientImplTest
 
     final Map<String, String> response = doRequest(serviceClient, requestBuilder);
 
-    Assertions.assertEquals(expectedResponseObject, response);
+    Assert.assertEquals(expectedResponseObject, response);
   }
 
   @Test
@@ -357,13 +360,13 @@ public class ServiceClientImplTest
 
     serviceClient = makeServiceClient(StandardRetryPolicy.builder().maxAttempts(10).build());
 
-    final ExecutionException e = Assertions.assertThrows(
+    final ExecutionException e = Assert.assertThrows(
         ExecutionException.class,
         () -> doRequest(serviceClient, requestBuilder)
     );
 
-    assertThat(e.getCause(), CoreMatchers.instanceOf(ServiceNotAvailableException.class));
-    assertThat(
+    MatcherAssert.assertThat(e.getCause(), CoreMatchers.instanceOf(ServiceNotAvailableException.class));
+    MatcherAssert.assertThat(
         e.getCause(),
         ThrowableMessageMatcher.hasMessage(CoreMatchers.containsString("issued too many redirects"))
     );
@@ -383,13 +386,13 @@ public class ServiceClientImplTest
 
     serviceClient = makeServiceClient(StandardRetryPolicy.builder().maxAttempts(10).build());
 
-    final ExecutionException e = Assertions.assertThrows(
+    final ExecutionException e = Assert.assertThrows(
         ExecutionException.class,
         () -> doRequest(serviceClient, requestBuilder)
     );
 
-    assertThat(e.getCause(), CoreMatchers.instanceOf(ServiceNotAvailableException.class));
-    assertThat(
+    MatcherAssert.assertThat(e.getCause(), CoreMatchers.instanceOf(ServiceNotAvailableException.class));
+    MatcherAssert.assertThat(
         e.getCause(),
         ThrowableMessageMatcher.hasMessage(CoreMatchers.containsString("issued too many redirects"))
     );
@@ -407,13 +410,13 @@ public class ServiceClientImplTest
 
     serviceClient = makeServiceClient(StandardRetryPolicy.unlimited());
 
-    final ExecutionException e = Assertions.assertThrows(
+    final ExecutionException e = Assert.assertThrows(
         ExecutionException.class,
         () -> doRequest(serviceClient, requestBuilder)
     );
 
-    assertThat(e.getCause(), CoreMatchers.instanceOf(RpcException.class));
-    assertThat(
+    MatcherAssert.assertThat(e.getCause(), CoreMatchers.instanceOf(RpcException.class));
+    MatcherAssert.assertThat(
         e.getCause(),
         ThrowableMessageMatcher.hasMessage(
             CoreMatchers.containsString("redirected to invalid URL [invalid-url]"))
@@ -432,13 +435,13 @@ public class ServiceClientImplTest
 
     serviceClient = makeServiceClient(StandardRetryPolicy.unlimited());
 
-    final ExecutionException e = Assertions.assertThrows(
+    final ExecutionException e = Assert.assertThrows(
         ExecutionException.class,
         () -> doRequest(serviceClient, requestBuilder)
     );
 
-    assertThat(e.getCause(), CoreMatchers.instanceOf(RpcException.class));
-    assertThat(
+    MatcherAssert.assertThat(e.getCause(), CoreMatchers.instanceOf(RpcException.class));
+    MatcherAssert.assertThat(
         e.getCause(),
         ThrowableMessageMatcher.hasMessage(CoreMatchers.containsString("redirected to invalid URL [null]"))
     );
@@ -456,13 +459,13 @@ public class ServiceClientImplTest
 
     serviceClient = makeServiceClient(StandardRetryPolicy.noRetries());
 
-    final ExecutionException e = Assertions.assertThrows(
+    final ExecutionException e = Assert.assertThrows(
         ExecutionException.class,
         () -> doRequest(serviceClient, requestBuilder)
     );
 
-    assertThat(e.getCause(), CoreMatchers.instanceOf(ServiceNotAvailableException.class));
-    assertThat(
+    MatcherAssert.assertThat(e.getCause(), CoreMatchers.instanceOf(ServiceNotAvailableException.class));
+    MatcherAssert.assertThat(
         e.getCause(),
         ThrowableMessageMatcher.hasMessage(CoreMatchers.containsString(
             "issued redirect to unknown URL [https://example.com:9999/q/foo]"))
@@ -479,13 +482,13 @@ public class ServiceClientImplTest
 
     serviceClient = makeServiceClient(StandardRetryPolicy.noRetries());
 
-    final ExecutionException e = Assertions.assertThrows(
+    final ExecutionException e = Assert.assertThrows(
         ExecutionException.class,
         () -> doRequest(serviceClient, requestBuilder)
     );
 
-    assertThat(e.getCause(), CoreMatchers.instanceOf(ServiceNotAvailableException.class));
-    assertThat(
+    MatcherAssert.assertThat(e.getCause(), CoreMatchers.instanceOf(ServiceNotAvailableException.class));
+    MatcherAssert.assertThat(
         e.getCause(),
         ThrowableMessageMatcher.hasMessage(CoreMatchers.containsString("Service [test-service] is not available"))
     );
@@ -506,7 +509,7 @@ public class ServiceClientImplTest
     serviceClient = makeServiceClient(StandardRetryPolicy.builder().maxAttempts(2).build());
     final Map<String, String> response = doRequest(serviceClient, requestBuilder);
 
-    Assertions.assertEquals(expectedResponseObject, response);
+    Assert.assertEquals(expectedResponseObject, response);
   }
 
   @Test
@@ -524,13 +527,13 @@ public class ServiceClientImplTest
                            .build()
     );
 
-    final ExecutionException e = Assertions.assertThrows(
+    final ExecutionException e = Assert.assertThrows(
         ExecutionException.class,
         () -> doRequest(serviceClient, requestBuilder)
     );
 
-    assertThat(e.getCause(), CoreMatchers.instanceOf(ServiceNotAvailableException.class));
-    assertThat(
+    MatcherAssert.assertThat(e.getCause(), CoreMatchers.instanceOf(ServiceNotAvailableException.class));
+    MatcherAssert.assertThat(
         e.getCause(),
         ThrowableMessageMatcher.hasMessage(CoreMatchers.containsString("Service [test-service] is not available"))
     );
@@ -548,13 +551,13 @@ public class ServiceClientImplTest
     // Use an unlimited retry policy to ensure that the future actually resolves.
     serviceClient = makeServiceClient(StandardRetryPolicy.unlimited());
 
-    final ExecutionException e = Assertions.assertThrows(
+    final ExecutionException e = Assert.assertThrows(
         ExecutionException.class,
         () -> doRequest(serviceClient, requestBuilder)
     );
 
-    assertThat(e.getCause(), CoreMatchers.instanceOf(ServiceClosedException.class));
-    assertThat(
+    MatcherAssert.assertThat(e.getCause(), CoreMatchers.instanceOf(ServiceClosedException.class));
+    MatcherAssert.assertThat(
         e.getCause(),
         ThrowableMessageMatcher.hasMessage(CoreMatchers.containsString("Service [test-service] is closed"))
     );
@@ -572,20 +575,20 @@ public class ServiceClientImplTest
     // Use an unlimited retry policy to ensure that the future actually resolves.
     serviceClient = makeServiceClient(StandardRetryPolicy.unlimited());
 
-    final ExecutionException e = Assertions.assertThrows(
+    final ExecutionException e = Assert.assertThrows(
         ExecutionException.class,
         () -> doRequest(serviceClient, requestBuilder)
     );
 
-    assertThat(e.getCause(), CoreMatchers.instanceOf(RpcException.class));
-    assertThat(e.getCause().getCause(), CoreMatchers.instanceOf(IllegalStateException.class));
-    assertThat(
+    MatcherAssert.assertThat(e.getCause(), CoreMatchers.instanceOf(RpcException.class));
+    MatcherAssert.assertThat(e.getCause().getCause(), CoreMatchers.instanceOf(IllegalStateException.class));
+    MatcherAssert.assertThat(
         e.getCause(),
         ThrowableMessageMatcher.hasMessage(
             CoreMatchers.containsString("Service [test-service] locator encountered exception")
         )
     );
-    assertThat(
+    MatcherAssert.assertThat(
         e.getCause().getCause(),
         ThrowableMessageMatcher.hasMessage(CoreMatchers.containsString("oh no"))
     );
@@ -603,8 +606,8 @@ public class ServiceClientImplTest
 
     final ListenableFuture<Map<String, String>> response = doAsyncRequest(serviceClient, requestBuilder);
 
-    Assertions.assertTrue(response.cancel(true));
-    Assertions.assertTrue(response.isCancelled());
+    Assert.assertTrue(response.cancel(true));
+    Assert.assertTrue(response.isCancelled());
   }
 
   @Test
@@ -621,8 +624,8 @@ public class ServiceClientImplTest
     serviceClient = makeServiceClient(StandardRetryPolicy.unlimited());
     final ListenableFuture<Map<String, String>> response = doAsyncRequest(serviceClient, requestBuilder);
 
-    Assertions.assertTrue(response.cancel(true));
-    Assertions.assertTrue(response.isCancelled());
+    Assert.assertTrue(response.cancel(true));
+    Assert.assertTrue(response.isCancelled());
   }
 
   @Test
@@ -630,53 +633,53 @@ public class ServiceClientImplTest
   {
     final StandardRetryPolicy retryPolicy = StandardRetryPolicy.unlimited();
 
-    Assertions.assertEquals(100, ServiceClientImpl.computeBackoffMs(retryPolicy, 0));
-    Assertions.assertEquals(200, ServiceClientImpl.computeBackoffMs(retryPolicy, 1));
-    Assertions.assertEquals(3200, ServiceClientImpl.computeBackoffMs(retryPolicy, 5));
-    Assertions.assertEquals(30000, ServiceClientImpl.computeBackoffMs(retryPolicy, 20));
+    Assert.assertEquals(100, ServiceClientImpl.computeBackoffMs(retryPolicy, 0));
+    Assert.assertEquals(200, ServiceClientImpl.computeBackoffMs(retryPolicy, 1));
+    Assert.assertEquals(3200, ServiceClientImpl.computeBackoffMs(retryPolicy, 5));
+    Assert.assertEquals(30000, ServiceClientImpl.computeBackoffMs(retryPolicy, 20));
   }
 
   @Test
   public void test_serviceLocationNoPathFromUri()
   {
-    Assertions.assertNull(ServiceClientImpl.serviceLocationNoPathFromUri("/"));
+    Assert.assertNull(ServiceClientImpl.serviceLocationNoPathFromUri("/"));
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new ServiceLocation("1.2.3.4", 9999, -1, ""),
         ServiceClientImpl.serviceLocationNoPathFromUri("http://1.2.3.4:9999/foo")
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new ServiceLocation("1.2.3.4", 80, -1, ""),
         ServiceClientImpl.serviceLocationNoPathFromUri("http://1.2.3.4/foo")
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new ServiceLocation("1.2.3.4", -1, 9999, ""),
         ServiceClientImpl.serviceLocationNoPathFromUri("https://1.2.3.4:9999/foo")
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new ServiceLocation("1.2.3.4", -1, 443, ""),
         ServiceClientImpl.serviceLocationNoPathFromUri("https://1.2.3.4/foo")
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
             new ServiceLocation("1:2:3:4:5:6:7:8", 9999, -1, ""),
             ServiceClientImpl.serviceLocationNoPathFromUri("http://[1:2:3:4:5:6:7:8]:9999/foo")
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
             new ServiceLocation("1:2:3:4:5:6:7:8", 80, -1, ""),
             ServiceClientImpl.serviceLocationNoPathFromUri("http://[1:2:3:4:5:6:7:8]/foo")
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
             new ServiceLocation("1:2:3:4:5:6:7:8", -1, 9999, ""),
             ServiceClientImpl.serviceLocationNoPathFromUri("https://[1:2:3:4:5:6:7:8]:9999/foo")
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
             new ServiceLocation("1:2:3:4:5:6:7:8", -1, 443, ""),
             ServiceClientImpl.serviceLocationNoPathFromUri("https://[1:2:3:4:5:6:7:8]/foo")
     );
@@ -685,18 +688,18 @@ public class ServiceClientImplTest
   @Test
   public void test_normalizeHost()
   {
-    Assertions.assertEquals("1:2:3:4:5:6:7:8", ServiceClientImpl.sanitizeHost("[1:2:3:4:5:6:7:8]"));
-    Assertions.assertEquals("1:2:3:4:5:6:7:8", ServiceClientImpl.sanitizeHost("1:2:3:4:5:6:7:8"));
-    Assertions.assertEquals("1.2.3.4", ServiceClientImpl.sanitizeHost("1.2.3.4"));
+    Assert.assertEquals("1:2:3:4:5:6:7:8", ServiceClientImpl.sanitizeHost("[1:2:3:4:5:6:7:8]"));
+    Assert.assertEquals("1:2:3:4:5:6:7:8", ServiceClientImpl.sanitizeHost("1:2:3:4:5:6:7:8"));
+    Assert.assertEquals("1.2.3.4", ServiceClientImpl.sanitizeHost("1.2.3.4"));
   }
 
   @Test
   public void test_isRedirect()
   {
-    Assertions.assertTrue(ServiceClientImpl.isRedirect(HttpResponseStatus.FOUND));
-    Assertions.assertTrue(ServiceClientImpl.isRedirect(HttpResponseStatus.MOVED_PERMANENTLY));
-    Assertions.assertTrue(ServiceClientImpl.isRedirect(HttpResponseStatus.TEMPORARY_REDIRECT));
-    Assertions.assertFalse(ServiceClientImpl.isRedirect(HttpResponseStatus.OK));
+    Assert.assertTrue(ServiceClientImpl.isRedirect(HttpResponseStatus.FOUND));
+    Assert.assertTrue(ServiceClientImpl.isRedirect(HttpResponseStatus.MOVED_PERMANENTLY));
+    Assert.assertTrue(ServiceClientImpl.isRedirect(HttpResponseStatus.TEMPORARY_REDIRECT));
+    Assert.assertFalse(ServiceClientImpl.isRedirect(HttpResponseStatus.OK));
   }
 
   private <T> OngoingStubbing<ListenableFuture<Either<StringFullResponseHolder, T>>> expectHttpCall(

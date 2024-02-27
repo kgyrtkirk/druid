@@ -20,8 +20,8 @@
 package org.apache.druid.server.coordinator.loading;
 
 import com.google.common.collect.ImmutableMap;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class ReplicationThrottlerTest
 {
@@ -39,10 +39,10 @@ public class ReplicationThrottlerTest
 
     // Verify that both the tiers can be assigned replicas upto the limit
     for (int i = 0; i < replicationThrottleLimit; ++i) {
-      Assertions.assertFalse(throttler.isReplicationThrottledForTier(TIER_1));
+      Assert.assertFalse(throttler.isReplicationThrottledForTier(TIER_1));
       throttler.incrementAssignedReplicas(TIER_1);
 
-      Assertions.assertFalse(throttler.isReplicationThrottledForTier(TIER_2));
+      Assert.assertFalse(throttler.isReplicationThrottledForTier(TIER_2));
       throttler.incrementAssignedReplicas(TIER_2);
     }
   }
@@ -57,14 +57,14 @@ public class ReplicationThrottlerTest
     );
 
     // T1 cannot be assigned any more replicas
-    Assertions.assertTrue(throttler.isReplicationThrottledForTier(TIER_1));
+    Assert.assertTrue(throttler.isReplicationThrottledForTier(TIER_1));
 
     // T2 can be assigned replicas until it hits the limit
     for (int i = 0; i < 3; ++i) {
-      Assertions.assertFalse(throttler.isReplicationThrottledForTier(TIER_2));
+      Assert.assertFalse(throttler.isReplicationThrottledForTier(TIER_2));
       throttler.incrementAssignedReplicas(TIER_2);
     }
-    Assertions.assertTrue(throttler.isReplicationThrottledForTier(TIER_2));
+    Assert.assertTrue(throttler.isReplicationThrottledForTier(TIER_2));
   }
 
 }

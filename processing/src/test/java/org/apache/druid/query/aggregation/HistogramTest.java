@@ -22,8 +22,8 @@ package org.apache.druid.query.aggregation;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Maps;
 import org.apache.druid.segment.TestHelper;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -43,7 +43,7 @@ public class HistogramTest
       h.offer(v);
     }
 
-    Assertions.assertEquals(hExpected, h, "histogram matches expected histogram");
+    Assert.assertEquals("histogram matches expected histogram", hExpected, h);
   }
 
   /**
@@ -63,7 +63,7 @@ public class HistogramTest
       h.offer(v);
     }
 
-    Assertions.assertEquals(hExpected, h, "histogram matches expected histogram");
+    Assert.assertEquals("histogram matches expected histogram", hExpected, h);
   }
 
   @Test
@@ -73,7 +73,7 @@ public class HistogramTest
     long[] bins = {23, 123, 4, 56, 7, 493210};
     Histogram h = new Histogram(breaks, bins, -1f, 1f);
 
-    Assertions.assertEquals(Histogram.fromBytes(h.toBytes()), h);
+    Assert.assertEquals(Histogram.fromBytes(h.toBytes()), h);
   }
 
   @Test
@@ -95,6 +95,6 @@ public class HistogramTest
     expectedObj.put("quantiles", Arrays.asList(new Double[]{-1.0, 1.0}));
 
     Map<String, Object> obj = (Map<String, Object>) objectMapper.readValue(json, Object.class);
-    Assertions.assertEquals(expectedObj, obj);
+    Assert.assertEquals(expectedObj, obj);
   }
 }

@@ -25,13 +25,12 @@ import org.apache.druid.client.DruidServer;
 import org.apache.druid.error.DruidException;
 import org.apache.druid.error.DruidExceptionMatcher;
 import org.apache.druid.jackson.DefaultObjectMapper;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.hamcrest.MatcherAssert;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.hamcrest.MatcherAssert.assertThat;
 
 public class ForeverLoadRuleTest
 {
@@ -45,15 +44,15 @@ public class ForeverLoadRuleTest
     ObjectMapper jsonMapper = new DefaultObjectMapper();
     Rule reread = jsonMapper.readValue(jsonMapper.writeValueAsString(rule), Rule.class);
 
-    Assertions.assertEquals(rule.getTieredReplicants(), ((ForeverLoadRule) reread).getTieredReplicants());
-    Assertions.assertEquals(ImmutableMap.of(DruidServer.DEFAULT_TIER, DruidServer.DEFAULT_NUM_REPLICANTS), rule.getTieredReplicants());
+    Assert.assertEquals(rule.getTieredReplicants(), ((ForeverLoadRule) reread).getTieredReplicants());
+    Assert.assertEquals(ImmutableMap.of(DruidServer.DEFAULT_TIER, DruidServer.DEFAULT_NUM_REPLICANTS), rule.getTieredReplicants());
   }
 
   @Test
   public void testCreatingNegativeTieredReplicants()
   {
-    assertThat(
-        Assertions.assertThrows(DruidException.class, () ->
+    MatcherAssert.assertThat(
+        Assert.assertThrows(DruidException.class, () ->
             new ForeverLoadRule(
                 ImmutableMap.of(DruidServer.DEFAULT_TIER, -1),
                 null
@@ -71,7 +70,7 @@ public class ForeverLoadRuleTest
     ForeverLoadRule rule = new ForeverLoadRule(ImmutableMap.of(), false);
 
     LoadRule reread = (LoadRule) OBJECT_MAPPER.readValue(OBJECT_MAPPER.writeValueAsString(rule), Rule.class);
-    Assertions.assertEquals(ImmutableMap.of(), reread.getTieredReplicants());
+    Assert.assertEquals(ImmutableMap.of(), reread.getTieredReplicants());
   }
 
   @Test
@@ -81,8 +80,8 @@ public class ForeverLoadRuleTest
     Map<String, Integer> tieredReplicants = new HashMap<>();
     tieredReplicants.put("tier", null);
 
-    assertThat(
-        Assertions.assertThrows(DruidException.class, () ->
+    MatcherAssert.assertThat(
+        Assert.assertThrows(DruidException.class, () ->
             new ForeverLoadRule(
                 tieredReplicants,
                 true
@@ -101,7 +100,7 @@ public class ForeverLoadRuleTest
                        + "     \"type\": \"loadForever\"\n"
                        + "  }";
     ForeverLoadRule inputForeverLoadRule = OBJECT_MAPPER.readValue(inputJson, ForeverLoadRule.class);
-    Assertions.assertEquals(ImmutableMap.of(DruidServer.DEFAULT_TIER, DruidServer.DEFAULT_NUM_REPLICANTS), inputForeverLoadRule.getTieredReplicants());
+    Assert.assertEquals(ImmutableMap.of(DruidServer.DEFAULT_TIER, DruidServer.DEFAULT_NUM_REPLICANTS), inputForeverLoadRule.getTieredReplicants());
   }
 
   @Test
@@ -112,7 +111,7 @@ public class ForeverLoadRuleTest
                        + "     \"useDefaultTierForNull\": \"true\"\n"
                        + "  }";
     ForeverLoadRule inputForeverLoadRule = OBJECT_MAPPER.readValue(inputJson, ForeverLoadRule.class);
-    Assertions.assertEquals(ImmutableMap.of(DruidServer.DEFAULT_TIER, DruidServer.DEFAULT_NUM_REPLICANTS), inputForeverLoadRule.getTieredReplicants());
+    Assert.assertEquals(ImmutableMap.of(DruidServer.DEFAULT_TIER, DruidServer.DEFAULT_NUM_REPLICANTS), inputForeverLoadRule.getTieredReplicants());
   }
 
   @Test
@@ -123,6 +122,6 @@ public class ForeverLoadRuleTest
                        + "     \"useDefaultTierForNull\": \"false\"\n"
                        + "  }";
     ForeverLoadRule inputForeverLoadRule = OBJECT_MAPPER.readValue(inputJson, ForeverLoadRule.class);
-    Assertions.assertEquals(ImmutableMap.of(), inputForeverLoadRule.getTieredReplicants());
+    Assert.assertEquals(ImmutableMap.of(), inputForeverLoadRule.getTieredReplicants());
   }
 }

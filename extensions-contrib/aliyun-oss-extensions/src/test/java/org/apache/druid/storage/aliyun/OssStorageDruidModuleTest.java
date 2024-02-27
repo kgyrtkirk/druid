@@ -29,6 +29,7 @@ import org.apache.druid.segment.loading.OmniDataSegmentArchiver;
 import org.apache.druid.segment.loading.OmniDataSegmentKiller;
 import org.apache.druid.segment.loading.OmniDataSegmentMover;
 import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Properties;
 

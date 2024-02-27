@@ -41,21 +41,21 @@ import org.apache.druid.query.ResourceLimitExceededException;
 import org.apache.druid.query.aggregation.LongSumAggregatorFactory;
 import org.apache.druid.query.dimension.DefaultDimensionSpec;
 import org.apache.druid.segment.TestHelper;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Timeout;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.AfterClass;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
+@RunWith(Parameterized.class)
 public class GroupByQueryRunnerFailureTest
 {
   private static final DruidProcessingConfig DEFAULT_PROCESSING_CONFIG = new DruidProcessingConfig()
@@ -85,6 +85,9 @@ public class GroupByQueryRunnerFailureTest
       return 2;
     }
   };
+
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
 
   private static GroupByQueryRunnerFactory makeQueryRunnerFactory(
       final ObjectMapper mapper,
@@ -123,13 +126,14 @@ public class GroupByQueryRunnerFailureTest
 
   private QueryRunner<ResultRow> runner;
 
-  @AfterAll
+  @AfterClass
   public static void teardownClass()
   {
     BUFFER_POOL.close();
     MERGE_BUFFER_POOL.close();
   }
 
+  @Parameters(name = "{0}")
   public static Collection<Object[]> constructorFeeder()
   {
     final List<Object[]> args = new ArrayList<>();
@@ -139,169 +143,151 @@ public class GroupByQueryRunnerFailureTest
     return args;
   }
 
-  public void initGroupByQueryRunnerFailureTest(QueryRunner<ResultRow> runner)
+  public GroupByQueryRunnerFailureTest(QueryRunner<ResultRow> runner)
   {
     this.runner = FACTORY.mergeRunners(Execs.directExecutor(), ImmutableList.of(runner));
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  @Timeout(value = 60_000L, unit = TimeUnit.MILLISECONDS)
-  public void testNotEnoughMergeBuffersOnQueryable(QueryRunner<ResultRow> runner)
+  @Test(timeout = 60_000L)
+  public void testNotEnoughMergeBuffersOnQueryable()
   {
-    Throwable exception = assertThrows(QueryTimeoutException.class, () -> {
-      initGroupByQueryRunnerFailureTest(runner);
+    expectedException.expect(QueryTimeoutException.class);
+    expectedException.expectMessage("Cannot acquire enough merge buffers");
 
-      final GroupByQuery query = GroupByQuery
-          .builder()
-          .setDataSource(
-              new QueryDataSource(
-                  GroupByQuery.builder()
-                      .setDataSource(QueryRunnerTestHelper.DATA_SOURCE)
-                      .setInterval(QueryRunnerTestHelper.FIRST_TO_THIRD)
-                      .setGranularity(Granularities.ALL)
-                      .setDimensions(new DefaultDimensionSpec("quality", "alias"))
-                      .setAggregatorSpecs(Collections.singletonList(QueryRunnerTestHelper.ROWS_COUNT))
-                      .build()
-              )
-          )
-          .setGranularity(Granularities.ALL)
-          .setInterval(QueryRunnerTestHelper.FIRST_TO_THIRD)
-          .setAggregatorSpecs(new LongSumAggregatorFactory("rows", "rows"))
-          .setContext(ImmutableMap.of(QueryContexts.TIMEOUT_KEY, 500))
-          .build();
+    final GroupByQuery query = GroupByQuery
+        .builder()
+        .setDataSource(
+            new QueryDataSource(
+                GroupByQuery.builder()
+                            .setDataSource(QueryRunnerTestHelper.DATA_SOURCE)
+                            .setInterval(QueryRunnerTestHelper.FIRST_TO_THIRD)
+                            .setGranularity(Granularities.ALL)
+                            .setDimensions(new DefaultDimensionSpec("quality", "alias"))
+                            .setAggregatorSpecs(Collections.singletonList(QueryRunnerTestHelper.ROWS_COUNT))
+                            .build()
+            )
+        )
+        .setGranularity(Granularities.ALL)
+        .setInterval(QueryRunnerTestHelper.FIRST_TO_THIRD)
+        .setAggregatorSpecs(new LongSumAggregatorFactory("rows", "rows"))
+        .setContext(ImmutableMap.of(QueryContexts.TIMEOUT_KEY, 500))
+        .build();
 
+    GroupByQueryRunnerTestHelper.runQuery(FACTORY, runner, query);
+  }
+
+  @Test(timeout = 60_000L)
+  public void testResourceLimitExceededOnBroker()
+  {
+    expectedException.expect(ResourceLimitExceededException.class);
+
+    final GroupByQuery query = GroupByQuery
+        .builder()
+        .setDataSource(
+            new QueryDataSource(
+                GroupByQuery.builder()
+                            .setDataSource(
+                                GroupByQuery.builder()
+                                            .setDataSource(QueryRunnerTestHelper.DATA_SOURCE)
+                                            .setInterval(QueryRunnerTestHelper.FIRST_TO_THIRD)
+                                            .setGranularity(Granularities.ALL)
+                                            .setDimensions(
+                                                new DefaultDimensionSpec("quality", "alias"),
+                                                new DefaultDimensionSpec("market", null)
+                                            )
+                                            .setAggregatorSpecs(Collections.singletonList(QueryRunnerTestHelper.ROWS_COUNT))
+                                            .build()
+                            )
+                            .setInterval(QueryRunnerTestHelper.FIRST_TO_THIRD)
+                            .setGranularity(Granularities.ALL)
+                            .setDimensions(new DefaultDimensionSpec("quality", "alias"))
+                            .setAggregatorSpecs(Collections.singletonList(QueryRunnerTestHelper.ROWS_COUNT))
+                            .build()
+            )
+        )
+        .setGranularity(Granularities.ALL)
+        .setInterval(QueryRunnerTestHelper.FIRST_TO_THIRD)
+        .setAggregatorSpecs(new LongSumAggregatorFactory("rows", "rows"))
+        .setContext(ImmutableMap.of(QueryContexts.TIMEOUT_KEY, 500))
+        .build();
+
+    GroupByQueryRunnerTestHelper.runQuery(FACTORY, runner, query);
+  }
+
+  @Test(timeout = 60_000L)
+  public void testInsufficientResourcesOnBroker()
+  {
+    final GroupByQuery query = GroupByQuery
+        .builder()
+        .setDataSource(
+            new QueryDataSource(
+                GroupByQuery.builder()
+                            .setDataSource(QueryRunnerTestHelper.DATA_SOURCE)
+                            .setInterval(QueryRunnerTestHelper.FIRST_TO_THIRD)
+                            .setGranularity(Granularities.ALL)
+                            .setDimensions(new DefaultDimensionSpec("quality", "alias"))
+                            .setAggregatorSpecs(Collections.singletonList(QueryRunnerTestHelper.ROWS_COUNT))
+                            .build()
+            )
+        )
+        .setGranularity(Granularities.ALL)
+        .setInterval(QueryRunnerTestHelper.FIRST_TO_THIRD)
+        .setAggregatorSpecs(new LongSumAggregatorFactory("rows", "rows"))
+        .setContext(ImmutableMap.of(QueryContexts.TIMEOUT_KEY, 500))
+        .build();
+
+    List<ReferenceCountingResourceHolder<ByteBuffer>> holder = null;
+    try {
+      holder = MERGE_BUFFER_POOL.takeBatch(1, 10);
+      expectedException.expect(QueryCapacityExceededException.class);
+      expectedException.expectMessage("Cannot acquire 1 merge buffers. Try again after current running queries are finished.");
       GroupByQueryRunnerTestHelper.runQuery(FACTORY, runner, query);
-    });
-    assertTrue(exception.getMessage().contains("Cannot acquire enough merge buffers"));
-  }
-
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  @Timeout(value = 60_000L, unit = TimeUnit.MILLISECONDS)
-  public void testResourceLimitExceededOnBroker(QueryRunner<ResultRow> runner)
-  {
-    assertThrows(ResourceLimitExceededException.class, () -> {
-      initGroupByQueryRunnerFailureTest(runner);
-
-      final GroupByQuery query = GroupByQuery
-          .builder()
-          .setDataSource(
-              new QueryDataSource(
-                  GroupByQuery.builder()
-                      .setDataSource(
-                          GroupByQuery.builder()
-                              .setDataSource(QueryRunnerTestHelper.DATA_SOURCE)
-                              .setInterval(QueryRunnerTestHelper.FIRST_TO_THIRD)
-                              .setGranularity(Granularities.ALL)
-                              .setDimensions(
-                                  new DefaultDimensionSpec("quality", "alias"),
-                                  new DefaultDimensionSpec("market", null)
-                              )
-                              .setAggregatorSpecs(Collections.singletonList(QueryRunnerTestHelper.ROWS_COUNT))
-                              .build()
-                      )
-                      .setInterval(QueryRunnerTestHelper.FIRST_TO_THIRD)
-                      .setGranularity(Granularities.ALL)
-                      .setDimensions(new DefaultDimensionSpec("quality", "alias"))
-                      .setAggregatorSpecs(Collections.singletonList(QueryRunnerTestHelper.ROWS_COUNT))
-                      .build()
-              )
-          )
-          .setGranularity(Granularities.ALL)
-          .setInterval(QueryRunnerTestHelper.FIRST_TO_THIRD)
-          .setAggregatorSpecs(new LongSumAggregatorFactory("rows", "rows"))
-          .setContext(ImmutableMap.of(QueryContexts.TIMEOUT_KEY, 500))
-          .build();
-
-      GroupByQueryRunnerTestHelper.runQuery(FACTORY, runner, query);
-    });
-  }
-
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  @Timeout(value = 60_000L, unit = TimeUnit.MILLISECONDS)
-  public void testInsufficientResourcesOnBroker(QueryRunner<ResultRow> runner)
-  {
-    Throwable exception = assertThrows(QueryCapacityExceededException.class, () -> {
-      initGroupByQueryRunnerFailureTest(runner);
-      final GroupByQuery query = GroupByQuery
-          .builder()
-          .setDataSource(
-              new QueryDataSource(
-                  GroupByQuery.builder()
-                      .setDataSource(QueryRunnerTestHelper.DATA_SOURCE)
-                      .setInterval(QueryRunnerTestHelper.FIRST_TO_THIRD)
-                      .setGranularity(Granularities.ALL)
-                      .setDimensions(new DefaultDimensionSpec("quality", "alias"))
-                      .setAggregatorSpecs(Collections.singletonList(QueryRunnerTestHelper.ROWS_COUNT))
-                      .build()
-              )
-          )
-          .setGranularity(Granularities.ALL)
-          .setInterval(QueryRunnerTestHelper.FIRST_TO_THIRD)
-          .setAggregatorSpecs(new LongSumAggregatorFactory("rows", "rows"))
-          .setContext(ImmutableMap.of(QueryContexts.TIMEOUT_KEY, 500))
-          .build();
-
-      List<ReferenceCountingResourceHolder<ByteBuffer>> holder = null;
-      try {
-        holder = MERGE_BUFFER_POOL.takeBatch(1, 10);
-        expectedException.expect(QueryCapacityExceededException.class);
-        expectedException.expectMessage("Cannot acquire 1 merge buffers. Try again after current running queries are finished.");
-        GroupByQueryRunnerTestHelper.runQuery(FACTORY, runner, query);
+    }
+    finally {
+      if (holder != null) {
+        holder.forEach(ReferenceCountingResourceHolder::close);
       }
-      finally {
-        if (holder != null) {
-          holder.forEach(ReferenceCountingResourceHolder::close);
-        }
-      }
-    });
-    assertTrue(exception.getMessage().contains("Cannot acquire 1 merge buffers. Try again after current running queries are finished."));
+    }
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  @Timeout(value = 60_000L, unit = TimeUnit.MILLISECONDS)
-  public void testTimeoutExceptionOnQueryable(QueryRunner<ResultRow> runner)
+  @Test(timeout = 60_000L)
+  public void testTimeoutExceptionOnQueryable()
   {
-    assertThrows(QueryTimeoutException.class, () -> {
-      initGroupByQueryRunnerFailureTest(runner);
+    expectedException.expect(QueryTimeoutException.class);
 
-      final GroupByQuery query = GroupByQuery
-          .builder()
-          .setDataSource(QueryRunnerTestHelper.DATA_SOURCE)
-          .setQuerySegmentSpec(QueryRunnerTestHelper.FIRST_TO_THIRD)
-          .setDimensions(new DefaultDimensionSpec("quality", "alias"))
-          .setAggregatorSpecs(new LongSumAggregatorFactory("rows", "rows"))
-          .setGranularity(QueryRunnerTestHelper.DAY_GRAN)
-          .overrideContext(ImmutableMap.of(QueryContexts.TIMEOUT_KEY, 1))
-          .build();
+    final GroupByQuery query = GroupByQuery
+        .builder()
+        .setDataSource(QueryRunnerTestHelper.DATA_SOURCE)
+        .setQuerySegmentSpec(QueryRunnerTestHelper.FIRST_TO_THIRD)
+        .setDimensions(new DefaultDimensionSpec("quality", "alias"))
+        .setAggregatorSpecs(new LongSumAggregatorFactory("rows", "rows"))
+        .setGranularity(QueryRunnerTestHelper.DAY_GRAN)
+        .overrideContext(ImmutableMap.of(QueryContexts.TIMEOUT_KEY, 1))
+        .build();
 
-      GroupByQueryRunnerFactory factory = makeQueryRunnerFactory(
-          GroupByQueryRunnerTest.DEFAULT_MAPPER,
-          new GroupByQueryConfig()
+    GroupByQueryRunnerFactory factory = makeQueryRunnerFactory(
+        GroupByQueryRunnerTest.DEFAULT_MAPPER,
+        new GroupByQueryConfig()
+        {
+
+          @Override
+          public boolean isSingleThreaded()
           {
-
-            @Override
-            public boolean isSingleThreaded()
-            {
-              return true;
-            }
+            return true;
           }
-      );
-      QueryRunner<ResultRow> mockRunner = (queryPlus, responseContext) -> {
-        try {
-          Thread.sleep(100);
         }
-        catch (InterruptedException e) {
-          throw new RuntimeException(e);
-        }
-        return Sequences.empty();
-      };
+    );
+    QueryRunner<ResultRow> mockRunner = (queryPlus, responseContext) -> {
+      try {
+        Thread.sleep(100);
+      }
+      catch (InterruptedException e) {
+        throw new RuntimeException(e);
+      }
+      return Sequences.empty();
+    };
 
-      QueryRunner<ResultRow> mergeRunners = factory.mergeRunners(Execs.directExecutor(), ImmutableList.of(runner, mockRunner));
-      GroupByQueryRunnerTestHelper.runQuery(factory, mergeRunners, query);
-    });
+    QueryRunner<ResultRow> mergeRunners = factory.mergeRunners(Execs.directExecutor(), ImmutableList.of(runner, mockRunner));
+    GroupByQueryRunnerTestHelper.runQuery(factory, mergeRunners, query);
   }
 }

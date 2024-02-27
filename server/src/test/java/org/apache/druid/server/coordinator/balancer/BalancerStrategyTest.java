@@ -27,25 +27,26 @@ import org.apache.druid.server.coordinator.ServerHolder;
 import org.apache.druid.server.coordinator.loading.TestLoadQueuePeon;
 import org.apache.druid.timeline.DataSegment;
 import org.apache.druid.timeline.partition.NoneShardSpec;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Timeout;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
+@RunWith(Parameterized.class)
 public class BalancerStrategyTest
 {
-  private BalancerStrategy balancerStrategy;
+  private final BalancerStrategy balancerStrategy;
   private DataSegment proposedDataSegment;
   private List<ServerHolder> serverHolders;
 
+  @Parameterized.Parameters(name = "{index}: BalancerStrategy:{0}")
   public static Iterable<Object[]> data()
   {
     return Arrays.asList(
@@ -56,12 +57,12 @@ public class BalancerStrategyTest
     );
   }
 
-  public void initBalancerStrategyTest(BalancerStrategy balancerStrategy)
+  public BalancerStrategyTest(BalancerStrategy balancerStrategy)
   {
     this.balancerStrategy = balancerStrategy;
   }
 
-  @BeforeEach
+  @Before
   public void setUp()
   {
     this.proposedDataSegment = new DataSegment(
@@ -78,15 +79,13 @@ public class BalancerStrategyTest
   }
 
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}: BalancerStrategy:{0}")
-  public void findNewSegmentHomeReplicatorNotEnoughSpace(BalancerStrategy balancerStrategy)
+  @Test
+  public void findNewSegmentHomeReplicatorNotEnoughSpace()
   {
-    initBalancerStrategyTest(balancerStrategy);
     final ServerHolder serverHolder = new ServerHolder(
         new DruidServer("server1", "host1", null, 10L, ServerType.HISTORICAL, DruidServer.DEFAULT_TIER, 0).addDataSegment(proposedDataSegment).toImmutableDruidServer(),
         new TestLoadQueuePeon());
-    Assertions.assertFalse(
+    Assert.assertFalse(
         balancerStrategy.findServersToLoadSegment(
             proposedDataSegment,
             Collections.singletonList(serverHolder)
@@ -94,12 +93,9 @@ public class BalancerStrategyTest
     );
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}: BalancerStrategy:{0}")
-  @Timeout(value = 5000L, unit = TimeUnit.MILLISECONDS)
-  public void findNewSegmentHomeReplicatorNotEnoughNodesForReplication(BalancerStrategy balancerStrategy)
+  @Test(timeout = 5000L)
+  public void findNewSegmentHomeReplicatorNotEnoughNodesForReplication()
   {
-    initBalancerStrategyTest(balancerStrategy);
     final ServerHolder serverHolder1 = new ServerHolder(
         new DruidServer("server1", "host1", null, 1000L, ServerType.HISTORICAL, DruidServer.DEFAULT_TIER, 0)
             .addDataSegment(proposedDataSegment).toImmutableDruidServer(),
@@ -115,14 +111,12 @@ public class BalancerStrategyTest
     serverHolders.add(serverHolder2);
 
     // since there is not enough nodes to load 3 replicas of segment
-    Assertions.assertFalse(balancerStrategy.findServersToLoadSegment(proposedDataSegment, serverHolders).hasNext());
+    Assert.assertFalse(balancerStrategy.findServersToLoadSegment(proposedDataSegment, serverHolders).hasNext());
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}: BalancerStrategy:{0}")
-  public void findNewSegmentHomeReplicatorEnoughSpace(BalancerStrategy balancerStrategy)
+  @Test
+  public void findNewSegmentHomeReplicatorEnoughSpace()
   {
-    initBalancerStrategyTest(balancerStrategy);
     final ServerHolder serverHolder = new ServerHolder(
         new DruidServer("server1", "host1", null, 1000L, ServerType.HISTORICAL, DruidServer.DEFAULT_TIER, 0).toImmutableDruidServer(),
         new TestLoadQueuePeon());
@@ -131,6 +125,6 @@ public class BalancerStrategyTest
     final ServerHolder foundServerHolder = balancerStrategy
         .findServersToLoadSegment(proposedDataSegment, serverHolders).next();
     // since there is enough space on server it should be selected
-    Assertions.assertEquals(serverHolder, foundServerHolder);
+    Assert.assertEquals(serverHolder, foundServerHolder);
   }
 }

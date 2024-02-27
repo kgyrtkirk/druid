@@ -19,8 +19,8 @@
 
 package org.apache.druid.java.util.common.function;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -40,6 +40,6 @@ public class TriConsumerTest
     };
     consumerA.andThen(consumerB).accept(1, 2, 3);
 
-    Assertions.assertTrue(sumSet.isEmpty());
+    Assert.assertTrue(sumSet.isEmpty());
   }
 }

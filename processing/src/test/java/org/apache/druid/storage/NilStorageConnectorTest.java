@@ -21,8 +21,8 @@ package org.apache.druid.storage;
 
 import com.google.common.collect.ImmutableList;
 import org.apache.druid.error.DruidException;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class NilStorageConnectorTest
 {
@@ -34,14 +34,14 @@ public class NilStorageConnectorTest
   public void sanity()
   {
     NilStorageConnector nilStorageConnector = NilStorageConnector.getInstance();
-    Assertions.assertThrows(DruidException.class, () -> nilStorageConnector.pathExists("null"), ERROR_MESSAGE);
-    Assertions.assertThrows(DruidException.class, () -> nilStorageConnector.read("null"), ERROR_MESSAGE);
-    Assertions.assertThrows(DruidException.class, () -> nilStorageConnector.readRange("null", 0, 0), ERROR_MESSAGE);
-    Assertions.assertThrows(DruidException.class, () -> nilStorageConnector.deleteFile("null"), ERROR_MESSAGE);
-    Assertions.assertThrows(DruidException.class, () -> nilStorageConnector.deleteFiles(ImmutableList.of()), ERROR_MESSAGE);
-    Assertions.assertThrows(DruidException.class, () -> nilStorageConnector.deleteRecursively("null"), ERROR_MESSAGE);
-    Assertions.assertThrows(DruidException.class, () -> nilStorageConnector.listDir("null"), ERROR_MESSAGE);
-    Assertions.assertThrows(DruidException.class, () -> nilStorageConnector.pathExists("null"), ERROR_MESSAGE);
+    Assert.assertThrows(ERROR_MESSAGE, DruidException.class, () -> nilStorageConnector.pathExists("null"));
+    Assert.assertThrows(ERROR_MESSAGE, DruidException.class, () -> nilStorageConnector.read("null"));
+    Assert.assertThrows(ERROR_MESSAGE, DruidException.class, () -> nilStorageConnector.readRange("null", 0, 0));
+    Assert.assertThrows(ERROR_MESSAGE, DruidException.class, () -> nilStorageConnector.deleteFile("null"));
+    Assert.assertThrows(ERROR_MESSAGE, DruidException.class, () -> nilStorageConnector.deleteFiles(ImmutableList.of()));
+    Assert.assertThrows(ERROR_MESSAGE, DruidException.class, () -> nilStorageConnector.deleteRecursively("null"));
+    Assert.assertThrows(ERROR_MESSAGE, DruidException.class, () -> nilStorageConnector.listDir("null"));
+    Assert.assertThrows(ERROR_MESSAGE, DruidException.class, () -> nilStorageConnector.pathExists("null"));
   }
 
 }

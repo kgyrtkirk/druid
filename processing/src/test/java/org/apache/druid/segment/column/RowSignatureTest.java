@@ -23,8 +23,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.apache.druid.segment.TestHelper;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.IOException;
 
@@ -49,10 +49,10 @@ public class RowSignatureTest
                     .add("d", ColumnType.DOUBLE)
                     .add("d", ColumnType.LONG);
 
-    Assertions.assertThrows(
+    Assert.assertThrows(
+        "Column [d] has conflicting types",
         IllegalArgumentException.class,
-        builder::build,
-        "Column [d] has conflicting types"
+        builder::build
     );
   }
 
@@ -72,7 +72,7 @@ public class RowSignatureTest
                     .addAll(RowSignature.builder().add("l", ColumnType.LONG).build())
                     .build();
 
-    Assertions.assertEquals(expectedSignature, signature);
+    Assert.assertEquals(expectedSignature, signature);
   }
 
   @Test
@@ -91,8 +91,8 @@ public class RowSignatureTest
                     .addAll(RowSignature.builder().add("d", ColumnType.DOUBLE).build())
                     .build();
 
-    Assertions.assertEquals(ImmutableList.of("s", "d", "d"), expectedSignature.getColumnNames());
-    Assertions.assertEquals(expectedSignature, signature);
+    Assert.assertEquals(ImmutableList.of("s", "d", "d"), expectedSignature.getColumnNames());
+    Assert.assertEquals(expectedSignature, signature);
   }
 
   @Test
@@ -111,8 +111,8 @@ public class RowSignatureTest
 
     final ObjectMapper mapper = TestHelper.makeJsonMapper();
     final RowSignature signature = mapper.readValue(signatureString, RowSignature.class);
-    Assertions.assertEquals(signatureString, mapper.writeValueAsString(signature));
-    Assertions.assertEquals(
+    Assert.assertEquals(signatureString, mapper.writeValueAsString(signature));
+    Assert.assertEquals(
         RowSignature.builder()
                     .add("s", ColumnType.STRING)
                     .add("d", ColumnType.DOUBLE)
@@ -135,10 +135,10 @@ public class RowSignatureTest
         + "{\"type\":\"DOUBLE\"}]";
 
     final ObjectMapper mapper = TestHelper.makeJsonMapper();
-    Assertions.assertThrows(
+    Assert.assertThrows(
+        "Column name must be non-empty",
         IOException.class,
-        () -> mapper.readValue(signatureString, RowSignature.class),
-        "Column name must be non-empty"
+        () -> mapper.readValue(signatureString, RowSignature.class)
     );
   }
 }

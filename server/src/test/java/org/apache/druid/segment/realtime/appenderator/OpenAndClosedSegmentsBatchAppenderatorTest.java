@@ -30,8 +30,8 @@ import org.apache.druid.java.util.common.Intervals;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.apache.druid.timeline.DataSegment;
 import org.apache.druid.timeline.partition.LinearShardSpec;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -55,37 +55,37 @@ public class OpenAndClosedSegmentsBatchAppenderatorTest extends InitializedNullH
       boolean thrown;
 
       // startJob
-      Assertions.assertEquals(null, appenderator.startJob());
+      Assert.assertEquals(null, appenderator.startJob());
 
       // getDataSource
-      Assertions.assertEquals(OpenAndClosedSegmentsAppenderatorTester.DATASOURCE, appenderator.getDataSource());
+      Assert.assertEquals(OpenAndClosedSegmentsAppenderatorTester.DATASOURCE, appenderator.getDataSource());
 
       // add
-      Assertions.assertEquals(
+      Assert.assertEquals(
           1,
           appenderator.add(IDENTIFIERS.get(0), createInputRow("2000", "foo", 1), null)
                       .getNumRowsInSegment()
       );
 
-      Assertions.assertEquals(
+      Assert.assertEquals(
           2,
           appenderator.add(IDENTIFIERS.get(0), createInputRow("2000", "bar", 2), null)
                       .getNumRowsInSegment()
       );
 
-      Assertions.assertEquals(
+      Assert.assertEquals(
           1,
           appenderator.add(IDENTIFIERS.get(1), createInputRow("2000", "qux", 4), null)
                       .getNumRowsInSegment()
       );
 
       // getSegments
-      Assertions.assertEquals(IDENTIFIERS.subList(0, 2),
+      Assert.assertEquals(IDENTIFIERS.subList(0, 2),
                           appenderator.getSegments().stream().sorted().collect(Collectors.toList()));
 
       // getRowCount
-      Assertions.assertEquals(2, appenderator.getRowCount(IDENTIFIERS.get(0)));
-      Assertions.assertEquals(1, appenderator.getRowCount(IDENTIFIERS.get(1)));
+      Assert.assertEquals(2, appenderator.getRowCount(IDENTIFIERS.get(0)));
+      Assert.assertEquals(1, appenderator.getRowCount(IDENTIFIERS.get(1)));
       thrown = false;
       try {
         appenderator.getRowCount(IDENTIFIERS.get(2));
@@ -93,7 +93,7 @@ public class OpenAndClosedSegmentsBatchAppenderatorTest extends InitializedNullH
       catch (IllegalStateException e) {
         thrown = true;
       }
-      Assertions.assertTrue(thrown);
+      Assert.assertTrue(thrown);
 
       // push all
       final SegmentsAndCommitMetadata segmentsAndCommitMetadata = appenderator.push(
@@ -101,7 +101,7 @@ public class OpenAndClosedSegmentsBatchAppenderatorTest extends InitializedNullH
           null,
           false
       ).get();
-      Assertions.assertEquals(
+      Assert.assertEquals(
           IDENTIFIERS.subList(0, 2),
           Lists.transform(
               segmentsAndCommitMetadata.getSegments(),
@@ -115,11 +115,11 @@ public class OpenAndClosedSegmentsBatchAppenderatorTest extends InitializedNullH
               }
           ).stream().sorted().collect(Collectors.toList())
       );
-      Assertions.assertEquals(tester.getPushedSegments().stream().sorted().collect(Collectors.toList()),
+      Assert.assertEquals(tester.getPushedSegments().stream().sorted().collect(Collectors.toList()),
                           segmentsAndCommitMetadata.getSegments().stream().sorted().collect(Collectors.toList()));
 
       appenderator.clear();
-      Assertions.assertTrue(appenderator.getSegments().isEmpty());
+      Assert.assertTrue(appenderator.getSegments().isEmpty());
     }
   }
 
@@ -133,37 +133,37 @@ public class OpenAndClosedSegmentsBatchAppenderatorTest extends InitializedNullH
       boolean thrown;
 
       // startJob
-      Assertions.assertEquals(null, appenderator.startJob());
+      Assert.assertEquals(null, appenderator.startJob());
 
       // getDataSource
-      Assertions.assertEquals(OpenAndClosedSegmentsAppenderatorTester.DATASOURCE, appenderator.getDataSource());
+      Assert.assertEquals(OpenAndClosedSegmentsAppenderatorTester.DATASOURCE, appenderator.getDataSource());
 
       // add
-      Assertions.assertEquals(
+      Assert.assertEquals(
           1,
           appenderator.add(IDENTIFIERS.get(0), createInputRow("2000", "foo", 1), null)
                       .getNumRowsInSegment()
       );
 
-      Assertions.assertEquals(
+      Assert.assertEquals(
           2,
           appenderator.add(IDENTIFIERS.get(0), createInputRow("2000", "bar", 2), null)
                       .getNumRowsInSegment()
       );
 
-      Assertions.assertEquals(
+      Assert.assertEquals(
           1,
           appenderator.add(IDENTIFIERS.get(1), createInputRow("2000", "qux", 4), null)
                       .getNumRowsInSegment()
       );
 
       // getSegments
-      Assertions.assertEquals(IDENTIFIERS.subList(0, 2),
+      Assert.assertEquals(IDENTIFIERS.subList(0, 2),
                           appenderator.getSegments().stream().sorted().collect(Collectors.toList()));
 
       // getRowCount
-      Assertions.assertEquals(2, appenderator.getRowCount(IDENTIFIERS.get(0)));
-      Assertions.assertEquals(1, appenderator.getRowCount(IDENTIFIERS.get(1)));
+      Assert.assertEquals(2, appenderator.getRowCount(IDENTIFIERS.get(0)));
+      Assert.assertEquals(1, appenderator.getRowCount(IDENTIFIERS.get(1)));
       thrown = false;
       try {
         appenderator.getRowCount(IDENTIFIERS.get(2));
@@ -171,7 +171,7 @@ public class OpenAndClosedSegmentsBatchAppenderatorTest extends InitializedNullH
       catch (IllegalStateException e) {
         thrown = true;
       }
-      Assertions.assertTrue(thrown);
+      Assert.assertTrue(thrown);
 
       // push all
       final SegmentsAndCommitMetadata segmentsAndCommitMetadata = appenderator.push(
@@ -179,7 +179,7 @@ public class OpenAndClosedSegmentsBatchAppenderatorTest extends InitializedNullH
           null,
           false
       ).get();
-      Assertions.assertEquals(
+      Assert.assertEquals(
           IDENTIFIERS.subList(0, 2),
           Lists.transform(
               segmentsAndCommitMetadata.getSegments(),
@@ -193,11 +193,11 @@ public class OpenAndClosedSegmentsBatchAppenderatorTest extends InitializedNullH
               }
           ).stream().sorted().collect(Collectors.toList())
       );
-      Assertions.assertEquals(tester.getPushedSegments().stream().sorted().collect(Collectors.toList()),
+      Assert.assertEquals(tester.getPushedSegments().stream().sorted().collect(Collectors.toList()),
                           segmentsAndCommitMetadata.getSegments().stream().sorted().collect(Collectors.toList()));
 
       appenderator.clear();
-      Assertions.assertTrue(appenderator.getSegments().isEmpty());
+      Assert.assertTrue(appenderator.getSegments().isEmpty());
     }
   }
   private static SegmentIdWithShardSpec createSegmentId(String interval, String version, int partitionNum)

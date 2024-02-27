@@ -26,6 +26,7 @@ import org.apache.druid.indexing.overlord.config.RemoteTaskRunnerConfig;
 import org.apache.druid.indexing.worker.Worker;
 import org.apache.druid.java.util.common.DateTimes;
 import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.HashSet;
 

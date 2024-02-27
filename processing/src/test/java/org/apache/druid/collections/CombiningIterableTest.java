@@ -24,8 +24,8 @@ import com.google.common.collect.Ordering;
 import com.google.common.collect.Sets;
 import org.apache.druid.java.util.common.DateTimes;
 import org.apache.druid.query.Result;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -55,9 +55,9 @@ public class CombiningIterableTest
         iterators,
         Ordering.natural()
     );
-    Assertions.assertEquals(mergedLists.size(), Iterables.size(actualIterable));
+    Assert.assertEquals(mergedLists.size(), Iterables.size(actualIterable));
     Set actualHashset = Sets.newHashSet(actualIterable);
-    Assertions.assertEquals(actualHashset, mergedLists);
+    Assert.assertEquals(actualHashset, mergedLists);
   }
   
   @Test
@@ -98,8 +98,8 @@ public class CombiningIterableTest
       Result r1 = it1.next();
       Result r2 = it2.next();
 
-      Assertions.assertEquals(r1.getTimestamp(), r2.getTimestamp());
-      Assertions.assertEquals(r1.getValue(), r2.getValue());
+      Assert.assertEquals(r1.getTimestamp(), r2.getTimestamp());
+      Assert.assertEquals(r1.getValue(), r2.getValue());
     }
   }
 }

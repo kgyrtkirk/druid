@@ -25,8 +25,8 @@ import org.apache.druid.math.expr.ExprMacroTable;
 import org.apache.druid.math.expr.ExpressionValidationException;
 import org.apache.druid.math.expr.InputBindings;
 import org.apache.druid.math.expr.Parser;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -86,120 +86,120 @@ public class IPv4AddressMatchExprMacroTest extends MacroTestBase
   public void testNullStringArg()
   {
     Expr nullString = ExprEval.of(null).toExpr();
-    Assertions.assertFalse(eval(nullString, SUBNET_192_168));
+    Assert.assertFalse(eval(nullString, SUBNET_192_168));
   }
 
   @Test
   public void testNullLongArg()
   {
     Expr nullLong = ExprEval.ofLong(null).toExpr();
-    Assertions.assertFalse(eval(nullLong, SUBNET_192_168));
+    Assert.assertFalse(eval(nullLong, SUBNET_192_168));
   }
 
   @Test
   public void testInvalidArgType()
   {
     Expr longArray = ExprEval.ofLongArray(new Long[]{1L, 2L}).toExpr();
-    Assertions.assertFalse(eval(longArray, SUBNET_192_168));
+    Assert.assertFalse(eval(longArray, SUBNET_192_168));
   }
 
   @Test
   public void testMatchingStringArgIPv4()
   {
-    Assertions.assertTrue(eval(IPV4, SUBNET_192_168));
+    Assert.assertTrue(eval(IPV4, SUBNET_192_168));
   }
 
   @Test
   public void testNotMatchingStringArgIPv4()
   {
-    Assertions.assertFalse(eval(IPV4, SUBNET_10));
+    Assert.assertFalse(eval(IPV4, SUBNET_10));
   }
 
   @Test
   public void testMatchingStringArgIPv6Mapped()
   {
-    Assertions.assertFalse(eval(IPV6_MAPPED, SUBNET_192_168));
+    Assert.assertFalse(eval(IPV6_MAPPED, SUBNET_192_168));
   }
 
   @Test
   public void testNotMatchingStringArgIPv6Mapped()
   {
-    Assertions.assertFalse(eval(IPV6_MAPPED, SUBNET_10));
+    Assert.assertFalse(eval(IPV6_MAPPED, SUBNET_10));
   }
 
   @Test
   public void testMatchingStringArgIPv6Compatible()
   {
-    Assertions.assertFalse(eval(IPV6_COMPATIBLE, SUBNET_192_168));
+    Assert.assertFalse(eval(IPV6_COMPATIBLE, SUBNET_192_168));
   }
 
   @Test
   public void testNotMatchingStringArgIPv6Compatible()
   {
-    Assertions.assertFalse(eval(IPV6_COMPATIBLE, SUBNET_10));
+    Assert.assertFalse(eval(IPV6_COMPATIBLE, SUBNET_10));
   }
 
   @Test
   public void testNotIpAddress()
   {
     Expr notIpAddress = ExprEval.of("druid.apache.org").toExpr();
-    Assertions.assertFalse(eval(notIpAddress, SUBNET_192_168));
+    Assert.assertFalse(eval(notIpAddress, SUBNET_192_168));
   }
 
   @Test
   public void testMatchingLongArg()
   {
-    Assertions.assertTrue(eval(IPV4_LONG, SUBNET_192_168));
+    Assert.assertTrue(eval(IPV4_LONG, SUBNET_192_168));
   }
 
   @Test
   public void testNotMatchingLongArg()
   {
-    Assertions.assertFalse(eval(IPV4_LONG, SUBNET_10));
+    Assert.assertFalse(eval(IPV4_LONG, SUBNET_10));
   }
 
   @Test
   public void testMatchingStringArgUnsignedInt()
   {
-    Assertions.assertFalse(eval(IPV4_UINT, SUBNET_192_168));
+    Assert.assertFalse(eval(IPV4_UINT, SUBNET_192_168));
   }
 
   @Test
   public void testNotMatchingStringArgUnsignedInt()
   {
-    Assertions.assertFalse(eval(IPV4_UINT, SUBNET_10));
+    Assert.assertFalse(eval(IPV4_UINT, SUBNET_10));
   }
 
   @Test
   public void testInclusive()
   {
     Expr subnet = SUBNET_192_168;
-    Assertions.assertTrue(eval(IPV4_NETWORK, subnet));
-    Assertions.assertTrue(eval(IPV4, subnet));
-    Assertions.assertTrue(eval(IPV4_BROADCAST, subnet));
+    Assert.assertTrue(eval(IPV4_NETWORK, subnet));
+    Assert.assertTrue(eval(IPV4, subnet));
+    Assert.assertTrue(eval(IPV4_BROADCAST, subnet));
   }
 
   @Test
   public void testMatchesPrefix()
   {
-    Assertions.assertTrue(eval(ExprEval.of("192.168.1.250").toExpr(), ExprEval.of("192.168.1.251/31").toExpr()));
-    Assertions.assertFalse(eval(ExprEval.of("192.168.1.240").toExpr(), ExprEval.of("192.168.1.251/31").toExpr()));
-    Assertions.assertFalse(eval(ExprEval.of("192.168.1.250").toExpr(), ExprEval.of("192.168.1.251/32").toExpr()));
-    Assertions.assertTrue(eval(ExprEval.of("192.168.1.251").toExpr(), ExprEval.of("192.168.1.251/32").toExpr()));
+    Assert.assertTrue(eval(ExprEval.of("192.168.1.250").toExpr(), ExprEval.of("192.168.1.251/31").toExpr()));
+    Assert.assertFalse(eval(ExprEval.of("192.168.1.240").toExpr(), ExprEval.of("192.168.1.251/31").toExpr()));
+    Assert.assertFalse(eval(ExprEval.of("192.168.1.250").toExpr(), ExprEval.of("192.168.1.251/32").toExpr()));
+    Assert.assertTrue(eval(ExprEval.of("192.168.1.251").toExpr(), ExprEval.of("192.168.1.251/32").toExpr()));
 
-    Assertions.assertTrue(eval(
+    Assert.assertTrue(eval(
         ExprEval.of(IPv4AddressExprUtils.parse("192.168.1.250").longValue()).toExpr(),
         ExprEval.of("192.168.1.251/31").toExpr()
     ));
-    Assertions.assertFalse(eval(
+    Assert.assertFalse(eval(
         ExprEval.of(IPv4AddressExprUtils.parse("192.168.1.240").longValue()).toExpr(),
         ExprEval.of("192.168.1.251/31").toExpr()
     ));
-    Assertions.assertFalse(eval(
+    Assert.assertFalse(eval(
         ExprEval.of(IPv4AddressExprUtils.parse("192.168.1.250").longValue()).toExpr(),
         ExprEval.of("192.168.1.251/32").toExpr()
     ));
-    Assertions.assertTrue(eval(
+    Assert.assertTrue(eval(
         ExprEval.of(IPv4AddressExprUtils.parse("192.168.1.251").longValue()).toExpr(),
         ExprEval.of("192.168.1.251/32").toExpr()
     ));

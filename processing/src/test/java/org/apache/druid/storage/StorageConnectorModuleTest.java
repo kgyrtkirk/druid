@@ -23,8 +23,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import org.apache.druid.storage.local.LocalFileStorageConnector;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.File;
 
@@ -46,21 +46,21 @@ public class StorageConnectorModuleTest
   public void testJsonSerde() throws JsonProcessingException
   {
     StorageConnectorProvider storageConnectorProvider = objectMapper.readValue(JSON, StorageConnectorProvider.class);
-    Assertions.assertTrue(storageConnectorProvider.get() instanceof LocalFileStorageConnector);
-    Assertions.assertEquals(new File("/tmp"), ((LocalFileStorageConnector) storageConnectorProvider.get()).getBasePath());
+    Assert.assertTrue(storageConnectorProvider.get() instanceof LocalFileStorageConnector);
+    Assert.assertEquals(new File("/tmp"), ((LocalFileStorageConnector) storageConnectorProvider.get()).getBasePath());
   }
 
 
   @Test
   public void testJsonSerdeWithoutPath()
   {
-    Assertions.assertThrows(
+    Assert.assertThrows(
+        "Missing required creator property 'basePath'",
         MismatchedInputException.class,
         () -> objectMapper.readValue(
             JSON_WITHOUT_PATH,
             StorageConnectorProvider.class
-        ),
-        "Missing required creator property 'basePath'"
+        )
     );
   }
 }

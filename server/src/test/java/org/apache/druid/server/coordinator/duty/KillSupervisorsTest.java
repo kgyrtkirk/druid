@@ -25,16 +25,16 @@ import org.apache.druid.server.coordinator.TestDruidCoordinatorConfig;
 import org.apache.druid.server.coordinator.stats.CoordinatorRunStats;
 import org.apache.druid.server.coordinator.stats.Stats;
 import org.joda.time.Duration;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.MockitoJUnitRunner;
 
-@ExtendWith(MockitoExtension.class)
+@RunWith(MockitoJUnitRunner.class)
 public class KillSupervisorsTest
 {
   @Mock
@@ -46,7 +46,7 @@ public class KillSupervisorsTest
   private KillSupervisors killSupervisors;
   private CoordinatorRunStats runStats;
 
-  @BeforeEach
+  @Before
   public void setup()
   {
     runStats = new CoordinatorRunStats();
@@ -81,7 +81,7 @@ public class KillSupervisorsTest
     killSupervisors = new KillSupervisors(druidCoordinatorConfig, mockMetadataSupervisorManager);
     killSupervisors.run(mockDruidCoordinatorRuntimeParams);
     Mockito.verify(mockMetadataSupervisorManager).removeTerminatedSupervisorsOlderThan(ArgumentMatchers.anyLong());
-    Assertions.assertTrue(runStats.hasStat(Stats.Kill.SUPERVISOR_SPECS));
+    Assert.assertTrue(runStats.hasStat(Stats.Kill.SUPERVISOR_SPECS));
   }
 
   @Test
@@ -94,11 +94,11 @@ public class KillSupervisorsTest
         .withCoordinatorKillMaxSegments(10)
         .withCoordinatorKillIgnoreDurationToRetain(false)
         .build();
-    final IllegalArgumentException exception = Assertions.assertThrows(
+    final IllegalArgumentException exception = Assert.assertThrows(
         IllegalArgumentException.class,
         () -> killSupervisors = new KillSupervisors(druidCoordinatorConfig, mockMetadataSupervisorManager)
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         "[druid.coordinator.kill.supervisor.period] must be greater than"
         + " [druid.coordinator.period.metadataStoreManagementPeriod]",
         exception.getMessage()
@@ -116,11 +116,11 @@ public class KillSupervisorsTest
         .withCoordinatorKillIgnoreDurationToRetain(false)
         .build();
 
-    final IllegalArgumentException exception = Assertions.assertThrows(
+    final IllegalArgumentException exception = Assert.assertThrows(
         IllegalArgumentException.class,
         () -> killSupervisors = new KillSupervisors(druidCoordinatorConfig, mockMetadataSupervisorManager)
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         "[druid.coordinator.kill.supervisor.durationToRetain] must be 0 milliseconds or higher",
         exception.getMessage()
     );

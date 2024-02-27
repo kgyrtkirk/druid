@@ -35,6 +35,7 @@ import org.easymock.EasyMock;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.joda.time.Period;
 import org.junit.Assert;
+import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import java.io.IOException;

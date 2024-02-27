@@ -20,10 +20,10 @@
 package org.apache.druid.common.utils;
 
 import org.apache.druid.java.util.common.StringUtils;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -47,7 +47,7 @@ public class SerializerUtilsTest
   private byte[] longsByte;
   private ByteArrayOutputStream outStream;
 
-  @BeforeEach
+  @Before
   public void setUpByteArrays() throws IOException
   {
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -97,7 +97,7 @@ public class SerializerUtilsTest
   {
     serializerUtils.writeInts(outStream, ints);
     byte[] actuals = outStream.toByteArray();
-    Assertions.assertArrayEquals(intsByte, actuals);
+    Assert.assertArrayEquals(intsByte, actuals);
   }
 
   @Test
@@ -105,7 +105,7 @@ public class SerializerUtilsTest
   {
     serializerUtils.writeFloats(outStream, floats);
     byte[] actuals = outStream.toByteArray();
-    Assertions.assertArrayEquals(floatsByte, actuals);
+    Assert.assertArrayEquals(floatsByte, actuals);
   }
 
   @Test
@@ -120,7 +120,7 @@ public class SerializerUtilsTest
     }
     float expected = serializerUtils.readFloat(inputstream);
     float actuals = floats[index];
-    Assertions.assertEquals(expected, actuals, delta);
+    Assert.assertEquals(expected, actuals, delta);
   }
 
   @Test
@@ -128,7 +128,7 @@ public class SerializerUtilsTest
   {
     serializerUtils.writeLongs(outStream, longs);
     byte[] actuals = outStream.toByteArray();
-    Assertions.assertArrayEquals(longsByte, actuals);
+    Assert.assertArrayEquals(longsByte, actuals);
   }
 
   @Test
@@ -142,7 +142,7 @@ public class SerializerUtilsTest
     inputstream.close();
     long expected = serializerUtils.readLong(inputstream);
     long actuals = longs[index];
-    Assertions.assertEquals(expected, actuals);
+    Assert.assertEquals(expected, actuals);
   }
 
   @Test
@@ -151,7 +151,7 @@ public class SerializerUtilsTest
     ByteArrayInputStream inputstream = new ByteArrayInputStream(intsByte);
     int[] actuals = serializerUtils.readInts(inputstream);
     inputstream.close();
-    Assertions.assertArrayEquals(ints, actuals);
+    Assert.assertArrayEquals(ints, actuals);
   }
 
   @Test
@@ -160,7 +160,7 @@ public class SerializerUtilsTest
     ByteArrayInputStream inputstream = new ByteArrayInputStream(floatsByte);
     float[] actuals = serializerUtils.readFloats(inputstream);
     inputstream.close();
-    Assertions.assertArrayEquals(floats, actuals, delta);
+    Assert.assertArrayEquals(floats, actuals, delta);
   }
 
   @Test
@@ -169,7 +169,7 @@ public class SerializerUtilsTest
     ByteArrayInputStream inputstream = new ByteArrayInputStream(longsByte);
     long[] actuals = serializerUtils.readLongs(inputstream);
     inputstream.close();
-    Assertions.assertArrayEquals(longs, actuals);
+    Assert.assertArrayEquals(longs, actuals);
   }
 
   @Test 
@@ -178,7 +178,7 @@ public class SerializerUtilsTest
     ByteArrayInputStream inputstream = new ByteArrayInputStream(stringsByte);
     String[] actuals = serializerUtils.readStrings(inputstream);
     inputstream.close();
-    Assertions.assertArrayEquals(strings, actuals);
+    Assert.assertArrayEquals(strings, actuals);
   }
 
   @Test
@@ -192,7 +192,7 @@ public class SerializerUtilsTest
     inputstream.close();
     String expected = serializerUtils.readString(inputstream);
     String actuals = strings[index];
-    Assertions.assertEquals(expected, actuals);
+    Assert.assertEquals(expected, actuals);
   }
 
   @Test 
@@ -202,10 +202,10 @@ public class SerializerUtilsTest
     buffer.put(stringsByte);
     buffer.flip();
     String[] actuals = serializerUtils.readStrings(buffer);
-    Assertions.assertArrayEquals(strings, actuals);
+    Assert.assertArrayEquals(strings, actuals);
   }
 
-  @AfterEach
+  @After
   public void tearDown() throws IOException
   {
     serializerUtils = null;

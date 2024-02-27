@@ -40,6 +40,7 @@ import org.apache.druid.sql.calcite.filtration.Filtration;
 import org.apache.druid.sql.calcite.util.CalciteTests;
 import org.apache.druid.sql.http.SqlParameter;
 import org.junit.Ignore;
+import org.junit.Test;
 
 import java.io.IOException;
 

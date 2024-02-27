@@ -30,9 +30,9 @@ import org.apache.druid.discovery.NodeRole;
 import org.apache.druid.server.DruidNode;
 import org.apache.druid.server.http.HostAndPortWithScheme;
 import org.easymock.EasyMock;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  */
@@ -42,7 +42,7 @@ public class LookupNodeDiscoveryTest
   private DruidNodeDiscovery druidNodeDiscovery;
   private LookupNodeDiscovery lookupNodeDiscovery;
 
-  @BeforeEach
+  @Before
   public void setup()
   {
     druidNodeDiscoveryProvider = EasyMock.createStrictMock(DruidNodeDiscoveryProvider.class);
@@ -85,7 +85,7 @@ public class LookupNodeDiscoveryTest
   @Test
   public void testGetNodesInTier()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableList.of(
             HostAndPortWithScheme.fromParts("http", "h1", 8080),
             HostAndPortWithScheme.fromParts("http", "h2", 8080)
@@ -93,14 +93,14 @@ public class LookupNodeDiscoveryTest
         ImmutableList.copyOf(lookupNodeDiscovery.getNodesInTier("tier1"))
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableList.of(
             HostAndPortWithScheme.fromParts("http", "h3", 8080)
         ),
         ImmutableList.copyOf(lookupNodeDiscovery.getNodesInTier("tier2"))
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableList.of(),
         ImmutableList.copyOf(lookupNodeDiscovery.getNodesInTier("tier3"))
     );
@@ -111,7 +111,7 @@ public class LookupNodeDiscoveryTest
   @Test
   public void testGetAllTiers()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableSet.of("tier1", "tier2"),
         lookupNodeDiscovery.getAllTiers()
     );

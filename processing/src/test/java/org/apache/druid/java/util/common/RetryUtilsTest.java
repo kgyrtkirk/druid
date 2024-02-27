@@ -24,15 +24,13 @@ import com.google.common.base.Predicates;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.druid.java.util.RetryableException;
 import org.apache.druid.java.util.common.concurrent.Execs;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class RetryUtilsTest
@@ -52,8 +50,8 @@ public class RetryUtilsTest
         IS_TRANSIENT,
         2
     );
-    Assertions.assertEquals("hey", result, "result");
-    Assertions.assertEquals(1, count.get(), "count");
+    Assert.assertEquals("result", "hey", result);
+    Assert.assertEquals("count", 1, count.get());
   }
 
   @Test
@@ -74,8 +72,8 @@ public class RetryUtilsTest
     catch (IOException e) {
       threwExpectedException = e.getMessage().equals("what");
     }
-    Assertions.assertTrue(threwExpectedException, "threw expected exception");
-    Assertions.assertEquals(2, count.get(), "count");
+    Assert.assertTrue("threw expected exception", threwExpectedException);
+    Assert.assertEquals("count", 2, count.get());
   }
 
   @Test
@@ -93,15 +91,15 @@ public class RetryUtilsTest
         IS_TRANSIENT,
         3
     );
-    Assertions.assertEquals("hey", result, "result");
-    Assertions.assertEquals(2, count.get(), "count");
+    Assert.assertEquals("result", "hey", result);
+    Assert.assertEquals("count", 2, count.get());
   }
 
   @Test
   public void testExceptionPredicateNotMatching()
   {
     final AtomicInteger count = new AtomicInteger();
-    Assertions.assertThrows(IOException.class, () -> {
+    Assert.assertThrows("uhh", IOException.class, () -> {
       RetryUtils.retry(
           () -> {
             if (count.incrementAndGet() >= 2) {
@@ -113,12 +111,11 @@ public class RetryUtilsTest
           IS_TRANSIENT,
           3
       );
-    }, "uhh");
-    Assertions.assertEquals(1, count.get(), "count");
+    });
+    Assert.assertEquals("count", 1, count.get());
   }
 
-  @Test
-  @Timeout(value = 5000L, unit = TimeUnit.MILLISECONDS)
+  @Test(timeout = 5000L)
   public void testInterruptWhileSleepingBetweenTries()
   {
     ExecutorService exec = Execs.singleThreaded("test-interrupt");
@@ -136,15 +133,14 @@ public class RetryUtilsTest
           Integer.MAX_VALUE
       ));
 
-      Assertions.assertThrows(ExecutionException.class, future::get, "sleep interrupted");
+      Assert.assertThrows("sleep interrupted", ExecutionException.class, future::get);
     }
     finally {
       exec.shutdownNow();
     }
   }
 
-  @Test
-  @Timeout(value = 5000L, unit = TimeUnit.MILLISECONDS)
+  @Test(timeout = 5000L)
   public void testInterruptRetryLoop()
   {
     ExecutorService exec = Execs.singleThreaded("test-interrupt");
@@ -165,7 +161,7 @@ public class RetryUtilsTest
           true
       ));
 
-      Assertions.assertThrows(ExecutionException.class, future::get, "Current thread is interrupted after [2] tries");
+      Assert.assertThrows("Current thread is interrupted after [2] tries", ExecutionException.class, future::get);
     }
     finally {
       exec.shutdownNow();
@@ -187,7 +183,7 @@ public class RetryUtilsTest
         e -> e instanceof RetryableException,
         3
     );
-    Assertions.assertEquals(result, "hey");
-    Assertions.assertEquals(2, count.get(), "count");
+    Assert.assertEquals(result, "hey");
+    Assert.assertEquals("count", 2, count.get());
   }
 }

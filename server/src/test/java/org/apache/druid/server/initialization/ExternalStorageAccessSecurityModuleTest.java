@@ -26,8 +26,8 @@ import com.google.inject.Injector;
 import org.apache.druid.guice.DruidGuiceExtensions;
 import org.apache.druid.guice.JsonConfigurator;
 import org.apache.druid.guice.LazySingleton;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import javax.validation.Validation;
 import javax.validation.Validator;
@@ -41,13 +41,13 @@ public class ExternalStorageAccessSecurityModuleTest
     JdbcAccessSecurityConfig securityConfig = makeInjectorWithProperties(new Properties()).getInstance(
         JdbcAccessSecurityConfig.class
     );
-    Assertions.assertNotNull(securityConfig);
-    Assertions.assertEquals(
+    Assert.assertNotNull(securityConfig);
+    Assert.assertEquals(
         JdbcAccessSecurityConfig.DEFAULT_ALLOWED_PROPERTIES,
         securityConfig.getAllowedProperties()
     );
-    Assertions.assertTrue(securityConfig.isAllowUnknownJdbcUrlFormat());
-    Assertions.assertTrue(securityConfig.isEnforceAllowedProperties());
+    Assert.assertTrue(securityConfig.isAllowUnknownJdbcUrlFormat());
+    Assert.assertTrue(securityConfig.isEnforceAllowedProperties());
   }
 
   @Test
@@ -60,8 +60,8 @@ public class ExternalStorageAccessSecurityModuleTest
     JdbcAccessSecurityConfig securityConfig = makeInjectorWithProperties(properties).getInstance(
         JdbcAccessSecurityConfig.class
     );
-    Assertions.assertNotNull(securityConfig);
-    Assertions.assertEquals(
+    Assert.assertNotNull(securityConfig);
+    Assert.assertEquals(
         ImmutableSet.of(
             "valid1",
             "valid2",
@@ -69,8 +69,8 @@ public class ExternalStorageAccessSecurityModuleTest
         ),
         securityConfig.getAllowedProperties()
     );
-    Assertions.assertFalse(securityConfig.isAllowUnknownJdbcUrlFormat());
-    Assertions.assertTrue(securityConfig.isEnforceAllowedProperties());
+    Assert.assertFalse(securityConfig.isAllowUnknownJdbcUrlFormat());
+    Assert.assertTrue(securityConfig.isEnforceAllowedProperties());
   }
 
   private static Injector makeInjectorWithProperties(final Properties props)

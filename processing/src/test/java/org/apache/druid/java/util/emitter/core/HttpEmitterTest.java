@@ -24,14 +24,13 @@ import com.google.common.primitives.Ints;
 import org.asynchttpclient.ListenableFuture;
 import org.asynchttpclient.Request;
 import org.asynchttpclient.Response;
+import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicLong;
-
-import static org.hamcrest.MatcherAssert.assertThat;
 
 public class HttpEmitterTest
 {
@@ -47,7 +46,7 @@ public class HttpEmitterTest
 
   private final AtomicLong timeoutUsed = new AtomicLong();
 
-  @BeforeEach
+  @Before
   public void setup()
   {
     timeoutUsed.set(-1L);
@@ -80,7 +79,7 @@ public class HttpEmitterTest
     emitter.emitAndReturnBatch(new IntEvent());
     emitter.flush();
     long fillTimeMs = System.currentTimeMillis() - startMs;
-    assertThat((double) timeoutUsed.get(), Matchers.lessThan(fillTimeMs * (timeoutAllowanceFactor + 0.5)));
+    MatcherAssert.assertThat((double) timeoutUsed.get(), Matchers.lessThan(fillTimeMs * (timeoutAllowanceFactor + 0.5)));
 
     startMs = System.currentTimeMillis();
     final Batch batch = emitter.emitAndReturnBatch(new IntEvent());
@@ -88,6 +87,6 @@ public class HttpEmitterTest
     batch.seal();
     emitter.flush();
     fillTimeMs = System.currentTimeMillis() - startMs;
-    assertThat((double) timeoutUsed.get(), Matchers.lessThan(fillTimeMs * (timeoutAllowanceFactor + 0.5)));
+    MatcherAssert.assertThat((double) timeoutUsed.get(), Matchers.lessThan(fillTimeMs * (timeoutAllowanceFactor + 0.5)));
   }
 }

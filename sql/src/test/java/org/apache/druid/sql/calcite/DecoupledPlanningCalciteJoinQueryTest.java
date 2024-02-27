@@ -29,11 +29,11 @@ import org.apache.druid.sql.calcite.planner.PlannerConfig;
 import org.apache.druid.sql.calcite.util.SqlTestFramework;
 import org.apache.druid.sql.calcite.util.SqlTestFramework.PlannerComponentSupplier;
 import org.junit.Rule;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.Assert.assertNotNull;
 
 public class DecoupledPlanningCalciteJoinQueryTest extends CalciteJoinQueryTest
 {
@@ -76,7 +76,6 @@ public class DecoupledPlanningCalciteJoinQueryTest extends CalciteJoinQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   @DecoupledTestConfig(nativeQueryIgnore = NativeQueryIgnore.JOIN_LEFT_DIRECT_ACCESS)
   public void ensureDecoupledTestConfigAnnotationWorks(Map<String, Object> queryContext)

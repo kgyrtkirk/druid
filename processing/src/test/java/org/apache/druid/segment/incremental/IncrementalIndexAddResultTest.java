@@ -20,24 +20,24 @@
 package org.apache.druid.segment.incremental;
 
 import org.apache.druid.java.util.common.parsers.ParseException;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class IncrementalIndexAddResultTest
 {
   @Test
   public void testIsRowAdded()
   {
-    Assertions.assertTrue(new IncrementalIndexAddResult(0, 0L).isRowAdded());
-    Assertions.assertFalse(new IncrementalIndexAddResult(0, 0L, "test").isRowAdded());
-    Assertions.assertFalse(new IncrementalIndexAddResult(0, 0L, new ParseException(null, "test")).isRowAdded());
+    Assert.assertTrue(new IncrementalIndexAddResult(0, 0L).isRowAdded());
+    Assert.assertFalse(new IncrementalIndexAddResult(0, 0L, "test").isRowAdded());
+    Assert.assertFalse(new IncrementalIndexAddResult(0, 0L, new ParseException(null, "test")).isRowAdded());
   }
 
   @Test
   public void testHasParseException()
   {
-    Assertions.assertFalse(new IncrementalIndexAddResult(0, 0L).hasParseException());
-    Assertions.assertFalse(new IncrementalIndexAddResult(0, 0L, "test").hasParseException());
-    Assertions.assertTrue(new IncrementalIndexAddResult(0, 0L, new ParseException(null, "test")).hasParseException());
+    Assert.assertFalse(new IncrementalIndexAddResult(0, 0L).hasParseException());
+    Assert.assertFalse(new IncrementalIndexAddResult(0, 0L, "test").hasParseException());
+    Assert.assertTrue(new IncrementalIndexAddResult(0, 0L, new ParseException(null, "test")).hasParseException());
   }
 }

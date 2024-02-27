@@ -20,6 +20,7 @@
 package org.apache.druid.storage.google.output;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
+import org.junit.Test;
 
 public class GoogleInputRangeTest
 {

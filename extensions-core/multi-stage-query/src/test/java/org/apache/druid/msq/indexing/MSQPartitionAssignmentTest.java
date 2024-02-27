@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableMap;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.apache.druid.frame.key.ClusterByPartitions;
 import org.apache.druid.segment.realtime.appenderator.SegmentIdWithShardSpec;
+import org.junit.Test;
 
 import java.util.Collections;
 import java.util.Map;

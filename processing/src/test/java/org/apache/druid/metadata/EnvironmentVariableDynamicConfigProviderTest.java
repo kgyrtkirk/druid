@@ -21,8 +21,8 @@ package org.apache.druid.metadata;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.util.Map;
@@ -36,10 +36,10 @@ public class EnvironmentVariableDynamicConfigProviderTest
 
     String providerString = "{\"type\": \"environment\", \"variables\" : {\"testKey\":\"testValue\"}}";
     DynamicConfigProvider provider = objectMapper.readValue(providerString, DynamicConfigProvider.class);
-    Assertions.assertTrue(provider instanceof EnvironmentVariableDynamicConfigProvider);
-    Assertions.assertEquals("testValue", ((EnvironmentVariableDynamicConfigProvider) provider).getVariables().get("testKey"));
+    Assert.assertTrue(provider instanceof EnvironmentVariableDynamicConfigProvider);
+    Assert.assertEquals("testValue", ((EnvironmentVariableDynamicConfigProvider) provider).getVariables().get("testKey"));
     DynamicConfigProvider serde = objectMapper.readValue(objectMapper.writeValueAsString(provider), DynamicConfigProvider.class);
-    Assertions.assertEquals(provider, serde);
+    Assert.assertEquals(provider, serde);
   }
 
   @Test
@@ -62,7 +62,7 @@ public class EnvironmentVariableDynamicConfigProviderTest
       }
     };
 
-    Assertions.assertEquals("druid", provider.getConfig().get("user"));
-    Assertions.assertEquals("123", provider.getConfig().get("password"));
+    Assert.assertEquals("druid", provider.getConfig().get("user"));
+    Assert.assertEquals("123", provider.getConfig().get("password"));
   }
 }

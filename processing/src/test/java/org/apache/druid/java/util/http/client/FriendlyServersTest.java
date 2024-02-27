@@ -36,9 +36,9 @@ import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.jboss.netty.channel.ChannelException;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLHandshakeException;
@@ -105,8 +105,8 @@ public class FriendlyServersTest
               StatusResponseHandler.getInstance()
           ).get();
 
-      Assertions.assertEquals(200, response.getStatus().getCode());
-      Assertions.assertEquals("hello!", response.getContent());
+      Assert.assertEquals(200, response.getStatus().getCode());
+      Assert.assertEquals("hello!", response.getContent());
     }
     finally {
       exec.shutdownNow();
@@ -150,7 +150,7 @@ public class FriendlyServersTest
                 out.write("HTTP/1.1 200 OK\r\nContent-Length: 6\r\n\r\nhello!".getBytes(StandardCharsets.UTF_8));
               }
               catch (Exception e) {
-                Assertions.fail(e.toString());
+                Assert.fail(e.toString());
               }
             }
           }
@@ -175,10 +175,10 @@ public class FriendlyServersTest
               StatusResponseHandler.getInstance()
           ).get();
 
-      Assertions.assertEquals(200, response.getStatus().getCode());
-      Assertions.assertEquals("hello!", response.getContent());
+      Assert.assertEquals(200, response.getStatus().getCode());
+      Assert.assertEquals("hello!", response.getContent());
 
-      Assertions.assertEquals(
+      Assert.assertEquals(
           "CONNECT anotherHost:8080 HTTP/1.1\r\nProxy-Authorization: Basic Ym9iOnNhbGx5\r\n",
           requestContent.get()
       );
@@ -242,9 +242,9 @@ public class FriendlyServersTest
               StatusResponseHandler.getInstance()
           ).get();
 
-      Assertions.assertEquals(200, response.getStatus().getCode());
-      Assertions.assertEquals("hello!", response.getContent());
-      Assertions.assertTrue(foundAcceptEncoding.get());
+      Assert.assertEquals(200, response.getStatus().getCode());
+      Assert.assertEquals("hello!", response.getContent());
+      Assert.assertTrue(foundAcceptEncoding.get());
     }
     finally {
       exec.shutdownNow();
@@ -300,7 +300,7 @@ public class FriendlyServersTest
                 ),
                 StatusResponseHandler.getInstance()
             ).get().getStatus();
-        Assertions.assertEquals(404, status.getCode());
+        Assert.assertEquals(404, status.getCode());
       }
 
       // Incorrect name ("127.0.0.1")
@@ -322,8 +322,8 @@ public class FriendlyServersTest
           ea = e.getCause();
         }
 
-        Assertions.assertTrue(ea instanceof ChannelException, "ChannelException thrown by 'get'");
-        Assertions.assertTrue(ea.getCause().getMessage().contains("Failed to handshake"), "Expected error message");
+        Assert.assertTrue("ChannelException thrown by 'get'", ea instanceof ChannelException);
+        Assert.assertTrue("Expected error message", ea.getCause().getMessage().contains("Failed to handshake"));
       }
 
       {
@@ -344,10 +344,10 @@ public class FriendlyServersTest
         catch (ExecutionException e) {
           eb = e.getCause();
         }
-        Assertions.assertNotNull(eb, "ChannelException thrown by 'get'");
-        Assertions.assertTrue(
-            eb.getCause().getCause() instanceof SSLHandshakeException,
-            "Root cause is SSLHandshakeException"
+        Assert.assertNotNull("ChannelException thrown by 'get'", eb);
+        Assert.assertTrue(
+            "Root cause is SSLHandshakeException",
+            eb.getCause().getCause() instanceof SSLHandshakeException
         );
       }
     }
@@ -358,7 +358,7 @@ public class FriendlyServersTest
   }
 
   @Test
-  @Disabled
+  @Ignore
   public void testHttpBin() throws Throwable
   {
     final Lifecycle lifecycle = new Lifecycle();
@@ -373,7 +373,7 @@ public class FriendlyServersTest
                 StatusResponseHandler.getInstance()
             ).get().getStatus();
 
-        Assertions.assertEquals(200, status.getCode());
+        Assert.assertEquals(200, status.getCode());
       }
 
       {
@@ -384,7 +384,7 @@ public class FriendlyServersTest
                 StatusResponseHandler.getInstance()
             ).get().getStatus();
 
-        Assertions.assertEquals(200, status.getCode());
+        Assert.assertEquals(200, status.getCode());
       }
     }
     finally {

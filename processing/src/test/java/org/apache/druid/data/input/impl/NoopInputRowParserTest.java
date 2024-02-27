@@ -21,8 +21,8 @@ package org.apache.druid.data.input.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 /**
  */
@@ -42,7 +42,7 @@ public class NoopInputRowParserTest
         InputRowParser.class
     );
 
-    Assertions.assertEquals(new NoopInputRowParser(null), actual);
+    Assert.assertEquals(new NoopInputRowParser(null), actual);
   }
 
   @Test
@@ -60,7 +60,7 @@ public class NoopInputRowParserTest
         InputRowParser.class
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         new NoopInputRowParser(
             new TimeAndDimsParseSpec(
                 null,

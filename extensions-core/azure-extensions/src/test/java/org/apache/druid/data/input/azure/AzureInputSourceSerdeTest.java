@@ -34,6 +34,7 @@ import org.apache.druid.storage.azure.AzureStorageDruidModule;
 import org.easymock.EasyMockSupport;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Test;
 
 import java.net.URI;
 import java.util.Collections;

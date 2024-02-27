@@ -23,10 +23,12 @@ import com.google.common.collect.ImmutableMap;
 import org.apache.druid.java.util.common.FileUtils;
 import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.java.util.metrics.cgroups.TestUtils;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -34,17 +36,19 @@ import java.io.IOException;
 
 public class CpuAcctDeltaMonitorTest
 {
-  @TempDir
-  public File temporaryFolder;
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
+  @Rule
+  public TemporaryFolder temporaryFolder = new TemporaryFolder();
   private File procDir;
   private File cgroupDir;
   private File cpuacctDir;
 
-  @BeforeEach
+  @Before
   public void setUp() throws IOException
   {
-    cgroupDir = newFolder(temporaryFolder, "junit");
-    procDir = newFolder(temporaryFolder, "junit");
+    cgroupDir = temporaryFolder.newFolder();
+    procDir = temporaryFolder.newFolder();
     TestUtils.setUpCgroups(procDir, cgroupDir);
     cpuacctDir = new File(
         cgroupDir,
@@ -69,7 +73,7 @@ public class CpuAcctDeltaMonitorTest
     monitor.doMonitor(emitter);
     monitor.doMonitor(emitter);
     monitor.doMonitor(emitter);
-    Assertions.assertTrue(emitter.getEvents().isEmpty());
+    Assert.assertTrue(emitter.getEvents().isEmpty());
   }
 
   @Test
@@ -88,21 +92,12 @@ public class CpuAcctDeltaMonitorTest
         (cgroup) -> cpuacctDir.toPath()
     );
     final StubServiceEmitter emitter = new StubServiceEmitter("service", "host");
-    Assertions.assertFalse(monitor.doMonitor(emitter));
+    Assert.assertFalse(monitor.doMonitor(emitter));
     // First should just cache
-    Assertions.assertEquals(0, emitter.getEvents().size());
-    Assertions.assertTrue(cpuacct.delete());
+    Assert.assertEquals(0, emitter.getEvents().size());
+    Assert.assertTrue(cpuacct.delete());
     TestUtils.copyResource("/cpuacct.usage_all", cpuacct);
-    Assertions.assertTrue(monitor.doMonitor(emitter));
-    Assertions.assertEquals(2 * 128 + 1, emitter.getEvents().size());
-  }
-
-  private static File newFolder(File root, String... subDirs) throws IOException {
-    String subFolder = String.join("/", subDirs);
-    File result = new File(root, subFolder);
-    if (!result.mkdirs()) {
-      throw new IOException("Couldn't create folders " + root);
-    }
-    return result;
+    Assert.assertTrue(monitor.doMonitor(emitter));
+    Assert.assertEquals(2 * 128 + 1, emitter.getEvents().size());
   }
 }

@@ -23,8 +23,8 @@ import com.google.common.collect.Sets;
 import org.apache.druid.collections.IntSetTestUtility;
 import org.apache.druid.collections.ResourceHolder;
 import org.apache.druid.java.util.common.ByteBufferUtils;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 import org.roaringbitmap.IntIterator;
 
 import java.nio.ByteBuffer;
@@ -53,8 +53,8 @@ public class WrappedBitSetBitmapBitSetTest
     }
     IntIterator intIt = bitSet.iterator();
     for (int i : IntSetTestUtility.getSetBits()) {
-      Assertions.assertTrue(intIt.hasNext());
-      Assertions.assertEquals(i, intIt.next());
+      Assert.assertTrue(intIt.hasNext());
+      Assert.assertEquals(i, intIt.next());
     }
   }
 
@@ -63,7 +63,7 @@ public class WrappedBitSetBitmapBitSetTest
   {
     BitSet bitSet = IntSetTestUtility.createSimpleBitSet(IntSetTestUtility.getSetBits());
     WrappedBitSetBitmap wrappedBitSetBitmapBitSet = new WrappedBitSetBitmap(bitSet);
-    Assertions.assertEquals(bitSet.cardinality(), wrappedBitSetBitmapBitSet.size());
+    Assert.assertEquals(bitSet.cardinality(), wrappedBitSetBitmapBitSet.size());
   }
 
   @Test
@@ -74,9 +74,9 @@ public class WrappedBitSetBitmapBitSetTest
       BitSet testSet = BitSet.valueOf(buffer);
       testSet.set(1);
       WrappedImmutableBitSetBitmap bitMap = new WrappedImmutableBitSetBitmap(testSet);
-      Assertions.assertTrue(bitMap.get(1));
+      Assert.assertTrue(bitMap.get(1));
       testSet.set(2);
-      Assertions.assertTrue(bitMap.get(2));
+      Assert.assertTrue(bitMap.get(2));
     }
   }
 
@@ -84,7 +84,7 @@ public class WrappedBitSetBitmapBitSetTest
   public void testSimpleBitSet()
   {
     WrappedBitSetBitmap bitSet = new WrappedBitSetBitmap(IntSetTestUtility.createSimpleBitSet(IntSetTestUtility.getSetBits()));
-    Assertions.assertTrue(IntSetTestUtility.equalSets(IntSetTestUtility.getSetBits(), bitSet));
+    Assert.assertTrue(IntSetTestUtility.equalSets(IntSetTestUtility.getSetBits(), bitSet));
   }
 
   @Test
@@ -97,7 +97,7 @@ public class WrappedBitSetBitmapBitSetTest
 
     Set<Integer> union = Sets.union(extraBits, IntSetTestUtility.getSetBits());
 
-    Assertions.assertTrue(IntSetTestUtility.equalSets(union, (WrappedBitSetBitmap) bitSet.union(bitExtraSet)));
+    Assert.assertTrue(IntSetTestUtility.equalSets(union, (WrappedBitSetBitmap) bitSet.union(bitExtraSet)));
   }
 
   @Test
@@ -110,7 +110,7 @@ public class WrappedBitSetBitmapBitSetTest
 
     Set<Integer> intersection = Sets.intersection(extraBits, IntSetTestUtility.getSetBits());
 
-    Assertions.assertTrue(IntSetTestUtility.equalSets(
+    Assert.assertTrue(IntSetTestUtility.equalSets(
         intersection,
         (WrappedBitSetBitmap) bitSet.intersection(bitExtraSet)
     ));
@@ -130,7 +130,7 @@ public class WrappedBitSetBitmapBitSetTest
     defaultBitSet.remove(1);
     defaultBitSet.remove(2);
 
-    Assertions.assertTrue(IntSetTestUtility.equalSets(defaultBitSet, bitSet));
+    Assert.assertTrue(IntSetTestUtility.equalSets(defaultBitSet, bitSet));
   }
 
 
@@ -145,7 +145,7 @@ public class WrappedBitSetBitmapBitSetTest
 
     bitSet.or(bitSet2);
 
-    Assertions.assertTrue(IntSetTestUtility.equalSets(defaultBitSet, bitSet));
+    Assert.assertTrue(IntSetTestUtility.equalSets(defaultBitSet, bitSet));
   }
 
   @Test
@@ -161,7 +161,7 @@ public class WrappedBitSetBitmapBitSetTest
 
     defaultBitSet.add(2);
 
-    Assertions.assertTrue(IntSetTestUtility.equalSets(defaultBitSet, bitSet));
+    Assert.assertTrue(IntSetTestUtility.equalSets(defaultBitSet, bitSet));
   }
 
 

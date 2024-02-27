@@ -20,8 +20,8 @@
 package org.apache.druid.collections.spatial.search;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Arrays;
 
@@ -30,19 +30,19 @@ public class RectangularBoundTest
   @Test
   public void testCacheKey()
   {
-    Assertions.assertArrayEquals(
+    Assert.assertArrayEquals(
         new RectangularBound(new float[]{1F, 1F}, new float[]{2F, 2F}, 1).getCacheKey(),
         new RectangularBound(new float[]{1F, 1F}, new float[]{2F, 2F}, 1).getCacheKey()
     );
-    Assertions.assertFalse(Arrays.equals(
+    Assert.assertFalse(Arrays.equals(
         new RectangularBound(new float[]{1F, 1F}, new float[]{2F, 2F}, 1).getCacheKey(),
         new RectangularBound(new float[]{1F, 1F}, new float[]{2F, 3F}, 1).getCacheKey()
     ));
-    Assertions.assertFalse(Arrays.equals(
+    Assert.assertFalse(Arrays.equals(
         new RectangularBound(new float[]{1F, 1F}, new float[]{2F, 2F}, 1).getCacheKey(),
         new RectangularBound(new float[]{1F, 0F}, new float[]{2F, 2F}, 1).getCacheKey()
     ));
-    Assertions.assertFalse(Arrays.equals(
+    Assert.assertFalse(Arrays.equals(
         new RectangularBound(new float[]{1F, 1F}, new float[]{2F, 2F}, 1).getCacheKey(),
         new RectangularBound(new float[]{1F, 1F}, new float[]{2F, 2F}, 2).getCacheKey()
     ));

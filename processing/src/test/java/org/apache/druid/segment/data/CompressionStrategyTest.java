@@ -23,11 +23,11 @@ import com.google.common.collect.Iterables;
 import org.apache.druid.collections.ResourceHolder;
 import org.apache.druid.java.util.common.ByteBufferUtils;
 import org.apache.druid.java.util.common.io.Closer;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Timeout;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -41,8 +41,10 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+@RunWith(Parameterized.class)
 public class CompressionStrategyTest
 {
+  @Parameterized.Parameters(name = "{0}")
   public static Iterable<Object[]> compressionStrategies()
   {
     return Iterables.transform(
@@ -51,9 +53,9 @@ public class CompressionStrategyTest
     );
   }
 
-  protected CompressionStrategy compressionStrategy;
+  protected final CompressionStrategy compressionStrategy;
 
-  public void initCompressionStrategyTest(CompressionStrategy compressionStrategy)
+  public CompressionStrategyTest(CompressionStrategy compressionStrategy)
   {
     this.compressionStrategy = compressionStrategy;
   }
@@ -62,7 +64,7 @@ public class CompressionStrategyTest
   private static final int DATA_SIZER = 0xFFFF;
   private static byte[] ORIGINAL_DATA;
 
-  @BeforeAll
+  @BeforeClass
   public static void setupClass()
   {
     ORIGINAL_DATA = new byte[DATA_SIZER];
@@ -70,11 +72,9 @@ public class CompressionStrategyTest
     random.nextBytes(ORIGINAL_DATA);
   }
 
-  @MethodSource("compressionStrategies")
-  @ParameterizedTest(name = "{0}")
-  public void testBasicOperations(CompressionStrategy compressionStrategy) throws IOException
+  @Test
+  public void testBasicOperations() throws IOException
   {
-    initCompressionStrategyTest(compressionStrategy);
     try (final Closer closer = Closer.create();
          final ResourceHolder<ByteBuffer> holder = ByteBufferUtils.allocateDirect(ORIGINAL_DATA.length)) {
       ByteBuffer compressionOut = compressionStrategy.getCompressor().allocateOutBuffer(ORIGINAL_DATA.length, closer);
@@ -87,16 +87,13 @@ public class CompressionStrategyTest
       compressionStrategy.getDecompressor().decompress(compressed, compressed.remaining(), output);
       byte[] checkArray = new byte[DATA_SIZER];
       output.get(checkArray);
-      Assertions.assertArrayEquals(ORIGINAL_DATA, checkArray, "Uncompressed data does not match");
+      Assert.assertArrayEquals("Uncompressed data does not match", ORIGINAL_DATA, checkArray);
     }
   }
 
-  @MethodSource("compressionStrategies")
-  @ParameterizedTest(name = "{0}")
-  @Timeout(value = 60_000L, unit = TimeUnit.MILLISECONDS)
-  public void testConcurrency(CompressionStrategy compressionStrategy) throws Exception
+  @Test(timeout = 60_000L)
+  public void testConcurrency() throws Exception
   {
-    initCompressionStrategyTest(compressionStrategy);
     final int numThreads = 20;
     BlockingQueue<Runnable> queue = new ArrayBlockingQueue<>(numThreads);
     ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(
@@ -124,7 +121,7 @@ public class CompressionStrategyTest
                   compressionStrategy.getDecompressor().decompress(compressed, compressed.remaining(), output);
                   byte[] checkArray = new byte[DATA_SIZER];
                   output.get(checkArray);
-                  Assertions.assertArrayEquals(ORIGINAL_DATA, checkArray, "Uncompressed data does not match");
+                  Assert.assertArrayEquals("Uncompressed data does not match", ORIGINAL_DATA, checkArray);
                   return true;
                 }
               }
@@ -133,7 +130,7 @@ public class CompressionStrategyTest
     }
     threadPoolExecutor.shutdown();
     for (Future<Boolean> result : results) {
-      Assertions.assertTrue(result.get());
+      Assert.assertTrue(result.get());
     }
   }
 }

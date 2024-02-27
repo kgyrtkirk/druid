@@ -23,6 +23,7 @@ import org.apache.druid.java.util.common.ISE;
 import org.apache.druid.msq.indexing.MSQWorkerTask;
 import org.apache.druid.msq.kernel.StageId;
 import org.junit.Assert;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;

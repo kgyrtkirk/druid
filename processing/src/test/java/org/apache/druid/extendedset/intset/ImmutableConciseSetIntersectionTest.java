@@ -19,18 +19,20 @@
 
 package org.apache.druid.extendedset.intset;
 
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import junit.framework.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
+@RunWith(Parameterized.class)
 public class ImmutableConciseSetIntersectionTest
 {
+  @Parameterized.Parameters
   public static List<Object[]> parameters()
   {
     return Arrays.asList(new Object[] {false}, new Object[] {true});
@@ -38,7 +40,7 @@ public class ImmutableConciseSetIntersectionTest
 
   private boolean compact;
 
-  public void initImmutableConciseSetIntersectionTest(boolean compact)
+  public ImmutableConciseSetIntersectionTest(boolean compact)
   {
     this.compact = compact;
   }
@@ -46,11 +48,9 @@ public class ImmutableConciseSetIntersectionTest
   /**
    * Testing basic intersection of similar sets
    */
-  @MethodSource("parameters")
-  @ParameterizedTest
-  public void testIntersection1(boolean compact)
+  @Test
+  public void testIntersection1()
   {
-    initImmutableConciseSetIntersectionTest(compact);
     final int[] ints1 = {33, 100000};
     final int[] ints2 = {33, 100000};
     List<Integer> expected = Arrays.asList(33, 100000);
@@ -71,11 +71,9 @@ public class ImmutableConciseSetIntersectionTest
    * Set1: literal, zero fill with flip bit, literal
    * Set2: literal, zero fill with different flip bit, literal
    */
-  @MethodSource("parameters")
-  @ParameterizedTest
-  public void testIntersection2(boolean compact)
+  @Test
+  public void testIntersection2()
   {
-    initImmutableConciseSetIntersectionTest(compact);
     final int[] ints1 = {33, 100000};
     final int[] ints2 = {34, 100000};
     List<Integer> expected = Collections.singletonList(100000);
@@ -95,11 +93,9 @@ public class ImmutableConciseSetIntersectionTest
   /**
    * Testing intersection of one fills
    */
-  @MethodSource("parameters")
-  @ParameterizedTest
-  public void testIntersection3(boolean compact)
+  @Test
+  public void testIntersection3()
   {
-    initImmutableConciseSetIntersectionTest(compact);
     List<Integer> expected = new ArrayList<>();
     ConciseSet set1 = new ConciseSet();
     ConciseSet set2 = new ConciseSet();
@@ -115,11 +111,9 @@ public class ImmutableConciseSetIntersectionTest
   /**
    * Similar to previous test with one bit in the sequence set to zero
    */
-  @MethodSource("parameters")
-  @ParameterizedTest
-  public void testIntersection4(boolean compact)
+  @Test
+  public void testIntersection4()
   {
-    initImmutableConciseSetIntersectionTest(compact);
     List<Integer> expected = new ArrayList<>();
     ConciseSet set1 = new ConciseSet();
     ConciseSet set2 = new ConciseSet();
@@ -137,11 +131,9 @@ public class ImmutableConciseSetIntersectionTest
   /**
    * Testing with disjoint sets
    */
-  @MethodSource("parameters")
-  @ParameterizedTest
-  public void testIntersection5(boolean compact)
+  @Test
+  public void testIntersection5()
   {
-    initImmutableConciseSetIntersectionTest(compact);
     final int[] ints1 = {33, 100000};
     final int[] ints2 = {34, 200000};
     List<Integer> expected = new ArrayList<>();
@@ -162,11 +154,9 @@ public class ImmutableConciseSetIntersectionTest
    * Set 1: literal, zero fill, literal
    * Set 2: one fill, literal that falls within the zero fill above, one fill
    */
-  @MethodSource("parameters")
-  @ParameterizedTest
-  public void testIntersection6(boolean compact)
+  @Test
+  public void testIntersection6()
   {
-    initImmutableConciseSetIntersectionTest(compact);
     List<Integer> expected = new ArrayList<>();
     ConciseSet set1 = new ConciseSet();
     for (int i = 0; i < 5; i++) {
@@ -191,11 +181,9 @@ public class ImmutableConciseSetIntersectionTest
     verifyIntersection(expected, set1, set2);
   }
 
-  @MethodSource("parameters")
-  @ParameterizedTest
-  public void testIntersection7(boolean compact)
+  @Test
+  public void testIntersection7()
   {
-    initImmutableConciseSetIntersectionTest(compact);
     ConciseSet set1 = new ConciseSet();
     for (int i = 0; i < 3100; i++) {
       set1.add(i);
@@ -218,11 +206,9 @@ public class ImmutableConciseSetIntersectionTest
     verifyIntersection(expected, set1, set2);
   }
 
-  @MethodSource("parameters")
-  @ParameterizedTest
-  public void testIntersection8(boolean compact)
+  @Test
+  public void testIntersection8()
   {
-    initImmutableConciseSetIntersectionTest(compact);
     ConciseSet set1 = new ConciseSet();
     for (int i = 0; i < 3100; i++) {
       set1.add(i);
@@ -248,11 +234,9 @@ public class ImmutableConciseSetIntersectionTest
     verifyIntersection(expected, set1, set2);
   }
 
-  @MethodSource("parameters")
-  @ParameterizedTest
-  public void testIntersection9(boolean compact)
+  @Test
+  public void testIntersection9()
   {
-    initImmutableConciseSetIntersectionTest(compact);
     ConciseSet set1 = new ConciseSet();
     set1.add(2005);
     set1.add(3005);
@@ -270,11 +254,9 @@ public class ImmutableConciseSetIntersectionTest
     verifyIntersection(expected, set1, set2);
   }
 
-  @MethodSource("parameters")
-  @ParameterizedTest
-  public void testIntersection10(boolean compact)
+  @Test
+  public void testIntersection10()
   {
-    initImmutableConciseSetIntersectionTest(compact);
     ConciseSet set1 = new ConciseSet();
     for (int i = 0; i < 3100; i++) {
       set1.add(i);
@@ -293,11 +275,9 @@ public class ImmutableConciseSetIntersectionTest
     verifyIntersection(expected, set1, set2);
   }
 
-  @MethodSource("parameters")
-  @ParameterizedTest
-  public void testIntersection11(boolean compact)
+  @Test
+  public void testIntersection11()
   {
-    initImmutableConciseSetIntersectionTest(compact);
     ConciseSet set1 = new ConciseSet();
     set1.add(2005);
     for (int i = 2800; i < 3500; i++) {
@@ -318,11 +298,9 @@ public class ImmutableConciseSetIntersectionTest
     verifyIntersection(expected, set1, set2);
   }
 
-  @MethodSource("parameters")
-  @ParameterizedTest
-  public void testIntersection12(boolean compact)
+  @Test
+  public void testIntersection12()
   {
-    initImmutableConciseSetIntersectionTest(compact);
     ConciseSet set1 = new ConciseSet();
     set1.add(2005);
     for (int i = 2800; i < 3500; i++) {
@@ -346,11 +324,9 @@ public class ImmutableConciseSetIntersectionTest
     verifyIntersection(expected, set1, set2);
   }
 
-  @MethodSource("parameters")
-  @ParameterizedTest
-  public void testIntersection13(boolean compact)
+  @Test
+  public void testIntersection13()
   {
-    initImmutableConciseSetIntersectionTest(compact);
     ConciseSet set1 = new ConciseSet();
     set1.add(2005);
 
@@ -364,11 +340,9 @@ public class ImmutableConciseSetIntersectionTest
     verifyIntersection(expected, set1, set2);
   }
 
-  @MethodSource("parameters")
-  @ParameterizedTest
-  public void testIntersection14(boolean compact)
+  @Test
+  public void testIntersection14()
   {
-    initImmutableConciseSetIntersectionTest(compact);
     ConciseSet set1 = new ConciseSet();
     for (int i = 0; i < 1000; i++) {
       set1.add(i);
@@ -391,11 +365,9 @@ public class ImmutableConciseSetIntersectionTest
     verifyIntersection(expected, set1, set2);
   }
 
-  @MethodSource("parameters")
-  @ParameterizedTest
-  public void testIntersection15(boolean compact)
+  @Test
+  public void testIntersection15()
   {
-    initImmutableConciseSetIntersectionTest(compact);
     ConciseSet set1 = new ConciseSet();
     for (int i = 0; i < 1000; i++) {
       set1.add(i);
@@ -420,11 +392,9 @@ public class ImmutableConciseSetIntersectionTest
     verifyIntersection(expected, set1, set2);
   }
 
-  @MethodSource("parameters")
-  @ParameterizedTest
-  public void testIntersection16(boolean compact)
+  @Test
+  public void testIntersection16()
   {
-    initImmutableConciseSetIntersectionTest(compact);
     ConciseSet set1 = new ConciseSet();
     set1.add(2005);
 
@@ -440,11 +410,9 @@ public class ImmutableConciseSetIntersectionTest
     verifyIntersection(expected, set1, set2);
   }
 
-  @MethodSource("parameters")
-  @ParameterizedTest
-  public void testIntersection17(boolean compact)
+  @Test
+  public void testIntersection17()
   {
-    initImmutableConciseSetIntersectionTest(compact);
     ConciseSet set1 = new ConciseSet();
     for (int i = 0; i < 4002; i++) {
       set1.add(i);
@@ -459,11 +427,9 @@ public class ImmutableConciseSetIntersectionTest
     verifyIntersection(expected, set1, set2);
   }
 
-  @MethodSource("parameters")
-  @ParameterizedTest
-  public void testIntersection18(boolean compact)
+  @Test
+  public void testIntersection18()
   {
-    initImmutableConciseSetIntersectionTest(compact);
     ConciseSet set1 = new ConciseSet();
     for (int i = 32; i < 93; i++) {
       set1.add(i);
@@ -482,11 +448,9 @@ public class ImmutableConciseSetIntersectionTest
     verifyIntersection(expected, set1, set2);
   }
 
-  @MethodSource("parameters")
-  @ParameterizedTest
-  public void testIntersection19(boolean compact)
+  @Test
+  public void testIntersection19()
   {
-    initImmutableConciseSetIntersectionTest(compact);
     ConciseSet set1 = new ConciseSet();
     set1.add(2005);
 
@@ -501,11 +465,9 @@ public class ImmutableConciseSetIntersectionTest
     verifyIntersection(expected, set1, set2);
   }
 
-  @MethodSource("parameters")
-  @ParameterizedTest
-  public void testIntersectionLiteralAndOneFill(boolean compact)
+  @Test
+  public void testIntersectionLiteralAndOneFill()
   {
-    initImmutableConciseSetIntersectionTest(compact);
     ConciseSet set1 = new ConciseSet();
     for (int i = 0; i < 31; i += 2) {
       set1.add(i);
@@ -519,11 +481,9 @@ public class ImmutableConciseSetIntersectionTest
     verifyIntersection(set1, set2);
   }
 
-  @MethodSource("parameters")
-  @ParameterizedTest
-  public void testIntersectionZeroSequenceRemovedFromQueue(boolean compact)
+  @Test
+  public void testIntersectionZeroSequenceRemovedFromQueue()
   {
-    initImmutableConciseSetIntersectionTest(compact);
     // Seems that it is impossible to test this case with naturally constructed ConciseSet, because the end of the
     // sequence is defined by the last set bit, then naturally constructed ConciseSet won't have the last word as zero
     // sequence, it will be a literal or one sequence.
@@ -537,11 +497,9 @@ public class ImmutableConciseSetIntersectionTest
     verifyIntersection(set1, set2);
   }
 
-  @MethodSource("parameters")
-  @ParameterizedTest
-  public void testIntersectionOneFillAndOneFillWithFlipBit(boolean compact)
+  @Test
+  public void testIntersectionOneFillAndOneFillWithFlipBit()
   {
-    initImmutableConciseSetIntersectionTest(compact);
     ConciseSet set1 = new ConciseSet();
     for (int i = 0; i < 100; i++) {
       set1.add(i);
@@ -555,11 +513,9 @@ public class ImmutableConciseSetIntersectionTest
     verifyIntersection(set1, set2);
   }
 
-  @MethodSource("parameters")
-  @ParameterizedTest
-  public void testIntersectionSecondOneFillRemovedFromQueue(boolean compact)
+  @Test
+  public void testIntersectionSecondOneFillRemovedFromQueue()
   {
-    initImmutableConciseSetIntersectionTest(compact);
     ConciseSet set1 = new ConciseSet();
     for (int i = 0; i < 31 * 2; i++) {
       set1.add(i);
@@ -574,11 +530,9 @@ public class ImmutableConciseSetIntersectionTest
     verifyIntersection(set1, set2);
   }
 
-  @MethodSource("parameters")
-  @ParameterizedTest
-  public void testIntersectionFirstOneFillRemovedFromQueue(boolean compact)
+  @Test
+  public void testIntersectionFirstOneFillRemovedFromQueue()
   {
-    initImmutableConciseSetIntersectionTest(compact);
     ConciseSet set1 = new ConciseSet();
     for (int i = 0; i < 31 * 2; i++) {
       set1.add(i);
@@ -592,11 +546,9 @@ public class ImmutableConciseSetIntersectionTest
     verifyIntersection(set1, set2);
   }
 
-  @MethodSource("parameters")
-  @ParameterizedTest
-  public void testIntersectionTerminates(boolean compact)
+  @Test
+  public void testIntersectionTerminates()
   {
-    initImmutableConciseSetIntersectionTest(compact);
     verifyIntersection(Collections.emptyList(), Arrays.asList(new ImmutableConciseSet(), new ImmutableConciseSet()));
   }
 
@@ -636,6 +588,6 @@ public class ImmutableConciseSetIntersectionTest
     while (itr.hasNext()) {
       actual.add(itr.next());
     }
-    assertEquals(expected, actual);
+    Assert.assertEquals(expected, actual);
   }
 }

@@ -21,8 +21,8 @@ package org.apache.druid.query.scan;
 
 import com.google.common.collect.ImmutableList;
 import org.apache.druid.java.util.common.guava.Sequences;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.List;
 
@@ -52,7 +52,7 @@ public class ScanQueryOffsetSequenceTest
           skip
       ).toList();
 
-      Assertions.assertEquals(expected, resultsAfterSkip, "skip = " + skip);
+      Assert.assertEquals("skip = " + skip, expected, resultsAfterSkip);
     }
   }
 

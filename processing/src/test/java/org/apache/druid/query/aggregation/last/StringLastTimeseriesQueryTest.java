@@ -47,8 +47,8 @@ import org.apache.druid.segment.incremental.OnheapIncrementalIndex;
 import org.apache.druid.segment.serde.ComplexMetrics;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.joda.time.DateTime;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.Collections;
 import java.util.List;
@@ -67,7 +67,7 @@ public class StringLastTimeseriesQueryTest extends InitializedNullHandlingTest
   private IncrementalIndex incrementalIndex;
   private QueryableIndex queryableIndex;
 
-  @BeforeEach
+  @Before
   public void setUp() throws IndexSizeExceededException
   {
     final SerializablePairLongStringComplexMetricSerde serde = new SerializablePairLongStringComplexMetricSerde();

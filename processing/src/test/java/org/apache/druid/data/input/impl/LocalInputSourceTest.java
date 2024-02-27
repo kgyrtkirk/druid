@@ -31,9 +31,10 @@ import org.apache.druid.data.input.impl.systemfield.SystemFields;
 import org.apache.druid.java.util.common.HumanReadableBytes;
 import org.apache.druid.utils.Streams;
 import org.easymock.EasyMock;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,8 +52,8 @@ import java.util.stream.Collectors;
 
 public class LocalInputSourceTest
 {
-  @TempDir
-  public File temporaryFolder;
+  @Rule
+  public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
   @Test
   public void testSerdeAbsoluteBaseDir() throws IOException
@@ -61,7 +62,7 @@ public class LocalInputSourceTest
     final LocalInputSource source = new LocalInputSource(new File("myFile").getAbsoluteFile(), "myFilter");
     final byte[] json = mapper.writeValueAsBytes(source);
     final LocalInputSource fromJson = (LocalInputSource) mapper.readValue(json, InputSource.class);
-    Assertions.assertEquals(source, fromJson);
+    Assert.assertEquals(source, fromJson);
   }
 
   @Test
@@ -71,8 +72,8 @@ public class LocalInputSourceTest
     final LocalInputSource source = new LocalInputSource(new File("myFile"), "myFilter");
     final byte[] json = mapper.writeValueAsBytes(source);
     final LocalInputSource fromJson = (LocalInputSource) mapper.readValue(json, InputSource.class);
-    Assertions.assertEquals(source, fromJson);
-    Assertions.assertEquals(Collections.emptySet(), fromJson.getConfiguredSystemFields());
+    Assert.assertEquals(source, fromJson);
+    Assert.assertEquals(Collections.emptySet(), fromJson.getConfiguredSystemFields());
   }
 
   @Test
@@ -87,8 +88,8 @@ public class LocalInputSourceTest
     );
     final byte[] json = mapper.writeValueAsBytes(source);
     final LocalInputSource fromJson = (LocalInputSource) mapper.readValue(json, InputSource.class);
-    Assertions.assertEquals(source, fromJson);
-    Assertions.assertEquals(EnumSet.of(SystemField.URI, SystemField.PATH), fromJson.getConfiguredSystemFields());
+    Assert.assertEquals(source, fromJson);
+    Assert.assertEquals(EnumSet.of(SystemField.URI, SystemField.PATH), fromJson.getConfiguredSystemFields());
   }
 
   @Test
@@ -106,14 +107,14 @@ public class LocalInputSourceTest
     );
     final byte[] json = mapper.writeValueAsBytes(source);
     final LocalInputSource fromJson = (LocalInputSource) mapper.readValue(json, InputSource.class);
-    Assertions.assertEquals(source, fromJson);
+    Assert.assertEquals(source, fromJson);
   }
 
   @Test
   public void testGetTypes()
   {
     final LocalInputSource source = new LocalInputSource(new File("myFile").getAbsoluteFile(), "myFilter");
-    Assertions.assertEquals(Collections.singleton(LocalInputSource.TYPE_KEY), source.getTypes());
+    Assert.assertEquals(Collections.singleton(LocalInputSource.TYPE_KEY), source.getTypes());
   }
 
   @Test
@@ -129,15 +130,15 @@ public class LocalInputSourceTest
         new SystemFields(EnumSet.of(SystemField.URI, SystemField.PATH))
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         EnumSet.of(SystemField.URI, SystemField.PATH),
         inputSource.getConfiguredSystemFields()
     );
 
     final FileEntity entity = new FileEntity(new File("/tmp/foo"));
 
-    Assertions.assertEquals("file:/tmp/foo", inputSource.getSystemFieldValue(entity, SystemField.URI));
-    Assertions.assertEquals("/tmp/foo", inputSource.getSystemFieldValue(entity, SystemField.PATH));
+    Assert.assertEquals("file:/tmp/foo", inputSource.getSystemFieldValue(entity, SystemField.URI));
+    Assert.assertEquals("/tmp/foo", inputSource.getSystemFieldValue(entity, SystemField.PATH));
   }
 
   @Test
@@ -156,11 +157,11 @@ public class LocalInputSourceTest
     final List<InputSplit<List<File>>> splits = inputSource
         .createSplits(new NoopInputFormat(), new MaxSizeSplitHintSpec(maxSplitSize, null))
         .collect(Collectors.toList());
-    Assertions.assertEquals(4, splits.size());
-    Assertions.assertEquals(3, splits.get(0).get().size());
-    Assertions.assertEquals(3, splits.get(1).get().size());
-    Assertions.assertEquals(3, splits.get(2).get().size());
-    Assertions.assertEquals(1, splits.get(3).get().size());
+    Assert.assertEquals(4, splits.size());
+    Assert.assertEquals(3, splits.get(0).get().size());
+    Assert.assertEquals(3, splits.get(1).get().size());
+    Assert.assertEquals(3, splits.get(2).get().size());
+    Assert.assertEquals(1, splits.get(3).get().size());
   }
 
   @Test
@@ -170,7 +171,7 @@ public class LocalInputSourceTest
     final HumanReadableBytes maxSplitSize = new HumanReadableBytes(40L);
     final List<File> files = mockFiles(10, fileSize);
     final LocalInputSource inputSource = new LocalInputSource(null, null, files, null);
-    Assertions.assertEquals(
+    Assert.assertEquals(
         4,
         inputSource.estimateNumSplits(new NoopInputFormat(), new MaxSizeSplitHintSpec(maxSplitSize, null))
     );
@@ -179,7 +180,7 @@ public class LocalInputSourceTest
   @Test
   public void testGetFileIteratorWithBothBaseDirAndDuplicateFilesIteratingFilesOnlyOnce() throws IOException
   {
-    File baseDir = newFolder(temporaryFolder, "junit");
+    File baseDir = temporaryFolder.newFolder();
     List<File> filesInBaseDir = new ArrayList<>();
     for (int i = 0; i < 10; i++) {
       final File file = File.createTempFile("local-input-source", ".data", baseDir);
@@ -201,13 +202,13 @@ public class LocalInputSourceTest
     File.createTempFile("local-input-source", ".filtered", baseDir);
     Iterator<File> fileIterator = new LocalInputSource(baseDir, "*.data", files, null).getFileIterator();
     Set<File> actualFiles = Streams.sequentialStreamFrom(fileIterator).collect(Collectors.toSet());
-    Assertions.assertEquals(expectedFiles, actualFiles);
+    Assert.assertEquals(expectedFiles, actualFiles);
   }
 
   @Test
   public void testGetFileIteratorWithOnlyBaseDirIteratingAllFiles() throws IOException
   {
-    File baseDir = newFolder(temporaryFolder, "junit");
+    File baseDir = temporaryFolder.newFolder();
     Set<File> filesInBaseDir = new HashSet<>();
     for (int i = 0; i < 10; i++) {
       final File file = File.createTempFile("local-input-source", ".data", baseDir);
@@ -218,13 +219,13 @@ public class LocalInputSourceTest
     }
     Iterator<File> fileIterator = new LocalInputSource(baseDir, "*", null, null).getFileIterator();
     Set<File> actualFiles = Streams.sequentialStreamFrom(fileIterator).collect(Collectors.toSet());
-    Assertions.assertEquals(filesInBaseDir, actualFiles);
+    Assert.assertEquals(filesInBaseDir, actualFiles);
   }
 
   @Test
   public void testGetFileIteratorWithOnlyFilesIteratingAllFiles() throws IOException
   {
-    File baseDir = newFolder(temporaryFolder, "junit");
+    File baseDir = temporaryFolder.newFolder();
     List<File> filesInBaseDir = new ArrayList<>();
     for (int i = 0; i < 10; i++) {
       final File file = File.createTempFile("local-input-source", ".data", baseDir);
@@ -235,7 +236,7 @@ public class LocalInputSourceTest
     }
     Iterator<File> fileIterator = new LocalInputSource(null, null, filesInBaseDir, null).getFileIterator();
     List<File> actualFiles = Streams.sequentialStreamFrom(fileIterator).collect(Collectors.toList());
-    Assertions.assertEquals(filesInBaseDir, actualFiles);
+    Assert.assertEquals(filesInBaseDir, actualFiles);
   }
 
   @Test
@@ -245,7 +246,7 @@ public class LocalInputSourceTest
     files.addAll(mockFiles(10, 0));
     final LocalInputSource inputSource = new LocalInputSource(null, null, files, null);
     List<File> iteratedFiles = Lists.newArrayList(inputSource.getFileIterator());
-    Assertions.assertTrue(iteratedFiles.stream().allMatch(file -> file.length() > 0));
+    Assert.assertTrue(iteratedFiles.stream().allMatch(file -> file.length() > 0));
   }
 
   private static List<File> mockFiles(int numFiles, long fileSize)
@@ -258,14 +259,5 @@ public class LocalInputSourceTest
       files.add(file);
     }
     return files;
-  }
-
-  private static File newFolder(File root, String... subDirs) throws IOException {
-    String subFolder = String.join("/", subDirs);
-    File result = new File(root, subFolder);
-    if (!result.mkdirs()) {
-      throw new IOException("Couldn't create folders " + root);
-    }
-    return result;
   }
 }

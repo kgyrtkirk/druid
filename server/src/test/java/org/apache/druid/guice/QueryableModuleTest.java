@@ -36,8 +36,8 @@ import org.apache.druid.server.log.NoopRequestLoggerProvider;
 import org.apache.druid.server.log.RequestLogger;
 import org.apache.druid.server.log.RequestLoggerProvider;
 import org.apache.druid.server.metrics.NoopServiceEmitter;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Properties;
 
@@ -52,9 +52,9 @@ public class QueryableModuleTest
     properties.setProperty("druid.request.logging.feed", "requestlog");
     final Injector injector = makeInjector(properties);
     RequestLoggerProvider emittingRequestLoggerProvider = injector.getInstance(RequestLoggerProvider.class);
-    Assertions.assertTrue(emittingRequestLoggerProvider instanceof EmittingRequestLoggerProvider);
+    Assert.assertTrue(emittingRequestLoggerProvider instanceof EmittingRequestLoggerProvider);
     RequestLogger requestLogger = emittingRequestLoggerProvider.get();
-    Assertions.assertTrue(requestLogger instanceof EmittingRequestLogger);
+    Assert.assertTrue(requestLogger instanceof EmittingRequestLogger);
   }
 
   @Test
@@ -63,9 +63,9 @@ public class QueryableModuleTest
     Properties properties = new Properties();
     final Injector injector = makeInjector(properties);
     RequestLoggerProvider emittingRequestLoggerProvider = injector.getInstance(RequestLoggerProvider.class);
-    Assertions.assertTrue(emittingRequestLoggerProvider instanceof NoopRequestLoggerProvider);
+    Assert.assertTrue(emittingRequestLoggerProvider instanceof NoopRequestLoggerProvider);
     RequestLogger requestLogger = emittingRequestLoggerProvider.get();
-    Assertions.assertTrue(requestLogger instanceof NoopRequestLogger);
+    Assert.assertTrue(requestLogger instanceof NoopRequestLogger);
   }
 
 

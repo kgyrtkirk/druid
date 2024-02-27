@@ -32,9 +32,9 @@ import org.apache.druid.segment.serde.StringUtf8DictionaryEncodedColumnSupplier;
 import org.apache.druid.segment.vector.NilVectorSelector;
 import org.apache.druid.segment.vector.NoFilterVectorOffset;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.nio.ByteBuffer;
 
@@ -44,7 +44,7 @@ public class ValueMatchersTest extends InitializedNullHandlingTest
   private StringUtf8DictionaryEncodedColumnSupplier<?> supplierSingle;
   private StringUtf8DictionaryEncodedColumnSupplier<?> supplierMulti;
 
-  @BeforeEach
+  @Before
   public void setup()
   {
     supplierSingleConstant = new StringUtf8DictionaryEncodedColumnSupplier<>(
@@ -88,46 +88,46 @@ public class ValueMatchersTest extends InitializedNullHandlingTest
         false,
         DruidObjectPredicate.isNull()
     );
-    Assertions.assertNotNull(resultMatchNull);
-    Assertions.assertEquals(ConstantMatcherType.ALL_TRUE, resultMatchNull);
+    Assert.assertNotNull(resultMatchNull);
+    Assert.assertEquals(ConstantMatcherType.ALL_TRUE, resultMatchNull);
 
     ConstantMatcherType resultMatchNotNull = ValueMatchers.toConstantMatcherTypeIfPossible(
         DimensionSelector.constant(null),
         false,
         DruidObjectPredicate.notNull()
     );
-    Assertions.assertNotNull(resultMatchNotNull);
-    Assertions.assertEquals(ConstantMatcherType.ALL_FALSE, resultMatchNotNull);
+    Assert.assertNotNull(resultMatchNotNull);
+    Assert.assertEquals(ConstantMatcherType.ALL_FALSE, resultMatchNotNull);
 
     ConstantMatcherType resultMatchNullUnknown = ValueMatchers.toConstantMatcherTypeIfPossible(
         DimensionSelector.constant(null),
         false,
         value -> value == null ? DruidPredicateMatch.UNKNOWN : DruidPredicateMatch.of(true)
     );
-    Assertions.assertNotNull(resultMatchNullUnknown);
-    Assertions.assertEquals(ConstantMatcherType.ALL_UNKNOWN, resultMatchNullUnknown);
+    Assert.assertNotNull(resultMatchNullUnknown);
+    Assert.assertEquals(ConstantMatcherType.ALL_UNKNOWN, resultMatchNullUnknown);
 
     ConstantMatcherType resultMatchNonNilConstant = ValueMatchers.toConstantMatcherTypeIfPossible(
         supplierSingleConstant.get().makeDimensionSelector(new SimpleAscendingOffset(1), null),
         false,
         DruidObjectPredicate.notNull()
     );
-    Assertions.assertNotNull(resultMatchNonNilConstant);
-    Assertions.assertEquals(ConstantMatcherType.ALL_TRUE, resultMatchNonNilConstant);
+    Assert.assertNotNull(resultMatchNonNilConstant);
+    Assert.assertEquals(ConstantMatcherType.ALL_TRUE, resultMatchNonNilConstant);
 
     ConstantMatcherType resultMatchNonNil = ValueMatchers.toConstantMatcherTypeIfPossible(
         supplierSingle.get().makeDimensionSelector(new SimpleAscendingOffset(1), null),
         false,
         DruidObjectPredicate.notNull()
     );
-    Assertions.assertNull(resultMatchNonNil);
+    Assert.assertNull(resultMatchNonNil);
 
     ConstantMatcherType resultMatchNonNilMulti = ValueMatchers.toConstantMatcherTypeIfPossible(
         supplierMulti.get().makeDimensionSelector(new SimpleAscendingOffset(1), null),
         true,
         DruidObjectPredicate.notNull()
     );
-    Assertions.assertNull(resultMatchNonNilMulti);
+    Assert.assertNull(resultMatchNonNilMulti);
   }
 
   @Test
@@ -138,45 +138,45 @@ public class ValueMatchersTest extends InitializedNullHandlingTest
         false,
         DruidObjectPredicate.isNull()
     );
-    Assertions.assertNotNull(resultMatchNull);
-    Assertions.assertEquals(ConstantMatcherType.ALL_TRUE, resultMatchNull);
+    Assert.assertNotNull(resultMatchNull);
+    Assert.assertEquals(ConstantMatcherType.ALL_TRUE, resultMatchNull);
 
     ConstantMatcherType resultMatchNotNull = ValueMatchers.toConstantMatcherTypeIfPossible(
         NilVectorSelector.create(new NoFilterVectorOffset(10, 0, 100)),
         false,
         DruidObjectPredicate.notNull()
     );
-    Assertions.assertNotNull(resultMatchNotNull);
-    Assertions.assertEquals(ConstantMatcherType.ALL_FALSE, resultMatchNotNull);
+    Assert.assertNotNull(resultMatchNotNull);
+    Assert.assertEquals(ConstantMatcherType.ALL_FALSE, resultMatchNotNull);
 
     ConstantMatcherType resultMatchNullUnknown = ValueMatchers.toConstantMatcherTypeIfPossible(
         NilVectorSelector.create(new NoFilterVectorOffset(10, 0, 100)),
         false,
         value -> value == null ? DruidPredicateMatch.UNKNOWN : DruidPredicateMatch.of(true)
     );
-    Assertions.assertNotNull(resultMatchNullUnknown);
-    Assertions.assertEquals(ConstantMatcherType.ALL_UNKNOWN, resultMatchNullUnknown);
+    Assert.assertNotNull(resultMatchNullUnknown);
+    Assert.assertEquals(ConstantMatcherType.ALL_UNKNOWN, resultMatchNullUnknown);
 
     ConstantMatcherType resultMatchNotNilConstant = ValueMatchers.toConstantMatcherTypeIfPossible(
         supplierSingleConstant.get().makeSingleValueDimensionVectorSelector(new NoFilterVectorOffset(10, 0, 1)),
         false,
         DruidObjectPredicate.notNull()
     );
-    Assertions.assertNotNull(resultMatchNotNilConstant);
-    Assertions.assertEquals(ConstantMatcherType.ALL_TRUE, resultMatchNotNilConstant);
+    Assert.assertNotNull(resultMatchNotNilConstant);
+    Assert.assertEquals(ConstantMatcherType.ALL_TRUE, resultMatchNotNilConstant);
 
     ConstantMatcherType resultMatchNotNil = ValueMatchers.toConstantMatcherTypeIfPossible(
         supplierSingle.get().makeSingleValueDimensionVectorSelector(new NoFilterVectorOffset(10, 0, 1)),
         false,
         DruidObjectPredicate.notNull()
     );
-    Assertions.assertNull(resultMatchNotNil);
+    Assert.assertNull(resultMatchNotNil);
 
     ConstantMatcherType resultMatchNotNilMulti = ValueMatchers.toConstantMatcherTypeIfPossible(
         supplierMulti.get().makeSingleValueDimensionVectorSelector(new NoFilterVectorOffset(10, 0, 1)),
         true,
         DruidObjectPredicate.notNull()
     );
-    Assertions.assertNull(resultMatchNotNilMulti);
+    Assert.assertNull(resultMatchNotNilMulti);
   }
 }

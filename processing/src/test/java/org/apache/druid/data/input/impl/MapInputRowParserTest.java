@@ -25,13 +25,15 @@ import org.apache.druid.data.input.InputRow;
 import org.apache.druid.java.util.common.DateTimes;
 import org.apache.druid.java.util.common.JodaUtils;
 import org.apache.druid.java.util.common.parsers.ParseException;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public class MapInputRowParserTest
 {
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
 
   private final TimestampSpec timestampSpec = new TimestampSpec("time", null, null);
   private final DimensionsSpec dimensionsSpec = DimensionsSpec
@@ -48,62 +50,58 @@ public class MapInputRowParserTest
         dimensionsSpec,
         ImmutableMap.of("time", "2020-01-01", "dim", 0, "met", 10)
     );
-    Assertions.assertEquals(dimensionsSpec.getDimensionNames(), inputRow.getDimensions());
-    Assertions.assertEquals(DateTimes.of("2020-01-01"), inputRow.getTimestamp());
-    Assertions.assertEquals(ImmutableList.of("0"), inputRow.getDimension("dim"));
-    Assertions.assertEquals(10, inputRow.getMetric("met"));
+    Assert.assertEquals(dimensionsSpec.getDimensionNames(), inputRow.getDimensions());
+    Assert.assertEquals(DateTimes.of("2020-01-01"), inputRow.getTimestamp());
+    Assert.assertEquals(ImmutableList.of("0"), inputRow.getDimension("dim"));
+    Assert.assertEquals(10, inputRow.getMetric("met"));
   }
 
   @Test
   public void testParseInvalidTimestampThrowParseException()
   {
-    Throwable exception = assertThrows(ParseException.class, () -> {
-      final InputRow inputRow = MapInputRowParser.parse(
-          timestampSpec,
-          dimensionsSpec,
-          ImmutableMap.of("time", "invalid timestamp", "dim", 0, "met", 10)
-      );
-    });
-    assertTrue(exception.getMessage().contains("Timestamp[invalid timestamp] is unparseable!"));
+    expectedException.expect(ParseException.class);
+    expectedException.expectMessage("Timestamp[invalid timestamp] is unparseable!");
+    final InputRow inputRow = MapInputRowParser.parse(
+        timestampSpec,
+        dimensionsSpec,
+        ImmutableMap.of("time", "invalid timestamp", "dim", 0, "met", 10)
+    );
   }
 
   @Test
   public void testParseMissingTimestampThrowParseException()
   {
-    Throwable exception = assertThrows(ParseException.class, () -> {
-      final InputRow inputRow = MapInputRowParser.parse(
-          timestampSpec,
-          dimensionsSpec,
-          ImmutableMap.of("dim", 0, "met", 10)
-      );
-    });
-    assertTrue(exception.getMessage().contains("Timestamp[null] is unparseable!"));
+    expectedException.expect(ParseException.class);
+    expectedException.expectMessage("Timestamp[null] is unparseable!");
+    final InputRow inputRow = MapInputRowParser.parse(
+        timestampSpec,
+        dimensionsSpec,
+        ImmutableMap.of("dim", 0, "met", 10)
+    );
   }
 
   @Test
   public void testParseTimestampSmallerThanMinThrowParseException()
   {
-    Throwable exception = assertThrows(ParseException.class, () -> {
-      MapInputRowParser.parse(
-          timestampSpec,
-          dimensionsSpec,
-          ImmutableMap.of("time", DateTimes.utc(JodaUtils.MIN_INSTANT - 1), "dim", 0, "met", 10)
-      );
-    });
-    assertTrue(exception.getMessage().contains("Encountered row with timestamp[-146136543-09-08T08:23:32.095Z] that cannot be represented as a long"));
+    expectedException.expect(ParseException.class);
+    expectedException.expectMessage("Encountered row with timestamp[-146136543-09-08T08:23:32.095Z] that cannot be represented as a long");
+    MapInputRowParser.parse(
+        timestampSpec,
+        dimensionsSpec,
+        ImmutableMap.of("time", DateTimes.utc(JodaUtils.MIN_INSTANT - 1), "dim", 0, "met", 10)
+    );
   }
 
   @Test
   public void testParseTimestampLargerThanMaxThrowParseException()
   {
-    Throwable exception = assertThrows(ParseException.class, () -> {
-      MapInputRowParser.parse(
-          timestampSpec,
-          dimensionsSpec,
-          ImmutableMap.of("time", DateTimes.utc(JodaUtils.MAX_INSTANT + 1), "dim", 0, "met", 10)
-      );
-    });
-    assertTrue(exception.getMessage().contains("Encountered row with timestamp[146140482-04-24T15:36:27.904Z] that cannot be represented as a long"));
+    expectedException.expect(ParseException.class);
+    expectedException.expectMessage("Encountered row with timestamp[146140482-04-24T15:36:27.904Z] that cannot be represented as a long");
+    MapInputRowParser.parse(
+        timestampSpec,
+        dimensionsSpec,
+        ImmutableMap.of("time", DateTimes.utc(JodaUtils.MAX_INSTANT + 1), "dim", 0, "met", 10)
+    );
   }
 
   @Test
@@ -114,10 +112,10 @@ public class MapInputRowParserTest
         dimensionsSpec,
         ImmutableMap.of("time", "2020-01-01", "dim", "val1", "dim2", "val2", "met", 10)
     );
-    Assertions.assertEquals(dimensionsSpec.getDimensionNames(), inputRow.getDimensions());
-    Assertions.assertEquals(DateTimes.of("2020-01-01"), inputRow.getTimestamp());
-    Assertions.assertEquals(ImmutableList.of("val1"), inputRow.getDimension("dim"));
-    Assertions.assertEquals(10, inputRow.getMetric("met"));
+    Assert.assertEquals(dimensionsSpec.getDimensionNames(), inputRow.getDimensions());
+    Assert.assertEquals(DateTimes.of("2020-01-01"), inputRow.getTimestamp());
+    Assert.assertEquals(ImmutableList.of("val1"), inputRow.getDimension("dim"));
+    Assert.assertEquals(10, inputRow.getMetric("met"));
   }
 
   @Test
@@ -128,11 +126,11 @@ public class MapInputRowParserTest
         DimensionsSpec.builder().setDimensionExclusions(ImmutableList.of("time", "met")).build(),
         ImmutableMap.of("time", "2020-01-01", "dim", "val1", "dim2", "val2", "met", 10)
     );
-    Assertions.assertEquals(ImmutableList.of("dim", "dim2"), inputRow.getDimensions());
-    Assertions.assertEquals(DateTimes.of("2020-01-01"), inputRow.getTimestamp());
-    Assertions.assertEquals(ImmutableList.of("val1"), inputRow.getDimension("dim"));
-    Assertions.assertEquals(ImmutableList.of("val2"), inputRow.getDimension("dim2"));
-    Assertions.assertEquals(10, inputRow.getMetric("met"));
+    Assert.assertEquals(ImmutableList.of("dim", "dim2"), inputRow.getDimensions());
+    Assert.assertEquals(DateTimes.of("2020-01-01"), inputRow.getTimestamp());
+    Assert.assertEquals(ImmutableList.of("val1"), inputRow.getDimension("dim"));
+    Assert.assertEquals(ImmutableList.of("val2"), inputRow.getDimension("dim2"));
+    Assert.assertEquals(10, inputRow.getMetric("met"));
   }
 
   @Test
@@ -150,12 +148,12 @@ public class MapInputRowParserTest
     );
     // dim3 should appear first as it's explicitly defined in dimensionsSpec.
     // Discovered dimensions, i.e., dim and dim2, should be in the parsed row since includeAllDimensions is set.
-    Assertions.assertEquals(ImmutableList.of("dim3", "dim", "dim2"), inputRow.getDimensions());
-    Assertions.assertEquals(DateTimes.of("2020-01-01"), inputRow.getTimestamp());
-    Assertions.assertEquals(ImmutableList.of("val3"), inputRow.getDimension("dim3"));
-    Assertions.assertEquals(ImmutableList.of("val1"), inputRow.getDimension("dim"));
-    Assertions.assertEquals(ImmutableList.of("val2"), inputRow.getDimension("dim2"));
-    Assertions.assertEquals(10, inputRow.getMetric("met"));
+    Assert.assertEquals(ImmutableList.of("dim3", "dim", "dim2"), inputRow.getDimensions());
+    Assert.assertEquals(DateTimes.of("2020-01-01"), inputRow.getTimestamp());
+    Assert.assertEquals(ImmutableList.of("val3"), inputRow.getDimension("dim3"));
+    Assert.assertEquals(ImmutableList.of("val1"), inputRow.getDimension("dim"));
+    Assert.assertEquals(ImmutableList.of("val2"), inputRow.getDimension("dim2"));
+    Assert.assertEquals(10, inputRow.getMetric("met"));
   }
 
   @Test
@@ -184,7 +182,7 @@ public class MapInputRowParserTest
     );
     // string should appear first as it's explicitly defined in dimensionsSpec.
     // Discovered dimensions, should be in the parsed row since useSchemaDiscovery is set.
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableList.of("string", "array_double", "array_long", "array_string", "bool", "double", "float", "nested"),
         inputRow.getDimensions()
     );

@@ -28,6 +28,7 @@ import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.timeline.partition.HashPartitionFunction;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Collections;
 import java.util.List;

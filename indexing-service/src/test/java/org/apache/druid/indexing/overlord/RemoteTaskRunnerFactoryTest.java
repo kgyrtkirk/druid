@@ -26,6 +26,7 @@ import org.apache.druid.indexing.overlord.config.RemoteTaskRunnerConfig;
 import org.apache.druid.server.initialization.IndexerZkConfig;
 import org.apache.druid.server.initialization.ZkPathsConfig;
 import org.junit.Assert;
+import org.junit.Test;
 import org.mockito.Mockito;
 
 public class RemoteTaskRunnerFactoryTest

@@ -31,8 +31,8 @@ import org.apache.druid.segment.serde.cell.RandomStringUtils;
 import org.apache.druid.segment.writeout.HeapByteBufferWriteOutBytes;
 import org.apache.druid.segment.writeout.OnHeapMemorySegmentWriteOutMedium;
 import org.apache.druid.segment.writeout.SegmentWriteOutMedium;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -165,8 +165,8 @@ public class SerializablePairLongStringComplexMetricSerdeTest
          ComplexColumn compressedCol = createComplexColumn(compressedBuffer)
     ) {
       for (int i = 0; i < expected.size(); i++) {
-        Assertions.assertEquals(expected.get(i), legacyCol.getRowValue(i));
-        Assertions.assertEquals(expected.get(i), compressedCol.getRowValue(i));
+        Assert.assertEquals(expected.get(i), legacyCol.getRowValue(i));
+        Assert.assertEquals(expected.get(i), compressedCol.getRowValue(i));
       }
     }
     return compressedBuffer;
@@ -184,10 +184,10 @@ public class SerializablePairLongStringComplexMetricSerdeTest
 
     final ComplexColumn col = (ComplexColumn) columnHolder.getColumn();
     if (col instanceof SerializablePairLongStringComplexColumn) {
-      Assertions.assertEquals(serializedSize, col.getLength());
+      Assert.assertEquals(serializedSize, col.getLength());
     }
-    Assertions.assertEquals("serializablePairLongString", col.getTypeName());
-    Assertions.assertEquals(SerializablePairLongString.class, col.getClazz());
+    Assert.assertEquals("serializablePairLongString", col.getTypeName());
+    Assert.assertEquals(SerializablePairLongString.class, col.getClazz());
 
     return col;
   }
@@ -239,10 +239,10 @@ public class SerializablePairLongStringComplexMetricSerdeTest
     byteBuffer.flip();
 
     if (expectedSize > -1) {
-      Assertions.assertEquals(expectedSize, serializer.getSerializedSize());
+      Assert.assertEquals(expectedSize, serializer.getSerializedSize());
     }
 
-    Assertions.assertEquals(serializer.getSerializedSize(), byteBuffer.limit());
+    Assert.assertEquals(serializer.getSerializedSize(), byteBuffer.limit());
 
     return byteBuffer;
   }

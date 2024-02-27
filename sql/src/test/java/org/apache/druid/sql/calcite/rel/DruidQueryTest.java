@@ -38,8 +38,8 @@ import org.apache.druid.sql.calcite.filtration.Filtration;
 import org.apache.druid.sql.calcite.planner.ExpressionParserImpl;
 import org.apache.druid.sql.calcite.util.CalciteTests;
 import org.joda.time.Interval;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Collections;
 
@@ -225,8 +225,8 @@ public class DruidQueryTest
       Interval interval
   )
   {
-    Assertions.assertEquals(dataSource, pair.lhs);
-    Assertions.assertEquals(columnFilter, pair.rhs.getDimFilter(), "dim-filter: " + pair.rhs.getDimFilter());
-    Assertions.assertEquals(Collections.singletonList(interval), pair.rhs.getIntervals());
+    Assert.assertEquals(dataSource, pair.lhs);
+    Assert.assertEquals("dim-filter: " + pair.rhs.getDimFilter(), columnFilter, pair.rhs.getDimFilter());
+    Assert.assertEquals(Collections.singletonList(interval), pair.rhs.getIntervals());
   }
 }

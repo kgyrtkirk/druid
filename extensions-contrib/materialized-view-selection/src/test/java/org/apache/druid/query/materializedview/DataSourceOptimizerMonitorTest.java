@@ -21,6 +21,7 @@ package org.apache.druid.query.materializedview;
 
 import org.apache.druid.java.util.metrics.StubServiceEmitter;
 import org.easymock.EasyMock;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Collections;

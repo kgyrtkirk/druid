@@ -23,14 +23,13 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import org.apache.druid.java.util.common.ISE;
 import org.hamcrest.CoreMatchers;
+import org.hamcrest.MatcherAssert;
+import org.junit.Assert;
+import org.junit.Test;
 import org.junit.internal.matchers.ThrowableMessageMatcher;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 import java.util.Set;
-
-import static org.hamcrest.MatcherAssert.assertThat;
 
 public class CollectionUtilsTest
 {
@@ -43,45 +42,45 @@ public class CollectionUtilsTest
   @Test
   public void testSubtract()
   {
-    Assertions.assertEquals(empty, CollectionUtils.subtract(empty, empty));
-    Assertions.assertEquals(abc, CollectionUtils.subtract(abc, empty));
-    Assertions.assertEquals(empty, CollectionUtils.subtract(abc, abc));
-    Assertions.assertEquals(abc, CollectionUtils.subtract(abc, efg));
-    Assertions.assertEquals(ImmutableSet.of("a"), CollectionUtils.subtract(abc, bcd));
+    Assert.assertEquals(empty, CollectionUtils.subtract(empty, empty));
+    Assert.assertEquals(abc, CollectionUtils.subtract(abc, empty));
+    Assert.assertEquals(empty, CollectionUtils.subtract(abc, abc));
+    Assert.assertEquals(abc, CollectionUtils.subtract(abc, efg));
+    Assert.assertEquals(ImmutableSet.of("a"), CollectionUtils.subtract(abc, bcd));
   }
 
   @Test
   public void testIntersect()
   {
-    Assertions.assertEquals(empty, CollectionUtils.intersect(empty, empty));
-    Assertions.assertEquals(abc, CollectionUtils.intersect(abc, abc));
-    Assertions.assertEquals(empty, CollectionUtils.intersect(abc, efg));
-    Assertions.assertEquals(ImmutableSet.of("b", "c"), CollectionUtils.intersect(abc, bcd));
+    Assert.assertEquals(empty, CollectionUtils.intersect(empty, empty));
+    Assert.assertEquals(abc, CollectionUtils.intersect(abc, abc));
+    Assert.assertEquals(empty, CollectionUtils.intersect(abc, efg));
+    Assert.assertEquals(ImmutableSet.of("b", "c"), CollectionUtils.intersect(abc, bcd));
   }
 
   @Test
   public void testUnion()
   {
-    Assertions.assertEquals(empty, CollectionUtils.union(empty, empty));
-    Assertions.assertEquals(abc, CollectionUtils.union(abc, abc));
-    Assertions.assertEquals(ImmutableSet.of("a", "b", "c", "e", "f", "g"), CollectionUtils.union(abc, efg));
-    Assertions.assertEquals(ImmutableSet.of("a", "b", "c", "d"), CollectionUtils.union(abc, bcd));
+    Assert.assertEquals(empty, CollectionUtils.union(empty, empty));
+    Assert.assertEquals(abc, CollectionUtils.union(abc, abc));
+    Assert.assertEquals(ImmutableSet.of("a", "b", "c", "e", "f", "g"), CollectionUtils.union(abc, efg));
+    Assert.assertEquals(ImmutableSet.of("a", "b", "c", "d"), CollectionUtils.union(abc, bcd));
   }
 
   @Test
   public void testGetOnlyElement_empty()
   {
-    final IllegalStateException e = Assertions.assertThrows(
+    final IllegalStateException e = Assert.assertThrows(
         IllegalStateException.class,
         () -> CollectionUtils.getOnlyElement(Collections.emptyList(), xs -> new ISE("oops"))
     );
-    assertThat(e, ThrowableMessageMatcher.hasMessage(CoreMatchers.equalTo("oops")));
+    MatcherAssert.assertThat(e, ThrowableMessageMatcher.hasMessage(CoreMatchers.equalTo("oops")));
   }
 
   @Test
   public void testGetOnlyElement_one()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         "a",
         CollectionUtils.getOnlyElement(Collections.singletonList("a"), xs -> new ISE("oops"))
     );
@@ -90,10 +89,10 @@ public class CollectionUtilsTest
   @Test
   public void testGetOnlyElement_two()
   {
-    final IllegalStateException e = Assertions.assertThrows(
+    final IllegalStateException e = Assert.assertThrows(
         IllegalStateException.class,
         () -> CollectionUtils.getOnlyElement(ImmutableList.of("a", "b"), xs -> new ISE("oops"))
     );
-    assertThat(e, ThrowableMessageMatcher.hasMessage(CoreMatchers.equalTo("oops")));
+    MatcherAssert.assertThat(e, ThrowableMessageMatcher.hasMessage(CoreMatchers.equalTo("oops")));
   }
 }

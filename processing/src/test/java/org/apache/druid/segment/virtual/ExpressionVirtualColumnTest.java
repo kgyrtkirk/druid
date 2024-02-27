@@ -56,8 +56,8 @@ import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.segment.column.ValueType;
 import org.apache.druid.segment.data.IndexedInts;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
@@ -217,21 +217,21 @@ public class ExpressionVirtualColumnTest extends InitializedNullHandlingTest
     final BaseObjectColumnValueSelector selector = X_PLUS_Y.makeColumnValueSelector("expr", COLUMN_SELECTOR_FACTORY);
 
     CURRENT_ROW.set(ROW0);
-    Assertions.assertEquals(null, selector.getObject());
+    Assert.assertEquals(null, selector.getObject());
 
     CURRENT_ROW.set(ROW1);
     if (NullHandling.replaceWithDefault()) {
-      Assertions.assertEquals(4L, selector.getObject());
+      Assert.assertEquals(4L, selector.getObject());
     } else {
       // y is null for row1
-      Assertions.assertEquals(null, selector.getObject());
+      Assert.assertEquals(null, selector.getObject());
     }
 
     CURRENT_ROW.set(ROW2);
-    Assertions.assertEquals(5.1d, selector.getObject());
+    Assert.assertEquals(5.1d, selector.getObject());
 
     CURRENT_ROW.set(ROW3);
-    Assertions.assertEquals(5L, selector.getObject());
+    Assert.assertEquals(5L, selector.getObject());
   }
 
   @Test
@@ -244,11 +244,11 @@ public class ExpressionVirtualColumnTest extends InitializedNullHandlingTest
         COLUMN_SELECTOR_FACTORY
     );
     CURRENT_ROW.set(ROWMULTI);
-    Assertions.assertEquals(ImmutableList.of("2.0", "4.0", "6.0"), selectorImplicit.getObject());
+    Assert.assertEquals(ImmutableList.of("2.0", "4.0", "6.0"), selectorImplicit.getObject());
     CURRENT_ROW.set(ROWMULTI2);
-    Assertions.assertEquals(ImmutableList.of("6.0", "8.0", "10.0"), selectorImplicit.getObject());
+    Assert.assertEquals(ImmutableList.of("6.0", "8.0", "10.0"), selectorImplicit.getObject());
     CURRENT_ROW.set(ROWMULTI3);
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Arrays.asList("6.0", NullHandling.replaceWithDefault() ? "0.0" : null, "10.0"),
         selectorImplicit.getObject()
     );
@@ -258,11 +258,11 @@ public class ExpressionVirtualColumnTest extends InitializedNullHandlingTest
         COLUMN_SELECTOR_FACTORY
     );
     CURRENT_ROW.set(ROWMULTI);
-    Assertions.assertEquals(ImmutableList.of("2.0", "4.0", "6.0"), selectorExplicit.getObject());
+    Assert.assertEquals(ImmutableList.of("2.0", "4.0", "6.0"), selectorExplicit.getObject());
     CURRENT_ROW.set(ROWMULTI2);
-    Assertions.assertEquals(ImmutableList.of("6.0", "8.0", "10.0"), selectorExplicit.getObject());
+    Assert.assertEquals(ImmutableList.of("6.0", "8.0", "10.0"), selectorExplicit.getObject());
     CURRENT_ROW.set(ROWMULTI3);
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Arrays.asList("6.0", NullHandling.replaceWithDefault() ? "0.0" : null, "10.0"),
         selectorExplicit.getObject()
     );
@@ -370,8 +370,8 @@ public class ExpressionVirtualColumnTest extends InitializedNullHandlingTest
     final BaseObjectColumnValueSelector selectorExplicit =
         SCALE_LIST_SELF_EXPLICIT.makeDimensionSelector(spec, factory);
 
-    Assertions.assertTrue(selectorImplicit instanceof SingleStringInputDeferredEvaluationExpressionDimensionSelector);
-    Assertions.assertTrue(selectorExplicit instanceof ExpressionMultiValueDimensionSelector);
+    Assert.assertTrue(selectorImplicit instanceof SingleStringInputDeferredEvaluationExpressionDimensionSelector);
+    Assert.assertTrue(selectorExplicit instanceof ExpressionMultiValueDimensionSelector);
   }
 
   @Test
@@ -381,24 +381,24 @@ public class ExpressionVirtualColumnTest extends InitializedNullHandlingTest
 
     CURRENT_ROW.set(ROW0);
     if (NullHandling.replaceWithDefault()) {
-      Assertions.assertEquals(0L, selector.getLong());
+      Assert.assertEquals(0L, selector.getLong());
     } else {
-      Assertions.assertTrue(selector.isNull());
+      Assert.assertTrue(selector.isNull());
     }
 
     CURRENT_ROW.set(ROW1);
     if (NullHandling.replaceWithDefault()) {
-      Assertions.assertEquals(4L, selector.getLong());
+      Assert.assertEquals(4L, selector.getLong());
     } else {
       // y is null for row1
-      Assertions.assertTrue(selector.isNull());
+      Assert.assertTrue(selector.isNull());
     }
 
     CURRENT_ROW.set(ROW2);
-    Assertions.assertEquals(5L, selector.getLong());
+    Assert.assertEquals(5L, selector.getLong());
 
     CURRENT_ROW.set(ROW3);
-    Assertions.assertEquals(5L, selector.getLong());
+    Assert.assertEquals(5L, selector.getLong());
   }
 
   @Test
@@ -408,31 +408,31 @@ public class ExpressionVirtualColumnTest extends InitializedNullHandlingTest
 
     CURRENT_ROW.set(ROW0);
     if (NullHandling.replaceWithDefault()) {
-      Assertions.assertEquals(0L, selector.getLong());
+      Assert.assertEquals(0L, selector.getLong());
     } else {
-      Assertions.assertTrue(selector.isNull());
+      Assert.assertTrue(selector.isNull());
     }
 
     CURRENT_ROW.set(ROW1);
     if (NullHandling.replaceWithDefault()) {
-      Assertions.assertEquals(4L, selector.getLong());
+      Assert.assertEquals(4L, selector.getLong());
     } else {
       // y is null for row1
-      Assertions.assertTrue(selector.isNull());
+      Assert.assertTrue(selector.isNull());
     }
 
     CURRENT_ROW.set(ROW2);
     if (NullHandling.replaceWithDefault()) {
-      Assertions.assertEquals(0L, selector.getLong());
+      Assert.assertEquals(0L, selector.getLong());
     } else {
-      Assertions.assertTrue(selector.isNull());
+      Assert.assertTrue(selector.isNull());
     }
 
     CURRENT_ROW.set(ROW3);
     if (NullHandling.replaceWithDefault()) {
-      Assertions.assertEquals(0L, selector.getLong());
+      Assert.assertEquals(0L, selector.getLong());
     } else {
-      Assertions.assertTrue(selector.isNull());
+      Assert.assertTrue(selector.isNull());
     }
   }
 
@@ -443,24 +443,24 @@ public class ExpressionVirtualColumnTest extends InitializedNullHandlingTest
 
     CURRENT_ROW.set(ROW0);
     if (NullHandling.replaceWithDefault()) {
-      Assertions.assertEquals(0.0f, selector.getFloat(), 0.0f);
+      Assert.assertEquals(0.0f, selector.getFloat(), 0.0f);
     } else {
-      Assertions.assertTrue(selector.isNull());
+      Assert.assertTrue(selector.isNull());
     }
 
     CURRENT_ROW.set(ROW1);
     if (NullHandling.replaceWithDefault()) {
-      Assertions.assertEquals(4.0f, selector.getFloat(), 0.0f);
+      Assert.assertEquals(4.0f, selector.getFloat(), 0.0f);
     } else {
       // y is null for row1
-      Assertions.assertTrue(selector.isNull());
+      Assert.assertTrue(selector.isNull());
     }
 
     CURRENT_ROW.set(ROW2);
-    Assertions.assertEquals(5.1f, selector.getFloat(), 0.0f);
+    Assert.assertEquals(5.1f, selector.getFloat(), 0.0f);
 
     CURRENT_ROW.set(ROW3);
-    Assertions.assertEquals(5.0f, selector.getFloat(), 0.0f);
+    Assert.assertEquals(5.0f, selector.getFloat(), 0.0f);
   }
 
   @Test
@@ -480,36 +480,36 @@ public class ExpressionVirtualColumnTest extends InitializedNullHandlingTest
     );
 
     CURRENT_ROW.set(ROW0);
-    Assertions.assertEquals(true, nullMatcher.matches(false));
-    Assertions.assertEquals(false, fiveMatcher.matches(false));
-    Assertions.assertEquals(false, nonNullMatcher.matches(false));
-    Assertions.assertEquals(null, selector.lookupName(selector.getRow().get(0)));
+    Assert.assertEquals(true, nullMatcher.matches(false));
+    Assert.assertEquals(false, fiveMatcher.matches(false));
+    Assert.assertEquals(false, nonNullMatcher.matches(false));
+    Assert.assertEquals(null, selector.lookupName(selector.getRow().get(0)));
 
     CURRENT_ROW.set(ROW1);
     if (NullHandling.replaceWithDefault()) {
-      Assertions.assertEquals(false, nullMatcher.matches(false));
-      Assertions.assertEquals(false, fiveMatcher.matches(false));
-      Assertions.assertEquals(true, nonNullMatcher.matches(false));
-      Assertions.assertEquals("4", selector.lookupName(selector.getRow().get(0)));
+      Assert.assertEquals(false, nullMatcher.matches(false));
+      Assert.assertEquals(false, fiveMatcher.matches(false));
+      Assert.assertEquals(true, nonNullMatcher.matches(false));
+      Assert.assertEquals("4", selector.lookupName(selector.getRow().get(0)));
     } else {
       // y is null in row1
-      Assertions.assertEquals(true, nullMatcher.matches(false));
-      Assertions.assertEquals(false, fiveMatcher.matches(false));
-      Assertions.assertEquals(false, nonNullMatcher.matches(false));
-      Assertions.assertEquals(null, selector.lookupName(selector.getRow().get(0)));
+      Assert.assertEquals(true, nullMatcher.matches(false));
+      Assert.assertEquals(false, fiveMatcher.matches(false));
+      Assert.assertEquals(false, nonNullMatcher.matches(false));
+      Assert.assertEquals(null, selector.lookupName(selector.getRow().get(0)));
     }
 
     CURRENT_ROW.set(ROW2);
-    Assertions.assertEquals(false, nullMatcher.matches(false));
-    Assertions.assertEquals(false, fiveMatcher.matches(false));
-    Assertions.assertEquals(true, nonNullMatcher.matches(false));
-    Assertions.assertEquals("5.1", selector.lookupName(selector.getRow().get(0)));
+    Assert.assertEquals(false, nullMatcher.matches(false));
+    Assert.assertEquals(false, fiveMatcher.matches(false));
+    Assert.assertEquals(true, nonNullMatcher.matches(false));
+    Assert.assertEquals("5.1", selector.lookupName(selector.getRow().get(0)));
 
     CURRENT_ROW.set(ROW3);
-    Assertions.assertEquals(false, nullMatcher.matches(false));
-    Assertions.assertEquals(true, fiveMatcher.matches(false));
-    Assertions.assertEquals(true, nonNullMatcher.matches(false));
-    Assertions.assertEquals("5", selector.lookupName(selector.getRow().get(0)));
+    Assert.assertEquals(false, nullMatcher.matches(false));
+    Assert.assertEquals(true, fiveMatcher.matches(false));
+    Assert.assertEquals(true, nonNullMatcher.matches(false));
+    Assert.assertEquals("5", selector.lookupName(selector.getRow().get(0)));
   }
 
   @Test
@@ -527,7 +527,7 @@ public class ExpressionVirtualColumnTest extends InitializedNullHandlingTest
     );
 
     CURRENT_ROW.set(ROW0);
-    Assertions.assertEquals(false, nonNullMatcher.matches(false));
+    Assert.assertEquals(false, nonNullMatcher.matches(false));
 
 
   }
@@ -540,26 +540,26 @@ public class ExpressionVirtualColumnTest extends InitializedNullHandlingTest
         COLUMN_SELECTOR_FACTORY
     );
 
-    Assertions.assertNotNull(selector);
+    Assert.assertNotNull(selector);
 
     CURRENT_ROW.set(ROW0);
-    Assertions.assertEquals(1, selector.getRow().size());
-    Assertions.assertEquals(null, selector.lookupName(selector.getRow().get(0)));
+    Assert.assertEquals(1, selector.getRow().size());
+    Assert.assertEquals(null, selector.lookupName(selector.getRow().get(0)));
 
     CURRENT_ROW.set(ROW1);
-    Assertions.assertEquals(1, selector.getRow().size());
-    Assertions.assertEquals(
+    Assert.assertEquals(1, selector.getRow().size());
+    Assert.assertEquals(
         NullHandling.replaceWithDefault() ? "4" : null,
         selector.lookupName(selector.getRow().get(0))
     );
 
     CURRENT_ROW.set(ROW2);
-    Assertions.assertEquals(1, selector.getRow().size());
-    Assertions.assertEquals("foobar2.1", selector.lookupName(selector.getRow().get(0)));
+    Assert.assertEquals(1, selector.getRow().size());
+    Assert.assertEquals("foobar2.1", selector.lookupName(selector.getRow().get(0)));
 
     CURRENT_ROW.set(ROW3);
-    Assertions.assertEquals(1, selector.getRow().size());
-    Assertions.assertEquals("foobar2", selector.lookupName(selector.getRow().get(0)));
+    Assert.assertEquals(1, selector.getRow().size());
+    Assert.assertEquals("foobar2", selector.lookupName(selector.getRow().get(0)));
   }
 
   @Test
@@ -570,26 +570,26 @@ public class ExpressionVirtualColumnTest extends InitializedNullHandlingTest
         COLUMN_SELECTOR_FACTORY
     );
 
-    Assertions.assertNotNull(selector);
+    Assert.assertNotNull(selector);
 
     CURRENT_ROW.set(ROW0);
-    Assertions.assertEquals(1, selector.getRow().size());
-    Assertions.assertNull(selector.lookupName(selector.getRow().get(0)));
+    Assert.assertEquals(1, selector.getRow().size());
+    Assert.assertNull(selector.lookupName(selector.getRow().get(0)));
 
     CURRENT_ROW.set(ROW1);
-    Assertions.assertEquals(1, selector.getRow().size());
-    Assertions.assertNull(selector.lookupName(selector.getRow().get(0)));
+    Assert.assertEquals(1, selector.getRow().size());
+    Assert.assertNull(selector.lookupName(selector.getRow().get(0)));
 
     CURRENT_ROW.set(ROW2);
-    Assertions.assertEquals(1, selector.getRow().size());
-    Assertions.assertEquals(
+    Assert.assertEquals(1, selector.getRow().size());
+    Assert.assertEquals(
         NullHandling.replaceWithDefault() ? "foobar" : null,
         selector.lookupName(selector.getRow().get(0))
     );
 
     CURRENT_ROW.set(ROW3);
-    Assertions.assertEquals(1, selector.getRow().size());
-    Assertions.assertEquals(
+    Assert.assertEquals(1, selector.getRow().size());
+    Assert.assertEquals(
         NullHandling.replaceWithDefault() ? "foobar" : null,
         selector.lookupName(selector.getRow().get(0))
     );
@@ -612,36 +612,36 @@ public class ExpressionVirtualColumnTest extends InitializedNullHandlingTest
     );
 
     CURRENT_ROW.set(ROW0);
-    Assertions.assertEquals(true, nullMatcher.matches(false));
-    Assertions.assertEquals(false, fiveMatcher.matches(false));
-    Assertions.assertEquals(false, nonNullMatcher.matches(false));
-    Assertions.assertEquals(null, selector.lookupName(selector.getRow().get(0)));
+    Assert.assertEquals(true, nullMatcher.matches(false));
+    Assert.assertEquals(false, fiveMatcher.matches(false));
+    Assert.assertEquals(false, nonNullMatcher.matches(false));
+    Assert.assertEquals(null, selector.lookupName(selector.getRow().get(0)));
 
     CURRENT_ROW.set(ROW1);
     if (NullHandling.replaceWithDefault()) {
-      Assertions.assertEquals(false, nullMatcher.matches(false));
-      Assertions.assertEquals(false, fiveMatcher.matches(false));
-      Assertions.assertEquals(true, nonNullMatcher.matches(false));
-      Assertions.assertEquals("4", selector.lookupName(selector.getRow().get(0)));
+      Assert.assertEquals(false, nullMatcher.matches(false));
+      Assert.assertEquals(false, fiveMatcher.matches(false));
+      Assert.assertEquals(true, nonNullMatcher.matches(false));
+      Assert.assertEquals("4", selector.lookupName(selector.getRow().get(0)));
     } else {
       // y is null in row1
-      Assertions.assertEquals(true, nullMatcher.matches(false));
-      Assertions.assertEquals(false, fiveMatcher.matches(false));
-      Assertions.assertEquals(false, nonNullMatcher.matches(false));
-      Assertions.assertEquals(null, selector.lookupName(selector.getRow().get(0)));
+      Assert.assertEquals(true, nullMatcher.matches(false));
+      Assert.assertEquals(false, fiveMatcher.matches(false));
+      Assert.assertEquals(false, nonNullMatcher.matches(false));
+      Assert.assertEquals(null, selector.lookupName(selector.getRow().get(0)));
     }
 
     CURRENT_ROW.set(ROW2);
-    Assertions.assertEquals(false, nullMatcher.matches(false));
-    Assertions.assertEquals(true, fiveMatcher.matches(false));
-    Assertions.assertEquals(true, nonNullMatcher.matches(false));
-    Assertions.assertEquals("5.1", selector.lookupName(selector.getRow().get(0)));
+    Assert.assertEquals(false, nullMatcher.matches(false));
+    Assert.assertEquals(true, fiveMatcher.matches(false));
+    Assert.assertEquals(true, nonNullMatcher.matches(false));
+    Assert.assertEquals("5.1", selector.lookupName(selector.getRow().get(0)));
 
     CURRENT_ROW.set(ROW3);
-    Assertions.assertEquals(false, nullMatcher.matches(false));
-    Assertions.assertEquals(true, fiveMatcher.matches(false));
-    Assertions.assertEquals(true, nonNullMatcher.matches(false));
-    Assertions.assertEquals("5", selector.lookupName(selector.getRow().get(0)));
+    Assert.assertEquals(false, nullMatcher.matches(false));
+    Assert.assertEquals(true, fiveMatcher.matches(false));
+    Assert.assertEquals(true, nonNullMatcher.matches(false));
+    Assert.assertEquals("5", selector.lookupName(selector.getRow().get(0)));
   }
 
   @Test
@@ -651,7 +651,7 @@ public class ExpressionVirtualColumnTest extends InitializedNullHandlingTest
         CONSTANT_LIKE.makeColumnValueSelector("expr", COLUMN_SELECTOR_FACTORY);
 
     CURRENT_ROW.set(ROW0);
-    Assertions.assertEquals(1L, selector.getLong());
+    Assert.assertEquals(1L, selector.getLong());
   }
 
   @Test
@@ -662,10 +662,10 @@ public class ExpressionVirtualColumnTest extends InitializedNullHandlingTest
 
     CURRENT_ROW.set(ROW0);
     if (NullHandling.replaceWithDefault()) {
-      Assertions.assertEquals(2L, selector.getLong());
-      Assertions.assertFalse(selector.isNull());
+      Assert.assertEquals(2L, selector.getLong());
+      Assert.assertFalse(selector.isNull());
     } else {
-      Assertions.assertTrue(selector.isNull());
+      Assert.assertTrue(selector.isNull());
     }
   }
 
@@ -677,10 +677,10 @@ public class ExpressionVirtualColumnTest extends InitializedNullHandlingTest
 
     CURRENT_ROW.set(ROW0);
     if (NullHandling.replaceWithDefault()) {
-      Assertions.assertEquals(2.1f, selector.getFloat(), 0.0f);
-      Assertions.assertFalse(selector.isNull());
+      Assert.assertEquals(2.1f, selector.getFloat(), 0.0f);
+      Assert.assertFalse(selector.isNull());
     } else {
-      Assertions.assertTrue(selector.isNull());
+      Assert.assertTrue(selector.isNull());
     }
   }
 
@@ -694,12 +694,12 @@ public class ExpressionVirtualColumnTest extends InitializedNullHandlingTest
 
     CURRENT_ROW.set(ROW0);
     if (NullHandling.replaceWithDefault()) {
-      Assertions.assertEquals(2.1f, selector.getFloat(), 0.0f);
-      Assertions.assertFalse(selector.isNull());
-      Assertions.assertEquals(2.1d, selector.getObject().asDouble(), 0.0d);
+      Assert.assertEquals(2.1f, selector.getFloat(), 0.0f);
+      Assert.assertFalse(selector.isNull());
+      Assert.assertEquals(2.1d, selector.getObject().asDouble(), 0.0d);
     } else {
-      Assertions.assertTrue(selector.isNull());
-      Assertions.assertTrue(selector.getObject().isNumericNull());
+      Assert.assertTrue(selector.isNull());
+      Assert.assertTrue(selector.getObject().isNumericNull());
     }
   }
 
@@ -709,16 +709,16 @@ public class ExpressionVirtualColumnTest extends InitializedNullHandlingTest
     final ColumnValueSelector selector = Z_LIKE.makeColumnValueSelector("expr", COLUMN_SELECTOR_FACTORY);
 
     CURRENT_ROW.set(ROW0);
-    Assertions.assertEquals(0L, selector.getLong());
+    Assert.assertEquals(0L, selector.getLong());
 
     CURRENT_ROW.set(ROW1);
-    Assertions.assertEquals(0L, selector.getLong());
+    Assert.assertEquals(0L, selector.getLong());
 
     CURRENT_ROW.set(ROW2);
-    Assertions.assertEquals(1L, selector.getLong());
+    Assert.assertEquals(1L, selector.getLong());
 
     CURRENT_ROW.set(ROW3);
-    Assertions.assertEquals(1L, selector.getLong());
+    Assert.assertEquals(1L, selector.getLong());
   }
 
   @Test
@@ -727,29 +727,29 @@ public class ExpressionVirtualColumnTest extends InitializedNullHandlingTest
     final ColumnValueSelector selector = TIME_FLOOR.makeColumnValueSelector("expr", COLUMN_SELECTOR_FACTORY);
 
     CURRENT_ROW.set(ROW0);
-    Assertions.assertEquals(DateTimes.of("2000-01-01").getMillis(), selector.getLong());
-    Assertions.assertEquals(DateTimes.of("2000-01-01").getMillis(), selector.getFloat(), 0.0f);
-    Assertions.assertEquals(DateTimes.of("2000-01-01").getMillis(), selector.getDouble(), 0.0d);
-    Assertions.assertEquals(DateTimes.of("2000-01-01").getMillis(), selector.getObject());
+    Assert.assertEquals(DateTimes.of("2000-01-01").getMillis(), selector.getLong());
+    Assert.assertEquals(DateTimes.of("2000-01-01").getMillis(), selector.getFloat(), 0.0f);
+    Assert.assertEquals(DateTimes.of("2000-01-01").getMillis(), selector.getDouble(), 0.0d);
+    Assert.assertEquals(DateTimes.of("2000-01-01").getMillis(), selector.getObject());
 
     CURRENT_ROW.set(ROW1);
-    Assertions.assertEquals(DateTimes.of("2000-01-01").getMillis(), selector.getLong());
+    Assert.assertEquals(DateTimes.of("2000-01-01").getMillis(), selector.getLong());
 
     CURRENT_ROW.set(ROW2);
-    Assertions.assertEquals(DateTimes.of("2000-01-01").getMillis(), selector.getLong());
+    Assert.assertEquals(DateTimes.of("2000-01-01").getMillis(), selector.getLong());
 
     CURRENT_ROW.set(ROW3);
-    Assertions.assertEquals(DateTimes.of("2000-01-02").getMillis(), selector.getLong());
-    Assertions.assertEquals(DateTimes.of("2000-01-02").getMillis(), selector.getDouble(), 0.0);
+    Assert.assertEquals(DateTimes.of("2000-01-02").getMillis(), selector.getLong());
+    Assert.assertEquals(DateTimes.of("2000-01-02").getMillis(), selector.getDouble(), 0.0);
   }
 
   @Test
   public void testRequiredColumns()
   {
-    Assertions.assertEquals(ImmutableList.of("x", "y"), X_PLUS_Y.requiredColumns());
-    Assertions.assertEquals(ImmutableList.of(), CONSTANT_LIKE.requiredColumns());
-    Assertions.assertEquals(ImmutableList.of("z"), Z_LIKE.requiredColumns());
-    Assertions.assertEquals(ImmutableList.of("x", "z"), Z_CONCAT_X.requiredColumns());
+    Assert.assertEquals(ImmutableList.of("x", "y"), X_PLUS_Y.requiredColumns());
+    Assert.assertEquals(ImmutableList.of(), CONSTANT_LIKE.requiredColumns());
+    Assert.assertEquals(ImmutableList.of("z"), Z_LIKE.requiredColumns());
+    Assert.assertEquals(ImmutableList.of("x", "z"), Z_CONCAT_X.requiredColumns());
   }
 
   @Test
@@ -768,11 +768,11 @@ public class ExpressionVirtualColumnTest extends InitializedNullHandlingTest
 
     CURRENT_ROW.set(ROW0);
     if (NullHandling.replaceWithDefault()) {
-      Assertions.assertEquals(0, selector.getLong(), 0.0f);
-      Assertions.assertFalse(selector.isNull());
+      Assert.assertEquals(0, selector.getLong(), 0.0f);
+      Assert.assertFalse(selector.isNull());
     } else {
-      Assertions.assertTrue(selector.isNull());
-      Assertions.assertTrue(selector.getObject().isNumericNull());
+      Assert.assertTrue(selector.isNull());
+      Assert.assertTrue(selector.getObject().isNumericNull());
     }
   }
 
@@ -792,11 +792,11 @@ public class ExpressionVirtualColumnTest extends InitializedNullHandlingTest
 
     CURRENT_ROW.set(ROW0);
     if (NullHandling.replaceWithDefault()) {
-      Assertions.assertEquals(0, selector.getDouble(), 0.0f);
-      Assertions.assertFalse(selector.isNull());
+      Assert.assertEquals(0, selector.getDouble(), 0.0f);
+      Assert.assertFalse(selector.isNull());
     } else {
-      Assertions.assertTrue(selector.isNull());
-      Assertions.assertTrue(selector.getObject().isNumericNull());
+      Assert.assertTrue(selector.isNull());
+      Assert.assertTrue(selector.getObject().isNumericNull());
     }
   }
 
@@ -816,11 +816,11 @@ public class ExpressionVirtualColumnTest extends InitializedNullHandlingTest
 
     CURRENT_ROW.set(ROW0);
     if (NullHandling.replaceWithDefault()) {
-      Assertions.assertEquals(0, selector.getFloat(), 0.0f);
-      Assertions.assertFalse(selector.isNull());
+      Assert.assertEquals(0, selector.getFloat(), 0.0f);
+      Assert.assertFalse(selector.isNull());
     } else {
-      Assertions.assertTrue(selector.isNull());
-      Assertions.assertTrue(selector.getObject().isNumericNull());
+      Assert.assertTrue(selector.isNull());
+      Assert.assertTrue(selector.getObject().isNumericNull());
     }
   }
 
@@ -828,24 +828,24 @@ public class ExpressionVirtualColumnTest extends InitializedNullHandlingTest
   public void testCapabilities()
   {
     ColumnCapabilities caps = X_PLUS_Y.capabilities("expr");
-    Assertions.assertEquals(ValueType.FLOAT, caps.getType());
-    Assertions.assertFalse(caps.hasBitmapIndexes());
-    Assertions.assertFalse(caps.isDictionaryEncoded().isTrue());
-    Assertions.assertFalse(caps.areDictionaryValuesSorted().isTrue());
-    Assertions.assertFalse(caps.areDictionaryValuesUnique().isTrue());
-    Assertions.assertTrue(caps.hasMultipleValues().isUnknown());
-    Assertions.assertTrue(caps.hasMultipleValues().isMaybeTrue());
-    Assertions.assertFalse(caps.hasSpatialIndexes());
+    Assert.assertEquals(ValueType.FLOAT, caps.getType());
+    Assert.assertFalse(caps.hasBitmapIndexes());
+    Assert.assertFalse(caps.isDictionaryEncoded().isTrue());
+    Assert.assertFalse(caps.areDictionaryValuesSorted().isTrue());
+    Assert.assertFalse(caps.areDictionaryValuesUnique().isTrue());
+    Assert.assertTrue(caps.hasMultipleValues().isUnknown());
+    Assert.assertTrue(caps.hasMultipleValues().isMaybeTrue());
+    Assert.assertFalse(caps.hasSpatialIndexes());
 
     caps = Z_CONCAT_X.capabilities("expr");
-    Assertions.assertEquals(ValueType.STRING, caps.getType());
-    Assertions.assertFalse(caps.hasBitmapIndexes());
-    Assertions.assertFalse(caps.isDictionaryEncoded().isTrue());
-    Assertions.assertFalse(caps.areDictionaryValuesSorted().isTrue());
-    Assertions.assertFalse(caps.areDictionaryValuesUnique().isTrue());
-    Assertions.assertTrue(caps.hasMultipleValues().isUnknown());
-    Assertions.assertTrue(caps.hasMultipleValues().isMaybeTrue());
-    Assertions.assertFalse(caps.hasSpatialIndexes());
+    Assert.assertEquals(ValueType.STRING, caps.getType());
+    Assert.assertFalse(caps.hasBitmapIndexes());
+    Assert.assertFalse(caps.isDictionaryEncoded().isTrue());
+    Assert.assertFalse(caps.areDictionaryValuesSorted().isTrue());
+    Assert.assertFalse(caps.areDictionaryValuesUnique().isTrue());
+    Assert.assertTrue(caps.hasMultipleValues().isUnknown());
+    Assert.assertTrue(caps.hasMultipleValues().isMaybeTrue());
+    Assert.assertFalse(caps.hasSpatialIndexes());
   }
 
   @Test
@@ -860,8 +860,8 @@ public class ExpressionVirtualColumnTest extends InitializedNullHandlingTest
         DefaultDimensionSpec.of("constant"),
         COLUMN_SELECTOR_FACTORY
     );
-    Assertions.assertTrue(constantSelector instanceof ConstantDimensionSelector);
-    Assertions.assertEquals("3", constantSelector.getObject());
+    Assert.assertTrue(constantSelector instanceof ConstantDimensionSelector);
+    Assert.assertEquals("3", constantSelector.getObject());
 
 
     ExpressionVirtualColumn multiConstant = new ExpressionVirtualColumn(
@@ -875,7 +875,7 @@ public class ExpressionVirtualColumnTest extends InitializedNullHandlingTest
         COLUMN_SELECTOR_FACTORY
     );
 
-    Assertions.assertTrue(multiConstantSelector instanceof ConstantMultiValueDimensionSelector);
-    Assertions.assertEquals(ImmutableList.of("a", "b", "c"), multiConstantSelector.getObject());
+    Assert.assertTrue(multiConstantSelector instanceof ConstantMultiValueDimensionSelector);
+    Assert.assertEquals(ImmutableList.of("a", "b", "c"), multiConstantSelector.getObject());
   }
 }

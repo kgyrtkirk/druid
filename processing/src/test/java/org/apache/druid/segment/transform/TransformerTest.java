@@ -33,9 +33,10 @@ import org.apache.druid.query.expression.TestExprMacroTable;
 import org.apache.druid.query.filter.SelectorDimFilter;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.joda.time.DateTime;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Ignore;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import javax.annotation.Nullable;
@@ -44,18 +45,17 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 public class TransformerTest extends InitializedNullHandlingTest
 {
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
 
   @Test
   public void testTransformNullRowReturnNull()
   {
     final Transformer transformer = new Transformer(new TransformSpec(null, null));
-    Assertions.assertNull(transformer.transform((InputRow) null));
-    Assertions.assertNull(transformer.transform((InputRowListPlusRawValues) null));
+    Assert.assertNull(transformer.transform((InputRow) null));
+    Assert.assertNull(transformer.transform((InputRowListPlusRawValues) null));
   }
 
   @Test
@@ -76,39 +76,36 @@ public class TransformerTest extends InitializedNullHandlingTest
         ImmutableMap.of("__time", now, "dim", false)
     );
     final InputRow actual = transformer.transform(row);
-    Assertions.assertNotNull(actual);
-    Assertions.assertEquals(now.minusDays(2), actual.getTimestamp());
+    Assert.assertNotNull(actual);
+    Assert.assertEquals(now.minusDays(2), actual.getTimestamp());
   }
 
   @Test
   public void testTransformTimeColumnWithInvalidTimeValue()
   {
-    Throwable exception = assertThrows(ParseException.class, () -> {
-      final Transformer transformer = new Transformer(
-          new TransformSpec(
-              null,
-              ImmutableList.of(
-                  new ExpressionTransform("__time", "timestamp_parse(ts, null, 'UTC')", TestExprMacroTable.INSTANCE)
-              )
-          )
-      );
-      final DateTime now = DateTimes.nowUtc();
-      final InputRow row = new MapBasedInputRow(
-          now,
-          ImmutableList.of("ts", "dim"),
-          ImmutableMap.of("ts", "not_a_timestamp", "dim", false)
-      );
-      if (NullHandling.replaceWithDefault()) {
-        final InputRow actual = transformer.transform(row);
-        Assertions.assertNotNull(actual);
-        Assertions.assertEquals(DateTimes.of("1970-01-01T00:00:00.000Z"), actual.getTimestamp());
-      } else {
-        expectedException.expectMessage("Could not transform value for __time.");
-        expectedException.expect(ParseException.class);
-        transformer.transform(row);
-      }
-    });
-    assertTrue(exception.getMessage().contains("Could not transform value for __time."));
+    final Transformer transformer = new Transformer(
+        new TransformSpec(
+            null,
+            ImmutableList.of(
+                new ExpressionTransform("__time", "timestamp_parse(ts, null, 'UTC')", TestExprMacroTable.INSTANCE)
+            )
+        )
+    );
+    final DateTime now = DateTimes.nowUtc();
+    final InputRow row = new MapBasedInputRow(
+        now,
+        ImmutableList.of("ts", "dim"),
+        ImmutableMap.of("ts", "not_a_timestamp", "dim", false)
+    );
+    if (NullHandling.replaceWithDefault()) {
+      final InputRow actual = transformer.transform(row);
+      Assert.assertNotNull(actual);
+      Assert.assertEquals(DateTimes.of("1970-01-01T00:00:00.000Z"), actual.getTimestamp());
+    } else {
+      expectedException.expectMessage("Could not transform value for __time.");
+      expectedException.expect(ParseException.class);
+      transformer.transform(row);
+    }
   }
 
   @Test
@@ -134,14 +131,14 @@ public class TransformerTest extends InitializedNullHandlingTest
             ImmutableMap.of("ts", "not_a_timestamp", "dim", false)
         )
     );
-    Assertions.assertNotNull(actual);
-    Assertions.assertEquals(1, actual.getRawValuesList().size());
+    Assert.assertNotNull(actual);
+    Assert.assertEquals(1, actual.getRawValuesList().size());
     if (NullHandling.replaceWithDefault()) {
-      Assertions.assertEquals(1, actual.getInputRows().size());
-      Assertions.assertEquals(DateTimes.of("1970-01-01T00:00:00.000Z"), actual.getInputRows().get(0).getTimestamp());
+      Assert.assertEquals(1, actual.getInputRows().size());
+      Assert.assertEquals(DateTimes.of("1970-01-01T00:00:00.000Z"), actual.getInputRows().get(0).getTimestamp());
     } else {
-      Assertions.assertNull(actual.getInputRows());
-      Assertions.assertEquals("Could not transform value for __time.", actual.getParseException().getMessage());
+      Assert.assertNull(actual.getInputRows());
+      Assert.assertEquals("Could not transform value for __time.", actual.getParseException().getMessage());
     }
   }
 
@@ -160,11 +157,11 @@ public class TransformerTest extends InitializedNullHandlingTest
         ImmutableMap.of("dim", false)
     );
     final InputRow actual = transformer.transform(row);
-    Assertions.assertNotNull(actual);
-    Assertions.assertEquals(ImmutableList.of("dim"), actual.getDimensions());
+    Assert.assertNotNull(actual);
+    Assert.assertEquals(ImmutableList.of("dim"), actual.getDimensions());
     // booleans are longs by default, so strlen of false (0L) is 1
-    Assertions.assertEquals(1L, actual.getRaw("dim"));
-    Assertions.assertEquals(row.getTimestamp(), actual.getTimestamp());
+    Assert.assertEquals(1L, actual.getRaw("dim"));
+    Assert.assertEquals(row.getTimestamp(), actual.getTimestamp());
   }
 
   @Test
@@ -182,10 +179,10 @@ public class TransformerTest extends InitializedNullHandlingTest
         ImmutableMap.of("dim", 10L)
     );
     final InputRow actual = transformer.transform(row);
-    Assertions.assertNotNull(actual);
-    Assertions.assertEquals(ImmutableList.of("dim"), actual.getDimensions());
-    Assertions.assertEquals(2L, actual.getRaw("dim"));
-    Assertions.assertEquals(row.getTimestamp(), actual.getTimestamp());
+    Assert.assertNotNull(actual);
+    Assert.assertEquals(ImmutableList.of("dim"), actual.getDimensions());
+    Assert.assertEquals(2L, actual.getRaw("dim"));
+    Assert.assertEquals(row.getTimestamp(), actual.getTimestamp());
   }
 
   @Test
@@ -203,33 +200,33 @@ public class TransformerTest extends InitializedNullHandlingTest
         ImmutableMap.of("dim", 200.5d)
     );
     final InputRow actual = transformer.transform(row);
-    Assertions.assertNotNull(actual);
-    Assertions.assertEquals(ImmutableList.of("dim"), actual.getDimensions());
-    Assertions.assertEquals(5L, actual.getRaw("dim"));
-    Assertions.assertEquals(row.getTimestamp(), actual.getTimestamp());
+    Assert.assertNotNull(actual);
+    Assert.assertEquals(ImmutableList.of("dim"), actual.getDimensions());
+    Assert.assertEquals(5L, actual.getRaw("dim"));
+    Assert.assertEquals(row.getTimestamp(), actual.getTimestamp());
   }
 
-  @Disabled("Disabled until https://github.com/apache/druid/issues/9824 is fixed")
+  @Ignore("Disabled until https://github.com/apache/druid/issues/9824 is fixed")
   @Test
   public void testTransformWithStringTransformOnListColumnThrowingException()
   {
-    assertThrows(AssertionError.class, () -> {
-      final Transformer transformer = new Transformer(
-          new TransformSpec(
-              null,
-              ImmutableList.of(new ExpressionTransform("dim", "strlen(dim)", TestExprMacroTable.INSTANCE))
-          )
-      );
-      final InputRow row = new MapBasedInputRow(
-          DateTimes.nowUtc(),
-          ImmutableList.of("dim"),
-          ImmutableMap.of("dim", ImmutableList.of(10, 20, 100))
-      );
-      final InputRow actual = transformer.transform(row);
-      Assertions.assertNotNull(actual);
-      Assertions.assertEquals(ImmutableList.of("dim"), actual.getDimensions());
-      actual.getRaw("dim");
-    });
+    final Transformer transformer = new Transformer(
+        new TransformSpec(
+            null,
+            ImmutableList.of(new ExpressionTransform("dim", "strlen(dim)", TestExprMacroTable.INSTANCE))
+        )
+    );
+    final InputRow row = new MapBasedInputRow(
+        DateTimes.nowUtc(),
+        ImmutableList.of("dim"),
+        ImmutableMap.of("dim", ImmutableList.of(10, 20, 100))
+    );
+    final InputRow actual = transformer.transform(row);
+    Assert.assertNotNull(actual);
+    Assert.assertEquals(ImmutableList.of("dim"), actual.getDimensions());
+    // Unlike for querying, Druid doesn't explode multi-valued columns automatically for ingestion.
+    expectedException.expect(AssertionError.class);
+    actual.getRaw("dim");
   }
 
   @Test
@@ -243,13 +240,13 @@ public class TransformerTest extends InitializedNullHandlingTest
         ImmutableList.of("dim"),
         ImmutableMap.of("dim", false)
     );
-    Assertions.assertEquals(row1, transformer.transform(row1));
+    Assert.assertEquals(row1, transformer.transform(row1));
     final InputRow row2 = new MapBasedInputRow(
         DateTimes.nowUtc(),
         ImmutableList.of("dim"),
         ImmutableMap.of("dim", true)
     );
-    Assertions.assertNull(transformer.transform(row2));
+    Assert.assertNull(transformer.transform(row2));
   }
 
   @Test
@@ -263,13 +260,13 @@ public class TransformerTest extends InitializedNullHandlingTest
         ImmutableList.of("dim"),
         ImmutableMap.of("dim", "false")
     );
-    Assertions.assertEquals(row, transformer.transform(row));
+    Assert.assertEquals(row, transformer.transform(row));
     final InputRow row2 = new MapBasedInputRow(
         DateTimes.nowUtc(),
         ImmutableList.of("dim"),
         ImmutableMap.of("dim", "true")
     );
-    Assertions.assertNull(transformer.transform(row2));
+    Assert.assertNull(transformer.transform(row2));
   }
 
   @Test
@@ -288,10 +285,10 @@ public class TransformerTest extends InitializedNullHandlingTest
         ImmutableMap.of("dim", "short")
     );
     final InputRow actual = transformer.transform(row);
-    Assertions.assertNotNull(actual);
-    Assertions.assertEquals(ImmutableList.of("dim"), actual.getDimensions());
-    Assertions.assertEquals(0L, actual.getRaw("dim"));
-    Assertions.assertEquals(row.getTimestamp(), actual.getTimestamp());
+    Assert.assertNotNull(actual);
+    Assert.assertEquals(ImmutableList.of("dim"), actual.getDimensions());
+    Assert.assertEquals(0L, actual.getRaw("dim"));
+    Assert.assertEquals(row.getTimestamp(), actual.getTimestamp());
   }
 
   @Test
@@ -323,11 +320,11 @@ public class TransformerTest extends InitializedNullHandlingTest
     );
 
     final InputRowListPlusRawValues actual = transformer.transform(InputRowListPlusRawValues.ofList(valList, rows));
-    Assertions.assertNotNull(actual);
-    Assertions.assertEquals(1, actual.getInputRows().size());
-    Assertions.assertEquals(1, actual.getRawValuesList().size());
-    Assertions.assertEquals("val1", actual.getInputRows().get(0).getRaw("dim"));
-    Assertions.assertEquals("val1", actual.getRawValuesList().get(0).get("dim"));
+    Assert.assertNotNull(actual);
+    Assert.assertEquals(1, actual.getInputRows().size());
+    Assert.assertEquals(1, actual.getRawValuesList().size());
+    Assert.assertEquals("val1", actual.getInputRows().get(0).getRaw("dim"));
+    Assert.assertEquals("val1", actual.getRawValuesList().get(0).get("dim"));
   }
 
   @Test
@@ -345,11 +342,11 @@ public class TransformerTest extends InitializedNullHandlingTest
         ImmutableMap.of("dim", ImmutableList.of("a", "b", "c"))
     );
     final InputRow actual = transformer.transform(row);
-    Assertions.assertNotNull(actual);
-    Assertions.assertEquals(ImmutableList.of("dim"), actual.getDimensions());
-    Assertions.assertEquals(3L, actual.getRaw("dimlen"));
-    Assertions.assertEquals(ImmutableList.of("3"), actual.getDimension("dimlen"));
-    Assertions.assertEquals(row.getTimestamp(), actual.getTimestamp());
+    Assert.assertNotNull(actual);
+    Assert.assertEquals(ImmutableList.of("dim"), actual.getDimensions());
+    Assert.assertEquals(3L, actual.getRaw("dimlen"));
+    Assert.assertEquals(ImmutableList.of("3"), actual.getDimension("dimlen"));
+    Assert.assertEquals(row.getTimestamp(), actual.getTimestamp());
   }
 
   @Test
@@ -367,11 +364,11 @@ public class TransformerTest extends InitializedNullHandlingTest
         ImmutableMap.of("dim", ImmutableList.of("a", "b", "c"))
     );
     final InputRow actual = transformer.transform(row);
-    Assertions.assertNotNull(actual);
-    Assertions.assertEquals(ImmutableList.of("dim"), actual.getDimensions());
-    Assertions.assertArrayEquals(new Object[]{"a", "b", "c"}, (Object[]) actual.getRaw("dim"));
-    Assertions.assertEquals(ImmutableList.of("a", "b", "c"), actual.getDimension("dim"));
-    Assertions.assertEquals(row.getTimestamp(), actual.getTimestamp());
+    Assert.assertNotNull(actual);
+    Assert.assertEquals(ImmutableList.of("dim"), actual.getDimensions());
+    Assert.assertArrayEquals(new Object[]{"a", "b", "c"}, (Object[]) actual.getRaw("dim"));
+    Assert.assertEquals(ImmutableList.of("a", "b", "c"), actual.getDimension("dim"));
+    Assert.assertEquals(row.getTimestamp(), actual.getTimestamp());
   }
 
   @Test
@@ -389,11 +386,11 @@ public class TransformerTest extends InitializedNullHandlingTest
         ImmutableMap.of("dim", Arrays.asList(1, 2, null, 3))
     );
     final InputRow actual = transformer.transform(row);
-    Assertions.assertNotNull(actual);
-    Assertions.assertEquals(ImmutableList.of("dim"), actual.getDimensions());
-    Assertions.assertArrayEquals(new Object[]{1L, 2L, null, 3L}, (Object[]) actual.getRaw("dim"));
-    Assertions.assertEquals(ImmutableList.of("1", "2", "null", "3"), actual.getDimension("dim"));
-    Assertions.assertEquals(row.getTimestamp(), actual.getTimestamp());
+    Assert.assertNotNull(actual);
+    Assert.assertEquals(ImmutableList.of("dim"), actual.getDimensions());
+    Assert.assertArrayEquals(new Object[]{1L, 2L, null, 3L}, (Object[]) actual.getRaw("dim"));
+    Assert.assertEquals(ImmutableList.of("1", "2", "null", "3"), actual.getDimension("dim"));
+    Assert.assertEquals(row.getTimestamp(), actual.getTimestamp());
   }
 
   @Test
@@ -411,19 +408,19 @@ public class TransformerTest extends InitializedNullHandlingTest
         ImmutableMap.of("dim", Arrays.asList(1.2f, 2.3f, null, 3.4f))
     );
     final InputRow actual = transformer.transform(row);
-    Assertions.assertNotNull(actual);
-    Assertions.assertEquals(ImmutableList.of("dim"), actual.getDimensions());
+    Assert.assertNotNull(actual);
+    Assert.assertEquals(ImmutableList.of("dim"), actual.getDimensions());
     Object[] raw = (Object[]) actual.getRaw("dim");
     // floats are converted to doubles since expressions have no doubles
-    Assertions.assertEquals(1.2, (Double) raw[0], 0.00001);
-    Assertions.assertEquals(2.3, (Double) raw[1], 0.00001);
-    Assertions.assertNull(raw[2]);
-    Assertions.assertEquals(3.4, (Double) raw[3], 0.00001);
-    Assertions.assertEquals(
+    Assert.assertEquals(1.2, (Double) raw[0], 0.00001);
+    Assert.assertEquals(2.3, (Double) raw[1], 0.00001);
+    Assert.assertNull(raw[2]);
+    Assert.assertEquals(3.4, (Double) raw[3], 0.00001);
+    Assert.assertEquals(
         ImmutableList.of("1.2000000476837158", "2.299999952316284", "null", "3.4000000953674316"),
         actual.getDimension("dim")
     );
-    Assertions.assertEquals(row.getTimestamp(), actual.getTimestamp());
+    Assert.assertEquals(row.getTimestamp(), actual.getTimestamp());
   }
 
   @Test
@@ -441,15 +438,15 @@ public class TransformerTest extends InitializedNullHandlingTest
         ImmutableMap.of("dim", Arrays.asList(1.2, 2.3, null, 3.4))
     );
     final InputRow actual = transformer.transform(row);
-    Assertions.assertNotNull(actual);
-    Assertions.assertEquals(ImmutableList.of("dim"), actual.getDimensions());
+    Assert.assertNotNull(actual);
+    Assert.assertEquals(ImmutableList.of("dim"), actual.getDimensions());
     Object[] raw = (Object[]) actual.getRaw("dim");
-    Assertions.assertEquals(1.2, (Double) raw[0], 0.0);
-    Assertions.assertEquals(2.3, (Double) raw[1], 0.0);
-    Assertions.assertNull(raw[2]);
-    Assertions.assertEquals(3.4, (Double) raw[3], 0.0);
-    Assertions.assertEquals(ImmutableList.of("1.2", "2.3", "null", "3.4"), actual.getDimension("dim"));
-    Assertions.assertEquals(row.getTimestamp(), actual.getTimestamp());
+    Assert.assertEquals(1.2, (Double) raw[0], 0.0);
+    Assert.assertEquals(2.3, (Double) raw[1], 0.0);
+    Assert.assertNull(raw[2]);
+    Assert.assertEquals(3.4, (Double) raw[3], 0.0);
+    Assert.assertEquals(ImmutableList.of("1.2", "2.3", "null", "3.4"), actual.getDimension("dim"));
+    Assert.assertEquals(row.getTimestamp(), actual.getTimestamp());
   }
 
   @Test
@@ -469,8 +466,8 @@ public class TransformerTest extends InitializedNullHandlingTest
         DateTimes.nowUtc(),
         ImmutableMap.of("dim", dimList)
     );
-    Assertions.assertEquals(row.getDimension("dim"), dimList);
-    Assertions.assertEquals(row.getRaw("dim"), dimList);
+    Assert.assertEquals(row.getDimension("dim"), dimList);
+    Assert.assertEquals(row.getRaw("dim"), dimList);
 
     final InputRow actualTranformedRow = transformer.transform(new InputRow()
     {
@@ -518,8 +515,8 @@ public class TransformerTest extends InitializedNullHandlingTest
         return row.compareTo(o);
       }
     });
-    Assertions.assertEquals(actualTranformedRow.getDimension("dim"), dimList.subList(0, 5));
-    Assertions.assertArrayEquals(dimList.subList(0, 5).toArray(), (Object[]) actualTranformedRow.getRaw("dim"));
-    Assertions.assertEquals(ImmutableList.of("a"), actualTranformedRow.getDimension("dim1"));
+    Assert.assertEquals(actualTranformedRow.getDimension("dim"), dimList.subList(0, 5));
+    Assert.assertArrayEquals(dimList.subList(0, 5).toArray(), (Object[]) actualTranformedRow.getRaw("dim"));
+    Assert.assertEquals(ImmutableList.of("a"), actualTranformedRow.getDimension("dim1"));
   }
 }

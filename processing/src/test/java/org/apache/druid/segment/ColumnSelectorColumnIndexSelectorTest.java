@@ -34,9 +34,9 @@ import org.apache.druid.segment.index.semantic.DictionaryEncodedStringValueIndex
 import org.apache.druid.segment.index.semantic.StringValueSetIndexes;
 import org.apache.druid.segment.serde.NoIndexesColumnIndexSupplier;
 import org.easymock.EasyMock;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 public class ColumnSelectorColumnIndexSelectorTest
 {
@@ -51,7 +51,7 @@ public class ColumnSelectorColumnIndexSelectorTest
   ColumnSelectorColumnIndexSelector indexSelector;
   ColumnIndexSupplier indexSupplier;
 
-  @BeforeEach
+  @Before
   public void setup()
   {
     bitmapFactory = EasyMock.createMock(BitmapFactory.class);
@@ -135,16 +135,16 @@ public class ColumnSelectorColumnIndexSelectorTest
     DictionaryEncodedStringValueIndex bitmapIndex = supplier.as(
         DictionaryEncodedStringValueIndex.class
     );
-    Assertions.assertNotNull(bitmapIndex);
+    Assert.assertNotNull(bitmapIndex);
 
     StringValueSetIndexes valueIndex = supplier.as(StringValueSetIndexes.class);
-    Assertions.assertNotNull(valueIndex);
+    Assert.assertNotNull(valueIndex);
     ImmutableBitmap valueBitmap = valueIndex.forValue("foo")
                                             .computeBitmapResult(
                                                 new DefaultBitmapResultFactory(indexSelector.getBitmapFactory()),
                                                 false
                                             );
-    Assertions.assertNotNull(valueBitmap);
+    Assert.assertNotNull(valueBitmap);
     EasyMock.verify(bitmapFactory, index, indexSupplier);
   }
 
@@ -155,10 +155,10 @@ public class ColumnSelectorColumnIndexSelectorTest
     DictionaryEncodedStringValueIndex bitmapIndex = supplier.as(
         DictionaryEncodedStringValueIndex.class
     );
-    Assertions.assertNull(bitmapIndex);
+    Assert.assertNull(bitmapIndex);
 
     StringValueSetIndexes valueIndex = supplier.as(StringValueSetIndexes.class);
-    Assertions.assertNull(valueIndex);
+    Assert.assertNull(valueIndex);
     EasyMock.verify(bitmapFactory, index, indexSupplier);
   }
 
@@ -166,24 +166,24 @@ public class ColumnSelectorColumnIndexSelectorTest
   public void testStringDictionaryGetColumnCapabilities()
   {
     final ColumnCapabilities capabilities = indexSelector.getColumnCapabilities(STRING_DICTIONARY_COLUMN_NAME);
-    Assertions.assertEquals(ValueType.STRING, capabilities.getType());
-    Assertions.assertEquals(ColumnCapabilities.Capable.FALSE, capabilities.hasMultipleValues());
-    Assertions.assertEquals(ColumnCapabilities.Capable.TRUE, capabilities.isDictionaryEncoded());
+    Assert.assertEquals(ValueType.STRING, capabilities.getType());
+    Assert.assertEquals(ColumnCapabilities.Capable.FALSE, capabilities.hasMultipleValues());
+    Assert.assertEquals(ColumnCapabilities.Capable.TRUE, capabilities.isDictionaryEncoded());
   }
 
   @Test
   public void testNonStringDictionaryGetColumnCapabilities()
   {
     final ColumnCapabilities capabilities = indexSelector.getColumnCapabilities(NON_STRING_DICTIONARY_COLUMN_NAME);
-    Assertions.assertEquals(ValueType.STRING, capabilities.getType());
-    Assertions.assertEquals(ColumnCapabilities.Capable.FALSE, capabilities.hasMultipleValues());
-    Assertions.assertEquals(ColumnCapabilities.Capable.FALSE, capabilities.isDictionaryEncoded());
+    Assert.assertEquals(ValueType.STRING, capabilities.getType());
+    Assert.assertEquals(ColumnCapabilities.Capable.FALSE, capabilities.hasMultipleValues());
+    Assert.assertEquals(ColumnCapabilities.Capable.FALSE, capabilities.isDictionaryEncoded());
   }
 
   @Test
   public void testNonexistentColumnGetColumnCapabilities()
   {
     final ColumnCapabilities capabilities = indexSelector.getColumnCapabilities(NONEXISTENT_COLUMN_NAME);
-    Assertions.assertNull(capabilities);
+    Assert.assertNull(capabilities);
   }
 }

@@ -22,6 +22,7 @@ package org.apache.druid.delta.input;
 import org.apache.druid.java.util.common.Intervals;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Test;
 
 import java.time.Instant;
 

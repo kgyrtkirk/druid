@@ -21,25 +21,25 @@ package org.apache.druid.query.lookup;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.druid.segment.TestHelper;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
-import java.io.File;
 import java.io.IOException;
 
 public class LookupConfigTest
 {
 
   ObjectMapper mapper = TestHelper.makeJsonMapper();
-  @TempDir
-  public File temporaryFolder;
+  @Rule
+  public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
   @Test
   public void testSerDesr() throws IOException
   {
-    LookupConfig lookupConfig = new LookupConfig(File.createTempFile("junit", null, temporaryFolder).getAbsolutePath());
-    Assertions.assertEquals(
+    LookupConfig lookupConfig = new LookupConfig(temporaryFolder.newFile().getAbsolutePath());
+    Assert.assertEquals(
         lookupConfig,
         mapper.readerFor(LookupConfig.class).readValue(mapper.writeValueAsString(lookupConfig))
     );
@@ -63,11 +63,11 @@ public class LookupConfigTest
         LookupConfig.class
     );
 
-    Assertions.assertEquals("/tmp", config.getSnapshotWorkingDir());
-    Assertions.assertEquals(false, config.getEnableLookupSyncOnStartup());
-    Assertions.assertEquals(4, config.getNumLookupLoadingThreads());
-    Assertions.assertEquals(4, config.getCoordinatorFetchRetries());
-    Assertions.assertEquals(4, config.getLookupStartRetries());
-    Assertions.assertEquals(100, config.getCoordinatorRetryDelay());
+    Assert.assertEquals("/tmp", config.getSnapshotWorkingDir());
+    Assert.assertEquals(false, config.getEnableLookupSyncOnStartup());
+    Assert.assertEquals(4, config.getNumLookupLoadingThreads());
+    Assert.assertEquals(4, config.getCoordinatorFetchRetries());
+    Assert.assertEquals(4, config.getLookupStartRetries());
+    Assert.assertEquals(100, config.getCoordinatorRetryDelay());
   }
 }

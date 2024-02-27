@@ -19,15 +19,15 @@
 
 package org.apache.druid.server;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class JettyUtilsTest
 {
   @Test
   public void testConcatenateForRewrite()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         "http://example.com/foo%20bar?q=baz%20qux",
         JettyUtils.concatenateForRewrite(
             "http://example.com",

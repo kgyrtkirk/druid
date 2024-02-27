@@ -19,8 +19,8 @@
 
 package org.apache.druid.timeline;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 
 public class OvershadowableTest
@@ -61,6 +61,6 @@ public class OvershadowableTest
         return 0;
       }
     };
-    Assertions.assertTrue(overshadowable.hasData());
+    Assert.assertTrue(overshadowable.hasData());
   }
 }

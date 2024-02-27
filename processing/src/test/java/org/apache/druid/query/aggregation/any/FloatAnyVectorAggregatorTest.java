@@ -21,20 +21,20 @@ package org.apache.druid.query.aggregation.any;
 
 import org.apache.druid.segment.vector.VectorValueSelector;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static org.mockito.Mockito.spy;
 
-@ExtendWith(MockitoExtension.class)
+@RunWith(MockitoJUnitRunner.class)
 public class FloatAnyVectorAggregatorTest extends InitializedNullHandlingTest
 {
   private static final int NULL_POSITION = 32;
@@ -48,7 +48,7 @@ public class FloatAnyVectorAggregatorTest extends InitializedNullHandlingTest
 
   private FloatAnyVectorAggregator target;
 
-  @BeforeEach
+  @Before
   public void setUp()
   {
     byte[] randomBytes = new byte[128];
@@ -65,40 +65,40 @@ public class FloatAnyVectorAggregatorTest extends InitializedNullHandlingTest
   public void initValueShouldInitZero()
   {
     target.initValue(buf, POSITION);
-    Assertions.assertEquals(0, buf.getFloat(POSITION), EPSILON);
+    Assert.assertEquals(0, buf.getFloat(POSITION), EPSILON);
   }
 
   @Test
   public void getAtPositionIsNullShouldReturnNull()
   {
-    Assertions.assertNull(target.get(buf, NULL_POSITION));
+    Assert.assertNull(target.get(buf, NULL_POSITION));
   }
 
   @Test
   public void getAtPositionShouldReturnValue()
   {
     buf.putFloat(POSITION + 1, VALUES[3]);
-    Assertions.assertEquals(VALUES[3], (float) target.get(buf, POSITION), EPSILON);
+    Assert.assertEquals(VALUES[3], (float) target.get(buf, POSITION), EPSILON);
   }
 
   @Test
   public void putValueShouldAddToBuffer()
   {
-    Assertions.assertTrue(target.putAnyValueFromRow(buf, POSITION, 2, 3));
-    Assertions.assertEquals(VALUES[2], buf.getFloat(POSITION), EPSILON);
+    Assert.assertTrue(target.putAnyValueFromRow(buf, POSITION, 2, 3));
+    Assert.assertEquals(VALUES[2], buf.getFloat(POSITION), EPSILON);
   }
 
   @Test
   public void putValueStartAfterEndShouldNotAddToBuffer()
   {
-    Assertions.assertFalse(target.putAnyValueFromRow(buf, POSITION, 2, 2));
-    Assertions.assertNotEquals(VALUES[2], buf.getFloat(POSITION), EPSILON);
+    Assert.assertFalse(target.putAnyValueFromRow(buf, POSITION, 2, 2));
+    Assert.assertNotEquals(VALUES[2], buf.getFloat(POSITION), EPSILON);
   }
 
   @Test
   public void putValueStartOutsideRangeShouldNotAddToBuffer()
   {
-    Assertions.assertFalse(target.putAnyValueFromRow(buf, POSITION, 5, 6));
-    Assertions.assertNotEquals(VALUES[2], buf.getFloat(POSITION), EPSILON);
+    Assert.assertFalse(target.putAnyValueFromRow(buf, POSITION, 5, 6));
+    Assert.assertNotEquals(VALUES[2], buf.getFloat(POSITION), EPSILON);
   }
 }

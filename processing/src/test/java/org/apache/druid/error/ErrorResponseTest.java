@@ -23,12 +23,11 @@ import com.google.common.collect.ImmutableMap;
 import org.apache.druid.matchers.DruidMatchers;
 import org.apache.druid.query.QueryTimeoutException;
 import org.hamcrest.Matcher;
+import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import java.util.Map;
-
-import static org.hamcrest.MatcherAssert.assertThat;
 
 public class ErrorResponseTest
 {
@@ -38,7 +37,7 @@ public class ErrorResponseTest
     ErrorResponse response = new ErrorResponse(InvalidSqlInput.exception("bad sql!"));
 
     final Map<String, Object> asMap = response.getAsMap();
-    assertThat(
+    MatcherAssert.assertThat(
         asMap,
         DruidMatchers.mapMatcher(
             "error", "druidException",
@@ -52,7 +51,7 @@ public class ErrorResponseTest
 
     ErrorResponse recomposed = ErrorResponse.fromMap(asMap);
 
-    assertThat(
+    MatcherAssert.assertThat(
         recomposed.getUnderlyingException(),
         DruidExceptionMatcher.invalidSqlInput().expectMessageIs("bad sql!")
     );
@@ -67,7 +66,7 @@ public class ErrorResponseTest
     );
 
     final Map<String, Object> asMap = response.getAsMap();
-    assertThat(
+    MatcherAssert.assertThat(
         asMap,
         DruidMatchers.mapMatcher(
             "error",
@@ -86,7 +85,7 @@ public class ErrorResponseTest
             "Query did not complete within configured timeout period. You can increase query timeout or tune the performance of query."
         )
     );
-    assertThat(
+    MatcherAssert.assertThat(
         asMap,
         (Matcher) Matchers.hasEntry(
             Matchers.is("context"),
@@ -102,7 +101,7 @@ public class ErrorResponseTest
 
     ErrorResponse recomposed = ErrorResponse.fromMap(asMap);
 
-    assertThat(
+    MatcherAssert.assertThat(
         recomposed.getUnderlyingException(),
         new DruidExceptionMatcher(DruidException.Persona.OPERATOR, DruidException.Category.TIMEOUT, "legacyQueryException")
             .expectMessageIs("Query did not complete within configured timeout period. You can increase query timeout or tune the performance of query.")
@@ -116,7 +115,7 @@ public class ErrorResponseTest
         "hostname"
     ))));
     final Map<String, Object> asMap = response.getAsMap();
-    assertThat(
+    MatcherAssert.assertThat(
         asMap,
         DruidMatchers.mapMatcher(
             "error",

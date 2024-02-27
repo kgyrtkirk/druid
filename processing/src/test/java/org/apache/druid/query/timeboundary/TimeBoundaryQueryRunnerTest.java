@@ -58,22 +58,23 @@ import org.apache.druid.timeline.partition.SingleElementPartitionChunk;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
 /**
  *
  */
+@RunWith(Parameterized.class)
 public class TimeBoundaryQueryRunnerTest extends InitializedNullHandlingTest
 {
+  @Parameterized.Parameters(name = "{0}")
   public static Iterable<Object[]> constructorFeeder()
   {
     return QueryRunnerTestHelper.transformToConstructionFeeder(
@@ -83,14 +84,14 @@ public class TimeBoundaryQueryRunnerTest extends InitializedNullHandlingTest
     );
   }
 
-  private QueryRunner runner;
+  private final QueryRunner runner;
   private static final QueryRunnerFactory FACTORY = new TimeBoundaryQueryRunnerFactory(
       QueryRunnerTestHelper.NOOP_QUERYWATCHER
   );
   private static Segment segment0;
   private static Segment segment1;
 
-  public void initTimeBoundaryQueryRunnerTest(
+  public TimeBoundaryQueryRunnerTest(
       QueryRunner runner
   )
   {
@@ -171,37 +172,33 @@ public class TimeBoundaryQueryRunnerTest extends InitializedNullHandlingTest
     return QueryRunnerTestHelper.makeFilteringQueryRunner(timeline, FACTORY);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
+  @Test
   @SuppressWarnings("unchecked")
-  public void testFilteredTimeBoundaryQuery(QueryRunner runner) throws IOException
+  public void testFilteredTimeBoundaryQuery() throws IOException
   {
-    initTimeBoundaryQueryRunnerTest(runner);
     QueryRunner customRunner = getCustomRunner();
     TimeBoundaryQuery timeBoundaryQuery = Druids.newTimeBoundaryQueryBuilder()
                                                 .dataSource("testing")
                                                 .filters("quality", "automotive")
                                                 .build();
-    Assertions.assertTrue(timeBoundaryQuery.hasFilters());
+    Assert.assertTrue(timeBoundaryQuery.hasFilters());
     List<Result<TimeBoundaryResultValue>> results =
         customRunner.run(QueryPlus.wrap(timeBoundaryQuery)).toList();
 
-    Assertions.assertTrue(Iterables.size(results) > 0);
+    Assert.assertTrue(Iterables.size(results) > 0);
 
     TimeBoundaryResultValue val = results.iterator().next().getValue();
     DateTime minTime = val.getMinTime();
     DateTime maxTime = val.getMaxTime();
 
-    Assertions.assertEquals(DateTimes.of("2011-01-13T00:00:00.000Z"), minTime);
-    Assertions.assertEquals(DateTimes.of("2011-01-16T00:00:00.000Z"), maxTime);
+    Assert.assertEquals(DateTimes.of("2011-01-13T00:00:00.000Z"), minTime);
+    Assert.assertEquals(DateTimes.of("2011-01-16T00:00:00.000Z"), maxTime);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
+  @Test
   @SuppressWarnings("unchecked")
-  public void testTimeFilteredTimeBoundaryQuery(QueryRunner runner) throws IOException
+  public void testTimeFilteredTimeBoundaryQuery() throws IOException
   {
-    initTimeBoundaryQueryRunnerTest(runner);
     QueryRunner customRunner = getCustomRunner();
     TimeBoundaryQuery timeBoundaryQuery = Druids.newTimeBoundaryQueryBuilder()
                                                 .dataSource("testing")
@@ -215,58 +212,52 @@ public class TimeBoundaryQueryRunnerTest extends InitializedNullHandlingTest
     List<Result<TimeBoundaryResultValue>> results =
         customRunner.run(QueryPlus.wrap(timeBoundaryQuery)).toList();
 
-    Assertions.assertTrue(Iterables.size(results) > 0);
+    Assert.assertTrue(Iterables.size(results) > 0);
 
     TimeBoundaryResultValue val = results.iterator().next().getValue();
     DateTime minTime = val.getMinTime();
     DateTime maxTime = val.getMaxTime();
 
-    Assertions.assertEquals(DateTimes.of("2011-01-15T00:00:00.000Z"), minTime);
-    Assertions.assertEquals(DateTimes.of("2011-01-15T01:00:00.000Z"), maxTime);
+    Assert.assertEquals(DateTimes.of("2011-01-15T00:00:00.000Z"), minTime);
+    Assert.assertEquals(DateTimes.of("2011-01-15T01:00:00.000Z"), maxTime);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
+  @Test
   @SuppressWarnings("unchecked")
-  public void testFilteredTimeBoundaryQueryNoMatches(QueryRunner runner) throws IOException
+  public void testFilteredTimeBoundaryQueryNoMatches() throws IOException
   {
-    initTimeBoundaryQueryRunnerTest(runner);
     QueryRunner customRunner = getCustomRunner();
     TimeBoundaryQuery timeBoundaryQuery = Druids.newTimeBoundaryQueryBuilder()
                                                 .dataSource("testing")
                                                 .filters("quality", "foobar") // foobar dimension does not exist
                                                 .build();
-    Assertions.assertTrue(timeBoundaryQuery.hasFilters());
+    Assert.assertTrue(timeBoundaryQuery.hasFilters());
     List<Result<TimeBoundaryResultValue>> results =
         customRunner.run(QueryPlus.wrap(timeBoundaryQuery)).toList();
 
-    Assertions.assertTrue(Iterables.size(results) == 0);
+    Assert.assertTrue(Iterables.size(results) == 0);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
+  @Test
   @SuppressWarnings("unchecked")
-  public void testTimeBoundary(QueryRunner runner)
+  public void testTimeBoundary()
   {
-    initTimeBoundaryQueryRunnerTest(runner);
     TimeBoundaryQuery timeBoundaryQuery = Druids.newTimeBoundaryQueryBuilder()
                                                 .dataSource("testing")
                                                 .build();
-    Assertions.assertFalse(timeBoundaryQuery.hasFilters());
+    Assert.assertFalse(timeBoundaryQuery.hasFilters());
     Iterable<Result<TimeBoundaryResultValue>> results = runner.run(QueryPlus.wrap(timeBoundaryQuery)).toList();
     TimeBoundaryResultValue val = results.iterator().next().getValue();
     DateTime minTime = val.getMinTime();
     DateTime maxTime = val.getMaxTime();
 
-    Assertions.assertEquals(DateTimes.of("2011-01-12T00:00:00.000Z"), minTime);
-    Assertions.assertEquals(DateTimes.of("2011-04-15T00:00:00.000Z"), maxTime);
+    Assert.assertEquals(DateTimes.of("2011-01-12T00:00:00.000Z"), minTime);
+    Assert.assertEquals(DateTimes.of("2011-04-15T00:00:00.000Z"), maxTime);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testTimeBoundaryInlineData(QueryRunner runner)
+  @Test
+  public void testTimeBoundaryInlineData()
   {
-    initTimeBoundaryQueryRunnerTest(runner);
     final InlineDataSource inlineDataSource = InlineDataSource.fromIterable(
         ImmutableList.of(new Object[]{DateTimes.of("2000-01-02").getMillis()}),
         RowSignature.builder().addTimeColumn().build()
@@ -277,7 +268,7 @@ public class TimeBoundaryQueryRunnerTest extends InitializedNullHandlingTest
               .dataSource(inlineDataSource)
               .build();
 
-    Assertions.assertFalse(timeBoundaryQuery.hasFilters());
+    Assert.assertFalse(timeBoundaryQuery.hasFilters());
     final QueryRunner<Result<TimeBoundaryResultValue>> theRunner =
         new TimeBoundaryQueryRunnerFactory(QueryRunnerTestHelper.NOOP_QUERYWATCHER).createRunner(
             new RowBasedSegment<>(
@@ -292,36 +283,30 @@ public class TimeBoundaryQueryRunnerTest extends InitializedNullHandlingTest
     DateTime minTime = val.getMinTime();
     DateTime maxTime = val.getMaxTime();
 
-    Assertions.assertEquals(DateTimes.of("2000-01-02"), minTime);
-    Assertions.assertEquals(DateTimes.of("2000-01-02"), maxTime);
+    Assert.assertEquals(DateTimes.of("2000-01-02"), minTime);
+    Assert.assertEquals(DateTimes.of("2000-01-02"), maxTime);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
+  @Test(expected = UOE.class)
   @SuppressWarnings("unchecked")
-  public void testTimeBoundaryArrayResults(QueryRunner runner)
+  public void testTimeBoundaryArrayResults()
   {
-    initTimeBoundaryQueryRunnerTest(runner);
-    assertThrows(UOE.class, () -> {
-      TimeBoundaryQuery timeBoundaryQuery = Druids.newTimeBoundaryQueryBuilder()
-          .dataSource("testing")
-          .bound(null)
-          .build();
-      ResponseContext context = ConcurrentResponseContext.createEmpty();
-      context.initializeMissingSegments();
-      new TimeBoundaryQueryQueryToolChest().resultsAsArrays(
-          timeBoundaryQuery,
-          runner.run(QueryPlus.wrap(timeBoundaryQuery), context)
-      ).toList();
-    });
+    TimeBoundaryQuery timeBoundaryQuery = Druids.newTimeBoundaryQueryBuilder()
+                                                .dataSource("testing")
+                                                .bound(null)
+                                                .build();
+    ResponseContext context = ConcurrentResponseContext.createEmpty();
+    context.initializeMissingSegments();
+    new TimeBoundaryQueryQueryToolChest().resultsAsArrays(
+        timeBoundaryQuery,
+        runner.run(QueryPlus.wrap(timeBoundaryQuery), context)
+    ).toList();
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
+  @Test
   @SuppressWarnings("unchecked")
-  public void testTimeBoundaryMax(QueryRunner runner)
+  public void testTimeBoundaryMax()
   {
-    initTimeBoundaryQueryRunnerTest(runner);
     TimeBoundaryQuery timeBoundaryQuery = Druids.newTimeBoundaryQueryBuilder()
                                                 .dataSource("testing")
                                                 .bound(TimeBoundaryQuery.MAX_TIME)
@@ -333,16 +318,14 @@ public class TimeBoundaryQueryRunnerTest extends InitializedNullHandlingTest
     DateTime minTime = val.getMinTime();
     DateTime maxTime = val.getMaxTime();
 
-    Assertions.assertNull(minTime);
-    Assertions.assertEquals(DateTimes.of("2011-04-15T00:00:00.000Z"), maxTime);
+    Assert.assertNull(minTime);
+    Assert.assertEquals(DateTimes.of("2011-04-15T00:00:00.000Z"), maxTime);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
+  @Test
   @SuppressWarnings("unchecked")
-  public void testTimeBoundaryMaxArraysResults(QueryRunner runner)
+  public void testTimeBoundaryMaxArraysResults()
   {
-    initTimeBoundaryQueryRunnerTest(runner);
     TimeBoundaryQuery maxTimeBoundaryQuery = Druids.newTimeBoundaryQueryBuilder()
                                                    .dataSource("testing")
                                                    .bound(TimeBoundaryQuery.MAX_TIME)
@@ -355,16 +338,14 @@ public class TimeBoundaryQueryRunnerTest extends InitializedNullHandlingTest
     ).toList();
 
     Long maxTimeMillis = (Long) maxTime.get(0)[0];
-    Assertions.assertEquals(DateTimes.of("2011-04-15T00:00:00.000Z"), new DateTime(maxTimeMillis, DateTimeZone.UTC));
-    Assertions.assertEquals(1, maxTime.size());
+    Assert.assertEquals(DateTimes.of("2011-04-15T00:00:00.000Z"), new DateTime(maxTimeMillis, DateTimeZone.UTC));
+    Assert.assertEquals(1, maxTime.size());
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
+  @Test
   @SuppressWarnings("unchecked")
-  public void testTimeBoundaryMin(QueryRunner runner)
+  public void testTimeBoundaryMin()
   {
-    initTimeBoundaryQueryRunnerTest(runner);
     TimeBoundaryQuery timeBoundaryQuery = Druids.newTimeBoundaryQueryBuilder()
                                                 .dataSource("testing")
                                                 .bound(TimeBoundaryQuery.MIN_TIME)
@@ -376,16 +357,14 @@ public class TimeBoundaryQueryRunnerTest extends InitializedNullHandlingTest
     DateTime minTime = val.getMinTime();
     DateTime maxTime = val.getMaxTime();
 
-    Assertions.assertEquals(DateTimes.of("2011-01-12T00:00:00.000Z"), minTime);
-    Assertions.assertNull(maxTime);
+    Assert.assertEquals(DateTimes.of("2011-01-12T00:00:00.000Z"), minTime);
+    Assert.assertNull(maxTime);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
+  @Test
   @SuppressWarnings("unchecked")
-  public void testTimeBoundaryMinArraysResults(QueryRunner runner)
+  public void testTimeBoundaryMinArraysResults()
   {
-    initTimeBoundaryQueryRunnerTest(runner);
     TimeBoundaryQuery minTimeBoundaryQuery = Druids.newTimeBoundaryQueryBuilder()
                                                    .dataSource("testing")
                                                    .bound(TimeBoundaryQuery.MIN_TIME)
@@ -398,15 +377,13 @@ public class TimeBoundaryQueryRunnerTest extends InitializedNullHandlingTest
     ).toList();
 
     Long minTimeMillis = (Long) minTime.get(0)[0];
-    Assertions.assertEquals(DateTimes.of("2011-01-12T00:00:00.000Z"), new DateTime(minTimeMillis, DateTimeZone.UTC));
-    Assertions.assertEquals(1, minTime.size());
+    Assert.assertEquals(DateTimes.of("2011-01-12T00:00:00.000Z"), new DateTime(minTimeMillis, DateTimeZone.UTC));
+    Assert.assertEquals(1, minTime.size());
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testMergeResults(QueryRunner runner)
+  @Test
+  public void testMergeResults()
   {
-    initTimeBoundaryQueryRunnerTest(runner);
     List<Result<TimeBoundaryResultValue>> results = Arrays.asList(
         new Result<>(
             DateTimes.nowUtc(),
@@ -431,19 +408,17 @@ public class TimeBoundaryQueryRunnerTest extends InitializedNullHandlingTest
     TimeBoundaryQuery query = new TimeBoundaryQuery(new TableDataSource("test"), null, null, null, null);
     Iterable<Result<TimeBoundaryResultValue>> actual = query.mergeResults(results);
 
-    Assertions.assertTrue(actual.iterator().next().getValue().getMaxTime().equals(DateTimes.of("2012-02-01")));
+    Assert.assertTrue(actual.iterator().next().getValue().getMaxTime().equals(DateTimes.of("2012-02-01")));
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testMergeResultsEmptyResults(QueryRunner runner)
+  @Test
+  public void testMergeResultsEmptyResults()
   {
-    initTimeBoundaryQueryRunnerTest(runner);
     List<Result<TimeBoundaryResultValue>> results = new ArrayList<>();
 
     TimeBoundaryQuery query = new TimeBoundaryQuery(new TableDataSource("test"), null, null, null, null);
     Iterable<Result<TimeBoundaryResultValue>> actual = query.mergeResults(results);
 
-    Assertions.assertFalse(actual.iterator().hasNext());
+    Assert.assertFalse(actual.iterator().hasNext());
   }
 }

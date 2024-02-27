@@ -41,19 +41,17 @@ import org.apache.druid.segment.join.filter.JoinFilterPreAnalysis;
 import org.apache.druid.timeline.SegmentId;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import javax.annotation.Nullable;
-
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.Thread.sleep;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class PostJoinCursorTest extends BaseHashJoinSegmentStorageAdapterTest
 {
@@ -146,24 +144,6 @@ public class PostJoinCursorTest extends BaseHashJoinSegmentStorageAdapterTest
         {
 
         }
-
-        private static File newFolder(File root, String... subDirs) throws IOException {
-          String subFolder = String.join("/", subDirs);
-          File result = new File(root, subFolder);
-          if (!result.mkdirs()) {
-            throw new IOException("Couldn't create folders " + root);
-          }
-          return result;
-        }
-      }
-
-      private static File newFolder(File root, String... subDirs) throws IOException {
-        String subFolder = String.join("/", subDirs);
-        File result = new File(root, subFolder);
-        if (!result.mkdirs()) {
-          throw new IOException("Couldn't create folders " + root);
-        }
-        return result;
       }
     }
 
@@ -179,15 +159,6 @@ public class PostJoinCursorTest extends BaseHashJoinSegmentStorageAdapterTest
     public StorageAdapter asStorageAdapter()
     {
       return testStorageAdaptor;
-    }
-
-    private static File newFolder(File root, String... subDirs) throws IOException {
-      String subFolder = String.join("/", subDirs);
-      File result = new File(root, subFolder);
-      if (!result.mkdirs()) {
-        throw new IOException("Couldn't create folders " + root);
-      }
-      return result;
     }
   }
 
@@ -207,15 +178,6 @@ public class PostJoinCursorTest extends BaseHashJoinSegmentStorageAdapterTest
     {
       return exception;
     }
-
-    private static File newFolder(File root, String... subDirs) throws IOException {
-      String subFolder = String.join("/", subDirs);
-      File result = new File(root, subFolder);
-      if (!result.mkdirs()) {
-        throw new IOException("Couldn't create folders " + root);
-      }
-      return result;
-    }
   }
 
   @Test
@@ -227,7 +189,7 @@ public class PostJoinCursorTest extends BaseHashJoinSegmentStorageAdapterTest
     CountDownLatch countDownLatch = new CountDownLatch(rowsBeforeInterrupt);
 
     infiniteFactSegment = new TestInfiniteQueryableIndexSegment(
-        JoinTestHelper.createFactIndexBuilder(newFolder(temporaryFolder, "junit")).buildMMappedIndex(),
+        JoinTestHelper.createFactIndexBuilder(temporaryFolder.newFolder()).buildMMappedIndex(),
         SegmentId.dummy("facts"),
         countDownLatch
     );
@@ -298,14 +260,5 @@ public class PostJoinCursorTest extends BaseHashJoinSegmentStorageAdapterTest
     });
 
     cursor.advance();
-  }
-
-  private static File newFolder(File root, String... subDirs) throws IOException {
-    String subFolder = String.join("/", subDirs);
-    File result = new File(root, subFolder);
-    if (!result.mkdirs()) {
-      throw new IOException("Couldn't create folders " + root);
-    }
-    return result;
   }
 }

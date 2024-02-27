@@ -71,12 +71,12 @@ import org.apache.druid.segment.incremental.IndexSizeExceededException;
 import org.apache.druid.segment.incremental.OnheapIncrementalIndex;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.joda.time.Interval;
+import org.junit.Assert;
 import org.junit.Rule;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Timeout;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -87,21 +87,22 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  */
+@RunWith(Parameterized.class)
 public class IncrementalIndexTest extends InitializedNullHandlingTest
 {
-  public IncrementalIndexCreator indexCreator;
-  private boolean isPreserveExistingMetrics;
+  public final IncrementalIndexCreator indexCreator;
+  private final boolean isPreserveExistingMetrics;
+
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
   @Rule
   public final CloserRule closer = new CloserRule(false);
 
-  public void initIncrementalIndexTest(String indexType, String mode, boolean isPreserveExistingMetrics) throws JsonProcessingException
+  public IncrementalIndexTest(String indexType, String mode, boolean isPreserveExistingMetrics) throws JsonProcessingException
   {
     NestedDataModule.registerHandlersAndSerde();
     this.isPreserveExistingMetrics = isPreserveExistingMetrics;
@@ -112,6 +113,7 @@ public class IncrementalIndexTest extends InitializedNullHandlingTest
     ));
   }
 
+  @Parameterized.Parameters(name = "{index}: {0}, {1}, {2}")
   public static Collection<?> constructorFeeder()
   {
     return IncrementalIndexCreator.indexTypeCartesianProduct(
@@ -222,35 +224,31 @@ public class IncrementalIndexTest extends InitializedNullHandlingTest
       DEFAULT_AGGREGATOR_FACTORIES[0].getCombiningFactory()
   };
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{index}: {0}, {1}, {2}")
-  public void testCaseSensitivity(String indexType, String mode, boolean isPreserveExistingMetrics) throws Exception
+  @Test
+  public void testCaseSensitivity() throws Exception
   {
-    initIncrementalIndexTest(indexType, mode, isPreserveExistingMetrics);
     long timestamp = System.currentTimeMillis();
     IncrementalIndex index = indexCreator.createIndex((Object) DEFAULT_AGGREGATOR_FACTORIES);
 
     populateIndex(timestamp, index);
-    Assertions.assertEquals(Arrays.asList("dim1", "dim2"), index.getDimensionNames());
-    Assertions.assertEquals(2, index.size());
+    Assert.assertEquals(Arrays.asList("dim1", "dim2"), index.getDimensionNames());
+    Assert.assertEquals(2, index.size());
 
     final Iterator<Row> rows = index.iterator();
     Row row = rows.next();
-    Assertions.assertEquals(timestamp, row.getTimestampFromEpoch());
-    Assertions.assertEquals(Collections.singletonList("1"), row.getDimension("dim1"));
-    Assertions.assertEquals(Collections.singletonList("2"), row.getDimension("dim2"));
+    Assert.assertEquals(timestamp, row.getTimestampFromEpoch());
+    Assert.assertEquals(Collections.singletonList("1"), row.getDimension("dim1"));
+    Assert.assertEquals(Collections.singletonList("2"), row.getDimension("dim2"));
 
     row = rows.next();
-    Assertions.assertEquals(timestamp, row.getTimestampFromEpoch());
-    Assertions.assertEquals(Collections.singletonList("3"), row.getDimension("dim1"));
-    Assertions.assertEquals(Collections.singletonList("4"), row.getDimension("dim2"));
+    Assert.assertEquals(timestamp, row.getTimestampFromEpoch());
+    Assert.assertEquals(Collections.singletonList("3"), row.getDimension("dim1"));
+    Assert.assertEquals(Collections.singletonList("4"), row.getDimension("dim2"));
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{index}: {0}, {1}, {2}")
-  public void testFilteredAggregators(String indexType, String mode, boolean isPreserveExistingMetrics) throws Exception
+  @Test
+  public void testFilteredAggregators() throws Exception
   {
-    initIncrementalIndexTest(indexType, mode, isPreserveExistingMetrics);
     long timestamp = System.currentTimeMillis();
     IncrementalIndex index = indexCreator.createIndex((Object) new AggregatorFactory[]{
         new CountAggregatorFactory("count"),
@@ -288,8 +286,8 @@ public class IncrementalIndexTest extends InitializedNullHandlingTest
         )
     );
 
-    Assertions.assertEquals(Arrays.asList("dim1", "dim2", "dim3"), index.getDimensionNames());
-    Assertions.assertEquals(
+    Assert.assertEquals(Arrays.asList("dim1", "dim2", "dim3"), index.getDimensionNames());
+    Assert.assertEquals(
         Arrays.asList(
             "count",
             "count_selector_filtered",
@@ -299,37 +297,35 @@ public class IncrementalIndexTest extends InitializedNullHandlingTest
         ),
         index.getMetricNames()
     );
-    Assertions.assertEquals(2, index.size());
+    Assert.assertEquals(2, index.size());
 
     final Iterator<Row> rows = index.iterator();
     Row row = rows.next();
-    Assertions.assertEquals(timestamp, row.getTimestampFromEpoch());
-    Assertions.assertEquals(Collections.singletonList("1"), row.getDimension("dim1"));
-    Assertions.assertEquals(Collections.singletonList("2"), row.getDimension("dim2"));
-    Assertions.assertEquals(Arrays.asList("a", "b"), row.getDimension("dim3"));
-    Assertions.assertEquals(1L, row.getMetric("count"));
-    Assertions.assertEquals(1L, row.getMetric("count_selector_filtered"));
-    Assertions.assertEquals(1L, row.getMetric("count_bound_filtered"));
-    Assertions.assertEquals(1L, row.getMetric("count_multivaldim_filtered"));
-    Assertions.assertEquals(0L, row.getMetric("count_numeric_filtered"));
+    Assert.assertEquals(timestamp, row.getTimestampFromEpoch());
+    Assert.assertEquals(Collections.singletonList("1"), row.getDimension("dim1"));
+    Assert.assertEquals(Collections.singletonList("2"), row.getDimension("dim2"));
+    Assert.assertEquals(Arrays.asList("a", "b"), row.getDimension("dim3"));
+    Assert.assertEquals(1L, row.getMetric("count"));
+    Assert.assertEquals(1L, row.getMetric("count_selector_filtered"));
+    Assert.assertEquals(1L, row.getMetric("count_bound_filtered"));
+    Assert.assertEquals(1L, row.getMetric("count_multivaldim_filtered"));
+    Assert.assertEquals(0L, row.getMetric("count_numeric_filtered"));
 
     row = rows.next();
-    Assertions.assertEquals(timestamp, row.getTimestampFromEpoch());
-    Assertions.assertEquals(Collections.singletonList("3"), row.getDimension("dim1"));
-    Assertions.assertEquals(Collections.singletonList("4"), row.getDimension("dim2"));
-    Assertions.assertEquals(Arrays.asList("c", "d"), row.getDimension("dim3"));
-    Assertions.assertEquals(1L, row.getMetric("count"));
-    Assertions.assertEquals(0L, row.getMetric("count_selector_filtered"));
-    Assertions.assertEquals(0L, row.getMetric("count_bound_filtered"));
-    Assertions.assertEquals(0L, row.getMetric("count_multivaldim_filtered"));
-    Assertions.assertEquals(1L, row.getMetric("count_numeric_filtered"));
+    Assert.assertEquals(timestamp, row.getTimestampFromEpoch());
+    Assert.assertEquals(Collections.singletonList("3"), row.getDimension("dim1"));
+    Assert.assertEquals(Collections.singletonList("4"), row.getDimension("dim2"));
+    Assert.assertEquals(Arrays.asList("c", "d"), row.getDimension("dim3"));
+    Assert.assertEquals(1L, row.getMetric("count"));
+    Assert.assertEquals(0L, row.getMetric("count_selector_filtered"));
+    Assert.assertEquals(0L, row.getMetric("count_bound_filtered"));
+    Assert.assertEquals(0L, row.getMetric("count_multivaldim_filtered"));
+    Assert.assertEquals(1L, row.getMetric("count_numeric_filtered"));
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{index}: {0}, {1}, {2}")
-  public void testSingleThreadedIndexingAndQuery(String indexType, String mode, boolean isPreserveExistingMetrics) throws Exception
+  @Test
+  public void testSingleThreadedIndexingAndQuery() throws Exception
   {
-    initIncrementalIndexTest(indexType, mode, isPreserveExistingMetrics);
     final int dimensionCount = 5;
     final ArrayList<AggregatorFactory> ingestAggregatorFactories = new ArrayList<>();
     ingestAggregatorFactories.add(new CountAggregatorFactory("rows"));
@@ -407,27 +403,24 @@ public class IncrementalIndexTest extends InitializedNullHandlingTest
     List<Result<TimeseriesResultValue>> results = runner.run(QueryPlus.wrap(query)).toList();
     Result<TimeseriesResultValue> result = Iterables.getOnlyElement(results);
     boolean isRollup = index.isRollup();
-    Assertions.assertEquals(rows * (isRollup ? 1 : 2), result.getValue().getLongMetric("rows").intValue());
+    Assert.assertEquals(rows * (isRollup ? 1 : 2), result.getValue().getLongMetric("rows").intValue());
     for (int i = 0; i < dimensionCount; ++i) {
-      Assertions.assertEquals(
+      Assert.assertEquals(
+          "Failed long sum on dimension " + i,
           2 * rows,
-          result.getValue().getLongMetric("sumResult" + i).intValue(),
-          "Failed long sum on dimension " + i
+          result.getValue().getLongMetric("sumResult" + i).intValue()
       );
-      Assertions.assertEquals(
+      Assert.assertEquals(
+          "Failed double sum on dimension " + i,
           2 * rows,
-          result.getValue().getDoubleMetric("doubleSumResult" + i).intValue(),
-          "Failed double sum on dimension " + i
+          result.getValue().getDoubleMetric("doubleSumResult" + i).intValue()
       );
     }
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{index}: {0}, {1}, {2}")
-  @Timeout(value = 60_000L, unit = TimeUnit.MILLISECONDS)
-  public void testConcurrentAddRead(String indexType, String mode, boolean isPreserveExistingMetrics) throws InterruptedException, ExecutionException
+  @Test(timeout = 60_000L)
+  public void testConcurrentAddRead() throws InterruptedException, ExecutionException
   {
-    initIncrementalIndexTest(indexType, mode, isPreserveExistingMetrics);
     final int dimensionCount = 5;
     final ArrayList<AggregatorFactory> ingestAggregatorFactories = new ArrayList<>(dimensionCount + 1);
     ingestAggregatorFactories.add(new CountAggregatorFactory("rows"));
@@ -585,9 +578,9 @@ public class IncrementalIndexTest extends InitializedNullHandlingTest
                       if (maxValueExpected > 0) {
                         // Eventually consistent, but should be somewhere in that range
                         // Actual result is validated after all writes are guaranteed done.
-                        Assertions.assertTrue(
-                            result >= 0 && result <= maxValueExpected,
-                            StringUtils.format("%d >= %g >= 0 violated", maxValueExpected, result)
+                        Assert.assertTrue(
+                            StringUtils.format("%d >= %g >= 0 violated", maxValueExpected, result),
+                            result >= 0 && result <= maxValueExpected
                         );
                       }
                     }
@@ -603,8 +596,8 @@ public class IncrementalIndexTest extends InitializedNullHandlingTest
     allFutures.addAll(queryFutures);
     allFutures.addAll(indexFutures);
     Futures.allAsList(allFutures).get();
-    Assertions.assertTrue(queriesAccumualted.get() > 0, "Queries ran too fast");
-    Assertions.assertTrue(concurrentlyRan.get() > 0, "Did not hit concurrency, please try again");
+    Assert.assertTrue("Queries ran too fast", queriesAccumualted.get() > 0);
+    Assert.assertTrue("Did not hit concurrency, please try again", concurrentlyRan.get() > 0);
     queryExecutor.shutdown();
     indexExecutor.shutdown();
     QueryRunner<Result<TimeseriesResultValue>> runner = new FinalizeResultsQueryRunner<Result<TimeseriesResultValue>>(
@@ -620,30 +613,28 @@ public class IncrementalIndexTest extends InitializedNullHandlingTest
     List<Result<TimeseriesResultValue>> results = runner.run(QueryPlus.wrap(query)).toList();
     boolean isRollup = index.isRollup();
     for (Result<TimeseriesResultValue> result : results) {
-      Assertions.assertEquals(
+      Assert.assertEquals(
           elementsPerThread * (isRollup ? 1 : addThreads),
           result.getValue().getLongMetric("rows").intValue()
       );
       for (int i = 0; i < dimensionCount; ++i) {
-        Assertions.assertEquals(
+        Assert.assertEquals(
+            StringUtils.format("Failed long sum on dimension %d", i),
             elementsPerThread * addThreads,
-            result.getValue().getLongMetric(StringUtils.format("sumResult%s", i)).intValue(),
-            StringUtils.format("Failed long sum on dimension %d", i)
+            result.getValue().getLongMetric(StringUtils.format("sumResult%s", i)).intValue()
         );
-        Assertions.assertEquals(
+        Assert.assertEquals(
+            StringUtils.format("Failed double sum on dimension %d", i),
             elementsPerThread * addThreads,
-            result.getValue().getDoubleMetric(StringUtils.format("doubleSumResult%s", i)).intValue(),
-            StringUtils.format("Failed double sum on dimension %d", i)
+            result.getValue().getDoubleMetric(StringUtils.format("doubleSumResult%s", i)).intValue()
         );
       }
     }
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{index}: {0}, {1}, {2}")
-  public void testgetDimensions(String indexType, String mode, boolean isPreserveExistingMetrics)
+  @Test
+  public void testgetDimensions()
   {
-    initIncrementalIndexTest(indexType, mode, isPreserveExistingMetrics);
     final IncrementalIndex incrementalIndex = indexCreator.createIndex(
         (builder, args) -> builder
             .setIndexSchema(
@@ -658,14 +649,12 @@ public class IncrementalIndexTest extends InitializedNullHandlingTest
             .build()
     );
 
-    Assertions.assertEquals(Arrays.asList("dim0", "dim1"), incrementalIndex.getDimensionNames());
+    Assert.assertEquals(Arrays.asList("dim0", "dim1"), incrementalIndex.getDimensionNames());
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{index}: {0}, {1}, {2}")
-  public void testDynamicSchemaRollup(String indexType, String mode, boolean isPreserveExistingMetrics) throws IndexSizeExceededException
+  @Test
+  public void testDynamicSchemaRollup() throws IndexSizeExceededException
   {
-    initIncrementalIndexTest(indexType, mode, isPreserveExistingMetrics);
     final IncrementalIndex index = indexCreator.createIndex(
         (builder, args) -> builder
             .setSimpleTestingIndexSchema(/* empty */)
@@ -695,14 +684,12 @@ public class IncrementalIndexTest extends InitializedNullHandlingTest
         )
     );
 
-    Assertions.assertEquals(2, index.size());
+    Assert.assertEquals(2, index.size());
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{index}: {0}, {1}, {2}")
-  public void testSchemaRollupWithRowWithExistingMetricsAndWithoutMetric(String indexType, String mode, boolean isPreserveExistingMetrics) throws IndexSizeExceededException
+  @Test
+  public void testSchemaRollupWithRowWithExistingMetricsAndWithoutMetric() throws IndexSizeExceededException
   {
-    initIncrementalIndexTest(indexType, mode, isPreserveExistingMetrics);
     AggregatorFactory[] aggregatorFactories = new AggregatorFactory[]{
         new CountAggregatorFactory("count"),
         new LongSumAggregatorFactory("sum_of_x", "x")
@@ -737,41 +724,39 @@ public class IncrementalIndexTest extends InitializedNullHandlingTest
         )
     );
 
-    Assertions.assertEquals(index.isRollup() ? 1 : 4, index.size());
+    Assert.assertEquals(index.isRollup() ? 1 : 4, index.size());
     Iterator<Row> iterator = index.iterator();
     int rowCount = 0;
     while (iterator.hasNext()) {
       rowCount++;
       Row row = iterator.next();
-      Assertions.assertEquals(1481871600000L, row.getTimestampFromEpoch());
+      Assert.assertEquals(1481871600000L, row.getTimestampFromEpoch());
       if (index.isRollup()) {
         // All rows are rollup into one row
-        Assertions.assertEquals(isPreserveExistingMetrics ? 7 : 4, row.getMetric("count").intValue());
-        Assertions.assertEquals(isPreserveExistingMetrics ? 14 : 5, row.getMetric("sum_of_x").intValue());
+        Assert.assertEquals(isPreserveExistingMetrics ? 7 : 4, row.getMetric("count").intValue());
+        Assert.assertEquals(isPreserveExistingMetrics ? 14 : 5, row.getMetric("sum_of_x").intValue());
       } else {
         // We still have 4 rows
         if (rowCount == 1 || rowCount == 2) {
-          Assertions.assertEquals(1, row.getMetric("count").intValue());
-          Assertions.assertEquals(1 + rowCount, row.getMetric("sum_of_x").intValue());
+          Assert.assertEquals(1, row.getMetric("count").intValue());
+          Assert.assertEquals(1 + rowCount, row.getMetric("sum_of_x").intValue());
         } else {
           if (isPreserveExistingMetrics) {
-            Assertions.assertEquals(rowCount - 1, row.getMetric("count").intValue());
-            Assertions.assertEquals(1 + rowCount, row.getMetric("sum_of_x").intValue());
+            Assert.assertEquals(rowCount - 1, row.getMetric("count").intValue());
+            Assert.assertEquals(1 + rowCount, row.getMetric("sum_of_x").intValue());
           } else {
-            Assertions.assertEquals(1, row.getMetric("count").intValue());
+            Assert.assertEquals(1, row.getMetric("count").intValue());
             // The rows does not have the dim "x", hence metric is null (useDefaultValueForNull=false) or 0 (useDefaultValueForNull=true)
-            Assertions.assertEquals(NullHandling.sqlCompatible() ? null : 0L, row.getMetric("sum_of_x"));
+            Assert.assertEquals(NullHandling.sqlCompatible() ? null : 0L, row.getMetric("sum_of_x"));
           }
         }
       }
     }
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{index}: {0}, {1}, {2}")
-  public void testSchemaRollupWithRowWithExistingMetricsAndWithoutMetricUsingAggregatorWithDifferentReturnType(String indexType, String mode, boolean isPreserveExistingMetrics) throws IndexSizeExceededException
+  @Test
+  public void testSchemaRollupWithRowWithExistingMetricsAndWithoutMetricUsingAggregatorWithDifferentReturnType() throws IndexSizeExceededException
   {
-    initIncrementalIndexTest(indexType, mode, isPreserveExistingMetrics);
     AggregatorFactory[] aggregatorFactories = new AggregatorFactory[]{
         new CountAggregatorFactory("count"),
         // FloatSumAggregator combine method takes in two Float but return Double
@@ -807,41 +792,39 @@ public class IncrementalIndexTest extends InitializedNullHandlingTest
         )
     );
 
-    Assertions.assertEquals(index.isRollup() ? 1 : 4, index.size());
+    Assert.assertEquals(index.isRollup() ? 1 : 4, index.size());
     Iterator<Row> iterator = index.iterator();
     int rowCount = 0;
     while (iterator.hasNext()) {
       rowCount++;
       Row row = iterator.next();
-      Assertions.assertEquals(1481871600000L, row.getTimestampFromEpoch());
+      Assert.assertEquals(1481871600000L, row.getTimestampFromEpoch());
       if (index.isRollup()) {
         // All rows are rollup into one row
-        Assertions.assertEquals(isPreserveExistingMetrics ? 7 : 4, row.getMetric("count").intValue());
-        Assertions.assertEquals(isPreserveExistingMetrics ? 14 : 5, row.getMetric("sum_of_x").intValue());
+        Assert.assertEquals(isPreserveExistingMetrics ? 7 : 4, row.getMetric("count").intValue());
+        Assert.assertEquals(isPreserveExistingMetrics ? 14 : 5, row.getMetric("sum_of_x").intValue());
       } else {
         // We still have 4 rows
         if (rowCount == 1 || rowCount == 2) {
-          Assertions.assertEquals(1, row.getMetric("count").intValue());
-          Assertions.assertEquals(1 + rowCount, row.getMetric("sum_of_x").intValue());
+          Assert.assertEquals(1, row.getMetric("count").intValue());
+          Assert.assertEquals(1 + rowCount, row.getMetric("sum_of_x").intValue());
         } else {
           if (isPreserveExistingMetrics) {
-            Assertions.assertEquals(rowCount - 1, row.getMetric("count").intValue());
-            Assertions.assertEquals(1 + rowCount, row.getMetric("sum_of_x").intValue());
+            Assert.assertEquals(rowCount - 1, row.getMetric("count").intValue());
+            Assert.assertEquals(1 + rowCount, row.getMetric("sum_of_x").intValue());
           } else {
-            Assertions.assertEquals(1, row.getMetric("count").intValue());
+            Assert.assertEquals(1, row.getMetric("count").intValue());
             // The rows does not have the dim "x", hence metric is null (useDefaultValueForNull=false) or 0 (useDefaultValueForNull=true)
-            Assertions.assertEquals(NullHandling.sqlCompatible() ? null : 0.0f, row.getMetric("sum_of_x"));
+            Assert.assertEquals(NullHandling.sqlCompatible() ? null : 0.0f, row.getMetric("sum_of_x"));
           }
         }
       }
     }
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{index}: {0}, {1}, {2}")
-  public void testSchemaRollupWithRowWithOnlyExistingMetrics(String indexType, String mode, boolean isPreserveExistingMetrics) throws IndexSizeExceededException
+  @Test
+  public void testSchemaRollupWithRowWithOnlyExistingMetrics() throws IndexSizeExceededException
   {
-    initIncrementalIndexTest(indexType, mode, isPreserveExistingMetrics);
     AggregatorFactory[] aggregatorFactories = new AggregatorFactory[]{
         new CountAggregatorFactory("count"),
         new LongSumAggregatorFactory("sum_of_x", "x")
@@ -862,41 +845,39 @@ public class IncrementalIndexTest extends InitializedNullHandlingTest
         )
     );
 
-    Assertions.assertEquals(index.isRollup() ? 1 : 2, index.size());
+    Assert.assertEquals(index.isRollup() ? 1 : 2, index.size());
     Iterator<Row> iterator = index.iterator();
     int rowCount = 0;
     while (iterator.hasNext()) {
       rowCount++;
       Row row = iterator.next();
-      Assertions.assertEquals(1481871600000L, row.getTimestampFromEpoch());
+      Assert.assertEquals(1481871600000L, row.getTimestampFromEpoch());
       if (index.isRollup()) {
         // All rows are rollup into one row
-        Assertions.assertEquals(isPreserveExistingMetrics ? 5 : 2, row.getMetric("count").intValue());
-        Assertions.assertEquals(isPreserveExistingMetrics ? 9 : 3, row.getMetric("sum_of_x").intValue());
+        Assert.assertEquals(isPreserveExistingMetrics ? 5 : 2, row.getMetric("count").intValue());
+        Assert.assertEquals(isPreserveExistingMetrics ? 9 : 3, row.getMetric("sum_of_x").intValue());
       } else {
         // We still have 2 rows
         if (rowCount == 1) {
           if (isPreserveExistingMetrics) {
-            Assertions.assertEquals(2, row.getMetric("count").intValue());
-            Assertions.assertEquals(4, row.getMetric("sum_of_x").intValue());
+            Assert.assertEquals(2, row.getMetric("count").intValue());
+            Assert.assertEquals(4, row.getMetric("sum_of_x").intValue());
           } else {
-            Assertions.assertEquals(1, row.getMetric("count").intValue());
+            Assert.assertEquals(1, row.getMetric("count").intValue());
             // The rows does not have the dim "x", hence metric is null (useDefaultValueForNull=false) or 0 (useDefaultValueForNull=true)
-            Assertions.assertEquals(NullHandling.sqlCompatible() ? null : 0L, row.getMetric("sum_of_x"));
+            Assert.assertEquals(NullHandling.sqlCompatible() ? null : 0L, row.getMetric("sum_of_x"));
           }
         } else {
-          Assertions.assertEquals(isPreserveExistingMetrics ? 3 : 1, row.getMetric("count").intValue());
-          Assertions.assertEquals(isPreserveExistingMetrics ? 5 : 3, row.getMetric("sum_of_x").intValue());
+          Assert.assertEquals(isPreserveExistingMetrics ? 3 : 1, row.getMetric("count").intValue());
+          Assert.assertEquals(isPreserveExistingMetrics ? 5 : 3, row.getMetric("sum_of_x").intValue());
         }
       }
     }
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{index}: {0}, {1}, {2}")
-  public void testSchemaRollupWithRowsWithNoMetrics(String indexType, String mode, boolean isPreserveExistingMetrics) throws IndexSizeExceededException
+  @Test
+  public void testSchemaRollupWithRowsWithNoMetrics() throws IndexSizeExceededException
   {
-    initIncrementalIndexTest(indexType, mode, isPreserveExistingMetrics);
     AggregatorFactory[] aggregatorFactories = new AggregatorFactory[]{
         new CountAggregatorFactory("count"),
         new LongSumAggregatorFactory("sum_of_x", "x")
@@ -917,90 +898,84 @@ public class IncrementalIndexTest extends InitializedNullHandlingTest
         )
     );
 
-    Assertions.assertEquals(index.isRollup() ? 1 : 2, index.size());
+    Assert.assertEquals(index.isRollup() ? 1 : 2, index.size());
     Iterator<Row> iterator = index.iterator();
     int rowCount = 0;
     while (iterator.hasNext()) {
       rowCount++;
       Row row = iterator.next();
-      Assertions.assertEquals(1481871600000L, row.getTimestampFromEpoch());
+      Assert.assertEquals(1481871600000L, row.getTimestampFromEpoch());
       if (index.isRollup()) {
         // All rows are rollup into one row
-        Assertions.assertEquals(2, row.getMetric("count").intValue());
-        Assertions.assertEquals(7, row.getMetric("sum_of_x").intValue());
+        Assert.assertEquals(2, row.getMetric("count").intValue());
+        Assert.assertEquals(7, row.getMetric("sum_of_x").intValue());
       } else {
         // We still have 2 rows
         if (rowCount == 1) {
-          Assertions.assertEquals(1, row.getMetric("count").intValue());
-          Assertions.assertEquals(4, row.getMetric("sum_of_x").intValue());
+          Assert.assertEquals(1, row.getMetric("count").intValue());
+          Assert.assertEquals(4, row.getMetric("sum_of_x").intValue());
         } else {
-          Assertions.assertEquals(1, row.getMetric("count").intValue());
-          Assertions.assertEquals(3, row.getMetric("sum_of_x").intValue());
+          Assert.assertEquals(1, row.getMetric("count").intValue());
+          Assert.assertEquals(3, row.getMetric("sum_of_x").intValue());
         }
       }
     }
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{index}: {0}, {1}, {2}")
-  public void testSchemaRollupWithRowWithMixedTypeMetrics(String indexType, String mode, boolean isPreserveExistingMetrics) throws IndexSizeExceededException
+  @Test
+  public void testSchemaRollupWithRowWithMixedTypeMetrics() throws IndexSizeExceededException
   {
-    assertThrows(ParseException.class, () -> {
-      initIncrementalIndexTest(indexType, mode, isPreserveExistingMetrics);
-      if (isPreserveExistingMetrics) {
-        expectedException.expect(ParseException.class);
-      }
-      AggregatorFactory[] aggregatorFactories = new AggregatorFactory[]{
-          new CountAggregatorFactory("count"),
-          new LongSumAggregatorFactory("sum_of_x", "x")
-      };
-      final IncrementalIndex index = indexCreator.createIndex((Object) aggregatorFactories);
-      index.add(
-          new MapBasedInputRow(
-              1481871600000L,
-              Arrays.asList("name", "host"),
-              ImmutableMap.of("name", "name1", "host", "host", "count", "not a number 1", "sum_of_x", 4)
-          )
-      );
-      index.add(
-          new MapBasedInputRow(
-              1481871600000L,
-              Arrays.asList("name", "host"),
-              ImmutableMap.of("name", "name1", "host", "host", "count", 3, "x", 3, "sum_of_x", "not a number 2")
-          )
-      );
+    if (isPreserveExistingMetrics) {
+      expectedException.expect(ParseException.class);
+    }
+    AggregatorFactory[] aggregatorFactories = new AggregatorFactory[]{
+        new CountAggregatorFactory("count"),
+        new LongSumAggregatorFactory("sum_of_x", "x")
+    };
+    final IncrementalIndex index = indexCreator.createIndex((Object) aggregatorFactories);
+    index.add(
+        new MapBasedInputRow(
+            1481871600000L,
+            Arrays.asList("name", "host"),
+            ImmutableMap.of("name", "name1", "host", "host", "count", "not a number 1", "sum_of_x", 4)
+        )
+    );
+    index.add(
+        new MapBasedInputRow(
+            1481871600000L,
+            Arrays.asList("name", "host"),
+            ImmutableMap.of("name", "name1", "host", "host", "count", 3, "x", 3, "sum_of_x", "not a number 2")
+        )
+    );
 
-      Assertions.assertEquals(index.isRollup() ? 1 : 2, index.size());
-      Iterator<Row> iterator = index.iterator();
-      int rowCount = 0;
-      while (iterator.hasNext()) {
-        rowCount++;
-        Row row = iterator.next();
-        Assertions.assertEquals(1481871600000L, row.getTimestampFromEpoch());
-        if (index.isRollup()) {
-          // All rows are rollup into one row
-          Assertions.assertEquals(2, row.getMetric("count").intValue());
-          Assertions.assertEquals(3, row.getMetric("sum_of_x").intValue());
+    Assert.assertEquals(index.isRollup() ? 1 : 2, index.size());
+    Iterator<Row> iterator = index.iterator();
+    int rowCount = 0;
+    while (iterator.hasNext()) {
+      rowCount++;
+      Row row = iterator.next();
+      Assert.assertEquals(1481871600000L, row.getTimestampFromEpoch());
+      if (index.isRollup()) {
+        // All rows are rollup into one row
+        Assert.assertEquals(2, row.getMetric("count").intValue());
+        Assert.assertEquals(3, row.getMetric("sum_of_x").intValue());
+      } else {
+        // We still have 2 rows
+        if (rowCount == 1) {
+          Assert.assertEquals(1, row.getMetric("count").intValue());
+          // The rows does not have the dim "x", hence metric is null (useDefaultValueForNull=false) or 0 (useDefaultValueForNull=true)
+          Assert.assertEquals(NullHandling.sqlCompatible() ? null : 0L, row.getMetric("sum_of_x"));
         } else {
-          // We still have 2 rows
-          if (rowCount == 1) {
-            Assertions.assertEquals(1, row.getMetric("count").intValue());
-            // The rows does not have the dim "x", hence metric is null (useDefaultValueForNull=false) or 0 (useDefaultValueForNull=true)
-            Assertions.assertEquals(NullHandling.sqlCompatible() ? null : 0L, row.getMetric("sum_of_x"));
-          } else {
-            Assertions.assertEquals(1, row.getMetric("count").intValue());
-            Assertions.assertEquals(3, row.getMetric("sum_of_x").intValue());
-          }
+          Assert.assertEquals(1, row.getMetric("count").intValue());
+          Assert.assertEquals(3, row.getMetric("sum_of_x").intValue());
         }
       }
-    });
+    }
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{index}: {0}, {1}, {2}")
-  public void testSchemaRollupWithRowsWithNonRolledUpSameColumnName(String indexType, String mode, boolean isPreserveExistingMetrics) throws IndexSizeExceededException
+  @Test
+  public void testSchemaRollupWithRowsWithNonRolledUpSameColumnName() throws IndexSizeExceededException
   {
-    initIncrementalIndexTest(indexType, mode, isPreserveExistingMetrics);
     AggregatorFactory[] aggregatorFactories = new AggregatorFactory[]{
         new CountAggregatorFactory("count"),
         new LongSumAggregatorFactory("sum_of_x", "x")
@@ -1021,25 +996,25 @@ public class IncrementalIndexTest extends InitializedNullHandlingTest
         )
     );
 
-    Assertions.assertEquals(index.isRollup() ? 1 : 2, index.size());
+    Assert.assertEquals(index.isRollup() ? 1 : 2, index.size());
     Iterator<Row> iterator = index.iterator();
     int rowCount = 0;
     while (iterator.hasNext()) {
       rowCount++;
       Row row = iterator.next();
-      Assertions.assertEquals(1481871600000L, row.getTimestampFromEpoch());
+      Assert.assertEquals(1481871600000L, row.getTimestampFromEpoch());
       if (index.isRollup()) {
         // All rows are rollup into one row
-        Assertions.assertEquals(2, row.getMetric("count").intValue());
-        Assertions.assertEquals(isPreserveExistingMetrics ? 200 : 7, row.getMetric("sum_of_x").intValue());
+        Assert.assertEquals(2, row.getMetric("count").intValue());
+        Assert.assertEquals(isPreserveExistingMetrics ? 200 : 7, row.getMetric("sum_of_x").intValue());
       } else {
         // We still have 2 rows
         if (rowCount == 1) {
-          Assertions.assertEquals(1, row.getMetric("count").intValue());
-          Assertions.assertEquals(isPreserveExistingMetrics ? 100 : 4, row.getMetric("sum_of_x").intValue());
+          Assert.assertEquals(1, row.getMetric("count").intValue());
+          Assert.assertEquals(isPreserveExistingMetrics ? 100 : 4, row.getMetric("sum_of_x").intValue());
         } else {
-          Assertions.assertEquals(1, row.getMetric("count").intValue());
-          Assertions.assertEquals(isPreserveExistingMetrics ? 100 : 3, row.getMetric("sum_of_x").intValue());
+          Assert.assertEquals(1, row.getMetric("count").intValue());
+          Assert.assertEquals(isPreserveExistingMetrics ? 100 : 3, row.getMetric("sum_of_x").intValue());
         }
       }
     }

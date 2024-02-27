@@ -33,8 +33,8 @@ import org.apache.druid.server.coordinator.loading.TestLoadQueuePeon;
 import org.apache.druid.timeline.DataSegment;
 import org.easymock.EasyMock;
 import org.joda.time.Interval;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -137,8 +137,8 @@ public class DiskNormalizedCostBalancerStrategyTest
         MoreExecutors.listeningDecorator(Execs.multiThreaded(4, "DiskNormalizedCostBalancerStrategyTest-%d"))
     );
     ServerHolder holder = strategy.findServersToLoadSegment(segment, serverHolderList).next();
-    Assertions.assertNotNull(holder, "Should be able to find a place for new segment!!");
-    Assertions.assertEquals("BEST_SERVER", holder.getServer().getName(), "Best Server should be BEST_SERVER");
+    Assert.assertNotNull("Should be able to find a place for new segment!!", holder);
+    Assert.assertEquals("Best Server should be BEST_SERVER", "BEST_SERVER", holder.getServer().getName());
   }
 
   @Test
@@ -151,7 +151,7 @@ public class DiskNormalizedCostBalancerStrategyTest
         MoreExecutors.listeningDecorator(Execs.multiThreaded(1, "DiskNormalizedCostBalancerStrategyTest-%d"))
     );
     ServerHolder holder = strategy.findServersToLoadSegment(segment, serverHolderList).next();
-    Assertions.assertNotNull(holder, "Should be able to find a place for new segment!!");
-    Assertions.assertEquals("BEST_SERVER", holder.getServer().getName(), "Best Server should be BEST_SERVER");
+    Assert.assertNotNull("Should be able to find a place for new segment!!", holder);
+    Assert.assertEquals("Best Server should be BEST_SERVER", "BEST_SERVER", holder.getServer().getName());
   }
 }

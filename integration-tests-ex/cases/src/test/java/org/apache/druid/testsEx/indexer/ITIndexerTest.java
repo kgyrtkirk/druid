@@ -31,6 +31,7 @@ import org.apache.druid.testsEx.categories.BatchIndex;
 import org.apache.druid.testsEx.config.DruidTestRunner;
 import org.joda.time.Interval;
 import org.junit.Assert;
+import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 

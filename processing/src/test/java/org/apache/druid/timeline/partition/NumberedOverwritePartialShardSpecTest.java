@@ -19,8 +19,8 @@
 
 package org.apache.druid.timeline.partition;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class NumberedOverwritePartialShardSpecTest
 {
@@ -28,13 +28,13 @@ public class NumberedOverwritePartialShardSpecTest
   public void testUseNonRootGenerationPartitionSpace()
   {
     final NumberedOverwritePartialShardSpec partialShardSpec = new NumberedOverwritePartialShardSpec(0, 1, (short) 1);
-    Assertions.assertTrue(partialShardSpec.useNonRootGenerationPartitionSpace());
+    Assert.assertTrue(partialShardSpec.useNonRootGenerationPartitionSpace());
   }
 
   @Test
   public void tetsGetShardSpecClass()
   {
     final NumberedOverwritePartialShardSpec partialShardSpec = new NumberedOverwritePartialShardSpec(0, 1, (short) 1);
-    Assertions.assertSame(NumberedOverwriteShardSpec.class, partialShardSpec.getShardSpecClass());
+    Assert.assertSame(NumberedOverwriteShardSpec.class, partialShardSpec.getShardSpecClass());
   }
 }

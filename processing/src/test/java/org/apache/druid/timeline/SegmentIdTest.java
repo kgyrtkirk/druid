@@ -25,8 +25,8 @@ import org.apache.druid.java.util.common.DateTimes;
 import org.apache.druid.java.util.common.Intervals;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.List;
@@ -39,20 +39,20 @@ public class SegmentIdTest
   {
     String datasource = "datasource";
     SegmentId desc = SegmentId.of(datasource, Intervals.of("2015-01-02/2015-01-03"), "ver_0", 1);
-    Assertions.assertEquals("datasource_2015-01-02T00:00:00.000Z_2015-01-03T00:00:00.000Z_ver_0_1", desc.toString());
-    Assertions.assertEquals(desc, SegmentId.tryParse(datasource, desc.toString()));
+    Assert.assertEquals("datasource_2015-01-02T00:00:00.000Z_2015-01-03T00:00:00.000Z_ver_0_1", desc.toString());
+    Assert.assertEquals(desc, SegmentId.tryParse(datasource, desc.toString()));
 
     desc = desc.withInterval(Intervals.of("2014-10-20T00:00:00Z/P1D"));
-    Assertions.assertEquals("datasource_2014-10-20T00:00:00.000Z_2014-10-21T00:00:00.000Z_ver_0_1", desc.toString());
-    Assertions.assertEquals(desc, SegmentId.tryParse(datasource, desc.toString()));
+    Assert.assertEquals("datasource_2014-10-20T00:00:00.000Z_2014-10-21T00:00:00.000Z_ver_0_1", desc.toString());
+    Assert.assertEquals(desc, SegmentId.tryParse(datasource, desc.toString()));
 
     desc = SegmentId.of(datasource, Intervals.of("2015-01-02/2015-01-03"), "ver", 0);
-    Assertions.assertEquals("datasource_2015-01-02T00:00:00.000Z_2015-01-03T00:00:00.000Z_ver", desc.toString());
-    Assertions.assertEquals(desc, SegmentId.tryParse(datasource, desc.toString()));
+    Assert.assertEquals("datasource_2015-01-02T00:00:00.000Z_2015-01-03T00:00:00.000Z_ver", desc.toString());
+    Assert.assertEquals(desc, SegmentId.tryParse(datasource, desc.toString()));
 
     desc = desc.withInterval(Intervals.of("2014-10-20T00:00:00Z/P1D"));
-    Assertions.assertEquals("datasource_2014-10-20T00:00:00.000Z_2014-10-21T00:00:00.000Z_ver", desc.toString());
-    Assertions.assertEquals(desc, SegmentId.tryParse(datasource, desc.toString()));
+    Assert.assertEquals("datasource_2014-10-20T00:00:00.000Z_2014-10-21T00:00:00.000Z_ver", desc.toString());
+    Assert.assertEquals(desc, SegmentId.tryParse(datasource, desc.toString()));
   }
 
   @Test
@@ -60,20 +60,20 @@ public class SegmentIdTest
   {
     String datasource = "datasource_1";
     SegmentId desc = SegmentId.of(datasource, Intervals.of("2015-01-02/2015-01-03"), "ver_0", 1);
-    Assertions.assertEquals("datasource_1_2015-01-02T00:00:00.000Z_2015-01-03T00:00:00.000Z_ver_0_1", desc.toString());
-    Assertions.assertEquals(desc, SegmentId.tryParse(datasource, desc.toString()));
+    Assert.assertEquals("datasource_1_2015-01-02T00:00:00.000Z_2015-01-03T00:00:00.000Z_ver_0_1", desc.toString());
+    Assert.assertEquals(desc, SegmentId.tryParse(datasource, desc.toString()));
 
     desc = desc.withInterval(Intervals.of("2014-10-20T00:00:00Z/P1D"));
-    Assertions.assertEquals("datasource_1_2014-10-20T00:00:00.000Z_2014-10-21T00:00:00.000Z_ver_0_1", desc.toString());
-    Assertions.assertEquals(desc, SegmentId.tryParse(datasource, desc.toString()));
+    Assert.assertEquals("datasource_1_2014-10-20T00:00:00.000Z_2014-10-21T00:00:00.000Z_ver_0_1", desc.toString());
+    Assert.assertEquals(desc, SegmentId.tryParse(datasource, desc.toString()));
 
     desc = SegmentId.of(datasource, Intervals.of("2015-01-02/2015-01-03"), "ver", 0);
-    Assertions.assertEquals("datasource_1_2015-01-02T00:00:00.000Z_2015-01-03T00:00:00.000Z_ver", desc.toString());
-    Assertions.assertEquals(desc, SegmentId.tryParse(datasource, desc.toString()));
+    Assert.assertEquals("datasource_1_2015-01-02T00:00:00.000Z_2015-01-03T00:00:00.000Z_ver", desc.toString());
+    Assert.assertEquals(desc, SegmentId.tryParse(datasource, desc.toString()));
 
     desc = desc.withInterval(Intervals.of("2014-10-20T00:00:00Z/P1D"));
-    Assertions.assertEquals("datasource_1_2014-10-20T00:00:00.000Z_2014-10-21T00:00:00.000Z_ver", desc.toString());
-    Assertions.assertEquals(desc, SegmentId.tryParse(datasource, desc.toString()));
+    Assert.assertEquals("datasource_1_2014-10-20T00:00:00.000Z_2014-10-21T00:00:00.000Z_ver", desc.toString());
+    Assert.assertEquals(desc, SegmentId.tryParse(datasource, desc.toString()));
   }
 
   /**
@@ -85,32 +85,32 @@ public class SegmentIdTest
   {
     String dataSource = "datasource_2015-01-01T00:00:00.000Z";
     SegmentId desc = SegmentId.of(dataSource, Intervals.of("2015-01-02/2015-01-03"), "ver_0", 1);
-    Assertions.assertEquals(
+    Assert.assertEquals(
         "datasource_2015-01-01T00:00:00.000Z_2015-01-02T00:00:00.000Z_2015-01-03T00:00:00.000Z_ver_0_1",
         desc.toString()
     );
-    Assertions.assertEquals(desc, SegmentId.tryParse(dataSource, desc.toString()));
+    Assert.assertEquals(desc, SegmentId.tryParse(dataSource, desc.toString()));
 
     desc = desc.withInterval(Intervals.of("2014-10-20T00:00:00Z/P1D"));
-    Assertions.assertEquals(
+    Assert.assertEquals(
         "datasource_2015-01-01T00:00:00.000Z_2014-10-20T00:00:00.000Z_2014-10-21T00:00:00.000Z_ver_0_1",
         desc.toString()
     );
-    Assertions.assertEquals(desc, SegmentId.tryParse(dataSource, desc.toString()));
+    Assert.assertEquals(desc, SegmentId.tryParse(dataSource, desc.toString()));
 
     desc = SegmentId.of(dataSource, Intervals.of("2015-01-02/2015-01-03"), "ver", 0);
-    Assertions.assertEquals(
+    Assert.assertEquals(
         "datasource_2015-01-01T00:00:00.000Z_2015-01-02T00:00:00.000Z_2015-01-03T00:00:00.000Z_ver",
         desc.toString()
     );
-    Assertions.assertEquals(desc, SegmentId.tryParse(dataSource, desc.toString()));
+    Assert.assertEquals(desc, SegmentId.tryParse(dataSource, desc.toString()));
 
     desc = desc.withInterval(Intervals.of("2014-10-20T00:00:00Z/P1D"));
-    Assertions.assertEquals(
+    Assert.assertEquals(
         "datasource_2015-01-01T00:00:00.000Z_2014-10-20T00:00:00.000Z_2014-10-21T00:00:00.000Z_ver",
         desc.toString()
     );
-    Assertions.assertEquals(desc, SegmentId.tryParse(dataSource, desc.toString()));
+    Assert.assertEquals(desc, SegmentId.tryParse(dataSource, desc.toString()));
   }
 
   /**
@@ -119,7 +119,7 @@ public class SegmentIdTest
   @Test
   public void testInvalidFormat0()
   {
-    Assertions.assertNull(
+    Assert.assertNull(
         SegmentId.tryParse("datasource", "datasource_2015-01-02T00:00:00.000Z_2014-10-20T00:00:00.000Z_version")
     );
   }
@@ -130,7 +130,7 @@ public class SegmentIdTest
   @Test
   public void testInvalidFormat1()
   {
-    Assertions.assertNull(SegmentId.tryParse("datasource", "datasource_invalid_interval_version"));
+    Assert.assertNull(SegmentId.tryParse("datasource", "datasource_invalid_interval_version"));
   }
 
   /**
@@ -139,7 +139,7 @@ public class SegmentIdTest
   @Test
   public void testInvalidFormat2()
   {
-    Assertions.assertNull(SegmentId.tryParse("datasource", "datasource_2015-01-02T00:00:00.000Z_version"));
+    Assert.assertNull(SegmentId.tryParse("datasource", "datasource_2015-01-02T00:00:00.000Z_version"));
   }
 
   /**
@@ -159,8 +159,8 @@ public class SegmentIdTest
     );
     for (String segmentId : segmentIds) {
       String dataSource = SegmentId.tryExtractMostProbableDataSource(segmentId);
-      Assertions.assertTrue("datasource".equals(dataSource) || "datasource_1".equals(dataSource));
-      Assertions.assertTrue(!SegmentId.iteratePossibleParsingsWithDataSource(dataSource, segmentId).isEmpty());
+      Assert.assertTrue("datasource".equals(dataSource) || "datasource_1".equals(dataSource));
+      Assert.assertTrue(!SegmentId.iteratePossibleParsingsWithDataSource(dataSource, segmentId).isEmpty());
     }
   }
 
@@ -169,9 +169,9 @@ public class SegmentIdTest
   {
     SegmentId segmentId =
         SegmentId.tryParse("datasource", "datasource_2015-01-02T00:00:00.000Z_2015-01-03T00:00:00.000Z_ver_0");
-    Assertions.assertNotNull(segmentId);
-    Assertions.assertEquals("ver_0", segmentId.getVersion());
-    Assertions.assertEquals(0, segmentId.getPartitionNum());
+    Assert.assertNotNull(segmentId);
+    Assert.assertEquals("ver_0", segmentId.getVersion());
+    Assert.assertEquals(0, segmentId.getPartitionNum());
   }
 
   @Test
@@ -188,8 +188,8 @@ public class SegmentIdTest
         SegmentId.of("datasource_2015-01-01T00:00:00.000Z", new Interval(dt2, dt3), "ver_0", 1),
         SegmentId.of("datasource_2015-01-01T00:00:00.000Z", new Interval(dt2, dt3), "ver_0_1", 0)
     );
-    Assertions.assertEquals(4, possibleParsings.size());
-    Assertions.assertEquals(expected, ImmutableSet.copyOf(possibleParsings));
+    Assert.assertEquals(4, possibleParsings.size());
+    Assert.assertEquals(expected, ImmutableSet.copyOf(possibleParsings));
   }
 
   @Test
@@ -206,8 +206,8 @@ public class SegmentIdTest
         SegmentId.of("datasource_2015-01-01T00:00:00.000Z", new Interval(dt2, dt3), "", 1),
         SegmentId.of("datasource_2015-01-01T00:00:00.000Z", new Interval(dt2, dt3), "_1", 0)
     );
-    Assertions.assertEquals(4, possibleParsings.size());
-    Assertions.assertEquals(expected, ImmutableSet.copyOf(possibleParsings));
+    Assert.assertEquals(4, possibleParsings.size());
+    Assert.assertEquals(expected, ImmutableSet.copyOf(possibleParsings));
   }
 
   /**
@@ -225,7 +225,7 @@ public class SegmentIdTest
         SegmentId.of("datasource", new Interval(dt1, dt2), "2015-01-02T00:00:00.000Z_ver", 1),
         SegmentId.of("datasource", new Interval(dt1, dt2), "2015-01-02T00:00:00.000Z_ver_1", 0)
     );
-    Assertions.assertEquals(2, possibleParsings.size());
-    Assertions.assertEquals(expected, ImmutableSet.copyOf(possibleParsings));
+    Assert.assertEquals(2, possibleParsings.size());
+    Assert.assertEquals(expected, ImmutableSet.copyOf(possibleParsings));
   }
 }

@@ -31,6 +31,7 @@ import org.apache.druid.java.util.common.parsers.JSONPathSpec;
 import org.joda.time.DateTime;
 import org.joda.time.chrono.ISOChronology;
 import org.junit.Before;
+import org.junit.Test;
 
 import java.nio.ByteBuffer;
 

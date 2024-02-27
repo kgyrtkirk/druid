@@ -23,6 +23,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.druid.jackson.DefaultObjectMapper;
 import org.junit.Assert;
+import org.junit.Test;
 
 public class QuantilesSketchKeyCollectorSnapshotTest
 {

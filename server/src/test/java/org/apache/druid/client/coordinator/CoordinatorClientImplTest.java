@@ -41,10 +41,10 @@ import org.apache.druid.timeline.partition.NumberedShardSpec;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.joda.time.Interval;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -58,7 +58,7 @@ public class CoordinatorClientImplTest
   private MockServiceClient serviceClient;
   private CoordinatorClient coordinatorClient;
 
-  @BeforeEach
+  @Before
   public void setup()
   {
     jsonMapper = new DefaultObjectMapper();
@@ -70,7 +70,7 @@ public class CoordinatorClientImplTest
     coordinatorClient = new CoordinatorClientImpl(serviceClient, jsonMapper);
   }
 
-  @AfterEach
+  @After
   public void tearDown()
   {
     serviceClient.verify();
@@ -92,7 +92,7 @@ public class CoordinatorClientImplTest
         StringUtils.toUtf8("true")
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         true,
         coordinatorClient.isHandoffComplete(
             "xyz",
@@ -120,7 +120,7 @@ public class CoordinatorClientImplTest
         jsonMapper.writeValueAsBytes(segment)
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         segment,
         coordinatorClient.fetchSegment("xyz", "def", false).get()
     );
@@ -148,7 +148,7 @@ public class CoordinatorClientImplTest
         jsonMapper.writeValueAsBytes(segment)
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         segment,
         coordinatorClient.fetchSegment("xyz", "def", true).get()
     );
@@ -175,7 +175,7 @@ public class CoordinatorClientImplTest
         jsonMapper.writeValueAsBytes(Collections.singletonList(segment))
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Collections.singletonList(segment),
         coordinatorClient.fetchUsedSegments("xyz", intervals).get()
     );
@@ -202,7 +202,7 @@ public class CoordinatorClientImplTest
         jsonMapper.writeValueAsBytes(Collections.singletonList(fooInfo))
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Collections.singletonList(fooInfo),
         coordinatorClient.fetchDataSourceInformation(Collections.singleton(foo)).get()
     );
@@ -269,7 +269,7 @@ public class CoordinatorClientImplTest
     List<ImmutableSegmentLoadInfo> segmentLoadInfoList =
         ImmutableList.of(immutableSegmentLoadInfo1, immutableSegmentLoadInfo2);
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         segmentLoadInfoList,
         coordinatorClient.fetchServerViewSegments("xyz", intervals)
     );

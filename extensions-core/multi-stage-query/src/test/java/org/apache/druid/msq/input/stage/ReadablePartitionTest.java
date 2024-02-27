@@ -20,6 +20,7 @@
 package org.apache.druid.msq.input.stage;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
+import org.junit.Test;
 
 public class ReadablePartitionTest
 {

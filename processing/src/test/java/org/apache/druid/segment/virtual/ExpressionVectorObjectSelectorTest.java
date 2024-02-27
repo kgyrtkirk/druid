@@ -24,10 +24,10 @@ import org.apache.druid.math.expr.vector.ExprEvalObjectVector;
 import org.apache.druid.math.expr.vector.ExprEvalVector;
 import org.apache.druid.math.expr.vector.ExprVectorProcessor;
 import org.easymock.EasyMock;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 public class ExpressionVectorObjectSelectorTest
 {
@@ -36,7 +36,7 @@ public class ExpressionVectorObjectSelectorTest
   private ExprVectorProcessor vectorProcessor;
   private ExpressionVectorObjectSelector expressionVectorValueSelector;
 
-  @BeforeEach
+  @Before
   public void setUp()
   {
     binding = EasyMock.createMock(Expr.VectorInputBinding.class);
@@ -47,7 +47,7 @@ public class ExpressionVectorObjectSelectorTest
     EasyMock.reset(binding, vectorProcessor);
   }
 
-  @AfterEach
+  @After
   public void tearDown()
   {
     EasyMock.verify(binding, vectorProcessor);
@@ -65,6 +65,6 @@ public class ExpressionVectorObjectSelectorTest
     Object[] vector1 = expressionVectorValueSelector.getObjectVector();
     Object[] vector2 = expressionVectorValueSelector.getObjectVector();
 
-    Assertions.assertArrayEquals(vector1, vector2);
+    Assert.assertArrayEquals(vector1, vector2);
   }
 }

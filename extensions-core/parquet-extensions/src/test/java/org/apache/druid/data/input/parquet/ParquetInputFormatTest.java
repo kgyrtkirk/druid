@@ -22,6 +22,7 @@ package org.apache.druid.data.input.parquet;
 import org.apache.druid.java.util.common.parsers.JSONPathSpec;
 import org.apache.hadoop.conf.Configuration;
 import org.junit.Assert;
+import org.junit.Test;
 
 public class ParquetInputFormatTest
 {

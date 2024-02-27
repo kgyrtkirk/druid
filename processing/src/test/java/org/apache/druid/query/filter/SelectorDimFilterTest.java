@@ -21,8 +21,8 @@ package org.apache.druid.query.filter;
 
 import com.google.common.collect.Sets;
 import org.apache.druid.query.extraction.RegexDimExtractionFn;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -34,11 +34,11 @@ public class SelectorDimFilterTest
   {
     SelectorDimFilter selectorDimFilter = new SelectorDimFilter("abc", "d", null);
     SelectorDimFilter selectorDimFilter2 = new SelectorDimFilter("ab", "cd", null);
-    Assertions.assertFalse(Arrays.equals(selectorDimFilter.getCacheKey(), selectorDimFilter2.getCacheKey()));
+    Assert.assertFalse(Arrays.equals(selectorDimFilter.getCacheKey(), selectorDimFilter2.getCacheKey()));
 
     RegexDimExtractionFn regexFn = new RegexDimExtractionFn(".*", false, null);
     SelectorDimFilter selectorDimFilter3 = new SelectorDimFilter("abc", "d", regexFn);
-    Assertions.assertFalse(Arrays.equals(selectorDimFilter.getCacheKey(), selectorDimFilter3.getCacheKey()));
+    Assert.assertFalse(Arrays.equals(selectorDimFilter.getCacheKey(), selectorDimFilter3.getCacheKey()));
   }
 
   @Test
@@ -48,8 +48,8 @@ public class SelectorDimFilterTest
     RegexDimExtractionFn regexFn = new RegexDimExtractionFn(".*", false, null);
     SelectorDimFilter selectorDimFilter2 = new SelectorDimFilter("abc", "d", regexFn);
 
-    Assertions.assertEquals("abc = d", selectorDimFilter.toString());
-    Assertions.assertEquals("regex(/.*/, 1)(abc) = d", selectorDimFilter2.toString());
+    Assert.assertEquals("abc = d", selectorDimFilter.toString());
+    Assert.assertEquals("regex(/.*/, 1)(abc) = d", selectorDimFilter2.toString());
   }
 
   @Test
@@ -59,7 +59,7 @@ public class SelectorDimFilterTest
     RegexDimExtractionFn regexFn = new RegexDimExtractionFn(".*", false, null);
     SelectorDimFilter selectorDimFilter2 = new SelectorDimFilter("abc", "d", regexFn);
 
-    Assertions.assertNotEquals(selectorDimFilter.hashCode(), selectorDimFilter2.hashCode());
+    Assert.assertNotEquals(selectorDimFilter.hashCode(), selectorDimFilter2.hashCode());
   }
 
   @Test
@@ -75,14 +75,14 @@ public class SelectorDimFilterTest
             )
         )
     );
-    Assertions.assertEquals(selectorDimFilter, filter.optimize(false));
-    Assertions.assertEquals(selectorDimFilter, filter.optimize(true));
+    Assert.assertEquals(selectorDimFilter, filter.optimize(false));
+    Assert.assertEquals(selectorDimFilter, filter.optimize(true));
   }
 
   @Test
   public void testGetRequiredColumns()
   {
     SelectorDimFilter selectorDimFilter = new SelectorDimFilter("abc", "d", null);
-    Assertions.assertEquals(selectorDimFilter.getRequiredColumns(), Sets.newHashSet("abc"));
+    Assert.assertEquals(selectorDimFilter.getRequiredColumns(), Sets.newHashSet("abc"));
   }
 }

@@ -32,6 +32,7 @@ import org.apache.druid.tasklogs.TaskLogPusher;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.Mockito;
 

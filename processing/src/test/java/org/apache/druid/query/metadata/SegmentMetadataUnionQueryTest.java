@@ -38,14 +38,16 @@ import org.apache.druid.segment.TestIndex;
 import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.column.ValueType;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+@RunWith(Parameterized.class)
 public class SegmentMetadataUnionQueryTest extends InitializedNullHandlingTest
 {
 
@@ -55,10 +57,10 @@ public class SegmentMetadataUnionQueryTest extends InitializedNullHandlingTest
           QueryRunnerTestHelper.NOOP_QUERYWATCHER
       );
 
-  private QueryRunner<SegmentAnalysis> runner;
-  private boolean mmap;
+  private final QueryRunner<SegmentAnalysis> runner;
+  private final boolean mmap;
 
-  public void initSegmentMetadataUnionQueryTest(
+  public SegmentMetadataUnionQueryTest(
       QueryRunner<SegmentAnalysis> runner,
       boolean mmap
   )
@@ -67,6 +69,7 @@ public class SegmentMetadataUnionQueryTest extends InitializedNullHandlingTest
     this.mmap = mmap;
   }
 
+  @Parameterized.Parameters
   public static Iterable<Object[]> constructorFeeder()
   {
     final ArrayList<QueryRunner<SegmentAnalysis>> runners = QueryRunnerTestHelper.mapQueryRunnersToMerge(
@@ -92,11 +95,9 @@ public class SegmentMetadataUnionQueryTest extends InitializedNullHandlingTest
   }
 
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest
-  public void testSegmentMetadataUnionQuery(QueryRunner<SegmentAnalysis> runner, boolean mmap)
+  @Test
+  public void testSegmentMetadataUnionQuery()
   {
-    initSegmentMetadataUnionQueryTest(runner, mmap);
     SegmentAnalysis expected = new SegmentAnalysis(
         QueryRunnerTestHelper.SEGMENT_ID.toString(),
         Collections.singletonList(Intervals.of("2011-01-12T00:00:00.000Z/2011-04-15T00:00:00.001Z")),

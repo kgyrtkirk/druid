@@ -19,15 +19,15 @@
 
 package org.apache.druid.segment.realtime;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 public class FireDepartmentMetricsTest
 {
   private FireDepartmentMetrics metrics;
 
-  @BeforeEach
+  @Before
   public void setup()
   {
     metrics = new FireDepartmentMetrics();
@@ -37,9 +37,9 @@ public class FireDepartmentMetricsTest
   public void testSnapshotBeforeProcessing()
   {
     FireDepartmentMetrics snapshot = metrics.snapshot();
-    Assertions.assertEquals(0L, snapshot.messageGap());
+    Assert.assertEquals(0L, snapshot.messageGap());
     // invalid value
-    Assertions.assertTrue(0 > snapshot.maxSegmentHandoffTime());
+    Assert.assertTrue(0 > snapshot.maxSegmentHandoffTime());
   }
 
   @Test
@@ -48,8 +48,8 @@ public class FireDepartmentMetricsTest
     metrics.reportMessageMaxTimestamp(System.currentTimeMillis() - 20L);
     metrics.reportMaxSegmentHandoffTime(7L);
     FireDepartmentMetrics snapshot = metrics.snapshot();
-    Assertions.assertTrue(snapshot.messageGap() >= 20L);
-    Assertions.assertEquals(7, snapshot.maxSegmentHandoffTime());
+    Assert.assertTrue(snapshot.messageGap() >= 20L);
+    Assert.assertEquals(7, snapshot.maxSegmentHandoffTime());
   }
 
   @Test
@@ -62,8 +62,8 @@ public class FireDepartmentMetricsTest
     metrics.markProcessingDone();
     FireDepartmentMetrics snapshot = metrics.snapshot();
     // Message gap must be invalid after processing is done
-    Assertions.assertTrue(0 > snapshot.messageGap());
+    Assert.assertTrue(0 > snapshot.messageGap());
     // value must be invalid
-    Assertions.assertTrue(0 > snapshot.maxSegmentHandoffTime());
+    Assert.assertTrue(0 > snapshot.maxSegmentHandoffTime());
   }
 }

@@ -26,8 +26,8 @@ import org.apache.druid.query.rowsandcols.RowsAndColumns;
 import org.apache.druid.query.rowsandcols.column.IntArrayColumn;
 import org.apache.druid.query.rowsandcols.column.ObjectArrayColumn;
 import org.apache.druid.segment.column.ColumnType;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Collections;
 import java.util.function.Function;
@@ -89,7 +89,7 @@ public class AppendableRowsAndColumnsTest extends SemanticTestBase
     final ClusteredGroupPartitioner parter = ClusteredGroupPartitioner.fromRAC(appender);
     final int[] boundaries = parter.computeBoundaries(Collections.singletonList("sorted"));
 
-    Assertions.assertArrayEquals(new int[]{0, 3, 5, 6, 9}, boundaries);
+    Assert.assertArrayEquals(new int[]{0, 3, 5, 6, 9}, boundaries);
   }
 
 }

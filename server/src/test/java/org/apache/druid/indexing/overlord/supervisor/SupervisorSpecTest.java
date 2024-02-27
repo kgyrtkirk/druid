@@ -20,8 +20,8 @@
 package org.apache.druid.indexing.overlord.supervisor;
 
 import org.apache.druid.java.util.common.UOE;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.List;
 
@@ -63,6 +63,6 @@ public class SupervisorSpecTest
   @Test
   public void test()
   {
-    Assertions.assertThrows(UOE.class, () -> SUPERVISOR_SPEC.getInputSourceResources());
+    Assert.assertThrows(UOE.class, () -> SUPERVISOR_SPEC.getInputSourceResources());
   }
 }

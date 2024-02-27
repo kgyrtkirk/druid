@@ -35,6 +35,7 @@ import org.apache.druid.msq.kernel.StageDefinition;
 import org.apache.druid.msq.kernel.WorkerAssignmentStrategy;
 import org.apache.druid.msq.querykit.common.OffsetLimitFrameProcessorFactory;
 import org.junit.Assert;
+import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;

@@ -19,8 +19,8 @@
 
 package org.apache.druid.server.initialization;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class JettyWithResponseFilterEnabledTest extends JettyTest
 {
@@ -37,6 +37,6 @@ public class JettyWithResponseFilterEnabledTest extends JettyTest
   public void testJettyErrorHandlerWithFilter()
   {
     // Response filter is enabled by config hence we do not show servlet information
-    Assertions.assertFalse(server.getErrorHandler().isShowServlet());
+    Assert.assertFalse(server.getErrorHandler().isShowServlet());
   }
 }

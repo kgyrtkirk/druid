@@ -48,9 +48,9 @@ import org.apache.druid.query.topn.TopNQueryConfig;
 import org.apache.druid.query.topn.TopNQueryQueryToolChest;
 import org.apache.druid.query.topn.TopNResultValue;
 import org.joda.time.DateTime;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.Closeable;
 import java.util.ArrayList;
@@ -83,7 +83,7 @@ public class BackgroundCachePopulatorTest
   private QueryRunner baseRunner;
   private AssertingClosable closable;
 
-  @BeforeEach
+  @Before
   public void before()
   {
     this.backgroundCachePopulator = new BackgroundCachePopulator(
@@ -115,7 +115,7 @@ public class BackgroundCachePopulatorTest
           @Override
           public void before()
           {
-            Assertions.assertFalse(closable.isClosed());
+            Assert.assertFalse(closable.isClosed());
           }
 
           @Override
@@ -199,14 +199,14 @@ public class BackgroundCachePopulatorTest
 
     Sequence res = this.backgroundCachePopulator.wrap(this.baseRunner.run(QueryPlus.wrap(query), ResponseContext.createEmpty()),
         (value) -> cacheStrategy.prepareForSegmentLevelCache().apply(value), cache, cacheKey);
-    Assertions.assertFalse(closable.isClosed(), "sequence must not be closed");
-    Assertions.assertNull(cache.get(cacheKey), "cache must be empty");
+    Assert.assertFalse("sequence must not be closed", closable.isClosed());
+    Assert.assertNull("cache must be empty", cache.get(cacheKey));
 
     List results = res.toList();
-    Assertions.assertTrue(closable.isClosed());
+    Assert.assertTrue(closable.isClosed());
     List<Result> expectedRes = makeTopNResults(false, OBJECTS);
-    Assertions.assertEquals(expectedRes.toString(), results.toString());
-    Assertions.assertEquals(5, results.size());
+    Assert.assertEquals(expectedRes.toString(), results.toString());
+    Assert.assertEquals(5, results.size());
   }
 
   @Test
@@ -227,14 +227,14 @@ public class BackgroundCachePopulatorTest
         (value) -> {
         throw new RuntimeException("Error");
       }, cache, cacheKey);
-    Assertions.assertFalse(closable.isClosed(), "sequence must not be closed");
-    Assertions.assertNull(cache.get(cacheKey), "cache must be empty");
+    Assert.assertFalse("sequence must not be closed", closable.isClosed());
+    Assert.assertNull("cache must be empty", cache.get(cacheKey));
 
     List results = res.toList();
-    Assertions.assertTrue(closable.isClosed());
+    Assert.assertTrue(closable.isClosed());
     List<Result> expectedRes = makeTopNResults(false, OBJECTS);
-    Assertions.assertEquals(expectedRes.toString(), results.toString());
-    Assertions.assertEquals(5, results.size());
+    Assert.assertEquals(expectedRes.toString(), results.toString());
+    Assert.assertEquals(5, results.size());
   }
 
 
@@ -291,8 +291,8 @@ public class BackgroundCachePopulatorTest
     @Override
     public void close()
     {
-      Assertions.assertFalse(closed.get());
-      Assertions.assertTrue(closed.compareAndSet(false, true));
+      Assert.assertFalse(closed.get());
+      Assert.assertTrue(closed.compareAndSet(false, true));
     }
 
     public boolean isClosed()

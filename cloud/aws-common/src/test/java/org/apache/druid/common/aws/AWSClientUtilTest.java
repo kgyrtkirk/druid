@@ -23,8 +23,8 @@ import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.model.MultiObjectDeleteException;
 import com.google.common.collect.ImmutableList;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.IOException;
 
@@ -33,7 +33,7 @@ public class AWSClientUtilTest
   @Test
   public void testRecoverableException_IOException()
   {
-    Assertions.assertTrue(AWSClientUtil.isClientExceptionRecoverable(new AmazonClientException(new IOException())));
+    Assert.assertTrue(AWSClientUtil.isClientExceptionRecoverable(new AmazonClientException(new IOException())));
   }
 
   @Test
@@ -41,7 +41,7 @@ public class AWSClientUtilTest
   {
     AmazonServiceException ex = new AmazonServiceException(null);
     ex.setErrorCode("RequestTimeout");
-    Assertions.assertTrue(AWSClientUtil.isClientExceptionRecoverable(ex));
+    Assert.assertTrue(AWSClientUtil.isClientExceptionRecoverable(ex));
   }
 
   @Test
@@ -49,7 +49,7 @@ public class AWSClientUtilTest
   {
     AmazonServiceException ex = new AmazonServiceException(null);
     ex.setStatusCode(500);
-    Assertions.assertTrue(AWSClientUtil.isClientExceptionRecoverable(ex));
+    Assert.assertTrue(AWSClientUtil.isClientExceptionRecoverable(ex));
   }
 
   @Test
@@ -57,7 +57,7 @@ public class AWSClientUtilTest
   {
     AmazonServiceException ex = new AmazonServiceException(null);
     ex.setStatusCode(502);
-    Assertions.assertTrue(AWSClientUtil.isClientExceptionRecoverable(ex));
+    Assert.assertTrue(AWSClientUtil.isClientExceptionRecoverable(ex));
   }
 
   @Test
@@ -65,7 +65,7 @@ public class AWSClientUtilTest
   {
     AmazonServiceException ex = new AmazonServiceException(null);
     ex.setStatusCode(503);
-    Assertions.assertTrue(AWSClientUtil.isClientExceptionRecoverable(ex));
+    Assert.assertTrue(AWSClientUtil.isClientExceptionRecoverable(ex));
   }
 
   @Test
@@ -73,7 +73,7 @@ public class AWSClientUtilTest
   {
     AmazonServiceException ex = new AmazonServiceException(null);
     ex.setErrorCode("ProvisionedThroughputExceededException");
-    Assertions.assertTrue(AWSClientUtil.isClientExceptionRecoverable(ex));
+    Assert.assertTrue(AWSClientUtil.isClientExceptionRecoverable(ex));
   }
 
   @Test
@@ -81,7 +81,7 @@ public class AWSClientUtilTest
   {
     AmazonServiceException ex = new AmazonServiceException(null);
     ex.setErrorCode("RequestExpired");
-    Assertions.assertTrue(AWSClientUtil.isClientExceptionRecoverable(ex));
+    Assert.assertTrue(AWSClientUtil.isClientExceptionRecoverable(ex));
   }
 
   @Test
@@ -95,13 +95,13 @@ public class AWSClientUtilTest
         ImmutableList.of(retryableError, nonRetryableError),
         ImmutableList.of()
     );
-    Assertions.assertTrue(AWSClientUtil.isClientExceptionRecoverable(ex));
+    Assert.assertTrue(AWSClientUtil.isClientExceptionRecoverable(ex));
   }
 
   @Test
   public void testNonRecoverableException_RuntimeException()
   {
     AmazonClientException ex = new AmazonClientException(new RuntimeException());
-    Assertions.assertFalse(AWSClientUtil.isClientExceptionRecoverable(ex));
+    Assert.assertFalse(AWSClientUtil.isClientExceptionRecoverable(ex));
   }
 }

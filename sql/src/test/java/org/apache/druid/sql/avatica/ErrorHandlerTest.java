@@ -24,8 +24,8 @@ import org.apache.druid.common.exception.AllowedRegexErrorResponseTransformStrat
 import org.apache.druid.query.QueryException;
 import org.apache.druid.query.QueryInterruptedException;
 import org.apache.druid.server.initialization.ServerConfig;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 import org.mockito.Mockito;
 
 public class ErrorHandlerTest
@@ -44,7 +44,7 @@ public class ErrorHandlerTest
     QueryException input = new QueryException("error", "error message", "error class", "host");
 
     RuntimeException output = errorHandler.sanitize(input);
-    Assertions.assertNull(output.getMessage());
+    Assert.assertNull(output.getMessage());
   }
 
   @Test
@@ -55,7 +55,7 @@ public class ErrorHandlerTest
     QueryInterruptedException input = new QueryInterruptedException("error", "error messagez", "error class", "host");
 
     RuntimeException output = errorHandler.sanitize(input);
-    Assertions.assertEquals("error messagez", output.getMessage());
+    Assert.assertEquals("error messagez", output.getMessage());
   }
 
   @Test
@@ -68,7 +68,7 @@ public class ErrorHandlerTest
     Mockito.when(serverConfig.getErrorResponseTransformStrategy())
            .thenReturn(emptyAllowedRegexErrorResponseTransformStrategy);
     ErrorHandler errorHandler = new ErrorHandler(serverConfig);
-    Assertions.assertTrue(errorHandler.hasAffectingErrorResponseTransformStrategy());
+    Assert.assertTrue(errorHandler.hasAffectingErrorResponseTransformStrategy());
   }
 
   @Test
@@ -76,7 +76,7 @@ public class ErrorHandlerTest
   {
     ServerConfig serverConfig = new ServerConfig();
     ErrorHandler errorHandler = new ErrorHandler(serverConfig);
-    Assertions.assertFalse(errorHandler.hasAffectingErrorResponseTransformStrategy());
+    Assert.assertFalse(errorHandler.hasAffectingErrorResponseTransformStrategy());
   }
 
   @Test
@@ -92,6 +92,6 @@ public class ErrorHandlerTest
 
     Exception input = new Exception("message");
     RuntimeException output = errorHandler.sanitize(input);
-    Assertions.assertEquals(null, output.getMessage());
+    Assert.assertEquals(null, output.getMessage());
   }
 }

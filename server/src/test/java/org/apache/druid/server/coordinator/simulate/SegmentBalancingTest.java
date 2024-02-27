@@ -22,13 +22,10 @@ package org.apache.druid.server.coordinator.simulate;
 import org.apache.druid.client.DruidServer;
 import org.apache.druid.server.coordinator.CoordinatorDynamicConfig;
 import org.apache.druid.timeline.DataSegment;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -43,7 +40,6 @@ public class SegmentBalancingTest extends CoordinatorSimulationBaseTest
   private final String datasource = DS.WIKI;
   private final List<DataSegment> segments = Segments.WIKI_10X1D;
 
-  @BeforeEach
   @Override
   public void setUp()
   {
@@ -90,8 +86,8 @@ public class SegmentBalancingTest extends CoordinatorSimulationBaseTest
     loadQueuedSegments();
 
     // Verify that segments have now been balanced out
-    Assertions.assertEquals(5, historicalT11.getTotalSegments());
-    Assertions.assertEquals(5, historicalT12.getTotalSegments());
+    Assert.assertEquals(5, historicalT11.getTotalSegments());
+    Assert.assertEquals(5, historicalT12.getTotalSegments());
     verifyDatasourceIsFullyLoaded(datasource);
   }
 
@@ -118,8 +114,8 @@ public class SegmentBalancingTest extends CoordinatorSimulationBaseTest
     loadQueuedSegments();
 
     // Verify that no segment has been loaded or dropped
-    Assertions.assertEquals(10, historicalT11.getTotalSegments());
-    Assertions.assertEquals(0, historicalT12.getTotalSegments());
+    Assert.assertEquals(10, historicalT11.getTotalSegments());
+    Assert.assertEquals(0, historicalT12.getTotalSegments());
     verifyDatasourceIsFullyLoaded(datasource);
   }
 
@@ -152,8 +148,8 @@ public class SegmentBalancingTest extends CoordinatorSimulationBaseTest
 
     // Finish and verify balancing
     loadQueuedSegments();
-    Assertions.assertEquals(5, historicalT11.getTotalSegments());
-    Assertions.assertEquals(5, historicalT12.getTotalSegments());
+    Assert.assertEquals(5, historicalT11.getTotalSegments());
+    Assert.assertEquals(5, historicalT12.getTotalSegments());
     verifyDatasourceIsFullyLoaded(datasource);
   }
 
@@ -186,8 +182,8 @@ public class SegmentBalancingTest extends CoordinatorSimulationBaseTest
 
     // Complete loading the segments
     loadQueuedSegments();
-    Assertions.assertEquals(5, historicalT11.getTotalSegments());
-    Assertions.assertEquals(5, historicalT12.getTotalSegments());
+    Assert.assertEquals(5, historicalT11.getTotalSegments());
+    Assert.assertEquals(5, historicalT12.getTotalSegments());
   }
 
   @Test
@@ -232,11 +228,10 @@ public class SegmentBalancingTest extends CoordinatorSimulationBaseTest
     // Run 4: Load pending segments, more are moved
     loadQueuedSegments();
     runCoordinatorCycle();
-    Assertions.assertTrue(getValue(Metric.MOVED_COUNT, null).intValue() > 0);
+    Assert.assertTrue(getValue(Metric.MOVED_COUNT, null).intValue() > 0);
   }
 
-  @Test
-  @Timeout(value = 60000L, unit = TimeUnit.MILLISECONDS)
+  @Test(timeout = 60000L)
   public void testMaxSegmentsAreMovedWhenClusterIsSkewed()
   {
     // Add 10 historicals of size 1 TB each

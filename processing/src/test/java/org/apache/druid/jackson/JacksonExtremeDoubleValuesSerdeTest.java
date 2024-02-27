@@ -20,8 +20,8 @@
 package org.apache.druid.jackson;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.IOException;
 
@@ -33,9 +33,9 @@ public class JacksonExtremeDoubleValuesSerdeTest
     ObjectMapper objectMapper = new ObjectMapper();
     for (double value : new double[] {Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY}) {
       String serialized = objectMapper.writeValueAsString(value);
-      Assertions.assertEquals(new Double(value), objectMapper.readValue(serialized, Double.class));
+      Assert.assertEquals(new Double(value), objectMapper.readValue(serialized, Double.class));
     }
     String negativeInfinityString = objectMapper.writeValueAsString(Double.NaN);
-    Assertions.assertTrue(objectMapper.readValue(negativeInfinityString, Double.class).isNaN());
+    Assert.assertTrue(objectMapper.readValue(negativeInfinityString, Double.class).isNaN());
   }
 }

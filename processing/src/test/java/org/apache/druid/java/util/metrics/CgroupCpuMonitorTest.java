@@ -25,10 +25,12 @@ import org.apache.druid.java.util.emitter.core.Event;
 import org.apache.druid.java.util.metrics.cgroups.CgroupDiscoverer;
 import org.apache.druid.java.util.metrics.cgroups.ProcCgroupDiscoverer;
 import org.apache.druid.java.util.metrics.cgroups.TestUtils;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,17 +39,19 @@ import java.util.Map;
 
 public class CgroupCpuMonitorTest
 {
-  @TempDir
-  public File temporaryFolder;
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
+  @Rule
+  public TemporaryFolder temporaryFolder = new TemporaryFolder();
   private File procDir;
   private File cgroupDir;
   private CgroupDiscoverer discoverer;
 
-  @BeforeEach
+  @Before
   public void setUp() throws IOException
   {
-    cgroupDir = newFolder(temporaryFolder, "junit");
-    procDir = newFolder(temporaryFolder, "junit");
+    cgroupDir = temporaryFolder.newFolder();
+    procDir = temporaryFolder.newFolder();
     discoverer = new ProcCgroupDiscoverer(procDir.toPath());
     TestUtils.setUpCgroups(procDir, cgroupDir);
     final File cpuDir = new File(
@@ -66,33 +70,24 @@ public class CgroupCpuMonitorTest
   {
     final CgroupCpuMonitor monitor = new CgroupCpuMonitor(discoverer, ImmutableMap.of(), "some_feed");
     final StubServiceEmitter emitter = new StubServiceEmitter("service", "host");
-    Assertions.assertTrue(monitor.doMonitor(emitter));
+    Assert.assertTrue(monitor.doMonitor(emitter));
     final List<Event> actualEvents = emitter.getEvents();
-    Assertions.assertEquals(2, actualEvents.size());
+    Assert.assertEquals(2, actualEvents.size());
     final Map<String, Object> sharesEvent = actualEvents.get(0).toMap();
     final Map<String, Object> coresEvent = actualEvents.get(1).toMap();
-    Assertions.assertEquals("cgroup/cpu/shares", sharesEvent.get("metric"));
-    Assertions.assertEquals(1024L, sharesEvent.get("value"));
-    Assertions.assertEquals("cgroup/cpu/cores_quota", coresEvent.get("metric"));
-    Assertions.assertEquals(3.0D, coresEvent.get("value"));
+    Assert.assertEquals("cgroup/cpu/shares", sharesEvent.get("metric"));
+    Assert.assertEquals(1024L, sharesEvent.get("value"));
+    Assert.assertEquals("cgroup/cpu/cores_quota", coresEvent.get("metric"));
+    Assert.assertEquals(3.0D, coresEvent.get("value"));
   }
 
   @Test
   public void testQuotaCompute()
   {
-    Assertions.assertEquals(-1, CgroupCpuMonitor.computeProcessorQuota(-1, 100000), 0);
-    Assertions.assertEquals(0, CgroupCpuMonitor.computeProcessorQuota(0, 100000), 0);
-    Assertions.assertEquals(-1, CgroupCpuMonitor.computeProcessorQuota(100000, 0), 0);
-    Assertions.assertEquals(2.0D, CgroupCpuMonitor.computeProcessorQuota(200000, 100000), 0);
-    Assertions.assertEquals(0.5D, CgroupCpuMonitor.computeProcessorQuota(50000, 100000), 0);
-  }
-
-  private static File newFolder(File root, String... subDirs) throws IOException {
-    String subFolder = String.join("/", subDirs);
-    File result = new File(root, subFolder);
-    if (!result.mkdirs()) {
-      throw new IOException("Couldn't create folders " + root);
-    }
-    return result;
+    Assert.assertEquals(-1, CgroupCpuMonitor.computeProcessorQuota(-1, 100000), 0);
+    Assert.assertEquals(0, CgroupCpuMonitor.computeProcessorQuota(0, 100000), 0);
+    Assert.assertEquals(-1, CgroupCpuMonitor.computeProcessorQuota(100000, 0), 0);
+    Assert.assertEquals(2.0D, CgroupCpuMonitor.computeProcessorQuota(200000, 100000), 0);
+    Assert.assertEquals(0.5D, CgroupCpuMonitor.computeProcessorQuota(50000, 100000), 0);
   }
 }

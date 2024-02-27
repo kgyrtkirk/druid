@@ -31,9 +31,9 @@ import org.apache.druid.segment.column.ColumnCapabilitiesImpl;
 import org.apache.druid.segment.vector.TestVectorColumnSelectorFactory;
 import org.apache.druid.segment.virtual.FallbackVirtualColumnTest;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.List;
 
@@ -48,7 +48,7 @@ public class StringAnyAggregatorFactoryTest extends InitializedNullHandlingTest
   private TestVectorColumnSelectorFactory vectorSelectorFactory;
   private StringAnyAggregatorFactory target;
 
-  @BeforeEach
+  @Before
   public void setUp()
   {
     target = new StringAnyAggregatorFactory(NAME, FIELD_NAME, MAX_STRING_BYTES, true);
@@ -62,46 +62,46 @@ public class StringAnyAggregatorFactoryTest extends InitializedNullHandlingTest
   @Test
   public void canVectorizeWithoutCapabilitiesShouldReturnTrue()
   {
-    Assertions.assertTrue(target.canVectorize(columnInspector));
+    Assert.assertTrue(target.canVectorize(columnInspector));
   }
 
   @Test
   public void factorizeVectorWithoutCapabilitiesShouldReturnAggregatorWithMultiDimensionSelector()
   {
     StringAnyVectorAggregator aggregator = target.factorizeVector(vectorSelectorFactory);
-    Assertions.assertNotNull(aggregator);
+    Assert.assertNotNull(aggregator);
   }
 
   @Test
   public void factorizeVectorWithUnknownCapabilitiesShouldReturnAggregatorWithMultiDimensionSelector()
   {
     StringAnyVectorAggregator aggregator = target.factorizeVector(vectorSelectorFactory);
-    Assertions.assertNotNull(aggregator);
+    Assert.assertNotNull(aggregator);
   }
 
   @Test
   public void factorizeVectorWithMultipleValuesCapabilitiesShouldReturnAggregatorWithMultiDimensionSelector()
   {
     StringAnyVectorAggregator aggregator = target.factorizeVector(vectorSelectorFactory);
-    Assertions.assertNotNull(aggregator);
+    Assert.assertNotNull(aggregator);
   }
 
   @Test
   public void factorizeVectorWithoutMultipleValuesCapabilitiesShouldReturnAggregatorWithSingleDimensionSelector()
   {
     StringAnyVectorAggregator aggregator = target.factorizeVector(vectorSelectorFactory);
-    Assertions.assertNotNull(aggregator);
+    Assert.assertNotNull(aggregator);
   }
 
   @Test
   public void testFactorize()
   {
     Aggregator res = target.factorize(new TestColumnSelectorFactory());
-    Assertions.assertTrue(res instanceof StringAnyAggregator);
+    Assert.assertTrue(res instanceof StringAnyAggregator);
     res.aggregate();
-    Assertions.assertEquals(null, res.get());
+    Assert.assertEquals(null, res.get());
     StringAnyVectorAggregator vectorAggregator = target.factorizeVector(vectorSelectorFactory);
-    Assertions.assertTrue(vectorAggregator.isAggregateMultipleValues());
+    Assert.assertTrue(vectorAggregator.isAggregateMultipleValues());
   }
 
   @Test
@@ -109,10 +109,10 @@ public class StringAnyAggregatorFactoryTest extends InitializedNullHandlingTest
   {
     TestColumnSelectorFactory columnSelectorFactory = new TestColumnSelectorFactory();
     Aggregator res = target.factorize(columnSelectorFactory);
-    Assertions.assertTrue(res instanceof StringAnyAggregator);
+    Assert.assertTrue(res instanceof StringAnyAggregator);
     columnSelectorFactory.moveSelectorCursorToNext();
     res.aggregate();
-    Assertions.assertEquals("CCCC", res.get());
+    Assert.assertEquals("CCCC", res.get());
   }
 
   @Test
@@ -120,11 +120,11 @@ public class StringAnyAggregatorFactoryTest extends InitializedNullHandlingTest
   {
     TestColumnSelectorFactory columnSelectorFactory = new TestColumnSelectorFactory();
     Aggregator res = target.factorize(columnSelectorFactory);
-    Assertions.assertTrue(res instanceof StringAnyAggregator);
+    Assert.assertTrue(res instanceof StringAnyAggregator);
     columnSelectorFactory.moveSelectorCursorToNext();
     columnSelectorFactory.moveSelectorCursorToNext();
     res.aggregate();
-    Assertions.assertEquals("[AAAA, AAA", res.get());
+    Assert.assertEquals("[AAAA, AAA", res.get());
   }
 
   @Test
@@ -133,12 +133,12 @@ public class StringAnyAggregatorFactoryTest extends InitializedNullHandlingTest
     StringAnyAggregatorFactory target = new StringAnyAggregatorFactory(NAME, FIELD_NAME, MAX_STRING_BYTES, false);
     TestColumnSelectorFactory columnSelectorFactory = new TestColumnSelectorFactory();
     Aggregator res = target.factorize(columnSelectorFactory);
-    Assertions.assertTrue(res instanceof StringAnyAggregator);
+    Assert.assertTrue(res instanceof StringAnyAggregator);
     columnSelectorFactory.moveSelectorCursorToNext();
     columnSelectorFactory.moveSelectorCursorToNext();
     res.aggregate();
     // picks up first value in mvd list
-    Assertions.assertEquals("AAAA", res.get());
+    Assert.assertEquals("AAAA", res.get());
   }
 
   static class TestColumnSelectorFactory implements ColumnSelectorFactory

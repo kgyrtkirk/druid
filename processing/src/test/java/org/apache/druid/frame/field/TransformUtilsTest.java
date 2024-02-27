@@ -21,8 +21,8 @@ package org.apache.druid.frame.field;
 
 import com.google.common.collect.ImmutableList;
 import org.apache.datasketches.memory.WritableMemory;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.List;
 
@@ -56,7 +56,7 @@ public class TransformUtilsTest
     //CHECKSTYLE.ON: Regexp
 
     for (double value : values) {
-      Assertions.assertEquals(
+      Assert.assertEquals(
           value,
           TransformUtils.detransformToDouble(TransformUtils.transformFromDouble(value)),
           0.0
@@ -73,11 +73,11 @@ public class TransformUtilsTest
         int byteCmp = byteComparison(Double.BYTES);
 
         if (byteCmp < 0) {
-          Assertions.assertTrue(lhs < rhs);
+          Assert.assertTrue(lhs < rhs);
         } else if (byteCmp == 0) {
-          Assertions.assertEquals(lhs, rhs, 0.0);
+          Assert.assertEquals(lhs, rhs, 0.0);
         } else {
-          Assertions.assertTrue(lhs > rhs);
+          Assert.assertTrue(lhs > rhs);
         }
 
       }
@@ -97,7 +97,7 @@ public class TransformUtilsTest
         );
 
     for (long value : values) {
-      Assertions.assertEquals(
+      Assert.assertEquals(
           value,
           TransformUtils.detransformToLong(TransformUtils.transformFromLong(value))
       );
@@ -113,11 +113,11 @@ public class TransformUtilsTest
         int byteCmp = byteComparison(Long.BYTES);
 
         if (byteCmp < 0) {
-          Assertions.assertTrue(lhs < rhs);
+          Assert.assertTrue(lhs < rhs);
         } else if (byteCmp == 0) {
-          Assertions.assertEquals(lhs, rhs);
+          Assert.assertEquals(lhs, rhs);
         } else {
-          Assertions.assertTrue(lhs > rhs);
+          Assert.assertTrue(lhs > rhs);
         }
       }
     }
@@ -145,7 +145,7 @@ public class TransformUtilsTest
     //CHECKSTYLE.ON: Regexp
 
     for (float value : values) {
-      Assertions.assertEquals(
+      Assert.assertEquals(
           value,
           TransformUtils.detransformToFloat(TransformUtils.transformFromFloat(value)),
           0.0
@@ -162,11 +162,11 @@ public class TransformUtilsTest
         int byteCmp = byteComparison(Long.BYTES);
 
         if (byteCmp < 0) {
-          Assertions.assertTrue(lhs < rhs);
+          Assert.assertTrue(lhs < rhs);
         } else if (byteCmp == 0) {
-          Assertions.assertEquals(lhs, rhs, 0.0);
+          Assert.assertEquals(lhs, rhs, 0.0);
         } else {
-          Assertions.assertTrue(lhs > rhs);
+          Assert.assertTrue(lhs > rhs);
         }
       }
     }

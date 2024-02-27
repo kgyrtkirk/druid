@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableList;
 import org.apache.druid.data.input.MapBasedInputRow;
 import org.apache.druid.segment.serde.ComplexMetricExtractor;
 import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;

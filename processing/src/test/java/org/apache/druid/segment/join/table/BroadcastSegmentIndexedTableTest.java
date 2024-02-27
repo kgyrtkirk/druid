@@ -57,17 +57,17 @@ import org.apache.druid.segment.writeout.OffHeapMemorySegmentWriteOutMediumFacto
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.apache.druid.timeline.DataSegment;
 import org.joda.time.Interval;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class BroadcastSegmentIndexedTableTest extends InitializedNullHandlingTest
 {
@@ -80,8 +80,10 @@ public class BroadcastSegmentIndexedTableTest extends InitializedNullHandlingTes
   private static final String DIM_NOT_EXISTS = "DIM_NOT_EXISTS";
   private static final String DATASOURCE = "DATASOURCE";
 
-  @TempDir
-  public File temporaryFolder;
+  @Rule
+  public TemporaryFolder temporaryFolder = new TemporaryFolder();
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
 
   private QueryableIndexSegment backingSegment;
   private BroadcastSegmentIndexedTable broadcastTable;
@@ -96,7 +98,7 @@ public class BroadcastSegmentIndexedTableTest extends InitializedNullHandlingTes
                                                      .add(DIM_NOT_EXISTS)
                                                      .build();
 
-  @BeforeEach
+  @Before
   public void setup() throws IOException, SegmentLoadingException
   {
     final ObjectMapper mapper = new DefaultObjectMapper();
@@ -114,7 +116,7 @@ public class BroadcastSegmentIndexedTableTest extends InitializedNullHandlingTes
         new IndexMergerV9(mapper, indexIO, OffHeapMemorySegmentWriteOutMediumFactory.instance());
     Interval testInterval = Intervals.of("2011-01-12T00:00:00.000Z/2011-05-01T00:00:00.000Z");
     IncrementalIndex data = TestIndex.makeRealtimeIndex("druid.sample.numeric.tsv");
-    File segment = new File(newFolder(temporaryFolder, "junit"), "segment");
+    File segment = new File(temporaryFolder.newFolder(), "segment");
     File persisted = indexMerger.persist(
         data,
         testInterval,
@@ -123,9 +125,9 @@ public class BroadcastSegmentIndexedTableTest extends InitializedNullHandlingTes
         null
     );
     File factoryJson = new File(persisted, "factory.json");
-    Assertions.assertTrue(factoryJson.exists());
+    Assert.assertTrue(factoryJson.exists());
     SegmentizerFactory factory = mapper.readValue(factoryJson, SegmentizerFactory.class);
-    Assertions.assertTrue(factory instanceof MMappedQueryableSegmentizerFactory);
+    Assert.assertTrue(factory instanceof MMappedQueryableSegmentizerFactory);
 
     DataSegment dataSegment = new DataSegment(
         DATASOURCE,
@@ -148,7 +150,7 @@ public class BroadcastSegmentIndexedTableTest extends InitializedNullHandlingTes
   @Test
   public void testInitShouldGenerateCorrectTable()
   {
-    Assertions.assertEquals(1209, broadcastTable.numRows());
+    Assert.assertEquals(1209, broadcastTable.numRows());
   }
 
   @Test
@@ -227,26 +229,24 @@ public class BroadcastSegmentIndexedTableTest extends InitializedNullHandlingTes
   @Test
   public void testIsCacheable()
   {
-    Assertions.assertTrue(broadcastTable.isCacheable());
+    Assert.assertTrue(broadcastTable.isCacheable());
   }
 
   @Test
   public void testNonexistentColumn()
   {
-    Throwable exception = assertThrows(IAE.class, () -> {
-      broadcastTable.columnReader(columnNames.indexOf(DIM_NOT_EXISTS));
-    });
-    assertTrue(exception.getMessage().contains("Column[-1] is not a valid column"));
+    expectedException.expect(IAE.class);
+    expectedException.expectMessage("Column[-1] is not a valid column");
+    broadcastTable.columnReader(columnNames.indexOf(DIM_NOT_EXISTS));
   }
 
   @Test
   public void testNonexistentColumnOutOfRange()
   {
-    Throwable exception = assertThrows(IAE.class, () -> {
-      final int non = columnNames.size();
-      broadcastTable.columnReader(non);
-    });
-    assertTrue(exception.getMessage().contains(StringUtils.format("Column[%s] is not a valid column", non)));
+    final int non = columnNames.size();
+    expectedException.expect(IAE.class);
+    expectedException.expectMessage(StringUtils.format("Column[%s] is not a valid column", non));
+    broadcastTable.columnReader(non);
   }
 
   private void checkIndexAndReader(String columnName, Object[] vals)
@@ -266,15 +266,15 @@ public class BroadcastSegmentIndexedTableTest extends InitializedNullHandlingTes
       // lets try a few values out
       for (Object val : vals) {
         final IntSortedSet valIndex = valueIndex.find(val);
-        Assertions.assertTrue(valIndex.size() > 0);
+        Assert.assertTrue(valIndex.size() > 0);
         final IntBidirectionalIterator rowIterator = valIndex.iterator();
         while (rowIterator.hasNext()) {
-          Assertions.assertEquals(val, reader.read(rowIterator.nextInt()));
+          Assert.assertEquals(val, reader.read(rowIterator.nextInt()));
         }
       }
       for (Object val : nonmatchingVals) {
         final IntSortedSet valIndex = valueIndex.find(val);
-        Assertions.assertEquals(0, valIndex.size());
+        Assert.assertEquals(0, valIndex.size());
       }
     }
     catch (IOException e) {
@@ -299,14 +299,14 @@ public class BroadcastSegmentIndexedTableTest extends InitializedNullHandlingTes
       // compare with selector make sure reader can read correct values
       for (int row = 0; row < numRows; row++) {
         offset.setCurrentOffset(row);
-        Assertions.assertEquals(selector.getObject(), reader.read(row));
+        Assert.assertEquals(selector.getObject(), reader.read(row));
       }
       // make sure it doesn't have an index since it isn't a key column
       try {
-        Assertions.assertEquals(null, broadcastTable.columnIndex(columnIndex));
+        Assert.assertEquals(null, broadcastTable.columnIndex(columnIndex));
       }
       catch (IAE iae) {
-        Assertions.assertEquals(StringUtils.format("Column[%d] is not a key column", columnIndex), iae.getMessage());
+        Assert.assertEquals(StringUtils.format("Column[%d] is not a key column", columnIndex), iae.getMessage());
       }
     }
     catch (IOException e) {
@@ -332,20 +332,11 @@ public class BroadcastSegmentIndexedTableTest extends InitializedNullHandlingTes
       // compare with base segment selector to make sure tables selector can read correct values
       for (int row = 0; row < numRows; row++) {
         offset.setCurrentOffset(row);
-        Assertions.assertEquals(selector.getObject(), tableSelector.getObject());
+        Assert.assertEquals(selector.getObject(), tableSelector.getObject());
       }
     }
     catch (IOException e) {
       throw new RuntimeException(e);
     }
-  }
-
-  private static File newFolder(File root, String... subDirs) throws IOException {
-    String subFolder = String.join("/", subDirs);
-    File result = new File(root, subFolder);
-    if (!result.mkdirs()) {
-      throw new IOException("Couldn't create folders " + root);
-    }
-    return result;
   }
 }

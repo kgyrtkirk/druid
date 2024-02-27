@@ -26,8 +26,8 @@ import org.apache.druid.java.util.emitter.core.EventMap;
 import org.apache.druid.timeline.DataSegment;
 import org.apache.druid.timeline.partition.NumberedShardSpec;
 import org.joda.time.DateTime;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class SegmentMetadataEventTest
 {
@@ -43,7 +43,7 @@ public class SegmentMetadataEventTest
         true
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableMap.<String, Object>builder()
             .put(SegmentMetadataEvent.FEED, "segment_metadata")
             .put(SegmentMetadataEvent.DATASOURCE, "dummy_datasource")
@@ -69,7 +69,7 @@ public class SegmentMetadataEventTest
                                            .build();
     final DateTime eventTime = DateTimes.nowUtc();
     SegmentMetadataEvent event = SegmentMetadataEvent.create(segment, eventTime);
-    Assertions.assertEquals(
+    Assert.assertEquals(
         EventMap.builder()
                 .put(SegmentMetadataEvent.FEED, "segment_metadata")
                 .put(SegmentMetadataEvent.DATASOURCE, segment.getDataSource())

@@ -60,8 +60,9 @@ import org.apache.druid.segment.incremental.IncrementalIndexSchema;
 import org.apache.druid.segment.incremental.OnheapIncrementalIndex;
 import org.apache.druid.segment.writeout.SegmentWriteOutMediumFactory;
 import org.joda.time.Interval;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.io.File;
 import java.io.IOException;
@@ -77,6 +78,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 /**
  */
+@RunWith(Parameterized.class)
 public class SpatialFilterBonusTest
 {
   public static final int NUM_POINTS = 5000;
@@ -87,13 +89,14 @@ public class SpatialFilterBonusTest
   };
   private static List<String> DIMS = Lists.newArrayList("dim", "dim.geo");
 
-  private Segment segment;
+  private final Segment segment;
 
-  public void initSpatialFilterBonusTest(Segment segment)
+  public SpatialFilterBonusTest(Segment segment)
   {
     this.segment = segment;
   }
 
+  @Parameterized.Parameters
   public static Collection<?> constructorFeeder() throws IOException
   {
     List<Object[]> argumentArrays = new ArrayList<>();
@@ -465,11 +468,9 @@ public class SpatialFilterBonusTest
     }
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest
-  public void testSpatialQuery(Segment segment)
+  @Test
+  public void testSpatialQuery()
   {
-    initSpatialFilterBonusTest(segment);
     TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
                                   .dataSource("test")
                                   .granularity(Granularities.ALL)
@@ -517,11 +518,9 @@ public class SpatialFilterBonusTest
     }
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest
-  public void testSpatialQueryMorePoints(Segment segment)
+  @Test
+  public void testSpatialQueryMorePoints()
   {
-    initSpatialFilterBonusTest(segment);
     TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
                                   .dataSource("test")
                                   .granularity(Granularities.DAY)
@@ -605,11 +604,9 @@ public class SpatialFilterBonusTest
     }
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest
-  public void testSpatialQueryFilteredAggregator(Segment segment)
+  @Test
+  public void testSpatialQueryFilteredAggregator()
   {
-    initSpatialFilterBonusTest(segment);
     TimeseriesQuery query = Druids.newTimeseriesQueryBuilder()
                                   .dataSource("test")
                                   .granularity(Granularities.DAY)

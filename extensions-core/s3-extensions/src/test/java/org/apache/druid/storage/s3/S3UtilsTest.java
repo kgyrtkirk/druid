@@ -21,6 +21,7 @@ package org.apache.druid.storage.s3;
 
 import com.amazonaws.services.s3.model.AmazonS3Exception;
 import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;

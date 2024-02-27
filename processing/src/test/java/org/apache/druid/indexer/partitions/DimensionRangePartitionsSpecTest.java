@@ -21,15 +21,14 @@ package org.apache.druid.indexer.partitions;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DimensionRangePartitionsSpecTest
 {
@@ -46,12 +45,15 @@ public class DimensionRangePartitionsSpecTest
   );
   private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
+  @Rule
+  public ExpectedException exception = ExpectedException.none();
+
   @Test
   public void serde()
   {
     String json = serialize(SPEC);
     DimensionRangePartitionsSpec spec = deserialize(json);
-    Assertions.assertEquals(SPEC, spec);
+    Assert.assertEquals(SPEC, spec);
   }
 
   @Test
@@ -107,7 +109,7 @@ public class DimensionRangePartitionsSpecTest
     DimensionRangePartitionsSpec spec = new TestSpecBuilder()
         .targetRowsPerSegment(123)
         .build();
-    Assertions.assertEquals(184, spec.getMaxRowsPerSegment().intValue());
+    Assert.assertEquals(184, spec.getMaxRowsPerSegment().intValue());
   }
 
   @Test
@@ -116,7 +118,7 @@ public class DimensionRangePartitionsSpecTest
     DimensionRangePartitionsSpec spec = new TestSpecBuilder()
         .maxRowsPerSegment(123)
         .build();
-    Assertions.assertEquals(123, spec.getMaxRowsPerSegment().intValue());
+    Assert.assertEquals(123, spec.getMaxRowsPerSegment().intValue());
   }
 
   @Test
@@ -136,7 +138,7 @@ public class DimensionRangePartitionsSpecTest
         .targetRowsPerSegment(10)
         .partitionDimensions(partitionDimensions)
         .build();
-    Assertions.assertEquals(partitionDimensions, spec.getPartitionDimensions());
+    Assert.assertEquals(partitionDimensions, spec.getPartitionDimensions());
   }
 
   private static String serialize(Object object)
@@ -188,10 +190,9 @@ public class DimensionRangePartitionsSpecTest
 
     void testIllegalArgumentException(String exceptionExpectedMessage)
     {
-      Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
-        build();
-      });
-      assertTrue(exception.getMessage().contains(exceptionExpectedMessage));
+      exception.expect(IllegalArgumentException.class);
+      exception.expectMessage(exceptionExpectedMessage);
+      build();
     }
 
     DimensionRangePartitionsSpec build()

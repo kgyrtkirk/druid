@@ -23,8 +23,8 @@ import it.unimi.dsi.fastutil.ints.IntArrays;
 import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.segment.data.ArrayBasedIndexedInts;
 import org.apache.druid.segment.data.IndexedInts;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.function.Function;
@@ -61,10 +61,10 @@ public class CombineFirstTwoValuesIndexedIntsTest
     final IndexedInts combined = combineFn.apply(original);
 
     // Check size.
-    Assertions.assertEquals(
+    Assert.assertEquals(
+        StringUtils.format("%s (size)", Arrays.toString(original)),
         expectedCombined.length,
-        combined.size(),
-        StringUtils.format("%s (size)", Arrays.toString(original))
+        combined.size()
     );
 
     // Check regular get.
@@ -72,15 +72,15 @@ public class CombineFirstTwoValuesIndexedIntsTest
     for (int i = 0; i < expectedCombined.length; i++) {
       arr[i] = combined.get(i);
     }
-    Assertions.assertArrayEquals(expectedCombined, arr, StringUtils.format("%s (get)", Arrays.toString(original)));
+    Assert.assertArrayEquals(StringUtils.format("%s (get)", Arrays.toString(original)), expectedCombined, arr);
 
     // Check contiguous vector get.
     Arrays.fill(arr, Integer.MIN_VALUE);
     combined.get(arr, 0, arr.length);
-    Assertions.assertArrayEquals(
+    Assert.assertArrayEquals(
+        StringUtils.format("%s (contiguous vector get)", Arrays.toString(original)),
         expectedCombined,
-        arr,
-        StringUtils.format("%s (contiguous vector get)", Arrays.toString(original))
+        arr
     );
 
     // Check noncontiguous vector get.
@@ -92,10 +92,10 @@ public class CombineFirstTwoValuesIndexedIntsTest
     Arrays.fill(arr, Integer.MIN_VALUE);
     combined.get(arr, indexes, arr.length);
     final int[] expectedCombinedReversed = IntArrays.reverse(IntArrays.copy(expectedCombined));
-    Assertions.assertArrayEquals(
+    Assert.assertArrayEquals(
+        StringUtils.format("%s (noncontiguous vector get, reversed)", Arrays.toString(original)),
         expectedCombinedReversed,
-        arr,
-        StringUtils.format("%s (noncontiguous vector get, reversed)", Arrays.toString(original))
+        arr
     );
   }
 }

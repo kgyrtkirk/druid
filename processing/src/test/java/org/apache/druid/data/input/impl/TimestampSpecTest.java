@@ -23,8 +23,8 @@ import com.google.common.collect.ImmutableMap;
 import org.apache.druid.java.util.common.DateTimes;
 import org.joda.time.DateTime;
 import org.joda.time.format.ISODateTimeFormat;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class TimestampSpecTest
 {
@@ -32,7 +32,7 @@ public class TimestampSpecTest
   public void testExtractTimestamp()
   {
     TimestampSpec spec = new TimestampSpec("TIMEstamp", "yyyy-MM-dd", null);
-    Assertions.assertEquals(
+    Assert.assertEquals(
         DateTimes.of("2014-03-01"),
         spec.extractTimestamp(ImmutableMap.of("TIMEstamp", "2014-03-01"))
     );
@@ -42,7 +42,7 @@ public class TimestampSpecTest
   public void testExtractTimestampWithMissingTimestampColumn()
   {
     TimestampSpec spec = new TimestampSpec(null, null, DateTimes.EPOCH);
-    Assertions.assertEquals(
+    Assert.assertEquals(
         DateTimes.of("1970-01-01"),
         spec.extractTimestamp(ImmutableMap.of("dim", "foo"))
     );
@@ -66,7 +66,7 @@ public class TimestampSpecTest
     for (String date : dates) {
       DateTime dateTime = spec.extractTimestamp(ImmutableMap.of("TIMEstamp", date));
       DateTime expectedDateTime = formatter.parse(date);
-      Assertions.assertEquals(expectedDateTime, dateTime);
+      Assert.assertEquals(expectedDateTime, dateTime);
     }
   }
 }

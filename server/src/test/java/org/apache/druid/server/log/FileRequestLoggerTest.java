@@ -26,35 +26,36 @@ import org.apache.druid.server.RequestLogLine;
 import org.easymock.EasyMock;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Date;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 public class FileRequestLoggerTest
 {
   private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
   private static final String HOST = "localhost";
 
-  @TempDir
-  public File temporaryFolder;
+  @Rule
+  public TemporaryFolder temporaryFolder = new TemporaryFolder();
+
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
 
   @Test
   public void testLog() throws Exception
   {
     ObjectMapper objectMapper = new ObjectMapper();
     DateTime dateTime = DateTimes.nowUtc();
-    File logDir = newFolder(temporaryFolder, "junit");
+    File logDir = temporaryFolder.newFolder();
     String nativeQueryLogString = dateTime + "\t" + HOST + "\t" + "native";
     String sqlQueryLogString = dateTime + "\t" + HOST + "\t" + "sql";
 
@@ -80,7 +81,7 @@ public class FileRequestLoggerTest
 
     File logFile = new File(logDir, dateTime.toString("yyyy-MM-dd'.log'"));
     String logString = CharStreams.toString(Files.newBufferedReader(logFile.toPath(), StandardCharsets.UTF_8));
-    Assertions.assertTrue(logString.contains(nativeQueryLogString + "\n" + sqlQueryLogString + "\n"));
+    Assert.assertTrue(logString.contains(nativeQueryLogString + "\n" + sqlQueryLogString + "\n"));
     fileRequestLogger.stop();
   }
 
@@ -88,7 +89,7 @@ public class FileRequestLoggerTest
   public void testLogRemove() throws Exception
   {
     ObjectMapper objectMapper = new ObjectMapper();
-    File logDir = newFolder(temporaryFolder, "junit");
+    File logDir = temporaryFolder.newFolder();
     DateTime dateTime = DateTimes.nowUtc();
     String logString = dateTime + "\t" + HOST + "\t" + "logString";
 
@@ -109,34 +110,24 @@ public class FileRequestLoggerTest
     fileRequestLogger.logNativeQuery(nativeRequestLogLine);
     File logFile = new File(logDir, dateTime.toString("yyyy-MM-dd'.log'"));
     Thread.sleep(100);
-    Assertions.assertFalse(oldLogFile.exists());
-    Assertions.assertTrue(logFile.exists());
+    Assert.assertFalse(oldLogFile.exists());
+    Assert.assertTrue(logFile.exists());
     fileRequestLogger.stop();
   }
 
   @Test
   public void testLogRemoveWithInvalidDuration() throws Exception
   {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
-      ObjectMapper objectMapper = new ObjectMapper();
-      File logDir = newFolder(temporaryFolder, "junit");
-      FileRequestLogger fileRequestLogger = new FileRequestLogger(
-          objectMapper,
-          scheduler,
-          logDir,
-          "yyyy-MM-dd'.log'",
-          Duration.standardHours(12)
-      );
-    });
-    assertTrue(exception.getMessage().contains("request logs retention period must be atleast P1D"));
-  }
-
-  private static File newFolder(File root, String... subDirs) throws IOException {
-    String subFolder = String.join("/", subDirs);
-    File result = new File(root, subFolder);
-    if (!result.mkdirs()) {
-      throw new IOException("Couldn't create folders " + root);
-    }
-    return result;
+    expectedException.expect(IllegalArgumentException.class);
+    expectedException.expectMessage("request logs retention period must be atleast P1D");
+    ObjectMapper objectMapper = new ObjectMapper();
+    File logDir = temporaryFolder.newFolder();
+    FileRequestLogger fileRequestLogger = new FileRequestLogger(
+        objectMapper,
+        scheduler,
+        logDir,
+        "yyyy-MM-dd'.log'",
+        Duration.standardHours(12)
+    );
   }
 }

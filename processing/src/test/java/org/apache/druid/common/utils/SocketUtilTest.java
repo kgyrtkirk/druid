@@ -21,10 +21,8 @@ package org.apache.druid.common.utils;
 
 import org.apache.druid.java.util.common.ISE;
 import org.hamcrest.number.OrderingComparison;
-import org.junit.jupiter.api.Test;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class SocketUtilTest
 {
@@ -34,23 +32,19 @@ public class SocketUtilTest
   public void testSocketUtil()
   {
     int port = SocketUtil.findOpenPort(0);
-    assertThat("Port is greater than the maximum port 0xffff", port, OrderingComparison.lessThanOrEqualTo(MAX_PORT));
-    assertThat("Port is less than minimum port 0", port, OrderingComparison.greaterThanOrEqualTo(0));
+    Assert.assertThat("Port is greater than the maximum port 0xffff", port, OrderingComparison.lessThanOrEqualTo(MAX_PORT));
+    Assert.assertThat("Port is less than minimum port 0", port, OrderingComparison.greaterThanOrEqualTo(0));
   }
 
-  @Test
+  @Test(expected = IllegalArgumentException.class)
   public void testIllegalArgument()
   {
-    assertThrows(IllegalArgumentException.class, () -> {
-      SocketUtil.findOpenPort(-1);
-    });
+    SocketUtil.findOpenPort(-1);
   }
 
-  @Test
+  @Test(expected = ISE.class)
   public void testISEexception()
   {
-    assertThrows(ISE.class, () -> {
-      SocketUtil.findOpenPort(0xffff);
-    });
+    SocketUtil.findOpenPort(0xffff);
   }
 }

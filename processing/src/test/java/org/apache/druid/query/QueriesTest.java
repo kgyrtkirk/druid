@@ -35,21 +35,22 @@ import org.apache.druid.query.spec.MultipleSpecificSegmentSpec;
 import org.apache.druid.query.timeseries.TimeseriesQuery;
 import org.apache.druid.query.timeseries.TimeseriesResultValue;
 import org.apache.druid.segment.join.JoinType;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  *
  */
 public class QueriesTest
 {
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
 
   @Test
   public void testVerifyAggregations()
@@ -80,7 +81,7 @@ public class QueriesTest
       exceptionOccurred = true;
     }
 
-    Assertions.assertFalse(exceptionOccurred);
+    Assert.assertFalse(exceptionOccurred);
   }
 
   @Test
@@ -112,7 +113,7 @@ public class QueriesTest
       exceptionOccurred = true;
     }
 
-    Assertions.assertTrue(exceptionOccurred);
+    Assert.assertTrue(exceptionOccurred);
   }
 
   @Test
@@ -166,7 +167,7 @@ public class QueriesTest
       exceptionOccurred = true;
     }
 
-    Assertions.assertFalse(exceptionOccurred);
+    Assert.assertFalse(exceptionOccurred);
   }
 
   @Test
@@ -220,7 +221,7 @@ public class QueriesTest
       exceptionOccurred = true;
     }
 
-    Assertions.assertTrue(exceptionOccurred);
+    Assert.assertTrue(exceptionOccurred);
   }
 
   @Test
@@ -231,7 +232,7 @@ public class QueriesTest
         new SegmentDescriptor(Intervals.of("2000/3000"), "0", 1)
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Druids.newTimeseriesQueryBuilder()
               .dataSource("foo")
               .intervals(
@@ -263,7 +264,7 @@ public class QueriesTest
         new SegmentDescriptor(Intervals.of("2000/3000"), "0", 1)
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Druids.newTimeseriesQueryBuilder()
               .dataSource(
                   new QueryDataSource(
@@ -315,28 +316,28 @@ public class QueriesTest
   @Test
   public void testWithSpecificSegmentsOnUnionIsAnError()
   {
-    Throwable exception = assertThrows(IllegalStateException.class, () -> {
-      final ImmutableList<SegmentDescriptor> descriptors = ImmutableList.of(
-          new SegmentDescriptor(Intervals.of("2000/3000"), "0", 0),
-          new SegmentDescriptor(Intervals.of("2000/3000"), "0", 1)
-      );
+    final ImmutableList<SegmentDescriptor> descriptors = ImmutableList.of(
+        new SegmentDescriptor(Intervals.of("2000/3000"), "0", 0),
+        new SegmentDescriptor(Intervals.of("2000/3000"), "0", 1)
+    );
 
-      final TimeseriesQuery query =
-          Druids.newTimeseriesQueryBuilder()
+    final TimeseriesQuery query =
+        Druids.newTimeseriesQueryBuilder()
               .dataSource(new LookupDataSource("lookyloo"))
               .intervals("2000/3000")
               .granularity(Granularities.ALL)
               .build();
 
-      final Query<Result<TimeseriesResultValue>> ignored = Queries.withSpecificSegments(query, descriptors);
-    });
-    assertTrue(exception.getMessage().contains("Unable to apply specific segments to non-table-based dataSource"));
+    expectedException.expect(IllegalStateException.class);
+    expectedException.expectMessage("Unable to apply specific segments to non-table-based dataSource");
+
+    final Query<Result<TimeseriesResultValue>> ignored = Queries.withSpecificSegments(query, descriptors);
   }
 
   @Test
   public void testWithBaseDataSourceBasic()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Druids.newTimeseriesQueryBuilder()
               .dataSource("bar")
               .intervals("2000/3000")
@@ -356,7 +357,7 @@ public class QueriesTest
   @Test
   public void testWithBaseDataSourceSubQueryStack()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Druids.newTimeseriesQueryBuilder()
               .dataSource(
                   new QueryDataSource(
@@ -408,7 +409,7 @@ public class QueriesTest
   @Test
   public void testWithBaseDataSourceSubQueryStackWithJoinOnUnion()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Druids.newTimeseriesQueryBuilder()
               .dataSource(
                   new QueryDataSource(
@@ -487,7 +488,7 @@ public class QueriesTest
   @Test
   public void testWithBaseDataSourcedBaseFilterWithMultiJoin()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         Druids.newTimeseriesQueryBuilder()
               .dataSource(
                   new QueryDataSource(

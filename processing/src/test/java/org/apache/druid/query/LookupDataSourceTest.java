@@ -23,64 +23,64 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.apache.druid.segment.TestHelper;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.util.Collections;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 public class LookupDataSourceTest
 {
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
 
   private final LookupDataSource lookylooDataSource = new LookupDataSource("lookyloo");
 
   @Test
   public void test_getTableNames()
   {
-    Assertions.assertEquals(Collections.emptySet(), lookylooDataSource.getTableNames());
+    Assert.assertEquals(Collections.emptySet(), lookylooDataSource.getTableNames());
   }
 
   @Test
   public void test_getChildren()
   {
-    Assertions.assertEquals(Collections.emptyList(), lookylooDataSource.getChildren());
+    Assert.assertEquals(Collections.emptyList(), lookylooDataSource.getChildren());
   }
 
   @Test
   public void test_isCacheable()
   {
-    Assertions.assertFalse(lookylooDataSource.isCacheable(true));
-    Assertions.assertFalse(lookylooDataSource.isCacheable(false));
+    Assert.assertFalse(lookylooDataSource.isCacheable(true));
+    Assert.assertFalse(lookylooDataSource.isCacheable(false));
   }
 
   @Test
   public void test_isGlobal()
   {
-    Assertions.assertTrue(lookylooDataSource.isGlobal());
+    Assert.assertTrue(lookylooDataSource.isGlobal());
   }
 
   @Test
   public void test_isConcrete()
   {
-    Assertions.assertTrue(lookylooDataSource.isConcrete());
+    Assert.assertTrue(lookylooDataSource.isConcrete());
   }
 
   @Test
   public void test_withChildren_empty()
   {
-    Assertions.assertSame(lookylooDataSource, lookylooDataSource.withChildren(Collections.emptyList()));
+    Assert.assertSame(lookylooDataSource, lookylooDataSource.withChildren(Collections.emptyList()));
   }
 
   @Test
   public void test_withChildren_nonEmpty()
   {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
+    expectedException.expect(IllegalArgumentException.class);
+    expectedException.expectMessage("Cannot accept children");
 
-      lookylooDataSource.withChildren(ImmutableList.of(new LookupDataSource("bar")));
-    });
-    assertTrue(exception.getMessage().contains("Cannot accept children"));
+    lookylooDataSource.withChildren(ImmutableList.of(new LookupDataSource("bar")));
   }
 
   @Test
@@ -98,6 +98,6 @@ public class LookupDataSourceTest
         DataSource.class
     );
 
-    Assertions.assertEquals(lookylooDataSource, deserialized);
+    Assert.assertEquals(lookylooDataSource, deserialized);
   }
 }

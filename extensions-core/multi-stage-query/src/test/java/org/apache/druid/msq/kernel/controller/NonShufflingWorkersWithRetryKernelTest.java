@@ -21,6 +21,7 @@ package org.apache.druid.msq.kernel.controller;
 
 
 import org.junit.Assert;
+import org.junit.Test;
 
 import javax.annotation.Nonnull;
 

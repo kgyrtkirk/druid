@@ -77,10 +77,10 @@ import org.apache.druid.segment.incremental.OnheapIncrementalIndex;
 import org.apache.druid.segment.writeout.OffHeapMemorySegmentWriteOutMediumFactory;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.apache.druid.timeline.SegmentId;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -136,7 +136,7 @@ public class NestedQueryPushDownTest extends InitializedNullHandlingTest
         .build();
   }
 
-  @BeforeEach
+  @Before
   public void setup() throws Exception
   {
     closer = Closer.create();
@@ -247,9 +247,9 @@ public class NestedQueryPushDownTest extends InitializedNullHandlingTest
     TestBufferPool mergePool2 = TestBufferPool.offHeap(10_000_000, 10);
     closer.register(() -> {
       // Verify that all objects have been returned to the pool.
-      Assertions.assertEquals(0, bufferPool.getOutstandingObjectCount());
-      Assertions.assertEquals(0, mergePool.getOutstandingObjectCount());
-      Assertions.assertEquals(0, mergePool2.getOutstandingObjectCount());
+      Assert.assertEquals(0, bufferPool.getOutstandingObjectCount());
+      Assert.assertEquals(0, mergePool.getOutstandingObjectCount());
+      Assert.assertEquals(0, mergePool2.getOutstandingObjectCount());
     });
 
     final GroupByQueryConfig config = new GroupByQueryConfig()
@@ -316,7 +316,7 @@ public class NestedQueryPushDownTest extends InitializedNullHandlingTest
     );
   }
 
-  @AfterEach
+  @After
   public void tearDown() throws Exception
   {
     closer.close();
@@ -385,9 +385,9 @@ public class NestedQueryPushDownTest extends InitializedNullHandlingTest
         "totalSum", 6000L
     );
 
-    Assertions.assertEquals(2, results.size());
-    Assertions.assertEquals(expectedRow0, results.get(0));
-    Assertions.assertEquals(expectedRow1, results.get(1));
+    Assert.assertEquals(2, results.size());
+    Assert.assertEquals(expectedRow0, results.get(0));
+    Assert.assertEquals(expectedRow1, results.get(1));
   }
 
   @Test
@@ -439,9 +439,9 @@ public class NestedQueryPushDownTest extends InitializedNullHandlingTest
         "renamedDimB", "sweet",
         "maxBSum", 60L
     );
-    Assertions.assertEquals(2, results.size());
-    Assertions.assertEquals(expectedRow0, results.get(0));
-    Assertions.assertEquals(expectedRow1, results.get(1));
+    Assert.assertEquals(2, results.size());
+    Assert.assertEquals(expectedRow0, results.get(0));
+    Assert.assertEquals(expectedRow1, results.get(1));
   }
 
   @Test
@@ -491,7 +491,7 @@ public class NestedQueryPushDownTest extends InitializedNullHandlingTest
     Sequence<ResultRow> queryResult = runNestedQueryWithForcePushDown(nestedQuery);
     List<ResultRow> results = queryResult.toList();
 
-    Assertions.assertEquals(0, results.size());
+    Assert.assertEquals(0, results.size());
   }
 
   @Test
@@ -541,8 +541,8 @@ public class NestedQueryPushDownTest extends InitializedNullHandlingTest
     Sequence<ResultRow> queryResult = runNestedQueryWithForcePushDown(nestedQuery);
     List<ResultRow> results = queryResult.toList();
 
-    Assertions.assertEquals(1, results.size());
-    Assertions.assertEquals(expectedRow0, results.get(0));
+    Assert.assertEquals(1, results.size());
+    Assert.assertEquals(expectedRow0, results.get(0));
   }
 
   @Test
@@ -592,8 +592,8 @@ public class NestedQueryPushDownTest extends InitializedNullHandlingTest
     Sequence<ResultRow> queryResult = runNestedQueryWithForcePushDown(nestedQuery);
     List<ResultRow> results = queryResult.toList();
 
-    Assertions.assertEquals(1, results.size());
-    Assertions.assertEquals(expectedRow0, results.get(0));
+    Assert.assertEquals(1, results.size());
+    Assert.assertEquals(expectedRow0, results.get(0));
   }
 
   @Test
@@ -645,9 +645,9 @@ public class NestedQueryPushDownTest extends InitializedNullHandlingTest
     Sequence<ResultRow> queryResult = runNestedQueryWithForcePushDown(nestedQuery);
     List<ResultRow> results = queryResult.toList();
 
-    Assertions.assertEquals(2, results.size());
-    Assertions.assertEquals(expectedRow0, results.get(0));
-    Assertions.assertEquals(expectedRow1, results.get(1));
+    Assert.assertEquals(2, results.size());
+    Assert.assertEquals(expectedRow0, results.get(0));
+    Assert.assertEquals(expectedRow1, results.get(1));
   }
 
   @Test
@@ -692,8 +692,8 @@ public class NestedQueryPushDownTest extends InitializedNullHandlingTest
     Sequence<ResultRow> queryResult = runNestedQueryWithForcePushDown(nestedQuery);
     List<ResultRow> results = queryResult.toList();
 
-    Assertions.assertEquals(1, results.size());
-    Assertions.assertEquals(expectedRow0, results.get(0));
+    Assert.assertEquals(1, results.size());
+    Assert.assertEquals(expectedRow0, results.get(0));
   }
 
   private Sequence<ResultRow> runNestedQueryWithForcePushDown(GroupByQuery nestedQuery)
@@ -788,8 +788,8 @@ public class NestedQueryPushDownTest extends InitializedNullHandlingTest
         .build();
     QueryToolChest<ResultRow, GroupByQuery> toolChest = groupByFactory.getToolchest();
     GroupByQuery rewrittenQuery = ((GroupByQueryQueryToolChest) toolChest).rewriteNestedQueryForPushDown(nestedQuery);
-    Assertions.assertEquals(outputNameB, rewrittenQuery.getDimensions().get(0).getDimension());
-    Assertions.assertEquals(outputNameAgg, rewrittenQuery.getAggregatorSpecs().get(0).getName());
+    Assert.assertEquals(outputNameB, rewrittenQuery.getDimensions().get(0).getDimension());
+    Assert.assertEquals(outputNameAgg, rewrittenQuery.getAggregatorSpecs().get(0).getName());
   }
 
   public static <T, QueryType extends Query<T>> QueryRunner<T> makeQueryRunner(

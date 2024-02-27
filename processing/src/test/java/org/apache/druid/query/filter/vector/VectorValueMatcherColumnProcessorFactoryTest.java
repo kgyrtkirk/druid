@@ -27,9 +27,9 @@ import org.apache.druid.segment.vector.SingleValueDimensionVectorSelector;
 import org.apache.druid.segment.vector.VectorValueSelector;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.easymock.EasyMock;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 public class VectorValueMatcherColumnProcessorFactoryTest extends InitializedNullHandlingTest
 {
@@ -37,7 +37,7 @@ public class VectorValueMatcherColumnProcessorFactoryTest extends InitializedNul
   private static final int CURRENT_SIZE = 24;
   private VectorValueSelector vectorValueSelector;
 
-  @BeforeEach
+  @Before
   public void setup()
   {
     vectorValueSelector = EasyMock.createMock(VectorValueSelector.class);
@@ -55,17 +55,17 @@ public class VectorValueMatcherColumnProcessorFactoryTest extends InitializedNul
             vectorValueSelector
         );
 
-    Assertions.assertTrue(matcherFactory instanceof FloatVectorValueMatcher);
+    Assert.assertTrue(matcherFactory instanceof FloatVectorValueMatcher);
 
     VectorValueMatcher matcher = matcherFactory.makeMatcher("2.0");
-    Assertions.assertFalse(matcher instanceof BooleanVectorValueMatcher);
-    Assertions.assertEquals(VECTOR_SIZE, matcher.getMaxVectorSize());
-    Assertions.assertEquals(CURRENT_SIZE, matcher.getCurrentVectorSize());
+    Assert.assertFalse(matcher instanceof BooleanVectorValueMatcher);
+    Assert.assertEquals(VECTOR_SIZE, matcher.getMaxVectorSize());
+    Assert.assertEquals(CURRENT_SIZE, matcher.getCurrentVectorSize());
 
     VectorValueMatcher booleanMatcher = matcherFactory.makeMatcher((String) null);
-    Assertions.assertFalse(booleanMatcher instanceof BooleanVectorValueMatcher);
-    Assertions.assertEquals(VECTOR_SIZE, booleanMatcher.getMaxVectorSize());
-    Assertions.assertEquals(CURRENT_SIZE, booleanMatcher.getCurrentVectorSize());
+    Assert.assertFalse(booleanMatcher instanceof BooleanVectorValueMatcher);
+    Assert.assertEquals(VECTOR_SIZE, booleanMatcher.getMaxVectorSize());
+    Assert.assertEquals(CURRENT_SIZE, booleanMatcher.getCurrentVectorSize());
     EasyMock.verify(vectorValueSelector);
   }
 
@@ -78,19 +78,19 @@ public class VectorValueMatcherColumnProcessorFactoryTest extends InitializedNul
             vectorValueSelector
         );
 
-    Assertions.assertTrue(matcherFactory instanceof DoubleVectorValueMatcher);
+    Assert.assertTrue(matcherFactory instanceof DoubleVectorValueMatcher);
 
 
     VectorValueMatcher matcher = matcherFactory.makeMatcher("1.0");
-    Assertions.assertFalse(matcher instanceof BooleanVectorValueMatcher);
-    Assertions.assertEquals(VECTOR_SIZE, matcher.getMaxVectorSize());
-    Assertions.assertEquals(CURRENT_SIZE, matcher.getCurrentVectorSize());
+    Assert.assertFalse(matcher instanceof BooleanVectorValueMatcher);
+    Assert.assertEquals(VECTOR_SIZE, matcher.getMaxVectorSize());
+    Assert.assertEquals(CURRENT_SIZE, matcher.getCurrentVectorSize());
 
 
     VectorValueMatcher booleanMatcher = matcherFactory.makeMatcher((String) null);
-    Assertions.assertFalse(booleanMatcher instanceof BooleanVectorValueMatcher);
-    Assertions.assertEquals(VECTOR_SIZE, booleanMatcher.getMaxVectorSize());
-    Assertions.assertEquals(CURRENT_SIZE, booleanMatcher.getCurrentVectorSize());
+    Assert.assertFalse(booleanMatcher instanceof BooleanVectorValueMatcher);
+    Assert.assertEquals(VECTOR_SIZE, booleanMatcher.getMaxVectorSize());
+    Assert.assertEquals(CURRENT_SIZE, booleanMatcher.getCurrentVectorSize());
     EasyMock.verify(vectorValueSelector);
   }
 
@@ -103,17 +103,17 @@ public class VectorValueMatcherColumnProcessorFactoryTest extends InitializedNul
             vectorValueSelector
         );
 
-    Assertions.assertTrue(matcherFactory instanceof LongVectorValueMatcher);
+    Assert.assertTrue(matcherFactory instanceof LongVectorValueMatcher);
 
     VectorValueMatcher matcher = matcherFactory.makeMatcher("1");
-    Assertions.assertFalse(matcher instanceof BooleanVectorValueMatcher);
-    Assertions.assertEquals(VECTOR_SIZE, matcher.getMaxVectorSize());
-    Assertions.assertEquals(CURRENT_SIZE, matcher.getCurrentVectorSize());
+    Assert.assertFalse(matcher instanceof BooleanVectorValueMatcher);
+    Assert.assertEquals(VECTOR_SIZE, matcher.getMaxVectorSize());
+    Assert.assertEquals(CURRENT_SIZE, matcher.getCurrentVectorSize());
 
     VectorValueMatcher booleanMatcher = matcherFactory.makeMatcher((String) null);
-    Assertions.assertFalse(booleanMatcher instanceof BooleanVectorValueMatcher);
-    Assertions.assertEquals(VECTOR_SIZE, booleanMatcher.getMaxVectorSize());
-    Assertions.assertEquals(CURRENT_SIZE, booleanMatcher.getCurrentVectorSize());
+    Assert.assertFalse(booleanMatcher instanceof BooleanVectorValueMatcher);
+    Assert.assertEquals(VECTOR_SIZE, booleanMatcher.getMaxVectorSize());
+    Assert.assertEquals(CURRENT_SIZE, booleanMatcher.getCurrentVectorSize());
     EasyMock.verify(vectorValueSelector);
   }
 
@@ -144,17 +144,17 @@ public class VectorValueMatcherColumnProcessorFactoryTest extends InitializedNul
             selector
         );
 
-    Assertions.assertTrue(matcherFactory instanceof SingleValueStringVectorValueMatcher);
+    Assert.assertTrue(matcherFactory instanceof SingleValueStringVectorValueMatcher);
 
     // value exists in column nonboolean matcher
     VectorValueMatcher matcher = matcherFactory.makeMatcher("any value");
-    Assertions.assertFalse(matcher instanceof BooleanVectorValueMatcher);
-    Assertions.assertEquals(VECTOR_SIZE, matcher.getMaxVectorSize());
-    Assertions.assertEquals(CURRENT_SIZE, matcher.getCurrentVectorSize());
+    Assert.assertFalse(matcher instanceof BooleanVectorValueMatcher);
+    Assert.assertEquals(VECTOR_SIZE, matcher.getMaxVectorSize());
+    Assert.assertEquals(CURRENT_SIZE, matcher.getCurrentVectorSize());
 
     VectorValueMatcher booleanMatcher = matcherFactory.makeMatcher("another value");
-    Assertions.assertEquals(VECTOR_SIZE, booleanMatcher.getMaxVectorSize());
-    Assertions.assertEquals(CURRENT_SIZE, booleanMatcher.getCurrentVectorSize());
+    Assert.assertEquals(VECTOR_SIZE, booleanMatcher.getMaxVectorSize());
+    Assert.assertEquals(CURRENT_SIZE, booleanMatcher.getCurrentVectorSize());
     EasyMock.verify(selector, lookup);
   }
 
@@ -184,18 +184,18 @@ public class VectorValueMatcherColumnProcessorFactoryTest extends InitializedNul
             selector
         );
 
-    Assertions.assertTrue(matcherFactory instanceof SingleValueStringVectorValueMatcher);
+    Assert.assertTrue(matcherFactory instanceof SingleValueStringVectorValueMatcher);
 
     VectorValueMatcher matcher = matcherFactory.makeMatcher("any value");
-    Assertions.assertTrue(matcher instanceof BooleanVectorValueMatcher);
-    Assertions.assertEquals(VECTOR_SIZE, matcher.getMaxVectorSize());
-    Assertions.assertEquals(CURRENT_SIZE, matcher.getCurrentVectorSize());
+    Assert.assertTrue(matcher instanceof BooleanVectorValueMatcher);
+    Assert.assertEquals(VECTOR_SIZE, matcher.getMaxVectorSize());
+    Assert.assertEquals(CURRENT_SIZE, matcher.getCurrentVectorSize());
 
     // all are boolean with no valued column i guess
     VectorValueMatcher anotherMatcher = matcherFactory.makeMatcher((String) null);
-    Assertions.assertTrue(anotherMatcher instanceof BooleanVectorValueMatcher);
-    Assertions.assertEquals(VECTOR_SIZE, anotherMatcher.getMaxVectorSize());
-    Assertions.assertEquals(CURRENT_SIZE, anotherMatcher.getCurrentVectorSize());
+    Assert.assertTrue(anotherMatcher instanceof BooleanVectorValueMatcher);
+    Assert.assertEquals(VECTOR_SIZE, anotherMatcher.getMaxVectorSize());
+    Assert.assertEquals(CURRENT_SIZE, anotherMatcher.getCurrentVectorSize());
     EasyMock.verify(selector, lookup);
   }
 
@@ -224,19 +224,19 @@ public class VectorValueMatcherColumnProcessorFactoryTest extends InitializedNul
             selector
         );
 
-    Assertions.assertTrue(matcherFactory instanceof SingleValueStringVectorValueMatcher);
+    Assert.assertTrue(matcherFactory instanceof SingleValueStringVectorValueMatcher);
 
     // false matcher
     VectorValueMatcher booleanMatcher = matcherFactory.makeMatcher("any value");
-    Assertions.assertTrue(booleanMatcher instanceof BooleanVectorValueMatcher);
-    Assertions.assertEquals(VECTOR_SIZE, booleanMatcher.getMaxVectorSize());
-    Assertions.assertEquals(CURRENT_SIZE, booleanMatcher.getCurrentVectorSize());
+    Assert.assertTrue(booleanMatcher instanceof BooleanVectorValueMatcher);
+    Assert.assertEquals(VECTOR_SIZE, booleanMatcher.getMaxVectorSize());
+    Assert.assertEquals(CURRENT_SIZE, booleanMatcher.getCurrentVectorSize());
 
     // true matcher
     VectorValueMatcher anotherBooleanMatcher = matcherFactory.makeMatcher((String) null);
-    Assertions.assertTrue(anotherBooleanMatcher instanceof BooleanVectorValueMatcher);
-    Assertions.assertEquals(VECTOR_SIZE, anotherBooleanMatcher.getMaxVectorSize());
-    Assertions.assertEquals(CURRENT_SIZE, anotherBooleanMatcher.getCurrentVectorSize());
+    Assert.assertTrue(anotherBooleanMatcher instanceof BooleanVectorValueMatcher);
+    Assert.assertEquals(VECTOR_SIZE, anotherBooleanMatcher.getMaxVectorSize());
+    Assert.assertEquals(CURRENT_SIZE, anotherBooleanMatcher.getCurrentVectorSize());
     EasyMock.verify(selector);
   }
 
@@ -268,12 +268,12 @@ public class VectorValueMatcherColumnProcessorFactoryTest extends InitializedNul
             selector
         );
 
-    Assertions.assertTrue(matcherFactory instanceof SingleValueStringVectorValueMatcher);
+    Assert.assertTrue(matcherFactory instanceof SingleValueStringVectorValueMatcher);
 
     VectorValueMatcher matcher = matcherFactory.makeMatcher("any value");
-    Assertions.assertFalse(matcher instanceof BooleanVectorValueMatcher);
-    Assertions.assertEquals(VECTOR_SIZE, matcher.getMaxVectorSize());
-    Assertions.assertEquals(CURRENT_SIZE, matcher.getCurrentVectorSize());
+    Assert.assertFalse(matcher instanceof BooleanVectorValueMatcher);
+    Assert.assertEquals(VECTOR_SIZE, matcher.getMaxVectorSize());
+    Assert.assertEquals(CURRENT_SIZE, matcher.getCurrentVectorSize());
     EasyMock.verify(selector, lookup);
   }
 
@@ -302,15 +302,15 @@ public class VectorValueMatcherColumnProcessorFactoryTest extends InitializedNul
             selector
         );
 
-    Assertions.assertTrue(matcherFactory instanceof MultiValueStringVectorValueMatcher);
+    Assert.assertTrue(matcherFactory instanceof MultiValueStringVectorValueMatcher);
 
     VectorValueMatcher valueNotExistMatcher = matcherFactory.makeMatcher("any value");
-    Assertions.assertEquals(VECTOR_SIZE, valueNotExistMatcher.getMaxVectorSize());
-    Assertions.assertEquals(CURRENT_SIZE, valueNotExistMatcher.getCurrentVectorSize());
+    Assert.assertEquals(VECTOR_SIZE, valueNotExistMatcher.getMaxVectorSize());
+    Assert.assertEquals(CURRENT_SIZE, valueNotExistMatcher.getCurrentVectorSize());
 
     VectorValueMatcher valueExistMatcher = matcherFactory.makeMatcher((String) null);
-    Assertions.assertEquals(VECTOR_SIZE, valueExistMatcher.getMaxVectorSize());
-    Assertions.assertEquals(CURRENT_SIZE, valueExistMatcher.getCurrentVectorSize());
+    Assert.assertEquals(VECTOR_SIZE, valueExistMatcher.getMaxVectorSize());
+    Assert.assertEquals(CURRENT_SIZE, valueExistMatcher.getCurrentVectorSize());
     EasyMock.verify(selector, lookup);
   }
 }

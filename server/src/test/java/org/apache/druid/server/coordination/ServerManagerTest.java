@@ -102,9 +102,11 @@ import org.apache.druid.timeline.partition.NoneShardSpec;
 import org.apache.druid.timeline.partition.PartitionChunk;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -121,13 +123,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 /**
  */
 public class ServerManagerTest
 {
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
 
   private ServerManager serverManager;
   private MyQueryRunnerFactory factory;
@@ -137,7 +138,7 @@ public class ServerManagerTest
   private ExecutorService serverManagerExec;
   private SegmentManager segmentManager;
 
-  @BeforeEach
+  @Before
   public void setUp()
   {
     EmittingLogger.registerEmitter(new NoopServiceEmitter());
@@ -348,18 +349,18 @@ public class ServerManagerTest
 
     queryNotifyLatch.await(1000, TimeUnit.MILLISECONDS);
 
-    Assertions.assertEquals(1, factory.getSegmentReferences().size());
+    Assert.assertEquals(1, factory.getSegmentReferences().size());
 
     for (ReferenceCountingSegment referenceCountingSegment : factory.getSegmentReferences()) {
-      Assertions.assertEquals(1, referenceCountingSegment.getNumReferences());
+      Assert.assertEquals(1, referenceCountingSegment.getNumReferences());
     }
 
     queryWaitYieldLatch.countDown();
 
-    Assertions.assertTrue(factory.getAdapters().size() == 1);
+    Assert.assertTrue(factory.getAdapters().size() == 1);
 
     for (SegmentForTesting segmentForTesting : factory.getAdapters()) {
-      Assertions.assertFalse(segmentForTesting.isClosed());
+      Assert.assertFalse(segmentForTesting.isClosed());
     }
 
     queryWaitLatch.countDown();
@@ -368,7 +369,7 @@ public class ServerManagerTest
     dropQueryable("test", "3", Intervals.of("2011-04-04/2011-04-05"));
 
     for (SegmentForTesting segmentForTesting : factory.getAdapters()) {
-      Assertions.assertTrue(segmentForTesting.isClosed());
+      Assert.assertTrue(segmentForTesting.isClosed());
     }
   }
 
@@ -387,31 +388,31 @@ public class ServerManagerTest
 
     queryNotifyLatch.await(1000, TimeUnit.MILLISECONDS);
 
-    Assertions.assertEquals(1, factory.getSegmentReferences().size());
+    Assert.assertEquals(1, factory.getSegmentReferences().size());
 
     for (ReferenceCountingSegment referenceCountingSegment : factory.getSegmentReferences()) {
-      Assertions.assertEquals(1, referenceCountingSegment.getNumReferences());
+      Assert.assertEquals(1, referenceCountingSegment.getNumReferences());
     }
 
     queryWaitYieldLatch.countDown();
 
-    Assertions.assertEquals(1, factory.getAdapters().size());
+    Assert.assertEquals(1, factory.getAdapters().size());
 
     for (SegmentForTesting segmentForTesting : factory.getAdapters()) {
-      Assertions.assertFalse(segmentForTesting.isClosed());
+      Assert.assertFalse(segmentForTesting.isClosed());
     }
 
     dropQueryable("test", "3", Intervals.of("2011-04-04/2011-04-05"));
 
     for (SegmentForTesting segmentForTesting : factory.getAdapters()) {
-      Assertions.assertFalse(segmentForTesting.isClosed());
+      Assert.assertFalse(segmentForTesting.isClosed());
     }
 
     queryWaitLatch.countDown();
     future.get();
 
     for (SegmentForTesting segmentForTesting : factory.getAdapters()) {
-      Assertions.assertTrue(segmentForTesting.isClosed());
+      Assert.assertTrue(segmentForTesting.isClosed());
     }
   }
 
@@ -430,32 +431,32 @@ public class ServerManagerTest
 
     queryNotifyLatch.await(1000, TimeUnit.MILLISECONDS);
 
-    Assertions.assertEquals(1, factory.getSegmentReferences().size());
+    Assert.assertEquals(1, factory.getSegmentReferences().size());
 
     for (ReferenceCountingSegment referenceCountingSegment : factory.getSegmentReferences()) {
-      Assertions.assertEquals(1, referenceCountingSegment.getNumReferences());
+      Assert.assertEquals(1, referenceCountingSegment.getNumReferences());
     }
 
     queryWaitYieldLatch.countDown();
 
-    Assertions.assertEquals(1, factory.getAdapters().size());
+    Assert.assertEquals(1, factory.getAdapters().size());
 
     for (SegmentForTesting segmentForTesting : factory.getAdapters()) {
-      Assertions.assertFalse(segmentForTesting.isClosed());
+      Assert.assertFalse(segmentForTesting.isClosed());
     }
 
     dropQueryable("test", "3", Intervals.of("2011-04-04/2011-04-05"));
     dropQueryable("test", "3", Intervals.of("2011-04-04/2011-04-05"));
 
     for (SegmentForTesting segmentForTesting : factory.getAdapters()) {
-      Assertions.assertFalse(segmentForTesting.isClosed());
+      Assert.assertFalse(segmentForTesting.isClosed());
     }
 
     queryWaitLatch.countDown();
     future.get();
 
     for (SegmentForTesting segmentForTesting : factory.getAdapters()) {
-      Assertions.assertTrue(segmentForTesting.isClosed());
+      Assert.assertTrue(segmentForTesting.isClosed());
     }
   }
 
@@ -467,28 +468,26 @@ public class ServerManagerTest
         searchQuery("unknown_datasource", interval, Granularities.ALL),
         Collections.singletonList(interval)
     );
-    Assertions.assertSame(NoopQueryRunner.class, queryRunner.getClass());
+    Assert.assertSame(NoopQueryRunner.class, queryRunner.getClass());
   }
 
-  @Test
+  @Test(expected = ISE.class)
   public void testGetQueryRunnerForSegmentsWhenTimelineIsMissingReportingMissingSegmentsOnQueryDataSource()
   {
-    assertThrows(ISE.class, () -> {
-      final Interval interval = Intervals.of("0000-01-01/P1D");
-      final SearchQuery query = searchQueryWithQueryDataSource("unknown_datasource", interval, Granularities.ALL);
-      final List<SegmentDescriptor> unknownSegments = Collections.singletonList(
-          new SegmentDescriptor(interval, "unknown_version", 0)
-      );
-      final QueryRunner<Result<SearchResultValue>> queryRunner = serverManager.getQueryRunnerForSegments(
-          query,
-          unknownSegments
-      );
-      final ResponseContext responseContext = DefaultResponseContext.createEmpty();
-      final List<Result<SearchResultValue>> results = queryRunner.run(QueryPlus.wrap(query), responseContext).toList();
-      Assertions.assertTrue(results.isEmpty());
-      Assertions.assertNotNull(responseContext.getMissingSegments());
-      Assertions.assertEquals(unknownSegments, responseContext.getMissingSegments());
-    });
+    final Interval interval = Intervals.of("0000-01-01/P1D");
+    final SearchQuery query = searchQueryWithQueryDataSource("unknown_datasource", interval, Granularities.ALL);
+    final List<SegmentDescriptor> unknownSegments = Collections.singletonList(
+        new SegmentDescriptor(interval, "unknown_version", 0)
+    );
+    final QueryRunner<Result<SearchResultValue>> queryRunner = serverManager.getQueryRunnerForSegments(
+        query,
+        unknownSegments
+    );
+    final ResponseContext responseContext = DefaultResponseContext.createEmpty();
+    final List<Result<SearchResultValue>> results = queryRunner.run(QueryPlus.wrap(query), responseContext).toList();
+    Assert.assertTrue(results.isEmpty());
+    Assert.assertNotNull(responseContext.getMissingSegments());
+    Assert.assertEquals(unknownSegments, responseContext.getMissingSegments());
   }
 
   @Test
@@ -505,9 +504,9 @@ public class ServerManagerTest
     );
     final ResponseContext responseContext = DefaultResponseContext.createEmpty();
     final List<Result<SearchResultValue>> results = queryRunner.run(QueryPlus.wrap(query), responseContext).toList();
-    Assertions.assertTrue(results.isEmpty());
-    Assertions.assertNotNull(responseContext.getMissingSegments());
-    Assertions.assertEquals(unknownSegments, responseContext.getMissingSegments());
+    Assert.assertTrue(results.isEmpty());
+    Assert.assertNotNull(responseContext.getMissingSegments());
+    Assert.assertEquals(unknownSegments, responseContext.getMissingSegments());
   }
 
   @Test
@@ -524,9 +523,9 @@ public class ServerManagerTest
     );
     final ResponseContext responseContext = DefaultResponseContext.createEmpty();
     final List<Result<SearchResultValue>> results = queryRunner.run(QueryPlus.wrap(query), responseContext).toList();
-    Assertions.assertTrue(results.isEmpty());
-    Assertions.assertNotNull(responseContext.getMissingSegments());
-    Assertions.assertEquals(unknownSegments, responseContext.getMissingSegments());
+    Assert.assertTrue(results.isEmpty());
+    Assert.assertNotNull(responseContext.getMissingSegments());
+    Assert.assertEquals(unknownSegments, responseContext.getMissingSegments());
   }
 
   @Test
@@ -544,9 +543,9 @@ public class ServerManagerTest
     );
     final ResponseContext responseContext = DefaultResponseContext.createEmpty();
     final List<Result<SearchResultValue>> results = queryRunner.run(QueryPlus.wrap(query), responseContext).toList();
-    Assertions.assertTrue(results.isEmpty());
-    Assertions.assertNotNull(responseContext.getMissingSegments());
-    Assertions.assertEquals(unknownSegments, responseContext.getMissingSegments());
+    Assert.assertTrue(results.isEmpty());
+    Assert.assertNotNull(responseContext.getMissingSegments());
+    Assert.assertEquals(unknownSegments, responseContext.getMissingSegments());
   }
 
   @Test
@@ -556,13 +555,13 @@ public class ServerManagerTest
     final SearchQuery query = searchQuery("test", interval, Granularities.ALL);
     final Optional<VersionedIntervalTimeline<String, ReferenceCountingSegment>> maybeTimeline = segmentManager
         .getTimeline(query.getDataSource().getAnalysis());
-    Assertions.assertTrue(maybeTimeline.isPresent());
+    Assert.assertTrue(maybeTimeline.isPresent());
     final List<TimelineObjectHolder<String, ReferenceCountingSegment>> holders = maybeTimeline.get().lookup(interval);
     final List<SegmentDescriptor> closedSegments = new ArrayList<>();
     for (TimelineObjectHolder<String, ReferenceCountingSegment> holder : holders) {
       for (PartitionChunk<ReferenceCountingSegment> chunk : holder.getObject()) {
         final ReferenceCountingSegment segment = chunk.getObject();
-        Assertions.assertNotNull(segment.getId());
+        Assert.assertNotNull(segment.getId());
         closedSegments.add(
             new SegmentDescriptor(segment.getDataInterval(), segment.getVersion(), segment.getId().getPartitionNum())
         );
@@ -575,65 +574,64 @@ public class ServerManagerTest
     );
     final ResponseContext responseContext = DefaultResponseContext.createEmpty();
     final List<Result<SearchResultValue>> results = queryRunner.run(QueryPlus.wrap(query), responseContext).toList();
-    Assertions.assertTrue(results.isEmpty());
-    Assertions.assertNotNull(responseContext.getMissingSegments());
-    Assertions.assertEquals(closedSegments, responseContext.getMissingSegments());
+    Assert.assertTrue(results.isEmpty());
+    Assert.assertNotNull(responseContext.getMissingSegments());
+    Assert.assertEquals(closedSegments, responseContext.getMissingSegments());
   }
 
   @Test
   public void testGetQueryRunnerForSegmentsForUnknownQueryThrowingException()
   {
-    Throwable exception = assertThrows(QueryUnsupportedException.class, () -> {
-      final Interval interval = Intervals.of("P1d/2011-04-01");
-      final List<SegmentDescriptor> descriptors = Collections.singletonList(new SegmentDescriptor(interval, "1", 0));
-      serverManager.getQueryRunnerForSegments(
-          new BaseQuery<Object>(
-              new TableDataSource("test"),
-              new MultipleSpecificSegmentSpec(descriptors),
-              false,
-              new HashMap<>()
-          )
+    final Interval interval = Intervals.of("P1d/2011-04-01");
+    final List<SegmentDescriptor> descriptors = Collections.singletonList(new SegmentDescriptor(interval, "1", 0));
+    expectedException.expect(QueryUnsupportedException.class);
+    expectedException.expectMessage("Unknown query type");
+    serverManager.getQueryRunnerForSegments(
+        new BaseQuery<Object>(
+            new TableDataSource("test"),
+            new MultipleSpecificSegmentSpec(descriptors),
+            false,
+            new HashMap<>()
+        )
+        {
+          @Override
+          public boolean hasFilters()
           {
-            @Override
-            public boolean hasFilters()
-            {
-              return false;
-            }
+            return false;
+          }
 
-            @Override
-            public DimFilter getFilter()
-            {
-              return null;
-            }
+          @Override
+          public DimFilter getFilter()
+          {
+            return null;
+          }
 
-            @Override
-            public String getType()
-            {
-              return null;
-            }
+          @Override
+          public String getType()
+          {
+            return null;
+          }
 
-            @Override
-            public Query<Object> withOverriddenContext(Map<String, Object> contextOverride)
-            {
-              return null;
-            }
+          @Override
+          public Query<Object> withOverriddenContext(Map<String, Object> contextOverride)
+          {
+            return null;
+          }
 
-            @Override
-            public Query<Object> withQuerySegmentSpec(QuerySegmentSpec spec)
-            {
-              return null;
-            }
+          @Override
+          public Query<Object> withQuerySegmentSpec(QuerySegmentSpec spec)
+          {
+            return null;
+          }
 
-            @Override
-            public Query<Object> withDataSource(DataSource dataSource)
-            {
-              return null;
-            }
-          },
-          descriptors
-      );
-    });
-    assertTrue(exception.getMessage().contains("Unknown query type"));
+          @Override
+          public Query<Object> withDataSource(DataSource dataSource)
+          {
+            return null;
+          }
+        },
+        descriptors
+    );
   }
 
   private void waitForTestVerificationAndCleanup(Future future)
@@ -713,12 +711,12 @@ public class ServerManagerTest
               Pair<String, Interval> expectedVals = expectedIter.next();
               SegmentForTesting value = adaptersIter.next();
 
-              Assertions.assertEquals(expectedVals.lhs, value.getVersion());
-              Assertions.assertEquals(expectedVals.rhs, value.getInterval());
+              Assert.assertEquals(expectedVals.lhs, value.getVersion());
+              Assert.assertEquals(expectedVals.rhs, value.getInterval());
             }
 
-            Assertions.assertFalse(expectedIter.hasNext());
-            Assertions.assertFalse(adaptersIter.hasNext());
+            Assert.assertFalse(expectedIter.hasNext());
+            Assert.assertFalse(adaptersIter.hasNext());
           }
         }
     );
@@ -815,7 +813,7 @@ public class ServerManagerTest
       }
       final ReferenceCountingSegment segment = (ReferenceCountingSegment) adapter;
 
-      Assertions.assertTrue(segment.getNumReferences() > 0);
+      Assert.assertTrue(segment.getNumReferences() > 0);
       segmentReferences.add(segment);
       adapters.add((SegmentForTesting) segment.getBaseSegment());
       return new BlockingQueryRunner<>(new NoopQueryRunner<>(), waitLatch, waitYieldLatch, notifyLatch);

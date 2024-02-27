@@ -28,18 +28,19 @@ import org.apache.druid.query.timeseries.TimeseriesQuery;
 import org.apache.druid.query.timeseries.TimeseriesQueryQueryToolChest;
 import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.column.RowSignature;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 public class JavaScriptPostAggregatorTest
 {
   private static final String ABS_PERCENT_FUNCTION = "function(delta, total) { return 100 * Math.abs(delta) / total; }";
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
 
   @Test
   public void testCompute()
@@ -57,22 +58,22 @@ public class JavaScriptPostAggregatorTest
         JavaScriptConfig.getEnabledInstance()
     );
 
-    Assertions.assertEquals(10.0, javaScriptPostAggregator.compute(metricValues));
+    Assert.assertEquals(10.0, javaScriptPostAggregator.compute(metricValues));
   }
 
   @Test
   public void testComputeJavaScriptNotAllowed()
   {
-    Throwable exception = assertThrows(IllegalStateException.class, () -> {
-      JavaScriptPostAggregator aggregator = new JavaScriptPostAggregator(
-          "absPercent",
-          Lists.newArrayList("delta", "total"),
-          ABS_PERCENT_FUNCTION,
-          new JavaScriptConfig(false)
-      );
-      aggregator.compute(new HashMap<>());
-    });
-    assertTrue(exception.getMessage().contains("JavaScript is disabled"));
+    JavaScriptPostAggregator aggregator = new JavaScriptPostAggregator(
+        "absPercent",
+        Lists.newArrayList("delta", "total"),
+        ABS_PERCENT_FUNCTION,
+        new JavaScriptConfig(false)
+    );
+
+    expectedException.expect(IllegalStateException.class);
+    expectedException.expectMessage("JavaScript is disabled");
+    aggregator.compute(new HashMap<>());
   }
 
   @Test
@@ -97,7 +98,7 @@ public class JavaScriptPostAggregatorTest
               )
               .build();
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         RowSignature.builder()
                     .addTimeColumn()
                     .add("total", ColumnType.LONG)

@@ -21,14 +21,12 @@ package org.apache.druid.data.input.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.druid.jackson.DefaultObjectMapper;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class DelimitedParseSpecTest
 {
@@ -50,54 +48,50 @@ public class DelimitedParseSpecTest
         jsonMapper.writeValueAsString(spec),
         DelimitedParseSpec.class
     );
-    Assertions.assertEquals("abc", serde.getTimestampSpec().getTimestampColumn());
-    Assertions.assertEquals("iso", serde.getTimestampSpec().getTimestampFormat());
+    Assert.assertEquals("abc", serde.getTimestampSpec().getTimestampColumn());
+    Assert.assertEquals("iso", serde.getTimestampSpec().getTimestampFormat());
 
-    Assertions.assertEquals(Collections.singletonList("abc"), serde.getColumns());
-    Assertions.assertEquals("\u0001", serde.getDelimiter());
-    Assertions.assertEquals("\u0002", serde.getListDelimiter());
-    Assertions.assertEquals(Collections.singletonList("abc"), serde.getDimensionsSpec().getDimensionNames());
+    Assert.assertEquals(Collections.singletonList("abc"), serde.getColumns());
+    Assert.assertEquals("\u0001", serde.getDelimiter());
+    Assert.assertEquals("\u0002", serde.getListDelimiter());
+    Assert.assertEquals(Collections.singletonList("abc"), serde.getDimensionsSpec().getDimensionNames());
   }
 
-  @Test
+  @Test(expected = IllegalArgumentException.class)
   public void testComma()
   {
-    assertThrows(IllegalArgumentException.class, () -> {
-      @SuppressWarnings("unused") // expected exception
-      final ParseSpec spec = new DelimitedParseSpec(
-          new TimestampSpec(
-              "timestamp",
-              "auto",
-              null
-          ),
-          new DimensionsSpec(DimensionsSpec.getDefaultSchemas(Arrays.asList("a,", "b"))),
-          ",",
-          null,
-          Collections.singletonList("a,"),
-          false,
-          0
-      );
-    });
+    @SuppressWarnings("unused") // expected exception
+    final ParseSpec spec = new DelimitedParseSpec(
+        new TimestampSpec(
+            "timestamp",
+            "auto",
+            null
+        ),
+        new DimensionsSpec(DimensionsSpec.getDefaultSchemas(Arrays.asList("a,", "b"))),
+        ",",
+        null,
+        Collections.singletonList("a,"),
+        false,
+        0
+    );
   }
 
-  @Test
+  @Test(expected = IllegalArgumentException.class)
   public void testDefaultColumnList()
   {
-    assertThrows(IllegalArgumentException.class, () -> {
-      @SuppressWarnings("unused") // expected exception
-      final DelimitedParseSpec spec = new DelimitedParseSpec(
-          new TimestampSpec(
-              "timestamp",
-              "auto",
-              null
-          ),
-          new DimensionsSpec(DimensionsSpec.getDefaultSchemas(Arrays.asList("a", "b"))),
-          ",",
-          null,
-          null,
-          false,
-          0
-      );
-    });
+    @SuppressWarnings("unused") // expected exception
+    final DelimitedParseSpec spec = new DelimitedParseSpec(
+        new TimestampSpec(
+            "timestamp",
+            "auto",
+            null
+        ),
+        new DimensionsSpec(DimensionsSpec.getDefaultSchemas(Arrays.asList("a", "b"))),
+        ",",
+        null,
+        null,
+        false,
+        0
+    );
   }
 }

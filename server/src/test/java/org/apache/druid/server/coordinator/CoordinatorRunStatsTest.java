@@ -24,10 +24,10 @@ import org.apache.druid.server.coordinator.stats.CoordinatorRunStats;
 import org.apache.druid.server.coordinator.stats.CoordinatorStat;
 import org.apache.druid.server.coordinator.stats.Dimension;
 import org.apache.druid.server.coordinator.stats.RowKey;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,13 +36,13 @@ public class CoordinatorRunStatsTest
 {
   private CoordinatorRunStats stats;
 
-  @BeforeEach
+  @Before
   public void setUp()
   {
     stats = new CoordinatorRunStats();
   }
 
-  @AfterEach
+  @After
   public void tearDown()
   {
     stats = null;
@@ -51,11 +51,11 @@ public class CoordinatorRunStatsTest
   @Test
   public void testAdd()
   {
-    Assertions.assertEquals(0, stats.get(Stat.ERROR_1));
+    Assert.assertEquals(0, stats.get(Stat.ERROR_1));
     stats.add(Stat.ERROR_1, 1);
-    Assertions.assertEquals(1, stats.get(Stat.ERROR_1));
+    Assert.assertEquals(1, stats.get(Stat.ERROR_1));
     stats.add(Stat.ERROR_1, -11);
-    Assertions.assertEquals(-10, stats.get(Stat.ERROR_1));
+    Assert.assertEquals(-10, stats.get(Stat.ERROR_1));
   }
 
   @Test
@@ -67,11 +67,11 @@ public class CoordinatorRunStatsTest
     stats.add(Stat.INFO_1, Key.TIER_1, 1);
     stats.add(Stat.ERROR_1, Key.TIER_2, 1);
 
-    Assertions.assertFalse(stats.hasStat(Stat.INFO_2));
+    Assert.assertFalse(stats.hasStat(Stat.INFO_2));
 
-    Assertions.assertEquals(-4, stats.get(Stat.ERROR_1, Key.TIER_1));
-    Assertions.assertEquals(2, stats.get(Stat.ERROR_1, Key.TIER_2));
-    Assertions.assertEquals(1, stats.get(Stat.INFO_1, Key.TIER_1));
+    Assert.assertEquals(-4, stats.get(Stat.ERROR_1, Key.TIER_1));
+    Assert.assertEquals(2, stats.get(Stat.ERROR_1, Key.TIER_2));
+    Assert.assertEquals(1, stats.get(Stat.INFO_1, Key.TIER_1));
   }
 
   @Test
@@ -83,12 +83,12 @@ public class CoordinatorRunStatsTest
     stats.add(Stat.ERROR_1, Key.DUTY_1, 7);
 
     final CoordinatorRunStats firstFlush = stats.getSnapshotAndReset();
-    Assertions.assertEquals(1, firstFlush.get(Stat.ERROR_1));
-    Assertions.assertEquals(3, firstFlush.get(Stat.INFO_1));
-    Assertions.assertEquals(5, firstFlush.get(Stat.ERROR_1, Key.TIER_1));
-    Assertions.assertEquals(7, firstFlush.get(Stat.ERROR_1, Key.DUTY_1));
+    Assert.assertEquals(1, firstFlush.get(Stat.ERROR_1));
+    Assert.assertEquals(3, firstFlush.get(Stat.INFO_1));
+    Assert.assertEquals(5, firstFlush.get(Stat.ERROR_1, Key.TIER_1));
+    Assert.assertEquals(7, firstFlush.get(Stat.ERROR_1, Key.DUTY_1));
 
-    Assertions.assertEquals(0, stats.rowCount());
+    Assert.assertEquals(0, stats.rowCount());
 
     stats.add(Stat.ERROR_1, 7);
     stats.add(Stat.ERROR_1, Key.TIER_1, 5);
@@ -97,12 +97,12 @@ public class CoordinatorRunStatsTest
 
     final CoordinatorRunStats secondFlush = stats.getSnapshotAndReset();
 
-    Assertions.assertEquals(7, secondFlush.get(Stat.ERROR_1));
-    Assertions.assertEquals(5, secondFlush.get(Stat.ERROR_1, Key.TIER_1));
-    Assertions.assertEquals(3, secondFlush.get(Stat.INFO_1, Key.DUTY_1));
-    Assertions.assertEquals(1, secondFlush.get(Stat.INFO_2, Key.TIER_1));
+    Assert.assertEquals(7, secondFlush.get(Stat.ERROR_1));
+    Assert.assertEquals(5, secondFlush.get(Stat.ERROR_1, Key.TIER_1));
+    Assert.assertEquals(3, secondFlush.get(Stat.INFO_1, Key.DUTY_1));
+    Assert.assertEquals(1, secondFlush.get(Stat.INFO_2, Key.TIER_1));
 
-    Assertions.assertEquals(0, stats.rowCount());
+    Assert.assertEquals(0, stats.rowCount());
   }
 
   @Test
@@ -120,11 +120,11 @@ public class CoordinatorRunStatsTest
     stats.updateMax(Stat.ERROR_1, Key.TIER_2, 9);
     stats.updateMax(Stat.ERROR_1, Key.TIER_2, 10);
 
-    Assertions.assertFalse(stats.hasStat(Stat.INFO_2));
+    Assert.assertFalse(stats.hasStat(Stat.INFO_2));
 
-    Assertions.assertEquals(6, stats.get(Stat.ERROR_1, Key.TIER_1));
-    Assertions.assertEquals(5, stats.get(Stat.INFO_1, Key.TIER_1));
-    Assertions.assertEquals(10, stats.get(Stat.ERROR_1, Key.TIER_2));
+    Assert.assertEquals(6, stats.get(Stat.ERROR_1, Key.TIER_1));
+    Assert.assertEquals(5, stats.get(Stat.INFO_1, Key.TIER_1));
+    Assert.assertEquals(10, stats.get(Stat.ERROR_1, Key.TIER_2));
   }
 
   @Test
@@ -136,10 +136,10 @@ public class CoordinatorRunStatsTest
     stats.add(Stat.INFO_1, Key.DUTY_1, 1);
     stats.add(Stat.ERROR_1, Key.DUTY_2, 1);
 
-    Assertions.assertFalse(stats.hasStat(Stat.INFO_2));
-    Assertions.assertEquals(-4, stats.get(Stat.ERROR_1, Key.DUTY_1));
-    Assertions.assertEquals(2, stats.get(Stat.ERROR_1, Key.DUTY_2));
-    Assertions.assertEquals(1, stats.get(Stat.INFO_1, Key.DUTY_1));
+    Assert.assertFalse(stats.hasStat(Stat.INFO_2));
+    Assert.assertEquals(-4, stats.get(Stat.ERROR_1, Key.DUTY_1));
+    Assert.assertEquals(2, stats.get(Stat.ERROR_1, Key.DUTY_2));
+    Assert.assertEquals(1, stats.get(Stat.INFO_1, Key.DUTY_1));
   }
 
   @Test
@@ -163,7 +163,7 @@ public class CoordinatorRunStatsTest
           }
         }
     );
-    Assertions.assertEquals(expected, actual);
+    Assert.assertEquals(expected, actual);
   }
 
   @Test
@@ -179,7 +179,7 @@ public class CoordinatorRunStatsTest
           + "\nDebug: 1 hidden stats. Set 'debugDimensions' to see these."
           + "\nTOTAL: 3 stats for 1 dimension keys";
 
-    Assertions.assertEquals(expectedTable, stats.buildStatsTable());
+    Assert.assertEquals(expectedTable, stats.buildStatsTable());
   }
 
   @Test
@@ -196,26 +196,26 @@ public class CoordinatorRunStatsTest
           + "\nDebug: {duty=duty1} ==> {debug1=30}"
           + "\nTOTAL: 3 stats for 1 dimension keys";
 
-    Assertions.assertEquals(expectedTable, debugStats.buildStatsTable());
+    Assert.assertEquals(expectedTable, debugStats.buildStatsTable());
   }
 
   @Test
   public void testAddToEmptyThrowsException()
   {
     CoordinatorRunStats runStats = CoordinatorRunStats.empty();
-    Assertions.assertThrows(
+    Assert.assertThrows(
         UnsupportedOperationException.class,
         () -> runStats.add(Stat.ERROR_1, 10)
     );
-    Assertions.assertThrows(
+    Assert.assertThrows(
         UnsupportedOperationException.class,
         () -> runStats.add(Stat.ERROR_1, Key.DUTY_1, 10)
     );
-    Assertions.assertThrows(
+    Assert.assertThrows(
         UnsupportedOperationException.class,
         () -> runStats.addToSegmentStat(Stat.ERROR_1, "t", "ds", 10)
     );
-    Assertions.assertThrows(
+    Assert.assertThrows(
         UnsupportedOperationException.class,
         () -> runStats.updateMax(Stat.INFO_1, Key.TIER_1, 10)
     );

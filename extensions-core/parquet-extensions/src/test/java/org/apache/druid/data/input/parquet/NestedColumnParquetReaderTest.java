@@ -36,6 +36,7 @@ import org.apache.druid.segment.transform.ExpressionTransform;
 import org.apache.druid.segment.transform.TransformSpec;
 import org.apache.druid.segment.transform.TransformingInputEntityReader;
 import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.util.List;

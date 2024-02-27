@@ -25,8 +25,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.druid.java.util.common.lifecycle.Lifecycle;
 import org.apache.druid.java.util.emitter.factory.EmitterFactory;
 import org.asynchttpclient.AsyncHttpClient;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Properties;
 
@@ -102,9 +102,9 @@ public class CustomEmitterFactoryTest
     final Lifecycle lifecycle = new Lifecycle();
     final Emitter emitter = Emitters.create(props, null, objectMapper, lifecycle);
 
-    Assertions.assertTrue(emitter instanceof StubEmitter, "created emitter should be of class StubEmitter");
+    Assert.assertTrue("created emitter should be of class StubEmitter", emitter instanceof StubEmitter);
     StubEmitter stubEmitter = (StubEmitter) emitter;
-    Assertions.assertEquals("http://example.com/", stubEmitter.getStringProperty());
-    Assertions.assertEquals(1, stubEmitter.getIntProperty());
+    Assert.assertEquals("http://example.com/", stubEmitter.getStringProperty());
+    Assert.assertEquals(1, stubEmitter.getIntProperty());
   }
 }

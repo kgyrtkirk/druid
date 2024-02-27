@@ -30,8 +30,8 @@ import org.apache.druid.query.metadata.metadata.ColumnAnalysis;
 import org.apache.druid.query.metadata.metadata.SegmentAnalysis;
 import org.apache.druid.segment.TestHelper;
 import org.apache.druid.segment.column.ColumnType;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.LinkedHashMap;
 
@@ -78,10 +78,10 @@ public class SegmentAnalysisTest
         SegmentAnalysis.class
     );
 
-    Assertions.assertEquals(analysis, analysis2);
+    Assert.assertEquals(analysis, analysis2);
 
     // Verify column order is preserved.
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableList.copyOf(columns.entrySet()),
         ImmutableList.copyOf(analysis2.getColumns().entrySet())
     );

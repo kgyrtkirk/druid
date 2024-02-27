@@ -19,12 +19,12 @@
 
 package org.apache.druid.timeline.partition;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Collections;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 
 public class TombstoneShardSpecTest
@@ -42,19 +42,19 @@ public class TombstoneShardSpecTest
   public void getLookup()
   {
     ShardSpecLookup shardSpecLookup = tombstoneShardSpec.getLookup(Collections.singletonList(tombstoneShardSpec));
-    Assertions.assertEquals(tombstoneShardSpec, shardSpecLookup.getShardSpec(1, null));
+    Assert.assertEquals(tombstoneShardSpec, shardSpecLookup.getShardSpec(1, null));
   }
 
   @Test
   public void getDomainDimensions()
   {
-    Assertions.assertTrue(tombstoneShardSpec.getDomainDimensions().isEmpty());
+    Assert.assertTrue(tombstoneShardSpec.getDomainDimensions().isEmpty());
   }
 
   @Test
   public void possibleInDomain()
   {
-    Assertions.assertTrue(tombstoneShardSpec.possibleInDomain(Collections.emptyMap()));
+    Assert.assertTrue(tombstoneShardSpec.possibleInDomain(Collections.emptyMap()));
   }
 
   @Test
@@ -66,13 +66,13 @@ public class TombstoneShardSpecTest
   @Test
   public void getType()
   {
-    Assertions.assertEquals(ShardSpec.Type.TOMBSTONE, tombstoneShardSpec.getType());
+    Assert.assertEquals(ShardSpec.Type.TOMBSTONE, tombstoneShardSpec.getType());
   }
 
   @Test
   public void createChunk()
   {
-    Assertions.assertTrue(tombstoneShardSpec.createChunk(new Object()) != null);
+    Assert.assertTrue(tombstoneShardSpec.createChunk(new Object()) != null);
   }
 
   // just to increase branch coverage
@@ -80,10 +80,10 @@ public class TombstoneShardSpecTest
   public void equalsTest()
   {
     TombstoneShardSpec tombstoneShardSpecOther = tombstoneShardSpec;
-    Assertions.assertTrue(tombstoneShardSpec.equals(tombstoneShardSpecOther));
+    Assert.assertTrue(tombstoneShardSpec.equals(tombstoneShardSpecOther));
     tombstoneShardSpecOther = null;
-    Assertions.assertFalse(tombstoneShardSpec.equals(tombstoneShardSpecOther));
+    Assert.assertFalse(tombstoneShardSpec.equals(tombstoneShardSpecOther));
     TombstoneShardSpec newTombostoneShardSepc = new TombstoneShardSpec();
-    Assertions.assertTrue(tombstoneShardSpec.equals(newTombostoneShardSepc));
+    Assert.assertTrue(tombstoneShardSpec.equals(newTombostoneShardSepc));
   }
 }

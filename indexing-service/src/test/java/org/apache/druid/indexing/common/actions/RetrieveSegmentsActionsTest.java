@@ -31,6 +31,7 @@ import org.joda.time.Interval;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.ClassRule;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.util.HashSet;

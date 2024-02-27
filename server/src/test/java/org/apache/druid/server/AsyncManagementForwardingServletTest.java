@@ -47,10 +47,10 @@ import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import javax.annotation.Nullable;
 import javax.servlet.http.HttpServlet;
@@ -97,7 +97,7 @@ public class AsyncManagementForwardingServletTest extends BaseJettyTest
   }
 
   @Override
-  @BeforeEach
+  @Before
   public void setup() throws Exception
   {
     super.setup();
@@ -113,7 +113,7 @@ public class AsyncManagementForwardingServletTest extends BaseJettyTest
     isValidLeader = true;
   }
 
-  @AfterEach
+  @After
   public void tearDown() throws Exception
   {
     coordinator.stop();
@@ -152,9 +152,9 @@ public class AsyncManagementForwardingServletTest extends BaseJettyTest
 
     COORDINATOR_EXPECTED_REQUEST.headers.forEach(connection::setRequestProperty);
 
-    Assertions.assertEquals(200, connection.getResponseCode());
-    Assertions.assertTrue(COORDINATOR_EXPECTED_REQUEST.called, "coordinator called");
-    Assertions.assertFalse(OVERLORD_EXPECTED_REQUEST.called, "overlord called");
+    Assert.assertEquals(200, connection.getResponseCode());
+    Assert.assertTrue("coordinator called", COORDINATOR_EXPECTED_REQUEST.called);
+    Assert.assertFalse("overlord called", OVERLORD_EXPECTED_REQUEST.called);
   }
 
   @Test
@@ -173,9 +173,9 @@ public class AsyncManagementForwardingServletTest extends BaseJettyTest
 
     COORDINATOR_EXPECTED_REQUEST.headers.forEach(connection::setRequestProperty);
 
-    Assertions.assertEquals(200, connection.getResponseCode());
-    Assertions.assertTrue(COORDINATOR_EXPECTED_REQUEST.called, "coordinator called");
-    Assertions.assertFalse(OVERLORD_EXPECTED_REQUEST.called, "overlord called");
+    Assert.assertEquals(200, connection.getResponseCode());
+    Assert.assertTrue("coordinator called", COORDINATOR_EXPECTED_REQUEST.called);
+    Assert.assertFalse("overlord called", OVERLORD_EXPECTED_REQUEST.called);
   }
 
   @Test
@@ -189,9 +189,9 @@ public class AsyncManagementForwardingServletTest extends BaseJettyTest
             .openConnection());
     connection.setRequestMethod(COORDINATOR_EXPECTED_REQUEST.method);
 
-    Assertions.assertEquals(200, connection.getResponseCode());
-    Assertions.assertTrue(COORDINATOR_EXPECTED_REQUEST.called, "coordinator called");
-    Assertions.assertFalse(OVERLORD_EXPECTED_REQUEST.called, "overlord called");
+    Assert.assertEquals(200, connection.getResponseCode());
+    Assert.assertTrue("coordinator called", COORDINATOR_EXPECTED_REQUEST.called);
+    Assert.assertFalse("overlord called", OVERLORD_EXPECTED_REQUEST.called);
   }
 
   @Test
@@ -205,9 +205,9 @@ public class AsyncManagementForwardingServletTest extends BaseJettyTest
             .openConnection());
     connection.setRequestMethod(COORDINATOR_EXPECTED_REQUEST.method);
 
-    Assertions.assertEquals(200, connection.getResponseCode());
-    Assertions.assertTrue(COORDINATOR_EXPECTED_REQUEST.called, "coordinator called");
-    Assertions.assertFalse(OVERLORD_EXPECTED_REQUEST.called, "overlord called");
+    Assert.assertEquals(200, connection.getResponseCode());
+    Assert.assertTrue("coordinator called", COORDINATOR_EXPECTED_REQUEST.called);
+    Assert.assertFalse("overlord called", OVERLORD_EXPECTED_REQUEST.called);
   }
 
   @Test
@@ -224,9 +224,9 @@ public class AsyncManagementForwardingServletTest extends BaseJettyTest
 
     COORDINATOR_EXPECTED_REQUEST.headers.forEach(connection::setRequestProperty);
 
-    Assertions.assertEquals(200, connection.getResponseCode());
-    Assertions.assertTrue(COORDINATOR_EXPECTED_REQUEST.called, "coordinator called");
-    Assertions.assertFalse(OVERLORD_EXPECTED_REQUEST.called, "overlord called");
+    Assert.assertEquals(200, connection.getResponseCode());
+    Assert.assertTrue("coordinator called", COORDINATOR_EXPECTED_REQUEST.called);
+    Assert.assertFalse("overlord called", OVERLORD_EXPECTED_REQUEST.called);
   }
 
   @Test
@@ -249,9 +249,9 @@ public class AsyncManagementForwardingServletTest extends BaseJettyTest
     os.write(COORDINATOR_EXPECTED_REQUEST.body.getBytes(StandardCharsets.UTF_8));
     os.close();
 
-    Assertions.assertEquals(200, connection.getResponseCode());
-    Assertions.assertTrue(COORDINATOR_EXPECTED_REQUEST.called, "coordinator called");
-    Assertions.assertFalse(OVERLORD_EXPECTED_REQUEST.called, "overlord called");
+    Assert.assertEquals(200, connection.getResponseCode());
+    Assert.assertTrue("coordinator called", COORDINATOR_EXPECTED_REQUEST.called);
+    Assert.assertFalse("overlord called", OVERLORD_EXPECTED_REQUEST.called);
   }
 
   @Test
@@ -277,9 +277,9 @@ public class AsyncManagementForwardingServletTest extends BaseJettyTest
     os.write(OVERLORD_EXPECTED_REQUEST.body.getBytes(StandardCharsets.UTF_8));
     os.close();
 
-    Assertions.assertEquals(200, connection.getResponseCode());
-    Assertions.assertFalse(COORDINATOR_EXPECTED_REQUEST.called, "coordinator called");
-    Assertions.assertTrue(OVERLORD_EXPECTED_REQUEST.called, "overlord called");
+    Assert.assertEquals(200, connection.getResponseCode());
+    Assert.assertFalse("coordinator called", COORDINATOR_EXPECTED_REQUEST.called);
+    Assert.assertTrue("overlord called", OVERLORD_EXPECTED_REQUEST.called);
   }
 
   @Test
@@ -296,9 +296,9 @@ public class AsyncManagementForwardingServletTest extends BaseJettyTest
 
     OVERLORD_EXPECTED_REQUEST.headers.forEach(connection::setRequestProperty);
 
-    Assertions.assertEquals(200, connection.getResponseCode());
-    Assertions.assertFalse(COORDINATOR_EXPECTED_REQUEST.called, "coordinator called");
-    Assertions.assertTrue(OVERLORD_EXPECTED_REQUEST.called, "overlord called");
+    Assert.assertEquals(200, connection.getResponseCode());
+    Assert.assertFalse("coordinator called", COORDINATOR_EXPECTED_REQUEST.called);
+    Assert.assertTrue("overlord called", OVERLORD_EXPECTED_REQUEST.called);
   }
 
   @Test
@@ -315,9 +315,9 @@ public class AsyncManagementForwardingServletTest extends BaseJettyTest
 
     OVERLORD_EXPECTED_REQUEST.headers.forEach(connection::setRequestProperty);
 
-    Assertions.assertEquals(200, connection.getResponseCode());
-    Assertions.assertFalse(COORDINATOR_EXPECTED_REQUEST.called, "coordinator called");
-    Assertions.assertTrue(OVERLORD_EXPECTED_REQUEST.called, "overlord called");
+    Assert.assertEquals(200, connection.getResponseCode());
+    Assert.assertFalse("coordinator called", COORDINATOR_EXPECTED_REQUEST.called);
+    Assert.assertTrue("overlord called", OVERLORD_EXPECTED_REQUEST.called);
   }
 
   @Test
@@ -327,12 +327,12 @@ public class AsyncManagementForwardingServletTest extends BaseJettyTest
         new URL(StringUtils.format("http://localhost:%d/proxy/enabled", port)).openConnection());
     connection.setRequestMethod("GET");
 
-    Assertions.assertEquals(200, connection.getResponseCode());
+    Assert.assertEquals(200, connection.getResponseCode());
     byte[] bytes = new byte[connection.getContentLength()];
-    Assertions.assertEquals(connection.getInputStream().read(bytes), connection.getContentLength());
-    Assertions.assertEquals(ImmutableMap.of("enabled", true), new ObjectMapper().readValue(bytes, Map.class));
-    Assertions.assertFalse(COORDINATOR_EXPECTED_REQUEST.called, "coordinator called");
-    Assertions.assertFalse(OVERLORD_EXPECTED_REQUEST.called, "overlord called");
+    Assert.assertEquals(connection.getInputStream().read(bytes), connection.getContentLength());
+    Assert.assertEquals(ImmutableMap.of("enabled", true), new ObjectMapper().readValue(bytes, Map.class));
+    Assert.assertFalse("coordinator called", COORDINATOR_EXPECTED_REQUEST.called);
+    Assert.assertFalse("overlord called", OVERLORD_EXPECTED_REQUEST.called);
   }
 
   @Test
@@ -342,9 +342,9 @@ public class AsyncManagementForwardingServletTest extends BaseJettyTest
         new URL(StringUtils.format("http://localhost:%d/proxy/other/status", port)).openConnection());
     connection.setRequestMethod("GET");
 
-    Assertions.assertEquals(400, connection.getResponseCode());
-    Assertions.assertFalse(COORDINATOR_EXPECTED_REQUEST.called, "coordinator called");
-    Assertions.assertFalse(OVERLORD_EXPECTED_REQUEST.called, "overlord called");
+    Assert.assertEquals(400, connection.getResponseCode());
+    Assert.assertFalse("coordinator called", COORDINATOR_EXPECTED_REQUEST.called);
+    Assert.assertFalse("overlord called", OVERLORD_EXPECTED_REQUEST.called);
   }
 
   @Test
@@ -355,9 +355,9 @@ public class AsyncManagementForwardingServletTest extends BaseJettyTest
         new URL(StringUtils.format("http://localhost:%d/druid/coordinator", port)).openConnection());
     connection.setRequestMethod("GET");
 
-    Assertions.assertEquals(503, connection.getResponseCode());
-    Assertions.assertFalse(COORDINATOR_EXPECTED_REQUEST.called, "coordinator called");
-    Assertions.assertFalse(OVERLORD_EXPECTED_REQUEST.called, "overlord called");
+    Assert.assertEquals(503, connection.getResponseCode());
+    Assert.assertFalse("coordinator called", COORDINATOR_EXPECTED_REQUEST.called);
+    Assert.assertFalse("overlord called", OVERLORD_EXPECTED_REQUEST.called);
   }
 
   @Test
@@ -368,9 +368,9 @@ public class AsyncManagementForwardingServletTest extends BaseJettyTest
         new URL(StringUtils.format("http://localhost:%d/druid/indexer", port)).openConnection());
     connection.setRequestMethod("GET");
 
-    Assertions.assertEquals(503, connection.getResponseCode());
-    Assertions.assertFalse(COORDINATOR_EXPECTED_REQUEST.called, "coordinator called");
-    Assertions.assertFalse(OVERLORD_EXPECTED_REQUEST.called, "overlord called");
+    Assert.assertEquals(503, connection.getResponseCode());
+    Assert.assertFalse("coordinator called", COORDINATOR_EXPECTED_REQUEST.called);
+    Assert.assertFalse("overlord called", OVERLORD_EXPECTED_REQUEST.called);
     isValidLeader = true;
   }
 
@@ -381,9 +381,9 @@ public class AsyncManagementForwardingServletTest extends BaseJettyTest
         new URL(StringUtils.format("http://localhost:%d/proxy/other/status2", port)).openConnection());
     connection.setRequestMethod("GET");
 
-    Assertions.assertEquals(400, connection.getResponseCode());
-    Assertions.assertFalse(COORDINATOR_EXPECTED_REQUEST.called, "coordinator called");
-    Assertions.assertFalse(OVERLORD_EXPECTED_REQUEST.called, "overlord called");
+    Assert.assertEquals(400, connection.getResponseCode());
+    Assert.assertFalse("coordinator called", COORDINATOR_EXPECTED_REQUEST.called);
+    Assert.assertFalse("overlord called", OVERLORD_EXPECTED_REQUEST.called);
   }
 
   @Test
@@ -393,9 +393,9 @@ public class AsyncManagementForwardingServletTest extends BaseJettyTest
         new URL(StringUtils.format("http://localhost:%d/status", port)).openConnection());
     connection.setRequestMethod("GET");
 
-    Assertions.assertEquals(404, connection.getResponseCode());
-    Assertions.assertFalse(COORDINATOR_EXPECTED_REQUEST.called, "coordinator called");
-    Assertions.assertFalse(OVERLORD_EXPECTED_REQUEST.called, "overlord called");
+    Assert.assertEquals(404, connection.getResponseCode());
+    Assert.assertFalse("coordinator called", COORDINATOR_EXPECTED_REQUEST.called);
+    Assert.assertFalse("overlord called", OVERLORD_EXPECTED_REQUEST.called);
   }
 
   private static Server makeTestServer(int port, ExpectedRequest expectedRequest)

@@ -25,6 +25,7 @@ import org.apache.druid.jackson.DefaultObjectMapper;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.easymock.EasyMock;
 import org.junit.Assert;
+import org.junit.Test;
 
 /**
  */

@@ -26,8 +26,8 @@ import org.apache.druid.query.rowsandcols.RowsAndColumns;
 import org.apache.druid.query.rowsandcols.column.IntArrayColumn;
 import org.apache.druid.query.rowsandcols.column.ObjectArrayColumn;
 import org.apache.druid.segment.column.ColumnType;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -54,8 +54,8 @@ public class ClusteredGroupPartitionerTest extends SemanticTestBase
     final ClusteredGroupPartitioner parter = ClusteredGroupPartitioner.fromRAC(rac);
 
     final List<String> cols = Collections.singletonList("notThere");
-    Assertions.assertArrayEquals(new int[]{}, parter.computeBoundaries(cols));
-    Assertions.assertTrue(parter.partitionOnBoundaries(cols).isEmpty());
+    Assert.assertArrayEquals(new int[]{}, parter.computeBoundaries(cols));
+    Assert.assertTrue(parter.partitionOnBoundaries(cols).isEmpty());
   }
 
   @Test
@@ -92,14 +92,14 @@ public class ClusteredGroupPartitionerTest extends SemanticTestBase
     );
 
     final List<String> partCols = Collections.singletonList("sorted");
-    Assertions.assertArrayEquals(expectedBounds, parter.computeBoundaries(partCols));
+    Assert.assertArrayEquals(expectedBounds, parter.computeBoundaries(partCols));
 
     final Iterator<RowsAndColumns> partedChunks = parter.partitionOnBoundaries(partCols).iterator();
     for (RowsAndColumnsHelper expectation : expectations) {
-      Assertions.assertTrue(partedChunks.hasNext());
+      Assert.assertTrue(partedChunks.hasNext());
       expectation.validate(partedChunks.next());
     }
-    Assertions.assertFalse(partedChunks.hasNext());
+    Assert.assertFalse(partedChunks.hasNext());
 
     BiFunction<Integer, Integer, RowsAndColumnsHelper> singleHelperMaker =
         (sorted, unsorted) ->
@@ -123,10 +123,10 @@ public class ClusteredGroupPartitionerTest extends SemanticTestBase
     final List<String> unsorted = Collections.singletonList("unsorted");
     final Iterator<RowsAndColumns> unsortedChunks = parter.partitionOnBoundaries(unsorted).iterator();
     for (RowsAndColumnsHelper expectation : unsortedExcpectations) {
-      Assertions.assertTrue(unsortedChunks.hasNext());
+      Assert.assertTrue(unsortedChunks.hasNext());
       expectation.validate(unsortedChunks.next());
     }
-    Assertions.assertFalse(unsortedChunks.hasNext());
+    Assert.assertFalse(unsortedChunks.hasNext());
   }
 
   @Test
@@ -163,13 +163,13 @@ public class ClusteredGroupPartitionerTest extends SemanticTestBase
     );
 
     final List<String> partCols = Collections.singletonList("sorted");
-    Assertions.assertArrayEquals(expectedBounds, parter.computeBoundaries(partCols));
+    Assert.assertArrayEquals(expectedBounds, parter.computeBoundaries(partCols));
 
     final Iterator<RowsAndColumns> partedChunks = parter.partitionOnBoundaries(partCols).iterator();
     for (RowsAndColumnsHelper expectation : expectations) {
-      Assertions.assertTrue(partedChunks.hasNext());
+      Assert.assertTrue(partedChunks.hasNext());
       expectation.validate(partedChunks.next());
     }
-    Assertions.assertFalse(partedChunks.hasNext());
+    Assert.assertFalse(partedChunks.hasNext());
   }
 }

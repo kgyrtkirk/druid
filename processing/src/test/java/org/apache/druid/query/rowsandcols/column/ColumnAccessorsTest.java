@@ -22,20 +22,24 @@ package org.apache.druid.query.rowsandcols.column;
 import org.apache.druid.query.rowsandcols.column.accessor.DoubleColumnAccessorBase;
 import org.apache.druid.query.rowsandcols.column.accessor.FloatColumnAccessorBase;
 import org.apache.druid.query.rowsandcols.column.accessor.LongColumnAccessorBase;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
+@RunWith(Parameterized.class)
 public class ColumnAccessorsTest
 {
   private TestAccessorShim testAccessor;
 
+  @Parameters
   public static List<Object[]> getParameters()
   {
     List<Object[]> ret = new ArrayList<>();
@@ -158,16 +162,14 @@ public class ColumnAccessorsTest
     protected abstract Object getSomeValue();
   }
 
-  public void initColumnAccessorsTest(TestAccessorShim accessor)
+  public ColumnAccessorsTest(TestAccessorShim accessor)
   {
     this.testAccessor = accessor;
   }
 
-  @MethodSource("getParameters")
-  @ParameterizedTest
-  public void testSomeValue(TestAccessorShim accessor)
+  @Test
+  public void testSomeValue()
   {
-    initColumnAccessorsTest(accessor);
     Object expectedValue = testAccessor.getSomeValue();
     ColumnAccessor acc = testAccessor.getColumnAccessor(expectedValue);
 
@@ -175,11 +177,9 @@ public class ColumnAccessorsTest
     assertEquals(expectedValue, acc.getObject(0));
   }
 
-  @MethodSource("getParameters")
-  @ParameterizedTest
-  public void testNull(TestAccessorShim accessor)
+  @Test
+  public void testNull()
   {
-    initColumnAccessorsTest(accessor);
     ColumnAccessor acc = testAccessor.getColumnAccessor(null);
 
     assertTrue(acc.isNull(0));

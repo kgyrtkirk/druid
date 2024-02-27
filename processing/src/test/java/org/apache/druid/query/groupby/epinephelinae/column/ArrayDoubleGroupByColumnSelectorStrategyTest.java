@@ -26,10 +26,10 @@ import org.apache.druid.query.groupby.epinephelinae.Grouper;
 import org.apache.druid.query.ordering.StringComparators;
 import org.apache.druid.segment.ColumnValueSelector;
 import org.apache.druid.segment.data.ComparableList;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.nio.ByteBuffer;
@@ -47,7 +47,7 @@ public class ArrayDoubleGroupByColumnSelectorStrategyTest
 
   private ArrayNumericGroupByColumnSelectorStrategy strategy;
 
-  @BeforeEach
+  @Before
   public void setup()
   {
     dictionary.add(ImmutableList.of(1.0, 2.0));
@@ -65,14 +65,14 @@ public class ArrayDoubleGroupByColumnSelectorStrategyTest
   @Test
   public void testKeySize()
   {
-    Assertions.assertEquals(Integer.BYTES, strategy.getGroupingKeySize());
+    Assert.assertEquals(Integer.BYTES, strategy.getGroupingKeySize());
   }
 
   @Test
   public void testWriteKey()
   {
     strategy.writeToKeyBuffer(0, 1, buffer1);
-    Assertions.assertEquals(1, buffer1.getInt(0));
+    Assert.assertEquals(1, buffer1.getInt(0));
   }
 
   @Test
@@ -81,16 +81,16 @@ public class ArrayDoubleGroupByColumnSelectorStrategyTest
     buffer1.putInt(1);
     buffer2.putInt(2);
     Grouper.BufferComparator comparator = strategy.bufferComparator(0, null);
-    Assertions.assertTrue(comparator.compare(buffer1, buffer2, 0, 0) > 0);
-    Assertions.assertTrue(comparator.compare(buffer2, buffer1, 0, 0) < 0);
+    Assert.assertTrue(comparator.compare(buffer1, buffer2, 0, 0) > 0);
+    Assert.assertTrue(comparator.compare(buffer2, buffer1, 0, 0) < 0);
 
     comparator = strategy.bufferComparator(0, StringComparators.LEXICOGRAPHIC);
-    Assertions.assertTrue(comparator.compare(buffer1, buffer2, 0, 0) > 0);
-    Assertions.assertTrue(comparator.compare(buffer2, buffer1, 0, 0) < 0);
+    Assert.assertTrue(comparator.compare(buffer1, buffer2, 0, 0) > 0);
+    Assert.assertTrue(comparator.compare(buffer2, buffer1, 0, 0) < 0);
 
     comparator = strategy.bufferComparator(0, StringComparators.STRLEN);
-    Assertions.assertTrue(comparator.compare(buffer1, buffer2, 0, 0) > 0);
-    Assertions.assertTrue(comparator.compare(buffer2, buffer1, 0, 0) < 0);
+    Assert.assertTrue(comparator.compare(buffer1, buffer2, 0, 0) > 0);
+    Assert.assertTrue(comparator.compare(buffer2, buffer1, 0, 0) < 0);
   }
 
   @Test
@@ -99,7 +99,7 @@ public class ArrayDoubleGroupByColumnSelectorStrategyTest
     buffer1.putInt(0);
     buffer2.putInt(2);
     Grouper.BufferComparator comparator = strategy.bufferComparator(0, null);
-    Assertions.assertTrue(comparator.compare(buffer1, buffer2, 0, 0) > 0);
+    Assert.assertTrue(comparator.compare(buffer1, buffer2, 0, 0) > 0);
 
   }
 
@@ -109,7 +109,7 @@ public class ArrayDoubleGroupByColumnSelectorStrategyTest
   {
     ColumnValueSelector columnValueSelector = Mockito.mock(ColumnValueSelector.class);
     Mockito.when(columnValueSelector.getObject()).thenReturn(ImmutableList.of(1.0, 2.0));
-    Assertions.assertEquals(0, strategy.computeDictionaryId(columnValueSelector));
+    Assert.assertEquals(0, strategy.computeDictionaryId(columnValueSelector));
 
     GroupByColumnSelectorPlus groupByColumnSelectorPlus = Mockito.mock(GroupByColumnSelectorPlus.class);
     Mockito.when(groupByColumnSelectorPlus.getResultRowPosition()).thenReturn(0);
@@ -117,7 +117,7 @@ public class ArrayDoubleGroupByColumnSelectorStrategyTest
 
     buffer1.putInt(0);
     strategy.processValueFromGroupingKey(groupByColumnSelectorPlus, buffer1, row, 0);
-    Assertions.assertEquals(new ComparableList<>(ImmutableList.of(1.0, 2.0)), row.get(0));
+    Assert.assertEquals(new ComparableList<>(ImmutableList.of(1.0, 2.0)), row.get(0));
   }
 
 
@@ -126,7 +126,7 @@ public class ArrayDoubleGroupByColumnSelectorStrategyTest
   {
     ColumnValueSelector columnValueSelector = Mockito.mock(ColumnValueSelector.class);
     Mockito.when(columnValueSelector.getObject()).thenReturn(ImmutableList.of(4.0, 2.0));
-    Assertions.assertEquals(3, strategy.computeDictionaryId(columnValueSelector));
+    Assert.assertEquals(3, strategy.computeDictionaryId(columnValueSelector));
 
     GroupByColumnSelectorPlus groupByColumnSelectorPlus = Mockito.mock(GroupByColumnSelectorPlus.class);
     Mockito.when(groupByColumnSelectorPlus.getResultRowPosition()).thenReturn(0);
@@ -134,7 +134,7 @@ public class ArrayDoubleGroupByColumnSelectorStrategyTest
 
     buffer1.putInt(3);
     strategy.processValueFromGroupingKey(groupByColumnSelectorPlus, buffer1, row, 0);
-    Assertions.assertEquals(new ComparableList<>(ImmutableList.of(4.0, 2.0)), row.get(0));
+    Assert.assertEquals(new ComparableList<>(ImmutableList.of(4.0, 2.0)), row.get(0));
   }
 
   @Test
@@ -142,17 +142,17 @@ public class ArrayDoubleGroupByColumnSelectorStrategyTest
   {
     ColumnValueSelector columnValueSelector = Mockito.mock(ColumnValueSelector.class);
     Mockito.when(columnValueSelector.getObject()).thenReturn(new Object[]{4.0D, 2.0D});
-    Assertions.assertEquals(3, strategy.computeDictionaryId(columnValueSelector));
+    Assert.assertEquals(3, strategy.computeDictionaryId(columnValueSelector));
 
     GroupByColumnSelectorPlus groupByColumnSelectorPlus = Mockito.mock(GroupByColumnSelectorPlus.class);
     Mockito.when(groupByColumnSelectorPlus.getResultRowPosition()).thenReturn(0);
     ResultRow row = ResultRow.create(1);
     buffer1.putInt(3);
     strategy.processValueFromGroupingKey(groupByColumnSelectorPlus, buffer1, row, 0);
-    Assertions.assertEquals(new ComparableList<>(ImmutableList.of(4.0, 2.0)), row.get(0));
+    Assert.assertEquals(new ComparableList<>(ImmutableList.of(4.0, 2.0)), row.get(0));
   }
 
-  @AfterEach
+  @After
   public void tearDown()
   {
     buffer1.clear();

@@ -21,6 +21,7 @@ package org.apache.druid.storage.hdfs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.IOException;
 

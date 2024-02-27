@@ -22,12 +22,10 @@ package org.apache.druid.audit;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.druid.jackson.DefaultObjectMapper;
 import org.apache.druid.java.util.common.DateTimes;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 public class AuditInfoTest
 {
@@ -38,8 +36,8 @@ public class AuditInfoTest
   {
     final AuditInfo auditInfo1 = new AuditInfo("druid", "id", "test equality", "127.0.0.1");
     final AuditInfo auditInfo2 = new AuditInfo("druid", "id", "test equality", "127.0.0.1");
-    Assertions.assertEquals(auditInfo1, auditInfo2);
-    Assertions.assertEquals(auditInfo1.hashCode(), auditInfo2.hashCode());
+    Assert.assertEquals(auditInfo1, auditInfo2);
+    Assert.assertEquals(auditInfo1.hashCode(), auditInfo2.hashCode());
   }
 
   @Test
@@ -47,17 +45,16 @@ public class AuditInfoTest
   {
     final AuditInfo auditInfo = new AuditInfo("author", null, "comment", "ip");
     AuditInfo deserialized = mapper.readValue(mapper.writeValueAsString(auditInfo), AuditInfo.class);
-    Assertions.assertEquals(auditInfo, deserialized);
+    Assert.assertEquals(auditInfo, deserialized);
 
     final AuditInfo auditInfoWithIdentity = new AuditInfo("author", "identity", "comment", "ip");
     deserialized = mapper.readValue(mapper.writeValueAsString(auditInfoWithIdentity), AuditInfo.class);
-    Assertions.assertEquals(auditInfoWithIdentity, deserialized);
+    Assert.assertEquals(auditInfoWithIdentity, deserialized);
 
-    Assertions.assertNotEquals(auditInfo, auditInfoWithIdentity);
+    Assert.assertNotEquals(auditInfo, auditInfoWithIdentity);
   }
 
-  @Test
-  @Timeout(value = 60_000L, unit = TimeUnit.MILLISECONDS)
+  @Test(timeout = 60_000L)
   public void testAuditEntrySerde() throws IOException
   {
     final AuditEntry original = new AuditEntry(
@@ -69,7 +66,7 @@ public class AuditInfoTest
         DateTimes.of("2013-01-01T00:00:00Z")
     );
     AuditEntry deserialized = mapper.readValue(mapper.writeValueAsString(original), AuditEntry.class);
-    Assertions.assertEquals(original, deserialized);
+    Assert.assertEquals(original, deserialized);
   }
 
   @Test
@@ -77,9 +74,9 @@ public class AuditInfoTest
   {
     final String json = "{\"key\": \"a\", \"type\": \"b\", \"auditInfo\": {}, \"payload\":\"Truncated\"}";
     AuditEntry entry = mapper.readValue(json, AuditEntry.class);
-    Assertions.assertEquals("a", entry.getKey());
-    Assertions.assertEquals("b", entry.getType());
-    Assertions.assertEquals(AuditEntry.Payload.fromString("Truncated"), entry.getPayload());
+    Assert.assertEquals("a", entry.getKey());
+    Assert.assertEquals("b", entry.getType());
+    Assert.assertEquals(AuditEntry.Payload.fromString("Truncated"), entry.getPayload());
   }
 
   @Test
@@ -87,7 +84,7 @@ public class AuditInfoTest
   {
     RequestInfo requestInfo = new RequestInfo("overlord", "GET", "/uri", "a=b");
     RequestInfo deserialized = mapper.readValue(mapper.writeValueAsString(requestInfo), RequestInfo.class);
-    Assertions.assertEquals(requestInfo, deserialized);
+    Assert.assertEquals(requestInfo, deserialized);
   }
 
 }

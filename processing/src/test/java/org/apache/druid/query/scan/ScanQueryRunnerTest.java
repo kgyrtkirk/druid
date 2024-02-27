@@ -63,9 +63,10 @@ import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.virtual.ExpressionVirtualColumn;
 import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.joda.time.DateTime;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -80,6 +81,7 @@ import java.util.Set;
 /**
  *
  */
+@RunWith(Parameterized.class)
 public class ScanQueryRunnerTest extends InitializedNullHandlingTest
 {
 
@@ -146,6 +148,7 @@ public class ScanQueryRunnerTest extends InitializedNullHandlingTest
       new ScanQueryConfig()
   );
 
+  @Parameterized.Parameters(name = "{0}, legacy = {1}")
   public static Iterable<Object[]> constructorFeeder()
   {
 
@@ -157,11 +160,11 @@ public class ScanQueryRunnerTest extends InitializedNullHandlingTest
     );
   }
 
-  private QueryRunner runner;
-  private boolean legacy;
-  private List<String> columns;
+  private final QueryRunner runner;
+  private final boolean legacy;
+  private final List<String> columns;
 
-  public void initScanQueryRunnerTest(final QueryRunner runner, final boolean legacy)
+  public ScanQueryRunnerTest(final QueryRunner runner, final boolean legacy)
   {
     this.runner = runner;
     this.legacy = legacy;
@@ -201,12 +204,9 @@ public class ScanQueryRunnerTest extends InitializedNullHandlingTest
                  .legacy(legacy);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}, legacy = {1}")
-  public void testFullOnSelect(final QueryRunner runner, final boolean legacy)
+  @Test
+  public void testFullOnSelect()
   {
-
-    initScanQueryRunnerTest(runner, legacy);
 
     ScanQuery query = newTestQuery()
         .intervals(I_0112_0114)
@@ -234,11 +234,9 @@ public class ScanQueryRunnerTest extends InitializedNullHandlingTest
     verify(expectedResults, populateNullColumnAtLastForQueryableIndexCase(results, "null_column"));
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}, legacy = {1}")
-  public void testFullOnSelectAsCompactedList(final QueryRunner runner, final boolean legacy)
+  @Test
+  public void testFullOnSelectAsCompactedList()
   {
-    initScanQueryRunnerTest(runner, legacy);
     ScanQuery query = newTestQuery()
         .intervals(I_0112_0114)
         .virtualColumns(EXPR_COLUMN)
@@ -256,11 +254,9 @@ public class ScanQueryRunnerTest extends InitializedNullHandlingTest
     verify(expectedResults, populateNullColumnAtLastForQueryableIndexCase(compactedListToRow(results), "null_column"));
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}, legacy = {1}")
-  public void testSelectWithUnderscoreUnderscoreTime(final QueryRunner runner, final boolean legacy)
+  @Test
+  public void testSelectWithUnderscoreUnderscoreTime()
   {
-    initScanQueryRunnerTest(runner, legacy);
     ScanQuery query = newTestQuery()
         .intervals(I_0112_0114)
         .columns(
@@ -312,11 +308,9 @@ public class ScanQueryRunnerTest extends InitializedNullHandlingTest
     verify(expectedResults, results);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}, legacy = {1}")
-  public void testSelectWithDimsAndMets(final QueryRunner runner, final boolean legacy)
+  @Test
+  public void testSelectWithDimsAndMets()
   {
-    initScanQueryRunnerTest(runner, legacy);
     ScanQuery query = newTestQuery()
         .intervals(I_0112_0114)
         .columns(QueryRunnerTestHelper.MARKET_DIMENSION, QueryRunnerTestHelper.INDEX_METRIC)
@@ -351,11 +345,9 @@ public class ScanQueryRunnerTest extends InitializedNullHandlingTest
     verify(expectedResults, results);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}, legacy = {1}")
-  public void testSelectWithDimsAndMetsAsCompactedList(final QueryRunner runner, final boolean legacy)
+  @Test
+  public void testSelectWithDimsAndMetsAsCompactedList()
   {
-    initScanQueryRunnerTest(runner, legacy);
     ScanQuery query = newTestQuery()
         .intervals(I_0112_0114)
         .columns(QueryRunnerTestHelper.MARKET_DIMENSION, QueryRunnerTestHelper.INDEX_METRIC)
@@ -391,11 +383,9 @@ public class ScanQueryRunnerTest extends InitializedNullHandlingTest
     verify(expectedResults, compactedListToRow(results));
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}, legacy = {1}")
-  public void testFullOnSelectWithFilterAndLimit(final QueryRunner runner, final boolean legacy)
+  @Test
+  public void testFullOnSelectWithFilterAndLimit()
   {
-    initScanQueryRunnerTest(runner, legacy);
     // limits
     for (int limit : new int[]{3, 1, 5, 7, 0}) {
       ScanQuery query = newTestQuery()
@@ -452,11 +442,9 @@ public class ScanQueryRunnerTest extends InitializedNullHandlingTest
     }
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}, legacy = {1}")
-  public void testSelectWithFilterLookupExtractionFn(final QueryRunner runner, final boolean legacy)
+  @Test
+  public void testSelectWithFilterLookupExtractionFn()
   {
-    initScanQueryRunnerTest(runner, legacy);
     Map<String, String> extractionMap = new HashMap<>();
     extractionMap.put("total_market", "replaced");
     MapLookupExtractor mapLookupExtractor = new MapLookupExtractor(extractionMap, false);
@@ -512,11 +500,9 @@ public class ScanQueryRunnerTest extends InitializedNullHandlingTest
     verify(expectedResults, resultsOptimize);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}, legacy = {1}")
-  public void testFullSelectNoResults(final QueryRunner runner, final boolean legacy)
+  @Test
+  public void testFullSelectNoResults()
   {
-    initScanQueryRunnerTest(runner, legacy);
     ScanQuery query = newTestQuery()
         .intervals(I_0112_0114)
         .filters(
@@ -536,11 +522,9 @@ public class ScanQueryRunnerTest extends InitializedNullHandlingTest
     verify(expectedResults, populateNullColumnAtLastForQueryableIndexCase(results, "null_column"));
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}, legacy = {1}")
-  public void testFullSelectNoDimensionAndMetric(final QueryRunner runner, final boolean legacy)
+  @Test
+  public void testFullSelectNoDimensionAndMetric()
   {
-    initScanQueryRunnerTest(runner, legacy);
     ScanQuery query = newTestQuery()
         .intervals(I_0112_0114)
         .columns("foo", "foo2")
@@ -564,11 +548,9 @@ public class ScanQueryRunnerTest extends InitializedNullHandlingTest
     verify(expectedResults, results);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}, legacy = {1}")
-  public void testFullOnSelectWithFilterLimitAndAscendingTimeOrderingListFormat(final QueryRunner runner, final boolean legacy)
+  @Test
+  public void testFullOnSelectWithFilterLimitAndAscendingTimeOrderingListFormat()
   {
-    initScanQueryRunnerTest(runner, legacy);
     // limits shouldn't matter -> all rows should be returned if time-ordering on the broker is occurring
     for (int limit : new int[]{3, 1, 5, 7, 0}) {
       ScanQuery query = newTestQuery()
@@ -655,11 +637,9 @@ public class ScanQueryRunnerTest extends InitializedNullHandlingTest
     }
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}, legacy = {1}")
-  public void testFullOnSelectWithFilterLimitAndDescendingTimeOrderingListFormat(final QueryRunner runner, final boolean legacy)
+  @Test
+  public void testFullOnSelectWithFilterLimitAndDescendingTimeOrderingListFormat()
   {
-    initScanQueryRunnerTest(runner, legacy);
     // limits shouldn't matter -> all rows should be returned if time-ordering on the broker is occurring
     for (int limit : new int[]{3, 1, 5, 7, 0}) {
       ScanQuery query = newTestQuery()
@@ -746,11 +726,9 @@ public class ScanQueryRunnerTest extends InitializedNullHandlingTest
     }
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}, legacy = {1}")
-  public void testFullOnSelectWithFilterLimitAndAscendingTimeOrderingCompactedListFormat(final QueryRunner runner, final boolean legacy)
+  @Test
+  public void testFullOnSelectWithFilterLimitAndAscendingTimeOrderingCompactedListFormat()
   {
-    initScanQueryRunnerTest(runner, legacy);
     String[] seg1Results = new String[]{
         "2011-01-12T00:00:00.000Z\tspot\tautomotive\tpreferred\tapreferred\t100.000000",
         "2011-01-12T00:00:00.000Z\tspot\tbusiness\tpreferred\tbpreferred\t100.000000",
@@ -838,11 +816,9 @@ public class ScanQueryRunnerTest extends InitializedNullHandlingTest
     }
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}, legacy = {1}")
-  public void testFullOnSelectWithFilterLimitAndDescendingTimeOrderingCompactedListFormat(final QueryRunner runner, final boolean legacy)
+  @Test
+  public void testFullOnSelectWithFilterLimitAndDescendingTimeOrderingCompactedListFormat()
   {
-    initScanQueryRunnerTest(runner, legacy);
     String[] seg1Results = new String[]{
         "2011-01-12T00:00:00.000Z\tspot\tautomotive\tpreferred\tapreferred\t100.000000",
         "2011-01-12T00:00:00.000Z\tspot\tbusiness\tpreferred\tbpreferred\t100.000000",
@@ -933,11 +909,9 @@ public class ScanQueryRunnerTest extends InitializedNullHandlingTest
     }
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}, legacy = {1}")
-  public void testScanQueryTimeout(final QueryRunner runner, final boolean legacy)
+  @Test
+  public void testScanQueryTimeout()
   {
-    initScanQueryRunnerTest(runner, legacy);
     ScanQuery query = newTestQuery()
         .intervals(I_0112_0114)
         .virtualColumns(EXPR_COLUMN)
@@ -948,20 +922,18 @@ public class ScanQueryRunnerTest extends InitializedNullHandlingTest
     responseContext.putTimeoutTime(timeoutAt);
     try {
       runner.run(QueryPlus.wrap(query), responseContext).toList();
-      Assertions.fail("didn't timeout");
+      Assert.fail("didn't timeout");
     }
     catch (RuntimeException e) {
-      Assertions.assertTrue(e instanceof QueryTimeoutException);
-      Assertions.assertEquals("Query timeout", ((QueryTimeoutException) e).getErrorCode());
-      Assertions.assertEquals(timeoutAt, responseContext.getTimeoutTime().longValue());
+      Assert.assertTrue(e instanceof QueryTimeoutException);
+      Assert.assertEquals("Query timeout", ((QueryTimeoutException) e).getErrorCode());
+      Assert.assertEquals(timeoutAt, responseContext.getTimeoutTime().longValue());
     }
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}, legacy = {1}")
-  public void testScanQueryTimeoutMerge(final QueryRunner runner, final boolean legacy)
+  @Test
+  public void testScanQueryTimeoutMerge()
   {
-    initScanQueryRunnerTest(runner, legacy);
     ScanQuery query = newTestQuery()
         .intervals(I_0112_0114)
         .virtualColumns(EXPR_COLUMN)
@@ -981,19 +953,17 @@ public class ScanQueryRunnerTest extends InitializedNullHandlingTest
               })
       ).run(QueryPlus.wrap(query), DefaultResponseContext.createEmpty()).toList();
 
-      Assertions.fail("didn't timeout");
+      Assert.fail("didn't timeout");
     }
     catch (RuntimeException e) {
-      Assertions.assertTrue(e instanceof QueryTimeoutException);
-      Assertions.assertEquals("Query timeout", ((QueryTimeoutException) e).getErrorCode());
+      Assert.assertTrue(e instanceof QueryTimeoutException);
+      Assert.assertEquals("Query timeout", ((QueryTimeoutException) e).getErrorCode());
     }
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}, legacy = {1}")
-  public void testScanQueryTimeoutZeroDoesntTimeOut(final QueryRunner runner, final boolean legacy)
+  @Test
+  public void testScanQueryTimeoutZeroDoesntTimeOut()
   {
-    initScanQueryRunnerTest(runner, legacy);
     ScanQuery query = newTestQuery()
         .intervals(I_0112_0114)
         .virtualColumns(EXPR_COLUMN)
@@ -1203,11 +1173,11 @@ public class ScanQueryRunnerTest extends InitializedNullHandlingTest
       ScanResultValue expected = expectedIter.next();
       ScanResultValue actual = actualIter.next();
 
-      Assertions.assertEquals(expected.getSegmentId(), actual.getSegmentId());
+      Assert.assertEquals(expected.getSegmentId(), actual.getSegmentId());
 
       Set exColumns = Sets.newTreeSet(expected.getColumns());
       Set acColumns = Sets.newTreeSet(actual.getColumns());
-      Assertions.assertEquals(exColumns, acColumns);
+      Assert.assertEquals(exColumns, acColumns);
 
       Iterator<Map<String, Object>> expectedEvts = ((List<Map<String, Object>>) expected.getEvents()).iterator();
       Iterator<Map<String, Object>> actualEvts = ((List<Map<String, Object>>) actual.getEvents()).iterator();
@@ -1225,22 +1195,22 @@ public class ScanQueryRunnerTest extends InitializedNullHandlingTest
           Object exValue = ex.getValue();
           if (exValue instanceof Double || exValue instanceof Float) {
             final double expectedDoubleValue = ((Number) exValue).doubleValue();
-            Assertions.assertNotNull(
-                actVal,
+            Assert.assertNotNull(
                 StringUtils.format(
                     "invalid null value for %s (expected %f)",
                     ex.getKey(),
                     expectedDoubleValue
-                )
+                ),
+                actVal
             );
-            Assertions.assertEquals(
+            Assert.assertEquals(
+                "invalid value for " + ex.getKey(),
                 expectedDoubleValue,
                 ((Number) actVal).doubleValue(),
-                expectedDoubleValue * 1e-6,
-                "invalid value for " + ex.getKey()
+                expectedDoubleValue * 1e-6
             );
           } else {
-            Assertions.assertEquals(ex.getValue(), actVal, "invalid value for " + ex.getKey());
+            Assert.assertEquals("invalid value for " + ex.getKey(), ex.getValue(), actVal);
           }
         }
 
@@ -1254,14 +1224,14 @@ public class ScanQueryRunnerTest extends InitializedNullHandlingTest
 
           if (exVal instanceof Double || exVal instanceof Float) {
             final double exDoubleValue = ((Number) exVal).doubleValue();
-            Assertions.assertEquals(
+            Assert.assertEquals(
+                "invalid value for " + ac.getKey(),
                 exDoubleValue,
                 ((Number) actVal).doubleValue(),
-                exDoubleValue * 1e-6,
-                "invalid value for " + ac.getKey()
+                exDoubleValue * 1e-6
             );
           } else {
-            Assertions.assertEquals(exVal, actVal, "invalid value for " + ac.getKey());
+            Assert.assertEquals("invalid value for " + ac.getKey(), exVal, actVal);
           }
         }
       }

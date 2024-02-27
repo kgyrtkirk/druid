@@ -23,10 +23,11 @@ import com.google.common.collect.ImmutableList;
 import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.writeout.OnHeapMemorySegmentWriteOutMedium;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -36,16 +37,18 @@ import java.util.Collection;
 import java.util.Iterator;
 
 
+@RunWith(Parameterized.class)
 public class FixedIndexedTest extends InitializedNullHandlingTest
 {
   private static final Long[] LONGS = new Long[64];
 
+  @Parameterized.Parameters(name = "{0}")
   public static Collection<Object[]> constructorFeeder()
   {
     return ImmutableList.of(new Object[]{ByteOrder.LITTLE_ENDIAN}, new Object[]{ByteOrder.BIG_ENDIAN});
   }
 
-  @BeforeAll
+  @BeforeClass
   public static void setup()
   {
     for (int i = 0; i < LONGS.length; i++) {
@@ -53,37 +56,33 @@ public class FixedIndexedTest extends InitializedNullHandlingTest
     }
   }
 
-  private ByteOrder order;
+  private final ByteOrder order;
 
-  public void initFixedIndexedTest(ByteOrder byteOrder)
+  public FixedIndexedTest(ByteOrder byteOrder)
   {
     this.order = byteOrder;
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testGet(ByteOrder byteOrder) throws IOException
+  @Test
+  public void testGet() throws IOException
   {
-    initFixedIndexedTest(byteOrder);
     ByteBuffer buffer = ByteBuffer.allocate(1 << 14);
     fillBuffer(buffer, order, false);
     FixedIndexed<Long> fixedIndexed =
         FixedIndexed.<Long>read(buffer, ColumnType.LONG.getStrategy(), order, Long.BYTES).get();
-    Assertions.assertEquals(64, fixedIndexed.size());
+    Assert.assertEquals(64, fixedIndexed.size());
     for (int i = 0; i < LONGS.length; i++) {
-      Assertions.assertEquals(LONGS[i], fixedIndexed.get(i));
-      Assertions.assertEquals(i, fixedIndexed.indexOf(LONGS[i]));
+      Assert.assertEquals(LONGS[i], fixedIndexed.get(i));
+      Assert.assertEquals(i, fixedIndexed.indexOf(LONGS[i]));
     }
 
-    Assertions.assertThrows(IllegalArgumentException.class, () -> fixedIndexed.get(-1));
-    Assertions.assertThrows(IllegalArgumentException.class, () -> fixedIndexed.get(LONGS.length));
+    Assert.assertThrows(IllegalArgumentException.class, () -> fixedIndexed.get(-1));
+    Assert.assertThrows(IllegalArgumentException.class, () -> fixedIndexed.get(LONGS.length));
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testIterator(ByteOrder byteOrder) throws IOException
+  @Test
+  public void testIterator() throws IOException
   {
-    initFixedIndexedTest(byteOrder);
     ByteBuffer buffer = ByteBuffer.allocate(1 << 14);
     fillBuffer(buffer, order, false);
     FixedIndexed<Long> fixedIndexed =
@@ -91,41 +90,37 @@ public class FixedIndexedTest extends InitializedNullHandlingTest
     Iterator<Long> iterator = fixedIndexed.iterator();
     int i = 0;
     while (iterator.hasNext()) {
-      Assertions.assertEquals(LONGS[i++], iterator.next());
+      Assert.assertEquals(LONGS[i++], iterator.next());
     }
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testGetWithNull(ByteOrder byteOrder) throws IOException
+  @Test
+  public void testGetWithNull() throws IOException
   {
-    initFixedIndexedTest(byteOrder);
     ByteBuffer buffer = ByteBuffer.allocate(1 << 14);
     fillBuffer(buffer, order, true);
     FixedIndexed<Long> fixedIndexed =
         FixedIndexed.<Long>read(buffer, ColumnType.LONG.getStrategy(), order, Long.BYTES).get();
-    Assertions.assertEquals(65, fixedIndexed.size());
-    Assertions.assertNull(fixedIndexed.get(0));
+    Assert.assertEquals(65, fixedIndexed.size());
+    Assert.assertNull(fixedIndexed.get(0));
     for (int i = 0; i < LONGS.length; i++) {
-      Assertions.assertEquals(LONGS[i], fixedIndexed.get(i + 1));
-      Assertions.assertEquals(i + 1, fixedIndexed.indexOf(LONGS[i]));
+      Assert.assertEquals(LONGS[i], fixedIndexed.get(i + 1));
+      Assert.assertEquals(i + 1, fixedIndexed.indexOf(LONGS[i]));
     }
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testIteratorWithNull(ByteOrder byteOrder) throws IOException
+  @Test
+  public void testIteratorWithNull() throws IOException
   {
-    initFixedIndexedTest(byteOrder);
     ByteBuffer buffer = ByteBuffer.allocate(1 << 14);
     fillBuffer(buffer, order, true);
     FixedIndexed<Long> fixedIndexed =
         FixedIndexed.<Long>read(buffer, ColumnType.LONG.getStrategy(), order, Long.BYTES).get();
     Iterator<Long> iterator = fixedIndexed.iterator();
-    Assertions.assertNull(iterator.next());
+    Assert.assertNull(iterator.next());
     int i = 0;
     while (iterator.hasNext()) {
-      Assertions.assertEquals(LONGS[i++], iterator.next());
+      Assert.assertEquals(LONGS[i++], iterator.next());
     }
   }
 
@@ -152,26 +147,26 @@ public class FixedIndexedTest extends InitializedNullHandlingTest
     for (int i = 0; i < totalCount; i++) {
       if (withNull) {
         if (i == 0) {
-          Assertions.assertNull(writer.get(i));
+          Assert.assertNull(writer.get(i));
         } else {
-          Assertions.assertEquals(LONGS[i - 1], writer.get(i), " index: " + i);
+          Assert.assertEquals(" index: " + i, LONGS[i - 1], writer.get(i));
         }
       } else {
-        Assertions.assertEquals(LONGS[i], writer.get(i), " index: " + i);
+        Assert.assertEquals(" index: " + i, LONGS[i], writer.get(i));
       }
     }
     while (longIterator.hasNext()) {
       if (withNull) {
         if (ctr == 0) {
-          Assertions.assertNull(longIterator.next());
-          Assertions.assertNull(writer.get(ctr));
+          Assert.assertNull(longIterator.next());
+          Assert.assertNull(writer.get(ctr));
         } else {
-          Assertions.assertEquals(LONGS[ctr - 1], longIterator.next());
-          Assertions.assertEquals(LONGS[ctr - 1], writer.get(ctr));
+          Assert.assertEquals(LONGS[ctr - 1], longIterator.next());
+          Assert.assertEquals(LONGS[ctr - 1], writer.get(ctr));
         }
       } else {
-        Assertions.assertEquals(LONGS[ctr], longIterator.next());
-        Assertions.assertEquals(LONGS[ctr], writer.get(ctr));
+        Assert.assertEquals(LONGS[ctr], longIterator.next());
+        Assert.assertEquals(LONGS[ctr], writer.get(ctr));
       }
       ctr++;
     }
@@ -199,7 +194,7 @@ public class FixedIndexedTest extends InitializedNullHandlingTest
     long size = writer.getSerializedSize();
     buffer.position(0);
     writer.writeTo(channel, null);
-    Assertions.assertEquals(size, buffer.position());
+    Assert.assertEquals(size, buffer.position());
     buffer.position(0);
   }
 }

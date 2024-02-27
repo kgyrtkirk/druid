@@ -32,8 +32,8 @@ import org.apache.druid.query.rowsandcols.NoAsRowsAndColumns;
 import org.apache.druid.query.rowsandcols.RowsAndColumns;
 import org.apache.druid.query.rowsandcols.column.IntArrayColumn;
 import org.apache.druid.query.rowsandcols.semantic.FramedOnHeapAggregatable;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 @SuppressWarnings("unchecked")
 public class WindowFramedAggregateProcessorTest
@@ -61,16 +61,16 @@ public class WindowFramedAggregateProcessorTest
       @Override
       public <T> T as(Class<T> clazz)
       {
-        Assertions.assertEquals(clazz, FramedOnHeapAggregatable.class);
+        Assert.assertEquals(clazz, FramedOnHeapAggregatable.class);
         return (T) (FramedOnHeapAggregatable) (frame, aggFactories) -> {
-          Assertions.assertEquals(theFrame, frame);
-          Assertions.assertArrayEquals(theAggs, aggFactories);
+          Assert.assertEquals(theFrame, frame);
+          Assert.assertArrayEquals(theAggs, aggFactories);
           return rac;
         };
       }
     });
 
-    Assertions.assertSame(rac, processed);
+    Assert.assertSame(rac, processed);
   }
 
   @Test

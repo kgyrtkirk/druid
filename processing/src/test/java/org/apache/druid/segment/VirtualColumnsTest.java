@@ -40,26 +40,33 @@ import org.apache.druid.segment.data.ZeroIndexedInts;
 import org.apache.druid.segment.virtual.ExpressionVirtualColumn;
 import org.apache.druid.segment.virtual.NestedFieldVirtualColumn;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
+import org.mockito.quality.Strictness;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-@ExtendWith(MockitoExtension.class)
 public class VirtualColumnsTest extends InitializedNullHandlingTest
 {
   private static final String REAL_COLUMN_NAME = "real_column";
+
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
+
+  @Rule
+  public MockitoRule mockitoRule = MockitoJUnit.rule().strictness(Strictness.STRICT_STUBS);
 
   @Mock
   public ColumnSelectorFactory baseColumnSelectorFactory;
@@ -69,10 +76,10 @@ public class VirtualColumnsTest extends InitializedNullHandlingTest
   {
     final VirtualColumns virtualColumns = makeVirtualColumns();
 
-    Assertions.assertTrue(virtualColumns.exists("expr"));
-    Assertions.assertTrue(virtualColumns.exists("foo"));
-    Assertions.assertTrue(virtualColumns.exists("foo.5"));
-    Assertions.assertFalse(virtualColumns.exists("bar"));
+    Assert.assertTrue(virtualColumns.exists("expr"));
+    Assert.assertTrue(virtualColumns.exists("foo"));
+    Assert.assertTrue(virtualColumns.exists("foo.5"));
+    Assert.assertFalse(virtualColumns.exists("bar"));
   }
 
   @Test
@@ -100,9 +107,9 @@ public class VirtualColumnsTest extends InitializedNullHandlingTest
   {
     final VirtualColumns virtualColumns = makeVirtualColumns();
     final ColumnInspector baseInspector = column -> null;
-    Assertions.assertEquals(ValueType.FLOAT, virtualColumns.getColumnCapabilitiesWithoutFallback(baseInspector, "expr").getType());
-    Assertions.assertEquals(ValueType.LONG, virtualColumns.getColumnCapabilitiesWithoutFallback(baseInspector, "expr2").getType());
-    Assertions.assertNull(virtualColumns.getColumnCapabilitiesWithoutFallback(baseInspector, REAL_COLUMN_NAME));
+    Assert.assertEquals(ValueType.FLOAT, virtualColumns.getColumnCapabilitiesWithoutFallback(baseInspector, "expr").getType());
+    Assert.assertEquals(ValueType.LONG, virtualColumns.getColumnCapabilitiesWithoutFallback(baseInspector, "expr2").getType());
+    Assert.assertNull(virtualColumns.getColumnCapabilitiesWithoutFallback(baseInspector, REAL_COLUMN_NAME));
   }
 
   @Test
@@ -116,9 +123,9 @@ public class VirtualColumnsTest extends InitializedNullHandlingTest
         return null;
       }
     };
-    Assertions.assertEquals(ValueType.FLOAT, virtualColumns.getColumnCapabilitiesWithoutFallback(baseInspector, "expr").getType());
-    Assertions.assertEquals(ValueType.DOUBLE, virtualColumns.getColumnCapabilitiesWithoutFallback(baseInspector, "expr2").getType());
-    Assertions.assertNull(virtualColumns.getColumnCapabilitiesWithoutFallback(baseInspector, REAL_COLUMN_NAME));
+    Assert.assertEquals(ValueType.FLOAT, virtualColumns.getColumnCapabilitiesWithoutFallback(baseInspector, "expr").getType());
+    Assert.assertEquals(ValueType.DOUBLE, virtualColumns.getColumnCapabilitiesWithoutFallback(baseInspector, "expr2").getType());
+    Assert.assertNull(virtualColumns.getColumnCapabilitiesWithoutFallback(baseInspector, REAL_COLUMN_NAME));
   }
 
   @Test
@@ -126,15 +133,15 @@ public class VirtualColumnsTest extends InitializedNullHandlingTest
   {
     final VirtualColumns virtualColumns = makeVirtualColumns();
     final ColumnInspector baseInspector = column -> null;
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ValueType.FLOAT,
         virtualColumns.getColumnCapabilitiesWithFallback(baseInspector, "expr").getType()
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ValueType.LONG,
         virtualColumns.getColumnCapabilitiesWithFallback(baseInspector, "expr2").getType()
     );
-    Assertions.assertNull(virtualColumns.getColumnCapabilitiesWithFallback(baseInspector, REAL_COLUMN_NAME));
+    Assert.assertNull(virtualColumns.getColumnCapabilitiesWithFallback(baseInspector, REAL_COLUMN_NAME));
   }
 
   @Test
@@ -148,15 +155,15 @@ public class VirtualColumnsTest extends InitializedNullHandlingTest
         return null;
       }
     };
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ValueType.FLOAT,
         virtualColumns.getColumnCapabilitiesWithFallback(baseInspector, "expr").getType()
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ValueType.DOUBLE,
         virtualColumns.getColumnCapabilitiesWithFallback(baseInspector, "expr2").getType()
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ValueType.DOUBLE,
         virtualColumns.getColumnCapabilitiesWithFallback(baseInspector, REAL_COLUMN_NAME).getType()
     );
@@ -168,15 +175,15 @@ public class VirtualColumnsTest extends InitializedNullHandlingTest
     final VirtualColumns virtualColumns = makeVirtualColumns();
     final ColumnInspector baseInspector = column -> null;
     final ColumnInspector wrappedInspector = virtualColumns.wrapInspector(baseInspector);
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ValueType.FLOAT,
         wrappedInspector.getColumnCapabilities("expr").getType()
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ValueType.LONG,
         wrappedInspector.getColumnCapabilities("expr2").getType()
     );
-    Assertions.assertNull(wrappedInspector.getColumnCapabilities(REAL_COLUMN_NAME));
+    Assert.assertNull(wrappedInspector.getColumnCapabilities(REAL_COLUMN_NAME));
   }
 
   @Test
@@ -191,15 +198,15 @@ public class VirtualColumnsTest extends InitializedNullHandlingTest
       }
     };
     final ColumnInspector wrappedInspector = virtualColumns.wrapInspector(baseInspector);
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ValueType.FLOAT,
         wrappedInspector.getColumnCapabilities("expr").getType()
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ValueType.DOUBLE,
         wrappedInspector.getColumnCapabilities("expr2").getType()
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ValueType.DOUBLE,
         wrappedInspector.getColumnCapabilities(REAL_COLUMN_NAME).getType()
     );
@@ -208,12 +215,12 @@ public class VirtualColumnsTest extends InitializedNullHandlingTest
   @Test
   public void testNonExistentSelector()
   {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
-      final VirtualColumns virtualColumns = makeVirtualColumns();
+    final VirtualColumns virtualColumns = makeVirtualColumns();
 
-      virtualColumns.makeColumnValueSelector("bar", baseColumnSelectorFactory);
-    });
-    assertTrue(exception.getMessage().contains("No such virtual column[bar]"));
+    expectedException.expect(IllegalArgumentException.class);
+    expectedException.expectMessage("No such virtual column[bar]");
+
+    virtualColumns.makeColumnValueSelector("bar", baseColumnSelectorFactory);
   }
 
   @Test
@@ -243,11 +250,11 @@ public class VirtualColumnsTest extends InitializedNullHandlingTest
         baseColumnSelectorFactory
     );
 
-    Assertions.assertEquals(1L, objectSelector.getObject());
-    Assertions.assertEquals("1", dimensionSelector.lookupName(dimensionSelector.getRow().get(0)));
-    Assertions.assertEquals("0.5", extractionDimensionSelector.lookupName(extractionDimensionSelector.getRow().get(0)));
-    Assertions.assertEquals(1.0f, floatSelector.getFloat(), 0.0f);
-    Assertions.assertEquals(1L, longSelector.getLong());
+    Assert.assertEquals(1L, objectSelector.getObject());
+    Assert.assertEquals("1", dimensionSelector.lookupName(dimensionSelector.getRow().get(0)));
+    Assert.assertEquals("0.5", extractionDimensionSelector.lookupName(extractionDimensionSelector.getRow().get(0)));
+    Assert.assertEquals(1.0f, floatSelector.getFloat(), 0.0f);
+    Assert.assertEquals(1L, longSelector.getLong());
   }
 
   @Test
@@ -271,10 +278,10 @@ public class VirtualColumnsTest extends InitializedNullHandlingTest
         baseColumnSelectorFactory
     );
 
-    Assertions.assertEquals(5L, objectSelector.getObject());
-    Assertions.assertEquals("5", dimensionSelector.lookupName(dimensionSelector.getRow().get(0)));
-    Assertions.assertEquals(5.0f, floatSelector.getFloat(), 0.0f);
-    Assertions.assertEquals(5L, longSelector.getLong());
+    Assert.assertEquals(5L, objectSelector.getObject());
+    Assert.assertEquals("5", dimensionSelector.lookupName(dimensionSelector.getRow().get(0)));
+    Assert.assertEquals(5.0f, floatSelector.getFloat(), 0.0f);
+    Assert.assertEquals(5L, longSelector.getLong());
   }
 
   @Test
@@ -298,72 +305,72 @@ public class VirtualColumnsTest extends InitializedNullHandlingTest
         baseColumnSelectorFactory
     );
 
-    Assertions.assertEquals(-1L, objectSelector.getObject());
-    Assertions.assertEquals("-1", dimensionSelector.lookupName(dimensionSelector.getRow().get(0)));
-    Assertions.assertEquals(-1.0f, floatSelector.getFloat(), 0.0f);
-    Assertions.assertEquals(-1L, longSelector.getLong());
+    Assert.assertEquals(-1L, objectSelector.getObject());
+    Assert.assertEquals("-1", dimensionSelector.lookupName(dimensionSelector.getRow().get(0)));
+    Assert.assertEquals(-1.0f, floatSelector.getFloat(), 0.0f);
+    Assert.assertEquals(-1L, longSelector.getLong());
   }
 
   @Test
   public void testTimeNotAllowed()
   {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
-      final ExpressionVirtualColumn expr = new ExpressionVirtualColumn(
-          "__time",
-          "x + y",
-          ColumnType.FLOAT,
-          TestExprMacroTable.INSTANCE
-      );
+    final ExpressionVirtualColumn expr = new ExpressionVirtualColumn(
+        "__time",
+        "x + y",
+        ColumnType.FLOAT,
+        TestExprMacroTable.INSTANCE
+    );
 
-      VirtualColumns.create(ImmutableList.of(expr));
-    });
-    assertTrue(exception.getMessage().contains("virtualColumn name[__time] not allowed"));
+    expectedException.expect(IllegalArgumentException.class);
+    expectedException.expectMessage("virtualColumn name[__time] not allowed");
+
+    VirtualColumns.create(ImmutableList.of(expr));
   }
 
   @Test
   public void testDuplicateNameDetection()
   {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
-      final ExpressionVirtualColumn expr = new ExpressionVirtualColumn(
-          "expr",
-          "x + y",
-          ColumnType.FLOAT,
-          TestExprMacroTable.INSTANCE
-      );
+    final ExpressionVirtualColumn expr = new ExpressionVirtualColumn(
+        "expr",
+        "x + y",
+        ColumnType.FLOAT,
+        TestExprMacroTable.INSTANCE
+    );
 
-      final ExpressionVirtualColumn expr2 = new ExpressionVirtualColumn(
-          "expr",
-          "x * 2",
-          ColumnType.FLOAT,
-          TestExprMacroTable.INSTANCE
-      );
+    final ExpressionVirtualColumn expr2 = new ExpressionVirtualColumn(
+        "expr",
+        "x * 2",
+        ColumnType.FLOAT,
+        TestExprMacroTable.INSTANCE
+    );
 
-      VirtualColumns.create(ImmutableList.of(expr, expr2));
-    });
-    assertTrue(exception.getMessage().contains("Duplicate virtualColumn name[expr]"));
+    expectedException.expect(IllegalArgumentException.class);
+    expectedException.expectMessage("Duplicate virtualColumn name[expr]");
+
+    VirtualColumns.create(ImmutableList.of(expr, expr2));
   }
 
   @Test
   public void testCycleDetection()
   {
-    Throwable exception = assertThrows(IllegalArgumentException.class, () -> {
-      final ExpressionVirtualColumn expr = new ExpressionVirtualColumn(
-          "expr",
-          "x + expr2",
-          ColumnType.FLOAT,
-          TestExprMacroTable.INSTANCE
-      );
+    final ExpressionVirtualColumn expr = new ExpressionVirtualColumn(
+        "expr",
+        "x + expr2",
+        ColumnType.FLOAT,
+        TestExprMacroTable.INSTANCE
+    );
 
-      final ExpressionVirtualColumn expr2 = new ExpressionVirtualColumn(
-          "expr2",
-          "expr * 2",
-          ColumnType.FLOAT,
-          TestExprMacroTable.INSTANCE
-      );
+    final ExpressionVirtualColumn expr2 = new ExpressionVirtualColumn(
+        "expr2",
+        "expr * 2",
+        ColumnType.FLOAT,
+        TestExprMacroTable.INSTANCE
+    );
 
-      VirtualColumns.create(ImmutableList.of(expr, expr2));
-    });
-    assertTrue(exception.getMessage().contains("Self-referential column[expr]"));
+    expectedException.expect(IllegalArgumentException.class);
+    expectedException.expectMessage("Self-referential column[expr]");
+
+    VirtualColumns.create(ImmutableList.of(expr, expr2));
   }
 
   @Test
@@ -381,8 +388,8 @@ public class VirtualColumnsTest extends InitializedNullHandlingTest
         )
     );
 
-    Assertions.assertArrayEquals(virtualColumns.getCacheKey(), virtualColumns2.getCacheKey());
-    Assertions.assertFalse(Arrays.equals(virtualColumns.getCacheKey(), VirtualColumns.EMPTY.getCacheKey()));
+    Assert.assertArrayEquals(virtualColumns.getCacheKey(), virtualColumns2.getCacheKey());
+    Assert.assertFalse(Arrays.equals(virtualColumns.getCacheKey(), VirtualColumns.EMPTY.getCacheKey()));
   }
 
   @Test
@@ -400,14 +407,14 @@ public class VirtualColumnsTest extends InitializedNullHandlingTest
         )
     );
 
-    Assertions.assertEquals(virtualColumns, virtualColumns);
-    Assertions.assertEquals(virtualColumns, virtualColumns2);
-    Assertions.assertNotEquals(VirtualColumns.EMPTY, virtualColumns);
-    Assertions.assertNotEquals(VirtualColumns.EMPTY, null);
+    Assert.assertEquals(virtualColumns, virtualColumns);
+    Assert.assertEquals(virtualColumns, virtualColumns2);
+    Assert.assertNotEquals(VirtualColumns.EMPTY, virtualColumns);
+    Assert.assertNotEquals(VirtualColumns.EMPTY, null);
 
-    Assertions.assertEquals(virtualColumns.hashCode(), virtualColumns.hashCode());
-    Assertions.assertEquals(virtualColumns.hashCode(), virtualColumns2.hashCode());
-    Assertions.assertNotEquals(VirtualColumns.EMPTY.hashCode(), virtualColumns.hashCode());
+    Assert.assertEquals(virtualColumns.hashCode(), virtualColumns.hashCode());
+    Assert.assertEquals(virtualColumns.hashCode(), virtualColumns2.hashCode());
+    Assert.assertNotEquals(VirtualColumns.EMPTY.hashCode(), virtualColumns.hashCode());
   }
 
   @Test
@@ -420,7 +427,7 @@ public class VirtualColumnsTest extends InitializedNullHandlingTest
     );
     final VirtualColumns virtualColumns = VirtualColumns.create(theColumns);
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         virtualColumns,
         mapper.readValue(
             mapper.writeValueAsString(virtualColumns),
@@ -428,7 +435,7 @@ public class VirtualColumnsTest extends InitializedNullHandlingTest
         )
     );
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
         theColumns,
         mapper.readValue(
             mapper.writeValueAsString(virtualColumns),
@@ -445,9 +452,9 @@ public class VirtualColumnsTest extends InitializedNullHandlingTest
     final ExpressionVirtualColumn expr0 = new ExpressionVirtualColumn("v0", "case_searched(notnull(1 + x), v1, v2)", ColumnType.LONG, TestExprMacroTable.INSTANCE);
     final VirtualColumns virtualColumns = VirtualColumns.create(ImmutableList.of(expr0, expr1, expr2));
 
-    Assertions.assertTrue(virtualColumns.exists("v0"));
-    Assertions.assertTrue(virtualColumns.exists("v1"));
-    Assertions.assertTrue(virtualColumns.exists("v2"));
+    Assert.assertTrue(virtualColumns.exists("v0"));
+    Assert.assertTrue(virtualColumns.exists("v1"));
+    Assert.assertTrue(virtualColumns.exists("v2"));
   }
 
   @Test
@@ -458,9 +465,9 @@ public class VirtualColumnsTest extends InitializedNullHandlingTest
     final ExpressionVirtualColumn expr0 = new ExpressionVirtualColumn("v0", "case_searched(notnull(v1), v1, v2)", ColumnType.LONG, TestExprMacroTable.INSTANCE);
     final VirtualColumns virtualColumns = VirtualColumns.create(ImmutableList.of(expr0, expr1, expr2));
 
-    Assertions.assertTrue(virtualColumns.exists("v0"));
-    Assertions.assertTrue(virtualColumns.exists("v1"));
-    Assertions.assertTrue(virtualColumns.exists("v2"));
+    Assert.assertTrue(virtualColumns.exists("v0"));
+    Assert.assertTrue(virtualColumns.exists("v1"));
+    Assert.assertTrue(virtualColumns.exists("v2"));
   }
 
   @Test
@@ -471,9 +478,9 @@ public class VirtualColumnsTest extends InitializedNullHandlingTest
     final ExpressionVirtualColumn expr0 = new ExpressionVirtualColumn("v0", "v1 + v2", ColumnType.LONG, TestExprMacroTable.INSTANCE);
     final VirtualColumns virtualColumns = VirtualColumns.create(ImmutableList.of(expr0, expr1, expr2));
 
-    Assertions.assertTrue(virtualColumns.exists("v0"));
-    Assertions.assertTrue(virtualColumns.exists("v1"));
-    Assertions.assertTrue(virtualColumns.exists("v2"));
+    Assert.assertTrue(virtualColumns.exists("v0"));
+    Assert.assertTrue(virtualColumns.exists("v1"));
+    Assert.assertTrue(virtualColumns.exists("v2"));
   }
 
   @Test
@@ -500,11 +507,11 @@ public class VirtualColumnsTest extends InitializedNullHandlingTest
     final ExpressionVirtualColumn expr2 = new ExpressionVirtualColumn("v3", "v0 * x", null, TestExprMacroTable.INSTANCE);
     final VirtualColumns virtualColumns = VirtualColumns.create(ImmutableList.of(v0, v1, expr1, expr2));
 
-    Assertions.assertEquals(ColumnType.STRING, virtualColumns.getColumnCapabilitiesWithoutFallback(baseInspector, "v0").toColumnType());
-    Assertions.assertEquals(ColumnType.LONG, virtualColumns.getColumnCapabilitiesWithoutFallback(baseInspector, "v1").toColumnType());
-    Assertions.assertEquals(ColumnType.DOUBLE, virtualColumns.getColumnCapabilitiesWithoutFallback(baseInspector, "v2").toColumnType());
-    Assertions.assertEquals(ColumnType.DOUBLE, virtualColumns.getColumnCapabilitiesWithoutFallback(baseInspector, "v3").toColumnType());
-    Assertions.assertTrue(virtualColumns.canVectorize(baseInspector));
+    Assert.assertEquals(ColumnType.STRING, virtualColumns.getColumnCapabilitiesWithoutFallback(baseInspector, "v0").toColumnType());
+    Assert.assertEquals(ColumnType.LONG, virtualColumns.getColumnCapabilitiesWithoutFallback(baseInspector, "v1").toColumnType());
+    Assert.assertEquals(ColumnType.DOUBLE, virtualColumns.getColumnCapabilitiesWithoutFallback(baseInspector, "v2").toColumnType());
+    Assert.assertEquals(ColumnType.DOUBLE, virtualColumns.getColumnCapabilitiesWithoutFallback(baseInspector, "v3").toColumnType());
+    Assert.assertTrue(virtualColumns.canVectorize(baseInspector));
   }
 
   private VirtualColumns makeVirtualColumns()

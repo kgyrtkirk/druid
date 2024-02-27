@@ -35,6 +35,7 @@ import org.apache.druid.query.timeseries.TimeseriesResultValue;
 import org.apache.druid.segment.TestHelper;
 import org.apache.druid.sql.calcite.BaseCalciteQueryTest;
 import org.apache.druid.testing.InitializedNullHandlingTest;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 

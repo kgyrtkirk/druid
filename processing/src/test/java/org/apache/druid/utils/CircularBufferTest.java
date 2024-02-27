@@ -19,8 +19,8 @@
 
 package org.apache.druid.utils;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 
 public class CircularBufferTest
@@ -34,7 +34,7 @@ public class CircularBufferTest
       buff.add(i); // buffer should contain [9, 6, 7, 8]
     }
     for (int i = 0; i < 4; i++) {
-      Assertions.assertEquals((Integer) (9 - i), buff.getLatest(i));
+      Assert.assertEquals((Integer) (9 - i), buff.getLatest(i));
     }
   }
 
@@ -45,49 +45,49 @@ public class CircularBufferTest
         3);
 
     circularBuffer.add(1);
-    Assertions.assertEquals(1, circularBuffer.size());
-    Assertions.assertEquals(1, (int) circularBuffer.get(0));
+    Assert.assertEquals(1, circularBuffer.size());
+    Assert.assertEquals(1, (int) circularBuffer.get(0));
 
     circularBuffer.add(2);
-    Assertions.assertEquals(2, circularBuffer.size());
+    Assert.assertEquals(2, circularBuffer.size());
     for (int i = 0; i < circularBuffer.size(); i++) {
-      Assertions.assertEquals(i + 1, (int) circularBuffer.get(i));
+      Assert.assertEquals(i + 1, (int) circularBuffer.get(i));
     }
 
     circularBuffer.add(3);
-    Assertions.assertEquals(3, circularBuffer.size());
+    Assert.assertEquals(3, circularBuffer.size());
     for (int i = 0; i < circularBuffer.size(); i++) {
-      Assertions.assertEquals(i + 1, (int) circularBuffer.get(i));
+      Assert.assertEquals(i + 1, (int) circularBuffer.get(i));
     }
 
     circularBuffer.add(4);
-    Assertions.assertEquals(3, circularBuffer.size());
+    Assert.assertEquals(3, circularBuffer.size());
     for (int i = 0; i < circularBuffer.size(); i++) {
-      Assertions.assertEquals(i + 2, (int) circularBuffer.get(i));
+      Assert.assertEquals(i + 2, (int) circularBuffer.get(i));
     }
 
     circularBuffer.add(5);
-    Assertions.assertEquals(3, circularBuffer.size());
+    Assert.assertEquals(3, circularBuffer.size());
     for (int i = 0; i < circularBuffer.size(); i++) {
-      Assertions.assertEquals(i + 3, (int) circularBuffer.get(i));
+      Assert.assertEquals(i + 3, (int) circularBuffer.get(i));
     }
 
     circularBuffer.add(6);
-    Assertions.assertEquals(3, circularBuffer.size());
+    Assert.assertEquals(3, circularBuffer.size());
     for (int i = 0; i < circularBuffer.size(); i++) {
-      Assertions.assertEquals(i + 4, (int) circularBuffer.get(i));
+      Assert.assertEquals(i + 4, (int) circularBuffer.get(i));
     }
 
     circularBuffer.add(7);
-    Assertions.assertEquals(3, circularBuffer.size());
+    Assert.assertEquals(3, circularBuffer.size());
     for (int i = 0; i < circularBuffer.size(); i++) {
-      Assertions.assertEquals(i + 5, (int) circularBuffer.get(i));
+      Assert.assertEquals(i + 5, (int) circularBuffer.get(i));
     }
 
     circularBuffer.add(8);
-    Assertions.assertEquals(3, circularBuffer.size());
+    Assert.assertEquals(3, circularBuffer.size());
     for (int i = 0; i < circularBuffer.size(); i++) {
-      Assertions.assertEquals(i + 6, (int) circularBuffer.get(i));
+      Assert.assertEquals(i + 6, (int) circularBuffer.get(i));
     }
   }
 }

@@ -30,9 +30,9 @@ import org.apache.druid.segment.serde.cell.NativeClearedByteBufferProvider;
 import org.apache.druid.segment.writeout.HeapByteBufferWriteOutBytes;
 import org.apache.druid.segment.writeout.OnHeapMemorySegmentWriteOutMedium;
 import org.apache.druid.segment.writeout.SegmentWriteOutMedium;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -40,8 +40,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Random;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class SerializablePairLongLongBufferStoreTest
 {
@@ -65,7 +63,7 @@ public class SerializablePairLongLongBufferStoreTest
   private final SegmentWriteOutMedium writeOutMedium = new OnHeapMemorySegmentWriteOutMedium();
   private SerializablePairLongLongBufferStore bufferStore;
 
-  @BeforeEach
+  @Before
   public void setup() throws Exception
   {
     bufferStore = new SerializablePairLongLongBufferStore(
@@ -87,7 +85,7 @@ public class SerializablePairLongLongBufferStoreTest
 
     int i = 0;
     while (iterator.hasNext()) {
-      Assertions.assertEquals(integerRangeArr[i], iterator.next());
+      Assert.assertEquals(integerRangeArr[i], iterator.next());
       i++;
     }
   }
@@ -97,8 +95,8 @@ public class SerializablePairLongLongBufferStoreTest
   {
     bufferStore.store(null);
     IOIterator<SerializablePairLongLong> iterator = bufferStore.iterator();
-    Assertions.assertTrue(iterator.hasNext());
-    Assertions.assertNull(iterator.next());
+    Assert.assertTrue(iterator.hasNext());
+    Assert.assertNull(iterator.next());
   }
 
   @Test
@@ -108,25 +106,23 @@ public class SerializablePairLongLongBufferStoreTest
 
     IOIterator<SerializablePairLongLong> iterator = bufferStore.iterator();
 
-    Assertions.assertTrue(iterator.hasNext());
+    Assert.assertTrue(iterator.hasNext());
     // expect hasNext() to not modify state
-    Assertions.assertTrue(iterator.hasNext());
+    Assert.assertTrue(iterator.hasNext());
   }
 
-  @Test
+  @Test(expected = NoSuchElementException.class)
   public void testIteratorEmptyThrows() throws Exception
   {
-    assertThrows(NoSuchElementException.class, () -> {
-      IOIterator<SerializablePairLongLong> iterator = bufferStore.iterator();
-      iterator.next();
-    });
+    IOIterator<SerializablePairLongLong> iterator = bufferStore.iterator();
+    iterator.next();
   }
 
   @Test
   public void testIteratorEmptyHasNext() throws Exception
   {
     IOIterator<SerializablePairLongLong> iterator = bufferStore.iterator();
-    Assertions.assertFalse(iterator.hasNext());
+    Assert.assertFalse(iterator.hasNext());
   }
 
   @Test
@@ -137,8 +133,8 @@ public class SerializablePairLongLongBufferStoreTest
     }
 
     SerializablePairLongLongColumnHeader columnHeader = (SerializablePairLongLongColumnHeader) bufferStore.createColumnHeader();
-    Assertions.assertEquals(integerRangeArr[0].lhs.longValue(), columnHeader.getMinValue());
-    Assertions.assertTrue(columnHeader.isUseIntegerDeltas());
+    Assert.assertEquals(integerRangeArr[0].lhs.longValue(), columnHeader.getMinValue());
+    Assert.assertTrue(columnHeader.isUseIntegerDeltas());
   }
 
   @Test
@@ -149,8 +145,8 @@ public class SerializablePairLongLongBufferStoreTest
     }
 
     SerializablePairLongLongColumnHeader columnHeader = (SerializablePairLongLongColumnHeader) bufferStore.createColumnHeader();
-    Assertions.assertEquals(MIN_LONG, columnHeader.getMinValue());
-    Assertions.assertFalse(columnHeader.isUseIntegerDeltas());
+    Assert.assertEquals(MIN_LONG, columnHeader.getMinValue());
+    Assert.assertFalse(columnHeader.isUseIntegerDeltas());
   }
 
   @Test
@@ -172,8 +168,8 @@ public class SerializablePairLongLongBufferStoreTest
 
       SerializablePairLongLongColumnHeader deserializedColumnhHeader =
           (SerializablePairLongLongColumnHeader) AbstractSerializablePairLongObjectColumnHeader.fromBuffer(byteBuffer, SerializablePairLongLong.class);
-      Assertions.assertEquals(MIN_INTEGER, deserializedColumnhHeader.getMinValue());
-      Assertions.assertTrue(deserializedColumnhHeader.isUseIntegerDeltas());
+      Assert.assertEquals(MIN_INTEGER, deserializedColumnhHeader.getMinValue());
+      Assert.assertTrue(deserializedColumnhHeader.isUseIntegerDeltas());
     }
   }
 
@@ -198,8 +194,8 @@ public class SerializablePairLongLongBufferStoreTest
 
       SerializablePairLongLongColumnHeader deserializedColumnhHeader =
           (SerializablePairLongLongColumnHeader) AbstractSerializablePairLongObjectColumnHeader.fromBuffer(byteBuffer, SerializablePairLongLong.class);
-      Assertions.assertEquals(MIN_LONG, deserializedColumnhHeader.getMinValue());
-      Assertions.assertFalse(deserializedColumnhHeader.isUseIntegerDeltas());
+      Assert.assertEquals(MIN_LONG, deserializedColumnhHeader.getMinValue());
+      Assert.assertFalse(deserializedColumnhHeader.isUseIntegerDeltas());
     }
   }
 
@@ -213,9 +209,9 @@ public class SerializablePairLongLongBufferStoreTest
 
     IOIterator<SerializablePairLongLong> iterator = bufferStore.iterator();
 
-    Assertions.assertTrue(iterator.hasNext());
-    Assertions.assertEquals(value, iterator.next());
-    Assertions.assertFalse(iterator.hasNext());
+    Assert.assertTrue(iterator.hasNext());
+    Assert.assertEquals(value, iterator.next());
+    Assert.assertFalse(iterator.hasNext());
   }
 
   @Test
@@ -238,14 +234,14 @@ public class SerializablePairLongLongBufferStoreTest
 
     SerializablePairLongLongColumnHeader columnHeader = (SerializablePairLongLongColumnHeader) bufferStore.createColumnHeader();
 
-    Assertions.assertEquals(0, columnHeader.getMinValue());
+    Assert.assertEquals(0, columnHeader.getMinValue());
 
     AbstractSerializablePairLongObjectBufferStore.TransferredBuffer transferredBuffer = bufferStore.transferToRowWriter(
         NativeClearedByteBufferProvider.INSTANCE,
         writeOutMedium
     );
 
-    Assertions.assertEquals(94, transferredBuffer.getSerializedSize());
+    Assert.assertEquals(94, transferredBuffer.getSerializedSize());
   }
 
   @Test
@@ -259,14 +255,14 @@ public class SerializablePairLongLongBufferStoreTest
 
     SerializablePairLongLongColumnHeader columnHeader = (SerializablePairLongLongColumnHeader) bufferStore.createColumnHeader();
 
-    Assertions.assertEquals(0, columnHeader.getMinValue());
+    Assert.assertEquals(0, columnHeader.getMinValue());
 
     AbstractSerializablePairLongObjectBufferStore.TransferredBuffer transferredBuffer = bufferStore.transferToRowWriter(
         NativeClearedByteBufferProvider.INSTANCE,
         writeOutMedium
     );
 
-    Assertions.assertEquals(59, transferredBuffer.getSerializedSize());
+    Assert.assertEquals(59, transferredBuffer.getSerializedSize());
   }
 
   @Test
@@ -276,7 +272,7 @@ public class SerializablePairLongLongBufferStoreTest
       bufferStore.store(value);
     }
 
-    Assertions.assertTrue(bufferStore.createColumnHeader().isUseIntegerDeltas());
+    Assert.assertTrue(bufferStore.createColumnHeader().isUseIntegerDeltas());
 
     assertTransferredValuesEqual(integerRangeArr);
   }
@@ -288,7 +284,7 @@ public class SerializablePairLongLongBufferStoreTest
       bufferStore.store(value);
     }
 
-    Assertions.assertFalse(bufferStore.createColumnHeader().isUseIntegerDeltas());
+    Assert.assertFalse(bufferStore.createColumnHeader().isUseIntegerDeltas());
 
     assertTransferredValuesEqual(longRangeArr);
   }
@@ -303,14 +299,14 @@ public class SerializablePairLongLongBufferStoreTest
     int i = 0;
 
     while (iterator.hasNext()) {
-      Assertions.assertEquals(input.get(i), iterator.next());
+      Assert.assertEquals(input.get(i), iterator.next());
       i++;
     }
 
-    Assertions.assertEquals(
+    Assert.assertEquals(
+        StringUtils.format("element count mismatch: expected %s, got %s", input.size(), i),
         input.size(),
-        i,
-        StringUtils.format("element count mismatch: expected %s, got %s", input.size(), i)
+        i
     );
   }
 
@@ -324,7 +320,7 @@ public class SerializablePairLongLongBufferStoreTest
 
     try (SerializablePairLongLongComplexColumn column = createComplexColumn(transferredBuffer, resultChannel)) {
       for (int i = 0; i < input.length; i++) {
-        Assertions.assertEquals(input[i], column.getRowValue(i));
+        Assert.assertEquals(input[i], column.getRowValue(i));
       }
     }
   }

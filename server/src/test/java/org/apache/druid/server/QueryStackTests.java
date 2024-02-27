@@ -94,7 +94,7 @@ import org.apache.druid.sql.calcite.util.CacheTestHelperModule;
 import org.apache.druid.sql.calcite.util.CacheTestHelperModule.ResultCacheMode;
 import org.apache.druid.timeline.VersionedIntervalTimeline;
 import org.apache.druid.utils.JvmUtils;
-import org.junit.jupiter.api.Assertions;
+import org.junit.Assert;
 
 import javax.annotation.Nullable;
 
@@ -272,7 +272,7 @@ public class QueryStackTests
     final TestBufferPool testBufferPool = TestBufferPool.offHeap(COMPUTE_BUFFER_SIZE, Integer.MAX_VALUE);
     closer.register(() -> {
       // Verify that all objects have been returned to the pool.
-      Assertions.assertEquals(0, testBufferPool.getOutstandingObjectCount());
+      Assert.assertEquals(0, testBufferPool.getOutstandingObjectCount());
     });
 
     final TestGroupByBuffers groupByBuffers =

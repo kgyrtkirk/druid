@@ -21,8 +21,8 @@ package org.apache.druid.math.expr;
 
 import com.google.common.collect.ImmutableList;
 import nl.jqno.equalsverifier.EqualsVerifier;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -233,12 +233,12 @@ public class ExprTest
     };
 
     shuttle.visitAll(Collections.emptyList());
-    Assertions.assertEquals(Collections.emptyList(), visitedExprs, "Visiting an empty list");
+    Assert.assertEquals("Visiting an empty list", Collections.emptyList(), visitedExprs);
 
     final List<Expr> oneIdentifier = Collections.singletonList(new IdentifierExpr("ident"));
     visitedExprs.clear();
     shuttle.visitAll(oneIdentifier);
-    Assertions.assertEquals(oneIdentifier, visitedExprs, "One identifier");
+    Assert.assertEquals("One identifier", oneIdentifier, visitedExprs);
 
     final List<Expr> twoIdentifiers = ImmutableList.of(
         new IdentifierExpr("ident1"),
@@ -246,6 +246,6 @@ public class ExprTest
     );
     visitedExprs.clear();
     shuttle.visitAll(twoIdentifiers);
-    Assertions.assertEquals(twoIdentifiers, visitedExprs, "Two identifiers");
+    Assert.assertEquals("Two identifiers", twoIdentifiers, visitedExprs);
   }
 }

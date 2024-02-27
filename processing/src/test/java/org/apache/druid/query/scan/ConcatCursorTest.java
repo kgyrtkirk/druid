@@ -22,8 +22,8 @@ package org.apache.druid.query.scan;
 import com.google.common.collect.ImmutableList;
 import org.apache.druid.segment.Cursor;
 import org.apache.druid.segment.ListCursor;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,7 +53,7 @@ public class ConcatCursorTest
       tempList.add(concatCursor.getColumnSelectorFactory().makeColumnValueSelector("ignored").getObject());
       concatCursor.advance();
     }
-    Assertions.assertEquals(ImmutableList.of("a", "b", "c", "d"), tempList);
+    Assert.assertEquals(ImmutableList.of("a", "b", "c", "d"), tempList);
 
     // Check if reset() works after exhausting the cursor
     concatCursor.reset();
@@ -62,7 +62,7 @@ public class ConcatCursorTest
       tempList.add(concatCursor.getColumnSelectorFactory().makeColumnValueSelector("ignored").getObject());
       concatCursor.advance();
     }
-    Assertions.assertEquals(ImmutableList.of("a", "b", "c"), tempList);
+    Assert.assertEquals(ImmutableList.of("a", "b", "c"), tempList);
 
     // Check if reset() works from the middle
     concatCursor.reset();
@@ -71,7 +71,7 @@ public class ConcatCursorTest
       tempList.add(concatCursor.getColumnSelectorFactory().makeColumnValueSelector("ignored").getObject());
       concatCursor.advance();
     }
-    Assertions.assertEquals(ImmutableList.of("a", "b", "c", "d"), tempList);
+    Assert.assertEquals(ImmutableList.of("a", "b", "c", "d"), tempList);
   }
 
   @Test
@@ -83,7 +83,7 @@ public class ConcatCursorTest
         dummyCursor1,
         dummyCursor2
     ));
-    Assertions.assertTrue(concatCursor.isDone());
+    Assert.assertTrue(concatCursor.isDone());
   }
 
   @Test
@@ -102,7 +102,7 @@ public class ConcatCursorTest
       tempList.add(concatCursor.getColumnSelectorFactory().makeColumnValueSelector("ignored").getObject());
       concatCursor.advance();
     }
-    Assertions.assertEquals(ImmutableList.of("a", "b"), tempList);
+    Assert.assertEquals(ImmutableList.of("a", "b"), tempList);
 
     // Check if reset() works after exhausting the cursor
     concatCursor.reset();
@@ -111,7 +111,7 @@ public class ConcatCursorTest
       tempList.add(concatCursor.getColumnSelectorFactory().makeColumnValueSelector("ignored").getObject());
       concatCursor.advance();
     }
-    Assertions.assertEquals(ImmutableList.of("a"), tempList);
+    Assert.assertEquals(ImmutableList.of("a"), tempList);
 
     // Check if reset() works from the middle
     concatCursor.reset();
@@ -120,7 +120,7 @@ public class ConcatCursorTest
       tempList.add(concatCursor.getColumnSelectorFactory().makeColumnValueSelector("ignored").getObject());
       concatCursor.advance();
     }
-    Assertions.assertEquals(ImmutableList.of("a", "b"), tempList);
+    Assert.assertEquals(ImmutableList.of("a", "b"), tempList);
   }
 
   @Test
@@ -139,7 +139,7 @@ public class ConcatCursorTest
       tempList.add(concatCursor.getColumnSelectorFactory().makeColumnValueSelector("ignored").getObject());
       concatCursor.advance();
     }
-    Assertions.assertEquals(ImmutableList.of("a", "b"), tempList);
+    Assert.assertEquals(ImmutableList.of("a", "b"), tempList);
 
     // Check if reset() works after exhausting the cursor
     concatCursor.reset();
@@ -148,7 +148,7 @@ public class ConcatCursorTest
       tempList.add(concatCursor.getColumnSelectorFactory().makeColumnValueSelector("ignored").getObject());
       concatCursor.advance();
     }
-    Assertions.assertEquals(ImmutableList.of("a"), tempList);
+    Assert.assertEquals(ImmutableList.of("a"), tempList);
 
     // Check if reset() works from the middle
     concatCursor.reset();
@@ -157,7 +157,7 @@ public class ConcatCursorTest
       tempList.add(concatCursor.getColumnSelectorFactory().makeColumnValueSelector("ignored").getObject());
       concatCursor.advance();
     }
-    Assertions.assertEquals(ImmutableList.of("a", "b"), tempList);
+    Assert.assertEquals(ImmutableList.of("a", "b"), tempList);
   }
 
   @Test
@@ -180,7 +180,7 @@ public class ConcatCursorTest
       tempList.add(concatCursor.getColumnSelectorFactory().makeColumnValueSelector("ignored").getObject());
       concatCursor.advance();
     }
-    Assertions.assertEquals(ImmutableList.of("a", "b"), tempList);
+    Assert.assertEquals(ImmutableList.of("a", "b"), tempList);
 
     // Check if reset() works after exhausting the cursor
     concatCursor.reset();
@@ -189,7 +189,7 @@ public class ConcatCursorTest
       tempList.add(concatCursor.getColumnSelectorFactory().makeColumnValueSelector("ignored").getObject());
       concatCursor.advance();
     }
-    Assertions.assertEquals(ImmutableList.of("a"), tempList);
+    Assert.assertEquals(ImmutableList.of("a"), tempList);
 
     // Check if reset() works from the middle
     concatCursor.reset();
@@ -198,7 +198,7 @@ public class ConcatCursorTest
       tempList.add(concatCursor.getColumnSelectorFactory().makeColumnValueSelector("ignored").getObject());
       concatCursor.advance();
     }
-    Assertions.assertEquals(ImmutableList.of("a", "b"), tempList);
+    Assert.assertEquals(ImmutableList.of("a", "b"), tempList);
   }
 
   @Test
@@ -221,7 +221,7 @@ public class ConcatCursorTest
       tempList.add(concatCursor.getColumnSelectorFactory().makeColumnValueSelector("ignored").getObject());
       concatCursor.advance();
     }
-    Assertions.assertEquals(ImmutableList.of("a", "b"), tempList);
+    Assert.assertEquals(ImmutableList.of("a", "b"), tempList);
 
     // Check if reset() works after exhausting the cursor
     concatCursor.reset();
@@ -230,7 +230,7 @@ public class ConcatCursorTest
       tempList.add(concatCursor.getColumnSelectorFactory().makeColumnValueSelector("ignored").getObject());
       concatCursor.advance();
     }
-    Assertions.assertEquals(ImmutableList.of("a"), tempList);
+    Assert.assertEquals(ImmutableList.of("a"), tempList);
 
     // Check if reset() works from the middle
     concatCursor.reset();
@@ -239,7 +239,7 @@ public class ConcatCursorTest
       tempList.add(concatCursor.getColumnSelectorFactory().makeColumnValueSelector("ignored").getObject());
       concatCursor.advance();
     }
-    Assertions.assertEquals(ImmutableList.of("a", "b"), tempList);
+    Assert.assertEquals(ImmutableList.of("a", "b"), tempList);
   }
 
   @Test
@@ -264,7 +264,7 @@ public class ConcatCursorTest
       tempList.add(concatCursor.getColumnSelectorFactory().makeColumnValueSelector("ignored").getObject());
       concatCursor.advance();
     }
-    Assertions.assertEquals(ImmutableList.of("a", "b"), tempList);
+    Assert.assertEquals(ImmutableList.of("a", "b"), tempList);
 
     // Check if reset() works after exhausting the cursor
     concatCursor.reset();
@@ -273,7 +273,7 @@ public class ConcatCursorTest
       tempList.add(concatCursor.getColumnSelectorFactory().makeColumnValueSelector("ignored").getObject());
       concatCursor.advance();
     }
-    Assertions.assertEquals(ImmutableList.of("a"), tempList);
+    Assert.assertEquals(ImmutableList.of("a"), tempList);
 
     // Check if reset() works from the middle
     concatCursor.reset();
@@ -282,6 +282,6 @@ public class ConcatCursorTest
       tempList.add(concatCursor.getColumnSelectorFactory().makeColumnValueSelector("ignored").getObject());
       concatCursor.advance();
     }
-    Assertions.assertEquals(ImmutableList.of("a", "b"), tempList);
+    Assert.assertEquals(ImmutableList.of("a", "b"), tempList);
   }
 }

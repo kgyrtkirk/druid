@@ -28,8 +28,8 @@ import org.apache.druid.frame.processor.FrameProcessor;
 import org.apache.druid.frame.processor.ReturnOrAwait;
 import org.apache.druid.java.util.common.Unit;
 import org.apache.druid.java.util.common.guava.Sequences;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Collections;
 import java.util.List;
@@ -49,11 +49,11 @@ public class SequenceProcessorManagerTest
                  Sequences.<FrameProcessor<Object>>empty()
                           .withBaggage(closed::getAndIncrement))) {
       final ListenableFuture<Optional<ProcessorAndCallback<Object>>> future = manager.next();
-      Assertions.assertTrue(future.isDone());
-      Assertions.assertFalse(future.get().isPresent());
+      Assert.assertTrue(future.isDone());
+      Assert.assertFalse(future.get().isPresent());
     }
 
-    Assertions.assertEquals(1, closed.get());
+    Assert.assertEquals(1, closed.get());
   }
 
   @Test
@@ -68,17 +68,17 @@ public class SequenceProcessorManagerTest
                           .withBaggage(closed::getAndIncrement))) {
       // First element.
       ListenableFuture<Optional<ProcessorAndCallback<Unit>>> future = manager.next();
-      Assertions.assertTrue(future.isDone());
-      Assertions.assertTrue(future.get().isPresent());
-      Assertions.assertSame(processor, future.get().get().processor());
+      Assert.assertTrue(future.isDone());
+      Assert.assertTrue(future.get().isPresent());
+      Assert.assertSame(processor, future.get().get().processor());
 
       // End of sequence.
       future = manager.next();
-      Assertions.assertTrue(future.isDone());
-      Assertions.assertFalse(future.get().isPresent());
+      Assert.assertTrue(future.isDone());
+      Assert.assertFalse(future.get().isPresent());
     }
 
-    Assertions.assertEquals(1, closed.get());
+    Assert.assertEquals(1, closed.get());
   }
 
   @Test
@@ -94,29 +94,29 @@ public class SequenceProcessorManagerTest
                           .withBaggage(closed::getAndIncrement))) {
       // First element.
       ListenableFuture<Optional<ProcessorAndCallback<Unit>>> future = manager.next();
-      Assertions.assertTrue(future.isDone());
-      Assertions.assertTrue(future.get().isPresent());
-      Assertions.assertSame(processor0, future.get().get().processor());
+      Assert.assertTrue(future.isDone());
+      Assert.assertTrue(future.get().isPresent());
+      Assert.assertSame(processor0, future.get().get().processor());
 
       // Second element.
       future = manager.next();
-      Assertions.assertTrue(future.isDone());
-      Assertions.assertTrue(future.get().isPresent());
-      Assertions.assertSame(processor1, future.get().get().processor());
+      Assert.assertTrue(future.isDone());
+      Assert.assertTrue(future.get().isPresent());
+      Assert.assertSame(processor1, future.get().get().processor());
 
       // End of sequence.
       future = manager.next();
-      Assertions.assertTrue(future.isDone());
-      Assertions.assertFalse(future.get().isPresent());
+      Assert.assertTrue(future.isDone());
+      Assert.assertFalse(future.get().isPresent());
 
       // One more, should throw because there's nothing left.
-      Assertions.assertThrows(
+      Assert.assertThrows(
           NoSuchElementException.class,
           manager::next
       );
     }
 
-    Assertions.assertEquals(1, closed.get());
+    Assert.assertEquals(1, closed.get());
   }
 
   @Test
@@ -131,13 +131,13 @@ public class SequenceProcessorManagerTest
     manager.close();
 
     // IllegalStateException instead of NoSuchElementException because the problem is that we are closed.
-    Assertions.assertThrows(
+    Assert.assertThrows(
         IllegalStateException.class,
         manager::next
     );
 
     // Sequence is not closed because it never started iterating.
-    Assertions.assertEquals(0, closed.get());
+    Assert.assertEquals(0, closed.get());
   }
 
   private static class NilFrameProcessor implements FrameProcessor<Unit>

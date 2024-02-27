@@ -28,27 +28,30 @@ import org.apache.druid.segment.QueryableIndexStorageAdapter;
 import org.apache.druid.segment.StorageAdapter;
 import org.apache.druid.segment.TestIndex;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@RunWith(Parameterized.class)
 public class FrameReaderTest extends InitializedNullHandlingTest
 {
-  private FrameType frameType;
+  private final FrameType frameType;
 
   private StorageAdapter inputAdapter;
   private Frame frame;
   private FrameReader frameReader;
 
-  public void initFrameReaderTest(final FrameType frameType)
+  public FrameReaderTest(final FrameType frameType)
   {
     this.frameType = frameType;
   }
 
+  @Parameterized.Parameters(name = "frameType = {0}")
   public static Iterable<Object[]> constructorFeeder()
   {
     final List<Object[]> constructors = new ArrayList<>();
@@ -60,7 +63,7 @@ public class FrameReaderTest extends InitializedNullHandlingTest
     return constructors;
   }
 
-  @BeforeEach
+  @Before
   public void setUp()
   {
     inputAdapter = new QueryableIndexStorageAdapter(TestIndex.getNoRollupMMappedTestIndex());
@@ -74,24 +77,20 @@ public class FrameReaderTest extends InitializedNullHandlingTest
     frameReader = FrameReader.create(frameSequenceBuilder.signature());
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "frameType = {0}")
-  public void testSignature(final FrameType frameType)
+  @Test
+  public void testSignature()
   {
-    initFrameReaderTest(frameType);
-    Assertions.assertEquals(inputAdapter.getRowSignature(), frameReader.signature());
+    Assert.assertEquals(inputAdapter.getRowSignature(), frameReader.signature());
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "frameType = {0}")
-  public void testColumnCapabilitiesToColumnType(final FrameType frameType)
+  @Test
+  public void testColumnCapabilitiesToColumnType()
   {
-    initFrameReaderTest(frameType);
     for (final String columnName : inputAdapter.getRowSignature().getColumnNames()) {
-      Assertions.assertEquals(
+      Assert.assertEquals(
+          columnName,
           inputAdapter.getRowSignature().getColumnCapabilities(columnName).toColumnType(),
-          frameReader.columnCapabilities(frame, columnName).toColumnType(),
-          columnName
+          frameReader.columnCapabilities(frame, columnName).toColumnType()
       );
     }
   }
