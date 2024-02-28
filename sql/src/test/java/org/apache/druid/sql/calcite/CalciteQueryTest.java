@@ -8072,18 +8072,14 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     // Cannot vectorize due to extractionFn in dimension spec.
     cannotVectorize();
 
-    expectedException.expect(DruidException.class);
-    expectedException.expectMessage(
-        "An invalid pattern [^(.))] was provided for the REGEXP_EXTRACT function, " +
-        "error: [Unmatched closing ')' near index 3\n^(.))\n   ^]"
-    );
-
-    testQuery(
+    testQueryThrows(
         "SELECT DISTINCT\n"
         + "  REGEXP_EXTRACT(dim1, '^(.))', 1)\n"
         + "FROM foo",
-        ImmutableList.of(),
-        ImmutableList.of()
+        invalidSqlContains(
+            "An invalid pattern [^(.))] was provided for the REGEXP_EXTRACT function, " +
+                "error: [Unmatched closing ')' near index 3\n^(.))\n   ^]"
+        )
     );
   }
 
@@ -12861,36 +12857,27 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
   @Test
   public void testValidationErrorNullLiteralIllegal()
   {
-    expectedException.expectMessage("Illegal use of 'NULL'");
-
-    testQuery(
+    testQueryThrows(
         "SELECT REGEXP_LIKE('x', NULL)",
-        ImmutableList.of(),
-        ImmutableList.of()
+        invalidSqlContains("Illegal use of 'NULL'")
     );
   }
 
   @Test
   public void testValidationErrorNonLiteralIllegal()
   {
-    expectedException.expectMessage("Argument to function 'REGEXP_LIKE' must be a literal");
-
-    testQuery(
+    testQueryThrows(
         "SELECT REGEXP_LIKE('x', dim1) FROM foo",
-        ImmutableList.of(),
-        ImmutableList.of()
+        invalidSqlContains("Argument to function 'REGEXP_LIKE' must be a literal")
     );
   }
 
   @Test
   public void testValidationErrorWrongTypeLiteral()
   {
-    expectedException.expectMessage("Cannot apply 'REGEXP_LIKE' to arguments");
-
-    testQuery(
+    testQueryThrows(
         "SELECT REGEXP_LIKE('x', 1) FROM foo",
-        ImmutableList.of(),
-        ImmutableList.of()
+        invalidSqlContains("Cannot apply 'REGEXP_LIKE' to arguments")
     );
   }
 
