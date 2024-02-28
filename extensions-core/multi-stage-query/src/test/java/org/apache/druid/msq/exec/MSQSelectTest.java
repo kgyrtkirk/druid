@@ -2201,20 +2201,19 @@ public class MSQSelectTest extends MSQTestBase
     String externalFiles = String.join(", ", Collections.nCopies(numFiles, toReadFileNameAsJson));
 
     List<Object[]> result = new ArrayList<>();
-    for (int i = 0; i < 38; ++i) {
-      result.add(new Object[]{1});
-    }
+      result.add(new Object[]{1L});
+      result.add(new Object[]{2L});
 
     testSelectQuery()
         .setSql(StringUtils.format(
-            " SELECT 1 as \"timestamp\"\n"
+            " SELECT v as \"timestamp\"\n"
             + "FROM TABLE(\n"
             + "  EXTERN(\n"
-            + "    '{ \"files\": [%s],\"type\":\"local\"}',\n"
-            + "    '{\"type\": \"csv\", \"hasHeaderRow\": true}',\n"
-            + "    '[{\"name\": \"timestamp\", \"type\": \"string\"}]'\n"
-            + "  )\n"
-            + ")",
+            + "    '{\"type\":\"inline\",\"data\":\"n,v\\na,1\\nb,2\"}',\n"
+            + "    '{\"type\": \"csv\", \"hasHeaderRow\": true}'\n"
+            + "    ,'[{\"name\": \"v\", \"type\": \"long\"}]'\n"
+            + "  )  \n"
+            + ") ",
             externalFiles
         ))
         .setExpectedRowSignature(dummyRowSignature)
@@ -2222,6 +2221,42 @@ public class MSQSelectTest extends MSQTestBase
         .setExpectedResultRows(result)
         .verifyResults();
   }
+
+
+  @Test
+  public void testSelectRowsGetUntruncatedByDefaultErr() throws IOException
+  {
+    RowSignature dummyRowSignature = RowSignature.builder().add("timestamp", ColumnType.LONG).build();
+
+    final int numFiles = 2;
+
+    final File toRead = MSQTestFileUtils.getResourceAsTemporaryFile(temporaryFolder, this, "/wikipedia-sampled.json");
+    final String toReadFileNameAsJson = queryFramework().queryJsonMapper().writeValueAsString(toRead.getAbsolutePath());
+
+    String externalFiles = String.join(", ", Collections.nCopies(numFiles, toReadFileNameAsJson));
+
+    List<Object[]> result = new ArrayList<>();
+      result.add(new Object[]{1L});
+      result.add(new Object[]{2L});
+
+    testSelectQuery()
+        .setSql(StringUtils.format(
+            " SELECT v as \"timestamp\"\n"
+            + "FROM TABLE(\n"
+            + "  EXTERN(\n"
+            + "    '{\"type\":\"inline\",\"data\":\"n,v\\na,1.0\\nb,2.0\"}',\n"
+            + "    '{\"type\": \"csv\", \"hasHeaderRow\": true}'\n"
+            + "    ,'[{\"name\": \"v\", \"type\": \"long\"}]'\n"
+            + "  )  \n"
+            + ") ",
+            externalFiles
+        ))
+        .setExpectedRowSignature(dummyRowSignature)
+        .setQueryContext(context)
+        .setExpectedResultRows(result)
+        .verifyResults();
+  }
+
 
   @Test
   public void testJoinUsesDifferentAlgorithm()
