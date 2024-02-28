@@ -45,9 +45,9 @@ import org.apache.druid.sql.calcite.table.RowSignatures;
 import org.apache.druid.sql.calcite.util.CalciteTests;
 import org.apache.druid.sql.calcite.util.QueryFrameworkUtils;
 import org.apache.druid.sql.calcite.util.SqlTestFramework;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
@@ -62,7 +62,7 @@ public class InformationSchemaTest extends BaseCalciteQueryTest
   private InformationSchema informationSchema;
   private SqlTestFramework qf;
 
-  @BeforeEach
+  @Before
   public void setUp()
   {
     qf = queryFramework();
@@ -87,7 +87,7 @@ public class InformationSchemaTest extends BaseCalciteQueryTest
   @Test
   public void testGetTableNamesMap()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableSet.of("SCHEMATA", "TABLES", "COLUMNS", "ROUTINES"),
         informationSchema.getTableNames()
     );
@@ -102,19 +102,19 @@ public class InformationSchemaTest extends BaseCalciteQueryTest
 
     List<Object[]> rows = routinesTable.scan(dataContext).toList();
 
-    Assertions.assertTrue(rows.size() > 0,
-                      "There should at least be 1 built-in function that gets statically loaded by default");
+    Assert.assertTrue("There should at least be 1 built-in function that gets statically loaded by default",
+                      rows.size() > 0);
     RelDataType rowType = routinesTable.getRowType(new JavaTypeFactoryImpl());
-    Assertions.assertEquals(6, rowType.getFieldCount());
+    Assert.assertEquals(6, rowType.getFieldCount());
 
     for (Object[] row : rows) {
-      Assertions.assertEquals(rowType.getFieldCount(), row.length);
-      Assertions.assertEquals("druid", row[0]);
-      Assertions.assertEquals("INFORMATION_SCHEMA", row[1]);
-      Assertions.assertNotNull(row[2]);
-      Assertions.assertNotNull(row[3]);
+      Assert.assertEquals(rowType.getFieldCount(), row.length);
+      Assert.assertEquals("druid", row[0]);
+      Assert.assertEquals("INFORMATION_SCHEMA", row[1]);
+      Assert.assertNotNull(row[2]);
+      Assert.assertNotNull(row[3]);
       String isAggregator = row[4].toString();
-      Assertions.assertTrue(isAggregator.contains("YES") || isAggregator.contains("NO"));
+      Assert.assertTrue(isAggregator.contains("YES") || isAggregator.contains("NO"));
       // nothing to validate for signatures as it may be not be present if operandTypeChecker is not defined.
     }
   }
@@ -135,13 +135,14 @@ public class InformationSchemaTest extends BaseCalciteQueryTest
 
     List<Object[]> rows = routinesTable.scan(dataContext).toList();
 
-    Assertions.assertNotNull(rows);
-    Assertions.assertEquals(2, rows.size(), "There should be exactly 2 rows; any non-function syntax operator should get filtered out");
+    Assert.assertNotNull(rows);
+    Assert.assertEquals("There should be exactly 2 rows; any non-function syntax operator should get filtered out",
+                        2, rows.size());
     Object[] expectedRow1 = {"druid", "INFORMATION_SCHEMA", "FOO", "FUNCTION", "NO", "'FOO([<ANY>])'"};
-    Assertions.assertTrue(rows.stream().anyMatch(row -> Arrays.equals(row, expectedRow1)));
+    Assert.assertTrue(rows.stream().anyMatch(row -> Arrays.equals(row, expectedRow1)));
 
     Object[] expectedRow2 = {"druid", "INFORMATION_SCHEMA", "BAR", "FUNCTION", "NO", "'BAR(<INTEGER>, <INTEGER>)'"};
-    Assertions.assertTrue(rows.stream().anyMatch(row -> Arrays.equals(row, expectedRow2)));
+    Assert.assertTrue(rows.stream().anyMatch(row -> Arrays.equals(row, expectedRow2)));
   }
 
   @Test
@@ -158,8 +159,8 @@ public class InformationSchemaTest extends BaseCalciteQueryTest
 
     List<Object[]> rows = routinesTable.scan(dataContext).toList();
 
-    Assertions.assertNotNull(rows);
-    Assertions.assertEquals(0, rows.size());
+    Assert.assertNotNull(rows);
+    Assert.assertEquals(0, rows.size());
   }
 
   private static Set<SqlOperatorConversion> customOperatorsToOperatorConversions()

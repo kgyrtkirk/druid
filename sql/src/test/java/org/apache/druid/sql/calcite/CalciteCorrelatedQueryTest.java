@@ -45,7 +45,7 @@ import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.join.JoinType;
 import org.apache.druid.segment.virtual.ExpressionVirtualColumn;
 import org.apache.druid.sql.calcite.util.CalciteTests;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.Arrays;
@@ -56,7 +56,6 @@ import java.util.Map;
 public class CalciteCorrelatedQueryTest extends BaseCalciteQueryTest
 {
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testCorrelatedSubquery(Map<String, Object> queryContext)
   {
@@ -174,7 +173,6 @@ public class CalciteCorrelatedQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testCorrelatedSubqueryWithLeftFilter(Map<String, Object> queryContext)
   {
@@ -264,7 +262,6 @@ public class CalciteCorrelatedQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testCorrelatedSubqueryWithLeftFilter_leftDirectAccessDisabled(Map<String, Object> queryContext)
   {
@@ -360,7 +357,6 @@ public class CalciteCorrelatedQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testCorrelatedSubqueryWithCorrelatedQueryFilter(Map<String, Object> queryContext)
   {
@@ -455,7 +451,6 @@ public class CalciteCorrelatedQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testCorrelatedSubqueryWithCorrelatedQueryFilter_Scan(Map<String, Object> queryContext)
   {

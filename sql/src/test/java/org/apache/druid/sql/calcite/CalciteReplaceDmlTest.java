@@ -45,8 +45,9 @@ import org.apache.druid.sql.calcite.parser.DruidSqlParserUtils;
 import org.apache.druid.sql.calcite.parser.DruidSqlReplace;
 import org.apache.druid.sql.calcite.planner.PlannerContext;
 import org.apache.druid.sql.calcite.util.CalciteTests;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.hamcrest.MatcherAssert;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -60,7 +61,6 @@ import static org.apache.druid.segment.column.ColumnType.FLOAT;
 import static org.apache.druid.segment.column.ColumnType.LONG;
 import static org.apache.druid.segment.column.ColumnType.STRING;
 import static org.apache.druid.segment.column.ColumnType.ofComplex;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 public class CalciteReplaceDmlTest extends CalciteIngestionDmlTest
 {
@@ -621,7 +621,7 @@ public class CalciteReplaceDmlTest extends CalciteIngestionDmlTest
       }
       catch (JsonProcessingException e) {
         // Won't reach here
-        Assertions.fail(e.getMessage());
+        Assert.fail(e.getMessage());
       }
 
       testIngestionQuery()
@@ -654,10 +654,10 @@ public class CalciteReplaceDmlTest extends CalciteIngestionDmlTest
           ImmutableList.of(),
           ImmutableList.of()
       );
-      Assertions.fail("Exception should be thrown");
+      Assert.fail("Exception should be thrown");
     }
     catch (DruidException e) {
-      assertThat(
+      MatcherAssert.assertThat(
           e,
           invalidSqlIs(
               "Invalid granularity['invalid_granularity'] specified after PARTITIONED BY clause."
@@ -975,7 +975,7 @@ public class CalciteReplaceDmlTest extends CalciteIngestionDmlTest
   public void testExplainReplaceFromExternalUnauthorized()
   {
     // Use testQuery for EXPLAIN (not testIngestionQuery).
-    Assertions.assertThrows(
+    Assert.assertThrows(
         ForbiddenException.class,
         () ->
             testQuery(

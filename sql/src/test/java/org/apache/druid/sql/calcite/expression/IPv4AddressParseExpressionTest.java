@@ -26,9 +26,9 @@ import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.sql.calcite.expression.builtin.IPv4AddressParseOperatorConversion;
 import org.apache.druid.sql.calcite.util.CalciteTestBase;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -48,7 +48,7 @@ public class IPv4AddressParseExpressionTest extends CalciteTestBase
   private IPv4AddressParseOperatorConversion target;
   private ExpressionTestHelper testHelper;
 
-  @BeforeEach
+  @Before
   public void setUp()
   {
     target = new IPv4AddressParseOperatorConversion();
@@ -58,7 +58,7 @@ public class IPv4AddressParseExpressionTest extends CalciteTestBase
   @Test
   public void testTooFewArgs()
   {
-    Throwable t = Assertions.assertThrows(
+    Throwable t = Assert.assertThrows(
         ExpressionValidationException.class,
         () -> testExpression(
             Collections.emptyList(),
@@ -66,13 +66,13 @@ public class IPv4AddressParseExpressionTest extends CalciteTestBase
             IGNORE_EXPECTED_RESULT
         )
     );
-    Assertions.assertEquals("Function[ipv4_parse] requires 1 argument", t.getMessage());
+    Assert.assertEquals("Function[ipv4_parse] requires 1 argument", t.getMessage());
   }
 
   @Test
   public void testTooManyArgs()
   {
-    Throwable t = Assertions.assertThrows(
+    Throwable t = Assert.assertThrows(
         ExpressionValidationException.class,
         () -> testExpression(
             Arrays.asList(
@@ -83,7 +83,7 @@ public class IPv4AddressParseExpressionTest extends CalciteTestBase
             IGNORE_EXPECTED_RESULT
         )
     );
-    Assertions.assertEquals("Function[ipv4_parse] requires 1 argument", t.getMessage());
+    Assert.assertEquals("Function[ipv4_parse] requires 1 argument", t.getMessage());
   }
 
   @Test

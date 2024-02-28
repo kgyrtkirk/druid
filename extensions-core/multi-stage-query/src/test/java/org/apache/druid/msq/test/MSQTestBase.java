@@ -192,11 +192,13 @@ import org.apache.druid.timeline.partition.ShardSpec;
 import org.apache.druid.timeline.partition.TombstoneShardSpec;
 import org.easymock.EasyMock;
 import org.hamcrest.Matcher;
+import org.hamcrest.MatcherAssert;
 import org.joda.time.Interval;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.io.TempDir;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.rules.TemporaryFolder;
 import org.mockito.Mockito;
 
 import javax.annotation.Nonnull;
@@ -224,7 +226,6 @@ import static org.apache.druid.sql.calcite.util.CalciteTests.DATASOURCE1;
 import static org.apache.druid.sql.calcite.util.CalciteTests.DATASOURCE2;
 import static org.apache.druid.sql.calcite.util.TestDataBuilder.ROWS1;
 import static org.apache.druid.sql.calcite.util.TestDataBuilder.ROWS2;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
@@ -320,8 +321,8 @@ public class MSQTestBase extends BaseCalciteQueryTest
 
   private MSQTestSegmentManager segmentManager;
   private SegmentCacheManager segmentCacheManager;
-  @TempDir
-  public File tmpFolder;
+  @Rule
+  public TemporaryFolder tmpFolder = new TemporaryFolder();
 
   private TestGroupByBuffers groupByBuffers;
   protected final WorkerMemoryParameters workerMemoryParameters = Mockito.spy(
@@ -367,7 +368,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
         });
   }
 
-  @AfterEach
+  @After
   public void tearDown2()
   {
     groupByBuffers.close();
@@ -390,7 +391,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
   // is created in the main injector, but it depends on the SegmentCacheManagerFactory
   // which depends on the object mapper that the injector will provide, once it
   // is built, but has not yet been build while we build the SQL engine.
-  @BeforeEach
+  @Before
   public void setUp2() throws Exception
   {
     groupByBuffers = TestGroupByBuffers.createDefault();
@@ -408,7 +409,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
     indexIO = new IndexIO(secondMapper, ColumnConfig.DEFAULT);
 
     try {
-      segmentCacheManager = new SegmentCacheManagerFactory(secondMapper).manufacturate(newFolder(tmpFolder, "test"));
+      segmentCacheManager = new SegmentCacheManagerFactory(secondMapper).manufacturate(tmpFolder.newFolder("test"));
     }
     catch (IOException exception) {
       throw new ISE(exception, "Unable to create segmentCacheManager");
@@ -451,7 +452,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
 
           LocalDataSegmentPusherConfig config = new LocalDataSegmentPusherConfig();
           try {
-            config.storageDirectory = newFolder(tmpFolder, "localsegments");
+            config.storageDirectory = tmpFolder.newFolder("localsegments");
           }
           catch (IOException e) {
             throw new ISE(e, "Unable to create folder");
@@ -473,7 +474,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
                 StorageConnectorProvider.class,
                 MultiStageQuery.class
             );
-            localFileStorageDir = newFolder(tmpFolder, "fault");
+            localFileStorageDir = tmpFolder.newFolder("fault");
             localFileStorageConnector = Mockito.spy(
                 new LocalFileStorageConnector(localFileStorageDir)
             );
@@ -623,8 +624,9 @@ public class MSQTestBase extends BaseCalciteQueryTest
   {
     if (segmentManager.getSegment(segmentId) == null) {
       final QueryableIndex index;
-      File temporaryFolder = new File();
+      TemporaryFolder temporaryFolder = new TemporaryFolder();
       try {
+        temporaryFolder.create();
       }
       catch (IOException e) {
         throw new ISE(e, "Unable to create temporary folder for tests");
@@ -643,7 +645,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
                 .build();
             index = IndexBuilder
                 .create()
-                .tmpDir(new File(newFolder(temporaryFolder, "junit"), "1"))
+                .tmpDir(new File(temporaryFolder.newFolder(), "1"))
                 .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
                 .schema(foo1Schema)
                 .rows(ROWS1)
@@ -670,7 +672,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
                 .build();
             index = IndexBuilder
                 .create()
-                .tmpDir(new File(newFolder(temporaryFolder, "junit"), "1"))
+                .tmpDir(new File(temporaryFolder.newFolder(), "1"))
                 .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
                 .schema(indexSchemaDifferentDim3M1Types)
                 .rows(ROWS2)
@@ -814,10 +816,10 @@ public class MSQTestBase extends BaseCalciteQueryTest
 
   private void assertMSQSpec(MSQSpec expectedMSQSpec, MSQSpec querySpecForTask)
   {
-    Assertions.assertEquals(expectedMSQSpec.getQuery(), querySpecForTask.getQuery());
-    Assertions.assertEquals(expectedMSQSpec.getAssignmentStrategy(), querySpecForTask.getAssignmentStrategy());
-    Assertions.assertEquals(expectedMSQSpec.getColumnMappings(), querySpecForTask.getColumnMappings());
-    Assertions.assertEquals(expectedMSQSpec.getDestination(), querySpecForTask.getDestination());
+    Assert.assertEquals(expectedMSQSpec.getQuery(), querySpecForTask.getQuery());
+    Assert.assertEquals(expectedMSQSpec.getAssignmentStrategy(), querySpecForTask.getAssignmentStrategy());
+    Assert.assertEquals(expectedMSQSpec.getColumnMappings(), querySpecForTask.getColumnMappings());
+    Assert.assertEquals(expectedMSQSpec.getDestination(), querySpecForTask.getDestination());
   }
 
   private void assertTuningConfig(
@@ -825,15 +827,15 @@ public class MSQTestBase extends BaseCalciteQueryTest
       MSQTuningConfig tuningConfig
   )
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         expectedTuningConfig.getMaxNumWorkers(),
         tuningConfig.getMaxRowsInMemory()
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         expectedTuningConfig.getMaxRowsInMemory(),
         tuningConfig.getMaxRowsInMemory()
     );
-    Assertions.assertEquals(
+    Assert.assertEquals(
         expectedTuningConfig.getRowsPerSegment(),
         tuningConfig.getRowsPerSegment()
     );
@@ -1008,36 +1010,36 @@ public class MSQTestBase extends BaseCalciteQueryTest
       Preconditions.checkArgument(sql != null, "Sql cannot be null");
       readyToRun();
 
-      final Throwable e = Assertions.assertThrows(
+      final Throwable e = Assert.assertThrows(
           Throwable.class,
           () -> runMultiStageQuery(sql, queryContext)
       );
 
-      assertThat(e, expectedValidationErrorMatcher);
+      MatcherAssert.assertThat(e, expectedValidationErrorMatcher);
     }
 
     protected void verifyWorkerCount(CounterSnapshotsTree counterSnapshotsTree)
     {
       Map<Integer, Map<Integer, CounterSnapshots>> counterMap = counterSnapshotsTree.copyMap();
       for (Map.Entry<Integer, Integer> stageWorkerCount : expectedStageVsWorkerCount.entrySet()) {
-        Assertions.assertEquals(stageWorkerCount.getValue().intValue(), counterMap.get(stageWorkerCount.getKey()).size());
+        Assert.assertEquals(stageWorkerCount.getValue().intValue(), counterMap.get(stageWorkerCount.getKey()).size());
       }
     }
 
     protected void verifyCounters(CounterSnapshotsTree counterSnapshotsTree)
     {
-      Assertions.assertNotNull(counterSnapshotsTree);
+      Assert.assertNotNull(counterSnapshotsTree);
 
       final Map<Integer, Map<Integer, CounterSnapshots>> stageWorkerToSnapshots = counterSnapshotsTree.copyMap();
       expectedStageWorkerChannelToCounters.forEach((stage, expectedWorkerChannelToCounters) -> {
         final Map<Integer, CounterSnapshots> workerToCounters = stageWorkerToSnapshots.get(stage);
-        Assertions.assertNotNull(workerToCounters, "No counters for stage " + stage);
+        Assert.assertNotNull("No counters for stage " + stage, workerToCounters);
 
         expectedWorkerChannelToCounters.forEach((worker, expectedChannelToCounters) -> {
           CounterSnapshots counters = workerToCounters.get(worker);
-          Assertions.assertNotNull(
-              counters,
-              StringUtils.format("No counters for stage [%d], worker [%d]", stage, worker)
+          Assert.assertNotNull(
+              StringUtils.format("No counters for stage [%d], worker [%d]", stage, worker),
+              counters
           );
 
           final Map<String, QueryCounterSnapshot> channelToCounters = counters.getMap();
@@ -1049,12 +1051,12 @@ public class MSQTestBase extends BaseCalciteQueryTest
                     worker,
                     channel
                 );
-                Assertions.assertTrue(channelToCounters.containsKey(channel), StringUtils.format(
+                Assert.assertTrue(StringUtils.format(
                     "Counters not found for stage [%d], worker [%d], channel [%s]",
                     stage,
                     worker,
                     channel
-                ));
+                ), channelToCounters.containsKey(channel));
                 counter.matchQuerySnapshot(errorMessageFormat, channelToCounters.get(channel));
               }
           );
@@ -1069,15 +1071,6 @@ public class MSQTestBase extends BaseCalciteQueryTest
       } else {
         throw new ISE("Use one @Test method per tester");
       }
-    }
-
-    private static File newFolder(File root, String... subDirs) throws IOException {
-      String subFolder = String.join("/", subDirs);
-      File result = new File(root, subFolder);
-      if (!result.mkdirs()) {
-        throw new IOException("Couldn't create folders " + root);
-      }
-      return result;
     }
   }
 
@@ -1162,13 +1155,13 @@ public class MSQTestBase extends BaseCalciteQueryTest
             String errorMessage = msqErrorReport.getFault() instanceof TooManyAttemptsForWorker
                                   ? ((TooManyAttemptsForWorker) msqErrorReport.getFault()).getRootErrorMessage()
                                   : MSQFaultUtils.generateMessageWithErrorCode(msqErrorReport.getFault());
-            Assertions.assertEquals(
+            Assert.assertEquals(
                 MSQFaultUtils.generateMessageWithErrorCode(expectedMSQFault),
                 errorMessage
             );
           }
           if (expectedMSQFaultClass != null) {
-            Assertions.assertEquals(
+            Assert.assertEquals(
                 expectedMSQFaultClass,
                 msqErrorReport.getFault().getClass()
             );
@@ -1188,7 +1181,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
         );
         // check if segments are created
         if (!expectedResultRows.isEmpty()) {
-          Assertions.assertNotEquals(0, segmentManager.getAllDataSegments().size());
+          Assert.assertNotEquals(0, segmentManager.getAllDataSegments().size());
         }
 
         String foundDataSource = null;
@@ -1196,7 +1189,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
         for (DataSegment dataSegment : segmentManager.getAllDataSegments()) {
 
           //Assert shard spec class
-          Assertions.assertEquals(expectedShardSpec, dataSegment.getShardSpec().getClass());
+          Assert.assertEquals(expectedShardSpec, dataSegment.getShardSpec().getClass());
           if (foundDataSource == null) {
             foundDataSource = dataSegment.getDataSource();
 
@@ -1212,16 +1205,16 @@ public class MSQTestBase extends BaseCalciteQueryTest
           final StorageAdapter storageAdapter = new QueryableIndexStorageAdapter(queryableIndex);
 
           // assert rowSignature
-          Assertions.assertEquals(expectedRowSignature, resultSignatureFromRowSignature(storageAdapter.getRowSignature()));
+          Assert.assertEquals(expectedRowSignature, resultSignatureFromRowSignature(storageAdapter.getRowSignature()));
 
           // assert rollup
-          Assertions.assertEquals(expectedRollUp, queryableIndex.getMetadata().isRollup());
+          Assert.assertEquals(expectedRollUp, queryableIndex.getMetadata().isRollup());
 
           // asset query granularity
-          Assertions.assertEquals(expectedQueryGranularity, queryableIndex.getMetadata().getQueryGranularity());
+          Assert.assertEquals(expectedQueryGranularity, queryableIndex.getMetadata().getQueryGranularity());
 
           // assert aggregator factories
-          Assertions.assertArrayEquals(
+          Assert.assertArrayEquals(
               expectedAggregatorFactories.toArray(new AggregatorFactory[0]),
               queryableIndex.getMetadata().getAggregators()
           );
@@ -1256,7 +1249,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
 
         // assert data source name when result rows is non-empty
         if (!expectedResultRows.isEmpty()) {
-          Assertions.assertEquals(expectedDataSource, foundDataSource);
+          Assert.assertEquals(expectedDataSource, foundDataSource);
         }
         // assert spec
         if (expectedMSQSpec != null) {
@@ -1266,12 +1259,12 @@ public class MSQTestBase extends BaseCalciteQueryTest
           assertTuningConfig(expectedTuningConfig, foundSpec.getTuningConfig());
         }
         if (expectedDestinationIntervals != null) {
-          Assertions.assertNotNull(foundSpec);
+          Assert.assertNotNull(foundSpec);
           DataSourceMSQDestination destination = (DataSourceMSQDestination) foundSpec.getDestination();
-          Assertions.assertEquals(expectedDestinationIntervals, destination.getReplaceTimeChunks());
+          Assert.assertEquals(expectedDestinationIntervals, destination.getReplaceTimeChunks());
         }
         if (expectedSegments != null) {
-          Assertions.assertEquals(expectedSegments, segmentIdVsOutputRowsMap.keySet());
+          Assert.assertEquals(expectedSegments, segmentIdVsOutputRowsMap.keySet());
           for (Object[] row : transformedOutputRows) {
             List<SegmentId> diskSegmentList = segmentIdVsOutputRowsMap.keySet()
                                                                       .stream()
@@ -1283,7 +1276,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
             }
             SegmentId diskSegment = diskSegmentList.get(0);
             // Checking if the row belongs to the correct segment interval
-            Assertions.assertTrue(segmentIdVsOutputRowsMap.get(diskSegment).contains(Arrays.asList(row)));
+            Assert.assertTrue(segmentIdVsOutputRowsMap.get(diskSegment).contains(Arrays.asList(row)));
           }
         }
 
@@ -1319,11 +1312,11 @@ public class MSQTestBase extends BaseCalciteQueryTest
                                           .collect(Collectors.toSet())
             );
           }
-          Assertions.assertEquals(expectedTombstoneSegmentIds, tombstoneSegmentIds);
+          Assert.assertEquals(expectedTombstoneSegmentIds, tombstoneSegmentIds);
         }
 
         for (Pair<Predicate<MSQTaskReportPayload>, String> adhocReportAssertionAndReason : adhocReportAssertionAndReasons) {
-          Assertions.assertTrue(adhocReportAssertionAndReason.lhs.test(reportPayload), adhocReportAssertionAndReason.rhs);
+          Assert.assertTrue(adhocReportAssertionAndReason.rhs, adhocReportAssertionAndReason.lhs.test(reportPayload));
         }
 
         // assert results
@@ -1343,24 +1336,15 @@ public class MSQTestBase extends BaseCalciteQueryTest
       try {
         String controllerId = runMultiStageQuery(sql, queryContext);
         getPayloadOrThrow(controllerId);
-        Assertions.fail(StringUtils.format("Query did not throw an exception (sql = [%s])", sql));
+        Assert.fail(StringUtils.format("Query did not throw an exception (sql = [%s])", sql));
       }
       catch (Exception e) {
-        assertThat(
+        MatcherAssert.assertThat(
             StringUtils.format("Query error did not match expectations (sql = [%s])", sql),
             e,
             expectedExecutionErrorMatcher
         );
       }
-    }
-
-    private static File newFolder(File root, String... subDirs) throws IOException {
-      String subFolder = String.join("/", subDirs);
-      File result = new File(root, subFolder);
-      if (!result.mkdirs()) {
-        throw new IOException("Couldn't create folders " + root);
-      }
-      return result;
     }
   }
 
@@ -1388,13 +1372,13 @@ public class MSQTestBase extends BaseCalciteQueryTest
             String errorMessage = msqErrorReport.getFault() instanceof TooManyAttemptsForWorker
                                   ? ((TooManyAttemptsForWorker) msqErrorReport.getFault()).getRootErrorMessage()
                                   : MSQFaultUtils.generateMessageWithErrorCode(msqErrorReport.getFault());
-            Assertions.assertEquals(
+            Assert.assertEquals(
                 MSQFaultUtils.generateMessageWithErrorCode(expectedMSQFault),
                 errorMessage
             );
           }
           if (expectedMSQFaultClass != null) {
-            Assertions.assertEquals(
+            Assert.assertEquals(
                 expectedMSQFaultClass,
                 msqErrorReport.getFault().getClass()
             );
@@ -1455,7 +1439,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
           log.info(rows.stream().map(Arrays::toString).collect(Collectors.joining("\n")));
 
           for (Pair<Predicate<MSQTaskReportPayload>, String> adhocReportAssertionAndReason : adhocReportAssertionAndReasons) {
-            Assertions.assertTrue(adhocReportAssertionAndReason.lhs.test(payload), adhocReportAssertionAndReason.rhs);
+            Assert.assertTrue(adhocReportAssertionAndReason.rhs, adhocReportAssertionAndReason.lhs.test(payload));
           }
 
           log.info("Found spec: %s", objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(spec));
@@ -1473,7 +1457,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
         if (expectedExecutionErrorMatcher == null) {
           throw new ISE(e, "Query %s failed", sql);
         }
-        assertThat(e, expectedExecutionErrorMatcher);
+        MatcherAssert.assertThat(e, expectedExecutionErrorMatcher);
         return null;
       }
     }
@@ -1491,7 +1475,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
         return;
       }
 
-      Assertions.assertEquals(expectedRowSignature, specAndResults.rhs.lhs);
+      Assert.assertEquals(expectedRowSignature, specAndResults.rhs.lhs);
       assertResultsEquals(sql, expectedResultRows, specAndResults.rhs.rhs);
       assertMSQSpec(expectedMSQSpec, specAndResults.lhs);
     }
@@ -1502,15 +1486,6 @@ public class MSQTestBase extends BaseCalciteQueryTest
       if (runQueryWithResult() != null) {
         throw new ISE("Query %s did not throw an exception", sql);
       }
-    }
-
-    private static File newFolder(File root, String... subDirs) throws IOException {
-      String subFolder = String.join("/", subDirs);
-      File result = new File(root, subFolder);
-      if (!result.mkdirs()) {
-        throw new IOException("Couldn't create folders " + root);
-      }
-      return result;
     }
   }
 
@@ -1526,14 +1501,5 @@ public class MSQTestBase extends BaseCalciteQueryTest
       );
     }
     return retVal;
-  }
-
-  private static File newFolder(File root, String... subDirs) throws IOException {
-    String subFolder = String.join("/", subDirs);
-    File result = new File(root, subFolder);
-    if (!result.mkdirs()) {
-      throw new IOException("Couldn't create folders " + root);
-    }
-    return result;
   }
 }

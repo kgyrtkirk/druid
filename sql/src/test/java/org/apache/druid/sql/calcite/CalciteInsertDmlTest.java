@@ -52,9 +52,10 @@ import org.apache.druid.sql.calcite.planner.Calcites;
 import org.apache.druid.sql.calcite.planner.PlannerContext;
 import org.apache.druid.sql.calcite.util.CalciteTests;
 import org.hamcrest.CoreMatchers;
+import org.hamcrest.MatcherAssert;
+import org.junit.Assert;
+import org.junit.Test;
 import org.junit.internal.matchers.ThrowableMessageMatcher;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -68,7 +69,6 @@ import static org.apache.druid.segment.column.ColumnType.DOUBLE;
 import static org.apache.druid.segment.column.ColumnType.FLOAT;
 import static org.apache.druid.segment.column.ColumnType.LONG;
 import static org.apache.druid.segment.column.ColumnType.STRING;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 public class CalciteInsertDmlTest extends CalciteIngestionDmlTest
 {
@@ -635,7 +635,7 @@ public class CalciteInsertDmlTest extends CalciteIngestionDmlTest
       }
       catch (JsonProcessingException e) {
         // Won't reach here
-        Assertions.fail(e.getMessage());
+        Assert.fail(e.getMessage());
       }
 
       testIngestionQuery()
@@ -681,7 +681,7 @@ public class CalciteInsertDmlTest extends CalciteIngestionDmlTest
       }
       catch (JsonProcessingException e) {
         // Won't reach here
-        Assertions.fail(e.getMessage());
+        Assert.fail(e.getMessage());
       }
 
       testIngestionQuery()
@@ -1200,10 +1200,10 @@ public class CalciteInsertDmlTest extends CalciteIngestionDmlTest
           ImmutableList.of(),
           ImmutableList.of()
       );
-      Assertions.fail("Exception should be thrown");
+      Assert.fail("Exception should be thrown");
     }
     catch (DruidException e) {
-      assertThat(e, invalidSqlIs(
+      MatcherAssert.assertThat(e, invalidSqlIs(
           "Cannot use an ORDER BY clause on a Query of type [INSERT], use CLUSTERED BY instead"
       ));
     }
@@ -1219,10 +1219,10 @@ public class CalciteInsertDmlTest extends CalciteIngestionDmlTest
           ImmutableList.of(),
           ImmutableList.of()
       );
-      Assertions.fail("Exception should be thrown");
+      Assert.fail("Exception should be thrown");
     }
     catch (DruidException e) {
-      assertThat(
+      MatcherAssert.assertThat(
           e,
           invalidSqlIs(
               "Invalid granularity['invalid_granularity'] specified after PARTITIONED BY clause."
@@ -1246,10 +1246,10 @@ public class CalciteInsertDmlTest extends CalciteIngestionDmlTest
           ImmutableList.of(),
           ImmutableList.of()
       );
-      Assertions.fail("Exception should be thrown");
+      Assert.fail("Exception should be thrown");
     }
     catch (DruidException e) {
-      assertThat(
+      MatcherAssert.assertThat(
           e,
           invalidSqlIs("Cannot use an ORDER BY clause on a Query of type [INSERT], use CLUSTERED BY instead")
       );
@@ -1262,7 +1262,7 @@ public class CalciteInsertDmlTest extends CalciteIngestionDmlTest
   @Test
   public void testInsertWithoutPartitionedBy()
   {
-    DruidException e = Assertions.assertThrows(
+    DruidException e = Assert.assertThrows(
         DruidException.class,
         () ->
             testQuery(
@@ -1272,7 +1272,7 @@ public class CalciteInsertDmlTest extends CalciteIngestionDmlTest
             )
     );
 
-    assertThat(
+    MatcherAssert.assertThat(
         e,
         invalidSqlIs("Operation [INSERT] requires a PARTITIONED BY to be explicitly defined, but none was found.")
     );
@@ -1479,7 +1479,7 @@ public class CalciteInsertDmlTest extends CalciteIngestionDmlTest
   public void testExplainInsertFromExternalUnauthorized()
   {
     // Use testQuery for EXPLAIN (not testIngestionQuery).
-    Assertions.assertThrows(
+    Assert.assertThrows(
         ForbiddenException.class,
         () ->
             testQuery(

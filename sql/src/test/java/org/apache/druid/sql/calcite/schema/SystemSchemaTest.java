@@ -110,12 +110,13 @@ import org.apache.druid.timeline.partition.NumberedShardSpec;
 import org.easymock.EasyMock;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.joda.time.DateTime;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.io.IOException;
@@ -169,23 +170,23 @@ public class SystemSchemaTest extends CalciteTestBase
   private DruidNodeDiscoveryProvider druidNodeDiscoveryProvider;
   private FilteredServerInventoryView serverInventoryView;
 
-  @TempDir
-  public File temporaryFolder;
+  @Rule
+  public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-  @BeforeAll
+  @BeforeClass
   public static void setUpClass()
   {
     resourceCloser = Closer.create();
     conglomerate = QueryStackTests.createQueryRunnerFactoryConglomerate(resourceCloser);
   }
 
-  @AfterAll
+  @AfterClass
   public static void tearDownClass() throws IOException
   {
     resourceCloser.close();
   }
 
-  @BeforeEach
+  @Before
   public void setUp() throws Exception
   {
     serverView = EasyMock.createNiceMock(TimelineServerView.class);
@@ -206,7 +207,7 @@ public class SystemSchemaTest extends CalciteTestBase
     request = EasyMock.createMock(Request.class);
     authMapper = createAuthMapper();
 
-    final File tmpDir = newFolder(temporaryFolder, "junit");
+    final File tmpDir = temporaryFolder.newFolder();
     final QueryableIndex index1 = IndexBuilder.create()
                                               .tmpDir(new File(tmpDir, "1"))
                                               .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
@@ -533,13 +534,13 @@ public class SystemSchemaTest extends CalciteTestBase
   @Test
   public void testGetTableMap()
   {
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableSet.of("segments", "servers", "server_segments", "tasks", "supervisors"),
         schema.getTableNames()
     );
 
     final Map<String, Table> tableMap = schema.getTableMap();
-    Assertions.assertEquals(
+    Assert.assertEquals(
         ImmutableSet.of("segments", "servers", "server_segments", "tasks", "supervisors"),
         tableMap.keySet()
     );
@@ -547,22 +548,22 @@ public class SystemSchemaTest extends CalciteTestBase
     final RelDataType rowType = segmentsTable.getRowType(new JavaTypeFactoryImpl());
     final List<RelDataTypeField> fields = rowType.getFieldList();
 
-    Assertions.assertEquals(19, fields.size());
+    Assert.assertEquals(19, fields.size());
 
     final SystemSchema.TasksTable tasksTable = (SystemSchema.TasksTable) schema.getTableMap().get("tasks");
     final RelDataType sysRowType = tasksTable.getRowType(new JavaTypeFactoryImpl());
     final List<RelDataTypeField> sysFields = sysRowType.getFieldList();
-    Assertions.assertEquals(14, sysFields.size());
+    Assert.assertEquals(14, sysFields.size());
 
-    Assertions.assertEquals("task_id", sysFields.get(0).getName());
-    Assertions.assertEquals(SqlTypeName.VARCHAR, sysFields.get(0).getType().getSqlTypeName());
+    Assert.assertEquals("task_id", sysFields.get(0).getName());
+    Assert.assertEquals(SqlTypeName.VARCHAR, sysFields.get(0).getType().getSqlTypeName());
 
     final SystemSchema.ServersTable serversTable = (SystemSchema.ServersTable) schema.getTableMap().get("servers");
     final RelDataType serverRowType = serversTable.getRowType(new JavaTypeFactoryImpl());
     final List<RelDataTypeField> serverFields = serverRowType.getFieldList();
-    Assertions.assertEquals(10, serverFields.size());
-    Assertions.assertEquals("server", serverFields.get(0).getName());
-    Assertions.assertEquals(SqlTypeName.VARCHAR, serverFields.get(0).getType().getSqlTypeName());
+    Assert.assertEquals(10, serverFields.size());
+    Assert.assertEquals("server", serverFields.get(0).getName());
+    Assert.assertEquals(SqlTypeName.VARCHAR, serverFields.get(0).getType().getSqlTypeName());
   }
 
   @Test
@@ -590,7 +591,7 @@ public class SystemSchemaTest extends CalciteTestBase
     // segments test4, test5 are not published but available (realtime segments)
     // segment test2 is both published and served by a realtime server.
 
-    Assertions.assertEquals(8, rows.size());
+    Assert.assertEquals(8, rows.size());
 
     verifyRow(
         rows.get(0),
@@ -734,27 +735,27 @@ public class SystemSchemaTest extends CalciteTestBase
       long replicationFactor
   ) throws Exception
   {
-    Assertions.assertEquals(segmentId, row[0].toString());
+    Assert.assertEquals(segmentId, row[0].toString());
     SegmentId id = Iterables.get(SegmentId.iterateAllPossibleParsings(segmentId), 0);
-    Assertions.assertEquals(id.getDataSource(), row[1]);
-    Assertions.assertEquals(id.getIntervalStart().toString(), row[2]);
-    Assertions.assertEquals(id.getIntervalEnd().toString(), row[3]);
-    Assertions.assertEquals(size, row[4]);
-    Assertions.assertEquals(id.getVersion(), row[5]);
-    Assertions.assertEquals(partitionNum, row[6]);
-    Assertions.assertEquals(numReplicas, row[7]);
-    Assertions.assertEquals(numRows, row[8]);
-    Assertions.assertEquals((((isPublished == 1) && (isOvershadowed == 0)) || (isRealtime == 1)) ? 1L : 0L, row[9]);
-    Assertions.assertEquals(isPublished, row[10]);
-    Assertions.assertEquals(isAvailable, row[11]);
-    Assertions.assertEquals(isRealtime, row[12]);
-    Assertions.assertEquals(isOvershadowed, row[13]);
+    Assert.assertEquals(id.getDataSource(), row[1]);
+    Assert.assertEquals(id.getIntervalStart().toString(), row[2]);
+    Assert.assertEquals(id.getIntervalEnd().toString(), row[3]);
+    Assert.assertEquals(size, row[4]);
+    Assert.assertEquals(id.getVersion(), row[5]);
+    Assert.assertEquals(partitionNum, row[6]);
+    Assert.assertEquals(numReplicas, row[7]);
+    Assert.assertEquals(numRows, row[8]);
+    Assert.assertEquals((((isPublished == 1) && (isOvershadowed == 0)) || (isRealtime == 1)) ? 1L : 0L, row[9]);
+    Assert.assertEquals(isPublished, row[10]);
+    Assert.assertEquals(isAvailable, row[11]);
+    Assert.assertEquals(isRealtime, row[12]);
+    Assert.assertEquals(isOvershadowed, row[13]);
     if (compactionState == null) {
-      Assertions.assertNull(row[17]);
+      Assert.assertNull(row[17]);
     } else {
-      Assertions.assertEquals(mapper.writeValueAsString(compactionState), row[17]);
+      Assert.assertEquals(mapper.writeValueAsString(compactionState), row[17]);
     }
-    Assertions.assertEquals(replicationFactor, row[18]);
+    Assert.assertEquals(replicationFactor, row[18]);
   }
 
   @Test
@@ -1056,9 +1057,9 @@ public class SystemSchemaTest extends CalciteTestBase
         nonLeader,
         startTimeStr
     ));
-    Assertions.assertEquals(expectedRows.size(), rows.size());
+    Assert.assertEquals(expectedRows.size(), rows.size());
     for (int i = 0; i < rows.size(); i++) {
-      Assertions.assertArrayEquals(expectedRows.get(i), rows.get(i));
+      Assert.assertArrayEquals(expectedRows.get(i), rows.get(i));
     }
 
     // Verify value types.
@@ -1127,27 +1128,27 @@ public class SystemSchemaTest extends CalciteTestBase
     // server2:1234   |  test5_2017-01-01T00:00:00.000Z_2018-01-01T00:00:00.000Z_version5(segment5)
 
     final List<Object[]> rows = serverSegmentsTable.scan(dataContext).toList();
-    Assertions.assertEquals(5, rows.size());
+    Assert.assertEquals(5, rows.size());
 
     Object[] row0 = rows.get(0);
-    Assertions.assertEquals("localhost:0000", row0[0]);
-    Assertions.assertEquals("test1_2010-01-01T00:00:00.000Z_2011-01-01T00:00:00.000Z_version1", row0[1].toString());
+    Assert.assertEquals("localhost:0000", row0[0]);
+    Assert.assertEquals("test1_2010-01-01T00:00:00.000Z_2011-01-01T00:00:00.000Z_version1", row0[1].toString());
 
     Object[] row1 = rows.get(1);
-    Assertions.assertEquals("localhost:0000", row1[0]);
-    Assertions.assertEquals("test2_2011-01-01T00:00:00.000Z_2012-01-01T00:00:00.000Z_version2", row1[1].toString());
+    Assert.assertEquals("localhost:0000", row1[0]);
+    Assert.assertEquals("test2_2011-01-01T00:00:00.000Z_2012-01-01T00:00:00.000Z_version2", row1[1].toString());
 
     Object[] row2 = rows.get(2);
-    Assertions.assertEquals("server2:1234", row2[0]);
-    Assertions.assertEquals("test3_2012-01-01T00:00:00.000Z_2013-01-01T00:00:00.000Z_version3_2", row2[1].toString());
+    Assert.assertEquals("server2:1234", row2[0]);
+    Assert.assertEquals("test3_2012-01-01T00:00:00.000Z_2013-01-01T00:00:00.000Z_version3_2", row2[1].toString());
 
     Object[] row3 = rows.get(3);
-    Assertions.assertEquals("server2:1234", row3[0]);
-    Assertions.assertEquals("test4_2014-01-01T00:00:00.000Z_2015-01-01T00:00:00.000Z_version4", row3[1].toString());
+    Assert.assertEquals("server2:1234", row3[0]);
+    Assert.assertEquals("test4_2014-01-01T00:00:00.000Z_2015-01-01T00:00:00.000Z_version4", row3[1].toString());
 
     Object[] row4 = rows.get(4);
-    Assertions.assertEquals("server2:1234", row4[0]);
-    Assertions.assertEquals("test5_2015-01-01T00:00:00.000Z_2016-01-01T00:00:00.000Z_version5", row4[1].toString());
+    Assert.assertEquals("server2:1234", row4[0]);
+    Assert.assertEquals("test5_2015-01-01T00:00:00.000Z_2016-01-01T00:00:00.000Z_version5", row4[1].toString());
 
     // Verify value types.
     verifyTypes(rows, SystemSchema.SERVER_SEGMENTS_SIGNATURE);
@@ -1210,36 +1211,36 @@ public class SystemSchemaTest extends CalciteTestBase
     final List<Object[]> rows = tasksTable.scan(dataContext).toList();
 
     Object[] row0 = rows.get(0);
-    Assertions.assertEquals("index_wikipedia_2018-09-20T22:33:44.911Z", row0[0].toString());
-    Assertions.assertEquals("group_index_wikipedia_2018-09-20T22:33:44.911Z", row0[1].toString());
-    Assertions.assertEquals("index", row0[2].toString());
-    Assertions.assertEquals("wikipedia", row0[3].toString());
-    Assertions.assertEquals("2018-09-20T22:33:44.922Z", row0[4].toString());
-    Assertions.assertEquals("1970-01-01T00:00:00.000Z", row0[5].toString());
-    Assertions.assertEquals("FAILED", row0[6].toString());
-    Assertions.assertEquals("NONE", row0[7].toString());
-    Assertions.assertEquals(-1L, row0[8]);
-    Assertions.assertEquals("testHost:1234", row0[9]);
-    Assertions.assertEquals("testHost", row0[10]);
-    Assertions.assertEquals(1234L, row0[11]);
-    Assertions.assertEquals(-1L, row0[12]);
-    Assertions.assertEquals(null, row0[13]);
+    Assert.assertEquals("index_wikipedia_2018-09-20T22:33:44.911Z", row0[0].toString());
+    Assert.assertEquals("group_index_wikipedia_2018-09-20T22:33:44.911Z", row0[1].toString());
+    Assert.assertEquals("index", row0[2].toString());
+    Assert.assertEquals("wikipedia", row0[3].toString());
+    Assert.assertEquals("2018-09-20T22:33:44.922Z", row0[4].toString());
+    Assert.assertEquals("1970-01-01T00:00:00.000Z", row0[5].toString());
+    Assert.assertEquals("FAILED", row0[6].toString());
+    Assert.assertEquals("NONE", row0[7].toString());
+    Assert.assertEquals(-1L, row0[8]);
+    Assert.assertEquals("testHost:1234", row0[9]);
+    Assert.assertEquals("testHost", row0[10]);
+    Assert.assertEquals(1234L, row0[11]);
+    Assert.assertEquals(-1L, row0[12]);
+    Assert.assertEquals(null, row0[13]);
 
     Object[] row1 = rows.get(1);
-    Assertions.assertEquals("index_wikipedia_2018-09-21T18:38:47.773Z", row1[0].toString());
-    Assertions.assertEquals("group_index_wikipedia_2018-09-21T18:38:47.773Z", row1[1].toString());
-    Assertions.assertEquals("index", row1[2].toString());
-    Assertions.assertEquals("wikipedia", row1[3].toString());
-    Assertions.assertEquals("2018-09-21T18:38:47.873Z", row1[4].toString());
-    Assertions.assertEquals("2018-09-21T18:38:47.910Z", row1[5].toString());
-    Assertions.assertEquals("RUNNING", row1[6].toString());
-    Assertions.assertEquals("RUNNING", row1[7].toString());
-    Assertions.assertEquals(0L, row1[8]);
-    Assertions.assertEquals("192.168.1.6:8100", row1[9]);
-    Assertions.assertEquals("192.168.1.6", row1[10]);
-    Assertions.assertEquals(8100L, row1[11]);
-    Assertions.assertEquals(-1L, row1[12]);
-    Assertions.assertEquals(null, row1[13]);
+    Assert.assertEquals("index_wikipedia_2018-09-21T18:38:47.773Z", row1[0].toString());
+    Assert.assertEquals("group_index_wikipedia_2018-09-21T18:38:47.773Z", row1[1].toString());
+    Assert.assertEquals("index", row1[2].toString());
+    Assert.assertEquals("wikipedia", row1[3].toString());
+    Assert.assertEquals("2018-09-21T18:38:47.873Z", row1[4].toString());
+    Assert.assertEquals("2018-09-21T18:38:47.910Z", row1[5].toString());
+    Assert.assertEquals("RUNNING", row1[6].toString());
+    Assert.assertEquals("RUNNING", row1[7].toString());
+    Assert.assertEquals(0L, row1[8]);
+    Assert.assertEquals("192.168.1.6:8100", row1[9]);
+    Assert.assertEquals("192.168.1.6", row1[10]);
+    Assert.assertEquals(8100L, row1[11]);
+    Assert.assertEquals(-1L, row1[12]);
+    Assert.assertEquals(null, row1[13]);
 
     // Verify value types.
     verifyTypes(rows, SystemSchema.TASKS_SIGNATURE);
@@ -1298,19 +1299,19 @@ public class SystemSchemaTest extends CalciteTestBase
     List<Object[]> rows = tasksTable
         .scan(createDataContext(Users.DATASOURCE_WRITE))
         .toList();
-    Assertions.assertTrue(rows.isEmpty());
+    Assert.assertTrue(rows.isEmpty());
 
     // Verify that 2 rows are returned for Datasource Read user
     rows = tasksTable
         .scan(createDataContext(Users.DATASOURCE_READ))
         .toList();
-    Assertions.assertEquals(2, rows.size());
+    Assert.assertEquals(2, rows.size());
 
     // Verify that 2 rows are returned for Super user
     rows = tasksTable
         .scan(createDataContext(Users.SUPER))
         .toList();
-    Assertions.assertEquals(2, rows.size());
+    Assert.assertEquals(2, rows.size());
   }
 
   @Test
@@ -1347,14 +1348,14 @@ public class SystemSchemaTest extends CalciteTestBase
     final List<Object[]> rows = supervisorTable.scan(dataContext).toList();
 
     Object[] row0 = rows.get(0);
-    Assertions.assertEquals("wikipedia", row0[0].toString());
-    Assertions.assertEquals("UNHEALTHY_SUPERVISOR", row0[1].toString());
-    Assertions.assertEquals("UNABLE_TO_CONNECT_TO_STREAM", row0[2].toString());
-    Assertions.assertEquals(0L, row0[3]);
-    Assertions.assertEquals("kafka", row0[4].toString());
-    Assertions.assertEquals("wikipedia", row0[5].toString());
-    Assertions.assertEquals(0L, row0[6]);
-    Assertions.assertEquals(
+    Assert.assertEquals("wikipedia", row0[0].toString());
+    Assert.assertEquals("UNHEALTHY_SUPERVISOR", row0[1].toString());
+    Assert.assertEquals("UNABLE_TO_CONNECT_TO_STREAM", row0[2].toString());
+    Assert.assertEquals(0L, row0[3]);
+    Assert.assertEquals("kafka", row0[4].toString());
+    Assert.assertEquals("wikipedia", row0[5].toString());
+    Assert.assertEquals(0L, row0[6]);
+    Assert.assertEquals(
         "{\"type\":\"kafka\",\"dataSchema\":{\"dataSource\":\"wikipedia\"},\"context\":null,\"suspended\":false}",
         row0[7].toString()
     );
@@ -1395,19 +1396,19 @@ public class SystemSchemaTest extends CalciteTestBase
     List<Object[]> rows = supervisorTable
         .scan(createDataContext(Users.DATASOURCE_WRITE))
         .toList();
-    Assertions.assertTrue(rows.isEmpty());
+    Assert.assertTrue(rows.isEmpty());
 
     // Verify that 1 row is returned for Datasource Write user
     rows = supervisorTable
         .scan(createDataContext(Users.DATASOURCE_READ))
         .toList();
-    Assertions.assertEquals(1, rows.size());
+    Assert.assertEquals(1, rows.size());
 
     // Verify that 1 row is returned for Super user
     rows = supervisorTable
         .scan(createDataContext(Users.SUPER))
         .toList();
-    Assertions.assertEquals(1, rows.size());
+    Assert.assertEquals(1, rows.size());
 
     // TODO: If needed, verify the first row here
 
@@ -1499,7 +1500,7 @@ public class SystemSchemaTest extends CalciteTestBase
     final RelDataType rowType = RowSignatures.toRelDataType(signature, new JavaTypeFactoryImpl());
 
     for (Object[] row : rows) {
-      Assertions.assertEquals(row.length, signature.size());
+      Assert.assertEquals(row.length, signature.size());
 
       for (int i = 0; i < row.length; i++) {
         final Class<?> expectedClass;
@@ -1532,24 +1533,24 @@ public class SystemSchemaTest extends CalciteTestBase
         }
 
         if (nullable) {
-          Assertions.assertTrue(
-              row[i] == null || expectedClass.isAssignableFrom(row[i].getClass()),
+          Assert.assertTrue(
               StringUtils.format(
                   "Column[%s] is a [%s] or null (was %s)",
                   signature.getColumnName(i),
                   expectedClass.getName(),
                   row[i] == null ? null : row[i].getClass().getName()
-              )
+              ),
+              row[i] == null || expectedClass.isAssignableFrom(row[i].getClass())
           );
         } else {
-          Assertions.assertTrue(
-              row[i] != null && expectedClass.isAssignableFrom(row[i].getClass()),
+          Assert.assertTrue(
               StringUtils.format(
                   "Column[%s] is a [%s] (was %s)",
                   signature.getColumnName(i),
                   expectedClass.getName(),
                   row[i] == null ? null : row[i].getClass().getName()
-              )
+              ),
+              row[i] != null && expectedClass.isAssignableFrom(row[i].getClass())
           );
         }
       }
@@ -1564,23 +1565,5 @@ public class SystemSchemaTest extends CalciteTestBase
     private static final String SUPER = CalciteTests.TEST_SUPERUSER_NAME;
     private static final String DATASOURCE_READ = "datasourceRead";
     private static final String DATASOURCE_WRITE = "datasourceWrite";
-
-    private static File newFolder(File root, String... subDirs) throws IOException {
-      String subFolder = String.join("/", subDirs);
-      File result = new File(root, subFolder);
-      if (!result.mkdirs()) {
-        throw new IOException("Couldn't create folders " + root);
-      }
-      return result;
-    }
-  }
-
-  private static File newFolder(File root, String... subDirs) throws IOException {
-    String subFolder = String.join("/", subDirs);
-    File result = new File(root, subFolder);
-    if (!result.mkdirs()) {
-      throw new IOException("Couldn't create folders " + root);
-    }
-    return result;
   }
 }

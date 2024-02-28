@@ -61,9 +61,9 @@ import org.apache.druid.timeline.DataSegment;
 import org.apache.druid.timeline.partition.NumberedShardSpec;
 import org.joda.time.DateTime;
 import org.joda.time.LocalTime;
+import org.junit.Assert;
 import org.junit.Rule;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -90,9 +90,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
 /**
  * These test cases are borrowed from the drill-test-framework at
@@ -161,7 +161,7 @@ public class DrillWindowQueryTest extends BaseCalciteQueryTest
           string,
           string.replace('/', '_'));
     }
-    assertEquals(0, allCases.size(), "Found some non-declared testcases; please add the new testcases printed to the console!");
+    assertEquals("Found some non-declared testcases; please add the new testcases printed to the console!", 0, allCases.size());
   }
 
   @Retention(RetentionPolicy.RUNTIME)
@@ -172,15 +172,6 @@ public class DrillWindowQueryTest extends BaseCalciteQueryTest
      * Name of the file this test should execute.
      */
     String value();
-
-    private static File newFolder(File root, String... subDirs) throws IOException {
-      String subFolder = String.join("/", subDirs);
-      File result = new File(root, subFolder);
-      if (!result.mkdirs()) {
-        throw new IOException("Couldn't create folders " + root);
-      }
-      return result;
-    }
   }
 
   class DrillTestCaseLoaderRule implements TestRule
@@ -192,15 +183,6 @@ public class DrillWindowQueryTest extends BaseCalciteQueryTest
       DrillTest annotation = description.getAnnotation(DrillTest.class);
       testCase = (annotation == null) ? null : new DrillTestCase(annotation.value());
       return base;
-    }
-
-    private static File newFolder(File root, String... subDirs) throws IOException {
-      String subFolder = String.join("/", subDirs);
-      File result = new File(root, subFolder);
-      if (!result.mkdirs()) {
-        throw new IOException("Couldn't create folders " + root);
-      }
-      return result;
     }
   }
 
@@ -252,15 +234,6 @@ public class DrillWindowQueryTest extends BaseCalciteQueryTest
         query = new String(ByteStreams.toByteArray(queryIn), StandardCharsets.UTF_8);
       }
       return query;
-    }
-
-    private static File newFolder(File root, String... subDirs) throws IOException {
-      String subFolder = String.join("/", subDirs);
-      File result = new File(root, subFolder);
-      if (!result.mkdirs()) {
-        throw new IOException("Couldn't create folders " + root);
-      }
-      return result;
     }
   }
 
@@ -380,7 +353,7 @@ public class DrillWindowQueryTest extends BaseCalciteQueryTest
     public void verifyRowSignature(RowSignature rowSignature)
     {
       if (expectedResultRowSignature != null) {
-        Assertions.assertEquals(expectedResultRowSignature, rowSignature);
+        Assert.assertEquals(expectedResultRowSignature, rowSignature);
       }
       currentRowSignature = rowSignature;
     }
@@ -391,7 +364,7 @@ public class DrillWindowQueryTest extends BaseCalciteQueryTest
       List<Object[]> results = queryResults.results;
       List<Object[]> expectedResults = parseResults(currentRowSignature, expectedResultsText);
       try {
-        Assertions.assertEquals(expectedResultsText.size(), results.size(), StringUtils.format("result count: %s", sql));
+        Assert.assertEquals(StringUtils.format("result count: %s", sql), expectedResultsText.size(), results.size());
         if (!isOrdered(queryResults)) {
           // in case the resultset is not ordered; order via the same comparator before comparision
           results.sort(new ArrayRowCmp());
@@ -412,15 +385,6 @@ public class DrillWindowQueryTest extends BaseCalciteQueryTest
       SqlNode sqlNode = queryResults.capture.getSqlNode();
       return SqlToRelConverter.isOrdered(sqlNode);
     }
-
-    private static File newFolder(File root, String... subDirs) throws IOException {
-      String subFolder = String.join("/", subDirs);
-      File result = new File(root, subFolder);
-      if (!result.mkdirs()) {
-        throw new IOException("Couldn't create folders " + root);
-      }
-      return result;
-    }
   }
 
   static class ArrayRowCmp implements Comparator<Object[]>
@@ -431,15 +395,6 @@ public class DrillWindowQueryTest extends BaseCalciteQueryTest
       String s0 = Arrays.toString(arg0);
       String s1 = Arrays.toString(arg1);
       return s0.compareTo(s1);
-    }
-
-    private static File newFolder(File root, String... subDirs) throws IOException {
-      String subFolder = String.join("/", subDirs);
-      File result = new File(root, subFolder);
-      if (!result.mkdirs()) {
-        throw new IOException("Couldn't create folders " + root);
-      }
-      return result;
     }
   }
 
@@ -547,7 +502,7 @@ public class DrillWindowQueryTest extends BaseCalciteQueryTest
       dimensionNames.add(dimension.getName());
     }
 
-    final File tmpFolder = newFolder(temporaryFolder, "junit");
+    final File tmpFolder = temporaryFolder.newFolder();
     final QueryableIndex queryableIndex = IndexBuilder
         .create()
         .tmpDir(new File(tmpFolder, dataSource))
@@ -7831,14 +7786,5 @@ public class DrillWindowQueryTest extends BaseCalciteQueryTest
   public void test_nestedAggs_multiWin_8()
   {
     windowQueryTest();
-  }
-
-  private static File newFolder(File root, String... subDirs) throws IOException {
-    String subFolder = String.join("/", subDirs);
-    File result = new File(root, subFolder);
-    if (!result.mkdirs()) {
-      throw new IOException("Couldn't create folders " + root);
-    }
-    return result;
   }
 }

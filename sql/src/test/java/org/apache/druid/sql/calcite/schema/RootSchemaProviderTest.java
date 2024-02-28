@@ -26,14 +26,12 @@ import org.apache.druid.sql.calcite.util.CalciteTestBase;
 import org.easymock.EasyMock;
 import org.easymock.EasyMockRunner;
 import org.easymock.Mock;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.Set;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @RunWith(EasyMockRunner.class)
 public class RootSchemaProviderTest extends CalciteTestBase
@@ -56,7 +54,7 @@ public class RootSchemaProviderTest extends CalciteTestBase
 
   private RootSchemaProvider target;
 
-  @BeforeEach
+  @Before
   public void setUp()
   {
     EasyMock.expect(druidSchema1.getSchema()).andStubReturn(schema1);
@@ -74,21 +72,19 @@ public class RootSchemaProviderTest extends CalciteTestBase
   public void testGetShouldReturnRootSchemaWithProvidedSchemasRegistered()
   {
     DruidSchemaCatalog rootSchema = target.get();
-    Assertions.assertEquals("", rootSchema.getRootSchema().getName());
-    Assertions.assertFalse(rootSchema.getRootSchema().isCacheEnabled());
+    Assert.assertEquals("", rootSchema.getRootSchema().getName());
+    Assert.assertFalse(rootSchema.getRootSchema().isCacheEnabled());
     // metadata schema should not be added
-    Assertions.assertEquals(druidSchemas.size(), rootSchema.getSubSchemaNames().size());
+    Assert.assertEquals(druidSchemas.size(), rootSchema.getSubSchemaNames().size());
 
-    Assertions.assertEquals(schema1, rootSchema.getSubSchema(SCHEMA_1).unwrap(schema1.getClass()));
-    Assertions.assertEquals(schema2, rootSchema.getSubSchema(SCHEMA_2).unwrap(schema2.getClass()));
+    Assert.assertEquals(schema1, rootSchema.getSubSchema(SCHEMA_1).unwrap(schema1.getClass()));
+    Assert.assertEquals(schema2, rootSchema.getSubSchema(SCHEMA_2).unwrap(schema2.getClass()));
   }
 
-  @Test
+  @Test(expected = ISE.class)
   public void testGetWithDuplicateSchemasShouldThrowISE()
   {
-    assertThrows(ISE.class, () -> {
-      target = new RootSchemaProvider(ImmutableSet.of(druidSchema1, druidSchema2, duplicateSchema1));
-      target.get();
-    });
+    target = new RootSchemaProvider(ImmutableSet.of(druidSchema1, druidSchema2, duplicateSchema1));
+    target.get();
   }
 }

@@ -40,8 +40,9 @@ import org.apache.druid.timeline.SegmentId;
 import org.apache.druid.timeline.partition.DimensionRangeShardSpec;
 import org.easymock.EasyMock;
 import org.joda.time.Interval;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
@@ -57,6 +58,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+@RunWith(Parameterized.class)
 public class MSQReplaceTest extends MSQTestBase
 {
 
@@ -70,6 +72,7 @@ public class MSQReplaceTest extends MSQTestBase
                   )
                   .build();
 
+  @Parameterized.Parameters(name = "{index}:with context {0}")
   public static Collection<Object[]> data()
   {
     Object[][] data = new Object[][]{
@@ -81,14 +84,16 @@ public class MSQReplaceTest extends MSQTestBase
     };
     return Arrays.asList(data);
   }
+
+  @Parameterized.Parameter(0)
   public String contextName;
+
+  @Parameterized.Parameter(1)
   public Map<String, Object> context;
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testReplaceOnFooWithAll(String contextName, Map<String, Object> context)
+  @Test
+  public void testReplaceOnFooWithAll()
   {
-    initMSQReplaceTest(contextName, context);
     RowSignature rowSignature = RowSignature.builder()
                                             .add("__time", ColumnType.LONG)
                                             .add("m1", ColumnType.FLOAT)
@@ -167,11 +172,9 @@ public class MSQReplaceTest extends MSQTestBase
                      .verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testReplaceOnFooWithWhere(String contextName, Map<String, Object> context)
+  @Test
+  public void testReplaceOnFooWithWhere()
   {
-    initMSQReplaceTest(contextName, context);
     RowSignature rowSignature = RowSignature.builder()
                                             .add("__time", ColumnType.LONG)
                                             .add("m1", ColumnType.FLOAT)
@@ -218,11 +221,9 @@ public class MSQReplaceTest extends MSQTestBase
                      .verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testReplaceOnFoo1WithAllExtern(String contextName, Map<String, Object> context) throws IOException
+  @Test
+  public void testReplaceOnFoo1WithAllExtern() throws IOException
   {
-    initMSQReplaceTest(contextName, context);
     RowSignature rowSignature = RowSignature.builder()
                                             .add("__time", ColumnType.LONG)
                                             .add("cnt", ColumnType.LONG).build();
@@ -295,11 +296,9 @@ public class MSQReplaceTest extends MSQTestBase
                      .verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testReplaceOnFoo1WithWhereExtern(String contextName, Map<String, Object> context) throws IOException
+  @Test
+  public void testReplaceOnFoo1WithWhereExtern() throws IOException
   {
-    initMSQReplaceTest(contextName, context);
     RowSignature rowSignature = RowSignature.builder()
                                             .add("__time", ColumnType.LONG)
                                             .add("user", ColumnType.STRING).build();
@@ -363,11 +362,9 @@ public class MSQReplaceTest extends MSQTestBase
                      .verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testReplaceIncorrectSyntax(String contextName, Map<String, Object> context)
+  @Test
+  public void testReplaceIncorrectSyntax()
   {
-    initMSQReplaceTest(contextName, context);
     testIngestQuery()
         .setSql("REPLACE INTO foo1 OVERWRITE SELECT * FROM foo PARTITIONED BY ALL TIME")
         .setExpectedDataSource("foo1")
@@ -379,11 +376,9 @@ public class MSQReplaceTest extends MSQTestBase
         .verifyPlanningErrors();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testReplaceSegmentEntireTable(String contextName, Map<String, Object> context)
+  @Test
+  public void testReplaceSegmentEntireTable()
   {
-    initMSQReplaceTest(contextName, context);
     RowSignature rowSignature = RowSignature.builder()
                                             .add("__time", ColumnType.LONG)
                                             .add("m1", ColumnType.FLOAT)
@@ -438,11 +433,9 @@ public class MSQReplaceTest extends MSQTestBase
                      .verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testReplaceSegmentsRepartitionTable(String contextName, Map<String, Object> context)
+  @Test
+  public void testReplaceSegmentsRepartitionTable()
   {
-    initMSQReplaceTest(contextName, context);
     RowSignature rowSignature = RowSignature.builder()
                                             .add("__time", ColumnType.LONG)
                                             .add("m1", ColumnType.FLOAT)
@@ -523,11 +516,9 @@ public class MSQReplaceTest extends MSQTestBase
                      .verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testReplaceWithWhereClause(String contextName, Map<String, Object> context)
+  @Test
+  public void testReplaceWithWhereClause()
   {
-    initMSQReplaceTest(contextName, context);
     RowSignature rowSignature = RowSignature.builder()
                                             .add("__time", ColumnType.LONG)
                                             .add("m1", ColumnType.FLOAT)
@@ -598,11 +589,9 @@ public class MSQReplaceTest extends MSQTestBase
                      .verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testReplaceWhereClauseLargerThanData(String contextName, Map<String, Object> context)
+  @Test
+  public void testReplaceWhereClauseLargerThanData()
   {
-    initMSQReplaceTest(contextName, context);
     RowSignature rowSignature = RowSignature.builder()
                                             .add("__time", ColumnType.LONG)
                                             .add("m1", ColumnType.FLOAT)
@@ -676,11 +665,9 @@ public class MSQReplaceTest extends MSQTestBase
                      .verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testReplaceLimitWithPeriodGranularityThrowsException(String contextName, Map<String, Object> context)
+  @Test
+  public void testReplaceLimitWithPeriodGranularityThrowsException()
   {
-    initMSQReplaceTest(contextName, context);
     testIngestQuery().setSql(" REPLACE INTO foo "
                              + "OVERWRITE ALL "
                              + "SELECT __time, m1 "
@@ -694,11 +681,9 @@ public class MSQReplaceTest extends MSQTestBase
                      .verifyPlanningErrors();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testReplaceOffsetThrowsException(String contextName, Map<String, Object> context)
+  @Test
+  public void testReplaceOffsetThrowsException()
   {
-    initMSQReplaceTest(contextName, context);
     testIngestQuery().setSql(" REPLACE INTO foo "
                              + "OVERWRITE ALL "
                              + "SELECT __time, m1 "
@@ -713,11 +698,9 @@ public class MSQReplaceTest extends MSQTestBase
                      .verifyPlanningErrors();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testReplaceTimeChunks(String contextName, Map<String, Object> context)
+  @Test
+  public void testReplaceTimeChunks()
   {
-    initMSQReplaceTest(contextName, context);
     RowSignature rowSignature = RowSignature.builder()
                                             .add("__time", ColumnType.LONG)
                                             .add("m1", ColumnType.FLOAT)
@@ -762,11 +745,9 @@ public class MSQReplaceTest extends MSQTestBase
                      .verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testReplaceTimeChunksLargerThanData(String contextName, Map<String, Object> context)
+  @Test
+  public void testReplaceTimeChunksLargerThanData()
   {
-    initMSQReplaceTest(contextName, context);
     RowSignature rowSignature = RowSignature.builder()
                                             .add("__time", ColumnType.LONG)
                                             .add("m1", ColumnType.FLOAT)
@@ -819,11 +800,9 @@ public class MSQReplaceTest extends MSQTestBase
                      .verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testReplaceAllOverEternitySegment(String contextName, Map<String, Object> context)
+  @Test
+  public void testReplaceAllOverEternitySegment()
   {
-    initMSQReplaceTest(contextName, context);
     RowSignature rowSignature = RowSignature.builder()
                                             .add("__time", ColumnType.LONG)
                                             .add("m1", ColumnType.FLOAT)
@@ -873,11 +852,9 @@ public class MSQReplaceTest extends MSQTestBase
                      .verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testReplaceOnFoo1Range(String contextName, Map<String, Object> context)
+  @Test
+  public void testReplaceOnFoo1Range()
   {
-    initMSQReplaceTest(contextName, context);
     RowSignature rowSignature = RowSignature.builder()
                                             .add("__time", ColumnType.LONG)
                                             .add("dim1", ColumnType.STRING)
@@ -898,11 +875,9 @@ public class MSQReplaceTest extends MSQTestBase
 
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testReplaceSegmentsInsertIntoNewTable(String contextName, Map<String, Object> context)
+  @Test
+  public void testReplaceSegmentsInsertIntoNewTable()
   {
-    initMSQReplaceTest(contextName, context);
     RowSignature rowSignature = RowSignature.builder()
                                             .add("__time", ColumnType.LONG)
                                             .add("m1", ColumnType.FLOAT)
@@ -931,11 +906,9 @@ public class MSQReplaceTest extends MSQTestBase
                      .verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testReplaceWithClusteredByDescendingThrowsException(String contextName, Map<String, Object> context)
+  @Test
+  public void testReplaceWithClusteredByDescendingThrowsException()
   {
-    initMSQReplaceTest(contextName, context);
     // Add a DESC clustered by column, which should not be allowed
     testIngestQuery().setSql(" REPLACE INTO foobar "
                              + "OVERWRITE ALL "
@@ -950,11 +923,9 @@ public class MSQReplaceTest extends MSQTestBase
                      .verifyPlanningErrors();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testReplaceUnnestSegmentEntireTable(String contextName, Map<String, Object> context)
+  @Test
+  public void testReplaceUnnestSegmentEntireTable()
   {
-    initMSQReplaceTest(contextName, context);
     RowSignature rowSignature = RowSignature.builder()
                                             .add("__time", ColumnType.LONG)
                                             .add("d", ColumnType.STRING)
@@ -1011,11 +982,9 @@ public class MSQReplaceTest extends MSQTestBase
                      .verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testReplaceUnnestWithVirtualColumnSegmentEntireTable(String contextName, Map<String, Object> context)
+  @Test
+  public void testReplaceUnnestWithVirtualColumnSegmentEntireTable()
   {
-    initMSQReplaceTest(contextName, context);
     RowSignature rowSignature = RowSignature.builder()
                                             .add("__time", ColumnType.LONG)
                                             .add("d", ColumnType.FLOAT)
@@ -1076,11 +1045,9 @@ public class MSQReplaceTest extends MSQTestBase
                      .verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testReplaceUnnestSegmentWithTimeFilter(String contextName, Map<String, Object> context)
+  @Test
+  public void testReplaceUnnestSegmentWithTimeFilter()
   {
-    initMSQReplaceTest(contextName, context);
     RowSignature rowSignature = RowSignature.builder()
                                             .add("__time", ColumnType.LONG)
                                             .add("d", ColumnType.STRING)
@@ -1152,11 +1119,9 @@ public class MSQReplaceTest extends MSQTestBase
                      .verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testReplaceTombstonesOverPartiallyOverlappingSegments(String contextName, Map<String, Object> context)
+  @Test
+  public void testReplaceTombstonesOverPartiallyOverlappingSegments()
   {
-    initMSQReplaceTest(contextName, context);
     RowSignature rowSignature = RowSignature.builder()
                                             .add("__time", ColumnType.LONG)
                                             .add("dim1", ColumnType.STRING)
@@ -1220,11 +1185,9 @@ public class MSQReplaceTest extends MSQTestBase
                      .verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testEmptyReplaceAll(String contextName, Map<String, Object> context)
+  @Test
+  public void testEmptyReplaceAll()
   {
-    initMSQReplaceTest(contextName, context);
     // An empty replace all with no used segment should effectively be the same as an empty insert
     testIngestQuery().setSql(
                          "REPLACE INTO foo1"
@@ -1240,11 +1203,9 @@ public class MSQReplaceTest extends MSQTestBase
                      .verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testEmptyReplaceInterval(String contextName, Map<String, Object> context)
+  @Test
+  public void testEmptyReplaceInterval()
   {
-    initMSQReplaceTest(contextName, context);
     // An empty replace interval with no used segment should effectively be the same as an empty insert
     testIngestQuery().setSql(
                          "REPLACE INTO foo1"
@@ -1260,11 +1221,9 @@ public class MSQReplaceTest extends MSQTestBase
                      .verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testEmptyReplaceAllOverExistingSegment(String contextName, Map<String, Object> context)
+  @Test
+  public void testEmptyReplaceAllOverExistingSegment()
   {
-    initMSQReplaceTest(contextName, context);
     Interval existingSegmentInterval = Intervals.of("2001-01-01T/2001-01-02T");
     DataSegment existingDataSegment = DataSegment.builder()
                                                  .interval(existingSegmentInterval)
@@ -1293,11 +1252,9 @@ public class MSQReplaceTest extends MSQTestBase
                      .verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testEmptyReplaceIntervalOverPartiallyOverlappingSegment(String contextName, Map<String, Object> context)
+  @Test
+  public void testEmptyReplaceIntervalOverPartiallyOverlappingSegment()
   {
-    initMSQReplaceTest(contextName, context);
     // Create a data segment which lies partially outside the generated segment
     DataSegment existingDataSegment = DataSegment.builder()
                                                  .interval(Intervals.of("2016-06-27T/2016-06-28T"))
@@ -1330,11 +1287,9 @@ public class MSQReplaceTest extends MSQTestBase
                      .verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testEmptyReplaceIntervalOverPartiallyOverlappingStart(String contextName, Map<String, Object> context)
+  @Test
+  public void testEmptyReplaceIntervalOverPartiallyOverlappingStart()
   {
-    initMSQReplaceTest(contextName, context);
     // Create a data segment whose start partially lies outside the query's replace interval
     DataSegment existingDataSegment = DataSegment.builder()
                                                  .interval(Intervals.of("2016-06-01T/2016-07-01T"))
@@ -1369,11 +1324,9 @@ public class MSQReplaceTest extends MSQTestBase
                      .verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testEmptyReplaceIntervalOverPartiallyOverlappingEnd(String contextName, Map<String, Object> context)
+  @Test
+  public void testEmptyReplaceIntervalOverPartiallyOverlappingEnd()
   {
-    initMSQReplaceTest(contextName, context);
     // Create a data segment whose end partially lies outside the query's replace interval
     DataSegment existingDataSegment = DataSegment.builder()
                                                  .interval(Intervals.of("2016-06-01T/2016-07-01T"))
@@ -1408,11 +1361,9 @@ public class MSQReplaceTest extends MSQTestBase
                      .verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testEmptyReplaceAllOverEternitySegment(String contextName, Map<String, Object> context)
+  @Test
+  public void testEmptyReplaceAllOverEternitySegment()
   {
-    initMSQReplaceTest(contextName, context);
     // Create a data segment spanning eternity
     DataSegment existingDataSegment = DataSegment.builder()
                                                  .interval(Intervals.ETERNITY)
@@ -1443,11 +1394,9 @@ public class MSQReplaceTest extends MSQTestBase
   }
 
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testEmptyReplaceAllWithAllGrainOverFiniteIntervalSegment(String contextName, Map<String, Object> context)
+  @Test
+  public void testEmptyReplaceAllWithAllGrainOverFiniteIntervalSegment()
   {
-    initMSQReplaceTest(contextName, context);
     // Create a finite-interval segment
     DataSegment existingDataSegment = DataSegment.builder()
                                                  .interval(Intervals.of("2016-06-01T/2016-09-01T"))
@@ -1476,11 +1425,9 @@ public class MSQReplaceTest extends MSQTestBase
                      .verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testEmptyReplaceAllWithAllGrainOverEternitySegment(String contextName, Map<String, Object> context)
+  @Test
+  public void testEmptyReplaceAllWithAllGrainOverEternitySegment()
   {
-    initMSQReplaceTest(contextName, context);
     // Create a segment spanning eternity
     DataSegment existingDataSegment = DataSegment.builder()
                                                  .interval(Intervals.ETERNITY)
@@ -1510,11 +1457,9 @@ public class MSQReplaceTest extends MSQTestBase
                      .verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testEmptyReplaceAllWithAllGrainOverHalfEternitySegment(String contextName, Map<String, Object> context)
+  @Test
+  public void testEmptyReplaceAllWithAllGrainOverHalfEternitySegment()
   {
-    initMSQReplaceTest(contextName, context);
     // Create a segment spanning half-eternity
     DataSegment existingDataSegment = DataSegment.builder()
                                                  .interval(new Interval(DateTimes.of("2000"), DateTimes.MAX))
@@ -1543,11 +1488,9 @@ public class MSQReplaceTest extends MSQTestBase
                      .verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testEmptyReplaceLimitQuery(String contextName, Map<String, Object> context)
+  @Test
+  public void testEmptyReplaceLimitQuery()
   {
-    initMSQReplaceTest(contextName, context);
     // A limit query which results in 0 rows being inserted -- do nothing.
     testIngestQuery().setSql(
                          "REPLACE INTO foo1 "
@@ -1563,11 +1506,9 @@ public class MSQReplaceTest extends MSQTestBase
                      .verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testEmptyReplaceIntervalOverEternitySegment(String contextName, Map<String, Object> context)
+  @Test
+  public void testEmptyReplaceIntervalOverEternitySegment()
   {
-    initMSQReplaceTest(contextName, context);
     // Create a data segment spanning eternity
     DataSegment existingDataSegment = DataSegment.builder()
                                                  .interval(Intervals.ETERNITY)
@@ -1637,10 +1578,5 @@ public class MSQReplaceTest extends MSQTestBase
         new Object[]{978480000000L, "abc", 1L}
     ));
     return expectedRows;
-  }
-
-  public void initMSQReplaceTest(String contextName, Map<String, Object> context) {
-    this.contextName = contextName;
-    this.context = context;
   }
 }

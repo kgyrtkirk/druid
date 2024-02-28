@@ -52,9 +52,9 @@ import org.apache.druid.sql.calcite.util.CalciteTests;
 import org.easymock.EasyMock;
 import org.easymock.EasyMockRunner;
 import org.easymock.Mock;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import javax.validation.Validation;
@@ -98,7 +98,7 @@ public class CalcitePlannerModuleTest extends CalciteTestBase
   private Injector injector;
   private RelOptRule customRule;
 
-  @BeforeEach
+  @Before
   public void setUp()
   {
     EasyMock.expect(druidSchema1.getSchema()).andStubReturn(schema1);
@@ -146,29 +146,29 @@ public class CalcitePlannerModuleTest extends CalciteTestBase
   public void testDruidOperatorTableIsInjectable()
   {
     DruidOperatorTable operatorTable = injector.getInstance(DruidOperatorTable.class);
-    Assertions.assertNotNull(operatorTable);
+    Assert.assertNotNull(operatorTable);
 
     // Should be a singleton.
     DruidOperatorTable other = injector.getInstance(DruidOperatorTable.class);
-    Assertions.assertSame(other, operatorTable);
+    Assert.assertSame(other, operatorTable);
   }
 
   @Test
   public void testPlannerFactoryIsInjectable()
   {
     PlannerFactory plannerFactory = injector.getInstance(PlannerFactory.class);
-    Assertions.assertNotNull(PlannerFactory.class);
+    Assert.assertNotNull(PlannerFactory.class);
 
     // Should be a singleton.
     PlannerFactory other = injector.getInstance(PlannerFactory.class);
-    Assertions.assertSame(other, plannerFactory);
+    Assert.assertSame(other, plannerFactory);
   }
 
   @Test
   public void testPlannerConfigIsInjected()
   {
     PlannerConfig plannerConfig = injector.getInstance(PlannerConfig.class);
-    Assertions.assertNotNull(plannerConfig);
+    Assert.assertNotNull(plannerConfig);
   }
 
   @Test
@@ -200,6 +200,6 @@ public class CalcitePlannerModuleTest extends CalciteTestBase
     boolean containsCustomRule = injector.getInstance(CalciteRulesManager.class)
                                          .druidConventionRuleSet(context)
                                          .contains(customRule);
-    Assertions.assertTrue(containsCustomRule);
+    Assert.assertTrue(containsCustomRule);
   }
 }

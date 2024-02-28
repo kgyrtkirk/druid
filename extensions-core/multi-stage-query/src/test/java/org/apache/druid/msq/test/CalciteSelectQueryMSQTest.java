@@ -34,12 +34,9 @@ import org.apache.druid.server.QueryLifecycleFactory;
 import org.apache.druid.sql.calcite.CalciteQueryTest;
 import org.apache.druid.sql.calcite.QueryTestBuilder;
 import org.apache.druid.sql.calcite.run.SqlEngine;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
-
-import java.util.concurrent.TimeUnit;
+import org.junit.Assert;
+import org.junit.Ignore;
+import org.junit.Test;
 
 /**
  * Runs {@link CalciteQueryTest} but with MSQ engine
@@ -90,88 +87,77 @@ public class CalciteSelectQueryMSQTest extends CalciteQueryTest
         .msqCompatible(msqCompatible);
   }
 
-  @Disabled
+  @Ignore
   @Override
-  @Test
   public void testCannotInsertWithNativeEngine()
   {
 
   }
 
-  @Disabled
+  @Ignore
   @Override
-  @Test
   public void testCannotReplaceWithNativeEngine()
   {
 
   }
 
-  @Disabled
+  @Ignore
   @Override
-  @Test
   public void testRequireTimeConditionSimpleQueryNegative()
   {
 
   }
 
-  @Disabled
+  @Ignore
   @Override
-  @Test
   public void testRequireTimeConditionSubQueryNegative()
   {
 
   }
 
-  @Disabled
+  @Ignore
   @Override
-  @Test
   public void testRequireTimeConditionSemiJoinNegative()
   {
 
   }
 
-  @Disabled
+  @Ignore
   @Override
-  @Test
   public void testExactCountDistinctWithFilter()
   {
 
   }
 
-  @Disabled
+  @Ignore
   @Override
-  @Test
   public void testUnplannableScanOrderByNonTime()
   {
 
   }
 
-  @Disabled
+  @Ignore
   @Override
-  @Test
   public void testUnplannableJoinQueriesInNonSQLCompatibleMode()
   {
 
   }
 
-  @Disabled
+  @Ignore
   @Override
-  @Test
   public void testQueryWithMoreThanMaxNumericInFilter()
   {
 
   }
 
-  @Disabled
+  @Ignore
   @Override
-  @Test
   public void testUnSupportedNullsFirst()
   {
   }
 
-  @Disabled
+  @Ignore
   @Override
-  @Test
   public void testUnSupportedNullsLast()
   {
   }
@@ -186,17 +172,16 @@ public class CalciteSelectQueryMSQTest extends CalciteQueryTest
   {
     try {
       testQuery("SELECT ARRAY_AGG(unique_dim1) FROM druid.foo", ImmutableList.of(), ImmutableList.of());
-      Assertions.fail("query execution should fail");
+      Assert.fail("query execution should fail");
     }
     catch (ISE e) {
-      Assertions.assertTrue(
+      Assert.assertTrue(
           e.getMessage().contains("Cannot handle column [a0] with type [ARRAY<COMPLEX<hyperUnique>>]")
       );
     }
   }
 
-  @Test
-  @Timeout(value = 40000, unit = TimeUnit.MILLISECONDS)
+  @Test(timeout = 40000)
   public void testJoinMultipleTablesWithWhereCondition()
   {
     testBuilder()
@@ -233,7 +218,6 @@ public class CalciteSelectQueryMSQTest extends CalciteQueryTest
   }
 
   @Override
-  @Test
   public void testFilterParseLongNullable()
   {
     // this isn't really correct in default value mode, the result should be ImmutableList.of(new Object[]{0L})

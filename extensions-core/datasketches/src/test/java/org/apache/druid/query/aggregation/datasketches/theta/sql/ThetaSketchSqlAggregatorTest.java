@@ -69,10 +69,9 @@ import org.apache.druid.timeline.DataSegment;
 import org.apache.druid.timeline.partition.LinearShardSpec;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Period;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.Assert;
+import org.junit.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -117,7 +116,7 @@ public class ThetaSketchSqlAggregatorTest extends BaseCalciteQueryTest
     SketchModule.registerSerde();
 
     final QueryableIndex index = IndexBuilder.create()
-                                             .tmpDir(newFolder(temporaryFolder, "junit"))
+                                             .tmpDir(temporaryFolder.newFolder())
                                              .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
                                              .schema(
                                                  new IncrementalIndexSchema.Builder()
@@ -1101,7 +1100,7 @@ public class ThetaSketchSqlAggregatorTest extends BaseCalciteQueryTest
       );
     }
     catch (IllegalArgumentException e) {
-      Assertions.assertTrue(
+      Assert.assertTrue(
           e.getMessage().contains("requires a ThetaSketch as the argument")
       );
     }
@@ -1189,14 +1188,5 @@ public class ThetaSketchSqlAggregatorTest extends BaseCalciteQueryTest
             new Object[]{1.0D}
         )
     );
-  }
-
-  private static File newFolder(File root, String... subDirs) throws IOException {
-    String subFolder = String.join("/", subDirs);
-    File result = new File(root, subFolder);
-    if (!result.mkdirs()) {
-      throw new IOException("Couldn't create folders " + root);
-    }
-    return result;
   }
 }

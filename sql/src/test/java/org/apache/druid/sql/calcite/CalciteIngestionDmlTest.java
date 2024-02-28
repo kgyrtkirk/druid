@@ -65,9 +65,10 @@ import org.apache.druid.sql.guice.SqlBindings;
 import org.apache.druid.sql.http.SqlParameter;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matcher;
+import org.hamcrest.MatcherAssert;
+import org.junit.After;
+import org.junit.Assert;
 import org.junit.internal.matchers.ThrowableMessageMatcher;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -80,8 +81,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
-
-import static org.hamcrest.MatcherAssert.assertThat;
 
 public class CalciteIngestionDmlTest extends BaseCalciteQueryTest
 {
@@ -182,7 +181,7 @@ public class CalciteIngestionDmlTest extends BaseCalciteQueryTest
     });
   }
 
-  @AfterEach
+  @After
   public void tearDown()
   {
     // Catch situations where tests forgot to call "verify" on their tester.
@@ -215,7 +214,7 @@ public class CalciteIngestionDmlTest extends BaseCalciteQueryTest
       granularityString = queryJsonMapper.writeValueAsString(granularity);
     }
     catch (JsonProcessingException e) {
-      Assertions.fail(e.getMessage());
+      Assert.fail(e.getMessage());
     }
     return ImmutableMap.of(DruidSqlInsert.SQL_INSERT_SEGMENT_GRANULARITY, granularityString);
   }
@@ -380,15 +379,15 @@ public class CalciteIngestionDmlTest extends BaseCalciteQueryTest
       }
 
       queryLogHook.clearRecordedQueries();
-      final Throwable e = Assertions.assertThrows(
+      final Throwable e = Assert.assertThrows(
           Throwable.class,
           () -> {
             getSqlStatementFactory(plannerConfig, authConfig).directStatement(sqlQuery()).execute();
           }
       );
 
-      assertThat(e, validationErrorMatcher);
-      Assertions.assertTrue(queryLogHook.getRecordedQueries().isEmpty());
+      MatcherAssert.assertThat(e, validationErrorMatcher);
+      Assert.assertTrue(queryLogHook.getRecordedQueries().isEmpty());
     }
 
     private void verifySuccess()

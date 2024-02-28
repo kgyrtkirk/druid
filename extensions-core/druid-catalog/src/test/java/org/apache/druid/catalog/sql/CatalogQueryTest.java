@@ -32,14 +32,14 @@ import org.apache.druid.sql.calcite.BaseCalciteQueryTest;
 import org.apache.druid.sql.calcite.SqlSchema;
 import org.apache.druid.sql.calcite.planner.CatalogResolver;
 import org.apache.druid.sql.calcite.util.SqlTestFramework;
+import org.junit.After;
 import org.junit.Rule;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.Assert.fail;
 
 public class CatalogQueryTest extends BaseCalciteQueryTest
 {
@@ -70,7 +70,7 @@ public class CatalogQueryTest extends BaseCalciteQueryTest
         .run();
   }
 
-  @AfterEach
+  @After
   public void catalogTearDown()
   {
     CatalogTests.tearDown(dbFixture);
