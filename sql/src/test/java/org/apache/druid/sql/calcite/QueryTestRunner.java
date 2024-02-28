@@ -598,9 +598,6 @@ public class QueryTestRunner
       // The builder specifies one exception, but the query can run multiple
       // times. Pick the first failure as that emulates the original code flow
       // where the first exception ended the test.
-      if(true) {
-        throw new RuntimeException();
-      }
       ExpectedException expectedException = null; //builder.config.expectedException();
       for (QueryResults queryResults : execStep.results()) {
         if (queryResults.exception == null) {
@@ -611,11 +608,13 @@ public class QueryTestRunner
         // exception, then throw the exception from the run.
         // If the expected exception is not configured here, then the test may
         // have done it outside of the test builder.
-        if (builder.queryCannotVectorize && "force".equals(queryResults.vectorizeOption)) {
-          expectedException.expect(RuntimeException.class);
-          expectedException.expectMessage("Cannot vectorize");
-        } else if (builder.expectedExceptionInitializer != null) {
-          builder.expectedExceptionInitializer.accept(expectedException);
+        if(false) {
+          if (builder.queryCannotVectorize && "force".equals(queryResults.vectorizeOption)) {
+            expectedException.expect(RuntimeException.class);
+            expectedException.expectMessage("Cannot vectorize");
+          } else if (builder.expectedExceptionInitializer != null) {
+            builder.expectedExceptionInitializer.accept(expectedException);
+          }
         }
         throw queryResults.exception;
       }

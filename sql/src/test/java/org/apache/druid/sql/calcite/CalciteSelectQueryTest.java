@@ -314,28 +314,24 @@ public class CalciteSelectQueryTest extends BaseCalciteQueryTest
   @Test
   public void testSelectConstantExpressionEquivalentToNaN()
   {
-    expectedException.expect(invalidSqlIs(
-        "Expression [(log10(0) - log10(0))] evaluates to an unsupported value [NaN], "
-        + "expected something that can be a Double.  Consider casting with 'CAST(<col> AS BIGINT)'"
-    ));
-    testQuery(
+    testQueryThrows(
         "SELECT log10(0) - log10(0), dim1 FROM foo LIMIT 1",
-        ImmutableList.of(),
-        ImmutableList.of()
+        invalidSqlIs(
+            "Expression [(log10(0) - log10(0))] evaluates to an unsupported value [NaN], "
+                + "expected something that can be a Double.  Consider casting with 'CAST(<col> AS BIGINT)'"
+        )
     );
   }
 
   @Test
   public void testSelectConstantExpressionEquivalentToInfinity()
   {
-    expectedException.expect(invalidSqlIs(
-        "Expression [log10(0)] evaluates to an unsupported value [-Infinity], "
-        + "expected something that can be a Double.  Consider casting with 'CAST(<col> AS BIGINT)'"
-    ));
-    testQuery(
+    testQueryThrows(
         "SELECT log10(0), dim1 FROM foo LIMIT 1",
-        ImmutableList.of(),
-        ImmutableList.of()
+        invalidSqlIs(
+            "Expression [log10(0)] evaluates to an unsupported value [-Infinity], "
+                + "expected something that can be a Double.  Consider casting with 'CAST(<col> AS BIGINT)'"
+        )
     );
   }
 

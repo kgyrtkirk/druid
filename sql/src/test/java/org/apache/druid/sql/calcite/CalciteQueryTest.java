@@ -14074,32 +14074,24 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
   @Test
   public void testHumanReadableFormatFunctionExceptionWithWrongNumberType()
   {
-    this.expectedException.expect(DruidException.class);
-    this.expectedException.expectMessage("Supported form(s): HUMAN_READABLE_BINARY_BYTE_FORMAT(Number, [Precision])");
-    testQuery(
+    testQueryThrows(
         "SELECT HUMAN_READABLE_BINARY_BYTE_FORMAT('45678')",
-        Collections.emptyList(),
-        Collections.emptyList()
+        invalidSqlContains("Supported form(s): HUMAN_READABLE_BINARY_BYTE_FORMAT(Number, [Precision])")
     );
   }
 
   @Test
   public void testHumanReadableFormatFunctionWithWrongPrecisionType()
   {
-    this.expectedException.expect(DruidException.class);
-    this.expectedException.expectMessage("Supported form(s): HUMAN_READABLE_BINARY_BYTE_FORMAT(Number, [Precision])");
-    testQuery(
+    testQueryThrows(
         "SELECT HUMAN_READABLE_BINARY_BYTE_FORMAT(45678, '2')",
-        Collections.emptyList(),
-        Collections.emptyList()
+        invalidSqlContains("Supported form(s): HUMAN_READABLE_BINARY_BYTE_FORMAT(Number, [Precision])")
     );
   }
 
   @Test
   public void testHumanReadableFormatFunctionWithInvalidNumberOfArguments()
   {
-    this.expectedException.expect(DruidException.class);
-
     /*
      * frankly speaking, the exception message thrown here is a little bit confusing
      * it says it's 'expecting 1 arguments' but actually HUMAN_READABLE_BINARY_BYTE_FORMAT supports 1 or 2 arguments
@@ -14108,12 +14100,9 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
      * and we can see from its implementation that it gets the min number arguments to format the exception message.
      *
      */
-    this.expectedException.expectMessage(
-        "Invalid number of arguments to function 'HUMAN_READABLE_BINARY_BYTE_FORMAT'. Was expecting 1 arguments");
-    testQuery(
+    testQueryThrows(
         "SELECT HUMAN_READABLE_BINARY_BYTE_FORMAT(45678, 2, 1)",
-        Collections.emptyList(),
-        Collections.emptyList()
+        invalidSqlContains("Invalid number of arguments to function 'HUMAN_READABLE_BINARY_BYTE_FORMAT'. Was expecting 1 arguments")
     );
   }
 
