@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.druid.segment.join;
+package org.apache.druid.query.rowsandcols;
 
 import org.apache.druid.frame.Frame;
 import org.apache.druid.frame.FrameType;
@@ -29,8 +29,6 @@ import org.apache.druid.java.util.common.ISE;
 import org.apache.druid.java.util.common.Intervals;
 import org.apache.druid.java.util.common.granularity.Granularities;
 import org.apache.druid.java.util.common.guava.Sequence;
-import org.apache.druid.query.rowsandcols.EmptyRowsAndColumns;
-import org.apache.druid.query.rowsandcols.RowsAndColumns;
 import org.apache.druid.query.rowsandcols.column.Column;
 import org.apache.druid.query.rowsandcols.concrete.FrameRowsAndColumns;
 import org.apache.druid.segment.CloseableShapeshifter;
