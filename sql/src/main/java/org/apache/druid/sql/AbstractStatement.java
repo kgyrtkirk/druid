@@ -24,6 +24,7 @@ import org.apache.druid.query.QueryContexts;
 import org.apache.druid.server.security.Access;
 import org.apache.druid.server.security.Action;
 import org.apache.druid.server.security.AuthorizationUtils;
+import org.apache.druid.server.security.ForbiddenException;
 import org.apache.druid.server.security.Resource;
 import org.apache.druid.server.security.ResourceAction;
 import org.apache.druid.server.security.ResourceType;
@@ -150,7 +151,7 @@ public abstract class AbstractStatement implements Closeable
     // here. The planner ensures that this step is done before planning.
     authResult = planner.authorize(authorizer, contextResources);
     if (!authResult.authorizationResult.isAllowed()) {
-//      throw new ForbiddenException(authResult.authorizationResult.toMessage());
+      throw new ForbiddenException(authResult.authorizationResult.toMessage());
     }
   }
 

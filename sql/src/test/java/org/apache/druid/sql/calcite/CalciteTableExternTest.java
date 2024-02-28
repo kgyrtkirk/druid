@@ -38,6 +38,7 @@ import org.apache.druid.sql.calcite.external.HttpOperatorConversion;
 import org.apache.druid.sql.calcite.external.InlineOperatorConversion;
 import org.apache.druid.sql.calcite.external.LocalOperatorConversion;
 import org.apache.druid.sql.calcite.planner.Calcites;
+import org.apache.druid.sql.calcite.util.CalciteTests;
 import org.apache.druid.sql.guice.SqlBindings;
 import org.junit.Test;
 
@@ -132,6 +133,7 @@ public class CalciteTableExternTest extends BaseCalciteQueryTest
     }
 
     testBuilder()
+        .authResult(CalciteTests.SUPER_USER_AUTH_RESULT)
         .sql(
             StringUtils.format(
                 "SELECT * FROM %s\n" +
