@@ -46,12 +46,12 @@ import java.util.Collections;
 /**
  * Provides {@link RowsAndColumns} on top of a {@link StorageAdapter}.
  */
-public class StorageAdapterBasedRowsAndColumns implements CloseableShapeshifter, RowsAndColumns
+public class StorageAdapterRowsAndColumns implements CloseableShapeshifter, RowsAndColumns
 {
   private final StorageAdapter storageAdapter;
   private RowsAndColumns materialized;
 
-  public StorageAdapterBasedRowsAndColumns(StorageAdapter storageAdapter)
+  public StorageAdapterRowsAndColumns(StorageAdapter storageAdapter)
   {
     this.storageAdapter = storageAdapter;
   }

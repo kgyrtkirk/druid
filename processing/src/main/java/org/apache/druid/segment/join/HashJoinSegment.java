@@ -23,7 +23,7 @@ import org.apache.druid.java.util.common.IAE;
 import org.apache.druid.java.util.common.io.Closer;
 import org.apache.druid.java.util.common.logger.Logger;
 import org.apache.druid.query.filter.Filter;
-import org.apache.druid.query.rowsandcols.StorageAdapterBasedRowsAndColumns;
+import org.apache.druid.query.rowsandcols.StorageAdapterRowsAndColumns;
 import org.apache.druid.segment.CloseableShapeshifter;
 import org.apache.druid.segment.QueryableIndex;
 import org.apache.druid.segment.SegmentReference;
@@ -157,7 +157,7 @@ public class HashJoinSegment implements SegmentReference
   public <T> T as(Class<T> clazz)
   {
     if (CloseableShapeshifter.class.equals(clazz)) {
-      return (T) new StorageAdapterBasedRowsAndColumns(this.asStorageAdapter());
+      return (T) new StorageAdapterRowsAndColumns(this.asStorageAdapter());
     }
     return SegmentReference.super.as(clazz);
   }

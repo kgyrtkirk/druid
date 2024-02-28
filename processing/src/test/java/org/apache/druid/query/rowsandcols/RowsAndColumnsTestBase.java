@@ -68,7 +68,7 @@ public abstract class RowsAndColumnsTestBase
         new Object[]{ConcatRowsAndColumns.class, ConcatRowsAndColumnsTest.MAKER},
         new Object[]{RearrangedRowsAndColumns.class, RearrangedRowsAndColumnsTest.MAKER},
         new Object[]{FrameRowsAndColumns.class, FrameRowsAndColumnsTest.MAKER},
-        new Object[]{StorageAdapterBasedRowsAndColumns.class, StorageAdapterBasedRowsAndColumnsTest.MAKER}
+        new Object[]{StorageAdapterRowsAndColumns.class, StorageAdapterRowsAndColumnsTest.MAKER}
     );
   }
 

@@ -25,20 +25,20 @@ import org.apache.druid.segment.StorageAdapter;
 
 import java.util.function.Function;
 
-public class StorageAdapterBasedRowsAndColumnsTest extends RowsAndColumnsTestBase
+public class StorageAdapterRowsAndColumnsTest extends RowsAndColumnsTestBase
 {
-  public StorageAdapterBasedRowsAndColumnsTest()
+  public StorageAdapterRowsAndColumnsTest()
   {
-    super(StorageAdapterBasedRowsAndColumns.class);
+    super(StorageAdapterRowsAndColumns.class);
   }
 
-  public static Function<MapOfColumnsRowsAndColumns, StorageAdapterBasedRowsAndColumns> MAKER = input -> {
+  public static Function<MapOfColumnsRowsAndColumns, StorageAdapterRowsAndColumns> MAKER = input -> {
     return buildFrame(input);
   };
 
-  private static StorageAdapterBasedRowsAndColumns buildFrame(MapOfColumnsRowsAndColumns input)
+  private static StorageAdapterRowsAndColumns buildFrame(MapOfColumnsRowsAndColumns input)
   {
     FrameRowsAndColumns fRAC = FrameRowsAndColumnsTest.buildFrame(input);
-    return new StorageAdapterBasedRowsAndColumns(fRAC.as(StorageAdapter.class));
+    return new StorageAdapterRowsAndColumns(fRAC.as(StorageAdapter.class));
   }
 }
