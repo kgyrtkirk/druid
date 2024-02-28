@@ -70,11 +70,6 @@ import static org.apache.druid.segment.column.ColumnType.FLOAT;
 import static org.apache.druid.segment.column.ColumnType.LONG;
 import static org.apache.druid.segment.column.ColumnType.STRING;
 
-import static org.apache.druid.segment.column.ColumnType.DOUBLE;
-import static org.apache.druid.segment.column.ColumnType.FLOAT;
-import static org.apache.druid.segment.column.ColumnType.LONG;
-import static org.apache.druid.segment.column.ColumnType.STRING;
-
 public class CalciteInsertDmlTest extends CalciteIngestionDmlTest
 {
   protected static final Map<String, Object> PARTITIONED_BY_ALL_TIME_QUERY_CONTEXT = ImmutableMap.of(

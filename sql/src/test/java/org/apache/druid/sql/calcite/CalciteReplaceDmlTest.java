@@ -62,12 +62,6 @@ import static org.apache.druid.segment.column.ColumnType.LONG;
 import static org.apache.druid.segment.column.ColumnType.STRING;
 import static org.apache.druid.segment.column.ColumnType.ofComplex;
 
-import static org.apache.druid.segment.column.ColumnType.DOUBLE;
-import static org.apache.druid.segment.column.ColumnType.FLOAT;
-import static org.apache.druid.segment.column.ColumnType.LONG;
-import static org.apache.druid.segment.column.ColumnType.STRING;
-import static org.apache.druid.segment.column.ColumnType.ofComplex;
-
 public class CalciteReplaceDmlTest extends CalciteIngestionDmlTest
 {
   private static final Map<String, Object> REPLACE_ALL_TIME_CHUNKS = ImmutableMap.of(
