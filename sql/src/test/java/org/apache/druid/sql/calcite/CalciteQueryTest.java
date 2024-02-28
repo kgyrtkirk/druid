@@ -144,6 +144,7 @@ import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assume.assumeTrue;
 
 public class CalciteQueryTest extends BaseCalciteQueryTest
 {
@@ -568,6 +569,31 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
                 .build()
         ),
         ImmutableList.of(new Object[]{"", "a", 1L})
+    );
+  }
+
+  @Test
+  public void testSafeDivide()
+  {
+    skipVectorize();
+    cannotVectorize();
+    final Map<String, Object> context = new HashMap<>(QUERY_CONTEXT_DEFAULT);
+
+    testQuery(
+        "select count(*) c from foo where ((floor(safe_divide(cast(cast(m1 as char) as bigint), 2))) = 0)",
+        context,
+        ImmutableList.of(
+            Druids.newTimeseriesQueryBuilder()
+                .dataSource(CalciteTests.DATASOURCE1)
+                .intervals(querySegmentSpec(Filtration.eternity()))
+                .virtualColumns(expressionVirtualColumn("v0", "floor(safe_divide(CAST(CAST(\"m1\", 'STRING'), 'LONG'),2))", ColumnType.LONG))
+                .filters(equality("v0", 0L, ColumnType.LONG))
+                .granularity(Granularities.ALL)
+                .aggregators(new CountAggregatorFactory("a0"))
+                .context(context)
+                .build()
+        ),
+        ImmutableList.of(new Object[]{1L})
     );
   }
 
@@ -2914,7 +2940,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @NotYetSupported(Modes.MISSING_UNION_CONVERSION)
+  @NotYetSupported(Modes.UNION_WITH_COMPLEX_OPERAND)
   @Test
   public void testUnionAllQueries()
   {
@@ -2948,7 +2974,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @NotYetSupported(Modes.MISSING_UNION_CONVERSION)
+  @NotYetSupported(Modes.UNION_WITH_COMPLEX_OPERAND)
   @Test
   public void testUnionAllQueriesWithLimit()
   {
@@ -3388,7 +3414,6 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
    * doesn't reset framework once the merge buffers
    */
   @SqlTestFrameworkConfig(numMergeBuffers = 3)
-  @NotYetSupported(Modes.MISSING_UNION_CONVERSION)
   @Test
   public void testUnionAllSameTableThreeTimes()
   {
@@ -3433,7 +3458,6 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
   }
 
   @SqlTestFrameworkConfig(numMergeBuffers = 3)
-  @NotYetSupported(Modes.MISSING_UNION_CONVERSION)
   @Test
   public void testExactCountDistinctUsingSubqueryOnUnionAllTables()
   {
@@ -12620,7 +12644,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(nativeQueryIgnore = NativeQueryIgnore.EXPR_POSTAGG)
+  @DecoupledTestConfig(nativeQueryIgnore = NativeQueryIgnore.IMPROVED_PLAN)
   @Test
   public void testGroupByWithLiteralInSubqueryGrouping()
   {
@@ -12809,7 +12833,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(nativeQueryIgnore = NativeQueryIgnore.EXPR_POSTAGG)
+  @DecoupledTestConfig(nativeQueryIgnore = NativeQueryIgnore.IMPROVED_PLAN)
   @Test
   public void testRepeatedIdenticalVirtualExpressionGrouping()
   {
@@ -15107,6 +15131,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
   @Test
   public void testScanAndSortCanGetSchemaFromScanQuery()
   {
+    assumeTrue(NullHandling.sqlCompatible());
     msqIncompatible();
     String sql = "select * from (select * from \"wikipedia\" limit 3) order by \"user\"";
     ImmutableList<Object[]> expectedResults = ImmutableList.of(
@@ -15353,5 +15378,60 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
             )
         )
         .run();
+  }
+
+  @Test
+  public void testCastCharToVarcharInFlattenConcat()
+  {
+    cannotVectorize();
+    testQuery(
+        "select 'A'||cast(col as char)||'B' from (values(1)) as t(col)",
+        ImmutableList.of(
+            Druids.newScanQueryBuilder()
+                  .dataSource(
+                      InlineDataSource.fromIterable(
+                          ImmutableList.of(
+                              new Object[]{"A1B"}
+                          ),
+                          RowSignature.builder().add("EXPR$0", ColumnType.STRING).build()
+                      )
+                  )
+                  .intervals(querySegmentSpec(Filtration.eternity()))
+                  .resultFormat(ScanQuery.ResultFormat.RESULT_FORMAT_COMPACTED_LIST)
+                  .legacy(false)
+                  .columns(ImmutableList.of(
+                      "EXPR$0"
+                  ))
+                  .build()
+        ),
+        ImmutableList.of(
+            new Object[]{"A1B"}
+        )
+    );
+  }
+
+  @Test
+  public void testFilterParseLongNullable()
+  {
+    testQuery(
+        "select count(*) from druid.foo where parse_long(dim1, 10) is null",
+        ImmutableList.of(
+            Druids.newTimeseriesQueryBuilder()
+                  .dataSource(CalciteTests.DATASOURCE1)
+                  .intervals(querySegmentSpec(Filtration.eternity()))
+                  .virtualColumns(
+                      expressionVirtualColumn(
+                          "v0",
+                          "parse_long(\"dim1\",10)",
+                          ColumnType.LONG)
+                  )
+                  .filters(isNull("v0"))
+                  .granularity(Granularities.ALL)
+                  .aggregators(new CountAggregatorFactory("a0"))
+                  .context(QUERY_CONTEXT_DEFAULT)
+                  .build()
+        ),
+        ImmutableList.of(new Object[]{NullHandling.sqlCompatible() ? 4L : 0L})
+    );
   }
 }

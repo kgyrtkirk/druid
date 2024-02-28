@@ -31,6 +31,7 @@ import org.apache.druid.error.DruidExceptionMatcher;
 import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.java.util.common.granularity.Granularities;
 import org.apache.druid.java.util.common.granularity.Granularity;
+import org.apache.druid.java.util.common.granularity.GranularityType;
 import org.apache.druid.java.util.common.jackson.JacksonUtils;
 import org.apache.druid.query.QueryDataSource;
 import org.apache.druid.query.aggregation.CountAggregatorFactory;
@@ -58,9 +59,16 @@ import org.junit.internal.matchers.ThrowableMessageMatcher;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import static org.apache.druid.segment.column.ColumnType.DOUBLE;
+import static org.apache.druid.segment.column.ColumnType.FLOAT;
+import static org.apache.druid.segment.column.ColumnType.LONG;
+import static org.apache.druid.segment.column.ColumnType.STRING;
 
 import static org.apache.druid.segment.column.ColumnType.DOUBLE;
 import static org.apache.druid.segment.column.ColumnType.FLOAT;
@@ -657,12 +665,58 @@ public class CalciteInsertDmlTest extends CalciteIngestionDmlTest
   }
 
   @Test
+  public void testPartitionedBySupportedGranularityLiteralClauses()
+  {
+    final RowSignature targetRowSignature = RowSignature.builder()
+                                                        .add("__time", ColumnType.LONG)
+                                                        .add("dim1", ColumnType.STRING)
+                                                        .build();
+
+    final Map<String, Granularity> partitionedByToGranularity =
+        Arrays.stream(GranularityType.values())
+              .collect(Collectors.toMap(GranularityType::name, GranularityType::getDefaultGranularity));
+
+    final ObjectMapper queryJsonMapper = queryFramework().queryJsonMapper();
+    partitionedByToGranularity.forEach((partitionedByArgument, expectedGranularity) -> {
+      Map<String, Object> queryContext = null;
+      try {
+        queryContext = ImmutableMap.of(
+            DruidSqlInsert.SQL_INSERT_SEGMENT_GRANULARITY, queryJsonMapper.writeValueAsString(expectedGranularity)
+        );
+      }
+      catch (JsonProcessingException e) {
+        // Won't reach here
+        Assert.fail(e.getMessage());
+      }
+
+      testIngestionQuery()
+          .sql(StringUtils.format(
+              "INSERT INTO druid.dst SELECT __time, dim1 FROM foo PARTITIONED BY '%s'",
+              partitionedByArgument
+          ))
+          .expectTarget("dst", targetRowSignature)
+          .expectResources(dataSourceRead("foo"), dataSourceWrite("dst"))
+          .expectQuery(
+              newScanQueryBuilder()
+                  .dataSource("foo")
+                  .intervals(querySegmentSpec(Filtration.eternity()))
+                  .columns("__time", "dim1")
+                  .context(queryContext)
+                  .build()
+          )
+          .verify();
+      didTest = false;
+    });
+    didTest = true;
+  }
+
+  @Test
   public void testExplainPlanInsertWithClusteredBy() throws JsonProcessingException
   {
     skipVectorize();
 
     final String resources = "[{\"name\":\"dst\",\"type\":\"DATASOURCE\"},{\"name\":\"foo\",\"type\":\"DATASOURCE\"}]";
-    final String attributes = "{\"statementType\":\"INSERT\",\"targetDataSource\":\"dst\",\"partitionedBy\":\"DAY\",\"clusteredBy\":[\"floor_m1\",\"dim1\",\"CEIL(\\\"m2\\\")\"]}";
+    final String attributes = "{\"statementType\":\"INSERT\",\"targetDataSource\":{\"type\":\"table\",\"tableName\":\"dst\"},\"partitionedBy\":\"DAY\",\"clusteredBy\":[\"floor_m1\",\"dim1\",\"CEIL(\\\"m2\\\")\"]}";
 
     final String sql = "EXPLAIN PLAN FOR INSERT INTO druid.dst "
                        + "SELECT __time, FLOOR(m1) as floor_m1, dim1, CEIL(m2) as ceil_m2 FROM foo "
@@ -767,7 +821,7 @@ public class CalciteInsertDmlTest extends CalciteIngestionDmlTest
     skipVectorize();
 
     final String resources = "[{\"name\":\"EXTERNAL\",\"type\":\"EXTERNAL\"},{\"name\":\"foo\",\"type\":\"DATASOURCE\"}]";
-    final String attributes = "{\"statementType\":\"INSERT\",\"targetDataSource\":\"foo\",\"partitionedBy\":{\"type\":\"all\"},\"clusteredBy\":[\"namespace\",\"country\"]}";
+    final String attributes = "{\"statementType\":\"INSERT\",\"targetDataSource\":{\"type\":\"table\",\"tableName\":\"foo\"},\"partitionedBy\":{\"type\":\"all\"},\"clusteredBy\":[\"namespace\",\"country\"]}";
 
     final String sql = "EXPLAIN PLAN FOR\n"
                        + "INSERT INTO \"foo\"\n"
@@ -865,7 +919,7 @@ public class CalciteInsertDmlTest extends CalciteIngestionDmlTest
     skipVectorize();
 
     final String resources = "[{\"name\":\"EXTERNAL\",\"type\":\"EXTERNAL\"},{\"name\":\"my_table\",\"type\":\"DATASOURCE\"}]";
-    final String attributes = "{\"statementType\":\"INSERT\",\"targetDataSource\":\"my_table\",\"partitionedBy\":\"HOUR\",\"clusteredBy\":[\"__time\",\"isRobotAlias\",\"countryCapital\",\"regionName\"]}";
+    final String attributes = "{\"statementType\":\"INSERT\",\"targetDataSource\":{\"type\":\"table\",\"tableName\":\"my_table\"},\"partitionedBy\":\"HOUR\",\"clusteredBy\":[\"__time\",\"isRobotAlias\",\"countryCapital\",\"regionName\"]}";
 
     final String sql = "EXPLAIN PLAN FOR\n"
                        + "INSERT INTO my_table\n"
@@ -1023,6 +1077,47 @@ public class CalciteInsertDmlTest extends CalciteIngestionDmlTest
   }
 
   @Test
+  public void testInsertPeriodFormGranularityWithClusteredBy()
+  {
+    // Test correctness of the query when only the CLUSTERED BY clause is present
+    RowSignature targetRowSignature = RowSignature.builder()
+        .add("__time", ColumnType.LONG)
+        .add("floor_m1", ColumnType.FLOAT)
+        .add("dim1", ColumnType.STRING)
+        .add("ceil_m2", ColumnType.DOUBLE)
+        .build();
+    testIngestionQuery()
+        .sql(
+            "INSERT INTO druid.dst "
+            + "SELECT __time, FLOOR(m1) as floor_m1, dim1, CEIL(m2) as ceil_m2 FROM foo "
+            + "PARTITIONED BY P1D CLUSTERED BY 2, dim1, CEIL(m2)"
+        )
+        .expectTarget("dst", targetRowSignature)
+        .expectResources(dataSourceRead("foo"), dataSourceWrite("dst"))
+        .expectQuery(
+            newScanQueryBuilder()
+                .dataSource("foo")
+                .intervals(querySegmentSpec(Filtration.eternity()))
+                .columns("__time", "dim1", "v0", "v1")
+                .virtualColumns(
+                    expressionVirtualColumn("v0", "floor(\"m1\")", ColumnType.FLOAT),
+                    expressionVirtualColumn("v1", "ceil(\"m2\")", ColumnType.DOUBLE)
+                )
+                .orderBy(
+                    ImmutableList.of(
+                        new ScanQuery.OrderBy("v0", ScanQuery.Order.ASCENDING),
+                        new ScanQuery.OrderBy("dim1", ScanQuery.Order.ASCENDING),
+                        new ScanQuery.OrderBy("v1", ScanQuery.Order.ASCENDING)
+                    )
+                )
+                .context(queryContextWithGranularity(Granularities.DAY))
+                .build()
+        )
+        .expectLogicalPlanFrom("insertPartitionedByP1DWithClusteredBy")
+        .verify();
+  }
+
+  @Test
   public void testInsertWithoutPartitionedByWithClusteredBy()
   {
     testIngestionQuery()
@@ -1123,7 +1218,6 @@ public class CalciteInsertDmlTest extends CalciteIngestionDmlTest
   @Test
   public void testInsertWithPartitionedByContainingInvalidGranularity()
   {
-    // Throws a ValidationException, which gets converted to a DruidException before throwing to end user
     try {
       testQuery(
           "INSERT INTO dst SELECT * FROM foo PARTITIONED BY 'invalid_granularity'",
@@ -1136,8 +1230,10 @@ public class CalciteInsertDmlTest extends CalciteIngestionDmlTest
       MatcherAssert.assertThat(
           e,
           invalidSqlIs(
-              "Invalid granularity ['invalid_granularity'] after PARTITIONED BY.  "
-              + "Expected HOUR, DAY, MONTH, YEAR, ALL TIME, FLOOR() or TIME_FLOOR()"
+              "Invalid granularity['invalid_granularity'] specified after PARTITIONED BY clause."
+              + " Expected 'SECOND', 'MINUTE', 'FIVE_MINUTE', 'TEN_MINUTE', 'FIFTEEN_MINUTE', 'THIRTY_MINUTE', 'HOUR',"
+              + " 'SIX_HOUR', 'EIGHT_HOUR', 'DAY', 'MONTH', 'QUARTER', 'YEAR', 'ALL', ALL TIME, FLOOR()"
+              + " or TIME_FLOOR()"
           ));
     }
     didTest = true;
@@ -1232,7 +1328,7 @@ public class CalciteInsertDmlTest extends CalciteIngestionDmlTest
         + "}]";
 
     final String resources = "[{\"name\":\"EXTERNAL\",\"type\":\"EXTERNAL\"},{\"name\":\"dst\",\"type\":\"DATASOURCE\"}]";
-    final String attributes = "{\"statementType\":\"INSERT\",\"targetDataSource\":\"dst\",\"partitionedBy\":{\"type\":\"all\"}}";
+    final String attributes = "{\"statementType\":\"INSERT\",\"targetDataSource\":{\"type\":\"table\",\"tableName\":\"dst\"},\"partitionedBy\":{\"type\":\"all\"}}";
 
     // Use testQuery for EXPLAIN (not testIngestionQuery).
     testQuery(
@@ -1337,7 +1433,7 @@ public class CalciteInsertDmlTest extends CalciteIngestionDmlTest
         + "}]";
 
     final String resources = "[{\"name\":\"dst\",\"type\":\"DATASOURCE\"},{\"name\":\"foo\",\"type\":\"DATASOURCE\"}]";
-    final String attributes = "{\"statementType\":\"INSERT\",\"targetDataSource\":\"dst\",\"partitionedBy\":\"DAY\",\"clusteredBy\":[\"floor_m1\",\"dim1\",\"CEIL(\\\"m2\\\")\"]}";
+    final String attributes = "{\"statementType\":\"INSERT\",\"targetDataSource\":{\"type\":\"table\",\"tableName\":\"dst\"},\"partitionedBy\":\"DAY\",\"clusteredBy\":[\"floor_m1\",\"dim1\",\"CEIL(\\\"m2\\\")\"]}";
 
     // Use testQuery for EXPLAIN (not testIngestionQuery).
     testQuery(
@@ -1583,9 +1679,10 @@ public class CalciteInsertDmlTest extends CalciteIngestionDmlTest
             CoreMatchers.allOf(
                 CoreMatchers.instanceOf(DruidException.class),
                 ThrowableMessageMatcher.hasMessage(CoreMatchers.containsString(
-                    "The granularity specified in PARTITIONED BY [`time_floor`(`__time`, 'PT2H')] is not supported.  "
-                    + "Valid options: [second, minute, five_minute, ten_minute, fifteen_minute, thirty_minute, hour, "
-                    + "six_hour, eight_hour, day, week, month, quarter, year, all]"))
+                    "Invalid granularity[`time_floor`(`__time`, 'PT2H')] specified after PARTITIONED BY clause."
+                    + " Expected 'SECOND', 'MINUTE', 'FIVE_MINUTE', 'TEN_MINUTE', 'FIFTEEN_MINUTE', 'THIRTY_MINUTE',"
+                    + " 'HOUR', 'SIX_HOUR', 'EIGHT_HOUR', 'DAY', 'MONTH', 'QUARTER', 'YEAR', 'ALL',"
+                    + " ALL TIME, FLOOR() or TIME_FLOOR()"))
             )
         )
         .verify();
@@ -1646,7 +1743,6 @@ public class CalciteInsertDmlTest extends CalciteIngestionDmlTest
                              + "partitioned by DAY\n"
                              + "clustered by channel";
     HashMap<String, Object> context = new HashMap<>(DEFAULT_CONTEXT);
-    context.put(PlannerContext.CTX_SQL_OUTER_LIMIT, 100);
     testIngestionQuery().context(context).sql(sqlString)
                         .expectValidationError(
                             new DruidExceptionMatcher(
@@ -1675,7 +1771,6 @@ public class CalciteInsertDmlTest extends CalciteIngestionDmlTest
                              + "partitioned by DAY\n"
                              + "clustered by channel";
     HashMap<String, Object> context = new HashMap<>(DEFAULT_CONTEXT);
-    context.put(PlannerContext.CTX_SQL_OUTER_LIMIT, 100);
     testIngestionQuery().context(context).sql(sqlString)
                         .expectValidationError(
                             new DruidExceptionMatcher(
@@ -1703,7 +1798,6 @@ public class CalciteInsertDmlTest extends CalciteIngestionDmlTest
                              + "partitioned by DAY\n"
                              + "clustered by channel";
     HashMap<String, Object> context = new HashMap<>(DEFAULT_CONTEXT);
-    context.put(PlannerContext.CTX_SQL_OUTER_LIMIT, 100);
     testIngestionQuery().context(context).sql(sqlString)
                         .expectValidationError(
                             new DruidExceptionMatcher(
@@ -1732,7 +1826,6 @@ public class CalciteInsertDmlTest extends CalciteIngestionDmlTest
                              + "partitioned by DAY\n"
                              + "clustered by channel";
     HashMap<String, Object> context = new HashMap<>(DEFAULT_CONTEXT);
-    context.put(PlannerContext.CTX_SQL_OUTER_LIMIT, 100);
     testIngestionQuery().context(context).sql(sqlString)
                         .expectValidationError(
                             new DruidExceptionMatcher(
