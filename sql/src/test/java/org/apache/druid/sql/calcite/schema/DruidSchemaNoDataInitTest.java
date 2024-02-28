@@ -36,8 +36,8 @@ import org.apache.druid.sql.calcite.util.CalciteTestBase;
 import org.apache.druid.sql.calcite.util.CalciteTests;
 import org.apache.druid.sql.calcite.util.TestTimelineServerView;
 import org.easymock.EasyMock;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 
@@ -70,7 +70,7 @@ public class DruidSchemaNoDataInitTest extends CalciteTestBase
       cache.awaitInitialization();
       final DruidSchema druidSchema = new DruidSchema(cache, null, CatalogResolver.NULL_RESOLVER);
 
-      Assert.assertEquals(ImmutableSet.of(), druidSchema.getTableNames());
+      Assertions.assertEquals(ImmutableSet.of(), druidSchema.getTableNames());
     }
   }
 }

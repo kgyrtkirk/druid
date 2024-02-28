@@ -85,9 +85,10 @@ import org.apache.druid.timeline.DataSegment;
 import org.apache.druid.timeline.partition.LinearShardSpec;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Period;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -262,7 +263,7 @@ public class HllSketchSqlAggregatorTest extends BaseCalciteQueryTest
     HllSketchModule.registerSerde();
     final QueryableIndex index = IndexBuilder
         .create()
-        .tmpDir(temporaryFolder.newFolder())
+        .tmpDir(newFolder(temporaryFolder, "junit"))
         .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
         .schema(
             new IncrementalIndexSchema.Builder()
@@ -1080,7 +1081,7 @@ public class HllSketchSqlAggregatorTest extends BaseCalciteQueryTest
       );
     }
     catch (IllegalArgumentException e) {
-      Assert.assertTrue(
+      Assertions.assertTrue(
           e.getMessage().contains("Input byte[] should at least have 2 bytes for base64 bytes")
       );
     }
@@ -1326,5 +1327,14 @@ public class HllSketchSqlAggregatorTest extends BaseCalciteQueryTest
         ColumnType.DOUBLE,
         MACRO_TABLE
     );
+  }
+
+  private static File newFolder(File root, String... subDirs) throws IOException {
+    String subFolder = String.join("/", subDirs);
+    File result = new File(root, subFolder);
+    if (!result.mkdirs()) {
+      throw new IOException("Couldn't create folders " + root);
+    }
+    return result;
   }
 }

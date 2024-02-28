@@ -28,8 +28,8 @@ import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.sql.calcite.export.TestExportStorageConnector;
 import org.apache.druid.sql.http.ResultFormat;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -65,7 +65,7 @@ public class MSQExportTest extends MSQTestBase
 
     List<Object[]> objects = expectedFooFileContents();
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         convertResultsToString(objects),
         new String(storageConnector.getByteArrayOutputStream().toByteArray(), Charset.defaultCharset())
     );
@@ -79,7 +79,7 @@ public class MSQExportTest extends MSQTestBase
                                             .add("dim1", ColumnType.STRING)
                                             .add("cnt", ColumnType.LONG).build();
 
-    File exportDir = temporaryFolder.newFolder("export/");
+    File exportDir = newFolder(temporaryFolder, "export/");
 
     Map<String, Object> queryContext = new HashMap<>(DEFAULT_MSQ_CONTEXT);
     queryContext.put(MultiStageQueryContext.CTX_ROWS_PER_PAGE, 1);
@@ -94,7 +94,7 @@ public class MSQExportTest extends MSQTestBase
                      .setExpectedResultRows(ImmutableList.of())
                      .verifyResults();
 
-    Assert.assertEquals(
+    Assertions.assertEquals(
         expectedFooFileContents().size(),
         Objects.requireNonNull(new File(exportDir.getAbsolutePath()).listFiles()).length
     );
@@ -126,5 +126,14 @@ public class MSQExportTest extends MSQTestBase
     }
     formatter.writeResponseEnd();
     return new String(expectedResult.toByteArray(), Charset.defaultCharset());
+  }
+
+  private static File newFolder(File root, String... subDirs) throws IOException {
+    String subFolder = String.join("/", subDirs);
+    File result = new File(root, subFolder);
+    if (!result.mkdirs()) {
+      throw new IOException("Couldn't create folders " + root);
+    }
+    return result;
   }
 }

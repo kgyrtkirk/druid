@@ -115,21 +115,21 @@ import org.apache.druid.sql.calcite.view.ViewManager;
 import org.apache.druid.sql.http.SqlParameter;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matcher;
-import org.hamcrest.MatcherAssert;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.joda.time.chrono.ISOChronology;
-import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.internal.matchers.ThrowableMessageMatcher;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.rules.ExpectedException;
-import org.junit.rules.TemporaryFolder;
 
 import javax.annotation.Nullable;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -143,9 +143,10 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assume.assumeTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /**
  * A base class for SQL query testing. It sets up query execution environment, provides useful helper methods,
@@ -160,7 +161,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   public static Long NULL_LONG;
   public static final String HLLC_STRING = VersionOneHyperLogLogCollector.class.getName();
 
-  @BeforeClass
+  @BeforeAll
   public static void setupNullValues()
   {
     NULL_STRING = NullHandling.defaultStringValue();
@@ -296,8 +297,8 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   public final SqlEngine engine0;
   final boolean useDefault = NullHandling.replaceWithDefault();
 
-  @Rule(order = 2)
-  public TemporaryFolder temporaryFolder = new TemporaryFolder();
+  @TempDir
+  public File temporaryFolder;
 
   public boolean cannotVectorize = false;
   public boolean skipVectorize = false;
@@ -676,7 +677,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   {
     try {
       baseComponentSupplier = new StandardComponentSupplier(
-          temporaryFolder.newFolder()
+          newFolder(temporaryFolder, "junit")
       );
     }
     catch (IOException e) {
@@ -749,7 +750,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   {
     boolean featureAvailable = queryFramework().engine()
         .featureAvailable(feature, ExpressionTestHelper.PLANNER_CONTEXT);
-    assumeTrue(StringUtils.format("test disabled; feature [%s] is not available!", feature), featureAvailable);
+    assumeTrue(featureAvailable, StringUtils.format("test disabled; feature [%s] is not available!", feature));
   }
 
   public void assertQueryIsUnplannable(final String sql, String expectedError)
@@ -763,7 +764,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
       testQuery(plannerConfig, sql, CalciteTests.REGULAR_USER_AUTH_RESULT, ImmutableList.of(), ImmutableList.of());
     }
     catch (DruidException e) {
-      MatcherAssert.assertThat(
+      assertThat(
           e,
           buildUnplannableExceptionMatcher().expectMessageContains(expectedError)
       );
@@ -807,7 +808,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
 
     if (!(e instanceof ForbiddenException)) {
       log.error(e, "Expected ForbiddenException for query: %s with authResult: %s", sql, authenticationResult);
-      Assert.fail(sql);
+      Assertions.fail(sql);
     }
   }
 
@@ -1055,6 +1056,15 @@ public class BaseCalciteQueryTest extends CalciteTestBase
     {
       return baseQueryContext;
     }
+
+    private static File newFolder(File root, String... subDirs) throws IOException {
+      String subFolder = String.join("/", subDirs);
+      File result = new File(root, subFolder);
+      if (!result.mkdirs()) {
+        throw new IOException("Couldn't create folders " + root);
+      }
+      return result;
+    }
   }
 
   public enum ResultMatchMode
@@ -1064,9 +1074,9 @@ public class BaseCalciteQueryTest extends CalciteTestBase
       void validate(int row, int column, ValueType type, Object expectedCell, Object resultCell)
       {
         assertEquals(
-            mismatchMessage(row, column),
             expectedCell,
-            resultCell);
+            resultCell,
+            mismatchMessage(row, column));
       }
     },
     RELAX_NULLS {
@@ -1088,16 +1098,16 @@ public class BaseCalciteQueryTest extends CalciteTestBase
       {
         if (expectedCell instanceof Float) {
           assertEquals(
-              mismatchMessage(row, column),
               (Float) expectedCell,
               (Float) resultCell,
-              ASSERTION_EPSILON);
+              ASSERTION_EPSILON,
+              mismatchMessage(row, column));
         } else if (expectedCell instanceof Double) {
           assertEquals(
-              mismatchMessage(row, column),
               (Double) expectedCell,
               (Double) resultCell,
-              ASSERTION_EPSILON);
+              ASSERTION_EPSILON,
+              mismatchMessage(row, column));
         } else {
           EQUALS.validate(row, column, type, expectedCell, resultCell);
         }
@@ -1115,18 +1125,18 @@ public class BaseCalciteQueryTest extends CalciteTestBase
         if (expectedCell instanceof Float) {
           float eps = ASSERTION_ERROR_ULPS * Math.ulp((Float) expectedCell);
           assertEquals(
-              mismatchMessage(row, column),
               (Float) expectedCell,
               (Float) resultCell,
-              eps
+              eps,
+              mismatchMessage(row, column)
           );
         } else if (expectedCell instanceof Double) {
           double eps = ASSERTION_ERROR_ULPS * Math.ulp((Double) expectedCell);
           assertEquals(
-              mismatchMessage(row, column),
               (Double) expectedCell,
               (Double) resultCell,
-              eps
+              eps,
+              mismatchMessage(row, column)
           );
         } else {
           EQUALS.validate(row, column, type, expectedCell, resultCell);
@@ -1141,6 +1151,15 @@ public class BaseCalciteQueryTest extends CalciteTestBase
       return StringUtils.format("column content mismatch at %d,%d", row, column);
     }
 
+    private static File newFolder(File root, String... subDirs) throws IOException {
+      String subFolder = String.join("/", subDirs);
+      File result = new File(root, subFolder);
+      if (!result.mkdirs()) {
+        throw new IOException("Couldn't create folders " + root);
+      }
+      return result;
+    }
+
   }
 
   /**
@@ -1152,7 +1171,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   public void assertResultsValid(final ResultMatchMode matchMode, final List<Object[]> expected, final QueryResults queryResults)
   {
     final List<Object[]> results = queryResults.results;
-    Assert.assertEquals("Result count mismatch", expected.size(), results.size());
+    Assertions.assertEquals(expected.size(), results.size(), "Result count mismatch");
 
     final List<ValueType> types = new ArrayList<>();
 
@@ -1173,7 +1192,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
     for (int row = 0; row < numRows; row++) {
       final Object[] expectedRow = expected.get(row);
       final Object[] resultRow = results.get(row);
-      assertEquals("column count mismatch; at row#" + row, expectedRow.length, resultRow.length);
+      assertEquals(expectedRow.length, resultRow.length, "column count mismatch; at row#" + row);
 
       for (int i = 0; i < resultRow.length; i++) {
         final Object resultCell = resultRow[i];
@@ -1199,13 +1218,13 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   {
     int minSize = Math.min(results.size(), expectedResults.size());
     for (int i = 0; i < minSize; i++) {
-      Assert.assertArrayEquals(
-          StringUtils.format("result #%d: %s", i + 1, sql),
+      Assertions.assertArrayEquals(
           expectedResults.get(i),
-          results.get(i)
+          results.get(i),
+          StringUtils.format("result #%d: %s", i + 1, sql)
       );
     }
-    Assert.assertEquals(expectedResults.size(), results.size());
+    Assertions.assertEquals(expectedResults.size(), results.size());
   }
 
   @Deprecated
@@ -1267,7 +1286,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
             .build()
             .run()
     );
-    MatcherAssert.assertThat(e, exceptionMatcher);
+    assertThat(e, exceptionMatcher);
   }
 
   public void analyzeResources(
@@ -1457,6 +1476,15 @@ public class BaseCalciteQueryTest extends CalciteTestBase
               .build(),
           };
     }
+
+    private static File newFolder(File root, String... subDirs) throws IOException {
+      String subFolder = String.join("/", subDirs);
+      File result = new File(root, subFolder);
+      if (!result.mkdirs()) {
+        throw new IOException("Couldn't create folders " + root);
+      }
+      return result;
+    }
   }
 
   protected Map<String, Object> withLeftDirectAccessEnabled(Map<String, Object> context)
@@ -1500,6 +1528,15 @@ public class BaseCalciteQueryTest extends CalciteTestBase
     }
 
     void verify(String sql, QueryResults queryResults);
+
+    private static File newFolder(File root, String... subDirs) throws IOException {
+      String subFolder = String.join("/", subDirs);
+      File result = new File(root, subFolder);
+      if (!result.mkdirs()) {
+        throw new IOException("Couldn't create folders " + root);
+      }
+      return result;
+    }
   }
 
   private ResultsVerifier defaultResultsVerifier(
@@ -1534,7 +1571,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
     public void verifyRowSignature(RowSignature rowSignature)
     {
       if (expectedResultRowSignature != null) {
-        Assert.assertEquals(expectedResultRowSignature, rowSignature);
+        Assertions.assertEquals(expectedResultRowSignature, rowSignature);
       }
     }
 
@@ -1550,6 +1587,15 @@ public class BaseCalciteQueryTest extends CalciteTestBase
         log.info(resultsToString("Actual", queryResults.results));
         throw e;
       }
+    }
+
+    private static File newFolder(File root, String... subDirs) throws IOException {
+      String subFolder = String.join("/", subDirs);
+      File result = new File(root, subFolder);
+      if (!result.mkdirs()) {
+        throw new IOException("Couldn't create folders " + root);
+      }
+      return result;
     }
 
   }
@@ -1639,5 +1685,23 @@ public class BaseCalciteQueryTest extends CalciteTestBase
     {
       sb.append(post);
     }
+
+    private static File newFolder(File root, String... subDirs) throws IOException {
+      String subFolder = String.join("/", subDirs);
+      File result = new File(root, subFolder);
+      if (!result.mkdirs()) {
+        throw new IOException("Couldn't create folders " + root);
+      }
+      return result;
+    }
+  }
+
+  private static File newFolder(File root, String... subDirs) throws IOException {
+    String subFolder = String.join("/", subDirs);
+    File result = new File(root, subFolder);
+    if (!result.mkdirs()) {
+      throw new IOException("Couldn't create folders " + root);
+    }
+    return result;
   }
 }

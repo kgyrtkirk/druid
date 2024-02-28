@@ -68,9 +68,9 @@ import org.apache.druid.sql.calcite.expression.builtin.TruncateOperatorConversio
 import org.apache.druid.sql.calcite.planner.DruidOperatorTable;
 import org.apache.druid.sql.calcite.util.CalciteTestBase;
 import org.joda.time.Period;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.util.Collections;
@@ -132,7 +132,7 @@ public class ExpressionsTest extends CalciteTestBase
 
   final DruidOperatorTable operatorTable = new DruidOperatorTable(Collections.emptySet(), Collections.emptySet());
 
-  @Before
+  @BeforeEach
   public void setUp()
   {
     testHelper = new ExpressionTestHelper(ROW_SIGNATURE, BINDINGS);
@@ -1268,7 +1268,7 @@ public class ExpressionsTest extends CalciteTestBase
     final SqlOperator roundFunction = getOperatorConversion(SqlStdOperatorTable.ROUND).calciteOperator();
 
     if (!NullHandling.sqlCompatible()) {
-      Throwable t = Assert.assertThrows(
+      Throwable t = Assertions.assertThrows(
           DruidException.class,
           () -> testHelper.testExpression(
               roundFunction,
@@ -1283,7 +1283,7 @@ public class ExpressionsTest extends CalciteTestBase
               NullHandling.sqlCompatible() ? null : "IAE Exception"
           )
       );
-      Assert.assertEquals(
+      Assertions.assertEquals(
           "Function[round] first argument should be a LONG or DOUBLE but got STRING instead",
           t.getMessage()
       );
@@ -1295,7 +1295,7 @@ public class ExpressionsTest extends CalciteTestBase
   {
     final SqlOperator roundFunction = getOperatorConversion(SqlStdOperatorTable.ROUND).calciteOperator();
 
-    Throwable t = Assert.assertThrows(
+    Throwable t = Assertions.assertThrows(
         DruidException.class,
         () -> testHelper.testExpressionString(
             roundFunction,
@@ -1314,7 +1314,7 @@ public class ExpressionsTest extends CalciteTestBase
             "IAE Exception"
         )
     );
-    Assert.assertEquals("Function[round] second argument should be a LONG but got STRING instead", t.getMessage());
+    Assertions.assertEquals("Function[round] second argument should be a LONG but got STRING instead", t.getMessage());
   }
 
   @Test
@@ -2264,7 +2264,7 @@ public class ExpressionsTest extends CalciteTestBase
   @Test
   public void testAbnormalReverseWithWrongType()
   {
-    Throwable t = Assert.assertThrows(
+    Throwable t = Assertions.assertThrows(
         DruidException.class,
         () -> testHelper.testExpression(
             new ReverseOperatorConversion().calciteOperator(),
@@ -2279,7 +2279,7 @@ public class ExpressionsTest extends CalciteTestBase
             null
         )
     );
-    Assert.assertEquals("Function[reverse] needs a STRING argument but got LONG instead", t.getMessage());
+    Assertions.assertEquals("Function[reverse] needs a STRING argument but got LONG instead", t.getMessage());
   }
 
   @Test
@@ -2339,7 +2339,7 @@ public class ExpressionsTest extends CalciteTestBase
   @Test
   public void testAbnormalRightWithNegativeNumber()
   {
-    Throwable t = Assert.assertThrows(
+    Throwable t = Assertions.assertThrows(
         DruidException.class,
         () -> testHelper.testExpressionString(
             new RightOperatorConversion().calciteOperator(),
@@ -2351,13 +2351,13 @@ public class ExpressionsTest extends CalciteTestBase
             null
         )
     );
-    Assert.assertEquals("Function[right] needs a positive integer as the second argument", t.getMessage());
+    Assertions.assertEquals("Function[right] needs a positive integer as the second argument", t.getMessage());
   }
 
   @Test
   public void testAbnormalRightWithWrongType()
   {
-    Throwable t = Assert.assertThrows(
+    Throwable t = Assertions.assertThrows(
         DruidException.class,
         () -> testHelper.testExpressionString(
             new RightOperatorConversion().calciteOperator(),
@@ -2369,7 +2369,7 @@ public class ExpressionsTest extends CalciteTestBase
             null
         )
     );
-    Assert.assertEquals(
+    Assertions.assertEquals(
         "Function[right] needs a STRING as first argument and a LONG as second argument",
         t.getMessage()
     );
@@ -2432,7 +2432,7 @@ public class ExpressionsTest extends CalciteTestBase
   @Test
   public void testAbnormalLeftWithNegativeNumber()
   {
-    Throwable t = Assert.assertThrows(
+    Throwable t = Assertions.assertThrows(
         DruidException.class,
         () -> testHelper.testExpressionString(
             new LeftOperatorConversion().calciteOperator(),
@@ -2444,13 +2444,13 @@ public class ExpressionsTest extends CalciteTestBase
             null
         )
     );
-    Assert.assertEquals("Function[left] needs a postive integer as second argument", t.getMessage());
+    Assertions.assertEquals("Function[left] needs a postive integer as second argument", t.getMessage());
   }
 
   @Test
   public void testAbnormalLeftWithWrongType()
   {
-    Throwable t = Assert.assertThrows(
+    Throwable t = Assertions.assertThrows(
         DruidException.class,
         () -> testHelper.testExpressionString(
             new LeftOperatorConversion().calciteOperator(),
@@ -2462,7 +2462,7 @@ public class ExpressionsTest extends CalciteTestBase
             null
         )
     );
-    Assert.assertEquals(
+    Assertions.assertEquals(
         "Function[left] needs a STRING as first argument and a LONG as second argument",
         t.getMessage()
     );
@@ -2505,7 +2505,7 @@ public class ExpressionsTest extends CalciteTestBase
   @Test
   public void testAbnormalRepeatWithWrongType()
   {
-    Throwable t = Assert.assertThrows(
+    Throwable t = Assertions.assertThrows(
         DruidException.class,
         () -> testHelper.testExpressionString(
             new RepeatOperatorConversion().calciteOperator(),
@@ -2517,7 +2517,7 @@ public class ExpressionsTest extends CalciteTestBase
             null
         )
     );
-    Assert.assertEquals(
+    Assertions.assertEquals(
         "Function[repeat] needs a STRING as first argument and a LONG as second argument",
         t.getMessage()
     );
