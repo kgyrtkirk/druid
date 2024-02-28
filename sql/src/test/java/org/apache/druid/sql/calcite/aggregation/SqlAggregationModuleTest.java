@@ -35,6 +35,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+
 public class SqlAggregationModuleTest extends CalciteTestBase
 {
   private SqlAggregationModule target;
@@ -58,7 +60,7 @@ public class SqlAggregationModuleTest extends CalciteTestBase
                                                           .sorted(Comparator.comparing(o -> o.getClass().getName()))
                                                           .collect(Collectors.toList());
 
-    Assert.assertThat(aggregators.get(0), CoreMatchers.instanceOf(ApproxCountDistinctSqlAggregator.class));
-    Assert.assertThat(aggregators.get(1), CoreMatchers.instanceOf(CountSqlAggregator.class));
+    assertThat(aggregators.get(0), CoreMatchers.instanceOf(ApproxCountDistinctSqlAggregator.class));
+    assertThat(aggregators.get(1), CoreMatchers.instanceOf(CountSqlAggregator.class));
   }
 }

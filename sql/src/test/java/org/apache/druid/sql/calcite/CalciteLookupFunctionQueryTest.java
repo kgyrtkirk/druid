@@ -54,7 +54,6 @@ import org.apache.druid.sql.calcite.planner.PlannerContext;
 import org.apache.druid.sql.calcite.rule.ReverseLookupRule;
 import org.apache.druid.sql.calcite.util.CalciteTests;
 import org.hamcrest.CoreMatchers;
-import org.hamcrest.MatcherAssert;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.internal.matchers.ThrowableMessageMatcher;
@@ -64,6 +63,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class CalciteLookupFunctionQueryTest extends BaseCalciteQueryTest
 {
@@ -1591,7 +1592,7 @@ public class CalciteLookupFunctionQueryTest extends BaseCalciteQueryTest
         )
     );
 
-    MatcherAssert.assertThat(
+    assertThat(
         e,
         ThrowableMessageMatcher.hasMessage(CoreMatchers.startsWith("Too many optimize calls[2]"))
     );

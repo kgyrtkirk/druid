@@ -123,7 +123,6 @@ import org.apache.druid.sql.calcite.run.EngineFeature;
 import org.apache.druid.sql.calcite.util.CalciteTests;
 import org.apache.druid.sql.calcite.util.TestDataBuilder;
 import org.hamcrest.CoreMatchers;
-import org.hamcrest.MatcherAssert;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
@@ -349,7 +348,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
         )
     );
 
-    MatcherAssert.assertThat(
+    assertThat(
         e,
         invalidSqlIs("INSERT operations are not supported by requested SQL engine [native], consider using MSQ.")
     );
@@ -368,7 +367,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
         )
     );
 
-    MatcherAssert.assertThat(
+    assertThat(
         e,
         invalidSqlIs("REPLACE operations are not supported by the requested SQL engine [native].  Consider using MSQ.")
     );
@@ -6292,7 +6291,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
       testBuilder().sql(sql).run();
     }
     catch (DruidException e) {
-      MatcherAssert.assertThat(
+      assertThat(
           e,
           invalidSqlIs("Illegal TIMESTAMP constant [CAST('z2000-01-01 00:00:00'):TIMESTAMP(3) NOT NULL]")
       );
@@ -11339,7 +11338,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
       Assert.fail("query execution should fail");
     }
     catch (DruidException e) {
-      MatcherAssert.assertThat(
+      assertThat(
           e,
           invalidSqlIs(
               "Invalid number of arguments to function 'TIME_EXTRACT'. Was expecting 2 arguments (line [1], column [8])"

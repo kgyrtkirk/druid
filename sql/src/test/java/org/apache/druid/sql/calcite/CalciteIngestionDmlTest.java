@@ -65,7 +65,6 @@ import org.apache.druid.sql.guice.SqlBindings;
 import org.apache.druid.sql.http.SqlParameter;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matcher;
-import org.hamcrest.MatcherAssert;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.internal.matchers.ThrowableMessageMatcher;
@@ -81,6 +80,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
+
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class CalciteIngestionDmlTest extends BaseCalciteQueryTest
 {
@@ -386,7 +387,7 @@ public class CalciteIngestionDmlTest extends BaseCalciteQueryTest
           }
       );
 
-      MatcherAssert.assertThat(e, validationErrorMatcher);
+      assertThat(e, validationErrorMatcher);
       Assert.assertTrue(queryLogHook.getRecordedQueries().isEmpty());
     }
 
