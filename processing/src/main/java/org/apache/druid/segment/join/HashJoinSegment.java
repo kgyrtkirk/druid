@@ -150,13 +150,13 @@ public class HashJoinSegment implements SegmentReference
     }
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public <T> T as(Class<T> clazz)
   {
     if (CloseableShapeshifter.class.equals(clazz)) {
-      return (T) new StorageAdapterRowsAndColumns(this.asStorageAdapter());
+      return (T) new StorageAdapterBasedRowsAndColumns(this.asStorageAdapter());
     }
     return SegmentReference.super.as(clazz);
   }
-
 }
