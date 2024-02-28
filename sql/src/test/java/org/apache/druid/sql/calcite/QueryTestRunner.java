@@ -598,7 +598,10 @@ public class QueryTestRunner
       // The builder specifies one exception, but the query can run multiple
       // times. Pick the first failure as that emulates the original code flow
       // where the first exception ended the test.
-      ExpectedException expectedException = builder.config.expectedException();
+      if(true) {
+        throw new RuntimeException();
+      }
+      ExpectedException expectedException = null; //builder.config.expectedException();
       for (QueryResults queryResults : execStep.results()) {
         if (queryResults.exception == null) {
           continue;

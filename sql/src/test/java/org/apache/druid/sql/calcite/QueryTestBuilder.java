@@ -74,8 +74,6 @@ public class QueryTestBuilder
   {
     QueryLogHook queryLogHook();
 
-    ExpectedException expectedException();
-
     ObjectMapper jsonMapper();
 
     PlannerFixture plannerFixture(PlannerConfig plannerConfig, AuthConfig authConfig);

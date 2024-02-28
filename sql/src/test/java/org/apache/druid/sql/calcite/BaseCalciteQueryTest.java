@@ -1022,12 +1022,6 @@ public class BaseCalciteQueryTest extends CalciteTestBase
     }
 
     @Override
-    public ExpectedException expectedException()
-    {
-      return expectedException;
-    }
-
-    @Override
     public PlannerFixture plannerFixture(PlannerConfig plannerConfig, AuthConfig authConfig)
     {
       return queryFramework().plannerFixture(BaseCalciteQueryTest.this, plannerConfig, authConfig);
