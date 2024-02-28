@@ -115,6 +115,7 @@ import org.apache.druid.sql.calcite.view.ViewManager;
 import org.apache.druid.sql.http.SqlParameter;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matcher;
+import org.hamcrest.MatcherAssert;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
@@ -142,7 +143,6 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assume.assumeTrue;
@@ -763,7 +763,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
       testQuery(plannerConfig, sql, CalciteTests.REGULAR_USER_AUTH_RESULT, ImmutableList.of(), ImmutableList.of());
     }
     catch (DruidException e) {
-      assertThat(
+      MatcherAssert.assertThat(
           e,
           buildUnplannableExceptionMatcher().expectMessageContains(expectedError)
       );
@@ -1267,7 +1267,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
             .build()
             .run()
     );
-    assertThat(e, exceptionMatcher);
+    MatcherAssert.assertThat(e, exceptionMatcher);
   }
 
   public void analyzeResources(

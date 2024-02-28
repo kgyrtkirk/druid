@@ -91,6 +91,7 @@ import org.apache.druid.sql.calcite.expression.DruidExpression;
 import org.apache.druid.sql.calcite.filtration.Filtration;
 import org.apache.druid.sql.calcite.planner.PlannerConfig;
 import org.apache.druid.sql.calcite.util.CalciteTests;
+import org.hamcrest.MatcherAssert;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Period;
 import org.junit.Assert;
@@ -104,8 +105,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static org.hamcrest.MatcherAssert.assertThat;
 
 @RunWith(JUnitParamsRunner.class)
 public class CalciteJoinQueryTest extends BaseCalciteQueryTest
@@ -1603,7 +1602,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
       Assert.fail("Expected exception to be thrown.");
     }
     catch (DruidException e) {
-      assertThat(
+      MatcherAssert.assertThat(
           e,
           new DruidExceptionMatcher(DruidException.Persona.ADMIN, DruidException.Category.INVALID_INPUT, "general")
               .expectMessageIs(

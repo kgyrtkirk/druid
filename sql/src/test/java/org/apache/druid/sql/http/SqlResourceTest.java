@@ -104,6 +104,7 @@ import org.apache.druid.sql.calcite.util.CalciteTestBase;
 import org.apache.druid.sql.calcite.util.CalciteTests;
 import org.apache.druid.sql.calcite.util.QueryLogHook;
 import org.hamcrest.CoreMatchers;
+import org.hamcrest.MatcherAssert;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -142,8 +143,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-
-import static org.hamcrest.MatcherAssert.assertThat;
 
 @SuppressWarnings("ALL")
 public class SqlResourceTest extends CalciteTestBase
@@ -1604,7 +1603,7 @@ public class SqlResourceTest extends CalciteTestBase
         Status.BAD_REQUEST.getStatusCode()
     );
 
-    assertThat(
+    MatcherAssert.assertThat(
         exception.getUnderlyingException(),
         DruidExceptionMatcher
             .invalidSqlInput()
@@ -2303,7 +2302,7 @@ public class SqlResourceTest extends CalciteTestBase
     if (messageContainsString == null) {
       Assert.assertNull(exception.getMessage());
     } else {
-      assertThat(exception.getMessage(), CoreMatchers.containsString(messageContainsString));
+      MatcherAssert.assertThat(exception.getMessage(), CoreMatchers.containsString(messageContainsString));
     }
 
     return exception;
