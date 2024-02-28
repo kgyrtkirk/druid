@@ -827,27 +827,18 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
   @Test
   public void testEarliestByInvalidTimestamp()
   {
-    expectedException.expect(DruidException.class);
-    expectedException.expectMessage("Cannot apply 'EARLIEST_BY' to arguments of type 'EARLIEST_BY(<FLOAT>, <BIGINT>)");
-
-    testQuery(
+    testQueryThrows(
         "SELECT EARLIEST_BY(m1, l1) FROM druid.numfoo",
-        ImmutableList.of(),
-        ImmutableList.of()
+        invalidSqlContains("Cannot apply 'EARLIEST_BY' to arguments of type 'EARLIEST_BY(<FLOAT>, <BIGINT>)")
     );
   }
 
   @Test
   public void testLatestByInvalidTimestamp()
   {
-    expectedException.expect(
-        invalidSqlContains("Cannot apply 'LATEST_BY' to arguments of type 'LATEST_BY(<FLOAT>, <BIGINT>)")
-    );
-
-    testQuery(
+    testQueryThrows(
         "SELECT LATEST_BY(m1, l1) FROM druid.numfoo",
-        ImmutableList.of(),
-        ImmutableList.of()
+        invalidSqlContains("Cannot apply 'LATEST_BY' to arguments of type 'LATEST_BY(<FLOAT>, <BIGINT>)")
     );
   }
 
