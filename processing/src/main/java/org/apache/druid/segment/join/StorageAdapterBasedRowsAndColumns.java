@@ -19,13 +19,13 @@
 
 package org.apache.druid.segment.join;
 
-import com.google.common.base.Preconditions;
 import org.apache.druid.frame.Frame;
 import org.apache.druid.frame.FrameType;
 import org.apache.druid.frame.allocation.ArenaMemoryAllocatorFactory;
 import org.apache.druid.frame.write.FrameWriter;
 import org.apache.druid.frame.write.FrameWriterFactory;
 import org.apache.druid.frame.write.FrameWriters;
+import org.apache.druid.java.util.common.ISE;
 import org.apache.druid.java.util.common.Intervals;
 import org.apache.druid.java.util.common.granularity.Granularities;
 import org.apache.druid.java.util.common.guava.Sequence;
@@ -114,7 +114,11 @@ public class StorageAdapterBasedRowsAndColumns implements CloseableShapeshifter,
     RowSignature rowSignature = as.getRowSignature();
 
     FrameWriter writer = cursors.accumulate(null, (accumulated, in) -> {
-      Preconditions.checkNotNull("accumulated[%s] non-null, why did we get multiple cursors?", accumulated);
+      if (accumulated != null) {
+        // We should not get multiple cursors because we set the granularity to ALL.  So, this should never
+        // actually happen, but it doesn't hurt us to defensive here, so we test against it.
+        throw new ISE("accumulated[%s] non-null, why did we get multiple cursors?", accumulated);
+      }
 
       final ColumnSelectorFactory columnSelectorFactory = in.getColumnSelectorFactory();
 
