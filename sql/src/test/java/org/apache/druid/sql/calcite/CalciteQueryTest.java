@@ -145,6 +145,7 @@ import java.util.stream.Collectors;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CalciteQueryTest extends BaseCalciteQueryTest
 {
@@ -7571,47 +7572,48 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
   @Test
   public void testHighestMaxNumericInFilter()
   {
-    expectedException.expect(UOE.class);
-    expectedException.expectMessage("Expected parameter[maxNumericInFilters] cannot exceed system set value of [100]");
+    Throwable exception = assertThrows(UOE.class, () -> {
 
-    testQuery(
-        PLANNER_CONFIG_MAX_NUMERIC_IN_FILTER,
-        ImmutableMap.of(QueryContexts.MAX_NUMERIC_IN_FILTERS, 20000),
-        "SELECT COUNT(*)\n"
-        + "FROM druid.numfoo\n"
-        + "WHERE dim6 IN (\n"
-        + "1,2,3\n"
-        + ")\n",
-        CalciteTests.REGULAR_USER_AUTH_RESULT,
-        ImmutableList.of(),
-        ImmutableList.of()
-    );
+      testQuery(
+          PLANNER_CONFIG_MAX_NUMERIC_IN_FILTER,
+          ImmutableMap.of(QueryContexts.MAX_NUMERIC_IN_FILTERS, 20000),
+          "SELECT COUNT(*)\n"
+              + "FROM druid.numfoo\n"
+              + "WHERE dim6 IN (\n"
+              + "1,2,3\n"
+              + ")\n",
+          CalciteTests.REGULAR_USER_AUTH_RESULT,
+          ImmutableList.of(),
+          ImmutableList.of()
+      );
+    });
+    assertTrue(exception.getMessage().contains("Expected parameter[maxNumericInFilters] cannot exceed system set value of [100]"));
   }
 
   @Test
   public void testQueryWithMoreThanMaxNumericInFilter()
   {
-    if (NullHandling.sqlCompatible()) {
-      // skip in sql compatible mode, this plans to an OR filter with equality filter children...
-      return;
-    }
-    msqIncompatible();
-    expectedException.expect(UOE.class);
-    expectedException.expectMessage(
-        "The number of values in the IN clause for [dim6] in query exceeds configured maxNumericFilter limit of [2] for INs. Cast [3] values of IN clause to String");
+    Throwable exception = assertThrows(UOE.class, () -> {
+      if (NullHandling.sqlCompatible()) {
+        // skip in sql compatible mode, this plans to an OR filter with equality filter children...
+        return;
+      }
+      msqIncompatible();
 
-    testQuery(
-        PLANNER_CONFIG_MAX_NUMERIC_IN_FILTER,
-        ImmutableMap.of(QueryContexts.MAX_NUMERIC_IN_FILTERS, 2),
-        "SELECT COUNT(*)\n"
-        + "FROM druid.numfoo\n"
-        + "WHERE dim6 IN (\n"
-        + "1,2,3\n"
-        + ")\n",
-        CalciteTests.REGULAR_USER_AUTH_RESULT,
-        ImmutableList.of(),
-        ImmutableList.of()
-    );
+      testQuery(
+          PLANNER_CONFIG_MAX_NUMERIC_IN_FILTER,
+          ImmutableMap.of(QueryContexts.MAX_NUMERIC_IN_FILTERS, 2),
+          "SELECT COUNT(*)\n"
+              + "FROM druid.numfoo\n"
+              + "WHERE dim6 IN (\n"
+              + "1,2,3\n"
+              + ")\n",
+          CalciteTests.REGULAR_USER_AUTH_RESULT,
+          ImmutableList.of(),
+          ImmutableList.of()
+      );
+    });
+    assertTrue(exception.getMessage().contains("The number of values in the IN clause for [dim6] in query exceeds configured maxNumericFilter limit of [2] for INs. Cast [3] values of IN clause to String"));
   }
 
   @Test
@@ -12307,61 +12309,64 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
   @Test
   public void testRequireTimeConditionSimpleQueryNegative()
   {
-    msqIncompatible();
-    expectedException.expect(CannotBuildQueryException.class);
-    expectedException.expectMessage("__time column");
+    Throwable exception = assertThrows(CannotBuildQueryException.class, () -> {
+      msqIncompatible();
 
-    testQuery(
-        PLANNER_CONFIG_REQUIRE_TIME_CONDITION,
-        "SELECT SUM(cnt), gran FROM (\n"
-        + "  SELECT __time as t, floor(__time TO month) AS gran,\n"
-        + "  cnt FROM druid.foo\n"
-        + ") AS x\n"
-        + "GROUP BY gran\n"
-        + "ORDER BY gran",
-        CalciteTests.REGULAR_USER_AUTH_RESULT,
-        ImmutableList.of(),
-        ImmutableList.of()
-    );
+      testQuery(
+          PLANNER_CONFIG_REQUIRE_TIME_CONDITION,
+          "SELECT SUM(cnt), gran FROM (\n"
+              + "  SELECT __time as t, floor(__time TO month) AS gran,\n"
+              + "  cnt FROM druid.foo\n"
+              + ") AS x\n"
+              + "GROUP BY gran\n"
+              + "ORDER BY gran",
+          CalciteTests.REGULAR_USER_AUTH_RESULT,
+          ImmutableList.of(),
+          ImmutableList.of()
+      );
+    });
+    assertTrue(exception.getMessage().contains("__time column"));
   }
 
   @Test
   public void testRequireTimeConditionSubQueryNegative()
   {
-    msqIncompatible();
-    expectedException.expect(CannotBuildQueryException.class);
-    expectedException.expectMessage("__time column");
+    Throwable exception = assertThrows(CannotBuildQueryException.class, () -> {
+      msqIncompatible();
 
-    testQuery(
-        PLANNER_CONFIG_REQUIRE_TIME_CONDITION,
-        "SELECT\n"
-        + "  SUM(cnt),\n"
-        + "  COUNT(*)\n"
-        + "FROM (SELECT dim2, SUM(cnt) AS cnt FROM druid.foo GROUP BY dim2)",
-        CalciteTests.REGULAR_USER_AUTH_RESULT,
-        ImmutableList.of(),
-        ImmutableList.of()
-    );
+      testQuery(
+          PLANNER_CONFIG_REQUIRE_TIME_CONDITION,
+          "SELECT\n"
+              + "  SUM(cnt),\n"
+              + "  COUNT(*)\n"
+              + "FROM (SELECT dim2, SUM(cnt) AS cnt FROM druid.foo GROUP BY dim2)",
+          CalciteTests.REGULAR_USER_AUTH_RESULT,
+          ImmutableList.of(),
+          ImmutableList.of()
+      );
+    });
+    assertTrue(exception.getMessage().contains("__time column"));
   }
 
   @Test
   public void testRequireTimeConditionSemiJoinNegative()
   {
-    msqIncompatible();
-    expectedException.expect(CannotBuildQueryException.class);
-    expectedException.expectMessage("__time column");
+    Throwable exception = assertThrows(CannotBuildQueryException.class, () -> {
+      msqIncompatible();
 
-    testQuery(
-        PLANNER_CONFIG_REQUIRE_TIME_CONDITION,
-        "SELECT COUNT(*) FROM druid.foo\n"
-        + "WHERE SUBSTRING(dim2, 1, 1) IN (\n"
-        + "  SELECT SUBSTRING(dim1, 1, 1) FROM druid.foo\n"
-        + "  WHERE dim1 <> '' AND __time >= '2000-01-01'\n"
-        + ")",
-        CalciteTests.REGULAR_USER_AUTH_RESULT,
-        ImmutableList.of(),
-        ImmutableList.of()
-    );
+      testQuery(
+          PLANNER_CONFIG_REQUIRE_TIME_CONDITION,
+          "SELECT COUNT(*) FROM druid.foo\n"
+              + "WHERE SUBSTRING(dim2, 1, 1) IN (\n"
+              + "  SELECT SUBSTRING(dim1, 1, 1) FROM druid.foo\n"
+              + "  WHERE dim1 <> '' AND __time >= '2000-01-01'\n"
+              + ")",
+          CalciteTests.REGULAR_USER_AUTH_RESULT,
+          ImmutableList.of(),
+          ImmutableList.of()
+      );
+    });
+    assertTrue(exception.getMessage().contains("__time column"));
   }
 
   @Test

@@ -76,6 +76,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 
 /**
  * Calcite tests which involve subqueries and materializing the intermediate results on {@link org.apache.druid.server.ClientQuerySegmentWalker}
@@ -683,21 +686,22 @@ public class CalciteSubqueryTest extends BaseCalciteQueryTest
 
   private void testMaxSubqueryRowsWithoutMemoryLimit()
   {
-    expectedException.expect(ResourceLimitExceededException.class);
-    expectedException.expectMessage("Subquery generated results beyond maximum[1]");
-    Map<String, Object> modifiedQueryContext = new HashMap<>(queryContext);
-    modifiedQueryContext.put(QueryContexts.MAX_SUBQUERY_ROWS_KEY, 1);
+    Throwable exception = assertThrows(ResourceLimitExceededException.class, () -> {
+      Map<String, Object> modifiedQueryContext = new HashMap<>(queryContext);
+      modifiedQueryContext.put(QueryContexts.MAX_SUBQUERY_ROWS_KEY, 1);
 
-    testQuery(
-        "SELECT\n"
-        + "  SUM(cnt),\n"
-        + "  COUNT(*)\n"
-        + "FROM (SELECT dim2, SUM(cnt) AS cnt FROM druid.foo GROUP BY dim2 LIMIT 2) \n"
-        + "WHERE cnt > 0",
-        modifiedQueryContext,
-        ImmutableList.of(),
-        ImmutableList.of()
-    );
+      testQuery(
+          "SELECT\n"
+              + "  SUM(cnt),\n"
+              + "  COUNT(*)\n"
+              + "FROM (SELECT dim2, SUM(cnt) AS cnt FROM druid.foo GROUP BY dim2 LIMIT 2) \n"
+              + "WHERE cnt > 0",
+          modifiedQueryContext,
+          ImmutableList.of(),
+          ImmutableList.of()
+      );
+    });
+    assertTrue(exception.getMessage().contains("Subquery generated results beyond maximum[1]"));
   }
 
   private void testMaxSubQueryRowsWithLimit()
@@ -752,25 +756,26 @@ public class CalciteSubqueryTest extends BaseCalciteQueryTest
   @Test
   public void testZeroMaxNumericInFilter()
   {
-    expectedException.expect(UOE.class);
-    expectedException.expectMessage("[maxNumericInFilters] must be greater than 0");
+    Throwable exception = assertThrows(UOE.class, () -> {
 
-    Map<String, Object> modifiedQueryContext = new HashMap<>(queryContext);
-    modifiedQueryContext.put(QueryContexts.MAX_NUMERIC_IN_FILTERS, 0);
+      Map<String, Object> modifiedQueryContext = new HashMap<>(queryContext);
+      modifiedQueryContext.put(QueryContexts.MAX_NUMERIC_IN_FILTERS, 0);
 
 
-    testQuery(
-        PLANNER_CONFIG_DEFAULT,
-        modifiedQueryContext,
-        "SELECT COUNT(*)\n"
-        + "FROM druid.numfoo\n"
-        + "WHERE dim6 IN (\n"
-        + "1,2,3\n"
-        + ")\n",
-        CalciteTests.REGULAR_USER_AUTH_RESULT,
-        ImmutableList.of(),
-        ImmutableList.of()
-    );
+      testQuery(
+          PLANNER_CONFIG_DEFAULT,
+          modifiedQueryContext,
+          "SELECT COUNT(*)\n"
+              + "FROM druid.numfoo\n"
+              + "WHERE dim6 IN (\n"
+              + "1,2,3\n"
+              + ")\n",
+          CalciteTests.REGULAR_USER_AUTH_RESULT,
+          ImmutableList.of(),
+          ImmutableList.of()
+      );
+    });
+    assertTrue(exception.getMessage().contains("[maxNumericInFilters] must be greater than 0"));
   }
 
   @Test

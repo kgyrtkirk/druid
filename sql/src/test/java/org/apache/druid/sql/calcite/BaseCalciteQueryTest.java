@@ -296,9 +296,6 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   public final SqlEngine engine0;
   final boolean useDefault = NullHandling.replaceWithDefault();
 
-  @Rule(order = 1)
-  public ExpectedException expectedException = ExpectedException.none();
-
   @Rule(order = 2)
   public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
