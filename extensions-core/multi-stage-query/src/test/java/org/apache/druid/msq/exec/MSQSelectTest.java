@@ -2189,6 +2189,41 @@ public class MSQSelectTest extends MSQTestBase
   }
 
   @Test
+  public void testSelectRowsGetUntruncatedByDefault1() throws IOException
+  {
+    RowSignature dummyRowSignature = RowSignature.builder().add("timestamp", ColumnType.LONG).build();
+
+    final int numFiles = 2;
+
+    final File toRead = MSQTestFileUtils.getResourceAsTemporaryFile(temporaryFolder, this, "/wikipedia-sampled.json");
+    final String toReadFileNameAsJson = queryFramework().queryJsonMapper().writeValueAsString(toRead.getAbsolutePath());
+
+    String externalFiles = String.join(", ", Collections.nCopies(numFiles, toReadFileNameAsJson));
+
+    List<Object[]> result = new ArrayList<>();
+    for (int i = 0; i < 38; ++i) {
+      result.add(new Object[]{1});
+    }
+
+    testSelectQuery()
+        .setSql(StringUtils.format(
+            " SELECT 1 as \"timestamp\"\n"
+            + "FROM TABLE(\n"
+            + "  EXTERN(\n"
+            + "    '{ \"files\": [%s],\"type\":\"local\"}',\n"
+            + "    '{\"type\": \"csv\", \"hasHeaderRow\": true}',\n"
+            + "    '[{\"name\": \"timestamp\", \"type\": \"string\"}]'\n"
+            + "  )\n"
+            + ")",
+            externalFiles
+        ))
+        .setExpectedRowSignature(dummyRowSignature)
+        .setQueryContext(context)
+        .setExpectedResultRows(result)
+        .verifyResults();
+  }
+
+  @Test
   public void testJoinUsesDifferentAlgorithm()
   {
 
