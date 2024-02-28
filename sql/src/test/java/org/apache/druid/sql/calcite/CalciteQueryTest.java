@@ -19,12 +19,15 @@
 
 package org.apache.druid.sql.calcite;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.apache.calcite.runtime.CalciteContextException;
 import org.apache.druid.common.config.NullHandling;
+import org.apache.druid.data.input.impl.CsvInputFormat;
+import org.apache.druid.data.input.impl.InlineInputSource;
 import org.apache.druid.error.DruidException;
 import org.apache.druid.java.util.common.DateTimes;
 import org.apache.druid.java.util.common.HumanReadableBytes;
@@ -6315,6 +6318,68 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
       log.error(e, "Expected DruidException for query: %s", sql);
       Assert.fail(sql);
     }
+  }
+
+
+  @Test
+  public void testA2()
+  {
+    String sql = "SELECT CAST(1.0 AS BIGINT)";
+    testBuilder().sql(sql)
+        .expectedResults(ImmutableList.of(new Object[] {1L}))
+        .run();
+  }
+
+  @Test
+  public void testA() throws Exception
+  {
+    ObjectMapper queryJsonMapper = queryFramework().queryJsonMapper();
+    String extern = StringUtils.format(
+        "TABLE(extern(%s, %s))",
+        Calcites.escapeStringLiteral(
+            queryJsonMapper.writeValueAsString(
+                new InlineInputSource("a,b,1\nc,d,2\n")
+            )
+        ),
+        Calcites.escapeStringLiteral(
+            queryJsonMapper.writeValueAsString(
+                new CsvInputFormat(ImmutableList.of("x", "y", "z"), null, false, false, 0)
+            )
+        )
+    );
+
+    String sql = String.format("with ext as (select * from %s extend ( n varchar, v bigint) )"
+        + " select n,v from ext",extern);
+    testBuilder().sql(sql)
+        .expectedResults(ImmutableList.of(new Object[] {2L}))
+        .run();
+  }
+
+
+  @Test
+  public void testInsertFromExternalWithSchema() throws Exception
+  {
+    ObjectMapper queryJsonMapper = queryFramework().queryJsonMapper();
+    String extern = StringUtils.format(
+        "TABLE(EXTERN(%s, %s))",
+        Calcites.escapeStringLiteral(
+            queryJsonMapper.writeValueAsString(
+                new InlineInputSource("a,b,1\nc,d,2\n")
+            )
+        ),
+        Calcites.escapeStringLiteral(
+            queryJsonMapper.writeValueAsString(
+                new CsvInputFormat(ImmutableList.of("x", "y", "z"), null, false, false, 0)
+            )
+        )
+    );
+    testBuilder()
+        .sql(
+         String.format(   "SELECT * FROM %s\n" +
+            "  (x VARCHAR, y VARCHAR, z BIGINT)\n" ,
+            extern)
+        )
+        .run();
   }
 
   @Test

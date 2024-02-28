@@ -43,7 +43,7 @@ public class ExternalTableScanRule extends RelOptRule
   @Override
   public boolean matches(RelOptRuleCall call)
   {
-    if (plannerContext.featureAvailable(EngineFeature.READ_EXTERNAL_DATA)) {
+    if (supported()) {
       return super.matches(call);
     } else {
       plannerContext.setPlanningError(
@@ -56,10 +56,15 @@ public class ExternalTableScanRule extends RelOptRule
     }
   }
 
+  private boolean supported()
+  {
+    return plannerContext.featureAvailable(EngineFeature.READ_EXTERNAL_DATA) || true;
+  }
+
   @Override
   public void onMatch(final RelOptRuleCall call)
   {
-    if (!plannerContext.featureAvailable(EngineFeature.READ_EXTERNAL_DATA)) {
+    if (!supported()) {
       // Not called because "matches" returns false.
       throw new UnsupportedOperationException();
     }

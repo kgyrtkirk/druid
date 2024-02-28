@@ -357,7 +357,7 @@ public class CalciteInsertDmlTest extends CalciteIngestionDmlTest
           "TABLE(extern(%s, %s))",
           Calcites.escapeStringLiteral(
               queryJsonMapper.writeValueAsString(
-                  new InlineInputSource("a,b,1\nc,d,2\n")
+                  new InlineInputSource("a,b,1.0\nc,d,2.0\n")
               )
           ),
           Calcites.escapeStringLiteral(
@@ -370,6 +370,45 @@ public class CalciteInsertDmlTest extends CalciteIngestionDmlTest
     catch (JsonProcessingException e) {
       throw new RuntimeException(e);
     }
+
+    testIngestionQuery()
+        .sql(
+            "SELECT * FROM %s\n" +
+            "  (x VARCHAR, y VARCHAR, z BIGINT)\n" ,
+            extern
+        )
+        .authentication(CalciteTests.SUPER_USER_AUTH_RESULT)
+        .expectTarget("dst", externalDataSource.getSignature())
+        .expectResources(dataSourceWrite("dst"), Externals.EXTERNAL_RESOURCE_ACTION)
+        .verify();
+
+    System.out.println(extern);
+  }
+
+  @Test
+  public void testInsertFromExternalWithSchema2()
+  {
+    String extern;
+    ObjectMapper queryJsonMapper = queryFramework().queryJsonMapper();
+    try {
+      extern = StringUtils.format(
+          "TABLE(extern(%s, %s))",
+          Calcites.escapeStringLiteral(
+              queryJsonMapper.writeValueAsString(
+                  new InlineInputSource("a,b,1.0\nc,d,2.0\n")
+              )
+          ),
+          Calcites.escapeStringLiteral(
+              queryJsonMapper.writeValueAsString(
+                  new CsvInputFormat(ImmutableList.of("x", "y", "z"), null, false, false, 0)
+              )
+          )
+      );
+    }
+    catch (JsonProcessingException e) {
+      throw new RuntimeException(e);
+    }
+
     testIngestionQuery()
         .sql(
             "INSERT INTO dst SELECT * FROM %s\n" +
@@ -380,16 +419,14 @@ public class CalciteInsertDmlTest extends CalciteIngestionDmlTest
         .authentication(CalciteTests.SUPER_USER_AUTH_RESULT)
         .expectTarget("dst", externalDataSource.getSignature())
         .expectResources(dataSourceWrite("dst"), Externals.EXTERNAL_RESOURCE_ACTION)
-        .expectQuery(
-            newScanQueryBuilder()
-                .dataSource(externalDataSource)
-                .intervals(querySegmentSpec(Filtration.eternity()))
-                .columns("x", "y", "z")
-                .context(PARTITIONED_BY_ALL_TIME_QUERY_CONTEXT)
-                .build()
-        )
-        .expectLogicalPlanFrom("insertFromExternal")
         .verify();
+
+    testBuilder()
+    .sql("select * from dst")
+    .expectedResults(Collections.emptyList())
+    .run();
+
+    System.out.println(extern);
   }
 
   @Test

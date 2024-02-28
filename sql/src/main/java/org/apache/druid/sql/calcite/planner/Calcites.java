@@ -117,11 +117,11 @@ public class Calcites
     final StringBuilder builder = new StringBuilder("'");
     for (int i = 0; i < s.length(); i++) {
       final char c = s.charAt(i);
-      if (Character.isLetterOrDigit(c) || c == ' ') {
+      if (!Character.isISOControl(c) || c == ' ') {
         builder.append(c);
-        if (c > 127) {
-          isPlainAscii = false;
-        }
+//        if (c > 127) {
+//          isPlainAscii = false;
+//        }
       } else {
         builder.append("\\").append(BaseEncoding.base16().encode(Chars.toByteArray(c)));
         isPlainAscii = false;
