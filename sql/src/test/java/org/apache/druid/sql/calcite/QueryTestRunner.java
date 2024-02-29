@@ -46,8 +46,11 @@ import org.apache.druid.sql.calcite.planner.PlannerCaptureHook;
 import org.apache.druid.sql.calcite.planner.PrepareResult;
 import org.apache.druid.sql.calcite.table.RowSignatures;
 import org.apache.druid.sql.calcite.util.QueryLogHook;
+import org.hamcrest.CoreMatchers;
+import org.hamcrest.MatcherAssert;
 import org.junit.Assert;
 import org.junit.Assume;
+import org.junit.internal.matchers.ThrowableMessageMatcher;
 import org.junit.rules.ExpectedException;
 
 import java.util.ArrayList;
@@ -604,19 +607,20 @@ public class QueryTestRunner
           continue;
         }
 
-        // This variation uses JUnit exception validation: we configure the expected
-        // exception, then throw the exception from the run.
-        // If the expected exception is not configured here, then the test may
-        // have done it outside of the test builder.
-        if(false) {
-          if (builder.queryCannotVectorize && "force".equals(queryResults.vectorizeOption)) {
-            expectedException.expect(RuntimeException.class);
-            expectedException.expectMessage("Cannot vectorize");
-          } else if (builder.expectedExceptionInitializer != null) {
-            builder.expectedExceptionInitializer.accept(expectedException);
-          }
+        // Delayed exception checking to let other verify steps run before running vectorized checks
+        if (builder.queryCannotVectorize && "force".equals(queryResults.vectorizeOption)) {
+          MatcherAssert.assertThat(
+              queryResults.exception,
+              CoreMatchers.allOf(
+                  CoreMatchers.instanceOf(ISE.class),
+                  ThrowableMessageMatcher.hasMessage(
+                      CoreMatchers.equalTo("Cannot vectorize!")
+                  )
+              )
+          );
+        } else {
+          throw queryResults.exception;
         }
-        throw queryResults.exception;
       }
       if (builder.expectedExceptionInitializer != null) {
         throw new ISE("Expected query to throw an exception, but none was thrown.");
