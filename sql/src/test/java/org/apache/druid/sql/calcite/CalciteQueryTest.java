@@ -144,6 +144,7 @@ import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -7593,13 +7594,13 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
   @Test
   public void testQueryWithMoreThanMaxNumericInFilter()
   {
-    Throwable exception = assertThrows(UOE.class, () -> {
-      if (NullHandling.sqlCompatible()) {
-        // skip in sql compatible mode, this plans to an OR filter with equality filter children...
-        return;
-      }
-      msqIncompatible();
+    assumeFalse(
+        "skip in sql compatible mode, this plans to an OR filter with equality filter children",
+        NullHandling.sqlCompatible()
+    );
+    msqIncompatible();
 
+    Throwable exception = assertThrows(UOE.class, () -> {
       testQuery(
           PLANNER_CONFIG_MAX_NUMERIC_IN_FILTER,
           ImmutableMap.of(QueryContexts.MAX_NUMERIC_IN_FILTERS, 2),

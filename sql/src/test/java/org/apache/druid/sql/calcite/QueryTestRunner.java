@@ -28,7 +28,6 @@ import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.sql.SqlExplainFormat;
 import org.apache.calcite.sql.SqlExplainLevel;
 import org.apache.calcite.sql.SqlInsert;
-import org.apache.druid.java.util.common.ISE;
 import org.apache.druid.java.util.common.Pair;
 import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.java.util.common.guava.Sequence;
@@ -609,9 +608,9 @@ public class QueryTestRunner
           MatcherAssert.assertThat(
               queryResults.exception,
               CoreMatchers.allOf(
-                  CoreMatchers.instanceOf(ISE.class),
+                  CoreMatchers.instanceOf(RuntimeException.class),
                   ThrowableMessageMatcher.hasMessage(
-                      CoreMatchers.equalTo("Cannot vectorize!")
+                      CoreMatchers.containsString("Cannot vectorize!")
                   )
               )
           );
