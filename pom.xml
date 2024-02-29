@@ -157,6 +157,7 @@
     </properties>
 
     <modules>
+        <module>testdeps</module>
         <module>processing</module>
         <module>indexing-hadoop</module>
         <module>indexing-service</module>
@@ -1582,6 +1583,17 @@
                 <artifactId>maven-enforcer-plugin</artifactId>
                 <version>3.0.0</version>
                 <executions>
+<execution>
+      <id>enforce-no-duplicate-dependencies</id>
+      <goals>
+        <goal>enforce</goal>
+      </goals>
+      <configuration>
+        <rules>
+          <banDuplicatePomDependencyVersions/>
+        </rules>
+      </configuration>
+    </execution>
                     <execution>
                         <id>default-cli</id>
                         <goals>
