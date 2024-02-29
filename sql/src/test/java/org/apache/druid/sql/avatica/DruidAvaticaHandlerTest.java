@@ -93,19 +93,20 @@ import org.apache.druid.sql.guice.SqlModule;
 import org.eclipse.jetty.server.Server;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
 import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.io.TempDir;
 import org.skife.jdbi.v2.DBI;
 import org.skife.jdbi.v2.Handle;
 import org.skife.jdbi.v2.ResultIterator;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.Array;
 import java.sql.Connection;
@@ -129,6 +130,7 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Tests the Avatica-based JDBC implementation using JSON serialization. See
@@ -153,8 +155,8 @@ public class DruidAvaticaHandlerTest extends CalciteTestBase
 
   private static final String DUMMY_SQL_QUERY_ID = "dummy";
 
-  @ClassRule
-  public static TemporaryFolder temporaryFolder = new TemporaryFolder();
+  @TempDir
+  public static File temporaryFolder;
 
   private static QueryRunnerFactoryConglomerate conglomerate;
   private static SpecificSegmentsQuerySegmentWalker walker;
@@ -162,16 +164,16 @@ public class DruidAvaticaHandlerTest extends CalciteTestBase
 
   private final boolean nullNumeric = !NullHandling.replaceWithDefault();
 
-  @BeforeClass
+  @BeforeAll
   public static void setUpClass() throws Exception
   {
     resourceCloser = Closer.create();
     conglomerate = QueryStackTests.createQueryRunnerFactoryConglomerate(resourceCloser);
-    walker = CalciteTests.createMockWalker(conglomerate, temporaryFolder.getRoot());
+    walker = CalciteTests.createMockWalker(conglomerate, temporaryFolder);
     resourceCloser.register(walker);
   }
 
-  @AfterClass
+  @AfterAll
   public static void tearDownClass() throws IOException
   {
     resourceCloser.close();
@@ -266,7 +268,7 @@ public class DruidAvaticaHandlerTest extends CalciteTestBase
     );
   }
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception
   {
     final DruidSchemaCatalog rootSchema = makeRootSchema();
@@ -328,7 +330,7 @@ public class DruidAvaticaHandlerTest extends CalciteTestBase
     clientLosAngeles = DriverManager.getConnection(server.url, propertiesLosAngeles);
   }
 
-  @After
+  @AfterEach
   public void tearDown() throws Exception
   {
     if (server != null) {
@@ -846,7 +848,8 @@ public class DruidAvaticaHandlerTest extends CalciteTestBase
     );
   }
 
-  @Test(timeout = 90_000L)
+  @Test
+  @Timeout(value = 90_000L, unit = TimeUnit.MILLISECONDS)
   public void testConcurrentQueries()
   {
     queryLogHook.withSkippedLog(

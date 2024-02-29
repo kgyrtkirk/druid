@@ -53,8 +53,8 @@ import org.easymock.EasyMock;
 import org.easymock.EasyMockRunner;
 import org.easymock.Mock;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 
 import javax.validation.Validation;
@@ -98,7 +98,7 @@ public class CalcitePlannerModuleTest extends CalciteTestBase
   private Injector injector;
   private RelOptRule customRule;
 
-  @Before
+  @BeforeEach
   public void setUp()
   {
     EasyMock.expect(druidSchema1.getSchema()).andStubReturn(schema1);
