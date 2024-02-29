@@ -31,7 +31,6 @@
   <name>druid-testdeps</name>
   <description>druid-testdeps</description>
 
-<dependencyManagement>
   <dependencies>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
