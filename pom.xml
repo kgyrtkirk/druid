@@ -160,13 +160,87 @@
         <module>testdeps</module>
         <module>processing</module>
         <module>indexing-hadoop</module>
-        <!-- <module>indexing-service</module>
+        <module>indexing-service</module>
         <module>server</module>
         <module>sql</module>
         <module>services</module>
         <module>integration-tests</module>
         <module>benchmarks</module>
-        <module>web-console</module> -->
+        <module>web-console</module>
+        <!-- Core cloud functionality -->
+        <module>cloud/aws-common</module>
+        <module>cloud/gcp-common</module>
+        <!-- Core extensions -->
+        <module>extensions-core/kubernetes-extensions</module>
+        <module>extensions-core/avro-extensions</module>
+        <module>extensions-core/azure-extensions</module>
+        <module>extensions-core/datasketches</module>
+        <module>extensions-core/druid-bloom-filter</module>
+        <module>extensions-core/druid-kerberos</module>
+        <module>extensions-core/druid-pac4j</module>
+        <module>extensions-core/hdfs-storage</module>
+        <module>extensions-core/histogram</module>
+        <module>extensions-core/stats</module>
+        <module>extensions-core/kafka-extraction-namespace</module>
+        <module>extensions-core/kafka-indexing-service</module>
+        <module>extensions-core/kinesis-indexing-service</module>
+        <module>extensions-core/multi-stage-query</module>
+        <module>extensions-core/mysql-metadata-storage</module>
+        <module>extensions-core/orc-extensions</module>
+        <module>extensions-core/parquet-extensions</module>
+        <module>extensions-core/postgresql-metadata-storage</module>
+        <module>extensions-core/protobuf-extensions</module>
+        <module>extensions-core/lookups-cached-global</module>
+        <module>extensions-core/lookups-cached-single</module>
+        <module>extensions-core/ec2-extensions</module>
+        <module>extensions-core/s3-extensions</module>
+        <module>extensions-core/druid-aws-rds-extensions</module>
+        <module>extensions-core/simple-client-sslcontext</module>
+        <module>extensions-core/druid-basic-security</module>
+        <module>extensions-core/google-extensions</module>
+        <module>extensions-core/druid-ranger-security</module>
+        <module>extensions-core/druid-catalog</module>
+        <module>extensions-core/testing-tools</module>
+        <!-- Community extensions -->
+        <module>extensions-contrib/compressed-bigdecimal</module>
+        <module>extensions-contrib/influx-extensions</module>
+        <module>extensions-contrib/cassandra-storage</module>
+        <module>extensions-contrib/dropwizard-emitter</module>
+        <module>extensions-contrib/cloudfiles-extensions</module>
+        <module>extensions-contrib/graphite-emitter</module>
+        <module>extensions-contrib/distinctcount</module>
+        <module>extensions-contrib/statsd-emitter</module>
+        <module>extensions-contrib/time-min-max</module>
+        <module>extensions-contrib/virtual-columns</module>
+        <module>extensions-contrib/thrift-extensions</module>
+        <module>extensions-contrib/ambari-metrics-emitter</module>
+        <module>extensions-contrib/sqlserver-metadata-storage</module>
+        <module>extensions-contrib/kafka-emitter</module>
+        <module>extensions-contrib/redis-cache</module>
+        <module>extensions-contrib/opentsdb-emitter</module>
+        <module>extensions-contrib/materialized-view-maintenance</module>
+        <module>extensions-contrib/materialized-view-selection</module>
+        <module>extensions-contrib/momentsketch</module>
+        <module>extensions-contrib/moving-average-query</module>
+        <module>extensions-contrib/tdigestsketch</module>
+        <module>extensions-contrib/ddsketch</module>
+        <module>extensions-contrib/influxdb-emitter</module>
+        <module>extensions-contrib/gce-extensions</module>
+        <module>extensions-contrib/aliyun-oss-extensions</module>
+        <module>extensions-contrib/prometheus-emitter</module>
+        <module>extensions-contrib/opentelemetry-emitter</module>
+        <module>extensions-contrib/kubernetes-overlord-extensions</module>
+        <module>extensions-contrib/druid-iceberg-extensions</module>
+        <module>extensions-contrib/druid-deltalake-extensions</module>
+        <module>extensions-contrib/spectator-histogram</module>
+        <module>extensions-contrib/rabbit-stream-indexing-service</module>
+
+        <!-- distribution packaging -->
+        <module>distribution</module>
+        <!-- Revised integration tests -->
+        <module>integration-tests-ex/tools</module>
+        <module>integration-tests-ex/image</module>
+        <module>integration-tests-ex/cases</module>
     </modules>
 
     <repositories>
@@ -979,6 +1053,13 @@
                 <version>${datasketches.memory.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>5.10.2</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.calcite</groupId>
                 <artifactId>calcite-testkit</artifactId>
                 <version>${calcite.version}</version>
@@ -995,17 +1076,16 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
+                <groupId>org.easymock</groupId>
+                <artifactId>easymock</artifactId>
+                <version>5.2.0</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
                 <version>4.13.2</version>
                 <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.junit</groupId>
-                <artifactId>junit-bom</artifactId>
-                <version>5.10.2</version>
-                <type>pom</type>
-                <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>org.mockito</groupId>
@@ -1025,6 +1105,25 @@
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-simple</artifactId>
                 <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.carrotsearch</groupId>
+                <artifactId>junit-benchmarks</artifactId>
+                <version>0.7.2</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.google.caliper</groupId>
+                <artifactId>caliper</artifactId>
+                <version>0.5-rc1</version>
+                <exclusions>
+                    <!-- caliper ships a very old asm version which can cause issues during testing  -->
+                    <exclusion>
+                        <groupId>asm</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
+                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.apache.curator</groupId>
@@ -1159,6 +1258,48 @@
                         <artifactId>guice</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.hamcrest</groupId>
+                <artifactId>hamcrest-all</artifactId>
+                <version>${hamcrest.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.hamcrest</groupId>
+                <artifactId>hamcrest-core</artifactId>
+                <version>${hamcrest.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.reflections</groupId>
+                <artifactId>reflections</artifactId>
+                <version>0.9.12</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>pl.pragmatists</groupId>
+                <artifactId>JUnitParams</artifactId>
+                <version>1.1.1</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava-testlib</artifactId>
+                <version>${guava.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>nl.jqno.equalsverifier</groupId>
+                <artifactId>equalsverifier</artifactId>
+                <version>3.15.1</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+              <groupId>com.github.stefanbirkner</groupId>
+              <artifactId>system-rules</artifactId>
+              <version>1.19.0</version>
+              <scope>test</scope>
             </dependency>
           <dependency>
             <groupId>io.timeandspace</groupId>
