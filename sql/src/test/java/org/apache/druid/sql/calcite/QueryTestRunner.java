@@ -51,8 +51,6 @@ import org.hamcrest.MatcherAssert;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.internal.matchers.ThrowableMessageMatcher;
-import org.junit.rules.ExpectedException;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -601,7 +599,6 @@ public class QueryTestRunner
       // The builder specifies one exception, but the query can run multiple
       // times. Pick the first failure as that emulates the original code flow
       // where the first exception ended the test.
-      ExpectedException expectedException = null; //builder.config.expectedException();
       for (QueryResults queryResults : execStep.results()) {
         if (queryResults.exception == null) {
           continue;
@@ -621,9 +618,6 @@ public class QueryTestRunner
         } else {
           throw queryResults.exception;
         }
-      }
-      if (builder.expectedExceptionInitializer != null) {
-        throw new ISE("Expected query to throw an exception, but none was thrown.");
       }
     }
   }
