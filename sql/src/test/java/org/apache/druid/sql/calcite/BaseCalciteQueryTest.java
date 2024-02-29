@@ -125,7 +125,6 @@ import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.internal.matchers.ThrowableMessageMatcher;
-import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
 
 import javax.annotation.Nullable;
@@ -140,7 +139,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
@@ -962,8 +960,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
       final String sql,
       final AuthenticationResult authenticationResult,
       final List<Query<?>> expectedQueries,
-      final ResultsVerifier expectedResultsVerifier,
-      @Nullable final Consumer<ExpectedException> expectedExceptionInitializer
+      final ResultsVerifier expectedResultsVerifier
   )
   {
     testBuilder()
@@ -974,7 +971,6 @@ public class BaseCalciteQueryTest extends CalciteTestBase
         .authResult(authenticationResult)
         .expectedQueries(expectedQueries)
         .expectedResults(expectedResultsVerifier)
-        .expectedException(expectedExceptionInitializer)
         .run();
   }
 
@@ -1207,19 +1203,6 @@ public class BaseCalciteQueryTest extends CalciteTestBase
     }
     Assert.assertEquals(expectedResults.size(), results.size());
   }
-
-  @Deprecated
-  public void testQueryThrows(
-      final String sql,
-      Consumer<ExpectedException> expectedExceptionInitializer)
-  {
-    testBuilder()
-        .sql(sql)
-        .expectedException(expectedExceptionInitializer)
-        .build()
-        .run();
-  }
-
 
   public <T extends Throwable>void testQueryThrows(
       final String sql,
