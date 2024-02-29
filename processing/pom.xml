@@ -345,8 +345,6 @@
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
-
-
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
@@ -389,11 +387,6 @@
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
       <version>${postgresql.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.github.stefanbirkner</groupId>
-      <artifactId>system-rules</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>

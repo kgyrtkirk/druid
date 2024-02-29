@@ -159,8 +159,8 @@
     <modules>
         <module>testdeps</module>
         <module>processing</module>
-        <!-- <module>indexing-hadoop</module>
-        <module>indexing-service</module>
+        <module>indexing-hadoop</module>
+        <!-- <module>indexing-service</module>
         <module>server</module>
         <module>sql</module>
         <module>services</module>
@@ -1159,12 +1159,6 @@
                         <artifactId>guice</artifactId>
                     </exclusion>
                 </exclusions>
-            </dependency>
-            <dependency>
-              <groupId>com.github.stefanbirkner</groupId>
-              <artifactId>system-rules</artifactId>
-              <version>1.19.0</version>
-              <scope>test</scope>
             </dependency>
           <dependency>
             <groupId>io.timeandspace</groupId>
