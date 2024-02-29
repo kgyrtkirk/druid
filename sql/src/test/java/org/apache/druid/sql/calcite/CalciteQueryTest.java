@@ -14295,8 +14295,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
         ),
         (sql, result) -> {
           // Ignore the results, only need to check that the type of query is a filter.
-        },
-        null
+        }
     );
   }
 
