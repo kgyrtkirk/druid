@@ -22,7 +22,6 @@ package org.apache.druid.sql.calcite.planner.querygen;
 import org.apache.druid.query.DataSource;
 import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.sql.calcite.planner.PlannerContext;
-import org.apache.druid.sql.calcite.rel.VirtualColumnRegistry;
 
 import java.util.List;
 
@@ -31,31 +30,24 @@ import java.util.List;
  *
  * Example: TableScan ; Union; Join.
  */
-public interface SourceDescProducer
+public interface InputDescProducer
 {
   /**
    * Utility class to input related things details.
    *
    * Main reason to have this was that {@link DataSource} doesn't contain the {@link RowSignature}.
    */
-  class SourceDesc
+  class InputDesc
   {
-    public final DataSource dataSource;
-    public final RowSignature rowSignature;
-    public final VirtualColumnRegistry virtualColumnRegistry;
+    public DataSource dataSource;
+    public RowSignature rowSignature;
 
-    public SourceDesc(DataSource dataSource, RowSignature rowSignature)
-    {
-      this(dataSource, rowSignature, null);
-    }
-
-    public SourceDesc(DataSource dataSource, RowSignature rowSignature, VirtualColumnRegistry virtualColumnRegistry)
+    public InputDesc(DataSource dataSource, RowSignature rowSignature)
     {
       this.dataSource = dataSource;
       this.rowSignature = rowSignature;
-      this.virtualColumnRegistry = virtualColumnRegistry;
     }
   }
 
-  SourceDesc getSourceDesc(PlannerContext plannerContext, List<SourceDesc> sources);
+  InputDesc getInputDesc(PlannerContext plannerContext, List<InputDesc> inputs);
 }

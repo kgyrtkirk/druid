@@ -35,11 +35,11 @@ import org.apache.druid.query.TableDataSource;
 import org.apache.druid.query.UnionDataSource;
 import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.sql.calcite.planner.PlannerContext;
-import org.apache.druid.sql.calcite.planner.querygen.SourceDescProducer;
+import org.apache.druid.sql.calcite.planner.querygen.InputDescProducer;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DruidUnion extends Union implements DruidLogicalNode, SourceDescProducer
+public class DruidUnion extends Union implements DruidLogicalNode, InputDescProducer
 {
   public DruidUnion(
       RelOptCluster cluster,
@@ -64,26 +64,26 @@ public class DruidUnion extends Union implements DruidLogicalNode, SourceDescPro
   }
 
   @Override
-  public SourceDesc getSourceDesc(PlannerContext plannerContext, List<SourceDesc> sources)
+  public InputDesc getInputDesc(PlannerContext plannerContext, List<InputDesc> inputs)
   {
     List<DataSource> dataSources = new ArrayList<>();
     RowSignature signature = null;
-    for (SourceDesc sourceDesc : sources) {
-      checkDataSourceSupported(sourceDesc.dataSource);
-      dataSources.add(sourceDesc.dataSource);
+    for (InputDesc inputDesc : inputs) {
+      checkDataSourceSupported(inputDesc.dataSource);
+      dataSources.add(inputDesc.dataSource);
       if (signature == null) {
-        signature = sourceDesc.rowSignature;
+        signature = inputDesc.rowSignature;
       } else {
-        if (!signature.equals(sourceDesc.rowSignature)) {
+        if (!signature.equals(inputDesc.rowSignature)) {
           throw DruidException.defensive(
               "Row signature mismatch in Union inputs [%s] and [%s]",
               signature,
-              sourceDesc.rowSignature
+              inputDesc.rowSignature
           );
         }
       }
     }
-    return new SourceDesc(new UnionDataSource(dataSources), signature);
+    return new InputDesc(new UnionDataSource(dataSources), signature);
   }
 
   private void checkDataSourceSupported(DataSource dataSource)

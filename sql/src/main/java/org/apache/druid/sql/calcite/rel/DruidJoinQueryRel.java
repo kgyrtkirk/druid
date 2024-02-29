@@ -55,11 +55,9 @@ import org.apache.druid.sql.calcite.expression.Expressions;
 import org.apache.druid.sql.calcite.planner.Calcites;
 import org.apache.druid.sql.calcite.planner.PlannerConfig;
 import org.apache.druid.sql.calcite.planner.PlannerContext;
-import org.apache.druid.sql.calcite.planner.querygen.SourceDescProducer.SourceDesc;
 import org.apache.druid.sql.calcite.table.RowSignatures;
 
 import javax.annotation.Nullable;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -137,13 +135,19 @@ public class DruidJoinQueryRel extends DruidRel<DruidJoinQueryRel>
     );
   }
 
-  private SourceDesc buildLeftSourceDesc()
+  @Override
+  public DruidQuery toDruidQuery(final boolean finalizeAggregations)
   {
-    final SourceDesc leftDesc;
     final DruidRel<?> leftDruidRel = (DruidRel<?>) left;
     final DruidQuery leftQuery = Preconditions.checkNotNull(leftDruidRel.toDruidQuery(false), "leftQuery");
     final RowSignature leftSignature = leftQuery.getOutputRowSignature();
     final DataSource leftDataSource;
+
+    final DruidRel<?> rightDruidRel = (DruidRel<?>) right;
+    final DruidQuery rightQuery = Preconditions.checkNotNull(rightDruidRel.toDruidQuery(false), "rightQuery");
+    final RowSignature rightSignature = rightQuery.getOutputRowSignature();
+    final DataSource rightDataSource;
+
     if (computeLeftRequiresSubquery(getPlannerContext(), leftDruidRel)) {
       leftDataSource = new QueryDataSource(leftQuery.getQuery());
       if (leftFilter != null) {
@@ -152,54 +156,37 @@ public class DruidJoinQueryRel extends DruidRel<DruidJoinQueryRel>
     } else {
       leftDataSource = leftQuery.getDataSource();
     }
-    leftDesc = new SourceDesc(leftDataSource, leftSignature);
-    return leftDesc;
-  }
 
-  private SourceDesc buildRightSourceDesc()
-  {
-    final SourceDesc rightDesc;
-    final DruidRel<?> rightDruidRel = (DruidRel<?>) right;
-    final DruidQuery rightQuery = Preconditions.checkNotNull(rightDruidRel.toDruidQuery(false), "rightQuery");
-    final RowSignature rightSignature = rightQuery.getOutputRowSignature();
-    final DataSource rightDataSource;
     if (computeRightRequiresSubquery(getPlannerContext(), rightDruidRel)) {
       rightDataSource = new QueryDataSource(rightQuery.getQuery());
     } else {
       rightDataSource = rightQuery.getDataSource();
     }
-    rightDesc = new SourceDesc(rightDataSource, rightSignature);
-    return rightDesc;
-  }
 
-  public static SourceDesc buildJoinSourceDesc(final SourceDesc leftDesc, final SourceDesc rightDesc, PlannerContext plannerContext, Join joinRel, Filter leftFilter)
-  {
+
     final Pair<String, RowSignature> prefixSignaturePair = computeJoinRowSignature(
-        leftDesc.rowSignature,
-        rightDesc.rowSignature,
-        findExistingJoinPrefixes(leftDesc.dataSource, rightDesc.dataSource)
+        leftSignature,
+        rightSignature,
+        findExistingJoinPrefixes(leftDataSource, rightDataSource)
     );
-
-    String prefix = prefixSignaturePair.lhs;
-    RowSignature signature = prefixSignaturePair.rhs;
 
     VirtualColumnRegistry virtualColumnRegistry = VirtualColumnRegistry.create(
-        signature,
-        plannerContext.getExpressionParser(),
-        plannerContext.getPlannerConfig().isForceExpressionVirtualColumns()
+        prefixSignaturePair.rhs,
+        getPlannerContext().getExpressionParser(),
+        getPlannerContext().getPlannerConfig().isForceExpressionVirtualColumns()
     );
-    plannerContext.setJoinExpressionVirtualColumnRegistry(virtualColumnRegistry);
+    getPlannerContext().setJoinExpressionVirtualColumnRegistry(virtualColumnRegistry);
 
     // Generate the condition for this join as a Druid expression.
     final DruidExpression condition = Expressions.toDruidExpression(
-        plannerContext,
-        signature,
+        getPlannerContext(),
+        prefixSignaturePair.rhs,
         joinRel.getCondition()
     );
 
     // Unsetting it to avoid any VC Registry leaks incase there are multiple druid quries for the SQL
     // It should be fixed soon with changes in interface for SqlOperatorConversion and Expressions bridge class
-    plannerContext.setJoinExpressionVirtualColumnRegistry(null);
+    getPlannerContext().setJoinExpressionVirtualColumnRegistry(null);
 
     // DruidJoinRule should not have created us if "condition" is null. Check defensively anyway, which also
     // quiets static code analysis.
@@ -207,40 +194,25 @@ public class DruidJoinQueryRel extends DruidRel<DruidJoinQueryRel>
       throw new CannotBuildQueryException(joinRel, joinRel.getCondition());
     }
 
-    JoinDataSource joinDataSource = JoinDataSource.create(
-        leftDesc.dataSource,
-        rightDesc.dataSource,
-        prefix,
-        JoinConditionAnalysis.forExpression(
-            condition.getExpression(),
-            plannerContext.parseExpression(condition.getExpression()),
-            prefix
-        ),
-        toDruidJoinType(joinRel.getJoinType()),
-        getDimFilter(plannerContext, leftDesc.rowSignature, leftFilter),
-        plannerContext.getJoinableFactoryWrapper()
-    );
-
-    SourceDesc sourceDesc = new SourceDesc(joinDataSource, signature, virtualColumnRegistry);
-    return sourceDesc;
-  }
-
-
-  @Override
-  public DruidQuery toDruidQuery(final boolean finalizeAggregations)
-  {
-    final SourceDesc leftDesc = buildLeftSourceDesc();
-    final SourceDesc rightDesc = buildRightSourceDesc();
-
-    SourceDesc sourceDesc = buildJoinSourceDesc(leftDesc, rightDesc, getPlannerContext(), joinRel, leftFilter);
-
     return partialQuery.build(
-        sourceDesc.dataSource,
-        sourceDesc.rowSignature,
+        JoinDataSource.create(
+            leftDataSource,
+            rightDataSource,
+            prefixSignaturePair.lhs,
+            JoinConditionAnalysis.forExpression(
+                condition.getExpression(),
+                getPlannerContext().parseExpression(condition.getExpression()),
+                prefixSignaturePair.lhs
+            ),
+            toDruidJoinType(joinRel.getJoinType()),
+            getDimFilter(getPlannerContext(), leftSignature, leftFilter),
+            getPlannerContext().getJoinableFactoryWrapper()
+        ),
+        prefixSignaturePair.rhs,
         getPlannerContext(),
         getCluster().getRexBuilder(),
         finalizeAggregations,
-        sourceDesc.virtualColumnRegistry
+        virtualColumnRegistry
     );
   }
 

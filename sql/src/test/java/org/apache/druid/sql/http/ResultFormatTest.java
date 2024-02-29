@@ -21,21 +21,25 @@ package org.apache.druid.sql.http;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
+import org.apache.druid.annotations.UsedByJUnitParamsRunner;
 import org.apache.druid.jackson.DefaultObjectMapper;
 import org.apache.druid.java.util.common.StringUtils;
 import org.junit.Assert;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.EnumSet;
 
+@RunWith(JUnitParamsRunner.class)
 public class ResultFormatTest
 {
+
   private final ObjectMapper jsonMapper = new DefaultObjectMapper();
 
-  @ParameterizedTest
-  @MethodSource("provideResultFormats")
+  @Test
+  @Parameters(source = ResultFormatTypeProvider.class)
   public void testSerde(ResultFormat target) throws JsonProcessingException
   {
     final String json = jsonMapper.writeValueAsString(target);
@@ -52,11 +56,15 @@ public class ResultFormatTest
     Assert.assertEquals(ResultFormat.OBJECTLINES, jsonMapper.readValue("\"oBjEcTlInEs\"", ResultFormat.class));
   }
 
-  public static Object[] provideResultFormats()
+  public static class ResultFormatTypeProvider
   {
-    return EnumSet.allOf(ResultFormat.class)
-        .stream()
-        .map(format -> new Object[] {format})
-        .toArray(Object[]::new);
+    @UsedByJUnitParamsRunner
+    public static Object[] provideResultFormats()
+    {
+      return EnumSet.allOf(ResultFormat.class)
+                    .stream()
+                    .map(format -> new Object[]{format})
+                    .toArray(Object[]::new);
+    }
   }
 }
