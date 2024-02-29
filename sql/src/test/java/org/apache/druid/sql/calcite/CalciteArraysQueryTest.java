@@ -91,9 +91,8 @@ import org.apache.druid.sql.calcite.util.TestDataBuilder;
 import org.apache.druid.timeline.DataSegment;
 import org.apache.druid.timeline.partition.LinearShardSpec;
 import org.junit.Assert;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -157,7 +156,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
 
     final QueryableIndex foo = IndexBuilder
         .create()
-        .tmpDir(newFolder(temporaryFolder, "junit"))
+        .tmpDir(temporaryFolder.newFolder())
         .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
         .schema(TestDataBuilder.INDEX_SCHEMA)
         .rows(TestDataBuilder.ROWS1)
@@ -165,7 +164,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
 
     final QueryableIndex numfoo = IndexBuilder
         .create()
-        .tmpDir(newFolder(temporaryFolder, "junit"))
+        .tmpDir(temporaryFolder.newFolder())
         .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
         .schema(TestDataBuilder.INDEX_SCHEMA_NUMERIC_DIMS)
         .rows(TestDataBuilder.ROWS1_WITH_NUMERIC_DIMS)
@@ -173,7 +172,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
 
     final QueryableIndex indexLotsOfColumns = IndexBuilder
         .create()
-        .tmpDir(newFolder(temporaryFolder, "junit"))
+        .tmpDir(temporaryFolder.newFolder())
         .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
         .schema(TestDataBuilder.INDEX_SCHEMA_LOTS_O_COLUMNS)
         .rows(TestDataBuilder.ROWS_LOTS_OF_COLUMNS)
@@ -181,7 +180,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
 
     final QueryableIndex indexArrays =
         IndexBuilder.create()
-                    .tmpDir(newFolder(temporaryFolder, "junit"))
+                    .tmpDir(temporaryFolder.newFolder())
                     .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
                     .schema(
                         new IncrementalIndexSchema.Builder()
@@ -200,7 +199,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
                         )
                     )
                     .inputFormat(TestDataBuilder.DEFAULT_JSON_INPUT_FORMAT)
-                    .inputTmpDir(newFolder(temporaryFolder, "junit"))
+                    .inputTmpDir(temporaryFolder.newFolder())
                     .buildMMappedIndex();
 
     SpecificSegmentsQuerySegmentWalker walker = SpecificSegmentsQuerySegmentWalker.createWalker(
@@ -7369,14 +7368,5 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
             new Object[]{"d"}
         )
     );
-  }
-
-  private static File newFolder(File root, String... subDirs) throws IOException {
-    String subFolder = String.join("/", subDirs);
-    File result = new File(root, subFolder);
-    if (!result.mkdirs()) {
-      throw new IOException("Couldn't create folders " + root);
-    }
-    return result;
   }
 }

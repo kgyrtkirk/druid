@@ -115,21 +115,21 @@ import org.apache.druid.sql.calcite.view.ViewManager;
 import org.apache.druid.sql.http.SqlParameter;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matcher;
+import org.hamcrest.MatcherAssert;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.joda.time.chrono.ISOChronology;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.internal.matchers.ThrowableMessageMatcher;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.io.TempDir;
 import org.junit.rules.ExpectedException;
+import org.junit.rules.TemporaryFolder;
 
 import javax.annotation.Nullable;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -143,10 +143,9 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * A base class for SQL query testing. It sets up query execution environment, provides useful helper methods,
@@ -161,7 +160,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   public static Long NULL_LONG;
   public static final String HLLC_STRING = VersionOneHyperLogLogCollector.class.getName();
 
-  @BeforeAll
+  @BeforeClass
   public static void setupNullValues()
   {
     NULL_STRING = NullHandling.defaultStringValue();
@@ -297,8 +296,8 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   public final SqlEngine engine0;
   final boolean useDefault = NullHandling.replaceWithDefault();
 
-  @TempDir
-  public File temporaryFolder;
+  @Rule(order = 2)
+  public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
   public boolean cannotVectorize = false;
   public boolean skipVectorize = false;
@@ -677,7 +676,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   {
     try {
       baseComponentSupplier = new StandardComponentSupplier(
-          newFolder(temporaryFolder, "junit")
+          temporaryFolder.newFolder()
       );
     }
     catch (IOException e) {
@@ -750,7 +749,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   {
     boolean featureAvailable = queryFramework().engine()
         .featureAvailable(feature, ExpressionTestHelper.PLANNER_CONTEXT);
-    assumeTrue(featureAvailable, StringUtils.format("test disabled; feature [%s] is not available!", feature));
+    assumeTrue(StringUtils.format("test disabled; feature [%s] is not available!", feature), featureAvailable);
   }
 
   public void assertQueryIsUnplannable(final String sql, String expectedError)
@@ -764,7 +763,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
       testQuery(plannerConfig, sql, CalciteTests.REGULAR_USER_AUTH_RESULT, ImmutableList.of(), ImmutableList.of());
     }
     catch (DruidException e) {
-      assertThat(
+      MatcherAssert.assertThat(
           e,
           buildUnplannableExceptionMatcher().expectMessageContains(expectedError)
       );
@@ -1056,15 +1055,6 @@ public class BaseCalciteQueryTest extends CalciteTestBase
     {
       return baseQueryContext;
     }
-
-    private static File newFolder(File root, String... subDirs) throws IOException {
-      String subFolder = String.join("/", subDirs);
-      File result = new File(root, subFolder);
-      if (!result.mkdirs()) {
-        throw new IOException("Couldn't create folders " + root);
-      }
-      return result;
-    }
   }
 
   public enum ResultMatchMode
@@ -1149,15 +1139,6 @@ public class BaseCalciteQueryTest extends CalciteTestBase
     private static String mismatchMessage(int row, int column)
     {
       return StringUtils.format("column content mismatch at %d,%d", row, column);
-    }
-
-    private static File newFolder(File root, String... subDirs) throws IOException {
-      String subFolder = String.join("/", subDirs);
-      File result = new File(root, subFolder);
-      if (!result.mkdirs()) {
-        throw new IOException("Couldn't create folders " + root);
-      }
-      return result;
     }
 
   }
@@ -1286,7 +1267,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
             .build()
             .run()
     );
-    assertThat(e, exceptionMatcher);
+    MatcherAssert.assertThat(e, exceptionMatcher);
   }
 
   public void analyzeResources(
@@ -1476,15 +1457,6 @@ public class BaseCalciteQueryTest extends CalciteTestBase
               .build(),
           };
     }
-
-    private static File newFolder(File root, String... subDirs) throws IOException {
-      String subFolder = String.join("/", subDirs);
-      File result = new File(root, subFolder);
-      if (!result.mkdirs()) {
-        throw new IOException("Couldn't create folders " + root);
-      }
-      return result;
-    }
   }
 
   protected Map<String, Object> withLeftDirectAccessEnabled(Map<String, Object> context)
@@ -1528,15 +1500,6 @@ public class BaseCalciteQueryTest extends CalciteTestBase
     }
 
     void verify(String sql, QueryResults queryResults);
-
-    private static File newFolder(File root, String... subDirs) throws IOException {
-      String subFolder = String.join("/", subDirs);
-      File result = new File(root, subFolder);
-      if (!result.mkdirs()) {
-        throw new IOException("Couldn't create folders " + root);
-      }
-      return result;
-    }
   }
 
   private ResultsVerifier defaultResultsVerifier(
@@ -1587,15 +1550,6 @@ public class BaseCalciteQueryTest extends CalciteTestBase
         log.info(resultsToString("Actual", queryResults.results));
         throw e;
       }
-    }
-
-    private static File newFolder(File root, String... subDirs) throws IOException {
-      String subFolder = String.join("/", subDirs);
-      File result = new File(root, subFolder);
-      if (!result.mkdirs()) {
-        throw new IOException("Couldn't create folders " + root);
-      }
-      return result;
     }
 
   }
@@ -1685,23 +1639,5 @@ public class BaseCalciteQueryTest extends CalciteTestBase
     {
       sb.append(post);
     }
-
-    private static File newFolder(File root, String... subDirs) throws IOException {
-      String subFolder = String.join("/", subDirs);
-      File result = new File(root, subFolder);
-      if (!result.mkdirs()) {
-        throw new IOException("Couldn't create folders " + root);
-      }
-      return result;
-    }
-  }
-
-  private static File newFolder(File root, String... subDirs) throws IOException {
-    String subFolder = String.join("/", subDirs);
-    File result = new File(root, subFolder);
-    if (!result.mkdirs()) {
-      throw new IOException("Couldn't create folders " + root);
-    }
-    return result;
   }
 }

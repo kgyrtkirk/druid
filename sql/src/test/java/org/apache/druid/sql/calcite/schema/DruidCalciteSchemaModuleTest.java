@@ -59,8 +59,8 @@ import org.easymock.EasyMock;
 import org.easymock.EasyMockRunner;
 import org.easymock.Mock;
 import org.junit.Assert;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.Set;
@@ -103,7 +103,7 @@ public class DruidCalciteSchemaModuleTest extends CalciteTestBase
   private DruidCalciteSchemaModule target;
   private Injector injector;
 
-  @BeforeEach
+  @Before
   public void setUp()
   {
     EasyMock.replay(plannerConfig);

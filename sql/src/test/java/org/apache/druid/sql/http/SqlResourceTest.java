@@ -104,14 +104,16 @@ import org.apache.druid.sql.calcite.util.CalciteTestBase;
 import org.apache.druid.sql.calcite.util.CalciteTests;
 import org.apache.druid.sql.calcite.util.QueryLogHook;
 import org.hamcrest.CoreMatchers;
+import org.hamcrest.MatcherAssert;
+import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.ClassRule;
 import org.junit.Rule;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -121,7 +123,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.StreamingOutput;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.AbstractList;
@@ -142,8 +143,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-
-import static org.hamcrest.MatcherAssert.assertThat;
 
 @SuppressWarnings("ALL")
 public class SqlResourceTest extends CalciteTestBase
@@ -169,8 +168,8 @@ public class SqlResourceTest extends CalciteTestBase
 
   private static Closer staticCloser = Closer.create();
   private static QueryRunnerFactoryConglomerate conglomerate;
-  @TempDir
-  public static File temporaryFolder;
+  @ClassRule
+  public static TemporaryFolder temporaryFolder = new TemporaryFolder();
   private static SpecificSegmentsQuerySegmentWalker walker;
   private static QueryScheduler scheduler;
 
@@ -197,7 +196,7 @@ public class SqlResourceTest extends CalciteTestBase
 
   private static final AtomicReference<Supplier<Void>> SCHEDULER_BAGGAGE = new AtomicReference<>();
 
-  @BeforeAll
+  @BeforeClass
   public static void setupClass() throws Exception
   {
     conglomerate = QueryStackTests.createQueryRunnerFactoryConglomerate(staticCloser);
@@ -221,17 +220,17 @@ public class SqlResourceTest extends CalciteTestBase
         );
       }
     };
-    walker = CalciteTests.createMockWalker(conglomerate, newFolder(temporaryFolder, "junit"), scheduler);
+    walker = CalciteTests.createMockWalker(conglomerate, temporaryFolder.newFolder(), scheduler);
     staticCloser.register(walker);
   }
 
-  @AfterAll
+  @AfterClass
   public static void teardownClass() throws Exception
   {
     staticCloser.close();
   }
 
-  @BeforeEach
+  @Before
   public void setUp() throws Exception
   {
     SCHEDULER_BAGGAGE.set(() -> null);
@@ -342,7 +341,7 @@ public class SqlResourceTest extends CalciteTestBase
     return makeExpectedReq(CalciteTests.REGULAR_USER_AUTH_RESULT);
   }
 
-  @AfterEach
+  @After
   public void tearDown() throws Exception
   {
     SCHEDULER_BAGGAGE.set(() -> null);
@@ -1604,7 +1603,7 @@ public class SqlResourceTest extends CalciteTestBase
         Status.BAD_REQUEST.getStatusCode()
     );
 
-    assertThat(
+    MatcherAssert.assertThat(
         exception.getUnderlyingException(),
         DruidExceptionMatcher
             .invalidSqlInput()
@@ -2283,15 +2282,6 @@ public class SqlResourceTest extends CalciteTestBase
         }
       };
     }
-
-    private static File newFolder(File root, String... subDirs) throws IOException {
-      String subFolder = String.join("/", subDirs);
-      File result = new File(root, subFolder);
-      if (!result.mkdirs()) {
-        throw new IOException("Couldn't create folders " + root);
-      }
-      return result;
-    }
   }
 
   private DruidException validateErrorResponse(
@@ -2312,7 +2302,7 @@ public class SqlResourceTest extends CalciteTestBase
     if (messageContainsString == null) {
       Assert.assertNull(exception.getMessage());
     } else {
-      assertThat(exception.getMessage(), CoreMatchers.containsString(messageContainsString));
+      MatcherAssert.assertThat(exception.getMessage(), CoreMatchers.containsString(messageContainsString));
     }
 
     return exception;
@@ -2388,14 +2378,5 @@ public class SqlResourceTest extends CalciteTestBase
       default:
         return DruidException.Category.UNCATEGORIZED;
     }
-  }
-
-  private static File newFolder(File root, String... subDirs) throws IOException {
-    String subFolder = String.join("/", subDirs);
-    File result = new File(root, subFolder);
-    if (!result.mkdirs()) {
-      throw new IOException("Couldn't create folders " + root);
-    }
-    return result;
   }
 }
