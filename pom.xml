@@ -1345,24 +1345,6 @@
 
     <build>
         <plugins>
-    <plugin>
-      <groupId>org.openrewrite.maven</groupId>
-      <artifactId>rewrite-maven-plugin</artifactId>
-      <version>5.23.1</version>
-      <configuration>
-        <activeRecipes>
-          <recipe>org.apache.druid.RewriteRules</recipe>
-        </activeRecipes>
-        <configLocation>${maven.multiModuleProjectDirectory}/rewrite.yml</configLocation>
-      </configuration>
-      <dependencies>
-        <dependency>
-          <groupId>org.openrewrite.recipe</groupId>
-          <artifactId>rewrite-testing-frameworks</artifactId>
-          <version>2.4.1</version>
-        </dependency>
-      </dependencies>
-    </plugin>
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -2032,6 +2014,32 @@
                         </configuration>
                     </plugin>
                 </plugins>
+            </build>
+        </profile>
+        <profile>
+        <id>rewrite</id>
+            <build>
+    <plugins>
+
+    <plugin>
+      <groupId>org.openrewrite.maven</groupId>
+      <artifactId>rewrite-maven-plugin</artifactId>
+      <version>5.23.1</version>
+      <configuration>
+        <activeRecipes>
+          <recipe>org.apache.druid.RewriteRules</recipe>
+        </activeRecipes>
+        <configLocation>${maven.multiModuleProjectDirectory}/rewrite.yml</configLocation>
+      </configuration>
+      <dependencies>
+        <dependency>
+          <groupId>org.openrewrite.recipe</groupId>
+          <artifactId>rewrite-testing-frameworks</artifactId>
+          <version>2.4.1</version>
+        </dependency>
+      </dependencies>
+    </plugin>
+    </plugins>
             </build>
         </profile>
         <!-- Run Apache Rat license checks in a separate profile, because during local builds it doesn't skip files
