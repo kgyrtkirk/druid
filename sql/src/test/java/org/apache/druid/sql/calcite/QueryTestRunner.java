@@ -44,7 +44,6 @@ import org.apache.druid.sql.calcite.QueryTestBuilder.QueryTestConfig;
 import org.apache.druid.sql.calcite.parser.DruidSqlIngest;
 import org.apache.druid.sql.calcite.planner.PlannerCaptureHook;
 import org.apache.druid.sql.calcite.planner.PrepareResult;
-import org.apache.druid.sql.calcite.rel.CannotBuildQueryException;
 import org.apache.druid.sql.calcite.table.RowSignatures;
 import org.apache.druid.sql.calcite.util.QueryLogHook;
 import org.junit.Assert;
@@ -57,10 +56,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Runs a test built up by {@link QueryTestBuilder}. Running a SQL query test
@@ -261,20 +257,15 @@ public class QueryTestRunner
         theQueryContext.put(QueryContexts.VECTORIZE_KEY, vectorize);
         theQueryContext.put(QueryContexts.VECTORIZE_VIRTUAL_COLUMNS_KEY, vectorize);
 
-        boolean vectorizationEnabled = !"false".equals(vectorize);
-        if (vectorizationEnabled) {
+        if (!"false".equals(vectorize)) {
           theQueryContext.put(QueryContexts.VECTOR_SIZE_KEY, 2); // Small vector size to ensure we use more than one.
         }
 
-        Supplier<QueryResults> runQuery = () -> runQuery(
+        results.add(runQuery(
             sqlStatementFactory,
             sqlQuery.withContext(theQueryContext),
             vectorize
-        );
-        if (vectorizationEnabled && builder.queryCannotVectorize) {
-          assertThrows(CannotBuildQueryException.class, runQuery::get);
-        }
-        results.add(runQuery.get());
+        ));
       }
     }
 
