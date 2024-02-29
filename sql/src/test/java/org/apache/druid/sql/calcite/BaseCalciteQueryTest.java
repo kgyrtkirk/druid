@@ -144,8 +144,8 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
 import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * A base class for SQL query testing. It sets up query execution environment, provides useful helper methods,
