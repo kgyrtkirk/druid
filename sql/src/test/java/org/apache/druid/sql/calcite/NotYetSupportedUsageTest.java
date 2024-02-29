@@ -35,6 +35,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import static org.junit.Assert.assertEquals;
 
 public class NotYetSupportedUsageTest
@@ -61,7 +62,6 @@ public class NotYetSupportedUsageTest
 
   static class ReportEntry
   {
-
     public static final Comparator<ReportEntry> CLASS_NCASES_MODE_COMPARATOR = new Comparator<ReportEntry>()
     {
       @Override
@@ -144,5 +144,4 @@ public class NotYetSupportedUsageTest
     }
     return annotation.value();
   }
-
 }
