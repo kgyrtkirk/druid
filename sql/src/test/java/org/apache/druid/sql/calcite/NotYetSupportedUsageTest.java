@@ -61,7 +61,6 @@ public class NotYetSupportedUsageTest
 
   static class ReportEntry
   {
-
     public static final Comparator<ReportEntry> CLASS_NCASES_MODE_COMPARATOR = new Comparator<ReportEntry>()
     {
       @Override
@@ -144,5 +143,4 @@ public class NotYetSupportedUsageTest
     }
     return annotation.value();
   }
-
 }
