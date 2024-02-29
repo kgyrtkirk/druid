@@ -87,6 +87,8 @@ import org.junit.rules.TemporaryFolder;
 import org.mockito.Mockito;
 
 import javax.annotation.Nullable;
+
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
@@ -117,7 +119,21 @@ public class CalciteMSQTestsHelper
       TestGroupByBuffers groupByBuffers
   )
   {
-
+    try {
+      File cacheDirectory = temporaryFolder.newFolder("cache");
+      File localSegments = temporaryFolder.newFolder("localsegments");
+      return fetchModules(cacheDirectory, localSegments, groupByBuffers);
+    }
+    catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
+    public static List<Module> fetchModules(
+        File cacheDirectory ,
+        File localSegments ,
+        TestGroupByBuffers groupByBuffers
+    )
+    {
     Module customBindings =
         binder -> {
           binder.bind(AppenderatorsManager.class).toProvider(() -> null);
@@ -153,21 +169,10 @@ public class CalciteMSQTestsHelper
           ObjectMapper testMapper = MSQTestBase.setupObjectMapper(dummyInjector);
           IndexIO indexIO = new IndexIO(testMapper, ColumnConfig.DEFAULT);
           SegmentCacheManager segmentCacheManager = null;
-          try {
-            segmentCacheManager = new SegmentCacheManagerFactory(testMapper).manufacturate(temporaryFolder.newFolder(
-                "test"));
-          }
-          catch (IOException e) {
-            e.printStackTrace();
-          }
+          segmentCacheManager = new SegmentCacheManagerFactory(testMapper).manufacturate(cacheDirectory);
           LocalDataSegmentPusherConfig config = new LocalDataSegmentPusherConfig();
           MSQTestSegmentManager segmentManager = new MSQTestSegmentManager(segmentCacheManager, indexIO);
-          try {
-            config.storageDirectory = temporaryFolder.newFolder("localsegments");
-          }
-          catch (IOException e) {
-            throw new ISE(e, "Unable to create folder");
-          }
+          config.storageDirectory = localSegments;
           binder.bind(DataSegmentPusher.class).toProvider(() -> new MSQTestDelegateDataSegmentPusher(
               new LocalDataSegmentPusher(config),
               segmentManager
