@@ -88,7 +88,7 @@ public class DruidStatementTest extends CalciteTestBase
   {
     resourceCloser = Closer.create();
     conglomerate = QueryStackTests.createQueryRunnerFactoryConglomerate(resourceCloser);
-    walker = CalciteTests.createMockWalker(conglomerate, temporaryFolder.newFolder());
+    walker = CalciteTests.createMockWalker(conglomerate, temporaryFolder.getRoot());
     resourceCloser.register(walker);
   }
 
