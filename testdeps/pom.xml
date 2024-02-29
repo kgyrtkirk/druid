@@ -54,6 +54,18 @@
       <artifactId>easymock</artifactId>
       <version>5.2.0</version>
     </dependency>
+            <dependency>
+                <groupId>com.google.caliper</groupId>
+                <artifactId>caliper</artifactId>
+                <version>0.5-rc1</version>
+                <exclusions>
+                    <!-- caliper ships a very old asm version which can cause issues during testing  -->
+                    <exclusion>
+                        <groupId>asm</groupId>
+                        <artifactId>*</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
 
   </dependencies>
 </project>
