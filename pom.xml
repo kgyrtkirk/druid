@@ -1173,12 +1173,6 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>org.reflections</groupId>
-                <artifactId>reflections</artifactId>
-                <version>0.9.12</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
                 <groupId>pl.pragmatists</groupId>
                 <artifactId>JUnitParams</artifactId>
                 <version>1.1.1</version>
@@ -1188,12 +1182,6 @@
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava-testlib</artifactId>
                 <version>${guava.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>nl.jqno.equalsverifier</groupId>
-                <artifactId>equalsverifier</artifactId>
-                <version>3.15.1</version>
                 <scope>test</scope>
             </dependency>
             <dependency>

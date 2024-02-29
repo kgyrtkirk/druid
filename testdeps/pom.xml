@@ -66,6 +66,26 @@
                     </exclusion>
                 </exclusions>
             </dependency>
+    <!-- explicitly declare mockito-core dependency to make anaylize-dependencies happy when running with Java 8 -->
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-core</artifactId>
+      <version>${mockito.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-${mockito.inline.artifact}</artifactId>
+    </dependency>
+            <dependency>
+                <groupId>nl.jqno.equalsverifier</groupId>
+                <artifactId>equalsverifier</artifactId>
+                <version>3.15.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.reflections</groupId>
+                <artifactId>reflections</artifactId>
+                <version>0.9.12</version>
+            </dependency>
 
   </dependencies>
 </project>
