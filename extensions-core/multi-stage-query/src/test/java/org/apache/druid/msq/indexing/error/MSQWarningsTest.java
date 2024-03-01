@@ -45,8 +45,8 @@ import org.apache.druid.sql.calcite.planner.ColumnMapping;
 import org.apache.druid.sql.calcite.planner.ColumnMappings;
 import org.apache.druid.sql.calcite.util.CalciteTests;
 import org.junit.Assert;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -64,7 +64,7 @@ public class MSQWarningsTest extends MSQTestBase
   private Query<?> defaultQuery;
   private ColumnMappings defaultColumnMappings;
 
-  @BeforeEach
+  @Before
   public void setUp3() throws IOException
   {
     File tempFile = MSQTestFileUtils.getResourceAsTemporaryFile(temporaryFolder, this, "/unparseable.gz");

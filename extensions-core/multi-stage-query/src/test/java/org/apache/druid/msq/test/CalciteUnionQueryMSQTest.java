@@ -43,8 +43,8 @@ import org.apache.druid.sql.calcite.QueryTestBuilder;
 import org.apache.druid.sql.calcite.filtration.Filtration;
 import org.apache.druid.sql.calcite.run.SqlEngine;
 import org.apache.druid.sql.calcite.util.CalciteTests;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import org.junit.Ignore;
+import org.junit.Test;
 
 /**
  * Runs {@link CalciteUnionQueryTest} but with MSQ engine
@@ -114,7 +114,7 @@ public class CalciteUnionQueryMSQTest extends CalciteUnionQueryTest
 
   }
 
-  @Disabled("Ignored till MSQ can plan UNION ALL with any operand")
+  @Ignore("Ignored till MSQ can plan UNION ALL with any operand")
   @Test
   public void testUnionOnSubqueries()
   {

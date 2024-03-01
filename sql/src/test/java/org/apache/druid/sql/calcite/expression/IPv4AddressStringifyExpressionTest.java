@@ -27,8 +27,8 @@ import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.sql.calcite.expression.builtin.IPv4AddressStringifyOperatorConversion;
 import org.apache.druid.sql.calcite.util.CalciteTestBase;
 import org.junit.Assert;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -49,7 +49,7 @@ public class IPv4AddressStringifyExpressionTest extends CalciteTestBase
   private IPv4AddressStringifyOperatorConversion target;
   private ExpressionTestHelper testHelper;
 
-  @BeforeEach
+  @Before
   public void setUp()
   {
     target = new IPv4AddressStringifyOperatorConversion();

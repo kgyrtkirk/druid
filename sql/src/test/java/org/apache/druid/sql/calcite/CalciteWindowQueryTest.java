@@ -39,8 +39,9 @@ import org.apache.druid.sql.calcite.QueryVerification.QueryResultsVerifier;
 import org.apache.druid.sql.calcite.planner.PlannerContext;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.io.File;
 import java.net.URL;
@@ -57,6 +58,7 @@ import static org.junit.Assume.assumeThat;
 /**
  * These tests are file-based, look in resources -> calcite/tests/window for the set of test specifications.
  */
+@RunWith(Parameterized.class)
 public class CalciteWindowQueryTest extends BaseCalciteQueryTest
 {
 
@@ -70,6 +72,7 @@ public class CalciteWindowQueryTest extends BaseCalciteQueryTest
 
   private static final ObjectMapper YAML_JACKSON = new DefaultObjectMapper(new YAMLFactory(), "tests");
 
+  @Parameterized.Parameters(name = "{0}")
   public static Object parametersForWindowQueryTest() throws Exception
   {
     final URL windowFolderUrl = ClassLoader.getSystemResource("calcite/tests/window");
@@ -83,9 +86,9 @@ public class CalciteWindowQueryTest extends BaseCalciteQueryTest
         .toArray();
   }
 
-  private String filename;
+  private final String filename;
 
-  public void initCalciteWindowQueryTest(String filename)
+  public CalciteWindowQueryTest(String filename)
   {
     this.filename = filename;
   }
@@ -197,12 +200,10 @@ public class CalciteWindowQueryTest extends BaseCalciteQueryTest
     }
   }
 
-  @MethodSource("parametersForWindowQueryTest")
-  @ParameterizedTest(name = "{0}")
+  @Test
   @SuppressWarnings("unchecked")
-  public void windowQueryTest(String filename) throws Exception
+  public void windowQueryTest() throws Exception
   {
-    initCalciteWindowQueryTest(filename);
     TestCase testCase = new TestCase(filename);
 
     assumeThat(testCase.getType(), Matchers.not(TestType.failingTest));
@@ -221,12 +222,10 @@ public class CalciteWindowQueryTest extends BaseCalciteQueryTest
     }
   }
 
-  @MethodSource("parametersForWindowQueryTest")
-  @ParameterizedTest(name = "{0}")
+  @Test
   @SuppressWarnings("unchecked")
-  public void windowQueryTestWithCustomContextMaxSubqueryBytes(String filename) throws Exception
+  public void windowQueryTestWithCustomContextMaxSubqueryBytes() throws Exception
   {
-    initCalciteWindowQueryTest(filename);
     TestCase testCase = new TestCase(filename);
 
     assumeThat(testCase.getType(), Matchers.not(TestType.failingTest));

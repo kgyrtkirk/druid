@@ -110,12 +110,12 @@ import org.apache.druid.timeline.partition.NumberedShardSpec;
 import org.easymock.EasyMock;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.joda.time.DateTime;
+import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Rule;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
@@ -173,20 +173,20 @@ public class SystemSchemaTest extends CalciteTestBase
   @Rule
   public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
-  @BeforeAll
+  @BeforeClass
   public static void setUpClass()
   {
     resourceCloser = Closer.create();
     conglomerate = QueryStackTests.createQueryRunnerFactoryConglomerate(resourceCloser);
   }
 
-  @AfterAll
+  @AfterClass
   public static void tearDownClass() throws IOException
   {
     resourceCloser.close();
   }
 
-  @BeforeEach
+  @Before
   public void setUp() throws Exception
   {
     serverView = EasyMock.createNiceMock(TimelineServerView.class);

@@ -39,8 +39,8 @@ import org.apache.druid.sql.calcite.BaseCalciteQueryTest;
 import org.apache.druid.sql.calcite.filtration.Filtration;
 import org.apache.druid.sql.calcite.util.CalciteTests;
 import org.apache.druid.sql.http.SqlParameter;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import java.io.IOException;
 
@@ -219,7 +219,7 @@ public class BloomDimFilterSqlTest extends BaseCalciteQueryTest
     );
   }
 
-  @Disabled("this test is really slow and is intended to use for comparisons with testBloomFilterBigParameter")
+  @Ignore("this test is really slow and is intended to use for comparisons with testBloomFilterBigParameter")
   @Test
   public void testBloomFilterBigNoParam() throws IOException
   {
@@ -247,7 +247,7 @@ public class BloomDimFilterSqlTest extends BaseCalciteQueryTest
     );
   }
 
-  @Disabled("this test is for comparison with testBloomFilterBigNoParam")
+  @Ignore("this test is for comparison with testBloomFilterBigNoParam")
   @Test
   public void testBloomFilterBigParameter() throws IOException
   {

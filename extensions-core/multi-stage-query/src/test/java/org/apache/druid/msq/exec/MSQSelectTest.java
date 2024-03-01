@@ -81,9 +81,10 @@ import org.apache.druid.sql.calcite.planner.PlannerContext;
 import org.apache.druid.sql.calcite.util.CalciteTests;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
+import org.junit.Test;
 import org.junit.internal.matchers.ThrowableMessageMatcher;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
@@ -97,6 +98,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@RunWith(Parameterized.class)
 public class MSQSelectTest extends MSQTestBase
 {
 
@@ -124,6 +126,7 @@ public class MSQSelectTest extends MSQTestBase
                   )
                   .build();
 
+  @Parameterized.Parameters(name = "{index}:with context {0}")
   public static Collection<Object[]> data()
   {
     Object[][] data = new Object[][]{
@@ -137,14 +140,16 @@ public class MSQSelectTest extends MSQTestBase
 
     return Arrays.asList(data);
   }
+
+  @Parameterized.Parameter(0)
   public String contextName;
+
+  @Parameterized.Parameter(1)
   public Map<String, Object> context;
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testCalculator(String contextName, Map<String, Object> context)
+  @Test
+  public void testCalculator()
   {
-    initMSQSelectTest(contextName, context);
     RowSignature resultSignature = RowSignature.builder()
                                                .add("EXPR$0", ColumnType.LONG)
                                                .build();
@@ -178,11 +183,9 @@ public class MSQSelectTest extends MSQTestBase
         .setExpectedResultRows(ImmutableList.of(new Object[]{2})).verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testSelectOnFoo(String contextName, Map<String, Object> context)
+  @Test
+  public void testSelectOnFoo()
   {
-    initMSQSelectTest(contextName, context);
     RowSignature resultSignature = RowSignature.builder()
                                                .add("cnt", ColumnType.LONG)
                                                .add("dim1", ColumnType.STRING)
@@ -236,11 +239,9 @@ public class MSQSelectTest extends MSQTestBase
         )).verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testSelectOnFoo2(String contextName, Map<String, Object> context)
+  @Test
+  public void testSelectOnFoo2()
   {
-    initMSQSelectTest(contextName, context);
     RowSignature resultSignature = RowSignature.builder()
                                                .add("m1", ColumnType.LONG)
                                                .add("dim2", ColumnType.STRING)
@@ -296,11 +297,9 @@ public class MSQSelectTest extends MSQTestBase
         .verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testSelectOnFooDuplicateColumnNames(String contextName, Map<String, Object> context)
+  @Test
+  public void testSelectOnFooDuplicateColumnNames()
   {
-    initMSQSelectTest(contextName, context);
     // Duplicate column names are OK in SELECT statements.
 
     final RowSignature expectedScanSignature =
@@ -369,11 +368,9 @@ public class MSQSelectTest extends MSQTestBase
         )).verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testSelectOnFooWhereMatchesNoSegments(String contextName, Map<String, Object> context)
+  @Test
+  public void testSelectOnFooWhereMatchesNoSegments()
   {
-    initMSQSelectTest(contextName, context);
     RowSignature resultSignature = RowSignature.builder()
                                                .add("cnt", ColumnType.LONG)
                                                .add("dim1", ColumnType.STRING)
@@ -412,11 +409,9 @@ public class MSQSelectTest extends MSQTestBase
         .verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testSelectOnFooWhereMatchesNoData(String contextName, Map<String, Object> context)
+  @Test
+  public void testSelectOnFooWhereMatchesNoData()
   {
-    initMSQSelectTest(contextName, context);
     RowSignature resultSignature = RowSignature.builder()
                                                .add("cnt", ColumnType.LONG)
                                                .add("dim1", ColumnType.STRING)
@@ -448,11 +443,9 @@ public class MSQSelectTest extends MSQTestBase
         .verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testSelectAndOrderByOnFooWhereMatchesNoData(String contextName, Map<String, Object> context)
+  @Test
+  public void testSelectAndOrderByOnFooWhereMatchesNoData()
   {
-    initMSQSelectTest(contextName, context);
     RowSignature resultSignature = RowSignature.builder()
                                                .add("cnt", ColumnType.LONG)
                                                .add("dim1", ColumnType.STRING)
@@ -485,11 +478,9 @@ public class MSQSelectTest extends MSQTestBase
         .verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testGroupByOnFoo(String contextName, Map<String, Object> context)
+  @Test
+  public void testGroupByOnFoo()
   {
-    initMSQSelectTest(contextName, context);
     RowSignature rowSignature = RowSignature.builder()
                                             .add("cnt", ColumnType.LONG)
                                             .add("cnt1", ColumnType.LONG)
@@ -546,11 +537,9 @@ public class MSQSelectTest extends MSQTestBase
         .verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testGroupByOrderByDimension(String contextName, Map<String, Object> context)
+  @Test
+  public void testGroupByOrderByDimension()
   {
-    initMSQSelectTest(contextName, context);
     RowSignature rowSignature = RowSignature.builder()
                                             .add("m1", ColumnType.FLOAT)
                                             .add("cnt", ColumnType.LONG)
@@ -624,11 +613,9 @@ public class MSQSelectTest extends MSQTestBase
         .verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testSelectWithLimit(String contextName, Map<String, Object> context)
+  @Test
+  public void testSelectWithLimit()
   {
-    initMSQSelectTest(contextName, context);
     RowSignature resultSignature = RowSignature.builder()
                                                .add("cnt", ColumnType.LONG)
                                                .add("dim1", ColumnType.STRING)
@@ -681,11 +668,9 @@ public class MSQSelectTest extends MSQTestBase
         )).verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testSelectWithGroupByLimit(String contextName, Map<String, Object> context)
+  @Test
+  public void testSelectWithGroupByLimit()
   {
-    initMSQSelectTest(contextName, context);
     RowSignature rowSignature = RowSignature.builder()
                                             .add("cnt", ColumnType.LONG)
                                             .add("cnt1", ColumnType.LONG)
@@ -730,11 +715,9 @@ public class MSQSelectTest extends MSQTestBase
 
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testSelectLookup(String contextName, Map<String, Object> context)
+  @Test
+  public void testSelectLookup()
   {
-    initMSQSelectTest(contextName, context);
     final RowSignature rowSignature = RowSignature.builder().add("EXPR$0", ColumnType.LONG).build();
 
     testSelectQuery()
@@ -761,11 +744,9 @@ public class MSQSelectTest extends MSQTestBase
         .verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testJoinWithLookup(String contextName, Map<String, Object> context)
+  @Test
+  public void testJoinWithLookup()
   {
-    initMSQSelectTest(contextName, context);
     final RowSignature rowSignature =
         RowSignature.builder()
                     .add("v", ColumnType.STRING)
@@ -828,11 +809,9 @@ public class MSQSelectTest extends MSQTestBase
         .verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testSubquery(String contextName, Map<String, Object> context)
+  @Test
+  public void testSubquery()
   {
-    initMSQSelectTest(contextName, context);
     RowSignature resultSignature = RowSignature.builder()
                                                .add("cnt", ColumnType.LONG)
                                                .build();
@@ -887,19 +866,15 @@ public class MSQSelectTest extends MSQTestBase
         .verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testBroadcastJoin(String contextName, Map<String, Object> context)
+  @Test
+  public void testBroadcastJoin()
   {
-    initMSQSelectTest(contextName, context);
     testJoin(JoinAlgorithm.BROADCAST);
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testSortMergeJoin(String contextName, Map<String, Object> context)
+  @Test
+  public void testSortMergeJoin()
   {
-    initMSQSelectTest(contextName, context);
     testJoin(JoinAlgorithm.SORT_MERGE);
   }
 
@@ -1050,11 +1025,9 @@ public class MSQSelectTest extends MSQTestBase
         .verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testGroupByOrderByAggregation(String contextName, Map<String, Object> context)
+  @Test
+  public void testGroupByOrderByAggregation()
   {
-    initMSQSelectTest(contextName, context);
     RowSignature rowSignature = RowSignature.builder()
                                             .add("m1", ColumnType.FLOAT)
                                             .add("sum_m1", ColumnType.DOUBLE)
@@ -1131,11 +1104,9 @@ public class MSQSelectTest extends MSQTestBase
         .verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testGroupByOrderByAggregationWithLimit(String contextName, Map<String, Object> context)
+  @Test
+  public void testGroupByOrderByAggregationWithLimit()
   {
-    initMSQSelectTest(contextName, context);
     RowSignature rowSignature = RowSignature.builder()
                                             .add("m1", ColumnType.FLOAT)
                                             .add("sum_m1", ColumnType.DOUBLE)
@@ -1209,11 +1180,9 @@ public class MSQSelectTest extends MSQTestBase
         .verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testGroupByOrderByAggregationWithLimitAndOffset(String contextName, Map<String, Object> context)
+  @Test
+  public void testGroupByOrderByAggregationWithLimitAndOffset()
   {
-    initMSQSelectTest(contextName, context);
     RowSignature rowSignature = RowSignature.builder()
                                             .add("m1", ColumnType.FLOAT)
                                             .add("sum_m1", ColumnType.DOUBLE)
@@ -1287,11 +1256,9 @@ public class MSQSelectTest extends MSQTestBase
         .verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testExternGroupBy(String contextName, Map<String, Object> context) throws IOException
+  @Test
+  public void testExternGroupBy() throws IOException
   {
-    initMSQSelectTest(contextName, context);
     final File toRead = MSQTestFileUtils.getResourceAsTemporaryFile(temporaryFolder, this, "/wikipedia-sampled.json");
     final String toReadAsJson = queryFramework().queryJsonMapper().writeValueAsString(toRead.getAbsolutePath());
 
@@ -1382,11 +1349,9 @@ public class MSQSelectTest extends MSQTestBase
   }
 
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testExternSelectWithMultipleWorkers(String contextName, Map<String, Object> context) throws IOException
+  @Test
+  public void testExternSelectWithMultipleWorkers() throws IOException
   {
-    initMSQSelectTest(contextName, context);
     Map<String, Object> multipleWorkerContext = new HashMap<>(context);
     multipleWorkerContext.put(MultiStageQueryContext.CTX_MAX_NUM_TASKS, 3);
 
@@ -1535,11 +1500,9 @@ public class MSQSelectTest extends MSQTestBase
     selectTester.verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testIncorrectSelectQuery(String contextName, Map<String, Object> context)
+  @Test
+  public void testIncorrectSelectQuery()
   {
-    initMSQSelectTest(contextName, context);
     testSelectQuery()
         .setSql("select a from ")
         .setExpectedValidationErrorMatcher(
@@ -1549,11 +1512,9 @@ public class MSQSelectTest extends MSQTestBase
         .verifyPlanningErrors();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testSelectOnInformationSchemaSource(String contextName, Map<String, Object> context)
+  @Test
+  public void testSelectOnInformationSchemaSource()
   {
-    initMSQSelectTest(contextName, context);
     testSelectQuery()
         .setSql("SELECT * FROM INFORMATION_SCHEMA.SCHEMATA")
         .setQueryContext(context)
@@ -1563,11 +1524,9 @@ public class MSQSelectTest extends MSQTestBase
         .verifyPlanningErrors();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testSelectOnSysSource(String contextName, Map<String, Object> context)
+  @Test
+  public void testSelectOnSysSource()
   {
-    initMSQSelectTest(contextName, context);
     testSelectQuery()
         .setSql("SELECT * FROM sys.segments")
         .setQueryContext(context)
@@ -1577,11 +1536,9 @@ public class MSQSelectTest extends MSQTestBase
         .verifyPlanningErrors();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testSelectOnSysSourceWithJoin(String contextName, Map<String, Object> context)
+  @Test
+  public void testSelectOnSysSourceWithJoin()
   {
-    initMSQSelectTest(contextName, context);
     testSelectQuery()
         .setSql("select s.segment_id, s.num_rows, f.dim1 from sys.segments as s, foo as f")
         .setQueryContext(context)
@@ -1591,11 +1548,9 @@ public class MSQSelectTest extends MSQTestBase
         .verifyPlanningErrors();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testSelectOnSysSourceContainingWith(String contextName, Map<String, Object> context)
+  @Test
+  public void testSelectOnSysSourceContainingWith()
   {
-    initMSQSelectTest(contextName, context);
     testSelectQuery()
         .setSql("with segment_source as (SELECT * FROM sys.segments) "
                 + "select segment_source.segment_id, segment_source.num_rows from segment_source")
@@ -1606,11 +1561,9 @@ public class MSQSelectTest extends MSQTestBase
         .verifyPlanningErrors();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testSelectOnUserDefinedSourceContainingWith(String contextName, Map<String, Object> context)
+  @Test
+  public void testSelectOnUserDefinedSourceContainingWith()
   {
-    initMSQSelectTest(contextName, context);
     RowSignature resultSignature = RowSignature.builder()
                                                .add("m1", ColumnType.LONG)
                                                .add("dim2", ColumnType.STRING)
@@ -1669,11 +1622,9 @@ public class MSQSelectTest extends MSQTestBase
         .verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testScanWithMultiValueSelectQuery(String contextName, Map<String, Object> context)
+  @Test
+  public void testScanWithMultiValueSelectQuery()
   {
-    initMSQSelectTest(contextName, context);
     RowSignature expectedScanSignature = RowSignature.builder()
                                                      .add("dim3", ColumnType.STRING)
                                                      .add("v0", ColumnType.STRING_ARRAY)
@@ -1725,11 +1676,9 @@ public class MSQSelectTest extends MSQTestBase
         )).verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testHavingOnApproximateCountDistinct(String contextName, Map<String, Object> context)
+  @Test
+  public void testHavingOnApproximateCountDistinct()
   {
-    initMSQSelectTest(contextName, context);
     RowSignature resultSignature = RowSignature.builder()
                                                .add("dim2", ColumnType.STRING)
                                                .add("col", ColumnType.LONG)
@@ -1796,11 +1745,9 @@ public class MSQSelectTest extends MSQTestBase
         .verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testGroupByWithMultiValue(String contextName, Map<String, Object> context)
+  @Test
+  public void testGroupByWithMultiValue()
   {
-    initMSQSelectTest(contextName, context);
     Map<String, Object> localContext = enableMultiValueUnnesting(context, true);
     RowSignature rowSignature = RowSignature.builder()
                                             .add("dim3", ColumnType.STRING)
@@ -1847,11 +1794,9 @@ public class MSQSelectTest extends MSQTestBase
   }
 
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testGroupByWithMultiValueWithoutGroupByEnable(String contextName, Map<String, Object> context)
+  @Test
+  public void testGroupByWithMultiValueWithoutGroupByEnable()
   {
-    initMSQSelectTest(contextName, context);
     Map<String, Object> localContext = enableMultiValueUnnesting(context, false);
 
     testSelectQuery()
@@ -1866,11 +1811,9 @@ public class MSQSelectTest extends MSQTestBase
         .verifyExecutionError();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testGroupByWithMultiValueMvToArray(String contextName, Map<String, Object> context)
+  @Test
+  public void testGroupByWithMultiValueMvToArray()
   {
-    initMSQSelectTest(contextName, context);
     Map<String, Object> localContext = enableMultiValueUnnesting(context, true);
 
     RowSignature rowSignature = RowSignature.builder()
@@ -1925,11 +1868,9 @@ public class MSQSelectTest extends MSQTestBase
         .verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testGroupByArrayWithMultiValueMvToArray(String contextName, Map<String, Object> context)
+  @Test
+  public void testGroupByArrayWithMultiValueMvToArray()
   {
-    initMSQSelectTest(contextName, context);
     Map<String, Object> localContext = enableMultiValueUnnesting(context, true);
 
     RowSignature rowSignature = RowSignature.builder()
@@ -1995,11 +1936,9 @@ public class MSQSelectTest extends MSQTestBase
         .verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testTimeColumnAggregationFromExtern(String contextName, Map<String, Object> context) throws IOException
+  @Test
+  public void testTimeColumnAggregationFromExtern() throws IOException
   {
-    initMSQSelectTest(contextName, context);
     final File toRead = MSQTestFileUtils.getResourceAsTemporaryFile(temporaryFolder, this, "/wikipedia-sampled.json");
     final String toReadAsJson = queryFramework().queryJsonMapper().writeValueAsString(toRead.getAbsolutePath());
 
@@ -2037,11 +1976,9 @@ public class MSQSelectTest extends MSQTestBase
         .verifyPlanningErrors();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testGroupByWithMultiValueMvToArrayWithoutGroupByEnable(String contextName, Map<String, Object> context)
+  @Test
+  public void testGroupByWithMultiValueMvToArrayWithoutGroupByEnable()
   {
-    initMSQSelectTest(contextName, context);
     Map<String, Object> localContext = enableMultiValueUnnesting(context, false);
 
     testSelectQuery()
@@ -2057,11 +1994,9 @@ public class MSQSelectTest extends MSQTestBase
         .verifyExecutionError();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testGroupByWithComplexColumnThrowsUnsupportedException(String contextName, Map<String, Object> context)
+  @Test
+  public void testGroupByWithComplexColumnThrowsUnsupportedException()
   {
-    initMSQSelectTest(contextName, context);
     testSelectQuery()
         .setSql("select unique_dim1 from foo2 group by unique_dim1")
         .setQueryContext(context)
@@ -2073,11 +2008,9 @@ public class MSQSelectTest extends MSQTestBase
         .verifyExecutionError();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testGroupByMultiValueMeasureQuery(String contextName, Map<String, Object> context)
+  @Test
+  public void testGroupByMultiValueMeasureQuery()
   {
-    initMSQSelectTest(contextName, context);
     final RowSignature rowSignature = RowSignature.builder()
                                                   .add("__time", ColumnType.LONG)
                                                   .add("cnt1", ColumnType.LONG)
@@ -2131,11 +2064,9 @@ public class MSQSelectTest extends MSQTestBase
         .verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testGroupByOnFooWithDurableStoragePathAssertions(String contextName, Map<String, Object> context) throws IOException
+  @Test
+  public void testGroupByOnFooWithDurableStoragePathAssertions() throws IOException
   {
-    initMSQSelectTest(contextName, context);
     RowSignature rowSignature = RowSignature.builder()
                                             .add("cnt", ColumnType.LONG)
                                             .add("cnt1", ColumnType.LONG)
@@ -2187,11 +2118,9 @@ public class MSQSelectTest extends MSQTestBase
     }
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testSelectRowsGetUntruncatedByDefault(String contextName, Map<String, Object> context) throws IOException
+  @Test
+  public void testSelectRowsGetUntruncatedByDefault() throws IOException
   {
-    initMSQSelectTest(contextName, context);
     RowSignature dummyRowSignature = RowSignature.builder().add("timestamp", ColumnType.LONG).build();
 
     final int numFiles = 200;
@@ -2259,12 +2188,9 @@ public class MSQSelectTest extends MSQTestBase
         .verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testJoinUsesDifferentAlgorithm(String contextName, Map<String, Object> context)
+  @Test
+  public void testJoinUsesDifferentAlgorithm()
   {
-
-    initMSQSelectTest(contextName, context);
 
     // This test asserts that the join algorithnm used is a different one from that supplied. In sqlCompatible() mode
     // the query gets planned differently, therefore we do use the sortMerge processor. Instead of having separate
@@ -2367,11 +2293,9 @@ public class MSQSelectTest extends MSQTestBase
         .verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testSelectUnnestOnInlineFoo(String contextName, Map<String, Object> context)
+  @Test
+  public void testSelectUnnestOnInlineFoo()
   {
-    initMSQSelectTest(contextName, context);
     RowSignature resultSignature = RowSignature.builder()
                                                .add("EXPR$0", ColumnType.LONG)
                                                .build();
@@ -2425,11 +2349,9 @@ public class MSQSelectTest extends MSQTestBase
   }
 
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testSelectUnnestOnFoo(String contextName, Map<String, Object> context)
+  @Test
+  public void testSelectUnnestOnFoo()
   {
-    initMSQSelectTest(contextName, context);
     RowSignature resultSignature = RowSignature.builder()
                                                .add("j0.unnest", ColumnType.STRING)
                                                .build();
@@ -2495,11 +2417,9 @@ public class MSQSelectTest extends MSQTestBase
         .verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testSelectUnnestOnQueryFoo(String contextName, Map<String, Object> context)
+  @Test
+  public void testSelectUnnestOnQueryFoo()
   {
-    initMSQSelectTest(contextName, context);
     RowSignature resultSignature = RowSignature.builder()
                                                .add("j0.unnest", ColumnType.STRING)
                                                .build();
@@ -2574,12 +2494,9 @@ public class MSQSelectTest extends MSQTestBase
         .verifyResults();
   }
 
-  @MethodSource("data")
-  @ParameterizedTest(name = "{index}:with context {0}")
-  public void testUnionAllUsingUnionDataSource(String contextName, Map<String, Object> context)
+  @Test
+  public void testUnionAllUsingUnionDataSource()
   {
-
-    initMSQSelectTest(contextName, context);
 
     final RowSignature rowSignature = RowSignature.builder()
                                                   .add("__time", ColumnType.LONG)
@@ -2686,10 +2603,5 @@ public class MSQSelectTest extends MSQTestBase
   public boolean isPageSizeLimited()
   {
     return QUERY_RESULTS_WITH_DURABLE_STORAGE.equals(contextName);
-  }
-
-  public void initMSQSelectTest(String contextName, Map<String, Object> context) {
-    this.contextName = contextName;
-    this.context = context;
   }
 }

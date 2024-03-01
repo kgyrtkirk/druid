@@ -50,8 +50,8 @@ import org.apache.druid.sql.http.ResultFormat;
 import org.apache.druid.sql.http.SqlQuery;
 import org.apache.druid.storage.NilStorageConnector;
 import org.junit.Assert;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
 
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
@@ -69,7 +69,7 @@ public class SqlMSQStatementResourcePostTest extends MSQTestBase
   private SqlStatementResource resource;
 
 
-  @BeforeEach
+  @Before
   public void init()
   {
     resource = new SqlStatementResource(

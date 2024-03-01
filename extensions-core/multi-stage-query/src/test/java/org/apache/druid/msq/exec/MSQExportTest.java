@@ -29,7 +29,7 @@ import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.sql.calcite.export.TestExportStorageConnector;
 import org.apache.druid.sql.http.ResultFormat;
 import org.junit.Assert;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;

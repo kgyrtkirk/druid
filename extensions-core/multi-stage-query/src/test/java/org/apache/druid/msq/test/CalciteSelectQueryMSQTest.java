@@ -35,11 +35,8 @@ import org.apache.druid.sql.calcite.CalciteQueryTest;
 import org.apache.druid.sql.calcite.QueryTestBuilder;
 import org.apache.druid.sql.calcite.run.SqlEngine;
 import org.junit.Assert;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
-
-import java.util.concurrent.TimeUnit;
+import org.junit.Ignore;
+import org.junit.Test;
 
 /**
  * Runs {@link CalciteQueryTest} but with MSQ engine
@@ -90,76 +87,76 @@ public class CalciteSelectQueryMSQTest extends CalciteQueryTest
         .msqCompatible(msqCompatible);
   }
 
-  @Disabled
+  @Ignore
   @Override
   public void testCannotInsertWithNativeEngine()
   {
 
   }
 
-  @Disabled
+  @Ignore
   @Override
   public void testCannotReplaceWithNativeEngine()
   {
 
   }
 
-  @Disabled
+  @Ignore
   @Override
   public void testRequireTimeConditionSimpleQueryNegative()
   {
 
   }
 
-  @Disabled
+  @Ignore
   @Override
   public void testRequireTimeConditionSubQueryNegative()
   {
 
   }
 
-  @Disabled
+  @Ignore
   @Override
   public void testRequireTimeConditionSemiJoinNegative()
   {
 
   }
 
-  @Disabled
+  @Ignore
   @Override
   public void testExactCountDistinctWithFilter()
   {
 
   }
 
-  @Disabled
+  @Ignore
   @Override
   public void testUnplannableScanOrderByNonTime()
   {
 
   }
 
-  @Disabled
+  @Ignore
   @Override
   public void testUnplannableJoinQueriesInNonSQLCompatibleMode()
   {
 
   }
 
-  @Disabled
+  @Ignore
   @Override
   public void testQueryWithMoreThanMaxNumericInFilter()
   {
 
   }
 
-  @Disabled
+  @Ignore
   @Override
   public void testUnSupportedNullsFirst()
   {
   }
 
-  @Disabled
+  @Ignore
   @Override
   public void testUnSupportedNullsLast()
   {
@@ -184,8 +181,7 @@ public class CalciteSelectQueryMSQTest extends CalciteQueryTest
     }
   }
 
-  @Test
-  @Timeout(value = 40000, unit = TimeUnit.MILLISECONDS)
+  @Test(timeout = 40000)
   public void testJoinMultipleTablesWithWhereCondition()
   {
     testBuilder()

@@ -113,15 +113,16 @@ import org.apache.druid.sql.calcite.view.ViewManager;
 import org.apache.druid.sql.http.SqlParameter;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matcher;
+import org.hamcrest.MatcherAssert;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.joda.time.chrono.ISOChronology;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.internal.matchers.ThrowableMessageMatcher;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.rules.TemporaryFolder;
 
 import javax.annotation.Nullable;
@@ -137,10 +138,9 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * A base class for SQL query testing. It sets up query execution environment, provides useful helper methods,
@@ -155,7 +155,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   public static Long NULL_LONG;
   public static final String HLLC_STRING = VersionOneHyperLogLogCollector.class.getName();
 
-  @BeforeAll
+  @BeforeClass
   public static void setupNullValues()
   {
     NULL_STRING = NullHandling.defaultStringValue();
@@ -744,7 +744,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   {
     boolean featureAvailable = queryFramework().engine()
         .featureAvailable(feature, ExpressionTestHelper.PLANNER_CONTEXT);
-    assumeTrue(featureAvailable, StringUtils.format("test disabled; feature [%s] is not available!", feature));
+    assumeTrue(StringUtils.format("test disabled; feature [%s] is not available!", feature), featureAvailable);
   }
 
   public void assertQueryIsUnplannable(final String sql, String expectedError)
@@ -758,7 +758,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
       testQuery(plannerConfig, sql, CalciteTests.REGULAR_USER_AUTH_RESULT, ImmutableList.of(), ImmutableList.of());
     }
     catch (DruidException e) {
-      assertThat(
+      MatcherAssert.assertThat(
           e,
           new DruidExceptionMatcher(DruidException.Persona.ADMIN, DruidException.Category.INVALID_INPUT, "general")
               .expectMessageIs(
@@ -1244,7 +1244,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
             .build()
             .run()
     );
-    assertThat(e, exceptionMatcher);
+    MatcherAssert.assertThat(e, exceptionMatcher);
   }
 
   public void analyzeResources(

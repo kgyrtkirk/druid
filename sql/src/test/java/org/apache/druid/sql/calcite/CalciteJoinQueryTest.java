@@ -89,12 +89,13 @@ import org.apache.druid.sql.calcite.expression.DruidExpression;
 import org.apache.druid.sql.calcite.filtration.Filtration;
 import org.apache.druid.sql.calcite.planner.PlannerConfig;
 import org.apache.druid.sql.calcite.util.CalciteTests;
+import org.hamcrest.MatcherAssert;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Period;
 import org.junit.Assert;
-import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import org.junit.Assume;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
@@ -102,9 +103,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @RunWith(JUnitParamsRunner.class)
 public class CalciteJoinQueryTest extends BaseCalciteQueryTest
@@ -324,7 +322,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testJoinOuterGroupByAndSubqueryNoLimit(Map<String, Object> queryContext)
   {
@@ -681,7 +678,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testFilterAndGroupByLookupUsingJoinOperatorWithValueFilterPushdownMatchesNothing(Map<String, Object> queryContext)
 
@@ -719,7 +715,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testFilterAndGroupByLookupUsingJoinOperatorAllowNulls(Map<String, Object> queryContext)
   {
@@ -764,7 +759,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testFilterAndGroupByLookupUsingJoinOperatorBackwards(Map<String, Object> queryContext)
   {
@@ -820,7 +814,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testFilterAndGroupByLookupUsingJoinOperatorWithNotFilter(Map<String, Object> queryContext)
 
@@ -865,7 +858,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testJoinUnionTablesOnLookup(Map<String, Object> queryContext)
   {
@@ -918,7 +910,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testFilterAndGroupByLookupUsingJoinOperator(Map<String, Object> queryContext)
   {
@@ -957,7 +948,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testFilterAndGroupByLookupUsingPostAggregationJoinOperator(Map<String, Object> queryContext)
 
@@ -1015,7 +1005,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testGroupByInnerJoinOnLookupUsingJoinOperator(Map<String, Object> queryContext)
   {
@@ -1052,7 +1041,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testSelectOnLookupUsingInnerJoinOperator(Map<String, Object> queryContext)
   {
@@ -1085,7 +1073,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testLeftJoinTwoLookupsUsingJoinOperator(Map<String, Object> queryContext)
   {
@@ -1132,7 +1119,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testInnerJoinTableLookupLookupWithFilterWithOuterLimit(Map<String, Object> queryContext)
   {
@@ -1176,7 +1162,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testInnerJoinTableLookupLookupWithFilterWithoutLimit(Map<String, Object> queryContext)
   {
@@ -1218,7 +1203,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testInnerJoinTableLookupLookupWithFilterWithOuterLimitWithAllColumns(Map<String, Object> queryContext)
 
@@ -1263,7 +1247,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testInnerJoinTableLookupLookupWithFilterWithoutLimitWithAllColumns(Map<String, Object> queryContext)
   {
@@ -1305,7 +1288,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testManyManyInnerJoinOnManyManyLookup(Map<String, Object> queryContext)
   {
@@ -1535,7 +1517,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testInnerJoinQueryOfLookup(Map<String, Object> queryContext)
   {
@@ -1588,7 +1569,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testTimeColumnAggregationsOnLookups(Map<String, Object> queryContext)
   {
@@ -1602,7 +1582,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
       Assert.fail("Expected exception to be thrown.");
     }
     catch (DruidException e) {
-      assertThat(
+      MatcherAssert.assertThat(
           e,
           new DruidExceptionMatcher(DruidException.Persona.ADMIN, DruidException.Category.INVALID_INPUT, "general")
               .expectMessageIs(
@@ -1616,7 +1596,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testInnerJoinQueryOfLookupRemovable(Map<String, Object> queryContext)
   {
@@ -1655,7 +1634,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testInnerJoinTwoLookupsToTableUsingNumericColumn(Map<String, Object> queryContext)
   {
@@ -1717,7 +1695,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testInnerJoinTwoLookupsToTableUsingNumericColumnInReverse(Map<String, Object> queryContext)
 
@@ -1775,7 +1752,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testInnerJoinLookupTableTable(Map<String, Object> queryContext)
   {
@@ -1858,7 +1834,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testInnerJoinLookupTableTableChained(Map<String, Object> queryContext)
   {
@@ -2019,7 +1994,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   // Unfortunately, we have disabled pushing down predicates (conditions and filters) due to https://github.com/apache/druid/pull/9773
   // Hence, comma join will result in a cross join with filter on outermost
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testCommaJoinTableLookupTableMismatchedTypes(Map<String, Object> queryContext)
   {
@@ -2086,7 +2060,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testJoinTableLookupTableMismatchedTypesWithoutComma(Map<String, Object> queryContext)
   {
@@ -2157,7 +2130,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testInnerJoinCastLeft(Map<String, Object> queryContext)
   {
@@ -2192,7 +2164,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testInnerJoinCastRight(Map<String, Object> queryContext)
   {
@@ -2240,7 +2211,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testInnerJoinMismatchedTypes(Map<String, Object> queryContext)
   {
@@ -2288,7 +2258,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testInnerJoinLeftFunction(Map<String, Object> queryContext)
   {
@@ -2325,7 +2294,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testInnerJoinRightFunction(Map<String, Object> queryContext)
   {
@@ -2369,7 +2337,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testLeftJoinLookupOntoLookupUsingJoinOperator(Map<String, Object> queryContext)
   {
@@ -2416,7 +2383,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testLeftJoinThreeLookupsUsingJoinOperator(Map<String, Object> queryContext)
   {
@@ -2471,7 +2437,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testSelectOnLookupUsingLeftJoinOperator(Map<String, Object> queryContext)
   {
@@ -2517,7 +2482,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testSelectOnLookupUsingRightJoinOperator(Map<String, Object> queryContext)
   {
@@ -2561,7 +2525,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testSelectOnLookupUsingFullJoinOperator(Map<String, Object> queryContext)
   {
@@ -2611,7 +2574,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testInAggregationSubquery(Map<String, Object> queryContext)
   {
@@ -2662,7 +2624,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testNotInAggregationSubquery(Map<String, Object> queryContext)
   {
@@ -2749,7 +2710,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testUsingSubqueryWithExtractionFns(Map<String, Object> queryContext)
   {
@@ -2810,7 +2770,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testInnerJoinWithIsNullFilter(Map<String, Object> queryContext)
   {
@@ -2843,9 +2802,8 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
-  @Disabled // regression test for https://github.com/apache/druid/issues/9924
+  @Ignore // regression test for https://github.com/apache/druid/issues/9924
   public void testInnerJoinOnMultiValueColumn(Map<String, Object> queryContext)
   {
     cannotVectorize();
@@ -2885,7 +2843,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testLeftJoinOnTwoInlineDataSourcesWithTimeFilter(Map<String, Object> queryContext)
   {
@@ -2955,7 +2912,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testLeftJoinOnTwoInlineDataSourcesWithTimeFilter_withLeftDirectAccess(Map<String, Object> queryContext)
   {
@@ -3014,7 +2970,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testLeftJoinOnTwoInlineDataSourcesWithOuterWhere(Map<String, Object> queryContext)
   {
@@ -3068,7 +3023,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testLeftJoinOnTwoInlineDataSourcesWithOuterWhere_withLeftDirectAccess(Map<String, Object> queryContext)
   {
@@ -3117,7 +3071,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testLeftJoinOnTwoInlineDataSources(Map<String, Object> queryContext)
   {
@@ -3171,7 +3124,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testLeftJoinOnTwoInlineDataSources_withLeftDirectAccess(Map<String, Object> queryContext)
   {
@@ -3220,7 +3172,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testInnerJoinOnTwoInlineDataSourcesWithOuterWhere(Map<String, Object> queryContext)
   {
@@ -3274,7 +3225,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testInnerJoinOnTwoInlineDataSourcesWithOuterWhere_withLeftDirectAccess(Map<String, Object> queryContext)
   {
@@ -3323,7 +3273,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testInnerJoinOnTwoInlineDataSources(Map<String, Object> queryContext)
   {
@@ -3377,7 +3326,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testGroupByOverGroupByOverInnerJoinOnTwoInlineDataSources(Map<String, Object> queryContext)
   {
@@ -3463,7 +3411,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testInnerJoinOnTwoInlineDataSources_withLeftDirectAccess(Map<String, Object> queryContext)
   {
@@ -3515,7 +3462,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   // (see issue https://github.com/apache/druid/issues/9942 for more information)
   // TODO: Remove expected Exception when https://github.com/apache/druid/issues/9942 is fixed
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testJoinOnConstantShouldFail(Map<String, Object> queryContext)
   {
@@ -3606,13 +3552,12 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testLeftJoinSubqueryWithNullKeyFilter(Map<String, Object> queryContext)
   {
     // JoinFilterAnalyzer bug causes incorrect results on this test in replace-with-default mode.
     // This test case was originally added in https://github.com/apache/druid/pull/11434 with a note about this.
-    Assumptions.assumeFalse(NullHandling.replaceWithDefault() && QueryContext.of(queryContext).getEnableJoinFilterRewrite());
+    Assume.assumeFalse(NullHandling.replaceWithDefault() && QueryContext.of(queryContext).getEnableJoinFilterRewrite());
 
     // Cannot vectorize due to 'concat' expression.
     cannotVectorize();
@@ -3694,7 +3639,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testLeftJoinSubqueryWithSelectorFilter(Map<String, Object> queryContext)
   {
@@ -3748,7 +3692,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testLeftJoinWithNotNullFilter(Map<String, Object> queryContext)
   {
@@ -3796,7 +3739,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testInnerJoin(Map<String, Object> queryContext)
   {
@@ -3851,7 +3793,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testJoinWithExplicitIsNotDistinctFromCondition(Map<String, Object> queryContext)
   {
@@ -3897,7 +3838,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testInnerJoinSubqueryWithSelectorFilter(Map<String, Object> queryContext)
   {
@@ -4005,7 +3945,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testTwoSemiJoinsSimultaneously(Map<String, Object> queryContext)
   {
@@ -4071,7 +4010,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testSemiAndAntiJoinSimultaneouslyUsingWhereInSubquery(Map<String, Object> queryContext)
   {
@@ -4178,7 +4116,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testSemiAndAntiJoinSimultaneouslyUsingExplicitJoins(Map<String, Object> queryContext)
   {
@@ -4322,28 +4259,24 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   // This query is expected to fail as we do not support join on multi valued column
   // (see issue https://github.com/apache/druid/issues/9924 for more information)
   // TODO: Remove expected Exception when https://github.com/apache/druid/issues/9924 is fixed
-  @Test
-  // JunitParamsRunnerToParameterized conversion not supported
+  @Test(expected = QueryException.class)
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testJoinOnMultiValuedColumnShouldThrowException(Map<String, Object> queryContext)
   {
-    assertThrows(QueryException.class, () -> {
-      // MSQ throws a slightly different error than QueryException.
-      msqIncompatible();
+    // MSQ throws a slightly different error than QueryException.
+    msqIncompatible();
 
-      final String query = "SELECT dim3, l.v from druid.foo f inner join lookup.lookyloo l on f.dim3 = l.k\n";
+    final String query = "SELECT dim3, l.v from druid.foo f inner join lookup.lookyloo l on f.dim3 = l.k\n";
 
-      testQuery(
-          query,
-          queryContext,
-          ImmutableList.of(),
-          ImmutableList.of()
-      );
-    });
+    testQuery(
+        query,
+        queryContext,
+        ImmutableList.of(),
+        ImmutableList.of()
+    );
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testUnionAllTwoQueriesLeftQueryIsJoin(Map<String, Object> queryContext)
   {
@@ -4388,7 +4321,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testUnionAllTwoQueriesRightQueryIsJoin(Map<String, Object> queryContext)
   {
@@ -4481,7 +4413,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testTopNFilterJoin(Map<String, Object> queryContext)
   {
@@ -4547,7 +4478,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testTopNFilterJoinWithProjection(Map<String, Object> queryContext)
   {
@@ -4619,9 +4549,8 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
-  @Disabled("Stopped working after the ability to join on subqueries was added to DruidJoinRule")
+  @Ignore("Stopped working after the ability to join on subqueries was added to DruidJoinRule")
   public void testRemovableLeftJoin(Map<String, Object> queryContext)
   {
     // LEFT JOIN where the right-hand side can be ignored.
@@ -4664,7 +4593,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testCountDistinctOfLookupUsingJoinOperator(Map<String, Object> queryContext)
   {
@@ -4707,7 +4635,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testJoinWithNonEquiCondition(Map<String, Object> queryContext)
   {
@@ -4716,7 +4643,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     cannotVectorize();
 
     // We don't handle non-equi join conditions for non-sql compatible mode.
-    Assumptions.assumeFalse(NullHandling.replaceWithDefault());
+    Assume.assumeFalse(NullHandling.replaceWithDefault());
 
     testQuery(
         "SELECT x.m1, y.m1 FROM foo x INNER JOIN foo y ON x.m1 > y.m1",
@@ -4770,7 +4697,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testJoinWithEquiAndNonEquiCondition(Map<String, Object> queryContext)
   {
@@ -4779,7 +4705,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     cannotVectorize();
 
     // We don't handle non-equi join conditions for non-sql compatible mode.
-    Assumptions.assumeFalse(NullHandling.replaceWithDefault());
+    Assume.assumeFalse(NullHandling.replaceWithDefault());
 
     testQuery(
         "SELECT x.m1, y.m1 FROM foo x INNER JOIN foo y ON x.m1 = y.m1 AND x.m1 + y.m1 = 6.0",
@@ -4816,7 +4742,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testUsingSubqueryAsPartOfAndFilter(Map<String, Object> queryContext)
   {
@@ -4886,7 +4811,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testUsingSubqueryAsPartOfOrFilter(Map<String, Object> queryContext)
   {
@@ -4977,7 +4901,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testNestedGroupByOnInlineDataSourceWithFilter(Map<String, Object> queryContext)
   {
@@ -5055,7 +4978,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testGroupByJoinAsNativeQueryWithUnoptimizedFilter(Map<String, Object> queryContext)
   {
@@ -5130,7 +5052,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testCountOnSemiJoinSingleColumn(Map<String, Object> queryContext)
   {
@@ -5172,7 +5093,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testTopNOnStringWithNonSortedOrUniqueDictionary(Map<String, Object> queryContext)
   {
@@ -5213,7 +5133,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testTopNOnStringWithNonSortedOrUniqueDictionaryOrderByDim(Map<String, Object> queryContext)
 
@@ -5254,7 +5173,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testVirtualColumnOnMVFilterJoinExpression(Map<String, Object> queryContext)
   {
@@ -5311,7 +5229,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testVirtualColumnOnMVFilterMultiJoinExpression(Map<String, Object> queryContext)
   {
@@ -5391,7 +5308,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testInnerJoinWithFilterPushdownAndManyFiltersEmptyResults(Map<String, Object> queryContext)
   {
@@ -5499,7 +5415,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testInnerJoinWithFilterPushdownAndManyFiltersNonEmptyResults(Map<String, Object> queryContext)
   {
@@ -5667,7 +5582,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  // JunitParamsRunnerToParameterized conversion not supported
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testRegressionFilteredAggregatorsSubqueryJoins(Map<String, Object> queryContext)
   {
