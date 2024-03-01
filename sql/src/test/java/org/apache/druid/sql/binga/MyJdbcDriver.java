@@ -19,6 +19,86 @@
 
 package org.apache.druid.sql.binga;
 
-public class MyJdbcDriver
+import java.sql.Connection;
+import java.sql.Driver;
+import java.sql.DriverPropertyInfo;
+import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.util.Properties;
+import java.util.logging.Logger;
+
+public class MyJdbcDriver implements Driver
 {
+  @Override
+  public Connection connect(String url, Properties info) throws SQLException
+  {
+    return new MyConnection();
+  }
+
+  @Override
+  public boolean acceptsURL(String url) throws SQLException
+  {
+    if(true)
+    {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+    return false;
+
+  }
+
+  @Override
+  public DriverPropertyInfo[] getPropertyInfo(String url, Properties info) throws SQLException
+  {
+    if(true)
+    {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+    return null;
+
+  }
+
+  @Override
+  public int getMajorVersion()
+  {
+    if(true)
+    {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+    return 0;
+
+  }
+
+  @Override
+  public int getMinorVersion()
+  {
+    if(true)
+    {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+    return 0;
+
+  }
+
+  @Override
+  public boolean jdbcCompliant()
+  {
+    if(true)
+    {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+    return false;
+
+  }
+
+  @Override
+  public Logger getParentLogger() throws SQLFeatureNotSupportedException
+  {
+    if(true)
+    {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+    return null;
+
+  }
+
 }
