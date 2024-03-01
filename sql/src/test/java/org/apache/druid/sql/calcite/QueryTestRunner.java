@@ -48,7 +48,6 @@ import org.apache.druid.sql.calcite.util.QueryLogHook;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
 import org.junit.Assert;
-import org.junit.Assume;
 import org.junit.internal.matchers.ThrowableMessageMatcher;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -630,9 +629,6 @@ public class QueryTestRunner
   public QueryTestRunner(QueryTestBuilder builder)
   {
     QueryTestConfig config = builder.config;
-    if (config.isRunningMSQ()) {
-      Assume.assumeTrue(builder.msqCompatible);
-    }
     if (builder.expectedResultsVerifier == null && builder.expectedResults != null) {
       builder.expectedResultsVerifier = config.defaultResultsVerifier(
           builder.expectedResults,

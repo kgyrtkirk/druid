@@ -94,7 +94,6 @@ public class QueryTestBuilder
   protected List<ResourceAction> expectedResources;
   protected ResultsVerifier expectedResultsVerifier;
   protected boolean skipVectorize;
-  protected boolean msqCompatible = true;
   protected boolean queryCannotVectorize;
   protected Predicate<List<Query<?>>> verifyNativeQueries = xs -> true;
   protected AuthConfig authConfig = new AuthConfig();
@@ -218,12 +217,6 @@ public class QueryTestBuilder
   public QueryTestBuilder skipVectorize(boolean skipVectorize)
   {
     this.skipVectorize = skipVectorize;
-    return this;
-  }
-
-  public QueryTestBuilder msqCompatible(boolean msqCompatible)
-  {
-    this.msqCompatible = msqCompatible;
     return this;
   }
 

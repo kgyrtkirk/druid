@@ -143,6 +143,7 @@ import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
 
 /**
@@ -299,7 +300,6 @@ public class BaseCalciteQueryTest extends CalciteTestBase
 
   public boolean cannotVectorize = false;
   public boolean skipVectorize = false;
-  public boolean msqCompatible = true;
 
   public QueryLogHook queryLogHook;
 
@@ -981,8 +981,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   {
     return new QueryTestBuilder(new CalciteTestConfig())
         .cannotVectorize(cannotVectorize)
-        .skipVectorize(skipVectorize)
-        .msqCompatible(msqCompatible);
+        .skipVectorize(skipVectorize);
   }
 
   public class CalciteTestConfig implements QueryTestBuilder.QueryTestConfig
@@ -1337,7 +1336,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
 
   protected void msqIncompatible()
   {
-    msqCompatible = false;
+    assumeFalse("test case is not MSQ compatible", testBuilder().config.isRunningMSQ());
   }
 
   protected static boolean isRewriteJoinToFilter(final Map<String, Object> queryContext)
