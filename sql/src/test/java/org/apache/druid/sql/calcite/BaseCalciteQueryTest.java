@@ -1206,7 +1206,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
     Assert.assertEquals(expectedResults.size(), results.size());
   }
 
-  public <T extends Throwable>void testQueryThrows(
+  public <T extends Throwable> void testQueryThrows(
       final String sql,
       final DruidExceptionMatcher exceptionMatcher)
 
@@ -1221,13 +1221,15 @@ public class BaseCalciteQueryTest extends CalciteTestBase
 
   {
     testQueryThrows(
-        sql, null, null, exceptionType, ThrowableMessageMatcher.hasMessage(
-            CoreMatchers.equalTo(exceptionMessage)
-        )
+        sql,
+        null,
+        null,
+        exceptionType,
+        ThrowableMessageMatcher.hasMessage(CoreMatchers.equalTo(exceptionMessage))
     );
   }
 
-  public <T extends Exception>void testQueryThrows(
+  public <T extends Exception> void testQueryThrows(
       final String sql,
       final Class<T> exceptionType,
       final Matcher<Throwable> exceptionMatcher)
@@ -1235,7 +1237,6 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   {
     testQueryThrows(sql, null, null, exceptionType, exceptionMatcher);
   }
-
 
   public <T extends Exception> void testQueryThrows(
       final String sql,
@@ -1245,7 +1246,8 @@ public class BaseCalciteQueryTest extends CalciteTestBase
       final Matcher<Throwable> exceptionMatcher)
   {
     T e = assertThrows(
-        exceptionType, () -> testBuilder()
+        exceptionType,
+        () -> testBuilder()
             .sql(sql)
             .queryContext(queryContext)
             .expectedQueries(expectedQueries)
