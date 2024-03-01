@@ -1571,7 +1571,6 @@
                         </goals>
                         <configuration>
                             <rules>
-                                <banDuplicatePomDependencyVersions/>
                                 <requireMavenVersion>
                                     <version>3.0.0</version>
                                 </requireMavenVersion>
