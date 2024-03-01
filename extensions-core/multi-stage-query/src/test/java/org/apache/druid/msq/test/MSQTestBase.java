@@ -192,12 +192,11 @@ import org.apache.druid.timeline.partition.ShardSpec;
 import org.apache.druid.timeline.partition.TombstoneShardSpec;
 import org.easymock.EasyMock;
 import org.hamcrest.Matcher;
-import org.hamcrest.MatcherAssert;
 import org.joda.time.Interval;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Rule;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.Mockito;
 
@@ -226,6 +225,7 @@ import static org.apache.druid.sql.calcite.util.CalciteTests.DATASOURCE1;
 import static org.apache.druid.sql.calcite.util.CalciteTests.DATASOURCE2;
 import static org.apache.druid.sql.calcite.util.TestDataBuilder.ROWS1;
 import static org.apache.druid.sql.calcite.util.TestDataBuilder.ROWS2;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
@@ -368,7 +368,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
         });
   }
 
-  @After
+  @AfterEach
   public void tearDown2()
   {
     groupByBuffers.close();
@@ -391,7 +391,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
   // is created in the main injector, but it depends on the SegmentCacheManagerFactory
   // which depends on the object mapper that the injector will provide, once it
   // is built, but has not yet been build while we build the SQL engine.
-  @Before
+  @BeforeEach
   public void setUp2() throws Exception
   {
     groupByBuffers = TestGroupByBuffers.createDefault();
@@ -1015,7 +1015,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
           () -> runMultiStageQuery(sql, queryContext)
       );
 
-      MatcherAssert.assertThat(e, expectedValidationErrorMatcher);
+      assertThat(e, expectedValidationErrorMatcher);
     }
 
     protected void verifyWorkerCount(CounterSnapshotsTree counterSnapshotsTree)
@@ -1339,7 +1339,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
         Assert.fail(StringUtils.format("Query did not throw an exception (sql = [%s])", sql));
       }
       catch (Exception e) {
-        MatcherAssert.assertThat(
+        assertThat(
             StringUtils.format("Query error did not match expectations (sql = [%s])", sql),
             e,
             expectedExecutionErrorMatcher
@@ -1457,7 +1457,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
         if (expectedExecutionErrorMatcher == null) {
           throw new ISE(e, "Query %s failed", sql);
         }
-        MatcherAssert.assertThat(e, expectedExecutionErrorMatcher);
+        assertThat(e, expectedExecutionErrorMatcher);
         return null;
       }
     }

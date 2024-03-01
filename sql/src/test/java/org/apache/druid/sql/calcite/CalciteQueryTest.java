@@ -123,16 +123,15 @@ import org.apache.druid.sql.calcite.run.EngineFeature;
 import org.apache.druid.sql.calcite.util.CalciteTests;
 import org.apache.druid.sql.calcite.util.TestDataBuilder;
 import org.hamcrest.CoreMatchers;
-import org.hamcrest.MatcherAssert;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.joda.time.Period;
 import org.junit.Assert;
-import org.junit.Assume;
-import org.junit.Ignore;
-import org.junit.Test;
 import org.junit.internal.matchers.ThrowableMessageMatcher;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -143,10 +142,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assume.assumeFalse;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 public class CalciteQueryTest extends BaseCalciteQueryTest
 {
@@ -350,7 +349,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
         )
     );
 
-    MatcherAssert.assertThat(
+    assertThat(
         e,
         invalidSqlIs("INSERT operations are not supported by requested SQL engine [native], consider using MSQ.")
     );
@@ -369,7 +368,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
         )
     );
 
-    MatcherAssert.assertThat(
+    assertThat(
         e,
         invalidSqlIs("REPLACE operations are not supported by the requested SQL engine [native].  Consider using MSQ.")
     );
@@ -2181,7 +2180,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  @Ignore("Disabled since GROUP BY alias can confuse the validator; see DruidConformance::isGroupByAlias")
+  @Disabled("Disabled since GROUP BY alias can confuse the validator; see DruidConformance::isGroupByAlias")
   public void testGroupByAndOrderByAlias()
   {
     msqIncompatible();
@@ -5783,7 +5782,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
   {
     msqIncompatible();
 
-    Assume.assumeFalse(NullHandling.sqlCompatible());
+    Assumptions.assumeFalse(NullHandling.sqlCompatible());
 
     assertQueryIsUnplannable(
         // JOIN condition with not-equals (<>).
@@ -6299,7 +6298,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
       testBuilder().sql(sql).run();
     }
     catch (DruidException e) {
-      MatcherAssert.assertThat(
+      assertThat(
           e,
           invalidSqlIs("Illegal TIMESTAMP constant [CAST('z2000-01-01 00:00:00'):TIMESTAMP(3) NOT NULL]")
       );
@@ -7601,8 +7600,8 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
   public void testQueryWithMoreThanMaxNumericInFilter()
   {
     assumeFalse(
-        "skip in sql compatible mode, this plans to an OR filter with equality filter children",
-        NullHandling.sqlCompatible()
+        NullHandling.sqlCompatible(),
+        "skip in sql compatible mode, this plans to an OR filter with equality filter children"
     );
     msqIncompatible();
 
@@ -11344,7 +11343,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
       Assert.fail("query execution should fail");
     }
     catch (DruidException e) {
-      MatcherAssert.assertThat(
+      assertThat(
           e,
           invalidSqlIs(
               "Invalid number of arguments to function 'TIME_EXTRACT'. Was expecting 2 arguments (line [1], column [8])"
@@ -11538,7 +11537,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  @Ignore("In Calcite 1.17, this test worked, but after upgrading to Calcite 1.21, this query fails with:"
+  @Disabled("In Calcite 1.17, this test worked, but after upgrading to Calcite 1.21, this query fails with:"
           + " org.apache.calcite.sql.validate.SqlValidatorException: Column 'dim1' is ambiguous")
   public void testProjectAfterSort3()
   {
@@ -13908,14 +13907,16 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @Test(expected = DruidException.class)
+  @Test
   public void testStringAggExpressionNonConstantSeparator()
   {
-    testQuery(
-        "SELECT STRING_AGG(DISTINCT CONCAT(dim1, dim2), CONCAT('|', dim1)) FROM foo",
-        ImmutableList.of(),
-        ImmutableList.of()
-    );
+    assertThrows(DruidException.class, () -> {
+      testQuery(
+          "SELECT STRING_AGG(DISTINCT CONCAT(dim1, dim2), CONCAT('|', dim1)) FROM foo",
+          ImmutableList.of(),
+          ImmutableList.of()
+      );
+    });
   }
 
   @Test

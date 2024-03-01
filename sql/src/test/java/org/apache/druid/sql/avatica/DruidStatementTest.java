@@ -48,14 +48,14 @@ import org.apache.druid.sql.calcite.schema.DruidSchemaCatalog;
 import org.apache.druid.sql.calcite.util.CalciteTestBase;
 import org.apache.druid.sql.calcite.util.CalciteTests;
 import org.apache.druid.sql.calcite.util.QueryLogHook;
-import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.IOException;
@@ -83,7 +83,7 @@ public class DruidStatementTest extends CalciteTestBase
   private static QueryRunnerFactoryConglomerate conglomerate;
   private static Closer resourceCloser;
 
-  @BeforeClass
+  @BeforeAll
   public static void setUpClass() throws Exception
   {
     resourceCloser = Closer.create();
@@ -92,7 +92,7 @@ public class DruidStatementTest extends CalciteTestBase
     resourceCloser.register(walker);
   }
 
-  @AfterClass
+  @AfterAll
   public static void tearDownClass() throws IOException
   {
     resourceCloser.close();
@@ -100,7 +100,7 @@ public class DruidStatementTest extends CalciteTestBase
 
   private SqlStatementFactory sqlStatementFactory;
 
-  @Before
+  @BeforeEach
   public void setUp()
   {
     final PlannerConfig plannerConfig = new PlannerConfig();
@@ -128,7 +128,7 @@ public class DruidStatementTest extends CalciteTestBase
     );
   }
 
-  @After
+  @AfterEach
   public void tearDown()
   {
 

@@ -63,7 +63,7 @@ import org.joda.time.DateTime;
 import org.joda.time.LocalTime;
 import org.junit.Assert;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
