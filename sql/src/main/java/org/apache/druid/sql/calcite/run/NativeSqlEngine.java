@@ -34,7 +34,6 @@ import org.apache.druid.sql.calcite.parser.DruidSqlInsert;
 import org.apache.druid.sql.calcite.parser.DruidSqlReplace;
 import org.apache.druid.sql.calcite.planner.JoinAlgorithm;
 import org.apache.druid.sql.calcite.planner.PlannerContext;
-import org.apache.druid.sql.calcite.rel.DruidQuery;
 import org.apache.druid.sql.destination.IngestDestination;
 
 import java.util.Map;
@@ -49,7 +48,6 @@ public class NativeSqlEngine implements SqlEngine
       GroupByQuery.CTX_TIMESTAMP_RESULT_FIELD,
       GroupByQuery.CTX_TIMESTAMP_RESULT_FIELD_GRANULARITY,
       GroupByQuery.CTX_TIMESTAMP_RESULT_FIELD_INDEX,
-      DruidQuery.CTX_SCAN_SIGNATURE,
       DruidSqlInsert.SQL_INSERT_SEGMENT_GRANULARITY,
       DruidSqlReplace.SQL_REPLACE_TIME_CHUNKS
   );
@@ -115,7 +113,6 @@ public class NativeSqlEngine implements SqlEngine
       case READ_EXTERNAL_DATA:
       case WRITE_EXTERNAL_DATA:
       case SCAN_ORDER_BY_NON_TIME:
-      case SCAN_NEEDS_SIGNATURE:
         return false;
       default:
         throw SqlEngines.generateUnrecognizedFeatureException(NativeSqlEngine.class.getSimpleName(), feature);

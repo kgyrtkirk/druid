@@ -584,20 +584,10 @@ public class MSQTestBase extends BaseCalciteQueryTest
    * Returns query context expected for a scan query. Same as {@link #DEFAULT_MSQ_CONTEXT}, but
    * includes {@link DruidQuery#CTX_SCAN_SIGNATURE}.
    */
+  @Deprecated
   protected Map<String, Object> defaultScanQueryContext(Map<String, Object> context, final RowSignature signature)
   {
-    try {
-      return ImmutableMap.<String, Object>builder()
-                         .putAll(context)
-                         .put(
-                             DruidQuery.CTX_SCAN_SIGNATURE,
-                             queryFramework().queryJsonMapper().writeValueAsString(signature)
-                         )
-                         .build();
-    }
-    catch (JsonProcessingException e) {
-      throw new RuntimeException(e);
-    }
+    return context;
   }
 
   /**

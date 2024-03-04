@@ -31,7 +31,6 @@ import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.server.QueryLifecycleFactory;
 import org.apache.druid.sql.calcite.filtration.Filtration;
 import org.apache.druid.sql.calcite.planner.PlannerContext;
-import org.apache.druid.sql.calcite.rel.DruidQuery;
 import org.apache.druid.sql.calcite.run.EngineFeature;
 import org.apache.druid.sql.calcite.run.QueryMaker;
 import org.apache.druid.sql.calcite.run.SqlEngine;
@@ -53,7 +52,6 @@ public class CalciteScanSignatureTest extends BaseCalciteQueryTest
   public void testScanSignature()
   {
     final Map<String, Object> context = new HashMap<>(QUERY_CONTEXT_DEFAULT);
-    context.put(DruidQuery.CTX_SCAN_SIGNATURE, "[{\"name\":\"v0\",\"type\":\"STRING\"}]");
 
     testQuery(
         "SELECT CONCAT(dim1, '-', dim1, '_', dim1) as dimX FROM foo",
@@ -140,7 +138,7 @@ public class CalciteScanSignatureTest extends BaseCalciteQueryTest
     @Override
     public boolean featureAvailable(EngineFeature feature, PlannerContext plannerContext)
     {
-      return feature == EngineFeature.SCAN_NEEDS_SIGNATURE || parent.featureAvailable(feature, plannerContext);
+      return parent.featureAvailable(feature, plannerContext);
     }
 
     @Override

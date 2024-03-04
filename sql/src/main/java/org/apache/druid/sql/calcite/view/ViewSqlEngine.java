@@ -76,7 +76,6 @@ public class ViewSqlEngine implements SqlEngine
       case TOPN_QUERY:
       case TIMESERIES_QUERY:
       case TIME_BOUNDARY_QUERY:
-      case SCAN_NEEDS_SIGNATURE:
         return false;
 
       default:
