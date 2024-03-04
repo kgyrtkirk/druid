@@ -2333,6 +2333,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
                                 )
                                 .resultFormat(ScanQuery.ResultFormat.RESULT_FORMAT_COMPACTED_LIST)
                                 .columns("k", "v", "v0")
+                                .columnTypes(STRING, STRING, STRING)
                                 .context(queryContext)
                                 .build()
                         ),
@@ -2343,6 +2344,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
                 )
                 .intervals(querySegmentSpec(Filtration.eternity()))
                 .columns("dim1", "dim2", "j0.k", "j0.v")
+                .columnTypes(STRING, STRING, STRING, STRING)
                 .context(queryContext)
                 .build()
         ),
