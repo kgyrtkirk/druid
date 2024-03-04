@@ -2040,6 +2040,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
                                   .intervals(querySegmentSpec(Filtration.eternity()))
                                   .resultFormat(ScanQuery.ResultFormat.RESULT_FORMAT_COMPACTED_LIST)
                                   .columns("cnt")
+                                  .columnTypes(LONG)
                                   .context(QUERY_CONTEXT_DEFAULT)
                                   .build()
                           ),
@@ -3521,6 +3522,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
               .resultFormat(ScanQuery.ResultFormat.RESULT_FORMAT_COMPACTED_LIST)
               .filters(equality("m2", "1000", ColumnType.DOUBLE))
               .columns("dim2")
+              .columnTypes(STRING)
               .legacy(false)
               .build()
     );
@@ -3551,6 +3553,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
                                       false
                                   ))
                                   .columns("dim2")
+                                  .columnTypes(STRING)
                                   .legacy(false)
                                   .build()
                         ),
