@@ -128,7 +128,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @SqlTestFrameworkConfig(minTopNThreshold = 1)
   @Test
-  public void testInnerJoinWithLimitAndAlias()
+  public void test000131InnerJoinWithLimitAndAlias()
   {
 
     Map<String, Object> context = new HashMap<>(QUERY_CONTEXT_DEFAULT);
@@ -189,7 +189,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   // to compute the query with limit 1.
   @SqlTestFrameworkConfig(minTopNThreshold = 1)
   @Test
-  public void testExactTopNOnInnerJoinWithLimit()
+  public void test000192ExactTopNOnInnerJoinWithLimit()
   {
     Map<String, Object> context = new HashMap<>(QUERY_CONTEXT_DEFAULT);
     context.put(PlannerConfig.CTX_KEY_USE_APPROXIMATE_TOPN, false);
@@ -237,7 +237,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  public void testJoinOuterGroupByAndSubqueryHasLimit()
+  public void test000240JoinOuterGroupByAndSubqueryHasLimit()
   {
     // Cannot vectorize JOIN operator.
     cannotVectorize();
@@ -324,7 +324,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testJoinOuterGroupByAndSubqueryNoLimit(Map<String, Object> queryContext)
+  public void test000327JoinOuterGroupByAndSubqueryNoLimit(Map<String, Object> queryContext)
   {
     // Fully removing the join allows this query to vectorize.
     if (!isRewriteJoinToFilter(queryContext)) {
@@ -408,7 +408,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  public void testJoinWithLimitBeforeJoining()
+  public void test000411JoinWithLimitBeforeJoining()
   {
     // Cannot vectorize JOIN operator.
     cannotVectorize();
@@ -496,7 +496,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  public void testJoinOnTimeseriesWithFloorOnTime()
+  public void test000499JoinOnTimeseriesWithFloorOnTime()
   {
     // Cannot vectorize JOIN operator.
     cannotVectorize();
@@ -550,7 +550,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  public void testJoinOnGroupByInsteadOfTimeseriesWithFloorOnTime()
+  public void test000553JoinOnGroupByInsteadOfTimeseriesWithFloorOnTime()
   {
     // Cannot vectorize JOIN operator.
     cannotVectorize();
@@ -616,7 +616,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  public void testJoinOnGroupByInsteadOfTimeseriesWithFloorOnTimeWithNoAggregateMultipleValues()
+  public void test000619JoinOnGroupByInsteadOfTimeseriesWithFloorOnTimeWithNoAggregateMultipleValues()
   {
     // Cannot vectorize JOIN operator.
     cannotVectorize();
@@ -683,7 +683,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testFilterAndGroupByLookupUsingJoinOperatorWithValueFilterPushdownMatchesNothing(Map<String, Object> queryContext)
+  public void test000686FilterAndGroupByLookupUsingJoinOperatorWithValueFilterPushdownMatchesNothing(Map<String, Object> queryContext)
 
   {
     // Cannot vectorize JOIN operator.
@@ -720,7 +720,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testFilterAndGroupByLookupUsingJoinOperatorAllowNulls(Map<String, Object> queryContext)
+  public void test000723FilterAndGroupByLookupUsingJoinOperatorAllowNulls(Map<String, Object> queryContext)
   {
     // Cannot vectorize JOIN operator.
     cannotVectorize();
@@ -764,7 +764,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testFilterAndGroupByLookupUsingJoinOperatorBackwards(Map<String, Object> queryContext)
+  public void test000767FilterAndGroupByLookupUsingJoinOperatorBackwards(Map<String, Object> queryContext)
   {
     // Like "testFilterAndGroupByLookupUsingJoinOperator", but with the table and lookup reversed.
 
@@ -819,7 +819,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testFilterAndGroupByLookupUsingJoinOperatorWithNotFilter(Map<String, Object> queryContext)
+  public void test000822FilterAndGroupByLookupUsingJoinOperatorWithNotFilter(Map<String, Object> queryContext)
 
   {
     // Cannot vectorize JOIN operator.
@@ -863,7 +863,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testJoinUnionTablesOnLookup(Map<String, Object> queryContext)
+  public void test000866JoinUnionTablesOnLookup(Map<String, Object> queryContext)
   {
     // MSQ does not support UNION ALL.
     msqIncompatible();
@@ -915,7 +915,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testFilterAndGroupByLookupUsingJoinOperator(Map<String, Object> queryContext)
+  public void test000918FilterAndGroupByLookupUsingJoinOperator(Map<String, Object> queryContext)
   {
     // Cannot vectorize JOIN operator.
     cannotVectorize();
@@ -953,7 +953,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testFilterAndGroupByLookupUsingPostAggregationJoinOperator(Map<String, Object> queryContext)
+  public void test000956FilterAndGroupByLookupUsingPostAggregationJoinOperator(Map<String, Object> queryContext)
 
   {
     testQuery(
@@ -1011,7 +1011,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testGroupByInnerJoinOnLookupUsingJoinOperator(Map<String, Object> queryContext)
+  public void test001014GroupByInnerJoinOnLookupUsingJoinOperator(Map<String, Object> queryContext)
   {
     // Cannot vectorize JOIN operator.
     cannotVectorize();
@@ -1047,7 +1047,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testSelectOnLookupUsingInnerJoinOperator(Map<String, Object> queryContext)
+  public void test001050SelectOnLookupUsingInnerJoinOperator(Map<String, Object> queryContext)
   {
     testQuery(
         "SELECT dim2, lookyloo.*\n"
@@ -1080,7 +1080,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testLeftJoinTwoLookupsUsingJoinOperator(Map<String, Object> queryContext)
+  public void test001083LeftJoinTwoLookupsUsingJoinOperator(Map<String, Object> queryContext)
   {
     testQuery(
         "SELECT dim1, dim2, l1.v, l2.v\n"
@@ -1127,7 +1127,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testInnerJoinTableLookupLookupWithFilterWithOuterLimit(Map<String, Object> queryContext)
+  public void test001130InnerJoinTableLookupLookupWithFilterWithOuterLimit(Map<String, Object> queryContext)
   {
     testQuery(
         "SELECT dim1\n"
@@ -1171,7 +1171,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testInnerJoinTableLookupLookupWithFilterWithoutLimit(Map<String, Object> queryContext)
+  public void test001174InnerJoinTableLookupLookupWithFilterWithoutLimit(Map<String, Object> queryContext)
   {
     testQuery(
         "SELECT dim1\n"
@@ -1213,7 +1213,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testInnerJoinTableLookupLookupWithFilterWithOuterLimitWithAllColumns(Map<String, Object> queryContext)
+  public void test001216InnerJoinTableLookupLookupWithFilterWithOuterLimitWithAllColumns(Map<String, Object> queryContext)
 
   {
     testQuery(
@@ -1257,7 +1257,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testInnerJoinTableLookupLookupWithFilterWithoutLimitWithAllColumns(Map<String, Object> queryContext)
+  public void test001260InnerJoinTableLookupLookupWithFilterWithoutLimitWithAllColumns(Map<String, Object> queryContext)
   {
     testQuery(
         "SELECT __time, cnt, dim1, dim2, dim3, m1, m2, unique_dim1\n"
@@ -1299,7 +1299,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testManyManyInnerJoinOnManyManyLookup(Map<String, Object> queryContext)
+  public void test001302ManyManyInnerJoinOnManyManyLookup(Map<String, Object> queryContext)
   {
     testQuery(
         "SELECT dim1\n"
@@ -1529,7 +1529,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testInnerJoinQueryOfLookup(Map<String, Object> queryContext)
+  public void test001532InnerJoinQueryOfLookup(Map<String, Object> queryContext)
   {
     // Cannot vectorize the subquery.
     cannotVectorize();
@@ -1581,7 +1581,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testTimeColumnAggregationsOnLookups(Map<String, Object> queryContext)
+  public void test001584TimeColumnAggregationsOnLookups(Map<String, Object> queryContext)
   {
     try {
       testQuery(
@@ -1608,7 +1608,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testInnerJoinQueryOfLookupRemovable(Map<String, Object> queryContext)
+  public void test001611InnerJoinQueryOfLookupRemovable(Map<String, Object> queryContext)
   {
     // Like "testInnerJoinQueryOfLookup", but the subquery is removable.
 
@@ -1646,7 +1646,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testInnerJoinTwoLookupsToTableUsingNumericColumn(Map<String, Object> queryContext)
+  public void test001649InnerJoinTwoLookupsToTableUsingNumericColumn(Map<String, Object> queryContext)
   {
     // Regression test for https://github.com/apache/druid/issues/9646.
 
@@ -1707,7 +1707,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testInnerJoinTwoLookupsToTableUsingNumericColumnInReverse(Map<String, Object> queryContext)
+  public void test001710InnerJoinTwoLookupsToTableUsingNumericColumnInReverse(Map<String, Object> queryContext)
 
   {
     // Like "testInnerJoinTwoLookupsToTableUsingNumericColumn", but the tables are specified backwards.
@@ -1764,7 +1764,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testInnerJoinLookupTableTable(Map<String, Object> queryContext)
+  public void test001767InnerJoinLookupTableTable(Map<String, Object> queryContext)
   {
     // Regression test for https://github.com/apache/druid/issues/9646.
 
@@ -1848,7 +1848,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testInnerJoinLookupTableTableChained(Map<String, Object> queryContext)
+  public void test001851InnerJoinLookupTableTableChained(Map<String, Object> queryContext)
   {
     // Cannot vectorize JOIN operator.
     cannotVectorize();
@@ -1928,7 +1928,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
 
   @Test
-  public void testWhereInSelectNullFromLookup()
+  public void test001931WhereInSelectNullFromLookup()
   {
     // Regression test for https://github.com/apache/druid/issues/9646.
     cannotVectorize();
@@ -1970,7 +1970,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  public void testCommaJoinLeftFunction()
+  public void test001973CommaJoinLeftFunction()
   {
     testQuery(
         "SELECT foo.dim1, foo.dim2, l.k, l.v\n"
@@ -2008,7 +2008,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   // Hence, comma join will result in a cross join with filter on outermost
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testCommaJoinTableLookupTableMismatchedTypes(Map<String, Object> queryContext)
+  public void test002011CommaJoinTableLookupTableMismatchedTypes(Map<String, Object> queryContext)
   {
     // Regression test for https://github.com/apache/druid/issues/9646.
 
@@ -2075,7 +2075,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testJoinTableLookupTableMismatchedTypesWithoutComma(Map<String, Object> queryContext)
+  public void test002078JoinTableLookupTableMismatchedTypesWithoutComma(Map<String, Object> queryContext)
   {
     // Empty-dataset aggregation queries in MSQ return an empty row, rather than a single row as SQL requires.
     msqIncompatible();
@@ -2145,7 +2145,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testInnerJoinCastLeft(Map<String, Object> queryContext)
+  public void test002148InnerJoinCastLeft(Map<String, Object> queryContext)
   {
     // foo.m1 is FLOAT, l.k is STRING.
 
@@ -2179,7 +2179,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testInnerJoinCastRight(Map<String, Object> queryContext)
+  public void test002182InnerJoinCastRight(Map<String, Object> queryContext)
   {
     // foo.m1 is FLOAT, l.k is STRING.
 
@@ -2226,7 +2226,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testInnerJoinMismatchedTypes(Map<String, Object> queryContext)
+  public void test002229InnerJoinMismatchedTypes(Map<String, Object> queryContext)
   {
     // foo.m1 is FLOAT, l.k is STRING. Comparing them generates a CAST.
 
@@ -2273,7 +2273,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testInnerJoinLeftFunction(Map<String, Object> queryContext)
+  public void test002276InnerJoinLeftFunction(Map<String, Object> queryContext)
   {
     testQuery(
         "SELECT foo.dim1, foo.dim2, l.k, l.v\n"
@@ -2309,7 +2309,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testInnerJoinRightFunction(Map<String, Object> queryContext)
+  public void test002312InnerJoinRightFunction(Map<String, Object> queryContext)
   {
     testQuery(
         "SELECT foo.dim1, foo.dim2, l.k, l.v\n"
@@ -2352,7 +2352,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testLeftJoinLookupOntoLookupUsingJoinOperator(Map<String, Object> queryContext)
+  public void test002355LeftJoinLookupOntoLookupUsingJoinOperator(Map<String, Object> queryContext)
   {
     testQuery(
         "SELECT dim2, l1.v, l2.v\n"
@@ -2398,7 +2398,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testLeftJoinThreeLookupsUsingJoinOperator(Map<String, Object> queryContext)
+  public void test002401LeftJoinThreeLookupsUsingJoinOperator(Map<String, Object> queryContext)
   {
     testQuery(
         "SELECT dim1, dim2, l1.v, l2.v, l3.v\n"
@@ -2452,7 +2452,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testSelectOnLookupUsingLeftJoinOperator(Map<String, Object> queryContext)
+  public void test002455SelectOnLookupUsingLeftJoinOperator(Map<String, Object> queryContext)
   {
     testQuery(
         "SELECT dim1, lookyloo.*\n"
@@ -2497,7 +2497,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testSelectOnLookupUsingRightJoinOperator(Map<String, Object> queryContext)
+  public void test002500SelectOnLookupUsingRightJoinOperator(Map<String, Object> queryContext)
   {
     // MSQ refuses to do RIGHT join with broadcast.
     msqIncompatible();
@@ -2540,7 +2540,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testSelectOnLookupUsingFullJoinOperator(Map<String, Object> queryContext)
+  public void test002543SelectOnLookupUsingFullJoinOperator(Map<String, Object> queryContext)
   {
     // MSQ refuses to do FULL join with broadcast.
     msqIncompatible();
@@ -2589,7 +2589,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testInAggregationSubquery(Map<String, Object> queryContext)
+  public void test002592InAggregationSubquery(Map<String, Object> queryContext)
   {
     // Fully removing the join allows this query to vectorize.
     if (!isRewriteJoinToFilter(queryContext)) {
@@ -2639,7 +2639,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testNotInAggregationSubquery(Map<String, Object> queryContext)
+  public void test002642NotInAggregationSubquery(Map<String, Object> queryContext)
   {
     // Cannot vectorize JOIN operator.
     cannotVectorize();
@@ -2725,7 +2725,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testUsingSubqueryWithExtractionFns(Map<String, Object> queryContext)
+  public void test002728UsingSubqueryWithExtractionFns(Map<String, Object> queryContext)
   {
     // Cannot vectorize JOIN operator.
     cannotVectorize();
@@ -2785,7 +2785,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testInnerJoinWithIsNullFilter(Map<String, Object> queryContext)
+  public void test002788InnerJoinWithIsNullFilter(Map<String, Object> queryContext)
   {
     testQuery(
         "SELECT dim1, l.v from druid.foo f inner join lookup.lookyloo l on f.dim1 = l.k where f.dim2 is null",
@@ -2818,7 +2818,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
   @Ignore // regression test for https://github.com/apache/druid/issues/9924
-  public void testInnerJoinOnMultiValueColumn(Map<String, Object> queryContext)
+  public void test002821InnerJoinOnMultiValueColumn(Map<String, Object> queryContext)
   {
     cannotVectorize();
     testQuery(
@@ -2858,7 +2858,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testLeftJoinOnTwoInlineDataSourcesWithTimeFilter(Map<String, Object> queryContext)
+  public void test002861LeftJoinOnTwoInlineDataSourcesWithTimeFilter(Map<String, Object> queryContext)
   {
     testQuery(
         "with abc as\n"
@@ -2927,7 +2927,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testLeftJoinOnTwoInlineDataSourcesWithTimeFilter_withLeftDirectAccess(Map<String, Object> queryContext)
+  public void test002930LeftJoinOnTwoInlineDataSourcesWithTimeFilter_withLeftDirectAccess(Map<String, Object> queryContext)
   {
     queryContext = withLeftDirectAccessEnabled(queryContext);
     testQuery(
@@ -2987,7 +2987,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testLeftJoinOnTwoInlineDataSourcesWithOuterWhere(Map<String, Object> queryContext)
+  public void test002990LeftJoinOnTwoInlineDataSourcesWithOuterWhere(Map<String, Object> queryContext)
   {
     testQuery(
         "with abc as\n"
@@ -3042,7 +3042,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testLeftJoinOnTwoInlineDataSourcesWithOuterWhere_withLeftDirectAccess(Map<String, Object> queryContext)
+  public void test003045LeftJoinOnTwoInlineDataSourcesWithOuterWhere_withLeftDirectAccess(Map<String, Object> queryContext)
   {
     queryContext = withLeftDirectAccessEnabled(queryContext);
     testQuery(
@@ -3092,7 +3092,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testLeftJoinOnTwoInlineDataSources(Map<String, Object> queryContext)
+  public void test003095LeftJoinOnTwoInlineDataSources(Map<String, Object> queryContext)
   {
     testQuery(
         "with abc as\n"
@@ -3148,7 +3148,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testLeftJoinOnTwoInlineDataSources_withLeftDirectAccess(Map<String, Object> queryContext)
+  public void test003151LeftJoinOnTwoInlineDataSources_withLeftDirectAccess(Map<String, Object> queryContext)
   {
     queryContext = withLeftDirectAccessEnabled(queryContext);
     testQuery(
@@ -3198,7 +3198,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testInnerJoinOnTwoInlineDataSourcesWithOuterWhere(Map<String, Object> queryContext)
+  public void test003201InnerJoinOnTwoInlineDataSourcesWithOuterWhere(Map<String, Object> queryContext)
   {
     Druids.ScanQueryBuilder baseScanBuilder = newScanQueryBuilder()
         .dataSource(
@@ -3254,7 +3254,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testInnerJoinOnTwoInlineDataSourcesWithOuterWhere_withLeftDirectAccess(Map<String, Object> queryContext)
+  public void test003257InnerJoinOnTwoInlineDataSourcesWithOuterWhere_withLeftDirectAccess(Map<String, Object> queryContext)
   {
     queryContext = withLeftDirectAccessEnabled(queryContext);
     testQuery(
@@ -3304,7 +3304,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testInnerJoinOnTwoInlineDataSources(Map<String, Object> queryContext)
+  public void test003307InnerJoinOnTwoInlineDataSources(Map<String, Object> queryContext)
   {
     testQuery(
         "with abc as\n"
@@ -3360,7 +3360,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testGroupByOverGroupByOverInnerJoinOnTwoInlineDataSources(Map<String, Object> queryContext)
+  public void test003363GroupByOverGroupByOverInnerJoinOnTwoInlineDataSources(Map<String, Object> queryContext)
   {
     skipVectorize();
     cannotVectorize();
@@ -3447,7 +3447,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testInnerJoinOnTwoInlineDataSources_withLeftDirectAccess(Map<String, Object> queryContext)
+  public void test003450InnerJoinOnTwoInlineDataSources_withLeftDirectAccess(Map<String, Object> queryContext)
   {
     queryContext = withLeftDirectAccessEnabled(queryContext);
     testQuery(
@@ -3500,7 +3500,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   // TODO: Remove expected Exception when https://github.com/apache/druid/issues/9942 is fixed
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testJoinOnConstantShouldFail(Map<String, Object> queryContext)
+  public void test003503JoinOnConstantShouldFail(Map<String, Object> queryContext)
   {
     assertQueryIsUnplannable(
         "SELECT t1.dim1 from foo as t1 LEFT JOIN foo as t2 on t1.dim1 = '10.1'",
@@ -3509,7 +3509,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  public void testLeftJoinRightTableCanBeEmpty()
+  public void test003512LeftJoinRightTableCanBeEmpty()
   {
     // HashJoinSegmentStorageAdapter is not vectorizable
     cannotVectorize();
@@ -3592,7 +3592,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testLeftJoinSubqueryWithNullKeyFilter(Map<String, Object> queryContext)
+  public void test003595LeftJoinSubqueryWithNullKeyFilter(Map<String, Object> queryContext)
   {
     // JoinFilterAnalyzer bug causes incorrect results on this test in replace-with-default mode.
     // This test case was originally added in https://github.com/apache/druid/pull/11434 with a note about this.
@@ -3679,7 +3679,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testLeftJoinSubqueryWithSelectorFilter(Map<String, Object> queryContext)
+  public void test003682LeftJoinSubqueryWithSelectorFilter(Map<String, Object> queryContext)
   {
     // Cannot vectorize due to 'concat' expression.
     cannotVectorize();
@@ -3732,7 +3732,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testLeftJoinWithNotNullFilter(Map<String, Object> queryContext)
+  public void test003735LeftJoinWithNotNullFilter(Map<String, Object> queryContext)
   {
     testQuery(
         "SELECT s.dim1, t.dim1\n"
@@ -3779,7 +3779,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testInnerJoin(Map<String, Object> queryContext)
+  public void test003782InnerJoin(Map<String, Object> queryContext)
   {
     testQuery(
         "SELECT s.dim1, t.dim1\n"
@@ -3833,7 +3833,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testJoinWithExplicitIsNotDistinctFromCondition(Map<String, Object> queryContext)
+  public void test003836JoinWithExplicitIsNotDistinctFromCondition(Map<String, Object> queryContext)
   {
     // Like "testInnerJoin", but uses IS NOT DISTINCT FROM instead of equals.
 
@@ -3878,7 +3878,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testInnerJoinSubqueryWithSelectorFilter(Map<String, Object> queryContext)
+  public void test003881InnerJoinSubqueryWithSelectorFilter(Map<String, Object> queryContext)
   {
     if (sortBasedJoin) {
       // Cannot handle the [l1.k = 'abc'] condition.
@@ -3937,7 +3937,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  public void testSemiJoinWithOuterTimeExtractScan()
+  public void test003940SemiJoinWithOuterTimeExtractScan()
   {
     testQuery(
         "SELECT dim1, EXTRACT(MONTH FROM __time) FROM druid.foo\n"
@@ -3985,7 +3985,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testTwoSemiJoinsSimultaneously(Map<String, Object> queryContext)
+  public void test003988TwoSemiJoinsSimultaneously(Map<String, Object> queryContext)
   {
     // Fully removing the join allows this query to vectorize.
     if (!isRewriteJoinToFilter(queryContext)) {
@@ -4050,7 +4050,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testSemiAndAntiJoinSimultaneouslyUsingWhereInSubquery(Map<String, Object> queryContext)
+  public void test004053SemiAndAntiJoinSimultaneouslyUsingWhereInSubquery(Map<String, Object> queryContext)
   {
     cannotVectorize();
 
@@ -4156,7 +4156,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testSemiAndAntiJoinSimultaneouslyUsingExplicitJoins(Map<String, Object> queryContext)
+  public void test004159SemiAndAntiJoinSimultaneouslyUsingExplicitJoins(Map<String, Object> queryContext)
   {
     cannotVectorize();
 
@@ -4223,7 +4223,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  public void testSemiJoinWithOuterTimeExtractAggregateWithOrderBy()
+  public void test004226SemiJoinWithOuterTimeExtractAggregateWithOrderBy()
   {
     // Cannot vectorize due to virtual columns.
     cannotVectorize();
@@ -4300,7 +4300,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   // TODO: Remove expected Exception when https://github.com/apache/druid/issues/9924 is fixed
   @Test(expected = QueryException.class)
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testJoinOnMultiValuedColumnShouldThrowException(Map<String, Object> queryContext)
+  public void test004303JoinOnMultiValuedColumnShouldThrowException(Map<String, Object> queryContext)
   {
     // MSQ throws a slightly different error than QueryException.
     msqIncompatible();
@@ -4317,7 +4317,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testUnionAllTwoQueriesLeftQueryIsJoin(Map<String, Object> queryContext)
+  public void test004320UnionAllTwoQueriesLeftQueryIsJoin(Map<String, Object> queryContext)
   {
     // MSQ does not support UNION ALL.
     msqIncompatible();
@@ -4361,7 +4361,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testUnionAllTwoQueriesRightQueryIsJoin(Map<String, Object> queryContext)
+  public void test004364UnionAllTwoQueriesRightQueryIsJoin(Map<String, Object> queryContext)
   {
     // MSQ does not support UNION ALL.
     msqIncompatible();
@@ -4404,7 +4404,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  public void testUnionAllTwoQueriesBothQueriesAreJoin()
+  public void test004407UnionAllTwoQueriesBothQueriesAreJoin()
   {
     // MSQ does not support UNION ALL.
     msqIncompatible();
@@ -4453,7 +4453,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testTopNFilterJoin(Map<String, Object> queryContext)
+  public void test004456TopNFilterJoin(Map<String, Object> queryContext)
   {
     // Fully removing the join allows this query to vectorize.
     if (!isRewriteJoinToFilter(queryContext)) {
@@ -4518,7 +4518,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testTopNFilterJoinWithProjection(Map<String, Object> queryContext)
+  public void test004521TopNFilterJoinWithProjection(Map<String, Object> queryContext)
   {
     // Cannot vectorize JOIN operator.
     cannotVectorize();
@@ -4590,7 +4590,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
   @Ignore("Stopped working after the ability to join on subqueries was added to DruidJoinRule")
-  public void testRemovableLeftJoin(Map<String, Object> queryContext)
+  public void test004593RemovableLeftJoin(Map<String, Object> queryContext)
   {
     // LEFT JOIN where the right-hand side can be ignored.
 
@@ -4633,7 +4633,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testCountDistinctOfLookupUsingJoinOperator(Map<String, Object> queryContext)
+  public void test004636CountDistinctOfLookupUsingJoinOperator(Map<String, Object> queryContext)
   {
     // Cannot yet vectorize the JOIN operator.
     cannotVectorize();
@@ -4675,7 +4675,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testJoinWithNonEquiCondition(Map<String, Object> queryContext)
+  public void test004678JoinWithNonEquiCondition(Map<String, Object> queryContext)
   {
     // Native JOIN operator cannot handle the condition, so a SQL JOIN with greater-than is translated into a
     // cross join with a filter.
@@ -4737,7 +4737,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testJoinWithEquiAndNonEquiCondition(Map<String, Object> queryContext)
+  public void test004740JoinWithEquiAndNonEquiCondition(Map<String, Object> queryContext)
   {
     // Native JOIN operator cannot handle the condition, so a SQL JOIN with greater-than is translated into a
     // cross join with a filter.
@@ -4782,7 +4782,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testUsingSubqueryAsPartOfAndFilter(Map<String, Object> queryContext)
+  public void test004785UsingSubqueryAsPartOfAndFilter(Map<String, Object> queryContext)
   {
     // Fully removing the join allows this query to vectorize.
     if (!isRewriteJoinToFilter(queryContext)) {
@@ -4851,7 +4851,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testUsingSubqueryAsPartOfOrFilter(Map<String, Object> queryContext)
+  public void test004854UsingSubqueryAsPartOfOrFilter(Map<String, Object> queryContext)
   {
     // Cannot vectorize JOIN operator.
     cannotVectorize();
@@ -4941,7 +4941,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testNestedGroupByOnInlineDataSourceWithFilter(Map<String, Object> queryContext)
+  public void test004944NestedGroupByOnInlineDataSourceWithFilter(Map<String, Object> queryContext)
   {
     // Cannot vectorize due to virtual columns.
     cannotVectorize();
@@ -5018,7 +5018,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testGroupByJoinAsNativeQueryWithUnoptimizedFilter(Map<String, Object> queryContext)
+  public void test005021GroupByJoinAsNativeQueryWithUnoptimizedFilter(Map<String, Object> queryContext)
   {
     // The query below is the same as the inner groupBy on a join datasource from the test
     // testNestedGroupByOnInlineDataSourceWithFilter, except that the selector filter
@@ -5092,7 +5092,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testCountOnSemiJoinSingleColumn(Map<String, Object> queryContext)
+  public void test005095CountOnSemiJoinSingleColumn(Map<String, Object> queryContext)
   {
     testQuery(
         "SELECT dim1 FROM foo WHERE dim1 IN (SELECT dim1 FROM foo WHERE dim1 = '10.1')\n",
@@ -5133,7 +5133,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testTopNOnStringWithNonSortedOrUniqueDictionary(Map<String, Object> queryContext)
+  public void test005136TopNOnStringWithNonSortedOrUniqueDictionary(Map<String, Object> queryContext)
   {
     testQuery(
         "SELECT druid.broadcast.dim4, COUNT(*)\n"
@@ -5173,7 +5173,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testTopNOnStringWithNonSortedOrUniqueDictionaryOrderByDim(Map<String, Object> queryContext)
+  public void test005176TopNOnStringWithNonSortedOrUniqueDictionaryOrderByDim(Map<String, Object> queryContext)
 
   {
     testQuery(
@@ -5213,7 +5213,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testVirtualColumnOnMVFilterJoinExpression(Map<String, Object> queryContext)
+  public void test005216VirtualColumnOnMVFilterJoinExpression(Map<String, Object> queryContext)
   {
     // Doesn't work in MSQ, although it's not really MSQ's fault. In MSQ, the second field (foo2.dim3) is returned as
     // the string "[a, b]" because it gets run through DimensionHandlerUtils.convertObjectToString in
@@ -5269,7 +5269,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testVirtualColumnOnMVFilterMultiJoinExpression(Map<String, Object> queryContext)
+  public void test005272VirtualColumnOnMVFilterMultiJoinExpression(Map<String, Object> queryContext)
   {
     // Doesn't work in MSQ, although it's not really MSQ's fault. In MSQ, the second field (foo2.dim3) is returned as
     // the string "[a, b]" because it gets run through DimensionHandlerUtils.convertObjectToString in
@@ -5348,7 +5348,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testInnerJoinWithFilterPushdownAndManyFiltersEmptyResults(Map<String, Object> queryContext)
+  public void test005351InnerJoinWithFilterPushdownAndManyFiltersEmptyResults(Map<String, Object> queryContext)
   {
     // create the query we expect
     ScanQuery query = newScanQueryBuilder()
@@ -5455,7 +5455,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testInnerJoinWithFilterPushdownAndManyFiltersNonEmptyResults(Map<String, Object> queryContext)
+  public void test005458InnerJoinWithFilterPushdownAndManyFiltersNonEmptyResults(Map<String, Object> queryContext)
   {
     // create the query we expect
     ScanQuery query = newScanQueryBuilder()
@@ -5568,7 +5568,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  public void testPlanWithInFilterMoreThanInSubQueryThreshold()
+  public void test005571PlanWithInFilterMoreThanInSubQueryThreshold()
   {
     String query = "SELECT l1 FROM numfoo WHERE l1 IN (4842, 4844, 4845, 14905, 4853, 29064)";
 
@@ -5623,7 +5623,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @Parameters(source = QueryContextForJoinProvider.class)
-  public void testRegressionFilteredAggregatorsSubqueryJoins(Map<String, Object> queryContext)
+  public void test005626RegressionFilteredAggregatorsSubqueryJoins(Map<String, Object> queryContext)
   {
     cannotVectorize();
     testQuery(
@@ -5817,7 +5817,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @SqlTestFrameworkConfig(minTopNThreshold = 1)
   @Test
-  public void testJoinWithAliasAndOrderByNoGroupBy()
+  public void test005820JoinWithAliasAndOrderByNoGroupBy()
   {
     Map<String, Object> context = new HashMap<>(QUERY_CONTEXT_DEFAULT);
     context.put(PlannerConfig.CTX_KEY_USE_APPROXIMATE_TOPN, false);
@@ -5897,7 +5897,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  public void testJoinsWithTwoConditions()
+  public void test005900JoinsWithTwoConditions()
   {
     Map<String, Object> context = new HashMap<>(QUERY_CONTEXT_DEFAULT);
     testQuery(
@@ -5947,7 +5947,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  public void testJoinsWithThreeConditions()
+  public void test005950JoinsWithThreeConditions()
   {
     Map<String, Object> context = new HashMap<>(QUERY_CONTEXT_DEFAULT);
     testQuery(
@@ -6009,7 +6009,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  public void testJoinWithInputRefCondition()
+  public void test006012JoinWithInputRefCondition()
   {
     cannotVectorize();
     Map<String, Object> context = new HashMap<>(QUERY_CONTEXT_DEFAULT);
@@ -6127,7 +6127,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  public void testJoinsWithUnnestOnLeft()
+  public void test006130JoinsWithUnnestOnLeft()
   {
     // Segment map function of MSQ needs some work
     // To handle these nested cases
@@ -6184,7 +6184,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  public void testJoinsWithUnnestOverFilteredDSOnLeft()
+  public void test006187JoinsWithUnnestOverFilteredDSOnLeft()
   {
     // Segment map function of MSQ needs some work
     // To handle these nested cases
@@ -6242,7 +6242,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  public void testJoinsWithUnnestOverJoin()
+  public void test006245JoinsWithUnnestOverJoin()
   {
     // Segment map function of MSQ needs some work
     // To handle these nested cases
@@ -6328,7 +6328,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  public void testSelfJoinsWithUnnestOnLeftAndRight()
+  public void test006331SelfJoinsWithUnnestOnLeftAndRight()
   {
     // Segment map function of MSQ needs some work
     // To handle these nested cases
@@ -6399,7 +6399,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  public void testJoinsOverUnnestOverFilterDSOverJoin()
+  public void test006402JoinsOverUnnestOverFilterDSOverJoin()
   {
     // Segment map function of MSQ needs some work
     // To handle these nested cases
@@ -6484,7 +6484,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  public void testLeftJoinsOnTwoWithTables()
+  public void test006487LeftJoinsOnTwoWithTables()
   {
     Map<String, Object> context = new HashMap<>(QUERY_CONTEXT_DEFAULT);
     testQuery(
