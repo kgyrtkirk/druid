@@ -64,6 +64,9 @@ public class FloatFrameColumnReader implements FrameColumnReader
   {
     final FloatFrameColumn frameCol = makeFloatFrameColumn(frame);
 
+    if (true) {
+      throw new ISE("FrameColumnReader Triggered");
+    }
     return new ColumnPlus(
         frameCol,
         ColumnCapabilitiesImpl.createSimpleNumericColumnCapabilities(frameCol.getType())

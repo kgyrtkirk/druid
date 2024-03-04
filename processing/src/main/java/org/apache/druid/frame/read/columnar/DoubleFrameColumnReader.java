@@ -64,6 +64,9 @@ public class DoubleFrameColumnReader implements FrameColumnReader
   {
     final DoubleFrameColumn frameCol = makeDoubleFrameColumn(frame);
 
+    if (true) {
+      throw new ISE("FrameColumnReader Triggered");
+    }
     return new ColumnPlus(
         frameCol,
         ColumnCapabilitiesImpl.createSimpleNumericColumnCapabilities(frameCol.getType())

@@ -65,6 +65,9 @@ public class LongFrameColumnReader implements FrameColumnReader
   {
     final LongFrameColumn frameCol = makeLongFrameColumn(frame);
 
+    if (true) {
+      throw new ISE("FrameColumnReader Triggered");
+    }
     return new ColumnPlus(
         frameCol,
         ColumnCapabilitiesImpl.createSimpleNumericColumnCapabilities(frameCol.getType())
