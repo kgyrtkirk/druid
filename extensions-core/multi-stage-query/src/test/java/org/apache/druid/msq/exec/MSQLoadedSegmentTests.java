@@ -116,6 +116,7 @@ public class MSQLoadedSegmentTests extends MSQTestBase
             "foo"
         )).when(dataServerQueryHandler)
           .fetchRowsFromDataServer(any(), any(), any());
+    final RowSignature signature = resultSignature;
 
     testSelectQuery()
         .setSql("select cnt, dim1 from foo")
@@ -126,7 +127,7 @@ public class MSQLoadedSegmentTests extends MSQTestBase
                            .dataSource(CalciteTests.DATASOURCE1)
                            .intervals(querySegmentSpec(Filtration.eternity()))
                            .columns("cnt", "dim1")
-                           .context(defaultScanQueryContext(REALTIME_QUERY_CTX, resultSignature))
+                           .context(REALTIME_QUERY_CTX)
                            .build()
                    )
                    .columnMappings(ColumnMappings.identity(resultSignature))
@@ -179,6 +180,7 @@ public class MSQLoadedSegmentTests extends MSQTestBase
     )
         .when(dataServerQueryHandler)
         .fetchRowsFromDataServer(any(), any(), any());
+    final RowSignature signature = resultSignature;
 
     testSelectQuery()
         .setSql("select cnt, dim1 from foo order by dim1")
@@ -190,7 +192,7 @@ public class MSQLoadedSegmentTests extends MSQTestBase
                            .intervals(querySegmentSpec(Filtration.eternity()))
                            .columns("cnt", "dim1")
                            .orderBy(ImmutableList.of(new ScanQuery.OrderBy("dim1", ScanQuery.Order.ASCENDING)))
-                           .context(defaultScanQueryContext(REALTIME_QUERY_CTX, resultSignature))
+                           .context(REALTIME_QUERY_CTX)
                            .build()
                    )
                    .columnMappings(ColumnMappings.identity(resultSignature))

@@ -581,16 +581,6 @@ public class MSQTestBase extends BaseCalciteQueryTest
   }
 
   /**
-   * Returns query context expected for a scan query. Same as {@link #DEFAULT_MSQ_CONTEXT}, but
-   * includes {@link DruidQuery#CTX_SCAN_SIGNATURE}.
-   */
-  @Deprecated
-  protected Map<String, Object> defaultScanQueryContext(Map<String, Object> context, final RowSignature signature)
-  {
-    return context;
-  }
-
-  /**
    * Creates an array of length and containing values decided by the parameters.
    */
   protected long[] createExpectedFrameArray(int length, int value)

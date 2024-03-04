@@ -613,6 +613,7 @@ public class MSQArraysTest extends MSQTestBase
 
     final Map<String, Object> adjustedContext = new HashMap<>(context);
     adjustedContext.put(MultiStageQueryContext.CTX_ARRAY_INGEST_MODE, arrayIngestMode);
+    final RowSignature signature = scanSignature;
 
     Query<?> expectedQuery = newScanQueryBuilder()
         .dataSource(dataFileExternalDataSource)
@@ -632,7 +633,7 @@ public class MSQArraysTest extends MSQTestBase
             ColumnType.LONG,
             TestExprMacroTable.INSTANCE
         ))
-        .context(defaultScanQueryContext(adjustedContext, scanSignature))
+        .context(adjustedContext)
         .build();
 
     testSelectQuery().setSql("SELECT\n"
@@ -700,13 +701,14 @@ public class MSQArraysTest extends MSQTestBase
     RowSignature scanSignature = RowSignature.builder()
                                              .add("arrayString", ColumnType.STRING_ARRAY)
                                              .build();
+    final RowSignature signature = scanSignature;
 
     Query<?> expectedQuery = newScanQueryBuilder()
         .dataSource(dataFileExternalDataSource)
         .intervals(querySegmentSpec(Filtration.eternity()))
         .columns("arrayString")
         .orderBy(Collections.singletonList(new ScanQuery.OrderBy("arrayString", ScanQuery.Order.DESCENDING)))
-        .context(defaultScanQueryContext(context, scanSignature))
+        .context(context)
         .build();
 
     testSelectQuery().setSql("SELECT\n"
@@ -762,13 +764,14 @@ public class MSQArraysTest extends MSQTestBase
     RowSignature scanSignature = RowSignature.builder()
                                              .add("arrayLong", ColumnType.LONG_ARRAY)
                                              .build();
+    final RowSignature signature = scanSignature;
 
     Query<?> expectedQuery = newScanQueryBuilder()
         .dataSource(dataFileExternalDataSource)
         .intervals(querySegmentSpec(Filtration.eternity()))
         .columns("arrayLong")
         .orderBy(Collections.singletonList(new ScanQuery.OrderBy("arrayLong", ScanQuery.Order.ASCENDING)))
-        .context(defaultScanQueryContext(context, scanSignature))
+        .context(context)
         .build();
 
     testSelectQuery().setSql("SELECT\n"
@@ -824,13 +827,14 @@ public class MSQArraysTest extends MSQTestBase
     RowSignature scanSignature = RowSignature.builder()
                                              .add("arrayDouble", ColumnType.DOUBLE_ARRAY)
                                              .build();
+    final RowSignature signature = scanSignature;
 
     Query<?> expectedQuery = newScanQueryBuilder()
         .dataSource(dataFileExternalDataSource)
         .intervals(querySegmentSpec(Filtration.eternity()))
         .columns("arrayDouble")
         .orderBy(Collections.singletonList(new ScanQuery.OrderBy("arrayDouble", ScanQuery.Order.ASCENDING)))
-        .context(defaultScanQueryContext(context, scanSignature))
+        .context(context)
         .build();
 
     testSelectQuery().setSql("SELECT\n"
@@ -869,6 +873,7 @@ public class MSQArraysTest extends MSQTestBase
     RowSignature scanSignature = RowSignature.builder()
                                              .add("a_bool", ColumnType.LONG_ARRAY)
                                              .build();
+    final RowSignature signature = scanSignature;
 
     Query<?> expectedQuery = newScanQueryBuilder()
         .dataSource(
@@ -880,7 +885,7 @@ public class MSQArraysTest extends MSQTestBase
         )
         .intervals(querySegmentSpec(Filtration.eternity()))
         .columns("a_bool")
-        .context(defaultScanQueryContext(context, scanSignature))
+        .context(context)
         .build();
 
     testSelectQuery().setSql("SELECT a_bool FROM TABLE(\n"
@@ -916,6 +921,7 @@ public class MSQArraysTest extends MSQTestBase
     RowSignature scanSignature = RowSignature.builder()
                                              .add("a_bool", ColumnType.LONG_ARRAY)
                                              .build();
+    final RowSignature signature = scanSignature;
 
     Query<?> expectedQuery = newScanQueryBuilder()
         .dataSource(
@@ -927,7 +933,7 @@ public class MSQArraysTest extends MSQTestBase
         )
         .intervals(querySegmentSpec(Filtration.eternity()))
         .columns("a_bool")
-        .context(defaultScanQueryContext(context, scanSignature))
+        .context(context)
         .build();
 
     testSelectQuery().setSql("SELECT a_bool FROM TABLE(\n"

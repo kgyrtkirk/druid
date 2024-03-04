@@ -19,23 +19,11 @@
 
 package org.apache.druid.sql.calcite;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
-import com.google.inject.Injector;
-import org.apache.calcite.rel.RelRoot;
-import org.apache.calcite.rel.type.RelDataType;
-import org.apache.calcite.rel.type.RelDataTypeFactory;
-import org.apache.calcite.tools.ValidationException;
 import org.apache.druid.query.scan.ScanQuery;
 import org.apache.druid.segment.column.ColumnType;
-import org.apache.druid.server.QueryLifecycleFactory;
 import org.apache.druid.sql.calcite.filtration.Filtration;
-import org.apache.druid.sql.calcite.planner.PlannerContext;
-import org.apache.druid.sql.calcite.run.EngineFeature;
-import org.apache.druid.sql.calcite.run.QueryMaker;
-import org.apache.druid.sql.calcite.run.SqlEngine;
 import org.apache.druid.sql.calcite.util.CalciteTests;
-import org.apache.druid.sql.destination.IngestDestination;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -65,6 +53,7 @@ public class CalciteScanSignatureTest extends BaseCalciteQueryTest
                     ColumnType.STRING
                 ))
                 .columns("v0")
+                .columnTypes(ColumnType.STRING)
                 .resultFormat(ScanQuery.ResultFormat.RESULT_FORMAT_COMPACTED_LIST)
                 .context(context)
                 .build()
@@ -107,69 +96,5 @@ public class CalciteScanSignatureTest extends BaseCalciteQueryTest
             new Object[]{null}, new Object[]{null}
         )
     );
-  }
-
-  @Override
-  public SqlEngine createEngine(
-      QueryLifecycleFactory qlf,
-      ObjectMapper queryJsonMapper,
-      Injector injector
-  )
-  {
-    // Create an engine that says yes to EngineFeature.SCAN_NEEDS_SIGNATURE.
-    return new ScanSignatureTestSqlEngine(super.createEngine(qlf, queryJsonMapper, injector));
-  }
-
-  private static class ScanSignatureTestSqlEngine implements SqlEngine
-  {
-    private final SqlEngine parent;
-
-    public ScanSignatureTestSqlEngine(final SqlEngine parent)
-    {
-      this.parent = parent;
-    }
-
-    @Override
-    public String name()
-    {
-      return getClass().getName();
-    }
-
-    @Override
-    public boolean featureAvailable(EngineFeature feature, PlannerContext plannerContext)
-    {
-      return parent.featureAvailable(feature, plannerContext);
-    }
-
-    @Override
-    public void validateContext(Map<String, Object> queryContext)
-    {
-      // No validation.
-    }
-
-    @Override
-    public RelDataType resultTypeForSelect(RelDataTypeFactory typeFactory, RelDataType validatedRowType)
-    {
-      return validatedRowType;
-    }
-
-    @Override
-    public RelDataType resultTypeForInsert(RelDataTypeFactory typeFactory, RelDataType validatedRowType)
-    {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public QueryMaker buildQueryMakerForSelect(RelRoot relRoot, PlannerContext plannerContext)
-        throws ValidationException
-    {
-      return parent.buildQueryMakerForSelect(relRoot, plannerContext);
-    }
-
-    @Override
-    public QueryMaker buildQueryMakerForInsert(IngestDestination destination, RelRoot relRoot, PlannerContext plannerContext)
-    {
-      throw new UnsupportedOperationException();
-    }
   }
 }

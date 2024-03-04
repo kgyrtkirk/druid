@@ -189,13 +189,7 @@ public class MSQParseExceptionsTest extends MSQTestBase
             )
             .columns("v0", "v1")
             .resultFormat(ScanQuery.ResultFormat.RESULT_FORMAT_COMPACTED_LIST)
-            .context(defaultScanQueryContext(
-                context,
-                RowSignature.builder()
-                            .add("v0", ColumnType.LONG)
-                            .add("v1", ColumnType.STRING)
-                            .build()
-            ))
+            .context(context)
             .build();
 
 

@@ -21,6 +21,8 @@ package org.apache.druid.query.scan;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import nl.jqno.equalsverifier.Warning;
 import org.apache.druid.java.util.common.DateTimes;
 import org.apache.druid.java.util.common.ISE;
 import org.apache.druid.java.util.common.guava.Sequence;
@@ -400,4 +402,19 @@ public class ScanQueryTest
 
     Assert.assertEquals(sig, query.getRowSignature());
   }
+
+  @Test
+  public void testEquals()
+  {
+    EqualsVerifier.forClass(ScanQuery.class)
+        .usingGetClass()
+        .suppress(Warning.NULL_FIELDS, Warning.NONFINAL_FIELDS)
+        .withIgnoredFields(
+            "timeOrder", // orderBy have superseeded this field
+            "maxRowsQueuedForOrdering", // computed field
+            "maxSegmentPartitionsOrderedInMemory" // computed field
+        )
+        .verify();
+  }
+
 }

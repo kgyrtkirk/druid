@@ -551,6 +551,7 @@ public class ScanQuery extends BaseQuery<ScanResultValue>
            Objects.equals(resultFormat, scanQuery.resultFormat) &&
            Objects.equals(dimFilter, scanQuery.dimFilter) &&
            Objects.equals(columns, scanQuery.columns) &&
+           Objects.equals(columnTypes, scanQuery.columnTypes) &&
            Objects.equals(orderBys, scanQuery.orderBys);
   }
 
@@ -566,6 +567,7 @@ public class ScanQuery extends BaseQuery<ScanResultValue>
         scanRowsLimit,
         dimFilter,
         columns,
+        columnTypes,
         orderBys,
         legacy
     );
@@ -584,6 +586,7 @@ public class ScanQuery extends BaseQuery<ScanResultValue>
            ", limit=" + scanRowsLimit +
            ", dimFilter=" + dimFilter +
            ", columns=" + columns +
+           ", columnTypes=" + columnTypes +
            (orderBys.isEmpty() ? "" : ", orderBy=" + orderBys) +
            (legacy == null ? "" : ", legacy=" + legacy) +
            ", context=" + getContext() +
