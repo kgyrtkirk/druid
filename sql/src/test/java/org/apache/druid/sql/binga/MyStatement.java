@@ -19,35 +19,24 @@
 
 package org.apache.druid.sql.binga;
 
+import org.apache.druid.sql.SqlQueryPlus;
 import org.apache.druid.sql.calcite.BaseCalciteQueryTest;
+import org.apache.druid.sql.calcite.util.CalciteTests;
 import org.apache.druid.sql.calcite.util.SqlTestFramework;
 
-import java.sql.Array;
-import java.sql.Blob;
-import java.sql.CallableStatement;
-import java.sql.Clob;
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.NClob;
-import java.sql.PreparedStatement;
-import java.sql.SQLClientInfoException;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
-import java.sql.SQLXML;
-import java.sql.Savepoint;
 import java.sql.Statement;
-import java.sql.Struct;
-import java.util.Map;
-import java.util.Properties;
-import java.util.concurrent.Executor;
 
-public class MyConnection implements Connection
+public class MyStatement implements Statement
 {
 
-  private BaseCalciteQueryTest testHost;
   private SqlTestFramework frameWork;
+  private BaseCalciteQueryTest testHost;
 
-  public MyConnection(BaseCalciteQueryTest testHost, SqlTestFramework frameWork)
+  public MyStatement(BaseCalciteQueryTest testHost, SqlTestFramework frameWork)
   {
     this.testHost = testHost;
     this.frameWork = frameWork;
@@ -56,61 +45,16 @@ public class MyConnection implements Connection
   @Override
   public <T> T unwrap(Class<T> iface) throws SQLException
   {
+    if (true) {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
     return null;
+
   }
 
   @Override
   public boolean isWrapperFor(Class<?> iface) throws SQLException
   {
-    return false;
-  }
-
-  @Override
-  public Statement createStatement() throws SQLException
-  {
-    return new MyStatement(testHost, frameWork);
-  }
-
-  @Override
-  public PreparedStatement prepareStatement(String sql) throws SQLException
-  {
-    if (true) {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-    return null;
-  }
-
-  @Override
-  public CallableStatement prepareCall(String sql) throws SQLException
-  {
-    if (true) {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-    return null;
-  }
-
-  @Override
-  public String nativeSQL(String sql) throws SQLException
-  {
-    if (true) {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-    return null;
-
-  }
-
-  @Override
-  public void setAutoCommit(boolean autoCommit) throws SQLException
-  {
-    if (true) {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-
-  }
-
-  @Override
-  public boolean getAutoCommit() throws SQLException
-  {
     if (true) {
       throw new RuntimeException("FIXME: Unimplemented!");
     }
@@ -119,103 +63,109 @@ public class MyConnection implements Connection
   }
 
   @Override
-  public void commit() throws SQLException
+  public ResultSet executeQuery(String sql) throws SQLException
   {
-    if (true) {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
+//    res=testHost.testBuilder().sql(sql).run();
+    final SqlQueryPlus sqlQuery = SqlQueryPlus.builder(sql)
+        .sqlParameters(testHost.DEFAULT_PARAMETERS)
+        .auth(CalciteTests.REGULAR_USER_AUTH_RESULT)
+        .build();
 
+
+    return new MyResultset();
   }
 
   @Override
-  public void rollback() throws SQLException
+  public int executeUpdate(String sql) throws SQLException
   {
     if (true) {
       throw new RuntimeException("FIXME: Unimplemented!");
     }
+    return 0;
 
   }
 
   @Override
   public void close() throws SQLException
   {
+//    if (true) {
+//      throw new RuntimeException("FIXME: Unimplemented!");
+//    }
 
   }
 
   @Override
-  public boolean isClosed() throws SQLException
-  {
-    if (true) {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-    return false;
-
-  }
-
-  @Override
-  public DatabaseMetaData getMetaData() throws SQLException
-  {
-    if (true) {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-    return null;
-
-  }
-
-  @Override
-  public void setReadOnly(boolean readOnly) throws SQLException
-  {
-    if (true) {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-
-  }
-
-  @Override
-  public boolean isReadOnly() throws SQLException
-  {
-    if (true) {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-    return false;
-
-  }
-
-  @Override
-  public void setCatalog(String catalog) throws SQLException
-  {
-    if (true) {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-
-  }
-
-  @Override
-  public String getCatalog() throws SQLException
-  {
-    if (true) {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-    return null;
-
-  }
-
-  @Override
-  public void setTransactionIsolation(int level) throws SQLException
-  {
-    if (true) {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-
-  }
-
-  @Override
-  public int getTransactionIsolation() throws SQLException
+  public int getMaxFieldSize() throws SQLException
   {
     if (true) {
       throw new RuntimeException("FIXME: Unimplemented!");
     }
     return 0;
+
+  }
+
+  @Override
+  public void setMaxFieldSize(int max) throws SQLException
+  {
+    if (true) {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+
+  }
+
+  @Override
+  public int getMaxRows() throws SQLException
+  {
+    if (true) {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+    return 0;
+
+  }
+
+  @Override
+  public void setMaxRows(int max) throws SQLException
+  {
+    if (true) {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+
+  }
+
+  @Override
+  public void setEscapeProcessing(boolean enable) throws SQLException
+  {
+    if (true) {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+
+  }
+
+  @Override
+  public int getQueryTimeout() throws SQLException
+  {
+    if (true) {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+    return 0;
+
+  }
+
+  @Override
+  public void setQueryTimeout(int seconds) throws SQLException
+  {
+    if (true) {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+
+  }
+
+  @Override
+  public void cancel() throws SQLException
+  {
+    if (true) {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
 
   }
 
@@ -239,47 +189,7 @@ public class MyConnection implements Connection
   }
 
   @Override
-  public Statement createStatement(int resultSetType, int resultSetConcurrency) throws SQLException
-  {
-    if (true) {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-    return null;
-
-  }
-
-  @Override
-  public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency) throws SQLException
-  {
-    if (true) {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-    return null;
-
-  }
-
-  @Override
-  public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency) throws SQLException
-  {
-    if (true) {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-    return null;
-
-  }
-
-  @Override
-  public Map<String, Class<?>> getTypeMap() throws SQLException
-  {
-    if (true) {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-    return null;
-
-  }
-
-  @Override
-  public void setTypeMap(Map<String, Class<?>> map) throws SQLException
+  public void setCursorName(String name) throws SQLException
   {
     if (true) {
       throw new RuntimeException("FIXME: Unimplemented!");
@@ -288,167 +198,7 @@ public class MyConnection implements Connection
   }
 
   @Override
-  public void setHoldability(int holdability) throws SQLException
-  {
-    if (true) {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-
-  }
-
-  @Override
-  public int getHoldability() throws SQLException
-  {
-    if (true) {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-    return 0;
-
-  }
-
-  @Override
-  public Savepoint setSavepoint() throws SQLException
-  {
-    if (true) {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-    return null;
-
-  }
-
-  @Override
-  public Savepoint setSavepoint(String name) throws SQLException
-  {
-    if (true) {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-    return null;
-
-  }
-
-  @Override
-  public void rollback(Savepoint savepoint) throws SQLException
-  {
-    if (true) {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-
-  }
-
-  @Override
-  public void releaseSavepoint(Savepoint savepoint) throws SQLException
-  {
-    if (true) {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-
-  }
-
-  @Override
-  public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability)
-      throws SQLException
-  {
-    if (true) {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-    return null;
-
-  }
-
-  @Override
-  public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency,
-      int resultSetHoldability) throws SQLException
-  {
-    if (true) {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-    return null;
-
-  }
-
-  @Override
-  public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency,
-      int resultSetHoldability) throws SQLException
-  {
-    if (true) {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-    return null;
-
-  }
-
-  @Override
-  public PreparedStatement prepareStatement(String sql, int autoGeneratedKeys) throws SQLException
-  {
-    if (true) {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-    return null;
-
-  }
-
-  @Override
-  public PreparedStatement prepareStatement(String sql, int[] columnIndexes) throws SQLException
-  {
-    if (true) {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-    return null;
-
-  }
-
-  @Override
-  public PreparedStatement prepareStatement(String sql, String[] columnNames) throws SQLException
-  {
-    if (true) {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-    return null;
-
-  }
-
-  @Override
-  public Clob createClob() throws SQLException
-  {
-    if (true) {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-    return null;
-
-  }
-
-  @Override
-  public Blob createBlob() throws SQLException
-  {
-    if (true) {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-    return null;
-
-  }
-
-  @Override
-  public NClob createNClob() throws SQLException
-  {
-    if (true) {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-    return null;
-
-  }
-
-  @Override
-  public SQLXML createSQLXML() throws SQLException
-  {
-    if (true) {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-    return null;
-
-  }
-
-  @Override
-  public boolean isValid(int timeout) throws SQLException
+  public boolean execute(String sql) throws SQLException
   {
     if (true) {
       throw new RuntimeException("FIXME: Unimplemented!");
@@ -458,25 +208,7 @@ public class MyConnection implements Connection
   }
 
   @Override
-  public void setClientInfo(String name, String value) throws SQLClientInfoException
-  {
-    if (true) {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-
-  }
-
-  @Override
-  public void setClientInfo(Properties properties) throws SQLClientInfoException
-  {
-    if (true) {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-
-  }
-
-  @Override
-  public String getClientInfo(String name) throws SQLException
+  public ResultSet getResultSet() throws SQLException
   {
     if (true) {
       throw new RuntimeException("FIXME: Unimplemented!");
@@ -486,79 +218,256 @@ public class MyConnection implements Connection
   }
 
   @Override
-  public Properties getClientInfo() throws SQLException
-  {
-    if (true) {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-    return null;
-
-  }
-
-  @Override
-  public Array createArrayOf(String typeName, Object[] elements) throws SQLException
-  {
-    if (true) {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-    return null;
-
-  }
-
-  @Override
-  public Struct createStruct(String typeName, Object[] attributes) throws SQLException
-  {
-    if (true) {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-    return null;
-
-  }
-
-  @Override
-  public void setSchema(String schema) throws SQLException
-  {
-    if (true) {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-
-  }
-
-  @Override
-  public String getSchema() throws SQLException
-  {
-    if (true) {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-    return null;
-
-  }
-
-  @Override
-  public void abort(Executor executor) throws SQLException
-  {
-    if (true) {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-
-  }
-
-  @Override
-  public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException
-  {
-    if (true) {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-
-  }
-
-  @Override
-  public int getNetworkTimeout() throws SQLException
+  public int getUpdateCount() throws SQLException
   {
     if (true) {
       throw new RuntimeException("FIXME: Unimplemented!");
     }
     return 0;
+
+  }
+
+  @Override
+  public boolean getMoreResults() throws SQLException
+  {
+    if (true) {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+    return false;
+
+  }
+
+  @Override
+  public void setFetchDirection(int direction) throws SQLException
+  {
+    if (true) {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+
+  }
+
+  @Override
+  public int getFetchDirection() throws SQLException
+  {
+    if (true) {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+    return 0;
+
+  }
+
+  @Override
+  public void setFetchSize(int rows) throws SQLException
+  {
+    if (true) {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+
+  }
+
+  @Override
+  public int getFetchSize() throws SQLException
+  {
+    if (true) {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+    return 0;
+
+  }
+
+  @Override
+  public int getResultSetConcurrency() throws SQLException
+  {
+    if (true) {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+    return 0;
+
+  }
+
+  @Override
+  public int getResultSetType() throws SQLException
+  {
+    if (true) {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+    return 0;
+
+  }
+
+  @Override
+  public void addBatch(String sql) throws SQLException
+  {
+    if (true) {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+
+  }
+
+  @Override
+  public void clearBatch() throws SQLException
+  {
+    if (true) {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+
+  }
+
+  @Override
+  public int[] executeBatch() throws SQLException
+  {
+    if (true) {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+    return null;
+
+  }
+
+  @Override
+  public Connection getConnection() throws SQLException
+  {
+    if (true) {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+    return null;
+
+  }
+
+  @Override
+  public boolean getMoreResults(int current) throws SQLException
+  {
+    if (true) {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+    return false;
+
+  }
+
+  @Override
+  public ResultSet getGeneratedKeys() throws SQLException
+  {
+    if (true) {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+    return null;
+
+  }
+
+  @Override
+  public int executeUpdate(String sql, int autoGeneratedKeys) throws SQLException
+  {
+    if (true) {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+    return 0;
+
+  }
+
+  @Override
+  public int executeUpdate(String sql, int[] columnIndexes) throws SQLException
+  {
+    if (true) {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+    return 0;
+
+  }
+
+  @Override
+  public int executeUpdate(String sql, String[] columnNames) throws SQLException
+  {
+    if (true) {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+    return 0;
+
+  }
+
+  @Override
+  public boolean execute(String sql, int autoGeneratedKeys) throws SQLException
+  {
+    if (true) {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+    return false;
+
+  }
+
+  @Override
+  public boolean execute(String sql, int[] columnIndexes) throws SQLException
+  {
+    if (true) {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+    return false;
+
+  }
+
+  @Override
+  public boolean execute(String sql, String[] columnNames) throws SQLException
+  {
+    if (true) {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+    return false;
+
+  }
+
+  @Override
+  public int getResultSetHoldability() throws SQLException
+  {
+    if (true) {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+    return 0;
+
+  }
+
+  @Override
+  public boolean isClosed() throws SQLException
+  {
+    if (true) {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+    return false;
+
+  }
+
+  @Override
+  public void setPoolable(boolean poolable) throws SQLException
+  {
+    if (true) {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+
+  }
+
+  @Override
+  public boolean isPoolable() throws SQLException
+  {
+    if (true) {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+    return false;
+
+  }
+
+  @Override
+  public void closeOnCompletion() throws SQLException
+  {
+    if (true) {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+
+  }
+
+  @Override
+  public boolean isCloseOnCompletion() throws SQLException
+  {
+    if (true) {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+    return false;
 
   }
 

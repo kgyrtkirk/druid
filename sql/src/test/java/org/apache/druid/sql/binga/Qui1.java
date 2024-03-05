@@ -21,7 +21,6 @@ package org.apache.druid.sql.binga;
 
 import net.hydromatic.quidem.Quidem.ConnectionFactory;
 import org.apache.calcite.test.QuidemTest;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -33,14 +32,15 @@ public class Qui1 extends QuidemTest
   protected Collection<String> getPath()
   {
     ArrayList<String> ret = new ArrayList<>();
-ret.add(new File("qui/a.iq").getAbsolutePath());
+    ret.add(new File("qui/a.iq").getAbsolutePath());
     return ret;// data(new File("qui/a.iq").getAbsolutePath());
   }
 
   @Override
   protected ConnectionFactory createConnectionFactory()
   {
-    return super.createConnectionFactory();
+    return new MyConnectionFactory();
+//    return super.createConnectionFactory();
   }
 
   public static void main(String[] args) throws Exception

@@ -34,6 +34,7 @@ import org.apache.druid.error.DruidExceptionMatcher;
 import org.apache.druid.guice.DruidInjectorBuilder;
 import org.apache.druid.hll.VersionOneHyperLogLogCollector;
 import org.apache.druid.java.util.common.DateTimes;
+import org.apache.druid.java.util.common.FileUtils;
 import org.apache.druid.java.util.common.Intervals;
 import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.java.util.common.granularity.Granularity;
@@ -125,6 +126,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.rules.TemporaryFolder;
 
 import javax.annotation.Nullable;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -678,14 +680,9 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   @Override
   public void gatherProperties(Properties properties)
   {
-    try {
-      baseComponentSupplier = new StandardComponentSupplier(
-          temporaryFolder.newFolder()
-      );
-    }
-    catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    baseComponentSupplier = new StandardComponentSupplier(
+        FileUtils.createTempDir("base-calcite-query-test")
+    );
     baseComponentSupplier.gatherProperties(properties);
   }
 

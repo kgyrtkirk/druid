@@ -1,12 +1,12 @@
-!use post
+!use druid
 !set outputformat mysql
 
 select 1;
-+--------+
-| EXPR$0 |
-+--------+
-|      1 |
-+--------+
++-------+
+| col_1 |
++-------+
+| joe1  |
++-------+
 (1 row)
 
 !ok
