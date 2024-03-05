@@ -1,6 +1,33 @@
 !use druid
 !set outputformat mysql
 
-select 1;
+select 1+3;
++--------+
+| EXPR$0 |
++--------+
+| 4      |
++--------+
+(1 row)
+
 !ok
 
+select cityName, countryName from wikipedia where cityName='New York' limit 1;
++----------+---------------+
+| cityName | countryName   |
++----------+---------------+
+| New York | United States |
++----------+---------------+
+(1 row)
+
+!ok
+
+
+select cityName, countryName from wikipedia where cityName is null limit 1;
++----------+-------------+
+| cityName | countryName |
++----------+-------------+
+| ∅        | ∅           |
++----------+-------------+
+(1 row)
+
+!ok

@@ -19,11 +19,21 @@
 
 package org.apache.druid.sql.binga;
 
+import org.apache.calcite.avatica.ColumnMetaData;
+import org.apache.calcite.avatica.Meta.Signature;
+
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
 public class MyResultSetMetaData implements ResultSetMetaData
 {
+
+  private Signature signature;
+
+  public MyResultSetMetaData(Signature signature)
+  {
+    this.signature = signature;
+  }
 
   @Override
   public <T> T unwrap(Class<T> iface) throws SQLException
@@ -48,7 +58,7 @@ public class MyResultSetMetaData implements ResultSetMetaData
   @Override
   public int getColumnCount() throws SQLException
   {
-    return 1;
+    return signature.columns.size();
   }
 
   @Override
@@ -124,8 +134,8 @@ public class MyResultSetMetaData implements ResultSetMetaData
   @Override
   public String getColumnLabel(int column) throws SQLException
   {
-    return "col_"+column;
-
+    ColumnMetaData col = signature.columns.get(column-1);
+    return col.label;
   }
 
   @Override

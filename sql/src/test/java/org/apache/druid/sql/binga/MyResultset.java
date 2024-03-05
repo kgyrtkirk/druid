@@ -19,6 +19,9 @@
 
 package org.apache.druid.sql.binga;
 
+import org.apache.calcite.avatica.Meta.Frame;
+import org.apache.calcite.avatica.Meta.Signature;
+
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
@@ -39,13 +42,24 @@ import java.sql.Statement;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
+import java.util.Iterator;
 import java.util.Map;
 
 public class MyResultset implements ResultSet
 {
 
-  private int row=-1;
+  private int row = -1;
   private int numRows = 1;
+  private Signature signature;
+  private Frame frame;
+  private Iterator<Object> rowIterator = null;
+  private Object[] currentRow;
+
+  public MyResultset(Signature signature, Frame frame)
+  {
+    this.signature = signature;
+    this.frame = frame;
+  }
 
   @Override
   public <T> T unwrap(Class<T> iface) throws SQLException
@@ -70,7 +84,15 @@ public class MyResultset implements ResultSet
   @Override
   public boolean next() throws SQLException
   {
-    return ++row < numRows;
+    if (rowIterator == null) {
+      rowIterator = frame.rows.iterator();
+    }
+    if(!rowIterator.hasNext()) {
+      return false;
+    }
+    currentRow = (Object[]) rowIterator.next();
+
+    return true;
   }
 
   @Override
@@ -91,7 +113,11 @@ public class MyResultset implements ResultSet
   @Override
   public String getString(int columnIndex) throws SQLException
   {
-    return "joe"+columnIndex;
+    Object val = currentRow[columnIndex - 1];
+    if (val == null) {
+      return "∅";
+    }
+    return val.toString();
 
   }
 
@@ -437,7 +463,7 @@ public class MyResultset implements ResultSet
   @Override
   public ResultSetMetaData getMetaData() throws SQLException
   {
-    return  new MyResultSetMetaData();
+    return new MyResultSetMetaData(signature);
   }
 
   @Override

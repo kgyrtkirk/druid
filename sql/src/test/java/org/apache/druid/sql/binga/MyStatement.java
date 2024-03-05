@@ -19,7 +19,12 @@
 
 package org.apache.druid.sql.binga;
 
+import com.google.common.base.Preconditions;
+import org.apache.calcite.avatica.Meta.Frame;
+import org.apache.calcite.avatica.Meta.Signature;
 import org.apache.druid.sql.SqlQueryPlus;
+import org.apache.druid.sql.avatica.DruidJdbcResultSet.ResultFetcherFactory;
+import org.apache.druid.sql.avatica.DruidJdbcStatement;
 import org.apache.druid.sql.calcite.BaseCalciteQueryTest;
 import org.apache.druid.sql.calcite.util.CalciteTests;
 import org.apache.druid.sql.calcite.util.SqlTestFramework;
@@ -29,17 +34,29 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
+import java.util.Collections;
 
 public class MyStatement implements Statement
 {
 
+  private static final int DEFAULT_FETCH_TIMEOUT_MS = 5000;
   private SqlTestFramework frameWork;
   private BaseCalciteQueryTest testHost;
+  private DruidJdbcStatement djStmt;
 
   public MyStatement(BaseCalciteQueryTest testHost, SqlTestFramework frameWork)
   {
     this.testHost = testHost;
     this.frameWork = frameWork;
+
+    djStmt = new DruidJdbcStatement(
+        "",
+        0,
+        Collections.emptyMap(),
+        testHost.getSqlStatementFactory(testHost.PLANNER_CONFIG_DEFAULT),
+        new ResultFetcherFactory(DEFAULT_FETCH_TIMEOUT_MS)
+    );
+
   }
 
   @Override
@@ -65,14 +82,18 @@ public class MyStatement implements Statement
   @Override
   public ResultSet executeQuery(String sql) throws SQLException
   {
-//    res=testHost.testBuilder().sql(sql).run();
+    // res=testHost.testBuilder().sql(sql).run();
     final SqlQueryPlus sqlQuery = SqlQueryPlus.builder(sql)
         .sqlParameters(testHost.DEFAULT_PARAMETERS)
         .auth(CalciteTests.REGULAR_USER_AUTH_RESULT)
         .build();
 
+    djStmt.execute(sqlQuery, -1);
 
-    return new MyResultset();
+    Signature signature = djStmt.getSignature();
+    Frame nextFrame = djStmt.nextFrame(0, 10000);
+    Preconditions.checkState(nextFrame.done);
+    return new MyResultset(signature, nextFrame);
   }
 
   @Override
@@ -88,10 +109,7 @@ public class MyStatement implements Statement
   @Override
   public void close() throws SQLException
   {
-//    if (true) {
-//      throw new RuntimeException("FIXME: Unimplemented!");
-//    }
-
+    djStmt.closeResultSet();
   }
 
   @Override

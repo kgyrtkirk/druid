@@ -39,7 +39,11 @@ public class MyConnectionFactory implements ConnectionFactory
     CalciteTestBase.setupCalciteProperties();
 
     frameworkClassRule = new SqlTestFrameworkConfig.ClassRule();
-    testHost = new BaseCalciteQueryTest();
+    testHost = new BaseCalciteQueryTest() {
+      public SqlTestFramework queryFramework() {
+        return frameWork;
+      }
+    };
     frameworkMethodRule = frameworkClassRule.methodRule(testHost);
 
     frameWork = frameworkMethodRule.get(frameworkMethodRule.defaultConfig());
