@@ -32,7 +32,6 @@ import java.sql.Clob;
 import java.sql.Date;
 import java.sql.NClob;
 import java.sql.Ref;
-import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.RowId;
 import java.sql.SQLException;
@@ -45,11 +44,8 @@ import java.util.Calendar;
 import java.util.Iterator;
 import java.util.Map;
 
-public class MyResultset implements ResultSet
+public class MyResultset implements ResultSet1
 {
-
-  private int row = -1;
-  private int numRows = 1;
   private Signature signature;
   private Frame frame;
   private Iterator<Object> rowIterator = null;
@@ -128,16 +124,6 @@ public class MyResultset implements ResultSet
       throw new RuntimeException("FIXME: Unimplemented!");
     }
     return false;
-
-  }
-
-  @Override
-  public byte getByte(int columnIndex) throws SQLException
-  {
-    if (true) {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-    return 0;
 
   }
 
