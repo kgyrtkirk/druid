@@ -1,0 +1,13 @@
+!use post
+!set outputformat mysql
+
+select 1;
++--------+
+| EXPR$0 |
++--------+
+|      1 |
++--------+
+(1 row)
+
+!ok
+
