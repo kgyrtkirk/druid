@@ -49,10 +49,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
-import static org.hamcrest.junit.MatcherAssume.assumeThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeThat;
 
 /**
  * These tests are file-based, look in resources -> calcite/tests/window for the set of test specifications.
@@ -95,7 +95,7 @@ public class CalciteWindowQueryTest extends BaseCalciteQueryTest
     private WindowQueryTestInputClass input;
     private ObjectMapper queryJackson;
 
-    public void initCalciteWindowQueryTest(String filename) throws Exception
+    public TestCase(String filename) throws Exception
     {
       final URL systemResource = ClassLoader.getSystemResource("calcite/tests/window/" + filename);
 
