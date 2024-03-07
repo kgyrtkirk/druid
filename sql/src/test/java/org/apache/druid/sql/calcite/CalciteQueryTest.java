@@ -132,7 +132,6 @@ import org.junit.internal.matchers.ThrowableMessageMatcher;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -148,7 +147,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
-@EnableRuleMigrationSupport
 public class CalciteQueryTest extends BaseCalciteQueryTest
 {
   @Test

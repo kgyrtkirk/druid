@@ -76,7 +76,7 @@ public @interface SqlTestFrameworkConfig
   /**
    * @see {@link SqlTestFrameworkConfig}
    */
-  public class MethodRule extends ExternalResource
+  class MethodRule extends ExternalResource
   {
     private SqlTestFrameworkConfig config;
     private ClassRule classRule;
@@ -106,18 +106,12 @@ public @interface SqlTestFrameworkConfig
     @Override
     public Statement apply(Statement base, Description description)
     {
-      SqlTestFrameworkConfig annotation = description.getAnnotation(SqlTestFrameworkConfig.class);
       this.description = description;
-      setConfig(annotation);
-      return base;
-    }
-
-    public void setConfig(SqlTestFrameworkConfig annotation)
-    {
-      config = annotation;
+      config = description.getAnnotation(SqlTestFrameworkConfig.class);
       if (config == null) {
         config = defaultConfig();
       }
+      return base;
     }
 
     public SqlTestFramework get()
