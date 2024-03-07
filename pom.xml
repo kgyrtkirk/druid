@@ -136,9 +136,6 @@
         <repoOrgName>Maven Central Repository</repoOrgName>
         <repoOrgUrl>https://repo1.maven.org/maven2/</repoOrgUrl>
 
-        <!-- Allow the handful of flaky tests with transient failures to pass. -->
-        <surefire.rerunFailingTestsCount>3</surefire.rerunFailingTestsCount>
-
         <!-- Using -DskipTests or -P skip-tests will skip both the unit tests and
              the "new" integration tests. To skip just the unit tests (but run the
              new integration tests by setting the required profile), use -DskipUTs=true.
