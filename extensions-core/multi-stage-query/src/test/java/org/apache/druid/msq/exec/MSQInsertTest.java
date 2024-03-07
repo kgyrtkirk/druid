@@ -48,10 +48,9 @@ import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.segment.column.ValueType;
 import org.apache.druid.timeline.SegmentId;
 import org.hamcrest.CoreMatchers;
-import org.junit.Test;
 import org.junit.internal.matchers.ThrowableMessageMatcher;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 
 import java.io.File;
@@ -67,7 +66,6 @@ import java.util.Set;
 import java.util.TreeSet;
 
 
-@RunWith(Parameterized.class)
 public class MSQInsertTest extends MSQTestBase
 {
 
@@ -82,7 +80,6 @@ public class MSQInsertTest extends MSQTestBase
                   .build();
   private final HashFunction fn = Hashing.murmur3_128();
 
-  @Parameterized.Parameters(name = "{index}:with context {0}")
   public static Collection<Object[]> data()
   {
     Object[][] data = new Object[][]{
@@ -94,16 +91,14 @@ public class MSQInsertTest extends MSQTestBase
     };
     return Arrays.asList(data);
   }
-
-  @Parameterized.Parameter(0)
   public String contextName;
-
-  @Parameterized.Parameter(1)
   public Map<String, Object> context;
 
-  @Test
-  public void testInsertOnFoo1()
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}:with context {0}")
+  public void testInsertOnFoo1(String contextName, Map<String, Object> context)
   {
+    initMSQInsertTest(contextName, context);
     List<Object[]> expectedRows = expectedFooRows();
     int expectedCounterRows = expectedRows.size();
     long[] expectedArray = createExpectedFrameArray(expectedCounterRows, 1);
@@ -154,9 +149,11 @@ public class MSQInsertTest extends MSQTestBase
 
   }
 
-  @Test
-  public void testInsertWithExistingTimeColumn() throws IOException
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}:with context {0}")
+  public void testInsertWithExistingTimeColumn(String contextName, Map<String, Object> context) throws IOException
   {
+    initMSQInsertTest(contextName, context);
     List<Object[]> expectedRows = ImmutableList.of(
         new Object[] {1678897351000L, "A"},
         new Object[] {1679588551000L, "B"},
@@ -193,9 +190,11 @@ public class MSQInsertTest extends MSQTestBase
 
   }
 
-  @Test
-  public void testInsertWithUnnestInline()
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}:with context {0}")
+  public void testInsertWithUnnestInline(String contextName, Map<String, Object> context)
   {
+    initMSQInsertTest(contextName, context);
     List<Object[]> expectedRows = ImmutableList.of(
         new Object[]{1692226800000L, 1L},
         new Object[]{1692226800000L, 2L},
@@ -218,9 +217,11 @@ public class MSQInsertTest extends MSQTestBase
 
   }
 
-  @Test
-  public void testInsertWithUnnest()
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}:with context {0}")
+  public void testInsertWithUnnest(String contextName, Map<String, Object> context)
   {
+    initMSQInsertTest(contextName, context);
     List<Object[]> expectedRows = ImmutableList.of(
         new Object[]{946684800000L, "a"},
         new Object[]{946684800000L, "b"},
@@ -248,9 +249,11 @@ public class MSQInsertTest extends MSQTestBase
 
   }
 
-  @Test
-  public void testInsertWithUnnestWithVirtualColumns()
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}:with context {0}")
+  public void testInsertWithUnnestWithVirtualColumns(String contextName, Map<String, Object> context)
   {
+    initMSQInsertTest(contextName, context);
     List<Object[]> expectedRows = ImmutableList.of(
         new Object[]{946684800000L, 1.0f},
         new Object[]{946684800000L, 1.0f},
@@ -282,9 +285,11 @@ public class MSQInsertTest extends MSQTestBase
 
   }
 
-  @Test
-  public void testInsertOnExternalDataSource() throws IOException
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}:with context {0}")
+  public void testInsertOnExternalDataSource(String contextName, Map<String, Object> context) throws IOException
   {
+    initMSQInsertTest(contextName, context);
     final File toRead = MSQTestFileUtils.getResourceAsTemporaryFile(temporaryFolder, this, "/wikipedia-sampled.json");
     final String toReadFileNameAsJson = queryFramework().queryJsonMapper().writeValueAsString(toRead.getAbsolutePath());
 
@@ -347,9 +352,11 @@ public class MSQInsertTest extends MSQTestBase
 
   }
 
-  @Test
-  public void testInsertOnFoo1WithGroupByLimitWithoutClusterBy()
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}:with context {0}")
+  public void testInsertOnFoo1WithGroupByLimitWithoutClusterBy(String contextName, Map<String, Object> context)
   {
+    initMSQInsertTest(contextName, context);
     List<Object[]> expectedRows = expectedFooRows();
     int expectedCounterRows = expectedRows.size();
 
@@ -395,9 +402,11 @@ public class MSQInsertTest extends MSQTestBase
 
   }
 
-  @Test
-  public void testInsertOnFoo1WithTwoCountAggregatorsWithRollupContext()
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}:with context {0}")
+  public void testInsertOnFoo1WithTwoCountAggregatorsWithRollupContext(String contextName, Map<String, Object> context)
   {
+    initMSQInsertTest(contextName, context);
     final List<Object[]> expectedRows = expectedFooRows();
 
     // Add 1L to each expected row, since we have two count aggregators.
@@ -434,9 +443,11 @@ public class MSQInsertTest extends MSQTestBase
                      .verifyResults();
   }
 
-  @Test
-  public void testInsertOnFoo1WithGroupByLimitWithClusterBy()
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}:with context {0}")
+  public void testInsertOnFoo1WithGroupByLimitWithClusterBy(String contextName, Map<String, Object> context)
   {
+    initMSQInsertTest(contextName, context);
     List<Object[]> expectedRows = expectedFooRows();
     int expectedCounterRows = expectedRows.size();
 
@@ -485,9 +496,12 @@ public class MSQInsertTest extends MSQTestBase
                      .verifyResults();
 
   }
-  @Test
-  public void testInsertOnFoo1WithTimeFunction()
+
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}:with context {0}")
+  public void testInsertOnFoo1WithTimeFunction(String contextName, Map<String, Object> context)
   {
+    initMSQInsertTest(contextName, context);
     RowSignature rowSignature = RowSignature.builder()
                                             .add("__time", ColumnType.LONG)
                                             .add("dim1", ColumnType.STRING)
@@ -504,9 +518,11 @@ public class MSQInsertTest extends MSQTestBase
 
   }
 
-  @Test
-  public void testInsertOnFoo1WithTimeAggregator()
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}:with context {0}")
+  public void testInsertOnFoo1WithTimeAggregator(String contextName, Map<String, Object> context)
   {
+    initMSQInsertTest(contextName, context);
     RowSignature rowSignature = RowSignature.builder()
                                             .add("__time", ColumnType.LONG)
                                             .build();
@@ -534,9 +550,11 @@ public class MSQInsertTest extends MSQTestBase
 
   }
 
-  @Test
-  public void testInsertOnFoo1WithTimeAggregatorAndMultipleWorkers()
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}:with context {0}")
+  public void testInsertOnFoo1WithTimeAggregatorAndMultipleWorkers(String contextName, Map<String, Object> context)
   {
+    initMSQInsertTest(contextName, context);
     Map<String, Object> localContext = new HashMap<>(context);
     localContext.put(MultiStageQueryContext.CTX_TASK_ASSIGNMENT_STRATEGY, WorkerAssignmentStrategy.MAX.name());
     localContext.put(MultiStageQueryContext.CTX_MAX_NUM_TASKS, 4);
@@ -568,9 +586,11 @@ public class MSQInsertTest extends MSQTestBase
   }
 
 
-  @Test
-  public void testInsertOnFoo1WithTimePostAggregator()
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}:with context {0}")
+  public void testInsertOnFoo1WithTimePostAggregator(String contextName, Map<String, Object> context)
   {
+    initMSQInsertTest(contextName, context);
     RowSignature rowSignature = RowSignature.builder()
                                             .add("__time", ColumnType.LONG)
                                             .add("sum_m1", ColumnType.DOUBLE)
@@ -599,9 +619,11 @@ public class MSQInsertTest extends MSQTestBase
 
   }
 
-  @Test
-  public void testInsertOnFoo1WithTimeFunctionWithSequential()
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}:with context {0}")
+  public void testInsertOnFoo1WithTimeFunctionWithSequential(String contextName, Map<String, Object> context)
   {
+    initMSQInsertTest(contextName, context);
     List<Object[]> expectedRows = expectedFooRows();
     int expectedCounterRows = expectedRows.size();
     long[] expectedArray = createExpectedFrameArray(expectedCounterRows, 1);
@@ -660,9 +682,11 @@ public class MSQInsertTest extends MSQTestBase
 
   }
 
-  @Test
-  public void testInsertOnFoo1WithMultiValueDim()
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}:with context {0}")
+  public void testInsertOnFoo1WithMultiValueDim(String contextName, Map<String, Object> context)
   {
+    initMSQInsertTest(contextName, context);
     RowSignature rowSignature = RowSignature.builder()
                                             .add("__time", ColumnType.LONG)
                                             .add("dim3", ColumnType.STRING).build();
@@ -677,9 +701,11 @@ public class MSQInsertTest extends MSQTestBase
                      .verifyResults();
   }
 
-  @Test
-  public void testInsertOnFoo1MultiValueDimWithLimitWithoutClusterBy()
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}:with context {0}")
+  public void testInsertOnFoo1MultiValueDimWithLimitWithoutClusterBy(String contextName, Map<String, Object> context)
   {
+    initMSQInsertTest(contextName, context);
     RowSignature rowSignature = RowSignature.builder()
                                             .add("__time", ColumnType.LONG)
                                             .add("dim3", ColumnType.STRING).build();
@@ -694,9 +720,11 @@ public class MSQInsertTest extends MSQTestBase
                      .verifyResults();
   }
 
-  @Test
-  public void testInsertOnFoo1MultiValueDimWithLimitWithClusterBy()
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}:with context {0}")
+  public void testInsertOnFoo1MultiValueDimWithLimitWithClusterBy(String contextName, Map<String, Object> context)
   {
+    initMSQInsertTest(contextName, context);
     RowSignature rowSignature = RowSignature.builder()
                                             .add("__time", ColumnType.LONG)
                                             .add("dim3", ColumnType.STRING).build();
@@ -711,9 +739,11 @@ public class MSQInsertTest extends MSQTestBase
                      .verifyResults();
   }
 
-  @Test
-  public void testInsertOnFoo1WithMultiValueDimGroupBy()
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}:with context {0}")
+  public void testInsertOnFoo1WithMultiValueDimGroupBy(String contextName, Map<String, Object> context)
   {
+    initMSQInsertTest(contextName, context);
     RowSignature rowSignature = RowSignature.builder()
                                             .add("__time", ColumnType.LONG)
                                             .add("dim3", ColumnType.STRING).build();
@@ -728,9 +758,11 @@ public class MSQInsertTest extends MSQTestBase
                      .verifyResults();
   }
 
-  @Test
-  public void testInsertOnFoo1WithMultiValueMeasureGroupBy()
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}:with context {0}")
+  public void testInsertOnFoo1WithMultiValueMeasureGroupBy(String contextName, Map<String, Object> context)
   {
+    initMSQInsertTest(contextName, context);
     testIngestQuery().setSql(
                          "INSERT INTO foo1 SELECT count(dim3) FROM foo WHERE dim3 IS NOT NULL GROUP BY 1 PARTITIONED BY ALL TIME")
                      .setExpectedDataSource("foo1")
@@ -742,10 +774,11 @@ public class MSQInsertTest extends MSQTestBase
   }
 
 
-
-  @Test
-  public void testInsertOnFoo1WithAutoTypeArrayGroupBy()
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}:with context {0}")
+  public void testInsertOnFoo1WithAutoTypeArrayGroupBy(String contextName, Map<String, Object> context)
   {
+    initMSQInsertTest(contextName, context);
     RowSignature rowSignature = RowSignature.builder()
                                             .add("__time", ColumnType.LONG)
                                             .add("dim3", ColumnType.STRING_ARRAY).build();
@@ -777,9 +810,11 @@ public class MSQInsertTest extends MSQTestBase
                      .verifyResults();
   }
 
-  @Test
-  public void testInsertOnFoo1WithArrayIngestModeArrayGroupByInsertAsArray()
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}:with context {0}")
+  public void testInsertOnFoo1WithArrayIngestModeArrayGroupByInsertAsArray(String contextName, Map<String, Object> context)
   {
+    initMSQInsertTest(contextName, context);
     RowSignature rowSignature = RowSignature.builder()
                                             .add("__time", ColumnType.LONG)
                                             .add("dim3", ColumnType.STRING_ARRAY).build();
@@ -812,9 +847,11 @@ public class MSQInsertTest extends MSQTestBase
                      .verifyResults();
   }
 
-  @Test
-  public void testInsertOnFoo1WithArrayIngestModeArrayGroupByInsertAsMvd()
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}:with context {0}")
+  public void testInsertOnFoo1WithArrayIngestModeArrayGroupByInsertAsMvd(String contextName, Map<String, Object> context)
   {
+    initMSQInsertTest(contextName, context);
     RowSignature rowSignature = RowSignature.builder()
                                             .add("__time", ColumnType.LONG)
                                             .add("dim3", ColumnType.STRING).build();
@@ -847,9 +884,11 @@ public class MSQInsertTest extends MSQTestBase
                      .verifyResults();
   }
 
-  @Test
-  public void testInsertOnFoo1WithMultiValueDimGroupByWithoutGroupByEnable()
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}:with context {0}")
+  public void testInsertOnFoo1WithMultiValueDimGroupByWithoutGroupByEnable(String contextName, Map<String, Object> context)
   {
+    initMSQInsertTest(contextName, context);
     Map<String, Object> localContext = ImmutableMap.<String, Object>builder()
                                                    .putAll(context)
                                                    .put("groupByEnableMultiValueUnnesting", false)
@@ -868,9 +907,11 @@ public class MSQInsertTest extends MSQTestBase
                      .verifyExecutionError();
   }
 
-  @Test
-  public void testRollUpOnFoo1UpOnFoo1()
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}:with context {0}")
+  public void testRollUpOnFoo1UpOnFoo1(String contextName, Map<String, Object> context)
   {
+    initMSQInsertTest(contextName, context);
     List<Object[]> expectedRows = expectedFooRows();
     int expectedCounterRows = expectedRows.size();
     long[] expectedArray = createExpectedFrameArray(expectedCounterRows, 1);
@@ -925,9 +966,11 @@ public class MSQInsertTest extends MSQTestBase
 
   }
 
-  @Test
-  public void testRollUpOnFoo1WithTimeFunction()
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}:with context {0}")
+  public void testRollUpOnFoo1WithTimeFunction(String contextName, Map<String, Object> context)
   {
+    initMSQInsertTest(contextName, context);
     List<Object[]> expectedRows = expectedFooRows();
     int expectedCounterRows = expectedRows.size();
     long[] expectedArray = createExpectedFrameArray(expectedCounterRows, 1);
@@ -982,9 +1025,11 @@ public class MSQInsertTest extends MSQTestBase
 
   }
 
-  @Test
-  public void testInsertWithClusteredByDescendingThrowsException()
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}:with context {0}")
+  public void testInsertWithClusteredByDescendingThrowsException(String contextName, Map<String, Object> context)
   {
+    initMSQInsertTest(contextName, context);
     // Add a DESC clustered by column, which should not be allowed
     testIngestQuery().setSql("INSERT INTO foo1 "
                              + "SELECT __time, dim1 , count(*) as cnt "
@@ -999,9 +1044,11 @@ public class MSQInsertTest extends MSQTestBase
                      .verifyPlanningErrors();
   }
 
-  @Test
-  public void testRollUpOnFoo1WithTimeFunctionComplexCol()
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}:with context {0}")
+  public void testRollUpOnFoo1WithTimeFunctionComplexCol(String contextName, Map<String, Object> context)
   {
+    initMSQInsertTest(contextName, context);
     RowSignature rowSignature = RowSignature.builder()
                                             .add("__time", ColumnType.LONG)
                                             .add("dim1", ColumnType.STRING)
@@ -1025,9 +1072,11 @@ public class MSQInsertTest extends MSQTestBase
   }
 
 
-  @Test
-  public void testRollUpOnFoo1ComplexCol()
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}:with context {0}")
+  public void testRollUpOnFoo1ComplexCol(String contextName, Map<String, Object> context)
   {
+    initMSQInsertTest(contextName, context);
     RowSignature rowSignature = RowSignature.builder()
                                             .add("__time", ColumnType.LONG)
                                             .add("dim1", ColumnType.STRING)
@@ -1048,9 +1097,11 @@ public class MSQInsertTest extends MSQTestBase
 
   }
 
-  @Test
-  public void testRollUpOnExternalDataSource() throws IOException
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}:with context {0}")
+  public void testRollUpOnExternalDataSource(String contextName, Map<String, Object> context) throws IOException
   {
+    initMSQInsertTest(contextName, context);
     final File toRead = MSQTestFileUtils.getResourceAsTemporaryFile(temporaryFolder, this, "/wikipedia-sampled.json");
     final String toReadFileNameAsJson = queryFramework().queryJsonMapper().writeValueAsString(toRead.getAbsolutePath());
 
@@ -1115,9 +1166,11 @@ public class MSQInsertTest extends MSQTestBase
                      .verifyResults();
   }
 
-  @Test()
-  public void testRollUpOnExternalDataSourceWithCompositeKey() throws IOException
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}:with context {0}")
+  public void testRollUpOnExternalDataSourceWithCompositeKey(String contextName, Map<String, Object> context) throws IOException
   {
+    initMSQInsertTest(contextName, context);
     final File toRead = MSQTestFileUtils.getResourceAsTemporaryFile(temporaryFolder, this, "/wikipedia-sampled.json");
     final String toReadFileNameAsJson = queryFramework().queryJsonMapper().writeValueAsString(toRead.getAbsolutePath());
 
@@ -1191,9 +1244,11 @@ public class MSQInsertTest extends MSQTestBase
 
   }
 
-  @Test
-  public void testInsertWrongTypeTimestamp()
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}:with context {0}")
+  public void testInsertWrongTypeTimestamp(String contextName, Map<String, Object> context)
   {
+    initMSQInsertTest(contextName, context);
     final RowSignature rowSignature =
         RowSignature.builder()
                     .add("__time", ColumnType.LONG)
@@ -1220,9 +1275,11 @@ public class MSQInsertTest extends MSQTestBase
         .verifyPlanningErrors();
   }
 
-  @Test
-  public void testIncorrectInsertQuery()
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}:with context {0}")
+  public void testIncorrectInsertQuery(String contextName, Map<String, Object> context)
   {
+    initMSQInsertTest(contextName, context);
     testIngestQuery()
         .setSql(
             "insert into foo1 select  __time, dim1 , count(*) as cnt from foo  where dim1 is not null group by 1, 2 clustered by dim1"
@@ -1234,9 +1291,11 @@ public class MSQInsertTest extends MSQTestBase
   }
 
 
-  @Test
-  public void testInsertRestrictedColumns()
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}:with context {0}")
+  public void testInsertRestrictedColumns(String contextName, Map<String, Object> context)
   {
+    initMSQInsertTest(contextName, context);
     RowSignature rowSignature = RowSignature.builder()
                                             .add("__time", ColumnType.LONG)
                                             .add("namespace", ColumnType.STRING)
@@ -1262,9 +1321,11 @@ public class MSQInsertTest extends MSQTestBase
         .verifyResults();
   }
 
-  @Test
-  public void testInsertDuplicateColumnNames()
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}:with context {0}")
+  public void testInsertDuplicateColumnNames(String contextName, Map<String, Object> context)
   {
+    initMSQInsertTest(contextName, context);
     testIngestQuery()
         .setSql(" insert into foo1 SELECT\n"
                 + "  floor(TIME_PARSE(\"timestamp\") to day) AS __time,\n"
@@ -1284,9 +1345,11 @@ public class MSQInsertTest extends MSQTestBase
         .verifyPlanningErrors();
   }
 
-  @Test
-  public void testInsertQueryWithInvalidSubtaskCount()
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}:with context {0}")
+  public void testInsertQueryWithInvalidSubtaskCount(String contextName, Map<String, Object> context)
   {
+    initMSQInsertTest(contextName, context);
     Map<String, Object> localContext = new HashMap<>(context);
     localContext.put(MultiStageQueryContext.CTX_MAX_NUM_TASKS, 1);
 
@@ -1306,9 +1369,11 @@ public class MSQInsertTest extends MSQTestBase
                      .verifyExecutionError();
   }
 
-  @Test
-  public void testInsertWithTooLargeRowShouldThrowException() throws IOException
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}:with context {0}")
+  public void testInsertWithTooLargeRowShouldThrowException(String contextName, Map<String, Object> context) throws IOException
   {
+    initMSQInsertTest(contextName, context);
     final File toRead = MSQTestFileUtils.getResourceAsTemporaryFile(temporaryFolder, this, "/wikipedia-sampled.json");
     final String toReadFileNameAsJson = queryFramework().queryJsonMapper().writeValueAsString(toRead.getAbsolutePath());
 
@@ -1335,9 +1400,11 @@ public class MSQInsertTest extends MSQTestBase
                      .verifyExecutionError();
   }
 
-  @Test
-  public void testInsertLimitWithPeriodGranularityThrowsException()
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}:with context {0}")
+  public void testInsertLimitWithPeriodGranularityThrowsException(String contextName, Map<String, Object> context)
   {
+    initMSQInsertTest(contextName, context);
     testIngestQuery().setSql(" INSERT INTO foo "
                              + "SELECT __time, m1 "
                              + "FROM foo "
@@ -1352,9 +1419,11 @@ public class MSQInsertTest extends MSQTestBase
                      .verifyPlanningErrors();
   }
 
-  @Test
-  public void testInsertOffsetThrowsException()
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}:with context {0}")
+  public void testInsertOffsetThrowsException(String contextName, Map<String, Object> context)
   {
+    initMSQInsertTest(contextName, context);
     testIngestQuery().setSql(" INSERT INTO foo "
                              + "SELECT __time, m1 "
                              + "FROM foo "
@@ -1368,9 +1437,11 @@ public class MSQInsertTest extends MSQTestBase
                      .verifyPlanningErrors();
   }
 
-  @Test
-  public void testCorrectNumberOfWorkersUsedAutoModeWithoutBytesLimit() throws IOException
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}:with context {0}")
+  public void testCorrectNumberOfWorkersUsedAutoModeWithoutBytesLimit(String contextName, Map<String, Object> context) throws IOException
   {
+    initMSQInsertTest(contextName, context);
     Map<String, Object> localContext = new HashMap<>(context);
     localContext.put(MultiStageQueryContext.CTX_TASK_ASSIGNMENT_STRATEGY, WorkerAssignmentStrategy.AUTO.name());
     localContext.put(MultiStageQueryContext.CTX_MAX_NUM_TASKS, 4);
@@ -1418,9 +1489,11 @@ public class MSQInsertTest extends MSQTestBase
 
   }
 
-  @Test
-  public void testCorrectNumberOfWorkersUsedAutoModeWithBytesLimit() throws IOException
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}:with context {0}")
+  public void testCorrectNumberOfWorkersUsedAutoModeWithBytesLimit(String contextName, Map<String, Object> context) throws IOException
   {
+    initMSQInsertTest(contextName, context);
     Map<String, Object> localContext = new HashMap<>(context);
     localContext.put(MultiStageQueryContext.CTX_TASK_ASSIGNMENT_STRATEGY, WorkerAssignmentStrategy.AUTO.name());
     localContext.put(MultiStageQueryContext.CTX_MAX_NUM_TASKS, 4);
@@ -1468,9 +1541,11 @@ public class MSQInsertTest extends MSQTestBase
                      .verifyResults();
   }
 
-  @Test
-  public void testEmptyInsertQuery()
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}:with context {0}")
+  public void testEmptyInsertQuery(String contextName, Map<String, Object> context)
   {
+    initMSQInsertTest(contextName, context);
     // Insert with a condition which results in 0 rows being inserted -- do nothing.
     testIngestQuery().setSql(
                          "INSERT INTO foo1 "
@@ -1484,9 +1559,11 @@ public class MSQInsertTest extends MSQTestBase
                      .verifyResults();
   }
 
-  @Test
-  public void testEmptyInsertQueryWithAllGranularity()
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}:with context {0}")
+  public void testEmptyInsertQueryWithAllGranularity(String contextName, Map<String, Object> context)
   {
+    initMSQInsertTest(contextName, context);
     // Insert with a condition which results in 0 rows being inserted -- do nothing.
     testIngestQuery().setSql(
                          "INSERT INTO foo1 "
@@ -1500,9 +1577,11 @@ public class MSQInsertTest extends MSQTestBase
                      .verifyResults();
   }
 
-  @Test
-  public void testEmptyInsertLimitQuery()
+  @MethodSource("data")
+  @ParameterizedTest(name = "{index}:with context {0}")
+  public void testEmptyInsertLimitQuery(String contextName, Map<String, Object> context)
   {
+    initMSQInsertTest(contextName, context);
     // Insert with a condition which results in 0 rows being inserted -- do nothing.
     testIngestQuery().setSql(
                          "INSERT INTO foo1 "
@@ -1600,5 +1679,10 @@ public class MSQInsertTest extends MSQTestBase
         ));
 
     return expectedSegments;
+  }
+
+  public void initMSQInsertTest(String contextName, Map<String, Object> context) {
+    this.contextName = contextName;
+    this.context = context;
   }
 }

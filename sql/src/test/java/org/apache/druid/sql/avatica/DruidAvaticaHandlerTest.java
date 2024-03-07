@@ -93,14 +93,15 @@ import org.apache.druid.sql.guice.SqlModule;
 import org.eclipse.jetty.server.Server;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.junit.rules.TemporaryFolder;
 import org.skife.jdbi.v2.DBI;
 import org.skife.jdbi.v2.Handle;
@@ -129,6 +130,7 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Tests the Avatica-based JDBC implementation using JSON serialization. See
@@ -162,7 +164,7 @@ public class DruidAvaticaHandlerTest extends CalciteTestBase
 
   private final boolean nullNumeric = !NullHandling.replaceWithDefault();
 
-  @BeforeClass
+  @BeforeAll
   public static void setUpClass() throws Exception
   {
     resourceCloser = Closer.create();
@@ -171,7 +173,7 @@ public class DruidAvaticaHandlerTest extends CalciteTestBase
     resourceCloser.register(walker);
   }
 
-  @AfterClass
+  @AfterAll
   public static void tearDownClass() throws IOException
   {
     resourceCloser.close();
@@ -266,7 +268,7 @@ public class DruidAvaticaHandlerTest extends CalciteTestBase
     );
   }
 
-  @Before
+  @BeforeEach
   public void setUp() throws Exception
   {
     final DruidSchemaCatalog rootSchema = makeRootSchema();
@@ -328,7 +330,7 @@ public class DruidAvaticaHandlerTest extends CalciteTestBase
     clientLosAngeles = DriverManager.getConnection(server.url, propertiesLosAngeles);
   }
 
-  @After
+  @AfterEach
   public void tearDown() throws Exception
   {
     if (server != null) {
@@ -846,7 +848,8 @@ public class DruidAvaticaHandlerTest extends CalciteTestBase
     );
   }
 
-  @Test(timeout = 90_000L)
+  @Test
+  @Timeout(value = 90_000L, unit = TimeUnit.MILLISECONDS)
   public void testConcurrentQueries()
   {
     queryLogHook.withSkippedLog(
