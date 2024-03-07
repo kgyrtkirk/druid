@@ -621,9 +621,9 @@ public class MSQInsertTest extends MSQTestBase
 
   @MethodSource("data")
   @ParameterizedTest(name = "{index}:with context {0}")
-  public void testInsertOnFoo1WithTimeFunctionWithSequential(String contextName, Map<String, Object> context)
+  public void testInsertOnFoo1WithTimeFunctionWithSequential(String contextName, Map<String, Object> context1)
   {
-    initMSQInsertTest(contextName, context);
+    initMSQInsertTest(contextName, context1);
     List<Object[]> expectedRows = expectedFooRows();
     int expectedCounterRows = expectedRows.size();
     long[] expectedArray = createExpectedFrameArray(expectedCounterRows, 1);
