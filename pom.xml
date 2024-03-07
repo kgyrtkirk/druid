@@ -1355,6 +1355,7 @@
                         <recipe>org.apache.druid.RewriteRules</recipe>
                     </activeRecipes>
                     <configLocation>${maven.multiModuleProjectDirectory}/rewrite.yml</configLocation>
+                    <checkstyleDetectionEnabled>false</checkstyleDetectionEnabled>
                 </configuration>
                 <dependencies>
                     <dependency>
