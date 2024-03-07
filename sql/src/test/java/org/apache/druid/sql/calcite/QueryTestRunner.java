@@ -56,6 +56,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 /**
@@ -279,12 +280,17 @@ public class QueryTestRunner
         final PlannerCaptureHook capture = getCaptureHook();
         final DirectStatement stmt = sqlStatementFactory.directStatement(query);
         stmt.setHook(capture);
-        final Sequence<Object[]> results = stmt.execute().getResults();
+        AtomicReference<List<Object[]>> resultListRef = new AtomicReference<>();
+        builder().config.queryLogHook().logQueriesFor(
+            () -> {
+              resultListRef.set(stmt.execute().getResults().toList());
+            }
+        );
         return new QueryResults(
             query.context(),
             vectorize,
             stmt.prepareResult().getReturnedRowType(),
-            results.toList(),
+            resultListRef.get(),
             builder().config.queryLogHook().getRecordedQueries(),
             capture
         );

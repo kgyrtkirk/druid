@@ -120,10 +120,11 @@ import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.joda.time.chrono.ISOChronology;
 import org.junit.Assert;
-import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.internal.matchers.ThrowableMessageMatcher;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
 import org.junit.rules.TemporaryFolder;
 
@@ -642,11 +643,15 @@ public class BaseCalciteQueryTest extends CalciteTestBase
     return queryLogHook = new QueryLogHook(() -> queryFramework().queryJsonMapper());
   }
 
-  @ClassRule
-  public static SqlTestFrameworkConfig.ClassRule queryFrameworkClassRule = new SqlTestFrameworkConfig.ClassRule();
+//  @ClassRule
+//  public static SqlTestFrameworkConfig.ClassRule queryFrameworkClassRule = new SqlTestFrameworkConfig.ClassRule();
+//
+//  @Rule(order = 3)
+//  public SqlTestFrameworkConfig.MethodRule queryFrameworkRule = queryFrameworkClassRule.methodRule(this);
 
-  @Rule(order = 3)
-  public SqlTestFrameworkConfig.MethodRule queryFrameworkRule = queryFrameworkClassRule.methodRule(this);
+  @Order(3)
+  @RegisterExtension
+  static SqlTestFrameworkConfig.Rule  queryFrameworkRule = new SqlTestFrameworkConfig.Rule();
 
   public SqlTestFramework queryFramework()
   {
