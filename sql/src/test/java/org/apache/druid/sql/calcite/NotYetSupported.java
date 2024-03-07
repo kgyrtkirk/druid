@@ -22,6 +22,9 @@ package org.apache.druid.sql.calcite;
 import com.google.common.base.Throwables;
 import org.apache.druid.error.DruidException;
 import org.junit.AssumptionViolatedException;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.InvocationInterceptor;
+import org.junit.jupiter.api.extension.ReflectiveInvocationContext;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
@@ -30,6 +33,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.lang.reflect.Method;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -111,8 +115,58 @@ public @interface NotYetSupported
    * Ensures that test cases disabled with that annotation can still not pass.
    * If the error is as expected; the testcase is marked as "ignored".
    */
-  class NotYetSupportedProcessor implements TestRule
+  class NotYetSupportedProcessor implements TestRule, InvocationInterceptor
   {
+
+
+    @Override
+    public void interceptTestMethod(Invocation<Void> invocation,
+            ReflectiveInvocationContext<Method> invocationContext,
+            ExtensionContext extensionContext) throws Throwable {
+
+
+      Method method = extensionContext.getTestMethod().get();
+      NotYetSupported annotation = method.getAnnotation(NotYetSupported.class);
+
+      if (annotation == null) {
+        invocation.proceed();
+        return;
+      }
+      {
+        {
+          Modes ignoreMode = annotation.value();
+          Throwable e = null;
+          try {
+            invocation.proceed();
+          }
+          catch (Throwable t) {
+            e = t;
+          }
+          // If the base test case is supposed to be ignored already, just skip the further evaluation
+          if (e instanceof AssumptionViolatedException) {
+            throw (AssumptionViolatedException) e;
+          }
+          Throwable finalE = e;
+          assertThrows(
+              "Expected that this testcase will fail - it might got fixed; or failure have changed?",
+              ignoreMode.throwableClass,
+              () -> {
+                if (finalE != null) {
+                  throw finalE;
+                }
+              }
+          );
+
+          String trace = Throwables.getStackTraceAsString(e);
+          Matcher m = annotation.value().getPattern().matcher(trace);
+
+          if (!m.find()) {
+            throw new AssertionError("Exception stactrace doesn't match regex: " + annotation.value().regex, e);
+          }
+          throw new AssumptionViolatedException("Test is not-yet supported; ignored with:" + annotation);
+        }
+      }
+    }
     @Override
     public Statement apply(Statement base, Description description)
     {
