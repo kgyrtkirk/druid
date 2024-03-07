@@ -27,10 +27,13 @@ import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.runner.Description;
+
+import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -61,6 +64,7 @@ public @interface SqlTestFrameworkConfig
     private SqlTestFrameworkConfig config;
     private QueryComponentSupplier testHost;
     private Description description;
+    private Method method;
 
     @Override
     public void afterAll(ExtensionContext context) throws Exception
@@ -75,9 +79,8 @@ public @interface SqlTestFrameworkConfig
     public void beforeEach(ExtensionContext context) throws Exception
     {
       testHost=(QueryComponentSupplier) context.getTestInstance().get();
-      SqlTestFrameworkConfig configAnnotation = context.getTestMethod().get()
-          .getAnnotation(SqlTestFrameworkConfig.class);
-      setConfig(configAnnotation);
+      method = context.getTestMethod().get();
+      setConfig(method.getAnnotation(SqlTestFrameworkConfig.class));
 
     }
 
@@ -108,9 +111,9 @@ public @interface SqlTestFrameworkConfig
       return getConfigurationInstance().framework;
     }
 
-    public Description getDescription()
+    public <T extends Annotation> T getAnnotation(Class<T> clazz)
     {
-      return description;
+      return method.getAnnotation(clazz);
     }
 
     private ConfigurationInstance getConfigurationInstance()

@@ -28,6 +28,7 @@ import org.junit.jupiter.api.extension.ReflectiveInvocationContext;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
+import org.opentest4j.IncompleteExecutionException;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -145,6 +146,9 @@ public @interface NotYetSupported
           // If the base test case is supposed to be ignored already, just skip the further evaluation
           if (e instanceof AssumptionViolatedException) {
             throw (AssumptionViolatedException) e;
+          }
+          if (e instanceof IncompleteExecutionException) {
+            throw (IncompleteExecutionException) e;
           }
           Throwable finalE = e;
           assertThrows(

@@ -26,12 +26,14 @@ import org.apache.druid.sql.calcite.NotYetSupported.NotYetSupportedProcessor;
 import org.apache.druid.sql.calcite.planner.PlannerConfig;
 import org.apache.druid.sql.calcite.util.SqlTestFramework;
 import org.apache.druid.sql.calcite.util.SqlTestFramework.PlannerComponentSupplier;
-import org.junit.Rule;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 public class DecoupledPlanningCalciteQueryTest extends CalciteQueryTest
 {
 
-  @Rule(order = 0)
+  @Order(0)
+  @RegisterExtension
   public NotYetSupportedProcessor decoupledIgnoreProcessor = new NotYetSupportedProcessor();
 
   private static final ImmutableMap<String, Object> CONTEXT_OVERRIDES =
@@ -59,7 +61,7 @@ public class DecoupledPlanningCalciteQueryTest extends CalciteQueryTest
         .cannotVectorize(cannotVectorize)
         .skipVectorize(skipVectorize);
 
-    DecoupledTestConfig decTestConfig = queryFrameworkRule.getDescription().getAnnotation(DecoupledTestConfig.class);
+    DecoupledTestConfig decTestConfig = queryFrameworkRule.getAnnotation(DecoupledTestConfig.class);
 
     if (decTestConfig != null && decTestConfig.nativeQueryIgnore().isPresent()) {
       builder.verifyNativeQueries(x -> false);
