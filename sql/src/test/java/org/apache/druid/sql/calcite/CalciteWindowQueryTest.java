@@ -49,10 +49,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
-import static org.hamcrest.junit.MatcherAssume.assumeThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeThat;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /**
  * These tests are file-based, look in resources -> calcite/tests/window for the set of test specifications.
@@ -197,7 +198,7 @@ public class CalciteWindowQueryTest extends BaseCalciteQueryTest
   {
     TestCase testCase = new TestCase(filename);
 
-    assumeThat(testCase.getType(), Matchers.not(TestType.failingTest));
+    assumeTrue(testCase.getType() != TestType.failingTest);
 
     if (testCase.getType() == TestType.operatorValidation) {
       testBuilder()
