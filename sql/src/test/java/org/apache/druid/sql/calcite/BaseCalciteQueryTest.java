@@ -124,6 +124,7 @@ import org.joda.time.chrono.ISOChronology;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.internal.matchers.ThrowableMessageMatcher;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -148,7 +149,7 @@ import java.util.stream.Stream;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
-import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /**
@@ -1349,7 +1350,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
 
   protected void msqIncompatible()
   {
-    assumeFalse("test case is not MSQ compatible", testBuilder().config.isRunningMSQ());
+    assumeFalse(testBuilder().config.isRunningMSQ(), "test case is not MSQ compatible");
   }
 
   protected static boolean isRewriteJoinToFilter(final Map<String, Object> queryContext)
