@@ -1225,8 +1225,8 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   public <T extends Exception> void testQueryThrows(
       final String sql,
       final Class<T> exceptionType,
-      final String exceptionMessage)
-
+      final String exceptionMessage
+  )
   {
     testQueryThrows(
         sql, null, exceptionType, ThrowableMessageMatcher.hasMessage(
@@ -1235,21 +1235,21 @@ public class BaseCalciteQueryTest extends CalciteTestBase
     );
   }
 
-  public <T extends Exception>void testQueryThrows(
+  public <T extends Exception> void testQueryThrows(
       final String sql,
       final Class<T> exceptionType,
-      final Matcher<Throwable> exceptionMatcher)
-
+      final Matcher<Throwable> exceptionMatcher
+  )
   {
     testQueryThrows(sql, null, exceptionType, exceptionMatcher);
   }
-
 
   public <T extends Exception> void testQueryThrows(
       final String sql,
       final Map<String, Object> queryContext,
       final Class<T> exceptionType,
-      final Matcher<Throwable> exceptionMatcher)
+      final Matcher<Throwable> exceptionMatcher
+  )
   {
     T e = assertThrows(
         exceptionType, () -> testBuilder()
