@@ -35,8 +35,11 @@ import org.apache.druid.sql.calcite.CalciteQueryTest;
 import org.apache.druid.sql.calcite.QueryTestBuilder;
 import org.apache.druid.sql.calcite.run.SqlEngine;
 import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * Runs {@link CalciteQueryTest} but with MSQ engine
@@ -86,76 +89,76 @@ public class CalciteSelectQueryMSQTest extends CalciteQueryTest
         .verifyNativeQueries(new VerifyMSQSupportedNativeQueriesPredicate());
   }
 
-  @Ignore
+  @Disabled
   @Override
   public void testCannotInsertWithNativeEngine()
   {
 
   }
 
-  @Ignore
+  @Disabled
   @Override
   public void testCannotReplaceWithNativeEngine()
   {
 
   }
 
-  @Ignore
+  @Disabled
   @Override
   public void testRequireTimeConditionSimpleQueryNegative()
   {
 
   }
 
-  @Ignore
+  @Disabled
   @Override
   public void testRequireTimeConditionSubQueryNegative()
   {
 
   }
 
-  @Ignore
+  @Disabled
   @Override
   public void testRequireTimeConditionSemiJoinNegative()
   {
 
   }
 
-  @Ignore
+  @Disabled
   @Override
   public void testExactCountDistinctWithFilter()
   {
 
   }
 
-  @Ignore
+  @Disabled
   @Override
   public void testUnplannableScanOrderByNonTime()
   {
 
   }
 
-  @Ignore
+  @Disabled
   @Override
   public void testUnplannableJoinQueriesInNonSQLCompatibleMode()
   {
 
   }
 
-  @Ignore
+  @Disabled
   @Override
   public void testQueryWithMoreThanMaxNumericInFilter()
   {
 
   }
 
-  @Ignore
+  @Disabled
   @Override
   public void testUnSupportedNullsFirst()
   {
   }
 
-  @Ignore
+  @Disabled
   @Override
   public void testUnSupportedNullsLast()
   {
@@ -180,7 +183,8 @@ public class CalciteSelectQueryMSQTest extends CalciteQueryTest
     }
   }
 
-  @Test(timeout = 40000)
+  @Test
+  @Timeout(value = 40000, unit = TimeUnit.MILLISECONDS)
   public void testJoinMultipleTablesWithWhereCondition()
   {
     testBuilder()

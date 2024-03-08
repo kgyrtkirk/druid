@@ -27,11 +27,13 @@ import org.easymock.EasyMock;
 import org.easymock.EasyMockRunner;
 import org.easymock.Mock;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 
 import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @RunWith(EasyMockRunner.class)
 public class RootSchemaProviderTest extends CalciteTestBase
@@ -54,7 +56,7 @@ public class RootSchemaProviderTest extends CalciteTestBase
 
   private RootSchemaProvider target;
 
-  @Before
+  @BeforeEach
   public void setUp()
   {
     EasyMock.expect(druidSchema1.getSchema()).andStubReturn(schema1);
@@ -81,10 +83,12 @@ public class RootSchemaProviderTest extends CalciteTestBase
     Assert.assertEquals(schema2, rootSchema.getSubSchema(SCHEMA_2).unwrap(schema2.getClass()));
   }
 
-  @Test(expected = ISE.class)
+  @Test
   public void testGetWithDuplicateSchemasShouldThrowISE()
   {
-    target = new RootSchemaProvider(ImmutableSet.of(druidSchema1, druidSchema2, duplicateSchema1));
-    target.get();
+    assertThrows(ISE.class, () -> {
+      target = new RootSchemaProvider(ImmutableSet.of(druidSchema1, druidSchema2, duplicateSchema1));
+      target.get();
+    });
   }
 }

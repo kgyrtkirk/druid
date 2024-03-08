@@ -87,11 +87,15 @@ public abstract class CalciteSelectJoinQueryMSQTest
   {
     private final JoinAlgorithm joinAlgorithm;
 
-
     protected Base(final JoinAlgorithm joinAlgorithm)
     {
-      super(joinAlgorithm == JoinAlgorithm.SORT_MERGE);
       this.joinAlgorithm = joinAlgorithm;
+    }
+
+    @Override
+    public boolean isSortBasedJoin()
+    {
+      return joinAlgorithm == JoinAlgorithm.SORT_MERGE;
     }
 
     @Override

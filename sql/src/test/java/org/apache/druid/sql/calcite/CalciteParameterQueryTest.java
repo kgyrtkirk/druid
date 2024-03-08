@@ -42,7 +42,7 @@ import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.sql.calcite.filtration.Filtration;
 import org.apache.druid.sql.calcite.util.CalciteTests;
 import org.apache.druid.sql.http.SqlParameter;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -594,8 +594,7 @@ public class CalciteParameterQueryTest extends BaseCalciteQueryTest
   public void testMissingParameter()
   {
     DruidException exception = assertThrows(
-        DruidException.class,
-        () -> testQuery(
+        DruidException.class, () -> testQuery(
             "SELECT COUNT(*)\n"
                 + "FROM druid.numfoo\n"
                 + "WHERE l1 > ?",
@@ -614,8 +613,7 @@ public class CalciteParameterQueryTest extends BaseCalciteQueryTest
   public void testPartiallyMissingParameter()
   {
     DruidException exception = assertThrows(
-        DruidException.class,
-        () -> testQuery(
+        DruidException.class, () -> testQuery(
             "SELECT COUNT(*)\n"
                 + "FROM druid.numfoo\n"
                 + "WHERE l1 > ? AND f1 = ?",

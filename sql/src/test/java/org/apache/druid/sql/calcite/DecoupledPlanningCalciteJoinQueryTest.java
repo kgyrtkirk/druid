@@ -20,7 +20,6 @@
 package org.apache.druid.sql.calcite;
 
 import com.google.common.collect.ImmutableMap;
-import junitparams.Parameters;
 import org.apache.druid.query.QueryContexts;
 import org.apache.druid.server.security.AuthConfig;
 import org.apache.druid.sql.calcite.NotYetSupported.NotYetSupportedProcessor;
@@ -28,7 +27,8 @@ import org.apache.druid.sql.calcite.planner.PlannerConfig;
 import org.apache.druid.sql.calcite.util.SqlTestFramework;
 import org.apache.druid.sql.calcite.util.SqlTestFramework.PlannerComponentSupplier;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Map;
 
@@ -74,8 +74,8 @@ public class DecoupledPlanningCalciteJoinQueryTest extends CalciteJoinQueryTest
     return builder;
   }
 
-  @Test
-  @Parameters(source = QueryContextForJoinProvider.class)
+  @MethodSource("provideQueryContexts")
+  @ParameterizedTest(name = "{0}")
   @DecoupledTestConfig
   public void ensureDecoupledTestConfigAnnotationWorks(Map<String, Object> queryContext)
   {

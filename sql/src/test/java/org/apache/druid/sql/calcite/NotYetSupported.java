@@ -25,10 +25,14 @@ import org.apache.commons.lang3.RegExUtils;
 import org.apache.druid.error.DruidException;
 import org.apache.druid.java.util.common.ISE;
 import org.junit.AssumptionViolatedException;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.InvocationInterceptor;
+import org.junit.jupiter.api.extension.ReflectiveInvocationContext;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runner.RunWith;
 import org.junit.runners.model.Statement;
+import org.opentest4j.IncompleteExecutionException;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
@@ -125,8 +129,61 @@ public @interface NotYetSupported
    * Ensures that test cases disabled with that annotation can still not pass.
    * If the error is as expected; the testcase is marked as "ignored".
    */
-  class NotYetSupportedProcessor implements TestRule
+  class NotYetSupportedProcessor implements TestRule, InvocationInterceptor
   {
+
+
+    @Override
+    public void interceptTestMethod(Invocation<Void> invocation,
+            ReflectiveInvocationContext<Method> invocationContext,
+            ExtensionContext extensionContext) throws Throwable {
+
+
+      Method method = extensionContext.getTestMethod().get();
+      NotYetSupported annotation = method.getAnnotation(NotYetSupported.class);
+
+      if (annotation == null) {
+        invocation.proceed();
+        return;
+      }
+      {
+        {
+          Modes ignoreMode = annotation.value();
+          Throwable e = null;
+          try {
+            invocation.proceed();
+          }
+          catch (Throwable t) {
+            e = t;
+          }
+          // If the base test case is supposed to be ignored already, just skip the further evaluation
+          if (e instanceof AssumptionViolatedException) {
+            throw (AssumptionViolatedException) e;
+          }
+          if (e instanceof IncompleteExecutionException) {
+            throw (IncompleteExecutionException) e;
+          }
+          Throwable finalE = e;
+          assertThrows(
+              "Expected that this testcase will fail - it might got fixed; or failure have changed?",
+              ignoreMode.throwableClass,
+              () -> {
+                if (finalE != null) {
+                  throw finalE;
+                }
+              }
+          );
+
+          String trace = Throwables.getStackTraceAsString(e);
+          Matcher m = annotation.value().getPattern().matcher(trace);
+
+          if (!m.find()) {
+            throw new AssertionError("Exception stactrace doesn't match regex: " + annotation.value().regex, e);
+          }
+          throw new AssumptionViolatedException("Test is not-yet supported; ignored with:" + annotation);
+        }
+      }
+    }
     @Override
     public Statement apply(Statement base, Description description)
     {

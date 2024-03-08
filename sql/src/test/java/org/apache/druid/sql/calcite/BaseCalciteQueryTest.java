@@ -117,16 +117,17 @@ import org.apache.druid.sql.calcite.view.ViewManager;
 import org.apache.druid.sql.http.SqlParameter;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matcher;
-import org.hamcrest.MatcherAssert;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.joda.time.chrono.ISOChronology;
 import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.internal.matchers.ThrowableMessageMatcher;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
 import org.junit.rules.TemporaryFolder;
 
 import javax.annotation.Nullable;
@@ -144,15 +145,17 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assume.assumeFalse;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /**
  * A base class for SQL query testing. It sets up query execution environment, provides useful helper methods,
  * and populates data using {@link CalciteTests#createMockWalker}.
  */
+@EnableRuleMigrationSupport
 public class BaseCalciteQueryTest extends CalciteTestBase
     implements QueryComponentSupplier, PlannerComponentSupplier
 {
@@ -162,7 +165,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   public static Long NULL_LONG;
   public static final String HLLC_STRING = VersionOneHyperLogLogCollector.class.getName();
 
-  @BeforeClass
+  @BeforeAll
   public static void setupNullValues()
   {
     NULL_STRING = NullHandling.defaultStringValue();
@@ -643,11 +646,15 @@ public class BaseCalciteQueryTest extends CalciteTestBase
     return queryLogHook = new QueryLogHook(() -> queryFramework().queryJsonMapper());
   }
 
-  @ClassRule
-  public static SqlTestFrameworkConfig.ClassRule queryFrameworkClassRule = new SqlTestFrameworkConfig.ClassRule();
+//  @ClassRule
+//  public static SqlTestFrameworkConfig.ClassRule queryFrameworkClassRule = new SqlTestFrameworkConfig.ClassRule();
+//
+//  @Rule(order = 3)
+//  public SqlTestFrameworkConfig.MethodRule queryFrameworkRule = queryFrameworkClassRule.methodRule(this);
 
-  @Rule(order = 3)
-  public SqlTestFrameworkConfig.MethodRule queryFrameworkRule = queryFrameworkClassRule.methodRule(this);
+  @Order(3)
+  @RegisterExtension
+  static SqlTestFrameworkConfig.Rule  queryFrameworkRule = new SqlTestFrameworkConfig.Rule();
 
   public SqlTestFramework queryFramework()
   {
@@ -756,7 +763,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   {
     boolean featureAvailable = queryFramework().engine()
         .featureAvailable(feature, ExpressionTestHelper.PLANNER_CONTEXT);
-    assumeTrue(StringUtils.format("test disabled; feature [%s] is not available!", feature), featureAvailable);
+    assumeTrue(featureAvailable, StringUtils.format("test disabled; feature [%s] is not available!", feature));
   }
 
   public void assertQueryIsUnplannable(final String sql, String expectedError)
@@ -770,7 +777,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
       testQuery(plannerConfig, sql, CalciteTests.REGULAR_USER_AUTH_RESULT, ImmutableList.of(), ImmutableList.of());
     }
     catch (DruidException e) {
-      MatcherAssert.assertThat(
+      assertThat(
           e,
           buildUnplannableExceptionMatcher().expectMessageContains(expectedError)
       );
@@ -1258,7 +1265,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
             .build()
             .run()
     );
-    MatcherAssert.assertThat(e, exceptionMatcher);
+    assertThat(e, exceptionMatcher);
   }
 
   public void analyzeResources(
@@ -1395,8 +1402,6 @@ public class BaseCalciteQueryTest extends CalciteTestBase
    * It tests various configs that can be passed to join queries. All the configs provided by this provider should
    * have the join query engine return the same results.
    */
-  public static class QueryContextForJoinProvider
-  {
     @UsedByJUnitParamsRunner
     public static Object[] provideQueryContexts()
     {
@@ -1448,7 +1453,6 @@ public class BaseCalciteQueryTest extends CalciteTestBase
               .build(),
           };
     }
-  }
 
   protected Map<String, Object> withLeftDirectAccessEnabled(Map<String, Object> context)
   {

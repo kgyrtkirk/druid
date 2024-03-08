@@ -46,7 +46,6 @@ import org.apache.druid.sql.calcite.planner.Calcites;
 import org.apache.druid.sql.calcite.util.CalciteTests;
 import org.apache.druid.sql.http.SqlParameter;
 import org.hamcrest.CoreMatchers;
-import org.hamcrest.MatcherAssert;
 import org.junit.Test;
 import org.junit.internal.matchers.ThrowableMessageMatcher;
 
@@ -56,6 +55,7 @@ import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Collections;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
@@ -355,16 +355,14 @@ public class IngestTableFunctionTest extends CalciteIngestionDmlTest
         "PARTITIONED BY ALL TIME";
     didTest = true; // Else the framework will complain
     ForbiddenException e = assertThrows(
-        ForbiddenException.class,
-        () -> testBuilder()
+        ForbiddenException.class, () -> testBuilder()
             .plannerConfig(PLANNER_CONFIG_NATIVE_QUERY_EXPLAIN)
             .sql(query)
             // Regular user does not have permission on extern or other table functions
             .authResult(CalciteTests.REGULAR_USER_AUTH_RESULT)
             .run()
     );
-    MatcherAssert.assertThat(e, ThrowableMessageMatcher.hasMessage(CoreMatchers.equalTo(Access.DEFAULT_ERROR_MESSAGE)));
-
+    assertThat(e, ThrowableMessageMatcher.hasMessage(CoreMatchers.equalTo(Access.DEFAULT_ERROR_MESSAGE)));
   }
 
   @Test

@@ -52,6 +52,7 @@ import org.apache.druid.segment.incremental.IncrementalIndexSchema;
 import org.apache.druid.segment.join.JoinableFactoryWrapper;
 import org.apache.druid.segment.writeout.OnHeapMemorySegmentWriteOutMediumFactory;
 import org.apache.druid.server.SpecificSegmentsQuerySegmentWalker;
+import org.apache.druid.sql.calcite.DisableUnless.DisableUnlessRule;
 import org.apache.druid.sql.calcite.NotYetSupported.Modes;
 import org.apache.druid.sql.calcite.NotYetSupported.NotYetSupportedProcessor;
 import org.apache.druid.sql.calcite.QueryTestRunner.QueryResults;
@@ -62,12 +63,10 @@ import org.apache.druid.timeline.partition.NumberedShardSpec;
 import org.joda.time.DateTime;
 import org.joda.time.LocalTime;
 import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TestRule;
-import org.junit.runner.Description;
-import org.junit.runners.model.Statement;
-
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.File;
@@ -111,19 +110,18 @@ import static org.junit.Assert.fail;
 public class DrillWindowQueryTest extends BaseCalciteQueryTest
 {
   private static final ObjectMapper MAPPER = new DefaultObjectMapper();
-  private DrillTestCase testCase = null;
 
   static {
     NullHandling.initializeForTests();
   }
 
-  @Rule
-  public TestRule disableWhenNonSqlCompat = DisableUnless.SQL_COMPATIBLE;
+  @RegisterExtension
+  public DisableUnlessRule disableWhenNonSqlCompat = DisableUnless.SQL_COMPATIBLE;
 
-  @Rule
+  @RegisterExtension
   public NotYetSupportedProcessor ignoreProcessor = new NotYetSupportedProcessor();
 
-  @Rule
+  @RegisterExtension
   public DrillTestCaseLoaderRule drillTestCaseRule = new DrillTestCaseLoaderRule();
 
   @Test
@@ -174,15 +172,16 @@ public class DrillWindowQueryTest extends BaseCalciteQueryTest
     String value();
   }
 
-  class DrillTestCaseLoaderRule implements TestRule
+  static class DrillTestCaseLoaderRule implements BeforeEachCallback
   {
+    public DrillTestCase testCase = null;
 
     @Override
-    public Statement apply(Statement base, Description description)
+    public void beforeEach(ExtensionContext context) throws Exception
     {
-      DrillTest annotation = description.getAnnotation(DrillTest.class);
+      Method method = context.getTestMethod().get();
+      DrillTest annotation = method.getAnnotation(DrillTest.class);
       testCase = (annotation == null) ? null : new DrillTestCase(annotation.value());
-      return base;
     }
   }
 
@@ -473,6 +472,7 @@ public class DrillWindowQueryTest extends BaseCalciteQueryTest
     try {
       thread = Thread.currentThread();
       oldName = thread.getName();
+      DrillTestCase testCase = drillTestCaseRule.testCase;
       thread.setName("drillWindowQuery-" + testCase.filename);
 
       testBuilder()
