@@ -31,7 +31,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 public class DecoupledPlanningCalciteQueryTest extends CalciteQueryTest
 {
-
   @Order(0)
   @RegisterExtension
   public NotYetSupportedProcessor decoupledIgnoreProcessor = new NotYetSupportedProcessor();
