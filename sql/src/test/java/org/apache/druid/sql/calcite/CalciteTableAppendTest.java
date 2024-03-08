@@ -24,20 +24,15 @@ import org.apache.druid.error.DruidException;
 import org.apache.druid.query.Druids;
 import org.apache.druid.query.scan.ScanQuery.ResultFormat;
 import org.apache.druid.segment.column.ColumnType;
-import org.apache.druid.sql.calcite.NotYetSupported.NotYetSupportedProcessor;
 import org.apache.druid.sql.calcite.filtration.Filtration;
 import org.apache.druid.sql.calcite.util.CalciteTests;
 import org.junit.Assert;
-import org.junit.Rule;
 import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class CalciteTableAppendTest extends BaseCalciteQueryTest
 {
-  @Rule(order = 0)
-  public NotYetSupportedProcessor negativeTestProcessor = new NotYetSupportedProcessor();
-
   @Test
   public void testUnion()
   {
