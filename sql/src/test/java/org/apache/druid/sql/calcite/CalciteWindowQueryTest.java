@@ -70,7 +70,7 @@ public class CalciteWindowQueryTest extends BaseCalciteQueryTest
 
   private static final ObjectMapper YAML_JACKSON = new DefaultObjectMapper(new YAMLFactory(), "tests");
 
-  public static Object parametersForWindowQueryTest() throws Exception
+  public static Object[] parametersForWindowQueryTest() throws Exception
   {
     final URL windowFolderUrl = ClassLoader.getSystemResource("calcite/tests/window");
     File windowFolder = new File(windowFolderUrl.toURI());
@@ -81,13 +81,6 @@ public class CalciteWindowQueryTest extends BaseCalciteQueryTest
         .stream(Objects.requireNonNull(listedFiles))
         .map(File::getName)
         .toArray();
-  }
-
-  private String filename;
-
-  public void initCalciteWindowQueryTest(String filename)
-  {
-    this.filename = filename;
   }
 
   class TestCase implements QueryResultsVerifier
@@ -202,7 +195,6 @@ public class CalciteWindowQueryTest extends BaseCalciteQueryTest
   @SuppressWarnings("unchecked")
   public void windowQueryTest(String filename) throws Exception
   {
-    initCalciteWindowQueryTest(filename);
     TestCase testCase = new TestCase(filename);
 
     assumeThat(testCase.getType(), Matchers.not(TestType.failingTest));
@@ -226,7 +218,6 @@ public class CalciteWindowQueryTest extends BaseCalciteQueryTest
   @SuppressWarnings("unchecked")
   public void windowQueryTestWithCustomContextMaxSubqueryBytes(String filename) throws Exception
   {
-    initCalciteWindowQueryTest(filename);
     TestCase testCase = new TestCase(filename);
 
     assumeThat(testCase.getType(), Matchers.not(TestType.failingTest));
