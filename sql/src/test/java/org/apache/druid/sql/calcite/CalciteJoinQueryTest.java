@@ -22,7 +22,6 @@ package org.apache.druid.sql.calcite;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 import org.apache.druid.common.config.NullHandling;
 import org.apache.druid.error.DruidException;
@@ -95,8 +94,6 @@ import org.junit.Assert;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -106,25 +103,16 @@ import java.util.Map;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@RunWith(JUnitParamsRunner.class)
 public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 {
   /**
-   * Used for testing {@link org.apache.druid.sql.calcite.planner.JoinAlgorithm#SORT_MERGE}.
+   * Used by MSQ subclasses.
+   *
+   * Necessary because results come in a different order when using sort-based join.
    */
-  private final boolean sortBasedJoin;
-
-  public CalciteJoinQueryTest()
+  public boolean isSortBasedJoin()
   {
-    this(false);
-  }
-
-  /**
-   * Constructor used by MSQ subclasses. Necessary because results come in a different order when using sort-based join.
-   */
-  protected CalciteJoinQueryTest(boolean sortBasedJoin)
-  {
-    this.sortBasedJoin = sortBasedJoin;
+    return false;
   }
 
   @SqlTestFrameworkConfig(minTopNThreshold = 1)
@@ -3901,7 +3889,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   @Parameters(source = QueryContextForJoinProvider.class)
   public void testInnerJoinSubqueryWithSelectorFilter(Map<String, Object> queryContext)
   {
-    if (sortBasedJoin) {
+    if (isSortBasedJoin()) {
       // Cannot handle the [l1.k = 'abc'] condition.
       msqIncompatible();
     }
@@ -5922,7 +5910,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   @SuppressWarnings({"unchecked", "rawtypes"})
   private List<Object[]> sortIfSortBased(final List<Object[]> results, final int... keyColumns)
   {
-    if (sortBasedJoin) {
+    if (isSortBasedJoin()) {
       final List<Object[]> retVal = new ArrayList<>(results);
       retVal.sort(
           (a, b) -> {
