@@ -94,6 +94,9 @@ import org.junit.Assert;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -3502,9 +3505,9 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   // This query is expected to fail as we do not support join with constant in the on condition
   // (see issue https://github.com/apache/druid/issues/9942 for more information)
   // TODO: Remove expected Exception when https://github.com/apache/druid/issues/9942 is fixed
-  @Test
-  // JunitParamsRunnerToParameterized conversion not supported
-  @Parameters(source = QueryContextForJoinProvider.class)
+  @MethodSource("provideQueryContexts")
+  @ParameterizedTest(name = "{0}")
+  @SuppressWarnings("unchecked")
   public void testJoinOnConstantShouldFail(Map<String, Object> queryContext)
   {
     assertQueryIsUnplannable(

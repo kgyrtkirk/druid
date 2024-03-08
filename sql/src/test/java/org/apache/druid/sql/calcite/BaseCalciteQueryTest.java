@@ -1397,59 +1397,56 @@ public class BaseCalciteQueryTest extends CalciteTestBase
    * It tests various configs that can be passed to join queries. All the configs provided by this provider should
    * have the join query engine return the same results.
    */
-  public static class QueryContextForJoinProvider
+  @UsedByJUnitParamsRunner
+  public static Object[] provideQueryContexts()
   {
-    @UsedByJUnitParamsRunner
-    public static Object[] provideQueryContexts()
-    {
-      return new Object[]{
-          // default behavior
-          QUERY_CONTEXT_DEFAULT,
-          // all rewrites enabled
-          new ImmutableMap.Builder<String, Object>()
-              .putAll(QUERY_CONTEXT_DEFAULT)
-              .put(QueryContexts.JOIN_FILTER_REWRITE_VALUE_COLUMN_FILTERS_ENABLE_KEY, true)
-              .put(QueryContexts.JOIN_FILTER_REWRITE_ENABLE_KEY, true)
-              .put(QueryContexts.REWRITE_JOIN_TO_FILTER_ENABLE_KEY, true)
-              .build(),
-          // filter-on-value-column rewrites disabled, everything else enabled
-          new ImmutableMap.Builder<String, Object>()
-              .putAll(QUERY_CONTEXT_DEFAULT)
-              .put(QueryContexts.JOIN_FILTER_REWRITE_VALUE_COLUMN_FILTERS_ENABLE_KEY, false)
-              .put(QueryContexts.JOIN_FILTER_REWRITE_ENABLE_KEY, true)
-              .put(QueryContexts.REWRITE_JOIN_TO_FILTER_ENABLE_KEY, true)
-              .build(),
-          // filter rewrites fully disabled, join-to-filter enabled
-          new ImmutableMap.Builder<String, Object>()
-              .putAll(QUERY_CONTEXT_DEFAULT)
-              .put(QueryContexts.JOIN_FILTER_REWRITE_VALUE_COLUMN_FILTERS_ENABLE_KEY, false)
-              .put(QueryContexts.JOIN_FILTER_REWRITE_ENABLE_KEY, false)
-              .put(QueryContexts.REWRITE_JOIN_TO_FILTER_ENABLE_KEY, true)
-              .build(),
-          // filter rewrites disabled, but value column filters still set to true (it should be ignored and this should
-          // behave the same as the previous context)
-          new ImmutableMap.Builder<String, Object>()
-              .putAll(QUERY_CONTEXT_DEFAULT)
-              .put(QueryContexts.JOIN_FILTER_REWRITE_VALUE_COLUMN_FILTERS_ENABLE_KEY, true)
-              .put(QueryContexts.JOIN_FILTER_REWRITE_ENABLE_KEY, false)
-              .put(QueryContexts.REWRITE_JOIN_TO_FILTER_ENABLE_KEY, true)
-              .build(),
-          // filter rewrites fully enabled, join-to-filter disabled
-          new ImmutableMap.Builder<String, Object>()
-              .putAll(QUERY_CONTEXT_DEFAULT)
-              .put(QueryContexts.JOIN_FILTER_REWRITE_VALUE_COLUMN_FILTERS_ENABLE_KEY, true)
-              .put(QueryContexts.JOIN_FILTER_REWRITE_ENABLE_KEY, true)
-              .put(QueryContexts.REWRITE_JOIN_TO_FILTER_ENABLE_KEY, false)
-              .build(),
-          // all rewrites disabled
-          new ImmutableMap.Builder<String, Object>()
-              .putAll(QUERY_CONTEXT_DEFAULT)
-              .put(QueryContexts.JOIN_FILTER_REWRITE_VALUE_COLUMN_FILTERS_ENABLE_KEY, false)
-              .put(QueryContexts.JOIN_FILTER_REWRITE_ENABLE_KEY, false)
-              .put(QueryContexts.REWRITE_JOIN_TO_FILTER_ENABLE_KEY, false)
-              .build(),
-          };
-    }
+    return new Object[]{
+        // default behavior
+        QUERY_CONTEXT_DEFAULT,
+        // all rewrites enabled
+        new ImmutableMap.Builder<String, Object>()
+        .putAll(QUERY_CONTEXT_DEFAULT)
+        .put(QueryContexts.JOIN_FILTER_REWRITE_VALUE_COLUMN_FILTERS_ENABLE_KEY, true)
+        .put(QueryContexts.JOIN_FILTER_REWRITE_ENABLE_KEY, true)
+        .put(QueryContexts.REWRITE_JOIN_TO_FILTER_ENABLE_KEY, true)
+        .build(),
+        // filter-on-value-column rewrites disabled, everything else enabled
+        new ImmutableMap.Builder<String, Object>()
+        .putAll(QUERY_CONTEXT_DEFAULT)
+        .put(QueryContexts.JOIN_FILTER_REWRITE_VALUE_COLUMN_FILTERS_ENABLE_KEY, false)
+        .put(QueryContexts.JOIN_FILTER_REWRITE_ENABLE_KEY, true)
+        .put(QueryContexts.REWRITE_JOIN_TO_FILTER_ENABLE_KEY, true)
+        .build(),
+        // filter rewrites fully disabled, join-to-filter enabled
+        new ImmutableMap.Builder<String, Object>()
+        .putAll(QUERY_CONTEXT_DEFAULT)
+        .put(QueryContexts.JOIN_FILTER_REWRITE_VALUE_COLUMN_FILTERS_ENABLE_KEY, false)
+        .put(QueryContexts.JOIN_FILTER_REWRITE_ENABLE_KEY, false)
+        .put(QueryContexts.REWRITE_JOIN_TO_FILTER_ENABLE_KEY, true)
+        .build(),
+        // filter rewrites disabled, but value column filters still set to true (it should be ignored and this should
+        // behave the same as the previous context)
+        new ImmutableMap.Builder<String, Object>()
+        .putAll(QUERY_CONTEXT_DEFAULT)
+        .put(QueryContexts.JOIN_FILTER_REWRITE_VALUE_COLUMN_FILTERS_ENABLE_KEY, true)
+        .put(QueryContexts.JOIN_FILTER_REWRITE_ENABLE_KEY, false)
+        .put(QueryContexts.REWRITE_JOIN_TO_FILTER_ENABLE_KEY, true)
+        .build(),
+        // filter rewrites fully enabled, join-to-filter disabled
+        new ImmutableMap.Builder<String, Object>()
+        .putAll(QUERY_CONTEXT_DEFAULT)
+        .put(QueryContexts.JOIN_FILTER_REWRITE_VALUE_COLUMN_FILTERS_ENABLE_KEY, true)
+        .put(QueryContexts.JOIN_FILTER_REWRITE_ENABLE_KEY, true)
+        .put(QueryContexts.REWRITE_JOIN_TO_FILTER_ENABLE_KEY, false)
+        .build(),
+        // all rewrites disabled
+        new ImmutableMap.Builder<String, Object>()
+        .putAll(QUERY_CONTEXT_DEFAULT)
+        .put(QueryContexts.JOIN_FILTER_REWRITE_VALUE_COLUMN_FILTERS_ENABLE_KEY, false)
+        .put(QueryContexts.JOIN_FILTER_REWRITE_ENABLE_KEY, false)
+        .put(QueryContexts.REWRITE_JOIN_TO_FILTER_ENABLE_KEY, false)
+        .build(),
+    };
   }
 
   protected Map<String, Object> withLeftDirectAccessEnabled(Map<String, Object> context)
