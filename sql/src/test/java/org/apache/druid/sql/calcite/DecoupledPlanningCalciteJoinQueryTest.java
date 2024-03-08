@@ -26,8 +26,8 @@ import org.apache.druid.sql.calcite.NotYetSupported.NotYetSupportedProcessor;
 import org.apache.druid.sql.calcite.planner.PlannerConfig;
 import org.apache.druid.sql.calcite.util.SqlTestFramework;
 import org.apache.druid.sql.calcite.util.SqlTestFramework.PlannerComponentSupplier;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -35,11 +35,12 @@ import java.util.Map;
 
 import static org.junit.Assert.assertNotNull;
 
+@ExtendWith(NotYetSupportedProcessor.class)
 public class DecoupledPlanningCalciteJoinQueryTest extends CalciteJoinQueryTest
 {
-  @Order(0)
-  @RegisterExtension
-  public NotYetSupportedProcessor decoupledIgnoreProcessor = new NotYetSupportedProcessor();
+//  @Order(990)
+//  @RegisterExtension
+//  public NotYetSupportedProcessor decoupledIgnoreProcessor = new NotYetSupportedProcessor();
 
   private static final ImmutableMap<String, Object> CONTEXT_OVERRIDES =
       ImmutableMap.<String, Object>builder()
@@ -75,10 +76,17 @@ public class DecoupledPlanningCalciteJoinQueryTest extends CalciteJoinQueryTest
     return builder;
   }
 
+  @Test
+  @DecoupledTestConfig
+  public void ensureDecoupledTestConfigAnnotationWorks()
+  {
+    assertNotNull(queryFrameworkRule.getAnnotation(DecoupledTestConfig.class));
+  }
+
   @MethodSource("provideQueryContexts")
   @ParameterizedTest(name = "{0}")
   @DecoupledTestConfig
-  public void ensureDecoupledTestConfigAnnotationWorks(Map<String, Object> queryContext)
+  public void ensureDecoupledTestConfigAnnotationWorks1(Map<String, Object> queryContext)
   {
     assertNotNull(queryFrameworkRule.getAnnotation(DecoupledTestConfig.class));
     assertNotNull(queryContext);

@@ -25,10 +25,10 @@ import org.apache.commons.lang3.RegExUtils;
 import org.apache.druid.error.DruidException;
 import org.apache.druid.java.util.common.ISE;
 import org.junit.AssumptionViolatedException;
+import org.junit.jupiter.api.extension.DynamicTestInvocationContext;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.InvocationInterceptor;
 import org.junit.jupiter.api.extension.ReflectiveInvocationContext;
-import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runner.RunWith;
 import org.junit.runners.model.Statement;
@@ -129,10 +129,8 @@ public @interface NotYetSupported
    * Ensures that test cases disabled with that annotation can still not pass.
    * If the error is as expected; the testcase is marked as "ignored".
    */
-  class NotYetSupportedProcessor implements TestRule, InvocationInterceptor
+  public static class NotYetSupportedProcessor implements InvocationInterceptor
   {
-
-
     @Override
     public void interceptTestMethod(Invocation<Void> invocation,
             ReflectiveInvocationContext<Method> invocationContext,
@@ -184,7 +182,6 @@ public @interface NotYetSupported
         }
       }
     }
-    @Override
     public Statement apply(Statement base, Description description)
     {
       NotYetSupported annotation = getAnnotation(description, NotYetSupported.class);
@@ -263,5 +260,57 @@ public @interface NotYetSupported
       Method m = getMethodForName(testClass, realMethodName);
       return m.getAnnotation(annotationType);
     }
+//    @Override
+//    public void handleTestExecutionException(ExtensionContext context, Throwable throwable) throws Throwable
+//    {
+//      if(true)
+//      {
+////        throw new RuntimeException("FIXME: Unimplemented!");
+//      }
+//
+//    }
+    @Override
+    public <T> T interceptTestFactoryMethod(Invocation<T> invocation,
+        ReflectiveInvocationContext<Method> invocationContext, ExtensionContext extensionContext) throws Throwable
+    {
+      if(true)
+      {
+        throw new RuntimeException("FIXME: Unimplemented!");
+      }
+      return InvocationInterceptor.super.interceptTestFactoryMethod(invocation, invocationContext, extensionContext);
+
+    }
+    private void interceptTestMethod()
+    {
+//      if (true) {
+        throw new RuntimeException("FIXME: Unimplemented!");
+//      }
+
+    }
+    @Override
+    public void interceptDynamicTest(Invocation<Void> invocation, DynamicTestInvocationContext invocationContext,
+        ExtensionContext extensionContext) throws Throwable
+    {
+//      if(true)
+//      {
+        throw new RuntimeException("FIXME: Unimplemented!");
+//      }
+//      InvocationInterceptor.super.interceptDynamicTest(invocation, invocationContext, extensionContext);
+
+    }
+    @Override
+    public void interceptTestTemplateMethod(Invocation<Void> invocation,
+        ReflectiveInvocationContext<Method> invocationContext, ExtensionContext extensionContext) throws Throwable
+    {
+      interceptTestMethod(invocation,invocationContext,extensionContext);
+//      if(true)
+//      {
+//        throw new RuntimeException("FIXME: Unimplemented!");
+//      }
+//      InvocationInterceptor.super.interceptTestTemplateMethod(invocation, invocationContext, extensionContext);
+
+    }
+//    intercept
+
   }
 }
