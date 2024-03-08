@@ -20,8 +20,6 @@
 package org.apache.druid.sql.calcite;
 
 import com.google.common.collect.ImmutableList;
-import junitparams.JUnitParamsRunner;
-import junitparams.Parameters;
 import org.apache.druid.java.util.common.Intervals;
 import org.apache.druid.java.util.common.granularity.AllGranularity;
 import org.apache.druid.java.util.common.granularity.Granularities;
@@ -45,19 +43,16 @@ import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.join.JoinType;
 import org.apache.druid.segment.virtual.ExpressionVirtualColumn;
 import org.apache.druid.sql.calcite.util.CalciteTests;
-import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
-
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 
-@RunWith(JUnitParamsRunner.class)
 public class CalciteCorrelatedQueryTest extends BaseCalciteQueryTest
 {
-  @Test
-  // JunitParamsRunnerToParameterized conversion not supported
-  @Parameters(source = QueryContextForJoinProvider.class)
+  @MethodSource("provideQueryContexts")
+  @ParameterizedTest(name = "{0}")
   public void testCorrelatedSubquery(Map<String, Object> queryContext)
   {
     cannotVectorize();
@@ -173,9 +168,8 @@ public class CalciteCorrelatedQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @Test
-  // JunitParamsRunnerToParameterized conversion not supported
-  @Parameters(source = QueryContextForJoinProvider.class)
+  @MethodSource("provideQueryContexts")
+  @ParameterizedTest(name = "{0}")
   public void testCorrelatedSubqueryWithLeftFilter(Map<String, Object> queryContext)
   {
     cannotVectorize();
@@ -263,9 +257,8 @@ public class CalciteCorrelatedQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @Test
-  // JunitParamsRunnerToParameterized conversion not supported
-  @Parameters(source = QueryContextForJoinProvider.class)
+  @MethodSource("provideQueryContexts")
+  @ParameterizedTest(name = "{0}")
   public void testCorrelatedSubqueryWithLeftFilter_leftDirectAccessDisabled(Map<String, Object> queryContext)
   {
     cannotVectorize();
@@ -359,9 +352,8 @@ public class CalciteCorrelatedQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @Test
-  // JunitParamsRunnerToParameterized conversion not supported
-  @Parameters(source = QueryContextForJoinProvider.class)
+  @MethodSource("provideQueryContexts")
+  @ParameterizedTest(name = "{0}")
   public void testCorrelatedSubqueryWithCorrelatedQueryFilter(Map<String, Object> queryContext)
   {
     cannotVectorize();
@@ -454,9 +446,8 @@ public class CalciteCorrelatedQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @Test
-  // JunitParamsRunnerToParameterized conversion not supported
-  @Parameters(source = QueryContextForJoinProvider.class)
+  @MethodSource("provideQueryContexts")
+  @ParameterizedTest(name = "{0}")
   public void testCorrelatedSubqueryWithCorrelatedQueryFilter_Scan(Map<String, Object> queryContext)
   {
     cannotVectorize();
