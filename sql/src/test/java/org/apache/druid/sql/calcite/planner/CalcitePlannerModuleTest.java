@@ -67,7 +67,6 @@ import static org.apache.calcite.plan.RelOptRule.any;
 import static org.apache.calcite.plan.RelOptRule.operand;
 
 @ExtendWith(EasyMockExtension.class)
-//@ExtendWith(EasyMockExtension.class)
 public class CalcitePlannerModuleTest extends CalciteTestBase
 {
   private static final String SCHEMA_1 = "SCHEMA_1";

@@ -37,7 +37,6 @@ import org.apache.druid.sql.calcite.CalciteWindowQueryTest.WindowQueryTestInputC
 import org.apache.druid.sql.calcite.QueryTestRunner.QueryResults;
 import org.apache.druid.sql.calcite.QueryVerification.QueryResultsVerifier;
 import org.apache.druid.sql.calcite.planner.PlannerContext;
-import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -49,7 +48,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
-import static org.hamcrest.junit.MatcherAssume.assumeThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -221,7 +219,7 @@ public class CalciteWindowQueryTest extends BaseCalciteQueryTest
   {
     TestCase testCase = new TestCase(filename);
 
-    assumeThat(testCase.getType(), Matchers.not(TestType.failingTest));
+    assumeTrue(testCase.getType() != TestType.failingTest);
 
     if (testCase.getType() == TestType.operatorValidation) {
       testBuilder()
