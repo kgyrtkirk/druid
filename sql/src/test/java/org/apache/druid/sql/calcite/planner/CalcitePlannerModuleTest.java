@@ -59,6 +59,7 @@ import org.junit.runner.RunWith;
 
 import javax.validation.Validation;
 import javax.validation.Validator;
+
 import java.util.Collections;
 import java.util.Set;
 
@@ -66,6 +67,7 @@ import static org.apache.calcite.plan.RelOptRule.any;
 import static org.apache.calcite.plan.RelOptRule.operand;
 
 @RunWith(EasyMockRunner.class)
+//@ExtendWith(EasyMockExtension.class)
 public class CalcitePlannerModuleTest extends CalciteTestBase
 {
   private static final String SCHEMA_1 = "SCHEMA_1";
@@ -101,6 +103,7 @@ public class CalcitePlannerModuleTest extends CalciteTestBase
   @BeforeEach
   public void setUp()
   {
+
     EasyMock.expect(druidSchema1.getSchema()).andStubReturn(schema1);
     EasyMock.expect(druidSchema2.getSchema()).andStubReturn(schema2);
     EasyMock.expect(druidSchema1.getSchemaName()).andStubReturn(SCHEMA_1);

@@ -28,6 +28,14 @@ recipeList:
   #- org.openrewrite.java.testing.junit5.UseHamcrestAssertThat
 ---
 type: specs.openrewrite.org/v1beta/recipe
+name: org.apache.druid.EasyMockRunnerToEasyMockExtension
+displayName: Replace EasyMock `@RunWith` with `@ExtendWith` usage
+recipeList:
+  - org.openrewrite.java.testing.junit5.RunnerToExtension:
+      runners: org.easymock.EasyMockRunner
+      extension: org.easymock.EasyMockExtension
+---
+type: specs.openrewrite.org/v1beta/recipe
 name: org.apache.druid.JUnit4to5Migration
 displayName: Custom JUnit Jupiter migration from JUnit 4.x
 description: Migrates JUnit 4.x tests to JUnit Jupiter.
@@ -64,6 +72,7 @@ recipeList:
   #- org.openrewrite.java.testing.junit5.AddMissingTestBeforeAfterAnnotations
   - org.openrewrite.java.testing.junit5.ParameterizedRunnerToParameterized
   - org.openrewrite.java.testing.junit5.JUnitParamsRunnerToParameterized
+  - org.apache.druid.EasyMockRunnerToEasyMockExtension
   - org.openrewrite.java.testing.junit5.ExpectedExceptionToAssertThrows
   - org.openrewrite.java.testing.junit5.UpdateMockWebServer
   - org.openrewrite.java.testing.junit5.VertxUnitToVertxJunit5
