@@ -32,7 +32,8 @@ name: org.apache.druid.EasyMockRunnerToEasyMockExtension
 displayName: Replace EasyMock `@RunWith` with `@ExtendWith` usage
 recipeList:
   - org.openrewrite.java.testing.junit5.RunnerToExtension:
-      runners: org.easymock.EasyMockRunner
+      runners:
+        - org.easymock.EasyMockRunner
       extension: org.easymock.EasyMockExtension
 ---
 type: specs.openrewrite.org/v1beta/recipe
