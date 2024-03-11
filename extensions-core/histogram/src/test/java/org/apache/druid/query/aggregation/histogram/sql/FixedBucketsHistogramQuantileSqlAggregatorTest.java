@@ -80,7 +80,7 @@ public class FixedBucketsHistogramQuantileSqlAggregatorTest extends BaseCalciteQ
     ApproximateHistogramDruidModule.registerSerde();
 
     final QueryableIndex index = IndexBuilder.create(CalciteTests.getJsonMapper())
-                                             .tmpDir(temporaryFoldernewFolder())
+                                             .tmpDir(temporaryFolder.newFolder())
                                              .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
                                              .schema(
                                                  new IncrementalIndexSchema.Builder()

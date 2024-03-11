@@ -116,7 +116,7 @@ public class ArrayOfDoublesSketchSqlAggregatorTest extends BaseCalciteQueryTest
     ArrayOfDoublesSketchModule.registerSerde();
 
     final QueryableIndex index = IndexBuilder.create()
-                                             .tmpDir(temporaryFoldernewFolder())
+                                             .tmpDir(temporaryFolder.newFolder())
                                              .segmentWriteOutMediumFactory(
                                                  OffHeapMemorySegmentWriteOutMediumFactory.instance()
                                              )

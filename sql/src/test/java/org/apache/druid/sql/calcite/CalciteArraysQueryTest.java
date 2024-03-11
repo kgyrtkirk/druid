@@ -156,7 +156,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
 
     final QueryableIndex foo = IndexBuilder
         .create()
-        .tmpDir(temporaryFoldernewFolder())
+        .tmpDir(temporaryFolder.newFolder())
         .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
         .schema(TestDataBuilder.INDEX_SCHEMA)
         .rows(TestDataBuilder.ROWS1)
@@ -164,7 +164,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
 
     final QueryableIndex numfoo = IndexBuilder
         .create()
-        .tmpDir(temporaryFoldernewFolder())
+        .tmpDir(temporaryFolder.newFolder())
         .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
         .schema(TestDataBuilder.INDEX_SCHEMA_NUMERIC_DIMS)
         .rows(TestDataBuilder.ROWS1_WITH_NUMERIC_DIMS)
