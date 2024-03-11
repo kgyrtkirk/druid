@@ -78,7 +78,7 @@ public class TestDerbyConnector extends DerbyConnector
     return jdbcUri;
   }
 
-  public static class DerbyConnectorRule extends ExternalResource implements BeforeAllCallback, AfterAllCallback
+  public static class DerbyConnectorRule extends ExternalResource
   {
     private TestDerbyConnector connector;
     private final Supplier<MetadataStorageTablesConfig> dbTables;
@@ -138,6 +138,10 @@ public class TestDerbyConnector extends DerbyConnector
     {
       return dbTables;
     }
+  }
+
+  public static class DerbyConnectorRule5 extends DerbyConnectorRule implements BeforeAllCallback, AfterAllCallback
+  {
 
     @Override
     public void beforeAll(ExtensionContext context)

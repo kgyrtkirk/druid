@@ -50,7 +50,7 @@ public class CatalogIngestionTest extends CalciteIngestionDmlTest
 {
   @RegisterExtension
   public static final TestDerbyConnector.DerbyConnectorRule DERBY_CONNECTION_RULE =
-      new TestDerbyConnector.DerbyConnectorRule();
+      new TestDerbyConnector.DerbyConnectorRule5();
 
   /**
    * Signature for the foo datasource after applying catalog metadata.

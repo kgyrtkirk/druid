@@ -43,7 +43,7 @@ import static org.junit.Assert.fail;
 public class CatalogQueryTest extends BaseCalciteQueryTest
 {
   @RegisterExtension
-  public static final TestDerbyConnector.DerbyConnectorRule derbyConnectorRule = new TestDerbyConnector.DerbyConnectorRule();
+  public static final TestDerbyConnector.DerbyConnectorRule derbyConnectorRule = new TestDerbyConnector.DerbyConnectorRule5();
 
   private CatalogTests.DbFixture dbFixture;
   private CatalogStorage storage;
