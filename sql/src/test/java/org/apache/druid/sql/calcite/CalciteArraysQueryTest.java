@@ -156,7 +156,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
 
     final QueryableIndex foo = IndexBuilder
         .create()
-        .tmpDir(temporaryFolder.newFolder())
+        .tmpDir(temXMEXAXISporaryFolder.newFolder())
         .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
         .schema(TestDataBuilder.INDEX_SCHEMA)
         .rows(TestDataBuilder.ROWS1)
@@ -164,7 +164,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
 
     final QueryableIndex numfoo = IndexBuilder
         .create()
-        .tmpDir(temporaryFolder.newFolder())
+        .tmpDir(temXMEXAXISporaryFolder.newFolder())
         .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
         .schema(TestDataBuilder.INDEX_SCHEMA_NUMERIC_DIMS)
         .rows(TestDataBuilder.ROWS1_WITH_NUMERIC_DIMS)
@@ -172,7 +172,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
 
     final QueryableIndex indexLotsOfColumns = IndexBuilder
         .create()
-        .tmpDir(temporaryFolder.newFolder())
+        .tmpDir(temXMEXAXISporaryFolder.newFolder())
         .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
         .schema(TestDataBuilder.INDEX_SCHEMA_LOTS_O_COLUMNS)
         .rows(TestDataBuilder.ROWS_LOTS_OF_COLUMNS)
@@ -180,7 +180,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
 
     final QueryableIndex indexArrays =
         IndexBuilder.create()
-                    .tmpDir(temporaryFolder.newFolder())
+                    .tmpDir(temXMEXAXISporaryFolder.newFolder())
                     .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
                     .schema(
                         new IncrementalIndexSchema.Builder()
@@ -199,7 +199,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
                         )
                     )
                     .inputFormat(TestDataBuilder.DEFAULT_JSON_INPUT_FORMAT)
-                    .inputTmpDir(temporaryFolder.newFolder())
+                    .inputTmpDir(temXMEXAXISporaryFolder.newFolder())
                     .buildMMappedIndex();
 
     SpecificSegmentsQuerySegmentWalker walker = SpecificSegmentsQuerySegmentWalker.createWalker(

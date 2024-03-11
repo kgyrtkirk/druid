@@ -681,7 +681,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   @Override
   public void gatherProperties(Properties properties)
   {
-    baseComponentSupplier = new StandardComponentSupplier(temporaryFolder.newFolder());
+    baseComponentSupplier = new StandardComponentSupplier(temXMEXAXISporaryFolder.newFolder());
     baseComponentSupplier.gatherProperties(properties);
   }
 

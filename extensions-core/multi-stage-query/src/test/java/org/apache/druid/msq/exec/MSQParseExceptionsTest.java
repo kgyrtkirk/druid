@@ -58,7 +58,7 @@ public class MSQParseExceptionsTest extends MSQTestBase
   public void testIngestWithNullByte() throws IOException
   {
     final File toRead = MSQTestFileUtils.getResourceAsTemporaryFile(
-        temporaryFolder,
+        temXMEXAXISporaryFolder,
         this,
         "/unparseable-null-byte-string.csv"
     );
@@ -146,7 +146,7 @@ public class MSQParseExceptionsTest extends MSQTestBase
   public void testIngestWithSanitizedNullByte() throws IOException
   {
     final File toRead = MSQTestFileUtils.getResourceAsTemporaryFile(
-        temporaryFolder,
+        temXMEXAXISporaryFolder,
         this,
         "/unparseable-null-byte-string.csv"
     );
@@ -244,7 +244,7 @@ public class MSQParseExceptionsTest extends MSQTestBase
   public void testMultiValueStringWithIncorrectType() throws IOException
   {
     final File toRead = MSQTestFileUtils.getResourceAsTemporaryFile(
-        temporaryFolder,
+        temXMEXAXISporaryFolder,
         this,
         "/unparseable-mv-string-array.json"
     );

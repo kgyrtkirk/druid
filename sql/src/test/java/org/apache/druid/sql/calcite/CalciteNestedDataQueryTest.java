@@ -195,7 +195,7 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
     NestedDataModule.registerHandlersAndSerde();
     final QueryableIndex index =
         IndexBuilder.create()
-                    .tmpDir(temporaryFolder.newFolder())
+                    .tmpDir(temXMEXAXISporaryFolder.newFolder())
                     .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
                     .schema(
                         new IncrementalIndexSchema.Builder()
@@ -211,7 +211,7 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
 
     final QueryableIndex indexMix11 =
         IndexBuilder.create()
-                    .tmpDir(temporaryFolder.newFolder())
+                    .tmpDir(temXMEXAXISporaryFolder.newFolder())
                     .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
                     .schema(
                         new IncrementalIndexSchema.Builder()
@@ -228,7 +228,7 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
 
     final QueryableIndex indexMix12 =
         IndexBuilder.create()
-                    .tmpDir(temporaryFolder.newFolder())
+                    .tmpDir(temXMEXAXISporaryFolder.newFolder())
                     .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
                     .schema(
                         new IncrementalIndexSchema.Builder()
@@ -244,7 +244,7 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
 
     final QueryableIndex indexMix21 =
         IndexBuilder.create()
-                    .tmpDir(temporaryFolder.newFolder())
+                    .tmpDir(temXMEXAXISporaryFolder.newFolder())
                     .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
                     .schema(
                         new IncrementalIndexSchema.Builder()
@@ -260,7 +260,7 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
 
     final QueryableIndex indexMix22 =
         IndexBuilder.create()
-                    .tmpDir(temporaryFolder.newFolder())
+                    .tmpDir(temXMEXAXISporaryFolder.newFolder())
                     .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
                     .schema(
                         new IncrementalIndexSchema.Builder()
@@ -276,7 +276,7 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
 
     final QueryableIndex indexArrays =
         IndexBuilder.create()
-                    .tmpDir(temporaryFolder.newFolder())
+                    .tmpDir(temXMEXAXISporaryFolder.newFolder())
                     .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
                     .schema(
                         new IncrementalIndexSchema.Builder()
@@ -295,12 +295,12 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
                         )
                     )
                     .inputFormat(TestDataBuilder.DEFAULT_JSON_INPUT_FORMAT)
-                    .inputTmpDir(temporaryFolder.newFolder())
+                    .inputTmpDir(temXMEXAXISporaryFolder.newFolder())
                     .buildMMappedIndex();
 
     final QueryableIndex indexAllTypesAuto =
         IndexBuilder.create()
-                    .tmpDir(temporaryFolder.newFolder())
+                    .tmpDir(temXMEXAXISporaryFolder.newFolder())
                     .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
                     .schema(
                         new IncrementalIndexSchema.Builder()
@@ -319,7 +319,7 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
                         )
                     )
                     .inputFormat(TestDataBuilder.DEFAULT_JSON_INPUT_FORMAT)
-                    .inputTmpDir(temporaryFolder.newFolder())
+                    .inputTmpDir(temXMEXAXISporaryFolder.newFolder())
                     .buildMMappedIndex();
 
 

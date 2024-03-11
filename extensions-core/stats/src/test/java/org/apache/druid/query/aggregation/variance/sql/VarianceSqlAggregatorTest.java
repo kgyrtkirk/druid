@@ -87,7 +87,7 @@ public class VarianceSqlAggregatorTest extends BaseCalciteQueryTest
 
     final QueryableIndex index =
         IndexBuilder.create(CalciteTests.getJsonMapper().registerModules(new DruidStatsModule().getJacksonModules()))
-                    .tmpDir(temporaryFolder.newFolder())
+                    .tmpDir(temXMEXAXISporaryFolder.newFolder())
                     .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
                     .schema(
                         new IncrementalIndexSchema.Builder()

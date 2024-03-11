@@ -56,7 +56,7 @@ public class CalciteUnionQueryMSQTest extends CalciteUnionQueryTest
   {
     super.configureGuice(builder);
     builder.addModules(
-        CalciteMSQTestsHelper.fetchModules(temporaryFolder, TestGroupByBuffers.createDefault()).toArray(new Module[0])
+        CalciteMSQTestsHelper.fetchModules(temXMEXAXISporaryFolder, TestGroupByBuffers.createDefault()).toArray(new Module[0])
     );
   }
 

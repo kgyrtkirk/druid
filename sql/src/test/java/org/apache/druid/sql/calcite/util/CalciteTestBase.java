@@ -93,7 +93,7 @@ public abstract class CalciteTestBase
     }
   }
 
-  public TempFolderOverTempDir temporaryFolder = new TempFolderOverTempDir();
+  public TempFolderOverTempDir temXMEXAXISporaryFolder = new TempFolderOverTempDir();
 
   public class TempFolderOverTempDir {
 
