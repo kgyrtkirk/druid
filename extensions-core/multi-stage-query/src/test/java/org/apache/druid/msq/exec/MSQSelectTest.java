@@ -167,7 +167,7 @@ public class MSQSelectTest extends MSQTestBase
                    )
                    .columnMappings(ColumnMappings.identity(resultSignature))
                    .tuningConfig(MSQTuningConfig.defaultConfig())
-                   .destination(isDurableStorageDestination()
+                   .destination(isDurableStorageDestination(contextName, context)
                                 ? DurableStorageMSQDestination.INSTANCE
                                 : TaskReportMSQDestination.INSTANCE)
                    .build()
@@ -201,7 +201,7 @@ public class MSQSelectTest extends MSQTestBase
                    )
                    .columnMappings(ColumnMappings.identity(resultSignature))
                    .tuningConfig(MSQTuningConfig.defaultConfig())
-                   .destination(isDurableStorageDestination()
+                   .destination(isDurableStorageDestination(contextName, context)
                                 ? DurableStorageMSQDestination.INSTANCE
                                 : TaskReportMSQDestination.INSTANCE)
                    .build()
@@ -221,8 +221,8 @@ public class MSQSelectTest extends MSQTestBase
         .setExpectedCountersForStageWorkerChannel(
             CounterSnapshotMatcher
                 .with()
-                .rows(isPageSizeLimited() ? new long[]{2, 2, 2} : new long[]{6})
-                .frames(isPageSizeLimited() ? new long[]{1, 1, 1} : new long[]{1}),
+                .rows(isPageSizeLimited(contextName) ? new long[]{2, 2, 2} : new long[]{6})
+                .frames(isPageSizeLimited(contextName) ? new long[]{1, 1, 1} : new long[]{1}),
             0, 0, "shuffle"
         )
         .setExpectedResultRows(ImmutableList.of(
@@ -263,7 +263,7 @@ public class MSQSelectTest extends MSQTestBase
                               .build())
                    .columnMappings(ColumnMappings.identity(resultSignature))
                    .tuningConfig(MSQTuningConfig.defaultConfig())
-                   .destination(isDurableStorageDestination()
+                   .destination(isDurableStorageDestination(contextName, context)
                                 ? DurableStorageMSQDestination.INSTANCE
                                 : TaskReportMSQDestination.INSTANCE)
                    .build()
@@ -288,8 +288,8 @@ public class MSQSelectTest extends MSQTestBase
         .setExpectedCountersForStageWorkerChannel(
             CounterSnapshotMatcher
                 .with()
-                .rows(isPageSizeLimited() ? new long[]{1L, 2L} : new long[]{3L})
-                .frames(isPageSizeLimited() ? new long[]{1L, 1L} : new long[]{1L}),
+                .rows(isPageSizeLimited(contextName) ? new long[]{1L, 2L} : new long[]{3L})
+                .frames(isPageSizeLimited(contextName) ? new long[]{1L, 1L} : new long[]{1L}),
             0, 0, "shuffle"
         )
         .verifyResults();
@@ -335,7 +335,7 @@ public class MSQSelectTest extends MSQTestBase
                    )
                    .columnMappings(expectedColumnMappings)
                    .tuningConfig(MSQTuningConfig.defaultConfig())
-                   .destination(isDurableStorageDestination()
+                   .destination(isDurableStorageDestination(contextName, context)
                                 ? DurableStorageMSQDestination.INSTANCE
                                 : TaskReportMSQDestination.INSTANCE)
                    .build()
@@ -354,8 +354,8 @@ public class MSQSelectTest extends MSQTestBase
         .setExpectedCountersForStageWorkerChannel(
             CounterSnapshotMatcher
                 .with()
-                .rows(isPageSizeLimited() ? new long[]{2, 2, 2} : new long[]{6})
-                .frames(isPageSizeLimited() ? new long[]{1, 1, 1} : new long[]{1}),
+                .rows(isPageSizeLimited(contextName) ? new long[]{2, 2, 2} : new long[]{6})
+                .frames(isPageSizeLimited(contextName) ? new long[]{1, 1, 1} : new long[]{1}),
             0, 0, "shuffle"
         )
         .setExpectedResultRows(ImmutableList.of(
@@ -400,7 +400,7 @@ public class MSQSelectTest extends MSQTestBase
                    )
                    .columnMappings(ColumnMappings.identity(resultSignature))
                    .tuningConfig(MSQTuningConfig.defaultConfig())
-                   .destination(isDurableStorageDestination()
+                   .destination(isDurableStorageDestination(contextName, context)
                                 ? DurableStorageMSQDestination.INSTANCE
                                 : TaskReportMSQDestination.INSTANCE)
                    .build()
@@ -436,7 +436,7 @@ public class MSQSelectTest extends MSQTestBase
                    )
                    .columnMappings(ColumnMappings.identity(resultSignature))
                    .tuningConfig(MSQTuningConfig.defaultConfig())
-                   .destination(isDurableStorageDestination()
+                   .destination(isDurableStorageDestination(contextName, context)
                                 ? DurableStorageMSQDestination.INSTANCE
                                 : TaskReportMSQDestination.INSTANCE)
                    .build()
@@ -473,7 +473,7 @@ public class MSQSelectTest extends MSQTestBase
                    )
                    .columnMappings(ColumnMappings.identity(resultSignature))
                    .tuningConfig(MSQTuningConfig.defaultConfig())
-                   .destination(isDurableStorageDestination()
+                   .destination(isDurableStorageDestination(contextName, context)
                                 ? DurableStorageMSQDestination.INSTANCE
                                 : TaskReportMSQDestination.INSTANCE)
                    .build()
@@ -520,7 +520,7 @@ public class MSQSelectTest extends MSQTestBase
                                        )
                                        ))
                                    .tuningConfig(MSQTuningConfig.defaultConfig())
-                                   .destination(isDurableStorageDestination()
+                                   .destination(isDurableStorageDestination(contextName, context)
                                                 ? DurableStorageMSQDestination.INSTANCE
                                                 : TaskReportMSQDestination.INSTANCE)
                                    .build())
@@ -589,7 +589,7 @@ public class MSQSelectTest extends MSQTestBase
                        )
                        ))
                    .tuningConfig(MSQTuningConfig.defaultConfig())
-                   .destination(isDurableStorageDestination()
+                   .destination(isDurableStorageDestination(contextName, context)
                                 ? DurableStorageMSQDestination.INSTANCE
                                 : TaskReportMSQDestination.INSTANCE)
                    .build())
@@ -648,7 +648,7 @@ public class MSQSelectTest extends MSQTestBase
                    )
                    .columnMappings(ColumnMappings.identity(resultSignature))
                    .tuningConfig(MSQTuningConfig.defaultConfig())
-                   .destination(isDurableStorageDestination()
+                   .destination(isDurableStorageDestination(contextName, context)
                                 ? DurableStorageMSQDestination.INSTANCE
                                 : TaskReportMSQDestination.INSTANCE)
                    .build()
@@ -719,7 +719,7 @@ public class MSQSelectTest extends MSQTestBase
                                        )
                                        ))
                                    .tuningConfig(MSQTuningConfig.defaultConfig())
-                                   .destination(isDurableStorageDestination()
+                                   .destination(isDurableStorageDestination(contextName, context)
                                                 ? DurableStorageMSQDestination.INSTANCE
                                                 : TaskReportMSQDestination.INSTANCE)
                                    .build())
@@ -751,7 +751,7 @@ public class MSQSelectTest extends MSQTestBase
                                    .build())
                    .columnMappings(new ColumnMappings(ImmutableList.of(new ColumnMapping("a0", "EXPR$0"))))
                    .tuningConfig(MSQTuningConfig.defaultConfig())
-                   .destination(isDurableStorageDestination()
+                   .destination(isDurableStorageDestination(contextName, context)
                                 ? DurableStorageMSQDestination.INSTANCE
                                 : TaskReportMSQDestination.INSTANCE)
                    .build())
@@ -809,7 +809,7 @@ public class MSQSelectTest extends MSQTestBase
                        )
                    )
                    .tuningConfig(MSQTuningConfig.defaultConfig())
-                   .destination(isDurableStorageDestination()
+                   .destination(isDurableStorageDestination(contextName, context)
                                 ? DurableStorageMSQDestination.INSTANCE
                                 : TaskReportMSQDestination.INSTANCE)
                    .build())
@@ -860,7 +860,7 @@ public class MSQSelectTest extends MSQTestBase
                    .query(query)
                    .columnMappings(new ColumnMappings(ImmutableList.of(new ColumnMapping("a0", "cnt"))))
                    .tuningConfig(MSQTuningConfig.defaultConfig())
-                   .destination(isDurableStorageDestination()
+                   .destination(isDurableStorageDestination(contextName, context)
                                 ? DurableStorageMSQDestination.INSTANCE
                                 : TaskReportMSQDestination.INSTANCE)
                    .build()
@@ -1035,7 +1035,7 @@ public class MSQSelectTest extends MSQTestBase
                        )
                    )
                    .tuningConfig(MSQTuningConfig.defaultConfig())
-                   .destination(isDurableStorageDestination()
+                   .destination(isDurableStorageDestination(contextName, context)
                                 ? DurableStorageMSQDestination.INSTANCE
                                 : TaskReportMSQDestination.INSTANCE)
                    .build()
@@ -1095,7 +1095,7 @@ public class MSQSelectTest extends MSQTestBase
                        )
                    )
                    .tuningConfig(MSQTuningConfig.defaultConfig())
-                   .destination(isDurableStorageDestination()
+                   .destination(isDurableStorageDestination(contextName, context)
                                 ? DurableStorageMSQDestination.INSTANCE
                                 : TaskReportMSQDestination.INSTANCE)
                    .build()
@@ -1176,7 +1176,7 @@ public class MSQSelectTest extends MSQTestBase
                        )
                    )
                    .tuningConfig(MSQTuningConfig.defaultConfig())
-                   .destination(isDurableStorageDestination()
+                   .destination(isDurableStorageDestination(contextName, context)
                                 ? DurableStorageMSQDestination.INSTANCE
                                 : TaskReportMSQDestination.INSTANCE)
                    .build()
@@ -1255,7 +1255,7 @@ public class MSQSelectTest extends MSQTestBase
                        )
                    )
                    .tuningConfig(MSQTuningConfig.defaultConfig())
-                   .destination(isDurableStorageDestination()
+                   .destination(isDurableStorageDestination(contextName, context)
                                 ? DurableStorageMSQDestination.INSTANCE
                                 : TaskReportMSQDestination.INSTANCE)
                    .build()
@@ -1357,7 +1357,7 @@ public class MSQSelectTest extends MSQTestBase
                     )
                 ))
                 .tuningConfig(MSQTuningConfig.defaultConfig())
-                .destination(isDurableStorageDestination()
+                .destination(isDurableStorageDestination(contextName, context)
                              ? DurableStorageMSQDestination.INSTANCE
                              : TaskReportMSQDestination.INSTANCE)
                 .build()
@@ -1472,7 +1472,7 @@ public class MSQSelectTest extends MSQTestBase
                     )
                 ))
                 .tuningConfig(MSQTuningConfig.defaultConfig())
-                .destination(isDurableStorageDestination()
+                .destination(isDurableStorageDestination(contextName, context)
                              ? DurableStorageMSQDestination.INSTANCE
                              : TaskReportMSQDestination.INSTANCE)
                 .build()
@@ -1490,8 +1490,8 @@ public class MSQSelectTest extends MSQTestBase
         .setExpectedCountersForStageWorkerChannel(
             CounterSnapshotMatcher
                 .with()
-                .rows(isPageSizeLimited() ? new long[]{1L, 1L, 1L, 1L, 1L} : new long[]{5L})
-                .frames(isPageSizeLimited() ? new long[]{1L, 1L, 1L, 1L, 1L} : new long[]{1L}),
+                .rows(isPageSizeLimited(contextName) ? new long[]{1L, 1L, 1L, 1L, 1L} : new long[]{5L})
+                .frames(isPageSizeLimited(contextName) ? new long[]{1L, 1L, 1L, 1L, 1L} : new long[]{1L}),
             0, 0, "shuffle"
         )
         .setExpectedCountersForStageWorkerChannel(
@@ -1507,12 +1507,12 @@ public class MSQSelectTest extends MSQTestBase
         .setExpectedCountersForStageWorkerChannel(
             CounterSnapshotMatcher
                 .with()
-                .rows(isPageSizeLimited() ? new long[]{1L, 1L, 1L, 1L, 1L} : new long[]{5L})
-                .frames(isPageSizeLimited() ? new long[]{1L, 1L, 1L, 1L, 1L} : new long[]{1L}),
+                .rows(isPageSizeLimited(contextName) ? new long[]{1L, 1L, 1L, 1L, 1L} : new long[]{5L})
+                .frames(isPageSizeLimited(contextName) ? new long[]{1L, 1L, 1L, 1L, 1L} : new long[]{1L}),
             0, 1, "shuffle"
         );
     // adding result stage counter checks
-    if (isPageSizeLimited()) {
+    if (isPageSizeLimited(contextName)) {
       selectTester.setExpectedCountersForStageWorkerChannel(
           CounterSnapshotMatcher
               .with().rows(2, 0, 2, 0, 2),
@@ -1636,7 +1636,7 @@ public class MSQSelectTest extends MSQTestBase
                    )
                    .columnMappings(ColumnMappings.identity(resultSignature))
                    .tuningConfig(MSQTuningConfig.defaultConfig())
-                   .destination(isDurableStorageDestination()
+                   .destination(isDurableStorageDestination(contextName, context)
                                 ? DurableStorageMSQDestination.INSTANCE
                                 : TaskReportMSQDestination.INSTANCE)
                    .build()
@@ -1661,8 +1661,8 @@ public class MSQSelectTest extends MSQTestBase
         .setExpectedCountersForStageWorkerChannel(
             CounterSnapshotMatcher
                 .with()
-                .rows(isPageSizeLimited() ? new long[]{1, 2} : new long[]{3})
-                .frames(isPageSizeLimited() ? new long[]{1, 1} : new long[]{1}),
+                .rows(isPageSizeLimited(contextName) ? new long[]{1, 2} : new long[]{3})
+                .frames(isPageSizeLimited(contextName) ? new long[]{1, 1} : new long[]{1}),
             0, 0, "shuffle"
         )
         .verifyResults();
@@ -1708,7 +1708,7 @@ public class MSQSelectTest extends MSQTestBase
                                        )
                                    )
                                    .tuningConfig(MSQTuningConfig.defaultConfig())
-                                   .destination(isDurableStorageDestination()
+                                   .destination(isDurableStorageDestination(contextName, context)
                                                 ? DurableStorageMSQDestination.INSTANCE
                                                 : TaskReportMSQDestination.INSTANCE)
                                    .build())
@@ -1780,7 +1780,7 @@ public class MSQSelectTest extends MSQTestBase
                                        new ColumnMapping("a0", "col")
                                    )))
                                    .tuningConfig(MSQTuningConfig.defaultConfig())
-                                   .destination(isDurableStorageDestination()
+                                   .destination(isDurableStorageDestination(contextName, context)
                                                 ? DurableStorageMSQDestination.INSTANCE
                                                 : TaskReportMSQDestination.INSTANCE)
                                    .build())
@@ -1836,7 +1836,7 @@ public class MSQSelectTest extends MSQTestBase
                        )
                        ))
                    .tuningConfig(MSQTuningConfig.defaultConfig())
-                   .destination(isDurableStorageDestination()
+                   .destination(isDurableStorageDestination(contextName, context)
                                 ? DurableStorageMSQDestination.INSTANCE
                                 : TaskReportMSQDestination.INSTANCE)
                    .build())
@@ -1913,7 +1913,7 @@ public class MSQSelectTest extends MSQTestBase
                                        )
                                        ))
                                    .tuningConfig(MSQTuningConfig.defaultConfig())
-                                   .destination(isDurableStorageDestination()
+                                   .destination(isDurableStorageDestination(contextName, context)
                                                 ? DurableStorageMSQDestination.INSTANCE
                                                 : TaskReportMSQDestination.INSTANCE)
                                    .build())
@@ -1985,7 +1985,7 @@ public class MSQSelectTest extends MSQTestBase
                                        )
                                    )
                                    .tuningConfig(MSQTuningConfig.defaultConfig())
-                                   .destination(isDurableStorageDestination()
+                                   .destination(isDurableStorageDestination(contextName, context)
                                                 ? DurableStorageMSQDestination.INSTANCE
                                                 : TaskReportMSQDestination.INSTANCE)
                                    .build())
@@ -2112,7 +2112,7 @@ public class MSQSelectTest extends MSQTestBase
                                        )
                                        ))
                                    .tuningConfig(MSQTuningConfig.defaultConfig())
-                                   .destination(isDurableStorageDestination()
+                                   .destination(isDurableStorageDestination(contextName, context)
                                                 ? DurableStorageMSQDestination.INSTANCE
                                                 : TaskReportMSQDestination.INSTANCE)
                                    .build())
@@ -2168,7 +2168,7 @@ public class MSQSelectTest extends MSQTestBase
                                        ))
                                    )
                                    .tuningConfig(MSQTuningConfig.defaultConfig())
-                                   .destination(isDurableStorageDestination()
+                                   .destination(isDurableStorageDestination(contextName, context)
                                                 ? DurableStorageMSQDestination.INSTANCE
                                                 : TaskReportMSQDestination.INSTANCE)
                                    .build())
@@ -2249,7 +2249,7 @@ public class MSQSelectTest extends MSQTestBase
                     )
                 ))
                 .tuningConfig(MSQTuningConfig.defaultConfig())
-                .destination(isDurableStorageDestination()
+                .destination(isDurableStorageDestination(contextName, context)
                              ? DurableStorageMSQDestination.INSTANCE
                              : TaskReportMSQDestination.INSTANCE)
                 .build())
@@ -2347,7 +2347,7 @@ public class MSQSelectTest extends MSQTestBase
                         new ColumnMapping("a0", "cnt")
                     )
                 ))
-                .destination(isDurableStorageDestination()
+                .destination(isDurableStorageDestination(contextName, context)
                              ? DurableStorageMSQDestination.INSTANCE
                              : TaskReportMSQDestination.INSTANCE)
                 .tuningConfig(MSQTuningConfig.defaultConfig())
@@ -2408,7 +2408,7 @@ public class MSQSelectTest extends MSQTestBase
                               .build())
                    .columnMappings(expectedColumnMappings)
                    .tuningConfig(MSQTuningConfig.defaultConfig())
-                   .destination(isDurableStorageDestination()
+                   .destination(isDurableStorageDestination(contextName, context)
                                 ? DurableStorageMSQDestination.INSTANCE
                                 : TaskReportMSQDestination.INSTANCE)
                    .build()
@@ -2464,7 +2464,7 @@ public class MSQSelectTest extends MSQTestBase
                               .build())
                    .columnMappings(expectedColumnMappings)
                    .tuningConfig(MSQTuningConfig.defaultConfig())
-                   .destination(isDurableStorageDestination()
+                   .destination(isDurableStorageDestination(contextName, context)
                                 ? DurableStorageMSQDestination.INSTANCE
                                 : TaskReportMSQDestination.INSTANCE)
                    .build()
@@ -2554,7 +2554,7 @@ public class MSQSelectTest extends MSQTestBase
                               .build())
                    .columnMappings(expectedColumnMappings)
                    .tuningConfig(MSQTuningConfig.defaultConfig())
-                   .destination(isDurableStorageDestination()
+                   .destination(isDurableStorageDestination(contextName, context)
                                 ? DurableStorageMSQDestination.INSTANCE
                                 : TaskReportMSQDestination.INSTANCE)
                    .build()
@@ -2624,7 +2624,7 @@ public class MSQSelectTest extends MSQTestBase
                               .build())
                    .columnMappings(ColumnMappings.identity(rowSignature))
                    .tuningConfig(MSQTuningConfig.defaultConfig())
-                   .destination(isDurableStorageDestination()
+                   .destination(isDurableStorageDestination(contextName, context)
                                 ? DurableStorageMSQDestination.INSTANCE
                                 : TaskReportMSQDestination.INSTANCE)
                    .build()
@@ -2677,19 +2677,9 @@ public class MSQSelectTest extends MSQTestBase
     return localContext;
   }
 
-  public boolean isDurableStorageDestination()
-  {
-    return isDurableStorageDestination(contextName, context);
-  }
-
   private boolean isDurableStorageDestination(String contextName, Map<String, Object> context)
   {
     return QUERY_RESULTS_WITH_DURABLE_STORAGE.equals(contextName) || QUERY_RESULTS_WITH_DEFAULT_CONTEXT.equals(context);
-  }
-
-  public boolean isPageSizeLimited()
-  {
-    return isPageSizeLimited(contextName);
   }
 
   public boolean isPageSizeLimited(String contextName)
