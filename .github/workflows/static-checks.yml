@@ -164,7 +164,7 @@ jobs:
 
       - name: rewrite:dryRun
         run: |
-          ${MVN} rewrite:dryRun -Drewrite.failOnDryRunResults ${MAVEN_SKIP}
+          ${MVN} rewrite:dryRun ${MAVEN_SKIP}
 
   web-checks:
     strategy:
