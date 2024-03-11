@@ -23,6 +23,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.io.ByteStreams;
 import org.apache.druid.java.util.common.IOE;
 import org.apache.druid.java.util.common.StringUtils;
+import org.apache.druid.sql.calcite.BaseCalciteQueryTest;
+import org.apache.druid.sql.calcite.BaseCalciteQueryTest.TempFolderOverTempDir;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
@@ -70,5 +72,11 @@ public class MSQTestFileUtils
     }
     file.deleteOnExit();
     return file;
+  }
+
+  public static File getResourceAsTemporaryFile(TempFolderOverTempDir temporaryFolder, BaseCalciteQueryTest object,
+      String resource) throws IOException
+  {
+    return object.getResourceAsTemporaryFile(resource);
   }
 }

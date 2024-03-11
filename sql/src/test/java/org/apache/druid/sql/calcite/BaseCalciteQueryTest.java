@@ -26,6 +26,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.io.ByteStreams;
 import com.google.inject.Injector;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.druid.common.config.NullHandling;
@@ -126,11 +127,16 @@ import org.junit.internal.matchers.ThrowableMessageMatcher;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
 import org.junit.rules.TemporaryFolder;
 
 import javax.annotation.Nullable;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -153,6 +159,7 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
  * A base class for SQL query testing. It sets up query execution environment, provides useful helper methods,
  * and populates data using {@link CalciteTests#createMockWalker}.
  */
+@EnableRuleMigrationSupport
 public class BaseCalciteQueryTest extends CalciteTestBase
     implements QueryComponentSupplier, PlannerComponentSupplier
 {
@@ -299,7 +306,45 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   final boolean useDefault = NullHandling.replaceWithDefault();
 
   @Rule(order = 2)
-  public TemporaryFolder temporaryFolder = new TemporaryFolder();
+  public TemporaryFolder temporaryFolder2 = new TemporaryFolder();
+
+  @TempDir
+  public File tempDir;
+
+  public TempFolderOverTempDir temporaryFolder = new TempFolderOverTempDir();
+
+  public class TempFolderOverTempDir {
+
+    public File newFile()
+    {
+      try {
+        return temporaryFolder2.newFile();
+      }
+      catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
+
+    public File newFolder()
+    {
+      try {
+        return temporaryFolder2.newFolder();
+      }
+      catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
+
+    public File newFolder(String string)
+    {
+      try {
+        return temporaryFolder2.newFolder(string);
+      }
+      catch (IOException e) {
+        throw new RuntimeException(e);
+      }
+    }
+  }
 
   public boolean cannotVectorize = false;
   public boolean skipVectorize = false;
@@ -680,14 +725,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   @Override
   public void gatherProperties(Properties properties)
   {
-    try {
-      baseComponentSupplier = new StandardComponentSupplier(
-          temporaryFolder.newFolder()
-      );
-    }
-    catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    baseComponentSupplier = new StandardComponentSupplier(temporaryFolder.newFolder());
     baseComponentSupplier.gatherProperties(properties);
   }
 
@@ -1626,5 +1664,26 @@ public class BaseCalciteQueryTest extends CalciteTestBase
     {
       sb.append(post);
     }
+  }
+
+  /**
+   * Helper method that copies a resource to a temporary file, then returns it.
+   */
+  public File getResourceAsTemporaryFile(final String resource)
+  {
+    final File file = temporaryFolder.newFile();
+    final InputStream stream = getClass().getResourceAsStream(resource);
+
+    if (stream == null) {
+      throw new RuntimeException(StringUtils.format("No such resource [%s]", resource));
+    }
+
+    try {
+      ByteStreams.copy(stream, Files.newOutputStream(file.toPath()));
+    }
+    catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+    return file;
   }
 }
