@@ -497,7 +497,6 @@ public class DrillWindowQueryTest extends BaseCalciteQueryTest
 
   @SuppressWarnings({"rawtypes", "unchecked"})
   private void attachIndex(SpecificSegmentsQuerySegmentWalker texasRanger, String dataSource, DimensionSchema... dims)
-      throws IOException
   {
     ArrayList<String> dimensionNames = new ArrayList<>(dims.length);
     for (DimensionSchema dimension : dims) {
