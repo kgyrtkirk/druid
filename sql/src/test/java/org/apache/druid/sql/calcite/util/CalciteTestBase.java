@@ -100,9 +100,11 @@ public abstract class CalciteTestBase
     }
   }
 
+  // FIXME remove
   public TempFolderOverTempDir temXMEXAXISporaryFolder = new TempFolderOverTempDir();
 
-  public class TempFolderOverTempDir {
+  public class TempFolderOverTempDir
+  {
 
     public File newFolder()
     {

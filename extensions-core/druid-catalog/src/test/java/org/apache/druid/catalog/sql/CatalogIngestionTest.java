@@ -47,7 +47,7 @@ import static org.junit.Assert.fail;
 /**
  * Test the use of catalog specs to drive MSQ ingestion.
  */
-//enable rule migration because TestDerbyConnector.DerbyConnectorRule
+// enable rule migration because TestDerbyConnector.DerbyConnectorRule
 @EnableRuleMigrationSupport
 public class CatalogIngestionTest extends CalciteIngestionDmlTest
 {
