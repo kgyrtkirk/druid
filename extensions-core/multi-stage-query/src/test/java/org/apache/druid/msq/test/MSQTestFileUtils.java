@@ -24,7 +24,7 @@ import com.google.common.io.ByteStreams;
 import org.apache.druid.java.util.common.IOE;
 import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.sql.calcite.BaseCalciteQueryTest;
-import org.apache.druid.sql.calcite.BaseCalciteQueryTest.TempFolderOverTempDir;
+import org.apache.druid.sql.calcite.util.CalciteTestBase.TempFolderOverTempDir;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;

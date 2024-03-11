@@ -305,47 +305,6 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   public final SqlEngine engine0;
   final boolean useDefault = NullHandling.replaceWithDefault();
 
-  @Rule(order = 2)
-  public TemporaryFolder temporaryFolder2 = new TemporaryFolder();
-
-  @TempDir
-  public File tempDir;
-
-  public TempFolderOverTempDir temporaryFolder = new TempFolderOverTempDir();
-
-  public class TempFolderOverTempDir {
-
-    public File newFile()
-    {
-      try {
-        return temporaryFolder2.newFile();
-      }
-      catch (IOException e) {
-        throw new RuntimeException(e);
-      }
-    }
-
-    public File newFolder()
-    {
-      try {
-        return temporaryFolder2.newFolder();
-      }
-      catch (IOException e) {
-        throw new RuntimeException(e);
-      }
-    }
-
-    public File newFolder(String string)
-    {
-      try {
-        return temporaryFolder2.newFolder(string);
-      }
-      catch (IOException e) {
-        throw new RuntimeException(e);
-      }
-    }
-  }
-
   public boolean cannotVectorize = false;
   public boolean skipVectorize = false;
 
