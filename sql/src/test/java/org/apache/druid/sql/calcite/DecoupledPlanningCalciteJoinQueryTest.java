@@ -30,6 +30,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.TestRule;
 
 import java.util.Map;
 
@@ -41,6 +44,9 @@ public class DecoupledPlanningCalciteJoinQueryTest extends CalciteJoinQueryTest
 //  @Order(990)
 //  @RegisterExtension
 //  public NotYetSupportedProcessor decoupledIgnoreProcessor = new NotYetSupportedProcessor();
+
+  @Rule
+  public TestRule sqlCompatOnly = DisableUnless.SQL_COMPATIBLE;
 
   private static final ImmutableMap<String, Object> CONTEXT_OVERRIDES =
       ImmutableMap.<String, Object>builder()
