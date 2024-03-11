@@ -20,32 +20,21 @@
 package org.apache.druid.sql.calcite;
 
 import com.google.common.base.Throwables;
-import junitparams.JUnitParamsRunner;
-import org.apache.commons.lang3.RegExUtils;
 import org.apache.druid.error.DruidException;
 import org.apache.druid.java.util.common.ISE;
 import org.junit.AssumptionViolatedException;
-import org.junit.jupiter.api.extension.DynamicTestInvocationContext;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.InvocationInterceptor;
 import org.junit.jupiter.api.extension.ReflectiveInvocationContext;
-import org.junit.runner.Description;
-import org.junit.runner.RunWith;
-import org.junit.runners.model.Statement;
 import org.opentest4j.IncompleteExecutionException;
 
-import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import static org.junit.Assert.assertThrows;
 
 /**
@@ -63,10 +52,12 @@ import static org.junit.Assert.assertThrows;
  * expected error.</li>
  * </ol>
  *
- * During usage; the annotation process have to be added to the testclass.
- * Ensure that it's loaded as the most outer-rule by using order=0 - otherwise
- * it may interfere with other rules: <code>
- *   &#64;Rule(order = 0)
+ * During usage; the annotation process have to be added to registered with the testclass.
+ * Ensure that it's loaded as the most outer-rule by using the right ExtendWith order - or by
+ * specifying Order:
+ * <code>
+ *   @Order(0)
+ *   @RegisterExtension
  *   public TestRule notYetSupportedRule = new NotYetSupportedProcessor();
  *
  *   @NotYetSupported(NOT_ENOUGH_RULES)
@@ -134,14 +125,13 @@ public @interface NotYetSupported
    * Ensures that test cases disabled with that annotation can still not pass.
    * If the error is as expected; the testcase is marked as "ignored".
    */
-  public static class NotYetSupportedProcessor implements InvocationInterceptor
+  class NotYetSupportedProcessor implements InvocationInterceptor
   {
     @Override
     public void interceptTestMethod(Invocation<Void> invocation,
         ReflectiveInvocationContext<Method> invocationContext,
         ExtensionContext extensionContext) throws Throwable
     {
-
       Method method = extensionContext.getTestMethod().get();
       NotYetSupported annotation = method.getAnnotation(NotYetSupported.class);
 
@@ -189,108 +179,10 @@ public @interface NotYetSupported
       }
     }
 
-    public Statement apply(Statement base, Description description)
-    {
-      NotYetSupported annotation = getAnnotation(description, NotYetSupported.class);
-
-      if (annotation == null) {
-        return base;
-      }
-      return new Statement()
-      {
-        @Override
-        public void evaluate()
-        {
-          Modes ignoreMode = annotation.value();
-          Throwable e = null;
-          try {
-            base.evaluate();
-          }
-          catch (Throwable t) {
-            e = t;
-          }
-          // If the base test case is supposed to be ignored already, just skip
-          // the further evaluation
-          if (e instanceof AssumptionViolatedException) {
-            throw (AssumptionViolatedException) e;
-          }
-          Throwable finalE = e;
-          assertThrows(
-              "Expected that this testcase will fail - it might got fixed; or failure have changed?",
-              ignoreMode.throwableClass,
-              () -> {
-                if (finalE != null) {
-                  throw finalE;
-                }
-              }
-          );
-
-          String trace = Throwables.getStackTraceAsString(e);
-          Matcher m = annotation.value().getPattern().matcher(trace);
-
-          if (!m.find()) {
-            throw new AssertionError("Exception stactrace doesn't match regex: " + annotation.value().regex, e);
-          }
-          throw new AssumptionViolatedException("Test is not-yet supported; ignored with:" + annotation);
-        }
-      };
-    }
-
-    private static Method getMethodForName(Class<?> testClass, String realMethodName)
-    {
-      List<Method> matches = Stream.of(testClass.getMethods())
-          .filter(m -> realMethodName.equals(m.getName()))
-          .collect(Collectors.toList());
-      switch (matches.size()) {
-        case 0:
-          throw new IllegalArgumentException("Expected to find method...but there is none?");
-        case 1:
-          return matches.get(0);
-        default:
-          throw new IllegalArgumentException("method overrides are not supported");
-      }
-    }
-
-    public static <T extends Annotation> T getAnnotation(Description description, Class<T> annotationType)
-    {
-      T annotation = description.getAnnotation(annotationType);
-      if (annotation != null) {
-        return annotation;
-      }
-      Class<?> testClass = description.getTestClass();
-      RunWith runWith = testClass.getAnnotation(RunWith.class);
-      if (runWith == null || !runWith.value().equals(JUnitParamsRunner.class)) {
-        return null;
-      }
-      String mehodName = description.getMethodName();
-      String realMethodName = RegExUtils.replaceAll(mehodName, "\\(.*", "");
-
-      Method m = getMethodForName(testClass, realMethodName);
-      return m.getAnnotation(annotationType);
-    }
-
-    @Override
-    public <T> T interceptTestFactoryMethod(Invocation<T> invocation,
-        ReflectiveInvocationContext<Method> invocationContext, ExtensionContext extensionContext) throws Throwable
-    {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-
-    private void interceptTestMethod()
-    {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-
-    @Override
-    public void interceptDynamicTest(Invocation<Void> invocation, DynamicTestInvocationContext invocationContext,
-        ExtensionContext extensionContext) throws Throwable
-    {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-
     @Override
     public void interceptTestTemplateMethod(Invocation<Void> invocation,
-        ReflectiveInvocationContext<Method> invocationContext, ExtensionContext extensionContext) throws Throwable
+        ReflectiveInvocationContext<Method> invocationContext,
+        ExtensionContext extensionContext) throws Throwable
     {
       interceptTestMethod(invocation, invocationContext, extensionContext);
     }
