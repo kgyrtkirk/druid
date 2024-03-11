@@ -2679,15 +2679,27 @@ public class MSQSelectTest extends MSQTestBase
 
   public boolean isDurableStorageDestination()
   {
+    return isDurableStorageDestination(contextName, context);
+  }
+
+  private boolean isDurableStorageDestination(String contextName, Map<String, Object> context)
+  {
     return QUERY_RESULTS_WITH_DURABLE_STORAGE.equals(contextName) || QUERY_RESULTS_WITH_DEFAULT_CONTEXT.equals(context);
   }
 
   public boolean isPageSizeLimited()
   {
+    return isPageSizeLimited(contextName);
+  }
+
+  public boolean isPageSizeLimited(String contextName)
+  {
     return QUERY_RESULTS_WITH_DURABLE_STORAGE.equals(contextName);
   }
 
-  public void initMSQSelectTest(String contextName, Map<String, Object> context) {
+  // FIXME remove
+  public void initMSQSelectTest(String contextName, Map<String, Object> context)
+  {
     this.contextName = contextName;
     this.context = context;
   }
