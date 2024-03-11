@@ -1360,6 +1360,10 @@
                     <failOnDryRunResults>true</failOnDryRunResults>
                     <pomCacheEnabled>false</pomCacheEnabled>
                     <skipMavenParsing>true</skipMavenParsing>
+                    <exclusions>
+                        <exclude>**/*.json</exclude>
+                        <exclude>**/*.yaml</exclude>
+                    </exclusions>
                 </configuration>
                 <dependencies>
                     <dependency>
