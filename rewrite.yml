@@ -20,6 +20,7 @@ preconditions:
        typeName: org.apache.druid.sql.calcite.util.CalciteTestBase
 recipeList:
   - org.apache.druid.JUnit4to5Migration
+  - org.openrewrite.staticanalysis.UnnecessaryThrows
   #- org.openrewrite.java.testing.junit5.StaticImports
 ---
 type: specs.openrewrite.org/v1beta/recipe

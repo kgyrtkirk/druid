@@ -72,7 +72,7 @@ public class MSQExportTest extends MSQTestBase
   }
 
   @Test
-  public void testNumberOfRowsPerFile() throws IOException
+  public void testNumberOfRowsPerFile()
   {
     RowSignature rowSignature = RowSignature.builder()
                                             .add("__time", ColumnType.LONG)
