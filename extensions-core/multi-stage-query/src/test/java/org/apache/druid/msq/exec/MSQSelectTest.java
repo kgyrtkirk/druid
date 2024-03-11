@@ -1291,7 +1291,7 @@ public class MSQSelectTest extends MSQTestBase
   public void testExternGroupBy(String contextName, Map<String, Object> context) throws IOException
   {
     initMSQSelectTest(contextName, context);
-    final File toRead = this.getResourceAsTemporaryFile("/wikipedia-sampled.json");
+    final File toRead = getResourceAsTemporaryFile("/wikipedia-sampled.json");
     final String toReadAsJson = queryFramework().queryJsonMapper().writeValueAsString(toRead.getAbsolutePath());
 
     RowSignature rowSignature = RowSignature.builder()
@@ -1389,7 +1389,7 @@ public class MSQSelectTest extends MSQTestBase
     Map<String, Object> multipleWorkerContext = new HashMap<>(context);
     multipleWorkerContext.put(MultiStageQueryContext.CTX_MAX_NUM_TASKS, 3);
 
-    final File toRead = this.getResourceAsTemporaryFile("/wikipedia-sampled.json");
+    final File toRead = getResourceAsTemporaryFile("/wikipedia-sampled.json");
     final String toReadAsJson = queryFramework().queryJsonMapper().writeValueAsString(toRead.getAbsolutePath());
 
     RowSignature rowSignature = RowSignature.builder()
@@ -1999,7 +1999,7 @@ public class MSQSelectTest extends MSQTestBase
   public void testTimeColumnAggregationFromExtern(String contextName, Map<String, Object> context) throws IOException
   {
     initMSQSelectTest(contextName, context);
-    final File toRead = this.getResourceAsTemporaryFile("/wikipedia-sampled.json");
+    final File toRead = getResourceAsTemporaryFile("/wikipedia-sampled.json");
     final String toReadAsJson = queryFramework().queryJsonMapper().writeValueAsString(toRead.getAbsolutePath());
 
     RowSignature rowSignature = RowSignature.builder()
@@ -2195,7 +2195,7 @@ public class MSQSelectTest extends MSQTestBase
 
     final int numFiles = 200;
 
-    final File toRead = this.getResourceAsTemporaryFile("/wikipedia-sampled.json");
+    final File toRead = getResourceAsTemporaryFile("/wikipedia-sampled.json");
     final String toReadFileNameAsJson = queryFramework().queryJsonMapper().writeValueAsString(toRead.getAbsolutePath());
 
     String externalFiles = String.join(", ", Collections.nCopies(numFiles, toReadFileNameAsJson));

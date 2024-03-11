@@ -445,7 +445,7 @@ public class SqlMSQStatementResourcePostTest extends MSQTestBase
     context.put(MultiStageQueryContext.CTX_ROWS_PER_PAGE, 2);
     context.put(MultiStageQueryContext.CTX_MAX_NUM_TASKS, 3);
 
-    final File toRead = this.getResourceAsTemporaryFile("/wikipedia-sampled.json");
+    final File toRead = getResourceAsTemporaryFile("/wikipedia-sampled.json");
     final String toReadAsJson = queryFramework().queryJsonMapper().writeValueAsString(toRead.getAbsolutePath());
 
 

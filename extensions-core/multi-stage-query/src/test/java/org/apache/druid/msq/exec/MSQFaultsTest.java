@@ -423,7 +423,7 @@ public class MSQFaultsTest extends MSQTestBase
 
     final int numFiles = 20000;
 
-    final File toRead = this.getResourceAsTemporaryFile("/wikipedia-sampled.json");
+    final File toRead = getResourceAsTemporaryFile("/wikipedia-sampled.json");
     final String toReadFileNameAsJson = queryFramework().queryJsonMapper().writeValueAsString(toRead.getAbsolutePath());
 
     String externalFiles = String.join(", ", Collections.nCopies(numFiles, toReadFileNameAsJson));
