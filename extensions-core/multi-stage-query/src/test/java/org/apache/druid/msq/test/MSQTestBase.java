@@ -197,7 +197,6 @@ import org.junit.Assert;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.io.TempDir;
-import org.junit.rules.TemporaryFolder;
 import org.mockito.Mockito;
 
 import javax.annotation.Nonnull;
@@ -217,6 +216,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -438,7 +438,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
           binder.bind(QueryProcessingPool.class)
                 .toInstance(new ForwardingQueryProcessingPool(Execs.singleThreaded("Test-runner-processing-pool")));
           binder.bind(DataSegmentProvider.class)
-                .toInstance((segmentId, channelCounters, isReindex) -> getSupplierForSegment(segmentId));
+                .toInstance((segmentId, channelCounters, isReindex) -> getSupplierForSegment(this::newTempFile, segmentId));
           binder.bind(DataServerQueryHandlerFactory.class).toInstance(getTestDataServerQueryHandlerFactory());
           binder.bind(IndexIO.class).toInstance(indexIO);
           binder.bind(SpecificSegmentsQuerySegmentWalker.class).toInstance(qf.walker());
@@ -608,71 +608,59 @@ public class MSQTestBase extends BaseCalciteQueryTest
   }
 
   @Nonnull
-  private Supplier<ResourceHolder<Segment>> getSupplierForSegment(SegmentId segmentId)
+  private Supplier<ResourceHolder<Segment>> getSupplierForSegment(Function<String, File> tempFolderProducer, SegmentId segmentId)
   {
     if (segmentManager.getSegment(segmentId) == null) {
       final QueryableIndex index;
-      TemporaryFolder temporaryFolder = new TemporaryFolder();
-      try {
-        temporaryFolder.create();
-      }
-      catch (IOException e) {
-        throw new ISE(e, "Unable to create temporary folder for tests");
-      }
-      try {
-        switch (segmentId.getDataSource()) {
-          case DATASOURCE1:
-            IncrementalIndexSchema foo1Schema = new IncrementalIndexSchema.Builder()
-                .withMetrics(
-                    new CountAggregatorFactory("cnt"),
-                    new FloatSumAggregatorFactory("m1", "m1"),
-                    new DoubleSumAggregatorFactory("m2", "m2"),
-                    new HyperUniquesAggregatorFactory("unique_dim1", "dim1")
-                )
-                .withRollup(false)
-                .build();
-            index = IndexBuilder
-                .create()
-                .tmpDir(new File(temporaryFolder.newFolder(), "1"))
-                .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
-                .schema(foo1Schema)
-                .rows(ROWS1)
-                .buildMMappedIndex();
-            break;
-          case DATASOURCE2:
-            final IncrementalIndexSchema indexSchemaDifferentDim3M1Types = new IncrementalIndexSchema.Builder()
-                .withDimensionsSpec(
-                    new DimensionsSpec(
-                        ImmutableList.of(
-                            new StringDimensionSchema("dim1"),
-                            new StringDimensionSchema("dim2"),
-                            new LongDimensionSchema("dim3")
-                        )
-                    )
-                )
-                .withMetrics(
-                    new CountAggregatorFactory("cnt"),
-                    new LongSumAggregatorFactory("m1", "m1"),
-                    new DoubleSumAggregatorFactory("m2", "m2"),
-                    new HyperUniquesAggregatorFactory("unique_dim1", "dim1")
-                )
-                .withRollup(false)
-                .build();
-            index = IndexBuilder
-                .create()
-                .tmpDir(new File(temporaryFolder.newFolder(), "1"))
-                .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
-                .schema(indexSchemaDifferentDim3M1Types)
-                .rows(ROWS2)
-                .buildMMappedIndex();
-            break;
-          default:
-            throw new ISE("Cannot query segment %s in test runner", segmentId);
+      switch (segmentId.getDataSource()) {
+        case DATASOURCE1:
+          IncrementalIndexSchema foo1Schema = new IncrementalIndexSchema.Builder()
+              .withMetrics(
+                  new CountAggregatorFactory("cnt"),
+                  new FloatSumAggregatorFactory("m1", "m1"),
+                  new DoubleSumAggregatorFactory("m2", "m2"),
+                  new HyperUniquesAggregatorFactory("unique_dim1", "dim1")
+              )
+              .withRollup(false)
+              .build();
+          index = IndexBuilder
+              .create()
+              .tmpDir(new File(tempFolderProducer.apply("tmpDir"), "1"))
+              .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
+              .schema(foo1Schema)
+              .rows(ROWS1)
+              .buildMMappedIndex();
+          break;
+        case DATASOURCE2:
+          final IncrementalIndexSchema indexSchemaDifferentDim3M1Types = new IncrementalIndexSchema.Builder()
+              .withDimensionsSpec(
+                  new DimensionsSpec(
+                      ImmutableList.of(
+                          new StringDimensionSchema("dim1"),
+                          new StringDimensionSchema("dim2"),
+                          new LongDimensionSchema("dim3")
+                      )
+                  )
+              )
+              .withMetrics(
+                  new CountAggregatorFactory("cnt"),
+                  new LongSumAggregatorFactory("m1", "m1"),
+                  new DoubleSumAggregatorFactory("m2", "m2"),
+                  new HyperUniquesAggregatorFactory("unique_dim1", "dim1")
+              )
+              .withRollup(false)
+              .build();
+          index = IndexBuilder
+              .create()
+              .tmpDir(new File(tempFolderProducer.apply("tmpDir"), "1"))
+              .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
+              .schema(indexSchemaDifferentDim3M1Types)
+              .rows(ROWS2)
+              .buildMMappedIndex();
+          break;
+        default:
+          throw new ISE("Cannot query segment %s in test runner", segmentId);
 
-        }
-      }
-      catch (IOException e) {
-        throw new ISE(e, "Unable to load index for segment %s", segmentId);
       }
       Segment segment = new Segment()
       {
