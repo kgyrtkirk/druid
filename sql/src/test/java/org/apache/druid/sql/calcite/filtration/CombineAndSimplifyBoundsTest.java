@@ -105,18 +105,10 @@ public class CombineAndSimplifyBoundsTest extends BaseCalciteQueryTest
     );
   }
 
-  RangeFilterType rangeFilter;
-
-  public void initCombineAndSimplifyBoundsTest(RangeFilterType rangeFilter)
-  {
-    this.rangeFilter = rangeFilter;
-  }
-
   @MethodSource("getParameters")
   @ParameterizedTest
   public void testNotAZ(RangeFilterType rangeFilter)
   {
-    initCombineAndSimplifyBoundsTest(rangeFilter);
     String dim1 = "dim1";
     DimFilter inputFilter = or(
         rangeFilter.lt(dim1, "a"),
@@ -131,7 +123,6 @@ public class CombineAndSimplifyBoundsTest extends BaseCalciteQueryTest
   @ParameterizedTest
   public void testAZ(RangeFilterType rangeFilter)
   {
-    initCombineAndSimplifyBoundsTest(rangeFilter);
     String dim1 = "dim1";
     DimFilter inputFilter = and(
         rangeFilter.gt(dim1, "a"),
@@ -146,7 +137,6 @@ public class CombineAndSimplifyBoundsTest extends BaseCalciteQueryTest
   @ParameterizedTest
   public void testNot2(RangeFilterType rangeFilter)
   {
-    initCombineAndSimplifyBoundsTest(rangeFilter);
     String dim1 = "dim1";
     DimFilter inputFilter = or(
         rangeFilter.le(dim1, "a"),
