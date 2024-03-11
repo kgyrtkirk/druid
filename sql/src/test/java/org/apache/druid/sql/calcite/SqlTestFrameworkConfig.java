@@ -58,7 +58,7 @@ public @interface SqlTestFrameworkConfig
   /**
    * @see {@link SqlTestFrameworkConfig}
    */
-  public class Rule implements AfterAllCallback, BeforeEachCallback
+  class Rule implements AfterAllCallback, BeforeEachCallback
   {
     Map<SqlTestFrameworkConfig, ConfigurationInstance> configMap = new HashMap<>();
     private SqlTestFrameworkConfig config;

@@ -641,7 +641,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
       final QueryRunnerFactoryConglomerate conglomerate,
       final JoinableFactoryWrapper joinableFactory,
       final Injector injector
-  ) throws IOException
+  )
   {
     return baseComponentSupplier.createQuerySegmentWalker(conglomerate, joinableFactory, injector);
   }

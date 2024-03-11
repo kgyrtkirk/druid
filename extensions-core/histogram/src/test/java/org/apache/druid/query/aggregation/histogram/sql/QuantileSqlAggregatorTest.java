@@ -57,7 +57,6 @@ import org.apache.druid.timeline.DataSegment;
 import org.apache.druid.timeline.partition.LinearShardSpec;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.util.List;
 
 public class QuantileSqlAggregatorTest extends BaseCalciteQueryTest
@@ -74,7 +73,7 @@ public class QuantileSqlAggregatorTest extends BaseCalciteQueryTest
       final QueryRunnerFactoryConglomerate conglomerate,
       final JoinableFactoryWrapper joinableFactory,
       final Injector injector
-  ) throws IOException
+  )
   {
     ApproximateHistogramDruidModule.registerSerde();
 

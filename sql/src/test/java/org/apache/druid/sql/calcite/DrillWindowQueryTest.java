@@ -242,7 +242,8 @@ public class DrillWindowQueryTest extends BaseCalciteQueryTest
   public SpecificSegmentsQuerySegmentWalker createQuerySegmentWalker(
       QueryRunnerFactoryConglomerate conglomerate,
       JoinableFactoryWrapper joinableFactory,
-      Injector injector) throws IOException
+      Injector injector
+  )
   {
     final SpecificSegmentsQuerySegmentWalker retVal = super.createQuerySegmentWalker(
         conglomerate,

@@ -72,7 +72,6 @@ import org.joda.time.Period;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -111,7 +110,7 @@ public class ThetaSketchSqlAggregatorTest extends BaseCalciteQueryTest
       final QueryRunnerFactoryConglomerate conglomerate,
       final JoinableFactoryWrapper joinableFactory,
       final Injector injector
-  ) throws IOException
+  )
   {
     SketchModule.registerSerde();
 

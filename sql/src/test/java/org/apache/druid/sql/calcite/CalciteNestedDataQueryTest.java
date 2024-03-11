@@ -78,7 +78,6 @@ import org.hamcrest.CoreMatchers;
 import org.junit.internal.matchers.ThrowableMessageMatcher;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -190,7 +189,7 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
       final QueryRunnerFactoryConglomerate conglomerate,
       final JoinableFactoryWrapper joinableFactory,
       final Injector injector
-  ) throws IOException
+  )
   {
     NestedDataModule.registerHandlersAndSerde();
     final QueryableIndex index =
