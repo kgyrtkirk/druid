@@ -38,6 +38,7 @@ import org.apache.druid.guice.DruidInjectorBuilder;
 import org.apache.druid.hll.VersionOneHyperLogLogCollector;
 import org.apache.druid.java.util.common.DateTimes;
 import org.apache.druid.java.util.common.Intervals;
+import org.apache.druid.java.util.common.RE;
 import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.java.util.common.granularity.Granularity;
 import org.apache.druid.java.util.common.io.Closer;
@@ -1609,7 +1610,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
     final InputStream stream = getClass().getResourceAsStream(resource);
 
     if (stream == null) {
-      throw new RuntimeException(StringUtils.format("No such resource [%s]", resource));
+      throw new RE(StringUtils.format("No such resource [%s]", resource));
     }
 
     try {

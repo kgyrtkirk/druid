@@ -32,22 +32,18 @@ import org.apache.druid.sql.calcite.BaseCalciteQueryTest;
 import org.apache.druid.sql.calcite.SqlSchema;
 import org.apache.druid.sql.calcite.planner.CatalogResolver;
 import org.apache.druid.sql.calcite.util.SqlTestFramework;
-import org.junit.Rule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
-
+import org.junit.jupiter.api.extension.RegisterExtension;
 import java.util.Arrays;
 import java.util.Collections;
 
 import static org.junit.Assert.fail;
 
-// enable rule migration because TestDerbyConnector.DerbyConnectorRule
-@EnableRuleMigrationSupport
 public class CatalogQueryTest extends BaseCalciteQueryTest
 {
-  @Rule
-  public final TestDerbyConnector.DerbyConnectorRule derbyConnectorRule = new TestDerbyConnector.DerbyConnectorRule();
+  @RegisterExtension
+  public static final TestDerbyConnector.DerbyConnectorRule derbyConnectorRule = new TestDerbyConnector.DerbyConnectorRule();
 
   private CatalogTests.DbFixture dbFixture;
   private CatalogStorage storage;
