@@ -1,6 +1,7 @@
 !use druid
 !set outputformat mysql
 
+
 select 1+3;
 +--------+
 | EXPR$0 |
