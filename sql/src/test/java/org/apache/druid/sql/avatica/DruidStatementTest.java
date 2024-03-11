@@ -47,9 +47,7 @@ import org.apache.druid.sql.calcite.planner.PlannerFactory;
 import org.apache.druid.sql.calcite.schema.DruidSchemaCatalog;
 import org.apache.druid.sql.calcite.util.CalciteTestBase;
 import org.apache.druid.sql.calcite.util.CalciteTests;
-import org.apache.druid.sql.calcite.util.QueryLogHook;
 import org.junit.Assert;
-import org.junit.Rule;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -72,9 +70,6 @@ public class DruidStatementTest extends CalciteTestBase
       "SELECT __time, cnt, dim1, dim2, m1 FROM druid.foo";
   private static String SELECT_STAR_FROM_FOO =
       "SELECT * FROM druid.foo";
-
-  @Rule
-  public QueryLogHook queryLogHook = QueryLogHook.create();
 
   private static SpecificSegmentsQuerySegmentWalker walker;
   private static QueryRunnerFactoryConglomerate conglomerate;
