@@ -76,7 +76,8 @@ public class QueryLogHook implements TestRule
     try {
       skipLog.set(true);
       consumer.accept(null);
-    } finally {
+    }
+    finally {
       skipLog.set(false);
     }
   }
@@ -99,6 +100,7 @@ public class QueryLogHook implements TestRule
     };
   }
 
+  // FIXME
   static class C implements Consumer<Object>
   {
     private AtomicBoolean skipLog;
@@ -138,6 +140,5 @@ public class QueryLogHook implements TestRule
     try (final Hook.Closeable unhook = Hook.QUERY_PLAN.add(function)) {
       r.run();
     }
-  };
-
+  }
 }

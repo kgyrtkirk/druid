@@ -81,6 +81,7 @@ public @interface NotYetSupported
 
   enum Modes
   {
+    // @formatter:off
     NOT_ENOUGH_RULES(DruidException.class, "not enough rules"),
     ERROR_HANDLING(AssertionError.class, "targetPersona: is <[A-Z]+> and category: is <[A-Z_]+> and errorCode: is"),
     EXPRESSION_NOT_GROUPED(DruidException.class, "Expression '[a-z]+' is not being grouped"),
@@ -107,6 +108,7 @@ public @interface NotYetSupported
     SORT_REMOVE_TROUBLE(DruidException.class, "Calcite assertion violated.*Sort\\.<init>"),
     STACK_OVERFLOW(StackOverflowError.class, ""),
     CANNOT_JOIN_LOOKUP_NON_KEY(RuntimeException.class, "Cannot join lookup with condition referring to non-key");
+    // @formatter:on
 
     public Class<? extends Throwable> throwableClass;
     public String regex;
@@ -260,57 +262,27 @@ public @interface NotYetSupported
       Method m = getMethodForName(testClass, realMethodName);
       return m.getAnnotation(annotationType);
     }
-//    @Override
-//    public void handleTestExecutionException(ExtensionContext context, Throwable throwable) throws Throwable
-//    {
-//      if(true)
-//      {
-////        throw new RuntimeException("FIXME: Unimplemented!");
-//      }
-//
-//    }
     @Override
     public <T> T interceptTestFactoryMethod(Invocation<T> invocation,
         ReflectiveInvocationContext<Method> invocationContext, ExtensionContext extensionContext) throws Throwable
     {
-      if(true)
-      {
         throw new RuntimeException("FIXME: Unimplemented!");
-      }
-      return InvocationInterceptor.super.interceptTestFactoryMethod(invocation, invocationContext, extensionContext);
-
     }
     private void interceptTestMethod()
     {
-//      if (true) {
         throw new RuntimeException("FIXME: Unimplemented!");
-//      }
-
     }
     @Override
     public void interceptDynamicTest(Invocation<Void> invocation, DynamicTestInvocationContext invocationContext,
         ExtensionContext extensionContext) throws Throwable
     {
-//      if(true)
-//      {
         throw new RuntimeException("FIXME: Unimplemented!");
-//      }
-//      InvocationInterceptor.super.interceptDynamicTest(invocation, invocationContext, extensionContext);
-
     }
     @Override
     public void interceptTestTemplateMethod(Invocation<Void> invocation,
         ReflectiveInvocationContext<Method> invocationContext, ExtensionContext extensionContext) throws Throwable
     {
       interceptTestMethod(invocation,invocationContext,extensionContext);
-//      if(true)
-//      {
-//        throw new RuntimeException("FIXME: Unimplemented!");
-//      }
-//      InvocationInterceptor.super.interceptTestTemplateMethod(invocation, invocationContext, extensionContext);
-
     }
-//    intercept
-
   }
 }

@@ -594,7 +594,8 @@ public class CalciteParameterQueryTest extends BaseCalciteQueryTest
   public void testMissingParameter()
   {
     DruidException exception = assertThrows(
-        DruidException.class, () -> testQuery(
+        DruidException.class,
+        () -> testQuery(
             "SELECT COUNT(*)\n"
                 + "FROM druid.numfoo\n"
                 + "WHERE l1 > ?",
@@ -613,7 +614,8 @@ public class CalciteParameterQueryTest extends BaseCalciteQueryTest
   public void testPartiallyMissingParameter()
   {
     DruidException exception = assertThrows(
-        DruidException.class, () -> testQuery(
+        DruidException.class,
+        () -> testQuery(
             "SELECT COUNT(*)\n"
                 + "FROM druid.numfoo\n"
                 + "WHERE l1 > ? AND f1 = ?",

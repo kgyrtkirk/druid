@@ -77,8 +77,8 @@ public @interface SqlTestFrameworkConfig
 
     @Override
     public void beforeEach(ExtensionContext context) throws Exception
-  {
-      testHost=(QueryComponentSupplier) context.getTestInstance().get();
+    {
+      testHost = (QueryComponentSupplier) context.getTestInstance().get();
       method = context.getTestMethod().get();
       setConfig(method.getAnnotation(SqlTestFrameworkConfig.class));
 

@@ -355,7 +355,8 @@ public class IngestTableFunctionTest extends CalciteIngestionDmlTest
         "PARTITIONED BY ALL TIME";
     didTest = true; // Else the framework will complain
     ForbiddenException e = assertThrows(
-        ForbiddenException.class, () -> testBuilder()
+        ForbiddenException.class,
+        () -> testBuilder()
             .plannerConfig(PLANNER_CONFIG_NATIVE_QUERY_EXPLAIN)
             .sql(query)
             // Regular user does not have permission on extern or other table functions

@@ -4303,18 +4303,18 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   @ParameterizedTest(name = "{0}")
   public void testJoinOnMultiValuedColumnShouldThrowException(Map<String, Object> queryContext)
   {
+    // MSQ throws a slightly different error than QueryException.
     msqIncompatible();
+
     assertThrows(QueryException.class, () -> {
-      // MSQ throws a slightly different error than QueryException.
+      final String query = "SELECT dim3, l.v from druid.foo f inner join lookup.lookyloo l on f.dim3 = l.k\n";
 
-    final String query = "SELECT dim3, l.v from druid.foo f inner join lookup.lookyloo l on f.dim3 = l.k\n";
-
-    testQuery(
-        query,
-        queryContext,
-        ImmutableList.of(),
-        ImmutableList.of()
-    );
+      testQuery(
+          query,
+          queryContext,
+          ImmutableList.of(),
+          ImmutableList.of()
+      );
     });
   }
 
