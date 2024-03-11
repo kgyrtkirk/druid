@@ -84,8 +84,6 @@ public class MSQArraysTest extends MSQTestBase
     };
     return Arrays.asList(data);
   }
-  public String contextName;
-  public Map<String, Object> context;
 
   @BeforeEach
   public void setup() throws IOException
@@ -130,8 +128,6 @@ public class MSQArraysTest extends MSQTestBase
   public void testInsertStringArrayWithArrayIngestModeNone(String contextName, Map<String, Object> context)
   {
 
-    initMSQArraysTest(contextName, context);
-
     final Map<String, Object> adjustedContext = new HashMap<>(context);
     adjustedContext.put(MultiStageQueryContext.CTX_ARRAY_INGEST_MODE, "none");
 
@@ -155,7 +151,6 @@ public class MSQArraysTest extends MSQTestBase
   @ParameterizedTest(name = "{index}:with context {0}")
   public void testInsertOnFoo1WithMultiValueToArrayGroupByWithDefaultContext(String contextName, Map<String, Object> context)
   {
-    initMSQArraysTest(contextName, context);
     RowSignature rowSignature = RowSignature.builder()
                                             .add("__time", ColumnType.LONG)
                                             .add("dim3", ColumnType.STRING)
@@ -178,7 +173,6 @@ public class MSQArraysTest extends MSQTestBase
   @ParameterizedTest(name = "{index}:with context {0}")
   public void testInsertArraysAutoType(String contextName, Map<String, Object> context)
   {
-    initMSQArraysTest(contextName, context);
     List<Object[]> expectedRows = Arrays.asList(
         new Object[]{1672531200000L, null, null, null},
         new Object[]{1672531200000L, null, new Object[]{1L, 2L, 3L}, new Object[]{1.1, 2.2, 3.3}},
@@ -233,7 +227,6 @@ public class MSQArraysTest extends MSQTestBase
   @ParameterizedTest(name = "{index}:with context {0}")
   public void testInsertArraysWithStringArraysAsMVDs(String contextName, Map<String, Object> context)
   {
-    initMSQArraysTest(contextName, context);
     final Map<String, Object> adjustedContext = new HashMap<>(context);
     adjustedContext.put(MultiStageQueryContext.CTX_ARRAY_INGEST_MODE, "mvd");
 
@@ -269,7 +262,6 @@ public class MSQArraysTest extends MSQTestBase
   @ParameterizedTest(name = "{index}:with context {0}")
   public void testInsertArraysAsArrays(String contextName, Map<String, Object> context)
   {
-    initMSQArraysTest(contextName, context);
     final List<Object[]> expectedRows = Arrays.asList(
         new Object[]{
             1672531200000L,
@@ -443,29 +435,26 @@ public class MSQArraysTest extends MSQTestBase
   @ParameterizedTest(name = "{index}:with context {0}")
   public void testSelectOnArraysWithArrayIngestModeAsNone(String contextName, Map<String, Object> context)
   {
-    initMSQArraysTest(contextName, context);
-    testSelectOnArrays("none");
+    testSelectOnArrays(contextName, context, "none");
   }
 
   @MethodSource("data")
   @ParameterizedTest(name = "{index}:with context {0}")
   public void testSelectOnArraysWithArrayIngestModeAsMVD(String contextName, Map<String, Object> context)
   {
-    initMSQArraysTest(contextName, context);
-    testSelectOnArrays("mvd");
+    testSelectOnArrays(contextName, context, "mvd");
   }
 
   @MethodSource("data")
   @ParameterizedTest(name = "{index}:with context {0}")
   public void testSelectOnArraysWithArrayIngestModeAsArray(String contextName, Map<String, Object> context)
   {
-    initMSQArraysTest(contextName, context);
-    testSelectOnArrays("array");
+    testSelectOnArrays(contextName, context, "array");
   }
 
   // Tests the behaviour of the select with the given arrayIngestMode. The expectation should be the same, since the
   // arrayIngestMode should only determine how the array gets ingested at the end.
-  public void testSelectOnArrays(String arrayIngestMode)
+  public void testSelectOnArrays(String contextName, Map<String, Object> context, String arrayIngestMode)
   {
     final List<Object[]> expectedRows = Arrays.asList(
         new Object[]{
@@ -686,7 +675,6 @@ public class MSQArraysTest extends MSQTestBase
   @ParameterizedTest(name = "{index}:with context {0}")
   public void testScanWithOrderByOnStringArray(String contextName, Map<String, Object> context)
   {
-    initMSQArraysTest(contextName, context);
     final List<Object[]> expectedRows = Arrays.asList(
         new Object[]{Arrays.asList("d", "e")},
         new Object[]{Arrays.asList("d", "e")},
@@ -751,7 +739,6 @@ public class MSQArraysTest extends MSQTestBase
   @ParameterizedTest(name = "{index}:with context {0}")
   public void testScanWithOrderByOnLongArray(String contextName, Map<String, Object> context)
   {
-    initMSQArraysTest(contextName, context);
     final List<Object[]> expectedRows = Arrays.asList(
         new Object[]{null},
         new Object[]{null},
@@ -815,7 +802,6 @@ public class MSQArraysTest extends MSQTestBase
   @ParameterizedTest(name = "{index}:with context {0}")
   public void testScanWithOrderByOnDoubleArray(String contextName, Map<String, Object> context)
   {
-    initMSQArraysTest(contextName, context);
     final List<Object[]> expectedRows = Arrays.asList(
         new Object[]{null},
         new Object[]{null},
@@ -879,7 +865,6 @@ public class MSQArraysTest extends MSQTestBase
   @ParameterizedTest(name = "{index}:with context {0}")
   public void testScanExternBooleanArray(String contextName, Map<String, Object> context)
   {
-    initMSQArraysTest(contextName, context);
     final List<Object[]> expectedRows = Collections.singletonList(
         new Object[]{Arrays.asList(1L, 0L, null)}
     );
@@ -928,7 +913,6 @@ public class MSQArraysTest extends MSQTestBase
   @ParameterizedTest(name = "{index}:with context {0}")
   public void testScanExternArrayWithNonConvertibleType(String contextName, Map<String, Object> context)
   {
-    initMSQArraysTest(contextName, context);
     final List<Object[]> expectedRows = Collections.singletonList(
         new Object[]{Arrays.asList(null, null)}
     );
@@ -987,10 +971,5 @@ public class MSQArraysTest extends MSQTestBase
         new Object[]{0L, "d"}
     ));
     return expectedRows;
-  }
-
-  public void initMSQArraysTest(String contextName, Map<String, Object> context) {
-    this.contextName = contextName;
-    this.context = context;
   }
 }
