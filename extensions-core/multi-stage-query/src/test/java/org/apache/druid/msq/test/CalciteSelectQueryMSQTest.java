@@ -91,6 +91,7 @@ public class CalciteSelectQueryMSQTest extends CalciteQueryTest
 
   @Disabled
   @Override
+  @Test
   public void testCannotInsertWithNativeEngine()
   {
 
@@ -98,6 +99,7 @@ public class CalciteSelectQueryMSQTest extends CalciteQueryTest
 
   @Disabled
   @Override
+  @Test
   public void testCannotReplaceWithNativeEngine()
   {
 
@@ -105,6 +107,7 @@ public class CalciteSelectQueryMSQTest extends CalciteQueryTest
 
   @Disabled
   @Override
+  @Test
   public void testRequireTimeConditionSimpleQueryNegative()
   {
 
@@ -112,6 +115,7 @@ public class CalciteSelectQueryMSQTest extends CalciteQueryTest
 
   @Disabled
   @Override
+  @Test
   public void testRequireTimeConditionSubQueryNegative()
   {
 
@@ -119,6 +123,7 @@ public class CalciteSelectQueryMSQTest extends CalciteQueryTest
 
   @Disabled
   @Override
+  @Test
   public void testRequireTimeConditionSemiJoinNegative()
   {
 
@@ -126,6 +131,7 @@ public class CalciteSelectQueryMSQTest extends CalciteQueryTest
 
   @Disabled
   @Override
+  @Test
   public void testExactCountDistinctWithFilter()
   {
 
@@ -133,6 +139,7 @@ public class CalciteSelectQueryMSQTest extends CalciteQueryTest
 
   @Disabled
   @Override
+  @Test
   public void testUnplannableScanOrderByNonTime()
   {
 
@@ -140,6 +147,7 @@ public class CalciteSelectQueryMSQTest extends CalciteQueryTest
 
   @Disabled
   @Override
+  @Test
   public void testUnplannableJoinQueriesInNonSQLCompatibleMode()
   {
 
@@ -147,6 +155,7 @@ public class CalciteSelectQueryMSQTest extends CalciteQueryTest
 
   @Disabled
   @Override
+  @Test
   public void testQueryWithMoreThanMaxNumericInFilter()
   {
 
@@ -154,12 +163,14 @@ public class CalciteSelectQueryMSQTest extends CalciteQueryTest
 
   @Disabled
   @Override
+  @Test
   public void testUnSupportedNullsFirst()
   {
   }
 
   @Disabled
   @Override
+  @Test
   public void testUnSupportedNullsLast()
   {
   }
@@ -221,6 +232,7 @@ public class CalciteSelectQueryMSQTest extends CalciteQueryTest
   }
 
   @Override
+  @Test
   public void testFilterParseLongNullable()
   {
     // this isn't really correct in default value mode, the result should be ImmutableList.of(new Object[]{0L})
