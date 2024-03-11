@@ -38,7 +38,6 @@ import org.apache.druid.msq.indexing.error.RowTooLargeFault;
 import org.apache.druid.msq.kernel.WorkerAssignmentStrategy;
 import org.apache.druid.msq.test.CounterSnapshotMatcher;
 import org.apache.druid.msq.test.MSQTestBase;
-import org.apache.druid.msq.test.MSQTestFileUtils;
 import org.apache.druid.msq.util.MultiStageQueryContext;
 import org.apache.druid.query.QueryContexts;
 import org.apache.druid.query.aggregation.LongSumAggregatorFactory;

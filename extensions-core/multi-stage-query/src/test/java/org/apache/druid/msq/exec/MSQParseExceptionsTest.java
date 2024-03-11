@@ -32,7 +32,6 @@ import org.apache.druid.msq.indexing.error.CannotParseExternalDataFault;
 import org.apache.druid.msq.indexing.error.InvalidNullByteFault;
 import org.apache.druid.msq.querykit.scan.ExternalColumnSelectorFactory;
 import org.apache.druid.msq.test.MSQTestBase;
-import org.apache.druid.msq.test.MSQTestFileUtils;
 import org.apache.druid.query.dimension.DefaultDimensionSpec;
 import org.apache.druid.query.groupby.GroupByQuery;
 import org.apache.druid.query.scan.ScanQuery;
@@ -53,7 +52,7 @@ import java.util.Map;
 
 public class MSQParseExceptionsTest extends MSQTestBase
 {
-  
+
   @Test
   public void testIngestWithNullByte() throws IOException
   {
