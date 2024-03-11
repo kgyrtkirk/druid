@@ -21,6 +21,9 @@ package org.apache.druid.compressedbigdecimal;
 
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+
 public class CompressedBigDecimalMaxSqlAggregatorTest extends CompressedBigDecimalSqlAggregatorTestBase
 {
   private static final String FUNCTION_NAME = CompressedBigDecimalMaxSqlAggregator.NAME;
@@ -40,10 +43,12 @@ public class CompressedBigDecimalMaxSqlAggregatorTest extends CompressedBigDecim
   @Test
   public void testCompressedBigDecimalAggWithStrictNumberParse()
   {
-    testCompressedBigDecimalAggWithStrictNumberParseHelper(
-        FUNCTION_NAME,
-        CompressedBigDecimalMaxAggregatorFactory::new
-    );
+    assertThrows(NumberFormatException.class, () -> {
+      testCompressedBigDecimalAggWithStrictNumberParseHelper(
+          FUNCTION_NAME,
+          CompressedBigDecimalMaxAggregatorFactory::new
+      );
+    });
   }
 
   @Override

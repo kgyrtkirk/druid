@@ -48,7 +48,7 @@ import org.apache.druid.sql.calcite.util.CalciteTests;
 import org.apache.druid.sql.calcite.util.TestDataBuilder;
 import org.apache.druid.timeline.DataSegment;
 import org.apache.druid.timeline.partition.LinearShardSpec;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 import java.util.List;
@@ -56,7 +56,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.fail;
 
-public class CompressedBigDecimalSqlAggregatorTestBase extends BaseCalciteQueryTest
+public abstract class CompressedBigDecimalSqlAggregatorTestBase extends BaseCalciteQueryTest
 {
   private static final InputRowSchema SCHEMA = new InputRowSchema(
       new TimestampSpec(TestDataBuilder.TIMESTAMP_COLUMN, "iso", null),
@@ -124,7 +124,7 @@ public class CompressedBigDecimalSqlAggregatorTestBase extends BaseCalciteQueryT
     fail("Unimplemented!");
   }
 
-  @Test(expected = NumberFormatException.class)
+  @Test
   public void testCompressedBigDecimalAggWithStrictNumberParse()
   {
     fail("Unimplemented!");
