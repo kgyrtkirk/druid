@@ -54,7 +54,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public abstract class CompressedBigDecimalSqlAggregatorTestBase extends BaseCalciteQueryTest
+import static org.junit.Assert.fail;
+
+public class CompressedBigDecimalSqlAggregatorTestBase extends BaseCalciteQueryTest
 {
   private static final InputRowSchema SCHEMA = new InputRowSchema(
       new TimestampSpec(TestDataBuilder.TIMESTAMP_COLUMN, "iso", null),
@@ -117,19 +119,34 @@ public abstract class CompressedBigDecimalSqlAggregatorTestBase extends BaseCalc
   }
 
   @Test
-  public abstract void testCompressedBigDecimalAggWithNumberParse();
+  public void testCompressedBigDecimalAggWithNumberParse()
+  {
+    fail("Unimplemented!");
+  }
 
   @Test(expected = NumberFormatException.class)
-  public abstract void testCompressedBigDecimalAggWithStrictNumberParse();
+  public void testCompressedBigDecimalAggWithStrictNumberParse()
+  {
+    fail("Unimplemented!");
+  }
 
   @Test
-  public abstract void testCompressedBigDecimalAggDefaultNumberParseAndCustomSizeAndScale();
+  public void testCompressedBigDecimalAggDefaultNumberParseAndCustomSizeAndScale()
+  {
+    fail("Unimplemented!");
+  }
 
   @Test
-  public abstract void testCompressedBigDecimalAggDefaultScale();
+  public void testCompressedBigDecimalAggDefaultScale()
+  {
+    fail("Unimplemented!");
+  }
 
   @Test
-  public abstract void testCompressedBigDecimalAggDefaultSizeAndScale();
+  public void testCompressedBigDecimalAggDefaultSizeAndScale()
+  {
+    fail("Unimplemented!");
+  }
 
   protected void testCompressedBigDecimalAggWithNumberParseHelper(
       String functionName,
