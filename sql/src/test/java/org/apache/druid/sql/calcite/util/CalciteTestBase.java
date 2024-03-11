@@ -31,10 +31,12 @@ import org.apache.druid.sql.calcite.expression.DruidExpression;
 import org.apache.druid.sql.calcite.expression.SimpleExtraction;
 import org.apache.druid.sql.http.SqlParameter;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
 
 import java.util.Collections;
 import java.util.List;
 
+@EnableRuleMigrationSupport
 public abstract class CalciteTestBase
 {
   public static final List<SqlParameter> DEFAULT_PARAMETERS = ImmutableList.of();
