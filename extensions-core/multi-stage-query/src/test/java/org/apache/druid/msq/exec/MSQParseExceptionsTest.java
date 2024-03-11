@@ -57,11 +57,7 @@ public class MSQParseExceptionsTest extends MSQTestBase
   @Test
   public void testIngestWithNullByte() throws IOException
   {
-    final File toRead = MSQTestFileUtils.getResourceAsTemporaryFile(
-        temXMEXAXISporaryFolder,
-        this,
-        "/unparseable-null-byte-string.csv"
-    );
+    final File toRead = this.getResourceAsTemporaryFile("/unparseable-null-byte-string.csv");
     final String toReadAsJson = queryFramework().queryJsonMapper().writeValueAsString(toRead.getAbsolutePath());
 
     RowSignature rowSignature = RowSignature.builder()
@@ -145,11 +141,7 @@ public class MSQParseExceptionsTest extends MSQTestBase
   @Test
   public void testIngestWithSanitizedNullByte() throws IOException
   {
-    final File toRead = MSQTestFileUtils.getResourceAsTemporaryFile(
-        temXMEXAXISporaryFolder,
-        this,
-        "/unparseable-null-byte-string.csv"
-    );
+    final File toRead = this.getResourceAsTemporaryFile("/unparseable-null-byte-string.csv");
     final String toReadAsJson = queryFramework().queryJsonMapper().writeValueAsString(toRead.getAbsolutePath());
 
     RowSignature rowSignature = RowSignature.builder()
@@ -243,11 +235,7 @@ public class MSQParseExceptionsTest extends MSQTestBase
   @Test
   public void testMultiValueStringWithIncorrectType() throws IOException
   {
-    final File toRead = MSQTestFileUtils.getResourceAsTemporaryFile(
-        temXMEXAXISporaryFolder,
-        this,
-        "/unparseable-mv-string-array.json"
-    );
+    final File toRead = this.getResourceAsTemporaryFile("/unparseable-mv-string-array.json");
     final String toReadAsJson = queryFramework().queryJsonMapper().writeValueAsString(toRead.getAbsolutePath());
 
     RowSignature rowSignature = RowSignature.builder()

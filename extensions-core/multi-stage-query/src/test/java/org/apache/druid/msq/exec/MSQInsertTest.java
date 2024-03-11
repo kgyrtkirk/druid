@@ -165,9 +165,7 @@ public class MSQInsertTest extends MSQTestBase
                                             .add("flags", ColumnType.STRING)
                                             .build();
 
-    final File toRead = MSQTestFileUtils.getResourceAsTemporaryFile(temXMEXAXISporaryFolder, this,
-                                                                    "/dataset-with-time-column.json"
-    );
+    final File toRead = this.getResourceAsTemporaryFile("/dataset-with-time-column.json");
     final String toReadFileNameAsJson = queryFramework().queryJsonMapper().writeValueAsString(toRead.getAbsolutePath());
 
     testIngestQuery().setSql(" INSERT INTO foo1 SELECT\n"
@@ -290,7 +288,7 @@ public class MSQInsertTest extends MSQTestBase
   public void testInsertOnExternalDataSource(String contextName, Map<String, Object> context) throws IOException
   {
     initMSQInsertTest(contextName, context);
-    final File toRead = MSQTestFileUtils.getResourceAsTemporaryFile(temXMEXAXISporaryFolder, this, "/wikipedia-sampled.json");
+    final File toRead = this.getResourceAsTemporaryFile("/wikipedia-sampled.json");
     final String toReadFileNameAsJson = queryFramework().queryJsonMapper().writeValueAsString(toRead.getAbsolutePath());
 
     RowSignature rowSignature = RowSignature.builder()
@@ -1102,7 +1100,7 @@ public class MSQInsertTest extends MSQTestBase
   public void testRollUpOnExternalDataSource(String contextName, Map<String, Object> context) throws IOException
   {
     initMSQInsertTest(contextName, context);
-    final File toRead = MSQTestFileUtils.getResourceAsTemporaryFile(temXMEXAXISporaryFolder, this, "/wikipedia-sampled.json");
+    final File toRead = this.getResourceAsTemporaryFile("/wikipedia-sampled.json");
     final String toReadFileNameAsJson = queryFramework().queryJsonMapper().writeValueAsString(toRead.getAbsolutePath());
 
     RowSignature rowSignature = RowSignature.builder()
@@ -1171,7 +1169,7 @@ public class MSQInsertTest extends MSQTestBase
   public void testRollUpOnExternalDataSourceWithCompositeKey(String contextName, Map<String, Object> context) throws IOException
   {
     initMSQInsertTest(contextName, context);
-    final File toRead = MSQTestFileUtils.getResourceAsTemporaryFile(temXMEXAXISporaryFolder, this, "/wikipedia-sampled.json");
+    final File toRead = this.getResourceAsTemporaryFile("/wikipedia-sampled.json");
     final String toReadFileNameAsJson = queryFramework().queryJsonMapper().writeValueAsString(toRead.getAbsolutePath());
 
     RowSignature rowSignature = RowSignature.builder()
@@ -1374,7 +1372,7 @@ public class MSQInsertTest extends MSQTestBase
   public void testInsertWithTooLargeRowShouldThrowException(String contextName, Map<String, Object> context) throws IOException
   {
     initMSQInsertTest(contextName, context);
-    final File toRead = MSQTestFileUtils.getResourceAsTemporaryFile(temXMEXAXISporaryFolder, this, "/wikipedia-sampled.json");
+    final File toRead = this.getResourceAsTemporaryFile("/wikipedia-sampled.json");
     final String toReadFileNameAsJson = queryFramework().queryJsonMapper().writeValueAsString(toRead.getAbsolutePath());
 
     Mockito.doReturn(500).when(workerMemoryParameters).getLargeFrameSize();
@@ -1446,13 +1444,13 @@ public class MSQInsertTest extends MSQTestBase
     localContext.put(MultiStageQueryContext.CTX_TASK_ASSIGNMENT_STRATEGY, WorkerAssignmentStrategy.AUTO.name());
     localContext.put(MultiStageQueryContext.CTX_MAX_NUM_TASKS, 4);
 
-    final File toRead1 = MSQTestFileUtils.getResourceAsTemporaryFile(temXMEXAXISporaryFolder, this, "/multipleFiles/wikipedia-sampled-1.json");
+    final File toRead1 = this.getResourceAsTemporaryFile("/multipleFiles/wikipedia-sampled-1.json");
     final String toReadFileNameAsJson1 = queryFramework().queryJsonMapper().writeValueAsString(toRead1.getAbsolutePath());
 
-    final File toRead2 = MSQTestFileUtils.getResourceAsTemporaryFile(temXMEXAXISporaryFolder, this, "/multipleFiles/wikipedia-sampled-2.json");
+    final File toRead2 = this.getResourceAsTemporaryFile("/multipleFiles/wikipedia-sampled-2.json");
     final String toReadFileNameAsJson2 = queryFramework().queryJsonMapper().writeValueAsString(toRead2.getAbsolutePath());
 
-    final File toRead3 = MSQTestFileUtils.getResourceAsTemporaryFile(temXMEXAXISporaryFolder, this, "/multipleFiles/wikipedia-sampled-3.json");
+    final File toRead3 = this.getResourceAsTemporaryFile("/multipleFiles/wikipedia-sampled-3.json");
     final String toReadFileNameAsJson3 = queryFramework().queryJsonMapper().writeValueAsString(toRead3.getAbsolutePath());
 
     RowSignature rowSignature = RowSignature.builder()
@@ -1499,13 +1497,13 @@ public class MSQInsertTest extends MSQTestBase
     localContext.put(MultiStageQueryContext.CTX_MAX_NUM_TASKS, 4);
     localContext.put(MultiStageQueryContext.CTX_MAX_INPUT_BYTES_PER_WORKER, 10);
 
-    final File toRead1 = MSQTestFileUtils.getResourceAsTemporaryFile(temXMEXAXISporaryFolder, this, "/multipleFiles/wikipedia-sampled-1.json");
+    final File toRead1 = this.getResourceAsTemporaryFile("/multipleFiles/wikipedia-sampled-1.json");
     final String toReadFileNameAsJson1 = queryFramework().queryJsonMapper().writeValueAsString(toRead1.getAbsolutePath());
 
-    final File toRead2 = MSQTestFileUtils.getResourceAsTemporaryFile(temXMEXAXISporaryFolder, this, "/multipleFiles/wikipedia-sampled-2.json");
+    final File toRead2 = this.getResourceAsTemporaryFile("/multipleFiles/wikipedia-sampled-2.json");
     final String toReadFileNameAsJson2 = queryFramework().queryJsonMapper().writeValueAsString(toRead2.getAbsolutePath());
 
-    final File toRead3 = MSQTestFileUtils.getResourceAsTemporaryFile(temXMEXAXISporaryFolder, this, "/multipleFiles/wikipedia-sampled-3.json");
+    final File toRead3 = this.getResourceAsTemporaryFile("/multipleFiles/wikipedia-sampled-3.json");
     final String toReadFileNameAsJson3 = queryFramework().queryJsonMapper().writeValueAsString(toRead3.getAbsolutePath());
 
     RowSignature rowSignature = RowSignature.builder()

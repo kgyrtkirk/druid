@@ -67,7 +67,7 @@ public class MSQWarningsTest extends MSQTestBase
   @BeforeEach
   public void setUp3() throws IOException
   {
-    File tempFile = MSQTestFileUtils.getResourceAsTemporaryFile(temXMEXAXISporaryFolder, this, "/unparseable.gz");
+    File tempFile = this.getResourceAsTemporaryFile("/unparseable.gz");
 
     // Rename the file and the file's extension from .tmp to .gz to prevent issues with 'parsing' the file
     toRead = new File(tempFile.getParentFile(), "unparseable.gz");

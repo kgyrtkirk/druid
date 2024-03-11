@@ -73,10 +73,4 @@ public class MSQTestFileUtils
     file.deleteOnExit();
     return file;
   }
-
-  public static File getResourceAsTemporaryFile(TempFolderOverTempDir temporaryFolder, BaseCalciteQueryTest object,
-      String resource) throws IOException
-  {
-    return object.getResourceAsTemporaryFile(resource);
-  }
 }
