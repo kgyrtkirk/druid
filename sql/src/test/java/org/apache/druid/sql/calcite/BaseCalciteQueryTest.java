@@ -124,7 +124,6 @@ import org.joda.time.chrono.ISOChronology;
 import org.junit.Assert;
 import org.junit.internal.matchers.ThrowableMessageMatcher;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import javax.annotation.Nullable;
@@ -629,8 +628,6 @@ public class BaseCalciteQueryTest extends CalciteTestBase
     return DruidExceptionMatcher.invalidSqlInput().expectMessageContains(s);
   }
 
-  // FIXME remove?
-  @Order(3)
   @RegisterExtension
   static SqlTestFrameworkConfig.Rule queryFrameworkRule = new SqlTestFrameworkConfig.Rule();
 

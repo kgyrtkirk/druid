@@ -24,16 +24,12 @@ import com.google.common.collect.ImmutableMap;
 import org.apache.druid.sql.calcite.NotYetSupported.Modes;
 import org.apache.druid.sql.calcite.NotYetSupported.NotYetSupportedProcessor;
 import org.apache.druid.sql.calcite.planner.PlannerContext;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+@ExtendWith(NotYetSupportedProcessor.class)
 public class CalciteSysQueryTest extends BaseCalciteQueryTest
 {
-  @Order(0)
-  @RegisterExtension
-  public NotYetSupportedProcessor decoupledIgnoreProcessor = new NotYetSupportedProcessor();
-
   @Test
   public void testTasksSum()
   {
