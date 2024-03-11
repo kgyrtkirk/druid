@@ -250,10 +250,7 @@ public class QueryTestRunner
         vectorizeValues.add("force");
       }
 
-      final QueryLogHook queryLogHook = builder.config.queryLogHook();
       for (final String vectorize : vectorizeValues) {
-        queryLogHook.clearRecordedQueries();
-
         final Map<String, Object> theQueryContext = new HashMap<>(builder.queryContext);
         theQueryContext.put(QueryContexts.VECTORIZE_KEY, vectorize);
         theQueryContext.put(QueryContexts.VECTORIZE_VIRTUAL_COLUMNS_KEY, vectorize);
@@ -281,7 +278,8 @@ public class QueryTestRunner
         final DirectStatement stmt = sqlStatementFactory.directStatement(query);
         stmt.setHook(capture);
         AtomicReference<List<Object[]>> resultListRef = new AtomicReference<>();
-        builder().config.queryLogHook().logQueriesFor(
+        QueryLogHook queryLogHook = new QueryLogHook(() -> builder().config.jsonMapper());
+        queryLogHook.logQueriesFor(
             () -> {
               resultListRef.set(stmt.execute().getResults().toList());
             }
@@ -291,7 +289,7 @@ public class QueryTestRunner
             vectorize,
             stmt.prepareResult().getReturnedRowType(),
             resultListRef.get(),
-            builder().config.queryLogHook().getRecordedQueries(),
+            queryLogHook.getRecordedQueries(),
             capture
         );
       }

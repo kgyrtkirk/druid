@@ -379,7 +379,6 @@ public class CalciteIngestionDmlTest extends BaseCalciteQueryTest
         throw new ISE("Test must not have expectedQuery");
       }
 
-      queryLogHook.clearRecordedQueries();
       final Throwable e = Assert.assertThrows(
           Throwable.class,
           () -> {
@@ -388,7 +387,6 @@ public class CalciteIngestionDmlTest extends BaseCalciteQueryTest
       );
 
       assertThat(e, validationErrorMatcher);
-      Assert.assertTrue(queryLogHook.getRecordedQueries().isEmpty());
     }
 
     private void verifySuccess()

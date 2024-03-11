@@ -105,7 +105,6 @@ import org.apache.druid.sql.calcite.run.SqlEngine;
 import org.apache.druid.sql.calcite.schema.DruidSchemaManager;
 import org.apache.druid.sql.calcite.util.CalciteTestBase;
 import org.apache.druid.sql.calcite.util.CalciteTests;
-import org.apache.druid.sql.calcite.util.QueryLogHook;
 import org.apache.druid.sql.calcite.util.SqlTestFramework;
 import org.apache.druid.sql.calcite.util.SqlTestFramework.Builder;
 import org.apache.druid.sql.calcite.util.SqlTestFramework.PlannerComponentSupplier;
@@ -122,7 +121,6 @@ import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.joda.time.chrono.ISOChronology;
 import org.junit.Assert;
-import org.junit.Rule;
 import org.junit.internal.matchers.ThrowableMessageMatcher;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
@@ -302,8 +300,6 @@ public class BaseCalciteQueryTest extends CalciteTestBase
 
   public boolean cannotVectorize = false;
   public boolean skipVectorize = false;
-
-  public QueryLogHook queryLogHook;
 
   private QueryComponentSupplier baseComponentSupplier;
   public PlannerComponentSupplier basePlannerComponentSupplier = new StandardPlannerComponentSupplier();
@@ -629,17 +625,6 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   protected static DruidExceptionMatcher invalidSqlContains(String s)
   {
     return DruidExceptionMatcher.invalidSqlInput().expectMessageContains(s);
-  }
-
-  @Rule
-  public QueryLogHook getQueryLogHook()
-  {
-    // Indirection for the JSON mapper. Otherwise, this rule method is called
-    // before Setup is called, causing the query framework to be built before
-    // tests have done their setup. The indirection means we access the query
-    // framework only when we log the first query. By then, the query framework
-    // will have been created via the normal path.
-    return queryLogHook = new QueryLogHook(() -> queryFramework().queryJsonMapper());
   }
 
   // FIXME remove?
@@ -1005,12 +990,6 @@ public class BaseCalciteQueryTest extends CalciteTestBase
           baseQueryContext.containsKey(PlannerContext.CTX_SQL_CURRENT_TIMESTAMP),
           "context must contain CTX_SQL_CURRENT_TIMESTAMP to ensure consistent behaviour!"
       );
-    }
-
-    @Override
-    public QueryLogHook queryLogHook()
-    {
-      return queryLogHook;
     }
 
     @Override
