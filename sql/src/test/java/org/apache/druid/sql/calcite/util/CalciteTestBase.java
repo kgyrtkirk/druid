@@ -21,6 +21,7 @@ package org.apache.druid.sql.calcite.util;
 
 import com.google.common.collect.ImmutableList;
 import org.apache.druid.common.config.NullHandling;
+import org.apache.druid.java.util.common.FileUtils;
 import org.apache.druid.math.expr.ExpressionProcessing;
 import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.server.security.Action;
@@ -68,10 +69,10 @@ public abstract class CalciteTestBase
   private Path casetempPath;
 
   @BeforeEach
-  public void setCaseTempDir(TestInfo testInfo) throws IOException
+  public void setCaseTempDir(TestInfo testInfo)
   {
     String methodName = testInfo.getTestMethod().get().getName();
-    casetempPath = Files.createTempDirectory(rootTempPath, methodName);
+    casetempPath = FileUtils.createTempDirInLocation(rootTempPath, methodName).toPath();
   }
 
 
@@ -82,12 +83,7 @@ public abstract class CalciteTestBase
 
   public File newTempFolder(String prefix)
   {
-    try {
-      return Files.createTempDirectory(casetempPath, prefix).toFile();
-    }
-    catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    return FileUtils.createTempDirInLocation(casetempPath, prefix);
   }
 
   public File newTempFile(String prefix)
