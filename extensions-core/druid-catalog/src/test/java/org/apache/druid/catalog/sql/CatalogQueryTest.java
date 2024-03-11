@@ -27,7 +27,7 @@ import org.apache.druid.catalog.storage.CatalogStorage;
 import org.apache.druid.catalog.storage.CatalogTests;
 import org.apache.druid.catalog.sync.CachedMetadataCatalog;
 import org.apache.druid.catalog.sync.MetadataCatalog;
-import org.apache.druid.metadata.TestDerbyConnector;
+import org.apache.druid.metadata.TestDerbyConnector.DerbyConnectorRule5;
 import org.apache.druid.sql.calcite.BaseCalciteQueryTest;
 import org.apache.druid.sql.calcite.SqlSchema;
 import org.apache.druid.sql.calcite.planner.CatalogResolver;
@@ -35,6 +35,7 @@ import org.apache.druid.sql.calcite.util.SqlTestFramework;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -43,7 +44,7 @@ import static org.junit.Assert.fail;
 public class CatalogQueryTest extends BaseCalciteQueryTest
 {
   @RegisterExtension
-  public static final TestDerbyConnector.DerbyConnectorRule DERBY_CONNECTION_RULE = new TestDerbyConnector.DerbyConnectorRule5();
+  public static final DerbyConnectorRule5 DERBY_CONNECTION_RULE = new DerbyConnectorRule5();
 
   private CatalogTests.DbFixture dbFixture;
   private CatalogStorage storage;
