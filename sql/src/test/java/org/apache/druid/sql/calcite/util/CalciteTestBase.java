@@ -30,14 +30,11 @@ import org.apache.druid.server.security.ResourceType;
 import org.apache.druid.sql.calcite.expression.DruidExpression;
 import org.apache.druid.sql.calcite.expression.SimpleExtraction;
 import org.apache.druid.sql.http.SqlParameter;
-import org.junit.Rule;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
-import org.junit.rules.TemporaryFolder;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -56,9 +53,6 @@ public abstract class CalciteTestBase
     NullHandling.initializeForTests();
     ExpressionProcessing.initializeForTests();
   }
-
-  @Rule(order = 2)
-  public static TemporaryFolder temporaryFolder2 = new TemporaryFolder();
 
   /**
    * Temporary folder(s).
