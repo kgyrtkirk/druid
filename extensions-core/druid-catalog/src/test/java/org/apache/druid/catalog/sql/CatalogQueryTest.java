@@ -43,7 +43,7 @@ import static org.junit.Assert.fail;
 public class CatalogQueryTest extends BaseCalciteQueryTest
 {
   @RegisterExtension
-  public static final TestDerbyConnector.DerbyConnectorRule derbyConnectorRule = new TestDerbyConnector.DerbyConnectorRule5();
+  public static final TestDerbyConnector.DerbyConnectorRule DERBY_CONNECTION_RULE = new TestDerbyConnector.DerbyConnectorRule5();
 
   private CatalogTests.DbFixture dbFixture;
   private CatalogStorage storage;
@@ -78,7 +78,7 @@ public class CatalogQueryTest extends BaseCalciteQueryTest
   @Override
   public CatalogResolver createCatalogResolver()
   {
-    dbFixture = new CatalogTests.DbFixture(derbyConnectorRule);
+    dbFixture = new CatalogTests.DbFixture(DERBY_CONNECTION_RULE);
     storage = dbFixture.storage;
     MetadataCatalog catalog = new CachedMetadataCatalog(
         storage,
