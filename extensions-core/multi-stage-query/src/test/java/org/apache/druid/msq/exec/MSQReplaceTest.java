@@ -916,7 +916,6 @@ public class MSQReplaceTest extends MSQTestBase
   @ParameterizedTest(name = "{index}:with context {0}")
   public void testReplaceWithClusteredByDescendingThrowsException(String contextName, Map<String, Object> context)
   {
-
     // Add a DESC clustered by column, which should not be allowed
     testIngestQuery().setSql(" REPLACE INTO foobar "
                              + "OVERWRITE ALL "
@@ -1201,7 +1200,6 @@ public class MSQReplaceTest extends MSQTestBase
   @ParameterizedTest(name = "{index}:with context {0}")
   public void testEmptyReplaceAll(String contextName, Map<String, Object> context)
   {
-
     // An empty replace all with no used segment should effectively be the same as an empty insert
     testIngestQuery().setSql(
                          "REPLACE INTO foo1"
@@ -1221,7 +1219,6 @@ public class MSQReplaceTest extends MSQTestBase
   @ParameterizedTest(name = "{index}:with context {0}")
   public void testEmptyReplaceInterval(String contextName, Map<String, Object> context)
   {
-
     // An empty replace interval with no used segment should effectively be the same as an empty insert
     testIngestQuery().setSql(
                          "REPLACE INTO foo1"
@@ -1273,7 +1270,6 @@ public class MSQReplaceTest extends MSQTestBase
   @ParameterizedTest(name = "{index}:with context {0}")
   public void testEmptyReplaceIntervalOverPartiallyOverlappingSegment(String contextName, Map<String, Object> context)
   {
-
     // Create a data segment which lies partially outside the generated segment
     DataSegment existingDataSegment = DataSegment.builder()
                                                  .interval(Intervals.of("2016-06-27T/2016-06-28T"))
@@ -1310,7 +1306,6 @@ public class MSQReplaceTest extends MSQTestBase
   @ParameterizedTest(name = "{index}:with context {0}")
   public void testEmptyReplaceIntervalOverPartiallyOverlappingStart(String contextName, Map<String, Object> context)
   {
-
     // Create a data segment whose start partially lies outside the query's replace interval
     DataSegment existingDataSegment = DataSegment.builder()
                                                  .interval(Intervals.of("2016-06-01T/2016-07-01T"))
@@ -1349,7 +1344,6 @@ public class MSQReplaceTest extends MSQTestBase
   @ParameterizedTest(name = "{index}:with context {0}")
   public void testEmptyReplaceIntervalOverPartiallyOverlappingEnd(String contextName, Map<String, Object> context)
   {
-
     // Create a data segment whose end partially lies outside the query's replace interval
     DataSegment existingDataSegment = DataSegment.builder()
                                                  .interval(Intervals.of("2016-06-01T/2016-07-01T"))
@@ -1388,7 +1382,6 @@ public class MSQReplaceTest extends MSQTestBase
   @ParameterizedTest(name = "{index}:with context {0}")
   public void testEmptyReplaceAllOverEternitySegment(String contextName, Map<String, Object> context)
   {
-
     // Create a data segment spanning eternity
     DataSegment existingDataSegment = DataSegment.builder()
                                                  .interval(Intervals.ETERNITY)
@@ -1423,7 +1416,6 @@ public class MSQReplaceTest extends MSQTestBase
   @ParameterizedTest(name = "{index}:with context {0}")
   public void testEmptyReplaceAllWithAllGrainOverFiniteIntervalSegment(String contextName, Map<String, Object> context)
   {
-
     // Create a finite-interval segment
     DataSegment existingDataSegment = DataSegment.builder()
                                                  .interval(Intervals.of("2016-06-01T/2016-09-01T"))
@@ -1456,7 +1448,6 @@ public class MSQReplaceTest extends MSQTestBase
   @ParameterizedTest(name = "{index}:with context {0}")
   public void testEmptyReplaceAllWithAllGrainOverEternitySegment(String contextName, Map<String, Object> context)
   {
-
     // Create a segment spanning eternity
     DataSegment existingDataSegment = DataSegment.builder()
                                                  .interval(Intervals.ETERNITY)
@@ -1490,7 +1481,6 @@ public class MSQReplaceTest extends MSQTestBase
   @ParameterizedTest(name = "{index}:with context {0}")
   public void testEmptyReplaceAllWithAllGrainOverHalfEternitySegment(String contextName, Map<String, Object> context)
   {
-
     // Create a segment spanning half-eternity
     DataSegment existingDataSegment = DataSegment.builder()
                                                  .interval(new Interval(DateTimes.of("2000"), DateTimes.MAX))
@@ -1523,7 +1513,6 @@ public class MSQReplaceTest extends MSQTestBase
   @ParameterizedTest(name = "{index}:with context {0}")
   public void testEmptyReplaceLimitQuery(String contextName, Map<String, Object> context)
   {
-
     // A limit query which results in 0 rows being inserted -- do nothing.
     testIngestQuery().setSql(
                          "REPLACE INTO foo1 "
@@ -1543,7 +1532,6 @@ public class MSQReplaceTest extends MSQTestBase
   @ParameterizedTest(name = "{index}:with context {0}")
   public void testEmptyReplaceIntervalOverEternitySegment(String contextName, Map<String, Object> context)
   {
-
     // Create a data segment spanning eternity
     DataSegment existingDataSegment = DataSegment.builder()
                                                  .interval(Intervals.ETERNITY)
