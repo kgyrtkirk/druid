@@ -194,10 +194,9 @@ import org.easymock.EasyMock;
 import org.hamcrest.Matcher;
 import org.joda.time.Interval;
 import org.junit.Assert;
-import org.junit.Rule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mockito;
 
 import javax.annotation.Nonnull;
@@ -321,8 +320,8 @@ public class MSQTestBase extends BaseCalciteQueryTest
 
   private MSQTestSegmentManager segmentManager;
   private SegmentCacheManager segmentCacheManager;
-  @Rule
-  public TemporaryFolder tmpFolder = new TemporaryFolder();
+  @TempDir
+  public File tmpFolder;
 
   private TestGroupByBuffers groupByBuffers;
   protected final WorkerMemoryParameters workerMemoryParameters = Mockito.spy(
@@ -409,7 +408,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
     indexIO = new IndexIO(secondMapper, ColumnConfig.DEFAULT);
 
     try {
-      segmentCacheManager = new SegmentCacheManagerFactory(secondMapper).manufacturate(tmpFolder.newFolder("test"));
+      segmentCacheManager = new SegmentCacheManagerFactory(secondMapper).manufacturate(newFolder(tmpFolder, "test"));
     }
     catch (IOException exception) {
       throw new ISE(exception, "Unable to create segmentCacheManager");
@@ -452,7 +451,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
 
           LocalDataSegmentPusherConfig config = new LocalDataSegmentPusherConfig();
           try {
-            config.storageDirectory = tmpFolder.newFolder("localsegments");
+            config.storageDirectory = newFolder(tmpFolder, "localsegments");
           }
           catch (IOException e) {
             throw new ISE(e, "Unable to create folder");
@@ -474,7 +473,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
                 StorageConnectorProvider.class,
                 MultiStageQuery.class
             );
-            localFileStorageDir = tmpFolder.newFolder("fault");
+            localFileStorageDir = newFolder(tmpFolder, "fault");
             localFileStorageConnector = Mockito.spy(
                 new LocalFileStorageConnector(localFileStorageDir)
             );
@@ -624,9 +623,8 @@ public class MSQTestBase extends BaseCalciteQueryTest
   {
     if (segmentManager.getSegment(segmentId) == null) {
       final QueryableIndex index;
-      TemporaryFolder temporaryFolder = new TemporaryFolder();
+      File temporaryFolder = new File();
       try {
-        temporaryFolder.create();
       }
       catch (IOException e) {
         throw new ISE(e, "Unable to create temporary folder for tests");
@@ -645,7 +643,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
                 .build();
             index = IndexBuilder
                 .create()
-                .tmpDir(new File(temporaryFolder.newFolder(), "1"))
+                .tmpDir(new File(newFolder(temporaryFolder, "junit"), "1"))
                 .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
                 .schema(foo1Schema)
                 .rows(ROWS1)
@@ -672,7 +670,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
                 .build();
             index = IndexBuilder
                 .create()
-                .tmpDir(new File(temporaryFolder.newFolder(), "1"))
+                .tmpDir(new File(newFolder(temporaryFolder, "junit"), "1"))
                 .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
                 .schema(indexSchemaDifferentDim3M1Types)
                 .rows(ROWS2)
@@ -1072,6 +1070,15 @@ public class MSQTestBase extends BaseCalciteQueryTest
         throw new ISE("Use one @Test method per tester");
       }
     }
+
+    private static File newFolder(File root, String... subDirs) throws IOException {
+      String subFolder = String.join("/", subDirs);
+      File result = new File(root, subFolder);
+      if (!result.mkdirs()) {
+        throw new IOException("Couldn't create folders " + root);
+      }
+      return result;
+    }
   }
 
   public class IngestTester extends MSQTester<IngestTester>
@@ -1346,6 +1353,15 @@ public class MSQTestBase extends BaseCalciteQueryTest
         );
       }
     }
+
+    private static File newFolder(File root, String... subDirs) throws IOException {
+      String subFolder = String.join("/", subDirs);
+      File result = new File(root, subFolder);
+      if (!result.mkdirs()) {
+        throw new IOException("Couldn't create folders " + root);
+      }
+      return result;
+    }
   }
 
   public class SelectTester extends MSQTester<SelectTester>
@@ -1487,6 +1503,15 @@ public class MSQTestBase extends BaseCalciteQueryTest
         throw new ISE("Query %s did not throw an exception", sql);
       }
     }
+
+    private static File newFolder(File root, String... subDirs) throws IOException {
+      String subFolder = String.join("/", subDirs);
+      File result = new File(root, subFolder);
+      if (!result.mkdirs()) {
+        throw new IOException("Couldn't create folders " + root);
+      }
+      return result;
+    }
   }
 
   private static List<MSQResultsReport.ColumnAndType> resultSignatureFromRowSignature(final RowSignature signature)
@@ -1501,5 +1526,14 @@ public class MSQTestBase extends BaseCalciteQueryTest
       );
     }
     return retVal;
+  }
+
+  private static File newFolder(File root, String... subDirs) throws IOException {
+    String subFolder = String.join("/", subDirs);
+    File result = new File(root, subFolder);
+    if (!result.mkdirs()) {
+      throw new IOException("Couldn't create folders " + root);
+    }
+    return result;
   }
 }
