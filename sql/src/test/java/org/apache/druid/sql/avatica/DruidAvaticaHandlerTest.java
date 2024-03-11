@@ -88,25 +88,25 @@ import org.apache.druid.sql.calcite.schema.DruidSchemaName;
 import org.apache.druid.sql.calcite.schema.NamedSchema;
 import org.apache.druid.sql.calcite.util.CalciteTestBase;
 import org.apache.druid.sql.calcite.util.CalciteTests;
-import org.apache.druid.sql.calcite.util.QueryLogHook;
 import org.apache.druid.sql.guice.SqlModule;
 import org.eclipse.jetty.server.Server;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.junit.Assert;
 import org.junit.ClassRule;
-import org.junit.Rule;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.rules.TemporaryFolder;
 import org.skife.jdbi.v2.DBI;
 import org.skife.jdbi.v2.Handle;
 import org.skife.jdbi.v2.ResultIterator;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.Array;
 import java.sql.Connection;
@@ -165,11 +165,11 @@ public class DruidAvaticaHandlerTest extends CalciteTestBase
   private final boolean nullNumeric = !NullHandling.replaceWithDefault();
 
   @BeforeAll
-  public static void setUpClass() throws Exception
+  public static void setUpClass(@TempDir File tempDir) throws Exception
   {
     resourceCloser = Closer.create();
     conglomerate = QueryStackTests.createQueryRunnerFactoryConglomerate(resourceCloser);
-    walker = CalciteTests.createMockWalker(conglomerate, temporaryFolder.newFolder());
+    walker = CalciteTests.createMockWalker(conglomerate, tempDir);
     resourceCloser.register(walker);
   }
 
@@ -178,9 +178,6 @@ public class DruidAvaticaHandlerTest extends CalciteTestBase
   {
     resourceCloser.close();
   }
-
-  @Rule
-  public QueryLogHook queryLogHook = QueryLogHook.create();
 
   private final PlannerConfig plannerConfig = new PlannerConfig();
   private final DruidOperatorTable operatorTable = CalciteTests.createOperatorTable();
@@ -852,46 +849,41 @@ public class DruidAvaticaHandlerTest extends CalciteTestBase
   @Timeout(value = 90_000L, unit = TimeUnit.MILLISECONDS)
   public void testConcurrentQueries()
   {
-    queryLogHook.withSkippedLog(
-        v -> {
-          final List<ListenableFuture<Integer>> futures = new ArrayList<>();
-          final ListeningExecutorService exec = MoreExecutors.listeningDecorator(
-              Execs.multiThreaded(AVATICA_CONFIG.getMaxStatementsPerConnection(), "DruidAvaticaHandlerTest-%d")
-          );
-          for (int i = 0; i < 2000; i++) {
-            final String query = StringUtils.format("SELECT COUNT(*) + %s AS ci FROM foo", i);
-            futures.add(
-                exec.submit(() -> {
-                  try (
-                      final Statement statement = client.createStatement();
-                      final ResultSet resultSet = statement.executeQuery(query)
-                  ) {
-                    final List<Map<String, Object>> rows = getRows(resultSet);
-                    return ((Number) Iterables.getOnlyElement(rows).get("ci")).intValue();
-                  }
-                  catch (SQLException e) {
-                    throw new RuntimeException(e);
-                  }
-                })
-            );
-          }
-
-          final List<Integer> integers;
-          try {
-            integers = Futures.allAsList(futures).get();
-          }
-          catch (InterruptedException e) {
-            throw new RE(e);
-          }
-          catch (ExecutionException e) {
-            throw new RE(e);
-          }
-          for (int i = 0; i < 2000; i++) {
-            Assert.assertEquals(i + 6, (int) integers.get(i));
-          }
-          exec.shutdown();
-        }
+    final List<ListenableFuture<Integer>> futures = new ArrayList<>();
+    final ListeningExecutorService exec = MoreExecutors.listeningDecorator(
+        Execs.multiThreaded(AVATICA_CONFIG.getMaxStatementsPerConnection(), "DruidAvaticaHandlerTest-%d")
     );
+    for (int i = 0; i < 2000; i++) {
+      final String query = StringUtils.format("SELECT COUNT(*) + %s AS ci FROM foo", i);
+      futures.add(
+          exec.submit(() -> {
+            try (
+                final Statement statement = client.createStatement();
+                final ResultSet resultSet = statement.executeQuery(query)) {
+              final List<Map<String, Object>> rows = getRows(resultSet);
+              return ((Number) Iterables.getOnlyElement(rows).get("ci")).intValue();
+            }
+            catch (SQLException e) {
+              throw new RuntimeException(e);
+            }
+          })
+      );
+    }
+
+    final List<Integer> integers;
+    try {
+      integers = Futures.allAsList(futures).get();
+    }
+    catch (InterruptedException e) {
+      throw new RE(e);
+    }
+    catch (ExecutionException e) {
+      throw new RE(e);
+    }
+    for (int i = 0; i < 2000; i++) {
+      Assert.assertEquals(i + 6, (int) integers.get(i));
+    }
+    exec.shutdown();
   }
 
   @Test

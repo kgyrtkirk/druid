@@ -49,15 +49,15 @@ import org.apache.druid.sql.calcite.util.CalciteTestBase;
 import org.apache.druid.sql.calcite.util.CalciteTests;
 import org.apache.druid.sql.calcite.util.QueryLogHook;
 import org.junit.Assert;
-import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.io.TempDir;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -73,9 +73,6 @@ public class DruidStatementTest extends CalciteTestBase
   private static String SELECT_STAR_FROM_FOO =
       "SELECT * FROM druid.foo";
 
-  @ClassRule
-  public static TemporaryFolder temporaryFolder = new TemporaryFolder();
-
   @Rule
   public QueryLogHook queryLogHook = QueryLogHook.create();
 
@@ -84,11 +81,11 @@ public class DruidStatementTest extends CalciteTestBase
   private static Closer resourceCloser;
 
   @BeforeAll
-  public static void setUpClass() throws Exception
+  public static void setUpClass(@TempDir File tempDir) throws Exception
   {
     resourceCloser = Closer.create();
     conglomerate = QueryStackTests.createQueryRunnerFactoryConglomerate(resourceCloser);
-    walker = CalciteTests.createMockWalker(conglomerate, temporaryFolder.newFolder());
+    walker = CalciteTests.createMockWalker(conglomerate, tempDir);
     resourceCloser.register(walker);
   }
 
