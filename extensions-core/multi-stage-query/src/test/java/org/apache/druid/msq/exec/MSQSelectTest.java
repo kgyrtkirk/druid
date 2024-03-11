@@ -136,9 +136,6 @@ public class MSQSelectTest extends MSQTestBase
 
     return Arrays.asList(data);
   }
-  public String contextName;
-  public Map<String, Object> context;
-
   @MethodSource("data")
   @ParameterizedTest(name = "{index}:with context {0}")
   public void testCalculator(String contextName, Map<String, Object> context)
@@ -891,7 +888,7 @@ public class MSQSelectTest extends MSQTestBase
   public void testBroadcastJoin(String contextName, Map<String, Object> context)
   {
     initMSQSelectTest(contextName, context);
-    testJoin(JoinAlgorithm.BROADCAST);
+    testJoin(contextName, context, JoinAlgorithm.BROADCAST);
   }
 
   @MethodSource("data")
@@ -899,10 +896,10 @@ public class MSQSelectTest extends MSQTestBase
   public void testSortMergeJoin(String contextName, Map<String, Object> context)
   {
     initMSQSelectTest(contextName, context);
-    testJoin(JoinAlgorithm.SORT_MERGE);
+    testJoin(contextName, context, JoinAlgorithm.SORT_MERGE);
   }
 
-  private void testJoin(final JoinAlgorithm joinAlgorithm)
+  private void testJoin(String contextName, Map<String, Object> context, final JoinAlgorithm joinAlgorithm)
   {
     final Map<String, Object> queryContext =
         ImmutableMap.<String, Object>builder()
@@ -2690,7 +2687,5 @@ public class MSQSelectTest extends MSQTestBase
   // FIXME remove
   public void initMSQSelectTest(String contextName, Map<String, Object> context)
   {
-    this.contextName = contextName;
-    this.context = context;
   }
 }
