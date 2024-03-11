@@ -618,9 +618,9 @@ public class MSQInsertTest extends MSQTestBase
 
   @MethodSource("data")
   @ParameterizedTest(name = "{index}:with context {0}")
-  public void testInsertOnFoo1WithTimeFunctionWithSequential(String contextName, Map<String, Object> context1)
+  public void testInsertOnFoo1WithTimeFunctionWithSequential(String contextName, Map<String, Object> context)
   {
-    initMSQInsertTest(contextName, context1);
+    initMSQInsertTest(contextName, context);
     List<Object[]> expectedRows = expectedFooRows();
     int expectedCounterRows = expectedRows.size();
     long[] expectedArray = createExpectedFrameArray(expectedCounterRows, 1);
@@ -629,7 +629,7 @@ public class MSQInsertTest extends MSQTestBase
                                             .add("__time", ColumnType.LONG)
                                             .add("dim1", ColumnType.STRING)
                                             .add("cnt", ColumnType.LONG).build();
-    Map<String, Object> context = ImmutableMap.<String, Object>builder()
+    Map<String, Object> newContext = ImmutableMap.<String, Object>builder()
                                               .putAll(DEFAULT_MSQ_CONTEXT)
                                               .put(
                                                   MultiStageQueryContext.CTX_CLUSTER_STATISTICS_MERGE_MODE,
@@ -639,7 +639,7 @@ public class MSQInsertTest extends MSQTestBase
 
     testIngestQuery().setSql(
                          "insert into foo1 select  floor(__time to day) as __time , dim1 , count(*) as cnt from foo where dim1 is not null group by 1, 2 PARTITIONED by day clustered by dim1")
-                     .setQueryContext(context)
+                     .setQueryContext(newContext)
                      .setExpectedDataSource("foo1")
                      .setExpectedRowSignature(rowSignature)
                      .setQueryContext(MSQInsertTest.this.context)
