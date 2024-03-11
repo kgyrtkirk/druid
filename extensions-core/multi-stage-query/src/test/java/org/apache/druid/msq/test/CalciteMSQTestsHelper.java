@@ -76,7 +76,6 @@ import org.apache.druid.segment.writeout.OffHeapMemorySegmentWriteOutMediumFacto
 import org.apache.druid.server.SegmentManager;
 import org.apache.druid.server.coordination.DataSegmentAnnouncer;
 import org.apache.druid.server.coordination.NoopDataSegmentAnnouncer;
-import org.apache.druid.sql.calcite.BaseCalciteQueryTest.TempFolderOverTempDir;
 import org.apache.druid.sql.calcite.CalciteArraysQueryTest;
 import org.apache.druid.sql.calcite.util.CalciteTests;
 import org.apache.druid.sql.calcite.util.TestDataBuilder;
@@ -88,8 +87,6 @@ import org.junit.rules.TemporaryFolder;
 import org.mockito.Mockito;
 
 import javax.annotation.Nullable;
-
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
@@ -116,12 +113,10 @@ import static org.mockito.Mockito.doThrow;
 public class CalciteMSQTestsHelper
 {
   public static List<Module> fetchModules(
-      TempFolderOverTempDir temporaryFolder,
+      TemporaryFolder temporaryFolder,
       TestGroupByBuffers groupByBuffers
   )
   {
-    File cacheManagerDir = temporaryFolder.newFolder("test");
-    File storageDir = temporaryFolder.newFolder("localsegments");
 
     Module customBindings =
         binder -> {
@@ -157,11 +152,22 @@ public class CalciteMSQTestsHelper
           );
           ObjectMapper testMapper = MSQTestBase.setupObjectMapper(dummyInjector);
           IndexIO indexIO = new IndexIO(testMapper, ColumnConfig.DEFAULT);
-          SegmentCacheManager segmentCacheManager = new SegmentCacheManagerFactory(testMapper)
-              .manufacturate(cacheManagerDir);
+          SegmentCacheManager segmentCacheManager = null;
+          try {
+            segmentCacheManager = new SegmentCacheManagerFactory(testMapper).manufacturate(temporaryFolder.newFolder(
+                "test"));
+          }
+          catch (IOException e) {
+            e.printStackTrace();
+          }
           LocalDataSegmentPusherConfig config = new LocalDataSegmentPusherConfig();
           MSQTestSegmentManager segmentManager = new MSQTestSegmentManager(segmentCacheManager, indexIO);
-          config.storageDirectory = storageDir;
+          try {
+            config.storageDirectory = temporaryFolder.newFolder("localsegments");
+          }
+          catch (IOException e) {
+            throw new ISE(e, "Unable to create folder");
+          }
           binder.bind(DataSegmentPusher.class).toProvider(() -> new MSQTestDelegateDataSegmentPusher(
               new LocalDataSegmentPusher(config),
               segmentManager

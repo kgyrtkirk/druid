@@ -19,7 +19,6 @@
 
 package org.apache.druid.msq.exec;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.apache.druid.error.DruidException;
@@ -52,15 +51,11 @@ import org.apache.druid.timeline.partition.LinearShardSpec;
 import org.hamcrest.CoreMatchers;
 import org.junit.internal.matchers.ThrowableMessageMatcher;
 import org.junit.jupiter.api.Test;
-import org.junit.rules.TemporaryFolder;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -296,7 +291,7 @@ public class MSQFaultsTest extends MSQTestBase
                                             .add("__time", ColumnType.LONG)
                                             .build();
 
-    File file = createNdJsonFile(temporaryFolder.newFile(), 30000, 1);
+    File file = MSQTestFileUtils.generateTemporaryNdJsonFile(temporaryFolder, 30000, 1);
     String filePathAsJson = queryFramework().queryJsonMapper().writeValueAsString(file.getAbsolutePath());
 
     testIngestQuery().setSql(" insert into foo1 SELECT\n"
@@ -315,27 +310,6 @@ public class MSQFaultsTest extends MSQTestBase
                      .verifyResults();
 
   }
-
-  /**
-   * Helper method that populates a file with {@code numRows} rows and {@code numColumns} columns where the
-   * first column is a string 'timestamp' while the rest are string columns with junk value
-   */
-  public static File createNdJsonFile(File file, final int numRows, final int numColumns) throws IOException
-  {
-    for (int currentRow = 0; currentRow < numRows; ++currentRow) {
-      StringBuilder sb = new StringBuilder();
-      sb.append("{");
-      sb.append("\"timestamp\":\"2016-06-27T00:00:11.080Z\"");
-      for (int currentColumn = 1; currentColumn < numColumns; ++currentColumn) {
-        sb.append(StringUtils.format(",\"column%s\":\"val%s\"", currentColumn, currentRow));
-      }
-      sb.append("}");
-      Files.write(file.toPath(), ImmutableList.of(sb.toString()), StandardCharsets.UTF_8, StandardOpenOption.APPEND);
-    }
-    return file;
-  }
-
-
 
   @Test
   public void testInsertWithManyColumns()
