@@ -77,7 +77,6 @@ import org.apache.druid.server.SegmentManager;
 import org.apache.druid.server.coordination.DataSegmentAnnouncer;
 import org.apache.druid.server.coordination.NoopDataSegmentAnnouncer;
 import org.apache.druid.sql.calcite.CalciteArraysQueryTest;
-import org.apache.druid.sql.calcite.util.CalciteTestBase.TempFolderOverTempDir;
 import org.apache.druid.sql.calcite.util.CalciteTests;
 import org.apache.druid.sql.calcite.util.TestDataBuilder;
 import org.apache.druid.timeline.DataSegment;
@@ -91,6 +90,7 @@ import javax.annotation.Nullable;
 import java.io.File;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static org.apache.druid.sql.calcite.util.CalciteTests.DATASOURCE1;
@@ -114,12 +114,12 @@ import static org.mockito.Mockito.doThrow;
 public class CalciteMSQTestsHelper
 {
   public static List<Module> fetchModules(
-      TempFolderOverTempDir temporaryFolder,
+      Function<String, File> tempFolderProducer,
       TestGroupByBuffers groupByBuffers
   )
   {
-    File cacheManagerDir = temporaryFolder.newFolder("test");
-    File storageDir = temporaryFolder.newFolder("localsegments");
+    File cacheManagerDir = tempFolderProducer.apply("test");
+    File storageDir = tempFolderProducer.apply("localsegments");
 
     Module customBindings =
         binder -> {
@@ -166,7 +166,7 @@ public class CalciteMSQTestsHelper
           ));
           binder.bind(DataSegmentAnnouncer.class).toInstance(new NoopDataSegmentAnnouncer());
           binder.bind(DataSegmentProvider.class)
-                .toInstance((segmentId, channelCounters, isReindex) -> getSupplierForSegment(temporaryFolder, segmentId));
+                .toInstance((segmentId, channelCounters, isReindex) -> getSupplierForSegment(tempFolderProducer, segmentId));
           binder.bind(DataServerQueryHandlerFactory.class).toInstance(getTestDataServerQueryHandlerFactory());
 
           GroupByQueryConfig groupByQueryConfig = new GroupByQueryConfig();
@@ -198,7 +198,7 @@ public class CalciteMSQTestsHelper
     return mockFactory;
   }
 
-  private static Supplier<ResourceHolder<Segment>> getSupplierForSegment(TempFolderOverTempDir temporaryFolder, SegmentId segmentId)
+  private static Supplier<ResourceHolder<Segment>> getSupplierForSegment(Function<String, File> tempFolderProducer, SegmentId segmentId)
   {
     final QueryableIndex index;
     switch (segmentId.getDataSource()) {
@@ -214,7 +214,7 @@ public class CalciteMSQTestsHelper
             .build();
         index = IndexBuilder
             .create()
-            .tmpDir(temporaryFolder.newFolder())
+            .tmpDir(tempFolderProducer.apply("tmpDir"))
             .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
             .schema(foo1Schema)
             .rows(ROWS1)
@@ -241,7 +241,7 @@ public class CalciteMSQTestsHelper
             .build();
         index = IndexBuilder
             .create()
-            .tmpDir(temporaryFolder.newFolder())
+            .tmpDir(tempFolderProducer.apply("tmpDir"))
             .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
             .schema(indexSchemaDifferentDim3M1Types)
             .rows(ROWS2)
@@ -251,7 +251,7 @@ public class CalciteMSQTestsHelper
       case CalciteTests.BROADCAST_DATASOURCE:
         index = IndexBuilder
             .create()
-            .tmpDir(temporaryFolder.newFolder())
+            .tmpDir(tempFolderProducer.apply("tmpDir"))
             .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
             .schema(INDEX_SCHEMA_NUMERIC_DIMS)
             .rows(ROWS1_WITH_NUMERIC_DIMS)
@@ -260,7 +260,7 @@ public class CalciteMSQTestsHelper
       case DATASOURCE5:
         index = IndexBuilder
             .create()
-            .tmpDir(temporaryFolder.newFolder())
+            .tmpDir(tempFolderProducer.apply("tmpDir"))
             .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
             .schema(INDEX_SCHEMA_LOTS_O_COLUMNS)
             .rows(ROWS_LOTS_OF_COLUMNS)
@@ -268,7 +268,7 @@ public class CalciteMSQTestsHelper
         break;
       case CalciteArraysQueryTest.DATA_SOURCE_ARRAYS:
         index = IndexBuilder.create()
-                            .tmpDir(temporaryFolder.newFolder())
+                            .tmpDir(tempFolderProducer.apply("tmpDir"))
                             .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
                             .schema(
                                 new IncrementalIndexSchema.Builder()
@@ -287,11 +287,11 @@ public class CalciteMSQTestsHelper
                                 )
                             )
                             .inputFormat(TestDataBuilder.DEFAULT_JSON_INPUT_FORMAT)
-                            .inputTmpDir(temporaryFolder.newFolder())
+                            .inputTmpDir(tempFolderProducer.apply("tmpDir"))
                             .buildMMappedIndex();
         break;
       case CalciteTests.WIKIPEDIA_FIRST_LAST:
-        index = TestDataBuilder.makeWikipediaIndexWithAggregation(temporaryFolder.newFolder());
+        index = TestDataBuilder.makeWikipediaIndexWithAggregation(tempFolderProducer.apply("tmpDir"));
         break;
       default:
         throw new ISE("Cannot query segment %s in test runner", segmentId);
