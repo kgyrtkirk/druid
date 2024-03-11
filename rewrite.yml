@@ -34,6 +34,7 @@ recipeList:
 ---
 # Customized version of org.openrewrite.java.testing.junit5.JUnit4to5Migration
 # commented lines are recipes which were disabled
+
 type: specs.openrewrite.org/v1beta/recipe
 name: org.apache.druid.JUnit4to5Migration
 displayName: Custom JUnit Jupiter migration from JUnit 4.x
@@ -60,7 +61,7 @@ recipeList:
   - org.openrewrite.java.ChangeMethodName:
       methodPattern: org.junit.Assert assertEquals(.., Object[], Object[])
       newMethodName: assertArrayEquals
-  - org.openrewrite.java.testing.junit5.AssertToAssertionsgit 
+  #- org.openrewrite.java.testing.junit5.AssertToAssertions
   - org.openrewrite.java.testing.junit5.CategoryToTag
   - org.openrewrite.java.testing.junit5.CleanupJUnitImports
   - org.openrewrite.java.testing.junit5.TemporaryFolderToTempDir
