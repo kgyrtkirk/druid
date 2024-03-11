@@ -38,6 +38,7 @@ import org.apache.druid.sql.calcite.util.CalciteTests;
 import org.apache.druid.sql.calcite.util.SqlTestFramework;
 import org.junit.ClassRule;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
 
 import java.util.Arrays;
 
@@ -46,6 +47,8 @@ import static org.junit.Assert.fail;
 /**
  * Test the use of catalog specs to drive MSQ ingestion.
  */
+//enable rule migration because TestDerbyConnector.DerbyConnectorRule
+@EnableRuleMigrationSupport
 public class CatalogIngestionTest extends CalciteIngestionDmlTest
 {
   @ClassRule
