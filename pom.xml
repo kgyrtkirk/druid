@@ -159,7 +159,6 @@
     </properties>
 
     <modules>
-        <module>testdeps</module>
         <module>processing</module>
         <module>indexing-hadoop</module>
         <module>indexing-service</module>
