@@ -1621,4 +1621,10 @@ public class BaseCalciteQueryTest extends CalciteTestBase
     }
     return file;
   }
+
+  @org.junit.Test
+  public void tt()
+  {
+
+  }
 }
