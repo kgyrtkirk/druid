@@ -196,7 +196,6 @@ import org.joda.time.Interval;
 import org.junit.Assert;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mockito;
 
 import javax.annotation.Nonnull;
@@ -390,7 +389,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
   // which depends on the object mapper that the injector will provide, once it
   // is built, but has not yet been build while we build the SQL engine.
   @BeforeEach
-  public void setUp2(@TempDir File cacheManagerDir, @TempDir File storageDir, @TempDir File faultStorageDir) throws Exception
+  public void setUp2() throws Exception
   {
     groupByBuffers = TestGroupByBuffers.createDefault();
 
@@ -406,7 +405,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
     ObjectMapper secondMapper = setupObjectMapper(secondInjector);
     indexIO = new IndexIO(secondMapper, ColumnConfig.DEFAULT);
 
-    segmentCacheManager = new SegmentCacheManagerFactory(secondMapper).manufacturate(cacheManagerDir);
+    segmentCacheManager = new SegmentCacheManagerFactory(secondMapper).manufacturate(newTempFolder("cacheManager"));
 
     MSQSqlModule sqlModule = new MSQSqlModule();
 
@@ -438,13 +437,13 @@ public class MSQTestBase extends BaseCalciteQueryTest
           binder.bind(QueryProcessingPool.class)
                 .toInstance(new ForwardingQueryProcessingPool(Execs.singleThreaded("Test-runner-processing-pool")));
           binder.bind(DataSegmentProvider.class)
-                .toInstance((segmentId, channelCounters, isReindex) -> getSupplierForSegment(this::newTempFile, segmentId));
+                .toInstance((segmentId, channelCounters, isReindex) -> getSupplierForSegment(this::newTempFolder, segmentId));
           binder.bind(DataServerQueryHandlerFactory.class).toInstance(getTestDataServerQueryHandlerFactory());
           binder.bind(IndexIO.class).toInstance(indexIO);
           binder.bind(SpecificSegmentsQuerySegmentWalker.class).toInstance(qf.walker());
 
           LocalDataSegmentPusherConfig config = new LocalDataSegmentPusherConfig();
-          config.storageDirectory = storageDir;
+          config.storageDirectory = newTempFolder("storageDir");
           binder.bind(DataSegmentPusher.class).toInstance(new MSQTestDelegateDataSegmentPusher(
               new LocalDataSegmentPusher(config),
               segmentManager
@@ -462,7 +461,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
                 StorageConnectorProvider.class,
                 MultiStageQuery.class
             );
-            localFileStorageDir = faultStorageDir;
+            localFileStorageDir = newTempFolder("faultStorageDir");
             localFileStorageConnector = Mockito.spy(
                 new LocalFileStorageConnector(localFileStorageDir)
             );
