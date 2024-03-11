@@ -193,7 +193,7 @@ public class SqlResourceTest extends CalciteTestBase
   private static final AtomicReference<Supplier<Void>> SCHEDULER_BAGGAGE = new AtomicReference<>();
 
   @BeforeAll
-  public static void setupClass(@TempDir File tempDir) throws Exception
+  public static void setupClass(@TempDir File tempDir)
   {
     conglomerate = QueryStackTests.createQueryRunnerFactoryConglomerate(staticCloser);
     scheduler = new QueryScheduler(

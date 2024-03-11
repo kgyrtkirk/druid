@@ -76,7 +76,7 @@ public class DruidStatementTest extends CalciteTestBase
   private static Closer resourceCloser;
 
   @BeforeAll
-  public static void setUpClass(@TempDir File tempDir) throws Exception
+  public static void setUpClass(@TempDir File tempDir)
   {
     resourceCloser = Closer.create();
     conglomerate = QueryStackTests.createQueryRunnerFactoryConglomerate(resourceCloser);

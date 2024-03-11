@@ -160,7 +160,7 @@ public class DruidAvaticaHandlerTest extends CalciteTestBase
   private final boolean nullNumeric = !NullHandling.replaceWithDefault();
 
   @BeforeAll
-  public static void setUpClass(@TempDir File tempDir) throws Exception
+  public static void setUpClass(@TempDir File tempDir)
   {
     resourceCloser = Closer.create();
     conglomerate = QueryStackTests.createQueryRunnerFactoryConglomerate(resourceCloser);
