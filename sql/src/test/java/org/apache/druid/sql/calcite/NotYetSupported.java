@@ -52,22 +52,25 @@ import static org.junit.Assert.assertThrows;
  * Can be used to mark tests which are not-yet supported for some reason.
  *
  * In case a testcase marked with this annotation fails - it means that the
- * testcase no longer fails with the annotated expectation. This means that a code change affected this test either
+ * testcase no longer fails with the annotated expectation. This means that a
+ * code change affected this test either
  *
  * <ol>
- * <li>it suddenly passes: yay, assuming it makes sense that it suddenly passes, remove the annotation and move on</li>
- * <li>it suddenly fails with a different error: validate that the new error is expected and either fix to continue failing with the old error or update the expected error.</li>
+ * <li>it suddenly passes: yay, assuming it makes sense that it suddenly passes,
+ * remove the annotation and move on</li>
+ * <li>it suddenly fails with a different error: validate that the new error is
+ * expected and either fix to continue failing with the old error or update the
+ * expected error.</li>
  * </ol>
  *
  * During usage; the annotation process have to be added to the testclass.
  * Ensure that it's loaded as the most outer-rule by using order=0 - otherwise
- * it may interfere with other rules:
- * <code>
- *   @Rule(order = 0)
+ * it may interfere with other rules: <code>
+ *   &#64;Rule(order = 0)
  *   public TestRule notYetSupportedRule = new NotYetSupportedProcessor();
  *
  *   @NotYetSupported(NOT_ENOUGH_RULES)
- *   @Test
+ *   &#64;Test
  *   public void testA() {
  *   }
  * </code>
@@ -135,9 +138,9 @@ public @interface NotYetSupported
   {
     @Override
     public void interceptTestMethod(Invocation<Void> invocation,
-            ReflectiveInvocationContext<Method> invocationContext,
-            ExtensionContext extensionContext) throws Throwable {
-
+        ReflectiveInvocationContext<Method> invocationContext,
+        ExtensionContext extensionContext) throws Throwable
+    {
 
       Method method = extensionContext.getTestMethod().get();
       NotYetSupported annotation = method.getAnnotation(NotYetSupported.class);
@@ -156,7 +159,8 @@ public @interface NotYetSupported
           catch (Throwable t) {
             e = t;
           }
-          // If the base test case is supposed to be ignored already, just skip the further evaluation
+          // If the base test case is supposed to be ignored already, just skip
+          // the further evaluation
           if (e instanceof AssumptionViolatedException) {
             throw (AssumptionViolatedException) e;
           }
@@ -184,6 +188,7 @@ public @interface NotYetSupported
         }
       }
     }
+
     public Statement apply(Statement base, Description description)
     {
       NotYetSupported annotation = getAnnotation(description, NotYetSupported.class);
@@ -204,7 +209,8 @@ public @interface NotYetSupported
           catch (Throwable t) {
             e = t;
           }
-          // If the base test case is supposed to be ignored already, just skip the further evaluation
+          // If the base test case is supposed to be ignored already, just skip
+          // the further evaluation
           if (e instanceof AssumptionViolatedException) {
             throw (AssumptionViolatedException) e;
           }
@@ -262,27 +268,31 @@ public @interface NotYetSupported
       Method m = getMethodForName(testClass, realMethodName);
       return m.getAnnotation(annotationType);
     }
+
     @Override
     public <T> T interceptTestFactoryMethod(Invocation<T> invocation,
         ReflectiveInvocationContext<Method> invocationContext, ExtensionContext extensionContext) throws Throwable
     {
-        throw new RuntimeException("FIXME: Unimplemented!");
+      throw new RuntimeException("FIXME: Unimplemented!");
     }
+
     private void interceptTestMethod()
     {
-        throw new RuntimeException("FIXME: Unimplemented!");
+      throw new RuntimeException("FIXME: Unimplemented!");
     }
+
     @Override
     public void interceptDynamicTest(Invocation<Void> invocation, DynamicTestInvocationContext invocationContext,
         ExtensionContext extensionContext) throws Throwable
     {
-        throw new RuntimeException("FIXME: Unimplemented!");
+      throw new RuntimeException("FIXME: Unimplemented!");
     }
+
     @Override
     public void interceptTestTemplateMethod(Invocation<Void> invocation,
         ReflectiveInvocationContext<Method> invocationContext, ExtensionContext extensionContext) throws Throwable
     {
-      interceptTestMethod(invocation,invocationContext,extensionContext);
+      interceptTestMethod(invocation, invocationContext, extensionContext);
     }
   }
 }
