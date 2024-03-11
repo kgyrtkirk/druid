@@ -79,7 +79,7 @@ public class MSQExportTest extends MSQTestBase
                                             .add("dim1", ColumnType.STRING)
                                             .add("cnt", ColumnType.LONG).build();
 
-    File exportDir = temXMEXAXISporaryFolder.newFolder("export/");
+    File exportDir = newTempFolder("export/");
 
     Map<String, Object> queryContext = new HashMap<>(DEFAULT_MSQ_CONTEXT);
     queryContext.put(MultiStageQueryContext.CTX_ROWS_PER_PAGE, 1);

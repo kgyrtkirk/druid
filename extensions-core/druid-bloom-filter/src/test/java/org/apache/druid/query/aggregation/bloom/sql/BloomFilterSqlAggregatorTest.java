@@ -81,7 +81,7 @@ public class BloomFilterSqlAggregatorTest extends BaseCalciteQueryTest
   {
     final QueryableIndex index =
         IndexBuilder.create()
-                    .tmpDir(temXMEXAXISporaryFolder.newFolder())
+                    .tmpDir(newTempFolder())
                     .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
                     .schema(
                         new IncrementalIndexSchema.Builder()
