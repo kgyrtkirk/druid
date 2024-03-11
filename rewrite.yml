@@ -21,7 +21,6 @@ preconditions:
 recipeList:
   - org.apache.druid.JUnit4to5Migration
   #- org.openrewrite.java.testing.junit5.StaticImports
-
 ---
 type: specs.openrewrite.org/v1beta/recipe
 name: org.apache.druid.EasyMockRunnerToEasyMockExtension
@@ -34,7 +33,6 @@ recipeList:
 ---
 # Customized version of org.openrewrite.java.testing.junit5.JUnit4to5Migration
 # commented lines are recipes which were disabled
-
 type: specs.openrewrite.org/v1beta/recipe
 name: org.apache.druid.JUnit4to5Migration
 displayName: Custom JUnit Jupiter migration from JUnit 4.x
