@@ -194,9 +194,9 @@ import org.easymock.EasyMock;
 import org.hamcrest.Matcher;
 import org.joda.time.Interval;
 import org.junit.Assert;
-import org.junit.Rule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.Mockito;
 
@@ -321,8 +321,6 @@ public class MSQTestBase extends BaseCalciteQueryTest
 
   private MSQTestSegmentManager segmentManager;
   private SegmentCacheManager segmentCacheManager;
-  @Rule
-  public TemporaryFolder tmpFolder = new TemporaryFolder();
 
   private TestGroupByBuffers groupByBuffers;
   protected final WorkerMemoryParameters workerMemoryParameters = Mockito.spy(
@@ -392,7 +390,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
   // which depends on the object mapper that the injector will provide, once it
   // is built, but has not yet been build while we build the SQL engine.
   @BeforeEach
-  public void setUp2() throws Exception
+  public void setUp2(@TempDir File cacheManagerDir, @TempDir File storageDir, @TempDir File faultStorageDir) throws Exception
   {
     groupByBuffers = TestGroupByBuffers.createDefault();
 
@@ -408,12 +406,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
     ObjectMapper secondMapper = setupObjectMapper(secondInjector);
     indexIO = new IndexIO(secondMapper, ColumnConfig.DEFAULT);
 
-    try {
-      segmentCacheManager = new SegmentCacheManagerFactory(secondMapper).manufacturate(tmpFolder.newFolder("test"));
-    }
-    catch (IOException exception) {
-      throw new ISE(exception, "Unable to create segmentCacheManager");
-    }
+    segmentCacheManager = new SegmentCacheManagerFactory(secondMapper).manufacturate(cacheManagerDir);
 
     MSQSqlModule sqlModule = new MSQSqlModule();
 
@@ -451,12 +444,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
           binder.bind(SpecificSegmentsQuerySegmentWalker.class).toInstance(qf.walker());
 
           LocalDataSegmentPusherConfig config = new LocalDataSegmentPusherConfig();
-          try {
-            config.storageDirectory = tmpFolder.newFolder("localsegments");
-          }
-          catch (IOException e) {
-            throw new ISE(e, "Unable to create folder");
-          }
+          config.storageDirectory = storageDir;
           binder.bind(DataSegmentPusher.class).toInstance(new MSQTestDelegateDataSegmentPusher(
               new LocalDataSegmentPusher(config),
               segmentManager
@@ -474,7 +462,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
                 StorageConnectorProvider.class,
                 MultiStageQuery.class
             );
-            localFileStorageDir = tmpFolder.newFolder("fault");
+            localFileStorageDir = faultStorageDir;
             localFileStorageConnector = Mockito.spy(
                 new LocalFileStorageConnector(localFileStorageDir)
             );

@@ -708,7 +708,7 @@ public class SqlStatementResourceTest extends MSQTestBase
         sqlStatementFactory,
         objectMapper,
         overlordClient,
-        new LocalFileStorageConnector(tmpFolder.newFolder("local")),
+        new LocalFileStorageConnector(newTempFolder("local")),
         authorizerMapper
     );
   }
