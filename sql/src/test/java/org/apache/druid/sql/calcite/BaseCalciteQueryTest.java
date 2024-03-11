@@ -127,10 +127,7 @@ import org.junit.internal.matchers.ThrowableMessageMatcher;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
-import org.junit.rules.TemporaryFolder;
-
 import javax.annotation.Nullable;
 
 import java.io.File;
@@ -1630,7 +1627,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
    */
   public File getResourceAsTemporaryFile(final String resource)
   {
-    final File file = temporaryFolder.newFile();
+    final File file = newTempFile("resourceAsTempFile");
     final InputStream stream = getClass().getResourceAsStream(resource);
 
     if (stream == null) {

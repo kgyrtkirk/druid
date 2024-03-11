@@ -52,7 +52,6 @@ import org.apache.druid.timeline.partition.LinearShardSpec;
 import org.hamcrest.CoreMatchers;
 import org.junit.internal.matchers.ThrowableMessageMatcher;
 import org.junit.jupiter.api.Test;
-import org.junit.rules.TemporaryFolder;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
@@ -296,7 +295,7 @@ public class MSQFaultsTest extends MSQTestBase
                                             .add("__time", ColumnType.LONG)
                                             .build();
 
-    File file = createNdJsonFile(temporaryFolder.newFile(), 30000, 1);
+    File file = createNdJsonFile(newTempFile("ndjson30k"), 30000, 1);
     String filePathAsJson = queryFramework().queryJsonMapper().writeValueAsString(file.getAbsolutePath());
 
     testIngestQuery().setSql(" insert into foo1 SELECT\n"

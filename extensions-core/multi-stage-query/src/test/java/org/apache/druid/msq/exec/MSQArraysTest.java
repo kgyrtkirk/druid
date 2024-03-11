@@ -91,7 +91,7 @@ public class MSQArraysTest extends MSQTestBase
   public void setup() throws IOException
   {
     // Read the file and make the name available to the tests
-    File dataFile = temporaryFolder.newFile();
+    File dataFile = newTempFile("dataFile");
     final InputStream resourceStream = NestedDataTestUtils.class.getClassLoader()
                                                                 .getResourceAsStream(NestedDataTestUtils.ARRAY_TYPES_DATA_FILE);
     final InputStream decompressing = CompressionUtils.decompress(

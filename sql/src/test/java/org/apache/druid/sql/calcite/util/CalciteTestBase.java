@@ -97,11 +97,6 @@ public abstract class CalciteTestBase
 
   public class TempFolderOverTempDir {
 
-    public File newFile()
-    {
-      return newTempFile("tempFile");
-    }
-
     public File newFolder()
     {
       return newTempFolder("unknown");
