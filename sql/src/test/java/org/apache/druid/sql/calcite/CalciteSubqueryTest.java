@@ -90,16 +90,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class CalciteSubqueryTest extends BaseCalciteQueryTest
 {
 
-  public String testName;
-  public Map<String, Object> queryContext;
 
   public void initCalciteSubqueryTest(
       String testName,
       Map<String, Object> queryContext
   )
   {
-    this.testName = testName;
-    this.queryContext = queryContext;
   }
 
   public static Iterable<Object[]> constructorFeeder()
@@ -697,13 +693,13 @@ public class CalciteSubqueryTest extends BaseCalciteQueryTest
   {
     initCalciteSubqueryTest(testName, queryContext);
     if ("without memory limit".equals(testName)) {
-      testMaxSubqueryRowsWithoutMemoryLimit();
+      testMaxSubqueryRowsWithoutMemoryLimit(testName, queryContext);
     } else {
-      testMaxSubQueryRowsWithLimit();
+      testMaxSubQueryRowsWithLimit(testName, queryContext);
     }
   }
 
-  private void testMaxSubqueryRowsWithoutMemoryLimit()
+  private void testMaxSubqueryRowsWithoutMemoryLimit(String testName, Map<String, Object> queryContext)
   {
     Map<String, Object> modifiedQueryContext = new HashMap<>(queryContext);
     modifiedQueryContext.put(QueryContexts.MAX_SUBQUERY_ROWS_KEY, 1);
@@ -728,7 +724,7 @@ public class CalciteSubqueryTest extends BaseCalciteQueryTest
     );
   }
 
-  private void testMaxSubQueryRowsWithLimit()
+  private void testMaxSubQueryRowsWithLimit(String testName, Map<String, Object> queryContext)
   {
     // Since the results are materializable as frames, we are able to use the memory limit and donot rely on the
     // row limit for the subquery
