@@ -35,12 +35,15 @@ import org.apache.druid.sql.calcite.util.SqlTestFramework;
 import org.junit.Rule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
 
 import java.util.Arrays;
 import java.util.Collections;
 
 import static org.junit.Assert.fail;
 
+// enable rule migration because TestDerbyConnector.DerbyConnectorRule
+@EnableRuleMigrationSupport
 public class CatalogQueryTest extends BaseCalciteQueryTest
 {
   @Rule

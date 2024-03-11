@@ -102,10 +102,8 @@ import org.apache.druid.sql.calcite.run.NativeSqlEngine;
 import org.apache.druid.sql.calcite.schema.DruidSchemaCatalog;
 import org.apache.druid.sql.calcite.util.CalciteTestBase;
 import org.apache.druid.sql.calcite.util.CalciteTests;
-import org.apache.druid.sql.calcite.util.QueryLogHook;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
-import org.junit.Rule;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -171,9 +169,6 @@ public class SqlResourceTest extends CalciteTestBase
 
   private static SpecificSegmentsQuerySegmentWalker walker;
   private static QueryScheduler scheduler;
-
-  @Rule
-  public QueryLogHook queryLogHook = QueryLogHook.create();
 
   private Closer resourceCloser;
   private TestRequestLogger testRequestLogger;
