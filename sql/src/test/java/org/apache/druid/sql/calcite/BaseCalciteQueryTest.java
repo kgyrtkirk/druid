@@ -127,7 +127,6 @@ import org.junit.internal.matchers.ThrowableMessageMatcher;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
 import javax.annotation.Nullable;
 
 import java.io.File;
@@ -156,7 +155,6 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
  * A base class for SQL query testing. It sets up query execution environment, provides useful helper methods,
  * and populates data using {@link CalciteTests#createMockWalker}.
  */
-@EnableRuleMigrationSupport
 public class BaseCalciteQueryTest extends CalciteTestBase
     implements QueryComponentSupplier, PlannerComponentSupplier
 {

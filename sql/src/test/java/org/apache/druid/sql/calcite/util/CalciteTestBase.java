@@ -34,7 +34,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.io.TempDir;
-import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -42,7 +41,6 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 
-@EnableRuleMigrationSupport
 public abstract class CalciteTestBase
 {
   public static final List<SqlParameter> DEFAULT_PARAMETERS = ImmutableList.of();
