@@ -103,7 +103,7 @@ public abstract class CalciteSelectJoinQueryMSQTest
     {
       super.configureGuice(builder);
       builder.addModules(
-          CalciteMSQTestsHelper.fetchModules(temXMEXAXISporaryFolder, TestGroupByBuffers.createDefault()).toArray(new Module[0])
+          CalciteMSQTestsHelper.fetchModules(this::newTempFolder, TestGroupByBuffers.createDefault()).toArray(new Module[0])
       );
     }
 
