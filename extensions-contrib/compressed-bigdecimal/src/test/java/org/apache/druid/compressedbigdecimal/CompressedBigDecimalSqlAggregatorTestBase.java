@@ -84,7 +84,7 @@ public abstract class CompressedBigDecimalSqlAggregatorTestBase extends BaseCalc
   {
     QueryableIndex index =
         IndexBuilder.create()
-                    .tmpDir(temporaryFolder.newFolder())
+                    .tmpDir(temporaryFoldernewFolder())
                     .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
                     .schema(
                         new IncrementalIndexSchema.Builder()

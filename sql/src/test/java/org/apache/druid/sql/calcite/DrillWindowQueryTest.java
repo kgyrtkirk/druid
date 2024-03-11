@@ -504,7 +504,7 @@ public class DrillWindowQueryTest extends BaseCalciteQueryTest
       dimensionNames.add(dimension.getName());
     }
 
-    final File tmpFolder = temporaryFolder.newFolder();
+    final File tmpFolder = temporaryFoldernewFolder();
     final QueryableIndex queryableIndex = IndexBuilder
         .create()
         .tmpDir(new File(tmpFolder, dataSource))

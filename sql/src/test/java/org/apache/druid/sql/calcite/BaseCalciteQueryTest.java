@@ -126,12 +126,15 @@ import org.junit.internal.matchers.ThrowableMessageMatcher;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.migrationsupport.rules.EnableRuleMigrationSupport;
 import org.junit.rules.TemporaryFolder;
 
 import javax.annotation.Nullable;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -151,8 +154,9 @@ import static org.junit.jupiter.api.Assumptions.assumeFalse;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /**
- * A base class for SQL query testing. It sets up query execution environment, provides useful helper methods,
- * and populates data using {@link CalciteTests#createMockWalker}.
+ * A base class for SQL query testing. It sets up query execution environment,
+ * provides useful helper methods, and populates data using
+ * {@link CalciteTests#createMockWalker}.
  */
 @EnableRuleMigrationSupport
 public class BaseCalciteQueryTest extends CalciteTestBase
@@ -175,61 +179,57 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   public static final Logger log = new Logger(BaseCalciteQueryTest.class);
 
   public static final PlannerConfig PLANNER_CONFIG_DEFAULT = new PlannerConfig();
-  public static final PlannerConfig PLANNER_CONFIG_DEFAULT_NO_COMPLEX_SERDE =
-      PlannerConfig.builder().serializeComplexValues(false).build();
+  public static final PlannerConfig PLANNER_CONFIG_DEFAULT_NO_COMPLEX_SERDE = PlannerConfig.builder()
+      .serializeComplexValues(false).build();
 
-  public static final PlannerConfig PLANNER_CONFIG_REQUIRE_TIME_CONDITION =
-      PlannerConfig.builder().requireTimeCondition(true).build();
+  public static final PlannerConfig PLANNER_CONFIG_REQUIRE_TIME_CONDITION = PlannerConfig.builder()
+      .requireTimeCondition(true).build();
 
-  public static final PlannerConfig PLANNER_CONFIG_NO_TOPN =
-      PlannerConfig.builder().maxTopNLimit(0).build();
+  public static final PlannerConfig PLANNER_CONFIG_NO_TOPN = PlannerConfig.builder().maxTopNLimit(0).build();
 
-  public static final PlannerConfig PLANNER_CONFIG_NO_HLL =
-      PlannerConfig.builder().useApproximateCountDistinct(false).build();
+  public static final PlannerConfig PLANNER_CONFIG_NO_HLL = PlannerConfig.builder().useApproximateCountDistinct(false)
+      .build();
 
   public static final String LOS_ANGELES = "America/Los_Angeles";
-  public static final PlannerConfig PLANNER_CONFIG_LOS_ANGELES =
-      PlannerConfig
-          .builder()
-          .sqlTimeZone(DateTimes.inferTzFromString(LOS_ANGELES))
-          .build();
+  public static final PlannerConfig PLANNER_CONFIG_LOS_ANGELES = PlannerConfig
+      .builder()
+      .sqlTimeZone(DateTimes.inferTzFromString(LOS_ANGELES))
+      .build();
 
-  public static final PlannerConfig PLANNER_CONFIG_AUTHORIZE_SYS_TABLES =
-      PlannerConfig.builder().authorizeSystemTablesDirectly(true).build();
+  public static final PlannerConfig PLANNER_CONFIG_AUTHORIZE_SYS_TABLES = PlannerConfig.builder()
+      .authorizeSystemTablesDirectly(true).build();
 
-  public static final PlannerConfig PLANNER_CONFIG_LEGACY_QUERY_EXPLAIN =
-      PlannerConfig.builder().useNativeQueryExplain(false).build();
+  public static final PlannerConfig PLANNER_CONFIG_LEGACY_QUERY_EXPLAIN = PlannerConfig.builder()
+      .useNativeQueryExplain(false).build();
 
-  public static final PlannerConfig PLANNER_CONFIG_NATIVE_QUERY_EXPLAIN =
-      PlannerConfig.builder().useNativeQueryExplain(true).build();
+  public static final PlannerConfig PLANNER_CONFIG_NATIVE_QUERY_EXPLAIN = PlannerConfig.builder()
+      .useNativeQueryExplain(true).build();
 
   public static final int MAX_NUM_IN_FILTERS = 100;
-  public static final PlannerConfig PLANNER_CONFIG_MAX_NUMERIC_IN_FILTER =
-      PlannerConfig.builder().maxNumericInFilters(MAX_NUM_IN_FILTERS).build();
+  public static final PlannerConfig PLANNER_CONFIG_MAX_NUMERIC_IN_FILTER = PlannerConfig.builder()
+      .maxNumericInFilters(MAX_NUM_IN_FILTERS).build();
 
   public static final String DUMMY_SQL_ID = "dummy";
 
   public static final String PRETEND_CURRENT_TIME = "2000-01-01T00:00:00Z";
 
-  public static final Map<String, Object> QUERY_CONTEXT_DEFAULT =
-      ImmutableMap.<String, Object>builder()
-                  .put(QueryContexts.CTX_SQL_QUERY_ID, DUMMY_SQL_ID)
-                  .put(PlannerContext.CTX_SQL_CURRENT_TIMESTAMP, "2000-01-01T00:00:00Z")
-                  .put(QueryContexts.DEFAULT_TIMEOUT_KEY, QueryContexts.DEFAULT_TIMEOUT_MILLIS)
-                  .put(QueryContexts.MAX_SCATTER_GATHER_BYTES_KEY, Long.MAX_VALUE)
-                  .build();
+  public static final Map<String, Object> QUERY_CONTEXT_DEFAULT = ImmutableMap.<String, Object>builder()
+      .put(QueryContexts.CTX_SQL_QUERY_ID, DUMMY_SQL_ID)
+      .put(PlannerContext.CTX_SQL_CURRENT_TIMESTAMP, "2000-01-01T00:00:00Z")
+      .put(QueryContexts.DEFAULT_TIMEOUT_KEY, QueryContexts.DEFAULT_TIMEOUT_MILLIS)
+      .put(QueryContexts.MAX_SCATTER_GATHER_BYTES_KEY, Long.MAX_VALUE)
+      .build();
 
-  public static final Map<String, Object> QUERY_CONTEXT_NO_STRINGIFY_ARRAY =
-      ImmutableMap.<String, Object>builder()
-                  .putAll(QUERY_CONTEXT_DEFAULT)
-                  .put(QueryContexts.CTX_SQL_STRINGIFY_ARRAYS, false)
-                  .build();
+  public static final Map<String, Object> QUERY_CONTEXT_NO_STRINGIFY_ARRAY = ImmutableMap.<String, Object>builder()
+      .putAll(QUERY_CONTEXT_DEFAULT)
+      .put(QueryContexts.CTX_SQL_STRINGIFY_ARRAYS, false)
+      .build();
 
-  public static final Map<String, Object> QUERY_CONTEXT_NO_STRINGIFY_ARRAY_USE_EQUALITY =
-      ImmutableMap.<String, Object>builder()
-                  .putAll(QUERY_CONTEXT_NO_STRINGIFY_ARRAY)
-                  .put(PlannerContext.CTX_SQL_USE_BOUNDS_AND_SELECTORS, false)
-                  .build();
+  public static final Map<String, Object> QUERY_CONTEXT_NO_STRINGIFY_ARRAY_USE_EQUALITY = ImmutableMap
+      .<String, Object>builder()
+      .putAll(QUERY_CONTEXT_NO_STRINGIFY_ARRAY)
+      .put(PlannerContext.CTX_SQL_USE_BOUNDS_AND_SELECTORS, false)
+      .build();
 
   public static final Map<String, Object> QUERY_CONTEXT_DONT_SKIP_EMPTY_BUCKETS = ImmutableMap.of(
       QueryContexts.CTX_SQL_QUERY_ID, DUMMY_SQL_ID,
@@ -272,23 +272,22 @@ public class BaseCalciteQueryTest extends CalciteTestBase
       QueryContexts.MAX_SCATTER_GATHER_BYTES_KEY, Long.MAX_VALUE
   );
 
-  public static final Map<String, Object> QUERY_CONTEXT_WITH_SUBQUERY_MEMORY_LIMIT =
-      ImmutableMap.<String, Object>builder()
-                  .putAll(QUERY_CONTEXT_DEFAULT)
-                  .put(QueryContexts.MAX_SUBQUERY_BYTES_KEY, "100000")
-                  .build();
+  public static final Map<String, Object> QUERY_CONTEXT_WITH_SUBQUERY_MEMORY_LIMIT = ImmutableMap
+      .<String, Object>builder()
+      .putAll(QUERY_CONTEXT_DEFAULT)
+      .put(QueryContexts.MAX_SUBQUERY_BYTES_KEY, "100000")
+      .build();
 
   // Add additional context to the given context map for when the
   // timeseries query has timestamp_floor expression on the timestamp dimension
   public static Map<String, Object> getTimeseriesContextWithFloorTime(
       Map<String, Object> context,
-      String timestampResultField
-  )
+      String timestampResultField)
   {
     return ImmutableMap.<String, Object>builder()
-                       .putAll(context)
-                       .put(TimeseriesQuery.CTX_TIMESTAMP_RESULT_FIELD, timestampResultField)
-                       .build();
+        .putAll(context)
+        .put(TimeseriesQuery.CTX_TIMESTAMP_RESULT_FIELD, timestampResultField)
+        .build();
   }
 
   // Matches QUERY_CONTEXT_LOS_ANGELES
@@ -302,6 +301,9 @@ public class BaseCalciteQueryTest extends CalciteTestBase
 
   @Rule(order = 2)
   public TemporaryFolder temporaryFolder = new TemporaryFolder();
+
+  @TempDir
+  public Path tempDir;
 
   public boolean cannotVectorize = false;
   public boolean skipVectorize = false;
@@ -408,8 +410,9 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   }
 
   /**
-   * Callers should use {@link #equality(String, Object, ColumnType)} instead of this method, since they will correctly
-   * use either a {@link EqualityFilter} or {@link SelectorDimFilter} depending on the value of
+   * Callers should use {@link #equality(String, Object, ColumnType)} instead of
+   * this method, since they will correctly use either a {@link EqualityFilter}
+   * or {@link SelectorDimFilter} depending on the value of
    * {@link NullHandling#sqlCompatible()}, which determines the default of
    * {@link PlannerContext#CTX_SQL_USE_BOUNDS_AND_SELECTORS}
    */
@@ -419,8 +422,9 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   }
 
   /**
-   * Callers should use {@link #equality(String, Object, ColumnType)} instead of this method, since they will correctly
-   * use either a {@link EqualityFilter} or {@link SelectorDimFilter} depending on the value of
+   * Callers should use {@link #equality(String, Object, ColumnType)} instead of
+   * this method, since they will correctly use either a {@link EqualityFilter}
+   * or {@link SelectorDimFilter} depending on the value of
    * {@link NullHandling#sqlCompatible()}, which determines the default of
    * {@link PlannerContext#CTX_SQL_USE_BOUNDS_AND_SELECTORS}
    */
@@ -435,17 +439,18 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   }
 
   /**
-   * This method should be used instead of {@link #equality(String, Object, ColumnType)} when the match value type
-   * does not match the column type. If {@link NullHandling#sqlCompatible()} is true, this method is equivalent to
+   * This method should be used instead of
+   * {@link #equality(String, Object, ColumnType)} when the match value type
+   * does not match the column type. If {@link NullHandling#sqlCompatible()} is
+   * true, this method is equivalent to
    * {@link #equality(String, Object, ColumnType)}. When false, this method uses
-   * {@link #numericSelector(String, String)} so that the equality comparison uses a bound filter to correctly match
-   * numerical types.
+   * {@link #numericSelector(String, String)} so that the equality comparison
+   * uses a bound filter to correctly match numerical types.
    */
   public static DimFilter numericEquality(
       final String fieldName,
       final Object value,
-      final ColumnType matchValueType
-  )
+      final ColumnType matchValueType)
   {
     if (NullHandling.sqlCompatible()) {
       return equality(fieldName, value, matchValueType);
@@ -455,16 +460,17 @@ public class BaseCalciteQueryTest extends CalciteTestBase
 
   public static DimFilter numericSelector(
       final String fieldName,
-      final String value
-  )
+      final String value)
   {
     // We use Bound filters for numeric equality to achieve "10.0" = "10"
     return bound(fieldName, value, value, false, false, null, StringComparators.NUMERIC);
   }
 
   /**
-   * Callers should use {@link #range(String, ColumnType, Object, Object, boolean, boolean)} instead of this method,
-   * since they will correctly use either a {@link RangeFilter} or {@link BoundDimFilter} depending on the value of
+   * Callers should use
+   * {@link #range(String, ColumnType, Object, Object, boolean, boolean)}
+   * instead of this method, since they will correctly use either a
+   * {@link RangeFilter} or {@link BoundDimFilter} depending on the value of
    * {@link NullHandling#sqlCompatible()}, which determines the default of
    * {@link PlannerContext#CTX_SQL_USE_BOUNDS_AND_SELECTORS}
    */
@@ -475,16 +481,17 @@ public class BaseCalciteQueryTest extends CalciteTestBase
       final boolean lowerStrict,
       final boolean upperStrict,
       final ExtractionFn extractionFn,
-      final StringComparator comparator
-  )
+      final StringComparator comparator)
   {
     return new BoundDimFilter(fieldName, lower, upper, lowerStrict, upperStrict, null, extractionFn, comparator);
   }
 
   /**
-   * Callers should use {@link #timeRange(Object)} instead of this method, since it will correctly use either a
-   * {@link RangeFilter} or {@link BoundDimFilter} depending on the value of {@link NullHandling#sqlCompatible()},
-   * which determines the default of {@link PlannerContext#CTX_SQL_USE_BOUNDS_AND_SELECTORS}
+   * Callers should use {@link #timeRange(Object)} instead of this method, since
+   * it will correctly use either a {@link RangeFilter} or
+   * {@link BoundDimFilter} depending on the value of
+   * {@link NullHandling#sqlCompatible()}, which determines the default of
+   * {@link PlannerContext#CTX_SQL_USE_BOUNDS_AND_SELECTORS}
    */
   public static BoundDimFilter timeBound(final Object intervalObj)
   {
@@ -507,8 +514,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
       final Object lower,
       final Object upper,
       final boolean lowerStrict,
-      final boolean upperStrict
-  )
+      final boolean upperStrict)
   {
     if (NullHandling.sqlCompatible()) {
       return new RangeFilter(fieldName, matchValueType, lower, upper, lowerStrict, upperStrict, null);
@@ -564,8 +570,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   public static ExpressionVirtualColumn expressionVirtualColumn(
       final String name,
       final String expression,
-      final ColumnType outputType
-  )
+      final ColumnType outputType)
   {
     return new ExpressionVirtualColumn(name, expression, outputType, CalciteTests.createExprMacroTable());
   }
@@ -576,8 +581,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
       String rightPrefix,
       String condition,
       JoinType joinType,
-      DimFilter filter
-  )
+      DimFilter filter)
   {
     return JoinDataSource.create(
         left,
@@ -596,8 +600,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
       DataSource right,
       String rightPrefix,
       String condition,
-      JoinType joinType
-  )
+      JoinType joinType)
   {
     return join(left, right, rightPrefix, condition, joinType, null);
   }
@@ -613,7 +616,8 @@ public class BaseCalciteQueryTest extends CalciteTestBase
     return StringUtils.format("(%s == %s)", left.getExpression(), right.getExpression());
   }
 
-  public static ExpressionPostAggregator expressionPostAgg(final String name, final String expression, ColumnType outputType)
+  public static ExpressionPostAggregator expressionPostAgg(final String name, final String expression,
+      ColumnType outputType)
   {
     return new ExpressionPostAggregator(name, expression, null, outputType, CalciteTests.createExprMacroTable());
   }
@@ -621,7 +625,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   public static Druids.ScanQueryBuilder newScanQueryBuilder()
   {
     return new Druids.ScanQueryBuilder().resultFormat(ScanQuery.ResultFormat.RESULT_FORMAT_COMPACTED_LIST)
-                                        .legacy(false);
+        .legacy(false);
   }
 
   protected static DruidExceptionMatcher invalidSqlIs(String s)
@@ -659,8 +663,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   public SpecificSegmentsQuerySegmentWalker createQuerySegmentWalker(
       final QueryRunnerFactoryConglomerate conglomerate,
       final JoinableFactoryWrapper joinableFactory,
-      final Injector injector
-  ) throws IOException
+      final Injector injector) throws IOException
   {
     return baseComponentSupplier.createQuerySegmentWalker(conglomerate, joinableFactory, injector);
   }
@@ -669,8 +672,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   public SqlEngine createEngine(
       final QueryLifecycleFactory qlf,
       final ObjectMapper queryJsonMapper,
-      Injector injector
-  )
+      Injector injector)
   {
     if (engine0 == null) {
       return baseComponentSupplier.createEngine(qlf, queryJsonMapper, injector);
@@ -682,14 +684,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   @Override
   public void gatherProperties(Properties properties)
   {
-    try {
-      baseComponentSupplier = new StandardComponentSupplier(
-          temporaryFolder.newFolder()
-      );
-    }
-    catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    baseComponentSupplier = new StandardComponentSupplier(temporaryFoldernewFolder());
     baseComponentSupplier.gatherProperties(properties);
   }
 
@@ -792,7 +787,8 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   }
 
   /**
-   * Provided for tests that wish to check multiple queries instead of relying on ExpectedException.
+   * Provided for tests that wish to check multiple queries instead of relying
+   * on ExpectedException.
    */
   public void assertQueryIsForbidden(final String sql, final AuthenticationResult authenticationResult)
   {
@@ -802,8 +798,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   public void assertQueryIsForbidden(
       final PlannerConfig plannerConfig,
       final String sql,
-      final AuthenticationResult authenticationResult
-  )
+      final AuthenticationResult authenticationResult)
   {
     Exception e = null;
     try {
@@ -822,8 +817,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   public void testQuery(
       final String sql,
       final List<Query<?>> expectedQueries,
-      final List<Object[]> expectedResults
-  )
+      final List<Object[]> expectedResults)
   {
     testBuilder()
         .sql(sql)
@@ -836,8 +830,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
       final String sql,
       final List<Query<?>> expectedQueries,
       final ResultMatchMode resultsMatchMode,
-      final List<Object[]> expectedResults
-  )
+      final List<Object[]> expectedResults)
   {
     testBuilder()
         .sql(sql)
@@ -850,8 +843,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
       final String sql,
       final List<Query<?>> expectedQueries,
       final List<Object[]> expectedResults,
-      final RowSignature expectedResultSignature
-  )
+      final RowSignature expectedResultSignature)
   {
     testBuilder()
         .sql(sql)
@@ -865,8 +857,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
       final String sql,
       final Map<String, Object> queryContext,
       final List<Query<?>> expectedQueries,
-      final List<Object[]> expectedResults
-  )
+      final List<Object[]> expectedResults)
   {
     testBuilder()
         .queryContext(queryContext)
@@ -880,8 +871,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
       final String sql,
       final List<Query<?>> expectedQueries,
       final List<Object[]> expectedResults,
-      final List<SqlParameter> parameters
-  )
+      final List<SqlParameter> parameters)
   {
     testBuilder()
         .sql(sql)
@@ -896,8 +886,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
       final String sql,
       final AuthenticationResult authenticationResult,
       final List<Query<?>> expectedQueries,
-      final List<Object[]> expectedResults
-  )
+      final List<Object[]> expectedResults)
   {
     testBuilder()
         .plannerConfig(plannerConfig)
@@ -912,8 +901,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
       final String sql,
       final Map<String, Object> queryContext,
       final List<Query<?>> expectedQueries,
-      final ResultsVerifier expectedResultsVerifier
-  )
+      final ResultsVerifier expectedResultsVerifier)
   {
     testBuilder()
         .sql(sql)
@@ -929,8 +917,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
       final String sql,
       final AuthenticationResult authenticationResult,
       final List<Query<?>> expectedQueries,
-      final List<Object[]> expectedResults
-  )
+      final List<Object[]> expectedResults)
   {
     testBuilder()
         .plannerConfig(plannerConfig)
@@ -949,8 +936,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
       final String sql,
       final AuthenticationResult authenticationResult,
       final List<Query<?>> expectedQueries,
-      final List<Object[]> expectedResults
-  )
+      final List<Object[]> expectedResults)
   {
     testBuilder()
         .plannerConfig(plannerConfig)
@@ -970,8 +956,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
       final String sql,
       final AuthenticationResult authenticationResult,
       final List<Query<?>> expectedQueries,
-      final ResultsVerifier expectedResultsVerifier
-  )
+      final ResultsVerifier expectedResultsVerifier)
   {
     testBuilder()
         .plannerConfig(plannerConfig)
@@ -1039,8 +1024,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
     public ResultsVerifier defaultResultsVerifier(
         List<Object[]> expectedResults,
         ResultMatchMode expectedResultMatchMode,
-        RowSignature expectedResultSignature
-    )
+        RowSignature expectedResultSignature)
     {
       return BaseCalciteQueryTest.this.defaultResultsVerifier(
           expectedResults,
@@ -1064,17 +1048,20 @@ public class BaseCalciteQueryTest extends CalciteTestBase
 
   public enum ResultMatchMode
   {
-    EQUALS {
+    EQUALS
+    {
       @Override
       void validate(int row, int column, ValueType type, Object expectedCell, Object resultCell)
       {
         assertEquals(
             mismatchMessage(row, column),
             expectedCell,
-            resultCell);
+            resultCell
+        );
       }
     },
-    RELAX_NULLS {
+    RELAX_NULLS
+    {
       @Override
       void validate(int row, int column, ValueType type, Object expectedCell, Object resultCell)
       {
@@ -1087,7 +1074,8 @@ public class BaseCalciteQueryTest extends CalciteTestBase
         EQUALS.validate(row, column, type, expectedCell, resultCell);
       }
     },
-    EQUALS_EPS {
+    EQUALS_EPS
+    {
       @Override
       void validate(int row, int column, ValueType type, Object expectedCell, Object resultCell)
       {
@@ -1096,13 +1084,15 @@ public class BaseCalciteQueryTest extends CalciteTestBase
               mismatchMessage(row, column),
               (Float) expectedCell,
               (Float) resultCell,
-              ASSERTION_EPSILON);
+              ASSERTION_EPSILON
+          );
         } else if (expectedCell instanceof Double) {
           assertEquals(
               mismatchMessage(row, column),
               (Double) expectedCell,
               (Double) resultCell,
-              ASSERTION_EPSILON);
+              ASSERTION_EPSILON
+          );
         } else {
           EQUALS.validate(row, column, type, expectedCell, resultCell);
         }
@@ -1111,7 +1101,8 @@ public class BaseCalciteQueryTest extends CalciteTestBase
     /**
      * Comparision which accepts 1000 units of least precision.
      */
-    EQUALS_RELATIVE_1000_ULPS {
+    EQUALS_RELATIVE_1000_ULPS
+    {
       static final int ASSERTION_ERROR_ULPS = 1000;
 
       @Override
@@ -1149,12 +1140,15 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   }
 
   /**
-   * Validates the results with slight loosening in case {@link NullHandling} is not sql compatible.
+   * Validates the results with slight loosening in case {@link NullHandling} is
+   * not sql compatible.
    *
-   * In case {@link NullHandling#replaceWithDefault()} is true, if the expected result is <code>null</code> it accepts
-   * both <code>null</code> and the default value for that column as actual result.
+   * In case {@link NullHandling#replaceWithDefault()} is true, if the expected
+   * result is <code>null</code> it accepts both <code>null</code> and the
+   * default value for that column as actual result.
    */
-  public void assertResultsValid(final ResultMatchMode matchMode, final List<Object[]> expected, final QueryResults queryResults)
+  public void assertResultsValid(final ResultMatchMode matchMode, final List<Object[]> expected,
+      final QueryResults queryResults)
   {
     final List<Object[]> results = queryResults.results;
     Assert.assertEquals("Result count mismatch", expected.size(), results.size());
@@ -1189,7 +1183,8 @@ public class BaseCalciteQueryTest extends CalciteTestBase
             i,
             isMSQ ? null : types.get(i),
             expectedCell,
-            resultCell);
+            resultCell
+        );
       }
     }
   }
@@ -1215,8 +1210,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
 
   public <T extends Throwable> void testQueryThrows(
       final String sql,
-      final DruidExceptionMatcher exceptionMatcher
-  )
+      final DruidExceptionMatcher exceptionMatcher)
   {
     testQueryThrows(sql, null, DruidException.class, exceptionMatcher);
   }
@@ -1224,8 +1218,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   public <T extends Exception> void testQueryThrows(
       final String sql,
       final Class<T> exceptionType,
-      final String exceptionMessage
-  )
+      final String exceptionMessage)
   {
     testQueryThrows(
         sql,
@@ -1238,8 +1231,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   public <T extends Exception> void testQueryThrows(
       final String sql,
       final Class<T> exceptionType,
-      final Matcher<Throwable> exceptionMatcher
-  )
+      final Matcher<Throwable> exceptionMatcher)
   {
     testQueryThrows(sql, null, exceptionType, exceptionMatcher);
   }
@@ -1248,8 +1240,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
       final String sql,
       final Map<String, Object> queryContext,
       final Class<T> exceptionType,
-      final Matcher<Throwable> exceptionMatcher
-  )
+      final Matcher<Throwable> exceptionMatcher)
   {
     T e = assertThrows(
         exceptionType,
@@ -1264,8 +1255,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
 
   public void analyzeResources(
       String sql,
-      List<ResourceAction> expectedActions
-  )
+      List<ResourceAction> expectedActions)
   {
     testBuilder()
         .sql(sql)
@@ -1277,8 +1267,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
       PlannerConfig plannerConfig,
       String sql,
       AuthenticationResult authenticationResult,
-      List<ResourceAction> expectedActions
-  )
+      List<ResourceAction> expectedActions)
   {
     testBuilder()
         .plannerConfig(plannerConfig)
@@ -1294,8 +1283,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
       String sql,
       Map<String, Object> contexts,
       AuthenticationResult authenticationResult,
-      List<ResourceAction> expectedActions
-  )
+      List<ResourceAction> expectedActions)
   {
     testBuilder()
         .plannerConfig(plannerConfig)
@@ -1308,8 +1296,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   }
 
   public SqlStatementFactory getSqlStatementFactory(
-      PlannerConfig plannerConfig
-  )
+      PlannerConfig plannerConfig)
   {
     return getSqlStatementFactory(
         plannerConfig,
@@ -1325,8 +1312,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
    */
   SqlStatementFactory getSqlStatementFactory(
       PlannerConfig plannerConfig,
-      AuthConfig authConfig
-  )
+      AuthConfig authConfig)
   {
     return queryFramework().plannerFixture(this, plannerConfig, authConfig).statementFactory();
   }
@@ -1355,7 +1341,8 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   }
 
   /**
-   * Override not just the outer query context, but also the contexts of all subqueries.
+   * Override not just the outer query context, but also the contexts of all
+   * subqueries.
    *
    * @return
    */
@@ -1384,17 +1371,18 @@ public class BaseCalciteQueryTest extends CalciteTestBase
     } else {
       return dataSource.withChildren(
           dataSource.getChildren()
-                    .stream()
-                    .map(ds -> recursivelyClearContext(ds, queryJsonMapper))
-                    .collect(Collectors.toList())
+              .stream()
+              .map(ds -> recursivelyClearContext(ds, queryJsonMapper))
+              .collect(Collectors.toList())
       );
     }
   }
 
   /**
-   * This is a provider of query contexts that should be used by join tests.
-   * It tests various configs that can be passed to join queries. All the configs provided by this provider should
-   * have the join query engine return the same results.
+   * This is a provider of query contexts that should be used by join tests. It
+   * tests various configs that can be passed to join queries. All the configs
+   * provided by this provider should have the join query engine return the same
+   * results.
    */
   public static Object[] provideQueryContexts()
   {
@@ -1460,8 +1448,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
       Map<String, Object> input,
       String timestampResultField,
       int timestampResultFieldIndex,
-      Granularity granularity
-  )
+      Granularity granularity)
   {
     Map<String, Object> output = new HashMap<>(input);
     output.put(GroupByQuery.CTX_TIMESTAMP_RESULT_FIELD, timestampResultField);
@@ -1494,8 +1481,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   private ResultsVerifier defaultResultsVerifier(
       final List<Object[]> expectedResults,
       ResultMatchMode expectedResultMatchMode,
-      final RowSignature expectedSignature
-  )
+      final RowSignature expectedSignature)
   {
     return new DefaultResultsVerifier(expectedResults, expectedResultMatchMode, expectedSignature);
   }
@@ -1507,7 +1493,8 @@ public class BaseCalciteQueryTest extends CalciteTestBase
     protected final RowSignature expectedResultRowSignature;
     protected final ResultMatchMode expectedResultMatchMode;
 
-    public DefaultResultsVerifier(List<Object[]> expectedResults, ResultMatchMode expectedResultMatchMode, RowSignature expectedSignature)
+    public DefaultResultsVerifier(List<Object[]> expectedResults, ResultMatchMode expectedResultMatchMode,
+        RowSignature expectedSignature)
     {
       this.expectedResults = expectedResults;
       this.expectedResultMatchMode = expectedResultMatchMode;
@@ -1540,7 +1527,6 @@ public class BaseCalciteQueryTest extends CalciteTestBase
         throw e;
       }
     }
-
   }
 
   /**
@@ -1627,6 +1613,26 @@ public class BaseCalciteQueryTest extends CalciteTestBase
     private void outprint(Object post)
     {
       sb.append(post);
+    }
+  }
+
+  public File temporaryFoldernewFolder()
+  {
+    try {
+      return temporaryFolder.newFolder();
+    }
+    catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  public File temporaryFoldernewFile()
+  {
+    try {
+      return temporaryFolder.newFile();
+    }
+    catch (IOException e) {
+      throw new RuntimeException(e);
     }
   }
 }
