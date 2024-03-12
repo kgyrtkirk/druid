@@ -118,12 +118,7 @@ public @interface SqlTestFrameworkConfig
 
     public SqlTestFramework get()
     {
-      return get(config);
-    }
-
-    public SqlTestFramework get(SqlTestFrameworkConfig config)
-    {
-      return getConfigurationInstance(config).framework;
+      return getConfigurationInstance().framework;
     }
 
     public <T extends Annotation> T getAnnotation(Class<T> annotationType)
@@ -131,7 +126,7 @@ public @interface SqlTestFrameworkConfig
       return NotYetSupportedProcessor.getAnnotation(description, annotationType);
     }
 
-    private ConfigurationInstance getConfigurationInstance(SqlTestFrameworkConfig config)
+    private ConfigurationInstance getConfigurationInstance()
     {
       return classRule.configMap.computeIfAbsent(config, this::buildConfiguration);
     }

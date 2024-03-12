@@ -30,6 +30,7 @@ import org.junit.Rule;
 
 public class DecoupledPlanningCalciteQueryTest extends CalciteQueryTest
 {
+
   @Rule(order = 0)
   public NotYetSupportedProcessor decoupledIgnoreProcessor = new NotYetSupportedProcessor();
 
