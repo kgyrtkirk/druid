@@ -44,17 +44,16 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 
-public class MyConnection implements Connection
+public class DruidTestConnection implements Connection
 {
   private BaseCalciteQueryTest testHost;
   private SqlTestFramework frameWork;
 
   SqlTestFrameworkConfig.Rule frameworkRule;
 
-  public MyConnection()
+  public DruidTestConnection()
   {
     CalciteTestBase.setupCalciteProperties();
-
     frameworkRule = new SqlTestFrameworkConfig.Rule();
     testHost = new BaseCalciteQueryTest()
     {
@@ -63,7 +62,6 @@ public class MyConnection implements Connection
         return frameWork;
       }
     };
-
     testHost.setCaseTempDir(FileUtils.createTempDir("connectionFactory").toPath());
     frameworkRule.testHost = testHost;
     frameWork = frameworkRule.get(frameworkRule.defaultConfig());

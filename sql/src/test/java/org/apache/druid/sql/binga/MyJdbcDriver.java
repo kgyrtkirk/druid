@@ -32,7 +32,7 @@ public class MyJdbcDriver implements Driver
   @Override
   public Connection connect(String url, Properties info) throws SQLException
   {
-    return new MyConnection();
+    return new DruidTestConnection();
   }
 
   @Override

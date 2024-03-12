@@ -34,7 +34,7 @@ public class MyConnectionFactory implements ConnectionFactory
   public Connection connect(String name, boolean reference) throws Exception
   {
     if (name.equals("druid")) {
-      return new MyConnection();
+      return new DruidTestConnection();
     }
     return null;
   }
