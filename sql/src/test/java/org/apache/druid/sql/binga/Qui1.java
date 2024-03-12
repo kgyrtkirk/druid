@@ -21,6 +21,7 @@ package org.apache.druid.sql.binga;
 
 import net.hydromatic.quidem.Quidem.ConnectionFactory;
 import org.apache.calcite.test.QuidemTest;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
