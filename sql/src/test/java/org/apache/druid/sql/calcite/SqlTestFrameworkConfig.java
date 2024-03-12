@@ -67,7 +67,7 @@ public @interface SqlTestFrameworkConfig
     private Method method;
 
     @Override
-    public void afterAll(ExtensionContext context)
+    public void afterAll(ExtensionContext context) throws Exception
     {
       for (ConfigurationInstance f : configMap.values()) {
         f.close();
@@ -76,7 +76,7 @@ public @interface SqlTestFrameworkConfig
     }
 
     @Override
-    public void beforeEach(ExtensionContext context)
+    public void beforeEach(ExtensionContext context) throws Exception
     {
       testHost = (QueryComponentSupplier) context.getTestInstance().get();
       method = context.getTestMethod().get();
