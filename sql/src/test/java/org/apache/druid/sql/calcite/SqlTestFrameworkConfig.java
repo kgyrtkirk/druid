@@ -26,8 +26,6 @@ import org.apache.druid.sql.calcite.util.SqlTestFramework.QueryComponentSupplier
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.runner.Description;
-
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -63,7 +61,6 @@ public @interface SqlTestFrameworkConfig
     Map<SqlTestFrameworkConfig, ConfigurationInstance> configMap = new HashMap<>();
     private SqlTestFrameworkConfig config;
     private QueryComponentSupplier testHost;
-    private Description description;
     private Method method;
 
     @Override
