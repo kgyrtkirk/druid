@@ -26,6 +26,7 @@ import org.apache.druid.sql.calcite.util.SqlTestFramework.QueryComponentSupplier
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
+
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -51,16 +52,15 @@ public @interface SqlTestFrameworkConfig
 
   ResultCacheMode resultCache() default ResultCacheMode.DISABLED;
 
-
-
   /**
    * @see {@link SqlTestFrameworkConfig}
    */
   class Rule implements AfterAllCallback, BeforeEachCallback
   {
     Map<SqlTestFrameworkConfig, ConfigurationInstance> configMap = new HashMap<>();
-    private SqlTestFrameworkConfig config;
-    private QueryComponentSupplier testHost;
+    private SqlTestFrameworkConfig currentConfig;
+    //FIXME
+    public QueryComponentSupplier testHost;
     private Method method;
 
     @Override
@@ -97,15 +97,20 @@ public @interface SqlTestFrameworkConfig
 
     public void setConfig(SqlTestFrameworkConfig annotation)
     {
-      config = annotation;
-      if (config == null) {
-        config = defaultConfig();
+      currentConfig = annotation;
+      if (currentConfig == null) {
+        currentConfig = defaultConfig();
       }
     }
 
     public SqlTestFramework get()
     {
-      return getConfigurationInstance().framework;
+      return get(currentConfig);
+    }
+
+    public SqlTestFramework get(SqlTestFrameworkConfig config)
+    {
+      return getConfigurationInstance(config).framework;
     }
 
     public <T extends Annotation> T getAnnotation(Class<T> annotationType)
@@ -113,7 +118,7 @@ public @interface SqlTestFrameworkConfig
       return method.getAnnotation(annotationType);
     }
 
-    private ConfigurationInstance getConfigurationInstance()
+    private ConfigurationInstance getConfigurationInstance(SqlTestFrameworkConfig config)
     {
       return configMap.computeIfAbsent(config, this::buildConfiguration);
     }

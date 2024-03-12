@@ -20,6 +20,7 @@
 package org.apache.druid.sql.binga;
 
 import net.hydromatic.quidem.Quidem.ConnectionFactory;
+import org.apache.druid.java.util.common.FileUtils;
 import org.apache.druid.sql.calcite.BaseCalciteQueryTest;
 import org.apache.druid.sql.calcite.SqlTestFrameworkConfig;
 import org.apache.druid.sql.calcite.util.CalciteTestBase;
@@ -29,8 +30,7 @@ import java.sql.Connection;
 public class MyConnectionFactory implements ConnectionFactory
 {
 
-  SqlTestFrameworkConfig.ClassRule  frameworkClassRule ;
-  SqlTestFrameworkConfig.MethodRule  frameworkMethodRule;
+  SqlTestFrameworkConfig.Rule frameworkRule;
   private SqlTestFramework frameWork;
   private BaseCalciteQueryTest testHost;
 
@@ -38,15 +38,19 @@ public class MyConnectionFactory implements ConnectionFactory
   {
     CalciteTestBase.setupCalciteProperties();
 
-    frameworkClassRule = new SqlTestFrameworkConfig.ClassRule();
-    testHost = new BaseCalciteQueryTest() {
-      public SqlTestFramework queryFramework() {
+    frameworkRule = new SqlTestFrameworkConfig.Rule();
+    testHost = new BaseCalciteQueryTest()
+    {
+      public SqlTestFramework queryFramework()
+      {
         return frameWork;
       }
     };
-    frameworkMethodRule = frameworkClassRule.methodRule(testHost);
 
-    frameWork = frameworkMethodRule.get(frameworkMethodRule.defaultConfig());
+
+    testHost.setCaseTempDir(FileUtils.createTempDir("connectionFactory").toPath());
+    frameworkRule.testHost = testHost;
+    frameWork = frameworkRule.get(frameworkRule.defaultConfig());
 
   }
 
@@ -54,7 +58,7 @@ public class MyConnectionFactory implements ConnectionFactory
   public Connection connect(String name, boolean reference) throws Exception
   {
     if (name.equals("druid")) {
-      return new MyConnection(testHost,frameWork);
+      return new MyConnection(testHost, frameWork);
     }
     return null;
   }
