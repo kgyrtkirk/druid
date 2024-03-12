@@ -179,7 +179,7 @@ public class DrillWindowQueryTest extends BaseCalciteQueryTest
     public DrillTestCase testCase = null;
 
     @Override
-    public void beforeEach(ExtensionContext context) throws Exception
+    public void beforeEach(ExtensionContext context)
     {
       Method method = context.getTestMethod().get();
       DrillTest annotation = method.getAnnotation(DrillTest.class);
