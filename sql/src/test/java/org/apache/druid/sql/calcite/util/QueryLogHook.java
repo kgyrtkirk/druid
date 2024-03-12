@@ -31,7 +31,6 @@ import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -44,7 +43,6 @@ public class QueryLogHook implements TestRule
 
   private final Supplier<ObjectMapper> objectMapperSupplier;
   private final List<Query<?>> recordedQueries = Lists.newCopyOnWriteArrayList();
-  private final AtomicBoolean skipLog = new AtomicBoolean(false);
 
   public QueryLogHook(final Supplier<ObjectMapper> objectMapperSupplier)
   {
@@ -71,17 +69,6 @@ public class QueryLogHook implements TestRule
     return ImmutableList.copyOf(recordedQueries);
   }
 
-  public void withSkippedLog(Consumer<Void> consumer)
-  {
-    try {
-      skipLog.set(true);
-      consumer.accept(null);
-    }
-    finally {
-      skipLog.set(false);
-    }
-  }
-
   @Override
   public Statement apply(final Statement base, final Description description)
   {
@@ -92,7 +79,7 @@ public class QueryLogHook implements TestRule
       {
         clearRecordedQueries();
 
-        final Consumer<Object> function = new C(skipLog, recordedQueries, objectMapperSupplier);
+        final Consumer<Object> function = new C(recordedQueries, objectMapperSupplier);
         try (final Hook.Closeable unhook = Hook.QUERY_PLAN.add(function)) {
           base.evaluate();
         }
@@ -103,13 +90,11 @@ public class QueryLogHook implements TestRule
   // FIXME
   static class C implements Consumer<Object>
   {
-    private AtomicBoolean skipLog;
     private List<Query<?>> recordedQueries;
     private Supplier<ObjectMapper> objectMapperSupplier;
 
-    public C(AtomicBoolean skipLog, List<Query<?>> recordedQueries, Supplier<ObjectMapper> objectMapperSupplier)
+    public C(List<Query<?>> recordedQueries, Supplier<ObjectMapper> objectMapperSupplier)
     {
-      this.skipLog = skipLog;
       this.recordedQueries = recordedQueries;
       this.objectMapperSupplier = objectMapperSupplier;
     }
@@ -117,10 +102,6 @@ public class QueryLogHook implements TestRule
     @Override
     public void accept(Object query)
     {
-      if (skipLog.get()) {
-        return;
-      }
-
       try {
         recordedQueries.add((Query<?>) query);
         log.info(
@@ -136,7 +117,7 @@ public class QueryLogHook implements TestRule
 
   public void logQueriesFor(Runnable r)
   {
-    final Consumer<Object> function = new C(skipLog, recordedQueries, objectMapperSupplier);
+    final Consumer<Object> function = new C(recordedQueries, objectMapperSupplier);
     try (final Hook.Closeable unhook = Hook.QUERY_PLAN.add(function)) {
       r.run();
     }
