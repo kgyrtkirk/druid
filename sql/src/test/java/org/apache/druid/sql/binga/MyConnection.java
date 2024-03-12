@@ -19,7 +19,10 @@
 
 package org.apache.druid.sql.binga;
 
+import org.apache.druid.java.util.common.FileUtils;
 import org.apache.druid.sql.calcite.BaseCalciteQueryTest;
+import org.apache.druid.sql.calcite.SqlTestFrameworkConfig;
+import org.apache.druid.sql.calcite.util.CalciteTestBase;
 import org.apache.druid.sql.calcite.util.SqlTestFramework;
 
 import java.sql.Array;
@@ -43,14 +46,27 @@ import java.util.concurrent.Executor;
 
 public class MyConnection implements Connection
 {
-
   private BaseCalciteQueryTest testHost;
   private SqlTestFramework frameWork;
 
-  public MyConnection(BaseCalciteQueryTest testHost, SqlTestFramework frameWork)
+  SqlTestFrameworkConfig.Rule frameworkRule;
+
+  public MyConnection()
   {
-    this.testHost = testHost;
-    this.frameWork = frameWork;
+    CalciteTestBase.setupCalciteProperties();
+
+    frameworkRule = new SqlTestFrameworkConfig.Rule();
+    testHost = new BaseCalciteQueryTest()
+    {
+      public SqlTestFramework queryFramework()
+      {
+        return frameWork;
+      }
+    };
+
+    testHost.setCaseTempDir(FileUtils.createTempDir("connectionFactory").toPath());
+    frameworkRule.testHost = testHost;
+    frameWork = frameworkRule.get(frameworkRule.defaultConfig());
   }
 
   @Override

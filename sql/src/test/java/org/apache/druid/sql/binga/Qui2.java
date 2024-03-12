@@ -29,7 +29,7 @@ public class Qui2 extends MyQuidemTest
   @Override
   protected Collection<String> getPath()
   {
-//    File root = findProjectRoot();
+    // File root = findProjectRoot();
     ArrayList<String> ret = new ArrayList<>();
     ret.add(new File("qui/a.iq").getAbsolutePath());
     return ret;// data(new File("qui/a.iq").getAbsolutePath());
