@@ -26,27 +26,37 @@ import java.util.Collection;
 
 public class Qui2 extends MyQuidemTest
 {
-
   @Override
   protected Collection<String> getPath()
   {
+//    File root = findProjectRoot();
     ArrayList<String> ret = new ArrayList<>();
     ret.add(new File("qui/a.iq").getAbsolutePath());
     return ret;// data(new File("qui/a.iq").getAbsolutePath());
+  }
+
+  private File findProjectRoot()
+  {
+    File f = new File(".");
+    if (isProjectRoot(f)) {
+      return f;
+    }
+    f = f.getParentFile();
+    if (isProjectRoot(f)) {
+      return f;
+    }
+    throw new IllegalStateException("can't find project root");
+  }
+
+  private boolean isProjectRoot(File f)
+  {
+    return new File(f, "web-console").exists();
   }
 
   @Override
   protected ConnectionFactory createConnectionFactory()
   {
     return new MyConnectionFactory();
-//    return super.createConnectionFactory();
+    // return super.createConnectionFactory();
   }
-
-  public static void main(String[] args) throws Exception
-  {
-    for (String arg : args) {
-      new Qui2().test(arg);
-    }
-  }
-
 }
