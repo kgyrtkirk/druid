@@ -56,9 +56,6 @@ public class MyConnectionFactory implements ConnectionFactory
     if (name.equals("druid")) {
       return new MyConnection(testHost,frameWork);
     }
-    if (name.equals("av")) {
-      return new MyConnection(testHost,frameWork);
-    }
     return null;
   }
 
