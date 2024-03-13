@@ -82,7 +82,7 @@ import java.util.Properties;
  *
  * FIXME: Extracted from DruidAvaticaHandlerTest; finish refactor / remove duplication.
  */
-public class DruidAvaticaHandlerTest3
+public class DruidAvaticaConnectionRule
     implements BeforeAllCallback, AfterAllCallback, BeforeEachCallback, AfterEachCallback
 {
   private static final int CONNECTION_LIMIT = 4;
@@ -90,7 +90,7 @@ public class DruidAvaticaHandlerTest3
 
   private final AvaticaServerConfig avaticaConfig;
 
-  public DruidAvaticaHandlerTest3()
+  public DruidAvaticaConnectionRule()
   {
     avaticaConfig = new AvaticaServerConfig();
     // This must match the number of Connection objects created in

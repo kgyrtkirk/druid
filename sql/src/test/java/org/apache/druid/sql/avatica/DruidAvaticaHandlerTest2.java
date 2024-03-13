@@ -40,12 +40,12 @@ import java.util.Set;
 public class DruidAvaticaHandlerTest2
 {
   @RegisterExtension
-  public static DruidAvaticaHandlerTest3 e = new DruidAvaticaHandlerTest3();
+  public static DruidAvaticaConnectionRule avatica = new DruidAvaticaConnectionRule();
 
   @Test
   public void testSelectCount() throws SQLException
   {
-    try (Connection c = e.getConnection(); Statement stmt = c.createStatement()) {
+    try (Connection c = avatica.getConnection(); Statement stmt = c.createStatement()) {
       final ResultSet resultSet = stmt.executeQuery("SELECT COUNT(*) AS cnt FROM druid.foo");
       final List<Map<String, Object>> rows = getRows(resultSet);
       Assert.assertEquals(
