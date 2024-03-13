@@ -54,7 +54,7 @@ public class Qui2 extends MyQuidemTest
   }
 
   @Override
-  protected ConnectionFactory createConnectionFactory()
+  protected ConnectionFactory createConnectionFactory() throws Exception
   {
     return new MyConnectionFactory();
     // return super.createConnectionFactory();

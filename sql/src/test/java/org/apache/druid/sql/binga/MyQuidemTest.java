@@ -48,8 +48,9 @@ public abstract class MyQuidemTest
     return Quidem.EMPTY_COMMAND_HANDLER;
   }
 
-  /** Creates a connection factory. */
-  protected Quidem.ConnectionFactory createConnectionFactory()
+  /** Creates a connection factory.
+   * @throws Exception */
+  protected Quidem.ConnectionFactory createConnectionFactory() throws Exception
   {
     return new MyConnectionFactory();
   }

@@ -39,7 +39,14 @@ public class Qui1 extends QuidemTest
   @Override
   protected ConnectionFactory createConnectionFactory()
   {
-    return new MyConnectionFactory();
+    try {
+      return new MyConnectionFactory();
+    }
+    catch (Exception e) {
+
+      throw new RuntimeException(e);
+
+    }
 //    return super.createConnectionFactory();
   }
 
