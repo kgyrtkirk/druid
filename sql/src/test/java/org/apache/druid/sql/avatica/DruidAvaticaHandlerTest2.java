@@ -26,7 +26,6 @@ import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import java.sql.Array;
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -41,13 +40,6 @@ public class DruidAvaticaHandlerTest2
 {
   @RegisterExtension
   public static DruidAvaticaHandlerTest3 e = new DruidAvaticaHandlerTest3();
-  private Connection client;
-
-  public DruidAvaticaHandlerTest2()
-  {
-    client=e.client;
-
-  }
 
   @Test
   public void testSelectCount() throws SQLException

@@ -80,17 +80,20 @@ import java.util.Properties;
 public class DruidAvaticaHandlerTest3
     implements BeforeAllCallback, AfterAllCallback, BeforeEachCallback, AfterEachCallback
 {
+  @Deprecated
   private static final int CONNECTION_LIMIT = 4;
+  @Deprecated
   private static final int STATEMENT_LIMIT = 4;
 
-  private static final AvaticaServerConfig AVATICA_CONFIG;
+  private final AvaticaServerConfig avaticaConfig;
 
-  static {
-    AVATICA_CONFIG = new AvaticaServerConfig();
+  public DruidAvaticaHandlerTest3()
+  {
+    avaticaConfig = new AvaticaServerConfig();
     // This must match the number of Connection objects created in
     // testTooManyStatements()
-    AVATICA_CONFIG.maxConnections = CONNECTION_LIMIT;
-    AVATICA_CONFIG.maxStatementsPerConnection = STATEMENT_LIMIT;
+    avaticaConfig.maxConnections = CONNECTION_LIMIT;
+    avaticaConfig.maxStatementsPerConnection = STATEMENT_LIMIT;
     System.setProperty("user.timezone", "UTC");
   }
 
@@ -103,13 +106,9 @@ public class DruidAvaticaHandlerTest3
   @Override
   public void beforeAll(ExtensionContext context) throws Exception
   {
-
     NullHandling.initializeForTests();
     ExpressionProcessing.initializeForTests();
-    // }
-    // @BeforeAll
-    // public static void setUpClass(@TempDir File tempDir)
-    // {
+
     resourceCloser = Closer.create();
     conglomerate = QueryStackTests.createQueryRunnerFactoryConglomerate(resourceCloser);
     File tempDir = FileUtils.createTempDir("FIXME");
@@ -117,7 +116,6 @@ public class DruidAvaticaHandlerTest3
     resourceCloser.register(walker);
   }
 
-  // @AfterAll
   @Override
   public void afterAll(ExtensionContext arg0) throws Exception
   {
@@ -239,7 +237,7 @@ public class DruidAvaticaHandlerTest3
               binder.bind(String.class)
                   .annotatedWith(DruidSchemaName.class)
                   .toInstance(CalciteTests.DRUID_SCHEMA_NAME);
-              binder.bind(AvaticaServerConfig.class).toInstance(AVATICA_CONFIG);
+              binder.bind(AvaticaServerConfig.class).toInstance(avaticaConfig);
               binder.bind(ServiceEmitter.class).to(NoopServiceEmitter.class);
               binder.bind(QuerySchedulerProvider.class).in(LazySingleton.class);
               binder.bind(QueryScheduler.class)
