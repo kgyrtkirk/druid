@@ -77,12 +77,15 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
+/**
+ * Provides an JDBC connections to Druid test data.
+ *
+ * FIXME: Extracted from DruidAvaticaHandlerTest; finish refactor / remove duplication.
+ */
 public class DruidAvaticaHandlerTest3
     implements BeforeAllCallback, AfterAllCallback, BeforeEachCallback, AfterEachCallback
 {
-  @Deprecated
   private static final int CONNECTION_LIMIT = 4;
-  @Deprecated
   private static final int STATEMENT_LIMIT = 4;
 
   private final AvaticaServerConfig avaticaConfig;
