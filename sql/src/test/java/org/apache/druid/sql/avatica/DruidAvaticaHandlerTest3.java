@@ -38,6 +38,7 @@ import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.java.util.common.io.Closer;
 import org.apache.druid.java.util.emitter.service.ServiceEmitter;
 import org.apache.druid.math.expr.ExprMacroTable;
+import org.apache.druid.math.expr.ExpressionProcessing;
 import org.apache.druid.query.BaseQuery;
 import org.apache.druid.query.DefaultQueryConfig;
 import org.apache.druid.query.QueryRunnerFactoryConglomerate;
@@ -99,11 +100,12 @@ public class DruidAvaticaHandlerTest3
   private static SpecificSegmentsQuerySegmentWalker walker;
   private static Closer resourceCloser;
 
-  private final boolean nullNumeric = !NullHandling.replaceWithDefault();
-
   @Override
   public void beforeAll(ExtensionContext context) throws Exception
   {
+
+    NullHandling.initializeForTests();
+    ExpressionProcessing.initializeForTests();
     // }
     // @BeforeAll
     // public static void setUpClass(@TempDir File tempDir)
@@ -126,7 +128,7 @@ public class DruidAvaticaHandlerTest3
   private final DruidOperatorTable operatorTable = CalciteTests.createOperatorTable();
   private final ExprMacroTable macroTable = CalciteTests.createExprMacroTable();
   private ServerWrapper server;
-  private Connection client;
+  Connection client;
   private Connection clientNoTrailingSlash;
   private Connection superuserClient;
   private Connection clientLosAngeles;
