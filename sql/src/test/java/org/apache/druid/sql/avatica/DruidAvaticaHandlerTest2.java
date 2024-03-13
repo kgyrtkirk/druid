@@ -26,6 +26,7 @@ import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import java.sql.Array;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -44,7 +45,7 @@ public class DruidAvaticaHandlerTest2
   @Test
   public void testSelectCount() throws SQLException
   {
-    try (Statement stmt = e.client.createStatement()) {
+    try (Connection c = e.getConnection(); Statement stmt = c.createStatement()) {
       final ResultSet resultSet = stmt.executeQuery("SELECT COUNT(*) AS cnt FROM druid.foo");
       final List<Map<String, Object>> rows = getRows(resultSet);
       Assert.assertEquals(

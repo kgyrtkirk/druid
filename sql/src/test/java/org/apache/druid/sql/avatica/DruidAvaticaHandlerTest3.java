@@ -288,4 +288,9 @@ public class DruidAvaticaHandlerTest3
       server = null;
     }
   }
+
+  public Connection getConnection() throws SQLException
+  {
+    return server.getUserConnection();
+  }
 }
