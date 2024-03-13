@@ -293,4 +293,19 @@ public class DruidAvaticaConnectionRule
   {
     return server.getUserConnection();
   }
+
+  public void ensureInited()
+  {
+    try {
+      if (resourceCloser == null) {
+        beforeAll(null);
+      }
+      if (server == null) {
+        beforeEach(null);
+      }
+    }
+    catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+  }
 }

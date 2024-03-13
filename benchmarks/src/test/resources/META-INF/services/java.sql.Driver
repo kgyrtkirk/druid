@@ -1,0 +1,2 @@
+org.apache.druid.sql.avatica.DruidAvaticaDriver
+org.apache.calcite.avatica.remote.Driver
