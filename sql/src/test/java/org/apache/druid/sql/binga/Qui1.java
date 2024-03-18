@@ -40,7 +40,7 @@ public class Qui1 extends QuidemTest
   protected ConnectionFactory createConnectionFactory()
   {
     try {
-      return new MyConnectionFactory();
+      return new DruidQuidemConnectionFactory();
     }
     catch (Exception e) {
 

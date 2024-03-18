@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.druid.sql.binga;
+package org.apache.druid.jdbc;
 
 import java.sql.Connection;
 import java.sql.Driver;

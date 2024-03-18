@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.druid.sql.binga;
+package org.apache.druid.jdbc;
 
 import com.google.common.base.Preconditions;
 import org.apache.calcite.avatica.Meta.Frame;

@@ -17,10 +17,11 @@
  * under the License.
  */
 
-package org.apache.druid.sql.binga;
+package org.apache.druid.jdbc;
 
 import org.apache.calcite.avatica.Meta.Frame;
 import org.apache.calcite.avatica.Meta.Signature;
+import org.apache.druid.sql.binga.ResultSet1;
 
 import java.io.InputStream;
 import java.io.Reader;

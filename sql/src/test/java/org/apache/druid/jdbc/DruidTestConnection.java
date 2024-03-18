@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.druid.sql.binga;
+package org.apache.druid.jdbc;
 
 import org.apache.druid.java.util.common.FileUtils;
 import org.apache.druid.sql.calcite.BaseCalciteQueryTest;

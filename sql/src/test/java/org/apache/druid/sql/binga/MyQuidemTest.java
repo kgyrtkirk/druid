@@ -52,7 +52,7 @@ public abstract class MyQuidemTest
    * @throws Exception */
   protected Quidem.ConnectionFactory createConnectionFactory() throws Exception
   {
-    return new MyConnectionFactory();
+    return new DruidQuidemConnectionFactory();
   }
 
   @ParameterizedTest

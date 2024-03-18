@@ -56,7 +56,7 @@ public class Qui2 extends MyQuidemTest
   @Override
   protected ConnectionFactory createConnectionFactory() throws Exception
   {
-    return new MyConnectionFactory();
+    return new DruidQuidemConnectionFactory();
     // return super.createConnectionFactory();
   }
 }

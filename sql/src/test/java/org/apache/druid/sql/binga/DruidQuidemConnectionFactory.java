@@ -20,17 +20,18 @@
 package org.apache.druid.sql.binga;
 
 import net.hydromatic.quidem.Quidem.ConnectionFactory;
+import org.apache.druid.jdbc.DruidTestConnection;
 import org.apache.druid.sql.avatica.DruidAvaticaConnectionRule;
 
 import java.sql.Connection;
 
-public class MyConnectionFactory implements ConnectionFactory
+public class DruidQuidemConnectionFactory implements ConnectionFactory
 {
 
   DruidTestConnection druidTestConnection = new DruidTestConnection();
   DruidAvaticaConnectionRule avaticaDriver = new DruidAvaticaConnectionRule();
 
-  public MyConnectionFactory() throws Exception
+  public DruidQuidemConnectionFactory() throws Exception
   {
     avaticaDriver.beforeAll(null);
     avaticaDriver.beforeEach(null);

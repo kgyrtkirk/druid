@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.druid.sql.binga;
+package org.apache.druid.jdbc;
 
 import org.apache.calcite.avatica.ColumnMetaData;
 import org.apache.calcite.avatica.Meta.Signature;
