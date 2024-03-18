@@ -289,9 +289,15 @@ public class DruidAvaticaConnectionRule
     }
   }
 
-  public Connection getConnection() throws SQLException
+  public Connection getConnection(Properties info) throws SQLException
   {
-    return server.getUserConnection();
+//    return server.getUserConnection();
+////    final Properties props = new Properties();
+////    props.setProperty("user", user);
+////    props.setProperty("password", password);
+//    props.setProperty(BuiltInConnectionProperty.TRANSPARENT_RECONNECTION.camelName(), "true");
+    return DriverManager.getConnection(server.url, info);
+
   }
 
   public void ensureInited()

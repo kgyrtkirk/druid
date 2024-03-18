@@ -51,7 +51,7 @@ public class DruidAvaticaDriver implements Driver
       return null;
     }
     rule.ensureInited();
-    return rule.getConnection();
+    return rule.getConnection(info);
   }
 
   private void register()
