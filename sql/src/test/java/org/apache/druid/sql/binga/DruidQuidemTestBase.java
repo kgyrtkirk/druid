@@ -47,24 +47,11 @@ public abstract class DruidQuidemTestBase
     return Quidem.EMPTY_COMMAND_HANDLER;
   }
 
-  /** Creates a connection factory.
-   * @throws Exception */
-  protected Quidem.ConnectionFactory createConnectionFactory() throws Exception
-  {
-    return new DruidQuidemConnectionFactory();
-  }
-
   @ParameterizedTest
   @MethodSource("getPath")
   public void test(File inFile) throws Exception
   {
-    // final File inFile;
-
-    // File a = new File(".").toPath().is;
-    // Files.makre
     final File outFile = new File(inFile.getParentFile(), inFile.getName() + ".out");
-    // final File f = new File(path);
-
     Util.discard(outFile.getParentFile().mkdirs());
     try (Reader reader = Util.reader(inFile);
         Writer writer = Util.printWriter(outFile);
@@ -72,8 +59,8 @@ public abstract class DruidQuidemTestBase
       final Quidem.Config config = Quidem.configBuilder()
           .withReader(reader)
           .withWriter(writer)
-          .withConnectionFactory(createConnectionFactory())
-          .withCommandHandler(createCommandHandler())
+          .withConnectionFactory(new DruidQuidemConnectionFactory())
+          .withCommandHandler(new DruidQuidemCommandHandler())
           .build();
       new Quidem(config).execute();
     }
