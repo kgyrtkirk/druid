@@ -36,14 +36,11 @@ import org.apache.druid.sql.calcite.planner.PlannerContext;
 import org.apache.druid.sql.calcite.run.EngineFeature;
 import org.apache.druid.sql.calcite.run.QueryMaker;
 import org.apache.druid.sql.calcite.run.SqlEngine;
-import org.junit.experimental.runners.Enclosed;
-import org.junit.runner.RunWith;
 
 /**
  * Runs {@link CalciteJoinQueryTest} but with MSQ engine.
  */
-@RunWith(Enclosed.class)
-public abstract class CalciteSelectJoinQueryMSQTest
+public class CalciteSelectJoinQueryMSQTest
 {
   /**
    * Run all tests with {@link JoinAlgorithm#BROADCAST}.
@@ -126,10 +123,9 @@ public abstract class CalciteSelectJoinQueryMSQTest
       return new MSQTaskSqlEngine(indexingServiceClient, queryJsonMapper)
       {
         @Override
-        public boolean featureAvailable(EngineFeature feature, PlannerContext plannerContext)
+        public boolean featureAvailable(EngineFeature feature)
         {
-          plannerContext.queryContextMap().put(PlannerContext.CTX_SQL_JOIN_ALGORITHM, joinAlgorithm.toString());
-          return super.featureAvailable(feature, plannerContext);
+          return super.featureAvailable(feature);
         }
 
         @Override
