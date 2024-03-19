@@ -50,7 +50,7 @@ public class MSQExportTest extends MSQTestBase
                                             .add("dim1", ColumnType.STRING)
                                             .add("cnt", ColumnType.LONG).build();
 
-    File exportDir = temporaryFolder.newFolder("export/");
+    File exportDir = newTempFolder("export");
     final String sql = StringUtils.format("insert into extern(local(exportPath=>'%s')) as csv select cnt, dim1 as dim from foo", exportDir.getAbsolutePath());
 
     testIngestQuery().setSql(sql)
@@ -75,12 +75,9 @@ public class MSQExportTest extends MSQTestBase
   }
 
   @Test
-  public void testNumberOfRowsPerFile() throws IOException
-  public void testNumberOfRowsPerFile()
   public void testExport2() throws IOException
   {
     RowSignature rowSignature = RowSignature.builder()
-                                            .add("__time", ColumnType.LONG)
                                             .add("dim1", ColumnType.STRING)
                                             .add("cnt", ColumnType.LONG).build();
 
