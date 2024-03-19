@@ -39,7 +39,6 @@ import org.apache.druid.java.util.common.io.Closer;
 import org.apache.druid.java.util.emitter.service.ServiceEmitter;
 import org.apache.druid.math.expr.ExprMacroTable;
 import org.apache.druid.math.expr.ExpressionProcessing;
-import org.apache.druid.query.BaseQuery;
 import org.apache.druid.query.DefaultQueryConfig;
 import org.apache.druid.query.QueryRunnerFactoryConglomerate;
 import org.apache.druid.segment.join.JoinableFactoryWrapper;
@@ -129,11 +128,6 @@ public class DruidAvaticaConnectionRule
   private final DruidOperatorTable operatorTable = CalciteTests.createOperatorTable();
   private final ExprMacroTable macroTable = CalciteTests.createExprMacroTable();
   private ServerWrapper server;
-  Connection client;
-  private Connection clientNoTrailingSlash;
-  private Connection superuserClient;
-  private Connection clientLosAngeles;
-  private Connection clientLosAngelesUsingUrl;
   private Injector injector;
   private TestRequestLogger testRequestLogger;
 
@@ -259,32 +253,13 @@ public class DruidAvaticaConnectionRule
 
     DruidMeta druidMeta = injector.getInstance(DruidMeta.class);
     server = new ServerWrapper(druidMeta);
-    client = server.getUserConnection();
-    superuserClient = server.getConnection(CalciteTests.TEST_SUPERUSER_NAME, "druid");
-    clientNoTrailingSlash = DriverManager.getConnection(
-        StringUtils.maybeRemoveTrailingSlash(server.url),
-        CalciteTests.TEST_SUPERUSER_NAME,
-        "druid"
-    );
-
-    final Properties propertiesLosAngeles = new Properties();
-    propertiesLosAngeles.setProperty("sqlTimeZone", "America/Los_Angeles");
-    propertiesLosAngeles.setProperty("user", "regularUserLA");
-    propertiesLosAngeles.setProperty(BaseQuery.SQL_QUERY_ID, DUMMY_SQL_QUERY_ID);
-    clientLosAngeles = DriverManager.getConnection(server.url, propertiesLosAngeles);
   }
 
   @Override
   public void afterEach(ExtensionContext arg0) throws Exception
   {
     if (server != null) {
-      client.close();
-      clientLosAngeles.close();
-      clientNoTrailingSlash.close();
       server.close();
-      client = null;
-      clientLosAngeles = null;
-      clientNoTrailingSlash = null;
       server = null;
     }
   }
@@ -306,8 +281,6 @@ public class DruidAvaticaConnectionRule
   {
     return DriverManager.getConnection(server.url, info);
   }
-
-
 
   public void ensureInited()
   {
