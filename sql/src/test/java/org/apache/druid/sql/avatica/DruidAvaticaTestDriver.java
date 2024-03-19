@@ -28,18 +28,17 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
 import java.util.logging.Logger;
 
-public class DruidAvaticaDriver implements Driver
+public class DruidAvaticaTestDriver implements Driver
 {
-
   static {
-    new DruidAvaticaDriver().register();
+    new DruidAvaticaTestDriver().register();
   }
 
   private static final String FIXME_UNIMPLEMENTED = "FIXME: Unimplemented!";
   private static final String prefix = "druidtest://";
   private DruidAvaticaConnectionRule rule;
 
-  public DruidAvaticaDriver()
+  public DruidAvaticaTestDriver()
   {
     rule = new DruidAvaticaConnectionRule();
   }
@@ -73,10 +72,7 @@ public class DruidAvaticaDriver implements Driver
   @Override
   public DriverPropertyInfo[] getPropertyInfo(String url, Properties info) throws SQLException
   {
-    if (true) {
-      throw new RuntimeException(FIXME_UNIMPLEMENTED);
-    }
-    return null;
+    throw new RuntimeException(FIXME_UNIMPLEMENTED);
   }
 
   @Override

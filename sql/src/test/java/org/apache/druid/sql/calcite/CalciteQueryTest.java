@@ -15438,7 +15438,9 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
             + ") AS q1 ON q0.countryName IS NOT DISTINCT FROM q1.countryName\n"
             + "ORDER BY \"CountPlusOne\" DESC\n"
             + "LIMIT 10")
-    .expectedResults(ImmutableList.of(new Object[]{NullHandling.sqlCompatible() ? 4L : 0L}))
+    .expectedResults(ImmutableList.of(
+        new Object[]{"United States", 529L, 1.0D}
+        ))
     .run();
   }
 

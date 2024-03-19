@@ -36,7 +36,7 @@ public class DruidAvaticaDriverTest
   @Test
   public void t1() throws SQLException
   {
-    DruidAvaticaDriver dc = new DruidAvaticaDriver();
+    DruidAvaticaTestDriver dc = new DruidAvaticaTestDriver();
     try (Connection con = DriverManager.getConnection("druidtest://", "user1", "pass");
         Statement stmt = con.createStatement();
         ResultSet rs = stmt.executeQuery("select 42");) {

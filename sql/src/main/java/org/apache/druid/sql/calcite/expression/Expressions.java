@@ -235,6 +235,9 @@ public class Expressions
   )
   {
     final SqlKind kind = rexNode.getKind();
+//    if(kind == SqlKind.CAST && rexNode.getType() ) {
+//      RexUtil.isNullabilityCast(, rexNode)
+//    }
     if (kind == SqlKind.INPUT_REF) {
       return inputRefToDruidExpression(rowSignature, rexNode);
     } else if (rexNode instanceof RexCall) {
