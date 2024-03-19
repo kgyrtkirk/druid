@@ -37,9 +37,8 @@ import static org.junit.jupiter.api.Assertions.fail;
  * Test that runs every Quidem file as a test.
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public abstract class MyQuidemTest
+public abstract class DruidQuidemTestBase
 {
-
   private static final Pattern PATTERN = Pattern.compile("\\.iq$");
 
   /** Creates a command handler. */
@@ -87,6 +86,6 @@ public abstract class MyQuidemTest
     }
   }
 
-  /** Factory method for {@link MyQuidemTest#test(String)} parameters. */
+  /** Factory method for {@link DruidQuidemTestBase#test(String)} parameters. */
   protected abstract Collection<String> getPath();
 }

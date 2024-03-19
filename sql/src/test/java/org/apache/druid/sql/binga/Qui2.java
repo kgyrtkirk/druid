@@ -24,7 +24,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class Qui2 extends MyQuidemTest
+public class Qui2 extends DruidQuidemTestBase
 {
   @Override
   protected Collection<String> getPath()
@@ -57,6 +57,5 @@ public class Qui2 extends MyQuidemTest
   protected ConnectionFactory createConnectionFactory() throws Exception
   {
     return new DruidQuidemConnectionFactory();
-    // return super.createConnectionFactory();
   }
 }
