@@ -74,7 +74,6 @@ public abstract class CalciteTestBase
     setCaseTempDir(path);
   }
 
-
   public void setCaseTempDir(Path path)
   {
     casetempPath = path;

@@ -52,6 +52,8 @@ public @interface SqlTestFrameworkConfig
 
   ResultCacheMode resultCache() default ResultCacheMode.DISABLED;
 
+
+
   /**
    * @see {@link SqlTestFrameworkConfig}
    */
