@@ -20,15 +20,12 @@
 package org.apache.druid.sql.binga;
 
 import net.hydromatic.quidem.Quidem.ConnectionFactory;
-import org.apache.druid.jdbc.DruidTestConnection;
 import org.apache.druid.sql.avatica.DruidAvaticaConnectionRule;
 
 import java.sql.Connection;
 
 public class DruidQuidemConnectionFactory implements ConnectionFactory
 {
-
-  DruidTestConnection druidTestConnection = new DruidTestConnection();
   DruidAvaticaConnectionRule avaticaDriver = new DruidAvaticaConnectionRule();
 
   public DruidQuidemConnectionFactory() throws Exception
@@ -43,10 +40,6 @@ public class DruidQuidemConnectionFactory implements ConnectionFactory
     if (name.equals("druid")) {
       return avaticaDriver.getConnection();
     }
-    if (name.equals("druid0")) {
-      return druidTestConnection;
-    }
-
     return null;
   }
 
