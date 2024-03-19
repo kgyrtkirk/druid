@@ -79,14 +79,12 @@ public class DruidAvaticaTestDriver implements Driver
   public int getMajorVersion()
   {
     return 0;
-
   }
 
   @Override
   public int getMinorVersion()
   {
     return 0;
-
   }
 
   @Override
@@ -100,5 +98,4 @@ public class DruidAvaticaTestDriver implements Driver
   {
     return Logger.getLogger("");
   }
-
 }

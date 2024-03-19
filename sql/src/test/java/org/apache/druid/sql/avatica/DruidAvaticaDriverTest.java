@@ -26,17 +26,18 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DruidAvaticaDriverTest
 {
+  // create a new driver instance; this will load the class and register it
+  DruidAvaticaTestDriver driver = new DruidAvaticaTestDriver();
+
   @Test
-  public void t1() throws SQLException
+  public void testSelect() throws SQLException
   {
-    DruidAvaticaTestDriver dc = new DruidAvaticaTestDriver();
     try (Connection con = DriverManager.getConnection("druidtest://", "user1", "pass");
         Statement stmt = con.createStatement();
         ResultSet rs = stmt.executeQuery("select 42");) {
