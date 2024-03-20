@@ -26,7 +26,6 @@ import org.apache.druid.sql.calcite.util.SqlTestFramework.QueryComponentSupplier
 import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
-
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -60,9 +59,8 @@ public @interface SqlTestFrameworkConfig
   class Rule implements AfterAllCallback, BeforeEachCallback
   {
     Map<SqlTestFrameworkConfig, ConfigurationInstance> configMap = new HashMap<>();
-    private SqlTestFrameworkConfig currentConfig;
-    //FIXME
-    public QueryComponentSupplier testHost;
+    private SqlTestFrameworkConfig config;
+    private QueryComponentSupplier testHost;
     private Method method;
 
     @Override
@@ -99,20 +97,15 @@ public @interface SqlTestFrameworkConfig
 
     public void setConfig(SqlTestFrameworkConfig annotation)
     {
-      currentConfig = annotation;
-      if (currentConfig == null) {
-        currentConfig = defaultConfig();
+      config = annotation;
+      if (config == null) {
+        config = defaultConfig();
       }
     }
 
     public SqlTestFramework get()
     {
-      return get(currentConfig);
-    }
-
-    public SqlTestFramework get(SqlTestFrameworkConfig config)
-    {
-      return getConfigurationInstance(config).framework;
+      return getConfigurationInstance().framework;
     }
 
     public <T extends Annotation> T getAnnotation(Class<T> annotationType)
@@ -120,7 +113,7 @@ public @interface SqlTestFrameworkConfig
       return method.getAnnotation(annotationType);
     }
 
-    private ConfigurationInstance getConfigurationInstance(SqlTestFrameworkConfig config)
+    private ConfigurationInstance getConfigurationInstance()
     {
       return configMap.computeIfAbsent(config, this::buildConfiguration);
     }

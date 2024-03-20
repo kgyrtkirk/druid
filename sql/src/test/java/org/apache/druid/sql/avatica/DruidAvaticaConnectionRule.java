@@ -93,7 +93,6 @@ public class DruidAvaticaConnectionRule
     avaticaConfig = new AvaticaServerConfig();
     avaticaConfig.maxConnections = CONNECTION_LIMIT;
     avaticaConfig.maxStatementsPerConnection = STATEMENT_LIMIT;
-    System.setProperty("user.timezone", "UTC");
   }
 
   private static QueryRunnerFactoryConglomerate conglomerate;
