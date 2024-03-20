@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.druid.sql.binga;
+package org.apache.druid.sql.quidem;
 
 import net.hydromatic.quidem.CommandHandler;
 import net.hydromatic.quidem.Quidem;

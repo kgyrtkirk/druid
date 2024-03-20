@@ -17,20 +17,39 @@
  * under the License.
  */
 
-package org.apache.druid.sql.binga;
+package org.apache.druid.sql.quidem;
 
-import net.hydromatic.quidem.Command;
-import net.hydromatic.quidem.CommandHandler;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
 
-import java.util.List;
-
-public class DruidQuidemCommandHandler implements CommandHandler
+public class Qui2 extends DruidQuidemTestBase
 {
-
   @Override
-  public Command parseCommand(List<String> lines, List<String> content, String line)
+  protected Collection<String> getPath()
   {
-    return null;
+    // File root = findProjectRoot();
+    ArrayList<String> ret = new ArrayList<>();
+    ret.add(new File("qui/a.iq").getAbsolutePath());
+    return ret;// data(new File("qui/a.iq").getAbsolutePath());
+  }
+
+  private File findProjectRoot()
+  {
+    File f = new File(".");
+    if (isProjectRoot(f)) {
+      return f;
+    }
+    f = f.getParentFile();
+    if (isProjectRoot(f)) {
+      return f;
+    }
+    throw new IllegalStateException("can't find project root");
+  }
+
+  private boolean isProjectRoot(File f)
+  {
+    return new File(f, "web-console").exists();
   }
 
 }

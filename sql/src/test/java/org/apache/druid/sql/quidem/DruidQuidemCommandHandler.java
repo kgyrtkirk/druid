@@ -17,15 +17,20 @@
  * under the License.
  */
 
-package org.apache.druid.sql.binga;
+package org.apache.druid.sql.quidem;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import net.hydromatic.quidem.Command;
+import net.hydromatic.quidem.CommandHandler;
 
-public interface ResultSet1 extends ResultSet
+import java.util.List;
+
+public class DruidQuidemCommandHandler implements CommandHandler
 {
-  default byte getByte(int columnIndex) throws SQLException {
-    throw new RuntimeException("FIXME: Unimplemented!");
+
+  @Override
+  public Command parseCommand(List<String> lines, List<String> content, String line)
+  {
+    return null;
   }
 
 }

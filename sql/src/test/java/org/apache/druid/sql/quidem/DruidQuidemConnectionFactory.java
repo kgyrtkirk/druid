@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.druid.sql.binga;
+package org.apache.druid.sql.quidem;
 
 import net.hydromatic.quidem.Quidem.ConnectionFactory;
 import org.apache.druid.sql.avatica.DruidAvaticaConnectionRule;

@@ -169,20 +169,6 @@ public class DruidAvaticaConnectionRule
       return DriverManager.getConnection(url, props);
     }
 
-    public Connection getUserConnection() throws SQLException
-    {
-      return getConnection("regularUser", "druid");
-    }
-
-    // Note: though the URL-only form is OK in general, but it will cause tests
-    // to crash as the mock auth test code needs the user name.
-    // Use getUserConnection() instead, or create a URL that includes the
-    // user name and password.
-    // public Connection getConnection() throws SQLException
-    // {
-    // return DriverManager.getConnection(url);
-    // }
-
     public void close() throws Exception
     {
       druidMeta.closeAllConnections();
