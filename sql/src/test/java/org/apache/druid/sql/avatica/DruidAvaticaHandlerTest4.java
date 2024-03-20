@@ -137,7 +137,7 @@ import java.util.concurrent.TimeUnit;
  * this same set of tests using Protobuf serialization.
  * To run this in an IDE, set {@code -Duser.timezone=UTC}.
  */
-public class DruidAvaticaHandlerTest extends CalciteTestBase
+public class DruidAvaticaHandlerTest4 extends CalciteTestBase
 {
   @RegisterExtension
   public static DruidAvaticaConnectionRule avatica = new DruidAvaticaConnectionRule();
@@ -187,7 +187,7 @@ public class DruidAvaticaHandlerTest extends CalciteTestBase
     return DruidAvaticaJsonHandler.AVATICA_PATH;
   }
 
-  public DruidAvaticaHandlerTest() throws SQLException
+  public DruidAvaticaHandlerTest4() throws SQLException
   {
 
     client = getUserConnection();

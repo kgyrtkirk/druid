@@ -296,4 +296,15 @@ public class DruidAvaticaConnectionRule
       throw new RuntimeException(e);
     }
   }
+
+  public String getUrl()
+  {
+    return server.url;
+  }
+
+  public void closeAllConnections()
+  {
+server.druidMeta.closeAllConnections();
+
+  }
 }
