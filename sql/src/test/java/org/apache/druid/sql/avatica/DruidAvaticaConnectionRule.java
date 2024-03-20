@@ -27,7 +27,6 @@ import com.google.inject.Injector;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
-import org.apache.calcite.avatica.BuiltInConnectionProperty;
 import org.apache.calcite.avatica.server.AbstractAvaticaHandler;
 import org.apache.druid.common.config.NullHandling;
 import org.apache.druid.guice.LazySingleton;
@@ -79,7 +78,7 @@ import java.util.Properties;
 /**
  * Provides an JDBC connections to Druid test data.
  *
- * FIXME: Extracted from DruidAvaticaHandlerTest; finish refactor / remove duplication.
+ * Extracted from DruidAvaticaHandlerTest; can be reused for some cases.
  */
 public class DruidAvaticaConnectionRule
     implements BeforeAllCallback, AfterAllCallback, BeforeEachCallback, AfterEachCallback
@@ -92,14 +91,10 @@ public class DruidAvaticaConnectionRule
   public DruidAvaticaConnectionRule()
   {
     avaticaConfig = new AvaticaServerConfig();
-    // This must match the number of Connection objects created in
-    // testTooManyStatements()
     avaticaConfig.maxConnections = CONNECTION_LIMIT;
     avaticaConfig.maxStatementsPerConnection = STATEMENT_LIMIT;
     System.setProperty("user.timezone", "UTC");
   }
-
-  private static final String DUMMY_SQL_QUERY_ID = "dummy";
 
   private static QueryRunnerFactoryConglomerate conglomerate;
   private static SpecificSegmentsQuerySegmentWalker walker;
@@ -128,8 +123,6 @@ public class DruidAvaticaConnectionRule
   private final DruidOperatorTable operatorTable = CalciteTests.createOperatorTable();
   private final ExprMacroTable macroTable = CalciteTests.createExprMacroTable();
   private ServerWrapper server;
-  private Injector injector;
-  private TestRequestLogger testRequestLogger;
 
   private DruidSchemaCatalog makeRootSchema()
   {
@@ -160,15 +153,6 @@ public class DruidAvaticaConnectionRule
       );
     }
 
-    public Connection getConnection(String user, String password) throws SQLException
-    {
-      final Properties props = new Properties();
-      props.setProperty("user", user);
-      props.setProperty("password", password);
-      props.setProperty(BuiltInConnectionProperty.TRANSPARENT_RECONNECTION.camelName(), "true");
-      return DriverManager.getConnection(url, props);
-    }
-
     public void close() throws Exception
     {
       druidMeta.closeAllConnections();
@@ -195,10 +179,10 @@ public class DruidAvaticaConnectionRule
   public void beforeEach(ExtensionContext arg0) throws Exception
   {
 
-    final DruidSchemaCatalog rootSchema = makeRootSchema();
-    testRequestLogger = new TestRequestLogger();
+    DruidSchemaCatalog rootSchema = makeRootSchema();
+    TestRequestLogger testRequestLogger = new TestRequestLogger();
 
-    injector = new CoreInjectorBuilder(new StartupInjectorBuilder().build())
+    Injector injector = new CoreInjectorBuilder(new StartupInjectorBuilder().build())
         .addModule(
             binder -> {
               binder.bindConstant().annotatedWith(Names.named("serviceName")).to("test");
@@ -290,7 +274,6 @@ public class DruidAvaticaConnectionRule
 
   public void closeAllConnections()
   {
-server.druidMeta.closeAllConnections();
-
+    server.druidMeta.closeAllConnections();
   }
 }
