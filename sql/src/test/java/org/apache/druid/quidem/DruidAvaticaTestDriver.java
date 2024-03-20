@@ -17,7 +17,9 @@
  * under the License.
  */
 
-package org.apache.druid.sql.avatica;
+package org.apache.druid.quidem;
+
+import org.apache.druid.sql.avatica.DruidAvaticaConnectionRule;
 
 import java.sql.Connection;
 import java.sql.Driver;
@@ -34,7 +36,7 @@ public class DruidAvaticaTestDriver implements Driver
     new DruidAvaticaTestDriver().register();
   }
 
-  private static final String FIXME_UNIMPLEMENTED = "FIXME: Unimplemented!";
+  private static final String UNIMPLEMENTED_MESSAGE = "Unimplemented method!";
   private static final String prefix = "druidtest://";
   private DruidAvaticaConnectionRule rule;
 
@@ -72,7 +74,7 @@ public class DruidAvaticaTestDriver implements Driver
   @Override
   public DriverPropertyInfo[] getPropertyInfo(String url, Properties info) throws SQLException
   {
-    throw new RuntimeException(FIXME_UNIMPLEMENTED);
+    throw new RuntimeException(UNIMPLEMENTED_MESSAGE);
   }
 
   @Override

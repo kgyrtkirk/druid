@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.druid.sql.quidem;
+package org.apache.druid.quidem;
 
 import java.io.File;
 import java.util.ArrayList;

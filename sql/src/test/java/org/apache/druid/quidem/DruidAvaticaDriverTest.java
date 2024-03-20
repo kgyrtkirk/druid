@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.druid.sql.avatica;
+package org.apache.druid.quidem;
 
 import org.junit.jupiter.api.Test;
 
