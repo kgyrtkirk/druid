@@ -99,7 +99,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
-import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.api.io.TempDir;
 import org.skife.jdbi.v2.DBI;
 import org.skife.jdbi.v2.Handle;
@@ -139,32 +138,82 @@ import java.util.concurrent.TimeUnit;
  */
 public class DruidAvaticaHandlerTest extends CalciteTestBase
 {
-  @RegisterExtension
-  public static DruidAvaticaConnectionRule avatica = new DruidAvaticaConnectionRule();
-
   private static final int CONNECTION_LIMIT = 4;
   private static final int STATEMENT_LIMIT = 4;
 
-  private static final AvaticaServerConfig AVATICA_CONFIG = buildAvaticaServerConfig();
+  private static final AvaticaServerConfig AVATICA_CONFIG;
 
-  static AvaticaServerConfig buildAvaticaServerConfig() {
-    AvaticaServerConfig config = new AvaticaServerConfig();
+  static {
+    AVATICA_CONFIG = new AvaticaServerConfig();
     // This must match the number of Connection objects created in testTooManyStatements()
-    config .maxConnections = CONNECTION_LIMIT;
-    config .maxStatementsPerConnection = STATEMENT_LIMIT;
+    AVATICA_CONFIG.maxConnections = CONNECTION_LIMIT;
+    AVATICA_CONFIG.maxStatementsPerConnection = STATEMENT_LIMIT;
     System.setProperty("user.timezone", "UTC");
-    return config;
   }
 
   private static final String DUMMY_SQL_QUERY_ID = "dummy";
 
+  private static QueryRunnerFactoryConglomerate conglomerate;
+  private static SpecificSegmentsQuerySegmentWalker walker;
+  private static Closer resourceCloser;
+
   private final boolean nullNumeric = !NullHandling.replaceWithDefault();
 
+  @BeforeAll
+  public static void setUpClass(@TempDir File tempDir)
+  {
+    resourceCloser = Closer.create();
+    conglomerate = QueryStackTests.createQueryRunnerFactoryConglomerate(resourceCloser);
+    walker = CalciteTests.createMockWalker(conglomerate, tempDir);
+    resourceCloser.register(walker);
+  }
+
+  @AfterAll
+  public static void tearDownClass() throws IOException
+  {
+    resourceCloser.close();
+  }
+
+  private final PlannerConfig plannerConfig = new PlannerConfig();
+  private final DruidOperatorTable operatorTable = CalciteTests.createOperatorTable();
+  private final ExprMacroTable macroTable = CalciteTests.createExprMacroTable();
+  private ServerWrapper server;
   private Connection client;
   private Connection clientNoTrailingSlash;
   private Connection superuserClient;
   private Connection clientLosAngeles;
   private Connection clientLosAngelesUsingUrl;
+  private Injector injector;
+  private TestRequestLogger testRequestLogger;
+
+  private DruidSchemaCatalog makeRootSchema()
+  {
+    return CalciteTests.createMockRootSchema(
+        conglomerate,
+        walker,
+        plannerConfig,
+        CalciteTests.TEST_AUTHORIZER_MAPPER
+    );
+  }
+
+  private class ServerWrapper
+  {
+    final DruidMeta druidMeta;
+    final Server server;
+    final String url;
+
+    ServerWrapper(final DruidMeta druidMeta) throws Exception
+    {
+      this.druidMeta = druidMeta;
+      server = new Server(0);
+      server.setHandler(getAvaticaHandler(druidMeta));
+      server.start();
+      url = StringUtils.format(
+          "jdbc:avatica:remote:url=%s%s",
+          server.getURI().toString(),
+          StringUtils.maybeRemoveLeadingSlash(getJdbcUrlTail())
+      );
+    }
 
     public Connection getConnection(String user, String password) throws SQLException
     {
@@ -172,8 +221,7 @@ public class DruidAvaticaHandlerTest extends CalciteTestBase
       props.setProperty("user", user);
       props.setProperty("password", password);
       props.setProperty(BuiltInConnectionProperty.TRANSPARENT_RECONNECTION.camelName(), "true");
-      // FIXME url?
-      return avatica.getConnection(props);
+      return DriverManager.getConnection(url, props);
     }
 
     public Connection getUserConnection() throws SQLException
@@ -181,19 +229,88 @@ public class DruidAvaticaHandlerTest extends CalciteTestBase
       return getConnection("regularUser", "druid");
     }
 
+    // Note: though the URL-only form is OK in general, but it will cause tests
+    // to crash as the mock auth test code needs the user name.
+    // Use getUserConnection() instead, or create a URL that includes the
+    // user name and password.
+    //public Connection getConnection() throws SQLException
+    //{
+    //  return DriverManager.getConnection(url);
+    //}
+
+    public void close() throws Exception
+    {
+      druidMeta.closeAllConnections();
+      server.stop();
+    }
+  }
 
   protected String getJdbcUrlTail()
   {
     return DruidAvaticaJsonHandler.AVATICA_PATH;
   }
 
-  public DruidAvaticaHandlerTest() throws SQLException
+  // Default implementation is for JSON to allow debugging of tests.
+  protected AbstractAvaticaHandler getAvaticaHandler(final DruidMeta druidMeta)
   {
+    return new DruidAvaticaJsonHandler(
+        druidMeta,
+        new DruidNode("dummy", "dummy", false, 1, null, true, false),
+        new AvaticaMonitor()
+    );
+  }
 
-    client = getUserConnection();
-    superuserClient = getConnection(CalciteTests.TEST_SUPERUSER_NAME, "druid");
+  @BeforeEach
+  public void setUp() throws Exception
+  {
+    final DruidSchemaCatalog rootSchema = makeRootSchema();
+    testRequestLogger = new TestRequestLogger();
+
+    injector = new CoreInjectorBuilder(new StartupInjectorBuilder().build())
+        .addModule(
+            binder -> {
+              binder.bindConstant().annotatedWith(Names.named("serviceName")).to("test");
+              binder.bindConstant().annotatedWith(Names.named("servicePort")).to(0);
+              binder.bindConstant().annotatedWith(Names.named("tlsServicePort")).to(-1);
+              binder.bind(AuthenticatorMapper.class).toInstance(CalciteTests.TEST_AUTHENTICATOR_MAPPER);
+              binder.bind(AuthorizerMapper.class).toInstance(CalciteTests.TEST_AUTHORIZER_MAPPER);
+              binder.bind(Escalator.class).toInstance(CalciteTests.TEST_AUTHENTICATOR_ESCALATOR);
+              binder.bind(RequestLogger.class).toInstance(testRequestLogger);
+              binder.bind(DruidSchemaCatalog.class).toInstance(rootSchema);
+              for (NamedSchema schema : rootSchema.getNamedSchemas().values()) {
+                Multibinder.newSetBinder(binder, NamedSchema.class).addBinding().toInstance(schema);
+              }
+              binder.bind(QueryLifecycleFactory.class)
+                    .toInstance(CalciteTests.createMockQueryLifecycleFactory(walker, conglomerate));
+              binder.bind(DruidOperatorTable.class).toInstance(operatorTable);
+              binder.bind(ExprMacroTable.class).toInstance(macroTable);
+              binder.bind(PlannerConfig.class).toInstance(plannerConfig);
+              binder.bind(String.class)
+                    .annotatedWith(DruidSchemaName.class)
+                    .toInstance(CalciteTests.DRUID_SCHEMA_NAME);
+              binder.bind(AvaticaServerConfig.class).toInstance(AVATICA_CONFIG);
+              binder.bind(ServiceEmitter.class).to(NoopServiceEmitter.class);
+              binder.bind(QuerySchedulerProvider.class).in(LazySingleton.class);
+              binder.bind(QueryScheduler.class)
+                    .toProvider(QuerySchedulerProvider.class)
+                    .in(LazySingleton.class);
+              binder.install(new SqlModule.SqlStatementFactoryModule());
+              binder.bind(new TypeLiteral<Supplier<DefaultQueryConfig>>()
+              {
+              }).toInstance(Suppliers.ofInstance(new DefaultQueryConfig(ImmutableMap.of())));
+              binder.bind(CalciteRulesManager.class).toInstance(new CalciteRulesManager(ImmutableSet.of()));
+              binder.bind(JoinableFactoryWrapper.class).toInstance(CalciteTests.createJoinableFactoryWrapper());
+              binder.bind(CatalogResolver.class).toInstance(CatalogResolver.NULL_RESOLVER);
+            }
+        )
+        .build();
+
+    DruidMeta druidMeta = injector.getInstance(DruidMeta.class);
+    server = new ServerWrapper(druidMeta);
+    client = server.getUserConnection();
+    superuserClient = server.getConnection(CalciteTests.TEST_SUPERUSER_NAME, "druid");
     clientNoTrailingSlash = DriverManager.getConnection(
-        StringUtils.maybeRemoveTrailingSlash(avatica.getUrl()),
+        StringUtils.maybeRemoveTrailingSlash(server.url),
         CalciteTests.TEST_SUPERUSER_NAME,
         "druid"
     );
@@ -202,7 +319,22 @@ public class DruidAvaticaHandlerTest extends CalciteTestBase
     propertiesLosAngeles.setProperty("sqlTimeZone", "America/Los_Angeles");
     propertiesLosAngeles.setProperty("user", "regularUserLA");
     propertiesLosAngeles.setProperty(BaseQuery.SQL_QUERY_ID, DUMMY_SQL_QUERY_ID);
-    clientLosAngeles = DriverManager.getConnection(avatica.getUrl(), propertiesLosAngeles);
+    clientLosAngeles = DriverManager.getConnection(server.url, propertiesLosAngeles);
+  }
+
+  @AfterEach
+  public void tearDown() throws Exception
+  {
+    if (server != null) {
+      client.close();
+      clientLosAngeles.close();
+      clientNoTrailingSlash.close();
+      server.close();
+      client = null;
+      clientLosAngeles = null;
+      clientNoTrailingSlash = null;
+      server = null;
+    }
   }
 
   @Test
@@ -857,7 +989,7 @@ public class DruidAvaticaHandlerTest extends CalciteTestBase
           ImmutableList.of(ImmutableMap.of("cnt", 6L)),
           getRows(resultSet)
       );
-      avatica.closeAllConnections();
+      server.druidMeta.closeAllConnections();
     }
   }
 
@@ -871,7 +1003,7 @@ public class DruidAvaticaHandlerTest extends CalciteTestBase
 
     AvaticaClientRuntimeException ex = Assert.assertThrows(
         AvaticaClientRuntimeException.class,
-        () -> getUserConnection()
+        () -> server.getUserConnection()
     );
     Assert.assertTrue(ex.getMessage().contains("Too many connections"));
   }
@@ -880,7 +1012,7 @@ public class DruidAvaticaHandlerTest extends CalciteTestBase
   public void testNotTooManyConnectionsWhenTheyAreClosed() throws SQLException
   {
     for (int i = 0; i < CONNECTION_LIMIT * 2; i++) {
-      try (Connection connection = getUserConnection()) {
+      try (Connection connection = server.getUserConnection()) {
       }
     }
   }
@@ -889,7 +1021,7 @@ public class DruidAvaticaHandlerTest extends CalciteTestBase
   public void testConnectionsCloseStatements() throws SQLException
   {
     for (int i = 0; i < CONNECTION_LIMIT * 2; i++) {
-      try (Connection connection = getUserConnection()) {
+      try (Connection connection = server.getUserConnection()) {
         // Note: NOT in a try-catch block. Let the connection close the statement
         final Statement statement = connection.createStatement();
 
@@ -899,6 +1031,26 @@ public class DruidAvaticaHandlerTest extends CalciteTestBase
         Assert.assertTrue(resultSet.next());
       }
     }
+  }
+
+  private SqlStatementFactory makeStatementFactory()
+  {
+    return CalciteTests.createSqlStatementFactory(
+        CalciteTests.createMockSqlEngine(walker, conglomerate),
+        new PlannerFactory(
+            makeRootSchema(),
+            operatorTable,
+            macroTable,
+            plannerConfig,
+            AuthTestUtils.TEST_AUTHORIZER_MAPPER,
+            CalciteTests.getJsonMapper(),
+            CalciteTests.DRUID_SCHEMA_NAME,
+            new CalciteRulesManager(ImmutableSet.of()),
+            CalciteTests.createJoinableFactoryWrapper(),
+            CatalogResolver.NULL_RESOLVER,
+            new AuthConfig()
+        )
+    );
   }
 
   @Test
