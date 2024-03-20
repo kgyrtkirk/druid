@@ -39,7 +39,6 @@ import org.apache.calcite.sql.SqlSelect;
 import org.apache.calcite.sql.SqlUpdate;
 import org.apache.calcite.sql.SqlUtil;
 import org.apache.calcite.sql.SqlWindow;
-import org.apache.calcite.sql.SqlWith;
 import org.apache.calcite.sql.parser.SqlParserPos;
 import org.apache.calcite.sql.type.SqlTypeName;
 import org.apache.calcite.sql.type.SqlTypeUtil;
@@ -49,6 +48,7 @@ import org.apache.calcite.sql.validate.SqlValidatorException;
 import org.apache.calcite.sql.validate.SqlValidatorNamespace;
 import org.apache.calcite.sql.validate.SqlValidatorScope;
 import org.apache.calcite.sql.validate.SqlValidatorTable;
+import org.apache.calcite.sql.validate.SqlValidatorUtil;
 import org.apache.calcite.util.Pair;
 import org.apache.calcite.util.Static;
 import org.apache.calcite.util.Util;
@@ -153,6 +153,53 @@ public class DruidSqlValidator extends BaseDruidSqlValidator
     super.validateWindow(windowOrId, scope, call);
   }
 
+
+  @Override public RelDataType deriveType(
+      SqlValidatorScope scope,
+      SqlNode expr) {
+    return super.deriveType(scope, expr);
+  }
+
+
+  @Override
+  protected void inferUnknownTypes(RelDataType inferredType, SqlValidatorScope scope, SqlNode node)
+  {
+    final RelDataType newInferredType;
+    if(inferredType instanceof MetaType) {
+      MetaType metaType = (MetaType) inferredType;
+      DatasourceFacade tableMetadata = metaType.tableMetadata;
+      @Nullable
+      String alias = SqlValidatorUtil.alias(node);
+
+      final DatasourceFacade.ColumnFacade definedCol = tableMetadata.column(alias);
+
+      if(definedCol == null ) {
+        // new column?!
+        newInferredType=unknownType;
+      }else {
+        String sqlTypeName=definedCol.sqlStorageType();
+        RelDataType newType = typeFactory.createSqlType(SqlTypeName.get(sqlTypeName));
+
+        newType  = typeFactory.createTypeWithNullability(newType, true);
+
+
+        RelDataType derivedType = deriveType(scope, node);
+
+        /*happy with derived -> newInferred*/
+        if(true) {
+          setValidatedNodeType(node, newType);
+          return;
+        } else {
+          throw buildCalciteContextException("not happy", node);
+        }
+      }
+
+    } else {
+      newInferredType=inferredType;
+    }
+    super.inferUnknownTypes(newInferredType, scope, node);
+  }
+
   /**
    * Most of the implementation here is copied over from {@link org.apache.calcite.sql.validate.SqlValidator#validateInsert(SqlInsert)}
    * we've extended, refactored, and extracted methods, to fit out needs, and added comments where appropriate.
@@ -211,6 +258,10 @@ public class DruidSqlValidator extends BaseDruidSqlValidator
     // The source must be a SELECT
     final SqlNode source = insert.getSource();
 
+
+    RelDataType unknownType1 = new MetaType(tableMetadata);
+
+
     // Validate the source statement.
     // Because of the non-standard Druid semantics, we can't define the target type: we don't know
     // the target columns yet, and we can't infer types when they must come from the SELECT.
@@ -222,18 +273,18 @@ public class DruidSqlValidator extends BaseDruidSqlValidator
     final SqlValidatorScope scope;
     if (source instanceof SqlSelect) {
       final SqlSelect sqlSelect = (SqlSelect) source;
-      validateSelect(sqlSelect, unknownType);
+      validateSelect(sqlSelect, unknownType1);
       scope = null;
     } else {
       scope = scopes.get(source);
-      validateQuery(source, scope, unknownType);
+      validateQuery(source, scope, unknownType1);
     }
 
     final SqlValidatorNamespace sourceNamespace = namespaces.get(source);
     final RelRecordType sourceType = (RelRecordType) sourceNamespace.getRowType();
 
     // Determine the output (target) schema.
-    final RelDataType targetType = validateTargetType(scope, insertNs, insert, sourceType, tableMetadata);
+//    final RelDataType targetType = validateTargetType(scope, insertNs, insert, sourceType, tableMetadata);
 
     // WITH node type is computed to be the type of the body recursively in
     // org.apache.calcite.sql2rel.SqlToRelConverter.convertQuery}. If this computed type
@@ -242,15 +293,15 @@ public class DruidSqlValidator extends BaseDruidSqlValidator
     // During the validateTargetType call above, the WITH body node validated type may be updated
     // with any coercions applied. We update the validated node type of the WITH node here so
     // that they are consistent.
-    if (source instanceof SqlWith) {
-      final RelDataType withBodyType = getValidatedNodeTypeIfKnown(((SqlWith) source).body);
-      if (withBodyType != null) {
-        setValidatedNodeType(source, withBodyType);
-      }
-    }
+//    if (source instanceof SqlWith) {
+//      final RelDataType withBodyType = getValidatedNodeTypeIfKnown(((SqlWith) source).body);
+//      if (withBodyType != null) {
+//        setValidatedNodeType(source, withBodyType);
+//      }
+//    }
 
     // Set the type for the INSERT/REPLACE node
-    setValidatedNodeType(insert, targetType);
+    setValidatedNodeType(insert, sourceType);
 
     // Segment size
     if (tableMetadata != null && !plannerContext.queryContextMap().containsKey(CTX_ROWS_PER_SEGMENT)) {

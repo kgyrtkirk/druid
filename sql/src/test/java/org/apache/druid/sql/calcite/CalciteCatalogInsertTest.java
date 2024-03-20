@@ -171,7 +171,7 @@ public class CalciteCatalogInsertTest extends CalciteCatalogIngestionDmlTest
              "  CAST(d AS BIGINT) AS extra2,\n" +
              "  e AS extra3\n" +
              "FROM TABLE(inline(\n" +
-             "  data => ARRAY['2022-12-26T12:34:56,extra,10,\"20\",foo'],\n" +
+             "  data => ARRAY[''],\n" +
              "  format => 'csv'))\n" +
              "  (a VARCHAR, b VARCHAR, c BIGINT, d VARCHAR, e VARCHAR)\n" +
              "PARTITIONED BY ALL TIME")
