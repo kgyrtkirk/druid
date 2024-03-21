@@ -16,11 +16,13 @@
  */
 package org.apache.druid.quidem;
 
+import com.google.common.io.Files;
 import net.hydromatic.quidem.CommandHandler;
 import net.hydromatic.quidem.Quidem;
 import org.apache.calcite.test.DiffTestCase;
 import org.apache.calcite.util.Closer;
 import org.apache.calcite.util.Util;
+import org.apache.druid.java.util.common.logger.Logger;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -32,12 +34,48 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.fail;
 
+/**
+ * Execute Quidem tests in Druid.
+ *
+ * How these tests work:
+ * <ol>
+ * <li>Test cases are in .iq files - contract of these files is that they
+ * produce themselves if it was executed without errors</li>
+ * <li>Executor (this class) picks up these files and runs them as part of unit
+ * testruns</li>
+ * <li>System under test is connected via an adapter which looks like a JDBC
+ * driver</li>
+ * </ol>
+ *
+ * Example usage:
+ * <ol>
+ * <li>Write new .iq test as a under the appropriate directory; with command for
+ * expectations but without specifying them.</li>
+ * <li>Run the test - it will produce a ".iq.out" file next to the ".iq"
+ * one.</li>
+ * <li>Copy over the .iq.out to .iq to accept the changes</li>
+ * </ol>
+ *
+ * To shorten the above 2 steps
+ *
+ */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public abstract class DruidQuidemTestBase
 {
+
+  private static final Logger LOG = new Logger(DruidQuidemTestBase.class);
+
   private static final String IQ_SUFFIX = ".iq";
+  private static final String OVERWRITE_PROPERTY = "quidem.overwrite";
+  private boolean overwrite;
+
+  public DruidQuidemTestBase()
+  {
+    overwrite = Boolean.valueOf(System.getProperty(OVERWRITE_PROPERTY, "false"));
+  }
 
   /** Creates a command handler. */
   protected CommandHandler createCommandHandler()
@@ -65,11 +103,13 @@ public abstract class DruidQuidemTestBase
       new Quidem(config).execute();
     }
     final String diff = DiffTestCase.diff(inFile, outFile);
+
     if (!diff.isEmpty()) {
-      fail(
-          "Files differ: " + outFile + " " + inFile + "\n"
-              + diff
-      );
+      if (overwrite) {
+        Files.copy(outFile, inFile);
+      } else {
+        fail("Files differ: " + outFile + " " + inFile + "\n" + diff);
+      }
     }
   }
 
