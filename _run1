@@ -1,14 +1,14 @@
 #!/bin/bash
+
 set -e
 
 OPTS+=" -Pskip-static-checks"
-OPTS+=" -Dquidem.overwriteX"
-OPTS+=" -Dsurefire.trimStackTrace=true"
 OPTS+=" -Dsurefire.rerunFailingTestsCount=0"
+[[ $@ =~ "-q" ]] && OPTS+=" -Dsurefire.trimStackTrace=true"
 
 OPTS+=" -pl sql -Dtest=SqlQuidemTest"
 
-mvn $OPTS install "$@"
+echo mvn $OPTS install "$@"
 
 #-Dquidem.filter=*join*
 #-Dquidem.overwrite
