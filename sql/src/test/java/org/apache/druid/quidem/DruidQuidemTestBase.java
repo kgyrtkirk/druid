@@ -26,14 +26,19 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public abstract class DruidQuidemTestBase
 {
+  private static final String IQ_SUFFIX = ".iq";
+
   /** Creates a command handler. */
   protected CommandHandler createCommandHandler()
   {
@@ -41,9 +46,11 @@ public abstract class DruidQuidemTestBase
   }
 
   @ParameterizedTest
-  @MethodSource("getPath")
-  public void test(File inFile) throws Exception
+  @MethodSource("getFileNames")
+  public void test(String testFileName) throws Exception
   {
+    File inFile = new File(getTestRoot(), testFileName);
+
     final File outFile = new File(inFile.getParentFile(), inFile.getName() + ".out");
     Util.discard(outFile.getParentFile().mkdirs());
     try (Reader reader = Util.reader(inFile);
@@ -66,6 +73,22 @@ public abstract class DruidQuidemTestBase
     }
   }
 
-  /** Factory method for {@link DruidQuidemTestBase#test(String)} parameters. */
-  protected abstract Collection<String> getPath();
+  protected final List<String> getFileNames() throws IOException
+  {
+    List<String> ret = new ArrayList<String>();
+    for (File f : getTestRoot().listFiles()) {
+      if (f.isDirectory()) {
+        continue;
+      }
+      if (!f.getName().endsWith(IQ_SUFFIX)) {
+        continue;
+      }
+      ret.add(f.getName());
+    }
+    Collections.sort(ret);
+    return ret;
+
+  }
+
+  protected abstract File getTestRoot();
 }

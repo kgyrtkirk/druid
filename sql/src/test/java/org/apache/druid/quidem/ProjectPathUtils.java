@@ -21,12 +21,29 @@ package org.apache.druid.quidem;
 
 import java.io.File;
 
-public class PathBasedQuidemTestBase extends DruidQuidemTestBase
+public class ProjectPathUtils
 {
-  @Override
-  protected File getTestRoot()
+  public static final File PROJECT_ROOT = findProjectRoot();
+
+  public static File getPathFromProjectRoot(String path)
   {
-    return ProjectPathUtils.getPathFromProjectRoot("sql/src/test/quidem");
+    return new File(PROJECT_ROOT, path);
   }
 
+  protected static File findProjectRoot()
+  {
+    File f = new File(".").getAbsoluteFile();
+    while (f != null) {
+      if (isProjectRoot(f)) {
+        return f;
+      }
+      f = f.getParentFile();
+    }
+    throw new IllegalStateException("Can't find project root!");
+  }
+
+  private static boolean isProjectRoot(File candidate)
+  {
+    return new File(candidate, "web-console").exists();
+  }
 }
