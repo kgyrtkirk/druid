@@ -4,11 +4,13 @@ set -e
 
 OPTS+=" -Pskip-static-checks"
 OPTS+=" -Dsurefire.rerunFailingTestsCount=0"
+OPTS+=" -Dorg.slf4j.simpleLogger.log.org.apache.maven.plugin.surefire.SurefirePlugin=INFO"
 [[ $@ =~ "-q" ]] && OPTS+=" -Dsurefire.trimStackTrace=true"
 
 OPTS+=" -pl sql -Dtest=SqlQuidemTest"
+OPTS+=" org.apache.maven.plugins:maven-surefire-plugin:test"
 
-echo mvn $OPTS install "$@"
+mvn "$@" $OPTS
 
 #-Dquidem.filter=*join*
 #-Dquidem.overwrite
