@@ -29,18 +29,11 @@ import java.io.File;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.Collection;
-import java.util.regex.Pattern;
-
 import static org.junit.jupiter.api.Assertions.fail;
 
-/**
- * Test that runs every Quidem file as a test.
- */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public abstract class DruidQuidemTestBase
 {
-  private static final Pattern PATTERN = Pattern.compile("\\.iq$");
-
   /** Creates a command handler. */
   protected CommandHandler createCommandHandler()
   {
