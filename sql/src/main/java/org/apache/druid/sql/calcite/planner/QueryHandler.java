@@ -47,6 +47,7 @@ import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.rel.type.RelDataTypeFactory;
 import org.apache.calcite.rex.RexBuilder;
 import org.apache.calcite.rex.RexNode;
+import org.apache.calcite.runtime.Hook;
 import org.apache.calcite.schema.ScannableTable;
 import org.apache.calcite.sql.SqlExplain;
 import org.apache.calcite.sql.SqlNode;
@@ -546,6 +547,7 @@ public abstract class QueryHandler extends SqlStatementHandler.BaseStatementHand
     RelNode parameterized = possiblyLimitedRoot.rel.accept(
         new RelParameterizerShuttle(plannerContext)
     );
+    Hook.TRIMMED.run(parameterized);
     QueryValidations.validateLogicalQueryForDruid(handlerContext.plannerContext(), parameterized);
     CalcitePlanner planner = handlerContext.planner();
 
