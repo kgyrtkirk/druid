@@ -22,12 +22,15 @@ import net.hydromatic.quidem.Quidem;
 import org.apache.calcite.test.DiffTestCase;
 import org.apache.calcite.util.Closer;
 import org.apache.calcite.util.Util;
+import org.apache.commons.io.filefilter.TrueFileFilter;
+import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.druid.java.util.common.logger.Logger;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -70,11 +73,22 @@ public abstract class DruidQuidemTestBase
 
   private static final String IQ_SUFFIX = ".iq";
   private static final String OVERWRITE_PROPERTY = "quidem.overwrite";
+
+  private static final String PROPERTY_FILTER = "quidem.filter";
   private boolean overwrite;
+
+  private FileFilter filter = TrueFileFilter.INSTANCE;
 
   public DruidQuidemTestBase()
   {
     overwrite = Boolean.valueOf(System.getProperty(OVERWRITE_PROPERTY, "false"));
+    String filterStr = System.getProperty(PROPERTY_FILTER, null);
+    if (filterStr != null) {
+      if (!filterStr.endsWith("*") && !filterStr.endsWith(IQ_SUFFIX)) {
+        filterStr = filterStr + IQ_SUFFIX;
+      }
+      filter = new WildcardFileFilter(filterStr);
+    }
   }
 
   /** Creates a command handler. */
@@ -116,18 +130,19 @@ public abstract class DruidQuidemTestBase
   protected final List<String> getFileNames() throws IOException
   {
     List<String> ret = new ArrayList<String>();
-    for (File f : getTestRoot().listFiles()) {
-      if (f.isDirectory()) {
-        continue;
-      }
-      if (!f.getName().endsWith(IQ_SUFFIX)) {
-        continue;
-      }
+    for (File f : getTestRoot().listFiles(this::isTestIncluded)) {
       ret.add(f.getName());
     }
     Collections.sort(ret);
     return ret;
 
+  }
+
+  private boolean isTestIncluded(File f)
+  {
+    return !f.isDirectory()
+        && f.getName().endsWith(IQ_SUFFIX)
+        && filter.accept(f);
   }
 
   protected abstract File getTestRoot();
