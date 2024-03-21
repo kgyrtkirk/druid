@@ -21,12 +21,11 @@ package org.apache.druid.quidem;
 
 import java.io.File;
 
-public class PathBasedQuidemTestBase extends DruidQuidemTestBase
+public class SqlQuidemTest extends DruidQuidemTestBase
 {
   @Override
   protected File getTestRoot()
   {
     return ProjectPathUtils.getPathFromProjectRoot("sql/src/test/quidem");
   }
-
 }
