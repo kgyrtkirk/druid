@@ -19,6 +19,8 @@ package org.apache.druid.quidem;
 import com.google.common.io.Files;
 import net.hydromatic.quidem.CommandHandler;
 import net.hydromatic.quidem.Quidem;
+import net.hydromatic.quidem.Quidem.Config;
+import net.hydromatic.quidem.Quidem.ConfigBuilder;
 import org.apache.calcite.test.DiffTestCase;
 import org.apache.calcite.util.Closer;
 import org.apache.calcite.util.Util;
@@ -31,6 +33,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -79,7 +82,9 @@ public abstract class DruidQuidemTestBase
 
   private FileFilter filter = TrueFileFilter.INSTANCE;
 
-  public DruidQuidemTestBase()
+  private DruidQuidemRunner druidQuidemRunner;
+
+  public DruidQuidemTestBase() throws Exception
   {
     overwrite = Boolean.valueOf(System.getProperty(OVERWRITE_PROPERTY, "false"));
     String filterStr = System.getProperty(PROPERTY_FILTER, null);
@@ -89,6 +94,7 @@ public abstract class DruidQuidemTestBase
       }
       filter = new WildcardFileFilter(filterStr);
     }
+    druidQuidemRunner = new DruidQuidemRunner(overwrite);
   }
 
   /** Creates a command handler. */
@@ -104,25 +110,42 @@ public abstract class DruidQuidemTestBase
     File inFile = new File(getTestRoot(), testFileName);
 
     final File outFile = new File(inFile.getParentFile(), inFile.getName() + ".out");
-    Util.discard(outFile.getParentFile().mkdirs());
-    try (Reader reader = Util.reader(inFile);
-        Writer writer = Util.printWriter(outFile);
-        Closer closer = new Closer()) {
-      final Quidem.Config config = Quidem.configBuilder()
-          .withReader(reader)
-          .withWriter(writer)
-          .withConnectionFactory(new DruidQuidemConnectionFactory())
-          .withCommandHandler(new DruidQuidemCommandHandler())
-          .build();
-      new Quidem(config).execute();
-    }
-    final String diff = DiffTestCase.diff(inFile, outFile);
+    druidQuidemRunner.run(inFile, outFile);
+  }
 
-    if (!diff.isEmpty()) {
-      if (overwrite) {
-        Files.copy(outFile, inFile);
-      } else {
-        fail("Files differ: " + outFile + " " + inFile + "\n" + diff);
+  public static class DruidQuidemRunner
+  {
+    private boolean overwrite;
+    private ConfigBuilder configBuilder;
+
+    public DruidQuidemRunner(boolean overwrite) throws Exception
+    {
+      this.overwrite = overwrite;
+      configBuilder = Quidem.configBuilder()
+          .withConnectionFactory(new DruidQuidemConnectionFactory())
+          .withCommandHandler(new DruidQuidemCommandHandler());
+    }
+
+    public void run(File inFile, final File outFile) throws Exception, IOException, FileNotFoundException
+    {
+      Util.discard(outFile.getParentFile().mkdirs());
+      try (Reader reader = Util.reader(inFile);
+          Writer writer = Util.printWriter(outFile);
+          Closer closer = new Closer()) {
+        Config config = configBuilder
+            .withReader(reader)
+            .withWriter(writer).build();
+
+        new Quidem(config).execute();
+      }
+      final String diff = DiffTestCase.diff(inFile, outFile);
+
+      if (!diff.isEmpty()) {
+        if (overwrite) {
+          Files.copy(outFile, inFile);
+        } else {
+          fail("Files differ: " + outFile + " " + inFile + "\n" + diff);
+        }
       }
     }
   }

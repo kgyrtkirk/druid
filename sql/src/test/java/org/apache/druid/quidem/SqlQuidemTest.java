@@ -23,6 +23,11 @@ import java.io.File;
 
 public class SqlQuidemTest extends DruidQuidemTestBase
 {
+  public SqlQuidemTest() throws Exception
+  {
+    super();
+  }
+
   @Override
   protected File getTestRoot()
   {
