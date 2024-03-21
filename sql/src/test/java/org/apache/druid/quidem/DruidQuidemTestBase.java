@@ -71,7 +71,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public abstract class DruidQuidemTestBase
 {
-
   private static final Logger LOG = new Logger(DruidQuidemTestBase.class);
 
   private static final String IQ_SUFFIX = ".iq";
@@ -158,7 +157,6 @@ public abstract class DruidQuidemTestBase
     }
     Collections.sort(ret);
     return ret;
-
   }
 
   private boolean isTestIncluded(File f)

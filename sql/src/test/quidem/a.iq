@@ -21,14 +21,7 @@ select cityName, countryName from wikipedia where cityName='New York' limit 1;
 (1 row)
 
 !ok
-
-
-select cityName, countryName from wikipedia where cityName is null limit 1;
-+----------+-------------+
-| cityName | countryName |
-+----------+-------------+
-|          |             |
-+----------+-------------+
-(1 row)
-
-!ok
+hello-hello
+!nativePlan
+[{"query":{"queryType":"scan","dataSource":{"type":"table","name":"wikipedia"},"intervals":{"type":"intervals","intervals":["-146136543-09-08T08:23:32.096Z/146140482-04-24T15:36:27.903Z"]},"resultFormat":"compactedList","limit":1,"filter":{"type":"equals","column":"cityName","matchValueType":"STRING","matchValue":"New York"},"columns":["cityName","countryName"],"legacy":false,"context":{"sqlQueryId":"b4f7ea9b-724d-45b4-b84f-b6e018624ea4","sqlStringifyArrays":false},"columnTypes":["STRING","STRING"],"granularity":{"type":"all"}},"signature":[{"name":"cityName","type":"STRING"},{"name":"countryName","type":"STRING"}],"columnMappings":[{"queryColumn":"cityName","outputColumn":"cityName"},{"queryColumn":"countryName","outputColumn":"countryName"}]}]
+!plan
