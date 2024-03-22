@@ -454,7 +454,6 @@ public abstract class BaseFilterTest2 extends InitializedNullHandlingTest implem
     return parser.parseBatch(mapRow).get(0);
   }
 
-
   @Rule
   public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
@@ -477,7 +476,6 @@ public abstract class BaseFilterTest2 extends InitializedNullHandlingTest implem
   {
     this.config = config;
     this.rows= rows;
-
   }
 
   static interface SetBase {

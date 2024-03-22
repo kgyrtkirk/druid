@@ -19,7 +19,6 @@
 
 package org.apache.druid.segment.filter;
 
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import nl.jqno.equalsverifier.EqualsVerifier;
@@ -30,60 +29,60 @@ import org.apache.druid.data.input.impl.MapInputRowParser;
 import org.apache.druid.data.input.impl.TimeAndDimsParseSpec;
 import org.apache.druid.data.input.impl.TimestampSpec;
 import org.apache.druid.java.util.common.DateTimes;
-import org.apache.druid.java.util.common.Pair;
 import org.apache.druid.query.filter.AndDimFilter;
+import org.apache.druid.query.filter.DimFilter;
 import org.apache.druid.query.filter.NotDimFilter;
 import org.apache.druid.query.filter.SelectorDimFilter;
-import org.apache.druid.segment.IndexBuilder;
-import org.apache.druid.segment.StorageAdapter;
-import org.junit.AfterClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-
-import java.io.Closeable;
+import org.apache.druid.segment.filter.BaseFilterTest2.FilterTestConfig;
+import org.apache.druid.segment.filter.BaseFilterTest2.AbstractFilterTestContextProvider;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestTemplate;
+import org.junit.jupiter.api.extension.ExtendWith;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-@RunWith(Parameterized.class)
-public class AndFilterTest extends BaseFilterTest
+
+public class AndFilterTest extends FilterCheckBase
 {
-  private static final String TIMESTAMP_COLUMN = "timestamp";
-
-  private static final InputRowParser<Map<String, Object>> PARSER = new MapInputRowParser(
-      new TimeAndDimsParseSpec(
-          new TimestampSpec(TIMESTAMP_COLUMN, "iso", DateTimes.of("2000")),
-          DimensionsSpec.EMPTY
-      )
-  );
-
-  private static final List<InputRow> ROWS = ImmutableList.of(
-      PARSER.parseBatch(ImmutableMap.of("dim0", "0", "dim1", "0")).get(0),
-      PARSER.parseBatch(ImmutableMap.of("dim0", "1", "dim1", "0")).get(0),
-      PARSER.parseBatch(ImmutableMap.of("dim0", "2", "dim1", "0")).get(0),
-      PARSER.parseBatch(ImmutableMap.of("dim0", "3", "dim1", "0")).get(0),
-      PARSER.parseBatch(ImmutableMap.of("dim0", "4", "dim1", "0")).get(0),
-      PARSER.parseBatch(ImmutableMap.of("dim0", "5", "dim1", "0")).get(0)
-  );
-
-  public AndFilterTest(
-      String testName,
-      IndexBuilder indexBuilder,
-      Function<IndexBuilder, Pair<StorageAdapter, Closeable>> finisher,
-      boolean cnf,
-      boolean optimize
-  )
+  public static Collection<Object[]> constructorFeeder()
   {
-    super(testName, ROWS, indexBuilder, finisher, cnf, optimize);
+    return BaseFilterTest2.makeConstructors();
   }
 
-  @AfterClass
-  public static void tearDown() throws Exception
+  static class SomeRowsContextProvider extends AbstractFilterTestContextProvider
   {
-    BaseFilterTest.tearDown(AndFilterTest.class.getName());
+    private static final String TIMESTAMP_COLUMN = "timestamp";
+
+    private static final InputRowParser<Map<String, Object>> PARSER = new MapInputRowParser(
+        new TimeAndDimsParseSpec(
+            new TimestampSpec(TIMESTAMP_COLUMN, "iso", DateTimes.of("2000")),
+            DimensionsSpec.EMPTY
+        )
+    );
+
+    private static final List<InputRow> ROWS = ImmutableList.of(
+        PARSER.parseBatch(ImmutableMap.of("dim0", "0", "dim1", "0")).get(0),
+        PARSER.parseBatch(ImmutableMap.of("dim0", "1", "dim1", "0")).get(0),
+        PARSER.parseBatch(ImmutableMap.of("dim0", "2", "dim1", "0")).get(0),
+        PARSER.parseBatch(ImmutableMap.of("dim0", "3", "dim1", "0")).get(0),
+        PARSER.parseBatch(ImmutableMap.of("dim0", "4", "dim1", "0")).get(0),
+        PARSER.parseBatch(ImmutableMap.of("dim0", "5", "dim1", "0")).get(0)
+    );
+
+    @Override
+    protected BaseFilterTest2 buildBaseFilterTest2(FilterTestConfig fc)
+    {
+      return new BaseFilterTest2(fc, ROWS)
+      {
+      };
+    }
   }
 
-  @Test
+  private BaseFilterTest2 baseFilterTest;
+
+  @TestTemplate
+  @ExtendWith(SomeRowsContextProvider.class)
   public void testAnd()
   {
     assertFilterMatches(
@@ -130,7 +129,8 @@ public class AndFilterTest extends BaseFilterTest
     );
   }
 
-  @Test
+  @TestTemplate
+  @ExtendWith(SomeRowsContextProvider.class)
   public void testNotAnd()
   {
     assertFilterMatches(
