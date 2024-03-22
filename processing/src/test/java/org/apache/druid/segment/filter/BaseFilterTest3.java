@@ -26,7 +26,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
-import com.google.common.io.Files;
 import org.apache.druid.common.config.NullHandling;
 import org.apache.druid.common.guava.SettableSupplier;
 import org.apache.druid.data.input.InputRow;
@@ -111,16 +110,6 @@ import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Rule;
-import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
-import org.junit.jupiter.api.extension.BeforeEachCallback;
-import org.junit.jupiter.api.extension.BeforeTestExecutionCallback;
-import org.junit.jupiter.api.extension.Extension;
-import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.ParameterContext;
-import org.junit.jupiter.api.extension.ParameterResolutionException;
-import org.junit.jupiter.api.extension.TestTemplateInvocationContext;
-import org.junit.jupiter.api.extension.TestTemplateInvocationContextProvider;
-import org.junit.jupiter.api.extension.support.TypeBasedParameterResolver;
 import org.junit.rules.TemporaryFolder;
 import javax.annotation.Nullable;
 import java.io.Closeable;
@@ -136,94 +125,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.Stream.Builder;
 
-public abstract class BaseFilterTest2 extends InitializedNullHandlingTest implements TestTemplateInvocationContext
+public abstract class BaseFilterTest3 extends InitializedNullHandlingTest
 {
-
-  @Override
-  public List<Extension> getAdditionalExtensions() {
-
-      return ImmutableList.of(
-        new TypeBasedParameterResolver<BaseFilterTest2>() {
-
-          @Override
-          public BaseFilterTest2 resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
-              throws ParameterResolutionException
-          {
-            return BaseFilterTest2.this;
-          }
-        },
-        new BeforeTestExecutionCallback() {
-            @Override
-            public void beforeTestExecution(ExtensionContext extensionContext) throws Exception
-            {
-              setUp(Files.createTempDir());
-            }
-          },
-        new AfterTestExecutionCallback() {
-            @Override
-            public void afterTestExecution(ExtensionContext extensionContext) throws Exception {
-              tearDown(extensionContext.getTestClass().get().getName());
-            }
-        }
-      );
-  }
-
-  public static abstract class J5ContextProvider implements TestTemplateInvocationContextProvider{
-
-    private List<InputRow> rows;
-
-    public J5ContextProvider(List<InputRow> rows) {
-      this.rows = rows;
-
-    }
-    @Override
-    public boolean supportsTestTemplate(ExtensionContext context)
-    {
-      return true;
-    }
-
-    @Override
-    public Stream<TestTemplateInvocationContext> provideTestTemplateInvocationContexts(ExtensionContext context)
-    {
-      Collection<Object[]> inputs = makeConstructors();
-
-      Builder<TestTemplateInvocationContext> sb = Stream.builder();
-      for (Object[] objects : inputs) {
-        FilterTestConfig fc = (FilterTestConfig) objects[0];
-        BaseFilterTest2 b = new BaseFilterTest2(fc, rows) {
-        };
-
-        sb.add(b);
-      }
-      return sb.build();
-    }
-  }
-
-  public static class J5 implements BeforeEachCallback
-  {
-
-    private BaseFilterTest2 baseFilterTest;
-
-    public J5(List<InputRow> rows)
-    {
-      baseFilterTest = new BaseFilterTest2(null, rows) {};
-    }
-
-    @Override
-    public void beforeEach(ExtensionContext context) throws Exception
-    {
-      if(true)
-      {
-        throw new RuntimeException("FIXME: Unimplemented!");
-      }
-
-    }
-
-  }
-
   static final String TIMESTAMP_COLUMN = "timestamp";
 
   static final VirtualColumns VIRTUAL_COLUMNS = VirtualColumns.create(
@@ -494,6 +398,18 @@ public abstract class BaseFilterTest2 extends InitializedNullHandlingTest implem
   @Rule
   public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
+  private final List<InputRow> rows;
+
+  protected final IndexBuilder indexBuilder;
+  protected final Function<IndexBuilder, Pair<StorageAdapter, Closeable>> finisher;
+  protected final boolean cnf;
+  protected final boolean optimize;
+  protected final String testName;
+
+  // 'rowBasedWithoutTypeSignature' does not handle numeric null default values correctly, is equivalent to
+  // druid.generic.useDefaultValueForNull being set to false, regardless of how it is actually set.
+  // In other words, numeric null values will be treated as nulls instead of the default value
+  protected final boolean canTestNumericNullsAsDefaultValues;
 
   protected StorageAdapter adapter;
 
@@ -504,16 +420,23 @@ public abstract class BaseFilterTest2 extends InitializedNullHandlingTest implem
   private static ThreadLocal<Map<String, Map<String, Pair<StorageAdapter, Closeable>>>> adapterCache =
       ThreadLocal.withInitial(HashMap::new);
 
-
-  protected final FilterTestConfig config;
-
-  private final List<InputRow> rows;
-
-  public BaseFilterTest2(FilterTestConfig config, List<InputRow> rows)
+  public BaseFilterTest3(
+      String testName,
+      List<InputRow> rows,
+      IndexBuilder indexBuilder,
+      Function<IndexBuilder, Pair<StorageAdapter, Closeable>> finisher,
+      boolean cnf,
+      boolean optimize
+  )
   {
-    this.config = config;
-    this.rows= rows;
-
+    this.testName = testName;
+    this.rows = rows;
+    this.indexBuilder = indexBuilder;
+    this.finisher = finisher;
+    this.cnf = cnf;
+    this.optimize = optimize;
+    this.canTestNumericNullsAsDefaultValues =
+        NullHandling.replaceWithDefault() && !testName.contains("finisher[rowBasedWithoutTypeSignature]");
   }
 
   @Before
@@ -527,15 +450,16 @@ public abstract class BaseFilterTest2 extends InitializedNullHandlingTest implem
       adapterCache.get().put(className, adaptersForClass);
     }
 
-    Pair<StorageAdapter, Closeable> pair = adaptersForClass.get(config.testName);
+    Pair<StorageAdapter, Closeable> pair = adaptersForClass.get(testName);
     if (pair == null) {
-      pair = config.finisher.apply(
-          config.indexBuilder.tmpDir(tempDir).rows(rows)
+      pair = finisher.apply(
+          indexBuilder.tmpDir(tempDir).rows(rows)
       );
-      adaptersForClass.put(config.testName, pair);
+      adaptersForClass.put(testName, pair);
     }
 
     this.adapter = pair.lhs;
+
   }
 
   public static void tearDown(String className) throws Exception
@@ -551,71 +475,9 @@ public abstract class BaseFilterTest2 extends InitializedNullHandlingTest implem
     }
   }
 
-  public static class FilterTestConfig {
-
-    private String testName;
-    private IndexBuilder indexBuilder;
-    private Function<IndexBuilder, Pair<StorageAdapter, Closeable>> finisher;
-    private boolean cnf;
-    private boolean optimize;
-    /**
-     * 'rowBasedWithoutTypeSignature' does not handle numeric null default
-     * values correctly, is equivalent to druid.generic.useDefaultValueForNull
-     * being set to false, regardless of how it is actually set. In other words,
-     * numeric null values will be treated as nulls instead of the default value
-     */
-    private boolean canTestNumericNullsAsDefaultValues;
-
-    public FilterTestConfig(
-        String testName,
-        IndexBuilder indexBuilder,
-        Function<IndexBuilder, Pair<StorageAdapter, Closeable>> finisher,
-        boolean cnf,
-        boolean optimize
-    )
-    {
-      this.testName = testName;
-      this.indexBuilder = indexBuilder;
-      this.finisher = finisher;
-      this.cnf = cnf;
-      this.optimize = optimize;
-      this.canTestNumericNullsAsDefaultValues =
-          NullHandling.replaceWithDefault() && !testName.contains("finisher[rowBasedWithoutTypeSignature]");
-    }
-
-    public boolean isAutoSchema()
-    {
-      if (testName.contains("AutoTypes")) {
-        return true;
-      }
-      return false;
-    }
-
-    public boolean canTestArrayColumns()
-    {
-      if (testName.contains("frame (columnar)") || testName.contains("rowBasedWithoutTypeSignature")) {
-        return false;
-      }
-      return true;
-    }
-
-    public DimFilter maybeOptimized(DimFilter dimFilter)
-    {
-      if (dimFilter == null) {
-        return null;
-      }
-      if (optimize) {
-        return dimFilter.optimize(false);
-      } else {
-        return dimFilter;
-      }
-    }
-  }
-
   public static Collection<Object[]> makeConstructors()
   {
     final List<Object[]> constructors = new ArrayList<>();
-
 
     final Map<String, BitmapSerdeFactory> bitmapSerdeFactories = ImmutableMap.of(
         "concise", new ConciseBitmapSerdeFactory(),
@@ -857,7 +719,7 @@ public abstract class BaseFilterTest2 extends InitializedNullHandlingTest implem
                                    .build()
                       )
                       .segmentWriteOutMediumFactory(segmentWriteOutMediumFactoryEntry.getValue());
-                  constructors.add(new Object[] {new FilterTestConfig(testName, indexBuilder, finisherEntry.getValue(), cnf, optimize)});
+                  constructors.add(new Object[]{testName, indexBuilder, finisherEntry.getValue(), cnf, optimize});
                 }
               }
             }
@@ -869,16 +731,20 @@ public abstract class BaseFilterTest2 extends InitializedNullHandlingTest implem
     return constructors;
   }
 
-  //FIXME
   protected boolean isAutoSchema()
   {
-    return config.isAutoSchema();
+    if (testName.contains("AutoTypes")) {
+      return true;
+    }
+    return false;
   }
 
-  //FIXME
   protected boolean canTestArrayColumns()
   {
-    return config.canTestArrayColumns();
+    if (testName.contains("frame (columnar)") || testName.contains("rowBasedWithoutTypeSignature")) {
+      return false;
+    }
+    return true;
   }
 
   private Filter makeFilter(final DimFilter dimFilter)
@@ -887,19 +753,22 @@ public abstract class BaseFilterTest2 extends InitializedNullHandlingTest implem
       return null;
     }
 
-    final Filter filter = config.maybeOptimized(dimFilter).toFilter();
+    final DimFilter maybeOptimized = optimize ? dimFilter.optimize(false) : dimFilter;
+    final Filter filter = maybeOptimized.toFilter();
     try {
-      return config.cnf ? Filters.toCnf(filter) : filter;
+      return cnf ? Filters.toCnf(filter) : filter;
     }
     catch (CNFFilterExplosionException cnfFilterExplosionException) {
       throw new RuntimeException(cnfFilterExplosionException);
     }
   }
 
-  //FIXME
   private DimFilter maybeOptimize(final DimFilter dimFilter)
   {
-    return config.maybeOptimized(dimFilter);
+    if (dimFilter == null) {
+      return null;
+    }
+    return optimize ? dimFilter.optimize(false) : dimFilter;
   }
 
   private Sequence<Cursor> makeCursorSequence(final Filter filter)
@@ -1263,7 +1132,7 @@ public abstract class BaseFilterTest2 extends InitializedNullHandlingTest implem
 
     assertFilterMatches(filter, expectedRows, testVectorized);
     // test double inverted
-    if (!StringUtils.toLowerCase(config.testName).contains("concise")) {
+    if (!StringUtils.toLowerCase(testName).contains("concise")) {
       assertFilterMatches(NotDimFilter.of(NotDimFilter.of(filter)), expectedRows, testVectorized);
     }
   }
@@ -1290,7 +1159,7 @@ public abstract class BaseFilterTest2 extends InitializedNullHandlingTest implem
     } else {
       assertFilterMatches(filter, expectedRows, testVectorized);
       // test double inverted
-      if (!StringUtils.toLowerCase(config.testName).contains("concise")) {
+      if (!StringUtils.toLowerCase(testName).contains("concise")) {
         assertFilterMatches(NotDimFilter.of(NotDimFilter.of(filter)), expectedRows, testVectorized);
       }
     }
@@ -1303,7 +1172,7 @@ public abstract class BaseFilterTest2 extends InitializedNullHandlingTest implem
   {
     assertFilterMatches(filter, expectedRows, false);
     // test double inverted
-    if (!StringUtils.toLowerCase(config.testName).contains("concise")) {
+    if (!StringUtils.toLowerCase(testName).contains("concise")) {
       assertFilterMatches(NotDimFilter.of(NotDimFilter.of(filter)), expectedRows, false);
     }
   }

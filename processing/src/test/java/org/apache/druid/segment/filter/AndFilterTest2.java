@@ -19,7 +19,6 @@
 
 package org.apache.druid.segment.filter;
 
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import nl.jqno.equalsverifier.EqualsVerifier;
@@ -30,23 +29,13 @@ import org.apache.druid.data.input.impl.MapInputRowParser;
 import org.apache.druid.data.input.impl.TimeAndDimsParseSpec;
 import org.apache.druid.data.input.impl.TimestampSpec;
 import org.apache.druid.java.util.common.DateTimes;
-import org.apache.druid.java.util.common.Pair;
 import org.apache.druid.query.filter.AndDimFilter;
 import org.apache.druid.query.filter.DimFilter;
 import org.apache.druid.query.filter.NotDimFilter;
 import org.apache.druid.query.filter.SelectorDimFilter;
-import org.apache.druid.segment.IndexBuilder;
-import org.apache.druid.segment.StorageAdapter;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeEach;
+import org.apache.druid.segment.filter.BaseFilterTest2.J5ContextProvider;
 import org.junit.jupiter.api.TestTemplate;
-import org.junit.jupiter.api.io.TempDir;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.MethodSource;
-
-import java.io.Closeable;
-import java.io.File;
+import org.junit.jupiter.api.extension.ExtendWith;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -56,7 +45,7 @@ public class AndFilterTest2
 {
   public static Collection<Object[]> constructorFeeder()
   {
-    return BaseFilterTest.makeConstructors();
+    return BaseFilterTest2.makeConstructors();
   }
 
   private static final String TIMESTAMP_COLUMN = "timestamp";
@@ -77,33 +66,32 @@ public class AndFilterTest2
       PARSER.parseBatch(ImmutableMap.of("dim0", "5", "dim1", "0")).get(0)
   );
 
-  private BaseFilterTest baseFilterTest;
+  private BaseFilterTest2 baseFilterTest;
+
+//  @RegisterExtension
+//  public static BaseFilterTest2.J5ContextProvider base = new BaseFilterTest2.J5ContextProvider(ROWS);
+
 
   public void initAndFilterTest(
-      String testName,
-      IndexBuilder indexBuilder,
-      Function<IndexBuilder, Pair<StorageAdapter, Closeable>> finisher,
-      boolean cnf,
-      boolean optimize
+      BaseFilterTest2 config
   )
   {
 
-    baseFilterTest = new BaseFilterTest(testName, ROWS, indexBuilder, finisher, cnf, optimize) {
+    baseFilterTest = config;
+    }
 
-    };
-  }
-
-  @BeforeEach
-  public void beforeEach(@TempDir File tempDir) throws Exception {
-    baseFilterTest.setUp(tempDir);
-  }
-
-  @AfterAll
-  public static void tearDown() throws Exception
-  {
-    BaseFilterTest.tearDown(AndFilterTest2.class.getName());
-  }
-
+//  @BeforeEach
+//  public void beforeEach(@TempDir File tempDir) throws Exception {
+//    baseFilterTest.setUp(tempDir);
+//  }
+//
+//  // FIXME
+//  @AfterAll
+//  public static void tearDown() throws Exception
+//  {
+//    BaseFilterTest2.tearDown(AndFilterTest2.class.getName());
+//  }
+//
 
   @TestTemplate
   private void sda()
@@ -113,14 +101,23 @@ public class AndFilterTest2
     }
 
   }
+static class MyJ5ContextProvider extends J5ContextProvider {
 
-
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  @EnumSource
-  public void testAnd(String testName, IndexBuilder indexBuilder, Function<IndexBuilder, Pair<StorageAdapter, Closeable>> finisher, boolean cnf, boolean optimize)
+  public MyJ5ContextProvider()
   {
-    initAndFilterTest(testName, indexBuilder, finisher, cnf, optimize);
+    super(ROWS);
+  }
+
+}
+
+  @TestTemplate
+  @ExtendWith(MyJ5ContextProvider.class)
+//  @MethodSource("constructorFeeder")
+//  @ParameterizedTest(name = "{0}")
+//  @EnumSource
+  public void testAnd(BaseFilterTest2 config)
+  {
+    initAndFilterTest(config);
     assertFilterMatches(
         new AndDimFilter(ImmutableList.of(
             new SelectorDimFilter("dim0", "0", null),
@@ -173,11 +170,11 @@ public class AndFilterTest2
     baseFilterTest.assertFilterMatches(filter, expectedRows);
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void testNotAnd(String testName, IndexBuilder indexBuilder, Function<IndexBuilder, Pair<StorageAdapter, Closeable>> finisher, boolean cnf, boolean optimize)
+  @TestTemplate
+  @ExtendWith(MyJ5ContextProvider.class)
+  public void testNotAnd(BaseFilterTest2 config)
   {
-    initAndFilterTest(testName, indexBuilder, finisher, cnf, optimize);
+    initAndFilterTest(config);
     assertFilterMatches(
         new NotDimFilter(new AndDimFilter(ImmutableList.of(
             new SelectorDimFilter("dim0", "0", null),
@@ -222,11 +219,11 @@ public class AndFilterTest2
     );
   }
 
-  @MethodSource("constructorFeeder")
-  @ParameterizedTest(name = "{0}")
-  public void test_equals(String testName, IndexBuilder indexBuilder, Function<IndexBuilder, Pair<StorageAdapter, Closeable>> finisher, boolean cnf, boolean optimize)
+  //FIXME
+  @TestTemplate
+  @ExtendWith(MyJ5ContextProvider.class)
+  public void test_equals(BaseFilterTest2 config)
   {
-    initAndFilterTest(testName, indexBuilder, finisher, cnf, optimize);
     EqualsVerifier.forClass(AndFilter.class).usingGetClass().withNonnullFields("filters").verify();
   }
 }
