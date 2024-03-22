@@ -36,6 +36,7 @@ import org.apache.druid.query.filter.SelectorDimFilter;
 import org.apache.druid.segment.filter.BaseFilterTest2.FilterTestConfig;
 import org.apache.druid.segment.filter.BaseFilterTest2.SetBase;
 import org.apache.druid.segment.filter.BaseFilterTest2.AbstractFilterTestContextProvider;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestTemplate;
 import org.junit.jupiter.api.extension.ExtendWith;
 import java.util.Collection;
@@ -81,16 +82,10 @@ public class AndFilterTest2 implements SetBase
 
   private BaseFilterTest2 baseFilterTest;
 
-  public void initAndFilterTest(BaseFilterTest2 config)
-  {
-    baseFilterTest = config;
-  }
-
   @TestTemplate
   @ExtendWith(SomeRowsContextProvider.class)
-  public void testAnd(BaseFilterTest2 config)
+  public void testAnd()
   {
-    initAndFilterTest(config);
     assertFilterMatches(
         new AndDimFilter(ImmutableList.of(
             new SelectorDimFilter("dim0", "0", null),
@@ -145,9 +140,8 @@ public class AndFilterTest2 implements SetBase
 
   @TestTemplate
   @ExtendWith(SomeRowsContextProvider.class)
-  public void testNotAnd(BaseFilterTest2 config)
+  public void testNotAnd()
   {
-    initAndFilterTest(config);
     assertFilterMatches(
         new NotDimFilter(new AndDimFilter(ImmutableList.of(
             new SelectorDimFilter("dim0", "0", null),
@@ -192,10 +186,8 @@ public class AndFilterTest2 implements SetBase
     );
   }
 
-  //FIXME
-  @TestTemplate
-  @ExtendWith(SomeRowsContextProvider.class)
-  public void test_equals(BaseFilterTest2 config)
+  @Test
+  public void test_equals()
   {
     EqualsVerifier.forClass(AndFilter.class).usingGetClass().withNonnullFields("filters").verify();
   }
