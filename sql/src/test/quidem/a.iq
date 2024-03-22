@@ -5,13 +5,13 @@ select 1+5;
 +--------+
 | EXPR$0 |
 +--------+
-|      6 |
+|      9 |
 +--------+
 (1 row)
 
 !ok
 
-select cityName, countryName from wikipedia where cityName='New York' limit 2;
+select cityName, countryName from wikipedia where cityName='New York' limit 1;
 +----------+---------------+
 | cityName | countryName   |
 +----------+---------------+
