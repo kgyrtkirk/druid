@@ -39,8 +39,10 @@ import org.apache.druid.segment.IndexBuilder;
 import org.apache.druid.segment.StorageAdapter;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.TestTemplate;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.Closeable;
@@ -101,8 +103,20 @@ public class AndFilterTest
     BaseFilterTest.tearDown(AndFilterTest.class.getName());
   }
 
+
+  @TestTemplate
+  private void sda()
+  {
+    if (true) {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+
+  }
+
+
   @MethodSource("constructorFeeder")
   @ParameterizedTest(name = "{0}")
+  @EnumSource
   public void testAnd(String testName, IndexBuilder indexBuilder, Function<IndexBuilder, Pair<StorageAdapter, Closeable>> finisher, boolean cnf, boolean optimize)
   {
     initAndFilterTest(testName, indexBuilder, finisher, cnf, optimize);
