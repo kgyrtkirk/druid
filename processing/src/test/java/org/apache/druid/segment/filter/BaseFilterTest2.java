@@ -112,7 +112,6 @@ import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
-import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.BeforeTestExecutionCallback;
 import org.junit.jupiter.api.extension.Extension;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -185,28 +184,6 @@ public abstract class BaseFilterTest2 extends InitializedNullHandlingTest implem
     }
 
     protected abstract BaseFilterTest2 buildBaseFilterTest2(FilterTestConfig fc);
-  }
-
-  public static class J5 implements BeforeEachCallback
-  {
-
-    private BaseFilterTest2 baseFilterTest;
-
-    public J5(List<InputRow> rows)
-    {
-      baseFilterTest = new BaseFilterTest2(null, rows) {};
-    }
-
-    @Override
-    public void beforeEach(ExtensionContext context) throws Exception
-    {
-      if(true)
-      {
-        throw new RuntimeException("FIXME: Unimplemented!");
-      }
-
-    }
-
   }
 
   static final String TIMESTAMP_COLUMN = "timestamp";
