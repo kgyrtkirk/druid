@@ -1,7 +1,6 @@
 !use druid
 !set outputformat mysql
 
-
 select 1+5;
 +--------+
 | EXPR$0 |
@@ -10,15 +9,16 @@ select 1+5;
 +--------+
 (1 row)
 
-!ok  
+!ok
 
-select cityName, countryName from wikipedia where cityName='New York' limit 1;
+select cityName, countryName from wikipedia where cityName='New York' limit 2;
 +----------+---------------+
 | cityName | countryName   |
 +----------+---------------+
 | New York | United States |
+| New York | United States |
 +----------+---------------+
-(1 row)
+(2 rows)
 
 !ok
 {
@@ -32,7 +32,7 @@ select cityName, countryName from wikipedia where cityName='New York' limit 1;
     "intervals" : [ "-146136543-09-08T08:23:32.096Z/146140482-04-24T15:36:27.903Z" ]
   },
   "resultFormat" : "compactedList",
-  "limit" : 1,
+  "limit" : 2,
   "filter" : {
     "type" : "equals",
     "column" : "cityName",
@@ -47,13 +47,13 @@ select cityName, countryName from wikipedia where cityName='New York' limit 1;
   }
 }
 !nativePlan
-LogicalSort(fetch=[1]): rowcount = 1.0, cumulative cost = {131.0 rows, 251.0 cpu, 0.0 io}, id = 174
+LogicalSort(fetch=[2]): rowcount = 2.0, cumulative cost = {132.0 rows, 271.0 cpu, 0.0 io}, id = 174
   LogicalProject(cityName=[$2], countryName=[$5]): rowcount = 15.0, cumulative cost = {130.0 rows, 231.0 cpu, 0.0 io}, id = 172
     LogicalFilter(condition=[=($2, 'New York')]): rowcount = 15.0, cumulative cost = {115.0 rows, 201.0 cpu, 0.0 io}, id = 171
       LogicalTableScan(table=[[druid, wikipedia]]): rowcount = 100.0, cumulative cost = {100.0 rows, 101.0 cpu, 0.0 io}, id = 170
 
 !logicalPlan
-LogicalSort(fetch=[1]): rowcount = 1.0, cumulative cost = {131.0 rows, 251.0 cpu, 0.0 io}, id = 245
+LogicalSort(fetch=[2]): rowcount = 2.0, cumulative cost = {132.0 rows, 271.0 cpu, 0.0 io}, id = 245
   LogicalProject(cityName=[$2], countryName=[$5]): rowcount = 15.0, cumulative cost = {130.0 rows, 231.0 cpu, 0.0 io}, id = 243
     LogicalFilter(condition=[=($2, 'New York')]): rowcount = 15.0, cumulative cost = {115.0 rows, 201.0 cpu, 0.0 io}, id = 242
       LogicalTableScan(table=[[druid, wikipedia]]): rowcount = 100.0, cumulative cost = {100.0 rows, 101.0 cpu, 0.0 io}, id = 241
