@@ -34,7 +34,8 @@ import org.apache.druid.query.filter.DimFilter;
 import org.apache.druid.query.filter.NotDimFilter;
 import org.apache.druid.query.filter.SelectorDimFilter;
 import org.apache.druid.segment.filter.BaseFilterTest2.FilterTestConfig;
-import org.apache.druid.segment.filter.BaseFilterTest2.J5ContextProvider;
+import org.apache.druid.segment.filter.BaseFilterTest2.SetBase;
+import org.apache.druid.segment.filter.BaseFilterTest2.AbstractFilterTestContextProvider;
 import org.junit.jupiter.api.TestTemplate;
 import org.junit.jupiter.api.extension.ExtendWith;
 import java.util.Collection;
@@ -42,46 +43,33 @@ import java.util.List;
 import java.util.Map;
 
 
-public class AndFilterTest2
+public class AndFilterTest2 implements SetBase
 {
   public static Collection<Object[]> constructorFeeder()
   {
     return BaseFilterTest2.makeConstructors();
   }
 
-  private static final String TIMESTAMP_COLUMN = "timestamp";
-
-  private static final InputRowParser<Map<String, Object>> PARSER = new MapInputRowParser(
-      new TimeAndDimsParseSpec(
-          new TimestampSpec(TIMESTAMP_COLUMN, "iso", DateTimes.of("2000")),
-          DimensionsSpec.EMPTY
-      )
-  );
-
-  private static final List<InputRow> ROWS = ImmutableList.of(
-      PARSER.parseBatch(ImmutableMap.of("dim0", "0", "dim1", "0")).get(0),
-      PARSER.parseBatch(ImmutableMap.of("dim0", "1", "dim1", "0")).get(0),
-      PARSER.parseBatch(ImmutableMap.of("dim0", "2", "dim1", "0")).get(0),
-      PARSER.parseBatch(ImmutableMap.of("dim0", "3", "dim1", "0")).get(0),
-      PARSER.parseBatch(ImmutableMap.of("dim0", "4", "dim1", "0")).get(0),
-      PARSER.parseBatch(ImmutableMap.of("dim0", "5", "dim1", "0")).get(0)
-  );
-
-  private BaseFilterTest2 baseFilterTest;
-
-//  @RegisterExtension
-//  public static BaseFilterTest2.J5ContextProvider base = new BaseFilterTest2.J5ContextProvider(ROWS);
-
-
-public void initAndFilterTest(
-    BaseFilterTest2 config)
-{
-
-  baseFilterTest = config;
-}
-
-  static class MyJ5ContextProvider extends J5ContextProvider
+  static class SomeRowsContextProvider extends AbstractFilterTestContextProvider
   {
+    private static final String TIMESTAMP_COLUMN = "timestamp";
+
+    private static final InputRowParser<Map<String, Object>> PARSER = new MapInputRowParser(
+        new TimeAndDimsParseSpec(
+            new TimestampSpec(TIMESTAMP_COLUMN, "iso", DateTimes.of("2000")),
+            DimensionsSpec.EMPTY
+        )
+    );
+
+    private static final List<InputRow> ROWS = ImmutableList.of(
+        PARSER.parseBatch(ImmutableMap.of("dim0", "0", "dim1", "0")).get(0),
+        PARSER.parseBatch(ImmutableMap.of("dim0", "1", "dim1", "0")).get(0),
+        PARSER.parseBatch(ImmutableMap.of("dim0", "2", "dim1", "0")).get(0),
+        PARSER.parseBatch(ImmutableMap.of("dim0", "3", "dim1", "0")).get(0),
+        PARSER.parseBatch(ImmutableMap.of("dim0", "4", "dim1", "0")).get(0),
+        PARSER.parseBatch(ImmutableMap.of("dim0", "5", "dim1", "0")).get(0)
+    );
+
     @Override
     protected BaseFilterTest2 buildBaseFilterTest2(FilterTestConfig fc)
     {
@@ -91,11 +79,15 @@ public void initAndFilterTest(
     }
   }
 
+  private BaseFilterTest2 baseFilterTest;
+
+  public void initAndFilterTest(BaseFilterTest2 config)
+  {
+    baseFilterTest = config;
+  }
+
   @TestTemplate
-  @ExtendWith(MyJ5ContextProvider.class)
-//  @MethodSource("constructorFeeder")
-//  @ParameterizedTest(name = "{0}")
-//  @EnumSource
+  @ExtendWith(SomeRowsContextProvider.class)
   public void testAnd(BaseFilterTest2 config)
   {
     initAndFilterTest(config);
@@ -152,7 +144,7 @@ public void initAndFilterTest(
   }
 
   @TestTemplate
-  @ExtendWith(MyJ5ContextProvider.class)
+  @ExtendWith(SomeRowsContextProvider.class)
   public void testNotAnd(BaseFilterTest2 config)
   {
     initAndFilterTest(config);
@@ -202,9 +194,15 @@ public void initAndFilterTest(
 
   //FIXME
   @TestTemplate
-  @ExtendWith(MyJ5ContextProvider.class)
+  @ExtendWith(SomeRowsContextProvider.class)
   public void test_equals(BaseFilterTest2 config)
   {
     EqualsVerifier.forClass(AndFilter.class).usingGetClass().withNonnullFields("filters").verify();
+  }
+
+  @Override
+  public void setBase(BaseFilterTest2 base)
+  {
+    baseFilterTest=base;
   }
 }

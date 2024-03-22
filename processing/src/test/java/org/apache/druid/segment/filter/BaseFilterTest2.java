@@ -138,6 +138,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.Stream.Builder;
 
+import static org.junit.Assert.assertTrue;
+
 public abstract class BaseFilterTest2 extends InitializedNullHandlingTest implements TestTemplateInvocationContext
 {
 
@@ -160,7 +162,7 @@ public abstract class BaseFilterTest2 extends InitializedNullHandlingTest implem
       );
   }
 
-  public static abstract class J5ContextProvider implements TestTemplateInvocationContextProvider{
+  public static abstract class AbstractFilterTestContextProvider implements TestTemplateInvocationContextProvider{
 
     @Override
     public boolean supportsTestTemplate(ExtensionContext context)
@@ -478,9 +480,17 @@ public abstract class BaseFilterTest2 extends InitializedNullHandlingTest implem
 
   }
 
+  static interface SetBase {
+    void setBase(BaseFilterTest2 base);
+  }
 
-  void beforeEach(ExtensionContext context) throws Exception {
+  void beforeEach(ExtensionContext context) throws Exception
+  {
     setUp(Files.createTempDir());
+    Object testInstance = context.getTestInstance().get();
+    assertTrue(testInstance instanceof SetBase);
+    ((SetBase) testInstance).setBase(this);
+    //FIXME after null
   }
 
   @Before
