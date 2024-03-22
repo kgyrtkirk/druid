@@ -42,12 +42,20 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.io.Closeable;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 @RunWith(Parameterized.class)
 public class AndFilterTest extends BaseFilterTest
 {
+
+  @Parameterized.Parameters(name = "{0}")
+  public static Collection<Object[]> constructorFeeder()
+  {
+    return makeConstructors();
+  }
+
   private static final String TIMESTAMP_COLUMN = "timestamp";
 
   private static final InputRowParser<Map<String, Object>> PARSER = new MapInputRowParser(

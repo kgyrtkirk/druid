@@ -111,8 +111,6 @@ import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
-import org.junit.runners.Parameterized;
-
 import javax.annotation.Nullable;
 import java.io.Closeable;
 import java.io.File;
@@ -475,12 +473,6 @@ public abstract class BaseFilterTest extends InitializedNullHandlingTest
       }
       adapterCache.get().put(className, null);
     }
-  }
-
-  @Parameterized.Parameters(name = "{0}")
-  public static Collection<Object[]> constructorFeeder()
-  {
-    return makeConstructors();
   }
 
   public static Collection<Object[]> makeConstructors()
