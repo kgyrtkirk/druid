@@ -146,39 +146,23 @@ public abstract class BaseFilterTest2 extends InitializedNullHandlingTest implem
   public List<Extension> getAdditionalExtensions() {
 
       return ImmutableList.of(
-        new TypeBasedParameterResolver<BaseFilterTest2>() {
-
-          @Override
-          public BaseFilterTest2 resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
-              throws ParameterResolutionException
+          new TypeBasedParameterResolver<BaseFilterTest2>()
           {
-            return BaseFilterTest2.this;
-          }
-        },
-        new BeforeTestExecutionCallback() {
             @Override
-            public void beforeTestExecution(ExtensionContext extensionContext) throws Exception
+            public BaseFilterTest2 resolveParameter(ParameterContext parameterContext,
+                ExtensionContext extensionContext)
+                throws ParameterResolutionException
             {
-              setUp(Files.createTempDir());
+              return BaseFilterTest2.this;
             }
           },
-        new AfterTestExecutionCallback() {
-            @Override
-            public void afterTestExecution(ExtensionContext extensionContext) throws Exception {
-              tearDown(extensionContext.getTestClass().get().getName());
-            }
-        }
+          (BeforeTestExecutionCallback)BaseFilterTest2.this::beforeEach,
+        (AfterTestExecutionCallback)BaseFilterTest2.this::afterEach
       );
   }
 
   public static abstract class J5ContextProvider implements TestTemplateInvocationContextProvider{
 
-    private List<InputRow> rows;
-
-    public J5ContextProvider(List<InputRow> rows) {
-      this.rows = rows;
-
-    }
     @Override
     public boolean supportsTestTemplate(ExtensionContext context)
     {
@@ -193,13 +177,14 @@ public abstract class BaseFilterTest2 extends InitializedNullHandlingTest implem
       Builder<TestTemplateInvocationContext> sb = Stream.builder();
       for (Object[] objects : inputs) {
         FilterTestConfig fc = (FilterTestConfig) objects[0];
-        BaseFilterTest2 b = new BaseFilterTest2(fc, rows) {
-        };
+        BaseFilterTest2 b = buildBaseFilterTest2(fc);
 
         sb.add(b);
       }
       return sb.build();
     }
+
+    protected abstract BaseFilterTest2 buildBaseFilterTest2(FilterTestConfig fc);
   }
 
   public static class J5 implements BeforeEachCallback
@@ -516,6 +501,11 @@ public abstract class BaseFilterTest2 extends InitializedNullHandlingTest implem
 
   }
 
+
+  void beforeEach(ExtensionContext context) throws Exception {
+    setUp(Files.createTempDir());
+  }
+
   @Before
   public void setUp(File tempDir) throws Exception
   {
@@ -536,6 +526,10 @@ public abstract class BaseFilterTest2 extends InitializedNullHandlingTest implem
     }
 
     this.adapter = pair.lhs;
+  }
+
+  public void afterEach(ExtensionContext extensionContext) throws Exception {
+    tearDown(extensionContext.getTestClass().get().getName());
   }
 
   public static void tearDown(String className) throws Exception

@@ -33,6 +33,7 @@ import org.apache.druid.query.filter.AndDimFilter;
 import org.apache.druid.query.filter.DimFilter;
 import org.apache.druid.query.filter.NotDimFilter;
 import org.apache.druid.query.filter.SelectorDimFilter;
+import org.apache.druid.segment.filter.BaseFilterTest2.FilterTestConfig;
 import org.apache.druid.segment.filter.BaseFilterTest2.J5ContextProvider;
 import org.junit.jupiter.api.TestTemplate;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -72,43 +73,23 @@ public class AndFilterTest2
 //  public static BaseFilterTest2.J5ContextProvider base = new BaseFilterTest2.J5ContextProvider(ROWS);
 
 
-  public void initAndFilterTest(
-      BaseFilterTest2 config
-  )
-  {
+public void initAndFilterTest(
+    BaseFilterTest2 config)
+{
 
-    baseFilterTest = config;
-    }
-
-//  @BeforeEach
-//  public void beforeEach(@TempDir File tempDir) throws Exception {
-//    baseFilterTest.setUp(tempDir);
-//  }
-//
-//  // FIXME
-//  @AfterAll
-//  public static void tearDown() throws Exception
-//  {
-//    BaseFilterTest2.tearDown(AndFilterTest2.class.getName());
-//  }
-//
-
-  @TestTemplate
-  private void sda()
-  {
-    if (true) {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-
-  }
-static class MyJ5ContextProvider extends J5ContextProvider {
-
-  public MyJ5ContextProvider()
-  {
-    super(ROWS);
-  }
-
+  baseFilterTest = config;
 }
+
+  static class MyJ5ContextProvider extends J5ContextProvider
+  {
+    @Override
+    protected BaseFilterTest2 buildBaseFilterTest2(FilterTestConfig fc)
+    {
+      return new BaseFilterTest2(fc, ROWS)
+      {
+      };
+    }
+  }
 
   @TestTemplate
   @ExtendWith(MyJ5ContextProvider.class)
