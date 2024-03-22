@@ -43,9 +43,9 @@ import org.apache.druid.segment.IndexBuilder;
 import org.apache.druid.segment.StorageAdapter;
 import org.apache.druid.segment.filter.cnf.CNFFilterExplosionException;
 import org.apache.druid.segment.index.BitmapColumnIndex;
+import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -168,7 +168,7 @@ public class FilterPartitionTest extends BaseFilterTest
     super(testName, ROWS, indexBuilder, finisher, cnf, optimize);
   }
 
-  @AfterAll
+  @AfterClass
   public static void tearDown() throws Exception
   {
     BaseFilterTest.tearDown(FilterPartitionTest.class.getName());

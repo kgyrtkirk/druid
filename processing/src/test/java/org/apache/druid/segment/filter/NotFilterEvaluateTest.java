@@ -34,8 +34,8 @@ import org.apache.druid.query.filter.NotDimFilter;
 import org.apache.druid.query.filter.SelectorDimFilter;
 import org.apache.druid.segment.IndexBuilder;
 import org.apache.druid.segment.StorageAdapter;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Test;
+import org.junit.AfterClass;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -75,7 +75,7 @@ public class NotFilterEvaluateTest extends BaseFilterTest
     super(testName, ROWS, indexBuilder, finisher, cnf, optimize);
   }
 
-  @AfterAll
+  @AfterClass
   public static void tearDown() throws Exception
   {
     BaseFilterTest.tearDown(NotFilterEvaluateTest.class.getName());

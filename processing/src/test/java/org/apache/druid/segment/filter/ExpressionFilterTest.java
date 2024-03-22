@@ -46,11 +46,11 @@ import org.apache.druid.segment.StorageAdapter;
 import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.segment.incremental.IncrementalIndexSchema;
+import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -126,19 +126,19 @@ public class ExpressionFilterTest extends BaseFilterTest
     );
   }
 
-  @BeforeEach
+  @Before
   public void setup()
   {
     ExpressionProcessing.initializeForStrictBooleansTests(true);
   }
 
-  @AfterEach
+  @After
   public void teardown()
   {
     ExpressionProcessing.initializeForTests();
   }
 
-  @AfterAll
+  @AfterClass
   public static void tearDown() throws Exception
   {
     BaseFilterTest.tearDown(ColumnComparisonFilterTest.class.getName());

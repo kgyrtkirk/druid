@@ -35,9 +35,9 @@ import org.apache.druid.query.lookup.LookupExtractionFn;
 import org.apache.druid.query.lookup.LookupExtractor;
 import org.apache.druid.segment.IndexBuilder;
 import org.apache.druid.segment.StorageAdapter;
+import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -59,7 +59,7 @@ public class SelectorFilterTest extends BaseFilterTest
     super(testName, DEFAULT_ROWS, indexBuilder, finisher, cnf, optimize);
   }
 
-  @AfterAll
+  @AfterClass
   public static void tearDown() throws Exception
   {
     BaseFilterTest.tearDown(SelectorFilterTest.class.getName());

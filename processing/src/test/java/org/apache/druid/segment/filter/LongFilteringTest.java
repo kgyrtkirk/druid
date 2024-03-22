@@ -52,9 +52,9 @@ import org.apache.druid.query.search.ContainsSearchQuerySpec;
 import org.apache.druid.segment.IndexBuilder;
 import org.apache.druid.segment.StorageAdapter;
 import org.apache.druid.segment.incremental.IncrementalIndexSchema;
+import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -117,7 +117,7 @@ public class LongFilteringTest extends BaseFilterTest
     );
   }
 
-  @AfterAll
+  @AfterClass
   public static void tearDown() throws Exception
   {
     BaseFilterTest.tearDown(LongFilteringTest.class.getName());
