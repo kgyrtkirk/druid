@@ -111,8 +111,6 @@ import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
-import org.junit.runners.Parameterized;
-
 import javax.annotation.Nullable;
 import java.io.Closeable;
 import java.io.File;
@@ -128,7 +126,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public abstract class BaseFilterTest extends InitializedNullHandlingTest
+public abstract class BaseFilterTest2 extends InitializedNullHandlingTest
 {
   static final String TIMESTAMP_COLUMN = "timestamp";
 
@@ -422,7 +420,7 @@ public abstract class BaseFilterTest extends InitializedNullHandlingTest
   private static ThreadLocal<Map<String, Map<String, Pair<StorageAdapter, Closeable>>>> adapterCache =
       ThreadLocal.withInitial(HashMap::new);
 
-  public BaseFilterTest(
+  public BaseFilterTest2(
       String testName,
       List<InputRow> rows,
       IndexBuilder indexBuilder,
@@ -442,7 +440,7 @@ public abstract class BaseFilterTest extends InitializedNullHandlingTest
   }
 
   @Before
-  public void setUp() throws Exception
+  public void setUp(File tempDir) throws Exception
   {
     NestedDataModule.registerHandlersAndSerde();
     String className = getClass().getName();
@@ -455,7 +453,7 @@ public abstract class BaseFilterTest extends InitializedNullHandlingTest
     Pair<StorageAdapter, Closeable> pair = adaptersForClass.get(testName);
     if (pair == null) {
       pair = finisher.apply(
-          indexBuilder.tmpDir(temporaryFolder.newFolder()).rows(rows)
+          indexBuilder.tmpDir(tempDir).rows(rows)
       );
       adaptersForClass.put(testName, pair);
     }
@@ -475,12 +473,6 @@ public abstract class BaseFilterTest extends InitializedNullHandlingTest
       }
       adapterCache.get().put(className, null);
     }
-  }
-
-  @Parameterized.Parameters(name = "{0}")
-  public static Collection<Object[]> constructorFeeder()
-  {
-    return makeConstructors();
   }
 
   public static Collection<Object[]> makeConstructors()
@@ -1123,6 +1115,7 @@ public abstract class BaseFilterTest extends InitializedNullHandlingTest
     }
     return values;
   }
+
 
   protected void assertFilterMatches(
       final DimFilter filter,

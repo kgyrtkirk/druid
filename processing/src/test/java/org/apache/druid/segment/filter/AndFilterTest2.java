@@ -32,22 +32,33 @@ import org.apache.druid.data.input.impl.TimestampSpec;
 import org.apache.druid.java.util.common.DateTimes;
 import org.apache.druid.java.util.common.Pair;
 import org.apache.druid.query.filter.AndDimFilter;
+import org.apache.druid.query.filter.DimFilter;
 import org.apache.druid.query.filter.NotDimFilter;
 import org.apache.druid.query.filter.SelectorDimFilter;
 import org.apache.druid.segment.IndexBuilder;
 import org.apache.druid.segment.StorageAdapter;
-import org.junit.AfterClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.TestTemplate;
+import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.Closeable;
+import java.io.File;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-@RunWith(Parameterized.class)
-public class AndFilterTest extends BaseFilterTest
+
+public class AndFilterTest2
 {
+  public static Collection<Object[]> constructorFeeder()
+  {
+    return BaseFilterTest.makeConstructors();
+  }
+
   private static final String TIMESTAMP_COLUMN = "timestamp";
 
   private static final InputRowParser<Map<String, Object>> PARSER = new MapInputRowParser(
@@ -66,7 +77,9 @@ public class AndFilterTest extends BaseFilterTest
       PARSER.parseBatch(ImmutableMap.of("dim0", "5", "dim1", "0")).get(0)
   );
 
-  public AndFilterTest(
+  private BaseFilterTest baseFilterTest;
+
+  public void initAndFilterTest(
       String testName,
       IndexBuilder indexBuilder,
       Function<IndexBuilder, Pair<StorageAdapter, Closeable>> finisher,
@@ -74,18 +87,40 @@ public class AndFilterTest extends BaseFilterTest
       boolean optimize
   )
   {
-    super(testName, ROWS, indexBuilder, finisher, cnf, optimize);
+
+    baseFilterTest = new BaseFilterTest(testName, ROWS, indexBuilder, finisher, cnf, optimize) {
+
+    };
   }
 
-  @AfterClass
+  @BeforeEach
+  public void beforeEach(@TempDir File tempDir) throws Exception {
+    baseFilterTest.setUp(tempDir);
+  }
+
+  @AfterAll
   public static void tearDown() throws Exception
   {
-    BaseFilterTest.tearDown(AndFilterTest.class.getName());
+    BaseFilterTest.tearDown(AndFilterTest2.class.getName());
   }
 
-  @Test
-  public void testAnd()
+
+  @TestTemplate
+  private void sda()
   {
+    if (true) {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+
+  }
+
+
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  @EnumSource
+  public void testAnd(String testName, IndexBuilder indexBuilder, Function<IndexBuilder, Pair<StorageAdapter, Closeable>> finisher, boolean cnf, boolean optimize)
+  {
+    initAndFilterTest(testName, indexBuilder, finisher, cnf, optimize);
     assertFilterMatches(
         new AndDimFilter(ImmutableList.of(
             new SelectorDimFilter("dim0", "0", null),
@@ -130,9 +165,19 @@ public class AndFilterTest extends BaseFilterTest
     );
   }
 
-  @Test
-  public void testNotAnd()
+  protected void assertFilterMatches(
+      final DimFilter filter,
+      final List<String> expectedRows
+  )
   {
+    baseFilterTest.assertFilterMatches(filter, expectedRows);
+  }
+
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void testNotAnd(String testName, IndexBuilder indexBuilder, Function<IndexBuilder, Pair<StorageAdapter, Closeable>> finisher, boolean cnf, boolean optimize)
+  {
+    initAndFilterTest(testName, indexBuilder, finisher, cnf, optimize);
     assertFilterMatches(
         new NotDimFilter(new AndDimFilter(ImmutableList.of(
             new SelectorDimFilter("dim0", "0", null),
@@ -177,9 +222,11 @@ public class AndFilterTest extends BaseFilterTest
     );
   }
 
-  @Test
-  public void test_equals()
+  @MethodSource("constructorFeeder")
+  @ParameterizedTest(name = "{0}")
+  public void test_equals(String testName, IndexBuilder indexBuilder, Function<IndexBuilder, Pair<StorageAdapter, Closeable>> finisher, boolean cnf, boolean optimize)
   {
+    initAndFilterTest(testName, indexBuilder, finisher, cnf, optimize);
     EqualsVerifier.forClass(AndFilter.class).usingGetClass().withNonnullFields("filters").verify();
   }
 }
