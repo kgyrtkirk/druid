@@ -46,10 +46,11 @@ import org.apache.druid.segment.StorageAdapter;
 import org.apache.druid.segment.TestHelper;
 import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.testing.InitializedNullHandlingTest;
-import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Assume;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assumptions;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -125,7 +126,7 @@ public class RangeFilterTests
       super(testName, ROWS, indexBuilder, finisher, cnf, optimize);
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDown() throws Exception
     {
       BaseFilterTest.tearDown(RangeFilterTest.class.getName());
@@ -1016,7 +1017,7 @@ public class RangeFilterTests
       );
 
       // bail out, auto ingests arrays instead of mvds and this virtual column is for mvd stuff
-      Assume.assumeFalse(isAutoSchema());
+      Assumptions.assumeFalse(isAutoSchema());
 
       assertFilterMatchesSkipVectorize(
           new RangeFilter("allow-dim2", ColumnType.STRING, "a", "c", false, false, null),
@@ -1052,7 +1053,7 @@ public class RangeFilterTests
     {
       // only auto schema supports array columns currently, this means the match value will need to be coerceable to
       // the column value type...
-      Assume.assumeTrue(isAutoSchema());
+      Assumptions.assumeTrue(isAutoSchema());
 
       /*  dim0 .. arrayString               arrayLong             arrayDouble
           "0", .. ["a", "b", "c"],          [1L, 2L, 3L],         [1.1, 2.2, 3.3]
@@ -1405,7 +1406,7 @@ public class RangeFilterTests
     {
       // only auto schema supports array columns currently, this means the match value will need to be coerceable to
       // the column value type...
-      Assume.assumeTrue(isAutoSchema());
+      Assumptions.assumeTrue(isAutoSchema());
 
       /*  dim0 .. arrayLong
           "0", .. [1L, 2L, 3L],
@@ -1592,7 +1593,7 @@ public class RangeFilterTests
       "6", .. null
       "7", .. null
        */
-      Assume.assumeTrue(isAutoSchema());
+      Assumptions.assumeTrue(isAutoSchema());
       assertFilterMatches(
           new RangeFilter(
               "variant",
@@ -1652,7 +1653,7 @@ public class RangeFilterTests
     public void testNested()
     {
       // nested column mirrors the top level columns, so these cases are copied from other tests
-      Assume.assumeTrue(canTestArrayColumns());
+      Assumptions.assumeTrue(canTestArrayColumns());
       assertFilterMatches(
           new RangeFilter("nested.d0", ColumnType.DOUBLE, 120.0, 120.03, false, false, null),
           ImmutableList.of("3")
@@ -1839,6 +1840,7 @@ public class RangeFilterTests
     }
   }
 
+  @Nested
   public static class RangeFilterNonParameterizedTests extends InitializedNullHandlingTest
   {
     @Test

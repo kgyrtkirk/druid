@@ -34,9 +34,10 @@ import org.apache.druid.query.filter.NotDimFilter;
 import org.apache.druid.query.filter.NullFilter;
 import org.apache.druid.segment.IndexBuilder;
 import org.apache.druid.segment.StorageAdapter;
-import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -46,8 +47,9 @@ import java.util.Collections;
 
 public class NullFilterTests
 {
+  @Nested
   @RunWith(Parameterized.class)
-  public static class NullFilterTest extends BaseFilterTest
+  public class NullFilterTest extends BaseFilterTest
   {
     public NullFilterTest(
         String testName,
@@ -60,7 +62,7 @@ public class NullFilterTests
       super(testName, DEFAULT_ROWS, indexBuilder, finisher, cnf, optimize);
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDown() throws Exception
     {
       BaseFilterTest.tearDown(NullFilterTest.class.getName());
@@ -367,7 +369,8 @@ public class NullFilterTests
     }
   }
 
-  public static class NullFilterNonParameterizedTest
+  @Nested
+  public class NullFilterNonParameterizedTest
   {
     @Test
     public void testGetDimensionRangeSet()

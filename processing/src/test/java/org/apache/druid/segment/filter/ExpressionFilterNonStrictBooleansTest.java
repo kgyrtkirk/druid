@@ -27,8 +27,8 @@ import org.apache.druid.math.expr.ExpressionProcessing;
 import org.apache.druid.query.filter.NotDimFilter;
 import org.apache.druid.segment.IndexBuilder;
 import org.apache.druid.segment.StorageAdapter;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -48,7 +48,7 @@ public class ExpressionFilterNonStrictBooleansTest extends ExpressionFilterTest
     super(testName, indexBuilder, finisher, cnf, optimize);
   }
 
-  @Before
+  @BeforeEach
   @Override
   public void setup()
   {
