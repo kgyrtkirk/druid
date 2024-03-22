@@ -440,7 +440,7 @@ public abstract class BaseFilterTest extends InitializedNullHandlingTest
   }
 
   @Before
-  public void setUp() throws Exception
+  public void setUp(File tempDir) throws Exception
   {
     NestedDataModule.registerHandlersAndSerde();
     String className = getClass().getName();
@@ -453,7 +453,7 @@ public abstract class BaseFilterTest extends InitializedNullHandlingTest
     Pair<StorageAdapter, Closeable> pair = adaptersForClass.get(testName);
     if (pair == null) {
       pair = finisher.apply(
-          indexBuilder.tmpDir(temporaryFolder.newFolder()).rows(rows)
+          indexBuilder.tmpDir(tempDir).rows(rows)
       );
       adaptersForClass.put(testName, pair);
     }
