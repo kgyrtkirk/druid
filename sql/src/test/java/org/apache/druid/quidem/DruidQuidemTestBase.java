@@ -26,7 +26,6 @@ import org.apache.calcite.util.Closer;
 import org.apache.calcite.util.Util;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
-import org.apache.druid.java.util.common.logger.Logger;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -71,8 +70,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public abstract class DruidQuidemTestBase
 {
-  private static final Logger LOG = new Logger(DruidQuidemTestBase.class);
-
   private static final String IQ_SUFFIX = ".iq";
   private static final String OVERWRITE_PROPERTY = "quidem.overwrite";
 

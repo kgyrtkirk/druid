@@ -20,27 +20,23 @@
 package org.apache.druid.quidem;
 
 import net.hydromatic.quidem.Quidem.ConnectionFactory;
-import org.apache.druid.sql.avatica.DruidAvaticaConnectionRule;
-
 import java.sql.Connection;
+import java.sql.DriverManager;
 
 public class DruidQuidemConnectionFactory implements ConnectionFactory
 {
-  DruidAvaticaConnectionRule avaticaDriver = new DruidAvaticaConnectionRule();
-
   public DruidQuidemConnectionFactory() throws Exception
   {
-    avaticaDriver.beforeAll(null);
-    avaticaDriver.beforeEach(null);
+    // ensure driver loaded
+    new DruidAvaticaTestDriver();
   }
 
   @Override
   public Connection connect(String name, boolean reference) throws Exception
   {
     if (name.equals("druid")) {
-      return avaticaDriver.getConnection();
+      return DriverManager.getConnection(DruidAvaticaTestDriver.DEFAULT_URI);
     }
     return null;
   }
-
 }
