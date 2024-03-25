@@ -110,7 +110,6 @@ import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.jupiter.api.extension.AfterTestExecutionCallback;
 import org.junit.jupiter.api.extension.BeforeTestExecutionCallback;
 import org.junit.jupiter.api.extension.Extension;
@@ -120,7 +119,6 @@ import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.TestTemplateInvocationContext;
 import org.junit.jupiter.api.extension.TestTemplateInvocationContextProvider;
 import org.junit.jupiter.api.extension.support.TypeBasedParameterResolver;
-import org.junit.rules.TemporaryFolder;
 import javax.annotation.Nullable;
 import java.io.Closeable;
 import java.io.File;
@@ -140,7 +138,7 @@ import java.util.stream.Stream.Builder;
 
 import static org.junit.Assert.assertTrue;
 
-public abstract class BaseFilterTest2 extends InitializedNullHandlingTest implements TestTemplateInvocationContext
+public abstract class BaseFilterTest2 extends InitializedNullHandlingTest implements TestTemplateInvocationContext,IBaseFilterTest2
 {
 
   @Override
@@ -454,10 +452,6 @@ public abstract class BaseFilterTest2 extends InitializedNullHandlingTest implem
     return parser.parseBatch(mapRow).get(0);
   }
 
-  @Rule
-  public TemporaryFolder temporaryFolder = new TemporaryFolder();
-
-
   protected StorageAdapter adapter;
 
   // JUnit creates a new test instance for every test method call.
@@ -514,6 +508,12 @@ public abstract class BaseFilterTest2 extends InitializedNullHandlingTest implem
   }
 
   public void afterEach(ExtensionContext extensionContext) throws Exception {
+//    afterAll1(extensionContext);
+  }
+
+
+  public void afterAll1(ExtensionContext extensionContext) throws Exception
+  {
     tearDown(extensionContext.getTestClass().get().getName());
   }
 
@@ -1227,7 +1227,7 @@ public abstract class BaseFilterTest2 extends InitializedNullHandlingTest implem
   }
 
 
-  protected void assertFilterMatches(
+  public void assertFilterMatches(
       final DimFilter filter,
       final List<String> expectedRows
   )

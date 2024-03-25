@@ -20,28 +20,13 @@
 package org.apache.druid.segment.filter;
 
 import org.apache.druid.query.filter.DimFilter;
-import org.apache.druid.segment.filter.BaseFilterTest2.SetBase;
 
 import java.util.List;
 
-public class FilterCheckBase implements SetBase,IBaseFilterTest2
+/**
+ * temp interface
+ */
+public interface IBaseFilterTest2
 {
-
-  private IBaseFilterTest2 baseFilterTest;
-
-  @Override
-  public void setBase(BaseFilterTest2 base)
-  {
-    baseFilterTest=base;
-  }
-
-  @Override
-  public void assertFilterMatches(
-      final DimFilter filter,
-      final List<String> expectedRows
-  )
-  {
-    baseFilterTest.assertFilterMatches(filter, expectedRows);
-  }
-
+  void assertFilterMatches(DimFilter filter, List<String> expectedRows);
 }

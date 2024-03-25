@@ -32,23 +32,19 @@ import org.apache.druid.java.util.common.DateTimes;
 import org.apache.druid.query.filter.AndDimFilter;
 import org.apache.druid.query.filter.NotDimFilter;
 import org.apache.druid.query.filter.SelectorDimFilter;
-import org.apache.druid.segment.filter.BaseFilterTest2.FilterTestConfig;
 import org.apache.druid.segment.filter.BaseFilterTest2.AbstractFilterTestContextProvider;
+import org.apache.druid.segment.filter.BaseFilterTest2.FilterTestConfig;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestTemplate;
 import org.junit.jupiter.api.extension.ExtendWith;
-import java.util.Collection;
+
 import java.util.List;
 import java.util.Map;
 
-
 public class AndFilterTest extends FilterCheckBase
 {
-  public static Collection<Object[]> constructorFeeder()
-  {
-    return BaseFilterTest2.makeConstructors();
-  }
 
+  // I believe these should be moved to somewhere else
   static class SomeRowsContextProvider extends AbstractFilterTestContextProvider
   {
     private static final String TIMESTAMP_COLUMN = "timestamp";
