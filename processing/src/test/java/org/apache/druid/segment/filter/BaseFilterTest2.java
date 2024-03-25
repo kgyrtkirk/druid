@@ -473,7 +473,7 @@ public abstract class BaseFilterTest2 extends InitializedNullHandlingTest implem
   }
 
   static interface SetBase {
-    void setBase(BaseFilterTest2 base);
+    void setBase(IBaseFilterTest2 base);
   }
 
   void beforeEach(ExtensionContext context) throws Exception

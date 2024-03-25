@@ -44,7 +44,7 @@ import java.util.Map;
 public class AndFilterTest extends FilterCheckBase
 {
 
-  // I believe these should be moved to somewhere else
+  // I believe these should be moved to somewhere else; possibly inside FilterCheckBase
   static class SomeRowsContextProvider extends AbstractFilterTestContextProvider
   {
     private static final String TIMESTAMP_COLUMN = "timestamp";
