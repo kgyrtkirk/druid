@@ -32,6 +32,7 @@ import org.apache.calcite.sql.SqlExplainFormat;
 import org.apache.calcite.sql.SqlExplainLevel;
 import org.apache.druid.jackson.DefaultObjectMapper;
 import org.apache.druid.query.Query;
+import org.apache.druid.segment.TestHelper;
 import org.apache.druid.sql.calcite.BaseCalciteQueryTest;
 import org.apache.druid.sql.calcite.util.QueryLogHook;
 
@@ -80,36 +81,41 @@ public class DruidQuidemCommandHandler implements CommandHandler
     public void execute(Context x, boolean execute) throws Exception
     {
       if (execute) {
-        final SqlCommand sqlCommand = x.previousSqlCommand();
+        try {
+          final SqlCommand sqlCommand = x.previousSqlCommand();
 
-        QueryLogHook qlh = new QueryLogHook(new DefaultObjectMapper());
-        qlh.logQueriesForGlobal(
-            () -> {
-              try (
-                  final Statement statement = x.connection().createStatement();
-                  final ResultSet resultSet = statement.executeQuery(sqlCommand.sql);) {
-                // throw away all results
-                while (resultSet.next()) {
-                  ;
+          QueryLogHook qlh = new QueryLogHook(new DefaultObjectMapper());
+          qlh.logQueriesForGlobal(
+              () -> {
+                try (
+                    final Statement statement = x.connection().createStatement();
+                    final ResultSet resultSet = statement.executeQuery(sqlCommand.sql);) {
+                  // throw away all results
+                  while (resultSet.next()) {
+                    ;
+                  }
+                }
+                catch (Exception e) {
+                  throw new RuntimeException(e);
                 }
               }
-              catch (Exception e) {
-                throw new RuntimeException(e);
-              }
-            }
-        );
-        List<Query<?>> queries = qlh.getRecordedQueries();
+          );
+          List<Query<?>> queries = qlh.getRecordedQueries();
 
-        ObjectMapper objectMapper = new DefaultObjectMapper();
-        queries = queries
-            .stream()
-            .map(q -> BaseCalciteQueryTest.recursivelyClearContext(q, objectMapper))
-            .collect(Collectors.toList());
+          ObjectMapper objectMapper = TestHelper.JSON_MAPPER;
+          queries = queries
+              .stream()
+              .map(q -> BaseCalciteQueryTest.recursivelyClearContext(q, objectMapper))
+              .collect(Collectors.toList());
 
-        for (Query<?> query : queries) {
-          String str = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(query);
-          x.echo(ImmutableList.of(str));
+          for (Query<?> query : queries) {
+            String str = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(query);
+            x.echo(ImmutableList.of(str));
 
+          }
+        }
+        catch (Exception e) {
+          throw new Error(e);
         }
       } else {
         x.echo(content);
@@ -167,6 +173,7 @@ public class DruidQuidemCommandHandler implements CommandHandler
       x.echo(lines);
     }
   }
+
   /** Command that prints the plan for the current query. */
   static class ConvertedPlanCommand extends AbstractCommand
   {
