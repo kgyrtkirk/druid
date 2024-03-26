@@ -35,11 +35,8 @@ import java.io.IOException;
 
 public class QTestCase
 {
-
   private StringBuffer sb;
-  private String testName;
   private DruidIQTestInfo testInfo;
-  private boolean overwrite=true;
 
   public QTestCase(DruidIQTestInfo testInfo)
   {
@@ -64,7 +61,7 @@ public class QTestCase
       @Override
       public void run()
       {
-        if (overwrite) {
+        if (DruidQuidemRunner.isOverwrite()) {
           writeCaseTo(testInfo.getIQFile());
         } else {
           isValidTestCaseFile(testInfo.getIQFile());
@@ -72,7 +69,7 @@ public class QTestCase
 
         try {
           DruidQuidemRunner rr;
-          rr = new DruidQuidemTestBase.DruidQuidemRunner(overwrite);
+          rr = new DruidQuidemTestBase.DruidQuidemRunner();
           rr.run(testInfo.getIQFile());
         }
         catch (Exception e) {
@@ -84,13 +81,13 @@ public class QTestCase
 
   protected void isValidTestCaseFile(File iqFile)
   {
-    if(iqFile.exists()) {
-      throw new IllegalStateException("testcase doesn't exists; run with (-Dquidem.overwrite) : "+iqFile);
+    if (!iqFile.exists()) {
+      throw new IllegalStateException("testcase doesn't exists; run with (-Dquidem.overwrite) : " + iqFile);
     }
     try {
-      String header= makeHeader();
-      String testCaseFirstLine = Files.asCharSource(iqFile,Charsets.UTF_8).readFirstLine();
-      if(!header.equals(testCaseFirstLine)) {
+      String header = makeHeader();
+      String testCaseFirstLine = Files.asCharSource(iqFile, Charsets.UTF_8).readFirstLine();
+      if (!header.equals(testCaseFirstLine)) {
         throw new IllegalStateException(
             "backing quidem testcase doesn't match test - run with (-Dquidem.overwrite) : " + iqFile
         );

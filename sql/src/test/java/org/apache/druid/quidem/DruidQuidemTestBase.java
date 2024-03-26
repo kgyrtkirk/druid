@@ -74,7 +74,6 @@ public abstract class DruidQuidemTestBase
   private static final String OVERWRITE_PROPERTY = "quidem.overwrite";
 
   private static final String PROPERTY_FILTER = "quidem.filter";
-  private boolean overwrite;
 
   private FileFilter filter = TrueFileFilter.INSTANCE;
 
@@ -82,7 +81,6 @@ public abstract class DruidQuidemTestBase
 
   public DruidQuidemTestBase() throws Exception
   {
-    overwrite = Boolean.valueOf(System.getProperty(OVERWRITE_PROPERTY, "false"));
     String filterStr = System.getProperty(PROPERTY_FILTER, null);
     if (filterStr != null) {
       if (!filterStr.endsWith("*") && !filterStr.endsWith(IQ_SUFFIX)) {
@@ -90,7 +88,7 @@ public abstract class DruidQuidemTestBase
       }
       filter = new WildcardFileFilter(filterStr);
     }
-    druidQuidemRunner = new DruidQuidemRunner(overwrite);
+    druidQuidemRunner = new DruidQuidemRunner();
   }
 
   /** Creates a command handler. */
@@ -111,12 +109,10 @@ public abstract class DruidQuidemTestBase
 
   public static class DruidQuidemRunner
   {
-    private boolean overwrite;
     private ConfigBuilder configBuilder;
 
-    public DruidQuidemRunner(boolean overwrite) throws Exception
+    public DruidQuidemRunner() throws Exception
     {
-      this.overwrite = overwrite;
       configBuilder = Quidem.configBuilder()
           .withConnectionFactory(new DruidQuidemConnectionFactory())
           .withCommandHandler(new DruidQuidemCommandHandler());
@@ -143,12 +139,17 @@ public abstract class DruidQuidemTestBase
       final String diff = DiffTestCase.diff(inFile, outFile);
 
       if (!diff.isEmpty()) {
-        if (overwrite) {
+        if (isOverwrite()) {
           Files.copy(outFile, inFile);
         } else {
           fail("Files differ: " + outFile + " " + inFile + "\n" + diff);
         }
       }
+    }
+
+    public static boolean isOverwrite()
+    {
+      return Boolean.valueOf(System.getProperty(OVERWRITE_PROPERTY, "false"));
     }
   }
 
