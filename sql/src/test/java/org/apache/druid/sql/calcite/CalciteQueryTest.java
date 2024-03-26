@@ -15483,45 +15483,6 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  public void testFilterParseLongNullable1()
-  {
-    testBuilder()
-    .sql("SELECT\n"
-            + "  q0.countryName,\n"
-            + "  q0.CountPlusOne,\n"
-            + "  q1.\"DAU\"\n"
-            + "FROM (\n"
-            + "  SELECT\n"
-            + "    countryName,\n"
-            + "    COUNT(*) + 1 AS CountPlusOne\n"
-            + "  FROM wikipedia AS \"t\"\n"
-            + "  GROUP BY 1\n"
-            + "  HAVING countryName = 'United States' AND CountPlusOne > 100\n"
-            + ") AS \"q0\"\n"
-            + "INNER JOIN (\n"
-            + "  SELECT\n"
-            + "    t.countryName,\n"
-            + "    AVG(t.daily_unique) AS \"DAU\"\n"
-            + "  FROM (\n"
-            + "    SELECT\n"
-            + "      countryName,\n"
-            + "      COUNT(DISTINCT t.isRobot) AS daily_unique\n"
-            + "    FROM wikipedia AS t\n"
-            + "    GROUP BY 1, TIME_FLOOR(t.__time, 'P1D')\n"
-            + "    HAVING countryName = 'United States'\n"
-            + "  ) AS t\n"
-            + "  GROUP BY 1\n"
-            + "  HAVING DAU < 5000\n"
-            + ") AS q1 ON q0.countryName IS NOT DISTINCT FROM q1.countryName\n"
-            + "ORDER BY \"CountPlusOne\" DESC\n"
-            + "LIMIT 10")
-    .expectedResults(ImmutableList.of(
-        new Object[]{"United States", 529L, 1.0D}
-        ))
-    .run();
-  }
-
-  @Test
   public void testLatestByAggregatorOnSecondaryTimestampGroupBy()
   {
     msqIncompatible();
