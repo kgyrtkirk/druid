@@ -31,6 +31,6 @@ public class SqlQuidemTest extends DruidQuidemTestBase
   @Override
   protected File getTestRoot()
   {
-    return ProjectPathUtils.getPathFromProjectRoot("sql/src/test/quidem");
+    return ProjectPathUtils.getPathFromProjectRoot("sql/src/test/quidem/" + getClass().getName());
   }
 }

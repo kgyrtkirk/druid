@@ -26,6 +26,7 @@ import org.apache.calcite.util.Closer;
 import org.apache.calcite.util.Util;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
+import org.apache.druid.java.util.common.StringUtils;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -161,7 +162,12 @@ public abstract class DruidQuidemTestBase
   protected final List<String> getFileNames() throws IOException
   {
     List<String> ret = new ArrayList<String>();
-    for (File f : getTestRoot().listFiles(this::isTestIncluded)) {
+
+    File testRoot = getTestRoot();
+    if (!testRoot.exists()) {
+      throw new FileNotFoundException(StringUtils.format("testRoot [%s] doesn't exists!", testRoot));
+    }
+    for (File f : testRoot.listFiles(this::isTestIncluded)) {
       ret.add(f.getName());
     }
     Collections.sort(ret);

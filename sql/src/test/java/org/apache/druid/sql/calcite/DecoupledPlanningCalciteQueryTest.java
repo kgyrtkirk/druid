@@ -32,6 +32,6 @@ public class DecoupledPlanningCalciteQueryTest extends CalciteQueryTest
   @Override
   protected QueryTestBuilder testBuilder()
   {
-    return de.get();
+    return de.testBuilder();
   }
 }

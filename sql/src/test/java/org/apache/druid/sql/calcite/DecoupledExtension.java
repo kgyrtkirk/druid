@@ -60,7 +60,7 @@ public class DecoupledExtension implements BeforeEachCallback
       .put(QueryContexts.ENABLE_DEBUG, true)
       .build();
 
-  public QueryTestBuilder get()
+  public QueryTestBuilder testBuilder()
   {
     DecoupledTestConfig decTestConfig = BaseCalciteQueryTest.queryFrameworkRule.getAnnotation(DecoupledTestConfig.class);
 
