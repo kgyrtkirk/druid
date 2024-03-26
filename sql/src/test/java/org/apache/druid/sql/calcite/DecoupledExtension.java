@@ -24,22 +24,33 @@ import org.apache.druid.query.QueryContexts;
 import org.apache.druid.quidem.DruidQTestInfo;
 import org.apache.druid.quidem.ProjectPathUtils;
 import org.apache.druid.server.security.AuthConfig;
-import org.apache.druid.sql.calcite.NotYetSupported.NotYetSupportedProcessor;
+import org.apache.druid.sql.calcite.BaseCalciteQueryTest.CalciteTestConfig;
 import org.apache.druid.sql.calcite.planner.PlannerConfig;
 import org.apache.druid.sql.calcite.util.SqlTestFramework;
 import org.apache.druid.sql.calcite.util.SqlTestFramework.PlannerComponentSupplier;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
 
 import java.io.File;
 
-@ExtendWith(NotYetSupportedProcessor.class)
-public class DecoupledPlanningCalciteQueryTest2 extends CalciteQueryTest
+public class DecoupledExtension implements BeforeEachCallback
 {
+
+  private BaseCalciteQueryTest baseTest;
+
+
+  public DecoupledExtension(BaseCalciteQueryTest baseTest)
+  {
+    this.baseTest = baseTest;
+  }
+
   private File qCaseDir;
 
-  public DecoupledPlanningCalciteQueryTest2()
+  @Override
+  public void beforeEach(ExtensionContext context) throws Exception
   {
-    qCaseDir = ProjectPathUtils.getPathFromProjectRoot("sql/src/test/quidem/" + getClass().getName());
+    Class<?> testClass = context.getTestClass().get();
+    qCaseDir = ProjectPathUtils.getPathFromProjectRoot("sql/src/test/quidem/" + testClass.getName());
   }
 
   private static final ImmutableMap<String, Object> CONTEXT_OVERRIDES =
@@ -49,30 +60,28 @@ public class DecoupledPlanningCalciteQueryTest2 extends CalciteQueryTest
       .put(QueryContexts.ENABLE_DEBUG, true)
       .build();
 
-  @Override
-  protected QueryTestBuilder testBuilder()
+  public QueryTestBuilder get()
   {
+    DecoupledTestConfig decTestConfig = BaseCalciteQueryTest.queryFrameworkRule.getAnnotation(DecoupledTestConfig.class);
 
-    DecoupledTestConfig decTestConfig = queryFrameworkRule.getAnnotation(DecoupledTestConfig.class);
-
-    PlannerComponentSupplier componentSupplier = this;
+    PlannerComponentSupplier componentSupplier = baseTest;
 
     boolean runQuidem = decTestConfig != null && decTestConfig.quidem();
-    CalciteTestConfig testConfig = new CalciteTestConfig(CONTEXT_OVERRIDES)
+    CalciteTestConfig testConfig = baseTest.new CalciteTestConfig(CONTEXT_OVERRIDES)
     {
 
       @Override
       public SqlTestFramework.PlannerFixture plannerFixture(PlannerConfig plannerConfig, AuthConfig authConfig)
       {
         plannerConfig = plannerConfig.withOverrides(CONTEXT_OVERRIDES);
-        return queryFramework().plannerFixture(componentSupplier, plannerConfig, authConfig);
+        return baseTest.queryFramework().plannerFixture(componentSupplier, plannerConfig, authConfig);
       }
 
       @Override
       public DruidQTestInfo getQTestInfo()
       {
         if(runQuidem) {
-          return new DruidQTestInfo(qCaseDir, queryFrameworkRule.testName());
+          return new DruidQTestInfo(qCaseDir, BaseCalciteQueryTest.queryFrameworkRule.testName());
         } else {
           return null;
         }
@@ -80,8 +89,8 @@ public class DecoupledPlanningCalciteQueryTest2 extends CalciteQueryTest
     };
 
     QueryTestBuilder builder = new QueryTestBuilder(testConfig)
-        .cannotVectorize(cannotVectorize)
-        .skipVectorize(skipVectorize);
+        .cannotVectorize(baseTest.cannotVectorize)
+        .skipVectorize(baseTest.skipVectorize);
 
     if (decTestConfig != null && decTestConfig.nativeQueryIgnore().isPresent()) {
       builder.verifyNativeQueries(x -> false);
