@@ -23,7 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
 import org.apache.druid.query.Query;
 import org.apache.druid.query.QueryContexts;
-import org.apache.druid.quidem.DruidIQTestInfo;
+import org.apache.druid.quidem.DruidQTestInfo;
 import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.server.security.AuthConfig;
 import org.apache.druid.server.security.AuthenticationResult;
@@ -77,11 +77,10 @@ public class QueryTestBuilder
 
     Map<String, Object> baseQueryContext();
 
-    default DruidIQTestInfo getIQTestInfo()
+    default DruidQTestInfo getQTestInfo()
     {
       return null;
     }
-
   }
 
   protected final QueryTestConfig config;

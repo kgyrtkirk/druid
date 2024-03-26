@@ -24,7 +24,7 @@ import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
 import org.apache.calcite.util.Util;
-import org.apache.druid.quidem.DruidIQTestInfo;
+import org.apache.druid.quidem.DruidQTestInfo;
 import org.apache.druid.quidem.DruidQuidemTestBase;
 import org.apache.druid.quidem.DruidQuidemTestBase.DruidQuidemRunner;
 import org.apache.druid.sql.calcite.QueryTestRunner.QueryRunStep;
@@ -36,9 +36,9 @@ import java.io.IOException;
 public class QTestCase
 {
   private StringBuffer sb;
-  private DruidIQTestInfo testInfo;
+  private DruidQTestInfo testInfo;
 
-  public QTestCase(DruidIQTestInfo testInfo)
+  public QTestCase(DruidQTestInfo testInfo)
   {
     this.testInfo = testInfo;
     sb = new StringBuffer();

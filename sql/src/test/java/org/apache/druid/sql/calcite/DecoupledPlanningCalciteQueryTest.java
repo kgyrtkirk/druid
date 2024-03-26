@@ -21,7 +21,7 @@ package org.apache.druid.sql.calcite;
 
 import com.google.common.collect.ImmutableMap;
 import org.apache.druid.query.QueryContexts;
-import org.apache.druid.quidem.DruidIQTestInfo;
+import org.apache.druid.quidem.DruidQTestInfo;
 import org.apache.druid.quidem.ProjectPathUtils;
 import org.apache.druid.server.security.AuthConfig;
 import org.apache.druid.sql.calcite.NotYetSupported.NotYetSupportedProcessor;
@@ -35,11 +35,11 @@ import java.io.File;
 @ExtendWith(NotYetSupportedProcessor.class)
 public class DecoupledPlanningCalciteQueryTest extends CalciteQueryTest
 {
-  private File iqCaseDir;
+  private File qCaseDir;
 
   public DecoupledPlanningCalciteQueryTest()
   {
-    iqCaseDir = ProjectPathUtils.getPathFromProjectRoot("sql/src/test/quidem/" + getClass().getName());
+    qCaseDir = ProjectPathUtils.getPathFromProjectRoot("sql/src/test/quidem/" + getClass().getName());
   }
 
   private static final ImmutableMap<String, Object> CONTEXT_OVERRIDES =
@@ -68,30 +68,22 @@ public class DecoupledPlanningCalciteQueryTest extends CalciteQueryTest
       }
 
       @Override
-      public DruidIQTestInfo getIQTestInfo()
+      public DruidQTestInfo getQTestInfo()
       {
         if(runQuidem) {
-          return new DruidIQTestInfo(iqCaseDir, queryFrameworkRule.testName());
+          return new DruidQTestInfo(qCaseDir, queryFrameworkRule.testName());
         } else {
           return null;
         }
       }
-
     };
 
     QueryTestBuilder builder = new QueryTestBuilder(testConfig)
         .cannotVectorize(cannotVectorize)
         .skipVectorize(skipVectorize);
 
-
-
-    if (decTestConfig != null) {
-      if (decTestConfig.nativeQueryIgnore().isPresent()) {
-        builder.verifyNativeQueries(x -> false);
-      }
-      if(decTestConfig.quidem()) {
-
-      }
+    if (decTestConfig != null && decTestConfig.nativeQueryIgnore().isPresent()) {
+      builder.verifyNativeQueries(x -> false);
     }
 
     return builder;

@@ -21,12 +21,12 @@ package org.apache.druid.quidem;
 
 import java.io.File;
 
-public class DruidIQTestInfo
+public class DruidQTestInfo
 {
-  public final  File caseDir;
+  public final File caseDir;
   public final String testName;
 
-  public DruidIQTestInfo(File caseDir, String testName)
+  public DruidQTestInfo(File caseDir, String testName)
   {
     this.caseDir = caseDir;
     this.testName = testName;

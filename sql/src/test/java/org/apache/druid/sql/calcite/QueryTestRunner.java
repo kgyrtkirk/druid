@@ -33,7 +33,7 @@ import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.java.util.common.guava.Sequence;
 import org.apache.druid.query.Query;
 import org.apache.druid.query.QueryContexts;
-import org.apache.druid.quidem.DruidIQTestInfo;
+import org.apache.druid.quidem.DruidQTestInfo;
 import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.server.security.ResourceAction;
 import org.apache.druid.sql.DirectStatement;
@@ -636,7 +636,7 @@ public class QueryTestRunner
   public QueryTestRunner(QueryTestBuilder builder)
   {
     QueryTestConfig config = builder.config;
-    DruidIQTestInfo iqTestInfo = config.getIQTestInfo();
+    DruidQTestInfo iqTestInfo = config.getQTestInfo();
     if (iqTestInfo != null) {
       QTestCase qt = new QTestCase(iqTestInfo);
       Map<String, Object> queryContext = builder.getQueryContext();
