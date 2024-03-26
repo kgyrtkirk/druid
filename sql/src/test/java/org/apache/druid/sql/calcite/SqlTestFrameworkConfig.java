@@ -113,6 +113,11 @@ public @interface SqlTestFrameworkConfig
       return method.getAnnotation(annotationType);
     }
 
+    public String testName()
+    {
+      return method.getClass().getSimpleName() + "_" + method.getName();
+    }
+
     private ConfigurationInstance getConfigurationInstance()
     {
       return configMap.computeIfAbsent(config, this::buildConfiguration);

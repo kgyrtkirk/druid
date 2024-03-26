@@ -41,7 +41,11 @@ public class DecoupledPlanningCalciteQueryTest extends CalciteQueryTest
   @Override
   protected QueryTestBuilder testBuilder()
   {
+
+    DecoupledTestConfig decTestConfig = queryFrameworkRule.getAnnotation(DecoupledTestConfig.class);
+
     PlannerComponentSupplier componentSupplier = this;
+    boolean runQuidem = decTestConfig != null && decTestConfig.quidem();
     CalciteTestConfig testConfig = new CalciteTestConfig(CONTEXT_OVERRIDES)
     {
       @Override
@@ -50,16 +54,33 @@ public class DecoupledPlanningCalciteQueryTest extends CalciteQueryTest
         plannerConfig = plannerConfig.withOverrides(CONTEXT_OVERRIDES);
         return queryFramework().plannerFixture(componentSupplier, plannerConfig, authConfig);
       }
+
+      @Override
+      public boolean runAsQuidem()
+      {
+        return runQuidem;
+      }
+
+      @Override
+      public String testName() {
+       return queryFrameworkRule.testName();
+      }
+
     };
 
     QueryTestBuilder builder = new QueryTestBuilder(testConfig)
         .cannotVectorize(cannotVectorize)
         .skipVectorize(skipVectorize);
 
-    DecoupledTestConfig decTestConfig = queryFrameworkRule.getAnnotation(DecoupledTestConfig.class);
 
-    if (decTestConfig != null && decTestConfig.nativeQueryIgnore().isPresent()) {
-      builder.verifyNativeQueries(x -> false);
+
+    if (decTestConfig != null) {
+      if (decTestConfig.nativeQueryIgnore().isPresent()) {
+        builder.verifyNativeQueries(x -> false);
+      }
+      if(decTestConfig.quidem()) {
+
+      }
     }
 
     return builder;

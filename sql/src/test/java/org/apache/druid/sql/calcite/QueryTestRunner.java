@@ -55,6 +55,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -634,6 +635,26 @@ public class QueryTestRunner
   public QueryTestRunner(QueryTestBuilder builder)
   {
     QueryTestConfig config = builder.config;
+    if (config.runAsQuidem()) {
+      QTestCase qt = new QTestCase(config.testName());
+      Map<String, Object> queryContext = builder.getQueryContext();
+      for (Entry<String, Object> entry : queryContext.entrySet()) {
+        qt.println(String.format("!set %s %s", entry.getKey(), entry.getValue()));
+      }
+      qt.println(builder.sql);
+      if (builder.expectedResults != null) {
+        qt.println("!ok");
+      }
+      if (builder.expectedQueries != null) {
+        qt.println("!nativePlan");
+      }
+      if (builder.expectedLogicalPlan != null) {
+        qt.println("!logicalPlan");
+      }
+      qt.close();
+      runSteps.add(qt.tuRunner());
+      return;
+    }
     if (builder.expectedResultsVerifier == null && builder.expectedResults != null) {
       builder.expectedResultsVerifier = config.defaultResultsVerifier(
           builder.expectedResults,

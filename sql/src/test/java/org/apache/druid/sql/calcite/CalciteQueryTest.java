@@ -5534,6 +5534,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @DecoupledTestConfig(quidem = true)
   @Test
   public void testNotInOrIsNullFilter()
   {

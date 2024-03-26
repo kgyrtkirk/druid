@@ -75,6 +75,16 @@ public class QueryTestBuilder
     boolean isRunningMSQ();
 
     Map<String, Object> baseQueryContext();
+
+    default boolean runAsQuidem()
+    {
+      return false;
+    }
+
+    default String testName()
+    {
+      return null;
+    }
   }
 
   protected final QueryTestConfig config;
