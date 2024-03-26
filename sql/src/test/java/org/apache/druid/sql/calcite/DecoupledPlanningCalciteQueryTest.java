@@ -21,6 +21,8 @@ package org.apache.druid.sql.calcite;
 
 import com.google.common.collect.ImmutableMap;
 import org.apache.druid.query.QueryContexts;
+import org.apache.druid.quidem.DruidIQTestInfo;
+import org.apache.druid.quidem.ProjectPathUtils;
 import org.apache.druid.server.security.AuthConfig;
 import org.apache.druid.sql.calcite.NotYetSupported.NotYetSupportedProcessor;
 import org.apache.druid.sql.calcite.planner.PlannerConfig;
@@ -28,9 +30,18 @@ import org.apache.druid.sql.calcite.util.SqlTestFramework;
 import org.apache.druid.sql.calcite.util.SqlTestFramework.PlannerComponentSupplier;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import java.io.File;
+
 @ExtendWith(NotYetSupportedProcessor.class)
 public class DecoupledPlanningCalciteQueryTest extends CalciteQueryTest
 {
+  private File iqCaseDir;
+
+  public DecoupledPlanningCalciteQueryTest()
+  {
+    iqCaseDir = ProjectPathUtils.getPathFromProjectRoot("sql/src/test/quidem/" + getClass().getName());
+  }
+
   private static final ImmutableMap<String, Object> CONTEXT_OVERRIDES =
       ImmutableMap.<String, Object>builder()
       .putAll(BaseCalciteQueryTest.QUERY_CONTEXT_DEFAULT)
@@ -48,6 +59,7 @@ public class DecoupledPlanningCalciteQueryTest extends CalciteQueryTest
     boolean runQuidem = decTestConfig != null && decTestConfig.quidem();
     CalciteTestConfig testConfig = new CalciteTestConfig(CONTEXT_OVERRIDES)
     {
+
       @Override
       public SqlTestFramework.PlannerFixture plannerFixture(PlannerConfig plannerConfig, AuthConfig authConfig)
       {
@@ -56,14 +68,9 @@ public class DecoupledPlanningCalciteQueryTest extends CalciteQueryTest
       }
 
       @Override
-      public boolean runAsQuidem()
+      public DruidIQTestInfo getIQTestInfo()
       {
-        return runQuidem;
-      }
-
-      @Override
-      public String testName() {
-       return queryFrameworkRule.testName();
+        return new DruidIQTestInfo(iqCaseDir, queryFrameworkRule.testName());
       }
 
     };

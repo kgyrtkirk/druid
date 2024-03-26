@@ -33,6 +33,7 @@ import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.java.util.common.guava.Sequence;
 import org.apache.druid.query.Query;
 import org.apache.druid.query.QueryContexts;
+import org.apache.druid.quidem.DruidIQTestInfo;
 import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.server.security.ResourceAction;
 import org.apache.druid.sql.DirectStatement;
@@ -635,13 +636,14 @@ public class QueryTestRunner
   public QueryTestRunner(QueryTestBuilder builder)
   {
     QueryTestConfig config = builder.config;
-    if (config.runAsQuidem()) {
-      QTestCase qt = new QTestCase(config.testName());
+    DruidIQTestInfo iqTestInfo = config.getIQTestInfo();
+    if (iqTestInfo != null) {
+      QTestCase qt = new QTestCase(iqTestInfo);
       Map<String, Object> queryContext = builder.getQueryContext();
       for (Entry<String, Object> entry : queryContext.entrySet()) {
         qt.println(String.format("!set %s %s", entry.getKey(), entry.getValue()));
       }
-      qt.println(builder.sql);
+      qt.println(builder.sql + ";");
       if (builder.expectedResults != null) {
         qt.println("!ok");
       }
@@ -651,8 +653,7 @@ public class QueryTestRunner
       if (builder.expectedLogicalPlan != null) {
         qt.println("!logicalPlan");
       }
-      qt.close();
-      runSteps.add(qt.tuRunner());
+      runSteps.add(qt.toRunner());
       return;
     }
     if (builder.expectedResultsVerifier == null && builder.expectedResults != null) {

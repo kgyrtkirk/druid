@@ -122,6 +122,12 @@ public abstract class DruidQuidemTestBase
           .withCommandHandler(new DruidQuidemCommandHandler());
     }
 
+    public void run(File inFile) throws Exception, IOException, FileNotFoundException
+    {
+      File outFile = new File(inFile.getParent(), inFile.getName() + ".out");
+      run(inFile, outFile);
+    }
+
     public void run(File inFile, final File outFile) throws Exception, IOException, FileNotFoundException
     {
       Util.discard(outFile.getParentFile().mkdirs());
