@@ -40,7 +40,6 @@ import org.apache.druid.math.expr.ExprMacroTable;
 import org.apache.druid.math.expr.ExpressionProcessing;
 import org.apache.druid.query.DefaultQueryConfig;
 import org.apache.druid.query.QueryRunnerFactoryConglomerate;
-import org.apache.druid.query.topn.TopNQueryConfig;
 import org.apache.druid.segment.join.JoinableFactoryWrapper;
 import org.apache.druid.server.DruidNode;
 import org.apache.druid.server.QueryLifecycleFactory;
@@ -107,7 +106,7 @@ public class DruidAvaticaConnectionRule
     ExpressionProcessing.initializeForTests();
 
     resourceCloser = Closer.create();
-    conglomerate = QueryStackTests.createQueryRunnerFactoryConglomerate(resourceCloser,() -> TopNQueryConfig.DEFAULT_MIN_TOPN_THRESHOLD);
+    conglomerate = QueryStackTests.createQueryRunnerFactoryConglomerate(resourceCloser);
     File tempDir = FileUtils.createTempDir("FIXME");
     walker = CalciteTests.createMockWalker(conglomerate, tempDir);
     resourceCloser.register(walker);
