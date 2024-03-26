@@ -29,13 +29,19 @@ import org.apache.druid.sql.calcite.planner.PlannerConfig;
 import org.apache.druid.sql.calcite.util.SqlTestFramework;
 import org.apache.druid.sql.calcite.util.SqlTestFramework.PlannerComponentSupplier;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.io.File;
 
 @ExtendWith(NotYetSupportedProcessor.class)
 public class DecoupledPlanningCalciteQueryTest extends CalciteQueryTest
 {
+
+  @RegisterExtension
+  DecoupledExtension de = new DecoupledExtension(this);
+
   private File qCaseDir;
+
 
   public DecoupledPlanningCalciteQueryTest()
   {
@@ -49,10 +55,15 @@ public class DecoupledPlanningCalciteQueryTest extends CalciteQueryTest
       .put(QueryContexts.ENABLE_DEBUG, true)
       .build();
 
+
+
   @Override
   protected QueryTestBuilder testBuilder()
   {
 
+    if(true) {
+      return de.get();
+    }
     DecoupledTestConfig decTestConfig = queryFrameworkRule.getAnnotation(DecoupledTestConfig.class);
 
     PlannerComponentSupplier componentSupplier = this;
