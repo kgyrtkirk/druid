@@ -643,6 +643,9 @@ public class QueryTestRunner
       for (Entry<String, Object> entry : queryContext.entrySet()) {
         qt.println(String.format("!set %s %s", entry.getKey(), entry.getValue()));
       }
+      qt.println("!set outputformat mysql");
+      qt.println("!use druid");
+
       qt.println(builder.sql + ";");
       if (builder.expectedResults != null) {
         qt.println("!ok");

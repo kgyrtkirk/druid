@@ -70,7 +70,11 @@ public class DecoupledPlanningCalciteQueryTest extends CalciteQueryTest
       @Override
       public DruidIQTestInfo getIQTestInfo()
       {
-        return new DruidIQTestInfo(iqCaseDir, queryFrameworkRule.testName());
+        if(runQuidem) {
+          return new DruidIQTestInfo(iqCaseDir, queryFrameworkRule.testName());
+        } else {
+          return null;
+        }
       }
 
     };

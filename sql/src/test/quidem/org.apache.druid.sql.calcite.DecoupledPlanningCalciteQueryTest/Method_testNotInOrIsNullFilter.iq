@@ -1,12 +1,12 @@
-# Method_testNotInOrIsNullFilter case-crc:7f5e3b0a
-!use druid
-!set outputformat mysql
+# Method_testNotInOrIsNullFilter case-crc:d6f0dd25
 !set sqlQueryId dummy
 !set sqlCurrentTimestamp 2000-01-01T00:00:00Z
 !set defaultTimeout 300000
 !set maxScatterGatherBytes 9223372036854775807
 !set plannerStrategy DECOUPLED
 !set debug true
+!set outputformat mysql
+!use druid
 SELECT dim1, COUNT(*) FROM druid.foo WHERE dim1 NOT IN ('abc', 'def', 'ghi') OR dim1 IS NULL GROUP BY dim1;
 +------+--------+
 | dim1 | EXPR$1 |

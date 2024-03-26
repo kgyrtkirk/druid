@@ -20,11 +20,17 @@
 package org.apache.druid.quidem;
 
 import net.hydromatic.quidem.Quidem.ConnectionFactory;
+import net.hydromatic.quidem.Quidem.PropertyHandler;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.util.Properties;
 
-public class DruidQuidemConnectionFactory implements ConnectionFactory
+public class DruidQuidemConnectionFactory implements ConnectionFactory, PropertyHandler
 {
+  private Properties props = new Properties();
+  private boolean opened;
+
   public DruidQuidemConnectionFactory() throws Exception
   {
     // ensure driver loaded
@@ -35,8 +41,19 @@ public class DruidQuidemConnectionFactory implements ConnectionFactory
   public Connection connect(String name, boolean reference) throws Exception
   {
     if (name.equals("druid")) {
-      return DriverManager.getConnection(DruidAvaticaTestDriver.DEFAULT_URI);
+      return DriverManager.getConnection(DruidAvaticaTestDriver.DEFAULT_URI, props);
     }
     return null;
+  }
+
+  @Override
+  public void onSet(String key, Object value)
+  {
+    props.setProperty(key, value.toString());
+  }
+
+  public void reset()
+  {
+    props.clear();
   }
 }

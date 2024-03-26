@@ -109,12 +109,16 @@ public abstract class DruidQuidemTestBase
 
   public static class DruidQuidemRunner
   {
-    private ConfigBuilder configBuilder;
+    private final ConfigBuilder configBuilder;
+    private final DruidQuidemConnectionFactory connectionFactory;
 
     public DruidQuidemRunner() throws Exception
     {
+      connectionFactory = new DruidQuidemConnectionFactory();
       configBuilder = Quidem.configBuilder()
-          .withConnectionFactory(new DruidQuidemConnectionFactory())
+          .withConnectionFactory(connectionFactory)
+          // this is not nice - but it makes it possible to do queryContext changes
+          .withPropertyHandler(connectionFactory)
           .withCommandHandler(new DruidQuidemCommandHandler());
     }
 
@@ -127,6 +131,7 @@ public abstract class DruidQuidemTestBase
     public void run(File inFile, final File outFile) throws Exception, IOException, FileNotFoundException
     {
       Util.discard(outFile.getParentFile().mkdirs());
+      connectionFactory.reset();
       try (Reader reader = Util.reader(inFile);
           Writer writer = Util.printWriter(outFile);
           Closer closer = new Closer()) {

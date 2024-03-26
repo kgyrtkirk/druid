@@ -42,9 +42,6 @@ public class QTestCase
   {
     this.testInfo = testInfo;
     sb = new StringBuffer();
-
-    println("!use druid");
-    println("!set outputformat mysql");
   }
 
   public void println(String str)
