@@ -33,11 +33,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import java.io.File;
 
 @ExtendWith(NotYetSupportedProcessor.class)
-public class DecoupledPlanningCalciteQueryTest extends CalciteQueryTest
+public class DecoupledPlanningCalciteQueryTest2 extends CalciteQueryTest
 {
   private File qCaseDir;
 
-  public DecoupledPlanningCalciteQueryTest()
+  public DecoupledPlanningCalciteQueryTest2()
   {
     qCaseDir = ProjectPathUtils.getPathFromProjectRoot("sql/src/test/quidem/" + getClass().getName());
   }
