@@ -29,7 +29,6 @@ import java.util.Properties;
 public class DruidQuidemConnectionFactory implements ConnectionFactory, PropertyHandler
 {
   private Properties props = new Properties();
-  private boolean opened;
 
   public DruidQuidemConnectionFactory() throws Exception
   {
@@ -42,6 +41,9 @@ public class DruidQuidemConnectionFactory implements ConnectionFactory, Property
   {
     if (name.equals("druid")) {
       return DriverManager.getConnection(DruidAvaticaTestDriver.DEFAULT_URI, props);
+    }
+    if (name.startsWith("druidtest://")) {
+      return DriverManager.getConnection(name, props);
     }
     return null;
   }

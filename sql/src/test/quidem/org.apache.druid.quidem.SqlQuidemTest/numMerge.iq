@@ -1,0 +1,11 @@
+!use druidtest://
+!set outputformat mysql
+
+SELECT
+dim1, dim2, SUM(m1), COUNT(*)
+FROM (SELECT * FROM foo UNION ALL SELECT * FROM foo UNION ALL SELECT * FROM foo)
+WHERE dim2 = 'a' OR dim2 = 'def'
+GROUP BY 1, 2;
+!ok
+!nativePlan
+!convertedPlan

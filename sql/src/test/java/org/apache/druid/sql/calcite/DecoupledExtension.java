@@ -66,13 +66,11 @@ public class DecoupledExtension implements BeforeEachCallback
   {
     DecoupledTestConfig decTestConfig = BaseCalciteQueryTest.queryFrameworkRule.getAnnotation(DecoupledTestConfig.class);
 
-
     assumeTrue(BaseCalciteQueryTest.queryFrameworkRule.getConfig().numMergeBuffers() == 0);
 
     PlannerComponentSupplier componentSupplier = baseTest;
 
-    //    boolean runQuidem = (decTestConfig != null && decTestConfig.quidem());
-    boolean runQuidem = true;
+    boolean runQuidem = (decTestConfig != null && decTestConfig.quidem());
 
     CalciteTestConfig testConfig = baseTest.new CalciteTestConfig(CONTEXT_OVERRIDES)
     {

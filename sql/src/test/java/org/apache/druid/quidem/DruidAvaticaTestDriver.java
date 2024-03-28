@@ -36,7 +36,6 @@ public class DruidAvaticaTestDriver implements Driver
     new DruidAvaticaTestDriver().register();
   }
 
-
   private static final String UNIMPLEMENTED_MESSAGE = "Unimplemented method!";
   private static final String prefix = "druidtest://";
   private DruidAvaticaConnectionRule rule;
