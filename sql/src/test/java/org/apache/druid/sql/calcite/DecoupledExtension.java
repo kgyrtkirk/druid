@@ -33,8 +33,6 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 
 import java.io.File;
 
-import static org.junit.Assume.assumeTrue;
-
 public class DecoupledExtension implements BeforeEachCallback
 {
 
@@ -66,14 +64,9 @@ public class DecoupledExtension implements BeforeEachCallback
   {
     DecoupledTestConfig decTestConfig = BaseCalciteQueryTest.queryFrameworkRule.getAnnotation(DecoupledTestConfig.class);
 
-
-    assumeTrue(BaseCalciteQueryTest.queryFrameworkRule.getConfig().numMergeBuffers() == 0);
-
     PlannerComponentSupplier componentSupplier = baseTest;
 
-    //    boolean runQuidem = (decTestConfig != null && decTestConfig.quidem());
-    boolean runQuidem = true;
-
+    boolean runQuidem = decTestConfig != null && decTestConfig.quidem();
     CalciteTestConfig testConfig = baseTest.new CalciteTestConfig(CONTEXT_OVERRIDES)
     {
 
@@ -81,7 +74,6 @@ public class DecoupledExtension implements BeforeEachCallback
       public SqlTestFramework.PlannerFixture plannerFixture(PlannerConfig plannerConfig, AuthConfig authConfig)
       {
         plannerConfig = plannerConfig.withOverrides(CONTEXT_OVERRIDES);
-
         return baseTest.queryFramework().plannerFixture(componentSupplier, plannerConfig, authConfig);
       }
 

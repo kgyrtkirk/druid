@@ -103,11 +103,6 @@ public @interface SqlTestFrameworkConfig
       }
     }
 
-    public SqlTestFrameworkConfig getConfig()
-    {
-      return config;
-    }
-
     public SqlTestFramework get()
     {
       return getConfigurationInstance().framework;

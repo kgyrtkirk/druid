@@ -6,9 +6,7 @@
 !set plannerStrategy DECOUPLED
 !set debug true
 !set outputformat mysql
-
-!use druid!useDefaults!numMergeBuffers=2
-
+!use druid
 SELECT 
    t1, t2
   FROM
