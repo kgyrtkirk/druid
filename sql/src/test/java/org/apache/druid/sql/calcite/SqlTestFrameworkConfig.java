@@ -153,4 +153,15 @@ public @interface SqlTestFrameworkConfig
       framework.close();
     }
   }
+
+//  public  SqlTestFrameworkConfig fromURIParams(String url) {
+//    try {
+//      List<NameValuePair> params = URLEncodedUtils.parse(new URI(url), StandardCharsets.UTF_8);
+//    }
+//    catch (URISyntaxException e) {
+//      throw new SQLException("can't decode URI", e);
+//    }
+//
+//    return null;
+//  }
 }

@@ -20,7 +20,6 @@
 package org.apache.druid.quidem;
 
 import org.apache.druid.sql.avatica.DruidAvaticaConnectionRule;
-
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
@@ -53,6 +52,9 @@ public class DruidAvaticaTestDriver implements Driver
       return null;
     }
     rule.ensureInited();
+
+//    SqlTestFrameworkConfig config = SqlTestFrameworkConfig.fromURIParams(url);
+
     return rule.getConnection(info);
   }
 
