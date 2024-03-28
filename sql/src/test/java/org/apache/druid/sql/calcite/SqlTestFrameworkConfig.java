@@ -51,8 +51,6 @@ public @interface SqlTestFrameworkConfig
 
   ResultCacheMode resultCache() default ResultCacheMode.DISABLED;
 
-
-
   /**
    * @see {@link SqlTestFrameworkConfig}
    */
@@ -153,6 +151,7 @@ public @interface SqlTestFrameworkConfig
       framework.close();
     }
   }
+
 
 //  public  SqlTestFrameworkConfig fromURIParams(String url) {
 //    try {

@@ -20,12 +20,25 @@
 package org.apache.druid.quidem;
 
 import org.apache.druid.sql.avatica.DruidAvaticaConnectionRule;
+import org.apache.druid.sql.calcite.SqlTestFrameworkConfig;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
+
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Logger;
 
@@ -53,9 +66,63 @@ public class DruidAvaticaTestDriver implements Driver
     }
     rule.ensureInited();
 
-//    SqlTestFrameworkConfig config = SqlTestFrameworkConfig.fromURIParams(url);
+    SqlTestFrameworkConfig config = buildConfigfromURIParams(url);
 
     return rule.getConnection(info);
+  }
+
+  private SqlTestFrameworkConfig buildConfigfromURIParams(String url) throws SQLException
+  {
+    Map<String,String> queryParams ;
+        queryParams =new HashMap<>();
+    try {
+      List<NameValuePair> params = URLEncodedUtils.parse(new URI(url), StandardCharsets.UTF_8);
+      for (NameValuePair pair : params) {
+        queryParams.put(pair.getName(), pair.getValue());
+      }
+      // possible caveat: duplicate entries overwrite earlier ones
+    }
+    catch (URISyntaxException e) {
+      throw new SQLException("Can't decode URI", e);
+    }
+
+    return MapToInterfaceHandler.newInstanceFor(SqlTestFrameworkConfig.class, queryParams);
+  }
+
+  /**
+   *
+   *
+   */
+  static class MapToInterfaceHandler implements InvocationHandler
+  {
+    private Map<String, String> backingMap;
+
+    @SuppressWarnings("unchecked")
+    public static <T> T newInstanceFor(Class<T> clazz, Map<String, String> queryParams)
+    {
+      return (T) Proxy.newProxyInstance(
+          clazz.getClassLoader(),
+          new Class[] {clazz},
+          new MapToInterfaceHandler(queryParams)
+      );
+    }
+
+    private MapToInterfaceHandler(Map<String, String> backingMap)
+    {
+      this.backingMap = backingMap;
+    }
+
+    @Override
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable
+    {
+      Class<?> returnType = method.getReturnType();
+      String obj = backingMap.get(method.getName());
+      if (obj == null) {
+        return method.getDefaultValue();
+      } else {
+        return returnType.cast(obj);
+      }
+    }
   }
 
   private void register()
