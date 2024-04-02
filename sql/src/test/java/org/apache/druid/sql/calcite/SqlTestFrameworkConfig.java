@@ -118,7 +118,7 @@ public @interface SqlTestFrameworkConfig
 
     public String testName()
     {
-      return method.getClass().getSimpleName() + "_" + method.getName();
+      return method.getName();
     }
 
     private ConfigurationInstance getConfigurationInstance()
