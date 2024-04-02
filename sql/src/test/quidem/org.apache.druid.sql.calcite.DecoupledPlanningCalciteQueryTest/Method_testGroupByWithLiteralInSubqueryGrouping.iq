@@ -1,4 +1,4 @@
-# Method_testGroupByWithLiteralInSubqueryGrouping case-crc:f810ee0e
+# Method_testGroupByWithLiteralInSubqueryGrouping case-crc:83190e33
 !set sqlQueryId dummy
 !set sqlCurrentTimestamp 2000-01-01T00:00:00Z
 !set defaultTimeout 300000
@@ -6,7 +6,7 @@
 !set plannerStrategy DECOUPLED
 !set debug true
 !set outputformat mysql
-!use druid
+!use druidtest:///
 SELECT 
    t1, t2
   FROM

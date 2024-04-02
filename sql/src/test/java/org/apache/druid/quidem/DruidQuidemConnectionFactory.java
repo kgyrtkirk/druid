@@ -39,9 +39,6 @@ public class DruidQuidemConnectionFactory implements ConnectionFactory, Property
   @Override
   public Connection connect(String name, boolean reference) throws Exception
   {
-    if (name.equals("druid")) {
-      return DriverManager.getConnection(DruidAvaticaTestDriver.DEFAULT_URI, props);
-    }
     if (name.startsWith("druidtest://")) {
       return DriverManager.getConnection(name, props);
     }

@@ -1,4 +1,4 @@
-# Method_testMultipleExactCountDistinctWithGroupingAndOtherAggregatorsUsingJoin case-crc:266a27fd
+# Method_testMultipleExactCountDistinctWithGroupingAndOtherAggregatorsUsingJoin case-crc:bb45e284
 !set sqlQueryId dummy
 !set sqlCurrentTimestamp 2000-01-01T00:00:00Z
 !set defaultTimeout 300000
@@ -6,7 +6,7 @@
 !set plannerStrategy DECOUPLED
 !set debug true
 !set outputformat mysql
-!use druid
+!use druidtest:///
 SELECT dim2, COUNT(*), COUNT(distinct dim1), COUNT(distinct cnt) FROM druid.foo GROUP BY dim2;
 +------+--------+--------+--------+
 | dim2 | EXPR$1 | EXPR$2 | EXPR$3 |

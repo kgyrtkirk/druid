@@ -38,12 +38,17 @@ public class DruidAvaticaDriverTest
   @Test
   public void testSelect() throws SQLException
   {
-    try (Connection con = DriverManager.getConnection("druidtest://", "user1", "pass");
+    try (Connection con = DriverManager.getConnection("druidtest:///", "user1", "pass");
         Statement stmt = con.createStatement();
         ResultSet rs = stmt.executeQuery("select 42");) {
       assertTrue(rs.next());
       assertEquals(42, rs.getInt(1));
       assertFalse(rs.next());
     }
+  }
+
+  @Test
+  public void testURIParse() throws SQLException {
+    DruidAvaticaTestDriver.buildConfigfromURIParams("druidtest:///");
   }
 }

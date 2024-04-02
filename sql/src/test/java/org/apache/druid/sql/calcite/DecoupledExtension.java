@@ -37,9 +37,7 @@ import static org.junit.Assume.assumeTrue;
 
 public class DecoupledExtension implements BeforeEachCallback
 {
-
   private BaseCalciteQueryTest baseTest;
-
 
   public DecoupledExtension(BaseCalciteQueryTest baseTest)
   {

@@ -1,4 +1,4 @@
-# Method_testGroupByLimitPushdownExtraction case-crc:f7d51695
+# Method_testGroupByLimitPushdownExtraction case-crc:55fd31da
 !set sqlQueryId dummy
 !set sqlCurrentTimestamp 2000-01-01T00:00:00Z
 !set defaultTimeout 300000
@@ -6,7 +6,7 @@
 !set plannerStrategy DECOUPLED
 !set debug true
 !set outputformat mysql
-!use druid
+!use druidtest:///
 SELECT dim4, substring(dim5, 1, 1), count(*) FROM druid.numfoo WHERE dim4 = 'a' GROUP BY 1,2 LIMIT 2;
 +------+--------+--------+
 | dim4 | EXPR$1 | EXPR$2 |

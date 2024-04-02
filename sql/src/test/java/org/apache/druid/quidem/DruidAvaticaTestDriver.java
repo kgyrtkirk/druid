@@ -51,7 +51,7 @@ public class DruidAvaticaTestDriver implements Driver
   private static final String UNIMPLEMENTED_MESSAGE = "Unimplemented method!";
   private static final String prefix = "druidtest://";
   private DruidAvaticaConnectionRule rule;
-  public static final String DEFAULT_URI = prefix;
+  public static final String DEFAULT_URI = prefix+"/";
 
   public DruidAvaticaTestDriver()
   {
@@ -71,7 +71,7 @@ public class DruidAvaticaTestDriver implements Driver
     return rule.getConnection(info);
   }
 
-  private SqlTestFrameworkConfig buildConfigfromURIParams(String url) throws SQLException
+  public static SqlTestFrameworkConfig buildConfigfromURIParams(String url) throws SQLException
   {
     Map<String,String> queryParams ;
         queryParams =new HashMap<>();

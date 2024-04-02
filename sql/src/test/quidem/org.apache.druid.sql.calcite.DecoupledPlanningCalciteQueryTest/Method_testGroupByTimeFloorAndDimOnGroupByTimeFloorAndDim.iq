@@ -1,4 +1,4 @@
-# Method_testGroupByTimeFloorAndDimOnGroupByTimeFloorAndDim case-crc:c37f9664
+# Method_testGroupByTimeFloorAndDimOnGroupByTimeFloorAndDim case-crc:ead760e9
 !set sqlQueryId dummy
 !set sqlCurrentTimestamp 2000-01-01T00:00:00Z
 !set defaultTimeout 300000
@@ -6,7 +6,7 @@
 !set plannerStrategy DECOUPLED
 !set debug true
 !set outputformat mysql
-!use druid
+!use druidtest:///
 SELECT dim2, time_floor(gran, 'P1M') gran, sum(s)
 FROM (SELECT time_floor(__time, 'P1D') AS gran, dim2, sum(m1) as s FROM druid.foo GROUP BY 1, 2 HAVING sum(m1) > 1) AS x
 GROUP BY 1, 2

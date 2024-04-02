@@ -65,9 +65,8 @@ public class QTestCase
         }
 
         try {
-          DruidQuidemRunner rr;
-          rr = new DruidQuidemTestBase.DruidQuidemRunner();
-          rr.run(testInfo.getIQFile());
+          DruidQuidemRunner runner = new DruidQuidemTestBase.DruidQuidemRunner();
+          runner.run(testInfo.getIQFile());
         }
         catch (Exception e) {
           throw new RuntimeException("Error running quidem test", e);

@@ -644,7 +644,7 @@ public class QueryTestRunner
         qt.println(String.format("!set %s %s", entry.getKey(), entry.getValue()));
       }
       qt.println("!set outputformat mysql");
-      qt.println("!use druid");
+      qt.println("!use druidtest:///");
 
       qt.println(builder.sql + ";");
       if (builder.expectedResults != null) {

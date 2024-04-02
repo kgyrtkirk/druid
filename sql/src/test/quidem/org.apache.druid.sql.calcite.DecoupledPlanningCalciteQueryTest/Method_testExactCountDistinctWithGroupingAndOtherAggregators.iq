@@ -1,4 +1,4 @@
-# Method_testExactCountDistinctWithGroupingAndOtherAggregators case-crc:7072aecb
+# Method_testExactCountDistinctWithGroupingAndOtherAggregators case-crc:b56ce9b9
 !set sqlQueryId dummy
 !set sqlCurrentTimestamp 2000-01-01T00:00:00Z
 !set defaultTimeout 300000
@@ -6,7 +6,7 @@
 !set plannerStrategy DECOUPLED
 !set debug true
 !set outputformat mysql
-!use druid
+!use druidtest:///
 SELECT dim2, SUM(cnt), COUNT(distinct dim1) FROM druid.foo GROUP BY dim2;
 +------+--------+--------+
 | dim2 | EXPR$1 | EXPR$2 |
