@@ -1,4 +1,4 @@
-# Method_testGroupBySortPushDown case-crc:856207b9
+# testGroupBySortPushDown case-crc:856207b9
 !set sqlQueryId dummy
 !set sqlCurrentTimestamp 2000-01-01T00:00:00Z
 !set defaultTimeout 300000

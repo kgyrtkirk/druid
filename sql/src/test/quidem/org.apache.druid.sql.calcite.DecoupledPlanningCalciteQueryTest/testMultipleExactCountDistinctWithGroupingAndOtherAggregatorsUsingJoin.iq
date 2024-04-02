@@ -1,4 +1,4 @@
-# Method_testExactCountDistinctWithGroupingAndOtherAggregators case-crc:b56ce9b9
+# testMultipleExactCountDistinctWithGroupingAndOtherAggregatorsUsingJoin case-crc:bb45e284
 !set sqlQueryId dummy
 !set sqlCurrentTimestamp 2000-01-01T00:00:00Z
 !set defaultTimeout 300000
@@ -7,15 +7,15 @@
 !set debug true
 !set outputformat mysql
 !use druidtest:///
-SELECT dim2, SUM(cnt), COUNT(distinct dim1) FROM druid.foo GROUP BY dim2;
-+------+--------+--------+
-| dim2 | EXPR$1 | EXPR$2 |
-+------+--------+--------+
-|      |      1 |      1 |
-| a    |      2 |      2 |
-| abc  |      1 |      1 |
-|      |      2 |      2 |
-+------+--------+--------+
+SELECT dim2, COUNT(*), COUNT(distinct dim1), COUNT(distinct cnt) FROM druid.foo GROUP BY dim2;
++------+--------+--------+--------+
+| dim2 | EXPR$1 | EXPR$2 | EXPR$3 |
++------+--------+--------+--------+
+|      |      1 |      1 |      1 |
+| a    |      2 |      2 |      1 |
+| abc  |      1 |      1 |      1 |
+|      |      2 |      2 |      1 |
++------+--------+--------+--------+
 (4 rows)
 
 !ok
@@ -39,9 +39,8 @@ SELECT dim2, SUM(cnt), COUNT(distinct dim1) FROM druid.foo GROUP BY dim2;
     "outputType" : "STRING"
   } ],
   "aggregations" : [ {
-    "type" : "longSum",
-    "name" : "a0",
-    "fieldName" : "cnt"
+    "type" : "count",
+    "name" : "a0"
   }, {
     "type" : "cardinality",
     "name" : "a1",
@@ -50,6 +49,17 @@ SELECT dim2, SUM(cnt), COUNT(distinct dim1) FROM druid.foo GROUP BY dim2;
       "dimension" : "dim1",
       "outputName" : "dim1",
       "outputType" : "STRING"
+    } ],
+    "byRow" : false,
+    "round" : true
+  }, {
+    "type" : "cardinality",
+    "name" : "a2",
+    "fields" : [ {
+      "type" : "default",
+      "dimension" : "cnt",
+      "outputName" : "cnt",
+      "outputType" : "LONG"
     } ],
     "byRow" : false,
     "round" : true

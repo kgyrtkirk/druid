@@ -1,4 +1,4 @@
-# Method_testGroupByTimeFloorAndDimOnGroupByTimeFloorAndDim case-crc:ead760e9
+# testGroupByTimeFloorAndDimOnGroupByTimeFloorAndDim case-crc:ead760e9
 !set sqlQueryId dummy
 !set sqlCurrentTimestamp 2000-01-01T00:00:00Z
 !set defaultTimeout 300000

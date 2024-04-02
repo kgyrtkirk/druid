@@ -1,4 +1,4 @@
-# Method_testGroupByLimitPushdownExtraction case-crc:55fd31da
+# testGroupByLimitPushdownExtraction case-crc:55fd31da
 !set sqlQueryId dummy
 !set sqlCurrentTimestamp 2000-01-01T00:00:00Z
 !set defaultTimeout 300000
