@@ -51,7 +51,7 @@ public class DruidAvaticaTestDriver implements Driver
   private static final String UNIMPLEMENTED_MESSAGE = "Unimplemented method!";
   private static final String prefix = "druidtest://";
   private DruidAvaticaConnectionRule rule;
-  public static final String DEFAULT_URI = prefix+"/";
+  public static final String DEFAULT_URI = prefix + "/";
 
   public DruidAvaticaTestDriver()
   {
@@ -67,14 +67,15 @@ public class DruidAvaticaTestDriver implements Driver
     rule.ensureInited();
 
     SqlTestFrameworkConfig config = buildConfigfromURIParams(url);
+    int n = config.numMergeBuffers();
 
     return rule.getConnection(info);
   }
 
   public static SqlTestFrameworkConfig buildConfigfromURIParams(String url) throws SQLException
   {
-    Map<String,String> queryParams ;
-        queryParams =new HashMap<>();
+    Map<String, String> queryParams;
+    queryParams = new HashMap<>();
     try {
       List<NameValuePair> params = URLEncodedUtils.parse(new URI(url), StandardCharsets.UTF_8);
       for (NameValuePair pair : params) {
@@ -120,8 +121,19 @@ public class DruidAvaticaTestDriver implements Driver
       if (obj == null) {
         return method.getDefaultValue();
       } else {
-        return returnType.cast(obj);
+        if (returnType.isInstance(obj)) {
+          return obj;
+        }
+        return uglyCastCrap(obj, returnType);
       }
+    }
+
+    private Object uglyCastCrap(String obj, Class<?> returnType)
+    {
+      if (returnType == int.class) {
+        return Integer.parseInt(obj);
+      }
+      throw new RuntimeException("don't know how to handle conversion to " + returnType);
     }
   }
 
