@@ -24,9 +24,6 @@ import org.apache.druid.sql.calcite.SqlTestFrameworkConfig;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -48,7 +45,6 @@ public class DruidAvaticaTestDriver implements Driver
     new DruidAvaticaTestDriver().register();
   }
 
-  private static final String UNIMPLEMENTED_MESSAGE = "Unimplemented method!";
   private static final String prefix = "druidtest://";
   private DruidAvaticaConnectionRule rule;
   public static final String DEFAULT_URI = prefix + "/";
@@ -67,7 +63,6 @@ public class DruidAvaticaTestDriver implements Driver
     rule.ensureInited();
 
     SqlTestFrameworkConfig config = buildConfigfromURIParams(url);
-    int n = config.numMergeBuffers();
 
     return rule.getConnection(info);
   }
@@ -90,53 +85,6 @@ public class DruidAvaticaTestDriver implements Driver
     return MapToInterfaceHandler.newInstanceFor(SqlTestFrameworkConfig.class, queryParams);
   }
 
-  /**
-   *
-   *
-   */
-  static class MapToInterfaceHandler implements InvocationHandler
-  {
-    private Map<String, String> backingMap;
-
-    @SuppressWarnings("unchecked")
-    public static <T> T newInstanceFor(Class<T> clazz, Map<String, String> queryParams)
-    {
-      return (T) Proxy.newProxyInstance(
-          clazz.getClassLoader(),
-          new Class[] {clazz},
-          new MapToInterfaceHandler(queryParams)
-      );
-    }
-
-    private MapToInterfaceHandler(Map<String, String> backingMap)
-    {
-      this.backingMap = backingMap;
-    }
-
-    @Override
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable
-    {
-      Class<?> returnType = method.getReturnType();
-      String obj = backingMap.get(method.getName());
-      if (obj == null) {
-        return method.getDefaultValue();
-      } else {
-        if (returnType.isInstance(obj)) {
-          return obj;
-        }
-        return uglyCastCrap(obj, returnType);
-      }
-    }
-
-    private Object uglyCastCrap(String obj, Class<?> returnType)
-    {
-      if (returnType == int.class) {
-        return Integer.parseInt(obj);
-      }
-      throw new RuntimeException("don't know how to handle conversion to " + returnType);
-    }
-  }
-
   private void register()
   {
     try {
@@ -156,7 +104,7 @@ public class DruidAvaticaTestDriver implements Driver
   @Override
   public DriverPropertyInfo[] getPropertyInfo(String url, Properties info) throws SQLException
   {
-    throw new RuntimeException(UNIMPLEMENTED_MESSAGE);
+    throw new RuntimeException("Unimplemented method!");
   }
 
   @Override
