@@ -51,12 +51,37 @@ public @interface SqlTestFrameworkConfig
 
   ResultCacheMode resultCache() default ResultCacheMode.DISABLED;
 
+  class SqlTestFrameworkConfigStore {
+
+    Map<SqlTestFrameworkConfig, ConfigurationInstance> configMap = new HashMap<>();
+
+    private ConfigurationInstance getConfigurationInstance(SqlTestFrameworkConfig config, QueryComponentSupplier testHost)
+    {
+      ConfigurationInstance ret = configMap.get(config);
+      if (!configMap.containsKey(config)) {
+        ret = new ConfigurationInstance(config, testHost);
+        configMap.put(config, ret);
+      }
+      return ret;
+    }
+
+    public void close()
+    {
+      for (ConfigurationInstance f : configMap.values()) {
+        f.close();
+      }
+      configMap.clear();
+    }
+
+
+  }
+
   /**
    * @see {@link SqlTestFrameworkConfig}
    */
   class Rule implements AfterAllCallback, BeforeEachCallback
   {
-    Map<SqlTestFrameworkConfig, ConfigurationInstance> configMap = new HashMap<>();
+    SqlTestFrameworkConfigStore configStore = new SqlTestFrameworkConfigStore();
     private SqlTestFrameworkConfig config;
     private QueryComponentSupplier testHost;
     private Method method;
@@ -64,10 +89,7 @@ public @interface SqlTestFrameworkConfig
     @Override
     public void afterAll(ExtensionContext context)
     {
-      for (ConfigurationInstance f : configMap.values()) {
-        f.close();
-      }
-      configMap.clear();
+      configStore.close();
     }
 
     @Override
@@ -108,7 +130,7 @@ public @interface SqlTestFrameworkConfig
 
     public SqlTestFramework get()
     {
-      return getConfigurationInstance().framework;
+      return configStore.getConfigurationInstance(config, testHost).framework;
     }
 
     public <T extends Annotation> T getAnnotation(Class<T> annotationType)
@@ -119,16 +141,6 @@ public @interface SqlTestFrameworkConfig
     public String testName()
     {
       return method.getName();
-    }
-
-    private ConfigurationInstance getConfigurationInstance()
-    {
-      return configMap.computeIfAbsent(config, this::buildConfiguration);
-    }
-
-    ConfigurationInstance buildConfiguration(SqlTestFrameworkConfig config)
-    {
-      return new ConfigurationInstance(config, testHost);
     }
   }
 
@@ -151,16 +163,4 @@ public @interface SqlTestFrameworkConfig
       framework.close();
     }
   }
-
-
-//  public  SqlTestFrameworkConfig fromURIParams(String url) {
-//    try {
-//      List<NameValuePair> params = URLEncodedUtils.parse(new URI(url), StandardCharsets.UTF_8);
-//    }
-//    catch (URISyntaxException e) {
-//      throw new SQLException("can't decode URI", e);
-//    }
-//
-//    return null;
-//  }
 }
