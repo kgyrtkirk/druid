@@ -21,12 +21,17 @@ package org.apache.druid.quidem;
 
 import org.apache.druid.sql.avatica.DruidAvaticaConnectionRule;
 import org.apache.druid.sql.calcite.SqlTestFrameworkConfig;
+import org.apache.druid.sql.calcite.SqlTestFrameworkConfig.ConfigurationInstance;
+import org.apache.druid.sql.calcite.util.SqlTestFramework.StandardComponentSupplier;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
@@ -60,11 +65,26 @@ public class DruidAvaticaTestDriver implements Driver
     if (!acceptsURL(url)) {
       return null;
     }
-    rule.ensureInited();
+//    rule.ensureInited();
 
     SqlTestFrameworkConfig config = buildConfigfromURIParams(url);
+//    FIXME SqlTestFrameworkConfigStore store = new SqlTestFrameworkConfig.SqlTestFrameworkConfigStore();
 
-    return rule.getConnection(info);
+    ConfigurationInstance ci = new SqlTestFrameworkConfig.ConfigurationInstance(config, new StandardComponentSupplier(newTempFolder1()));
+
+    AvaticaTestConnection atc = new AvaticaTestConnection(ci.framework);
+
+    return atc.getConnection(info);
+  }
+
+  protected File newTempFolder1()
+  {
+    try {
+      return Files.createTempDirectory("FIXME").toFile();
+    }
+    catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   public static SqlTestFrameworkConfig buildConfigfromURIParams(String url) throws SQLException

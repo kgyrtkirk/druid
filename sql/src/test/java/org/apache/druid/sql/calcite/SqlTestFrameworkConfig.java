@@ -55,7 +55,7 @@ public @interface SqlTestFrameworkConfig
 
     Map<SqlTestFrameworkConfig, ConfigurationInstance> configMap = new HashMap<>();
 
-    private ConfigurationInstance getConfigurationInstance(SqlTestFrameworkConfig config, QueryComponentSupplier testHost)
+    public ConfigurationInstance getConfigurationInstance(SqlTestFrameworkConfig config, QueryComponentSupplier testHost)
     {
       ConfigurationInstance ret = configMap.get(config);
       if (!configMap.containsKey(config)) {
@@ -144,11 +144,11 @@ public @interface SqlTestFrameworkConfig
     }
   }
 
-  class ConfigurationInstance
+  public class ConfigurationInstance
   {
     public SqlTestFramework framework;
 
-    ConfigurationInstance(SqlTestFrameworkConfig config, QueryComponentSupplier testHost)
+    public ConfigurationInstance(SqlTestFrameworkConfig config, QueryComponentSupplier testHost)
     {
       SqlTestFramework.Builder builder = new SqlTestFramework.Builder(testHost)
           .catalogResolver(testHost.createCatalogResolver())
