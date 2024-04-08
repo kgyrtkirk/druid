@@ -114,22 +114,13 @@ public class DruidAvaticaTestDriver implements Driver
     }
     SqlTestFrameworkConfig config = buildConfigfromURIParams(url);
 
-    if(false) {
     ConfigurationInstance ci = SqlTestFrameworkConfig.SqlTestFrameworkConfigStore.INSTANCE.getConfigurationInstance(
         new SqlTestFrameworkConfigInstance(config),
         new AvaticaBasedTestConnectionSupplier(
             new StandardComponentSupplier(newTempFolder1())
         )
     );
-    }
 
-
-    ConfigurationInstance ci = new SqlTestFrameworkConfig.ConfigurationInstance(
-        new SqlTestFrameworkConfigInstance(config),
-        new AvaticaBasedTestConnectionSupplier(
-            new StandardComponentSupplier(newTempFolder1())
-        )
-    );
 
     try {
       AvaticaJettyServer server = ci.framework.injector().getInstance(AvaticaJettyServer.class);

@@ -72,6 +72,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 public abstract class DruidQuidemTestBase
 {
   private static final String IQ_SUFFIX = ".iq";
+  /** System property name for "overwrite mode"; note: empty value is treated as true */
   private static final String OVERWRITE_PROPERTY = "quidem.overwrite";
 
   private static final String PROPERTY_FILTER = "quidem.filter";
@@ -155,7 +156,8 @@ public abstract class DruidQuidemTestBase
 
     public static boolean isOverwrite()
     {
-      return Boolean.valueOf(System.getProperty(OVERWRITE_PROPERTY, "false"));
+      String property = System.getProperty(OVERWRITE_PROPERTY, "false");
+      return "".equals(property) || Boolean.valueOf(property);
     }
   }
 
