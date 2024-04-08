@@ -35,9 +35,10 @@ GROUP BY 1, 2;
     "intervals" : [ "-146136543-09-08T08:23:32.096Z/146140482-04-24T15:36:27.903Z" ]
   },
   "filter" : {
-    "type" : "in",
-    "dimension" : "dim2",
-    "values" : [ "a", "def" ]
+    "type" : "inType",
+    "column" : "dim2",
+    "matchValueType" : "STRING",
+    "sortedValues" : [ "a", "def" ]
   },
   "granularity" : {
     "type" : "all"

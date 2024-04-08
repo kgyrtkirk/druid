@@ -52,7 +52,7 @@ LogicalSort(fetch=[1]): rowcount = 1.0, cumulative cost = {131.0 rows, 251.0 cpu
       LogicalTableScan(table=[[druid, wikipedia]]): rowcount = 100.0, cumulative cost = {100.0 rows, 101.0 cpu, 0.0 io}, id = 170
 
 !logicalPlan
-LogicalSort(fetch=[1]): rowcount = 1.0, cumulative cost = {131.0 rows, 251.0 cpu, 0.0 io}, id = 245
+LogicalSort(fetch=[1]): rowcount = 1.0, cumulative cost = {131.0 rows, 251.0 cpu, 0.0 io}, id = 244
   LogicalProject(cityName=[$2], countryName=[$5]): rowcount = 15.0, cumulative cost = {130.0 rows, 231.0 cpu, 0.0 io}, id = 243
     LogicalFilter(condition=[=($2, 'New York')]): rowcount = 15.0, cumulative cost = {115.0 rows, 201.0 cpu, 0.0 io}, id = 242
       LogicalTableScan(table=[[druid, wikipedia]]): rowcount = 100.0, cumulative cost = {100.0 rows, 101.0 cpu, 0.0 io}, id = 241
