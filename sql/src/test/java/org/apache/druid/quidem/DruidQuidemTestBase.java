@@ -163,7 +163,7 @@ public abstract class DruidQuidemTestBase
     public static boolean isOverwrite()
     {
       String property = System.getProperty(OVERWRITE_PROPERTY, "false");
-      return "".equals(property) || Boolean.valueOf(property);
+      return property.length() == 0 || Boolean.valueOf(property);
     }
   }
 
