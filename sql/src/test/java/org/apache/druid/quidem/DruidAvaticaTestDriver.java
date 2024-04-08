@@ -29,15 +29,18 @@ import com.google.inject.Injector;
 import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
 import com.google.inject.name.Names;
+import org.apache.calcite.avatica.server.AbstractAvaticaHandler;
 import org.apache.druid.guice.DruidInjectorBuilder;
 import org.apache.druid.guice.LazySingleton;
 import org.apache.druid.initialization.DruidModule;
+import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.java.util.common.io.Closer;
 import org.apache.druid.java.util.emitter.service.ServiceEmitter;
 import org.apache.druid.query.DefaultQueryConfig;
 import org.apache.druid.query.QueryRunnerFactoryConglomerate;
 import org.apache.druid.query.lookup.LookupExtractorFactoryContainerProvider;
 import org.apache.druid.segment.join.JoinableFactoryWrapper;
+import org.apache.druid.server.DruidNode;
 import org.apache.druid.server.QueryLifecycleFactory;
 import org.apache.druid.server.QueryScheduler;
 import org.apache.druid.server.QuerySchedulerProvider;
@@ -48,7 +51,10 @@ import org.apache.druid.server.metrics.NoopServiceEmitter;
 import org.apache.druid.server.security.AuthenticatorMapper;
 import org.apache.druid.server.security.AuthorizerMapper;
 import org.apache.druid.server.security.Escalator;
+import org.apache.druid.sql.avatica.AvaticaMonitor;
 import org.apache.druid.sql.avatica.DruidAvaticaConnectionRule;
+import org.apache.druid.sql.avatica.DruidAvaticaJsonHandler;
+import org.apache.druid.sql.avatica.DruidMeta;
 import org.apache.druid.sql.calcite.SqlTestFrameworkConfig;
 import org.apache.druid.sql.calcite.SqlTestFrameworkConfig.ConfigurationInstance;
 import org.apache.druid.sql.calcite.planner.CalciteRulesManager;
@@ -64,7 +70,9 @@ import org.apache.druid.sql.calcite.util.SqlTestFramework.QueryComponentSupplier
 import org.apache.druid.sql.calcite.util.SqlTestFramework.StandardComponentSupplier;
 import org.apache.druid.sql.guice.SqlModule;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.eclipse.jetty.server.Server;
 
 import java.io.File;
 import java.io.IOException;
@@ -119,9 +127,14 @@ public class DruidAvaticaTestDriver implements Driver
     );
 
     try {
+      if(true) {
+      AvaticaJettyServer server = ci.framework.injector().getInstance(AvaticaJettyServer.class);
+      return server.getConnection(info);
+      }else {
       AvaticaTestConnection atc;
       atc = new AvaticaTestConnection(ci.framework);
       return atc.getConnection(info);
+      }
     }
     catch (Exception e) {
       throw new SQLException("Can't create testconnection", e);
@@ -142,11 +155,55 @@ public class DruidAvaticaTestDriver implements Driver
       );
     }
 
+    @Provides
+    @LazySingleton
+    public AvaticaJettyServer getAvaticaServer(DruidMeta druidMeta) throws Exception {
+      return new AvaticaJettyServer(druidMeta);
+    }
+
     @Override
     public void configure(Binder binder)
     {
     }
 
+
+  }
+  static class AvaticaJettyServer implements AutoCloseable {
+    final DruidMeta druidMeta;
+    final Server server;
+    final String url;
+
+    AvaticaJettyServer(final DruidMeta druidMeta) throws Exception
+    {
+      this.druidMeta = druidMeta;
+      server = new Server(0);
+      server.setHandler(getAvaticaHandler(druidMeta));
+      server.start();
+      url = StringUtils.format(
+          "jdbc:avatica:remote:url=%s",
+          new URIBuilder(server.getURI()).setPath(DruidAvaticaJsonHandler.AVATICA_PATH).build()
+          );
+    }
+
+    public Connection getConnection(Properties info) throws SQLException
+    {
+      return DriverManager.getConnection(url, info);
+    }
+
+    public void close() throws Exception
+    {
+      druidMeta.closeAllConnections();
+      server.stop();
+    }
+
+    protected AbstractAvaticaHandler getAvaticaHandler(final DruidMeta druidMeta)
+    {
+      return new DruidAvaticaJsonHandler(
+          druidMeta,
+          new DruidNode("dummy", "dummy", false, 1, null, true, false),
+          new AvaticaMonitor()
+          );
+    }
   }
 
   static class AvaticaBasedTestConnectionSupplier implements QueryComponentSupplier
