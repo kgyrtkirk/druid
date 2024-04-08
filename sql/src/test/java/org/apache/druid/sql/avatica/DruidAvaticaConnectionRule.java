@@ -133,7 +133,7 @@ public class DruidAvaticaConnectionRule
     );
   }
 
-  private class ServerWrapper
+  private static class ServerWrapper
   {
     final DruidMeta druidMeta;
     final Server server;
@@ -148,7 +148,7 @@ public class DruidAvaticaConnectionRule
       url = StringUtils.format(
           "jdbc:avatica:remote:url=%s%s",
           server.getURI().toString(),
-          StringUtils.maybeRemoveLeadingSlash(getJdbcUrlTail())
+          StringUtils.maybeRemoveLeadingSlash(DruidAvaticaJsonHandler.AVATICA_PATH)
       );
     }
 
@@ -157,21 +157,16 @@ public class DruidAvaticaConnectionRule
       druidMeta.closeAllConnections();
       server.stop();
     }
-  }
 
-  protected String getJdbcUrlTail()
-  {
-    return DruidAvaticaJsonHandler.AVATICA_PATH;
-  }
-
-  // Default implementation is for JSON to allow debugging of tests.
-  protected AbstractAvaticaHandler getAvaticaHandler(final DruidMeta druidMeta)
-  {
-    return new DruidAvaticaJsonHandler(
-        druidMeta,
-        new DruidNode("dummy", "dummy", false, 1, null, true, false),
-        new AvaticaMonitor()
-    );
+    // Default implementation is for JSON to allow debugging of tests.
+    protected AbstractAvaticaHandler getAvaticaHandler(final DruidMeta druidMeta)
+    {
+      return new DruidAvaticaJsonHandler(
+          druidMeta,
+          new DruidNode("dummy", "dummy", false, 1, null, true, false),
+          new AvaticaMonitor()
+      );
+    }
   }
 
   @Override
