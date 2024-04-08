@@ -73,6 +73,7 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.eclipse.jetty.server.Server;
 
+import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -111,6 +112,17 @@ public class DruidAvaticaTestDriver implements Driver
       return null;
     }
     SqlTestFrameworkConfig config = buildConfigfromURIParams(url);
+
+    if(false) {
+    ConfigurationInstance ci = SqlTestFrameworkConfig.SqlTestFrameworkConfigStore.INSTANCE.getConfigurationInstance(
+        config,
+        new AvaticaBasedTestConnectionSupplier(
+            new StandardComponentSupplier(newTempFolder1())
+        )
+    );
+    }
+
+
     ConfigurationInstance ci = new SqlTestFrameworkConfig.ConfigurationInstance(
         config,
         new AvaticaBasedTestConnectionSupplier(
@@ -145,9 +157,11 @@ public class DruidAvaticaTestDriver implements Driver
 
     @Provides
     @LazySingleton
-    public AvaticaJettyServer getAvaticaServer(DruidMeta druidMeta) throws Exception
+    public AvaticaJettyServer getAvaticaServer(DruidMeta druidMeta, Closer closer) throws Exception
     {
-      return new AvaticaJettyServer(druidMeta);
+      AvaticaJettyServer avaticaJettyServer = new AvaticaJettyServer(druidMeta);
+      closer.register(avaticaJettyServer);
+      return avaticaJettyServer;
     }
 
     @Override
@@ -157,7 +171,7 @@ public class DruidAvaticaTestDriver implements Driver
 
   }
 
-  static class AvaticaJettyServer implements AutoCloseable
+  static class AvaticaJettyServer implements Closeable
   {
     final DruidMeta druidMeta;
     final Server server;
@@ -180,10 +194,15 @@ public class DruidAvaticaTestDriver implements Driver
       return DriverManager.getConnection(url, info);
     }
 
-    public void close() throws Exception
+    public void close()
     {
       druidMeta.closeAllConnections();
-      server.stop();
+      try {
+        server.stop();
+      }
+      catch (Exception e) {
+        throw new RuntimeException("Can't stop server", e);
+      }
     }
 
     protected AbstractAvaticaHandler getAvaticaHandler(final DruidMeta druidMeta)
@@ -243,9 +262,7 @@ public class DruidAvaticaTestDriver implements Driver
             // binder.bind(JoinableFactoryWrapper.class).toInstance(CalciteTests.createJoinableFactoryWrapper());
             binder.bind(CatalogResolver.class).toInstance(CatalogResolver.NULL_RESOLVER);
           }
-
       );
-
     }
 
     @Override

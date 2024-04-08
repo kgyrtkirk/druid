@@ -53,6 +53,8 @@ public @interface SqlTestFrameworkConfig
 
   class SqlTestFrameworkConfigStore {
 
+    public static final SqlTestFrameworkConfigStore INSTANCE = new SqlTestFrameworkConfigStore();
+
     Map<SqlTestFrameworkConfig, ConfigurationInstance> configMap = new HashMap<>();
 
     public ConfigurationInstance getConfigurationInstance(SqlTestFrameworkConfig config, QueryComponentSupplier testHost)
