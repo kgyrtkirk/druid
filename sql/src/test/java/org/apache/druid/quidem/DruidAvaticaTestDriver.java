@@ -113,12 +113,7 @@ public class DruidAvaticaTestDriver implements Driver
     if (!acceptsURL(url)) {
       return null;
     }
-    // rule.ensureInited();
-
     SqlTestFrameworkConfig config = buildConfigfromURIParams(url);
-    // FIXME SqlTestFrameworkConfigStore store = new
-    // SqlTestFrameworkConfig.SqlTestFrameworkConfigStore();
-
     ConfigurationInstance ci = new SqlTestFrameworkConfig.ConfigurationInstance(
         config,
         new AvaticaBasedTestConnectionSupplier(
@@ -127,14 +122,8 @@ public class DruidAvaticaTestDriver implements Driver
     );
 
     try {
-      if(true) {
       AvaticaJettyServer server = ci.framework.injector().getInstance(AvaticaJettyServer.class);
       return server.getConnection(info);
-      }else {
-      AvaticaTestConnection atc;
-      atc = new AvaticaTestConnection(ci.framework);
-      return atc.getConnection(info);
-      }
     }
     catch (Exception e) {
       throw new SQLException("Can't create testconnection", e);
