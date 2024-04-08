@@ -85,7 +85,6 @@ import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.DriverPropertyInfo;
 import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -324,18 +323,18 @@ public class DruidAvaticaTestDriver implements Driver
       DriverManager.registerDriver(this);
     }
     catch (SQLException e) {
-      System.out.println("Error occurred while registering JDBC driver " + this + ": " + e.toString());
+      System.out.println("Error occurred while registering JDBC driver " + this.getClass().getName() + ": " + e.toString());
     }
   }
 
   @Override
-  public boolean acceptsURL(String url) throws SQLException
+  public boolean acceptsURL(String url)
   {
     return url.startsWith(URI_PREFIX);
   }
 
   @Override
-  public DriverPropertyInfo[] getPropertyInfo(String url, Properties info) throws SQLException
+  public DriverPropertyInfo[] getPropertyInfo(String url, Properties info)
   {
     throw new RuntimeException("Unimplemented method!");
   }
@@ -359,7 +358,7 @@ public class DruidAvaticaTestDriver implements Driver
   }
 
   @Override
-  public Logger getParentLogger() throws SQLFeatureNotSupportedException
+  public Logger getParentLogger()
   {
     return Logger.getLogger("");
   }

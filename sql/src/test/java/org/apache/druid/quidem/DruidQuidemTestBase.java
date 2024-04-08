@@ -30,6 +30,7 @@ import org.apache.calcite.util.Util;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.druid.java.util.common.FileUtils;
+import org.apache.druid.java.util.common.IAE;
 import org.apache.druid.java.util.common.StringUtils;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -118,17 +119,17 @@ public abstract class DruidQuidemTestBase
 
   public static class DruidQuidemRunner
   {
-    public DruidQuidemRunner() throws Exception
+    public DruidQuidemRunner()
     {
     }
 
-    public void run(File inFile) throws Exception, IOException, FileNotFoundException
+    public void run(File inFile) throws Exception
     {
       File outFile = new File(inFile.getParent(), inFile.getName() + ".out");
       run(inFile, outFile);
     }
 
-    public void run(File inFile, final File outFile) throws Exception, IOException, FileNotFoundException
+    public void run(File inFile, final File outFile) throws Exception
     {
       FileUtils.mkdirp(outFile.getParentFile());
       try (Reader reader = Util.reader(inFile);
@@ -179,12 +180,10 @@ public abstract class DruidQuidemTestBase
       ret.add(f.getName());
     }
     if (ret.isEmpty()) {
-      throw new IllegalArgumentException(
-          StringUtils.format(
-              "There are no test cases in directory [%s] or there are no matches to filter [%s]",
-              testRoot,
-              filter
-          )
+      throw new IAE(
+          "There are no test cases in directory [%s] or there are no matches to filter [%s]",
+          testRoot,
+          filter
       );
     }
     Collections.sort(ret);

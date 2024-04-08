@@ -31,6 +31,7 @@ import org.apache.calcite.rel.RelRoot;
 import org.apache.calcite.runtime.Hook;
 import org.apache.calcite.sql.SqlExplainFormat;
 import org.apache.calcite.sql.SqlExplainLevel;
+import org.apache.calcite.util.Util;
 import org.apache.druid.jackson.DefaultObjectMapper;
 import org.apache.druid.query.Query;
 import org.apache.druid.segment.TestHelper;
@@ -95,6 +96,7 @@ public class DruidQuidemCommandHandler implements CommandHandler
                     final ResultSet resultSet = statement.executeQuery(sqlCommand.sql);) {
                   // throw away all results
                   while (resultSet.next()) {
+                    Util.discard(false);
                   }
                 }
                 catch (Exception e) {
@@ -159,6 +161,7 @@ public class DruidQuidemCommandHandler implements CommandHandler
               final ResultSet resultSet = statement.executeQuery(sqlCommand.sql);) {
             // throw away all results
             while (resultSet.next()) {
+              Util.discard(false);
             }
           }
           catch (Exception e) {
@@ -210,6 +213,7 @@ public class DruidQuidemCommandHandler implements CommandHandler
               final ResultSet resultSet = statement.executeQuery(sqlCommand.sql);) {
             // throw away all results
             while (resultSet.next()) {
+              Util.discard(false);
             }
           }
           catch (Exception e) {
