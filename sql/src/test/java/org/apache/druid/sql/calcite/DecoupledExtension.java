@@ -64,7 +64,7 @@ public class DecoupledExtension implements BeforeEachCallback
   {
     DecoupledTestConfig decTestConfig = BaseCalciteQueryTest.queryFrameworkRule.getAnnotation(DecoupledTestConfig.class);
 
-    assumeTrue(BaseCalciteQueryTest.queryFrameworkRule.getConfig().numMergeBuffers() == 0);
+    assumeTrue(BaseCalciteQueryTest.queryFrameworkRule.getConfig().numMergeBuffers == 0);
 
     PlannerComponentSupplier componentSupplier = baseTest;
 

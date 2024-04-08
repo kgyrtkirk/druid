@@ -34,6 +34,7 @@ import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Annotation to specify desired framework settings.
@@ -51,13 +52,51 @@ public @interface SqlTestFrameworkConfig
 
   ResultCacheMode resultCache() default ResultCacheMode.DISABLED;
 
+  /**
+   * Non-annotation version of {@link SqlTestFrameworkConfig}.
+   *
+   * Makes it less convoluted to work with configurations created at runtime.
+   */
+  class SqlTestFrameworkConfigInstance
+  {
+    public final int numMergeBuffers;
+    public final int minTopNThreshold;
+    public final ResultCacheMode resultCache;
+
+    public SqlTestFrameworkConfigInstance(SqlTestFrameworkConfig annotation)
+    {
+      numMergeBuffers = annotation.numMergeBuffers();
+      minTopNThreshold = annotation.minTopNThreshold();
+      resultCache = annotation.resultCache();
+    }
+
+    @Override
+    public int hashCode()
+    {
+      return Objects.hash(minTopNThreshold, numMergeBuffers, resultCache);
+    }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+      if (obj == null || getClass() != obj.getClass()) {
+        return false;
+      }
+      SqlTestFrameworkConfigInstance other = (SqlTestFrameworkConfigInstance) obj;
+      return minTopNThreshold == other.minTopNThreshold
+          && numMergeBuffers == other.numMergeBuffers
+          && resultCache == other.resultCache;
+    }
+
+  }
+
   class SqlTestFrameworkConfigStore {
 
     public static final SqlTestFrameworkConfigStore INSTANCE = new SqlTestFrameworkConfigStore();
 
-    Map<SqlTestFrameworkConfig, ConfigurationInstance> configMap = new HashMap<>();
+    Map<SqlTestFrameworkConfigInstance, ConfigurationInstance> configMap = new HashMap<>();
 
-    public ConfigurationInstance getConfigurationInstance(SqlTestFrameworkConfig config, QueryComponentSupplier testHost)
+    public ConfigurationInstance getConfigurationInstance(SqlTestFrameworkConfigInstance config, QueryComponentSupplier testHost)
     {
       ConfigurationInstance ret = configMap.get(config);
       if (!configMap.containsKey(config)) {
@@ -84,7 +123,7 @@ public @interface SqlTestFrameworkConfig
   class Rule implements AfterAllCallback, BeforeEachCallback
   {
     SqlTestFrameworkConfigStore configStore = new SqlTestFrameworkConfigStore();
-    private SqlTestFrameworkConfig config;
+    private SqlTestFrameworkConfigInstance config;
     private QueryComponentSupplier testHost;
     private Method method;
 
@@ -117,15 +156,16 @@ public @interface SqlTestFrameworkConfig
       }
     }
 
+    // FIXME protect
     public void setConfig(SqlTestFrameworkConfig annotation)
     {
-      config = annotation;
-      if (config == null) {
-        config = defaultConfig();
+      if(annotation == null ) {
+        annotation= defaultConfig();
       }
+      config = new SqlTestFrameworkConfigInstance(annotation);
     }
 
-    public SqlTestFrameworkConfig getConfig()
+    public SqlTestFrameworkConfigInstance getConfig()
     {
       return config;
     }
@@ -150,13 +190,13 @@ public @interface SqlTestFrameworkConfig
   {
     public SqlTestFramework framework;
 
-    public ConfigurationInstance(SqlTestFrameworkConfig config, QueryComponentSupplier testHost)
+    public ConfigurationInstance(SqlTestFrameworkConfigInstance config, QueryComponentSupplier testHost)
     {
       SqlTestFramework.Builder builder = new SqlTestFramework.Builder(testHost)
           .catalogResolver(testHost.createCatalogResolver())
-          .minTopNThreshold(config.minTopNThreshold())
-          .mergeBufferCount(config.numMergeBuffers())
-          .withOverrideModule(config.resultCache().makeModule());
+          .minTopNThreshold(config.minTopNThreshold)
+          .mergeBufferCount(config.numMergeBuffers)
+          .withOverrideModule(config.resultCache.makeModule());
       framework = builder.build();
     }
 

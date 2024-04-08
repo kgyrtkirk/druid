@@ -56,6 +56,7 @@ import org.apache.druid.sql.avatica.DruidAvaticaJsonHandler;
 import org.apache.druid.sql.avatica.DruidMeta;
 import org.apache.druid.sql.calcite.SqlTestFrameworkConfig;
 import org.apache.druid.sql.calcite.SqlTestFrameworkConfig.ConfigurationInstance;
+import org.apache.druid.sql.calcite.SqlTestFrameworkConfig.SqlTestFrameworkConfigInstance;
 import org.apache.druid.sql.calcite.planner.CalciteRulesManager;
 import org.apache.druid.sql.calcite.planner.CatalogResolver;
 import org.apache.druid.sql.calcite.planner.PlannerConfig;
@@ -115,7 +116,7 @@ public class DruidAvaticaTestDriver implements Driver
 
     if(false) {
     ConfigurationInstance ci = SqlTestFrameworkConfig.SqlTestFrameworkConfigStore.INSTANCE.getConfigurationInstance(
-        config,
+        new SqlTestFrameworkConfigInstance(config),
         new AvaticaBasedTestConnectionSupplier(
             new StandardComponentSupplier(newTempFolder1())
         )
@@ -124,7 +125,7 @@ public class DruidAvaticaTestDriver implements Driver
 
 
     ConfigurationInstance ci = new SqlTestFrameworkConfig.ConfigurationInstance(
-        config,
+        new SqlTestFrameworkConfigInstance(config),
         new AvaticaBasedTestConnectionSupplier(
             new StandardComponentSupplier(newTempFolder1())
         )
