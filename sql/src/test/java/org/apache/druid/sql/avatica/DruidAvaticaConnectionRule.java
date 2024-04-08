@@ -230,7 +230,7 @@ public class DruidAvaticaConnectionRule
 
   public Connection getConnection() throws SQLException
   {
-    return getConnection("regularUser", "druid");
+    return getConnection("regularUser", null);
   }
 
   public Connection getConnection(String user, String password) throws SQLException
