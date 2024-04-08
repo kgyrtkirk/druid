@@ -52,7 +52,6 @@ import org.apache.druid.server.security.AuthenticatorMapper;
 import org.apache.druid.server.security.AuthorizerMapper;
 import org.apache.druid.server.security.Escalator;
 import org.apache.druid.sql.avatica.AvaticaMonitor;
-import org.apache.druid.sql.avatica.DruidAvaticaConnectionRule;
 import org.apache.druid.sql.avatica.DruidAvaticaJsonHandler;
 import org.apache.druid.sql.avatica.DruidMeta;
 import org.apache.druid.sql.calcite.SqlTestFrameworkConfig;
@@ -99,12 +98,10 @@ public class DruidAvaticaTestDriver implements Driver
   }
 
   private static final String prefix = "druidtest://";
-  private DruidAvaticaConnectionRule rule;
   public static final String DEFAULT_URI = prefix + "/";
 
   public DruidAvaticaTestDriver()
   {
-    rule = new DruidAvaticaConnectionRule();
   }
 
   @Override
@@ -130,12 +127,14 @@ public class DruidAvaticaTestDriver implements Driver
     }
   }
 
-  static class AvaticaBasedConnectionModule implements DruidModule {
-
+  static class AvaticaBasedConnectionModule implements DruidModule
+  {
 
     @Provides
     @LazySingleton
-    public DruidSchemaCatalog getLookupNodeService(QueryRunnerFactoryConglomerate conglomerate, SpecificSegmentsQuerySegmentWalker walker, PlannerConfig plannerConfig) {
+    public DruidSchemaCatalog getLookupNodeService(QueryRunnerFactoryConglomerate conglomerate,
+        SpecificSegmentsQuerySegmentWalker walker, PlannerConfig plannerConfig)
+    {
       return CalciteTests.createMockRootSchema(
           conglomerate,
           walker,
@@ -146,7 +145,8 @@ public class DruidAvaticaTestDriver implements Driver
 
     @Provides
     @LazySingleton
-    public AvaticaJettyServer getAvaticaServer(DruidMeta druidMeta) throws Exception {
+    public AvaticaJettyServer getAvaticaServer(DruidMeta druidMeta) throws Exception
+    {
       return new AvaticaJettyServer(druidMeta);
     }
 
@@ -155,9 +155,10 @@ public class DruidAvaticaTestDriver implements Driver
     {
     }
 
-
   }
-  static class AvaticaJettyServer implements AutoCloseable {
+
+  static class AvaticaJettyServer implements AutoCloseable
+  {
     final DruidMeta druidMeta;
     final Server server;
     final String url;
@@ -171,7 +172,7 @@ public class DruidAvaticaTestDriver implements Driver
       url = StringUtils.format(
           "jdbc:avatica:remote:url=%s",
           new URIBuilder(server.getURI()).setPath(DruidAvaticaJsonHandler.AVATICA_PATH).build()
-          );
+      );
     }
 
     public Connection getConnection(Properties info) throws SQLException
@@ -191,7 +192,7 @@ public class DruidAvaticaTestDriver implements Driver
           druidMeta,
           new DruidNode("dummy", "dummy", false, 1, null, true, false),
           new AvaticaMonitor()
-          );
+      );
     }
   }
 
@@ -211,23 +212,10 @@ public class DruidAvaticaTestDriver implements Driver
       delegate.gatherProperties(properties);
     }
 
-//    private DruidSchemaCatalog makeRootSchema()
-//    {
-//      return CalciteTests.createMockRootSchema(
-//          conglomerate,
-//          walker,
-//          plannerConfig,
-//          CalciteTests.TEST_AUTHORIZER_MAPPER
-//      );
-//    }
-
-
-
     @Override
     public void configureGuice(DruidInjectorBuilder builder)
     {
       delegate.configureGuice(builder);
-//      DruidSchemaCatalog rootSchema = makeRootSchema();
       TestRequestLogger testRequestLogger = new TestRequestLogger();
       builder.addModule(new AvaticaBasedConnectionModule());
       builder.addModule(
@@ -239,20 +227,9 @@ public class DruidAvaticaTestDriver implements Driver
             binder.bind(AuthorizerMapper.class).toInstance(CalciteTests.TEST_AUTHORIZER_MAPPER);
             binder.bind(Escalator.class).toInstance(CalciteTests.TEST_AUTHENTICATOR_ESCALATOR);
             binder.bind(RequestLogger.class).toInstance(testRequestLogger);
-//            binder.bind(DruidSchemaCatalog.class).toInstance(rootSchema);
-//            binder.bind(DruidSchemaCatalog.class).toInstance(rootSchema);
-//            for (NamedSchema schema : rootSchema.getNamedSchemas().values()) {
-//              Multibinder.newSetBinder(binder, NamedSchema.class).addBinding().toInstance(schema);
-//            }
-//            binder.bind(QueryLifecycleFactory.class)
-//                .toInstance(CalciteTests.createMockQueryLifecycleFactory(walker, conglomerate));
-//            binder.bind(DruidOperatorTable.class).toInstance(operatorTable);
-//            binder.bind(ExprMacroTable.class).toInstance(macroTable);
-//            binder.bind(PlannerConfig.class).toInstance(plannerConfig);
             binder.bind(String.class)
                 .annotatedWith(DruidSchemaName.class)
                 .toInstance(CalciteTests.DRUID_SCHEMA_NAME);
-//            binder.bind(AvaticaServerConfig.class).toInstance(avaticaConfig);
             binder.bind(ServiceEmitter.class).to(NoopServiceEmitter.class);
             binder.bind(QuerySchedulerProvider.class).in(LazySingleton.class);
             binder.bind(QueryScheduler.class)
@@ -263,11 +240,11 @@ public class DruidAvaticaTestDriver implements Driver
             {
             }).toInstance(Suppliers.ofInstance(new DefaultQueryConfig(ImmutableMap.of())));
             binder.bind(CalciteRulesManager.class).toInstance(new CalciteRulesManager(ImmutableSet.of()));
-//            binder.bind(JoinableFactoryWrapper.class).toInstance(CalciteTests.createJoinableFactoryWrapper());
+            // binder.bind(JoinableFactoryWrapper.class).toInstance(CalciteTests.createJoinableFactoryWrapper());
             binder.bind(CatalogResolver.class).toInstance(CatalogResolver.NULL_RESOLVER);
           }
 
-          );
+      );
 
     }
 
