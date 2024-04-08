@@ -33,6 +33,7 @@ import org.apache.calcite.avatica.server.AbstractAvaticaHandler;
 import org.apache.druid.guice.DruidInjectorBuilder;
 import org.apache.druid.guice.LazySingleton;
 import org.apache.druid.initialization.DruidModule;
+import org.apache.druid.java.util.common.FileUtils;
 import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.java.util.common.io.Closer;
 import org.apache.druid.java.util.emitter.service.ServiceEmitter;
@@ -76,11 +77,9 @@ import org.eclipse.jetty.server.Server;
 
 import java.io.Closeable;
 import java.io.File;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
@@ -293,18 +292,12 @@ public class DruidAvaticaTestDriver implements Driver
     {
       delegate.finalizeTestFramework(sqlTestFramework);
     }
-
   }
 
   // FIXME
   protected File newTempFolder1()
   {
-    try {
-      return Files.createTempDirectory("FIXME").toFile();
-    }
-    catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    return FileUtils.createTempDir("FIXME");
   }
 
   public static SqlTestFrameworkConfig buildConfigfromURIParams(String url) throws SQLException

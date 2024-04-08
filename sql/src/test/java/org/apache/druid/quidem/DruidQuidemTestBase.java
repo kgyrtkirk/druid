@@ -29,6 +29,7 @@ import org.apache.calcite.util.Closer;
 import org.apache.calcite.util.Util;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
+import org.apache.druid.java.util.common.FileUtils;
 import org.apache.druid.java.util.common.StringUtils;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -129,7 +130,7 @@ public abstract class DruidQuidemTestBase
 
     public void run(File inFile, final File outFile) throws Exception, IOException, FileNotFoundException
     {
-      Util.discard(outFile.getParentFile().mkdirs());
+      FileUtils.mkdirp(outFile.getParentFile());
       try (Reader reader = Util.reader(inFile);
           Writer writer = Util.printWriter(outFile);
           Closer closer = new Closer()) {

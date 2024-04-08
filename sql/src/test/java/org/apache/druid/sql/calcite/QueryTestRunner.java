@@ -641,7 +641,7 @@ public class QueryTestRunner
       QTestCase qt = new QTestCase(iqTestInfo);
       Map<String, Object> queryContext = builder.getQueryContext();
       for (Entry<String, Object> entry : queryContext.entrySet()) {
-        qt.println(String.format("!set %s %s", entry.getKey(), entry.getValue()));
+        qt.println(StringUtils.format("!set %s %s", entry.getKey(), entry.getValue()));
       }
       qt.println("!set outputformat mysql");
       qt.println("!use druidtest:///");

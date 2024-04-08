@@ -19,11 +19,11 @@
 
 package org.apache.druid.sql.calcite;
 
-import com.google.common.base.Charsets;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
-import org.apache.calcite.util.Util;
+import org.apache.druid.java.util.common.FileUtils;
+import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.quidem.DruidQTestInfo;
 import org.apache.druid.quidem.DruidQuidemTestBase;
 import org.apache.druid.quidem.DruidQuidemTestBase.DruidQuidemRunner;
@@ -32,6 +32,7 @@ import org.apache.druid.sql.calcite.QueryTestRunner.QueryRunStep;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 public class QTestCase
 {
@@ -58,13 +59,13 @@ public class QTestCase
       @Override
       public void run()
       {
-        if (DruidQuidemRunner.isOverwrite()) {
-          writeCaseTo(testInfo.getIQFile());
-        } else {
-          isValidTestCaseFile(testInfo.getIQFile());
-        }
-
         try {
+          if (DruidQuidemRunner.isOverwrite()) {
+            writeCaseTo(testInfo.getIQFile());
+          } else {
+            isValidTestCaseFile(testInfo.getIQFile());
+          }
+
           DruidQuidemRunner runner = new DruidQuidemTestBase.DruidQuidemRunner();
           runner.run(testInfo.getIQFile());
         }
@@ -82,7 +83,7 @@ public class QTestCase
     }
     try {
       String header = makeHeader();
-      String testCaseFirstLine = Files.asCharSource(iqFile, Charsets.UTF_8).readFirstLine();
+      String testCaseFirstLine = Files.asCharSource(iqFile, StandardCharsets.UTF_8).readFirstLine();
       if (!header.equals(testCaseFirstLine)) {
         throw new IllegalStateException(
             "backing quidem testcase doesn't match test - run with (-Dquidem.overwrite) : " + iqFile
@@ -96,18 +97,18 @@ public class QTestCase
 
   private String makeHeader()
   {
-    HashCode hash = Hashing.crc32().hashBytes(sb.toString().getBytes());
-    return String.format("# %s case-crc:%s", testInfo.testName, hash);
+    HashCode hash = Hashing.crc32().hashBytes(sb.toString().getBytes(StandardCharsets.UTF_8));
+    return StringUtils.format("# %s case-crc:%s", testInfo.testName, hash);
 
   }
 
-  public void writeCaseTo(File file)
+  public void writeCaseTo(File file) throws IOException
   {
-    Util.discard(file.getParentFile().mkdirs());
+    FileUtils.mkdirp(file.getParentFile());
     try (FileOutputStream fos = new FileOutputStream(file)) {
-      fos.write(makeHeader().getBytes(Charsets.UTF_8));
+      fos.write(makeHeader().getBytes(StandardCharsets.UTF_8));
       fos.write('\n');
-      fos.write(sb.toString().getBytes(Charsets.UTF_8));
+      fos.write(sb.toString().getBytes(StandardCharsets.UTF_8));
     }
     catch (IOException e) {
       throw new RuntimeException("Error writing testcase to: " + file, e);
