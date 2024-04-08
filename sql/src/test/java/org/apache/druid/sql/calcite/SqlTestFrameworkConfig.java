@@ -90,13 +90,16 @@ public @interface SqlTestFrameworkConfig
 
   }
 
-  class SqlTestFrameworkConfigStore {
+  class SqlTestFrameworkConfigStore
+  {
 
     public static final SqlTestFrameworkConfigStore INSTANCE = new SqlTestFrameworkConfigStore();
 
     Map<SqlTestFrameworkConfigInstance, ConfigurationInstance> configMap = new HashMap<>();
 
-    public ConfigurationInstance getConfigurationInstance(SqlTestFrameworkConfigInstance config, QueryComponentSupplier testHost)
+    public ConfigurationInstance getConfigurationInstance(
+        SqlTestFrameworkConfigInstance config,
+        QueryComponentSupplier testHost)
     {
       ConfigurationInstance ret = configMap.get(config);
       if (!configMap.containsKey(config)) {
@@ -113,8 +116,6 @@ public @interface SqlTestFrameworkConfig
       }
       configMap.clear();
     }
-
-
   }
 
   /**
@@ -156,11 +157,10 @@ public @interface SqlTestFrameworkConfig
       }
     }
 
-    // FIXME protect
-    public void setConfig(SqlTestFrameworkConfig annotation)
+    private void setConfig(SqlTestFrameworkConfig annotation)
     {
-      if(annotation == null ) {
-        annotation= defaultConfig();
+      if (annotation == null) {
+        annotation = defaultConfig();
       }
       config = new SqlTestFrameworkConfigInstance(annotation);
     }
