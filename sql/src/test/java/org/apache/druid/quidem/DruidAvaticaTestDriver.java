@@ -19,10 +19,50 @@
 
 package org.apache.druid.quidem;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Supplier;
+import com.google.common.base.Suppliers;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import com.google.inject.Binder;
+import com.google.inject.Injector;
+import com.google.inject.Provides;
+import com.google.inject.TypeLiteral;
+import com.google.inject.name.Names;
+import org.apache.druid.guice.DruidInjectorBuilder;
+import org.apache.druid.guice.LazySingleton;
+import org.apache.druid.initialization.DruidModule;
+import org.apache.druid.java.util.common.io.Closer;
+import org.apache.druid.java.util.emitter.service.ServiceEmitter;
+import org.apache.druid.query.DefaultQueryConfig;
+import org.apache.druid.query.QueryRunnerFactoryConglomerate;
+import org.apache.druid.query.lookup.LookupExtractorFactoryContainerProvider;
+import org.apache.druid.segment.join.JoinableFactoryWrapper;
+import org.apache.druid.server.QueryLifecycleFactory;
+import org.apache.druid.server.QueryScheduler;
+import org.apache.druid.server.QuerySchedulerProvider;
+import org.apache.druid.server.SpecificSegmentsQuerySegmentWalker;
+import org.apache.druid.server.log.RequestLogger;
+import org.apache.druid.server.log.TestRequestLogger;
+import org.apache.druid.server.metrics.NoopServiceEmitter;
+import org.apache.druid.server.security.AuthenticatorMapper;
+import org.apache.druid.server.security.AuthorizerMapper;
+import org.apache.druid.server.security.Escalator;
 import org.apache.druid.sql.avatica.DruidAvaticaConnectionRule;
 import org.apache.druid.sql.calcite.SqlTestFrameworkConfig;
 import org.apache.druid.sql.calcite.SqlTestFrameworkConfig.ConfigurationInstance;
+import org.apache.druid.sql.calcite.planner.CalciteRulesManager;
+import org.apache.druid.sql.calcite.planner.CatalogResolver;
+import org.apache.druid.sql.calcite.planner.PlannerConfig;
+import org.apache.druid.sql.calcite.run.SqlEngine;
+import org.apache.druid.sql.calcite.schema.DruidSchemaCatalog;
+import org.apache.druid.sql.calcite.schema.DruidSchemaName;
+import org.apache.druid.sql.calcite.util.CalciteTests;
+import org.apache.druid.sql.calcite.util.SqlTestFramework;
+import org.apache.druid.sql.calcite.util.SqlTestFramework.Builder;
+import org.apache.druid.sql.calcite.util.SqlTestFramework.QueryComponentSupplier;
 import org.apache.druid.sql.calcite.util.SqlTestFramework.StandardComponentSupplier;
+import org.apache.druid.sql.guice.SqlModule;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 
@@ -65,18 +105,166 @@ public class DruidAvaticaTestDriver implements Driver
     if (!acceptsURL(url)) {
       return null;
     }
-//    rule.ensureInited();
+    // rule.ensureInited();
 
     SqlTestFrameworkConfig config = buildConfigfromURIParams(url);
-//    FIXME SqlTestFrameworkConfigStore store = new SqlTestFrameworkConfig.SqlTestFrameworkConfigStore();
+    // FIXME SqlTestFrameworkConfigStore store = new
+    // SqlTestFrameworkConfig.SqlTestFrameworkConfigStore();
 
-    ConfigurationInstance ci = new SqlTestFrameworkConfig.ConfigurationInstance(config, new StandardComponentSupplier(newTempFolder1()));
+    ConfigurationInstance ci = new SqlTestFrameworkConfig.ConfigurationInstance(
+        config,
+        new AvaticaBasedTestConnectionSupplier(
+            new StandardComponentSupplier(newTempFolder1())
+        )
+    );
 
-    AvaticaTestConnection atc = new AvaticaTestConnection(ci.framework);
-
-    return atc.getConnection(info);
+    try {
+      AvaticaTestConnection atc;
+      atc = new AvaticaTestConnection(ci.framework);
+      return atc.getConnection(info);
+    }
+    catch (Exception e) {
+      throw new SQLException("Can't create testconnection", e);
+    }
   }
 
+  static class AvaticaBasedConnectionModule implements DruidModule {
+
+
+    @Provides
+    @LazySingleton
+    public DruidSchemaCatalog getLookupNodeService(QueryRunnerFactoryConglomerate conglomerate, SpecificSegmentsQuerySegmentWalker walker, PlannerConfig plannerConfig) {
+      return CalciteTests.createMockRootSchema(
+          conglomerate,
+          walker,
+          plannerConfig,
+          CalciteTests.TEST_AUTHORIZER_MAPPER
+      );
+    }
+
+    @Override
+    public void configure(Binder binder)
+    {
+    }
+
+  }
+
+  static class AvaticaBasedTestConnectionSupplier implements QueryComponentSupplier
+  {
+
+    private QueryComponentSupplier delegate;
+
+    public AvaticaBasedTestConnectionSupplier(QueryComponentSupplier delegate)
+    {
+      this.delegate = delegate;
+    }
+
+    @Override
+    public void gatherProperties(Properties properties)
+    {
+      delegate.gatherProperties(properties);
+    }
+
+//    private DruidSchemaCatalog makeRootSchema()
+//    {
+//      return CalciteTests.createMockRootSchema(
+//          conglomerate,
+//          walker,
+//          plannerConfig,
+//          CalciteTests.TEST_AUTHORIZER_MAPPER
+//      );
+//    }
+
+
+
+    @Override
+    public void configureGuice(DruidInjectorBuilder builder)
+    {
+      delegate.configureGuice(builder);
+//      DruidSchemaCatalog rootSchema = makeRootSchema();
+      TestRequestLogger testRequestLogger = new TestRequestLogger();
+      builder.addModule(new AvaticaBasedConnectionModule());
+      builder.addModule(
+          binder -> {
+            binder.bindConstant().annotatedWith(Names.named("serviceName")).to("test");
+            binder.bindConstant().annotatedWith(Names.named("servicePort")).to(0);
+            binder.bindConstant().annotatedWith(Names.named("tlsServicePort")).to(-1);
+            binder.bind(AuthenticatorMapper.class).toInstance(CalciteTests.TEST_AUTHENTICATOR_MAPPER);
+            binder.bind(AuthorizerMapper.class).toInstance(CalciteTests.TEST_AUTHORIZER_MAPPER);
+            binder.bind(Escalator.class).toInstance(CalciteTests.TEST_AUTHENTICATOR_ESCALATOR);
+            binder.bind(RequestLogger.class).toInstance(testRequestLogger);
+//            binder.bind(DruidSchemaCatalog.class).toInstance(rootSchema);
+//            binder.bind(DruidSchemaCatalog.class).toInstance(rootSchema);
+//            for (NamedSchema schema : rootSchema.getNamedSchemas().values()) {
+//              Multibinder.newSetBinder(binder, NamedSchema.class).addBinding().toInstance(schema);
+//            }
+//            binder.bind(QueryLifecycleFactory.class)
+//                .toInstance(CalciteTests.createMockQueryLifecycleFactory(walker, conglomerate));
+//            binder.bind(DruidOperatorTable.class).toInstance(operatorTable);
+//            binder.bind(ExprMacroTable.class).toInstance(macroTable);
+//            binder.bind(PlannerConfig.class).toInstance(plannerConfig);
+            binder.bind(String.class)
+                .annotatedWith(DruidSchemaName.class)
+                .toInstance(CalciteTests.DRUID_SCHEMA_NAME);
+//            binder.bind(AvaticaServerConfig.class).toInstance(avaticaConfig);
+            binder.bind(ServiceEmitter.class).to(NoopServiceEmitter.class);
+            binder.bind(QuerySchedulerProvider.class).in(LazySingleton.class);
+            binder.bind(QueryScheduler.class)
+                .toProvider(QuerySchedulerProvider.class)
+                .in(LazySingleton.class);
+            binder.install(new SqlModule.SqlStatementFactoryModule());
+            binder.bind(new TypeLiteral<Supplier<DefaultQueryConfig>>()
+            {
+            }).toInstance(Suppliers.ofInstance(new DefaultQueryConfig(ImmutableMap.of())));
+            binder.bind(CalciteRulesManager.class).toInstance(new CalciteRulesManager(ImmutableSet.of()));
+//            binder.bind(JoinableFactoryWrapper.class).toInstance(CalciteTests.createJoinableFactoryWrapper());
+            binder.bind(CatalogResolver.class).toInstance(CatalogResolver.NULL_RESOLVER);
+          }
+
+          );
+
+    }
+
+    @Override
+    public QueryRunnerFactoryConglomerate createCongolmerate(Builder builder, Closer closer)
+    {
+      return delegate.createCongolmerate(builder, closer);
+    }
+
+    @Override
+    public SpecificSegmentsQuerySegmentWalker createQuerySegmentWalker(QueryRunnerFactoryConglomerate conglomerate,
+        JoinableFactoryWrapper joinableFactory, Injector injector)
+    {
+      return delegate.createQuerySegmentWalker(conglomerate, joinableFactory, injector);
+    }
+
+    @Override
+    public SqlEngine createEngine(QueryLifecycleFactory qlf, ObjectMapper objectMapper, Injector injector)
+    {
+      return delegate.createEngine(qlf, objectMapper, injector);
+    }
+
+    @Override
+    public void configureJsonMapper(ObjectMapper mapper)
+    {
+      delegate.configureJsonMapper(mapper);
+    }
+
+    @Override
+    public JoinableFactoryWrapper createJoinableFactoryWrapper(LookupExtractorFactoryContainerProvider lookupProvider)
+    {
+      return delegate.createJoinableFactoryWrapper(lookupProvider);
+    }
+
+    @Override
+    public void finalizeTestFramework(SqlTestFramework sqlTestFramework)
+    {
+      delegate.finalizeTestFramework(sqlTestFramework);
+    }
+
+  }
+
+  // FIXME
   protected File newTempFolder1()
   {
     try {

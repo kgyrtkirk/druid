@@ -19,24 +19,80 @@
 
 package org.apache.druid.quidem;
 
+import org.apache.calcite.avatica.server.AbstractAvaticaHandler;
+import org.apache.druid.java.util.common.StringUtils;
+import org.apache.druid.server.DruidNode;
+import org.apache.druid.sql.avatica.AvaticaMonitor;
+import org.apache.druid.sql.avatica.DruidAvaticaJsonHandler;
+import org.apache.druid.sql.avatica.DruidMeta;
+import com.google.inject.Injector;
 import org.apache.druid.sql.calcite.util.SqlTestFramework;
+import org.apache.http.client.utils.URIBuilder;
+import org.eclipse.jetty.server.Server;
 
 import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.Properties;
 
 public class AvaticaTestConnection
 {
 
   private SqlTestFramework framework;
+  private ServerWrapper server;
 
-  public AvaticaTestConnection(SqlTestFramework framework)
+  public AvaticaTestConnection(SqlTestFramework framework) throws Exception
   {
     this.framework = framework;
+    Injector injector = framework.injector();
+
+    DruidMeta druidMeta = injector.getInstance(DruidMeta.class);
+    server = new ServerWrapper(druidMeta);
+
   }
 
-  public Connection getConnection(Properties info)
+  // Default implementation is for JSON to allow debugging of tests.
+// FIXME: should come via Inject module
+  protected AbstractAvaticaHandler getAvaticaHandler(final DruidMeta druidMeta)
   {
-    throw new RuntimeException();
+    return new DruidAvaticaJsonHandler(
+        druidMeta,
+        new DruidNode("dummy", "dummy", false, 1, null, true, false),
+        new AvaticaMonitor()
+    );
+  }
+
+  //FIXME: should be created via Inject module
+  private class ServerWrapper
+  {
+    final DruidMeta druidMeta;
+    final Server server;
+    final String url;
+
+    ServerWrapper(final DruidMeta druidMeta) throws Exception
+    {
+      this.druidMeta = druidMeta;
+      server = new Server(0);
+      server.setHandler(getAvaticaHandler(druidMeta));
+      server.start();
+      url = StringUtils.format(
+          "jdbc:avatica:remote:url=%s",
+          new URIBuilder(server.getURI()).setPath(DruidAvaticaJsonHandler.AVATICA_PATH).build()
+      );
+    }
+
+    public void close() throws Exception
+    {
+      druidMeta.closeAllConnections();
+      server.stop();
+    }
+  }
+
+
+
+  public Connection getConnection(Properties info) throws SQLException
+  {
+    return DriverManager.getConnection(server.url, info);
   }
 
 }

@@ -752,6 +752,7 @@ public class DruidMeta extends MetaImpl
   }
 
   @VisibleForTesting
+  public //FIXME move  other class
   void closeAllConnections()
   {
     for (String connectionId : ImmutableSet.copyOf(connections.keySet())) {
