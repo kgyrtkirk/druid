@@ -27,6 +27,7 @@ import net.hydromatic.quidem.CommandHandler;
 import net.hydromatic.quidem.Quidem.SqlCommand;
 import org.apache.calcite.plan.RelOptUtil;
 import org.apache.calcite.rel.RelNode;
+import org.apache.calcite.rel.RelRoot;
 import org.apache.calcite.runtime.Hook;
 import org.apache.calcite.sql.SqlExplainFormat;
 import org.apache.calcite.sql.SqlExplainLevel;
@@ -56,7 +57,7 @@ public class DruidQuidemCommandHandler implements CommandHandler
       return new LogicalPlanCommand(lines, content);
     }
     if (line.startsWith("convertedPlan")) {
-      return new LogicalPlanCommand(lines, content);
+      return new ConvertedPlanCommand(lines, content);
     }
     return null;
   }
@@ -73,11 +74,13 @@ public class DruidQuidemCommandHandler implements CommandHandler
       this.content = content;
     }
 
+    @Override
     public String describe(Context x)
     {
       return commandName() + " [sql: " + x.previousSqlCommand().sql + "]";
     }
 
+    @Override
     public void execute(Context x, boolean execute) throws Exception
     {
       if (execute) {
@@ -135,17 +138,19 @@ public class DruidQuidemCommandHandler implements CommandHandler
       this.content = content;
     }
 
+    @Override
     public String describe(Context x)
     {
       return commandName() + " [sql: " + x.previousSqlCommand().sql + "]";
     }
 
+    @Override
     public void execute(Context x, boolean execute) throws Exception
     {
       if (execute) {
         final SqlCommand sqlCommand = x.previousSqlCommand();
 
-        List<RelNode> logged = new ArrayList<RelNode>();
+        List<RelNode> logged = new ArrayList<>();
         try (final Hook.Closeable unhook = Hook.TRIMMED.add(
             (Consumer<RelNode>) a -> logged.add(a)
         )) {
@@ -157,7 +162,7 @@ public class DruidQuidemCommandHandler implements CommandHandler
             }
           }
           catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new Error(e);
           }
         }
 
@@ -184,19 +189,21 @@ public class DruidQuidemCommandHandler implements CommandHandler
       this.content = content;
     }
 
+    @Override
     public String describe(Context x)
     {
       return commandName() + " [sql: " + x.previousSqlCommand().sql + "]";
     }
 
+    @Override
     public void execute(Context x, boolean execute) throws Exception
     {
       if (execute) {
         final SqlCommand sqlCommand = x.previousSqlCommand();
 
-        List<RelNode> logged = new ArrayList<RelNode>();
+        List<RelRoot> logged = new ArrayList<>();
         try (final Hook.Closeable unhook = Hook.CONVERTED.add(
-            (Consumer<RelNode>) a -> logged.add(a)
+            (Consumer<RelRoot>) a -> logged.add(a)
         )) {
           try (
               final Statement statement = x.connection().createStatement();
@@ -206,12 +213,12 @@ public class DruidQuidemCommandHandler implements CommandHandler
             }
           }
           catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new Error(e);
           }
         }
 
-        for (RelNode node : logged) {
-          String str = RelOptUtil.dumpPlan("", node, SqlExplainFormat.TEXT, SqlExplainLevel.ALL_ATTRIBUTES);
+        for (RelRoot node : logged) {
+          String str = RelOptUtil.dumpPlan("", node.rel, SqlExplainFormat.TEXT, SqlExplainLevel.ALL_ATTRIBUTES);
           x.echo(ImmutableList.of(str));
         }
       } else {
