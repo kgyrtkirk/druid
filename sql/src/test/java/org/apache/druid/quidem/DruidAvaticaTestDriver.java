@@ -324,7 +324,7 @@ public class DruidAvaticaTestDriver implements Driver
       DriverManager.registerDriver(this);
     }
     catch (SQLException e) {
-      System.out.println("Error occurred while registering JDBC driver " + this.getClass().getName() + ": " + e.toString());
+      System.out.println("Error occurred while registering JDBC driver " + this.getClass().getName() + ": " + e);
     }
   }
 

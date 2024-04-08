@@ -52,7 +52,7 @@ class MapToInterfaceHandler implements InvocationHandler
   }
 
   @Override
-  public Object invoke(Object proxy, Method method, Object[] args) throws Throwable
+  public Object invoke(Object proxy, Method method, Object[] args)
   {
     Class<?> returnType = method.getReturnType();
     String obj = backingMap.get(method.getName());

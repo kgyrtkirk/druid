@@ -100,7 +100,7 @@ public class DruidAvaticaConnectionRule
   private static Closer resourceCloser;
 
   @Override
-  public void beforeAll(ExtensionContext context) throws Exception
+  public void beforeAll(ExtensionContext context)
   {
     NullHandling.initializeForTests();
     ExpressionProcessing.initializeForTests();

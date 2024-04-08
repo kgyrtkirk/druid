@@ -186,7 +186,7 @@ public @interface SqlTestFrameworkConfig
     }
   }
 
-  public class ConfigurationInstance
+  class ConfigurationInstance
   {
     public SqlTestFramework framework;
 

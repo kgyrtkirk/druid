@@ -82,7 +82,7 @@ public class DruidQuidemCommandHandler implements CommandHandler
     }
 
     @Override
-    public void execute(Context x, boolean execute) throws Exception
+    public void execute(Context x, boolean execute)
     {
       if (execute) {
         try {
@@ -147,7 +147,7 @@ public class DruidQuidemCommandHandler implements CommandHandler
     }
 
     @Override
-    public void execute(Context x, boolean execute) throws Exception
+    public void execute(Context x, boolean execute)
     {
       if (execute) {
         final SqlCommand sqlCommand = x.previousSqlCommand();
@@ -199,7 +199,7 @@ public class DruidQuidemCommandHandler implements CommandHandler
     }
 
     @Override
-    public void execute(Context x, boolean execute) throws Exception
+    public void execute(Context x, boolean execute)
     {
       if (execute) {
         final SqlCommand sqlCommand = x.previousSqlCommand();
