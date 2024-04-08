@@ -26,6 +26,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -48,7 +49,8 @@ public class DruidAvaticaDriverTest
   }
 
   @Test
-  public void testURIParse() throws SQLException {
+  public void testURIParse() throws SQLException
+  {
     DruidAvaticaTestDriver.buildConfigfromURIParams("druidtest:///");
   }
 }

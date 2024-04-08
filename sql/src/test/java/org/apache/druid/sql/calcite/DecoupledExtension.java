@@ -84,7 +84,7 @@ public class DecoupledExtension implements BeforeEachCallback
       @Override
       public DruidQTestInfo getQTestInfo()
       {
-        if(runQuidem) {
+        if (runQuidem) {
           return new DruidQTestInfo(qCaseDir, BaseCalciteQueryTest.queryFrameworkRule.testName());
         } else {
           return null;

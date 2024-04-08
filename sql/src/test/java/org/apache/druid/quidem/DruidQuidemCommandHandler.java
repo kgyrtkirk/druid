@@ -92,7 +92,6 @@ public class DruidQuidemCommandHandler implements CommandHandler
                     final ResultSet resultSet = statement.executeQuery(sqlCommand.sql);) {
                   // throw away all results
                   while (resultSet.next()) {
-                    ;
                   }
                 }
                 catch (Exception e) {
@@ -155,7 +154,6 @@ public class DruidQuidemCommandHandler implements CommandHandler
               final ResultSet resultSet = statement.executeQuery(sqlCommand.sql);) {
             // throw away all results
             while (resultSet.next()) {
-              ;
             }
           }
           catch (Exception e) {
@@ -205,7 +203,6 @@ public class DruidQuidemCommandHandler implements CommandHandler
               final ResultSet resultSet = statement.executeQuery(sqlCommand.sql);) {
             // throw away all results
             while (resultSet.next()) {
-              ;
             }
           }
           catch (Exception e) {

@@ -31,6 +31,7 @@ import java.util.Map;
  * intended usage: MapToInterfaceHandler.newInstanceFor(TargetInterface.class,
  * map);
  */
+// FIXME remove this?
 class MapToInterfaceHandler implements InvocationHandler
 {
   private Map<String, String> backingMap;

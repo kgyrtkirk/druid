@@ -99,8 +99,8 @@ public class DruidAvaticaTestDriver implements Driver
     new DruidAvaticaTestDriver().register();
   }
 
-  private static final String prefix = "druidtest://";
-  public static final String DEFAULT_URI = prefix + "/";
+  private static final String URI_PREFIX = "druidtest://";
+  public static final String DEFAULT_URI = URI_PREFIX + "/";
 
   public DruidAvaticaTestDriver()
   {
@@ -338,7 +338,7 @@ public class DruidAvaticaTestDriver implements Driver
   @Override
   public boolean acceptsURL(String url) throws SQLException
   {
-    return url.startsWith(prefix);
+    return url.startsWith(URI_PREFIX);
   }
 
   @Override

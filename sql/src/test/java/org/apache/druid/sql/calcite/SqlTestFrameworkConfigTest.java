@@ -25,7 +25,8 @@ import org.junit.jupiter.api.Test;
 public class SqlTestFrameworkConfigTest
 {
   @Test
-  public void testEquals() {
+  public void testEquals()
+  {
     EqualsVerifier.forClass(SqlTestFrameworkConfig.SqlTestFrameworkConfigInstance.class)
         .usingGetClass()
         .verify();
