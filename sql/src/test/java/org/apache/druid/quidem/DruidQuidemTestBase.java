@@ -178,6 +178,15 @@ public abstract class DruidQuidemTestBase
     for (File f : testRoot.listFiles(this::isTestIncluded)) {
       ret.add(f.getName());
     }
+    if (ret.isEmpty()) {
+      throw new IllegalArgumentException(
+          StringUtils.format(
+              "There are no test cases in directory [%s] or there are no matches to filter [%s]",
+              testRoot,
+              filter
+          )
+      );
+    }
     Collections.sort(ret);
     return ret;
   }
