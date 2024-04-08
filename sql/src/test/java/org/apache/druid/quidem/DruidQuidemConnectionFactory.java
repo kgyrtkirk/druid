@@ -21,7 +21,6 @@ package org.apache.druid.quidem;
 
 import net.hydromatic.quidem.Quidem.ConnectionFactory;
 import net.hydromatic.quidem.Quidem.PropertyHandler;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.Properties;
@@ -49,10 +48,5 @@ public class DruidQuidemConnectionFactory implements ConnectionFactory, Property
   public void onSet(String key, Object value)
   {
     props.setProperty(key, value.toString());
-  }
-
-  public void reset()
-  {
-    props.clear();
   }
 }

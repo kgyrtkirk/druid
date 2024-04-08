@@ -66,16 +66,16 @@ GROUP BY 1, 2;
   }
 }
 !nativePlan
-LogicalAggregate(group=[{0, 1}], EXPR$2=[SUM($2)], EXPR$3=[COUNT()]): rowcount = 7.5, cumulative cost = {1259.4687503576279 rows, 3728.0 cpu, 0.0 io}, id = 316
-  LogicalProject(dim1=[$1], dim2=[$2], m1=[$5]): rowcount = 75.0, cumulative cost = {1250.0 rows, 3728.0 cpu, 0.0 io}, id = 315
-    LogicalFilter(condition=[OR(=($2, 'a'), =($2, 'def'))]): rowcount = 75.0, cumulative cost = {1175.0 rows, 3503.0 cpu, 0.0 io}, id = 314
-      LogicalUnion(all=[true]): rowcount = 300.0, cumulative cost = {1100.0 rows, 3203.0 cpu, 0.0 io}, id = 313
-        LogicalUnion(all=[true]): rowcount = 200.0, cumulative cost = {600.0 rows, 2002.0 cpu, 0.0 io}, id = 310
-          LogicalProject(__time=[$0], dim1=[$1], dim2=[$2], dim3=[$3], cnt=[$4], m1=[$5], m2=[$6], unique_dim1=[$7]): rowcount = 100.0, cumulative cost = {200.0 rows, 901.0 cpu, 0.0 io}, id = 307
-            LogicalTableScan(table=[[druid, foo]]): rowcount = 100.0, cumulative cost = {100.0 rows, 101.0 cpu, 0.0 io}, id = 306
-          LogicalProject(__time=[$0], dim1=[$1], dim2=[$2], dim3=[$3], cnt=[$4], m1=[$5], m2=[$6], unique_dim1=[$7]): rowcount = 100.0, cumulative cost = {200.0 rows, 901.0 cpu, 0.0 io}, id = 309
-            LogicalTableScan(table=[[druid, foo]]): rowcount = 100.0, cumulative cost = {100.0 rows, 101.0 cpu, 0.0 io}, id = 308
-        LogicalProject(__time=[$0], dim1=[$1], dim2=[$2], dim3=[$3], cnt=[$4], m1=[$5], m2=[$6], unique_dim1=[$7]): rowcount = 100.0, cumulative cost = {200.0 rows, 901.0 cpu, 0.0 io}, id = 312
-          LogicalTableScan(table=[[druid, foo]]): rowcount = 100.0, cumulative cost = {100.0 rows, 101.0 cpu, 0.0 io}, id = 311
+LogicalAggregate(group=[{0, 1}], EXPR$2=[SUM($2)], EXPR$3=[COUNT()]): rowcount = 7.5, cumulative cost = {1259.4687503576279 rows, 3728.0 cpu, 0.0 io}, id = 784
+  LogicalProject(dim1=[$1], dim2=[$2], m1=[$5]): rowcount = 75.0, cumulative cost = {1250.0 rows, 3728.0 cpu, 0.0 io}, id = 783
+    LogicalFilter(condition=[OR(=($2, 'a'), =($2, 'def'))]): rowcount = 75.0, cumulative cost = {1175.0 rows, 3503.0 cpu, 0.0 io}, id = 782
+      LogicalUnion(all=[true]): rowcount = 300.0, cumulative cost = {1100.0 rows, 3203.0 cpu, 0.0 io}, id = 781
+        LogicalUnion(all=[true]): rowcount = 200.0, cumulative cost = {600.0 rows, 2002.0 cpu, 0.0 io}, id = 778
+          LogicalProject(__time=[$0], dim1=[$1], dim2=[$2], dim3=[$3], cnt=[$4], m1=[$5], m2=[$6], unique_dim1=[$7]): rowcount = 100.0, cumulative cost = {200.0 rows, 901.0 cpu, 0.0 io}, id = 775
+            LogicalTableScan(table=[[druid, foo]]): rowcount = 100.0, cumulative cost = {100.0 rows, 101.0 cpu, 0.0 io}, id = 774
+          LogicalProject(__time=[$0], dim1=[$1], dim2=[$2], dim3=[$3], cnt=[$4], m1=[$5], m2=[$6], unique_dim1=[$7]): rowcount = 100.0, cumulative cost = {200.0 rows, 901.0 cpu, 0.0 io}, id = 777
+            LogicalTableScan(table=[[druid, foo]]): rowcount = 100.0, cumulative cost = {100.0 rows, 101.0 cpu, 0.0 io}, id = 776
+        LogicalProject(__time=[$0], dim1=[$1], dim2=[$2], dim3=[$3], cnt=[$4], m1=[$5], m2=[$6], unique_dim1=[$7]): rowcount = 100.0, cumulative cost = {200.0 rows, 901.0 cpu, 0.0 io}, id = 780
+          LogicalTableScan(table=[[druid, foo]]): rowcount = 100.0, cumulative cost = {100.0 rows, 101.0 cpu, 0.0 io}, id = 779
 
 !convertedPlan
