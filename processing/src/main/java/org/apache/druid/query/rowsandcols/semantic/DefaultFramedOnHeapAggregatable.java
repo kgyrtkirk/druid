@@ -28,7 +28,6 @@ import org.apache.druid.query.aggregation.AggregatorFactory;
 import org.apache.druid.query.dimension.DimensionSpec;
 import org.apache.druid.query.monomorphicprocessing.RuntimeShapeInspector;
 import org.apache.druid.query.operator.window.WindowFrame;
-import org.apache.druid.query.operator.window.WindowFrame.PeerType;
 import org.apache.druid.query.rowsandcols.RowsAndColumns;
 import org.apache.druid.query.rowsandcols.column.ConstantObjectColumn;
 import org.apache.druid.query.rowsandcols.column.ObjectArrayColumn;
@@ -67,30 +66,25 @@ public class DefaultFramedOnHeapAggregatable implements FramedOnHeapAggregatable
     }
 
     if (frame.getPeerType() == WindowFrame.PeerType.ROWS) {
-      if(false) {
-              if (frame.isLowerUnbounded()) {
-                  return computeCumulativeAggregates(aggFactories, frame.getUpperOffset());
-                } else if (frame.isUpperUnbounded()) {
-                  return computeReverseCumulativeAggregates(aggFactories, frame.getLowerOffset());
-                } else {
-                  final int numRows = rac.numRows();
-                  int lowerOffset = frame.getLowerOffset();
-                  int upperOffset = frame.getUpperOffset();
-
-                  if (numRows < lowerOffset + upperOffset + 1) {
-                    // In this case, there are not enough rows to completely build up the full window aperture before it needs to
-                    // also start contracting the aperture because of the upper offset. So we use a method that specifically
-                    // handles checks for both expanding and reducing the aperture on every iteration.
-                    return aggregateWindowApertureInFlux(aggFactories, lowerOffset, upperOffset);
-                  } else {
-                    // In this case, there are 3 distinct phases that allow us to loop with less
-                    // branches, so we have a method that specifically does that.
-                    return aggregateWindowApertureWellBehaved(aggFactories, lowerOffset, upperOffset);
-                  }
-                }
-
+      if (frame.isLowerUnbounded()) {
+        return computeCumulativeAggregates(aggFactories, frame.getUpperOffset());
+      } else if (frame.isUpperUnbounded()) {
+        return computeReverseCumulativeAggregates(aggFactories, frame.getLowerOffset());
       } else {
-        return computeGroupAggregates(aggFactories, frame);
+        final int numRows = rac.numRows();
+        int lowerOffset = frame.getLowerOffset();
+        int upperOffset = frame.getUpperOffset();
+
+        if (numRows < lowerOffset + upperOffset + 1) {
+          // In this case, there are not enough rows to completely build up the full window aperture before it needs to
+          // also start contracting the aperture because of the upper offset. So we use a method that specifically
+          // handles checks for both expanding and reducing the aperture on every iteration.
+          return aggregateWindowApertureInFlux(aggFactories, lowerOffset, upperOffset);
+        } else {
+          // In this case, there are 3 distinct phases that allow us to loop with less
+          // branches, so we have a method that specifically does that.
+          return aggregateWindowApertureWellBehaved(aggFactories, lowerOffset, upperOffset);
+        }
       }
     } else {
       return computeGroupAggregates(aggFactories, frame);
@@ -134,7 +128,7 @@ public class DefaultFramedOnHeapAggregatable implements FramedOnHeapAggregatable
       AggregatorFactory[] aggFactories,
       WindowFrame frame)
   {
-    Iterable<AggInterval> groupIterator = buildIteratorFor(rac, frame);
+    Iterable<AggInterval> groupIterator = buildGroupIteratorFor(rac, frame);
     ResultPopulator resultRac = new ResultPopulator(aggFactories, rac.numRows());
     AggIntervalCursor aggCursor = new AggIntervalCursor(rac, aggFactories);
     for (AggInterval aggInterval : groupIterator) {
@@ -145,25 +139,7 @@ public class DefaultFramedOnHeapAggregatable implements FramedOnHeapAggregatable
     return rac;
   }
 
-  public static Iterable<AggInterval> buildIteratorFor(AppendableRowsAndColumns rac, WindowFrame frame)
-  {
-    if(frame.getPeerType() == PeerType.RANGE) {
-      return buildGroupIteratorFor(rac, frame);
-    } else {
-      return buildRowIteratorFor(rac, frame);
-    }
-  }
-
-  private static Iterable<AggInterval> buildRowIteratorFor(AppendableRowsAndColumns rac2, WindowFrame frame)
-  {
-    int[] groupBoundaries = new int[rac2.numRows()+1];
-    for (int j = 0; j < groupBoundaries.length; j++) {
-      groupBoundaries[j]=j;
-    }
-    return new GroupIteratorForWindowFrame(frame, groupBoundaries);
-  }
-
-  private static Iterable<AggInterval> buildGroupIteratorFor(AppendableRowsAndColumns rac, WindowFrame frame)
+  public static Iterable<AggInterval> buildGroupIteratorFor(AppendableRowsAndColumns rac, WindowFrame frame)
   {
     int[] groupBoundaries = ClusteredGroupPartitioner.fromRAC(rac).computeBoundaries(frame.getOrderByColNames());
     return new GroupIteratorForWindowFrame(frame, groupBoundaries);
