@@ -89,7 +89,7 @@ public abstract class DruidQuidemTestBase
 
   private DruidQuidemRunner druidQuidemRunner;
 
-  public DruidQuidemTestBase() throws Exception
+  public DruidQuidemTestBase()
   {
     String filterStr = System.getProperty(PROPERTY_FILTER, null);
     if (filterStr != null) {

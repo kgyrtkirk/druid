@@ -29,7 +29,7 @@ public class DruidQuidemConnectionFactory implements ConnectionFactory, Property
 {
   private Properties props = new Properties();
 
-  public DruidQuidemConnectionFactory() throws Exception
+  public DruidQuidemConnectionFactory()
   {
     // ensure driver loaded
     new DruidAvaticaTestDriver();

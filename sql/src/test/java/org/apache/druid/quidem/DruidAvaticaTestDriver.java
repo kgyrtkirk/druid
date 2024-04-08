@@ -184,6 +184,7 @@ public class DruidAvaticaTestDriver implements Driver
       return DriverManager.getConnection(url, info);
     }
 
+    @Override
     public void close()
     {
       druidMeta.closeAllConnections();
