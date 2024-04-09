@@ -73,6 +73,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import java.util.function.Supplier;
 
 /**
  * Builds the infrastructure needed to run Calcite tests. Building splits into
@@ -197,10 +198,10 @@ public class SqlTestFramework
    */
   public static class StandardComponentSupplier implements QueryComponentSupplier
   {
-    private final File temporaryFolder;
+    private final Supplier<File> temporaryFolder;
 
     public StandardComponentSupplier(
-        final File temporaryFolder
+        final Supplier<File> temporaryFolder
     )
     {
       this.temporaryFolder = temporaryFolder;
@@ -245,7 +246,7 @@ public class SqlTestFramework
       return TestDataBuilder.createMockWalker(
           injector,
           conglomerate,
-          temporaryFolder,
+          temporaryFolder.get(),
           QueryStackTests.DEFAULT_NOOP_SCHEDULER,
           joinableFactory
       );
