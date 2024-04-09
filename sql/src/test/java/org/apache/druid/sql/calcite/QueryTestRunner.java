@@ -650,12 +650,13 @@ public class QueryTestRunner
       if (builder.expectedResults != null) {
         qt.println("!ok");
       }
+      qt.println("!logicalPlan");
+      qt.println("!physicalPlan");
       if (builder.expectedQueries != null) {
         qt.println("!nativePlan");
       }
-      if (builder.expectedLogicalPlan != null) {
-        qt.println("!logicalPlan");
-      }
+      //      if (builder.expectedLogicalPlan != null) {
+      //      }
       runSteps.add(qt.toRunner());
       return;
     }

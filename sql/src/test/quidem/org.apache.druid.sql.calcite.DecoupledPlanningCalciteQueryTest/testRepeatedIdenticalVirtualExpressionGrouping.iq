@@ -1,4 +1,4 @@
-# testRepeatedIdenticalVirtualExpressionGrouping case-crc:50c7be4b
+# testRepeatedIdenticalVirtualExpressionGrouping case-crc:ebc8c4bb
 !set sqlQueryId dummy
 !set sqlCurrentTimestamp 2000-01-01T00:00:00Z
 !set defaultTimeout 300000
@@ -20,6 +20,17 @@ GROUP BY 1, 2;
 (1 row)
 
 !ok
+LogicalAggregate(group=[{0, 1}])
+  LogicalProject(col_a=[true], col_b=[true])
+    LogicalTableScan(table=[[druid, foo]])
+
+!logicalPlan
+DruidProject(col_a=[$0], col_b=[true], druid=[logical])
+  DruidAggregate(group=[{0}], druid=[logical])
+    DruidProject(col_a=[true], druid=[logical])
+      DruidTableScan(table=[[druid, foo]], druid=[logical])
+
+!physicalPlan
 {
   "queryType" : "groupBy",
   "dataSource" : {

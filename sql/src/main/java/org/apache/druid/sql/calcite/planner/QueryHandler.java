@@ -155,7 +155,7 @@ public abstract class QueryHandler extends SqlStatementHandler.BaseStatementHand
     isPrepared = true;
     SqlNode validatedQueryNode = validatedQueryNode();
     rootQueryRel = handlerContext.planner().rel(validatedQueryNode);
-    Hook.CONVERTED.run(rootQueryRel);
+    Hook.CONVERTED.run(rootQueryRel.rel);
     handlerContext.hook().captureQueryRel(rootQueryRel);
     final RelDataTypeFactory typeFactory = rootQueryRel.rel.getCluster().getTypeFactory();
     final SqlValidator validator = handlerContext.planner().getValidator();
@@ -564,6 +564,7 @@ public abstract class QueryHandler extends SqlStatementHandler.BaseStatementHand
                  .plus(DruidLogicalConvention.instance()),
           newRoot
       );
+      Hook.JAVA_PLAN.run(newRoot);
 
       DruidQueryGenerator generator = new DruidQueryGenerator(plannerContext, (DruidLogicalNode) newRoot, rexBuilder);
       DruidQuery baseQuery = generator.buildQuery();
