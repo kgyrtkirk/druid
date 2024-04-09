@@ -41,7 +41,7 @@ public class DruidQuidemConnectionFactory implements ConnectionFactory, Property
     if (name.startsWith("druidtest://")) {
       return DriverManager.getConnection(name, props);
     }
-    return null;
+    throw new RuntimeException("unknown connection '" + name + "'");
   }
 
   @Override
