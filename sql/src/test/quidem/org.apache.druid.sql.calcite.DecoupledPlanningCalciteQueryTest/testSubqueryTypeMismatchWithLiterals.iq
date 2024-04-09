@@ -1,4 +1,4 @@
-# testSubqueryTypeMismatchWithLiterals case-crc:443ff54c
+# testSubqueryTypeMismatchWithLiterals case-crc:ff3645c9
 !set sqlQueryId dummy
 !set sqlCurrentTimestamp 2000-01-01T00:00:00Z
 !set defaultTimeout 300000
@@ -43,7 +43,7 @@ DruidAggregate(group=[{0}], outer_l1=[COUNT() FILTER $1], druid=[logical])
     DruidAggregate(group=[{1}], sum_l1=[SUM($11)], druid=[logical])
       DruidTableScan(table=[[druid, numfoo]], druid=[logical])
 
-!physicalPlan
+!druidPlan
 {
   "queryType" : "groupBy",
   "dataSource" : {

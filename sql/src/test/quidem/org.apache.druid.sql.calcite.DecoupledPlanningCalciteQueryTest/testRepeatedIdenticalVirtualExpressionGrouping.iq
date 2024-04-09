@@ -1,4 +1,4 @@
-# testRepeatedIdenticalVirtualExpressionGrouping case-crc:ebc8c4bb
+# testRepeatedIdenticalVirtualExpressionGrouping case-crc:e79279c4
 !set sqlQueryId dummy
 !set sqlCurrentTimestamp 2000-01-01T00:00:00Z
 !set defaultTimeout 300000
@@ -30,7 +30,7 @@ DruidProject(col_a=[$0], col_b=[true], druid=[logical])
     DruidProject(col_a=[true], druid=[logical])
       DruidTableScan(table=[[druid, foo]], druid=[logical])
 
-!physicalPlan
+!druidPlan
 {
   "queryType" : "groupBy",
   "dataSource" : {
