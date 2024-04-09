@@ -58,6 +58,7 @@ import org.apache.druid.sql.avatica.DruidMeta;
 import org.apache.druid.sql.calcite.SqlTestFrameworkConfig;
 import org.apache.druid.sql.calcite.SqlTestFrameworkConfig.ConfigurationInstance;
 import org.apache.druid.sql.calcite.SqlTestFrameworkConfig.SqlTestFrameworkConfigInstance;
+import org.apache.druid.sql.calcite.SqlTestFrameworkConfig.SqlTestFrameworkConfigStore;
 import org.apache.druid.sql.calcite.planner.CalciteRulesManager;
 import org.apache.druid.sql.calcite.planner.CatalogResolver;
 import org.apache.druid.sql.calcite.planner.PlannerConfig;
@@ -97,8 +98,10 @@ public class DruidAvaticaTestDriver implements Driver
     new DruidAvaticaTestDriver().register();
   }
 
-  private static final String URI_PREFIX = "druidtest://";
+  public static final String URI_PREFIX = "druidtest://";
   public static final String DEFAULT_URI = URI_PREFIX + "/";
+
+  private static final SqlTestFrameworkConfigStore CONFIG_STORE = new SqlTestFrameworkConfigStore();
 
   public DruidAvaticaTestDriver()
   {
@@ -112,7 +115,7 @@ public class DruidAvaticaTestDriver implements Driver
     }
     SqlTestFrameworkConfig config = buildConfigfromURIParams(url);
 
-    ConfigurationInstance ci = SqlTestFrameworkConfig.SqlTestFrameworkConfigStore.INSTANCE.getConfigurationInstance(
+    ConfigurationInstance ci = CONFIG_STORE.getConfigurationInstance(
         new SqlTestFrameworkConfigInstance(config),
         new AvaticaBasedTestConnectionSupplier(
             new StandardComponentSupplier(newTempFolder1())
@@ -131,7 +134,6 @@ public class DruidAvaticaTestDriver implements Driver
 
   static class AvaticaBasedConnectionModule implements DruidModule
   {
-
     @Provides
     @LazySingleton
     public DruidSchemaCatalog getLookupNodeService(QueryRunnerFactoryConglomerate conglomerate,

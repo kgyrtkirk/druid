@@ -76,7 +76,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public abstract class DruidQuidemTestBase
 {
-  private static final String IQ_SUFFIX = ".iq";
+
+  public static final String IQ_SUFFIX = ".iq";
   /**
    * System property name for "overwrite mode"; note: empty value is treated as
    * true

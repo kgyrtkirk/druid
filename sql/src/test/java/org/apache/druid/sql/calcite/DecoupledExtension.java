@@ -19,9 +19,12 @@
 
 package org.apache.druid.sql.calcite;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.io.Files;
 import org.apache.druid.query.QueryContexts;
 import org.apache.druid.quidem.DruidQTestInfo;
+import org.apache.druid.quidem.DruidQuidemTestBase;
 import org.apache.druid.quidem.ProjectPathUtils;
 import org.apache.druid.server.security.AuthConfig;
 import org.apache.druid.sql.calcite.BaseCalciteQueryTest.CalciteTestConfig;
@@ -32,8 +35,13 @@ import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
 import java.io.File;
+import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DecoupledExtension implements BeforeEachCallback
 {
@@ -47,14 +55,42 @@ public class DecoupledExtension implements BeforeEachCallback
   private File qCaseDir;
 
   @Override
-  public void beforeEach(ExtensionContext context)
+  public void beforeEach(ExtensionContext context) throws Exception
   {
     Class<?> testClass = context.getTestClass().get();
     qCaseDir = ProjectPathUtils.getPathFromProjectRoot("sql/src/test/quidem/" + testClass.getName());
+    validateTestClass(context);
   }
 
-  private static final ImmutableMap<String, Object> CONTEXT_OVERRIDES =
-      ImmutableMap.<String, Object>builder()
+  private void validateTestClass(ExtensionContext context) throws Exception
+  {
+    Class<?> testClass = context.getTestClass().get();
+    String methodName = "validateTestClass";
+    Method testMethod = Preconditions.checkNotNull(
+        testClass.getMethod(methodName), "Please add validateTestClass() test method to the testClass!"
+    );
+    if (methodName.equals(testMethod.getName())) {
+      checkAnnotationConsistency(testClass);
+    }
+  }
+
+  private void checkAnnotationConsistency(Class<?> testClass)
+  {
+    Map<String, File> testNameToFileMap = new HashMap<>();
+    for (File iqFile : qCaseDir.listFiles(f -> f.getName().endsWith(DruidQuidemTestBase.IQ_SUFFIX))) {
+      testNameToFileMap.put(Files.getNameWithoutExtension(iqFile.getName()), iqFile);
+    }
+    for (Method method : testClass.getMethods()) {
+      DecoupledTestConfig dtc = method.getAnnotation(DecoupledTestConfig.class);
+      if (dtc == null || !dtc.quidem()) {
+        continue;
+      }
+      testNameToFileMap.remove(method.getName());
+    }
+    assertEquals(Collections.emptyMap(), testNameToFileMap, "Please remove dangling quidem files!");
+  }
+
+  private static final ImmutableMap<String, Object> CONTEXT_OVERRIDES = ImmutableMap.<String, Object>builder()
       .putAll(BaseCalciteQueryTest.QUERY_CONTEXT_DEFAULT)
       .put(PlannerConfig.CTX_NATIVE_QUERY_SQL_PLANNING_MODE, PlannerConfig.NATIVE_QUERY_SQL_PLANNING_MODE_DECOUPLED)
       .put(QueryContexts.ENABLE_DEBUG, true)
@@ -62,7 +98,8 @@ public class DecoupledExtension implements BeforeEachCallback
 
   public QueryTestBuilder testBuilder()
   {
-    DecoupledTestConfig decTestConfig = BaseCalciteQueryTest.queryFrameworkRule.getAnnotation(DecoupledTestConfig.class);
+    DecoupledTestConfig decTestConfig = BaseCalciteQueryTest.queryFrameworkRule
+        .getAnnotation(DecoupledTestConfig.class);
 
     assumeTrue(BaseCalciteQueryTest.queryFrameworkRule.getConfig().numMergeBuffers == 0);
 

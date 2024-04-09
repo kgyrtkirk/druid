@@ -92,9 +92,6 @@ public @interface SqlTestFrameworkConfig
 
   class SqlTestFrameworkConfigStore
   {
-
-    public static final SqlTestFrameworkConfigStore INSTANCE = new SqlTestFrameworkConfigStore();
-
     Map<SqlTestFrameworkConfigInstance, ConfigurationInstance> configMap = new HashMap<>();
 
     public ConfigurationInstance getConfigurationInstance(
