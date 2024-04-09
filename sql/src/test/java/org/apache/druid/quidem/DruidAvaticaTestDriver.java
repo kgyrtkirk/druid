@@ -78,7 +78,6 @@ import org.eclipse.jetty.server.Server;
 
 import java.io.Closeable;
 import java.io.File;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -119,7 +118,7 @@ public class DruidAvaticaTestDriver implements Driver
     ConfigurationInstance ci = CONFIG_STORE.getConfigurationInstance(
         new SqlTestFrameworkConfigInstance(config),
         new AvaticaBasedTestConnectionSupplier(
-            new StandardComponentSupplier(() -> createTempFolder(getClass().getSimpleName()))
+            new StandardComponentSupplier(newTempFolder1())
         )
     );
 
@@ -297,25 +296,10 @@ public class DruidAvaticaTestDriver implements Driver
     }
   }
 
-  protected File createTempFolder(String prefix)
+  // FIXME
+  protected File newTempFolder1()
   {
-    File tempDir = FileUtils.createTempDir(prefix);
-    if(false) {
-      Runtime.getRuntime().addShutdownHook(new Thread()
-      {
-        @Override
-        public void run()
-        {
-          try {
-            FileUtils.deleteDirectory(tempDir);
-          }
-          catch (IOException ex) {
-            ex.printStackTrace();
-          }
-        }
-      });
-    }
-    return tempDir;
+    return FileUtils.createTempDir("FIXME");
   }
 
   public static SqlTestFrameworkConfig buildConfigfromURIParams(String url) throws SQLException
