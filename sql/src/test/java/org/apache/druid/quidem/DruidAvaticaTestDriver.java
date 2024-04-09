@@ -114,10 +114,10 @@ public class DruidAvaticaTestDriver implements Driver
     if (!acceptsURL(url)) {
       return null;
     }
-    SqlTestFrameworkConfig config = buildConfigfromURIParams(url);
+    SqlTestFrameworkConfigInstance config = buildConfigfromURIParams(url);
 
     ConfigurationInstance ci = CONFIG_STORE.getConfigurationInstance(
-        new SqlTestFrameworkConfigInstance(config),
+        config,
         new AvaticaBasedTestConnectionSupplier(
             new StandardComponentSupplier(createTempFolder(getClass().getSimpleName()))
         )
@@ -316,7 +316,7 @@ public class DruidAvaticaTestDriver implements Driver
     return tempDir;
   }
 
-  public static SqlTestFrameworkConfig buildConfigfromURIParams(String url) throws SQLException
+  public static SqlTestFrameworkConfigInstance buildConfigfromURIParams(String url) throws SQLException
   {
     Map<String, String> queryParams;
     queryParams = new HashMap<>();
@@ -331,7 +331,8 @@ public class DruidAvaticaTestDriver implements Driver
       throw new SQLException("Can't decode URI", e);
     }
 
-    return MapToInterfaceHandler.newInstanceFor(SqlTestFrameworkConfig.class, queryParams);
+    SqlTestFrameworkConfig config = MapToInterfaceHandler.newInstanceFor(SqlTestFrameworkConfig.class, queryParams);
+    return new SqlTestFrameworkConfigInstance(config);
   }
 
   private void register()
