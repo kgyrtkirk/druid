@@ -115,7 +115,6 @@ public class DruidQuidemCommandHandler implements CommandHandler
           for (Query<?> query : queries) {
             String str = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(query);
             x.echo(ImmutableList.of(str));
-
           }
         }
         catch (Exception e) {
@@ -222,7 +221,7 @@ public class DruidQuidemCommandHandler implements CommandHandler
         }
 
         for (RelRoot node : logged) {
-          String str = RelOptUtil.dumpPlan("", node.rel, SqlExplainFormat.TEXT, SqlExplainLevel.ALL_ATTRIBUTES);
+          String str = RelOptUtil.dumpPlan("", node.rel, SqlExplainFormat.TEXT, SqlExplainLevel.EXPPLAN_ATTRIBUTES);
           x.echo(ImmutableList.of(str));
         }
       } else {
