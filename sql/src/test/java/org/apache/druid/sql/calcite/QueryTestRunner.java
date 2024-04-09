@@ -655,8 +655,6 @@ public class QueryTestRunner
       if (builder.expectedQueries != null) {
         qt.println("!nativePlan");
       }
-      //      if (builder.expectedLogicalPlan != null) {
-      //      }
       runSteps.add(qt.toRunner());
       return;
     }
