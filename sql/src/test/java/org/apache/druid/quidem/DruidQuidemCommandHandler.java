@@ -164,7 +164,7 @@ public class DruidQuidemCommandHandler implements CommandHandler
     }
 
     @Override
-    protected final void executeExplain(Context x) throws Exception
+    protected final void executeExplain(Context x)
     {
       List<RelNode> logged = new ArrayList<>();
       try (final Hook.Closeable unhook = hook.add((Consumer<RelNode>) logged::add)) {
