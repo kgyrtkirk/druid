@@ -27,7 +27,6 @@ import net.hydromatic.quidem.CommandHandler;
 import net.hydromatic.quidem.Quidem.SqlCommand;
 import org.apache.calcite.plan.RelOptUtil;
 import org.apache.calcite.rel.RelNode;
-import org.apache.calcite.rel.RelRoot;
 import org.apache.calcite.runtime.Hook;
 import org.apache.calcite.sql.SqlExplainFormat;
 import org.apache.calcite.sql.SqlExplainLevel;
@@ -67,58 +66,29 @@ public class DruidQuidemCommandHandler implements CommandHandler
   }
 
   /** Command that prints the plan for the current query. */
-  static class NativePlanCommand extends AbstractCommand
+  static abstract class AbstractPlanCommand extends AbstractCommand
   {
     private final List<String> content;
     private final List<String> lines;
 
-    NativePlanCommand(List<String> lines, List<String> content)
+    AbstractPlanCommand(List<String> lines, List<String> content)
     {
       this.lines = ImmutableList.copyOf(lines);
       this.content = content;
     }
 
     @Override
-    public String describe(Context x)
+    public final String describe(Context x)
     {
       return commandName() + " [sql: " + x.previousSqlCommand().sql + "]";
     }
 
     @Override
-    public void execute(Context x, boolean execute)
+    public final void execute(Context x, boolean execute)
     {
       if (execute) {
         try {
-          final SqlCommand sqlCommand = x.previousSqlCommand();
-
-          QueryLogHook qlh = new QueryLogHook(new DefaultObjectMapper());
-          qlh.logQueriesForGlobal(
-              () -> {
-                try (
-                    final Statement statement = x.connection().createStatement();
-                    final ResultSet resultSet = statement.executeQuery(sqlCommand.sql);) {
-                  // throw away all results
-                  while (resultSet.next()) {
-                    Util.discard(false);
-                  }
-                }
-                catch (Exception e) {
-                  throw new RuntimeException(e);
-                }
-              }
-          );
-          List<Query<?>> queries = qlh.getRecordedQueries();
-
-          ObjectMapper objectMapper = TestHelper.JSON_MAPPER;
-          queries = queries
-              .stream()
-              .map(q -> BaseCalciteQueryTest.recursivelyClearContext(q, objectMapper))
-              .collect(Collectors.toList());
-
-          for (Query<?> query : queries) {
-            String str = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(query);
-            x.echo(ImmutableList.of(str));
-          }
+          executeExplain(x);
         }
         catch (Exception e) {
           throw new Error(e);
@@ -128,162 +98,108 @@ public class DruidQuidemCommandHandler implements CommandHandler
       }
       x.echo(lines);
     }
+
+    protected final void executeQuery(Context x)
+    {
+      final SqlCommand sqlCommand = x.previousSqlCommand();
+      try (
+          final Statement statement = x.connection().createStatement();
+          final ResultSet resultSet = statement.executeQuery(sqlCommand.sql)) {
+        // throw away all results
+        while (resultSet.next()) {
+          Util.discard(false);
+        }
+      }
+      catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
+
+    protected abstract void executeExplain(Context x) throws Exception;
   }
 
   /** Command that prints the plan for the current query. */
-  static class LogicalPlanCommand extends AbstractCommand
+  static class NativePlanCommand extends AbstractPlanCommand
   {
-    private final List<String> content;
-    private final List<String> lines;
+    NativePlanCommand(List<String> lines, List<String> content)
+    {
+      super(lines, content);
+    }
 
+    @Override
+    protected void executeExplain(Context x) throws Exception
+    {
+      QueryLogHook qlh = new QueryLogHook(new DefaultObjectMapper());
+      qlh.logQueriesForGlobal(
+          () -> {
+            executeQuery(x);
+          }
+      );
+
+      List<Query<?>> queries = qlh.getRecordedQueries();
+
+      ObjectMapper objectMapper = TestHelper.JSON_MAPPER;
+      queries = queries
+          .stream()
+          .map(q -> BaseCalciteQueryTest.recursivelyClearContext(q, objectMapper))
+          .collect(Collectors.toList());
+
+      for (Query<?> query : queries) {
+        String str = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(query);
+        x.echo(ImmutableList.of(str));
+      }
+    }
+  }
+
+  /**
+   * Handles plan commands captured via {@link Hook}.
+   */
+  static abstract class AbstractRelPlanCommand extends AbstractPlanCommand
+  {
+    Hook hook;
+
+    AbstractRelPlanCommand(List<String> lines, List<String> content, Hook hook)
+    {
+      super(lines, content);
+      this.hook = hook;
+    }
+
+    @Override
+    protected final void executeExplain(Context x) throws Exception
+    {
+      List<RelNode> logged = new ArrayList<>();
+      try (final Hook.Closeable unhook = hook.add((Consumer<RelNode>) logged::add)) {
+        executeQuery(x);
+      }
+
+      for (RelNode node : logged) {
+        String str = RelOptUtil.dumpPlan("", node, SqlExplainFormat.TEXT, SqlExplainLevel.EXPPLAN_ATTRIBUTES);
+        x.echo(ImmutableList.of(str));
+      }
+    }
+  }
+
+  static class LogicalPlanCommand extends AbstractRelPlanCommand
+  {
     LogicalPlanCommand(List<String> lines, List<String> content)
     {
-      this.lines = ImmutableList.copyOf(lines);
-      this.content = content;
-    }
-
-    @Override
-    public String describe(Context x)
-    {
-      return commandName() + " [sql: " + x.previousSqlCommand().sql + "]";
-    }
-
-    @Override
-    public void execute(Context x, boolean execute)
-    {
-      if (execute) {
-        final SqlCommand sqlCommand = x.previousSqlCommand();
-
-        List<RelNode> logged = new ArrayList<>();
-        try (final Hook.Closeable unhook = Hook.TRIMMED.add(
-            (Consumer<RelNode>) a -> logged.add(a)
-        )) {
-          try (
-              final Statement statement = x.connection().createStatement();
-              final ResultSet resultSet = statement.executeQuery(sqlCommand.sql);) {
-            // throw away all results
-            while (resultSet.next()) {
-              Util.discard(false);
-            }
-          }
-          catch (Exception e) {
-            throw new Error(e);
-          }
-        }
-
-        for (RelNode node : logged) {
-          String str = RelOptUtil.dumpPlan("", node, SqlExplainFormat.TEXT, SqlExplainLevel.EXPPLAN_ATTRIBUTES);
-          x.echo(ImmutableList.of(str));
-        }
-      } else {
-        x.echo(content);
-      }
-      x.echo(lines);
+      super(lines, content, Hook.TRIMMED);
     }
   }
 
-  /** Command that prints the plan for the current query. */
-  static class PhysicalPlanCommand extends AbstractCommand
+  static class PhysicalPlanCommand extends AbstractRelPlanCommand
   {
-    private final List<String> content;
-    private final List<String> lines;
-
     PhysicalPlanCommand(List<String> lines, List<String> content)
     {
-      this.lines = ImmutableList.copyOf(lines);
-      this.content = content;
-    }
-
-    @Override
-    public String describe(Context x)
-    {
-      return commandName() + " [sql: " + x.previousSqlCommand().sql + "]";
-    }
-
-    @Override
-    public void execute(Context x, boolean execute)
-    {
-      if (execute) {
-        final SqlCommand sqlCommand = x.previousSqlCommand();
-
-        List<RelNode> logged = new ArrayList<>();
-        try (final Hook.Closeable unhook = Hook.JAVA_PLAN.add(
-            (Consumer<RelNode>) a -> logged.add(a)
-        )) {
-          try (
-              final Statement statement = x.connection().createStatement();
-              final ResultSet resultSet = statement.executeQuery(sqlCommand.sql);) {
-            // throw away all results
-            while (resultSet.next()) {
-              Util.discard(false);
-            }
-          }
-          catch (Exception e) {
-            throw new Error(e);
-          }
-        }
-
-        for (RelNode node : logged) {
-          String str = RelOptUtil.dumpPlan("", node, SqlExplainFormat.TEXT, SqlExplainLevel.EXPPLAN_ATTRIBUTES);
-          x.echo(ImmutableList.of(str));
-        }
-      } else {
-        x.echo(content);
-      }
-      x.echo(lines);
+      super(lines, content, Hook.JAVA_PLAN);
     }
   }
 
-  /** Command that prints the plan for the current query. */
-  static class ConvertedPlanCommand extends AbstractCommand
+  static class ConvertedPlanCommand extends AbstractRelPlanCommand
   {
-    private final List<String> content;
-    private final List<String> lines;
-
     ConvertedPlanCommand(List<String> lines, List<String> content)
     {
-      this.lines = ImmutableList.copyOf(lines);
-      this.content = content;
-    }
-
-    @Override
-    public String describe(Context x)
-    {
-      return commandName() + " [sql: " + x.previousSqlCommand().sql + "]";
-    }
-
-    @Override
-    public void execute(Context x, boolean execute)
-    {
-      if (execute) {
-        final SqlCommand sqlCommand = x.previousSqlCommand();
-
-        List<RelRoot> logged = new ArrayList<>();
-        try (final Hook.Closeable unhook = Hook.CONVERTED.add(
-            (Consumer<RelRoot>) a -> logged.add(a)
-        )) {
-          try (
-              final Statement statement = x.connection().createStatement();
-              final ResultSet resultSet = statement.executeQuery(sqlCommand.sql);) {
-            // throw away all results
-            while (resultSet.next()) {
-              Util.discard(false);
-            }
-          }
-          catch (Exception e) {
-            throw new Error(e);
-          }
-        }
-
-        for (RelRoot node : logged) {
-          String str = RelOptUtil.dumpPlan("", node.rel, SqlExplainFormat.TEXT, SqlExplainLevel.EXPPLAN_ATTRIBUTES);
-          x.echo(ImmutableList.of(str));
-        }
-      } else {
-        x.echo(content);
-      }
-      x.echo(lines);
+      super(lines, content, Hook.CONVERTED);
     }
   }
-
 }
