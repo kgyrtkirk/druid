@@ -19,25 +19,16 @@
 
 package org.apache.druid.sql.calcite;
 
-import org.apache.druid.sql.calcite.NotYetSupported.NotYetSupportedProcessor;
+import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.extension.RegisterExtension;
 
-@ExtendWith(NotYetSupportedProcessor.class)
-public class DecoupledPlanningCalciteQueryTest extends CalciteQueryTest
+public class SqlTestFrameworkConfigTest
 {
-  @RegisterExtension
-  DecoupledExtension decoupledExtension = new DecoupledExtension(this);
-
-  @Override
-  protected QueryTestBuilder testBuilder()
-  {
-    return decoupledExtension.testBuilder();
-  }
-
   @Test
-  public void validateTestClass()
+  public void testEquals()
   {
+    EqualsVerifier.forClass(SqlTestFrameworkConfig.SqlTestFrameworkConfigInstance.class)
+        .usingGetClass()
+        .verify();
   }
 }

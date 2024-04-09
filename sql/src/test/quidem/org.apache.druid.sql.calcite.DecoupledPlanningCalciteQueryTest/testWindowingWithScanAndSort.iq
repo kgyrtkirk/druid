@@ -1,0 +1,32 @@
+# testWindowingWithScanAndSort case-crc:6f93a961
+!set sqlQueryId dummy
+!set defaultTimeout 300001
+!set debug true
+!set enableWindowing true
+!set maxScatterGatherBytes 9223372036854775807
+!set sqlCurrentTimestamp 2000-01-01T00:00:00Z
+!set plannerStrategy DECOUPLED
+!set outputformat mysql
+!use druidtest:///
+with t AS (
+SELECT  
+    RANK() OVER (PARTITION BY m2 ORDER BY m2 ASC) 
+      AS ranking,
+    COUNT(m1) as trend_score
+FROM foo
+GROUP BY m2,m1 LIMIT 11
+)
+select ranking, trend_score from t ORDER BY trend_score;
++---------+-------------+
+| ranking | trend_score |
++---------+-------------+
+|       1 |           1 |
+|       1 |           1 |
+|       1 |           1 |
+|       1 |           1 |
+|       1 |           1 |
+|       1 |           1 |
++---------+-------------+
+(6 rows)
+
+!ok
