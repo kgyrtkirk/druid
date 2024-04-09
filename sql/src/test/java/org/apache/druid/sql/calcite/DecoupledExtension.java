@@ -77,8 +77,10 @@ public class DecoupledExtension implements BeforeEachCallback
   private void checkAnnotationConsistency(Class<?> testClass)
   {
     Map<String, File> testNameToFileMap = new HashMap<>();
-    for (File iqFile : qCaseDir.listFiles(f -> f.getName().endsWith(DruidQuidemTestBase.IQ_SUFFIX))) {
-      testNameToFileMap.put(Files.getNameWithoutExtension(iqFile.getName()), iqFile);
+    if (qCaseDir.exists()) {
+      for (File iqFile : qCaseDir.listFiles(f -> f.getName().endsWith(DruidQuidemTestBase.IQ_SUFFIX))) {
+        testNameToFileMap.put(Files.getNameWithoutExtension(iqFile.getName()), iqFile);
+      }
     }
     for (Method method : testClass.getMethods()) {
       DecoupledTestConfig dtc = method.getAnnotation(DecoupledTestConfig.class);

@@ -1,4 +1,4 @@
-# testWindowingWithScanAndSort case-crc:c32606b0
+# testWindowingWithScanAndSort case-crc:1d06dc93
 !set sqlQueryId dummy
 !set defaultTimeout 300000
 !set debug true
@@ -47,7 +47,7 @@ DruidProject(ranking=[$2], trend_score=[$1], druid=[logical])
           DruidAggregate(group=[{5, 6}], trend_score=[COUNT($5)], druid=[logical])
             DruidTableScan(table=[[druid, foo]], druid=[logical])
 
-!physicalPlan
+!druidPlan
 {
   "queryType" : "windowOperator",
   "dataSource" : {

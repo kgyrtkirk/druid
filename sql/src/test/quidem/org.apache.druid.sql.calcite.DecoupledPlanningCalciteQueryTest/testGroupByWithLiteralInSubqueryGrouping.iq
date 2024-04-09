@@ -1,4 +1,4 @@
-# testGroupByWithLiteralInSubqueryGrouping case-crc:1fae740c
+# testGroupByWithLiteralInSubqueryGrouping case-crc:933d8c09
 !set sqlQueryId dummy
 !set sqlCurrentTimestamp 2000-01-01T00:00:00Z
 !set defaultTimeout 300000
@@ -48,7 +48,7 @@ DruidProject(t1=['dummy'], t2=[$0], druid=[logical])
       DruidAggregate(group=[{4}], druid=[logical])
         DruidTableScan(table=[[druid, numfoo]], druid=[logical])
 
-!physicalPlan
+!druidPlan
 {
   "queryType" : "groupBy",
   "dataSource" : {

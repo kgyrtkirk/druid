@@ -1,4 +1,4 @@
-# testGroupBySortPushDown case-crc:14b90139
+# testGroupBySortPushDown case-crc:54515e94
 !set sqlQueryId dummy
 !set sqlCurrentTimestamp 2000-01-01T00:00:00Z
 !set defaultTimeout 300000
@@ -30,7 +30,7 @@ DruidProject(dim2=[$1], dim1=[$0], EXPR$2=[$2], druid=[logical])
     DruidAggregate(group=[{1, 2}], EXPR$2=[SUM($4)], druid=[logical])
       DruidTableScan(table=[[druid, foo]], druid=[logical])
 
-!physicalPlan
+!druidPlan
 {
   "queryType" : "groupBy",
   "dataSource" : {

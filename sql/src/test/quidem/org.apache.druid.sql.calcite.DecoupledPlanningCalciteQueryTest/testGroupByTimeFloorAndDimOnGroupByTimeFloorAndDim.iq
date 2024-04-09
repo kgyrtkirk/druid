@@ -1,4 +1,4 @@
-# testGroupByTimeFloorAndDimOnGroupByTimeFloorAndDim case-crc:256b3311
+# testGroupByTimeFloorAndDimOnGroupByTimeFloorAndDim case-crc:f87d60a4
 !set sqlQueryId dummy
 !set sqlCurrentTimestamp 2000-01-01T00:00:00Z
 !set defaultTimeout 300000
@@ -40,7 +40,7 @@ DruidSort(sort0=[$0], sort1=[$1], dir0=[ASC], dir1=[DESC], druid=[logical])
           DruidProject(gran=[TIME_FLOOR($0, 'P1D')], dim2=[$2], m1=[$5], druid=[logical])
             DruidTableScan(table=[[druid, foo]], druid=[logical])
 
-!physicalPlan
+!druidPlan
 {
   "queryType" : "groupBy",
   "dataSource" : {

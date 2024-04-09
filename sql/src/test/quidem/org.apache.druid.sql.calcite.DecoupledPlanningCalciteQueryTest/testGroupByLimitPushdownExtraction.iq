@@ -1,4 +1,4 @@
-# testGroupByLimitPushdownExtraction case-crc:29846b2d
+# testGroupByLimitPushdownExtraction case-crc:da2618b7
 !set sqlQueryId dummy
 !set sqlCurrentTimestamp 2000-01-01T00:00:00Z
 !set defaultTimeout 300000
@@ -31,7 +31,7 @@ DruidProject(dim4=[CAST('a':VARCHAR):VARCHAR], EXPR$1=[$0], EXPR$2=[$1], druid=[
         DruidFilter(condition=[=($4, 'a')])
           DruidTableScan(table=[[druid, numfoo]], druid=[logical])
 
-!physicalPlan
+!druidPlan
 {
   "queryType" : "topN",
   "dataSource" : {

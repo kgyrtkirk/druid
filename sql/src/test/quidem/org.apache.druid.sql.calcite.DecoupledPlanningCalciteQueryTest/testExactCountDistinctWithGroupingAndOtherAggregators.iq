@@ -1,4 +1,4 @@
-# testExactCountDistinctWithGroupingAndOtherAggregators case-crc:61af9250
+# testExactCountDistinctWithGroupingAndOtherAggregators case-crc:046d1e3e
 !set sqlQueryId dummy
 !set sqlCurrentTimestamp 2000-01-01T00:00:00Z
 !set defaultTimeout 300000
@@ -27,7 +27,7 @@ LogicalAggregate(group=[{0}], EXPR$1=[SUM($1)], EXPR$2=[COUNT(DISTINCT $2)])
 DruidAggregate(group=[{2}], EXPR$1=[SUM($4)], EXPR$2=[COUNT(DISTINCT $1)], druid=[logical])
   DruidTableScan(table=[[druid, foo]], druid=[logical])
 
-!physicalPlan
+!druidPlan
 {
   "queryType" : "groupBy",
   "dataSource" : {

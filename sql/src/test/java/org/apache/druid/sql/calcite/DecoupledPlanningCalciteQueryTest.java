@@ -39,5 +39,6 @@ public class DecoupledPlanningCalciteQueryTest extends CalciteQueryTest
   @Test
   public void validateTestClass()
   {
+    // technical testcase needed by the extension temporarily
   }
 }

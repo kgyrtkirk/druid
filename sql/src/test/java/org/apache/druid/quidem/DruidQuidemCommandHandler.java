@@ -50,17 +50,17 @@ public class DruidQuidemCommandHandler implements CommandHandler
   @Override
   public Command parseCommand(List<String> lines, List<String> content, String line)
   {
-    if (line.startsWith("nativePlan")) {
-      return new NativePlanCommand(lines, content);
+    if (line.startsWith("convertedPlan")) {
+      return new ConvertedPlanCommand(lines, content);
     }
     if (line.startsWith("logicalPlan")) {
       return new LogicalPlanCommand(lines, content);
     }
-    if (line.startsWith("physicalPlan")) {
+    if (line.startsWith("druidPlan")) {
       return new PhysicalPlanCommand(lines, content);
     }
-    if (line.startsWith("convertedPlan")) {
-      return new ConvertedPlanCommand(lines, content);
+    if (line.startsWith("nativePlan")) {
+      return new NativePlanCommand(lines, content);
     }
     return null;
   }

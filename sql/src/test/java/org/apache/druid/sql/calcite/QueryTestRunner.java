@@ -651,7 +651,7 @@ public class QueryTestRunner
         qt.println("!ok");
       }
       qt.println("!logicalPlan");
-      qt.println("!physicalPlan");
+      qt.println("!druidPlan");
       if (builder.expectedQueries != null) {
         qt.println("!nativePlan");
       }
