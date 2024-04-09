@@ -31,6 +31,7 @@ import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.druid.java.util.common.FileUtils;
 import org.apache.druid.java.util.common.IAE;
+import org.apache.druid.java.util.common.RE;
 import org.apache.druid.java.util.common.StringUtils;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -151,6 +152,10 @@ public abstract class DruidQuidemTestBase
 
         new Quidem(config).execute();
       }
+      catch (Exception e) {
+        throw new RE(e, "Encountered exception while running [%s]", inFile);
+      }
+
       final String diff = DiffTestCase.diff(inFile, outFile);
 
       if (!diff.isEmpty()) {

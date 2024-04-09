@@ -65,8 +65,7 @@ public class DruidQuidemCommandHandler implements CommandHandler
     return null;
   }
 
-  /** Command that prints the plan for the current query. */
-  static abstract class AbstractPlanCommand extends AbstractCommand
+  abstract static class AbstractPlanCommand extends AbstractCommand
   {
     private final List<String> content;
     private final List<String> lines;
@@ -154,7 +153,7 @@ public class DruidQuidemCommandHandler implements CommandHandler
   /**
    * Handles plan commands captured via {@link Hook}.
    */
-  static abstract class AbstractRelPlanCommand extends AbstractPlanCommand
+  abstract static class AbstractRelPlanCommand extends AbstractPlanCommand
   {
     Hook hook;
 
