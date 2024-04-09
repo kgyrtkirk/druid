@@ -1,4 +1,4 @@
-# testMultipleExactCountDistinctWithGroupingAndOtherAggregatorsUsingJoin case-crc:bb45e284
+# testMultipleExactCountDistinctWithGroupingAndOtherAggregatorsUsingJoin case-crc:d37cddb1
 !set sqlQueryId dummy
 !set sqlCurrentTimestamp 2000-01-01T00:00:00Z
 !set defaultTimeout 300000
@@ -19,6 +19,15 @@ SELECT dim2, COUNT(*), COUNT(distinct dim1), COUNT(distinct cnt) FROM druid.foo 
 (4 rows)
 
 !ok
+LogicalAggregate(group=[{0}], EXPR$1=[COUNT()], EXPR$2=[COUNT(DISTINCT $1)], EXPR$3=[COUNT(DISTINCT $2)])
+  LogicalProject(dim2=[$2], dim1=[$1], cnt=[$4])
+    LogicalTableScan(table=[[druid, foo]])
+
+!logicalPlan
+DruidAggregate(group=[{2}], EXPR$1=[COUNT()], EXPR$2=[COUNT(DISTINCT $1)], EXPR$3=[COUNT(DISTINCT $4)], druid=[logical])
+  DruidTableScan(table=[[druid, foo]], druid=[logical])
+
+!physicalPlan
 {
   "queryType" : "groupBy",
   "dataSource" : {

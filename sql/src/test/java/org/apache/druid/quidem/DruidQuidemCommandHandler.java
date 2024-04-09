@@ -57,6 +57,9 @@ public class DruidQuidemCommandHandler implements CommandHandler
     if (line.startsWith("logicalPlan")) {
       return new LogicalPlanCommand(lines, content);
     }
+    if (line.startsWith("physicalPlan")) {
+      return new PhysicalPlanCommand(lines, content);
+    }
     if (line.startsWith("convertedPlan")) {
       return new ConvertedPlanCommand(lines, content);
     }
@@ -153,6 +156,58 @@ public class DruidQuidemCommandHandler implements CommandHandler
 
         List<RelNode> logged = new ArrayList<>();
         try (final Hook.Closeable unhook = Hook.TRIMMED.add(
+            (Consumer<RelNode>) a -> logged.add(a)
+        )) {
+          try (
+              final Statement statement = x.connection().createStatement();
+              final ResultSet resultSet = statement.executeQuery(sqlCommand.sql);) {
+            // throw away all results
+            while (resultSet.next()) {
+              Util.discard(false);
+            }
+          }
+          catch (Exception e) {
+            throw new Error(e);
+          }
+        }
+
+        for (RelNode node : logged) {
+          String str = RelOptUtil.dumpPlan("", node, SqlExplainFormat.TEXT, SqlExplainLevel.EXPPLAN_ATTRIBUTES);
+          x.echo(ImmutableList.of(str));
+        }
+      } else {
+        x.echo(content);
+      }
+      x.echo(lines);
+    }
+  }
+
+  /** Command that prints the plan for the current query. */
+  static class PhysicalPlanCommand extends AbstractCommand
+  {
+    private final List<String> content;
+    private final List<String> lines;
+
+    PhysicalPlanCommand(List<String> lines, List<String> content)
+    {
+      this.lines = ImmutableList.copyOf(lines);
+      this.content = content;
+    }
+
+    @Override
+    public String describe(Context x)
+    {
+      return commandName() + " [sql: " + x.previousSqlCommand().sql + "]";
+    }
+
+    @Override
+    public void execute(Context x, boolean execute)
+    {
+      if (execute) {
+        final SqlCommand sqlCommand = x.previousSqlCommand();
+
+        List<RelNode> logged = new ArrayList<>();
+        try (final Hook.Closeable unhook = Hook.JAVA_PLAN.add(
             (Consumer<RelNode>) a -> logged.add(a)
         )) {
           try (

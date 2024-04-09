@@ -1,4 +1,4 @@
-# testGroupByTimeFloorAndDimOnGroupByTimeFloorAndDim case-crc:ead760e9
+# testGroupByTimeFloorAndDimOnGroupByTimeFloorAndDim case-crc:256b3311
 !set sqlQueryId dummy
 !set sqlCurrentTimestamp 2000-01-01T00:00:00Z
 !set defaultTimeout 300000
@@ -23,6 +23,24 @@ ORDER BY dim2, gran desc;
 (5 rows)
 
 !ok
+LogicalSort(sort0=[$0], sort1=[$1], dir0=[ASC], dir1=[DESC])
+  LogicalAggregate(group=[{0, 1}], EXPR$2=[SUM($2)])
+    LogicalProject(dim2=[$1], gran=[TIME_FLOOR($0, 'P1M')], s=[$2])
+      LogicalFilter(condition=[>($2, 1)])
+        LogicalAggregate(group=[{0, 1}], s=[SUM($2)])
+          LogicalProject(gran=[TIME_FLOOR($0, 'P1D')], dim2=[$2], m1=[$5])
+            LogicalTableScan(table=[[druid, foo]])
+
+!logicalPlan
+DruidSort(sort0=[$0], sort1=[$1], dir0=[ASC], dir1=[DESC], druid=[logical])
+  DruidAggregate(group=[{0, 1}], EXPR$2=[SUM($2)], druid=[logical])
+    DruidProject(dim2=[$1], gran=[TIME_FLOOR($0, 'P1M')], s=[$2], druid=[logical])
+      DruidFilter(condition=[>($2, 1)])
+        DruidAggregate(group=[{0, 1}], s=[SUM($2)], druid=[logical])
+          DruidProject(gran=[TIME_FLOOR($0, 'P1D')], dim2=[$2], m1=[$5], druid=[logical])
+            DruidTableScan(table=[[druid, foo]], druid=[logical])
+
+!physicalPlan
 {
   "queryType" : "groupBy",
   "dataSource" : {
