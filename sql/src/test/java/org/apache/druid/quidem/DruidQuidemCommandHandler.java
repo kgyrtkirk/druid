@@ -169,7 +169,7 @@ public class DruidQuidemCommandHandler implements CommandHandler
         }
 
         for (RelNode node : logged) {
-          String str = RelOptUtil.dumpPlan("", node, SqlExplainFormat.TEXT, SqlExplainLevel.ALL_ATTRIBUTES);
+          String str = RelOptUtil.dumpPlan("", node, SqlExplainFormat.TEXT, SqlExplainLevel.EXPPLAN_ATTRIBUTES);
           x.echo(ImmutableList.of(str));
         }
       } else {
