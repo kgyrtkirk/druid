@@ -21,20 +21,36 @@ package org.apache.druid.sql.calcite;
 
 import com.google.common.collect.ImmutableMap;
 import org.apache.druid.query.QueryContexts;
+import org.apache.druid.quidem.ProjectPathUtils;
 import org.apache.druid.server.security.AuthConfig;
 import org.apache.druid.sql.calcite.BaseCalciteQueryTest.CalciteTestConfig;
 import org.apache.druid.sql.calcite.planner.PlannerConfig;
 import org.apache.druid.sql.calcite.util.SqlTestFramework;
 import org.apache.druid.sql.calcite.util.SqlTestFramework.PlannerComponentSupplier;
 import org.junit.jupiter.api.extension.Extension;
+import org.junit.jupiter.api.extension.BeforeEachCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
 
-public class DecoupledExtension implements Extension
+import java.io.File;
+
+import static org.junit.Assume.assumeTrue;
+
+public class DecoupledExtension implements BeforeEachCallback
 {
   private BaseCalciteQueryTest baseTest;
 
   public DecoupledExtension(BaseCalciteQueryTest baseTest)
   {
     this.baseTest = baseTest;
+  }
+
+  private File qCaseDir;
+
+  @Override
+  public void beforeEach(ExtensionContext context) throws Exception
+  {
+    Class<?> testClass = context.getTestClass().get();
+    qCaseDir = ProjectPathUtils.getPathFromProjectRoot("sql/src/test/quidem/" + testClass.getName());
   }
 
   private static final ImmutableMap<String, Object> CONTEXT_OVERRIDES = ImmutableMap.<String, Object>builder()
