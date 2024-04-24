@@ -582,10 +582,9 @@ public class DruidQuery
           virtualColumnRegistry,
           rexBuilder,
           InputAccessor.buildFor(
-              rexBuilder,
-              rowSignature,
+              aggregate,
               partialQuery.getSelectProject(),
-              null),
+              rowSignature),
           aggregations,
           aggName,
           aggCall,
@@ -1471,13 +1470,18 @@ public class DruidQuery
           .addAll(windowing.getOperators())
           .build();
     }
+    // if planning in native set to null
+    // if planning in MSQ set to empty list
+    // This would cause MSQ queries to plan as
+    // Window over an inner scan and avoid
+    // leaf operators
     return new WindowOperatorQuery(
         dataSource,
         new LegacySegmentSpec(Intervals.ETERNITY),
         plannerContext.queryContextMap(),
         windowing.getSignature(),
         operators,
-        null
+        plannerContext.featureAvailable(EngineFeature.WINDOW_LEAF_OPERATOR) ? ImmutableList.of() : null
     );
   }
 

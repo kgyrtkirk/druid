@@ -19,7 +19,6 @@
 
 package org.apache.druid.indexing.seekablestream;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.jsontype.NamedType;
@@ -50,12 +49,13 @@ import org.apache.druid.data.input.impl.TimestampSpec;
 import org.apache.druid.discovery.DataNodeService;
 import org.apache.druid.discovery.DruidNodeAnnouncer;
 import org.apache.druid.discovery.LookupNodeService;
+import org.apache.druid.error.DruidException;
 import org.apache.druid.indexer.TaskStatus;
-import org.apache.druid.indexing.common.IngestionStatsAndErrorsTaskReportData;
+import org.apache.druid.indexer.report.IngestionStatsAndErrors;
+import org.apache.druid.indexer.report.SingleFileTaskReportFileWriter;
+import org.apache.druid.indexer.report.TaskReport;
 import org.apache.druid.indexing.common.LockGranularity;
 import org.apache.druid.indexing.common.SegmentCacheManagerFactory;
-import org.apache.druid.indexing.common.SingleFileTaskReportFileWriter;
-import org.apache.druid.indexing.common.TaskReport;
 import org.apache.druid.indexing.common.TaskToolbox;
 import org.apache.druid.indexing.common.TaskToolboxFactory;
 import org.apache.druid.indexing.common.TestUtils;
@@ -88,7 +88,6 @@ import org.apache.druid.java.util.common.parsers.JSONPathSpec;
 import org.apache.druid.java.util.emitter.service.ServiceEmitter;
 import org.apache.druid.java.util.metrics.MonitorScheduler;
 import org.apache.druid.metadata.DerbyMetadataStorageActionHandlerFactory;
-import org.apache.druid.metadata.EntryExistsException;
 import org.apache.druid.metadata.IndexerSQLMetadataStorageCoordinator;
 import org.apache.druid.metadata.TestDerbyConnector;
 import org.apache.druid.query.DirectQueryProcessingPool;
@@ -154,6 +153,8 @@ import java.util.stream.Collectors;
 
 public abstract class SeekableStreamIndexTaskTestBase extends EasyMockSupport
 {
+  private static final Logger log = new Logger(SeekableStreamIndexTaskTestBase.class);
+
   @Rule
   public final TemporaryFolder tempFolder = new TemporaryFolder();
 
@@ -457,15 +458,13 @@ public abstract class SeekableStreamIndexTaskTestBase extends EasyMockSupport
     return new SegmentDescriptorAndExpectedDim1Values(interval, partitionNum, expectedDim1Values);
   }
 
-  protected IngestionStatsAndErrorsTaskReportData getTaskReportData() throws IOException
+  protected IngestionStatsAndErrors getTaskReportData() throws IOException
   {
-    Map<String, TaskReport> taskReports = OBJECT_MAPPER.readValue(
+    TaskReport.ReportMap taskReports = OBJECT_MAPPER.readValue(
         reportsFile,
-        new TypeReference<Map<String, TaskReport>>()
-        {
-        }
+        TaskReport.ReportMap.class
     );
-    return IngestionStatsAndErrorsTaskReportData.getPayloadFromTaskReports(
+    return IngestionStatsAndErrors.getPayloadFromTaskReports(
         taskReports
     );
   }
@@ -475,8 +474,8 @@ public abstract class SeekableStreamIndexTaskTestBase extends EasyMockSupport
     try {
       taskStorage.insert(task, TaskStatus.running(task.getId()));
     }
-    catch (EntryExistsException e) {
-      // suppress
+    catch (DruidException e) {
+      log.noStackTrace().info(e, "Suppressing exception while inserting task [%s]", task.getId());
     }
     taskLockbox.syncFromStorage();
     final TaskToolbox toolbox = toolboxFactory.build(task);

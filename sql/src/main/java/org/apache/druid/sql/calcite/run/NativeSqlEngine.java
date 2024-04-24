@@ -93,7 +93,7 @@ public class NativeSqlEngine implements SqlEngine
   }
 
   @Override
-  public boolean featureAvailable(EngineFeature feature, PlannerContext plannerContext)
+  public boolean featureAvailable(EngineFeature feature)
   {
     switch (feature) {
       case CAN_SELECT:
@@ -105,14 +105,15 @@ public class NativeSqlEngine implements SqlEngine
       case UNNEST:
       case ALLOW_BROADCAST_RIGHTY_JOIN:
       case ALLOW_TOP_LEVEL_UNION_ALL:
-        return true;
       case TIME_BOUNDARY_QUERY:
-        return plannerContext.queryContext().isTimeBoundaryPlanningEnabled();
+      case GROUPBY_IMPLICITLY_SORTS:
+        return true;
       case CAN_INSERT:
       case CAN_REPLACE:
       case READ_EXTERNAL_DATA:
       case WRITE_EXTERNAL_DATA:
       case SCAN_ORDER_BY_NON_TIME:
+      case WINDOW_LEAF_OPERATOR:
         return false;
       default:
         throw SqlEngines.generateUnrecognizedFeatureException(NativeSqlEngine.class.getSimpleName(), feature);

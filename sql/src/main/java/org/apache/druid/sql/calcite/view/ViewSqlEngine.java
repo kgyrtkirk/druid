@@ -51,7 +51,7 @@ public class ViewSqlEngine implements SqlEngine
   }
 
   @Override
-  public boolean featureAvailable(EngineFeature feature, PlannerContext plannerContext)
+  public boolean featureAvailable(EngineFeature feature)
   {
     switch (feature) {
       // Use most permissive set of SELECT features, since our goal is to get the row type of the view.
@@ -68,6 +68,7 @@ public class ViewSqlEngine implements SqlEngine
       case ALLOW_TOP_LEVEL_UNION_ALL:
         return true;
       // Views can't sit on top of INSERT or REPLACE.
+      case WINDOW_LEAF_OPERATOR:
       case CAN_INSERT:
       case CAN_REPLACE:
         return false;
@@ -76,6 +77,7 @@ public class ViewSqlEngine implements SqlEngine
       case TOPN_QUERY:
       case TIMESERIES_QUERY:
       case TIME_BOUNDARY_QUERY:
+      case GROUPBY_IMPLICITLY_SORTS:
         return false;
 
       default:

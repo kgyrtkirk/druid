@@ -81,6 +81,7 @@ import org.apache.druid.indexing.common.task.IndexTask.IndexIngestionSpec;
 import org.apache.druid.indexing.common.task.IndexTask.IndexTuningConfig;
 import org.apache.druid.indexing.common.task.KillUnusedSegmentsTask;
 import org.apache.druid.indexing.common.task.NoopTask;
+import org.apache.druid.indexing.common.task.NoopTaskContextEnricher;
 import org.apache.druid.indexing.common.task.NoopTestTaskReportFileWriter;
 import org.apache.druid.indexing.common.task.RealtimeIndexTask;
 import org.apache.druid.indexing.common.task.Task;
@@ -696,7 +697,18 @@ public class TaskLifecycleTest extends InitializedNullHandlingTest
         TaskQueueConfig.class
     );
 
-    return new TaskQueue(lockConfig, tqc, new DefaultTaskConfig(), ts, tr, tac, taskLockbox, emitter);
+    return new TaskQueue(
+        lockConfig,
+        tqc,
+        new DefaultTaskConfig(),
+        ts,
+        tr,
+        tac,
+        taskLockbox,
+        emitter,
+        mapper,
+        new NoopTaskContextEnricher()
+    );
   }
 
   @After
@@ -924,6 +936,7 @@ public class TaskLifecycleTest extends InitializedNullHandlingTest
             "test_kill_task",
             Intervals.of("2011-04-01/P4D"),
             null,
+            null,
             false,
             null,
             null,
@@ -1021,6 +1034,7 @@ public class TaskLifecycleTest extends InitializedNullHandlingTest
             null,
             "test_kill_task",
             Intervals.of("2011-04-01/P4D"),
+            null,
             null,
             false,
             null,
