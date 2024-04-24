@@ -27,6 +27,7 @@ import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
+import java.io.Closeable;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -91,7 +92,7 @@ public @interface SqlTestFrameworkConfig
 
   }
 
-  class SqlTestFrameworkConfigStore
+  class SqlTestFrameworkConfigStore implements Closeable
   {
     Map<SqlTestFrameworkConfigInstance, ConfigurationInstance> configMap = new HashMap<>();
 
@@ -107,6 +108,7 @@ public @interface SqlTestFrameworkConfig
       return ret;
     }
 
+    @Override
     public void close()
     {
       for (ConfigurationInstance f : configMap.values()) {
