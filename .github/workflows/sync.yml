@@ -1,10 +1,10 @@
-name: "Pull apache/master changes into master"
+name: "Open PR to pull in apache/master changes into master"
 on:
   schedule:
     - cron:  '0 * * * *'
   workflow_dispatch:
 jobs:
-  release_pull_request:
+  open_pull_request:
     runs-on: ubuntu-latest
     name: release_pull_request
     steps:
@@ -18,7 +18,7 @@ jobs:
         branch: master
         pr_labels: upstream
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
         GITBOT_EMAIL: github-actions@github.com
         DRY_RUN: false
 
