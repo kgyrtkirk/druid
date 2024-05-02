@@ -30,7 +30,6 @@ import org.apache.druid.server.security.AuthConfig;
 import org.apache.druid.sql.calcite.BaseCalciteQueryTest.CalciteTestConfig;
 import org.apache.druid.sql.calcite.planner.PlannerConfig;
 import org.apache.druid.sql.calcite.util.SqlTestFramework;
-import org.apache.druid.sql.calcite.util.SqlTestFramework.PlannerComponentSupplier;
 import org.junit.jupiter.api.extension.Extension;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
@@ -104,8 +103,6 @@ public class DecoupledExtension implements BeforeEachCallback
     DecoupledTestConfig decTestConfig = BaseCalciteQueryTest.queryFrameworkRule
         .getAnnotation(DecoupledTestConfig.class);
 
-    PlannerComponentSupplier componentSupplier = baseTest;
-
     boolean runQuidem = (decTestConfig != null && decTestConfig.quidem());
 
     CalciteTestConfig testConfig = baseTest.new CalciteTestConfig(CONTEXT_OVERRIDES)
@@ -116,7 +113,7 @@ public class DecoupledExtension implements BeforeEachCallback
       {
         plannerConfig = plannerConfig.withOverrides(CONTEXT_OVERRIDES);
 
-        return baseTest.queryFramework().plannerFixture(componentSupplier, plannerConfig, authConfig);
+        return baseTest.queryFramework().plannerFixture(plannerConfig, authConfig);
       }
 
       @Override
