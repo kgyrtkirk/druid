@@ -646,8 +646,13 @@ public class QueryTestRunner
       for (Entry<String, Object> entry : queryContext.entrySet()) {
         qt.println(StringUtils.format("!set %s %s", entry.getKey(), entry.getValue()));
       }
+      Map<String, Object> queryContext1 = builder.plannerConfig.getNonDefaultAsQueryContext();
+      for (Entry<String, Object> entry : queryContext1.entrySet()) {
+        qt.println(StringUtils.format("!set %s %s", entry.getKey(), entry.getValue()));
+      }
+
       qt.println("!set outputformat mysql");
-      qt.println("!use druidtest:///");
+      qt.println("!use "+builder.config.queryFramework().getDruidTestURI());
 
       qt.println(builder.sql + ";");
       if (builder.expectedResults != null) {

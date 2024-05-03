@@ -30,7 +30,6 @@ import org.apache.druid.server.security.AuthConfig;
 import org.apache.druid.sql.calcite.BaseCalciteQueryTest.CalciteTestConfig;
 import org.apache.druid.sql.calcite.planner.PlannerConfig;
 import org.apache.druid.sql.calcite.util.SqlTestFramework;
-import org.junit.jupiter.api.extension.Extension;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
@@ -40,7 +39,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assume.assumeTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DecoupledExtension implements BeforeEachCallback
@@ -65,11 +63,12 @@ public class DecoupledExtension implements BeforeEachCallback
   private void validateTestClass(ExtensionContext context) throws Exception
   {
     Class<?> testClass = context.getTestClass().get();
+    Method testMethod1 = context.getTestMethod().get();
     String methodName = "validateTestClass";
     Method testMethod = Preconditions.checkNotNull(
         testClass.getMethod(methodName), "Please add validateTestClass() test method to the testClass!"
     );
-    if (methodName.equals(testMethod.getName())) {
+    if (testMethod1.getName().equals(testMethod.getName())) {
       checkAnnotationConsistency(testClass);
     }
   }

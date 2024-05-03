@@ -20,10 +20,13 @@
 package org.apache.druid.sql.calcite.planner;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.collect.ImmutableMap;
+import org.apache.druid.java.util.common.IAE;
 import org.apache.druid.java.util.common.UOE;
 import org.apache.druid.query.QueryContexts;
 import org.joda.time.DateTimeZone;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -427,5 +430,33 @@ public class PlannerConfig
       config.nativeQuerySqlPlanningMode = nativeQuerySqlPlanningMode;
       return config;
     }
+  }
+
+  public Map<String, Object> getNonDefaultAsQueryContext()
+  {
+   ImmutableMap.Builder<String, String> b = ImmutableMap.<String, String>builder();
+
+   Map<String, Object> overrides = new HashMap<>();
+   PlannerConfig def = new PlannerConfig();
+   if (def.useApproximateCountDistinct != useApproximateCountDistinct) {
+     overrides.put(
+         CTX_KEY_USE_APPROXIMATE_COUNT_DISTINCT,
+         String.valueOf(useApproximateCountDistinct)
+     );
+   }
+   if (def.useGroupingSetForExactDistinct != useGroupingSetForExactDistinct) {
+     overrides.put(
+         CTX_KEY_USE_GROUPING_SET_FOR_EXACT_DISTINCT,
+         String.valueOf(useGroupingSetForExactDistinct)
+     );
+   }
+
+
+   PlannerConfig newConfig = def.builder().withOverrides(overrides).build();
+   if(!equals(newConfig)) {
+     throw new IAE("Some configs are missing from the override!\nold: %s\nnew: %s",this, newConfig);
+   }
+
+   return overrides;
   }
 }
