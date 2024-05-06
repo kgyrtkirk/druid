@@ -1,4 +1,4 @@
-# testExactTopNOnInnerJoinWithLimit case-crc:bbbef51a
+# testExactTopNOnInnerJoinWithLimit case-crc:05d19212
 !set sqlQueryId dummy
 !set defaultTimeout 300000
 !set debug true
@@ -7,7 +7,7 @@
 !set sqlCurrentTimestamp 2000-01-01T00:00:00Z
 !set plannerStrategy DECOUPLED
 !set outputformat mysql
-!use druidtest:///
+!use druidtest:///?MinTopNThreshold=1
 select f1."dim4", sum("m1") from numfoo f1 inner join (
   select "dim4" from numfoo where dim4 <> 'a' group by 1
 ) f2 on f1."dim4" = f2."dim4" group by 1 limit 1;
