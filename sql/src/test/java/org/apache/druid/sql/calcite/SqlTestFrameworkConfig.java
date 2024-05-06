@@ -19,6 +19,7 @@
 
 package org.apache.druid.sql.calcite;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import org.apache.druid.java.util.common.IAE;
 import org.apache.druid.java.util.common.StringUtils;
@@ -275,6 +276,7 @@ public class SqlTestFrameworkConfig
     SqlTestFrameworkConfigStore configStore = new SqlTestFrameworkConfigStore();
     private SqlTestFrameworkConfig config;
     private Method method;
+    private String testName;
 
     @Override
     public void afterAll(ExtensionContext context)
@@ -290,10 +292,28 @@ public class SqlTestFrameworkConfig
 
     private void setConfig(ExtensionContext context)
     {
+      testName = buildTestCaseName(context);
       method = context.getTestMethod().get();
       Class<?> testClass = context.getTestClass().get();
       List<Annotation> annotations = collectAnnotations(testClass, method);
       config = new SqlTestFrameworkConfig(annotations);
+    }
+
+    /**
+     * Returns a string identifying the testcase.
+     *
+     *
+     */
+    public String buildTestCaseName(ExtensionContext context)
+    {
+      List<String> names = new ArrayList<String>();
+      // this will add all name pieces - except the "last" which would be the
+      // Class level name
+      do {
+        names.add(0, context.getDisplayName().replaceAll("\\([^\\)]*\\)",""));
+        context = context.getParent().get();
+      } while (context.getTestMethod().isPresent());
+      return Joiner.on("@").join(names);
     }
 
     public SqlTestFrameworkConfig getConfig()
@@ -313,7 +333,7 @@ public class SqlTestFrameworkConfig
 
     public String testName()
     {
-      return method.getName();
+      return testName;
     }
   }
 
