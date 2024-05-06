@@ -375,6 +375,10 @@ public class SqlTestFrameworkConfig
     if(def.numMergeBuffers != numMergeBuffers) {
       map.put("NumMergeBuffers", String.valueOf(numMergeBuffers));
     }
+    if(def.minTopNThreshold != minTopNThreshold) {
+      map.put("MinTopNThreshold", String.valueOf(minTopNThreshold));
+    }
+
     if (!equals(new SqlTestFrameworkConfig(map))) {
       throw new IAE("Can't reproduce config via map!");
     }
