@@ -30,6 +30,7 @@ import org.apache.druid.server.security.AuthConfig;
 import org.apache.druid.sql.calcite.BaseCalciteQueryTest.CalciteTestConfig;
 import org.apache.druid.sql.calcite.planner.PlannerConfig;
 import org.apache.druid.sql.calcite.util.SqlTestFramework;
+import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
@@ -38,19 +39,18 @@ import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class DecoupledExtension implements BeforeEachCallback
+public class DecoupledExtension implements BeforeEachCallback, BeforeAllCallback
 {
-  private BaseCalciteQueryTest baseTest;
-
-  public DecoupledExtension(BaseCalciteQueryTest baseTest)
+  public DecoupledExtension()
   {
-    this.baseTest = baseTest;
   }
 
   private File qCaseDir;
+  private BaseCalciteQueryTest baseTest;
 
   @Override
   public void beforeEach(ExtensionContext context) throws Exception
@@ -135,5 +135,12 @@ public class DecoupledExtension implements BeforeEachCallback
     }
 
     return builder;
+  }
+
+  @Override
+  public void beforeAll(ExtensionContext context) throws Exception
+  {
+    Optional<Class<?>> cc = context.getTestClass();
+    baseTest = (BaseCalciteQueryTest) context.getTestInstance().get();
   }
 }

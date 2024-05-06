@@ -37,7 +37,7 @@ public class DecoupledPlanningCalciteJoinQueryTest extends CalciteJoinQueryTest
   public DisableUnlessRule sqlCompatOnly = DisableUnless.SQL_COMPATIBLE;
 
   @RegisterExtension
-  DecoupledExtension decoupledExtension = new DecoupledExtension(this);
+  static DecoupledExtension decoupledExtension = new DecoupledExtension();
 
   @Override
   protected QueryTestBuilder testBuilder()

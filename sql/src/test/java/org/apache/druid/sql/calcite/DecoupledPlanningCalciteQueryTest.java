@@ -28,7 +28,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 public class DecoupledPlanningCalciteQueryTest extends CalciteQueryTest
 {
   @RegisterExtension
-  DecoupledExtension decoupledExtension = new DecoupledExtension(this);
+  DecoupledExtension decoupledExtension = new DecoupledExtension();
 
   @Override
   protected QueryTestBuilder testBuilder()
