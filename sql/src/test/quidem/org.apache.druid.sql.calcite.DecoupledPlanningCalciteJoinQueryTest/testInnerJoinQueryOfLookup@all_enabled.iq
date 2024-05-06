@@ -78,15 +78,10 @@ DruidProject(dim1=[$0], dim2=[$1], v=[$3], v0=[$3], druid=[logical])
         } ],
         "aggregations" : [ {
           "type" : "stringAny",
-          "name" : "a0:a",
+          "name" : "a0",
           "fieldName" : "v",
           "maxStringBytes" : 10,
           "aggregateMultipleValues" : true
-        } ],
-        "postAggregations" : [ {
-          "type" : "finalizingFieldAccess",
-          "name" : "a0",
-          "fieldName" : "a0:a"
         } ],
         "limitSpec" : {
           "type" : "NoopLimitSpec"
