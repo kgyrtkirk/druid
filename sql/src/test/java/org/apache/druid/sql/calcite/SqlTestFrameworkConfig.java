@@ -92,6 +92,23 @@ public class SqlTestFrameworkConfig
 
   @Retention(RetentionPolicy.RUNTIME)
   @Target({ElementType.METHOD, ElementType.TYPE})
+  @MinTopNThreshold(TopNQueryConfig.DEFAULT_MIN_TOPN_THRESHOLD)
+  public @interface MinTopNThreshold
+  {
+    ConfigOptionProcessor<Integer> PROCESSOR = new ConfigOptionProcessor<Integer>(MinTopNThreshold.class)
+    {
+      @Override
+      public Integer fromString(String str) throws NumberFormatException
+      {
+        return Integer.valueOf(str);
+      }
+    };
+
+    int value();
+  }
+
+  @Retention(RetentionPolicy.RUNTIME)
+  @Target({ElementType.METHOD, ElementType.TYPE})
   @ResultCache(ResultCacheMode.DISABLED)
   public @interface ResultCache
   {
@@ -130,6 +147,7 @@ public class SqlTestFrameworkConfig
   }
 
   public final int numMergeBuffers;
+  public final int minTopNThreshold;
   public final ResultCacheMode resultCache;
   public final Class<? extends QueryComponentSupplier> componentSupplier;
 
@@ -137,6 +155,7 @@ public class SqlTestFrameworkConfig
   {
     try {
       numMergeBuffers = NumMergeBuffers.PROCESSOR.fromAnnotations(annotations);
+      minTopNThreshold = MinTopNThreshold.PROCESSOR.fromAnnotations(annotations);
       resultCache = ResultCache.PROCESSOR.fromAnnotations(annotations);
       componentSupplier = ComponentSupplier.PROCESSOR.fromAnnotations(annotations);
     }
@@ -149,6 +168,7 @@ public class SqlTestFrameworkConfig
   {
     try {
       numMergeBuffers = NumMergeBuffers.PROCESSOR.fromMap(queryParams);
+      minTopNThreshold = MinTopNThreshold.PROCESSOR.fromMap(queryParams);
       resultCache = ResultCache.PROCESSOR.fromMap(queryParams);
       componentSupplier = ComponentSupplier.PROCESSOR.fromMap(queryParams);
     }
@@ -160,7 +180,7 @@ public class SqlTestFrameworkConfig
   @Override
   public int hashCode()
   {
-    return Objects.hash(numMergeBuffers, resultCache, componentSupplier);
+    return Objects.hash(minTopNThreshold, numMergeBuffers, resultCache, componentSupplier);
   }
 
   @Override
@@ -170,7 +190,8 @@ public class SqlTestFrameworkConfig
       return false;
     }
     SqlTestFrameworkConfig other = (SqlTestFrameworkConfig) obj;
-    return numMergeBuffers == other.numMergeBuffers
+    return minTopNThreshold == other.minTopNThreshold
+        && numMergeBuffers == other.numMergeBuffers
         && resultCache == other.resultCache
         && componentSupplier == other.componentSupplier;
   }
