@@ -87,10 +87,9 @@ DruidAggregate(group=[{0}], EXPR$1=[COUNT()], druid=[logical])
         "filter" : {
           "type" : "not",
           "field" : {
-            "type" : "equals",
-            "column" : "dim1",
-            "matchValueType" : "STRING",
-            "matchValue" : ""
+            "type" : "selector",
+            "dimension" : "dim1",
+            "value" : null
           }
         },
         "granularity" : {

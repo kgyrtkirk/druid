@@ -111,13 +111,13 @@ DruidAggregate(group=[{1}], EXPR$1=[COUNT()], druid=[logical])
   "filter" : {
     "type" : "and",
     "fields" : [ {
-      "type" : "inType",
-      "column" : "dim1",
-      "matchValueType" : "STRING",
-      "sortedValues" : [ "abc", "def" ]
+      "type" : "in",
+      "dimension" : "dim1",
+      "values" : [ "abc", "def" ]
     }, {
-      "type" : "null",
-      "column" : "_j0.a0"
+      "type" : "selector",
+      "dimension" : "_j0.a0",
+      "value" : null
     } ]
   },
   "granularity" : {

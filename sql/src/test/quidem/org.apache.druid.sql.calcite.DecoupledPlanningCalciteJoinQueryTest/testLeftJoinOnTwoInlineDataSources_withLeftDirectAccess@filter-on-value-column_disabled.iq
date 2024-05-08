@@ -70,10 +70,9 @@ DruidProject(dim1=[CAST('10.1':VARCHAR):VARCHAR], __time=[$1], druid=[logical])
         } ],
         "resultFormat" : "compactedList",
         "filter" : {
-          "type" : "equals",
-          "column" : "dim1",
-          "matchValueType" : "STRING",
-          "matchValue" : "10.1"
+          "type" : "selector",
+          "dimension" : "dim1",
+          "value" : "10.1"
         },
         "columns" : [ "__time", "v0" ],
         "legacy" : false,
@@ -97,10 +96,9 @@ DruidProject(dim1=[CAST('10.1':VARCHAR):VARCHAR], __time=[$1], druid=[logical])
         },
         "resultFormat" : "compactedList",
         "filter" : {
-          "type" : "equals",
-          "column" : "dim1",
-          "matchValueType" : "STRING",
-          "matchValue" : "10.1"
+          "type" : "selector",
+          "dimension" : "dim1",
+          "value" : "10.1"
         },
         "columns" : [ "dim1" ],
         "legacy" : false,

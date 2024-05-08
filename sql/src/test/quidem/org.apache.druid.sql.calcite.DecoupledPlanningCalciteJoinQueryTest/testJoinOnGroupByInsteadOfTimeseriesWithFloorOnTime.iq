@@ -96,10 +96,9 @@ DruidAggregate(group=[{0, 1}], EXPR$2=[ANY_VALUE($2, $3)], druid=[logical])
           "outputType" : "LONG"
         } ],
         "filter" : {
-          "type" : "equals",
-          "column" : "dim3",
-          "matchValueType" : "STRING",
-          "matchValue" : "b"
+          "type" : "selector",
+          "dimension" : "dim3",
+          "value" : "b"
         },
         "granularity" : {
           "type" : "all"
