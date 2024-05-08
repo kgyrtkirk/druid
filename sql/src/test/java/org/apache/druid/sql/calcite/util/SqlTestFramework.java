@@ -40,7 +40,6 @@ import org.apache.druid.math.expr.ExprMacroTable;
 import org.apache.druid.query.GlobalTableDataSource;
 import org.apache.druid.query.QueryRunnerFactoryConglomerate;
 import org.apache.druid.query.lookup.LookupExtractorFactoryContainerProvider;
-import org.apache.druid.query.topn.TopNQueryConfig;
 import org.apache.druid.segment.DefaultColumnFormatConfig;
 import org.apache.druid.segment.join.JoinableFactoryWrapper;
 import org.apache.druid.server.QueryLifecycle;
@@ -241,17 +240,10 @@ public class SqlTestFramework
         Closer resourceCloser
     )
     {
-      if (builder.mergeBufferCount == 0) {
-        return QueryStackTests.createQueryRunnerFactoryConglomerate(
-            resourceCloser,
-            () -> builder.minTopNThreshold
-        );
-      } else {
-        return QueryStackTests.createQueryRunnerFactoryConglomerate(
-            resourceCloser,
-            QueryStackTests.getProcessingConfig(builder.mergeBufferCount)
-        );
-      }
+      return QueryStackTests.createQueryRunnerFactoryConglomerate(
+          resourceCloser,
+          QueryStackTests.getProcessingConfig(builder.mergeBufferCount)
+      );
     }
 
     @Override
@@ -399,7 +391,6 @@ public class SqlTestFramework
   public static class Builder
   {
     private final QueryComponentSupplier componentSupplier;
-    private int minTopNThreshold = TopNQueryConfig.DEFAULT_MIN_TOPN_THRESHOLD;
     private int mergeBufferCount;
     private CatalogResolver catalogResolver = CatalogResolver.NULL_RESOLVER;
     private List<Module> overrideModules = new ArrayList<>();
@@ -407,12 +398,6 @@ public class SqlTestFramework
     public Builder(QueryComponentSupplier componentSupplier)
     {
       this.componentSupplier = componentSupplier;
-    }
-
-    public Builder minTopNThreshold(int minTopNThreshold)
-    {
-      this.minTopNThreshold = minTopNThreshold;
-      return this;
     }
 
     public Builder mergeBufferCount(int mergeBufferCount)
