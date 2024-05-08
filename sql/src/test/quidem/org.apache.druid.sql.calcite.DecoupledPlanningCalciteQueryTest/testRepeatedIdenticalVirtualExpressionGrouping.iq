@@ -1,4 +1,5 @@
-# testRepeatedIdenticalVirtualExpressionGrouping case-crc:e79279c4
+# testRepeatedIdenticalVirtualExpressionGrouping case-crc:1a5712f6
+# quidem testcase reason: IMPROVED_PLAN
 !set sqlQueryId dummy
 !set sqlCurrentTimestamp 2000-01-01T00:00:00Z
 !set defaultTimeout 300000

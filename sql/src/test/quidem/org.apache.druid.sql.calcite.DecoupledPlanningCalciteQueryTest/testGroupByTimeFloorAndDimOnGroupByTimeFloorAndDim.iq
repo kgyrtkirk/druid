@@ -1,4 +1,5 @@
-# testGroupByTimeFloorAndDimOnGroupByTimeFloorAndDim case-crc:f87d60a4
+# testGroupByTimeFloorAndDimOnGroupByTimeFloorAndDim case-crc:634b75d5
+# quidem testcase reason: IMPROVED_PLAN
 !set sqlQueryId dummy
 !set sqlCurrentTimestamp 2000-01-01T00:00:00Z
 !set defaultTimeout 300000

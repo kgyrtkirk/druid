@@ -1,4 +1,5 @@
-# testGroupByLimitPushdownExtraction case-crc:da2618b7
+# testGroupByLimitPushdownExtraction case-crc:1bfa9337
+# quidem testcase reason: IMPROVED_PLAN
 !set sqlQueryId dummy
 !set sqlCurrentTimestamp 2000-01-01T00:00:00Z
 !set defaultTimeout 300000

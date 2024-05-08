@@ -1,4 +1,5 @@
-# testGroupByWithLiteralInSubqueryGrouping case-crc:933d8c09
+# testGroupByWithLiteralInSubqueryGrouping case-crc:ddf0feaf
+# quidem testcase reason: IMPROVED_PLAN
 !set sqlQueryId dummy
 !set sqlCurrentTimestamp 2000-01-01T00:00:00Z
 !set defaultTimeout 300000

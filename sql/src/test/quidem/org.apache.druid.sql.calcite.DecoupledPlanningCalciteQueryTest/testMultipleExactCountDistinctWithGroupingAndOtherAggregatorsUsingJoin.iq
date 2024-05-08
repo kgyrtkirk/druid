@@ -1,4 +1,5 @@
-# testMultipleExactCountDistinctWithGroupingAndOtherAggregatorsUsingJoin case-crc:c632c11d
+# testMultipleExactCountDistinctWithGroupingAndOtherAggregatorsUsingJoin case-crc:6c95ac54
+# quidem testcase reason: AGG_COL_EXCHANGE
 !set sqlQueryId dummy
 !set sqlCurrentTimestamp 2000-01-01T00:00:00Z
 !set defaultTimeout 300000

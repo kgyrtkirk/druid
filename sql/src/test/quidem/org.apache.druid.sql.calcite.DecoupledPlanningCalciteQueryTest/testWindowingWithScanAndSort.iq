@@ -1,4 +1,5 @@
-# testWindowingWithScanAndSort case-crc:1d06dc93
+# testWindowingWithScanAndSort case-crc:24efe380
+# quidem testcase reason: SLIGHTLY_WORSE_PLAN
 !set sqlQueryId dummy
 !set defaultTimeout 300000
 !set debug true
