@@ -1,4 +1,4 @@
-# testExactCountDistinctWithGroupingAndOtherAggregators case-crc:80416865
+# testExactCountDistinctWithGroupingAndOtherAggregators@NullHandling=sql case-crc:80416865
 # quidem testcase reason: AGG_COL_EXCHANGE
 !set sqlQueryId dummy
 !set sqlCurrentTimestamp 2000-01-01T00:00:00Z

@@ -1,4 +1,4 @@
-# testSubqueryTypeMismatchWithLiterals case-crc:55baf28f
+# testSubqueryTypeMismatchWithLiterals@NullHandling=sql case-crc:55baf28f
 # quidem testcase reason: AGGREGATE_REMOVE_NOT_FIRED
 !set sqlQueryId dummy
 !set sqlCurrentTimestamp 2000-01-01T00:00:00Z

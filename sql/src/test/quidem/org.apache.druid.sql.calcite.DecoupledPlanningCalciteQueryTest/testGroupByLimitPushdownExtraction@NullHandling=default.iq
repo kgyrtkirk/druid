@@ -1,4 +1,4 @@
-# testGroupByLimitPushdownExtraction case-crc:1bfa9337
+# testGroupByLimitPushdownExtraction@NullHandling=default case-crc:1bfa9337
 # quidem testcase reason: IMPROVED_PLAN
 !set sqlQueryId dummy
 !set sqlCurrentTimestamp 2000-01-01T00:00:00Z
@@ -63,10 +63,9 @@ DruidProject(dim4=[CAST('a':VARCHAR):VARCHAR], EXPR$1=[$0], EXPR$2=[$1], druid=[
     "intervals" : [ "-146136543-09-08T08:23:32.096Z/146140482-04-24T15:36:27.903Z" ]
   },
   "filter" : {
-    "type" : "equals",
-    "column" : "dim4",
-    "matchValueType" : "STRING",
-    "matchValue" : "a"
+    "type" : "selector",
+    "dimension" : "dim4",
+    "value" : "a"
   },
   "granularity" : {
     "type" : "all"

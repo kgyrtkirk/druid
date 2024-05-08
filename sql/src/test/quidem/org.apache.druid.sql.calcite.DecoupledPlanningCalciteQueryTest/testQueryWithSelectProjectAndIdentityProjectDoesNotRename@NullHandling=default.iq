@@ -1,4 +1,4 @@
-# testQueryWithSelectProjectAndIdentityProjectDoesNotRename case-crc:43cd3215
+# testQueryWithSelectProjectAndIdentityProjectDoesNotRename@NullHandling=default case-crc:43cd3215
 # quidem testcase reason: SLIGHTLY_WORSE_PLAN
 !set sqlQueryId dummy
 !set sqlCurrentTimestamp 2000-01-01T00:00:00Z
@@ -74,12 +74,14 @@ DruidProject(EXPR$0=[/(CAST($0):DECIMAL(19, 1), $1)], druid=[logical])
           "name" : "a0"
         },
         "filter" : {
-          "type" : "range",
-          "column" : "__time",
-          "matchValueType" : "LONG",
-          "lower" : 947005200000,
-          "upper" : 1641402000000,
-          "upperOpen" : true
+          "type" : "bound",
+          "dimension" : "__time",
+          "lower" : "947005200000",
+          "upper" : "1641402000000",
+          "upperStrict" : true,
+          "ordering" : {
+            "type" : "numeric"
+          }
         },
         "name" : "a0"
       }, {
@@ -109,10 +111,9 @@ DruidProject(EXPR$0=[/(CAST($0):DECIMAL(19, 1), $1)], druid=[logical])
       "fieldName" : "a0"
     },
     "filter" : {
-      "type" : "equals",
-      "column" : "a1",
-      "matchValueType" : "LONG",
-      "matchValue" : 1
+      "type" : "selector",
+      "dimension" : "a1",
+      "value" : "1"
     },
     "name" : "_a0"
   }, {
@@ -126,14 +127,14 @@ DruidProject(EXPR$0=[/(CAST($0):DECIMAL(19, 1), $1)], druid=[logical])
       "fields" : [ {
         "type" : "not",
         "field" : {
-          "type" : "null",
-          "column" : "d0"
+          "type" : "selector",
+          "dimension" : "d0",
+          "value" : null
         }
       }, {
-        "type" : "equals",
-        "column" : "a1",
-        "matchValueType" : "LONG",
-        "matchValue" : 0
+        "type" : "selector",
+        "dimension" : "a1",
+        "value" : "0"
       } ]
     },
     "name" : "_a1"
@@ -149,4 +150,3 @@ DruidProject(EXPR$0=[/(CAST($0):DECIMAL(19, 1), $1)], druid=[logical])
   }
 }
 !nativePlan
-ativePlan
