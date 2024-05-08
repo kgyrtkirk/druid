@@ -24,6 +24,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.ImmutableSet;
+import org.apache.curator.shaded.com.google.common.collect.Sets;
 import org.apache.druid.java.util.common.IAE;
 import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.query.topn.TopNQueryConfig;
@@ -152,6 +154,13 @@ public class SqlTestFrameworkConfig
     Class<? extends QueryComponentSupplier> value();
   }
 
+  private static final Set<String> KNOWN_CONFIG_KEYS = ImmutableSet.<String>builder()
+      .add(NumMergeBuffers.class.getSimpleName())
+      .add(MinTopNThreshold.class.getSimpleName())
+      .add(ResultCache.class.getSimpleName())
+      .add(ComponentSupplier.class.getSimpleName())
+      .build();
+
   public final int numMergeBuffers;
   public final int minTopNThreshold;
   public final ResultCacheMode resultCache;
@@ -172,6 +181,7 @@ public class SqlTestFrameworkConfig
 
   public SqlTestFrameworkConfig(Map<String, String> queryParams)
   {
+    validateConfigKeys(queryParams.keySet());
     try {
       numMergeBuffers = NumMergeBuffers.PROCESSOR.fromMap(queryParams);
       minTopNThreshold = MinTopNThreshold.PROCESSOR.fromMap(queryParams);
@@ -181,6 +191,15 @@ public class SqlTestFrameworkConfig
     catch (Exception e) {
       throw new RuntimeException(e);
     }
+  }
+
+  private void validateConfigKeys(Set<String> keySet)
+  {
+    Set<String> diff = Sets.difference(keySet, KNOWN_CONFIG_KEYS);
+    if (diff.isEmpty()) {
+      return;
+    }
+    throw new IAE("Invalid configuration key(s) specified [%s]; valid options are [%s]", diff, KNOWN_CONFIG_KEYS);
   }
 
   @Override
