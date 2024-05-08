@@ -547,7 +547,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.JOIN_FILTER_LOCATIONS)
+  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.JOIN_FILTER_LOCATIONS, separateDefaultModeTest = true)
   public void testJoinOnGroupByInsteadOfTimeseriesWithFloorOnTime()
   {
     // Cannot vectorize JOIN operator.
@@ -2733,7 +2733,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.JOIN_FILTER_LOCATIONS)
+  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.JOIN_FILTER_LOCATIONS, separateDefaultModeTest = true)
   @MethodSource("provideQueryContexts")
   @ParameterizedTest(name = "{0}")
   public void testUsingSubqueryWithExtractionFns(Map<String, Object> queryContext)
@@ -2937,7 +2937,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.JOIN_LEFT_DIRECT_ACCESS)
+  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.JOIN_LEFT_DIRECT_ACCESS, separateDefaultModeTest = true)
   @MethodSource("provideQueryContexts")
   @ParameterizedTest(name = "{0}")
   public void testLeftJoinOnTwoInlineDataSourcesWithTimeFilter_withLeftDirectAccess(Map<String, Object> queryContext)
@@ -3049,7 +3049,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.JOIN_LEFT_DIRECT_ACCESS)
+  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.JOIN_LEFT_DIRECT_ACCESS, separateDefaultModeTest = true)
   @MethodSource("provideQueryContexts")
   @ParameterizedTest(name = "{0}")
   public void testLeftJoinOnTwoInlineDataSourcesWithOuterWhere_withLeftDirectAccess(Map<String, Object> queryContext)
@@ -3151,7 +3151,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.JOIN_LEFT_DIRECT_ACCESS)
+  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.JOIN_LEFT_DIRECT_ACCESS, separateDefaultModeTest = true)
   @MethodSource("provideQueryContexts")
   @ParameterizedTest(name = "{0}")
   public void testLeftJoinOnTwoInlineDataSources_withLeftDirectAccess(Map<String, Object> queryContext)
@@ -4156,7 +4156,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.EQUIV_PLAN)
+  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.EQUIV_PLAN, separateDefaultModeTest = true)
   @MethodSource("provideQueryContexts")
   @ParameterizedTest(name = "{0}")
   public void testSemiAndAntiJoinSimultaneouslyUsingExplicitJoins(Map<String, Object> queryContext)
