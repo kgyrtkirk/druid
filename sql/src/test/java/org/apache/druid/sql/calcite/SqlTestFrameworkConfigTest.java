@@ -125,12 +125,17 @@ public class SqlTestFrameworkConfigTest
   @Test
   public void testInvalidConfigKeySpecified()
   {
-    ImmutableMap<String, String> configMap = ImmutableMap.<String, String>builder().put("nonExistent", "someValue").build();
+    ImmutableMap<String, String> configMap = ImmutableMap.<String, String>builder()
+        .put("nonExistent", "someValue")
+        .build();
     IAE e = assertThrows(
         IAE.class,
         () -> new SqlTestFrameworkConfig(configMap)
     );
-    assertEquals("Invalid configuration key(s) specified [[nonExistent]]; valid options are [[NumMergeBuffers, MinTopNThreshold, ResultCache, ComponentSupplier]]", e.getMessage());
+    assertEquals(
+        "Invalid configuration key(s) specified [[nonExistent]]; valid options are [[NumMergeBuffers, MinTopNThreshold, ResultCache, ComponentSupplier]]",
+        e.getMessage()
+    );
   }
 
 }
