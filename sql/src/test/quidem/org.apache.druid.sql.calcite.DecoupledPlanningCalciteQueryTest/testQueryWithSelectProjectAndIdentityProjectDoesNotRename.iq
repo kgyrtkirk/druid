@@ -149,3 +149,4 @@ DruidProject(EXPR$0=[/(CAST($0):DECIMAL(19, 1), $1)], druid=[logical])
   }
 }
 !nativePlan
+ativePlan

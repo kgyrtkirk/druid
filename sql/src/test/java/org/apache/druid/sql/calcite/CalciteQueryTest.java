@@ -6955,7 +6955,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.AGG_COL_EXCHANGE)
+  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.AGG_COL_EXCHANGE, separateDefaultModeTest = true)
   @Test
   public void testExactCountDistinctWithGroupingAndOtherAggregators()
   {
