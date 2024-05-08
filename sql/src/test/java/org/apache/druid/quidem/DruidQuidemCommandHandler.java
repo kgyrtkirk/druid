@@ -42,8 +42,6 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static org.junit.Assume.assumeTrue;
-
 public class DruidQuidemCommandHandler implements CommandHandler
 {
 
@@ -61,9 +59,6 @@ public class DruidQuidemCommandHandler implements CommandHandler
     }
     if (line.startsWith("nativePlan")) {
       return new NativePlanCommand(lines, content);
-    }
-    if (line.startsWith("assumeNullHandling")) {
-      return new AssumeNullHandlingCommand(lines, content, line);
     }
     return null;
   }
@@ -205,35 +200,4 @@ public class DruidQuidemCommandHandler implements CommandHandler
       super(lines, content, Hook.CONVERTED);
     }
   }
-
-  static class AssumeNullHandlingCommand extends AbstractCommand
-  {
-
-    private final List<String> lines;
-    private final List<String> content;
-
-    public AssumeNullHandlingCommand(List<String> lines, List<String> content, String line)
-    {
-      this.lines = lines;
-      this.content = content;
-    }
-
-    @Override
-    public void execute(Context x, boolean execute) throws Exception
-    {
-      if (execute) {
-        try {
-          assumeTrue(false);
-        }
-        catch (Exception e) {
-          throw new Error(e);
-        }
-      } else {
-        x.echo(content);
-      }
-      x.echo(lines);
-    }
-
-  }
-
 }

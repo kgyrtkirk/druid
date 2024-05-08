@@ -20,8 +20,11 @@
 package org.apache.druid.quidem;
 
 import org.apache.druid.common.config.NullHandling;
+import org.junit.jupiter.api.condition.EnabledIf;
+
 import java.io.File;
 
+@EnabledIf(value = "enabled", disabledReason = "These tests are only run in SqlCompatible mode!")
 public class SqlQuidemTest extends DruidQuidemTestBase
 {
   public static boolean enabled()

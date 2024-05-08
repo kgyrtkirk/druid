@@ -154,9 +154,6 @@ public abstract class DruidQuidemTestBase
       catch (Exception e) {
         throw new RE(e, "Encountered exception while running [%s]", inFile);
       }
-      catch (AssumptionError ae) {
-        throw 
-      }
 
       final String diff = DiffTestCase.diff(inFile, outFile);
 

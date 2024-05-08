@@ -1,4 +1,3 @@
-!assumeNullHandling
 !use druidtest:///
 !set outputformat mysql
 
