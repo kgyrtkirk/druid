@@ -107,6 +107,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assume.assumeFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class CalciteJoinQueryTest extends BaseCalciteQueryTest
@@ -178,7 +179,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
         )
     );
   }
-
 
   // Adjust topN threshold, so that the topN engine keeps only 1 slot for aggregates, which should be enough
   // to compute the query with limit 1.
@@ -3591,6 +3591,10 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     // This test case was originally added in https://github.com/apache/druid/pull/11434 with a note about this.
     Assumptions.assumeFalse(NullHandling.replaceWithDefault() && QueryContext.of(queryContext).getEnableJoinFilterRewrite());
 
+    assumeFalse(
+        "join condition not support in decoupled mode", testBuilder().isDecoupledMode() && NullHandling.replaceWithDefault()
+    );
+
     // Cannot vectorize due to 'concat' expression.
     cannotVectorize();
 
@@ -5652,6 +5656,8 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   @ParameterizedTest(name = "{0}")
   public void testRegressionFilteredAggregatorsSubqueryJoins(Map<String, Object> queryContext)
   {
+    assumeFalse("not support in decoupled mode", testBuilder().isDecoupledMode() && NullHandling.replaceWithDefault());
+
     cannotVectorize();
     testQuery(
         "select\n" +
