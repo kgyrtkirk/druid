@@ -21,6 +21,9 @@ package org.apache.druid.sql.calcite;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import org.apache.druid.java.util.common.IAE;
 import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.query.topn.TopNQueryConfig;
@@ -34,6 +37,8 @@ import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.reflections.Reflections;
 
+import javax.annotation.Nonnull;
+
 import java.io.Closeable;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
@@ -41,7 +46,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -49,13 +53,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Specifies current framework settings.
@@ -80,6 +84,15 @@ public class SqlTestFrameworkConfig
   @NumMergeBuffers(0)
   public @interface NumMergeBuffers
   {
+    ConfigOptionProcessor<Integer> PROCESSOR = new ConfigOptionProcessor<Integer>(NumMergeBuffers.class)
+    {
+      @Override
+      public Integer fromString(String str) throws NumberFormatException
+      {
+        return Integer.valueOf(str);
+      }
+    };
+
     int value();
   }
 
@@ -88,6 +101,15 @@ public class SqlTestFrameworkConfig
   @MinTopNThreshold(TopNQueryConfig.DEFAULT_MIN_TOPN_THRESHOLD)
   public @interface MinTopNThreshold
   {
+    ConfigOptionProcessor<Integer> PROCESSOR = new ConfigOptionProcessor<Integer>(MinTopNThreshold.class)
+    {
+      @Override
+      public Integer fromString(String str) throws NumberFormatException
+      {
+        return Integer.valueOf(str);
+      }
+    };
+
     int value();
   }
 
@@ -96,6 +118,15 @@ public class SqlTestFrameworkConfig
   @ResultCache(ResultCacheMode.DISABLED)
   public @interface ResultCache
   {
+    ConfigOptionProcessor<ResultCacheMode> PROCESSOR = new ConfigOptionProcessor<ResultCacheMode>(ResultCache.class)
+    {
+      @Override
+      public ResultCacheMode fromString(String str)
+      {
+        return ResultCacheMode.valueOf(str);
+      }
+    };
+
     ResultCacheMode value();
   }
 
@@ -104,27 +135,37 @@ public class SqlTestFrameworkConfig
    */
   @Retention(RetentionPolicy.RUNTIME)
   @Target({ElementType.METHOD, ElementType.TYPE})
-  @Supplier(StandardComponentSupplier.class)
-  public @interface Supplier
+  @ComponentSupplier(StandardComponentSupplier.class)
+  public @interface ComponentSupplier
   {
+    ConfigOptionProcessor<Class<? extends QueryComponentSupplier>> PROCESSOR = new ConfigOptionProcessor<Class<? extends QueryComponentSupplier>>(
+        ComponentSupplier.class
+    )
+    {
+      @Override
+      public Class<? extends QueryComponentSupplier> fromString(String name) throws Exception
+      {
+        return getQueryComponentSupplierForName(name);
+      }
+    };
+
     Class<? extends QueryComponentSupplier> value();
   }
 
   public final int numMergeBuffers;
   public final int minTopNThreshold;
   public final ResultCacheMode resultCache;
-  public final Class<? extends QueryComponentSupplier> supplier;
+  public final Class<? extends QueryComponentSupplier> componentSupplier;
 
   public SqlTestFrameworkConfig(List<Annotation> annotations)
   {
     try {
-      numMergeBuffers = getValueFromAnnotation(annotations, NumMergeBuffers.class);
-      minTopNThreshold = getValueFromAnnotation(annotations, MinTopNThreshold.class);
-      resultCache = getValueFromAnnotation(annotations, ResultCache.class);
-      supplier = getValueFromAnnotation(annotations, Supplier.class);
+      numMergeBuffers = NumMergeBuffers.PROCESSOR.fromAnnotations(annotations);
+      minTopNThreshold = MinTopNThreshold.PROCESSOR.fromAnnotations(annotations);
+      resultCache = ResultCache.PROCESSOR.fromAnnotations(annotations);
+      componentSupplier = ComponentSupplier.PROCESSOR.fromAnnotations(annotations);
     }
-    catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
-        | InvocationTargetException e) {
+    catch (Exception e) {
       throw new RuntimeException(e);
     }
   }
@@ -132,87 +173,20 @@ public class SqlTestFrameworkConfig
   public SqlTestFrameworkConfig(Map<String, String> queryParams)
   {
     try {
-      numMergeBuffers = getValueFromMap(queryParams, NumMergeBuffers.class);
-      minTopNThreshold = getValueFromMap(queryParams, MinTopNThreshold.class);
-      resultCache = getValueFromMap(queryParams, ResultCache.class);
-      supplier = getValueFromMap(queryParams, Supplier.class);
+      numMergeBuffers = NumMergeBuffers.PROCESSOR.fromMap(queryParams);
+      minTopNThreshold = MinTopNThreshold.PROCESSOR.fromMap(queryParams);
+      resultCache = ResultCache.PROCESSOR.fromMap(queryParams);
+      componentSupplier = ComponentSupplier.PROCESSOR.fromMap(queryParams);
     }
-    catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException
-        | InvocationTargetException e) {
+    catch (Exception e) {
       throw new RuntimeException(e);
     }
-  }
-
-  @SuppressWarnings("unchecked")
-  private <T> T getValueFromMap(Map<String, String> map, Class<? extends Annotation> annotationClass)
-      throws IllegalAccessException, InvocationTargetException, NoSuchMethodException, SecurityException
-  {
-    String value = map.get(annotationClass.getSimpleName());
-    if (value == null) {
-      return defaultValue(annotationClass);
-    }
-    Class<?> type = annotationClass.getMethod("value").getReturnType();
-
-    if (type == int.class) {
-      return (T) Integer.valueOf(value);
-    }
-    if (type == Class.class) {
-
-      Object clazz = getQueryComponentSupplierForName(value);
-      if (clazz != null) {
-        return (T) clazz;
-      }
-
-    }
-    throw new RuntimeException("don't know how to handle conversion to " + type);
-  }
-
-  private Object getQueryComponentSupplierForName(String name)
-  {
-    Set<Class<? extends QueryComponentSupplier>> subTypes = new Reflections("org.apache.druid")
-        .getSubTypesOf(QueryComponentSupplier.class);
-    Set<String> knownNames = new HashSet<String>();
-
-    for (Class<? extends QueryComponentSupplier> cl : subTypes) {
-      if (cl.getSimpleName().equals(name)) {
-        return cl;
-      }
-      knownNames.add(cl.getSimpleName());
-    }
-    throw new IAE("supplier [%s] is not known; known are [%s]", name, knownNames);
-  }
-
-  @SuppressWarnings("unchecked")
-  private <T> T getValueFromAnnotation(List<Annotation> annotations, Class<? extends Annotation> annotationClass)
-      throws IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException,
-      SecurityException
-  {
-    Method method = annotationClass.getMethod("value");
-    for (Annotation annotation : annotations) {
-      if (annotationClass.isInstance(annotation)) {
-        return (T) method.invoke(annotation);
-      }
-    }
-    return defaultValue(annotationClass);
-  }
-
-  @SuppressWarnings("unchecked")
-  private <T> T defaultValue(Class<? extends Annotation> annotationClass)
-      throws IllegalAccessException, InvocationTargetException, NoSuchMethodException, SecurityException
-  {
-    Method method = annotationClass.getMethod("value");
-    Annotation annotation = annotationClass.getAnnotation(annotationClass);
-    Preconditions.checkNotNull(
-        annotation,
-        StringUtils.format("Annotation class [%s] must be annotated with itself to set default value", annotationClass)
-    );
-    return (T) method.invoke(annotation);
   }
 
   @Override
   public int hashCode()
   {
-    return Objects.hash(minTopNThreshold, numMergeBuffers, resultCache, supplier);
+    return Objects.hash(minTopNThreshold, numMergeBuffers, resultCache, componentSupplier);
   }
 
   @Override
@@ -225,7 +199,7 @@ public class SqlTestFrameworkConfig
     return minTopNThreshold == other.minTopNThreshold
         && numMergeBuffers == other.numMergeBuffers
         && resultCache == other.resultCache
-        && supplier == other.supplier;
+        && componentSupplier == other.componentSupplier;
   }
 
   public static class SqlTestFrameworkConfigStore implements Closeable
@@ -323,7 +297,7 @@ public class SqlTestFrameworkConfig
 
     public SqlTestFramework get() throws Exception
     {
-      return configStore.getConfigurationInstance(config, x -> x).framework;
+      return configStore.getConfigurationInstance(config, Function.identity()).framework;
     }
 
     public <T extends Annotation> T getAnnotation(Class<T> annotationType)
@@ -356,7 +330,7 @@ public class SqlTestFrameworkConfig
         SqlTestFrameworkConfig config,
         Function<QueryComponentSupplier, QueryComponentSupplier> queryComponentSupplierWrapper) throws Exception
     {
-      this(config, queryComponentSupplierWrapper.apply(makeQueryComponentSupplier(config.supplier)));
+      this(config, queryComponentSupplierWrapper.apply(makeQueryComponentSupplier(config.componentSupplier)));
     }
 
     private static QueryComponentSupplier makeQueryComponentSupplier(
@@ -390,19 +364,92 @@ public class SqlTestFrameworkConfig
 
   private Map<String, String> getNonDefaultMap()
   {
-    Map<String, String> map=new HashMap<>();
+    Map<String, String> map = new HashMap<>();
     SqlTestFrameworkConfig def = new SqlTestFrameworkConfig(Collections.emptyList());
-    if(def.numMergeBuffers != numMergeBuffers) {
+    if (def.numMergeBuffers != numMergeBuffers) {
       map.put("NumMergeBuffers", String.valueOf(numMergeBuffers));
     }
-    if(def.minTopNThreshold != minTopNThreshold) {
+    if (def.minTopNThreshold != minTopNThreshold) {
       map.put("MinTopNThreshold", String.valueOf(minTopNThreshold));
     }
-
     if (!equals(new SqlTestFrameworkConfig(map))) {
       throw new IAE("Can't reproduce config via map!");
     }
     return map;
+  }
 
+  abstract static class ConfigOptionProcessor<T>
+  {
+    final Class<? extends Annotation> annotationClass;
+
+    public ConfigOptionProcessor(Class<? extends Annotation> annotationClass)
+    {
+      this.annotationClass = annotationClass;
+    }
+
+    @SuppressWarnings("unchecked")
+    public final T fromAnnotations(List<Annotation> annotations) throws Exception
+    {
+      Method method = annotationClass.getMethod("value");
+      for (Annotation annotation : annotations) {
+        if (annotationClass.isInstance(annotation)) {
+          return (T) method.invoke(annotation);
+        }
+      }
+      return defaultValue();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Nonnull
+    public final T defaultValue() throws Exception
+    {
+      Method method = annotationClass.getMethod("value");
+      Annotation annotation = annotationClass.getAnnotation(annotationClass);
+      Preconditions.checkNotNull(
+          annotation,
+          StringUtils
+              .format("Annotation class [%s] must be annotated with itself to set default value", annotationClass)
+      );
+      return (T) method.invoke(annotation);
+    }
+
+    public final T fromMap(Map<String, String> map) throws Exception
+    {
+      String key = annotationClass.getSimpleName();
+      String value = map.get(key);
+      if (value == null) {
+        return defaultValue();
+      }
+      return fromString(value);
+    }
+
+    public abstract T fromString(String str) throws Exception;
+  }
+
+  static LoadingCache<String, Set<Class<? extends QueryComponentSupplier>>> componentSupplierClassCache = CacheBuilder
+      .newBuilder()
+      .build(new CacheLoader<String, Set<Class<? extends QueryComponentSupplier>>>()
+      {
+        @Override
+        public Set<Class<? extends QueryComponentSupplier>> load(String pkg)
+        {
+          return new Reflections(pkg).getSubTypesOf(QueryComponentSupplier.class);
+        }
+      });
+
+  @Nonnull
+  private static Class<? extends QueryComponentSupplier> getQueryComponentSupplierForName(String name) throws Exception
+  {
+    for (String pkg : new String[] {"org.apache.druid.sql.calcite", ""}) {
+      Set<Class<? extends QueryComponentSupplier>> availableSuppliers = componentSupplierClassCache.get(pkg);
+      for (Class<? extends QueryComponentSupplier> cl : availableSuppliers) {
+        if (cl.getSimpleName().equals(name)) {
+          return cl;
+        }
+      }
+    }
+    List<String> knownNames = componentSupplierClassCache.get("").stream().map(Class::getSimpleName)
+        .collect(Collectors.toList());
+    throw new IAE("ComponentSupplier [%s] is not known; known ones are [%s]", name, knownNames);
   }
 }
