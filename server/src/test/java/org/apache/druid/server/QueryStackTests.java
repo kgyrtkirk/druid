@@ -323,7 +323,14 @@ public class QueryStackTests
                 TopNQuery.class,
                 new TopNQueryRunnerFactory(
                     testBufferPool,
-                    new TopNQueryQueryToolChest(new TopNQueryConfig()),
+                    new TopNQueryQueryToolChest(new TopNQueryConfig()
+                    {
+                      @Override
+                      public int getMinTopNThreshold()
+                      {
+                        return minTopNThresholdSupplier.get();
+                      }
+                    }),
                     QueryRunnerTestHelper.NOOP_QUERYWATCHER
                 )
             )
