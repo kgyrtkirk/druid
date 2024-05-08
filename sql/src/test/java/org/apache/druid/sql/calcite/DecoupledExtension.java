@@ -61,7 +61,7 @@ public class DecoupledExtension implements BeforeEachCallback
     DecoupledTestConfig decTestConfig = BaseCalciteQueryTest.queryFrameworkRule
         .getAnnotation(DecoupledTestConfig.class);
 
-    boolean runQuidem = (decTestConfig != null && decTestConfig.nativeQueryIgnore().isPresent());
+    boolean runQuidem = (decTestConfig != null && decTestConfig.quidemReason().isPresent());
 
     CalciteTestConfig testConfig = baseTest.new CalciteTestConfig(CONTEXT_OVERRIDES)
     {
@@ -81,7 +81,7 @@ public class DecoupledExtension implements BeforeEachCallback
           return new DruidQTestInfo(
               qCaseDir,
               BaseCalciteQueryTest.queryFrameworkRule.testName(),
-              "quidem testcase reason: " + decTestConfig.nativeQueryIgnore()
+              "quidem testcase reason: " + decTestConfig.quidemReason()
               );
         } else {
           return null;

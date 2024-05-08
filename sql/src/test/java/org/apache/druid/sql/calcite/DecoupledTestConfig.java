@@ -39,9 +39,9 @@ public @interface DecoupledTestConfig
    *
    * The value of this field should describe the root cause of the difference.
    */
-  NativeQueryIgnore nativeQueryIgnore() default NativeQueryIgnore.NONE;
+  QuidemTestCaseReason quidemReason() default QuidemTestCaseReason.NONE;
 
-  enum NativeQueryIgnore
+  enum QuidemTestCaseReason
   {
     NONE,
     /**
