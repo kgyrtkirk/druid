@@ -1,4 +1,5 @@
-# testInnerJoinQueryOfLookupRemovable@all_disabled case-crc:f94036af
+# testInnerJoinQueryOfLookupRemovable@all_disabled case-crc:25b83d15
+# quidem testcase reason: DEFINETLY_WORSE_PLAN
 !set sqlQueryId dummy
 !set defaultTimeout 300000
 !set debug true

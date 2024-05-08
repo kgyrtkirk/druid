@@ -1,4 +1,5 @@
-# testInnerJoinTwoLookupsToTableUsingNumericColumn@all_enabled case-crc:7b6c597e
+# testInnerJoinTwoLookupsToTableUsingNumericColumn@all_enabled case-crc:a1514e0b
+# quidem testcase reason: EQUIV_PLAN
 !set sqlQueryId dummy
 !set defaultTimeout 300000
 !set debug true

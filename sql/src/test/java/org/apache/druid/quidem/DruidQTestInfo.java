@@ -25,11 +25,13 @@ public class DruidQTestInfo
 {
   public final File caseDir;
   public final String testName;
+  public final String comment;
 
-  public DruidQTestInfo(File caseDir, String testName)
+  public DruidQTestInfo(File caseDir, String testName, String comment)
   {
     this.caseDir = caseDir;
     this.testName = testName;
+    this.comment = comment;
   }
 
   public File getIQFile()

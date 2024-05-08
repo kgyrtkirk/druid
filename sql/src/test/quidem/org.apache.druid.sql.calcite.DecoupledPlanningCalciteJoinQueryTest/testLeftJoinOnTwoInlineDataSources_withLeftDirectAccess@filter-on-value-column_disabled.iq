@@ -1,4 +1,5 @@
-# testLeftJoinOnTwoInlineDataSources_withLeftDirectAccess@filter-on-value-column_disabled case-crc:ad387c08
+# testLeftJoinOnTwoInlineDataSources_withLeftDirectAccess@filter-on-value-column_disabled case-crc:1c4df7a3
+# quidem testcase reason: JOIN_LEFT_DIRECT_ACCESS
 !set sqlQueryId dummy
 !set defaultTimeout 300000
 !set debug true

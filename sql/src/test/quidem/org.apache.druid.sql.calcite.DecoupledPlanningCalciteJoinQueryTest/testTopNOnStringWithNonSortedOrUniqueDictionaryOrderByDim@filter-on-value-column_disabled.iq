@@ -1,4 +1,5 @@
-# testTopNOnStringWithNonSortedOrUniqueDictionaryOrderByDim@filter-on-value-column_disabled case-crc:a227a419
+# testTopNOnStringWithNonSortedOrUniqueDictionaryOrderByDim@filter-on-value-column_disabled case-crc:6270c3ac
+# quidem testcase reason: EQUIV_PLAN
 !set sqlQueryId dummy
 !set defaultTimeout 300000
 !set debug true

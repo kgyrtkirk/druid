@@ -1,4 +1,5 @@
-# testSemiAndAntiJoinSimultaneouslyUsingExplicitJoins@all_disabled case-crc:692fc7cc
+# testSemiAndAntiJoinSimultaneouslyUsingExplicitJoins@all_disabled case-crc:c8f9346d
+# quidem testcase reason: EQUIV_PLAN
 !set sqlQueryId dummy
 !set defaultTimeout 300000
 !set debug true

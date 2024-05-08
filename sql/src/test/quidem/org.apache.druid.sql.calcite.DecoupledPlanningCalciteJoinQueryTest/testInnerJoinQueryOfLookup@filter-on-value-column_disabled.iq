@@ -1,4 +1,5 @@
-# testInnerJoinQueryOfLookup@filter-on-value-column_disabled case-crc:172cd72a
+# testInnerJoinQueryOfLookup@filter-on-value-column_disabled case-crc:223bb3ea
+# quidem testcase reason: FINALIZING_FIELD_ACCESS
 !set sqlQueryId dummy
 !set defaultTimeout 300000
 !set debug true

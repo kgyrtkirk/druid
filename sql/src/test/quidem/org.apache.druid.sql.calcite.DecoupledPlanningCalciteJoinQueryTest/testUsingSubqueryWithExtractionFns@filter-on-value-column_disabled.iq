@@ -1,4 +1,5 @@
-# testUsingSubqueryWithExtractionFns@filter-on-value-column_disabled case-crc:2c5f3b30
+# testUsingSubqueryWithExtractionFns@filter-on-value-column_disabled case-crc:c71da62e
+# quidem testcase reason: JOIN_FILTER_LOCATIONS
 !set sqlQueryId dummy
 !set defaultTimeout 300000
 !set debug true

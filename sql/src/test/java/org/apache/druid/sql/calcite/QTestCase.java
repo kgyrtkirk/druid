@@ -22,7 +22,6 @@ package org.apache.druid.sql.calcite;
 import com.google.common.hash.HashCode;
 import com.google.common.hash.Hashing;
 import com.google.common.io.Files;
-import org.apache.druid.common.config.NullHandling;
 import org.apache.druid.java.util.common.FileUtils;
 import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.quidem.DruidQTestInfo;
@@ -35,8 +34,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
-
 public class QTestCase
 {
   private StringBuffer sb;
@@ -46,6 +43,8 @@ public class QTestCase
   {
     this.testInfo = testInfo;
     sb = new StringBuffer();
+    sb.append("# " + testInfo.comment);
+    sb.append("\n");
   }
 
   public void println(String str)
@@ -62,7 +61,6 @@ public class QTestCase
       @Override
       public void run()
       {
-        assumeTrue(NullHandling.sqlCompatible(), "Quidem tests are only run in sql-compatible mode!");
         try {
           if (DruidQuidemRunner.isOverwrite()) {
             writeCaseTo(testInfo.getIQFile());

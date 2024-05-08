@@ -1,4 +1,5 @@
-# testJoinWithInputRefCondition case-crc:912f3b33
+# testJoinWithInputRefCondition case-crc:a8c0f240
+# quidem testcase reason: JOIN_FILTER_LOCATIONS
 !set sqlQueryId dummy
 !set defaultTimeout 300000
 !set debug true

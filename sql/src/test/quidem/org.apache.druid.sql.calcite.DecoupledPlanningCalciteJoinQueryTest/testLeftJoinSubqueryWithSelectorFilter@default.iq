@@ -1,4 +1,5 @@
-# testLeftJoinSubqueryWithSelectorFilter@default case-crc:e5eaaddf
+# testLeftJoinSubqueryWithSelectorFilter@default case-crc:63cb4668
+# quidem testcase reason: EQUIV_PLAN
 !set sqlQueryId dummy
 !set defaultTimeout 300000
 !set debug true

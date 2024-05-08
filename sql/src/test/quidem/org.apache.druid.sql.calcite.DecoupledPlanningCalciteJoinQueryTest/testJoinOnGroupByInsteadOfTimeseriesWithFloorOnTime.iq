@@ -1,4 +1,5 @@
-# testJoinOnGroupByInsteadOfTimeseriesWithFloorOnTime case-crc:b7a9de50
+# testJoinOnGroupByInsteadOfTimeseriesWithFloorOnTime case-crc:a9e23ec5
+# quidem testcase reason: JOIN_FILTER_LOCATIONS
 !set sqlQueryId dummy
 !set sqlCurrentTimestamp 2000-01-01T00:00:00Z
 !set defaultTimeout 300000

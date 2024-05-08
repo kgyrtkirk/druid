@@ -1,4 +1,5 @@
-# testInnerJoinQueryOfLookupRemovable@filter-on-value-column_disabled case-crc:d92ef00f
+# testInnerJoinQueryOfLookupRemovable@filter-on-value-column_disabled case-crc:f30ce07a
+# quidem testcase reason: DEFINETLY_WORSE_PLAN
 !set sqlQueryId dummy
 !set defaultTimeout 300000
 !set debug true

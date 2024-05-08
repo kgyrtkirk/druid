@@ -1,4 +1,5 @@
-# testInnerJoinCastLeft@default case-crc:d9879f68
+# testInnerJoinCastLeft@default case-crc:fda58dbf
+# quidem testcase reason: JOIN_FILTER_LOCATIONS
 !set sqlQueryId dummy
 !set defaultTimeout 300000
 !set debug true

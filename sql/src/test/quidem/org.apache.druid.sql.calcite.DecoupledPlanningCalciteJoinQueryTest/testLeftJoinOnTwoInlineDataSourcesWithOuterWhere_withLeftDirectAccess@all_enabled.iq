@@ -1,4 +1,5 @@
-# testLeftJoinOnTwoInlineDataSourcesWithOuterWhere_withLeftDirectAccess@all_enabled case-crc:72eb503f
+# testLeftJoinOnTwoInlineDataSourcesWithOuterWhere_withLeftDirectAccess@all_enabled case-crc:2305f2ac
+# quidem testcase reason: JOIN_LEFT_DIRECT_ACCESS
 !set sqlQueryId dummy
 !set defaultTimeout 300000
 !set debug true

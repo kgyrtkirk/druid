@@ -1,4 +1,5 @@
-# testVirtualColumnOnMVFilterJoinExpression@all_disabled case-crc:3277a762
+# testVirtualColumnOnMVFilterJoinExpression@all_disabled case-crc:7a32e94a
+# quidem testcase reason: SLIGHTLY_WORSE_PLAN
 !set sqlQueryId dummy
 !set defaultTimeout 300000
 !set debug true

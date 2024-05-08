@@ -1,4 +1,5 @@
-# testInnerJoinSubqueryWithSelectorFilter@all_enabled case-crc:5a6e153d
+# testInnerJoinSubqueryWithSelectorFilter@all_enabled case-crc:2de7fafc
+# quidem testcase reason: EQUIV_PLAN
 !set sqlQueryId dummy
 !set defaultTimeout 300000
 !set debug true

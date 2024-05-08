@@ -1,4 +1,5 @@
-# testGroupByOverGroupByOverInnerJoinOnTwoInlineDataSources@all_disabled case-crc:a595df5b
+# testGroupByOverGroupByOverInnerJoinOnTwoInlineDataSources@all_disabled case-crc:7916e17e
+# quidem testcase reason: EQUIV_PLAN
 !set sqlQueryId dummy
 !set defaultTimeout 300000
 !set debug true
