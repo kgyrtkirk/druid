@@ -1,0 +1,136 @@
+!use druidtest://?numMergeBuffers=3
+!set outputformat mysql
+
+
+SELECT APPROX_COUNT_DISTINCT(dim2) FROM druid.foo;
++--------+
+| EXPR$0 |
++--------+
+|      3 |
++--------+
+(1 row)
+
+!ok
+
+with t0 as (
+	SELECT dim1,APPROX_COUNT_DISTINCT(dim2) a1 FROM druid.foo group by dim1
+), t1 as (
+	SELECT dim1,APPROX_COUNT_DISTINCT(dim3) a2 FROM druid.foo group by dim1
+)
+select t0.dim1,a1,a2,a1||'x' from t0 join t1 on (t0.dim1=t1.dim1);
++------+----+----+--------+
+| dim1 | a1 | a2 | EXPR$3 |
++------+----+----+--------+
+|      |  1 |  2 | 1x     |
+| 1    |  1 |  1 | 1x     |
+| 10.1 |  0 |  2 | 0x     |
+| 2    |  1 |  1 | 1x     |
+| abc  |  0 |  0 | 0x     |
+| def  |  1 |  0 | 1x     |
++------+----+----+--------+
+(6 rows)
+
+!ok
+{
+  "queryType" : "scan",
+  "dataSource" : {
+    "type" : "join",
+    "left" : {
+      "type" : "query",
+      "query" : {
+        "queryType" : "groupBy",
+        "dataSource" : {
+          "type" : "table",
+          "name" : "foo"
+        },
+        "intervals" : {
+          "type" : "intervals",
+          "intervals" : [ "-146136543-09-08T08:23:32.096Z/146140482-04-24T15:36:27.903Z" ]
+        },
+        "granularity" : {
+          "type" : "all"
+        },
+        "dimensions" : [ {
+          "type" : "default",
+          "dimension" : "dim1",
+          "outputName" : "d0",
+          "outputType" : "STRING"
+        } ],
+        "aggregations" : [ {
+          "type" : "cardinality",
+          "name" : "a0",
+          "fields" : [ {
+            "type" : "default",
+            "dimension" : "dim2",
+            "outputName" : "dim2",
+            "outputType" : "STRING"
+          } ],
+          "byRow" : false,
+          "round" : true
+        } ],
+        "limitSpec" : {
+          "type" : "NoopLimitSpec"
+        }
+      }
+    },
+    "right" : {
+      "type" : "query",
+      "query" : {
+        "queryType" : "groupBy",
+        "dataSource" : {
+          "type" : "table",
+          "name" : "foo"
+        },
+        "intervals" : {
+          "type" : "intervals",
+          "intervals" : [ "-146136543-09-08T08:23:32.096Z/146140482-04-24T15:36:27.903Z" ]
+        },
+        "granularity" : {
+          "type" : "all"
+        },
+        "dimensions" : [ {
+          "type" : "default",
+          "dimension" : "dim1",
+          "outputName" : "d0",
+          "outputType" : "STRING"
+        } ],
+        "aggregations" : [ {
+          "type" : "cardinality",
+          "name" : "a0",
+          "fields" : [ {
+            "type" : "default",
+            "dimension" : "dim3",
+            "outputName" : "dim3",
+            "outputType" : "STRING"
+          } ],
+          "byRow" : false,
+          "round" : true
+        } ],
+        "limitSpec" : {
+          "type" : "NoopLimitSpec"
+        }
+      }
+    },
+    "rightPrefix" : "j0.",
+    "condition" : "(\"d0\" == \"j0.d0\")",
+    "joinType" : "INNER"
+  },
+  "intervals" : {
+    "type" : "intervals",
+    "intervals" : [ "-146136543-09-08T08:23:32.096Z/146140482-04-24T15:36:27.903Z" ]
+  },
+  "virtualColumns" : [ {
+    "type" : "expression",
+    "name" : "v0",
+    "expression" : "concat(CAST(\"a0\", 'STRING'),'x')",
+    "outputType" : "STRING"
+  } ],
+  "resultFormat" : "compactedList",
+  "columns" : [ "a0", "d0", "j0.a0", "v0" ],
+  "legacy" : false,
+  "columnTypes" : [ "LONG", "STRING", "LONG", "STRING" ],
+  "granularity" : {
+    "type" : "all"
+  }
+}
+!nativePlan
