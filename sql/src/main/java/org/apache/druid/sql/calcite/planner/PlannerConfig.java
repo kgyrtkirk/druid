@@ -433,6 +433,7 @@ public class PlannerConfig
 
   public Map<String, Object> getNonDefaultAsQueryContext()
   {
+    // FIXME finish this up!
     Map<String, Object> overrides = new HashMap<>();
     PlannerConfig def = new PlannerConfig();
     if (def.useApproximateCountDistinct != useApproximateCountDistinct) {
