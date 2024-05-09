@@ -20,7 +20,6 @@
 package org.apache.druid.sql.calcite.planner;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.collect.ImmutableMap;
 import org.apache.druid.java.util.common.IAE;
 import org.apache.druid.java.util.common.UOE;
 import org.apache.druid.query.QueryContexts;
@@ -434,8 +433,6 @@ public class PlannerConfig
 
   public Map<String, Object> getNonDefaultAsQueryContext()
   {
-    ImmutableMap.Builder<String, String> b = ImmutableMap.<String, String>builder();
-
     Map<String, Object> overrides = new HashMap<>();
     PlannerConfig def = new PlannerConfig();
     if (def.useApproximateCountDistinct != useApproximateCountDistinct) {
@@ -451,11 +448,10 @@ public class PlannerConfig
       );
     }
 
-    PlannerConfig newConfig = def.builder().withOverrides(overrides).build();
+    PlannerConfig newConfig = PlannerConfig.builder().withOverrides(overrides).build();
     if (!equals(newConfig)) {
-      throw new IAE("Some configs are missing from the override!\nold: %s\nnew: %s", this, newConfig);
+      throw new IAE("Some configs are not handled in this method or not persistable as QueryContext keys!\nold: %s\nnew: %s", this, newConfig);
     }
-
     return overrides;
   }
 }
