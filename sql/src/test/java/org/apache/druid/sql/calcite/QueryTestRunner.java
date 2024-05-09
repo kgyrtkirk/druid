@@ -652,7 +652,7 @@ public class QueryTestRunner
       }
 
       qt.println("!set outputformat mysql");
-      qt.println("!use "+builder.config.queryFramework().getDruidTestURI());
+      qt.println("!use " + builder.config.queryFramework().getDruidTestURI());
 
       qt.println(builder.sql + ";");
       if (builder.expectedResults != null) {

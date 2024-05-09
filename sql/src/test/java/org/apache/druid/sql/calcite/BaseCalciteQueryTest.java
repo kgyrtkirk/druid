@@ -1280,9 +1280,9 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   {
     return new Object[] {
         // default behavior
-        Named.of("default",  QUERY_CONTEXT_DEFAULT),
+        Named.of("default", QUERY_CONTEXT_DEFAULT),
         // all rewrites enabled
-        Named.of("all_enabled",  new ImmutableMap.Builder<String, Object>()
+        Named.of("all_enabled", new ImmutableMap.Builder<String, Object>()
             .putAll(QUERY_CONTEXT_DEFAULT)
             .put(QueryContexts.JOIN_FILTER_REWRITE_VALUE_COLUMN_FILTERS_ENABLE_KEY, true)
             .put(QueryContexts.JOIN_FILTER_REWRITE_ENABLE_KEY, true)

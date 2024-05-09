@@ -81,7 +81,7 @@ public class DecoupledExtension implements BeforeEachCallback
         if (runQuidem) {
           final String testName;
           if (decTestConfig.separateDefaultModeTest()) {
-            if(NullHandling.sqlCompatible()) {
+            if (NullHandling.sqlCompatible()) {
               testName = BaseCalciteQueryTest.queryFrameworkRule.testName() + "@NullHandling=sql";
             } else {
               testName = BaseCalciteQueryTest.queryFrameworkRule.testName() + "@NullHandling=default";
