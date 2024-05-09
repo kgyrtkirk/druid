@@ -153,6 +153,7 @@ import org.apache.druid.server.SegmentManager;
 import org.apache.druid.server.SpecificSegmentsQuerySegmentWalker;
 import org.apache.druid.server.coordination.DataSegmentAnnouncer;
 import org.apache.druid.server.coordination.NoopDataSegmentAnnouncer;
+import org.apache.druid.server.lookup.cache.LookupLoadingSpec;
 import org.apache.druid.server.security.AuthConfig;
 import org.apache.druid.server.security.AuthorizerMapper;
 import org.apache.druid.sql.DirectStatement;
@@ -854,6 +855,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
     protected CompactionState expectedLastCompactionState = null;
     protected Set<Interval> expectedTombstoneIntervals = null;
     protected List<Object[]> expectedResultRows = null;
+    protected LookupLoadingSpec expectedLookupLoadingSpec = null;
     protected Matcher<Throwable> expectedValidationErrorMatcher = null;
     protected List<Pair<Predicate<MSQTaskReportPayload>, String>> adhocReportAssertionAndReasons = new ArrayList<>();
     protected Matcher<Throwable> expectedExecutionErrorMatcher = null;
@@ -915,6 +917,12 @@ public class MSQTestBase extends BaseCalciteQueryTest
     public Builder setExpectedResultRows(List<Object[]> expectedResultRows)
     {
       this.expectedResultRows = expectedResultRows;
+      return asBuilder();
+    }
+
+    public Builder setExpectedLookupLoadingSpec(LookupLoadingSpec lookupLoadingSpec)
+    {
+      this.expectedLookupLoadingSpec = lookupLoadingSpec;
       return asBuilder();
     }
 
@@ -1009,6 +1017,23 @@ public class MSQTestBase extends BaseCalciteQueryTest
       );
 
       assertThat(e, expectedValidationErrorMatcher);
+    }
+
+    protected void verifyLookupLoadingInfoInTaskContext(Map<String, Object> context)
+    {
+      String lookupLoadingMode = context.get(PlannerContext.CTX_LOOKUP_LOADING_MODE).toString();
+      List<String> lookupsToLoad = (List<String>) context.get(PlannerContext.CTX_LOOKUPS_TO_LOAD);
+      if (expectedLookupLoadingSpec != null) {
+        Assert.assertEquals(expectedLookupLoadingSpec.getMode().toString(), lookupLoadingMode);
+        if (expectedLookupLoadingSpec.getMode().equals(LookupLoadingSpec.Mode.ONLY_REQUIRED)) {
+          Assert.assertEquals(new ArrayList<>(expectedLookupLoadingSpec.getLookupsToLoad()), lookupsToLoad);
+        } else {
+          Assert.assertNull(lookupsToLoad);
+        }
+      } else {
+        Assert.assertEquals(LookupLoadingSpec.Mode.NONE.toString(), lookupLoadingMode);
+        Assert.assertNull(lookupsToLoad);
+      }
     }
 
     protected void verifyWorkerCount(CounterSnapshotsTree counterSnapshotsTree)
@@ -1166,7 +1191,9 @@ public class MSQTestBase extends BaseCalciteQueryTest
         verifyWorkerCount(reportPayload.getCounters());
         verifyCounters(reportPayload.getCounters());
 
-        MSQSpec foundSpec = indexingServiceClient.getMSQControllerTask(controllerId).getQuerySpec();
+        MSQControllerTask msqControllerTask = indexingServiceClient.getMSQControllerTask(controllerId);
+        MSQSpec foundSpec = msqControllerTask.getQuerySpec();
+        verifyLookupLoadingInfoInTaskContext(msqControllerTask.getContext());
         log.info(
             "found generated segments: %s",
             segmentManager.getAllDataSegments().stream().map(s -> s.toString()).collect(
@@ -1394,6 +1421,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
           throw new ISE("Query %s failed due to %s", sql, payload.getStatus().getErrorReport().toString());
         } else {
           MSQControllerTask msqControllerTask = indexingServiceClient.getMSQControllerTask(controllerId);
+          verifyLookupLoadingInfoInTaskContext(msqControllerTask.getContext());
 
           final MSQSpec spec = msqControllerTask.getQuerySpec();
           final List<Object[]> rows;
