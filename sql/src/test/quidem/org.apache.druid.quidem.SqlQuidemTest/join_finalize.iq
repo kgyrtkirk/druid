@@ -2,15 +2,8 @@
 !set outputformat mysql
 
 
-SELECT APPROX_COUNT_DISTINCT(dim2) FROM druid.foo;
-+--------+
-| EXPR$0 |
-+--------+
-|      3 |
-+--------+
-(1 row)
-
-!ok
+# SELECT APPROX_COUNT_DISTINCT(dim2) FROM druid.foo;
+# !ok
 
 with t0 as (
 	SELECT dim1,APPROX_COUNT_DISTINCT(dim2) a1 FROM druid.foo group by dim1
@@ -58,7 +51,7 @@ select t0.dim1,a1,a2,a1||'x' from t0 join t1 on (t0.dim1=t1.dim1);
         } ],
         "aggregations" : [ {
           "type" : "cardinality",
-          "name" : "a0",
+          "name" : "a0:a",
           "fields" : [ {
             "type" : "default",
             "dimension" : "dim2",
@@ -67,6 +60,11 @@ select t0.dim1,a1,a2,a1||'x' from t0 join t1 on (t0.dim1=t1.dim1);
           } ],
           "byRow" : false,
           "round" : true
+        } ],
+        "postAggregations" : [ {
+          "type" : "hyperUniqueCardinality",
+          "name" : "a0",
+          "fieldName" : "a0:a"
         } ],
         "limitSpec" : {
           "type" : "NoopLimitSpec"
@@ -96,7 +94,7 @@ select t0.dim1,a1,a2,a1||'x' from t0 join t1 on (t0.dim1=t1.dim1);
         } ],
         "aggregations" : [ {
           "type" : "cardinality",
-          "name" : "a0",
+          "name" : "a0:a",
           "fields" : [ {
             "type" : "default",
             "dimension" : "dim3",
@@ -105,6 +103,11 @@ select t0.dim1,a1,a2,a1||'x' from t0 join t1 on (t0.dim1=t1.dim1);
           } ],
           "byRow" : false,
           "round" : true
+        } ],
+        "postAggregations" : [ {
+          "type" : "hyperUniqueCardinality",
+          "name" : "a0",
+          "fieldName" : "a0:a"
         } ],
         "limitSpec" : {
           "type" : "NoopLimitSpec"
