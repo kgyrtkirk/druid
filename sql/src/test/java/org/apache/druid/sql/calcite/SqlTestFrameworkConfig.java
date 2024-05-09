@@ -61,6 +61,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -300,10 +301,11 @@ public class SqlTestFrameworkConfig
     public String buildTestCaseName(ExtensionContext context)
     {
       List<String> names = new ArrayList<String>();
+      Pattern pattern = Pattern.compile("\\([^\\)]*\\)");
       // this will add all name pieces - except the "last" which would be the
       // Class level name
       do {
-        names.add(0, context.getDisplayName().replaceAll("\\([^\\)]*\\)",""));
+        names.add(0, pattern.matcher(context.getDisplayName()).replaceAll(""));
         context = context.getParent().get();
       } while (context.getTestMethod().isPresent());
       return Joiner.on("@").join(names);
