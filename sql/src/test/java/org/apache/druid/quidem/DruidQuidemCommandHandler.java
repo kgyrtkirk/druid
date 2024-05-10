@@ -33,6 +33,7 @@ import org.apache.calcite.sql.SqlExplainLevel;
 import org.apache.calcite.util.Util;
 import org.apache.druid.query.Query;
 import org.apache.druid.sql.calcite.BaseCalciteQueryTest;
+import org.apache.druid.sql.calcite.rel.DruidRel;
 import org.apache.druid.sql.calcite.util.QueryLogHook;
 
 import java.sql.ResultSet;
@@ -165,12 +166,19 @@ public class DruidQuidemCommandHandler implements CommandHandler
     @Override
     protected final void executeExplain(Context x)
     {
-      List<RelNode> logged = new ArrayList<>();
-      try (final Hook.Closeable unhook = hook.add((Consumer<RelNode>) logged::add)) {
+      List<Object> logged = new ArrayList<>();
+      try (final Hook.Closeable unhook = hook.add((Consumer<Object>) logged::add)) {
         executeQuery(x);
       }
 
-      for (RelNode node : logged) {
+      for (Object loggedObject : logged) {
+
+        RelNode node;
+        if(logged instanceof RelNode) {
+          node = (RelNode) loggedObject;
+        }else {
+          node = ((DruidRel<?>)loggedObject).unwrapLogicalPlan();
+        }
         String str = RelOptUtil.dumpPlan("", node, SqlExplainFormat.TEXT, SqlExplainLevel.EXPPLAN_ATTRIBUTES);
         x.echo(ImmutableList.of(str));
       }
