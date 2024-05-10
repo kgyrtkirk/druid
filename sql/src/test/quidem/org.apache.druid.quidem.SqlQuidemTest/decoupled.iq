@@ -2,95 +2,112 @@
 !use druidtest://?NumMergeBuffers=3
 !set outputformat mysql
 
-select cityName, count(case when delta > 0 then channel end) as cnt, count(1) as aall
-from wikipedia
-where cityName in ('New York', 'Aarhus')
-group by 1
-order by 1;
-+----------+-----+------+
-| cityName | cnt | aall |
-+----------+-----+------+
-| Aarhus   |   0 |    1 |
-| New York |   7 |   13 |
-+----------+-----+------+
-(2 rows)
+SELECT COUNT(*)
+FROM foo
+INNER JOIN lookup.lookyloo l1 ON l1.k = foo.m1
+INNER JOIN lookup.lookyloo l2 ON l2.k = l1.k;
++--------+
+| EXPR$0 |
++--------+
+|      1 |
++--------+
+(1 row)
 
 !ok
-LogicalSort(sort0=[$0], dir0=[ASC])
-  LogicalAggregate(group=[{0}], cnt=[COUNT($1)], aall=[COUNT()])
-    LogicalProject(cityName=[$2], $f1=[CASE(>($17, 0), $1, null:VARCHAR)])
-      LogicalFilter(condition=[OR(=($2, 'New York'), =($2, 'Aarhus'))])
-        LogicalTableScan(table=[[druid, wikipedia]])
+LogicalAggregate(group=[{}], EXPR$0=[COUNT()])
+  LogicalJoin(condition=[=($10, $8)], joinType=[inner])
+    LogicalProject(__time=[$0], dim1=[$1], dim2=[$2], dim3=[$3], cnt=[$4], m1=[$5], m2=[$6], unique_dim1=[$7], k=[$8], v=[$9])
+      LogicalJoin(condition=[=($10, $5)], joinType=[inner])
+        LogicalTableScan(table=[[druid, foo]])
+        LogicalProject(k=[$0], v=[$1], k0=[CAST($0):FLOAT])
+          LogicalTableScan(table=[[lookup, lookyloo]])
+    LogicalTableScan(table=[[lookup, lookyloo]])
 
 !convertedPlan
-LogicalSort(sort0=[$0], dir0=[ASC])
-  LogicalAggregate(group=[{0}], cnt=[COUNT($1) FILTER $2], aall=[COUNT()])
-    LogicalProject(cityName=[$2], channel=[$1], $f3=[IS TRUE(>($17, 0))])
-      LogicalFilter(condition=[SEARCH($2, Sarg['Aarhus':VARCHAR(8), 'New York':VARCHAR(8)]:VARCHAR(8))])
-        LogicalTableScan(table=[[druid, wikipedia]])
+LogicalAggregate(group=[{}], EXPR$0=[COUNT()])
+  LogicalJoin(condition=[=($1, $0)], joinType=[inner])
+    LogicalProject(k=[$1])
+      LogicalJoin(condition=[=($2, $0)], joinType=[inner])
+        LogicalProject(m1=[$5])
+          LogicalTableScan(table=[[druid, foo]])
+        LogicalProject(k=[$0], k0=[CAST($0):FLOAT])
+          LogicalTableScan(table=[[lookup, lookyloo]])
+    LogicalProject(k=[$0])
+      LogicalTableScan(table=[[lookup, lookyloo]])
 
 !logicalPlan
-DruidAggregate(group=[{0}], cnt=[COUNT($1) FILTER $2], aall=[COUNT()], druid=[logical])
-  DruidProject(cityName=[$2], channel=[$1], $f3=[IS TRUE(>($17, 0))], druid=[logical])
-    DruidFilter(condition=[SEARCH($2, Sarg['Aarhus':VARCHAR(8), 'New York':VARCHAR(8)]:VARCHAR(8))])
-      DruidTableScan(table=[[druid, wikipedia]], druid=[logical])
+DruidAggregate(group=[{}], EXPR$0=[COUNT()], druid=[logical])
+  DruidJoin(condition=[=($1, $0)], joinType=[inner])
+    DruidProject(k=[$1], druid=[logical])
+      DruidJoin(condition=[=($2, $0)], joinType=[inner])
+        DruidProject(m1=[$5], druid=[logical])
+          DruidTableScan(table=[[druid, foo]], druid=[logical])
+        DruidProject(k=[$0], k0=[CAST($0):FLOAT], druid=[logical])
+          DruidTableScan(table=[[lookup, lookyloo]], druid=[logical])
+    DruidProject(k=[$0], druid=[logical])
+      DruidTableScan(table=[[lookup, lookyloo]], druid=[logical])
 
 !druidPlan
 {
-  "queryType" : "groupBy",
+  "queryType" : "timeseries",
   "dataSource" : {
-    "type" : "table",
-    "name" : "wikipedia"
+    "type" : "join",
+    "left" : {
+      "type" : "join",
+      "left" : {
+        "type" : "table",
+        "name" : "foo"
+      },
+      "right" : {
+        "type" : "query",
+        "query" : {
+          "queryType" : "scan",
+          "dataSource" : {
+            "type" : "lookup",
+            "lookup" : "lookyloo"
+          },
+          "intervals" : {
+            "type" : "intervals",
+            "intervals" : [ "-146136543-09-08T08:23:32.096Z/146140482-04-24T15:36:27.903Z" ]
+          },
+          "virtualColumns" : [ {
+            "type" : "expression",
+            "name" : "v0",
+            "expression" : "CAST(\"k\", 'DOUBLE')",
+            "outputType" : "FLOAT"
+          } ],
+          "resultFormat" : "compactedList",
+          "columns" : [ "k", "v0" ],
+          "legacy" : false,
+          "columnTypes" : [ "STRING", "FLOAT" ],
+          "granularity" : {
+            "type" : "all"
+          }
+        }
+      },
+      "rightPrefix" : "j0.",
+      "condition" : "(\"j0.v0\" == \"m1\")",
+      "joinType" : "INNER"
+    },
+    "right" : {
+      "type" : "lookup",
+      "lookup" : "lookyloo"
+    },
+    "rightPrefix" : "_j0.",
+    "condition" : "(\"_j0.k\" == \"j0.k\")",
+    "joinType" : "INNER"
   },
   "intervals" : {
     "type" : "intervals",
     "intervals" : [ "-146136543-09-08T08:23:32.096Z/146140482-04-24T15:36:27.903Z" ]
   },
-  "filter" : {
-    "type" : "inType",
-    "column" : "cityName",
-    "matchValueType" : "STRING",
-    "sortedValues" : [ "Aarhus", "New York" ]
-  },
   "granularity" : {
     "type" : "all"
   },
-  "dimensions" : [ {
-    "type" : "default",
-    "dimension" : "cityName",
-    "outputName" : "d0",
-    "outputType" : "STRING"
-  } ],
   "aggregations" : [ {
-    "type" : "filtered",
-    "aggregator" : {
-      "type" : "count",
-      "name" : "a0"
-    },
-    "filter" : {
-      "type" : "and",
-      "fields" : [ {
-        "type" : "not",
-        "field" : {
-          "type" : "null",
-          "column" : "channel"
-        }
-      }, {
-        "type" : "range",
-        "column" : "delta",
-        "matchValueType" : "LONG",
-        "lower" : 0,
-        "lowerOpen" : true
-      } ]
-    },
-    "name" : "a0"
-  }, {
     "type" : "count",
-    "name" : "a1"
-  } ],
-  "limitSpec" : {
-    "type" : "NoopLimitSpec"
-  }
+    "name" : "a0"
+  } ]
 }
 !nativePlan
 
