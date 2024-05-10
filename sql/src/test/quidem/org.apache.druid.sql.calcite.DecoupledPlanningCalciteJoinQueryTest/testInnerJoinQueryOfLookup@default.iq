@@ -23,21 +23,21 @@ INNER JOIN
 
 !ok
 LogicalProject(dim1=[$0], dim2=[$1], v=[$3], v0=[$3])
-  LogicalJoin(condition=[=($1, $2)], joinType=[inner])
-    LogicalProject(dim1=[$1], dim2=[$2])
+  LogicalProject(dim1=[$1], dim2=[$2], k=[$8], v=[$9])
+    LogicalJoin(condition=[=($2, $8)], joinType=[inner])
       LogicalTableScan(table=[[druid, foo]])
-    LogicalAggregate(group=[{0}], v=[ANY_VALUE($1, $2)])
-      LogicalProject(k=[SUBSTRING($0, 1, 1)], v=[$1], $f2=[10])
-        LogicalTableScan(table=[[lookup, lookyloo]])
+      LogicalAggregate(group=[{0}], v=[ANY_VALUE($1, $2)])
+        LogicalProject(k=[SUBSTRING($0, 1, 1)], v=[$1], $f2=[10])
+          LogicalTableScan(table=[[lookup, lookyloo]])
 
 !logicalPlan
 DruidProject(dim1=[$0], dim2=[$1], v=[$3], v0=[$3], druid=[logical])
-  DruidJoin(condition=[=($1, $2)], joinType=[inner])
-    DruidProject(dim1=[$1], dim2=[$2], druid=[logical])
+  DruidProject(dim1=[$1], dim2=[$2], k=[$8], v=[$9], druid=[logical])
+    DruidJoin(condition=[=($2, $8)], joinType=[inner])
       DruidTableScan(table=[[druid, foo]], druid=[logical])
-    DruidAggregate(group=[{0}], v=[ANY_VALUE($1, $2)], druid=[logical])
-      DruidProject(k=[SUBSTRING($0, 1, 1)], v=[$1], $f2=[10], druid=[logical])
-        DruidTableScan(table=[[lookup, lookyloo]], druid=[logical])
+      DruidAggregate(group=[{0}], v=[ANY_VALUE($1, $2)], druid=[logical])
+        DruidProject(k=[SUBSTRING($0, 1, 1)], v=[$1], $f2=[10], druid=[logical])
+          DruidTableScan(table=[[lookup, lookyloo]], druid=[logical])
 
 !druidPlan
 {

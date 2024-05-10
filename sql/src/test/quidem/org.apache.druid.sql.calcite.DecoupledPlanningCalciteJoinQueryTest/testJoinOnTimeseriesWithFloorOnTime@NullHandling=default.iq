@@ -26,24 +26,24 @@ GROUP BY 1, 2
 !ok
 LogicalAggregate(group=[{0, 1}], EXPR$2=[ANY_VALUE($2, $3, $4)])
   LogicalProject(EXPR$0=[CAST($0):BIGINT NOT NULL], m1=[$2], dim3=[$1], $f3=[100], $f4=[true])
-    LogicalJoin(condition=[AND(=($3, $4), =($2, $5))], joinType=[inner])
-      LogicalProject(__time=[$0], dim3=[$3], m1=[$5], $f3=[TIME_FLOOR($0, 'PT1H')])
+    LogicalProject(__time=[$0], dim3=[$3], m1=[$5], $f3=[TIME_FLOOR($0, 'PT1H')], t1=[$8], t2=[$9])
+      LogicalJoin(condition=[AND(=(TIME_FLOOR($0, 'PT1H'), $8), =($5, $9))], joinType=[inner])
         LogicalTableScan(table=[[druid, foo]])
-      LogicalAggregate(group=[{0}], t2=[MIN($1)])
-        LogicalProject(t1=[TIME_FLOOR($0, 'PT1H')], m1=[$5])
-          LogicalFilter(condition=[AND(=($3, 'b'), SEARCH($0, Sarg[[1994-04-29 00:00:00:TIMESTAMP(3)..2020-01-11 00:00:00:TIMESTAMP(3)]]:TIMESTAMP(3)))])
-            LogicalTableScan(table=[[druid, foo]])
+        LogicalAggregate(group=[{0}], t2=[MIN($1)])
+          LogicalProject(t1=[TIME_FLOOR($0, 'PT1H')], m1=[$5])
+            LogicalFilter(condition=[AND(=($3, 'b'), SEARCH($0, Sarg[[1994-04-29 00:00:00:TIMESTAMP(3)..2020-01-11 00:00:00:TIMESTAMP(3)]]:TIMESTAMP(3)))])
+              LogicalTableScan(table=[[druid, foo]])
 
 !logicalPlan
 DruidAggregate(group=[{0, 1}], EXPR$2=[ANY_VALUE($2, $3, $4)], druid=[logical])
   DruidProject(EXPR$0=[CAST($0):BIGINT NOT NULL], m1=[$2], dim3=[$1], $f3=[100], $f4=[true], druid=[logical])
-    DruidJoin(condition=[AND(=($3, $4), =($2, $5))], joinType=[inner])
-      DruidProject(__time=[$0], dim3=[$3], m1=[$5], $f3=[TIME_FLOOR($0, 'PT1H')], druid=[logical])
+    DruidProject(__time=[$0], dim3=[$3], m1=[$5], $f3=[TIME_FLOOR($0, 'PT1H')], t1=[$8], t2=[$9], druid=[logical])
+      DruidJoin(condition=[AND(=(TIME_FLOOR($0, 'PT1H'), $8), =($5, $9))], joinType=[inner])
         DruidTableScan(table=[[druid, foo]], druid=[logical])
-      DruidAggregate(group=[{0}], t2=[MIN($1)], druid=[logical])
-        DruidProject(t1=[TIME_FLOOR($0, 'PT1H')], m1=[$5], druid=[logical])
-          DruidFilter(condition=[AND(=($3, 'b'), SEARCH($0, Sarg[[1994-04-29 00:00:00:TIMESTAMP(3)..2020-01-11 00:00:00:TIMESTAMP(3)]]:TIMESTAMP(3)))])
-            DruidTableScan(table=[[druid, foo]], druid=[logical])
+        DruidAggregate(group=[{0}], t2=[MIN($1)], druid=[logical])
+          DruidProject(t1=[TIME_FLOOR($0, 'PT1H')], m1=[$5], druid=[logical])
+            DruidFilter(condition=[AND(=($3, 'b'), SEARCH($0, Sarg[[1994-04-29 00:00:00:TIMESTAMP(3)..2020-01-11 00:00:00:TIMESTAMP(3)]]:TIMESTAMP(3)))])
+              DruidTableScan(table=[[druid, foo]], druid=[logical])
 
 !druidPlan
 {
@@ -51,31 +51,8 @@ DruidAggregate(group=[{0, 1}], EXPR$2=[ANY_VALUE($2, $3, $4)], druid=[logical])
   "dataSource" : {
     "type" : "join",
     "left" : {
-      "type" : "query",
-      "query" : {
-        "queryType" : "scan",
-        "dataSource" : {
-          "type" : "table",
-          "name" : "foo"
-        },
-        "intervals" : {
-          "type" : "intervals",
-          "intervals" : [ "-146136543-09-08T08:23:32.096Z/146140482-04-24T15:36:27.903Z" ]
-        },
-        "virtualColumns" : [ {
-          "type" : "expression",
-          "name" : "v0",
-          "expression" : "timestamp_floor(\"__time\",'PT1H',null,'UTC')",
-          "outputType" : "LONG"
-        } ],
-        "resultFormat" : "compactedList",
-        "columns" : [ "__time", "dim3", "m1", "v0" ],
-        "legacy" : false,
-        "columnTypes" : [ "LONG", "STRING", "FLOAT", "LONG" ],
-        "granularity" : {
-          "type" : "all"
-        }
-      }
+      "type" : "table",
+      "name" : "foo"
     },
     "right" : {
       "type" : "query",
@@ -103,7 +80,7 @@ DruidAggregate(group=[{0, 1}], EXPR$2=[ANY_VALUE($2, $3, $4)], druid=[logical])
       }
     },
     "rightPrefix" : "j0.",
-    "condition" : "((\"v0\" == \"j0.d0\") && (\"m1\" == \"j0.a0\"))",
+    "condition" : "((timestamp_floor(\"__time\",'PT1H',null,'UTC') == \"j0.d0\") && (\"m1\" == \"j0.a0\"))",
     "joinType" : "INNER"
   },
   "intervals" : {

@@ -26,17 +26,17 @@ INNER JOIN lookup.lookyloo l ON SUBSTRING(foo.dim2, 1, 1) = l.k
 
 !ok
 LogicalProject(dim1=[$0], dim2=[$1], k=[$3], v=[$4])
-  LogicalJoin(condition=[=($2, $3)], joinType=[inner])
-    LogicalProject(dim1=[$1], dim2=[$2], $f8=[SUBSTRING($2, 1, 1)])
+  LogicalProject(dim1=[$1], dim2=[$2], $f8=[SUBSTRING($2, 1, 1)], k=[$8], v=[$9])
+    LogicalJoin(condition=[=(SUBSTRING($2, 1, 1), $8)], joinType=[inner])
       LogicalTableScan(table=[[druid, foo]])
-    LogicalTableScan(table=[[lookup, lookyloo]])
+      LogicalTableScan(table=[[lookup, lookyloo]])
 
 !logicalPlan
 DruidProject(dim1=[$0], dim2=[$1], k=[$3], v=[$4], druid=[logical])
-  DruidJoin(condition=[=($2, $3)], joinType=[inner])
-    DruidProject(dim1=[$1], dim2=[$2], $f8=[SUBSTRING($2, 1, 1)], druid=[logical])
+  DruidProject(dim1=[$1], dim2=[$2], $f8=[SUBSTRING($2, 1, 1)], k=[$8], v=[$9], druid=[logical])
+    DruidJoin(condition=[=(SUBSTRING($2, 1, 1), $8)], joinType=[inner])
       DruidTableScan(table=[[druid, foo]], druid=[logical])
-    DruidTableScan(table=[[lookup, lookyloo]], druid=[logical])
+      DruidTableScan(table=[[lookup, lookyloo]], druid=[logical])
 
 !druidPlan
 {
@@ -44,38 +44,15 @@ DruidProject(dim1=[$0], dim2=[$1], k=[$3], v=[$4], druid=[logical])
   "dataSource" : {
     "type" : "join",
     "left" : {
-      "type" : "query",
-      "query" : {
-        "queryType" : "scan",
-        "dataSource" : {
-          "type" : "table",
-          "name" : "foo"
-        },
-        "intervals" : {
-          "type" : "intervals",
-          "intervals" : [ "-146136543-09-08T08:23:32.096Z/146140482-04-24T15:36:27.903Z" ]
-        },
-        "virtualColumns" : [ {
-          "type" : "expression",
-          "name" : "v0",
-          "expression" : "substring(\"dim2\", 0, 1)",
-          "outputType" : "STRING"
-        } ],
-        "resultFormat" : "compactedList",
-        "columns" : [ "dim1", "dim2", "v0" ],
-        "legacy" : false,
-        "columnTypes" : [ "STRING", "STRING", "STRING" ],
-        "granularity" : {
-          "type" : "all"
-        }
-      }
+      "type" : "table",
+      "name" : "foo"
     },
     "right" : {
       "type" : "lookup",
       "lookup" : "lookyloo"
     },
     "rightPrefix" : "j0.",
-    "condition" : "(\"v0\" == \"j0.k\")",
+    "condition" : "(substring(\"dim2\", 0, 1) == \"j0.k\")",
     "joinType" : "INNER"
   },
   "intervals" : {
