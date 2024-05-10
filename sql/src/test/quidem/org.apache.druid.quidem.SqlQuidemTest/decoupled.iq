@@ -14,38 +14,38 @@ INNER JOIN lookup.lookyloo l2 ON l2.k = l1.k;
 (1 row)
 
 !ok
-LogicalAggregate(group=[{}], EXPR$0=[COUNT()])
-  LogicalJoin(condition=[=($10, $8)], joinType=[inner])
-    LogicalProject(__time=[$0], dim1=[$1], dim2=[$2], dim3=[$3], cnt=[$4], m1=[$5], m2=[$6], unique_dim1=[$7], k=[$8], v=[$9])
-      LogicalJoin(condition=[=($10, $5)], joinType=[inner])
-        LogicalTableScan(table=[[druid, foo]])
-        LogicalProject(k=[$0], v=[$1], k0=[CAST($0):FLOAT])
-          LogicalTableScan(table=[[lookup, lookyloo]])
-    LogicalTableScan(table=[[lookup, lookyloo]])
+LogicalAggregate(group=[{}], EXPR$0=[COUNT()]): rowcount = 1.0, cumulative cost = {25901.125 rows, 15603.0 cpu, 0.0 io}, id = 169
+  LogicalJoin(condition=[=($10, $8)], joinType=[inner]): rowcount = 22500.0, cumulative cost = {25900.0 rows, 15603.0 cpu, 0.0 io}, id = 168
+    LogicalProject(__time=[$0], dim1=[$1], dim2=[$2], dim3=[$3], cnt=[$4], m1=[$5], m2=[$6], unique_dim1=[$7], k=[$8], v=[$9]): rowcount = 1500.0, cumulative cost = {3300.0 rows, 15502.0 cpu, 0.0 io}, id = 166
+      LogicalJoin(condition=[=($10, $5)], joinType=[inner]): rowcount = 1500.0, cumulative cost = {1800.0 rows, 502.0 cpu, 0.0 io}, id = 165
+        LogicalTableScan(table=[[druid, foo]]): rowcount = 100.0, cumulative cost = {100.0 rows, 101.0 cpu, 0.0 io}, id = 162
+        LogicalProject(k=[$0], v=[$1], k0=[CAST($0):FLOAT]): rowcount = 100.0, cumulative cost = {200.0 rows, 401.0 cpu, 0.0 io}, id = 164
+          LogicalTableScan(table=[[lookup, lookyloo]]): rowcount = 100.0, cumulative cost = {100.0 rows, 101.0 cpu, 0.0 io}, id = 163
+    LogicalTableScan(table=[[lookup, lookyloo]]): rowcount = 100.0, cumulative cost = {100.0 rows, 101.0 cpu, 0.0 io}, id = 167
 
 !convertedPlan
-LogicalAggregate(group=[{}], EXPR$0=[COUNT()])
-  LogicalJoin(condition=[=($1, $0)], joinType=[inner])
-    LogicalProject(k=[$1])
-      LogicalJoin(condition=[=($2, $0)], joinType=[inner])
-        LogicalProject(m1=[$5])
-          LogicalTableScan(table=[[druid, foo]])
-        LogicalProject(k=[$0], k0=[CAST($0):FLOAT])
-          LogicalTableScan(table=[[lookup, lookyloo]])
-    LogicalProject(k=[$0])
-      LogicalTableScan(table=[[lookup, lookyloo]])
+LogicalAggregate(group=[{}], EXPR$0=[COUNT()]): rowcount = 1.0, cumulative cost = {26101.125 rows, 2203.0 cpu, 0.0 io}, id = 383
+  LogicalJoin(condition=[=($1, $0)], joinType=[inner]): rowcount = 22500.0, cumulative cost = {26100.0 rows, 2203.0 cpu, 0.0 io}, id = 381
+    LogicalProject(k=[$1]): rowcount = 1500.0, cumulative cost = {3400.0 rows, 2002.0 cpu, 0.0 io}, id = 376
+      LogicalJoin(condition=[=($2, $0)], joinType=[inner]): rowcount = 1500.0, cumulative cost = {1900.0 rows, 502.0 cpu, 0.0 io}, id = 374
+        LogicalProject(m1=[$5]): rowcount = 100.0, cumulative cost = {200.0 rows, 201.0 cpu, 0.0 io}, id = 369
+          LogicalTableScan(table=[[druid, foo]]): rowcount = 100.0, cumulative cost = {100.0 rows, 101.0 cpu, 0.0 io}, id = 305
+        LogicalProject(k=[$0], k0=[CAST($0):FLOAT]): rowcount = 100.0, cumulative cost = {200.0 rows, 301.0 cpu, 0.0 io}, id = 372
+          LogicalTableScan(table=[[lookup, lookyloo]]): rowcount = 100.0, cumulative cost = {100.0 rows, 101.0 cpu, 0.0 io}, id = 306
+    LogicalProject(k=[$0]): rowcount = 100.0, cumulative cost = {200.0 rows, 201.0 cpu, 0.0 io}, id = 379
+      LogicalTableScan(table=[[lookup, lookyloo]]): rowcount = 100.0, cumulative cost = {100.0 rows, 101.0 cpu, 0.0 io}, id = 310
 
 !logicalPlan
-DruidAggregate(group=[{}], EXPR$0=[COUNT()], druid=[logical])
-  DruidJoin(condition=[=($1, $0)], joinType=[inner])
-    DruidProject(k=[$1], druid=[logical])
-      DruidJoin(condition=[=($2, $0)], joinType=[inner])
-        DruidProject(m1=[$5], druid=[logical])
-          DruidTableScan(table=[[druid, foo]], druid=[logical])
-        DruidProject(k=[$0], k0=[CAST($0):FLOAT], druid=[logical])
-          DruidTableScan(table=[[lookup, lookyloo]], druid=[logical])
-    DruidProject(k=[$0], druid=[logical])
-      DruidTableScan(table=[[lookup, lookyloo]], druid=[logical])
+DruidAggregate(group=[{}], EXPR$0=[COUNT()], druid=[logical]): rowcount = 1.0, cumulative cost = {2.2650004E7 rows, 3.0500039999999995 cpu, 0.0 io}, id = 571
+  DruidJoin(condition=[=($1, $0)], joinType=[inner]): rowcount = 2.25E7, cumulative cost = {2.2650003E7 rows, 3.0000039999999997 cpu, 0.0 io}, id = 570
+    DruidProject(k=[$1], druid=[logical]): rowcount = 150000.0, cumulative cost = {150002.0 rows, 2.000003 cpu, 0.0 io}, id = 568
+      DruidJoin(condition=[=($2, $0)], joinType=[inner]): rowcount = 150000.0, cumulative cost = {150002.0 rows, 2.000002 cpu, 0.0 io}, id = 567
+        DruidProject(m1=[$5], druid=[logical]): rowcount = 1000.0, cumulative cost = {1.0 rows, 1.000001 cpu, 0.0 io}, id = 565
+          DruidTableScan(table=[[druid, foo]], druid=[logical]): rowcount = 1000.0, cumulative cost = {tiny}, id = 548
+        DruidProject(k=[$0], k0=[CAST($0):FLOAT], druid=[logical]): rowcount = 1000.0, cumulative cost = {1.0 rows, 1.000001 cpu, 0.0 io}, id = 566
+          DruidTableScan(table=[[lookup, lookyloo]], druid=[logical]): rowcount = 1000.0, cumulative cost = {tiny}, id = 552
+    DruidProject(k=[$0], druid=[logical]): rowcount = 1000.0, cumulative cost = {1.0 rows, 1.000001 cpu, 0.0 io}, id = 569
+      DruidTableScan(table=[[lookup, lookyloo]], druid=[logical]): rowcount = 1000.0, cumulative cost = {tiny}, id = 552
 
 !druidPlan
 {
