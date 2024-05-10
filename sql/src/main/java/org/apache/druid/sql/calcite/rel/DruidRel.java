@@ -126,8 +126,6 @@ public abstract class DruidRel<T extends DruidRel<?>> extends AbstractRelNode
    */
   public abstract Set<String> getDataSourceNames();
 
-
-
   public final RelNode unwrapLogicalPlan()
   {
     return accept(new LogicalPlanUnwrapperShuttle());
