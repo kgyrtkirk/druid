@@ -283,7 +283,7 @@ public class CalciteRulesManager
         .withOperandSupplier(b0 ->
         b0.operand(LogicalJoin.class).inputs(
             b1 -> b1.operand(LogicalProject.class)
-//            .predicate(CalciteRulesManager::inputIsTableScan)
+            .predicate(CalciteRulesManager::inputIsTableScan)
               .anyInputs()))
         .toRule()
         );
@@ -293,7 +293,7 @@ public class CalciteRulesManager
           b0.operand(LogicalJoin.class).inputs(
               b1 -> b1.operand(RelNode.class).anyInputs(),
               b2 -> b2.operand(LogicalProject.class)
-//              .predicate(CalciteRulesManager::inputIsTableScan)
+              .predicate(CalciteRulesManager::inputIsTableScan)
               .anyInputs()))
 
         .toRule()
@@ -304,11 +304,21 @@ public class CalciteRulesManager
 
   private static boolean inputIsTableScan(RelNode node)
   {
-    if (node instanceof HepRelVertex) {
-      HepRelVertex hepRelVertex = (HepRelVertex) node;
-      return hepRelVertex.getInputs().size() > 0 && hepRelVertex.getInput(0) instanceof TableScan;
+    node = unwrapHep(node);
+    if(node.getInputs().size() > 0) {
+      node = unwrapHep(node.getInput(0));
+      return node instanceof TableScan;
     }
     return false;
+  }
+
+  private static RelNode unwrapHep(RelNode node)
+  {
+    if (node instanceof HepRelVertex) {
+      HepRelVertex hepRelVertex = (HepRelVertex) node;
+      return hepRelVertex.getCurrentRel();
+    }
+    return node;
   }
 
   /**
