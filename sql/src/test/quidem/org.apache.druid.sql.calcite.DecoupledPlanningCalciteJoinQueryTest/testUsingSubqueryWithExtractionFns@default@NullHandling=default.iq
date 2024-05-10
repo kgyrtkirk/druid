@@ -19,23 +19,23 @@ SELECT dim2, COUNT(*) FROM druid.foo WHERE substring(dim2, 1, 1) IN (SELECT subs
 
 !ok
 LogicalAggregate(group=[{0}], EXPR$1=[COUNT()])
-  LogicalProject(dim2=[$2], $f1=[SUBSTRING($2, 1, 1)], EXPR$0=[$8])
-    LogicalJoin(condition=[=(SUBSTRING($2, 1, 1), $8)], joinType=[inner])
+  LogicalJoin(condition=[=($1, $2)], joinType=[inner])
+    LogicalProject(dim2=[$2], $f1=[SUBSTRING($2, 1, 1)])
       LogicalTableScan(table=[[druid, foo]])
-      LogicalAggregate(group=[{0}])
-        LogicalProject(EXPR$0=[SUBSTRING($1, 1, 1)])
-          LogicalFilter(condition=[<>($1, '')])
-            LogicalTableScan(table=[[druid, foo]])
+    LogicalAggregate(group=[{0}])
+      LogicalProject(EXPR$0=[SUBSTRING($1, 1, 1)])
+        LogicalFilter(condition=[<>($1, '')])
+          LogicalTableScan(table=[[druid, foo]])
 
 !logicalPlan
 DruidAggregate(group=[{0}], EXPR$1=[COUNT()], druid=[logical])
-  DruidProject(dim2=[$2], $f1=[SUBSTRING($2, 1, 1)], EXPR$0=[$8], druid=[logical])
-    DruidJoin(condition=[=(SUBSTRING($2, 1, 1), $8)], joinType=[inner])
+  DruidJoin(condition=[=($1, $2)], joinType=[inner])
+    DruidProject(dim2=[$2], $f1=[SUBSTRING($2, 1, 1)], druid=[logical])
       DruidTableScan(table=[[druid, foo]], druid=[logical])
-      DruidAggregate(group=[{0}], druid=[logical])
-        DruidProject(EXPR$0=[SUBSTRING($1, 1, 1)], druid=[logical])
-          DruidFilter(condition=[<>($1, '')])
-            DruidTableScan(table=[[druid, foo]], druid=[logical])
+    DruidAggregate(group=[{0}], druid=[logical])
+      DruidProject(EXPR$0=[SUBSTRING($1, 1, 1)], druid=[logical])
+        DruidFilter(condition=[<>($1, '')])
+          DruidTableScan(table=[[druid, foo]], druid=[logical])
 
 !druidPlan
 {
@@ -43,8 +43,31 @@ DruidAggregate(group=[{0}], EXPR$1=[COUNT()], druid=[logical])
   "dataSource" : {
     "type" : "join",
     "left" : {
-      "type" : "table",
-      "name" : "foo"
+      "type" : "query",
+      "query" : {
+        "queryType" : "scan",
+        "dataSource" : {
+          "type" : "table",
+          "name" : "foo"
+        },
+        "intervals" : {
+          "type" : "intervals",
+          "intervals" : [ "-146136543-09-08T08:23:32.096Z/146140482-04-24T15:36:27.903Z" ]
+        },
+        "virtualColumns" : [ {
+          "type" : "expression",
+          "name" : "v0",
+          "expression" : "substring(\"dim2\", 0, 1)",
+          "outputType" : "STRING"
+        } ],
+        "resultFormat" : "compactedList",
+        "columns" : [ "dim2", "v0" ],
+        "legacy" : false,
+        "columnTypes" : [ "STRING", "STRING" ],
+        "granularity" : {
+          "type" : "all"
+        }
+      }
     },
     "right" : {
       "type" : "query",
@@ -86,7 +109,7 @@ DruidAggregate(group=[{0}], EXPR$1=[COUNT()], druid=[logical])
       }
     },
     "rightPrefix" : "j0.",
-    "condition" : "(substring(\"dim2\", 0, 1) == \"j0.d0\")",
+    "condition" : "(\"v0\" == \"j0.d0\")",
     "joinType" : "INNER"
   },
   "intervals" : {
