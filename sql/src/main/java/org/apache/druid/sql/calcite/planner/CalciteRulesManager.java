@@ -30,18 +30,13 @@ import org.apache.calcite.plan.RelOptUtil;
 import org.apache.calcite.plan.RelTraitSet;
 import org.apache.calcite.plan.hep.HepProgram;
 import org.apache.calcite.plan.hep.HepProgramBuilder;
-import org.apache.calcite.plan.hep.HepRelVertex;
 import org.apache.calcite.plan.volcano.AbstractConverter;
 import org.apache.calcite.plan.volcano.VolcanoPlanner;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.core.RelFactories;
-import org.apache.calcite.rel.core.TableScan;
-import org.apache.calcite.rel.logical.LogicalJoin;
-import org.apache.calcite.rel.logical.LogicalProject;
 import org.apache.calcite.rel.metadata.DefaultRelMetadataProvider;
 import org.apache.calcite.rel.rules.CoreRules;
 import org.apache.calcite.rel.rules.DateRangeRules;
-import org.apache.calcite.rel.rules.JoinProjectTransposeRule;
 import org.apache.calcite.rel.rules.JoinPushThroughJoinRule;
 import org.apache.calcite.rel.rules.ProjectMergeRule;
 import org.apache.calcite.rel.rules.PruneEmptyRules;
@@ -279,52 +274,7 @@ public class CalciteRulesManager
     builder.addRuleCollection(baseRuleSet(plannerContext));
     builder.addRuleInstance(CoreRules.UNION_MERGE);
     builder.addGroupEnd();
-    builder.addGroupBegin();
-    builder.addRuleInstance(
-        JoinProjectTransposeRule.Config.LEFT
-            .withOperandSupplier(
-                b0 -> b0.operand(LogicalJoin.class).inputs(
-                    b1 -> b1.operand(LogicalProject.class)
-                        .predicate(CalciteRulesManager::inputIsTableScan)
-                        .anyInputs()
-                )
-            )
-            .toRule()
-    );
-    builder.addRuleInstance(
-        JoinProjectTransposeRule.Config.RIGHT
-            .withOperandSupplier(
-                b0 -> b0.operand(LogicalJoin.class).inputs(
-                    b1 -> b1.operand(RelNode.class).anyInputs(),
-                    b2 -> b2.operand(LogicalProject.class)
-                        .predicate(CalciteRulesManager::inputIsTableScan)
-                        .anyInputs()
-                )
-            )
-
-            .toRule()
-    );
-    builder.addGroupEnd();
     return Programs.of(builder.build(), true, DefaultRelMetadataProvider.INSTANCE);
-  }
-
-  private static boolean inputIsTableScan(RelNode node)
-  {
-    node = unwrapHep(node);
-    if(node.getInputs().size() > 0) {
-      node = unwrapHep(node.getInput(0));
-      return node instanceof TableScan;
-    }
-    return false;
-  }
-
-  private static RelNode unwrapHep(RelNode node)
-  {
-    if (node instanceof HepRelVertex) {
-      HepRelVertex hepRelVertex = (HepRelVertex) node;
-      return hepRelVertex.getCurrentRel();
-    }
-    return node;
   }
 
   /**
@@ -572,5 +522,4 @@ public class CalciteRulesManager
       return new RelFieldTrimmer(null, relBuilder).trim(decorrelatedRel);
     }
   }
-
 }
