@@ -589,6 +589,9 @@ public abstract class QueryHandler extends SqlStatementHandler.BaseStatementHand
           parameterized
       );
       handlerContext.hook().captureDruidRel(druidRel);
+
+      // the closest we have to the final piece is this
+      Hook.JAVA_PLAN.run(druidRel.unwrapLogicalPlan());
       if (explain != null) {
         return planExplanation(possiblyLimitedRoot, druidRel, true);
       } else {
