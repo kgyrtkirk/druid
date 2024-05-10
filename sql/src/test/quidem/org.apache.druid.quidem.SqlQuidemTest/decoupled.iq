@@ -2,101 +2,77 @@
 !use druidtest://?NumMergeBuffers=3
 !set outputformat mysql
 
-SELECT COUNT(*)
-FROM foo
-INNER JOIN lookup.lookyloo l1 ON l1.k = foo.m1
-INNER JOIN lookup.lookyloo l2 ON l2.k = l1.k;
-+--------+
-| EXPR$0 |
-+--------+
-|      1 |
-+--------+
-(1 row)
+SELECT druid.broadcast.dim4, COUNT(*)
+FROM druid.numfoo
+INNER JOIN druid.broadcast ON numfoo.dim4 = broadcast.dim4
+GROUP BY 1 ORDER BY 1 DESC LIMIT 4;
++------+--------+
+| dim4 | EXPR$1 |
++------+--------+
+| b    |      9 |
+| a    |      9 |
++------+--------+
+(2 rows)
 
 !ok
-LogicalAggregate(group=[{}], EXPR$0=[COUNT()])
-  LogicalJoin(condition=[=($10, $8)], joinType=[inner])
-    LogicalProject(__time=[$0], dim1=[$1], dim2=[$2], dim3=[$3], cnt=[$4], m1=[$5], m2=[$6], unique_dim1=[$7], k=[$8], v=[$9])
-      LogicalJoin(condition=[=($10, $5)], joinType=[inner])
-        LogicalTableScan(table=[[druid, foo]])
-        LogicalProject(k=[$0], v=[$1], k0=[CAST($0):FLOAT])
-          LogicalTableScan(table=[[lookup, lookyloo]])
-    LogicalTableScan(table=[[lookup, lookyloo]])
+LogicalSort(sort0=[$0], dir0=[DESC], fetch=[4])
+  LogicalAggregate(group=[{0}], EXPR$1=[COUNT()])
+    LogicalProject(dim4=[$21])
+      LogicalJoin(condition=[=($4, $21)], joinType=[inner])
+        LogicalTableScan(table=[[druid, numfoo]])
+        LogicalTableScan(table=[[druid, broadcast]])
 
 !convertedPlan
-LogicalAggregate(group=[{}], EXPR$0=[COUNT()])
-  LogicalJoin(condition=[=($1, $0)], joinType=[inner])
-    LogicalProject(k=[$1])
-      LogicalJoin(condition=[=($2, $0)], joinType=[inner])
-        LogicalProject(m1=[$5])
-          LogicalTableScan(table=[[druid, foo]])
-        LogicalProject(k=[$0], k0=[CAST($0):FLOAT])
-          LogicalTableScan(table=[[lookup, lookyloo]])
-    LogicalProject(k=[$0])
-      LogicalTableScan(table=[[lookup, lookyloo]])
+LogicalSort(sort0=[$0], dir0=[DESC], fetch=[4])
+  LogicalAggregate(group=[{1}], EXPR$1=[COUNT()])
+    LogicalJoin(condition=[=($0, $1)], joinType=[inner])
+      LogicalProject(dim4=[$4])
+        LogicalTableScan(table=[[druid, numfoo]])
+      LogicalProject(dim4=[$4])
+        LogicalTableScan(table=[[druid, broadcast]])
 
 !logicalPlan
-DruidAggregate(group=[{}], EXPR$0=[COUNT()], druid=[logical])
-  DruidJoin(condition=[=($0, $1)], joinType=[inner])
-    DruidProject(k=[$1], druid=[logical])
-      DruidJoin(condition=[=($0, $2)], joinType=[inner])
-        DruidProject(m1=[$5], druid=[logical])
-          DruidTableScan(table=[[druid, foo]], druid=[logical])
-        DruidProject(k=[$0], k0=[CAST($0):FLOAT], druid=[logical])
-          DruidTableScan(table=[[lookup, lookyloo]], druid=[logical])
-    DruidProject(k=[$0], druid=[logical])
-      DruidTableScan(table=[[lookup, lookyloo]], druid=[logical])
+DruidSort(sort0=[$0], dir0=[DESC], fetch=[4], druid=[logical])
+  DruidAggregate(group=[{1}], EXPR$1=[COUNT()], druid=[logical])
+    DruidJoin(condition=[=($0, $1)], joinType=[inner])
+      DruidProject(dim4=[$4], druid=[logical])
+        DruidTableScan(table=[[druid, numfoo]], druid=[logical])
+      DruidProject(dim4=[$4], druid=[logical])
+        DruidTableScan(table=[[druid, broadcast]], druid=[logical])
 
 !druidPlan
 {
-  "queryType" : "timeseries",
+  "queryType" : "topN",
   "dataSource" : {
     "type" : "join",
     "left" : {
-      "type" : "join",
-      "left" : {
-        "type" : "table",
-        "name" : "foo"
-      },
-      "right" : {
-        "type" : "query",
-        "query" : {
-          "queryType" : "scan",
-          "dataSource" : {
-            "type" : "lookup",
-            "lookup" : "lookyloo"
-          },
-          "intervals" : {
-            "type" : "intervals",
-            "intervals" : [ "-146136543-09-08T08:23:32.096Z/146140482-04-24T15:36:27.903Z" ]
-          },
-          "virtualColumns" : [ {
-            "type" : "expression",
-            "name" : "v0",
-            "expression" : "CAST(\"k\", 'DOUBLE')",
-            "outputType" : "FLOAT"
-          } ],
-          "resultFormat" : "compactedList",
-          "columns" : [ "k", "v0" ],
-          "legacy" : false,
-          "columnTypes" : [ "STRING", "FLOAT" ],
-          "granularity" : {
-            "type" : "all"
-          }
-        }
-      },
-      "rightPrefix" : "j0.",
-      "condition" : "(\"m1\" == \"j0.v0\")",
-      "joinType" : "INNER"
+      "type" : "table",
+      "name" : "numfoo"
     },
     "right" : {
-      "type" : "lookup",
-      "lookup" : "lookyloo"
+      "type" : "globalTable",
+      "name" : "broadcast"
     },
-    "rightPrefix" : "_j0.",
-    "condition" : "(\"j0.k\" == \"_j0.k\")",
+    "rightPrefix" : "j0.",
+    "condition" : "(\"dim4\" == \"j0.dim4\")",
     "joinType" : "INNER"
   },
+  "dimension" : {
+    "type" : "default",
+    "dimension" : "j0.dim4",
+    "outputName" : "d0",
+    "outputType" : "STRING"
+  },
+  "metric" : {
+    "type" : "inverted",
+    "metric" : {
+      "type" : "dimension",
+      "ordering" : {
+        "type" : "lexicographic"
+      }
+    }
+  },
+  "threshold" : 4,
   "intervals" : {
     "type" : "intervals",
     "intervals" : [ "-146136543-09-08T08:23:32.096Z/146140482-04-24T15:36:27.903Z" ]
