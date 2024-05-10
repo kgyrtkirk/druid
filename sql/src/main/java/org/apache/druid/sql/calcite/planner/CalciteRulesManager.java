@@ -278,26 +278,32 @@ public class CalciteRulesManager
     builder.addGroupBegin();
     builder.addRuleCollection(baseRuleSet(plannerContext));
     builder.addRuleInstance(CoreRules.UNION_MERGE);
+    builder.addGroupEnd();
+    builder.addGroupBegin();
     builder.addRuleInstance(
         JoinProjectTransposeRule.Config.LEFT
-        .withOperandSupplier(b0 ->
-        b0.operand(LogicalJoin.class).inputs(
-            b1 -> b1.operand(LogicalProject.class)
-            .predicate(CalciteRulesManager::inputIsTableScan)
-              .anyInputs()))
-        .toRule()
-        );
+            .withOperandSupplier(
+                b0 -> b0.operand(LogicalJoin.class).inputs(
+                    b1 -> b1.operand(LogicalProject.class)
+                        .predicate(CalciteRulesManager::inputIsTableScan)
+                        .anyInputs()
+                )
+            )
+            .toRule()
+    );
     builder.addRuleInstance(
         JoinProjectTransposeRule.Config.RIGHT
-        .withOperandSupplier(b0 ->
-          b0.operand(LogicalJoin.class).inputs(
-              b1 -> b1.operand(RelNode.class).anyInputs(),
-              b2 -> b2.operand(LogicalProject.class)
-              .predicate(CalciteRulesManager::inputIsTableScan)
-              .anyInputs()))
+            .withOperandSupplier(
+                b0 -> b0.operand(LogicalJoin.class).inputs(
+                    b1 -> b1.operand(RelNode.class).anyInputs(),
+                    b2 -> b2.operand(LogicalProject.class)
+                        .predicate(CalciteRulesManager::inputIsTableScan)
+                        .anyInputs()
+                )
+            )
 
-        .toRule()
-        );
+            .toRule()
+    );
     builder.addGroupEnd();
     return Programs.of(builder.build(), true, DefaultRelMetadataProvider.INSTANCE);
   }
