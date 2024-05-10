@@ -166,18 +166,14 @@ public class DruidQuidemCommandHandler implements CommandHandler
     @Override
     protected final void executeExplain(Context x)
     {
-      List<Object> logged = new ArrayList<>();
-      try (final Hook.Closeable unhook = hook.add((Consumer<Object>) logged::add)) {
+      List<RelNode> logged = new ArrayList<>();
+      try (final Hook.Closeable unhook = hook.add((Consumer<RelNode>) logged::add)) {
         executeQuery(x);
       }
 
-      for (Object loggedObject : logged) {
-
-        RelNode node;
-        if(logged instanceof RelNode) {
-          node = (RelNode) loggedObject;
-        }else {
-          node = ((DruidRel<?>)loggedObject).unwrapLogicalPlan();
+      for (RelNode node : logged) {
+        if (node instanceof DruidRel<?>) {
+          node = ((DruidRel) node).unwrapLogicalPlan();
         }
         String str = RelOptUtil.dumpPlan("", node, SqlExplainFormat.TEXT, SqlExplainLevel.EXPPLAN_ATTRIBUTES);
         x.echo(ImmutableList.of(str));

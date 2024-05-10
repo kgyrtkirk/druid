@@ -1,4 +1,4 @@
-!set plannerStrategy DECOUPLED
+# !set plannerStrategy DECOUPLED
 !use druidtest://?NumMergeBuffers=3
 !set outputformat mysql
 
@@ -24,17 +24,23 @@ LogicalSort(sort0=[$0], dir0=[DESC], fetch=[4])
 
 !convertedPlan
 LogicalSort(sort0=[$0], dir0=[DESC], fetch=[4])
-  LogicalAggregate(group=[{21}], EXPR$1=[COUNT()])
-    LogicalJoin(condition=[=($4, $21)], joinType=[inner])
-      LogicalTableScan(table=[[druid, numfoo]])
-      LogicalTableScan(table=[[druid, broadcast]])
+  LogicalAggregate(group=[{0}], EXPR$1=[COUNT()])
+    LogicalProject(dim4=[$1])
+      LogicalJoin(condition=[=($0, $1)], joinType=[inner])
+        LogicalProject(dim4=[$4])
+          LogicalTableScan(table=[[druid, numfoo]])
+        LogicalProject(dim4=[$4])
+          LogicalTableScan(table=[[druid, broadcast]])
 
 !logicalPlan
-DruidSort(sort0=[$0], dir0=[DESC], fetch=[4], druid=[logical])
-  DruidAggregate(group=[{21}], EXPR$1=[COUNT()], druid=[logical])
-    DruidJoin(condition=[=($4, $21)], joinType=[inner])
-      DruidTableScan(table=[[druid, numfoo]], druid=[logical])
-      DruidTableScan(table=[[druid, broadcast]], druid=[logical])
+LogicalSort(sort0=[$0], dir0=[DESC], fetch=[4])
+  LogicalAggregate(group=[{0}], EXPR$1=[COUNT()])
+    LogicalProject(dim4=[$1])
+      LogicalJoin(condition=[=($0, $1)], joinType=[inner])
+        LogicalProject(dim4=[$4])
+          LogicalTableScan(table=[[druid, numfoo]])
+        LogicalProject(dim4=[$4])
+          LogicalTableScan(table=[[druid, broadcast]])
 
 !druidPlan
 {
