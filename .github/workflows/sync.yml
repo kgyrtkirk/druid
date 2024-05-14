@@ -36,4 +36,12 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
         GITBOT_EMAIL: github-actions@github.com
         DRY_RUN: false
-
+  cleanup_merged_branches:
+    runs-on: ubuntu-latest
+    name: cleanup_merged
+    - name: checkout
+      uses: actions/checkout@v1
+    - name: run cleanup
+      run: .github/scripts/cleanup-dangling-upstream-branches.sh
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
