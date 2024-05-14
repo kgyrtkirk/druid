@@ -33,6 +33,7 @@ import org.apache.druid.msq.exec.ClusterStatisticsMergeMode;
 import org.apache.druid.msq.exec.Limits;
 import org.apache.druid.msq.exec.SegmentSource;
 import org.apache.druid.msq.indexing.destination.MSQSelectDestination;
+import org.apache.druid.msq.indexing.error.MSQWarnings;
 import org.apache.druid.msq.kernel.WorkerAssignmentStrategy;
 import org.apache.druid.msq.sql.MSQMode;
 import org.apache.druid.query.QueryContext;
@@ -112,6 +113,8 @@ public class MultiStageQueryContext
   public static final String CTX_INCLUDE_SEGMENT_SOURCE = "includeSegmentSource";
   public static final SegmentSource DEFAULT_INCLUDE_SEGMENT_SOURCE = SegmentSource.NONE;
 
+  public static final String CTX_MAX_CONCURRENT_STAGES = "maxConcurrentStages";
+  public static final int DEFAULT_MAX_CONCURRENT_STAGES = 1;
   public static final String CTX_DURABLE_SHUFFLE_STORAGE = "durableShuffleStorage";
   private static final boolean DEFAULT_DURABLE_SHUFFLE_STORAGE = false;
   public static final String CTX_SELECT_DESTINATION = "selectDestination";
@@ -144,13 +147,6 @@ public class MultiStageQueryContext
   public static final String CTX_IS_REINDEX = "isReindex";
 
   /**
-   * Key for controller task's context passed to worker tasks.
-   * Facilitates sharing the controller's execution environment
-   * and configurations with its associated worker tasks.
-   */
-  public static final String CTX_OF_CONTROLLER = "controllerCtx";
-
-  /**
    * Controls sort order within segments. Normally, this is the same as the overall order of the query (from the
    * CLUSTERED BY clause) but it can be overridden.
    */
@@ -177,6 +173,14 @@ public class MultiStageQueryContext
     return queryContext.getString(
         CTX_MSQ_MODE,
         DEFAULT_MSQ_MODE
+    );
+  }
+
+  public static int getMaxConcurrentStages(final QueryContext queryContext)
+  {
+    return queryContext.getInt(
+        CTX_MAX_CONCURRENT_STAGES,
+        DEFAULT_MAX_CONCURRENT_STAGES
     );
   }
 
@@ -321,6 +325,14 @@ public class MultiStageQueryContext
   public static IndexSpec getIndexSpec(final QueryContext queryContext, final ObjectMapper objectMapper)
   {
     return decodeIndexSpec(queryContext.get(CTX_INDEX_SPEC), objectMapper);
+  }
+
+  public static long getMaxParseExceptions(final QueryContext queryContext)
+  {
+    return queryContext.getLong(
+        MSQWarnings.CTX_MAX_PARSE_EXCEPTIONS_ALLOWED,
+        MSQWarnings.DEFAULT_MAX_PARSE_EXCEPTIONS_ALLOWED
+    );
   }
 
   public static boolean useAutoColumnSchemas(final QueryContext queryContext)
