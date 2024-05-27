@@ -148,7 +148,7 @@ public class DruidJoinQueryRel extends DruidRel<DruidJoinQueryRel>
   {
     final SourceDesc leftDesc;
     final DruidRel<?> leftDruidRel = (DruidRel<?>) left;
-    final DruidQuery leftQuery = Preconditions.checkNotNull(leftDruidRel.toDruidQuery(true), "leftQuery");
+    final DruidQuery leftQuery = Preconditions.checkNotNull(leftDruidRel.toDruidQuery(false), "leftQuery");
     final RowSignature leftSignature = leftQuery.getOutputRowSignature();
     final DataSource leftDataSource;
     if (computeLeftRequiresSubquery(getPlannerContext(), leftDruidRel)) {
@@ -167,7 +167,7 @@ public class DruidJoinQueryRel extends DruidRel<DruidJoinQueryRel>
   {
     final SourceDesc rightDesc;
     final DruidRel<?> rightDruidRel = (DruidRel<?>) right;
-    final DruidQuery rightQuery = Preconditions.checkNotNull(rightDruidRel.toDruidQuery(true), "rightQuery");
+    final DruidQuery rightQuery = Preconditions.checkNotNull(rightDruidRel.toDruidQuery(false), "rightQuery");
     final RowSignature rightSignature = rightQuery.getOutputRowSignature();
     final DataSource rightDataSource;
     if (computeRightRequiresSubquery(getPlannerContext(), rightDruidRel)) {
