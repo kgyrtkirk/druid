@@ -125,7 +125,7 @@ public class LoggerTest
     Logger.logSegmentIds(logger, segments, "Many segments");
 
     final int expected = (int) Math.ceil((double) numSegments / Logger.SEGMENTS_PER_LOG_MESSAGE);
-    Assert.assertEquals(expected, msgCount.getValue());
+    Assert.assertEquals(expected, msgCount.intValue());
   }
 
   @Test
