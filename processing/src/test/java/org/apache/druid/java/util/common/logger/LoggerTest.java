@@ -19,7 +19,7 @@
 
 package org.apache.druid.java.util.common.logger;
 
-import org.apache.commons.lang.mutable.MutableInt;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.druid.java.util.common.DateTimes;
 import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.timeline.DataSegment;
