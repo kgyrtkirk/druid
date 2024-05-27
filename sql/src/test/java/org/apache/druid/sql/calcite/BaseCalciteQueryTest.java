@@ -106,6 +106,7 @@ import org.joda.time.chrono.ISOChronology;
 import org.junit.Assert;
 import org.junit.internal.matchers.ThrowableMessageMatcher;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import javax.annotation.Nullable;
@@ -933,6 +934,12 @@ public class BaseCalciteQueryTest extends CalciteTestBase
     {
       return baseQueryContext;
     }
+
+    @Override
+    public SqlTestFramework queryFramework()
+    {
+      return BaseCalciteQueryTest.this.queryFramework();
+    }
   }
 
   public enum ResultMatchMode
@@ -1034,16 +1041,12 @@ public class BaseCalciteQueryTest extends CalciteTestBase
 
     final List<ValueType> types = new ArrayList<>();
 
-    final boolean isMSQ = isMSQRowType(queryResults.signature);
-
-    if (!isMSQ) {
-      for (int i = 0; i < queryResults.signature.getColumnNames().size(); i++) {
-        Optional<ColumnType> columnType = queryResults.signature.getColumnType(i);
-        if (columnType.isPresent()) {
-          types.add(columnType.get().getType());
-        } else {
-          types.add(null);
-        }
+    for (int i = 0; i < queryResults.signature.getColumnNames().size(); i++) {
+      Optional<ColumnType> columnType = queryResults.signature.getColumnType(i);
+      if (columnType.isPresent()) {
+        types.add(columnType.get().getType());
+      } else {
+        types.add(null);
       }
     }
 
@@ -1060,17 +1063,11 @@ public class BaseCalciteQueryTest extends CalciteTestBase
         matchMode.validate(
             row,
             i,
-            isMSQ ? null : types.get(i),
+            types.get(i),
             expectedCell,
             resultCell);
       }
     }
-  }
-
-  private boolean isMSQRowType(RowSignature signature)
-  {
-    List<String> colNames = signature.getColumnNames();
-    return colNames.size() == 1 && "TASK".equals(colNames.get(0));
   }
 
   public void assertResultsEquals(String sql, List<Object[]> expectedResults, List<Object[]> results)
@@ -1219,6 +1216,11 @@ public class BaseCalciteQueryTest extends CalciteTestBase
     assumeFalse(testBuilder().config.isRunningMSQ(), "test case is not MSQ compatible");
   }
 
+  protected boolean isRunningMSQ()
+  {
+    return testBuilder().config.isRunningMSQ();
+  }
+
   protected static boolean isRewriteJoinToFilter(final Map<String, Object> queryContext)
   {
     return (boolean) queryContext.getOrDefault(
@@ -1273,51 +1275,51 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   {
     return new Object[] {
         // default behavior
-        QUERY_CONTEXT_DEFAULT,
+        Named.of("default", QUERY_CONTEXT_DEFAULT),
         // all rewrites enabled
-        new ImmutableMap.Builder<String, Object>()
+        Named.of("all_enabled", new ImmutableMap.Builder<String, Object>()
             .putAll(QUERY_CONTEXT_DEFAULT)
             .put(QueryContexts.JOIN_FILTER_REWRITE_VALUE_COLUMN_FILTERS_ENABLE_KEY, true)
             .put(QueryContexts.JOIN_FILTER_REWRITE_ENABLE_KEY, true)
             .put(QueryContexts.REWRITE_JOIN_TO_FILTER_ENABLE_KEY, true)
-            .build(),
+            .build()),
         // filter-on-value-column rewrites disabled, everything else enabled
-        new ImmutableMap.Builder<String, Object>()
+        Named.of("filter-on-value-column_disabled", new ImmutableMap.Builder<String, Object>()
             .putAll(QUERY_CONTEXT_DEFAULT)
             .put(QueryContexts.JOIN_FILTER_REWRITE_VALUE_COLUMN_FILTERS_ENABLE_KEY, false)
             .put(QueryContexts.JOIN_FILTER_REWRITE_ENABLE_KEY, true)
             .put(QueryContexts.REWRITE_JOIN_TO_FILTER_ENABLE_KEY, true)
-            .build(),
+            .build()),
         // filter rewrites fully disabled, join-to-filter enabled
-        new ImmutableMap.Builder<String, Object>()
+        Named.of("join-to-filter", new ImmutableMap.Builder<String, Object>()
             .putAll(QUERY_CONTEXT_DEFAULT)
             .put(QueryContexts.JOIN_FILTER_REWRITE_VALUE_COLUMN_FILTERS_ENABLE_KEY, false)
             .put(QueryContexts.JOIN_FILTER_REWRITE_ENABLE_KEY, false)
             .put(QueryContexts.REWRITE_JOIN_TO_FILTER_ENABLE_KEY, true)
-            .build(),
+            .build()),
         // filter rewrites disabled, but value column filters still set to true
         // (it should be ignored and this should
         // behave the same as the previous context)
-        new ImmutableMap.Builder<String, Object>()
+        Named.of("filter-rewrites-disabled", new ImmutableMap.Builder<String, Object>()
             .putAll(QUERY_CONTEXT_DEFAULT)
             .put(QueryContexts.JOIN_FILTER_REWRITE_VALUE_COLUMN_FILTERS_ENABLE_KEY, true)
             .put(QueryContexts.JOIN_FILTER_REWRITE_ENABLE_KEY, false)
             .put(QueryContexts.REWRITE_JOIN_TO_FILTER_ENABLE_KEY, true)
-            .build(),
+            .build()),
         // filter rewrites fully enabled, join-to-filter disabled
-        new ImmutableMap.Builder<String, Object>()
+        Named.of("filter-rewrites", new ImmutableMap.Builder<String, Object>()
             .putAll(QUERY_CONTEXT_DEFAULT)
             .put(QueryContexts.JOIN_FILTER_REWRITE_VALUE_COLUMN_FILTERS_ENABLE_KEY, true)
             .put(QueryContexts.JOIN_FILTER_REWRITE_ENABLE_KEY, true)
             .put(QueryContexts.REWRITE_JOIN_TO_FILTER_ENABLE_KEY, false)
-            .build(),
+            .build()),
         // all rewrites disabled
-        new ImmutableMap.Builder<String, Object>()
+        Named.of("all_disabled", new ImmutableMap.Builder<String, Object>()
             .putAll(QUERY_CONTEXT_DEFAULT)
             .put(QueryContexts.JOIN_FILTER_REWRITE_VALUE_COLUMN_FILTERS_ENABLE_KEY, false)
             .put(QueryContexts.JOIN_FILTER_REWRITE_ENABLE_KEY, false)
             .put(QueryContexts.REWRITE_JOIN_TO_FILTER_ENABLE_KEY, false)
-            .build(),
+            .build()),
     };
   }
 

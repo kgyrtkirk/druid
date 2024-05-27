@@ -89,6 +89,10 @@ export function addOrUpdate<T>(xs: readonly T[], x: T, keyFn: (x: T) => string |
 
 // ----------------------------
 
+export function caseInsensitiveEquals(str1: string | undefined, str2: string | undefined): boolean {
+  return str1?.toLowerCase() === str2?.toLowerCase();
+}
+
 export function caseInsensitiveContains(testString: string, searchString: string): boolean {
   if (!searchString) return true;
   return testString.toLowerCase().includes(searchString.toLowerCase());
@@ -337,6 +341,22 @@ export function pluralIfNeeded(n: NumberLike, singular: string, plural?: string)
 }
 
 // ----------------------------
+
+export function partition<T>(xs: T[], predicate: (x: T, i: number) => boolean): [T[], T[]] {
+  const match: T[] = [];
+  const nonMatch: T[] = [];
+
+  for (let i = 0; i < xs.length; i++) {
+    const x = xs[i];
+    if (predicate(x, i)) {
+      match.push(x);
+    } else {
+      nonMatch.push(x);
+    }
+  }
+
+  return [match, nonMatch];
+}
 
 export function filterMap<T, Q>(xs: readonly T[], f: (x: T, i: number) => Q | undefined): Q[] {
   return xs.map(f).filter((x: Q | undefined) => typeof x !== 'undefined') as Q[];
