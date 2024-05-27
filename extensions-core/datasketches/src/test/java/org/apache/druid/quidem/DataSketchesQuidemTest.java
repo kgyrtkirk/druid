@@ -22,7 +22,7 @@ package org.apache.druid.quidem;
 import org.apache.druid.common.config.NullHandling;
 import java.io.File;
 
-public class SqlQuidemTest extends DruidQuidemTestBase
+public class DataSketchesQuidemTest extends DruidQuidemTestBase
 {
   public static boolean enabled()
   {
@@ -30,7 +30,7 @@ public class SqlQuidemTest extends DruidQuidemTestBase
     return NullHandling.sqlCompatible();
   }
 
-  public SqlQuidemTest()
+  public DataSketchesQuidemTest()
   {
     super();
   }
@@ -38,6 +38,6 @@ public class SqlQuidemTest extends DruidQuidemTestBase
   @Override
   protected File getTestRoot()
   {
-    return ProjectPathUtils.getPathFromProjectRoot("sql/src/test/quidem/" + getClass().getName());
+    return ProjectPathUtils.getPathFromProjectRoot("extensions-core/datasketches/src/test/quidem/" + getClass().getName());
   }
 }
