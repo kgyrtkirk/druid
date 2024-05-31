@@ -3,11 +3,11 @@
 
 
 with t0 as (
-	SELECT dim1,APPROX_COUNT_DISTINCT_BUILTIN(dim2) a1 FROM druid.foo group by dim1
+	SELECT dim1,APPROX_COUNT_DISTINCT_DS_HLL(dim2) a1 FROM druid.foo group by dim1
 ), t1 as (
-	SELECT dim1,APPROX_COUNT_DISTINCT_BUILTIN(dim3) a2 FROM druid.foo group by dim1
+	SELECT dim1,APPROX_COUNT_DISTINCT_DS_HLL(dim3) a2 FROM druid.foo group by dim1
 ), t2 as (
-	SELECT dim1,APPROX_COUNT_DISTINCT_BUILTIN(dim2||dim3) a3,APPROX_COUNT_DISTINCT(dim2||dim3) || 'x' a3x FROM druid.foo group by dim1
+	SELECT dim1,APPROX_COUNT_DISTINCT_DS_HLL(dim2||dim3) a3,APPROX_COUNT_DISTINCT_DS_HLL(dim2||dim3) || 'x' a3x FROM druid.foo group by dim1
 )
 select t0.dim1,a1,ANY_VALUE(a1),ANY_VALUE(a2),ANY_VALUE(a3),ANY_VALUE(a3x),ANY_VALUE(a1||'x'),ANY_VALUE(a2||'x'),
 ANY_VALUE(a3||'x') from t0
@@ -19,11 +19,11 @@ ANY_VALUE(a3||'x') from t0
 | dim1 | a1 | EXPR$2 | EXPR$3 | EXPR$4 | EXPR$5 | EXPR$6 | EXPR$7 | EXPR$8 |
 +------+----+--------+--------+--------+--------+--------+--------+--------+
 |      |  1 |      1 |      2 |      2 | 2x     | 1x     | 2x     | 2x     |
-| 1    |  1 |      1 |      1 |      1 | 1x     | 1x     | 1x     | 1x     |
 | 10.1 |  0 |      0 |      2 |      0 | 0x     | 0x     | 2x     | 0x     |
-| 2    |  1 |      1 |      1 |      1 | 1x     | 1x     | 1x     | 1x     |
 | abc  |  0 |      0 |      0 |      0 | 0x     | 0x     | 0x     | 0x     |
 | def  |  1 |      1 |      0 |      0 | 0x     | 1x     | 0x     | 0x     |
+| 1    |  1 |      1 |      0 |      1 | 1x     | 1x     | 0x     | 1x     |
+| 2    |  0 |      0 |      1 |      1 | 1x     | 0x     | 1x     | 1x     |
 +------+----+--------+--------+--------+--------+--------+--------+--------+
 (6 rows)
 
@@ -52,19 +52,15 @@ ANY_VALUE(a3||'x') from t0
           "dimensions" : [ {
             "type" : "default",
             "dimension" : "dim1",
-            "outputName" : "d0",
+            "outputName" : "_d0",
             "outputType" : "STRING"
           } ],
           "aggregations" : [ {
-            "type" : "cardinality",
+            "type" : "HLLSketchBuild",
             "name" : "a0",
-            "fields" : [ {
-              "type" : "default",
-              "dimension" : "dim2",
-              "outputName" : "dim2",
-              "outputType" : "STRING"
-            } ],
-            "byRow" : false,
+            "fieldName" : "dim2",
+            "lgK" : 12,
+            "tgtHllType" : "HLL_4",
             "round" : true
           } ],
           "limitSpec" : {
@@ -90,19 +86,15 @@ ANY_VALUE(a3||'x') from t0
           "dimensions" : [ {
             "type" : "default",
             "dimension" : "dim1",
-            "outputName" : "d0",
+            "outputName" : "_d0",
             "outputType" : "STRING"
           } ],
           "aggregations" : [ {
-            "type" : "cardinality",
+            "type" : "HLLSketchBuild",
             "name" : "a0",
-            "fields" : [ {
-              "type" : "default",
-              "dimension" : "dim3",
-              "outputName" : "dim3",
-              "outputType" : "STRING"
-            } ],
-            "byRow" : false,
+            "fieldName" : "dim3",
+            "lgK" : 12,
+            "tgtHllType" : "HLL_4",
             "round" : true
           } ],
           "limitSpec" : {
@@ -111,7 +103,7 @@ ANY_VALUE(a3||'x') from t0
         }
       },
       "rightPrefix" : "j0.",
-      "condition" : "(\"d0\" == \"j0.d0\")",
+      "condition" : "(\"_d0\" == \"j0._d0\")",
       "joinType" : "INNER"
     },
     "right" : {
@@ -138,36 +130,21 @@ ANY_VALUE(a3||'x') from t0
         "dimensions" : [ {
           "type" : "default",
           "dimension" : "dim1",
-          "outputName" : "d0",
+          "outputName" : "_d0",
           "outputType" : "STRING"
         } ],
         "aggregations" : [ {
-          "type" : "cardinality",
+          "type" : "HLLSketchBuild",
           "name" : "a0",
-          "fields" : [ {
-            "type" : "default",
-            "dimension" : "v0",
-            "outputName" : "v0",
-            "outputType" : "STRING"
-          } ],
-          "byRow" : false,
-          "round" : true
-        }, {
-          "type" : "cardinality",
-          "name" : "a1",
-          "fields" : [ {
-            "type" : "default",
-            "dimension" : "v0",
-            "outputName" : "v0",
-            "outputType" : "STRING"
-          } ],
-          "byRow" : false,
+          "fieldName" : "v0",
+          "lgK" : 12,
+          "tgtHllType" : "HLL_4",
           "round" : true
         } ],
         "postAggregations" : [ {
           "type" : "expression",
           "name" : "p0",
-          "expression" : "concat(CAST(\"a1\", 'STRING'),'x')",
+          "expression" : "concat(CAST(\"a0\", 'STRING'),'x')",
           "outputType" : "STRING"
         } ],
         "limitSpec" : {
@@ -176,7 +153,7 @@ ANY_VALUE(a3||'x') from t0
       }
     },
     "rightPrefix" : "_j0.",
-    "condition" : "(\"j0.d0\" == \"_j0.d0\")",
+    "condition" : "(\"j0._d0\" == \"_j0._d0\")",
     "joinType" : "INNER"
   },
   "intervals" : {
@@ -204,13 +181,13 @@ ANY_VALUE(a3||'x') from t0
   },
   "dimensions" : [ {
     "type" : "default",
-    "dimension" : "d0",
-    "outputName" : "_d0",
+    "dimension" : "_d0",
+    "outputName" : "d0",
     "outputType" : "STRING"
   }, {
     "type" : "default",
     "dimension" : "a0",
-    "outputName" : "_d1",
+    "outputName" : "d1",
     "outputType" : "LONG"
   } ],
   "aggregations" : [ {

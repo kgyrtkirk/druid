@@ -1,3 +1,5 @@
+!set finalize false
+!set vectorize false 
 !use druidtest://?numMergeBuffers=3
 !set outputformat mysql
 
@@ -7,127 +9,187 @@
 
 with t0 as (
 	SELECT dim1,APPROX_COUNT_DISTINCT_BUILTIN(dim2) a1 FROM druid.foo group by dim1
+	limit 10
 ), t1 as (
 	SELECT dim1,APPROX_COUNT_DISTINCT_BUILTIN(dim3) a2 FROM druid.foo group by dim1
+	limit 10
 ), t2 as (
 	SELECT dim1,APPROX_COUNT_DISTINCT_BUILTIN(dim2||dim3) a3,APPROX_COUNT_DISTINCT(dim2||dim3) || 'x' a3x FROM druid.foo group by dim1
-)
-select t0.dim1,a1,ANY_VALUE(a1),ANY_VALUE(a2),ANY_VALUE(a3),ANY_VALUE(a3x),ANY_VALUE(a1||'x'),ANY_VALUE(a2||'x'),
-ANY_VALUE(a3||'x') from t0
+	limit 10
+), t01 as (
+select t0.dim1,a1,ANY_VALUE(a2) as a2 from t0
   join t1 on (t0.dim1=t1.dim1)
-  join t2 on (t1.dim1=t2.dim1)
-  group by t0.dim1,a1
+  group by a1,t0.dim1
+  limit 10
+)
+select t01.dim1,SUM(a3),ANY_VALUE(a2) from t01
+    join t2 on (t01.dim1 = t2.dim1)
+    group by t01.dim1
+    limit 10
   ;
-+------+----+--------+--------+--------+--------+--------+--------+--------+
-| dim1 | a1 | EXPR$2 | EXPR$3 | EXPR$4 | EXPR$5 | EXPR$6 | EXPR$7 | EXPR$8 |
-+------+----+--------+--------+--------+--------+--------+--------+--------+
-|      |  1 |      1 |      2 |      2 | 2x     | 1x     | 2x     | 2x     |
-| 1    |  1 |      1 |      1 |      1 | 1x     | 1x     | 1x     | 1x     |
-| 10.1 |  0 |      0 |      2 |      0 | 0x     | 0x     | 2x     | 0x     |
-| 2    |  1 |      1 |      1 |      1 | 1x     | 1x     | 1x     | 1x     |
-| abc  |  0 |      0 |      0 |      0 | 0x     | 0x     | 0x     | 0x     |
-| def  |  1 |      1 |      0 |      0 | 0x     | 1x     | 0x     | 0x     |
-+------+----+--------+--------+--------+--------+--------+--------+--------+
++------+--------+--------+
+| dim1 | EXPR$1 | EXPR$2 |
++------+--------+--------+
+|      |      2 |      2 |
+| 1    |      1 |      1 |
+| 10.1 |      0 |      2 |
+| 2    |      1 |      1 |
+| abc  |      0 |      0 |
+| def  |      0 |      0 |
++------+--------+--------+
 (6 rows)
 
 !ok
 {
-  "queryType" : "groupBy",
+  "queryType" : "topN",
   "dataSource" : {
     "type" : "join",
     "left" : {
-      "type" : "join",
-      "left" : {
-        "type" : "query",
-        "query" : {
-          "queryType" : "groupBy",
-          "dataSource" : {
-            "type" : "table",
-            "name" : "foo"
-          },
-          "intervals" : {
-            "type" : "intervals",
-            "intervals" : [ "-146136543-09-08T08:23:32.096Z/146140482-04-24T15:36:27.903Z" ]
-          },
-          "granularity" : {
-            "type" : "all"
-          },
-          "dimensions" : [ {
-            "type" : "default",
-            "dimension" : "dim1",
-            "outputName" : "d0",
-            "outputType" : "STRING"
-          } ],
-          "aggregations" : [ {
-            "type" : "cardinality",
-            "name" : "a0",
-            "fields" : [ {
-              "type" : "default",
-              "dimension" : "dim2",
-              "outputName" : "dim2",
-              "outputType" : "STRING"
-            } ],
-            "byRow" : false,
-            "round" : true
-          } ],
-          "limitSpec" : {
-            "type" : "NoopLimitSpec"
-          }
-        }
-      },
-      "right" : {
-        "type" : "query",
-        "query" : {
-          "queryType" : "groupBy",
-          "dataSource" : {
-            "type" : "table",
-            "name" : "foo"
-          },
-          "intervals" : {
-            "type" : "intervals",
-            "intervals" : [ "-146136543-09-08T08:23:32.096Z/146140482-04-24T15:36:27.903Z" ]
-          },
-          "granularity" : {
-            "type" : "all"
-          },
-          "dimensions" : [ {
-            "type" : "default",
-            "dimension" : "dim1",
-            "outputName" : "d0",
-            "outputType" : "STRING"
-          } ],
-          "aggregations" : [ {
-            "type" : "cardinality",
-            "name" : "a0",
-            "fields" : [ {
-              "type" : "default",
-              "dimension" : "dim3",
-              "outputName" : "dim3",
-              "outputType" : "STRING"
-            } ],
-            "byRow" : false,
-            "round" : true
-          } ],
-          "limitSpec" : {
-            "type" : "NoopLimitSpec"
-          }
-        }
-      },
-      "rightPrefix" : "j0.",
-      "condition" : "(\"d0\" == \"j0.d0\")",
-      "joinType" : "INNER"
-    },
-    "right" : {
       "type" : "query",
       "query" : {
         "queryType" : "groupBy",
         "dataSource" : {
-          "type" : "table",
-          "name" : "foo"
+          "type" : "join",
+          "left" : {
+            "type" : "query",
+            "query" : {
+              "queryType" : "topN",
+              "dataSource" : {
+                "type" : "table",
+                "name" : "foo"
+              },
+              "dimension" : {
+                "type" : "default",
+                "dimension" : "dim1",
+                "outputName" : "d0",
+                "outputType" : "STRING"
+              },
+              "metric" : {
+                "type" : "dimension",
+                "ordering" : {
+                  "type" : "lexicographic"
+                }
+              },
+              "threshold" : 10,
+              "intervals" : {
+                "type" : "intervals",
+                "intervals" : [ "-146136543-09-08T08:23:32.096Z/146140482-04-24T15:36:27.903Z" ]
+              },
+              "granularity" : {
+                "type" : "all"
+              },
+              "aggregations" : [ {
+                "type" : "cardinality",
+                "name" : "a0:a",
+                "fields" : [ {
+                  "type" : "default",
+                  "dimension" : "dim2",
+                  "outputName" : "dim2",
+                  "outputType" : "STRING"
+                } ],
+                "byRow" : false,
+                "round" : true
+              } ],
+              "postAggregations" : [ {
+                "type" : "hyperUniqueCardinality",
+                "name" : "a0",
+                "fieldName" : "a0:a"
+              } ]
+            }
+          },
+          "right" : {
+            "type" : "query",
+            "query" : {
+              "queryType" : "topN",
+              "dataSource" : {
+                "type" : "table",
+                "name" : "foo"
+              },
+              "dimension" : {
+                "type" : "default",
+                "dimension" : "dim1",
+                "outputName" : "d0",
+                "outputType" : "STRING"
+              },
+              "metric" : {
+                "type" : "dimension",
+                "ordering" : {
+                  "type" : "lexicographic"
+                }
+              },
+              "threshold" : 10,
+              "intervals" : {
+                "type" : "intervals",
+                "intervals" : [ "-146136543-09-08T08:23:32.096Z/146140482-04-24T15:36:27.903Z" ]
+              },
+              "granularity" : {
+                "type" : "all"
+              },
+              "aggregations" : [ {
+                "type" : "cardinality",
+                "name" : "a0:a",
+                "fields" : [ {
+                  "type" : "default",
+                  "dimension" : "dim3",
+                  "outputName" : "dim3",
+                  "outputType" : "STRING"
+                } ],
+                "byRow" : false,
+                "round" : true
+              } ],
+              "postAggregations" : [ {
+                "type" : "hyperUniqueCardinality",
+                "name" : "a0",
+                "fieldName" : "a0:a"
+              } ]
+            }
+          },
+          "rightPrefix" : "j0.",
+          "condition" : "(\"d0\" == \"j0.d0\")",
+          "joinType" : "INNER"
         },
         "intervals" : {
           "type" : "intervals",
           "intervals" : [ "-146136543-09-08T08:23:32.096Z/146140482-04-24T15:36:27.903Z" ]
+        },
+        "granularity" : {
+          "type" : "all"
+        },
+        "dimensions" : [ {
+          "type" : "default",
+          "dimension" : "d0",
+          "outputName" : "_d0",
+          "outputType" : "STRING"
+        }, {
+          "type" : "default",
+          "dimension" : "a0",
+          "outputName" : "_d1",
+          "outputType" : "LONG"
+        } ],
+        "aggregations" : [ {
+          "type" : "longAny",
+          "name" : "_a0:a",
+          "fieldName" : "j0.a0"
+        } ],
+        "postAggregations" : [ {
+          "type" : "finalizingFieldAccess",
+          "name" : "_a0",
+          "fieldName" : "_a0:a"
+        } ],
+        "limitSpec" : {
+          "type" : "default",
+          "columns" : [ ],
+          "limit" : 10
+        }
+      }
+    },
+    "right" : {
+      "type" : "query",
+      "query" : {
+        "queryType" : "topN",
+        "dataSource" : {
+          "type" : "table",
+          "name" : "foo"
         },
         "virtualColumns" : [ {
           "type" : "expression",
@@ -135,29 +197,29 @@ ANY_VALUE(a3||'x') from t0
           "expression" : "concat(\"dim2\",\"dim3\")",
           "outputType" : "STRING"
         } ],
-        "granularity" : {
-          "type" : "all"
-        },
-        "dimensions" : [ {
+        "dimension" : {
           "type" : "default",
           "dimension" : "dim1",
           "outputName" : "d0",
           "outputType" : "STRING"
-        } ],
+        },
+        "metric" : {
+          "type" : "dimension",
+          "ordering" : {
+            "type" : "lexicographic"
+          }
+        },
+        "threshold" : 10,
+        "intervals" : {
+          "type" : "intervals",
+          "intervals" : [ "-146136543-09-08T08:23:32.096Z/146140482-04-24T15:36:27.903Z" ]
+        },
+        "granularity" : {
+          "type" : "all"
+        },
         "aggregations" : [ {
           "type" : "cardinality",
-          "name" : "a0",
-          "fields" : [ {
-            "type" : "default",
-            "dimension" : "v0",
-            "outputName" : "v0",
-            "outputType" : "STRING"
-          } ],
-          "byRow" : false,
-          "round" : true
-        }, {
-          "type" : "cardinality",
-          "name" : "a1",
+          "name" : "a0:a",
           "fields" : [ {
             "type" : "default",
             "dimension" : "v0",
@@ -168,93 +230,44 @@ ANY_VALUE(a3||'x') from t0
           "round" : true
         } ],
         "postAggregations" : [ {
-          "type" : "expression",
-          "name" : "p0",
-          "expression" : "concat(CAST(\"a1\", 'STRING'),'x')",
-          "outputType" : "STRING"
-        } ],
-        "limitSpec" : {
-          "type" : "NoopLimitSpec"
-        }
+          "type" : "hyperUniqueCardinality",
+          "name" : "a0",
+          "fieldName" : "a0:a"
+        } ]
       }
     },
     "rightPrefix" : "_j0.",
-    "condition" : "(\"j0.d0\" == \"_j0.d0\")",
+    "condition" : "(\"_d0\" == \"_j0.d0\")",
     "joinType" : "INNER"
   },
+  "dimension" : {
+    "type" : "default",
+    "dimension" : "_d0",
+    "outputName" : "d0",
+    "outputType" : "STRING"
+  },
+  "metric" : {
+    "type" : "dimension",
+    "ordering" : {
+      "type" : "lexicographic"
+    }
+  },
+  "threshold" : 10,
   "intervals" : {
     "type" : "intervals",
     "intervals" : [ "-146136543-09-08T08:23:32.096Z/146140482-04-24T15:36:27.903Z" ]
   },
-  "virtualColumns" : [ {
-    "type" : "expression",
-    "name" : "v0",
-    "expression" : "concat(CAST(\"a0\", 'STRING'),'x')",
-    "outputType" : "STRING"
-  }, {
-    "type" : "expression",
-    "name" : "v1",
-    "expression" : "concat(CAST(\"j0.a0\", 'STRING'),'x')",
-    "outputType" : "STRING"
-  }, {
-    "type" : "expression",
-    "name" : "v2",
-    "expression" : "concat(CAST(\"_j0.a0\", 'STRING'),'x')",
-    "outputType" : "STRING"
-  } ],
   "granularity" : {
     "type" : "all"
   },
-  "dimensions" : [ {
-    "type" : "default",
-    "dimension" : "d0",
-    "outputName" : "_d0",
-    "outputType" : "STRING"
-  }, {
-    "type" : "default",
-    "dimension" : "a0",
-    "outputName" : "_d1",
-    "outputType" : "LONG"
-  } ],
   "aggregations" : [ {
-    "type" : "longAny",
-    "name" : "_a0",
-    "fieldName" : "a0"
-  }, {
-    "type" : "longAny",
-    "name" : "_a1",
-    "fieldName" : "j0.a0"
-  }, {
-    "type" : "longAny",
-    "name" : "_a2",
+    "type" : "longSum",
+    "name" : "a0",
     "fieldName" : "_j0.a0"
   }, {
-    "type" : "stringAny",
-    "name" : "_a3",
-    "fieldName" : "_j0.p0",
-    "maxStringBytes" : 1024,
-    "aggregateMultipleValues" : true
-  }, {
-    "type" : "stringAny",
-    "name" : "_a4",
-    "fieldName" : "v0",
-    "maxStringBytes" : 1024,
-    "aggregateMultipleValues" : true
-  }, {
-    "type" : "stringAny",
-    "name" : "_a5",
-    "fieldName" : "v1",
-    "maxStringBytes" : 1024,
-    "aggregateMultipleValues" : true
-  }, {
-    "type" : "stringAny",
-    "name" : "_a6",
-    "fieldName" : "v2",
-    "maxStringBytes" : 1024,
-    "aggregateMultipleValues" : true
-  } ],
-  "limitSpec" : {
-    "type" : "NoopLimitSpec"
-  }
+    "type" : "longAny",
+    "name" : "a1",
+    "fieldName" : "_a0"
+  } ]
 }
 !nativePlan

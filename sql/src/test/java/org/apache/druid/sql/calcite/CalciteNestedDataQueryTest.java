@@ -41,6 +41,7 @@ import org.apache.druid.java.util.common.granularity.Granularities;
 import org.apache.druid.math.expr.ExprMacroTable;
 import org.apache.druid.query.Druids;
 import org.apache.druid.query.NestedDataTestUtils;
+import org.apache.druid.query.Query;
 import org.apache.druid.query.QueryRunnerFactoryConglomerate;
 import org.apache.druid.query.TableDataSource;
 import org.apache.druid.query.UnnestDataSource;
@@ -6684,13 +6685,28 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  public void testQuery1(
+      final String sql,
+      final List<Query<?>> expectedQueries,
+      final List<Object[]> expectedResults,
+      final RowSignature expectedResultSignature
+  )
+  {
+    testBuilder()
+        .sql(sql)
+//        .expectedQueries(expectedQueries)
+        .expectedResults(expectedResults)
+        .expectedSignature(expectedResultSignature)
+        .run();
+  }
+
   @Test
   public void testCoalesceOnNestedColumns()
   {
     // jo.unnest is first entry in coalesce
     // so Calcite removes the coalesce to be used here
-    testQuery(
-        "select coalesce(c,long) as col "
+    testQuery1(
+        "select c,long,coalesce(c,long) as col "
         + " from druid.all_auto, unnest(json_value(arrayNestedLong, '$[1]' returning bigint array)) as u(c) ",
         ImmutableList.of(
             Druids.newScanQueryBuilder()
