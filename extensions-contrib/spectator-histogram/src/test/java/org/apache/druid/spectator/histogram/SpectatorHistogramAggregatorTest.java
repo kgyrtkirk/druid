@@ -22,7 +22,6 @@ package org.apache.druid.spectator.histogram;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import com.netflix.spectator.api.histogram.PercentileBuckets;
 import org.apache.druid.common.config.NullHandling;
 import org.apache.druid.data.input.InputRow;
@@ -30,7 +29,6 @@ import org.apache.druid.data.input.MapBasedInputRow;
 import org.apache.druid.data.input.impl.NoopInputRowParser;
 import org.apache.druid.jackson.DefaultObjectMapper;
 import org.apache.druid.java.util.common.granularity.Granularities;
-import org.apache.druid.java.util.common.granularity.Granularity;
 import org.apache.druid.java.util.common.guava.Sequence;
 import org.apache.druid.query.Druids;
 import org.apache.druid.query.QueryPlus;
@@ -41,7 +39,6 @@ import org.apache.druid.query.aggregation.AggregationTestHelper;
 import org.apache.druid.query.aggregation.AggregatorFactory;
 import org.apache.druid.query.aggregation.AggregatorUtil;
 import org.apache.druid.query.aggregation.CountAggregatorFactory;
-import org.apache.druid.query.aggregation.DoubleSumAggregatorFactory;
 import org.apache.druid.query.groupby.GroupByQuery;
 import org.apache.druid.query.groupby.GroupByQueryConfig;
 import org.apache.druid.query.groupby.GroupByQueryRunnerTest;
@@ -74,7 +71,6 @@ import org.junit.runners.Parameterized;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -424,8 +420,12 @@ public class SpectatorHistogramAggregatorTest extends InitializedNullHandlingTes
         .setGranularity(Granularities.HOUR)
         .setInterval("1970/2050")
         .setAggregatorSpecs(
-            new DoubleSumAggregatorFactory("doubleSum", "histogram")
-        ).build();
+            new SpectatorHistogramAggregatorFactory("agg", "histogram")
+        )
+        .setPostAggregatorSpecs(
+            new SpectatorHistogramCountPostAggregator("cnt", "agg")
+        )
+        .build();
 
     Sequence<ResultRow> seq = helper.runQueryOnSegmentsObjs(segments, query);
 
@@ -434,7 +434,7 @@ public class SpectatorHistogramAggregatorTest extends InitializedNullHandlingTes
     // Check timestamp
     Assert.assertEquals(startOfDay.getMillis(), results.get(0).get(0));
     // Check doubleSum
-    Assert.assertEquals(n, (Double) results.get(0).get(1), 0.001);
+    Assert.assertEquals(n, (Double) results.get(0).get(2), 0.001);
   }
 
   @Test
@@ -646,7 +646,7 @@ public class SpectatorHistogramAggregatorTest extends InitializedNullHandlingTes
         true
     );
 
-    ObjectMapper mapper = (ObjectMapper) TestHelper.makeJsonMapper();
+    ObjectMapper mapper = TestHelper.makeJsonMapper();
     SpectatorHistogramModule module = new SpectatorHistogramModule();
     module.getJacksonModules().forEach(mod -> mapper.registerModule(mod));
     IndexIO indexIO = new IndexIO(
@@ -697,7 +697,7 @@ public class SpectatorHistogramAggregatorTest extends InitializedNullHandlingTes
         true
     );
 
-    ObjectMapper mapper = (ObjectMapper) TestHelper.makeJsonMapper();
+    ObjectMapper mapper = TestHelper.makeJsonMapper();
     SpectatorHistogramModule module = new SpectatorHistogramModule();
     module.getJacksonModules().forEach(mod -> mapper.registerModule(mod));
     IndexIO indexIO = new IndexIO(
