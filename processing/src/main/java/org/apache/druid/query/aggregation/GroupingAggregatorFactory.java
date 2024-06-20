@@ -111,10 +111,10 @@ public class GroupingAggregatorFactory extends AggregatorFactory
         groupings.size(),
         Long.SIZE - 1
     );
-    Preconditions.checkArgument(
-        groupings.stream().distinct().count() == groupings.size(),
-        "Encountered same dimension more than once in groupings"
-    );
+//    Preconditions.checkArgument(
+//        groupings.stream().distinct().count() == groupings.size(),
+//        "Encountered same dimension more than once in groupings"
+//    );
 
     this.name = name;
     this.groupings = groupings;

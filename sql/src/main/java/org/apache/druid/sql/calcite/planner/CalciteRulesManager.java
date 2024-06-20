@@ -66,7 +66,6 @@ import org.apache.druid.sql.calcite.rule.ProjectAggregatePruneUnusedCallRule;
 import org.apache.druid.sql.calcite.rule.ReverseLookupRule;
 import org.apache.druid.sql.calcite.rule.RewriteFirstValueLastValueRule;
 import org.apache.druid.sql.calcite.rule.SortCollapseRule;
-import org.apache.druid.sql.calcite.rule.logical.DruidAggregateRemoveRedundancyRule;
 import org.apache.druid.sql.calcite.rule.logical.DruidLogicalRules;
 import org.apache.druid.sql.calcite.run.EngineFeature;
 
@@ -497,7 +496,7 @@ public class CalciteRulesManager
     rules.add(FilterJoinExcludePushToChildRule.FILTER_ON_JOIN_EXCLUDE_PUSH_TO_CHILD);
     rules.add(SortCollapseRule.instance());
     rules.add(ProjectAggregatePruneUnusedCallRule.instance());
-    rules.add(DruidAggregateRemoveRedundancyRule.instance());
+//    rules.add(DruidAggregateRemoveRedundancyRule.instance());
 
     return rules.build();
   }

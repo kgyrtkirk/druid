@@ -1,71 +1,146 @@
-!set plannerStrategy DECOUPLED
-!use druidtest://?numMergeBuffers=3
+!set useApproximateCountDistinct false
+!set useGroupingSetForExactDistinct true
+!use druidtest://?numMergeBuffers=5
 !set outputformat mysql
 
-select cityName, count(case when delta > 0 then channel end) as cnt, count(1) as aall
-from wikipedia
-where cityName in ('New York', 'Aarhus')
-group by 1
-order by 1;
-+----------+-----+------+
-| cityName | cnt | aall |
-+----------+-----+------+
-| Aarhus   |   0 |    1 |
-| New York |   7 |   13 |
-+----------+-----+------+
-(2 rows)
+SELECT
+  TIME_FLOOR(__time, 'PT1H') as t,
+  COUNT(DISTINCT CASE WHEN channel = '#it.wikipedia' THEN user END) as cnt_case,
+  COUNT(DISTINCT user) FILTER (WHERE channel = '#it.wikipedia') as cnt_filter,
+  COUNT(DISTINCT user) as cnt
+FROM "wikipedia"
+GROUP BY 1;
++---------------------+----------+------------+-----+
+| t                   | cnt_case | cnt_filter | cnt |
++---------------------+----------+------------+-----+
+| 2015-09-12 00:00:00 |        0 |          0 |   0 |
+| 2015-09-12 01:00:00 |        0 |          0 |   0 |
+| 2015-09-12 02:00:00 |        0 |          0 |   0 |
+| 2015-09-12 03:00:00 |        0 |          0 |   0 |
+| 2015-09-12 04:00:00 |        0 |          0 |   0 |
+| 2015-09-12 05:00:00 |        0 |          0 |   0 |
+| 2015-09-12 06:00:00 |        0 |          0 |   0 |
+| 2015-09-12 07:00:00 |        0 |          0 |   0 |
+| 2015-09-12 08:00:00 |        0 |          0 |   0 |
+| 2015-09-12 09:00:00 |        0 |          0 |   0 |
+| 2015-09-12 10:00:00 |        0 |          0 |   0 |
+| 2015-09-12 11:00:00 |        0 |          0 |   0 |
+| 2015-09-12 12:00:00 |        0 |          0 |   0 |
+| 2015-09-12 13:00:00 |        0 |          0 |   0 |
+| 2015-09-12 14:00:00 |        0 |          0 |   0 |
+| 2015-09-12 15:00:00 |        0 |          0 |   0 |
+| 2015-09-12 16:00:00 |        0 |          0 |   0 |
+| 2015-09-12 17:00:00 |        0 |          0 |   0 |
+| 2015-09-12 18:00:00 |        0 |          0 |   0 |
+| 2015-09-12 19:00:00 |        0 |          0 |   0 |
+| 2015-09-12 20:00:00 |        0 |          0 |   0 |
+| 2015-09-12 21:00:00 |        0 |          0 |   0 |
+| 2015-09-12 22:00:00 |        0 |          0 |   0 |
+| 2015-09-12 23:00:00 |        0 |          0 |   0 |
++---------------------+----------+------------+-----+
+(24 rows)
 
 !ok
-LogicalSort(sort0=[$0], dir0=[ASC])
-  LogicalAggregate(group=[{0}], cnt=[COUNT($1)], aall=[COUNT()])
-    LogicalProject(cityName=[$2], $f1=[CASE(>($17, 0), $1, null:VARCHAR)])
-      LogicalFilter(condition=[OR(=($2, 'New York'), =($2, 'Aarhus'))])
-        LogicalTableScan(table=[[druid, wikipedia]])
+LogicalAggregate(group=[{0}], cnt_case=[COUNT(DISTINCT $1)], cnt_filter=[COUNT(DISTINCT $2) FILTER $3], cnt=[COUNT(DISTINCT $2)])
+  LogicalProject(t=[TIME_FLOOR($0, 'PT1H')], $f1=[CASE(=($1, '#it.wikipedia'), $16, null:VARCHAR)], user=[$16], $f3=[IS TRUE(=($1, '#it.wikipedia'))])
+    LogicalTableScan(table=[[druid, wikipedia]])
 
 !convertedPlan
-LogicalSort(sort0=[$0], dir0=[ASC])
-  LogicalAggregate(group=[{0}], cnt=[COUNT($1) FILTER $2], aall=[COUNT()])
-    LogicalProject(cityName=[$2], channel=[$1], $f3=[IS TRUE(>($17, 0))])
-      LogicalFilter(condition=[SEARCH($2, Sarg['Aarhus':VARCHAR(8), 'New York':VARCHAR(8)]:VARCHAR(8))])
-        LogicalTableScan(table=[[druid, wikipedia]])
+LogicalAggregate(group=[{0}], cnt_case=[COUNT(DISTINCT $1)], cnt_filter=[COUNT(DISTINCT $2) FILTER $3], cnt=[COUNT(DISTINCT $2)])
+  LogicalProject(t=[TIME_FLOOR($0, 'PT1H')], $f1=[CASE(=($1, '#it.wikipedia'), $16, null:VARCHAR)], user=[$16], $f3=[IS TRUE(=($1, '#it.wikipedia'))])
+    LogicalTableScan(table=[[druid, wikipedia]])
 
 !logicalPlan
-DruidAggregate(group=[{0}], cnt=[COUNT($1) FILTER $2], aall=[COUNT()], druid=[logical])
-  DruidProject(cityName=[$2], channel=[$1], $f3=[IS TRUE(>($17, 0))], druid=[logical])
-    DruidFilter(condition=[SEARCH($2, Sarg['Aarhus':VARCHAR(8), 'New York':VARCHAR(8)]:VARCHAR(8))])
-      DruidTableScan(table=[[druid, wikipedia]], druid=[logical])
+LogicalAggregate(group=[{0}], cnt_case=[COUNT($2) FILTER $5], cnt_filter=[COUNT($1) FILTER $3], cnt=[COUNT($1) FILTER $4])
+  LogicalProject($f0=[$0], user=[$1], user0=[$3], $g_3_f_2=[AND(=($5, 3), IS TRUE($2))], $g_7=[=($5, 7)], $g_12_f_4=[AND(=($5, 12), IS TRUE($4))])
+    LogicalAggregate(group=[{0, 1, 2, 3, 4}], groups=[[{0, 1, 2}, {0, 1}, {0, 3, 4}]], $g=[GROUPING($0, $1, $2, $3, $4)])
+      LogicalProject($f0=[TIME_FLOOR($0, 'PT1H')], user=[$16], $f3=[IS TRUE(=($1, '#it.wikipedia'))], user0=[$16], $f5=[IS TRUE(=($1, '#it.wikipedia'))])
+        LogicalTableScan(table=[[druid, wikipedia]])
 
 !druidPlan
 {
   "queryType" : "groupBy",
   "dataSource" : {
-    "type" : "table",
-    "name" : "wikipedia"
+    "type" : "query",
+    "query" : {
+      "queryType" : "groupBy",
+      "dataSource" : {
+        "type" : "table",
+        "name" : "wikipedia"
+      },
+      "intervals" : {
+        "type" : "intervals",
+        "intervals" : [ "-146136543-09-08T08:23:32.096Z/146140482-04-24T15:36:27.903Z" ]
+      },
+      "virtualColumns" : [ {
+        "type" : "expression",
+        "name" : "v0",
+        "expression" : "timestamp_floor(\"__time\",'PT1H',null,'UTC')",
+        "outputType" : "LONG"
+      }, {
+        "type" : "expression",
+        "name" : "v1",
+        "expression" : "istrue((\"channel\" == '#it.wikipedia'))",
+        "outputType" : "LONG"
+      } ],
+      "granularity" : {
+        "type" : "all"
+      },
+      "dimensions" : [ {
+        "type" : "default",
+        "dimension" : "v0",
+        "outputName" : "d0",
+        "outputType" : "LONG"
+      }, {
+        "type" : "default",
+        "dimension" : "user",
+        "outputName" : "d1",
+        "outputType" : "STRING"
+      }, {
+        "type" : "default",
+        "dimension" : "v1",
+        "outputName" : "d2",
+        "outputType" : "LONG"
+      }, {
+        "type" : "default",
+        "dimension" : "user",
+        "outputName" : "d3",
+        "outputType" : "STRING"
+      }, {
+        "type" : "default",
+        "dimension" : "v1",
+        "outputName" : "d4",
+        "outputType" : "LONG"
+      } ],
+      "aggregations" : [ {
+        "type" : "grouping",
+        "name" : "a0",
+        "groupings" : [ "v0", "user", "v1", "user", "v1" ]
+      } ],
+      "limitSpec" : {
+        "type" : "NoopLimitSpec"
+      },
+      "subtotalsSpec" : [ [ "d0", "d1", "d2" ], [ "d0", "d1" ], [ "d0", "d3", "d4" ] ]
+    }
   },
   "intervals" : {
     "type" : "intervals",
     "intervals" : [ "-146136543-09-08T08:23:32.096Z/146140482-04-24T15:36:27.903Z" ]
-  },
-  "filter" : {
-    "type" : "inType",
-    "column" : "cityName",
-    "matchValueType" : "STRING",
-    "sortedValues" : [ "Aarhus", "New York" ]
   },
   "granularity" : {
     "type" : "all"
   },
   "dimensions" : [ {
     "type" : "default",
-    "dimension" : "cityName",
-    "outputName" : "d0",
-    "outputType" : "STRING"
+    "dimension" : "d0",
+    "outputName" : "_d0",
+    "outputType" : "LONG"
   } ],
   "aggregations" : [ {
     "type" : "filtered",
     "aggregator" : {
       "type" : "count",
-      "name" : "a0"
+      "name" : "_a0"
     },
     "filter" : {
       "type" : "and",
@@ -73,24 +148,69 @@ DruidAggregate(group=[{0}], cnt=[COUNT($1) FILTER $2], aall=[COUNT()], druid=[lo
         "type" : "not",
         "field" : {
           "type" : "null",
-          "column" : "channel"
+          "column" : "d3"
         }
       }, {
-        "type" : "range",
-        "column" : "delta",
+        "type" : "equals",
+        "column" : "a0",
         "matchValueType" : "LONG",
-        "lower" : 0,
-        "lowerOpen" : true
+        "matchValue" : 12
+      }, {
+        "type" : "expression",
+        "expression" : "\"d4\""
       } ]
     },
-    "name" : "a0"
+    "name" : "_a0"
   }, {
-    "type" : "count",
-    "name" : "a1"
+    "type" : "filtered",
+    "aggregator" : {
+      "type" : "count",
+      "name" : "_a1"
+    },
+    "filter" : {
+      "type" : "and",
+      "fields" : [ {
+        "type" : "not",
+        "field" : {
+          "type" : "null",
+          "column" : "d1"
+        }
+      }, {
+        "type" : "equals",
+        "column" : "a0",
+        "matchValueType" : "LONG",
+        "matchValue" : 3
+      }, {
+        "type" : "expression",
+        "expression" : "\"d2\""
+      } ]
+    },
+    "name" : "_a1"
+  }, {
+    "type" : "filtered",
+    "aggregator" : {
+      "type" : "count",
+      "name" : "_a2"
+    },
+    "filter" : {
+      "type" : "and",
+      "fields" : [ {
+        "type" : "not",
+        "field" : {
+          "type" : "null",
+          "column" : "d1"
+        }
+      }, {
+        "type" : "equals",
+        "column" : "a0",
+        "matchValueType" : "LONG",
+        "matchValue" : 7
+      } ]
+    },
+    "name" : "_a2"
   } ],
   "limitSpec" : {
     "type" : "NoopLimitSpec"
   }
 }
 !nativePlan
-
