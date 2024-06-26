@@ -40,7 +40,7 @@ sdk install maven
 mvn --version
 
 # download druid sourcces (FIXME: change this to the main repo/branch before merging)
-git clone --branch quidem-record https://github.com/kgyrtkirk/druid
+git clone --branch quidem-qa https://github.com/kgyrtkirk/druid
 ```
 
 
