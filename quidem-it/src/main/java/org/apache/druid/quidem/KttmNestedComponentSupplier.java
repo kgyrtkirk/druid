@@ -20,9 +20,9 @@
 package org.apache.druid.quidem;
 
 import com.google.inject.Injector;
+import org.apache.druid.data.input.ResourceInputSource;
 import org.apache.druid.data.input.impl.DimensionSchema;
 import org.apache.druid.data.input.impl.DimensionsSpec;
-import org.apache.druid.data.input.impl.LocalInputSource;
 import org.apache.druid.data.input.impl.LongDimensionSchema;
 import org.apache.druid.data.input.impl.StringDimensionSchema;
 import org.apache.druid.data.input.impl.TimestampSpec;
@@ -128,7 +128,11 @@ public class KttmNestedComponentSupplier extends StandardComponentSupplier
         // TestIndex.class.getClassLoader(),
         // "kttm-nested-v2-2019-08-25.json"
         // );
-        LocalInputSource inputSource = new LocalInputSource(new File("/home/dev/host/kttm"), "kttm*json");
+        ResourceInputSource inputSource = ResourceInputSource.of(
+            TestIndex.class.getClassLoader(),
+            "kttm-nested-v2-2019-08-25.json"
+        );
+        //        LocalInputSource inputSource = new LocalInputSource(new File("/home/dev/host/kttm"), "kttm*json");
         for (DimensionSchema dimensionSchema : dimensions) {
 
         }
