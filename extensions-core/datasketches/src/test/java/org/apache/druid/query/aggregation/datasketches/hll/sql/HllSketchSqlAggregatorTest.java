@@ -75,13 +75,13 @@ import org.apache.druid.segment.virtual.ExpressionVirtualColumn;
 import org.apache.druid.segment.writeout.OffHeapMemorySegmentWriteOutMediumFactory;
 import org.apache.druid.server.SpecificSegmentsQuerySegmentWalker;
 import org.apache.druid.sql.calcite.BaseCalciteQueryTest;
+import org.apache.druid.sql.calcite.CalciteNestedDataQueryTest;
 import org.apache.druid.sql.calcite.SqlTestFrameworkConfig;
 import org.apache.druid.sql.calcite.TempDirProducer;
 import org.apache.druid.sql.calcite.filtration.Filtration;
 import org.apache.druid.sql.calcite.planner.PlannerContext;
 import org.apache.druid.sql.calcite.util.CacheTestHelperModule.ResultCacheMode;
 import org.apache.druid.sql.calcite.util.CalciteTests;
-import org.apache.druid.sql.calcite.util.SqlTestFramework.StandardComponentSupplier;
 import org.apache.druid.sql.calcite.util.TestDataBuilder;
 import org.apache.druid.sql.guice.SqlModule;
 import org.apache.druid.timeline.DataSegment;
@@ -237,7 +237,7 @@ public class HllSketchSqlAggregatorTest extends BaseCalciteQueryTest
       )
   );
 
-  public static class HllSketchComponentSupplier extends StandardComponentSupplier
+  public static class HllSketchComponentSupplier extends CalciteNestedDataQueryTest.NestedComponentSupplier
   {
     public HllSketchComponentSupplier(TempDirProducer tempFolderProducer)
     {
@@ -291,6 +291,9 @@ public class HllSketchSqlAggregatorTest extends BaseCalciteQueryTest
           .rows(TestDataBuilder.ROWS1_WITH_NUMERIC_DIMS)
           .buildMMappedIndex();
 
+      if(true) {
+        return super.createQuerySegmentWalker(conglomerate, joinableFactory, injector);
+      }
       return SpecificSegmentsQuerySegmentWalker.createWalker(injector, conglomerate).add(
           DataSegment.builder()
                      .dataSource(CalciteTests.DATASOURCE1)
@@ -596,6 +599,23 @@ public class HllSketchSqlAggregatorTest extends BaseCalciteQueryTest
             }
         )
     );
+  }
+
+  @Test
+  public void testHll1()
+  {
+    queryFramework();
+    testBuilder()
+        .sql(
+            "SELECT\n"
+//                + "  HLL_SKETCH_ESTIMATE(DS_HLL(hllsketch_dim1))\n"
+//                + "FROM foo\n"
+                + "  HLL_SKETCH_ESTIMATE(DS_HLL(nest))\n"
+                + "FROM nested\n"
+//                + "GROUP BY cnt"
+        )
+        .expectedResults(ImmutableList.of())
+        .run();
   }
 
   @Test

@@ -66,4 +66,15 @@ public class DruidSqlToRelConverter extends SqlToRelConverter
     // Presumably MSQ does these its own way.
     return sourceRel;
   }
+
+//  @Override
+//  protected void convertAgg(Blackboard bb, SqlSelect select, List<SqlNode> orderExprList)
+//  {
+//    if(true)
+//    {
+//      throw new RuntimeException("FIXME: Unimplemented!");
+//    }
+//    super.convertAgg(bb, select, orderExprList);
+//
+//  }
 }

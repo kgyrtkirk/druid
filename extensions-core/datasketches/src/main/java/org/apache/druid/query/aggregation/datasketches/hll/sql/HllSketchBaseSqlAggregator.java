@@ -31,10 +31,10 @@ import org.apache.druid.query.aggregation.datasketches.SketchQueryContext;
 import org.apache.druid.query.aggregation.datasketches.hll.HllSketchAggregatorFactory;
 import org.apache.druid.query.aggregation.datasketches.hll.HllSketchBuildAggregatorFactory;
 import org.apache.druid.query.aggregation.datasketches.hll.HllSketchMergeAggregatorFactory;
+import org.apache.druid.query.aggregation.datasketches.hll.HllSketchModule;
 import org.apache.druid.query.dimension.DefaultDimensionSpec;
 import org.apache.druid.query.dimension.DimensionSpec;
 import org.apache.druid.segment.column.ColumnType;
-import org.apache.druid.segment.column.ValueType;
 import org.apache.druid.sql.calcite.aggregation.Aggregation;
 import org.apache.druid.sql.calcite.aggregation.SqlAggregator;
 import org.apache.druid.sql.calcite.expression.DruidExpression;
@@ -115,7 +115,7 @@ public abstract class HllSketchBaseSqlAggregator implements SqlAggregator
     if (columnArg.isDirectColumnAccess()
         && inputAccessor.getInputRowSignature()
                         .getColumnType(columnArg.getDirectColumn())
-                        .map(type -> type.is(ValueType.COMPLEX))
+                        .map(type -> isHllType(type))
                         .orElse(false)) {
       aggregatorFactory = new HllSketchMergeAggregatorFactory(
           aggregatorName,
@@ -153,7 +153,7 @@ public abstract class HllSketchBaseSqlAggregator implements SqlAggregator
         dimensionSpec = new DefaultDimensionSpec(virtualColumnName, null, inputType);
       }
 
-      if (inputType.is(ValueType.COMPLEX)) {
+      if (isHllType(inputType)) {
         aggregatorFactory = new HllSketchMergeAggregatorFactory(
             aggregatorName,
             dimensionSpec.getOutputName(),
@@ -185,6 +185,11 @@ public abstract class HllSketchBaseSqlAggregator implements SqlAggregator
         finalizeAggregations,
         aggregatorFactory
     );
+  }
+
+  private boolean isHllType(ColumnType type)
+  {
+    return HllSketchModule.TYPE.equals(type);
   }
 
   protected abstract Aggregation toAggregation(
