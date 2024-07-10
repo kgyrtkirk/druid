@@ -1,0 +1,226 @@
+#started Wed Jul 10 19:17:20 IST 2024
+!use druidtest:///?componentSupplier=KttmNestedComponentSupplier
+!set outputformat mysql
+# Wed Jul 10 19:17:23 IST 2024
+SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'druid';
+!ok
+# Wed Jul 10 19:18:06 IST 2024
+SELECT
+MAX(CAST(t."__time" AS TIMESTAMP)) AS "__VALUE__"
+FROM "kttm_nested" AS t
+GROUP BY ();
+!ok
+# Wed Jul 10 19:18:06 IST 2024
+SELECT
+MAX(CAST(t."__time" AS TIMESTAMP)) AS "__VALUE__"
+FROM "kttm_nested" AS t
+GROUP BY ();
+!ok
+# Wed Jul 10 19:18:09 IST 2024
+SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'druid';
+!ok
+# Wed Jul 10 19:18:12 IST 2024
+SELECT
+FLOOR(CAST(t."session_length" AS DOUBLE) / 10) * 10 AS "session_length"
+FROM "kttm_nested" AS t
+WHERE (TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00')
+GROUP BY 1
+ORDER BY "session_length" ASC
+LIMIT 5000;
+!ok
+# Wed Jul 10 19:18:13 IST 2024
+SELECT
+FLOOR(CAST(t."session_length" AS DOUBLE) / 10) * 10 AS "session_length",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00') AND (22220<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<23730))
+GROUP BY 1;
+!ok
+# Wed Jul 10 19:18:16 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+FLOOR(CAST(t."session_length" AS DOUBLE) / 10) * 10 AS "session_length",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 11:00:00') AND (22220<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<23730))
+GROUP BY 1,2;
+!ok
+# Wed Jul 10 19:18:22 IST 2024
+SELECT
+FLOOR(CAST(t."session_length" AS DOUBLE) / 10) * 10 AS "session_length"
+FROM "kttm_nested" AS t
+WHERE (TIMESTAMP '2019-08-19 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00')
+GROUP BY 1
+ORDER BY "session_length" ASC
+LIMIT 5000;
+!ok
+# Wed Jul 10 19:18:22 IST 2024
+SELECT
+(COUNT(*)) AS "__VALUE__"
+FROM "kttm_nested" AS t
+WHERE (TIMESTAMP '2019-08-19 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00')
+GROUP BY ();
+!ok
+# Wed Jul 10 19:18:22 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE (TIMESTAMP '2019-08-19 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-19 11:00:00')
+GROUP BY 1;
+!ok
+# Wed Jul 10 19:18:22 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+FLOOR(CAST(t."session_length" AS DOUBLE) / 10) * 10 AS "session_length",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-19 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-19 11:00:00') AND (22220<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<23730))
+GROUP BY 1,2;
+!ok
+# Wed Jul 10 19:18:22 IST 2024
+SELECT
+FLOOR(CAST(t."session_length" AS DOUBLE) / 10) * 10 AS "session_length",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-19 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00') AND (22220<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<23730))
+GROUP BY 1;
+!ok
+# Wed Jul 10 19:18:24 IST 2024
+SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'druid';
+!ok
+# Wed Jul 10 19:18:30 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE (TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 11:00:00')
+GROUP BY 1;
+!ok
+# Wed Jul 10 19:18:38 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+FLOOR(CAST(t."session_length" AS DOUBLE) / 10) * 10 AS "session_length",
+(SUM(t."timezone_offset")) AS "sum_timezone_offset"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 11:00:00') AND (22220<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<23730))
+GROUP BY 1,2;
+!ok
+# Wed Jul 10 19:18:38 IST 2024
+SELECT
+FLOOR(CAST(t."session_length" AS DOUBLE) / 10) * 10 AS "session_length",
+(SUM(t."timezone_offset")) AS "sum_timezone_offset"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00') AND (22220<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<23730))
+GROUP BY 1;
+!ok
+# Wed Jul 10 19:18:52 IST 2024
+SELECT
+FLOOR(CAST(t."session_length" AS DOUBLE) / 10) * 10 AS "session_length",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE (TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00')
+GROUP BY 1
+HAVING (10<"count" AND "count"<300)
+ORDER BY "session_length" ASC
+LIMIT 5000;
+!ok
+# Wed Jul 10 19:18:52 IST 2024
+SELECT
+(COUNT(*)) AS "v0",
+(SUM(t."timezone_offset")) AS "v1"
+FROM "kttm_nested" AS t
+WHERE (TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00')
+GROUP BY ();
+!ok
+# Wed Jul 10 19:18:52 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE (TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00')
+GROUP BY 1
+HAVING (10<"count" AND "count"<300)
+ORDER BY "__time" ASC
+LIMIT 11;
+!ok
+# Wed Jul 10 19:18:52 IST 2024
+SELECT
+(COUNT(*) FILTER (WHERE (0<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<10))) AS "v0",
+(SUM(t."timezone_offset") FILTER (WHERE (0<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<10))) AS "v1",
+(COUNT(*) FILTER (WHERE (10<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<20))) AS "v2",
+(SUM(t."timezone_offset") FILTER (WHERE (10<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<20))) AS "v3"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00') AND (0<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<20))
+GROUP BY ();
+!ok
+# Wed Jul 10 19:18:52 IST 2024
+SELECT
+FLOOR(CAST(t."session_length" AS DOUBLE) / 10) * 10 AS "session_length",
+(COUNT(*)) AS "count",
+(SUM(t."timezone_offset")) AS "sum_timezone_offset"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00') AND (48490<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<50000))
+GROUP BY 1;
+!ok
+# Wed Jul 10 19:18:57 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+(COUNT(*)) AS "count",
+(SUM(t."timezone_offset")) AS "sum_timezone_offset"
+FROM "kttm_nested" AS t
+WHERE (TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 11:00:00')
+GROUP BY 1;
+!ok
+# Wed Jul 10 19:18:57 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+FLOOR(CAST(t."session_length" AS DOUBLE) / 10) * 10 AS "session_length",
+(COUNT(*)) AS "count",
+(SUM(t."timezone_offset")) AS "sum_timezone_offset"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 11:00:00') AND (22220<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<23730))
+GROUP BY 1,2;
+!ok
+# Wed Jul 10 19:18:57 IST 2024
+SELECT
+FLOOR(CAST(t."session_length" AS DOUBLE) / 10) * 10 AS "session_length",
+(COUNT(*)) AS "count",
+(SUM(t."timezone_offset")) AS "sum_timezone_offset"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00') AND (22220<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<23730))
+GROUP BY 1;
+!ok
+# Wed Jul 10 19:18:59 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+FLOOR(CAST(t."session_length" AS DOUBLE) / 10) * 10 AS "session_length",
+(COUNT(*)) AS "count",
+(SUM(t."timezone_offset")) AS "sum_timezone_offset"
+FROM "kttm_nested" AS t
+WHERE (((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 01:00:00') OR (TIMESTAMP '2019-08-25 02:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 12:00:00')) AND (22220<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<23730))
+GROUP BY 1,2;
+!ok
+# Wed Jul 10 19:19:00 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+FLOOR(CAST(t."session_length" AS DOUBLE) / 10) * 10 AS "session_length",
+(COUNT(*)) AS "count",
+(SUM(t."timezone_offset")) AS "sum_timezone_offset"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-25 02:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 13:00:00') AND (22220<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<23730))
+GROUP BY 1,2;
+!ok
+# Wed Jul 10 19:19:01 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+FLOOR(CAST(t."session_length" AS DOUBLE) / 10) * 10 AS "session_length",
+(COUNT(*)) AS "count",
+(SUM(t."timezone_offset")) AS "sum_timezone_offset"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-25 01:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 12:00:00') AND (22220<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<23730))
+GROUP BY 1,2;
+!ok
+# Wed Jul 10 19:19:09 IST 2024
+SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'druid';
+!ok

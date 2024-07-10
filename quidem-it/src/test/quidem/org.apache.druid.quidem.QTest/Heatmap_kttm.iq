@@ -1,0 +1,230 @@
+#started Wed Jul 10 19:21:24 IST 2024
+!use druidtest:///?componentSupplier=KttmNestedComponentSupplier
+!set outputformat mysql
+# Wed Jul 10 19:21:27 IST 2024
+SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'druid';
+!ok
+# Wed Jul 10 19:22:09 IST 2024
+SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'druid';
+!ok
+# Wed Jul 10 19:22:28 IST 2024
+SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'druid';
+!ok
+# Wed Jul 10 19:23:06 IST 2024
+SELECT
+MAX(CAST(t."__time" AS TIMESTAMP)) AS "__VALUE__"
+FROM "kttm_nested" AS t
+GROUP BY ();
+!ok
+# Wed Jul 10 19:23:09 IST 2024
+SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'druid';
+!ok
+# Wed Jul 10 19:23:29 IST 2024
+SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'druid';
+!ok
+# Wed Jul 10 19:24:09 IST 2024
+SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'druid';
+!ok
+# Wed Jul 10 19:24:30 IST 2024
+SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'druid';
+!ok
+# Wed Jul 10 19:25:09 IST 2024
+SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'druid';
+!ok
+# Wed Jul 10 19:25:31 IST 2024
+SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'druid';
+!ok
+# Wed Jul 10 19:26:00 IST 2024
+SELECT
+MAX(CAST(t."__time" AS TIMESTAMP)) AS "__VALUE__"
+FROM "kttm_nested" AS t
+GROUP BY ();
+!ok
+# Wed Jul 10 19:26:00 IST 2024
+SELECT
+MAX(CAST(t."__time" AS TIMESTAMP)) AS "__VALUE__"
+FROM "kttm_nested" AS t
+GROUP BY ();
+!ok
+# Wed Jul 10 19:26:01 IST 2024
+SELECT
+(COUNT(*)) AS "__VALUE__"
+FROM "kttm_nested" AS t
+WHERE (TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00')
+GROUP BY ();
+!ok
+# Wed Jul 10 19:26:07 IST 2024
+SELECT
+CAST(t."adblock_list" AS VARCHAR) AS "adblock_list",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE (TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00')
+GROUP BY 1
+ORDER BY "count" DESC
+LIMIT 1000;
+!ok
+# Wed Jul 10 19:26:07 IST 2024
+SELECT
+CAST(JSON_VALUE("t"."agent",'$.browser') AS VARCHAR) AS "Browser",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE (TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00')
+GROUP BY 1
+ORDER BY "count" DESC
+LIMIT 1000;
+!ok
+# Wed Jul 10 19:26:07 IST 2024
+SELECT
+CAST(t."adblock_list" AS VARCHAR) AS "adblock_list",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00') AND CAST(t."adblock_list" AS VARCHAR) IN ('NoAdblock','EasyList','EasyList,AntiAdblockKiller','AntiAdblockKiller'))
+GROUP BY 1;
+!ok
+# Wed Jul 10 19:26:07 IST 2024
+SELECT
+CAST(JSON_VALUE("t"."agent",'$.browser') AS VARCHAR) AS "Browser",
+CAST(t."adblock_list" AS VARCHAR) AS "adblock_list",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE (((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00') AND CAST(t."adblock_list" AS VARCHAR) IN ('NoAdblock','EasyList','EasyList,AntiAdblockKiller','AntiAdblockKiller')) AND CAST(JSON_VALUE("t"."agent",'$.browser') AS VARCHAR) IN ('Chrome','Mobile Safari','Chrome Mobile','Safari','Firefox','Yandex.Browser','Opera','IE','Mozilla','Silk','Yandex.Browser mobile','Mobile Firefox','Puffin'))
+GROUP BY 1,2;
+!ok
+# Wed Jul 10 19:26:09 IST 2024
+SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'druid';
+!ok
+# Wed Jul 10 19:26:09 IST 2024
+SELECT
+CAST(t."adblock_list" AS VARCHAR) AS "adblock_list",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE (((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00') AND CAST(t."adblock_list" AS VARCHAR) IN ('NoAdblock','EasyList','EasyList,AntiAdblockKiller','AntiAdblockKiller')) AND (CAST(JSON_VALUE("t"."agent",'$.browser') AS VARCHAR)='Chromium'))
+GROUP BY 1;
+!ok
+# Wed Jul 10 19:26:10 IST 2024
+SELECT
+CAST(t."adblock_list" AS VARCHAR) AS "adblock_list",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE (((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00') AND CAST(t."adblock_list" AS VARCHAR) IN ('NoAdblock','EasyList','EasyList,AntiAdblockKiller','AntiAdblockKiller')) AND (CAST(JSON_VALUE("t"."agent",'$.browser') AS VARCHAR)='Waterfox'))
+GROUP BY 1;
+!ok
+# Wed Jul 10 19:26:10 IST 2024
+SELECT
+CAST(t."adblock_list" AS VARCHAR) AS "adblock_list",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE (((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00') AND CAST(t."adblock_list" AS VARCHAR) IN ('NoAdblock','EasyList','EasyList,AntiAdblockKiller','AntiAdblockKiller')) AND (CAST(JSON_VALUE("t"."agent",'$.browser') AS VARCHAR)='Opera Mobile'))
+GROUP BY 1;
+!ok
+# Wed Jul 10 19:26:10 IST 2024
+SELECT
+CAST(t."adblock_list" AS VARCHAR) AS "adblock_list",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE (((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00') AND CAST(t."adblock_list" AS VARCHAR) IN ('NoAdblock','EasyList','EasyList,AntiAdblockKiller','AntiAdblockKiller')) AND (CAST(JSON_VALUE("t"."agent",'$.browser') AS VARCHAR)='PS4 Web browser'))
+GROUP BY 1;
+!ok
+# Wed Jul 10 19:26:10 IST 2024
+SELECT
+CAST(t."adblock_list" AS VARCHAR) AS "adblock_list",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE (((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00') AND CAST(t."adblock_list" AS VARCHAR) IN ('NoAdblock','EasyList','EasyList,AntiAdblockKiller','AntiAdblockKiller')) AND (CAST(JSON_VALUE("t"."agent",'$.browser') AS VARCHAR)='Android browser'))
+GROUP BY 1;
+!ok
+# Wed Jul 10 19:26:14 IST 2024
+SELECT
+(COUNT(*) FILTER (WHERE (TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 01:00:00'))) AS "v0",
+(COUNT(*) FILTER (WHERE (TIMESTAMP '2019-08-25 01:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 02:00:00'))) AS "v1"
+FROM "kttm_nested" AS t
+WHERE (TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 02:00:00')
+GROUP BY ();
+!ok
+# Wed Jul 10 19:26:14 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE (TIMESTAMP '2019-08-25 02:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00')
+GROUP BY 1;
+!ok
+# Wed Jul 10 19:26:23 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE (TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 19:00:00')
+GROUP BY 1;
+!ok
+# Wed Jul 10 19:26:30 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+CAST(t."adblock_list" AS VARCHAR) AS "adblock_list",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 17:00:00') AND CAST(t."adblock_list" AS VARCHAR) IN ('NoAdblock','EasyList','EasyList,AntiAdblockKiller','AntiAdblockKiller'))
+GROUP BY 1,2;
+!ok
+# Wed Jul 10 19:26:32 IST 2024
+SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'druid';
+!ok
+# Wed Jul 10 19:26:36 IST 2024
+SELECT
+CAST(t."adblock_list" AS VARCHAR) AS "adblock_list",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-25 02:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 03:00:00') AND (CAST(t."adblock_list" AS VARCHAR)='AntiAdblockKiller'))
+GROUP BY 1
+ORDER BY "count" DESC
+LIMIT 1000;
+!ok
+# Wed Jul 10 19:26:36 IST 2024
+SELECT
+(COUNT(*)) AS "__VALUE__"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-25 02:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 03:00:00') AND (CAST(t."adblock_list" AS VARCHAR)='AntiAdblockKiller'))
+GROUP BY ();
+!ok
+# Wed Jul 10 19:26:36 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1M', NULL, 'Etc/UTC') AS "__time",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-25 02:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 02:17:00') AND (CAST(t."adblock_list" AS VARCHAR)='AntiAdblockKiller'))
+GROUP BY 1;
+!ok
+# Wed Jul 10 19:26:38 IST 2024
+SELECT
+CAST(t."adblock_list" AS VARCHAR) AS "adblock_list",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE (TIMESTAMP '2019-08-25 02:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 03:00:00')
+GROUP BY 1
+ORDER BY "count" DESC
+LIMIT 1000;
+!ok
+# Wed Jul 10 19:26:38 IST 2024
+SELECT
+(COUNT(*)) AS "__VALUE__"
+FROM "kttm_nested" AS t
+WHERE (TIMESTAMP '2019-08-25 02:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 03:00:00')
+GROUP BY ();
+!ok
+# Wed Jul 10 19:26:38 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1M', NULL, 'Etc/UTC') AS "__time",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE (TIMESTAMP '2019-08-25 02:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 02:17:00')
+GROUP BY 1;
+!ok
+# Wed Jul 10 19:26:38 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1M', NULL, 'Etc/UTC') AS "__time",
+CAST(t."adblock_list" AS VARCHAR) AS "adblock_list",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-25 02:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 02:17:00') AND CAST(t."adblock_list" AS VARCHAR) IN ('NoAdblock','EasyList','EasyList,AntiAdblockKiller'))
+GROUP BY 1,2;
+!ok

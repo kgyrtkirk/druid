@@ -1,0 +1,238 @@
+#started Wed Jul 10 19:26:55 IST 2024
+!use druidtest:///?componentSupplier=KttmNestedComponentSupplier
+!set outputformat mysql
+# Wed Jul 10 19:27:09 IST 2024
+SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'druid';
+!ok
+# Wed Jul 10 19:27:27 IST 2024
+SELECT
+MAX(CAST(t."__time" AS TIMESTAMP)) AS "__VALUE__"
+FROM "kttm_nested" AS t
+GROUP BY ();
+!ok
+# Wed Jul 10 19:27:27 IST 2024
+SELECT
+MAX(CAST(t."__time" AS TIMESTAMP)) AS "__VALUE__"
+FROM "kttm_nested" AS t
+GROUP BY ();
+!ok
+# Wed Jul 10 19:27:33 IST 2024
+SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'druid';
+!ok
+# Wed Jul 10 19:27:46 IST 2024
+SELECT
+CAST(JSON_VALUE("t"."agent",'$.browser') AS VARCHAR) AS "Browser",
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 17:00:00') AND CAST(JSON_VALUE("t"."agent",'$.browser') AS VARCHAR) IN ('Chrome','Mobile Safari','Chrome Mobile','Safari','Firefox','Yandex.Browser','Opera','IE','Mozilla','Silk','Yandex.Browser mobile'))
+GROUP BY 1,2;
+!ok
+# Wed Jul 10 19:27:48 IST 2024
+SELECT
+CAST(JSON_VALUE("t"."agent",'$.browser') AS VARCHAR) AS "Browser",
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-24 17:00:00') AND CAST(JSON_VALUE("t"."agent",'$.browser') AS VARCHAR) IN ('Chrome','Mobile Safari','Chrome Mobile','Safari','Firefox','Yandex.Browser','Opera','IE','Mozilla','Silk','Yandex.Browser mobile'))
+GROUP BY 1,2;
+!ok
+# Wed Jul 10 19:27:52 IST 2024
+SELECT
+CAST(JSON_VALUE("t"."agent",'$.category') AS VARCHAR) AS "Category",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE (TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00')
+GROUP BY 1
+ORDER BY "count" DESC
+LIMIT 101;
+!ok
+# Wed Jul 10 19:27:52 IST 2024
+SELECT
+CAST(JSON_VALUE("t"."agent",'$.category') AS VARCHAR) AS "Category",
+(COUNT(*)) AS "_cmp_count"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 00:00:00') AND CAST(JSON_VALUE("t"."agent",'$.category') AS VARCHAR) IN ('Personal computer','Smartphone','Tablet','Game console','Smart TV',''))
+GROUP BY 1
+ORDER BY "_cmp_count" DESC
+LIMIT 101;
+!ok
+# Wed Jul 10 19:27:55 IST 2024
+SELECT
+CAST(JSON_VALUE("t"."agent",'$.browser') AS VARCHAR) AS "Browser",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00') AND (CAST(JSON_VALUE("t"."agent",'$.category') AS VARCHAR)='Tablet'))
+GROUP BY 1
+ORDER BY "count" DESC
+LIMIT 1000;
+!ok
+# Wed Jul 10 19:27:55 IST 2024
+SELECT
+(COUNT(*) FILTER (WHERE (TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00'))) AS "v0",
+(COUNT(*) FILTER (WHERE (TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 00:00:00'))) AS "v1"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00') AND (CAST(JSON_VALUE("t"."agent",'$.category') AS VARCHAR)='Tablet'))
+GROUP BY ();
+!ok
+# Wed Jul 10 19:27:55 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 17:00:00') AND (CAST(JSON_VALUE("t"."agent",'$.category') AS VARCHAR)='Tablet'))
+GROUP BY 1;
+!ok
+# Wed Jul 10 19:27:55 IST 2024
+SELECT
+CAST(JSON_VALUE("t"."agent",'$.browser') AS VARCHAR) AS "Browser",
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE (((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 17:00:00') AND (CAST(JSON_VALUE("t"."agent",'$.category') AS VARCHAR)='Tablet')) AND CAST(JSON_VALUE("t"."agent",'$.browser') AS VARCHAR) IN ('Mobile Safari','Silk','Chrome Mobile','Puffin','Yandex.Browser mobile'))
+GROUP BY 1,2;
+!ok
+# Wed Jul 10 19:27:55 IST 2024
+SELECT
+CAST(JSON_VALUE("t"."agent",'$.browser') AS VARCHAR) AS "Browser",
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE (((TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-24 17:00:00') AND (CAST(JSON_VALUE("t"."agent",'$.category') AS VARCHAR)='Tablet')) AND CAST(JSON_VALUE("t"."agent",'$.browser') AS VARCHAR) IN ('Mobile Safari','Silk','Chrome Mobile','Puffin','Yandex.Browser mobile'))
+GROUP BY 1,2;
+!ok
+# Wed Jul 10 19:27:57 IST 2024
+SELECT
+CAST(JSON_VALUE("t"."agent",'$.browser') AS VARCHAR) AS "Browser",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00') AND CAST(JSON_VALUE("t"."agent",'$.category') AS VARCHAR) IN ('Tablet','Smartphone'))
+GROUP BY 1
+ORDER BY "count" DESC
+LIMIT 1000;
+!ok
+# Wed Jul 10 19:27:57 IST 2024
+SELECT
+(COUNT(*) FILTER (WHERE (TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00'))) AS "v0",
+(COUNT(*) FILTER (WHERE (TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 00:00:00'))) AS "v1"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00') AND CAST(JSON_VALUE("t"."agent",'$.category') AS VARCHAR) IN ('Tablet','Smartphone'))
+GROUP BY ();
+!ok
+# Wed Jul 10 19:27:57 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 17:00:00') AND CAST(JSON_VALUE("t"."agent",'$.category') AS VARCHAR) IN ('Tablet','Smartphone'))
+GROUP BY 1;
+!ok
+# Wed Jul 10 19:27:57 IST 2024
+SELECT
+CAST(JSON_VALUE("t"."agent",'$.browser') AS VARCHAR) AS "Browser",
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE (((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 17:00:00') AND CAST(JSON_VALUE("t"."agent",'$.category') AS VARCHAR) IN ('Tablet','Smartphone')) AND CAST(JSON_VALUE("t"."agent",'$.browser') AS VARCHAR) IN ('Mobile Safari','Chrome Mobile','Silk','Yandex.Browser mobile','Mobile Firefox','Puffin','Opera Mobile','Android browser','IE Mobile'))
+GROUP BY 1,2;
+!ok
+# Wed Jul 10 19:27:57 IST 2024
+SELECT
+CAST(JSON_VALUE("t"."agent",'$.browser') AS VARCHAR) AS "Browser",
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE (((TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-24 17:00:00') AND CAST(JSON_VALUE("t"."agent",'$.category') AS VARCHAR) IN ('Tablet','Smartphone')) AND CAST(JSON_VALUE("t"."agent",'$.browser') AS VARCHAR) IN ('Mobile Safari','Chrome Mobile','Silk','Yandex.Browser mobile','Mobile Firefox','Puffin','Opera Mobile','Android browser','IE Mobile'))
+GROUP BY 1,2;
+!ok
+# Wed Jul 10 19:27:58 IST 2024
+SELECT
+CAST(JSON_VALUE("t"."agent",'$.browser') AS VARCHAR) AS "Browser",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00') AND CAST(JSON_VALUE("t"."agent",'$.category') AS VARCHAR) IN ('Tablet','Smartphone','Personal computer'))
+GROUP BY 1
+ORDER BY "count" DESC
+LIMIT 1000;
+!ok
+# Wed Jul 10 19:27:58 IST 2024
+SELECT
+(COUNT(*) FILTER (WHERE (TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00'))) AS "v0",
+(COUNT(*) FILTER (WHERE (TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 00:00:00'))) AS "v1"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00') AND CAST(JSON_VALUE("t"."agent",'$.category') AS VARCHAR) IN ('Tablet','Smartphone','Personal computer'))
+GROUP BY ();
+!ok
+# Wed Jul 10 19:27:58 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 17:00:00') AND CAST(JSON_VALUE("t"."agent",'$.category') AS VARCHAR) IN ('Tablet','Smartphone','Personal computer'))
+GROUP BY 1;
+!ok
+# Wed Jul 10 19:27:58 IST 2024
+SELECT
+CAST(JSON_VALUE("t"."agent",'$.browser') AS VARCHAR) AS "Browser",
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE (((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 17:00:00') AND CAST(JSON_VALUE("t"."agent",'$.category') AS VARCHAR) IN ('Tablet','Smartphone','Personal computer')) AND CAST(JSON_VALUE("t"."agent",'$.browser') AS VARCHAR) IN ('Chrome','Mobile Safari','Chrome Mobile','Safari','Firefox','Yandex.Browser','Opera','IE','Mozilla','Silk','Yandex.Browser mobile'))
+GROUP BY 1,2;
+!ok
+# Wed Jul 10 19:27:59 IST 2024
+SELECT
+CAST(JSON_VALUE("t"."agent",'$.browser') AS VARCHAR) AS "Browser",
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE (((TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-24 17:00:00') AND CAST(JSON_VALUE("t"."agent",'$.category') AS VARCHAR) IN ('Tablet','Smartphone','Personal computer')) AND CAST(JSON_VALUE("t"."agent",'$.browser') AS VARCHAR) IN ('Chrome','Mobile Safari','Chrome Mobile','Safari','Firefox','Yandex.Browser','Opera','IE','Mozilla','Silk','Yandex.Browser mobile'))
+GROUP BY 1,2;
+!ok
+# Wed Jul 10 19:28:02 IST 2024
+SELECT
+CAST(JSON_VALUE("t"."agent",'$.browser') AS VARCHAR) AS "Browser",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00') AND CAST(JSON_VALUE("t"."agent",'$.category') AS VARCHAR) IN ('Tablet','Smartphone','Personal computer','Game console'))
+GROUP BY 1
+ORDER BY "count" DESC
+LIMIT 1000;
+!ok
+# Wed Jul 10 19:28:02 IST 2024
+SELECT
+(COUNT(*) FILTER (WHERE (TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00'))) AS "v0",
+(COUNT(*) FILTER (WHERE (TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 00:00:00'))) AS "v1"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00') AND CAST(JSON_VALUE("t"."agent",'$.category') AS VARCHAR) IN ('Tablet','Smartphone','Personal computer','Game console'))
+GROUP BY ();
+!ok
+# Wed Jul 10 19:28:02 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 17:00:00') AND CAST(JSON_VALUE("t"."agent",'$.category') AS VARCHAR) IN ('Tablet','Smartphone','Personal computer','Game console'))
+GROUP BY 1;
+!ok
+# Wed Jul 10 19:28:02 IST 2024
+SELECT
+CAST(JSON_VALUE("t"."agent",'$.browser') AS VARCHAR) AS "Browser",
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE (((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 17:00:00') AND CAST(JSON_VALUE("t"."agent",'$.category') AS VARCHAR) IN ('Tablet','Smartphone','Personal computer','Game console')) AND CAST(JSON_VALUE("t"."agent",'$.browser') AS VARCHAR) IN ('Chrome','Mobile Safari','Chrome Mobile','Safari','Firefox','Yandex.Browser','Opera','IE','Mozilla','Silk','Yandex.Browser mobile'))
+GROUP BY 1,2;
+!ok
+# Wed Jul 10 19:28:02 IST 2024
+SELECT
+CAST(JSON_VALUE("t"."agent",'$.browser') AS VARCHAR) AS "Browser",
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE (((TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-24 17:00:00') AND CAST(JSON_VALUE("t"."agent",'$.category') AS VARCHAR) IN ('Tablet','Smartphone','Personal computer','Game console')) AND CAST(JSON_VALUE("t"."agent",'$.browser') AS VARCHAR) IN ('Chrome','Mobile Safari','Chrome Mobile','Safari','Firefox','Yandex.Browser','Opera','IE','Mozilla','Silk','Yandex.Browser mobile'))
+GROUP BY 1,2;
+!ok
+# Wed Jul 10 19:28:09 IST 2024
+SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'druid';
+!ok

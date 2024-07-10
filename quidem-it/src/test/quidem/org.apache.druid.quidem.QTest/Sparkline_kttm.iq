@@ -1,0 +1,485 @@
+#started Wed Jul 10 19:15:04 IST 2024
+!use druidtest:///?componentSupplier=KttmNestedComponentSupplier
+!set outputformat mysql
+# Wed Jul 10 19:15:09 IST 2024
+SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'druid';
+!ok
+# Wed Jul 10 19:15:21 IST 2024
+SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'druid';
+!ok
+# Wed Jul 10 19:16:01 IST 2024
+SELECT
+MAX(CAST(t."__time" AS TIMESTAMP)) AS "__VALUE__"
+FROM "kttm_nested" AS t
+GROUP BY ();
+!ok
+# Wed Jul 10 19:16:01 IST 2024
+SELECT
+MAX(CAST(t."__time" AS TIMESTAMP)) AS "__VALUE__"
+FROM "kttm_nested" AS t
+GROUP BY ();
+!ok
+# Wed Jul 10 19:16:08 IST 2024
+SELECT
+FLOOR(CAST(t."session_length" AS DOUBLE) / 10) * 10 AS "session_length"
+FROM "kttm_nested" AS t
+WHERE (TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00')
+GROUP BY 1
+ORDER BY "session_length" ASC
+LIMIT 100;
+!ok
+# Wed Jul 10 19:16:09 IST 2024
+SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'druid';
+!ok
+# Wed Jul 10 19:16:09 IST 2024
+SELECT
+(COUNT(*)) AS "__VALUE__"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00') AND (-26270<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<-26260))
+GROUP BY ();
+!ok
+# Wed Jul 10 19:16:13 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE (TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 23:00:00')
+GROUP BY 1;
+!ok
+# Wed Jul 10 19:16:13 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 23:00:00') AND (-26270<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<-26260))
+GROUP BY 1;
+!ok
+# Wed Jul 10 19:16:15 IST 2024
+SELECT
+CAST(t."adblock_list" AS VARCHAR) AS "adblock_list",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE (TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00')
+GROUP BY 1
+ORDER BY "count" DESC
+LIMIT 1000;
+!ok
+# Wed Jul 10 19:16:16 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 22:00:00') AND (CAST(t."adblock_list" AS VARCHAR)='NoAdblock'))
+GROUP BY 1;
+!ok
+# Wed Jul 10 19:16:16 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE (((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 22:00:00') AND (-26270<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<-26260)) AND (CAST(t."adblock_list" AS VARCHAR)='NoAdblock'))
+GROUP BY 1;
+!ok
+# Wed Jul 10 19:16:16 IST 2024
+SELECT
+(COUNT(*)) AS "v0",
+(COUNT(*) FILTER (WHERE (-26270<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<-26260))) AS "v1"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00') AND (CAST(t."adblock_list" AS VARCHAR)='NoAdblock'))
+GROUP BY ();
+!ok
+# Wed Jul 10 19:16:22 IST 2024
+SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'druid';
+!ok
+# Wed Jul 10 19:16:24 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE (TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-24 22:00:00')
+GROUP BY 1;
+!ok
+# Wed Jul 10 19:16:24 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-24 22:00:00') AND (-26270<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<-26260))
+GROUP BY 1;
+!ok
+# Wed Jul 10 19:16:24 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-24 22:00:00') AND (CAST(t."adblock_list" AS VARCHAR)='NoAdblock'))
+GROUP BY 1;
+!ok
+# Wed Jul 10 19:16:24 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE (((TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-24 22:00:00') AND (-26270<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<-26260)) AND (CAST(t."adblock_list" AS VARCHAR)='NoAdblock'))
+GROUP BY 1;
+!ok
+# Wed Jul 10 19:16:25 IST 2024
+SELECT
+(COUNT(*)) AS "v0",
+(COUNT(*) FILTER (WHERE (-26270<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<-26260))) AS "v1",
+(COUNT(*) FILTER (WHERE (CAST(t."adblock_list" AS VARCHAR)='NoAdblock'))) AS "v2",
+(COUNT(*) FILTER (WHERE ((-26270<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<-26260) AND (CAST(t."adblock_list" AS VARCHAR)='NoAdblock')))) AS "v3"
+FROM "kttm_nested" AS t
+WHERE (TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 00:00:00')
+GROUP BY ();
+!ok
+# Wed Jul 10 19:16:28 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+(SUM(t."session_length")) AS "sum_session_length"
+FROM "kttm_nested" AS t
+WHERE (TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 21:00:00')
+GROUP BY 1;
+!ok
+# Wed Jul 10 19:16:28 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+(SUM(t."session_length")) AS "sum_session_length"
+FROM "kttm_nested" AS t
+WHERE (TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-24 21:00:00')
+GROUP BY 1;
+!ok
+# Wed Jul 10 19:16:28 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+(SUM(t."session_length")) AS "sum_session_length"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 21:00:00') AND (-26270<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<-26260))
+GROUP BY 1;
+!ok
+# Wed Jul 10 19:16:28 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+(SUM(t."session_length")) AS "sum_session_length"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-24 21:00:00') AND (-26270<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<-26260))
+GROUP BY 1;
+!ok
+# Wed Jul 10 19:16:29 IST 2024
+SELECT
+(SUM(t."session_length") FILTER (WHERE (TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00'))) AS "v0",
+(SUM(t."session_length") FILTER (WHERE (TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 00:00:00'))) AS "v1",
+(SUM(t."session_length") FILTER (WHERE ((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00') AND (-26270<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<-26260)))) AS "v2",
+(SUM(t."session_length") FILTER (WHERE ((TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 00:00:00') AND (-26270<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<-26260)))) AS "v3"
+FROM "kttm_nested" AS t
+WHERE (TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00')
+GROUP BY ();
+!ok
+# Wed Jul 10 19:16:34 IST 2024
+SELECT
+CAST(JSON_VALUE("t"."event",'$.layer') AS VARCHAR) AS "Layer",
+(COUNT(*)) AS "r"
+FROM "kttm_nested" AS t
+WHERE (TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00')
+GROUP BY 1
+ORDER BY "r" DESC
+LIMIT 101;
+!ok
+# Wed Jul 10 19:16:37 IST 2024
+SELECT
+FLOOR(CAST(t."session_length" AS DOUBLE) / 10) * 10 AS "session_length"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00') AND (CAST(JSON_VALUE("t"."event",'$.layer') AS VARCHAR)='6'))
+GROUP BY 1
+ORDER BY "session_length" ASC
+LIMIT 100;
+!ok
+# Wed Jul 10 19:16:37 IST 2024
+SELECT
+(COUNT(*) FILTER (WHERE (TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00'))) AS "v0",
+(SUM(t."session_length") FILTER (WHERE (TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00'))) AS "v1",
+(COUNT(*) FILTER (WHERE (TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 00:00:00'))) AS "v2",
+(SUM(t."session_length") FILTER (WHERE (TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 00:00:00'))) AS "v3"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00') AND (CAST(JSON_VALUE("t"."event",'$.layer') AS VARCHAR)='6'))
+GROUP BY ();
+!ok
+# Wed Jul 10 19:16:37 IST 2024
+SELECT
+CAST(t."adblock_list" AS VARCHAR) AS "adblock_list",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00') AND (CAST(JSON_VALUE("t"."event",'$.layer') AS VARCHAR)='6'))
+GROUP BY 1
+ORDER BY "count" DESC
+LIMIT 1000;
+!ok
+# Wed Jul 10 19:16:37 IST 2024
+SELECT
+FLOOR(CAST(t."session_length" AS DOUBLE) / 10) * 10 AS "session_length",
+(COUNT(*)) AS "count",
+(SUM(t."session_length")) AS "sum_session_length"
+FROM "kttm_nested" AS t
+WHERE (((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00') AND (CAST(JSON_VALUE("t"."event",'$.layer') AS VARCHAR)='6')) AND (1040<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<2040))
+GROUP BY 1;
+!ok
+# Wed Jul 10 19:16:37 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+FLOOR(CAST(t."session_length" AS DOUBLE) / 10) * 10 AS "session_length",
+(COUNT(*)) AS "count",
+(SUM(t."session_length")) AS "sum_session_length"
+FROM "kttm_nested" AS t
+WHERE (((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 22:00:00') AND (CAST(JSON_VALUE("t"."event",'$.layer') AS VARCHAR)='6')) AND (1040<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<2040))
+GROUP BY 1,2;
+!ok
+# Wed Jul 10 19:16:38 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+FLOOR(CAST(t."session_length" AS DOUBLE) / 10) * 10 AS "session_length",
+(COUNT(*)) AS "count",
+(SUM(t."session_length")) AS "sum_session_length"
+FROM "kttm_nested" AS t
+WHERE (((TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-24 21:00:00') AND (CAST(JSON_VALUE("t"."event",'$.layer') AS VARCHAR)='6')) AND (1040<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<2040))
+GROUP BY 1,2;
+!ok
+# Wed Jul 10 19:16:38 IST 2024
+SELECT
+FLOOR(CAST(t."session_length" AS DOUBLE) / 10) * 10 AS "session_length",
+(COUNT(*)) AS "count",
+(SUM(t."session_length")) AS "sum_session_length"
+FROM "kttm_nested" AS t
+WHERE (((TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 00:00:00') AND (CAST(JSON_VALUE("t"."event",'$.layer') AS VARCHAR)='6')) AND (1040<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<2040))
+GROUP BY 1;
+!ok
+# Wed Jul 10 19:16:38 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+(COUNT(*)) AS "count",
+(SUM(t."session_length")) AS "sum_session_length"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 21:00:00') AND (CAST(JSON_VALUE("t"."event",'$.layer') AS VARCHAR)='6'))
+GROUP BY 1;
+!ok
+# Wed Jul 10 19:16:38 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+(COUNT(*)) AS "count",
+(SUM(t."session_length")) AS "sum_session_length"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-24 21:00:00') AND (CAST(JSON_VALUE("t"."event",'$.layer') AS VARCHAR)='6'))
+GROUP BY 1;
+!ok
+# Wed Jul 10 19:16:44 IST 2024
+SELECT
+FLOOR(CAST(t."session_length" AS DOUBLE) / 10) * 10 AS "session_length"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00') AND (CAST(JSON_VALUE("t"."event",'$.layer') AS VARCHAR)='6'))
+GROUP BY 1
+ORDER BY "session_length" ASC
+LIMIT 5000;
+!ok
+# Wed Jul 10 19:16:53 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+FLOOR(CAST(t."session_length" AS DOUBLE) / 10) * 10 AS "session_length",
+(COUNT(*)) AS "count",
+(SUM(t."session_length")) AS "sum_session_length"
+FROM "kttm_nested" AS t
+WHERE (((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00') AND (CAST(JSON_VALUE("t"."event",'$.layer') AS VARCHAR)='6')) AND (1040<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<1250))
+GROUP BY 1,2;
+!ok
+# Wed Jul 10 19:16:53 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+FLOOR(CAST(t."session_length" AS DOUBLE) / 10) * 10 AS "session_length",
+(COUNT(*)) AS "count",
+(SUM(t."session_length")) AS "sum_session_length"
+FROM "kttm_nested" AS t
+WHERE (((TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 00:00:00') AND (CAST(JSON_VALUE("t"."event",'$.layer') AS VARCHAR)='6')) AND (1040<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<1250))
+GROUP BY 1,2;
+!ok
+# Wed Jul 10 19:16:53 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+(COUNT(*)) AS "count",
+(SUM(t."session_length")) AS "sum_session_length"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00') AND (CAST(JSON_VALUE("t"."event",'$.layer') AS VARCHAR)='6'))
+GROUP BY 1;
+!ok
+# Wed Jul 10 19:16:53 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+(COUNT(*)) AS "count",
+(SUM(t."session_length")) AS "sum_session_length"
+FROM "kttm_nested" AS t
+WHERE ((TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 00:00:00') AND (CAST(JSON_VALUE("t"."event",'$.layer') AS VARCHAR)='6'))
+GROUP BY 1;
+!ok
+# Wed Jul 10 19:16:53 IST 2024
+SELECT
+FLOOR(CAST(t."session_length" AS DOUBLE) / 10) * 10 AS "session_length",
+(COUNT(*)) AS "count",
+(SUM(t."session_length")) AS "sum_session_length"
+FROM "kttm_nested" AS t
+WHERE (((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00') AND (CAST(JSON_VALUE("t"."event",'$.layer') AS VARCHAR)='6')) AND (1040<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<1250))
+GROUP BY 1;
+!ok
+# Wed Jul 10 19:16:53 IST 2024
+SELECT
+FLOOR(CAST(t."session_length" AS DOUBLE) / 10) * 10 AS "session_length",
+(COUNT(*)) AS "count",
+(SUM(t."session_length")) AS "sum_session_length"
+FROM "kttm_nested" AS t
+WHERE (((TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 00:00:00') AND (CAST(JSON_VALUE("t"."event",'$.layer') AS VARCHAR)='6')) AND (1040<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<1250))
+GROUP BY 1;
+!ok
+# Wed Jul 10 19:17:02 IST 2024
+SELECT
+CAST(JSON_VALUE("t"."agent",'$.browser') AS VARCHAR) AS "Browser",
+(COUNT(*)) AS "count"
+FROM "kttm_nested" AS t
+WHERE (((TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00') AND (CAST(JSON_VALUE("t"."event",'$.layer') AS VARCHAR)='6')) AND (CAST(t."adblock_list" AS VARCHAR)='NoAdblock'))
+GROUP BY 1
+ORDER BY "count" DESC
+LIMIT 1000;
+!ok
+# Wed Jul 10 19:17:02 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+FLOOR(CAST(t."session_length" AS DOUBLE) / 10) * 10 AS "session_length",
+(COUNT(*)) AS "count",
+(SUM(t."session_length")) AS "sum_session_length"
+FROM "kttm_nested" AS t
+WHERE ((((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00') AND (CAST(JSON_VALUE("t"."event",'$.layer') AS VARCHAR)='6')) AND (1040<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<1250)) AND (CAST(t."adblock_list" AS VARCHAR)='NoAdblock'))
+GROUP BY 1,2;
+!ok
+# Wed Jul 10 19:17:02 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+FLOOR(CAST(t."session_length" AS DOUBLE) / 10) * 10 AS "session_length",
+(COUNT(*)) AS "count",
+(SUM(t."session_length")) AS "sum_session_length"
+FROM "kttm_nested" AS t
+WHERE ((((TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 00:00:00') AND (CAST(JSON_VALUE("t"."event",'$.layer') AS VARCHAR)='6')) AND (1040<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<1240)) AND (CAST(t."adblock_list" AS VARCHAR)='NoAdblock'))
+GROUP BY 1,2;
+!ok
+# Wed Jul 10 19:17:02 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+(COUNT(*)) AS "count",
+(SUM(t."session_length")) AS "sum_session_length"
+FROM "kttm_nested" AS t
+WHERE (((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00') AND (CAST(JSON_VALUE("t"."event",'$.layer') AS VARCHAR)='6')) AND (CAST(t."adblock_list" AS VARCHAR)='NoAdblock'))
+GROUP BY 1;
+!ok
+# Wed Jul 10 19:17:02 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+(COUNT(*)) AS "count",
+(SUM(t."session_length")) AS "sum_session_length"
+FROM "kttm_nested" AS t
+WHERE (((TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 00:00:00') AND (CAST(JSON_VALUE("t"."event",'$.layer') AS VARCHAR)='6')) AND (CAST(t."adblock_list" AS VARCHAR)='NoAdblock'))
+GROUP BY 1;
+!ok
+# Wed Jul 10 19:17:02 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+FLOOR(CAST(t."session_length" AS DOUBLE) / 10) * 10 AS "session_length",
+(COUNT(*)) AS "count",
+(SUM(t."session_length")) AS "sum_session_length"
+FROM "kttm_nested" AS t
+WHERE ((((TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 00:00:00') AND (CAST(JSON_VALUE("t"."event",'$.layer') AS VARCHAR)='6')) AND (1240<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<1280)) AND (CAST(t."adblock_list" AS VARCHAR)='NoAdblock'))
+GROUP BY 1,2;
+!ok
+# Wed Jul 10 19:17:02 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+FLOOR(CAST(t."session_length" AS DOUBLE) / 10) * 10 AS "session_length",
+(COUNT(*)) AS "count",
+(SUM(t."session_length")) AS "sum_session_length"
+FROM "kttm_nested" AS t
+WHERE (((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00') AND (CAST(JSON_VALUE("t"."event",'$.layer') AS VARCHAR)='6')) AND (1250<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<1380))
+GROUP BY 1,2;
+!ok
+# Wed Jul 10 19:17:03 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+FLOOR(CAST(t."session_length" AS DOUBLE) / 10) * 10 AS "session_length",
+(COUNT(*)) AS "count",
+(SUM(t."session_length")) AS "sum_session_length"
+FROM "kttm_nested" AS t
+WHERE (((TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 00:00:00') AND (CAST(JSON_VALUE("t"."event",'$.layer') AS VARCHAR)='6')) AND (1250<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<1420))
+GROUP BY 1,2;
+!ok
+# Wed Jul 10 19:17:03 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+FLOOR(CAST(t."session_length" AS DOUBLE) / 10) * 10 AS "session_length",
+(COUNT(*)) AS "count",
+(SUM(t."session_length")) AS "sum_session_length"
+FROM "kttm_nested" AS t
+WHERE ((((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00') AND (CAST(JSON_VALUE("t"."event",'$.layer') AS VARCHAR)='6')) AND (1250<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<1460)) AND (CAST(t."adblock_list" AS VARCHAR)='NoAdblock'))
+GROUP BY 1,2;
+!ok
+# Wed Jul 10 19:17:03 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+FLOOR(CAST(t."session_length" AS DOUBLE) / 10) * 10 AS "session_length",
+(COUNT(*)) AS "count",
+(SUM(t."session_length")) AS "sum_session_length"
+FROM "kttm_nested" AS t
+WHERE ((((TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 00:00:00') AND (CAST(JSON_VALUE("t"."event",'$.layer') AS VARCHAR)='6')) AND (1280<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<1490)) AND (CAST(t."adblock_list" AS VARCHAR)='NoAdblock'))
+GROUP BY 1,2;
+!ok
+# Wed Jul 10 19:17:03 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+FLOOR(CAST(t."session_length" AS DOUBLE) / 10) * 10 AS "session_length",
+(COUNT(*)) AS "count",
+(SUM(t."session_length")) AS "sum_session_length"
+FROM "kttm_nested" AS t
+WHERE (((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00') AND (CAST(JSON_VALUE("t"."event",'$.layer') AS VARCHAR)='6')) AND (1380<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<1490))
+GROUP BY 1,2;
+!ok
+# Wed Jul 10 19:17:03 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+FLOOR(CAST(t."session_length" AS DOUBLE) / 10) * 10 AS "session_length",
+(COUNT(*)) AS "count",
+(SUM(t."session_length")) AS "sum_session_length"
+FROM "kttm_nested" AS t
+WHERE (((TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 00:00:00') AND (CAST(JSON_VALUE("t"."event",'$.layer') AS VARCHAR)='6')) AND (1420<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<1480))
+GROUP BY 1,2;
+!ok
+# Wed Jul 10 19:17:03 IST 2024
+SELECT
+TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
+(COUNT(*)) AS "count",
+(SUM(t."session_length")) AS "sum_session_length"
+FROM "kttm_nested" AS t
+WHERE ((((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00') AND (CAST(JSON_VALUE("t"."event",'$.layer') AS VARCHAR)='6')) AND (1460<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<1470)) AND (CAST(t."adblock_list" AS VARCHAR)='NoAdblock'))
+GROUP BY 1;
+!ok
+# Wed Jul 10 19:17:03 IST 2024
+SELECT
+FLOOR(CAST(t."session_length" AS DOUBLE) / 10) * 10 AS "session_length",
+(COUNT(*)) AS "count",
+(SUM(t."session_length")) AS "sum_session_length"
+FROM "kttm_nested" AS t
+WHERE (((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00') AND (CAST(JSON_VALUE("t"."event",'$.layer') AS VARCHAR)='6')) AND (1250<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<1450))
+GROUP BY 1;
+!ok
+# Wed Jul 10 19:17:03 IST 2024
+SELECT
+FLOOR(CAST(t."session_length" AS DOUBLE) / 10) * 10 AS "session_length",
+(COUNT(*)) AS "count",
+(SUM(t."session_length")) AS "sum_session_length"
+FROM "kttm_nested" AS t
+WHERE (((TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 00:00:00') AND (CAST(JSON_VALUE("t"."event",'$.layer') AS VARCHAR)='6')) AND (1250<=CAST(t."session_length" AS DOUBLE) AND CAST(t."session_length" AS DOUBLE)<1440))
+GROUP BY 1;
+!ok
+# Wed Jul 10 19:17:09 IST 2024
+SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'druid';
+!ok
