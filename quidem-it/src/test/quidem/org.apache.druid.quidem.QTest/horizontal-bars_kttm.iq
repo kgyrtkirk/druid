@@ -3,21 +3,387 @@
 !set outputformat mysql
 # Wed Jul 10 16:23:54 IST 2024
 SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'druid';
++----------------------+--------------------------------+-------------------------------------+
+| TABLE_NAME           | COLUMN_NAME                    | DATA_TYPE                           |
++----------------------+--------------------------------+-------------------------------------+
+| arrays               | __time                         | TIMESTAMP                           |
+| arrays               | arrayDouble                    | ARRAY                               |
+| arrays               | arrayDoubleNulls               | ARRAY                               |
+| arrays               | arrayLong                      | ARRAY                               |
+| arrays               | arrayLongNulls                 | ARRAY                               |
+| arrays               | arrayNestedLong                | COMPLEX<json>                       |
+| arrays               | arrayNoType                    | ARRAY                               |
+| arrays               | arrayObject                    | COMPLEX<json>                       |
+| arrays               | arrayString                    | ARRAY                               |
+| arrays               | arrayStringNulls               | ARRAY                               |
+| arrays               | arrayVariant                   | ARRAY                               |
+| arrays               | cnt                            | BIGINT                              |
+| broadcast            | __time                         | TIMESTAMP                           |
+| broadcast            | cnt                            | BIGINT                              |
+| broadcast            | d1                             | DOUBLE                              |
+| broadcast            | d2                             | DOUBLE                              |
+| broadcast            | dim1                           | VARCHAR                             |
+| broadcast            | dim2                           | VARCHAR                             |
+| broadcast            | dim3                           | VARCHAR                             |
+| broadcast            | dim4                           | VARCHAR                             |
+| broadcast            | dim5                           | VARCHAR                             |
+| broadcast            | dim6                           | VARCHAR                             |
+| broadcast            | f1                             | FLOAT                               |
+| broadcast            | f2                             | FLOAT                               |
+| broadcast            | l1                             | BIGINT                              |
+| broadcast            | l2                             | BIGINT                              |
+| broadcast            | m1                             | FLOAT                               |
+| broadcast            | m2                             | DOUBLE                              |
+| broadcast            | unique_dim1                    | COMPLEX<hyperUnique>                |
+| foo                  | __time                         | TIMESTAMP                           |
+| foo                  | cnt                            | BIGINT                              |
+| foo                  | dim1                           | VARCHAR                             |
+| foo                  | dim2                           | VARCHAR                             |
+| foo                  | dim3                           | VARCHAR                             |
+| foo                  | m1                             | FLOAT                               |
+| foo                  | m2                             | DOUBLE                              |
+| foo                  | unique_dim1                    | COMPLEX<hyperUnique>                |
+| foo2                 | __time                         | TIMESTAMP                           |
+| foo2                 | cnt                            | BIGINT                              |
+| foo2                 | dim1                           | VARCHAR                             |
+| foo2                 | dim2                           | VARCHAR                             |
+| foo2                 | dim3                           | BIGINT                              |
+| foo2                 | m1                             | BIGINT                              |
+| foo2                 | m2                             | DOUBLE                              |
+| foo2                 | unique_dim1                    | COMPLEX<hyperUnique>                |
+| foo4                 | __time                         | TIMESTAMP                           |
+| foo4                 | cnt                            | BIGINT                              |
+| foo4                 | dim1                           | VARCHAR                             |
+| foo4                 | dim2                           | VARCHAR                             |
+| foo4                 | dim3                           | VARCHAR                             |
+| foo4                 | m1                             | FLOAT                               |
+| foo4                 | m2                             | DOUBLE                              |
+| foo4                 | unique_dim1                    | COMPLEX<hyperUnique>                |
+| kttm_nested          | __time                         | TIMESTAMP                           |
+| kttm_nested          | adblock_list                   | VARCHAR                             |
+| kttm_nested          | agent                          | COMPLEX<json>                       |
+| kttm_nested          | app_version                    | VARCHAR                             |
+| kttm_nested          | client_ip                      | VARCHAR                             |
+| kttm_nested          | event                          | COMPLEX<json>                       |
+| kttm_nested          | geo_ip                         | VARCHAR                             |
+| kttm_nested          | language                       | VARCHAR                             |
+| kttm_nested          | loaded_image                   | VARCHAR                             |
+| kttm_nested          | number                         | VARCHAR                             |
+| kttm_nested          | path                           | VARCHAR                             |
+| kttm_nested          | referrer                       | VARCHAR                             |
+| kttm_nested          | referrer_host                  | VARCHAR                             |
+| kttm_nested          | screen                         | VARCHAR                             |
+| kttm_nested          | server_ip                      | VARCHAR                             |
+| kttm_nested          | session                        | VARCHAR                             |
+| kttm_nested          | session_length                 | BIGINT                              |
+| kttm_nested          | timezone                       | VARCHAR                             |
+| kttm_nested          | timezone_offset                | BIGINT                              |
+| kttm_nested          | window                         | VARCHAR                             |
+| lotsocolumns         | __time                         | TIMESTAMP                           |
+| lotsocolumns         | count                          | BIGINT                              |
+| lotsocolumns         | dimHyperUnique                 | VARCHAR                             |
+| lotsocolumns         | dimMultivalEnumerated          | VARCHAR                             |
+| lotsocolumns         | dimMultivalEnumerated2         | VARCHAR                             |
+| lotsocolumns         | dimMultivalSequentialWithNulls | VARCHAR                             |
+| lotsocolumns         | dimSequential                  | VARCHAR                             |
+| lotsocolumns         | dimSequentialHalfNull          | VARCHAR                             |
+| lotsocolumns         | dimUniform                     | VARCHAR                             |
+| lotsocolumns         | dimZipf                        | VARCHAR                             |
+| lotsocolumns         | metFloatNormal                 | VARCHAR                             |
+| lotsocolumns         | metFloatZipf                   | VARCHAR                             |
+| lotsocolumns         | metLongSequential              | VARCHAR                             |
+| lotsocolumns         | metLongUniform                 | VARCHAR                             |
+| numfoo               | __time                         | TIMESTAMP                           |
+| numfoo               | cnt                            | BIGINT                              |
+| numfoo               | d1                             | DOUBLE                              |
+| numfoo               | d2                             | DOUBLE                              |
+| numfoo               | dim1                           | VARCHAR                             |
+| numfoo               | dim2                           | VARCHAR                             |
+| numfoo               | dim3                           | VARCHAR                             |
+| numfoo               | dim4                           | VARCHAR                             |
+| numfoo               | dim5                           | VARCHAR                             |
+| numfoo               | dim6                           | VARCHAR                             |
+| numfoo               | f1                             | FLOAT                               |
+| numfoo               | f2                             | FLOAT                               |
+| numfoo               | l1                             | BIGINT                              |
+| numfoo               | l2                             | BIGINT                              |
+| numfoo               | m1                             | FLOAT                               |
+| numfoo               | m2                             | DOUBLE                              |
+| numfoo               | unique_dim1                    | COMPLEX<hyperUnique>                |
+| some_datasource      | __time                         | TIMESTAMP                           |
+| some_datasource      | cnt                            | BIGINT                              |
+| some_datasource      | dim1                           | VARCHAR                             |
+| some_datasource      | dim2                           | VARCHAR                             |
+| some_datasource      | dim3                           | VARCHAR                             |
+| some_datasource      | m1                             | FLOAT                               |
+| some_datasource      | m2                             | DOUBLE                              |
+| some_datasource      | unique_dim1                    | COMPLEX<hyperUnique>                |
+| somexdatasource      | __time                         | TIMESTAMP                           |
+| somexdatasource      | cnt_x                          | BIGINT                              |
+| somexdatasource      | m1_x                           | FLOAT                               |
+| somexdatasource      | m2_x                           | DOUBLE                              |
+| somexdatasource      | unique_dim1_x                  | COMPLEX<hyperUnique>                |
+| visits               | __time                         | TIMESTAMP                           |
+| visits               | city                           | VARCHAR                             |
+| visits               | cnt                            | BIGINT                              |
+| visits               | country                        | VARCHAR                             |
+| visits               | m1                             | FLOAT                               |
+| visits               | m2                             | DOUBLE                              |
+| visits               | unique_dim1                    | COMPLEX<hyperUnique>                |
+| visits               | user                           | VARCHAR                             |
+| wikipedia            | __time                         | TIMESTAMP                           |
+| wikipedia            | added                          | BIGINT                              |
+| wikipedia            | channel                        | VARCHAR                             |
+| wikipedia            | cityName                       | VARCHAR                             |
+| wikipedia            | comment                        | VARCHAR                             |
+| wikipedia            | countryIsoCode                 | VARCHAR                             |
+| wikipedia            | countryName                    | VARCHAR                             |
+| wikipedia            | deleted                        | BIGINT                              |
+| wikipedia            | delta                          | BIGINT                              |
+| wikipedia            | isAnonymous                    | VARCHAR                             |
+| wikipedia            | isMinor                        | VARCHAR                             |
+| wikipedia            | isNew                          | VARCHAR                             |
+| wikipedia            | isRobot                        | VARCHAR                             |
+| wikipedia            | isUnpatrolled                  | VARCHAR                             |
+| wikipedia            | metroCode                      | VARCHAR                             |
+| wikipedia            | namespace                      | VARCHAR                             |
+| wikipedia            | page                           | VARCHAR                             |
+| wikipedia            | regionIsoCode                  | VARCHAR                             |
+| wikipedia            | regionName                     | VARCHAR                             |
+| wikipedia            | user                           | VARCHAR                             |
+| wikipedia_first_last | __time                         | TIMESTAMP                           |
+| wikipedia_first_last | channel                        | VARCHAR                             |
+| wikipedia_first_last | cityName                       | VARCHAR                             |
+| wikipedia_first_last | comment                        | VARCHAR                             |
+| wikipedia_first_last | countryIsoCode                 | VARCHAR                             |
+| wikipedia_first_last | countryName                    | VARCHAR                             |
+| wikipedia_first_last | double_first_added             | COMPLEX<serializablePairLongDouble> |
+| wikipedia_first_last | double_last_added              | COMPLEX<serializablePairLongDouble> |
+| wikipedia_first_last | float_first_added              | COMPLEX<serializablePairLongFloat>  |
+| wikipedia_first_last | float_last_added               | COMPLEX<serializablePairLongFloat>  |
+| wikipedia_first_last | isAnonymous                    | VARCHAR                             |
+| wikipedia_first_last | isMinor                        | VARCHAR                             |
+| wikipedia_first_last | isNew                          | VARCHAR                             |
+| wikipedia_first_last | isRobot                        | VARCHAR                             |
+| wikipedia_first_last | isUnpatrolled                  | VARCHAR                             |
+| wikipedia_first_last | long_first_added               | COMPLEX<serializablePairLongLong>   |
+| wikipedia_first_last | long_last_added                | COMPLEX<serializablePairLongLong>   |
+| wikipedia_first_last | metroCode                      | VARCHAR                             |
+| wikipedia_first_last | namespace                      | VARCHAR                             |
+| wikipedia_first_last | page                           | VARCHAR                             |
+| wikipedia_first_last | regionIsoCode                  | VARCHAR                             |
+| wikipedia_first_last | regionName                     | VARCHAR                             |
+| wikipedia_first_last | string_first_added             | COMPLEX<serializablePairLongString> |
+| wikipedia_first_last | string_last_added              | COMPLEX<serializablePairLongString> |
+| wikipedia_first_last | user                           | VARCHAR                             |
++----------------------+--------------------------------+-------------------------------------+
+(170 rows)
+
 !ok
 # Wed Jul 10 16:23:54 IST 2024
 SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'druid';
++----------------------+--------------------------------+-------------------------------------+
+| TABLE_NAME           | COLUMN_NAME                    | DATA_TYPE                           |
++----------------------+--------------------------------+-------------------------------------+
+| arrays               | __time                         | TIMESTAMP                           |
+| arrays               | arrayDouble                    | ARRAY                               |
+| arrays               | arrayDoubleNulls               | ARRAY                               |
+| arrays               | arrayLong                      | ARRAY                               |
+| arrays               | arrayLongNulls                 | ARRAY                               |
+| arrays               | arrayNestedLong                | COMPLEX<json>                       |
+| arrays               | arrayNoType                    | ARRAY                               |
+| arrays               | arrayObject                    | COMPLEX<json>                       |
+| arrays               | arrayString                    | ARRAY                               |
+| arrays               | arrayStringNulls               | ARRAY                               |
+| arrays               | arrayVariant                   | ARRAY                               |
+| arrays               | cnt                            | BIGINT                              |
+| broadcast            | __time                         | TIMESTAMP                           |
+| broadcast            | cnt                            | BIGINT                              |
+| broadcast            | d1                             | DOUBLE                              |
+| broadcast            | d2                             | DOUBLE                              |
+| broadcast            | dim1                           | VARCHAR                             |
+| broadcast            | dim2                           | VARCHAR                             |
+| broadcast            | dim3                           | VARCHAR                             |
+| broadcast            | dim4                           | VARCHAR                             |
+| broadcast            | dim5                           | VARCHAR                             |
+| broadcast            | dim6                           | VARCHAR                             |
+| broadcast            | f1                             | FLOAT                               |
+| broadcast            | f2                             | FLOAT                               |
+| broadcast            | l1                             | BIGINT                              |
+| broadcast            | l2                             | BIGINT                              |
+| broadcast            | m1                             | FLOAT                               |
+| broadcast            | m2                             | DOUBLE                              |
+| broadcast            | unique_dim1                    | COMPLEX<hyperUnique>                |
+| foo                  | __time                         | TIMESTAMP                           |
+| foo                  | cnt                            | BIGINT                              |
+| foo                  | dim1                           | VARCHAR                             |
+| foo                  | dim2                           | VARCHAR                             |
+| foo                  | dim3                           | VARCHAR                             |
+| foo                  | m1                             | FLOAT                               |
+| foo                  | m2                             | DOUBLE                              |
+| foo                  | unique_dim1                    | COMPLEX<hyperUnique>                |
+| foo2                 | __time                         | TIMESTAMP                           |
+| foo2                 | cnt                            | BIGINT                              |
+| foo2                 | dim1                           | VARCHAR                             |
+| foo2                 | dim2                           | VARCHAR                             |
+| foo2                 | dim3                           | BIGINT                              |
+| foo2                 | m1                             | BIGINT                              |
+| foo2                 | m2                             | DOUBLE                              |
+| foo2                 | unique_dim1                    | COMPLEX<hyperUnique>                |
+| foo4                 | __time                         | TIMESTAMP                           |
+| foo4                 | cnt                            | BIGINT                              |
+| foo4                 | dim1                           | VARCHAR                             |
+| foo4                 | dim2                           | VARCHAR                             |
+| foo4                 | dim3                           | VARCHAR                             |
+| foo4                 | m1                             | FLOAT                               |
+| foo4                 | m2                             | DOUBLE                              |
+| foo4                 | unique_dim1                    | COMPLEX<hyperUnique>                |
+| kttm_nested          | __time                         | TIMESTAMP                           |
+| kttm_nested          | adblock_list                   | VARCHAR                             |
+| kttm_nested          | agent                          | COMPLEX<json>                       |
+| kttm_nested          | app_version                    | VARCHAR                             |
+| kttm_nested          | client_ip                      | VARCHAR                             |
+| kttm_nested          | event                          | COMPLEX<json>                       |
+| kttm_nested          | geo_ip                         | VARCHAR                             |
+| kttm_nested          | language                       | VARCHAR                             |
+| kttm_nested          | loaded_image                   | VARCHAR                             |
+| kttm_nested          | number                         | VARCHAR                             |
+| kttm_nested          | path                           | VARCHAR                             |
+| kttm_nested          | referrer                       | VARCHAR                             |
+| kttm_nested          | referrer_host                  | VARCHAR                             |
+| kttm_nested          | screen                         | VARCHAR                             |
+| kttm_nested          | server_ip                      | VARCHAR                             |
+| kttm_nested          | session                        | VARCHAR                             |
+| kttm_nested          | session_length                 | BIGINT                              |
+| kttm_nested          | timezone                       | VARCHAR                             |
+| kttm_nested          | timezone_offset                | BIGINT                              |
+| kttm_nested          | window                         | VARCHAR                             |
+| lotsocolumns         | __time                         | TIMESTAMP                           |
+| lotsocolumns         | count                          | BIGINT                              |
+| lotsocolumns         | dimHyperUnique                 | VARCHAR                             |
+| lotsocolumns         | dimMultivalEnumerated          | VARCHAR                             |
+| lotsocolumns         | dimMultivalEnumerated2         | VARCHAR                             |
+| lotsocolumns         | dimMultivalSequentialWithNulls | VARCHAR                             |
+| lotsocolumns         | dimSequential                  | VARCHAR                             |
+| lotsocolumns         | dimSequentialHalfNull          | VARCHAR                             |
+| lotsocolumns         | dimUniform                     | VARCHAR                             |
+| lotsocolumns         | dimZipf                        | VARCHAR                             |
+| lotsocolumns         | metFloatNormal                 | VARCHAR                             |
+| lotsocolumns         | metFloatZipf                   | VARCHAR                             |
+| lotsocolumns         | metLongSequential              | VARCHAR                             |
+| lotsocolumns         | metLongUniform                 | VARCHAR                             |
+| numfoo               | __time                         | TIMESTAMP                           |
+| numfoo               | cnt                            | BIGINT                              |
+| numfoo               | d1                             | DOUBLE                              |
+| numfoo               | d2                             | DOUBLE                              |
+| numfoo               | dim1                           | VARCHAR                             |
+| numfoo               | dim2                           | VARCHAR                             |
+| numfoo               | dim3                           | VARCHAR                             |
+| numfoo               | dim4                           | VARCHAR                             |
+| numfoo               | dim5                           | VARCHAR                             |
+| numfoo               | dim6                           | VARCHAR                             |
+| numfoo               | f1                             | FLOAT                               |
+| numfoo               | f2                             | FLOAT                               |
+| numfoo               | l1                             | BIGINT                              |
+| numfoo               | l2                             | BIGINT                              |
+| numfoo               | m1                             | FLOAT                               |
+| numfoo               | m2                             | DOUBLE                              |
+| numfoo               | unique_dim1                    | COMPLEX<hyperUnique>                |
+| some_datasource      | __time                         | TIMESTAMP                           |
+| some_datasource      | cnt                            | BIGINT                              |
+| some_datasource      | dim1                           | VARCHAR                             |
+| some_datasource      | dim2                           | VARCHAR                             |
+| some_datasource      | dim3                           | VARCHAR                             |
+| some_datasource      | m1                             | FLOAT                               |
+| some_datasource      | m2                             | DOUBLE                              |
+| some_datasource      | unique_dim1                    | COMPLEX<hyperUnique>                |
+| somexdatasource      | __time                         | TIMESTAMP                           |
+| somexdatasource      | cnt_x                          | BIGINT                              |
+| somexdatasource      | m1_x                           | FLOAT                               |
+| somexdatasource      | m2_x                           | DOUBLE                              |
+| somexdatasource      | unique_dim1_x                  | COMPLEX<hyperUnique>                |
+| visits               | __time                         | TIMESTAMP                           |
+| visits               | city                           | VARCHAR                             |
+| visits               | cnt                            | BIGINT                              |
+| visits               | country                        | VARCHAR                             |
+| visits               | m1                             | FLOAT                               |
+| visits               | m2                             | DOUBLE                              |
+| visits               | unique_dim1                    | COMPLEX<hyperUnique>                |
+| visits               | user                           | VARCHAR                             |
+| wikipedia            | __time                         | TIMESTAMP                           |
+| wikipedia            | added                          | BIGINT                              |
+| wikipedia            | channel                        | VARCHAR                             |
+| wikipedia            | cityName                       | VARCHAR                             |
+| wikipedia            | comment                        | VARCHAR                             |
+| wikipedia            | countryIsoCode                 | VARCHAR                             |
+| wikipedia            | countryName                    | VARCHAR                             |
+| wikipedia            | deleted                        | BIGINT                              |
+| wikipedia            | delta                          | BIGINT                              |
+| wikipedia            | isAnonymous                    | VARCHAR                             |
+| wikipedia            | isMinor                        | VARCHAR                             |
+| wikipedia            | isNew                          | VARCHAR                             |
+| wikipedia            | isRobot                        | VARCHAR                             |
+| wikipedia            | isUnpatrolled                  | VARCHAR                             |
+| wikipedia            | metroCode                      | VARCHAR                             |
+| wikipedia            | namespace                      | VARCHAR                             |
+| wikipedia            | page                           | VARCHAR                             |
+| wikipedia            | regionIsoCode                  | VARCHAR                             |
+| wikipedia            | regionName                     | VARCHAR                             |
+| wikipedia            | user                           | VARCHAR                             |
+| wikipedia_first_last | __time                         | TIMESTAMP                           |
+| wikipedia_first_last | channel                        | VARCHAR                             |
+| wikipedia_first_last | cityName                       | VARCHAR                             |
+| wikipedia_first_last | comment                        | VARCHAR                             |
+| wikipedia_first_last | countryIsoCode                 | VARCHAR                             |
+| wikipedia_first_last | countryName                    | VARCHAR                             |
+| wikipedia_first_last | double_first_added             | COMPLEX<serializablePairLongDouble> |
+| wikipedia_first_last | double_last_added              | COMPLEX<serializablePairLongDouble> |
+| wikipedia_first_last | float_first_added              | COMPLEX<serializablePairLongFloat>  |
+| wikipedia_first_last | float_last_added               | COMPLEX<serializablePairLongFloat>  |
+| wikipedia_first_last | isAnonymous                    | VARCHAR                             |
+| wikipedia_first_last | isMinor                        | VARCHAR                             |
+| wikipedia_first_last | isNew                          | VARCHAR                             |
+| wikipedia_first_last | isRobot                        | VARCHAR                             |
+| wikipedia_first_last | isUnpatrolled                  | VARCHAR                             |
+| wikipedia_first_last | long_first_added               | COMPLEX<serializablePairLongLong>   |
+| wikipedia_first_last | long_last_added                | COMPLEX<serializablePairLongLong>   |
+| wikipedia_first_last | metroCode                      | VARCHAR                             |
+| wikipedia_first_last | namespace                      | VARCHAR                             |
+| wikipedia_first_last | page                           | VARCHAR                             |
+| wikipedia_first_last | regionIsoCode                  | VARCHAR                             |
+| wikipedia_first_last | regionName                     | VARCHAR                             |
+| wikipedia_first_last | string_first_added             | COMPLEX<serializablePairLongString> |
+| wikipedia_first_last | string_last_added              | COMPLEX<serializablePairLongString> |
+| wikipedia_first_last | user                           | VARCHAR                             |
++----------------------+--------------------------------+-------------------------------------+
+(170 rows)
+
 !ok
 # Wed Jul 10 16:24:06 IST 2024
 SELECT
 MAX(CAST(t."__time" AS TIMESTAMP)) AS "__VALUE__"
 FROM "kttm_nested" AS t
 GROUP BY ();
++-------------------------+
+| __VALUE__               |
++-------------------------+
+| 2019-08-25 23:59:59.686 |
++-------------------------+
+(1 row)
+
 !ok
 # Wed Jul 10 16:24:06 IST 2024
 SELECT
 MAX(CAST(t."__time" AS TIMESTAMP)) AS "__VALUE__"
 FROM "kttm_nested" AS t
 GROUP BY ();
++-------------------------+
+| __VALUE__               |
++-------------------------+
+| 2019-08-25 23:59:59.686 |
++-------------------------+
+(1 row)
+
 !ok
 # Wed Jul 10 16:24:06 IST 2024
 SELECT
@@ -25,6 +391,13 @@ SELECT
 FROM "kttm_nested" AS t
 WHERE (TIMESTAMP '2024-07-09 10:55:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2024-07-10 10:55:00')
 GROUP BY ();
++-----------+
+| __VALUE__ |
++-----------+
+|         0 |
++-----------+
+(1 row)
+
 !ok
 # Wed Jul 10 16:24:06 IST 2024
 SELECT
@@ -32,6 +405,13 @@ SELECT
 FROM "kttm_nested" AS t
 WHERE (TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00')
 GROUP BY ();
++-----------+
+| __VALUE__ |
++-----------+
+|    465346 |
++-----------+
+(1 row)
+
 !ok
 # Wed Jul 10 16:24:21 IST 2024
 SELECT
@@ -42,6 +422,37 @@ WHERE (TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t
 GROUP BY 1
 ORDER BY "count" DESC
 LIMIT 1000;
++-----------------------+--------+
+| Browser               | count  |
++-----------------------+--------+
+| Chrome                | 232603 |
+| Mobile Safari         | 113617 |
+| Chrome Mobile         |  60173 |
+| Safari                |  38323 |
+| Firefox               |   8307 |
+| Yandex.Browser        |   4258 |
+| Opera                 |   2819 |
+| IE                    |   1238 |
+| Mozilla               |   1224 |
+| Silk                  |   1050 |
+| Yandex.Browser mobile |    583 |
+| Mobile Firefox        |    253 |
+| Puffin                |    240 |
+| Chromium              |    149 |
+| Waterfox              |    129 |
+| Opera Mobile          |     78 |
+| PS4 Web browser       |     77 |
+| Android browser       |     52 |
+| Sogou Explorer        |     51 |
+| IE Mobile             |     35 |
+| Maxthon               |     34 |
+| PS Vita browser       |     19 |
+| unknown               |     17 |
+|                       |     10 |
+| Apple Mail            |      7 |
++-----------------------+--------+
+(25 rows)
+
 !ok
 # Wed Jul 10 16:24:21 IST 2024
 SELECT
@@ -49,6 +460,13 @@ SELECT
 FROM "kttm_nested" AS t
 WHERE ((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00') AND (CAST(JSON_VALUE("t"."agent",'$.browser') AS VARCHAR)='Chrome'))
 GROUP BY ();
++-----------+
+| __VALUE__ |
++-----------+
+|    232603 |
++-----------+
+(1 row)
+
 !ok
 # Wed Jul 10 16:24:21 IST 2024
 SELECT
@@ -57,6 +475,36 @@ CAST(JSON_VALUE("t"."agent",'$.browser') AS VARCHAR) AS "Browser",
 FROM "kttm_nested" AS t
 WHERE ((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00') AND CAST(JSON_VALUE("t"."agent",'$.browser') AS VARCHAR) IN ('Mobile Safari','Chrome Mobile','Safari','Firefox','Yandex.Browser','Opera','IE','Mozilla','Silk','Yandex.Browser mobile','Mobile Firefox','Puffin','Chromium','Waterfox','Opera Mobile','PS4 Web browser','Android browser','Sogou Explorer','IE Mobile','Maxthon','PS Vita browser','unknown','','Apple Mail'))
 GROUP BY 1;
++-----------------------+--------+
+| Browser               | count  |
++-----------------------+--------+
+|                       |     10 |
+| Android browser       |     52 |
+| Apple Mail            |      7 |
+| Chrome Mobile         |  60173 |
+| Chromium              |    149 |
+| Firefox               |   8307 |
+| IE                    |   1238 |
+| IE Mobile             |     35 |
+| Maxthon               |     34 |
+| Mobile Firefox        |    253 |
+| Mobile Safari         | 113617 |
+| Mozilla               |   1224 |
+| Opera                 |   2819 |
+| Opera Mobile          |     78 |
+| PS Vita browser       |     19 |
+| PS4 Web browser       |     77 |
+| Puffin                |    240 |
+| Safari                |  38323 |
+| Silk                  |   1050 |
+| Sogou Explorer        |     51 |
+| Waterfox              |    129 |
+| Yandex.Browser        |   4258 |
+| Yandex.Browser mobile |    583 |
+| unknown               |     17 |
++-----------------------+--------+
+(24 rows)
+
 !ok
 # Wed Jul 10 16:24:25 IST 2024
 SELECT
@@ -67,6 +515,13 @@ WHERE (TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t
 GROUP BY 1
 ORDER BY "count" DESC
 LIMIT 10;
++-------------+--------+
+| app_version | count  |
++-------------+--------+
+| 1.9.6       | 465346 |
++-------------+--------+
+(1 row)
+
 !ok
 # Wed Jul 10 16:24:25 IST 2024
 SELECT
@@ -75,6 +530,37 @@ CAST(JSON_VALUE("t"."agent",'$.browser') AS VARCHAR) AS "Browser",
 FROM "kttm_nested" AS t
 WHERE (((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00') AND CAST(JSON_VALUE("t"."agent",'$.browser') AS VARCHAR) IN ('Chrome','Mobile Safari','Chrome Mobile','Safari','Firefox','Yandex.Browser','Opera','IE','Mozilla','Silk','Yandex.Browser mobile','Mobile Firefox','Puffin','Chromium','Waterfox','Opera Mobile','PS4 Web browser','Android browser','Sogou Explorer','IE Mobile','Maxthon','PS Vita browser','unknown','','Apple Mail')) AND (CAST(t."app_version" AS VARCHAR)='1.9.6'))
 GROUP BY 1;
++-----------------------+--------+
+| Browser               | count  |
++-----------------------+--------+
+|                       |     10 |
+| Android browser       |     52 |
+| Apple Mail            |      7 |
+| Chrome                | 232603 |
+| Chrome Mobile         |  60173 |
+| Chromium              |    149 |
+| Firefox               |   8307 |
+| IE                    |   1238 |
+| IE Mobile             |     35 |
+| Maxthon               |     34 |
+| Mobile Firefox        |    253 |
+| Mobile Safari         | 113617 |
+| Mozilla               |   1224 |
+| Opera                 |   2819 |
+| Opera Mobile          |     78 |
+| PS Vita browser       |     19 |
+| PS4 Web browser       |     77 |
+| Puffin                |    240 |
+| Safari                |  38323 |
+| Silk                  |   1050 |
+| Sogou Explorer        |     51 |
+| Waterfox              |    129 |
+| Yandex.Browser        |   4258 |
+| Yandex.Browser mobile |    583 |
+| unknown               |     17 |
++-----------------------+--------+
+(25 rows)
+
 !ok
 # Wed Jul 10 16:24:30 IST 2024
 SELECT
@@ -85,6 +571,16 @@ WHERE (TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t
 GROUP BY 1
 ORDER BY "count" DESC
 LIMIT 1000;
++----------------------------+--------+
+| adblock_list               | count  |
++----------------------------+--------+
+| NoAdblock                  | 424282 |
+| EasyList                   |  40579 |
+| EasyList,AntiAdblockKiller |    401 |
+| AntiAdblockKiller          |     84 |
++----------------------------+--------+
+(4 rows)
+
 !ok
 # Wed Jul 10 16:24:30 IST 2024
 SELECT
@@ -93,6 +589,36 @@ CAST(JSON_VALUE("t"."agent",'$.browser') AS VARCHAR) AS "Browser",
 FROM "kttm_nested" AS t
 WHERE (((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00') AND CAST(JSON_VALUE("t"."agent",'$.browser') AS VARCHAR) IN ('Chrome','Mobile Safari','Chrome Mobile','Safari','Firefox','Yandex.Browser','Opera','IE','Mozilla','Silk','Yandex.Browser mobile','Mobile Firefox','Puffin','Chromium','Waterfox','Opera Mobile','PS4 Web browser','Android browser','Sogou Explorer','IE Mobile','Maxthon','PS Vita browser','unknown','','Apple Mail')) AND (CAST(t."adblock_list" AS VARCHAR)='NoAdblock'))
 GROUP BY 1;
++-----------------------+--------+
+| Browser               | count  |
++-----------------------+--------+
+| Android browser       |     52 |
+| Apple Mail            |      6 |
+| Chrome                | 197577 |
+| Chrome Mobile         |  60013 |
+| Chromium              |     36 |
+| Firefox               |   5254 |
+| IE                    |   1210 |
+| IE Mobile             |     35 |
+| Maxthon               |     16 |
+| Mobile Firefox        |    249 |
+| Mobile Safari         | 113431 |
+| Mozilla               |   1209 |
+| Opera                 |   1238 |
+| Opera Mobile          |     78 |
+| PS Vita browser       |     19 |
+| PS4 Web browser       |     77 |
+| Puffin                |    240 |
+| Safari                |  37975 |
+| Silk                  |   1050 |
+| Sogou Explorer        |     49 |
+| Waterfox              |    112 |
+| Yandex.Browser        |   3756 |
+| Yandex.Browser mobile |    583 |
+| unknown               |     17 |
++-----------------------+--------+
+(24 rows)
+
 !ok
 # Wed Jul 10 16:24:30 IST 2024
 SELECT
@@ -102,6 +628,56 @@ CAST(t."adblock_list" AS VARCHAR) AS "adblock_list",
 FROM "kttm_nested" AS t
 WHERE ((((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00') AND CAST(JSON_VALUE("t"."agent",'$.browser') AS VARCHAR) IN ('Chrome','Mobile Safari','Chrome Mobile','Safari','Firefox','Yandex.Browser','Opera','IE','Mozilla','Silk','Yandex.Browser mobile','Mobile Firefox','Puffin','Chromium','Waterfox','Opera Mobile','PS4 Web browser','Android browser','Sogou Explorer','IE Mobile','Maxthon','PS Vita browser','unknown','','Apple Mail')) AND (CAST(t."app_version" AS VARCHAR)='1.9.6')) AND CAST(t."adblock_list" AS VARCHAR) IN ('NoAdblock','EasyList','EasyList,AntiAdblockKiller'))
 GROUP BY 1,2;
++-----------------------+----------------------------+--------+
+| Browser               | adblock_list               | count  |
++-----------------------+----------------------------+--------+
+|                       | EasyList                   |     10 |
+| Android browser       | NoAdblock                  |     52 |
+| Apple Mail            | EasyList                   |      1 |
+| Apple Mail            | NoAdblock                  |      6 |
+| Chrome                | EasyList                   |  34745 |
+| Chrome                | EasyList,AntiAdblockKiller |    258 |
+| Chrome                | NoAdblock                  | 197577 |
+| Chrome Mobile         | EasyList                   |    146 |
+| Chrome Mobile         | EasyList,AntiAdblockKiller |     11 |
+| Chrome Mobile         | NoAdblock                  |  60013 |
+| Chromium              | EasyList                   |     78 |
+| Chromium              | EasyList,AntiAdblockKiller |     35 |
+| Chromium              | NoAdblock                  |     36 |
+| Firefox               | EasyList                   |   3014 |
+| Firefox               | EasyList,AntiAdblockKiller |     39 |
+| Firefox               | NoAdblock                  |   5254 |
+| IE                    | NoAdblock                  |   1210 |
+| IE Mobile             | NoAdblock                  |     35 |
+| Maxthon               | EasyList                   |     18 |
+| Maxthon               | NoAdblock                  |     16 |
+| Mobile Firefox        | EasyList                   |      4 |
+| Mobile Firefox        | NoAdblock                  |    249 |
+| Mobile Safari         | EasyList                   |    131 |
+| Mobile Safari         | EasyList,AntiAdblockKiller |     40 |
+| Mobile Safari         | NoAdblock                  | 113431 |
+| Mozilla               | NoAdblock                  |   1209 |
+| Opera                 | EasyList                   |   1581 |
+| Opera                 | NoAdblock                  |   1238 |
+| Opera Mobile          | NoAdblock                  |     78 |
+| PS Vita browser       | NoAdblock                  |     19 |
+| PS4 Web browser       | NoAdblock                  |     77 |
+| Puffin                | NoAdblock                  |    240 |
+| Safari                | EasyList                   |    348 |
+| Safari                | NoAdblock                  |  37975 |
+| Silk                  | NoAdblock                  |   1050 |
+| Sogou Explorer        | EasyList                   |      1 |
+| Sogou Explorer        | EasyList,AntiAdblockKiller |      1 |
+| Sogou Explorer        | NoAdblock                  |     49 |
+| Waterfox              | EasyList,AntiAdblockKiller |     17 |
+| Waterfox              | NoAdblock                  |    112 |
+| Yandex.Browser        | EasyList                   |    502 |
+| Yandex.Browser        | NoAdblock                  |   3756 |
+| Yandex.Browser mobile | NoAdblock                  |    583 |
+| unknown               | NoAdblock                  |     17 |
++-----------------------+----------------------------+--------+
+(44 rows)
+
 !ok
 # Wed Jul 10 16:24:31 IST 2024
 SELECT
@@ -111,9 +687,211 @@ CAST(t."adblock_list" AS VARCHAR) AS "adblock_list",
 FROM "kttm_nested" AS t
 WHERE (((TIMESTAMP '2019-08-25 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-26 00:00:00') AND CAST(JSON_VALUE("t"."agent",'$.browser') AS VARCHAR) IN ('Chrome','Mobile Safari','Chrome Mobile','Safari','Firefox','Yandex.Browser','Opera','IE','Mozilla','Silk','Yandex.Browser mobile','Mobile Firefox','Puffin','Chromium','Waterfox','Opera Mobile','PS4 Web browser','Android browser','Sogou Explorer','IE Mobile','Maxthon','PS Vita browser','unknown','','Apple Mail')) AND CAST(t."adblock_list" AS VARCHAR) IN ('EasyList','EasyList,AntiAdblockKiller'))
 GROUP BY 1,2;
++----------------+----------------------------+-------+
+| Browser        | adblock_list               | count |
++----------------+----------------------------+-------+
+|                | EasyList                   |    10 |
+| Apple Mail     | EasyList                   |     1 |
+| Chrome         | EasyList                   | 34745 |
+| Chrome         | EasyList,AntiAdblockKiller |   258 |
+| Chrome Mobile  | EasyList                   |   146 |
+| Chrome Mobile  | EasyList,AntiAdblockKiller |    11 |
+| Chromium       | EasyList                   |    78 |
+| Chromium       | EasyList,AntiAdblockKiller |    35 |
+| Firefox        | EasyList                   |  3014 |
+| Firefox        | EasyList,AntiAdblockKiller |    39 |
+| Maxthon        | EasyList                   |    18 |
+| Mobile Firefox | EasyList                   |     4 |
+| Mobile Safari  | EasyList                   |   131 |
+| Mobile Safari  | EasyList,AntiAdblockKiller |    40 |
+| Opera          | EasyList                   |  1581 |
+| Safari         | EasyList                   |   348 |
+| Sogou Explorer | EasyList                   |     1 |
+| Sogou Explorer | EasyList,AntiAdblockKiller |     1 |
+| Waterfox       | EasyList,AntiAdblockKiller |    17 |
+| Yandex.Browser | EasyList                   |   502 |
++----------------+----------------------------+-------+
+(20 rows)
+
 !ok
 # Wed Jul 10 16:24:31 IST 2024
 SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'druid';
++----------------------+--------------------------------+-------------------------------------+
+| TABLE_NAME           | COLUMN_NAME                    | DATA_TYPE                           |
++----------------------+--------------------------------+-------------------------------------+
+| arrays               | __time                         | TIMESTAMP                           |
+| arrays               | arrayDouble                    | ARRAY                               |
+| arrays               | arrayDoubleNulls               | ARRAY                               |
+| arrays               | arrayLong                      | ARRAY                               |
+| arrays               | arrayLongNulls                 | ARRAY                               |
+| arrays               | arrayNestedLong                | COMPLEX<json>                       |
+| arrays               | arrayNoType                    | ARRAY                               |
+| arrays               | arrayObject                    | COMPLEX<json>                       |
+| arrays               | arrayString                    | ARRAY                               |
+| arrays               | arrayStringNulls               | ARRAY                               |
+| arrays               | arrayVariant                   | ARRAY                               |
+| arrays               | cnt                            | BIGINT                              |
+| broadcast            | __time                         | TIMESTAMP                           |
+| broadcast            | cnt                            | BIGINT                              |
+| broadcast            | d1                             | DOUBLE                              |
+| broadcast            | d2                             | DOUBLE                              |
+| broadcast            | dim1                           | VARCHAR                             |
+| broadcast            | dim2                           | VARCHAR                             |
+| broadcast            | dim3                           | VARCHAR                             |
+| broadcast            | dim4                           | VARCHAR                             |
+| broadcast            | dim5                           | VARCHAR                             |
+| broadcast            | dim6                           | VARCHAR                             |
+| broadcast            | f1                             | FLOAT                               |
+| broadcast            | f2                             | FLOAT                               |
+| broadcast            | l1                             | BIGINT                              |
+| broadcast            | l2                             | BIGINT                              |
+| broadcast            | m1                             | FLOAT                               |
+| broadcast            | m2                             | DOUBLE                              |
+| broadcast            | unique_dim1                    | COMPLEX<hyperUnique>                |
+| foo                  | __time                         | TIMESTAMP                           |
+| foo                  | cnt                            | BIGINT                              |
+| foo                  | dim1                           | VARCHAR                             |
+| foo                  | dim2                           | VARCHAR                             |
+| foo                  | dim3                           | VARCHAR                             |
+| foo                  | m1                             | FLOAT                               |
+| foo                  | m2                             | DOUBLE                              |
+| foo                  | unique_dim1                    | COMPLEX<hyperUnique>                |
+| foo2                 | __time                         | TIMESTAMP                           |
+| foo2                 | cnt                            | BIGINT                              |
+| foo2                 | dim1                           | VARCHAR                             |
+| foo2                 | dim2                           | VARCHAR                             |
+| foo2                 | dim3                           | BIGINT                              |
+| foo2                 | m1                             | BIGINT                              |
+| foo2                 | m2                             | DOUBLE                              |
+| foo2                 | unique_dim1                    | COMPLEX<hyperUnique>                |
+| foo4                 | __time                         | TIMESTAMP                           |
+| foo4                 | cnt                            | BIGINT                              |
+| foo4                 | dim1                           | VARCHAR                             |
+| foo4                 | dim2                           | VARCHAR                             |
+| foo4                 | dim3                           | VARCHAR                             |
+| foo4                 | m1                             | FLOAT                               |
+| foo4                 | m2                             | DOUBLE                              |
+| foo4                 | unique_dim1                    | COMPLEX<hyperUnique>                |
+| kttm_nested          | __time                         | TIMESTAMP                           |
+| kttm_nested          | adblock_list                   | VARCHAR                             |
+| kttm_nested          | agent                          | COMPLEX<json>                       |
+| kttm_nested          | app_version                    | VARCHAR                             |
+| kttm_nested          | client_ip                      | VARCHAR                             |
+| kttm_nested          | event                          | COMPLEX<json>                       |
+| kttm_nested          | geo_ip                         | VARCHAR                             |
+| kttm_nested          | language                       | VARCHAR                             |
+| kttm_nested          | loaded_image                   | VARCHAR                             |
+| kttm_nested          | number                         | VARCHAR                             |
+| kttm_nested          | path                           | VARCHAR                             |
+| kttm_nested          | referrer                       | VARCHAR                             |
+| kttm_nested          | referrer_host                  | VARCHAR                             |
+| kttm_nested          | screen                         | VARCHAR                             |
+| kttm_nested          | server_ip                      | VARCHAR                             |
+| kttm_nested          | session                        | VARCHAR                             |
+| kttm_nested          | session_length                 | BIGINT                              |
+| kttm_nested          | timezone                       | VARCHAR                             |
+| kttm_nested          | timezone_offset                | BIGINT                              |
+| kttm_nested          | window                         | VARCHAR                             |
+| lotsocolumns         | __time                         | TIMESTAMP                           |
+| lotsocolumns         | count                          | BIGINT                              |
+| lotsocolumns         | dimHyperUnique                 | VARCHAR                             |
+| lotsocolumns         | dimMultivalEnumerated          | VARCHAR                             |
+| lotsocolumns         | dimMultivalEnumerated2         | VARCHAR                             |
+| lotsocolumns         | dimMultivalSequentialWithNulls | VARCHAR                             |
+| lotsocolumns         | dimSequential                  | VARCHAR                             |
+| lotsocolumns         | dimSequentialHalfNull          | VARCHAR                             |
+| lotsocolumns         | dimUniform                     | VARCHAR                             |
+| lotsocolumns         | dimZipf                        | VARCHAR                             |
+| lotsocolumns         | metFloatNormal                 | VARCHAR                             |
+| lotsocolumns         | metFloatZipf                   | VARCHAR                             |
+| lotsocolumns         | metLongSequential              | VARCHAR                             |
+| lotsocolumns         | metLongUniform                 | VARCHAR                             |
+| numfoo               | __time                         | TIMESTAMP                           |
+| numfoo               | cnt                            | BIGINT                              |
+| numfoo               | d1                             | DOUBLE                              |
+| numfoo               | d2                             | DOUBLE                              |
+| numfoo               | dim1                           | VARCHAR                             |
+| numfoo               | dim2                           | VARCHAR                             |
+| numfoo               | dim3                           | VARCHAR                             |
+| numfoo               | dim4                           | VARCHAR                             |
+| numfoo               | dim5                           | VARCHAR                             |
+| numfoo               | dim6                           | VARCHAR                             |
+| numfoo               | f1                             | FLOAT                               |
+| numfoo               | f2                             | FLOAT                               |
+| numfoo               | l1                             | BIGINT                              |
+| numfoo               | l2                             | BIGINT                              |
+| numfoo               | m1                             | FLOAT                               |
+| numfoo               | m2                             | DOUBLE                              |
+| numfoo               | unique_dim1                    | COMPLEX<hyperUnique>                |
+| some_datasource      | __time                         | TIMESTAMP                           |
+| some_datasource      | cnt                            | BIGINT                              |
+| some_datasource      | dim1                           | VARCHAR                             |
+| some_datasource      | dim2                           | VARCHAR                             |
+| some_datasource      | dim3                           | VARCHAR                             |
+| some_datasource      | m1                             | FLOAT                               |
+| some_datasource      | m2                             | DOUBLE                              |
+| some_datasource      | unique_dim1                    | COMPLEX<hyperUnique>                |
+| somexdatasource      | __time                         | TIMESTAMP                           |
+| somexdatasource      | cnt_x                          | BIGINT                              |
+| somexdatasource      | m1_x                           | FLOAT                               |
+| somexdatasource      | m2_x                           | DOUBLE                              |
+| somexdatasource      | unique_dim1_x                  | COMPLEX<hyperUnique>                |
+| visits               | __time                         | TIMESTAMP                           |
+| visits               | city                           | VARCHAR                             |
+| visits               | cnt                            | BIGINT                              |
+| visits               | country                        | VARCHAR                             |
+| visits               | m1                             | FLOAT                               |
+| visits               | m2                             | DOUBLE                              |
+| visits               | unique_dim1                    | COMPLEX<hyperUnique>                |
+| visits               | user                           | VARCHAR                             |
+| wikipedia            | __time                         | TIMESTAMP                           |
+| wikipedia            | added                          | BIGINT                              |
+| wikipedia            | channel                        | VARCHAR                             |
+| wikipedia            | cityName                       | VARCHAR                             |
+| wikipedia            | comment                        | VARCHAR                             |
+| wikipedia            | countryIsoCode                 | VARCHAR                             |
+| wikipedia            | countryName                    | VARCHAR                             |
+| wikipedia            | deleted                        | BIGINT                              |
+| wikipedia            | delta                          | BIGINT                              |
+| wikipedia            | isAnonymous                    | VARCHAR                             |
+| wikipedia            | isMinor                        | VARCHAR                             |
+| wikipedia            | isNew                          | VARCHAR                             |
+| wikipedia            | isRobot                        | VARCHAR                             |
+| wikipedia            | isUnpatrolled                  | VARCHAR                             |
+| wikipedia            | metroCode                      | VARCHAR                             |
+| wikipedia            | namespace                      | VARCHAR                             |
+| wikipedia            | page                           | VARCHAR                             |
+| wikipedia            | regionIsoCode                  | VARCHAR                             |
+| wikipedia            | regionName                     | VARCHAR                             |
+| wikipedia            | user                           | VARCHAR                             |
+| wikipedia_first_last | __time                         | TIMESTAMP                           |
+| wikipedia_first_last | channel                        | VARCHAR                             |
+| wikipedia_first_last | cityName                       | VARCHAR                             |
+| wikipedia_first_last | comment                        | VARCHAR                             |
+| wikipedia_first_last | countryIsoCode                 | VARCHAR                             |
+| wikipedia_first_last | countryName                    | VARCHAR                             |
+| wikipedia_first_last | double_first_added             | COMPLEX<serializablePairLongDouble> |
+| wikipedia_first_last | double_last_added              | COMPLEX<serializablePairLongDouble> |
+| wikipedia_first_last | float_first_added              | COMPLEX<serializablePairLongFloat>  |
+| wikipedia_first_last | float_last_added               | COMPLEX<serializablePairLongFloat>  |
+| wikipedia_first_last | isAnonymous                    | VARCHAR                             |
+| wikipedia_first_last | isMinor                        | VARCHAR                             |
+| wikipedia_first_last | isNew                          | VARCHAR                             |
+| wikipedia_first_last | isRobot                        | VARCHAR                             |
+| wikipedia_first_last | isUnpatrolled                  | VARCHAR                             |
+| wikipedia_first_last | long_first_added               | COMPLEX<serializablePairLongLong>   |
+| wikipedia_first_last | long_last_added                | COMPLEX<serializablePairLongLong>   |
+| wikipedia_first_last | metroCode                      | VARCHAR                             |
+| wikipedia_first_last | namespace                      | VARCHAR                             |
+| wikipedia_first_last | page                           | VARCHAR                             |
+| wikipedia_first_last | regionIsoCode                  | VARCHAR                             |
+| wikipedia_first_last | regionName                     | VARCHAR                             |
+| wikipedia_first_last | string_first_added             | COMPLEX<serializablePairLongString> |
+| wikipedia_first_last | string_last_added              | COMPLEX<serializablePairLongString> |
+| wikipedia_first_last | user                           | VARCHAR                             |
++----------------------+--------------------------------+-------------------------------------+
+(170 rows)
+
 !ok
 # Wed Jul 10 16:24:36 IST 2024
 SELECT
@@ -123,6 +901,12 @@ CAST(t."adblock_list" AS VARCHAR) AS "adblock_list",
 FROM "kttm_nested" AS t
 WHERE (((TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 00:00:00') AND CAST(JSON_VALUE("t"."agent",'$.browser') AS VARCHAR) IN ('Chrome','Mobile Safari','Chrome Mobile','Safari','Firefox','Yandex.Browser','Opera','IE','Mozilla','Silk','Yandex.Browser mobile','Mobile Firefox','Puffin','Chromium','Waterfox','Opera Mobile','PS4 Web browser','Android browser','Sogou Explorer','IE Mobile','Maxthon','PS Vita browser','unknown','','Apple Mail')) AND CAST(t."adblock_list" AS VARCHAR) IN ('NoAdblock','EasyList','EasyList,AntiAdblockKiller'))
 GROUP BY 1,2;
++---------+--------------+-------+
+| Browser | adblock_list | count |
++---------+--------------+-------+
++---------+--------------+-------+
+(0 rows)
+
 !ok
 # Wed Jul 10 16:24:37 IST 2024
 SELECT
@@ -132,10 +916,368 @@ CAST(t."adblock_list" AS VARCHAR) AS "adblock_list",
 FROM "kttm_nested" AS t
 WHERE ((((TIMESTAMP '2019-08-24 00:00:00'<=CAST(t."__time" AS TIMESTAMP) AND CAST(t."__time" AS TIMESTAMP)<TIMESTAMP '2019-08-25 00:00:00') AND CAST(JSON_VALUE("t"."agent",'$.browser') AS VARCHAR) IN ('Chrome','Mobile Safari','Chrome Mobile','Safari','Firefox','Yandex.Browser','Opera','IE','Mozilla','Silk','Yandex.Browser mobile','Mobile Firefox','Puffin','Chromium','Waterfox','Opera Mobile','PS4 Web browser','Android browser','Sogou Explorer','IE Mobile','Maxthon','PS Vita browser','unknown','','Apple Mail')) AND (CAST(t."app_version" AS VARCHAR)='1.9.6')) AND CAST(t."adblock_list" AS VARCHAR) IN ('NoAdblock','EasyList','EasyList,AntiAdblockKiller'))
 GROUP BY 1,2;
++---------+--------------+-------+
+| Browser | adblock_list | count |
++---------+--------------+-------+
++---------+--------------+-------+
+(0 rows)
+
 !ok
 # Wed Jul 10 16:24:54 IST 2024
 SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'druid';
++----------------------+--------------------------------+-------------------------------------+
+| TABLE_NAME           | COLUMN_NAME                    | DATA_TYPE                           |
++----------------------+--------------------------------+-------------------------------------+
+| arrays               | __time                         | TIMESTAMP                           |
+| arrays               | arrayDouble                    | ARRAY                               |
+| arrays               | arrayDoubleNulls               | ARRAY                               |
+| arrays               | arrayLong                      | ARRAY                               |
+| arrays               | arrayLongNulls                 | ARRAY                               |
+| arrays               | arrayNestedLong                | COMPLEX<json>                       |
+| arrays               | arrayNoType                    | ARRAY                               |
+| arrays               | arrayObject                    | COMPLEX<json>                       |
+| arrays               | arrayString                    | ARRAY                               |
+| arrays               | arrayStringNulls               | ARRAY                               |
+| arrays               | arrayVariant                   | ARRAY                               |
+| arrays               | cnt                            | BIGINT                              |
+| broadcast            | __time                         | TIMESTAMP                           |
+| broadcast            | cnt                            | BIGINT                              |
+| broadcast            | d1                             | DOUBLE                              |
+| broadcast            | d2                             | DOUBLE                              |
+| broadcast            | dim1                           | VARCHAR                             |
+| broadcast            | dim2                           | VARCHAR                             |
+| broadcast            | dim3                           | VARCHAR                             |
+| broadcast            | dim4                           | VARCHAR                             |
+| broadcast            | dim5                           | VARCHAR                             |
+| broadcast            | dim6                           | VARCHAR                             |
+| broadcast            | f1                             | FLOAT                               |
+| broadcast            | f2                             | FLOAT                               |
+| broadcast            | l1                             | BIGINT                              |
+| broadcast            | l2                             | BIGINT                              |
+| broadcast            | m1                             | FLOAT                               |
+| broadcast            | m2                             | DOUBLE                              |
+| broadcast            | unique_dim1                    | COMPLEX<hyperUnique>                |
+| foo                  | __time                         | TIMESTAMP                           |
+| foo                  | cnt                            | BIGINT                              |
+| foo                  | dim1                           | VARCHAR                             |
+| foo                  | dim2                           | VARCHAR                             |
+| foo                  | dim3                           | VARCHAR                             |
+| foo                  | m1                             | FLOAT                               |
+| foo                  | m2                             | DOUBLE                              |
+| foo                  | unique_dim1                    | COMPLEX<hyperUnique>                |
+| foo2                 | __time                         | TIMESTAMP                           |
+| foo2                 | cnt                            | BIGINT                              |
+| foo2                 | dim1                           | VARCHAR                             |
+| foo2                 | dim2                           | VARCHAR                             |
+| foo2                 | dim3                           | BIGINT                              |
+| foo2                 | m1                             | BIGINT                              |
+| foo2                 | m2                             | DOUBLE                              |
+| foo2                 | unique_dim1                    | COMPLEX<hyperUnique>                |
+| foo4                 | __time                         | TIMESTAMP                           |
+| foo4                 | cnt                            | BIGINT                              |
+| foo4                 | dim1                           | VARCHAR                             |
+| foo4                 | dim2                           | VARCHAR                             |
+| foo4                 | dim3                           | VARCHAR                             |
+| foo4                 | m1                             | FLOAT                               |
+| foo4                 | m2                             | DOUBLE                              |
+| foo4                 | unique_dim1                    | COMPLEX<hyperUnique>                |
+| kttm_nested          | __time                         | TIMESTAMP                           |
+| kttm_nested          | adblock_list                   | VARCHAR                             |
+| kttm_nested          | agent                          | COMPLEX<json>                       |
+| kttm_nested          | app_version                    | VARCHAR                             |
+| kttm_nested          | client_ip                      | VARCHAR                             |
+| kttm_nested          | event                          | COMPLEX<json>                       |
+| kttm_nested          | geo_ip                         | VARCHAR                             |
+| kttm_nested          | language                       | VARCHAR                             |
+| kttm_nested          | loaded_image                   | VARCHAR                             |
+| kttm_nested          | number                         | VARCHAR                             |
+| kttm_nested          | path                           | VARCHAR                             |
+| kttm_nested          | referrer                       | VARCHAR                             |
+| kttm_nested          | referrer_host                  | VARCHAR                             |
+| kttm_nested          | screen                         | VARCHAR                             |
+| kttm_nested          | server_ip                      | VARCHAR                             |
+| kttm_nested          | session                        | VARCHAR                             |
+| kttm_nested          | session_length                 | BIGINT                              |
+| kttm_nested          | timezone                       | VARCHAR                             |
+| kttm_nested          | timezone_offset                | BIGINT                              |
+| kttm_nested          | window                         | VARCHAR                             |
+| lotsocolumns         | __time                         | TIMESTAMP                           |
+| lotsocolumns         | count                          | BIGINT                              |
+| lotsocolumns         | dimHyperUnique                 | VARCHAR                             |
+| lotsocolumns         | dimMultivalEnumerated          | VARCHAR                             |
+| lotsocolumns         | dimMultivalEnumerated2         | VARCHAR                             |
+| lotsocolumns         | dimMultivalSequentialWithNulls | VARCHAR                             |
+| lotsocolumns         | dimSequential                  | VARCHAR                             |
+| lotsocolumns         | dimSequentialHalfNull          | VARCHAR                             |
+| lotsocolumns         | dimUniform                     | VARCHAR                             |
+| lotsocolumns         | dimZipf                        | VARCHAR                             |
+| lotsocolumns         | metFloatNormal                 | VARCHAR                             |
+| lotsocolumns         | metFloatZipf                   | VARCHAR                             |
+| lotsocolumns         | metLongSequential              | VARCHAR                             |
+| lotsocolumns         | metLongUniform                 | VARCHAR                             |
+| numfoo               | __time                         | TIMESTAMP                           |
+| numfoo               | cnt                            | BIGINT                              |
+| numfoo               | d1                             | DOUBLE                              |
+| numfoo               | d2                             | DOUBLE                              |
+| numfoo               | dim1                           | VARCHAR                             |
+| numfoo               | dim2                           | VARCHAR                             |
+| numfoo               | dim3                           | VARCHAR                             |
+| numfoo               | dim4                           | VARCHAR                             |
+| numfoo               | dim5                           | VARCHAR                             |
+| numfoo               | dim6                           | VARCHAR                             |
+| numfoo               | f1                             | FLOAT                               |
+| numfoo               | f2                             | FLOAT                               |
+| numfoo               | l1                             | BIGINT                              |
+| numfoo               | l2                             | BIGINT                              |
+| numfoo               | m1                             | FLOAT                               |
+| numfoo               | m2                             | DOUBLE                              |
+| numfoo               | unique_dim1                    | COMPLEX<hyperUnique>                |
+| some_datasource      | __time                         | TIMESTAMP                           |
+| some_datasource      | cnt                            | BIGINT                              |
+| some_datasource      | dim1                           | VARCHAR                             |
+| some_datasource      | dim2                           | VARCHAR                             |
+| some_datasource      | dim3                           | VARCHAR                             |
+| some_datasource      | m1                             | FLOAT                               |
+| some_datasource      | m2                             | DOUBLE                              |
+| some_datasource      | unique_dim1                    | COMPLEX<hyperUnique>                |
+| somexdatasource      | __time                         | TIMESTAMP                           |
+| somexdatasource      | cnt_x                          | BIGINT                              |
+| somexdatasource      | m1_x                           | FLOAT                               |
+| somexdatasource      | m2_x                           | DOUBLE                              |
+| somexdatasource      | unique_dim1_x                  | COMPLEX<hyperUnique>                |
+| visits               | __time                         | TIMESTAMP                           |
+| visits               | city                           | VARCHAR                             |
+| visits               | cnt                            | BIGINT                              |
+| visits               | country                        | VARCHAR                             |
+| visits               | m1                             | FLOAT                               |
+| visits               | m2                             | DOUBLE                              |
+| visits               | unique_dim1                    | COMPLEX<hyperUnique>                |
+| visits               | user                           | VARCHAR                             |
+| wikipedia            | __time                         | TIMESTAMP                           |
+| wikipedia            | added                          | BIGINT                              |
+| wikipedia            | channel                        | VARCHAR                             |
+| wikipedia            | cityName                       | VARCHAR                             |
+| wikipedia            | comment                        | VARCHAR                             |
+| wikipedia            | countryIsoCode                 | VARCHAR                             |
+| wikipedia            | countryName                    | VARCHAR                             |
+| wikipedia            | deleted                        | BIGINT                              |
+| wikipedia            | delta                          | BIGINT                              |
+| wikipedia            | isAnonymous                    | VARCHAR                             |
+| wikipedia            | isMinor                        | VARCHAR                             |
+| wikipedia            | isNew                          | VARCHAR                             |
+| wikipedia            | isRobot                        | VARCHAR                             |
+| wikipedia            | isUnpatrolled                  | VARCHAR                             |
+| wikipedia            | metroCode                      | VARCHAR                             |
+| wikipedia            | namespace                      | VARCHAR                             |
+| wikipedia            | page                           | VARCHAR                             |
+| wikipedia            | regionIsoCode                  | VARCHAR                             |
+| wikipedia            | regionName                     | VARCHAR                             |
+| wikipedia            | user                           | VARCHAR                             |
+| wikipedia_first_last | __time                         | TIMESTAMP                           |
+| wikipedia_first_last | channel                        | VARCHAR                             |
+| wikipedia_first_last | cityName                       | VARCHAR                             |
+| wikipedia_first_last | comment                        | VARCHAR                             |
+| wikipedia_first_last | countryIsoCode                 | VARCHAR                             |
+| wikipedia_first_last | countryName                    | VARCHAR                             |
+| wikipedia_first_last | double_first_added             | COMPLEX<serializablePairLongDouble> |
+| wikipedia_first_last | double_last_added              | COMPLEX<serializablePairLongDouble> |
+| wikipedia_first_last | float_first_added              | COMPLEX<serializablePairLongFloat>  |
+| wikipedia_first_last | float_last_added               | COMPLEX<serializablePairLongFloat>  |
+| wikipedia_first_last | isAnonymous                    | VARCHAR                             |
+| wikipedia_first_last | isMinor                        | VARCHAR                             |
+| wikipedia_first_last | isNew                          | VARCHAR                             |
+| wikipedia_first_last | isRobot                        | VARCHAR                             |
+| wikipedia_first_last | isUnpatrolled                  | VARCHAR                             |
+| wikipedia_first_last | long_first_added               | COMPLEX<serializablePairLongLong>   |
+| wikipedia_first_last | long_last_added                | COMPLEX<serializablePairLongLong>   |
+| wikipedia_first_last | metroCode                      | VARCHAR                             |
+| wikipedia_first_last | namespace                      | VARCHAR                             |
+| wikipedia_first_last | page                           | VARCHAR                             |
+| wikipedia_first_last | regionIsoCode                  | VARCHAR                             |
+| wikipedia_first_last | regionName                     | VARCHAR                             |
+| wikipedia_first_last | string_first_added             | COMPLEX<serializablePairLongString> |
+| wikipedia_first_last | string_last_added              | COMPLEX<serializablePairLongString> |
+| wikipedia_first_last | user                           | VARCHAR                             |
++----------------------+--------------------------------+-------------------------------------+
+(170 rows)
+
 !ok
 # Wed Jul 10 16:25:31 IST 2024
 SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = 'druid';
++----------------------+--------------------------------+-------------------------------------+
+| TABLE_NAME           | COLUMN_NAME                    | DATA_TYPE                           |
++----------------------+--------------------------------+-------------------------------------+
+| arrays               | __time                         | TIMESTAMP                           |
+| arrays               | arrayDouble                    | ARRAY                               |
+| arrays               | arrayDoubleNulls               | ARRAY                               |
+| arrays               | arrayLong                      | ARRAY                               |
+| arrays               | arrayLongNulls                 | ARRAY                               |
+| arrays               | arrayNestedLong                | COMPLEX<json>                       |
+| arrays               | arrayNoType                    | ARRAY                               |
+| arrays               | arrayObject                    | COMPLEX<json>                       |
+| arrays               | arrayString                    | ARRAY                               |
+| arrays               | arrayStringNulls               | ARRAY                               |
+| arrays               | arrayVariant                   | ARRAY                               |
+| arrays               | cnt                            | BIGINT                              |
+| broadcast            | __time                         | TIMESTAMP                           |
+| broadcast            | cnt                            | BIGINT                              |
+| broadcast            | d1                             | DOUBLE                              |
+| broadcast            | d2                             | DOUBLE                              |
+| broadcast            | dim1                           | VARCHAR                             |
+| broadcast            | dim2                           | VARCHAR                             |
+| broadcast            | dim3                           | VARCHAR                             |
+| broadcast            | dim4                           | VARCHAR                             |
+| broadcast            | dim5                           | VARCHAR                             |
+| broadcast            | dim6                           | VARCHAR                             |
+| broadcast            | f1                             | FLOAT                               |
+| broadcast            | f2                             | FLOAT                               |
+| broadcast            | l1                             | BIGINT                              |
+| broadcast            | l2                             | BIGINT                              |
+| broadcast            | m1                             | FLOAT                               |
+| broadcast            | m2                             | DOUBLE                              |
+| broadcast            | unique_dim1                    | COMPLEX<hyperUnique>                |
+| foo                  | __time                         | TIMESTAMP                           |
+| foo                  | cnt                            | BIGINT                              |
+| foo                  | dim1                           | VARCHAR                             |
+| foo                  | dim2                           | VARCHAR                             |
+| foo                  | dim3                           | VARCHAR                             |
+| foo                  | m1                             | FLOAT                               |
+| foo                  | m2                             | DOUBLE                              |
+| foo                  | unique_dim1                    | COMPLEX<hyperUnique>                |
+| foo2                 | __time                         | TIMESTAMP                           |
+| foo2                 | cnt                            | BIGINT                              |
+| foo2                 | dim1                           | VARCHAR                             |
+| foo2                 | dim2                           | VARCHAR                             |
+| foo2                 | dim3                           | BIGINT                              |
+| foo2                 | m1                             | BIGINT                              |
+| foo2                 | m2                             | DOUBLE                              |
+| foo2                 | unique_dim1                    | COMPLEX<hyperUnique>                |
+| foo4                 | __time                         | TIMESTAMP                           |
+| foo4                 | cnt                            | BIGINT                              |
+| foo4                 | dim1                           | VARCHAR                             |
+| foo4                 | dim2                           | VARCHAR                             |
+| foo4                 | dim3                           | VARCHAR                             |
+| foo4                 | m1                             | FLOAT                               |
+| foo4                 | m2                             | DOUBLE                              |
+| foo4                 | unique_dim1                    | COMPLEX<hyperUnique>                |
+| kttm_nested          | __time                         | TIMESTAMP                           |
+| kttm_nested          | adblock_list                   | VARCHAR                             |
+| kttm_nested          | agent                          | COMPLEX<json>                       |
+| kttm_nested          | app_version                    | VARCHAR                             |
+| kttm_nested          | client_ip                      | VARCHAR                             |
+| kttm_nested          | event                          | COMPLEX<json>                       |
+| kttm_nested          | geo_ip                         | VARCHAR                             |
+| kttm_nested          | language                       | VARCHAR                             |
+| kttm_nested          | loaded_image                   | VARCHAR                             |
+| kttm_nested          | number                         | VARCHAR                             |
+| kttm_nested          | path                           | VARCHAR                             |
+| kttm_nested          | referrer                       | VARCHAR                             |
+| kttm_nested          | referrer_host                  | VARCHAR                             |
+| kttm_nested          | screen                         | VARCHAR                             |
+| kttm_nested          | server_ip                      | VARCHAR                             |
+| kttm_nested          | session                        | VARCHAR                             |
+| kttm_nested          | session_length                 | BIGINT                              |
+| kttm_nested          | timezone                       | VARCHAR                             |
+| kttm_nested          | timezone_offset                | BIGINT                              |
+| kttm_nested          | window                         | VARCHAR                             |
+| lotsocolumns         | __time                         | TIMESTAMP                           |
+| lotsocolumns         | count                          | BIGINT                              |
+| lotsocolumns         | dimHyperUnique                 | VARCHAR                             |
+| lotsocolumns         | dimMultivalEnumerated          | VARCHAR                             |
+| lotsocolumns         | dimMultivalEnumerated2         | VARCHAR                             |
+| lotsocolumns         | dimMultivalSequentialWithNulls | VARCHAR                             |
+| lotsocolumns         | dimSequential                  | VARCHAR                             |
+| lotsocolumns         | dimSequentialHalfNull          | VARCHAR                             |
+| lotsocolumns         | dimUniform                     | VARCHAR                             |
+| lotsocolumns         | dimZipf                        | VARCHAR                             |
+| lotsocolumns         | metFloatNormal                 | VARCHAR                             |
+| lotsocolumns         | metFloatZipf                   | VARCHAR                             |
+| lotsocolumns         | metLongSequential              | VARCHAR                             |
+| lotsocolumns         | metLongUniform                 | VARCHAR                             |
+| numfoo               | __time                         | TIMESTAMP                           |
+| numfoo               | cnt                            | BIGINT                              |
+| numfoo               | d1                             | DOUBLE                              |
+| numfoo               | d2                             | DOUBLE                              |
+| numfoo               | dim1                           | VARCHAR                             |
+| numfoo               | dim2                           | VARCHAR                             |
+| numfoo               | dim3                           | VARCHAR                             |
+| numfoo               | dim4                           | VARCHAR                             |
+| numfoo               | dim5                           | VARCHAR                             |
+| numfoo               | dim6                           | VARCHAR                             |
+| numfoo               | f1                             | FLOAT                               |
+| numfoo               | f2                             | FLOAT                               |
+| numfoo               | l1                             | BIGINT                              |
+| numfoo               | l2                             | BIGINT                              |
+| numfoo               | m1                             | FLOAT                               |
+| numfoo               | m2                             | DOUBLE                              |
+| numfoo               | unique_dim1                    | COMPLEX<hyperUnique>                |
+| some_datasource      | __time                         | TIMESTAMP                           |
+| some_datasource      | cnt                            | BIGINT                              |
+| some_datasource      | dim1                           | VARCHAR                             |
+| some_datasource      | dim2                           | VARCHAR                             |
+| some_datasource      | dim3                           | VARCHAR                             |
+| some_datasource      | m1                             | FLOAT                               |
+| some_datasource      | m2                             | DOUBLE                              |
+| some_datasource      | unique_dim1                    | COMPLEX<hyperUnique>                |
+| somexdatasource      | __time                         | TIMESTAMP                           |
+| somexdatasource      | cnt_x                          | BIGINT                              |
+| somexdatasource      | m1_x                           | FLOAT                               |
+| somexdatasource      | m2_x                           | DOUBLE                              |
+| somexdatasource      | unique_dim1_x                  | COMPLEX<hyperUnique>                |
+| visits               | __time                         | TIMESTAMP                           |
+| visits               | city                           | VARCHAR                             |
+| visits               | cnt                            | BIGINT                              |
+| visits               | country                        | VARCHAR                             |
+| visits               | m1                             | FLOAT                               |
+| visits               | m2                             | DOUBLE                              |
+| visits               | unique_dim1                    | COMPLEX<hyperUnique>                |
+| visits               | user                           | VARCHAR                             |
+| wikipedia            | __time                         | TIMESTAMP                           |
+| wikipedia            | added                          | BIGINT                              |
+| wikipedia            | channel                        | VARCHAR                             |
+| wikipedia            | cityName                       | VARCHAR                             |
+| wikipedia            | comment                        | VARCHAR                             |
+| wikipedia            | countryIsoCode                 | VARCHAR                             |
+| wikipedia            | countryName                    | VARCHAR                             |
+| wikipedia            | deleted                        | BIGINT                              |
+| wikipedia            | delta                          | BIGINT                              |
+| wikipedia            | isAnonymous                    | VARCHAR                             |
+| wikipedia            | isMinor                        | VARCHAR                             |
+| wikipedia            | isNew                          | VARCHAR                             |
+| wikipedia            | isRobot                        | VARCHAR                             |
+| wikipedia            | isUnpatrolled                  | VARCHAR                             |
+| wikipedia            | metroCode                      | VARCHAR                             |
+| wikipedia            | namespace                      | VARCHAR                             |
+| wikipedia            | page                           | VARCHAR                             |
+| wikipedia            | regionIsoCode                  | VARCHAR                             |
+| wikipedia            | regionName                     | VARCHAR                             |
+| wikipedia            | user                           | VARCHAR                             |
+| wikipedia_first_last | __time                         | TIMESTAMP                           |
+| wikipedia_first_last | channel                        | VARCHAR                             |
+| wikipedia_first_last | cityName                       | VARCHAR                             |
+| wikipedia_first_last | comment                        | VARCHAR                             |
+| wikipedia_first_last | countryIsoCode                 | VARCHAR                             |
+| wikipedia_first_last | countryName                    | VARCHAR                             |
+| wikipedia_first_last | double_first_added             | COMPLEX<serializablePairLongDouble> |
+| wikipedia_first_last | double_last_added              | COMPLEX<serializablePairLongDouble> |
+| wikipedia_first_last | float_first_added              | COMPLEX<serializablePairLongFloat>  |
+| wikipedia_first_last | float_last_added               | COMPLEX<serializablePairLongFloat>  |
+| wikipedia_first_last | isAnonymous                    | VARCHAR                             |
+| wikipedia_first_last | isMinor                        | VARCHAR                             |
+| wikipedia_first_last | isNew                          | VARCHAR                             |
+| wikipedia_first_last | isRobot                        | VARCHAR                             |
+| wikipedia_first_last | isUnpatrolled                  | VARCHAR                             |
+| wikipedia_first_last | long_first_added               | COMPLEX<serializablePairLongLong>   |
+| wikipedia_first_last | long_last_added                | COMPLEX<serializablePairLongLong>   |
+| wikipedia_first_last | metroCode                      | VARCHAR                             |
+| wikipedia_first_last | namespace                      | VARCHAR                             |
+| wikipedia_first_last | page                           | VARCHAR                             |
+| wikipedia_first_last | regionIsoCode                  | VARCHAR                             |
+| wikipedia_first_last | regionName                     | VARCHAR                             |
+| wikipedia_first_last | string_first_added             | COMPLEX<serializablePairLongString> |
+| wikipedia_first_last | string_last_added              | COMPLEX<serializablePairLongString> |
+| wikipedia_first_last | user                           | VARCHAR                             |
++----------------------+--------------------------------+-------------------------------------+
+(170 rows)
+
 !ok
