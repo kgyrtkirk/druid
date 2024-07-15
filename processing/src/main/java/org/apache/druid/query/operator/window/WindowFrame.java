@@ -238,11 +238,6 @@ public interface WindowFrame
     }
   }
 
-  enum PeerType {
-    ROWS,
-    RANGE
-  }
-
   @SuppressWarnings("unchecked")
   @Nullable
   public default <T extends WindowFrame> T unwrap(Class<T> clazz) {
