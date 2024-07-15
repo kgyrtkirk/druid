@@ -20,7 +20,6 @@
 package org.apache.druid.data.input.azure;
 
 import com.azure.storage.blob.models.BlobStorageException;
-import com.azure.storage.blob.specialized.BlockBlobClient;
 import com.fasterxml.jackson.annotation.JacksonInject;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -35,6 +34,7 @@ import org.apache.druid.data.input.impl.CloudObjectSplitWidget;
 import org.apache.druid.data.input.impl.SplittableInputSource;
 import org.apache.druid.data.input.impl.systemfield.SystemField;
 import org.apache.druid.data.input.impl.systemfield.SystemFields;
+import org.apache.druid.guice.annotations.Global;
 import org.apache.druid.storage.azure.AzureCloudBlobIterableFactory;
 import org.apache.druid.storage.azure.AzureInputDataConfig;
 import org.apache.druid.storage.azure.AzureStorage;
@@ -63,7 +63,7 @@ public class AzureInputSource extends CloudObjectInputSource
 
   @JsonCreator
   public AzureInputSource(
-      @JacksonInject AzureStorage storage,
+      @JacksonInject @Global AzureStorage storage,
       @JacksonInject AzureEntityFactory entityFactory,
       @JacksonInject AzureCloudBlobIterableFactory azureCloudBlobIterableFactory,
       @JacksonInject AzureInputDataConfig inputDataConfig,
@@ -128,7 +128,7 @@ public class AzureInputSource extends CloudObjectInputSource
   @Override
   protected AzureEntity createEntity(CloudObjectLocation location)
   {
-    return entityFactory.create(location);
+    return entityFactory.create(location, storage, SCHEME);
   }
 
   @Override
@@ -140,7 +140,7 @@ public class AzureInputSource extends CloudObjectInputSource
       public Iterator<LocationWithSize> getDescriptorIteratorForPrefixes(List<URI> prefixes)
       {
         return Iterators.transform(
-            azureCloudBlobIterableFactory.create(getPrefixes(), inputDataConfig.getMaxListingLength()).iterator(),
+            azureCloudBlobIterableFactory.create(getPrefixes(), inputDataConfig.getMaxListingLength(), storage).iterator(),
             blob -> {
               try {
                 return new LocationWithSize(
@@ -160,12 +160,7 @@ public class AzureInputSource extends CloudObjectInputSource
       public long getObjectSize(CloudObjectLocation location)
       {
         try {
-          final BlockBlobClient blobWithAttributes = storage.getBlockBlobReferenceWithAttributes(
-              location.getBucket(),
-              location.getPath()
-          );
-
-          return blobWithAttributes.getProperties().getBlobSize();
+          return storage.getBlockBlobLength(location.getBucket(), location.getPath());
         }
         catch (BlobStorageException e) {
           throw new RuntimeException(e);

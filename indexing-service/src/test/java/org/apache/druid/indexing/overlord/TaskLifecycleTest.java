@@ -81,6 +81,7 @@ import org.apache.druid.indexing.common.task.IndexTask.IndexIngestionSpec;
 import org.apache.druid.indexing.common.task.IndexTask.IndexTuningConfig;
 import org.apache.druid.indexing.common.task.KillUnusedSegmentsTask;
 import org.apache.druid.indexing.common.task.NoopTask;
+import org.apache.druid.indexing.common.task.NoopTaskContextEnricher;
 import org.apache.druid.indexing.common.task.NoopTestTaskReportFileWriter;
 import org.apache.druid.indexing.common.task.RealtimeIndexTask;
 import org.apache.druid.indexing.common.task.Task;
@@ -124,7 +125,9 @@ import org.apache.druid.query.aggregation.LongSumAggregatorFactory;
 import org.apache.druid.segment.IndexIO;
 import org.apache.druid.segment.IndexMergerV9Factory;
 import org.apache.druid.segment.IndexSpec;
+import org.apache.druid.segment.SegmentSchemaMapping;
 import org.apache.druid.segment.TestHelper;
+import org.apache.druid.segment.TestIndex;
 import org.apache.druid.segment.handoff.SegmentHandoffNotifier;
 import org.apache.druid.segment.handoff.SegmentHandoffNotifierFactory;
 import org.apache.druid.segment.indexing.DataSchema;
@@ -467,6 +470,7 @@ public class TaskLifecycleTest extends InitializedNullHandlingTest
             new NamedType(NoopInputFormat.class, "noopInputFormat")
         );
         testDerbyConnector.createTaskTables();
+        testDerbyConnector.createSegmentSchemasTable();
         testDerbyConnector.createSegmentTable();
         taskStorage = new MetadataTaskStorage(
             testDerbyConnector,
@@ -566,9 +570,9 @@ public class TaskLifecycleTest extends InitializedNullHandlingTest
     return new TestIndexerMetadataStorageCoordinator()
     {
       @Override
-      public Set<DataSegment> commitSegments(Set<DataSegment> segments)
+      public Set<DataSegment> commitSegments(Set<DataSegment> segments, final SegmentSchemaMapping segmentSchemaMapping)
       {
-        Set<DataSegment> retVal = super.commitSegments(segments);
+        Set<DataSegment> retVal = super.commitSegments(segments, segmentSchemaMapping);
         if (publishCountDown != null) {
           publishCountDown.countDown();
         }
@@ -616,7 +620,6 @@ public class TaskLifecycleTest extends InitializedNullHandlingTest
         .setDefaultRowFlushBoundary(50000)
         .setBatchProcessingMode(TaskConfig.BATCH_PROCESSING_MODE_DEFAULT.name())
         .setTmpStorageBytesPerTask(-1L)
-        .enableConcurrentAppendAndReplace()
         .build();
 
     return new TaskToolboxFactory(
@@ -644,7 +647,7 @@ public class TaskLifecycleTest extends InitializedNullHandlingTest
         DirectQueryProcessingPool.INSTANCE, // query executor service
         NoopJoinableFactory.INSTANCE,
         () -> monitorScheduler, // monitor scheduler
-        new SegmentCacheManagerFactory(new DefaultObjectMapper()),
+        new SegmentCacheManagerFactory(TestIndex.INDEX_IO, new DefaultObjectMapper()),
         MAPPER,
         INDEX_IO,
         MapCache.create(0),
@@ -697,7 +700,18 @@ public class TaskLifecycleTest extends InitializedNullHandlingTest
         TaskQueueConfig.class
     );
 
-    return new TaskQueue(lockConfig, tqc, new DefaultTaskConfig(), ts, tr, tac, taskLockbox, emitter);
+    return new TaskQueue(
+        lockConfig,
+        tqc,
+        new DefaultTaskConfig(),
+        ts,
+        tr,
+        tac,
+        taskLockbox,
+        emitter,
+        mapper,
+        new NoopTaskContextEnricher()
+    );
   }
 
   @After
@@ -744,6 +758,7 @@ public class TaskLifecycleTest extends InitializedNullHandlingTest
                 null,
                 3,
                 false,
+                null,
                 null,
                 null,
                 null,
@@ -836,6 +851,7 @@ public class TaskLifecycleTest extends InitializedNullHandlingTest
                 null,
                 null,
                 null,
+                null,
                 null
             )
         ),
@@ -904,7 +920,13 @@ public class TaskLifecycleTest extends InitializedNullHandlingTest
 
     // manually create local segments files
     List<File> segmentFiles = new ArrayList<>();
-    for (DataSegment segment : mdc.retrieveUnusedSegmentsForInterval("test_kill_task", Intervals.of("2011-04-01/P4D"))) {
+    final List<DataSegment> unusedSegments = mdc.retrieveUnusedSegmentsForInterval(
+        "test_kill_task",
+        Intervals.of("2011-04-01/P4D"),
+        null,
+        null
+    );
+    for (DataSegment segment : unusedSegments) {
       File file = new File((String) segment.getLoadSpec().get("path"));
       FileUtils.mkdirp(file.getParentFile());
       Files.write(file.toPath(), ByteArrays.EMPTY_ARRAY);
@@ -917,7 +939,8 @@ public class TaskLifecycleTest extends InitializedNullHandlingTest
             "test_kill_task",
             Intervals.of("2011-04-01/P4D"),
             null,
-            false,
+            null,
+            null,
             null,
             null
         );
@@ -994,7 +1017,13 @@ public class TaskLifecycleTest extends InitializedNullHandlingTest
 
     // manually create local segments files
     List<File> segmentFiles = new ArrayList<>();
-    for (DataSegment segment : mdc.retrieveUnusedSegmentsForInterval("test_kill_task", Intervals.of("2011-04-01/P4D"))) {
+    final List<DataSegment> unusedSegments = mdc.retrieveUnusedSegmentsForInterval(
+        "test_kill_task",
+        Intervals.of("2011-04-01/P4D"),
+        null,
+        null
+    );
+    for (DataSegment segment : unusedSegments) {
       File file = new File((String) segment.getLoadSpec().get("path"));
       FileUtils.mkdirp(file.getParentFile());
       Files.write(file.toPath(), ByteArrays.EMPTY_ARRAY);
@@ -1008,9 +1037,10 @@ public class TaskLifecycleTest extends InitializedNullHandlingTest
             "test_kill_task",
             Intervals.of("2011-04-01/P4D"),
             null,
-            false,
             null,
-            maxSegmentsToKill
+            null,
+            maxSegmentsToKill,
+            null
         );
 
     final TaskStatus status = runTask(killUnusedSegmentsTask);
@@ -1125,7 +1155,7 @@ public class TaskLifecycleTest extends InitializedNullHandlingTest
             .size(0)
             .build();
 
-        toolbox.getTaskActionClient().submit(new SegmentInsertAction(ImmutableSet.of(segment)));
+        toolbox.getTaskActionClient().submit(new SegmentInsertAction(ImmutableSet.of(segment), null));
         return TaskStatus.success(getId());
       }
     };
@@ -1166,7 +1196,7 @@ public class TaskLifecycleTest extends InitializedNullHandlingTest
             .size(0)
             .build();
 
-        toolbox.getTaskActionClient().submit(new SegmentInsertAction(ImmutableSet.of(segment)));
+        toolbox.getTaskActionClient().submit(new SegmentInsertAction(ImmutableSet.of(segment), null));
         return TaskStatus.success(getId());
       }
     };
@@ -1208,7 +1238,7 @@ public class TaskLifecycleTest extends InitializedNullHandlingTest
             .size(0)
             .build();
 
-        toolbox.getTaskActionClient().submit(new SegmentInsertAction(ImmutableSet.of(segment)));
+        toolbox.getTaskActionClient().submit(new SegmentInsertAction(ImmutableSet.of(segment), null));
         return TaskStatus.success(getId());
       }
     };
@@ -1373,6 +1403,7 @@ public class TaskLifecycleTest extends InitializedNullHandlingTest
                 null,
                 null,
                 null,
+                null,
                 null
             )
         ),
@@ -1476,6 +1507,7 @@ public class TaskLifecycleTest extends InitializedNullHandlingTest
                 null,
                 3,
                 false,
+                null,
                 null,
                 null,
                 null,
@@ -1638,6 +1670,7 @@ public class TaskLifecycleTest extends InitializedNullHandlingTest
         null,
         0,
         0,
+        null,
         null,
         null,
         null,

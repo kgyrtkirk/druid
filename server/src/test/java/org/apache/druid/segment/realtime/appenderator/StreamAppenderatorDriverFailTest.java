@@ -46,6 +46,7 @@ import org.apache.druid.segment.realtime.appenderator.StreamAppenderatorDriverTe
 import org.apache.druid.segment.realtime.appenderator.StreamAppenderatorDriverTest.TestSegmentAllocator;
 import org.apache.druid.segment.realtime.appenderator.StreamAppenderatorDriverTest.TestSegmentHandoffNotifierFactory;
 import org.apache.druid.timeline.DataSegment;
+import org.apache.druid.timeline.SegmentId;
 import org.apache.druid.timeline.partition.NumberedShardSpec;
 import org.easymock.EasyMock;
 import org.easymock.EasyMockSupport;
@@ -201,7 +202,7 @@ public class StreamAppenderatorDriverFailTest extends EasyMockSupport
     expectedException.expect(ExecutionException.class);
     expectedException.expectCause(CoreMatchers.instanceOf(ISE.class));
     expectedException.expectMessage(
-        "Fail test while dropping segment[foo_2000-01-01T00:00:00.000Z_2000-01-01T01:00:00.000Z_abc123]"
+        "Fail test while dropping segment"
     );
 
     driver = new StreamAppenderatorDriver(
@@ -221,10 +222,8 @@ public class StreamAppenderatorDriverFailTest extends EasyMockSupport
 
     Assert.assertNull(driver.startJob(null));
 
-    for (int i = 0; i < ROWS.size(); i++) {
-      committerSupplier.setMetadata(i + 1);
-      Assert.assertTrue(driver.add(ROWS.get(i), "dummy", committerSupplier, false, true).isOk());
-    }
+    committerSupplier.setMetadata(1);
+    Assert.assertTrue(driver.add(ROWS.get(0), "dummy", committerSupplier, false, true).isOk());
 
     final SegmentsAndCommitMetadata published = driver.publish(
         StreamAppenderatorDriverTest.makeOkPublisher(),
@@ -328,7 +327,7 @@ public class StreamAppenderatorDriverFailTest extends EasyMockSupport
   private static class NoopUsedSegmentChecker implements UsedSegmentChecker
   {
     @Override
-    public Set<DataSegment> findUsedSegments(Set<SegmentIdWithShardSpec> identifiers)
+    public Set<DataSegment> findPublishedSegments(Set<SegmentId> identifiers)
     {
       return ImmutableSet.of();
     }
@@ -498,7 +497,7 @@ public class StreamAppenderatorDriverFailTest extends EasyMockSupport
                                                       .collect(Collectors.toList());
         return Futures.transform(
             persistAll(committer),
-            (Function<Object, SegmentsAndCommitMetadata>) commitMetadata -> new SegmentsAndCommitMetadata(segments, commitMetadata),
+            (Function<Object, SegmentsAndCommitMetadata>) commitMetadata -> new SegmentsAndCommitMetadata(segments, commitMetadata, null),
             MoreExecutors.directExecutor()
         );
       } else {

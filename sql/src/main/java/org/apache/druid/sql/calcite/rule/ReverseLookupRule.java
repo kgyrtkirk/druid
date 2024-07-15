@@ -46,6 +46,7 @@ import org.apache.druid.query.lookup.LookupExtractionFn;
 import org.apache.druid.query.lookup.LookupExtractor;
 import org.apache.druid.sql.calcite.expression.builtin.MultiValueStringOperatorConversions;
 import org.apache.druid.sql.calcite.expression.builtin.QueryLookupOperatorConversion;
+import org.apache.druid.sql.calcite.expression.builtin.ScalarInArrayOperatorConversion;
 import org.apache.druid.sql.calcite.expression.builtin.SearchOperatorConversion;
 import org.apache.druid.sql.calcite.filtration.CollectComparisons;
 import org.apache.druid.sql.calcite.planner.Calcites;
@@ -84,9 +85,14 @@ public class ReverseLookupRule extends RelOptRule implements SubstitutionRule
   public static final String CTX_MAX_OPTIMIZE_COUNT = "maxOptimizeCountForDruidReverseLookupRule";
 
   /**
+   * Context parameter to prevent creating too-large IN filters as a result of reverse lookups.
+   */
+  public static final String CTX_THRESHOLD = "sqlReverseLookupThreshold";
+
+  /**
    * Context parameter for tests, to allow us to force the case where we avoid creating a bunch of ORs.
    */
-  public static final String CTX_MAX_IN_SIZE = "maxInSizeForDruidReverseLookupRule";
+  public static final int DEFAULT_THRESHOLD = 10000;
 
   private final PlannerContext plannerContext;
 
@@ -103,7 +109,10 @@ public class ReverseLookupRule extends RelOptRule implements SubstitutionRule
 
     final int maxOptimizeCount = plannerContext.queryContext().getInt(CTX_MAX_OPTIMIZE_COUNT, Integer.MAX_VALUE);
     final int maxInSize =
-        plannerContext.queryContext().getInt(CTX_MAX_IN_SIZE, plannerContext.queryContext().getInSubQueryThreshold());
+        Math.min(
+            plannerContext.queryContext().getInSubQueryThreshold(),
+            plannerContext.queryContext().getInt(CTX_THRESHOLD, DEFAULT_THRESHOLD)
+        );
     final ReverseLookupShuttle reverseLookupShuttle = new ReverseLookupShuttle(
         plannerContext,
         filter.getCluster().getRexBuilder(),
@@ -267,12 +276,16 @@ public class ReverseLookupRule extends RelOptRule implements SubstitutionRule
     }
 
     /**
-     * When we encounter SEARCH, expand it using {@link SearchOperatorConversion#expandSearch(RexCall, RexBuilder)}
+     * When we encounter SEARCH, expand it using {@link SearchOperatorConversion#expandSearch(RexCall, RexBuilder, int)}
      * and continue processing what lies beneath.
      */
     private RexNode visitSearch(final RexCall call)
     {
-      final RexNode expanded = SearchOperatorConversion.expandSearch(call, rexBuilder);
+      final RexNode expanded = SearchOperatorConversion.expandSearch(
+          call,
+          rexBuilder,
+          plannerContext.queryContext().getInFunctionThreshold()
+      );
 
       if (expanded instanceof RexCall) {
         final RexNode converted = visitCall((RexCall) expanded);
@@ -292,17 +305,24 @@ public class ReverseLookupRule extends RelOptRule implements SubstitutionRule
      */
     private RexNode visitComparison(final RexCall call)
     {
-      return CollectionUtils.getOnlyElement(
+      final RexNode retVal = CollectionUtils.getOnlyElement(
           new CollectReverseLookups(Collections.singletonList(call), rexBuilder).collect(),
           ret -> new ISE("Expected to collect single node, got[%s]", ret)
       );
+
+      //noinspection ObjectEquality
+      if (retVal != call) {
+        return retVal;
+      } else {
+        return super.visitCall(call);
+      }
     }
 
     /**
      * Collect and reverse a set of lookups that appear as children to OR.
      */
     private class CollectReverseLookups
-        extends CollectComparisons<RexNode, RexCall, RexNode, ReverseLookupKey>
+        extends CollectComparisons<RexNode, RexCall, RexNode, ReverseLookupKey, String, InDimFilter.ValuesSet>
     {
       private final RexBuilder rexBuilder;
 
@@ -325,6 +345,12 @@ public class ReverseLookupRule extends RelOptRule implements SubstitutionRule
         } else {
           return null;
         }
+      }
+
+      @Override
+      protected InDimFilter.ValuesSet makeCollection()
+      {
+        return new InDimFilter.ValuesSet();
       }
 
       @Nullable
@@ -384,12 +410,13 @@ public class ReverseLookupRule extends RelOptRule implements SubstitutionRule
           return Collections.singleton(null);
         } else {
           // Compute the set of values that this comparison operator matches.
-          // Note that MV_CONTAINS and MV_OVERLAP match nulls, but other comparison operators do not.
+          // Note that MV_CONTAINS, MV_OVERLAP, and SCALAR_IN_ARRAY match nulls, but other comparison operators do not.
           // See "isBinaryComparison" for the set of operators we might encounter here.
           final RexNode matchLiteral = call.getOperands().get(1);
           final boolean matchNulls =
               call.getOperator().equals(MultiValueStringOperatorConversions.CONTAINS.calciteOperator())
-              || call.getOperator().equals(MultiValueStringOperatorConversions.OVERLAP.calciteOperator());
+              || call.getOperator().equals(MultiValueStringOperatorConversions.OVERLAP.calciteOperator())
+              || call.getOperator().equals(ScalarInArrayOperatorConversion.SQL_FUNCTION);
           return toStringSet(matchLiteral, matchNulls);
         }
       }
@@ -545,8 +572,16 @@ public class ReverseLookupRule extends RelOptRule implements SubstitutionRule
         } else {
           return SearchOperatorConversion.makeIn(
               reverseLookupKey.arg,
-              stringsToRexNodes(reversedMatchValues, rexBuilder),
+              reversedMatchValues,
+              rexBuilder.getTypeFactory()
+                        .createTypeWithNullability(
+                            rexBuilder.getTypeFactory().createSqlType(SqlTypeName.VARCHAR),
+                            true
+                        ),
               reverseLookupKey.negate,
+
+              // Use regular equals, or SCALAR_IN_ARRAY, depending on inFunctionThreshold.
+              reversedMatchValues.size() >= plannerContext.queryContext().getInFunctionThreshold(),
               rexBuilder
           );
         }
@@ -584,7 +619,8 @@ public class ReverseLookupRule extends RelOptRule implements SubstitutionRule
       return call.getKind() == SqlKind.EQUALS
              || call.getKind() == SqlKind.NOT_EQUALS
              || call.getOperator().equals(MultiValueStringOperatorConversions.CONTAINS.calciteOperator())
-             || call.getOperator().equals(MultiValueStringOperatorConversions.OVERLAP.calciteOperator());
+             || call.getOperator().equals(MultiValueStringOperatorConversions.OVERLAP.calciteOperator())
+             || call.getOperator().equals(ScalarInArrayOperatorConversion.SQL_FUNCTION);
     } else {
       return false;
     }

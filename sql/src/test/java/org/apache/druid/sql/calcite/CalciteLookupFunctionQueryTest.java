@@ -29,6 +29,7 @@ import org.apache.druid.java.util.common.granularity.Granularities;
 import org.apache.druid.query.Druids;
 import org.apache.druid.query.InlineDataSource;
 import org.apache.druid.query.Query;
+import org.apache.druid.query.QueryContexts;
 import org.apache.druid.query.QueryDataSource;
 import org.apache.druid.query.aggregation.CountAggregatorFactory;
 import org.apache.druid.query.aggregation.FilteredAggregatorFactory;
@@ -53,16 +54,17 @@ import org.apache.druid.sql.calcite.planner.PlannerContext;
 import org.apache.druid.sql.calcite.rule.ReverseLookupRule;
 import org.apache.druid.sql.calcite.util.CalciteTests;
 import org.hamcrest.CoreMatchers;
-import org.hamcrest.MatcherAssert;
 import org.junit.Assert;
-import org.junit.Test;
 import org.junit.internal.matchers.ThrowableMessageMatcher;
+import org.junit.jupiter.api.Test;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class CalciteLookupFunctionQueryTest extends BaseCalciteQueryTest
 {
@@ -82,8 +84,6 @@ public class CalciteLookupFunctionQueryTest extends BaseCalciteQueryTest
   @Test
   public void testFilterEquals()
   {
-    cannotVectorize();
-
     testQuery(
         buildFilterTestSql("LOOKUP(dim1, 'lookyloo') = 'xabc'"),
         QUERY_CONTEXT,
@@ -127,8 +127,6 @@ public class CalciteLookupFunctionQueryTest extends BaseCalciteQueryTest
   @Test
   public void testFilterLookupOfConcat()
   {
-    cannotVectorize();
-
     testQuery(
         buildFilterTestSql("LOOKUP(CONCAT(dim1, 'b', dim2), 'lookyloo') = 'xabc'"),
         QUERY_CONTEXT,
@@ -168,10 +166,32 @@ public class CalciteLookupFunctionQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  public void testFilterConcatOfLookup()
+  public void testFilterScalarInArrayLookupOfConcat()
   {
     cannotVectorize();
 
+    testQuery(
+        buildFilterTestSql("SCALAR_IN_ARRAY(LOOKUP(CONCAT(dim1, 'a', dim2), 'lookyloo'), ARRAY['xa', 'xabc'])"),
+        QUERY_CONTEXT,
+        buildFilterTestExpectedQuery(
+            or(
+                and(
+                    equality("dim1", "", ColumnType.STRING),
+                    equality("dim2", "", ColumnType.STRING)
+                ),
+                and(
+                    equality("dim1", "", ColumnType.STRING),
+                    equality("dim2", "bc", ColumnType.STRING)
+                )
+            )
+        ),
+        ImmutableList.of()
+    );
+  }
+
+  @Test
+  public void testFilterConcatOfLookup()
+  {
     testQuery(
         buildFilterTestSql("CONCAT(LOOKUP(dim1, 'lookyloo'), ' (', dim1, ')') = 'xabc (abc)'"),
         QUERY_CONTEXT,
@@ -201,7 +221,7 @@ public class CalciteLookupFunctionQueryTest extends BaseCalciteQueryTest
     testQuery(
         buildFilterTestSql("CONCAT(LOOKUP(dim1, 'lookyloo'), ' (', dim1, ')') IN ('xa (a)', 'xabc (abc)')"),
         queryContext,
-        buildFilterTestExpectedQuery(in("dim1", ImmutableList.of("a", "abc"), null)),
+        buildFilterTestExpectedQuery(in("dim1", ImmutableList.of("a", "abc"))),
         ImmutableList.of(new Object[]{"xabc", 1L})
     );
   }
@@ -209,8 +229,6 @@ public class CalciteLookupFunctionQueryTest extends BaseCalciteQueryTest
   @Test
   public void testFilterConcatOfLookupOfConcat()
   {
-    cannotVectorize();
-
     testQuery(
         buildFilterTestSql(
             "CONCAT(LOOKUP(CONCAT(dim1, 'b', dim2), 'lookyloo'), ' (', CONCAT(dim1, 'b', dim2), ')') = 'xabc (abc)'"),
@@ -265,8 +283,6 @@ public class CalciteLookupFunctionQueryTest extends BaseCalciteQueryTest
   @Test
   public void testFilterConcatOfCoalesceLookupOfConcat()
   {
-    cannotVectorize();
-
     testQuery(
         buildFilterTestSql(
             "CONCAT(COALESCE(LOOKUP(CONCAT(dim1, 'b', dim2), 'lookyloo'), 'N/A'), ' (', CONCAT(dim1, 'b', dim2), ')') = 'xabc (abc)'"),
@@ -285,8 +301,6 @@ public class CalciteLookupFunctionQueryTest extends BaseCalciteQueryTest
   @Test
   public void testFilterImpossibleLookupOfConcat()
   {
-    cannotVectorize();
-
     // No keys in the lookup table begin with 'key:', so this is always false.
     testQuery(
         buildFilterTestSql("LOOKUP('key:' || dim1, 'lookyloo') = 'xabc'"),
@@ -299,8 +313,6 @@ public class CalciteLookupFunctionQueryTest extends BaseCalciteQueryTest
   @Test
   public void testFilterChainedEquals()
   {
-    cannotVectorize();
-
     testQuery(
         buildFilterTestSql("LOOKUP(LOOKUP(dim1, 'lookyloo'), 'lookyloo-chain') = 'zabc'"),
         QUERY_CONTEXT,
@@ -312,8 +324,6 @@ public class CalciteLookupFunctionQueryTest extends BaseCalciteQueryTest
   @Test
   public void testFilterEqualsLiteralFirst()
   {
-    cannotVectorize();
-
     testQuery(
         buildFilterTestSql("'xabc' = LOOKUP(dim1, 'lookyloo')"),
         QUERY_CONTEXT,
@@ -325,8 +335,6 @@ public class CalciteLookupFunctionQueryTest extends BaseCalciteQueryTest
   @Test
   public void testFilterEqualsAlwaysFalse()
   {
-    cannotVectorize();
-
     testQuery(
         buildFilterTestSql("LOOKUP(dim1, 'lookyloo') = 'nonexistent'"),
         QUERY_CONTEXT,
@@ -338,8 +346,6 @@ public class CalciteLookupFunctionQueryTest extends BaseCalciteQueryTest
   @Test
   public void testFilterIsNotDistinctFrom()
   {
-    cannotVectorize();
-
     testQuery(
         buildFilterTestSql("LOOKUP(dim1, 'lookyloo') IS NOT DISTINCT FROM 'xabc'"),
         QUERY_CONTEXT,
@@ -358,7 +364,7 @@ public class CalciteLookupFunctionQueryTest extends BaseCalciteQueryTest
                            + "LOOKUP(dim1, 'lookyloo') IS NOT DISTINCT FROM 'x6' OR "
                            + "LOOKUP(dim1, 'lookyloo') IS NOT DISTINCT FROM 'nonexistent'"),
         QUERY_CONTEXT,
-        buildFilterTestExpectedQuery(in("dim1", Arrays.asList("6", "abc"), null)),
+        buildFilterTestExpectedQuery(in("dim1", Arrays.asList("6", "abc"))),
         ImmutableList.of(new Object[]{"xabc", 1L})
     );
   }
@@ -371,7 +377,41 @@ public class CalciteLookupFunctionQueryTest extends BaseCalciteQueryTest
     testQuery(
         buildFilterTestSql("LOOKUP(dim1, 'lookyloo') IN ('xabc', 'x6', 'nonexistent')"),
         QUERY_CONTEXT,
-        buildFilterTestExpectedQuery(in("dim1", Arrays.asList("6", "abc"), null)),
+        buildFilterTestExpectedQuery(in("dim1", Arrays.asList("6", "abc"))),
+        ImmutableList.of(new Object[]{"xabc", 1L})
+    );
+  }
+
+  @Test
+  public void testFilterScalarInArray()
+  {
+    cannotVectorize();
+
+    testQuery(
+        buildFilterTestSql("SCALAR_IN_ARRAY(LOOKUP(dim1, 'lookyloo'), ARRAY['xabc', 'x6', 'nonexistent'])"),
+        QUERY_CONTEXT,
+        buildFilterTestExpectedQuery(in("dim1", Arrays.asList("6", "abc"))),
+        ImmutableList.of(new Object[]{"xabc", 1L})
+    );
+  }
+
+  @Test
+  public void testFilterInOverScalarInArrayThreshold()
+  {
+    cannotVectorize();
+
+    // Set inFunctionThreshold = 1 to cause the IN to be converted to SCALAR_IN_ARRAY.
+    final ImmutableMap<String, Object> queryContext =
+        ImmutableMap.<String, Object>builder()
+                    .putAll(QUERY_CONTEXT_DEFAULT)
+                    .put(PlannerContext.CTX_SQL_REVERSE_LOOKUP, true)
+                    .put(QueryContexts.IN_FUNCTION_THRESHOLD, 1)
+                    .build();
+
+    testQuery(
+        buildFilterTestSql("LOOKUP(dim1, 'lookyloo') IN ('xabc', 'x6', 'nonexistent')"),
+        queryContext,
+        buildFilterTestExpectedQuery(in("dim1", Arrays.asList("6", "abc"))),
         ImmutableList.of(new Object[]{"xabc", 1L})
     );
   }
@@ -381,12 +421,12 @@ public class CalciteLookupFunctionQueryTest extends BaseCalciteQueryTest
   {
     cannotVectorize();
 
-    // Set CTX_MAX_IN_SIZE = 1 to stop the LOOKUP call from being reversed.
+    // Set sqlReverseLookupThreshold = 1 to stop the LOOKUP call from being reversed.
     final ImmutableMap<String, Object> queryContext =
         ImmutableMap.<String, Object>builder()
                     .putAll(QUERY_CONTEXT_DEFAULT)
                     .put(PlannerContext.CTX_SQL_REVERSE_LOOKUP, true)
-                    .put(ReverseLookupRule.CTX_MAX_IN_SIZE, 1)
+                    .put(ReverseLookupRule.CTX_THRESHOLD, 1)
                     .build();
 
     testQuery(
@@ -395,10 +435,38 @@ public class CalciteLookupFunctionQueryTest extends BaseCalciteQueryTest
         NullHandling.sqlCompatible()
         ? buildFilterTestExpectedQuery(
             expressionVirtualColumn("v0", "lookup(\"dim1\",'lookyloo')", ColumnType.STRING),
-            in("v0", ImmutableList.of("nonexistent", "x6", "xabc"), null)
+            in("v0", ImmutableList.of("nonexistent", "x6", "xabc"))
         )
         : buildFilterTestExpectedQuery(
             in("dim1", ImmutableList.of("nonexistent", "x6", "xabc"), EXTRACTION_FN)
+        ),
+        ImmutableList.of(new Object[]{"xabc", 1L})
+    );
+  }
+
+  @Test
+  public void testFilterInOverMaxSize2()
+  {
+    cannotVectorize();
+
+    // Set inSubQueryThreshold = 1 to stop the LOOKUP call from being reversed.
+    final ImmutableMap<String, Object> queryContext =
+        ImmutableMap.<String, Object>builder()
+                    .putAll(QUERY_CONTEXT_DEFAULT)
+                    .put(PlannerContext.CTX_SQL_REVERSE_LOOKUP, true)
+                    .put(QueryContexts.IN_SUB_QUERY_THRESHOLD_KEY, 1)
+                    .build();
+
+    testQuery(
+        buildFilterTestSql("LOOKUP(dim1, 'lookyloo') = 'xabc' OR LOOKUP(dim1, 'lookyloo') = 'x6'"),
+        queryContext,
+        NullHandling.sqlCompatible()
+        ? buildFilterTestExpectedQuery(
+            expressionVirtualColumn("v0", "lookup(\"dim1\",'lookyloo')", ColumnType.STRING),
+            in("v0", ImmutableList.of("x6", "xabc"))
+        )
+        : buildFilterTestExpectedQuery(
+            in("dim1", ImmutableList.of("x6", "xabc"), EXTRACTION_FN)
         ),
         ImmutableList.of(new Object[]{"xabc", 1L})
     );
@@ -417,13 +485,13 @@ public class CalciteLookupFunctionQueryTest extends BaseCalciteQueryTest
         ? buildFilterTestExpectedQuery(
             expressionVirtualColumn("v0", "lookup(\"dim1\",'lookyloo')", ColumnType.STRING),
             or(
-                in("dim1", Arrays.asList("6", "abc"), null),
+                in("dim1", Arrays.asList("6", "abc")),
                 isNull("v0")
             )
         )
         : buildFilterTestExpectedQuery(
             or(
-                in("dim1", Arrays.asList("6", "abc"), null),
+                in("dim1", Arrays.asList("6", "abc")),
                 selector("dim1", null, EXTRACTION_FN)
             )
         ),
@@ -447,13 +515,13 @@ public class CalciteLookupFunctionQueryTest extends BaseCalciteQueryTest
         ? buildFilterTestExpectedQuery(
             expressionVirtualColumn("v0", "lookup(\"dim1\",'lookyloo')", ColumnType.STRING),
             and(
-                in("dim1", ImmutableList.of("6", "abc"), null),
+                in("dim1", ImmutableList.of("6", "abc")),
                 not(isNull("v0"))
             )
         )
         : buildFilterTestExpectedQuery(
             and(
-                in("dim1", Arrays.asList("6", "abc"), null),
+                in("dim1", Arrays.asList("6", "abc")),
                 not(selector("dim1", null, EXTRACTION_FN))
             )
         ),
@@ -464,7 +532,9 @@ public class CalciteLookupFunctionQueryTest extends BaseCalciteQueryTest
   @Test
   public void testFilterInOrIsNullInjective()
   {
-    cannotVectorize();
+    if (NullHandling.sqlCompatible()) {
+      cannotVectorize();
+    }
 
     testQuery(
         buildFilterTestSql(
@@ -524,13 +594,13 @@ public class CalciteLookupFunctionQueryTest extends BaseCalciteQueryTest
         ? buildFilterTestExpectedQuery(
             expressionVirtualColumn("v0", "lookup(\"dim1\",'lookyloo')", ColumnType.STRING),
             and(
-                not(istrue(in("dim1", ImmutableList.of("6", "abc"), null))),
+                not(istrue(in("dim1", ImmutableList.of("6", "abc")))),
                 notNull("v0")
             )
         )
         : buildFilterTestExpectedQuery(
             and(
-                not(in("dim1", ImmutableList.of("6", "abc"), null)),
+                not(in("dim1", ImmutableList.of("6", "abc"))),
                 not(selector("dim1", null, EXTRACTION_FN))
             )
         ),
@@ -552,9 +622,9 @@ public class CalciteLookupFunctionQueryTest extends BaseCalciteQueryTest
             NullHandling.sqlCompatible()
             ? and(
                 not(isNull("dim1")),
-                not(in("dim1", ImmutableList.of("abc", "def"), null))
+                not(in("dim1", ImmutableList.of("abc", "def")))
             )
-            : not(in("dim1", ImmutableList.of("abc", "def"), null))),
+            : not(in("dim1", ImmutableList.of("abc", "def")))),
         ImmutableList.of(new Object[]{NULL_STRING, 4L})
     );
   }
@@ -674,7 +744,7 @@ public class CalciteLookupFunctionQueryTest extends BaseCalciteQueryTest
     testQuery(
         buildFilterTestSql("LOOKUP(dim1, 'lookyloo121') NOT IN ('xabc', 'xdef', 'nonexistent')"),
         QUERY_CONTEXT,
-        buildFilterTestExpectedQuery(not(in("dim1", ImmutableList.of("abc", "def"), null))),
+        buildFilterTestExpectedQuery(not(in("dim1", ImmutableList.of("abc", "def")))),
         ImmutableList.of(new Object[]{NULL_STRING, 4L})
     );
   }
@@ -687,7 +757,7 @@ public class CalciteLookupFunctionQueryTest extends BaseCalciteQueryTest
     testQuery(
         buildFilterTestSql("LOOKUP(dim1, 'lookyloo', 'xyzzy') NOT IN ('xabc', 'x6', 'nonexistent')"),
         QUERY_CONTEXT,
-        buildFilterTestExpectedQuery(not(in("dim1", ImmutableList.of("6", "abc"), null))),
+        buildFilterTestExpectedQuery(not(in("dim1", ImmutableList.of("6", "abc")))),
         ImmutableList.of(new Object[]{NULL_STRING, 5L})
     );
   }
@@ -702,8 +772,8 @@ public class CalciteLookupFunctionQueryTest extends BaseCalciteQueryTest
         QUERY_CONTEXT,
         buildFilterTestExpectedQuery(
             NullHandling.sqlCompatible()
-            ? not(istrue(in("dim1", ImmutableList.of("6", "abc"), null)))
-            : not(in("dim1", ImmutableList.of("6", "abc"), null))),
+            ? not(istrue(in("dim1", ImmutableList.of("6", "abc"))))
+            : not(in("dim1", ImmutableList.of("6", "abc")))),
         ImmutableList.of(new Object[]{NULL_STRING, 5L})
     );
   }
@@ -737,13 +807,16 @@ public class CalciteLookupFunctionQueryTest extends BaseCalciteQueryTest
   @Test
   public void testFilterMvContainsNullInjective()
   {
-    cannotVectorize();
+    if (NullHandling.sqlCompatible()) {
+      // cannotVectorize doesn't trip in default-value mode, due to buildFilterTestExpectedQueryAlwaysFalse.
+      cannotVectorize();
+    }
 
     testQuery(
         buildFilterTestSql("MV_CONTAINS(LOOKUP(dim1, 'lookyloo121'), NULL)"),
         QUERY_CONTEXT,
         NullHandling.sqlCompatible()
-        ? buildFilterTestExpectedQuery(expressionFilter("array_contains(\"dim1\",null)"))
+        ? buildFilterTestExpectedQuery(expressionFilter("array_contains(mv_harmonize_nulls(\"dim1\"),null)"))
         : buildFilterTestExpectedQueryAlwaysFalse(),
         ImmutableList.of()
     );
@@ -757,7 +830,7 @@ public class CalciteLookupFunctionQueryTest extends BaseCalciteQueryTest
     testQuery(
         buildFilterTestSql("MV_OVERLAP(lookup(dim1, 'lookyloo'), ARRAY['xabc', 'x6', 'nonexistent'])"),
         QUERY_CONTEXT,
-        buildFilterTestExpectedQuery(in("dim1", ImmutableSet.of("6", "abc"), null)),
+        buildFilterTestExpectedQuery(in("dim1", ImmutableSet.of("6", "abc"))),
         ImmutableList.of(new Object[]{"xabc", 1L})
     );
   }
@@ -790,7 +863,7 @@ public class CalciteLookupFunctionQueryTest extends BaseCalciteQueryTest
         QUERY_CONTEXT,
         buildFilterTestExpectedQuery(
             NullHandling.sqlCompatible()
-            ? in("dim1", Arrays.asList(null, "abc"), null)
+            ? in("dim1", Arrays.asList(null, "abc"))
             : equality("dim1", "abc", ColumnType.STRING)
         ),
         ImmutableList.of(new Object[]{"xabc", 1L})
@@ -827,17 +900,12 @@ public class CalciteLookupFunctionQueryTest extends BaseCalciteQueryTest
     testQuery(
         buildFilterTestSql("MV_CONTAINS(lookup(dim1, 'lookyloo'), 'xabc') IS NOT TRUE"),
         QUERY_CONTEXT,
-        NullHandling.sqlCompatible()
-        ? buildFilterTestExpectedQuery(
-            expressionVirtualColumn("v0", "lookup(\"dim1\",'lookyloo')", ColumnType.STRING),
-            not(equality("v0", "xabc", ColumnType.STRING))
-        )
-        : buildFilterTestExpectedQuery(
-            not(equality("dim1", "abc", ColumnType.STRING))
+        buildFilterTestExpectedQuery(
+            NullHandling.sqlCompatible()
+            ? not(istrue(equality("dim1", "abc", ColumnType.STRING)))
+            : not(equality("dim1", "abc", ColumnType.STRING))
         ),
-        NullHandling.sqlCompatible()
-        ? ImmutableList.of()
-        : ImmutableList.of(new Object[]{"", 5L})
+        ImmutableList.of(new Object[]{NullHandling.defaultStringValue(), 5L})
     );
   }
 
@@ -865,7 +933,7 @@ public class CalciteLookupFunctionQueryTest extends BaseCalciteQueryTest
         buildFilterTestExpectedQuery(
             NullHandling.sqlCompatible()
             ? not(in("dim1", ImmutableList.of("nonexistent", "x6", "xabc"), EXTRACTION_FN))
-            : not(in("dim1", ImmutableList.of("6", "abc"), null))
+            : not(in("dim1", ImmutableList.of("6", "abc")))
         ),
         NullHandling.sqlCompatible()
         ? Collections.emptyList()
@@ -883,12 +951,10 @@ public class CalciteLookupFunctionQueryTest extends BaseCalciteQueryTest
         QUERY_CONTEXT,
         buildFilterTestExpectedQuery(
             NullHandling.sqlCompatible()
-            ? not(in("dim1", ImmutableList.of("x6", "xabc", "nonexistent"), EXTRACTION_FN))
-            : not(in("dim1", ImmutableList.of("6", "abc"), null))
+            ? not(istrue(in("dim1", ImmutableList.of("6", "abc"))))
+            : not(in("dim1", ImmutableList.of("6", "abc")))
         ),
-        NullHandling.sqlCompatible()
-        ? Collections.emptyList()
-        : ImmutableList.of(new Object[]{NullHandling.defaultStringValue(), 5L})
+        ImmutableList.of(new Object[]{NullHandling.defaultStringValue(), 5L})
     );
   }
 
@@ -964,7 +1030,10 @@ public class CalciteLookupFunctionQueryTest extends BaseCalciteQueryTest
   @Test
   public void testFilterIsNullInjective()
   {
-    cannotVectorize();
+    if (NullHandling.sqlCompatible()) {
+      // cannotVectorize doesn't trip in default-value mode, due to buildFilterTestExpectedQueryAlwaysFalse.
+      cannotVectorize();
+    }
 
     testQuery(
         buildFilterTestSql("LOOKUP(dim1, 'lookyloo121') IS NULL"),
@@ -1233,7 +1302,10 @@ public class CalciteLookupFunctionQueryTest extends BaseCalciteQueryTest
   @Test
   public void testFilterCoalesceSameLiteralInjective()
   {
-    cannotVectorize();
+    if (NullHandling.sqlCompatible()) {
+      // cannotVectorize doesn't trip in default-value mode, due to buildFilterTestExpectedQueryAlwaysFalse.
+      cannotVectorize();
+    }
 
     testQuery(
         buildFilterTestSql("COALESCE(LOOKUP(dim1, 'lookyloo121'), 'x6') = 'x6'"),
@@ -1260,13 +1332,13 @@ public class CalciteLookupFunctionQueryTest extends BaseCalciteQueryTest
         ? buildFilterTestExpectedQuery(
             expressionVirtualColumn("v0", "lookup(\"dim1\",'lookyloo','x6')", ColumnType.STRING),
             or(
-                in("dim1", Arrays.asList("a", "abc"), null),
+                in("dim1", Arrays.asList("a", "abc")),
                 equality("v0", "x6", ColumnType.STRING)
             )
         )
         : buildFilterTestExpectedQuery(
             or(
-                in("dim1", Arrays.asList("a", "abc"), null),
+                in("dim1", Arrays.asList("a", "abc")),
                 selector("dim1", "x6", extractionFn)
             )
         ),
@@ -1284,8 +1356,8 @@ public class CalciteLookupFunctionQueryTest extends BaseCalciteQueryTest
         QUERY_CONTEXT,
         buildFilterTestExpectedQuery(
             NullHandling.sqlCompatible()
-            ? or(in("dim1", Arrays.asList("2", "abc", "def"), null), isNull("dim1"))
-            : in("dim1", Arrays.asList("2", "abc", "def"), null)
+            ? or(in("dim1", Arrays.asList("2", "abc", "def")), isNull("dim1"))
+            : in("dim1", Arrays.asList("2", "abc", "def"))
         ),
         ImmutableList.of(new Object[]{NullHandling.defaultStringValue(), 2L}, new Object[]{"xabc", 1L})
     );
@@ -1369,8 +1441,6 @@ public class CalciteLookupFunctionQueryTest extends BaseCalciteQueryTest
   @Test
   public void testFilterCoalesceDifferentLiteral()
   {
-    cannotVectorize();
-
     testQuery(
         buildFilterTestSql("COALESCE(LOOKUP(dim1, 'lookyloo'), 'xyzzy') = 'x6'"),
         QUERY_CONTEXT,
@@ -1382,8 +1452,6 @@ public class CalciteLookupFunctionQueryTest extends BaseCalciteQueryTest
   @Test
   public void testFilterCoalesceDifferentLiteralAlwaysFalse()
   {
-    cannotVectorize();
-
     testQuery(
         buildFilterTestSql("COALESCE(LOOKUP(dim1, 'lookyloo'), 'xyzzy') = 'nonexistent'"),
         QUERY_CONTEXT,
@@ -1395,8 +1463,6 @@ public class CalciteLookupFunctionQueryTest extends BaseCalciteQueryTest
   @Test
   public void testFilterCoalesceCastVarcharDifferentLiteral()
   {
-    cannotVectorize();
-
     testQuery(
         buildFilterTestSql("COALESCE(CAST(LOOKUP(dim1, 'lookyloo') AS VARCHAR), 'xyzzy') = 'x6'"),
         QUERY_CONTEXT,
@@ -1443,7 +1509,7 @@ public class CalciteLookupFunctionQueryTest extends BaseCalciteQueryTest
         buildFilterTestSql(
             "MV_OVERLAP(COALESCE(LOOKUP(dim1, 'lookyloo'), 'xyzzy'), ARRAY['xabc', 'x6', 'nonexistent'])"),
         QUERY_CONTEXT,
-        buildFilterTestExpectedQuery(in("dim1", ImmutableSet.of("6", "abc"), null)),
+        buildFilterTestExpectedQuery(in("dim1", ImmutableSet.of("6", "abc"))),
         ImmutableList.of(new Object[]{"xabc", 1L})
     );
   }
@@ -1506,7 +1572,7 @@ public class CalciteLookupFunctionQueryTest extends BaseCalciteQueryTest
         QUERY_CONTEXT,
         buildFilterTestExpectedQuery(
             expressionVirtualColumn("v0", "nvl(lookup(\"dim1\",'lookyloo'),\"dim1\")", ColumnType.STRING),
-            in("v0", ImmutableList.of("10.1", "xabc"), null)
+            in("v0", ImmutableList.of("10.1", "xabc"))
         ),
         ImmutableList.of(
             new Object[]{NullHandling.defaultStringValue(), 1L},
@@ -1562,7 +1628,7 @@ public class CalciteLookupFunctionQueryTest extends BaseCalciteQueryTest
         )
     );
 
-    MatcherAssert.assertThat(
+    assertThat(
         e,
         ThrowableMessageMatcher.hasMessage(CoreMatchers.startsWith("Too many optimize calls[2]"))
     );
@@ -1729,7 +1795,7 @@ public class CalciteLookupFunctionQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @SqlTestFrameworkConfig(numMergeBuffers = 3)
+  @SqlTestFrameworkConfig.NumMergeBuffers(3)
   @Test
   public void testExactCountDistinct()
   {
@@ -1854,7 +1920,7 @@ public class CalciteLookupFunctionQueryTest extends BaseCalciteQueryTest
                         .setDataSource(CalciteTests.DATASOURCE1)
                         .setInterval(querySegmentSpec(Filtration.eternity()))
                         .setGranularity(Granularities.ALL)
-                        .setDimFilter(in("dim1", ImmutableList.of("abc", "def"), null))
+                        .setDimFilter(in("dim1", ImmutableList.of("abc", "def")))
                         .setDimensions(dimensions(new DefaultDimensionSpec("dim1", "d0", ColumnType.STRING)))
                         .setAggregatorSpecs(aggregators(new CountAggregatorFactory("a0")))
                         .setPostAggregatorSpecs(
@@ -1872,8 +1938,6 @@ public class CalciteLookupFunctionQueryTest extends BaseCalciteQueryTest
   @Test
   public void testDontPullUpLookupWhenUsedByAggregation()
   {
-    cannotVectorize();
-
     testQuery(
         "SELECT LOOKUP(dim1, 'lookyloo121'), COUNT(LOOKUP(dim1, 'lookyloo121')) FROM druid.foo GROUP BY 1",
         ImmutableList.of(

@@ -323,10 +323,11 @@ public class DefaultFramedOnHeapAggregatable implements FramedOnHeapAggregatable
         currentValue,
         0
     );
-    Aggregator combiningAgg = aggFactory.getCombiningFactory().factorize(combiningFactory);
 
-    combiningAgg.aggregate();
-    return combiningAgg.get();
+    try (Aggregator combiningAgg = aggFactory.getCombiningFactory().factorize(combiningFactory)) {
+      combiningAgg.aggregate();
+      return aggFactory.finalizeComputation(combiningAgg.get());
+    }
   }
 
   /**
@@ -463,7 +464,7 @@ public class DefaultFramedOnHeapAggregatable implements FramedOnHeapAggregatable
     if (rowIdProvider.get() < numRows) {
       for (int i = 0; i < aggs.length; i++) {
         aggs[i].aggregate();
-        results[i][resultStorageIndex] = aggs[i].get();
+        results[i][resultStorageIndex] = aggFactories[i].finalizeComputation(aggs[i].get());
         aggs[i].close();
         aggs[i] = aggFactories[i].factorize(columnSelectorFactory);
       }
@@ -476,7 +477,7 @@ public class DefaultFramedOnHeapAggregatable implements FramedOnHeapAggregatable
     for (int rowId = rowIdProvider.get(); rowId < numRows; ++rowId) {
       for (int i = 0; i < aggs.length; i++) {
         aggs[i].aggregate();
-        results[i][resultStorageIndex] = aggs[i].get();
+        results[i][resultStorageIndex] = aggFactories[i].finalizeComputation(aggs[i].get());
         aggs[i].close();
 
         // Use a combining aggregator to combine the result we just got with the result from the previous row
@@ -494,7 +495,7 @@ public class DefaultFramedOnHeapAggregatable implements FramedOnHeapAggregatable
         combiningAgg.aggregate();
         combiningFactory.increment();
         combiningAgg.aggregate();
-        results[i][resultStorageIndex] = combiningAgg.get();
+        results[i][resultStorageIndex] = aggFactories[i].finalizeComputation(combiningAgg.get());
         combiningAgg.close();
 
         aggs[i] = aggFactories[i].factorize(columnSelectorFactory);
@@ -550,7 +551,7 @@ public class DefaultFramedOnHeapAggregatable implements FramedOnHeapAggregatable
     if (rowIdProvider.get() >= 0) {
       for (int i = 0; i < aggs.length; i++) {
         aggs[i].aggregate();
-        results[i][resultStorageIndex] = aggs[i].get();
+        results[i][resultStorageIndex] = aggFactories[i].finalizeComputation(aggs[i].get());
         aggs[i].close();
         aggs[i] = aggFactories[i].factorize(columnSelectorFactory);
       }
@@ -563,7 +564,7 @@ public class DefaultFramedOnHeapAggregatable implements FramedOnHeapAggregatable
     for (int rowId = rowIdProvider.get(); rowId >= 0; --rowId) {
       for (int i = 0; i < aggs.length; i++) {
         aggs[i].aggregate();
-        results[i][resultStorageIndex] = aggs[i].get();
+        results[i][resultStorageIndex] = aggFactories[i].finalizeComputation(aggs[i].get());
         aggs[i].close();
 
         // Use a combining aggregator to combine the result we just got with the result from the previous row
@@ -581,7 +582,7 @@ public class DefaultFramedOnHeapAggregatable implements FramedOnHeapAggregatable
         combiningAgg.aggregate();
         combiningFactory.decrement();
         combiningAgg.aggregate();
-        results[i][resultStorageIndex] = combiningAgg.get();
+        results[i][resultStorageIndex] = aggFactories[i].finalizeComputation(combiningAgg.get());
         combiningAgg.close();
 
         aggs[i] = aggFactories[i].factorize(columnSelectorFactory);
@@ -672,7 +673,7 @@ public class DefaultFramedOnHeapAggregatable implements FramedOnHeapAggregatable
       }
 
       for (int i = 0; i < aggFactories.length; ++i) {
-        results[i][resultStorageIndex] = aggregators[i][nextIndex].get();
+        results[i][resultStorageIndex] = aggFactories[i].finalizeComputation(aggregators[i][nextIndex].get());
         aggregators[i][nextIndex].close();
         aggregators[i][nextIndex] = aggFactories[i].factorize(columnSelectorFactory);
       }
@@ -711,7 +712,7 @@ public class DefaultFramedOnHeapAggregatable implements FramedOnHeapAggregatable
       }
 
       for (int i = 0; i < aggFactories.length; ++i) {
-        results[i][resultStorageIndex] = aggregators[i][nextIndex].get();
+        results[i][resultStorageIndex] = aggFactories[i].finalizeComputation(aggregators[i][nextIndex].get());
         aggregators[i][nextIndex].close();
         aggregators[i][nextIndex] = null;
       }
@@ -724,7 +725,8 @@ public class DefaultFramedOnHeapAggregatable implements FramedOnHeapAggregatable
     // End Phase 3, anything left in the window needs to be collected and put into our results
     for (; nextIndex < windowSize; ++nextIndex) {
       for (int i = 0; i < aggFactories.length; ++i) {
-        results[i][resultStorageIndex] = aggregators[i][nextIndex].get();
+        results[i][resultStorageIndex] = aggFactories[i].finalizeComputation(aggregators[i][nextIndex].get());
+        aggregators[i][nextIndex].close();
         aggregators[i][nextIndex] = null;
       }
       ++resultStorageIndex;
@@ -777,7 +779,7 @@ public class DefaultFramedOnHeapAggregatable implements FramedOnHeapAggregatable
 
       if (rowId >= upperOffset) {
         for (int i = 0; i < aggregators.length; ++i) {
-          results[i][resultStorageIndex] = aggregators[i][startIndex].get();
+          results[i][resultStorageIndex] = aggFactories[i].finalizeComputation(aggregators[i][startIndex].get());
           aggregators[i][startIndex].close();
           aggregators[i][startIndex] = null;
         }
@@ -795,7 +797,7 @@ public class DefaultFramedOnHeapAggregatable implements FramedOnHeapAggregatable
 
     for (; startIndex < windowSize; ++startIndex) {
       for (int i = 0; i < aggregators.length; ++i) {
-        results[i][resultStorageIndex] = aggregators[i][startIndex].get();
+        results[i][resultStorageIndex] = aggFactories[i].finalizeComputation(aggregators[i][startIndex].get());
         aggregators[i][startIndex].close();
         aggregators[i][startIndex] = null;
       }
