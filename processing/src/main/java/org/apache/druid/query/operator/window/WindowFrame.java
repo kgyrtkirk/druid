@@ -178,9 +178,9 @@ public interface WindowFrame
     public int getLowerOffsetClamped(int maxRows)
     {
       if (lowerOffset == null) {
-        return maxRows;
+        return -maxRows;
       }
-      return Math.min(maxRows, lowerOffset);
+      return Math.max(-maxRows, lowerOffset);
     }
 
     /**
