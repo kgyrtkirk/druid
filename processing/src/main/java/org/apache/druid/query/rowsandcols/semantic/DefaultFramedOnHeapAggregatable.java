@@ -63,11 +63,11 @@ public class DefaultFramedOnHeapAggregatable implements FramedOnHeapAggregatable
       AggregatorFactory[] aggFactories
   )
   {
-    if (frame.getAdapter(Unbounded.class) != null) {
+    if (frame.unwrap(Unbounded.class) != null) {
       return computeUnboundedAggregates(aggFactories);
     }
 
-    WindowFrame.Rows rowsFrame = frame.getAdapter(WindowFrame.Rows.class);
+    WindowFrame.Rows rowsFrame = frame.unwrap(WindowFrame.Rows.class);
     if (rowsFrame != null) {
       if (rowsFrame.lowerOffset == null) {
         return computeCumulativeAggregates(aggFactories, rowsFrame.upperOffset);
@@ -90,7 +90,7 @@ public class DefaultFramedOnHeapAggregatable implements FramedOnHeapAggregatable
         }
       }
     } else {
-      Groups groupFrame = frame.getAdapter(WindowFrame.Groups.class);
+      Groups groupFrame = frame.unwrap(WindowFrame.Groups.class);
       return computeGroupAggregates(aggFactories, groupFrame);
     }
   }

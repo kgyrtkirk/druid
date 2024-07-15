@@ -26,6 +26,9 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import org.apache.druid.query.operator.ColumnWithDirection;
+
+import javax.annotation.Nullable;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -37,7 +40,7 @@ import java.util.stream.Collectors;
     @JsonSubTypes.Type(name = "rows", value = WindowFrame.Rows.class),
     @JsonSubTypes.Type(name = "group", value = WindowFrame.Groups.class),
 })
-public interface WindowFrame extends Adaptable
+public interface WindowFrame
 {
   static WindowFrame unbounded()
   {
@@ -225,5 +228,14 @@ public interface WindowFrame extends Adaptable
           ", orderBy=" + orderBy + "]";
     }
 
+  }
+
+  @SuppressWarnings("unchecked")
+  @Nullable
+  public default <T extends WindowFrame> T unwrap(Class<T> clazz) {
+    if(clazz.isInstance(this)) {
+      return (T) this;
+    }
+    return null;
   }
 }
