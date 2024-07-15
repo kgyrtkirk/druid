@@ -15,7 +15,7 @@ expectedOperators:
     processor:
       type: "framedAgg"
       frame:
-          type: "group"
+          type: "rows"
           lowerOffset: -3
           upperOffset: 2
           orderBy: null
