@@ -95,15 +95,15 @@ public interface WindowFrame
     }
   }
 
-  public static class Rows implements WindowFrame
+  public static abstract class OffsetFrame implements WindowFrame
   {
     @JsonProperty
-    public Integer lowerOffset;
+    public final Integer lowerOffset;
     @JsonProperty
-    public Integer upperOffset;
+    public final Integer upperOffset;
 
     @JsonCreator
-    public Rows(
+    public OffsetFrame(
         @JsonProperty("lowerOffset") Integer lowerOffset,
         @JsonProperty("upperOffset") Integer upperOffset)
     {
@@ -115,60 +115,6 @@ public interface WindowFrame
     public int hashCode()
     {
       return Objects.hash(lowerOffset, upperOffset);
-    }
-
-    @Override
-    public boolean equals(Object obj)
-    {
-      if (this == obj) {
-        return true;
-      }
-      if (obj == null) {
-        return false;
-      }
-      if (getClass() != obj.getClass()) {
-        return false;
-      }
-      Rows other = (Rows) obj;
-      return Objects.equals(lowerOffset, other.lowerOffset) && Objects.equals(upperOffset, other.upperOffset);
-    }
-
-    @Override
-    public String toString()
-    {
-      return "WindowFrame.Rows ["
-          + "lowerOffset=" + lowerOffset +
-          ", upperOffset=" + upperOffset +
-          "]";
-    }
-  }
-
-  public static class Groups implements WindowFrame
-  {
-    @JsonProperty
-    private final Integer lowerOffset;
-    @JsonProperty
-    private final Integer upperOffset;
-    @JsonProperty
-    private final ImmutableList<ColumnWithDirection> orderBy;
-
-    @JsonCreator
-    public Groups(
-        @JsonProperty("lowerOffset") Integer lowerOffset,
-        @JsonProperty("upperOffset") Integer upperOffset,
-        @JsonProperty("orderBy") List<ColumnWithDirection> orderBy)
-    {
-      this.lowerOffset = lowerOffset;
-      this.upperOffset = upperOffset;
-      this.orderBy = ImmutableList.copyOf(orderBy);
-    }
-
-    public List<String> getOrderByColNames()
-    {
-      if (orderBy == null) {
-        return Collections.emptyList();
-      }
-      return orderBy.stream().map(ColumnWithDirection::getColumn).collect(Collectors.toList());
     }
 
     /**
@@ -193,6 +139,69 @@ public interface WindowFrame
         return maxRows;
       }
       return Math.min(maxRows, upperOffset);
+    }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+      if (this == obj) {
+        return true;
+      }
+      if (obj == null) {
+        return false;
+      }
+      if (getClass() != obj.getClass()) {
+        return false;
+      }
+      OffsetFrame other = (OffsetFrame) obj;
+      return Objects.equals(lowerOffset, other.lowerOffset) && Objects.equals(upperOffset, other.upperOffset);
+    }
+
+    @Override
+    public abstract String toString();
+  }
+
+  public static class Rows extends OffsetFrame
+  {
+    @JsonCreator
+    public Rows(
+        @JsonProperty("lowerOffset") Integer lowerOffset,
+        @JsonProperty("upperOffset") Integer upperOffset)
+    {
+      super(lowerOffset, upperOffset);
+    }
+
+    @Override
+    public String toString()
+    {
+      return "WindowFrame.Rows ["
+          + "lowerOffset=" + lowerOffset +
+          ", upperOffset=" + upperOffset +
+          "]";
+    }
+  }
+
+  public static class Groups extends OffsetFrame
+  {
+    @JsonProperty
+    private final ImmutableList<ColumnWithDirection> orderBy;
+
+    @JsonCreator
+    public Groups(
+        @JsonProperty("lowerOffset") Integer lowerOffset,
+        @JsonProperty("upperOffset") Integer upperOffset,
+        @JsonProperty("orderBy") List<ColumnWithDirection> orderBy)
+    {
+      super(lowerOffset, upperOffset);
+      this.orderBy = ImmutableList.copyOf(orderBy);
+    }
+
+    public List<String> getOrderByColNames()
+    {
+      if (orderBy == null) {
+        return Collections.emptyList();
+      }
+      return orderBy.stream().map(ColumnWithDirection::getColumn).collect(Collectors.toList());
     }
 
     @Override
@@ -222,12 +231,11 @@ public interface WindowFrame
     @Override
     public String toString()
     {
-      return "Groups [" +
+      return "WindowFrame.Groups [" +
           "lowerOffset=" + lowerOffset +
           ", upperOffset=" + upperOffset +
           ", orderBy=" + orderBy + "]";
     }
-
   }
 
   @SuppressWarnings("unchecked")
