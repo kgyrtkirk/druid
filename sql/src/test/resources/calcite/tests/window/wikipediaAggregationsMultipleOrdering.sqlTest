@@ -17,7 +17,7 @@ expectedOperators:
       type: "framedAgg"
       frame:
         type: group
-        lowerOffset: 3
+        lowerOffset: -3
         upperOffset: 2
         orderBy:
           - column: d1
