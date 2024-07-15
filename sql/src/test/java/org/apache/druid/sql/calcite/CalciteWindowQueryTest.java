@@ -207,11 +207,13 @@ public class CalciteWindowQueryTest extends BaseCalciteQueryTest
       testBuilder()
           .skipVectorize(true)
           .sql(testCase.getSql())
-          .queryContext(ImmutableMap.<String, Object> builder()
-              .put(PlannerContext.CTX_ENABLE_WINDOW_FNS, true)
-              .put(QueryContexts.ENABLE_DEBUG, true)
-              .putAll(testCase.getQueryContext())
-              .build())
+          .queryContext(
+              ImmutableMap.<String, Object>builder()
+                  .put(PlannerContext.CTX_ENABLE_WINDOW_FNS, true)
+                  .put(QueryContexts.ENABLE_DEBUG, true)
+                  .putAll(testCase.getQueryContext())
+                  .build()
+          )
           .addCustomVerification(QueryVerification.ofResults(testCase))
           .run();
     }

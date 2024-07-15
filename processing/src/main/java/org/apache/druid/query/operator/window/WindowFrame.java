@@ -66,7 +66,7 @@ public interface WindowFrame
     return groups(null, 0, Lists.newArrayList(orderBy));
   }
 
-  public static class Unbounded implements WindowFrame
+  class Unbounded implements WindowFrame
   {
     @JsonCreator
     public Unbounded()
@@ -95,7 +95,7 @@ public interface WindowFrame
     }
   }
 
-  public abstract static class OffsetFrame implements WindowFrame
+  abstract class OffsetFrame implements WindowFrame
   {
     @JsonProperty
     public final Integer lowerOffset;
@@ -161,7 +161,7 @@ public interface WindowFrame
     public abstract String toString();
   }
 
-  public static class Rows extends OffsetFrame
+  class Rows extends OffsetFrame
   {
     @JsonCreator
     public Rows(
@@ -181,7 +181,7 @@ public interface WindowFrame
     }
   }
 
-  public static class Groups extends OffsetFrame
+  class Groups extends OffsetFrame
   {
     @JsonProperty
     private final ImmutableList<ColumnWithDirection> orderBy;
