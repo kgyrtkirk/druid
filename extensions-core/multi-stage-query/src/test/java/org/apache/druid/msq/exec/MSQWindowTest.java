@@ -46,6 +46,7 @@ import org.apache.druid.query.operator.NaivePartitioningOperatorFactory;
 import org.apache.druid.query.operator.NaiveSortOperatorFactory;
 import org.apache.druid.query.operator.WindowOperatorQuery;
 import org.apache.druid.query.operator.window.WindowFrame;
+import org.apache.druid.query.operator.window.WindowFrame.PeerType;
 import org.apache.druid.query.operator.window.WindowFramedAggregateProcessor;
 import org.apache.druid.query.operator.window.WindowOperatorFactory;
 import org.apache.druid.query.scan.ScanQuery;
@@ -106,7 +107,7 @@ public class MSQWindowTest extends MSQTestBase
                                            .build();
 
 
-    final WindowFrame theFrame = new WindowFrame(WindowFrame.PeerType.ROWS, true, 0, true, 0, null);
+    final WindowFrame theFrame = newWindowFrame(WindowFrame.PeerType.ROWS, true, 0, true, 0, null);
     final AggregatorFactory[] theAggs = {
         new DoubleSumAggregatorFactory("w0", "d0")
     };
@@ -196,7 +197,7 @@ public class MSQWindowTest extends MSQTestBase
                                            .build();
 
 
-    final WindowFrame theFrame = new WindowFrame(WindowFrame.PeerType.ROWS, true, 0, true, 0, null);
+    final WindowFrame theFrame = newWindowFrame(WindowFrame.PeerType.ROWS, true, 0, true, 0, null);
     final AggregatorFactory[] theAggs = {
         new DoubleSumAggregatorFactory("w0", "d1")
     };
@@ -306,7 +307,7 @@ public class MSQWindowTest extends MSQTestBase
                                            .build();
 
 
-    final WindowFrame theFrame = new WindowFrame(WindowFrame.PeerType.ROWS, true, 0, true, 0, null);
+    final WindowFrame theFrame = newWindowFrame(WindowFrame.PeerType.ROWS, true, 0, true, 0, null);
     final AggregatorFactory[] theAggs = {
         new DoubleSumAggregatorFactory("w0", "d1")
     };
@@ -419,7 +420,7 @@ public class MSQWindowTest extends MSQTestBase
                                            .build();
 
 
-    final WindowFrame theFrame = new WindowFrame(WindowFrame.PeerType.ROWS, true, 0, true, 0, null);
+    final WindowFrame theFrame = newWindowFrame(WindowFrame.PeerType.ROWS, true, 0, true, 0, null);
     final AggregatorFactory[] theAggs = {
         new DoubleSumAggregatorFactory("w0", "d0")
     };
@@ -523,7 +524,7 @@ public class MSQWindowTest extends MSQTestBase
                                            .build();
 
 
-    final WindowFrame theFrame = new WindowFrame(WindowFrame.PeerType.ROWS, true, 0, true, 0, null);
+    final WindowFrame theFrame = newWindowFrame(WindowFrame.PeerType.ROWS, true, 0, true, 0, null);
     final AggregatorFactory[] theAggs = {
         new DoubleSumAggregatorFactory("w0", "d0")
     };
@@ -589,7 +590,7 @@ public class MSQWindowTest extends MSQTestBase
                                             .add("cc", ColumnType.DOUBLE)
                                             .build();
 
-    final WindowFrame theFrame = new WindowFrame(WindowFrame.PeerType.ROWS, true, 0, true, 0, null);
+    final WindowFrame theFrame = newWindowFrame(WindowFrame.PeerType.ROWS, true, 0, true, 0, null);
     final AggregatorFactory[] theAggs = {
         new DoubleSumAggregatorFactory("w0", "m1")
     };
@@ -655,7 +656,7 @@ public class MSQWindowTest extends MSQTestBase
                                             .add("cc", ColumnType.DOUBLE)
                                             .build();
 
-    final WindowFrame theFrame = new WindowFrame(WindowFrame.PeerType.ROWS, true, 0, true, 0, null);
+    final WindowFrame theFrame = newWindowFrame(WindowFrame.PeerType.ROWS, true, 0, true, 0, null);
     final AggregatorFactory[] theAggs = {
         new DoubleSumAggregatorFactory("w0", "m1")
     };
@@ -727,7 +728,7 @@ public class MSQWindowTest extends MSQTestBase
                                             .add("cc", ColumnType.DOUBLE)
                                             .build();
 
-    final WindowFrame theFrame = new WindowFrame(WindowFrame.PeerType.ROWS, true, 0, true, 0, null);
+    final WindowFrame theFrame = newWindowFrame(WindowFrame.PeerType.ROWS, true, 0, true, 0, null);
     final AggregatorFactory[] theAggs = {
         new DoubleSumAggregatorFactory("w0", "m1")
     };
@@ -796,7 +797,7 @@ public class MSQWindowTest extends MSQTestBase
                                             .add("cc", ColumnType.DOUBLE)
                                             .build();
 
-    final WindowFrame theFrame = new WindowFrame(WindowFrame.PeerType.ROWS, true, 0, true, 0, null);
+    final WindowFrame theFrame = newWindowFrame(WindowFrame.PeerType.ROWS, true, 0, true, 0, null);
     final AggregatorFactory[] theAggs = {
         new DoubleSumAggregatorFactory("w0", "d1")
     };
@@ -881,7 +882,7 @@ public class MSQWindowTest extends MSQTestBase
                                             .add("cc", ColumnType.DOUBLE)
                                             .build();
 
-    final WindowFrame theFrame = new WindowFrame(WindowFrame.PeerType.ROWS, true, 0, true, 0, null);
+    final WindowFrame theFrame = newWindowFrame(WindowFrame.PeerType.ROWS, true, 0, true, 0, null);
     final AggregatorFactory[] theAggs = {
         new DoubleSumAggregatorFactory("w0", "m1")
     };
@@ -955,7 +956,7 @@ public class MSQWindowTest extends MSQTestBase
                                             .add("cc", ColumnType.DOUBLE)
                                             .build();
 
-    final WindowFrame theFrame = new WindowFrame(WindowFrame.PeerType.ROWS, true, 0, true, 0, null);
+    final WindowFrame theFrame = newWindowFrame(WindowFrame.PeerType.ROWS, true, 0, true, 0, null);
     final AggregatorFactory[] theAggs = {
         new DoubleSumAggregatorFactory("w0", "m1")
     };
@@ -1033,7 +1034,7 @@ public class MSQWindowTest extends MSQTestBase
                                             .add("m2", ColumnType.DOUBLE)
                                             .build();
 
-    final WindowFrame theFrame = new WindowFrame(
+    final WindowFrame theFrame = newWindowFrame(
         WindowFrame.PeerType.RANGE,
         true,
         0,
@@ -1149,7 +1150,7 @@ public class MSQWindowTest extends MSQTestBase
                                             .add("m2", ColumnType.DOUBLE)
                                             .build();
 
-    final WindowFrame theFrame = new WindowFrame(
+    final WindowFrame theFrame = newWindowFrame(
         WindowFrame.PeerType.ROWS,
         true,
         0,
@@ -1242,7 +1243,7 @@ public class MSQWindowTest extends MSQTestBase
                                             .add("cc", ColumnType.DOUBLE)
                                             .build();
 
-    final WindowFrame theFrame = new WindowFrame(WindowFrame.PeerType.ROWS, true, 0, true, 0, null);
+    final WindowFrame theFrame = newWindowFrame(WindowFrame.PeerType.ROWS, true, 0, true, 0, null);
     final AggregatorFactory[] theAggs = {
         new DoubleSumAggregatorFactory("w0", "m1")
     };
@@ -1332,7 +1333,7 @@ public class MSQWindowTest extends MSQTestBase
                                             .add("d3", ColumnType.STRING)
                                             .build();
 
-    final WindowFrame theFrame = new WindowFrame(
+    final WindowFrame theFrame = newWindowFrame(
         WindowFrame.PeerType.ROWS,
         true,
         0,
@@ -1423,7 +1424,7 @@ public class MSQWindowTest extends MSQTestBase
                                             .add("d3", ColumnType.STRING)
                                             .build();
 
-    final WindowFrame theFrame = new WindowFrame(
+    final WindowFrame theFrame = newWindowFrame(
         WindowFrame.PeerType.ROWS,
         true,
         0,
@@ -1808,7 +1809,7 @@ public class MSQWindowTest extends MSQTestBase
                                             .add("cc", ColumnType.LONG)
                                             .build();
 
-    final WindowFrame theFrame = new WindowFrame(WindowFrame.PeerType.ROWS, true, 0, true, 0, null);
+    final WindowFrame theFrame = newWindowFrame(WindowFrame.PeerType.ROWS, true, 0, true, 0, null);
     final AggregatorFactory[] theAggs = {
         new LongSumAggregatorFactory("w0", "added")
     };
@@ -1900,7 +1901,7 @@ public class MSQWindowTest extends MSQTestBase
                                             .add("cc", ColumnType.LONG)
                                             .build();
 
-    final WindowFrame theFrame = new WindowFrame(WindowFrame.PeerType.ROWS, true, 0, true, 0, null);
+    final WindowFrame theFrame = newWindowFrame(WindowFrame.PeerType.ROWS, true, 0, true, 0, null);
     final AggregatorFactory[] theAggs = {
         new LongSumAggregatorFactory("w0", "added")
     };
@@ -2016,7 +2017,7 @@ public class MSQWindowTest extends MSQTestBase
                                            .build();
 
 
-    final WindowFrame theFrame = new WindowFrame(WindowFrame.PeerType.ROWS, true, 0, true, 0, null);
+    final WindowFrame theFrame = newWindowFrame(WindowFrame.PeerType.ROWS, true, 0, true, 0, null);
     final AggregatorFactory[] theAggs = {
         new LongSumAggregatorFactory("w0", "d1")
     };
@@ -2062,6 +2063,17 @@ public class MSQWindowTest extends MSQTestBase
         .setQueryContext(context)
         .verifyResults();
   }
+
+  private WindowFrame newWindowFrame(PeerType rows, boolean b, int i, boolean c, int j, Object object)
+  {
+    if(true)
+    {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+    return null;
+
+  }
+
 
   @MethodSource("data")
   @ParameterizedTest(name = "{index}:with context {0}")
