@@ -110,15 +110,15 @@ public class DefaultFramedOnHeapAggregatable implements FramedOnHeapAggregatable
   public static Iterable<AggInterval> buildIteratorFor(AppendableRowsAndColumns rac, WindowFrame frame)
   {
     int numRows = rac.numRows();
-    if(isEffectivelyUnbounded(frame, numRows)) {
+    if (isEffectivelyUnbounded(frame, numRows)) {
       return buildUnboundedIteratorFor(rac);
     }
     Rows rowsFrame = frame.unwrap(WindowFrame.Rows.class);
-    if(rowsFrame != null) {
+    if (rowsFrame != null) {
       return buildRowIteratorFor(rac, rowsFrame);
     }
     Groups groupsFrame = frame.unwrap(WindowFrame.Groups.class);
-    if(groupsFrame != null) {
+    if (groupsFrame != null) {
       return buildGroupIteratorFor(rac, groupsFrame);
     }
     throw DruidException.defensive("Unable to handle WindowFrame [%s]!", frame);
@@ -171,7 +171,6 @@ public class DefaultFramedOnHeapAggregatable implements FramedOnHeapAggregatable
     // upper exclusive
     private final int upperOffset;
 
-//    public GroupIteratorForWindowFrame(WindowFrame frame, int[] groupBoundaries)
     public GroupIteratorForWindowFrame(WindowFrame.OffsetFrame frame, int[] groupBoundaries)
     {
       this.groupBoundaries = groupBoundaries;

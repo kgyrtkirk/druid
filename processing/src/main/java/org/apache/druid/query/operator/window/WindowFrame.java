@@ -95,7 +95,7 @@ public interface WindowFrame
     }
   }
 
-  public static abstract class OffsetFrame implements WindowFrame
+  public abstract static class OffsetFrame implements WindowFrame
   {
     @JsonProperty
     public final Integer lowerOffset;
@@ -240,8 +240,9 @@ public interface WindowFrame
 
   @SuppressWarnings("unchecked")
   @Nullable
-  public default <T extends WindowFrame> T unwrap(Class<T> clazz) {
-    if(clazz.isInstance(this)) {
+  default <T extends WindowFrame> T unwrap(Class<T> clazz)
+  {
+    if (clazz.isInstance(this)) {
       return (T) this;
     }
     return null;
