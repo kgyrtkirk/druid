@@ -475,7 +475,7 @@ public class FramedOnHeapAggregatableTest extends SemanticTestBase
   @Test
   public void testRangeB1()
   {
-    WindowFrame frame = WindowFrame.groups(1, 0, Collections.singletonList(ColumnWithDirection.ascending("c1")));
+    WindowFrame frame = WindowFrame.groups(-1, 0, Collections.singletonList(ColumnWithDirection.ascending("c1")));
 
     int[] c1Vals = new int[] {0, 1, 2, 2, 3, 4, 5};
     int[] c2Vals = new int[] {0, 1, 1, 1, 3, 4, 5};
@@ -499,7 +499,7 @@ public class FramedOnHeapAggregatableTest extends SemanticTestBase
   @Test
   public void testRangeB1A1()
   {
-    WindowFrame frame = WindowFrame.groups(1, 1, Collections.singletonList(ColumnWithDirection.ascending("c1")));
+    WindowFrame frame = WindowFrame.groups(-1, 1, Collections.singletonList(ColumnWithDirection.ascending("c1")));
 
     int[] c1Vals = new int[] {0, 1, 2, 3, 4, 5};
     int[] c2Vals = new int[] {0, 1, 2, 3, 4, 5};
@@ -512,7 +512,7 @@ public class FramedOnHeapAggregatableTest extends SemanticTestBase
   @Test
   public void testRangeB1A1_2()
   {
-    WindowFrame frame = WindowFrame.groups(1, 1, Collections.singletonList(ColumnWithDirection.ascending("c1")));
+    WindowFrame frame = WindowFrame.groups(-1, 1, Collections.singletonList(ColumnWithDirection.ascending("c1")));
 
     int[] c1Vals = new int[] {0, 0, 1, 2, 3, 3, 4, 4, 5};
     int[] c2Vals = new int[] {0, 0, 1, 2, 2, 1, 2, 2, 5};
@@ -524,7 +524,7 @@ public class FramedOnHeapAggregatableTest extends SemanticTestBase
   @Test
   public void testRangeB1A2()
   {
-    WindowFrame frame = WindowFrame.groups(1, 2, Collections.singletonList(ColumnWithDirection.ascending("c1")));
+    WindowFrame frame = WindowFrame.groups(-1, 2, Collections.singletonList(ColumnWithDirection.ascending("c1")));
 
     int[] c1Vals = new int[] {0, 0, 0, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3};
     int[] c2Vals = new int[] {1, 1, 2, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1};
