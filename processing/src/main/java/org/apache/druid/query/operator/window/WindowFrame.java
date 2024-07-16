@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 @JsonSubTypes(value = {
     @JsonSubTypes.Type(name = "unbounded", value = WindowFrame.Unbounded.class),
     @JsonSubTypes.Type(name = "rows", value = WindowFrame.Rows.class),
-    @JsonSubTypes.Type(name = "group", value = WindowFrame.Groups.class),
+    @JsonSubTypes.Type(name = "groups", value = WindowFrame.Groups.class),
 })
 public interface WindowFrame
 {
