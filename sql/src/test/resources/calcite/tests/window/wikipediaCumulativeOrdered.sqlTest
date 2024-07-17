@@ -41,7 +41,9 @@ expectedOperators:
           frame:
             type: groups
             upperOffset: 0
-            orderByColumns: [ a0 ]
+            orderBy:
+              - column: a0
+                direction: ASC
           aggregations:
             - { "type": "longSum", "name": "w0", "fieldName": "a0" }
 
