@@ -196,12 +196,17 @@ public interface WindowFrame
       this.orderBy = ImmutableList.copyOf(orderBy);
     }
 
-    public List<String> getOrderByColNames()
+    public List<ColumnWithDirection> getOrderByColumns()
     {
       if (orderBy == null) {
         return Collections.emptyList();
       }
-      return orderBy.stream().map(ColumnWithDirection::getColumn).collect(Collectors.toList());
+      return orderBy;
+    }
+
+    public List<String> getOrderByColNames()
+    {
+      return getOrderByColumns().stream().map(ColumnWithDirection::getColumn).collect(Collectors.toList());
     }
 
     @Override
