@@ -1215,13 +1215,8 @@ public class ParallelMergeCombiningSequence<T> extends YieldingSequenceBase<T>
 
     RuntimeException cancelAndThrow111(Throwable t)
     {
-      if(false) {
-      throwable.compareAndSet(null, t);
+      cancel2(t, true);
       return wrapRuntimeException111(t);
-      }else {
-        cancel2(t, true);
-        return wrapRuntimeException111(t);
-      }
     }
 
     void cancel11(Throwable t)
