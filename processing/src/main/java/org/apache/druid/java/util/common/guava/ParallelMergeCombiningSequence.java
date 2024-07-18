@@ -1219,9 +1219,20 @@ public class ParallelMergeCombiningSequence<T> extends YieldingSequenceBase<T>
       return wrapRuntimeException111(t);
     }
 
-    void cancel11(Throwable t)
+    void cancel12(Throwable t)
     {
       throwable.compareAndSet(null, t);
+//      super.setException(t);
+    }
+    void cancel11(Throwable t)
+    {
+      cancel2(t,true);
+    }
+
+    private boolean cancel2(Throwable t, boolean mayInterruptIfRunning)
+    {
+      this.cancel12(t);
+      return super.cancel(mayInterruptIfRunning);
     }
 
     boolean isCancelled111()
@@ -1258,8 +1269,7 @@ public class ParallelMergeCombiningSequence<T> extends YieldingSequenceBase<T>
     @Override
     public boolean cancel(boolean mayInterruptIfRunning)
     {
-      this.cancel11(new RuntimeException("Sequence cancelled"));
-      return super.cancel(mayInterruptIfRunning);
+      return cancel2(new RuntimeException("Sequence cancelled"), mayInterruptIfRunning);
     }
   }
 
