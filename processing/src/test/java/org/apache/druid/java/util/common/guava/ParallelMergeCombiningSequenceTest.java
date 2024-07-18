@@ -611,6 +611,7 @@ public class ParallelMergeCombiningSequenceTest
     Assert.assertFalse(pool.hasQueuedSubmissions());
     for (TestingReporter reporter : reporters) {
       Assert.assertThrows(QueryTimeoutException.class, () -> reporter.yielder.next(null));
+      Assert.assertTrue(reporter.future.isDone());
       Assert.assertTrue(reporter.future.isCancelled());
       Assert.assertTrue(reporter.future.isCancelled111());
     }
