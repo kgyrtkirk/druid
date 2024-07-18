@@ -612,7 +612,7 @@ public class ParallelMergeCombiningSequenceTest
     for (TestingReporter reporter : reporters) {
       Assert.assertThrows(QueryTimeoutException.class, () -> reporter.yielder.next(null));
       Assert.assertTrue(reporter.future.isCancelled());
-      Assert.assertTrue(reporter.future.getCancellationGizmo().isCancelled111());
+      Assert.assertTrue(reporter.future.isCancelled111());
     }
     Assert.assertTrue(pool.awaitQuiescence(10, TimeUnit.SECONDS));
     Assert.assertTrue(pool.isQuiescent());
@@ -774,7 +774,7 @@ public class ParallelMergeCombiningSequenceTest
     // (though shouldn't actually matter even if it was...)
     Assert.assertFalse(parallelMergeCombineSequence.getCancellationFuture().isCancelled());
     Assert.assertTrue(parallelMergeCombineSequence.getCancellationFuture().isDone());
-    Assert.assertFalse(parallelMergeCombineSequence.getCancellationFuture().getCancellationGizmo().isCancelled111());
+    Assert.assertFalse(parallelMergeCombineSequence.getCancellationFuture().isCancelled111());
   }
 
   private void assertResult(
@@ -828,7 +828,7 @@ public class ParallelMergeCombiningSequenceTest
     // cancellation trigger should not be set if sequence was fully yielded and close is called
     // (though shouldn't actually matter even if it was...)
     Assert.assertFalse(parallelMergeCombineSequence.getCancellationFuture().isCancelled());
-    Assert.assertFalse(parallelMergeCombineSequence.getCancellationFuture().getCancellationGizmo().isCancelled111());
+    Assert.assertFalse(parallelMergeCombineSequence.getCancellationFuture().isCancelled111());
     Assert.assertTrue(parallelMergeCombineSequence.getCancellationFuture().isDone());
   }
 
@@ -890,10 +890,10 @@ public class ParallelMergeCombiningSequenceTest
     Assert.assertEquals(expectedExceptionMsg, t.getMessage());
 
     // cancellation gizmo of sequence should be cancelled, and also should contain our expected message
-    Assert.assertTrue(parallelMergeCombineSequence.getCancellationFuture().getCancellationGizmo().isCancelled111());
+    Assert.assertTrue(parallelMergeCombineSequence.getCancellationFuture().isCancelled111());
     Assert.assertEquals(
         expectedExceptionMsg,
-        parallelMergeCombineSequence.getCancellationFuture().getCancellationGizmo().getRuntimeException111().getMessage()
+        parallelMergeCombineSequence.getCancellationFuture().getRuntimeException111().getMessage()
     );
     Assert.assertTrue(parallelMergeCombineSequence.getCancellationFuture().isCancelled());
 

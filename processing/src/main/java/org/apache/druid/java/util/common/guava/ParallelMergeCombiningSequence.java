@@ -1242,11 +1242,6 @@ public class ParallelMergeCombiningSequence<T> extends YieldingSequenceBase<T>
       return new RuntimeException(t);
     }
 
-    public CancellationGizmo getCancellationGizmo()
-    {
-      return this;
-    }
-
     @Override
     public boolean set(Boolean value)
     {
