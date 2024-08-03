@@ -311,7 +311,7 @@ See [Enabling metrics](../configuration/index.md#enabling-metrics) for more deta
 
 ## Coordination
 
-These metrics are for the Druid Coordinator and are reset each time the Coordinator runs the coordination logic.
+These metrics are emitted by the Druid Coordinator in every run of the corresponding coordinator duty.
 
 |Metric|Description|Dimensions|Normal value|
 |------|-----------|----------|------------|
@@ -325,6 +325,7 @@ These metrics are for the Druid Coordinator and are reset each time the Coordina
 |`segment/dropSkipped/count`|Number of segments that could not be dropped from any server.|`dataSource`, `tier`, `description`|Varies|
 |`segment/loadQueue/size`|Size in bytes of segments to load.|`server`|Varies|
 |`segment/loadQueue/count`|Number of segments to load.|`server`|Varies|
+|`segment/loading/rateKbps`|Current rate of segment loading on a server in kbps (1000 bits per second). The rate is calculated as a moving average over the last 10 GiB or more of successful segment loads on that server.|`server`|Varies|
 |`segment/dropQueue/count`|Number of segments to drop.|`server`|Varies|
 |`segment/loadQueue/assigned`|Number of segments assigned for load or drop to the load queue of a server.|`dataSource`, `server`|Varies|
 |`segment/loadQueue/success`|Number of segment assignments that completed successfully.|`dataSource`, `server`|Varies|
@@ -427,15 +428,6 @@ These metrics are available only when `druid.zk.service.enabled = true`.
 |------|-----------|----------|------------|
 |`zk/connected`|Indicator of connection status. `1` for connected, `0` for disconnected. Emitted once per monitor period.|None|1|
 |`zk/reconnect/time`|Amount of time, in milliseconds, that a server was disconnected from ZooKeeper before reconnecting. Emitted on reconnection. Not emitted if connection to ZooKeeper is permanently lost, because in this case, there is no reconnection.|None|Not present|
-
-### EventReceiverFirehose
-
-The following metric is only available if the `EventReceiverFirehoseMonitor` module is included.
-
-|Metric|Description|Dimensions|Normal value|
-|------|-----------|----------|------------|
-|`ingest/events/buffered`|Number of events queued in the `EventReceiverFirehose` buffer.|`serviceName`, `dataSource`, `taskId`, `taskType`, `bufferCapacity`|Equal to the current number of events in the buffer queue.|
-|`ingest/bytes/received`|Number of bytes received by the `EventReceiverFirehose`.|`serviceName`, `dataSource`, `taskId`, `taskType`|Varies|
 
 ## Sys [Deprecated]
 
