@@ -328,6 +328,7 @@ public class CalciteRulesManager
     // Apply FILTER_INTO_JOIN early, if using a join algorithm that requires subqueries anyway.
     if (plannerContext.getJoinAlgorithm().requiresSubquery()) {
       builder.addRuleInstance(CoreRules.FILTER_INTO_JOIN);
+      throw new RuntimeException("This exception should fire when run CalciteSelectJoinQueryMSQTest.SortMergeTest");
     }
 
     // Apply SORT_PROJECT_TRANSPOSE to match the expected order of "sort" and "sortProject" in PartialDruidQuery.
