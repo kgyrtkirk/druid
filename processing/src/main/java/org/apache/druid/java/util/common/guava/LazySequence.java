@@ -21,6 +21,8 @@ package org.apache.druid.java.util.common.guava;
 
 import com.google.common.base.Supplier;
 
+import java.io.IOException;
+
 /**
  */
 public class LazySequence<T> implements Sequence<T>
@@ -43,6 +45,80 @@ public class LazySequence<T> implements Sequence<T>
   @Override
   public <OutType> Yielder<OutType> toYielder(OutType initValue, YieldingAccumulator<OutType, T> accumulator)
   {
-    return provider.get().toYielder(initValue, accumulator);
+    return new LazyYielder<OutType, T>(provider,initValue, accumulator);
+  }
+
+  static class LazyYielder<OutType,T> implements Yielder<OutType> {
+
+    private Supplier<Sequence<T>> provider;
+    private Yielder<OutType> realYielder=null;
+    private OutType initValue;
+    private YieldingAccumulator<OutType, T> accumulator;
+
+    public LazyYielder(Supplier<Sequence<T>> provider, OutType initValue,
+        YieldingAccumulator<OutType, T> accumulator)
+    {
+      this.provider = provider;
+      this.initValue = initValue;
+      this.accumulator = accumulator;
+    }
+
+
+    @Override
+    public void close() throws IOException
+    {
+      getSeq().close();
+    }
+
+    private Yielder<OutType> getSeq()
+    {
+      if (realYielder== null) {
+        realYielder= provider.get().toYielder(initValue, accumulator);
+      }
+      return realYielder;
+    }
+
+
+    @Override
+    public OutType get()
+    {
+      return getSeq().get();
+    }
+
+    @Override
+    public Yielder<OutType> next(OutType initValue)
+    {
+        return      getSeq().next(initValue);
+    }
+
+    @Override
+    public boolean isDone()
+    {
+      return getSeq().isDone();
+    }
+
   }
 }
+
+//Benchmark                                        (rowsPerSegment)  (schema)  (storageType)  Mode  Cnt    Score    Error  Units
+//SqlWindowFunctionsBenchmark.windowWithSorter               100000      auto           mmap  avgt    5  812.024 ± 24.003  ms/op
+//SqlWindowFunctionsBenchmark.windowWithoutSorter            100000      auto           mmap  avgt    5  611.424 ± 47.396  ms/op
+
+//Benchmark                                        (rowsPerSegment)  (schema)  (storageType)  Mode  Cnt    Score    Error  Units
+//SqlWindowFunctionsBenchmark.windowWithSorter               100000      auto           mmap  avgt    5  796.173 ± 23.359  ms/op
+//SqlWindowFunctionsBenchmark.windowWithoutSorter            100000      auto           mmap  avgt    5  614.778 ± 32.237  ms/op
+
+//Benchmark                                        (rowsPerSegment)  (schema)  (storageType)  Mode  Cnt    Score    Error  Units
+//SqlWindowFunctionsBenchmark.windowWithSorter               100000      auto           mmap  avgt    5  867.023 ± 15.175  ms/op
+//SqlWindowFunctionsBenchmark.windowWithoutSorter            100000      auto           mmap  avgt    5  660.928 ± 11.475  ms/op
+
+
+//Benchmark                                        (rowsPerSegment)  (schema)  (storageType)  Mode  Cnt    Score    Error  Units
+//SqlWindowFunctionsBenchmark.windowWithSorter               100000      auto           mmap  avgt    5  812.024 ± 24.003  ms/op
+//SqlWindowFunctionsBenchmark.windowWithoutSorter            100000      auto           mmap  avgt    5  611.424 ± 47.396  ms/op
+
+// ISO-8859-1
+//Benchmark                                        (rowsPerSegment)  (schema)  (storageType)  Mode  Cnt    Score    Error  Units
+//SqlWindowFunctionsBenchmark.windowWithSorter               100000      auto           mmap  avgt    5  779.933 ± 29.665  ms/op
+//SqlWindowFunctionsBenchmark.windowWithoutSorter            100000      auto           mmap  avgt    5  613.465 ± 37.255  ms/op
+

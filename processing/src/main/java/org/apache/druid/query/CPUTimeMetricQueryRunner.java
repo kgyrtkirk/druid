@@ -21,6 +21,7 @@ package org.apache.druid.query;
 
 import com.google.common.base.Supplier;
 import org.apache.druid.java.util.common.ISE;
+import org.apache.druid.java.util.common.guava.LazySequence;
 import org.apache.druid.java.util.common.guava.Sequence;
 import org.apache.druid.java.util.common.guava.SequenceWrapper;
 import org.apache.druid.java.util.common.guava.Sequences;
@@ -64,8 +65,13 @@ public class CPUTimeMetricQueryRunner<T> implements QueryRunner<T>
     final Sequence<T> baseSequence = delegate.run(queryWithMetrics, responseContext);
 
     cpuTimeAccumulator.addAndGet(JvmUtils.getCurrentThreadCpuTime() - startRun);
+    // FIXME: make this wrapping optional based on a ctx paramter
+    // FIXME: move this higher up to frame level
+    // FIXME: byte oriented subquery
+      // inlineIfNecessary
+      // switch off bytes based limiting as that implicitly builds frames
 
-    return Sequences.wrap(
+    return new LazySequence<>( () -> Sequences.wrap(
         baseSequence,
         new SequenceWrapper()
         {
@@ -93,7 +99,7 @@ public class CPUTimeMetricQueryRunner<T> implements QueryRunner<T>
             }
           }
         }
-    );
+    ));
   }
 
   public static <T> QueryRunner<T> safeBuild(

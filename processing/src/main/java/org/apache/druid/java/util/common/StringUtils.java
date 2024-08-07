@@ -48,8 +48,8 @@ public class StringUtils
 {
   public static final byte[] EMPTY_BYTES = new byte[0];
   @Deprecated // Charset parameters to String are currently slower than the charset's string name
-  public static final Charset UTF8_CHARSET = StandardCharsets.UTF_8;
-  public static final String UTF8_STRING = StandardCharsets.UTF_8.toString();
+  public static final Charset UTF8_CHARSET = StandardCharsets.ISO_8859_1;
+  public static final String UTF8_STRING = StandardCharsets.ISO_8859_1.toString();
   private static final Base64.Encoder BASE64_ENCODER = Base64.getEncoder();
   private static final Base64.Decoder BASE64_DECODER = Base64.getDecoder();
 
@@ -229,12 +229,16 @@ public class StringUtils
 
   public static String fromUtf8(final byte[] bytes, int offset, int length)
   {
-    try {
-      return new String(bytes, offset, length, UTF8_STRING);
-    }
-    catch (UnsupportedEncodingException e) {
-      // Should never happen
-      throw new RuntimeException(e);
+    if (false) {
+      return new String(bytes, offset, length, StandardCharsets.UTF_16);
+    } else {
+      try {
+        return new String(bytes, offset, length, UTF8_STRING);
+      }
+      catch (UnsupportedEncodingException e) {
+        // Should never happen
+        throw new RuntimeException(e);
+      }
     }
   }
 

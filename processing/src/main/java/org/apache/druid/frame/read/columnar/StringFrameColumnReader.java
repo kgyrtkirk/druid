@@ -445,7 +445,9 @@ public class StringFrameColumnReader implements FrameColumnReader
       if (stringUtf8 == null) {
         return null;
       } else {
-        return StringUtils.fromUtf8(stringUtf8);
+        return Integer.toString(stringUtf8.hashCode());
+
+            //StringUtils.fromUtf8(stringUtf8);
       }
     }
 
