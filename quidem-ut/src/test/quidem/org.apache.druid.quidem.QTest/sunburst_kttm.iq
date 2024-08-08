@@ -1,16 +1,6 @@
 #started Wed Jul 10 19:19:15 IST 2024
 !use druidtest:///?componentSupplier=KttmNestedComponentSupplier
 !set outputformat mysql
-# Wed Jul 10 19:19:25 IST 2024
-select 'infoschema';
-+------------+
-| EXPR$0     |
-+------------+
-| infoschema |
-+------------+
-(1 row)
-
-!ok
 # Wed Jul 10 19:20:02 IST 2024
 SELECT
 FLOOR(CAST(t."session_length" AS DOUBLE) / 10) * 10 AS "session_length"
@@ -425,16 +415,6 @@ GROUP BY 1;
 | 2019-08-25 23:00:00.000 | 18239 |
 +-------------------------+-------+
 (24 rows)
-
-!ok
-# Wed Jul 10 19:20:09 IST 2024
-select 'infoschema';
-+------------+
-| EXPR$0     |
-+------------+
-| infoschema |
-+------------+
-(1 row)
 
 !ok
 # Wed Jul 10 19:20:11 IST 2024
@@ -1634,16 +1614,6 @@ GROUP BY ();
 +-----+----+-----+----+
 | 587 |  0 | 502 |  0 |
 +-----+----+-----+----+
-(1 row)
-
-!ok
-# Wed Jul 10 19:20:26 IST 2024
-select 'infoschema';
-+------------+
-| EXPR$0     |
-+------------+
-| infoschema |
-+------------+
 (1 row)
 
 !ok
@@ -22097,16 +22067,6 @@ LIMIT 101;
 +-------------------+-------+
 | Personal computer |    27 |
 +-------------------+-------+
-(1 row)
-
-!ok
-# Wed Jul 10 19:21:09 IST 2024
-select 'infoschema';
-+------------+
-| EXPR$0     |
-+------------+
-| infoschema |
-+------------+
 (1 row)
 
 !ok

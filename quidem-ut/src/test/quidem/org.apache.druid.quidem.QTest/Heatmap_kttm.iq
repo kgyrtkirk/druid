@@ -1,36 +1,6 @@
 #started Wed Jul 10 19:21:24 IST 2024
 !use druidtest:///?componentSupplier=KttmNestedComponentSupplier
 !set outputformat mysql
-# Wed Jul 10 19:21:27 IST 2024
-select 'infoschema';
-+------------+
-| EXPR$0     |
-+------------+
-| infoschema |
-+------------+
-(1 row)
-
-!ok
-# Wed Jul 10 19:22:09 IST 2024
-select 'infoschema';
-+------------+
-| EXPR$0     |
-+------------+
-| infoschema |
-+------------+
-(1 row)
-
-!ok
-# Wed Jul 10 19:22:28 IST 2024
-select 'infoschema';
-+------------+
-| EXPR$0     |
-+------------+
-| infoschema |
-+------------+
-(1 row)
-
-!ok
 # Wed Jul 10 19:23:06 IST 2024
 SELECT
 MAX(CAST(t."__time" AS TIMESTAMP)) AS "__VALUE__"
@@ -41,66 +11,6 @@ GROUP BY ();
 +-------------------------+
 | 2019-08-25 23:59:59.686 |
 +-------------------------+
-(1 row)
-
-!ok
-# Wed Jul 10 19:23:09 IST 2024
-select 'infoschema';
-+------------+
-| EXPR$0     |
-+------------+
-| infoschema |
-+------------+
-(1 row)
-
-!ok
-# Wed Jul 10 19:23:29 IST 2024
-select 'infoschema';
-+------------+
-| EXPR$0     |
-+------------+
-| infoschema |
-+------------+
-(1 row)
-
-!ok
-# Wed Jul 10 19:24:09 IST 2024
-select 'infoschema';
-+------------+
-| EXPR$0     |
-+------------+
-| infoschema |
-+------------+
-(1 row)
-
-!ok
-# Wed Jul 10 19:24:30 IST 2024
-select 'infoschema';
-+------------+
-| EXPR$0     |
-+------------+
-| infoschema |
-+------------+
-(1 row)
-
-!ok
-# Wed Jul 10 19:25:09 IST 2024
-select 'infoschema';
-+------------+
-| EXPR$0     |
-+------------+
-| infoschema |
-+------------+
-(1 row)
-
-!ok
-# Wed Jul 10 19:25:31 IST 2024
-select 'infoschema';
-+------------+
-| EXPR$0     |
-+------------+
-| infoschema |
-+------------+
 (1 row)
 
 !ok
@@ -266,16 +176,6 @@ GROUP BY 1,2;
 | Yandex.Browser mobile | NoAdblock                  |    583 |
 +-----------------------+----------------------------+--------+
 (30 rows)
-
-!ok
-# Wed Jul 10 19:26:09 IST 2024
-select 'infoschema';
-+------------+
-| EXPR$0     |
-+------------+
-| infoschema |
-+------------+
-(1 row)
 
 !ok
 # Wed Jul 10 19:26:09 IST 2024
@@ -505,16 +405,6 @@ GROUP BY 1,2;
 | 2019-08-25 16:00:00.000 | NoAdblock                  | 33392 |
 +-------------------------+----------------------------+-------+
 (52 rows)
-
-!ok
-# Wed Jul 10 19:26:32 IST 2024
-select 'infoschema';
-+------------+
-| EXPR$0     |
-+------------+
-| infoschema |
-+------------+
-(1 row)
 
 !ok
 # Wed Jul 10 19:26:36 IST 2024

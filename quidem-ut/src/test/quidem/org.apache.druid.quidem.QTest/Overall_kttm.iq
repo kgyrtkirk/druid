@@ -1,66 +1,6 @@
 #started Wed Jul 10 19:08:31 IST 2024
 !use druidtest:///?componentSupplier=KttmNestedComponentSupplier
 !set outputformat mysql
-# Wed Jul 10 19:09:09 IST 2024
-select 'infoschema';
-+------------+
-| EXPR$0     |
-+------------+
-| infoschema |
-+------------+
-(1 row)
-
-!ok
-# Wed Jul 10 19:09:18 IST 2024
-select 'infoschema';
-+------------+
-| EXPR$0     |
-+------------+
-| infoschema |
-+------------+
-(1 row)
-
-!ok
-# Wed Jul 10 19:10:09 IST 2024
-select 'infoschema';
-+------------+
-| EXPR$0     |
-+------------+
-| infoschema |
-+------------+
-(1 row)
-
-!ok
-# Wed Jul 10 19:10:18 IST 2024
-select 'infoschema';
-+------------+
-| EXPR$0     |
-+------------+
-| infoschema |
-+------------+
-(1 row)
-
-!ok
-# Wed Jul 10 19:11:09 IST 2024
-select 'infoschema';
-+------------+
-| EXPR$0     |
-+------------+
-| infoschema |
-+------------+
-(1 row)
-
-!ok
-# Wed Jul 10 19:11:18 IST 2024
-select 'infoschema';
-+------------+
-| EXPR$0     |
-+------------+
-| infoschema |
-+------------+
-(1 row)
-
-!ok
 # Wed Jul 10 19:11:28 IST 2024
 SELECT
 MAX(CAST(t."__time" AS TIMESTAMP)) AS "__VALUE__"
@@ -170,26 +110,6 @@ GROUP BY ();
 +--------+--------------+----------+--------+--------------+----------+
 | 465346 | 153573448620 | 69683010 | 444865 | 140267784970 | 66401070 |
 +--------+--------------+----------+--------+--------------+----------+
-(1 row)
-
-!ok
-# Wed Jul 10 19:12:09 IST 2024
-select 'infoschema';
-+------------+
-| EXPR$0     |
-+------------+
-| infoschema |
-+------------+
-(1 row)
-
-!ok
-# Wed Jul 10 19:12:18 IST 2024
-select 'infoschema';
-+------------+
-| EXPR$0     |
-+------------+
-| infoschema |
-+------------+
 (1 row)
 
 !ok

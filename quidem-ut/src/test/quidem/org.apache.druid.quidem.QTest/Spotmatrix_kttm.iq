@@ -1,16 +1,6 @@
 #started Wed Jul 10 19:26:55 IST 2024
 !use druidtest:///?componentSupplier=KttmNestedComponentSupplier
 !set outputformat mysql
-# Wed Jul 10 19:27:09 IST 2024
-select 'infoschema';
-+------------+
-| EXPR$0     |
-+------------+
-| infoschema |
-+------------+
-(1 row)
-
-!ok
 # Wed Jul 10 19:27:27 IST 2024
 SELECT
 MAX(CAST(t."__time" AS TIMESTAMP)) AS "__VALUE__"
@@ -34,16 +24,6 @@ GROUP BY ();
 +-------------------------+
 | 2019-08-25 23:59:59.686 |
 +-------------------------+
-(1 row)
-
-!ok
-# Wed Jul 10 19:27:33 IST 2024
-select 'infoschema';
-+------------+
-| EXPR$0     |
-+------------+
-| infoschema |
-+------------+
 (1 row)
 
 !ok
@@ -1175,15 +1155,5 @@ GROUP BY 1,2;
 +---------+--------+-------+
 +---------+--------+-------+
 (0 rows)
-
-!ok
-# Wed Jul 10 19:28:09 IST 2024
-select 'infoschema';
-+------------+
-| EXPR$0     |
-+------------+
-| infoschema |
-+------------+
-(1 row)
 
 !ok

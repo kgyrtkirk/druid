@@ -1,16 +1,6 @@
 #started Wed Jul 10 19:17:20 IST 2024
 !use druidtest:///?componentSupplier=KttmNestedComponentSupplier
 !set outputformat mysql
-# Wed Jul 10 19:17:23 IST 2024
-select 'infoschema';
-+------------+
-| EXPR$0     |
-+------------+
-| infoschema |
-+------------+
-(1 row)
-
-!ok
 # Wed Jul 10 19:18:06 IST 2024
 SELECT
 MAX(CAST(t."__time" AS TIMESTAMP)) AS "__VALUE__"
@@ -34,16 +24,6 @@ GROUP BY ();
 +-------------------------+
 | 2019-08-25 23:59:59.686 |
 +-------------------------+
-(1 row)
-
-!ok
-# Wed Jul 10 19:18:09 IST 2024
-select 'infoschema';
-+------------+
-| EXPR$0     |
-+------------+
-| infoschema |
-+------------+
 (1 row)
 
 !ok
@@ -11320,16 +11300,6 @@ GROUP BY 1;
 (151 rows)
 
 !ok
-# Wed Jul 10 19:18:24 IST 2024
-select 'infoschema';
-+------------+
-| EXPR$0     |
-+------------+
-| infoschema |
-+------------+
-(1 row)
-
-!ok
 # Wed Jul 10 19:18:30 IST 2024
 SELECT
 TIME_FLOOR(CAST(t."__time" AS TIMESTAMP), 'PT1H', NULL, 'Etc/UTC') AS "__time",
@@ -21140,15 +21110,5 @@ GROUP BY 1,2;
 | 2019-08-25 11:00:00.000 |        23660.0 |     1 |                -600 |
 +-------------------------+----------------+-------+---------------------+
 (807 rows)
-
-!ok
-# Wed Jul 10 19:19:09 IST 2024
-select 'infoschema';
-+------------+
-| EXPR$0     |
-+------------+
-| infoschema |
-+------------+
-(1 row)
 
 !ok
