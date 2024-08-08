@@ -83,7 +83,7 @@ public class KttmNestedComponentSupplier extends StandardComponentSupplier
   {
     try {
       final File directory = new File(tmpDir, StringUtils.format("kttm-index-%s", UUID.randomUUID()));
-      final IncrementalIndex index = makeWikipediaIncrementalIndex();
+      final IncrementalIndex index = makeKttmNestedIndex();
       TestIndex.INDEX_MERGER.persist(index, directory, IndexSpec.DEFAULT, null);
       return TestIndex.INDEX_IO.loadIndex(directory);
     }
@@ -92,7 +92,7 @@ public class KttmNestedComponentSupplier extends StandardComponentSupplier
     }
   }
 
-  public static IncrementalIndex makeWikipediaIncrementalIndex()
+  public static IncrementalIndex makeKttmNestedIndex()
   {
     final List<DimensionSchema> dimensions = Arrays.asList(
         new StringDimensionSchema("session"),
