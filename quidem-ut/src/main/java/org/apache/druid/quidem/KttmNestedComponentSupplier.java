@@ -76,9 +76,7 @@ public class KttmNestedComponentSupplier extends StandardComponentSupplier
             .build(),
         idx
     );
-
     return walker;
-
   }
 
   public static QueryableIndex makeKttmIndex(File tmpDir)
@@ -101,8 +99,6 @@ public class KttmNestedComponentSupplier extends StandardComponentSupplier
         new StringDimensionSchema("number"),
         new AutoTypeColumnSchema("event", null),
         new AutoTypeColumnSchema("agent", null),
-        // new StringDimensionSchema("event"),
-        // new StringDimensionSchema("agent"),
         new StringDimensionSchema("client_ip"),
         new StringDimensionSchema("geo_ip"),
         new StringDimensionSchema("language"),
@@ -124,18 +120,10 @@ public class KttmNestedComponentSupplier extends StandardComponentSupplier
     try {
       tmpDir = FileUtils.createTempDir("test-index-input-source");
       try {
-        // InputSource inputSource = ResourceInputSource.of(
-        // TestIndex.class.getClassLoader(),
-        // "kttm-nested-v2-2019-08-25.json"
-        // );
         ResourceInputSource inputSource = ResourceInputSource.of(
             TestIndex.class.getClassLoader(),
             "kttm-nested-v2-2019-08-25.json"
         );
-        //        LocalInputSource inputSource = new LocalInputSource(new File("/home/dev/host/kttm"), "kttm*json");
-        for (DimensionSchema dimensionSchema : dimensions) {
-
-        }
         return IndexBuilder
             .create()
             .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
@@ -160,5 +148,4 @@ public class KttmNestedComponentSupplier extends StandardComponentSupplier
       throw new RuntimeException(e);
     }
   }
-
 }
