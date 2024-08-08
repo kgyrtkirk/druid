@@ -39,7 +39,6 @@ import org.apache.druid.guice.IndexingServiceModuleHelper;
 import org.apache.druid.indexing.common.config.TaskConfig;
 import org.apache.druid.indexing.common.task.Task;
 import org.apache.druid.java.util.common.IAE;
-import org.apache.druid.java.util.common.ISE;
 import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.java.util.common.logger.Logger;
 import org.apache.druid.k8s.overlord.KubernetesTaskRunnerConfig;
@@ -139,23 +138,21 @@ public class PodTemplateTaskAdapter implements TaskAdapter
       podTemplateSelectStrategy = dynamicConfig.getPodTemplateSelectStrategy();
     }
 
-    PodTemplate podTemplate = podTemplateSelectStrategy.getPodTemplateForTask(task, templates);
-
-    if (podTemplate == null) {
-      throw new ISE("Pod template spec not found for task type [%s]", task.getType());
-    }
+    PodTemplateWithName podTemplateWithName = podTemplateSelectStrategy.getPodTemplateForTask(task, templates);
 
     return new JobBuilder()
         .withNewMetadata()
         .withName(new K8sTaskId(task).getK8sJobName())
         .addToLabels(getJobLabels(taskRunnerConfig, task))
         .addToAnnotations(getJobAnnotations(taskRunnerConfig, task))
+        .addToAnnotations(DruidK8sConstants.TASK_JOB_TEMPLATE, podTemplateWithName.getName())
         .endMetadata()
         .withNewSpec()
-        .withTemplate(podTemplate.getTemplate())
+        .withTemplate(podTemplateWithName.getPodTemplate().getTemplate())
         .editTemplate()
         .editOrNewMetadata()
         .addToAnnotations(getPodTemplateAnnotations(task))
+        .addToAnnotations(DruidK8sConstants.TASK_JOB_TEMPLATE, podTemplateWithName.getName())
         .addToLabels(getPodLabels(taskRunnerConfig, task))
         .endMetadata()
         .editSpec()

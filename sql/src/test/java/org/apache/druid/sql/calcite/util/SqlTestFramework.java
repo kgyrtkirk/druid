@@ -68,6 +68,7 @@ import org.apache.druid.sql.calcite.schema.NoopDruidSchemaManager;
 import org.apache.druid.sql.calcite.view.DruidViewMacroFactory;
 import org.apache.druid.sql.calcite.view.InProcessViewManager;
 import org.apache.druid.sql.calcite.view.ViewManager;
+import org.apache.druid.sql.hook.DruidHookDispatcher;
 import org.apache.druid.timeline.DataSegment;
 
 import javax.inject.Named;
@@ -502,7 +503,8 @@ public class SqlTestFramework
           new CalciteRulesManager(componentSupplier.extensionCalciteRules()),
           framework.injector.getInstance(JoinableFactoryWrapper.class),
           framework.builder.catalogResolver,
-          authConfig != null ? authConfig : new AuthConfig()
+          authConfig != null ? authConfig : new AuthConfig(),
+          new DruidHookDispatcher()
       );
       componentSupplier.finalizePlanner(this);
       this.statementFactory = QueryFrameworkUtils.createSqlStatementFactory(
@@ -556,7 +558,7 @@ public class SqlTestFramework
     {
       binder.bind(DruidOperatorTable.class).in(LazySingleton.class);
       binder.bind(DataSegment.PruneSpecsHolder.class).toInstance(DataSegment.PruneSpecsHolder.DEFAULT);
-      binder.bind(DefaultColumnFormatConfig.class).toInstance(new DefaultColumnFormatConfig(null));
+      binder.bind(DefaultColumnFormatConfig.class).toInstance(new DefaultColumnFormatConfig(null, null));
     }
 
     @Provides
@@ -673,7 +675,6 @@ public class SqlTestFramework
         // test pulls in a module, then pull in that module, even though we are
         // not the Druid node to which the module is scoped.
         .ignoreLoadScopes();
-
     List<Module> overrideModules = new ArrayList<>(builder.overrideModules);
     overrideModules.add(new LookylooModule());
     overrideModules.add(new SqlAggregationModule());

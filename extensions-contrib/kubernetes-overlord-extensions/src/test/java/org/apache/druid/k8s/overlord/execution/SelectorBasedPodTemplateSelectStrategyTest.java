@@ -27,6 +27,7 @@ import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.PodTemplate;
 import org.apache.druid.indexing.common.task.NoopTask;
 import org.apache.druid.indexing.common.task.Task;
+import org.apache.druid.k8s.overlord.taskadapter.PodTemplateWithName;
 import org.apache.druid.segment.TestHelper;
 import org.junit.Assert;
 import org.junit.Before;
@@ -88,16 +89,19 @@ public class SelectorBasedPodTemplateSelectStrategyTest
   @Test(expected = NullPointerException.class)
   public void shouldThrowNullPointerExceptionWhenSelectorsAreNull()
   {
-    new SelectorBasedPodTemplateSelectStrategy(null, null);
+    new SelectorBasedPodTemplateSelectStrategy(null);
   }
 
   @Test
   public void testGetPodTemplate_ForTask_emptySelectorsFallbackToBaseTemplate()
   {
     List<Selector> emptySelectors = Collections.emptyList();
-    SelectorBasedPodTemplateSelectStrategy strategy = new SelectorBasedPodTemplateSelectStrategy(emptySelectors, null);
+    SelectorBasedPodTemplateSelectStrategy strategy = new SelectorBasedPodTemplateSelectStrategy(emptySelectors);
     Task task = NoopTask.create();
-    Assert.assertEquals("base", strategy.getPodTemplateForTask(task, templates).getMetadata().getName());
+    PodTemplateWithName podTemplateWithName = strategy.getPodTemplateForTask(task, templates);
+    Assert.assertEquals("base", podTemplateWithName.getName());
+    Assert.assertEquals("base", podTemplateWithName.getPodTemplate().getMetadata().getName());
+
   }
 
   @Test
@@ -105,19 +109,11 @@ public class SelectorBasedPodTemplateSelectStrategyTest
   {
     Selector noMatchSelector = new MockSelector(false, "mock");
     List<Selector> selectors = Collections.singletonList(noMatchSelector);
-    SelectorBasedPodTemplateSelectStrategy strategy = new SelectorBasedPodTemplateSelectStrategy(selectors, null);
+    SelectorBasedPodTemplateSelectStrategy strategy = new SelectorBasedPodTemplateSelectStrategy(selectors);
     Task task = NoopTask.create();
-    Assert.assertEquals("base", strategy.getPodTemplateForTask(task, templates).getMetadata().getName());
-  }
-
-  @Test
-  public void testGetPodTemplate_ForTask_noMatchSelectorsFallbackToDefaultKeyTemplate()
-  {
-    Selector noMatchSelector = new MockSelector(false, "mock");
-    List<Selector> selectors = Collections.singletonList(noMatchSelector);
-    SelectorBasedPodTemplateSelectStrategy strategy = new SelectorBasedPodTemplateSelectStrategy(selectors, "match");
-    Task task = NoopTask.create();
-    Assert.assertEquals("match", strategy.getPodTemplateForTask(task, templates).getMetadata().getName());
+    PodTemplateWithName podTemplateWithName = strategy.getPodTemplateForTask(task, templates);
+    Assert.assertEquals("base", podTemplateWithName.getName());
+    Assert.assertEquals("base", podTemplateWithName.getPodTemplate().getMetadata().getName());
   }
 
   @Test
@@ -132,9 +128,11 @@ public class SelectorBasedPodTemplateSelectStrategyTest
         noMatchSelector,
         matchSelector
     );
-    SelectorBasedPodTemplateSelectStrategy strategy = new SelectorBasedPodTemplateSelectStrategy(selectors, null);
+    SelectorBasedPodTemplateSelectStrategy strategy = new SelectorBasedPodTemplateSelectStrategy(selectors);
     Task task = NoopTask.create();
-    Assert.assertEquals("match", strategy.getPodTemplateForTask(task, templates).getMetadata().getName());
+    PodTemplateWithName podTemplateWithName = strategy.getPodTemplateForTask(task, templates);
+    Assert.assertEquals("match", podTemplateWithName.getName());
+    Assert.assertEquals("match", podTemplateWithName.getPodTemplate().getMetadata().getName());
   }
 
   @Test
@@ -152,7 +150,7 @@ public class SelectorBasedPodTemplateSelectStrategyTest
     );
 
     SelectorBasedPodTemplateSelectStrategy strategy = new SelectorBasedPodTemplateSelectStrategy(
-        Collections.singletonList(selector), "default");
+        Collections.singletonList(selector));
 
     SelectorBasedPodTemplateSelectStrategy strategy2 = objectMapper.readValue(
         objectMapper.writeValueAsBytes(strategy),

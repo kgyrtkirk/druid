@@ -24,8 +24,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import io.fabric8.kubernetes.api.model.PodTemplate;
 import org.apache.druid.indexing.common.task.Task;
+import org.apache.druid.k8s.overlord.common.DruidK8sConstants;
+import org.apache.druid.k8s.overlord.taskadapter.PodTemplateWithName;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -36,19 +37,15 @@ import java.util.Objects;
  */
 public class SelectorBasedPodTemplateSelectStrategy implements PodTemplateSelectStrategy
 {
-  @Nullable
-  private String defaultKey;
-  private List<Selector> selectors;
+  private final List<Selector> selectors;
 
   @JsonCreator
   public SelectorBasedPodTemplateSelectStrategy(
-      @JsonProperty("selectors") List<Selector> selectors,
-      @JsonProperty("defaultKey") @Nullable String defaultKey
+      @JsonProperty("selectors") List<Selector> selectors
   )
   {
     Preconditions.checkNotNull(selectors, "selectors");
     this.selectors = selectors;
-    this.defaultKey = defaultKey;
   }
 
   /**
@@ -58,28 +55,24 @@ public class SelectorBasedPodTemplateSelectStrategy implements PodTemplateSelect
    * @return the template if a selector matches, otherwise fallback to base template
    */
   @Override
-  public PodTemplate getPodTemplateForTask(Task task, Map<String, PodTemplate> templates)
+  public PodTemplateWithName getPodTemplateForTask(Task task, Map<String, PodTemplate> templates)
   {
     String templateKey = selectors.stream()
                                   .filter(selector -> selector.evaluate(task))
                                   .findFirst()
                                   .map(Selector::getSelectionKey)
-                                  .orElse(defaultKey);
+                                  .orElse(DruidK8sConstants.BASE_TEMPLATE_NAME);
 
-    return templates.getOrDefault(templateKey, templates.get("base"));
+    if (!templates.containsKey(templateKey)) {
+      templateKey = DruidK8sConstants.BASE_TEMPLATE_NAME;
+    }
+    return new PodTemplateWithName(templateKey, templates.get(templateKey));
   }
 
   @JsonProperty
   public List<Selector> getSelectors()
   {
     return selectors;
-  }
-
-  @Nullable
-  @JsonProperty
-  public String getDefaultKey()
-  {
-    return defaultKey;
   }
 
   @Override
@@ -92,13 +85,13 @@ public class SelectorBasedPodTemplateSelectStrategy implements PodTemplateSelect
       return false;
     }
     SelectorBasedPodTemplateSelectStrategy that = (SelectorBasedPodTemplateSelectStrategy) o;
-    return Objects.equals(defaultKey, that.defaultKey) && Objects.equals(selectors, that.selectors);
+    return Objects.equals(selectors, that.selectors);
   }
 
   @Override
   public int hashCode()
   {
-    return Objects.hash(defaultKey, selectors);
+    return Objects.hash(selectors);
   }
 
   @Override
@@ -106,7 +99,6 @@ public class SelectorBasedPodTemplateSelectStrategy implements PodTemplateSelect
   {
     return "SelectorBasedPodTemplateSelectStrategy{" +
            "selectors=" + selectors +
-           ", defaultKey=" + defaultKey +
            '}';
   }
 }
