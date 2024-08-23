@@ -19,7 +19,6 @@
 
 package org.apache.druid.java.util.common.guava;
 
-import com.google.common.base.Supplier;
 import com.google.common.base.Throwables;
 
 import java.io.IOException;
@@ -28,6 +27,7 @@ final class WrappingYielder<OutType> implements Yielder<OutType>
 {
   private Yielder<OutType> baseYielder;
   private final SequenceWrapper wrapper;
+  private OutType lastInitValue;
 
   WrappingYielder(Yielder<OutType> baseYielder, SequenceWrapper wrapper)
   {
@@ -41,19 +41,18 @@ final class WrappingYielder<OutType> implements Yielder<OutType>
     return baseYielder.get();
   }
 
+
+  protected Yielder<OutType> t() {
+    baseYielder = baseYielder.next(lastInitValue);
+    return WrappingYielder.this;
+  }
+
   @Override
   public Yielder<OutType> next(final OutType initValue)
   {
+    lastInitValue=initValue;
     try {
-      return wrapper.wrap(new Supplier<Yielder<OutType>>()
-      {
-        @Override
-        public Yielder<OutType> get()
-        {
-          baseYielder = baseYielder.next(initValue);
-          return WrappingYielder.this;
-        }
-      });
+      return wrapper.wrap(this::t);
     }
     catch (Throwable t) {
       // Close on failure

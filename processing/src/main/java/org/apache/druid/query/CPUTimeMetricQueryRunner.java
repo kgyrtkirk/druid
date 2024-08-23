@@ -70,6 +70,8 @@ public class CPUTimeMetricQueryRunner<T> implements QueryRunner<T>
     // FIXME: byte oriented subquery
       // inlineIfNecessary
       // switch off bytes based limiting as that implicitly builds frames
+    // FIXME: maxSubqueryBytes to 0
+        //  max
 
     return new LazySequence<>( () -> Sequences.wrap(
         baseSequence,
