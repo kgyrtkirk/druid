@@ -92,6 +92,7 @@ import org.apache.druid.msq.guice.MSQExternalDataSourceModule;
 import org.apache.druid.msq.guice.MSQIndexingModule;
 import org.apache.druid.msq.guice.MSQSqlModule;
 import org.apache.druid.msq.guice.MultiStageQuery;
+import org.apache.druid.msq.guice.SegmentGenerationTerminalStageSpecFactory;
 import org.apache.druid.msq.indexing.InputChannelFactory;
 import org.apache.druid.msq.indexing.MSQControllerTask;
 import org.apache.druid.msq.indexing.MSQSpec;
@@ -141,6 +142,7 @@ import org.apache.druid.segment.Segment;
 import org.apache.druid.segment.StorageAdapter;
 import org.apache.druid.segment.TestIndex;
 import org.apache.druid.segment.column.ColumnConfig;
+import org.apache.druid.segment.column.ColumnHolder;
 import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.segment.incremental.IncrementalIndexSchema;
 import org.apache.druid.segment.loading.DataSegmentPusher;
@@ -209,7 +211,6 @@ import org.mockito.Mockito;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -335,6 +336,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
 
   private TestGroupByBuffers groupByBuffers;
   protected final WorkerMemoryParameters workerMemoryParameters = Mockito.spy(makeTestWorkerMemoryParameters());
+  protected static final String TEST_CONTROLLER_TASK_ID = "query-test-query";
 
   protected static class MSQBaseComponentSupplier extends StandardComponentSupplier
   {
@@ -549,7 +551,8 @@ public class MSQTestBase extends BaseCalciteQueryTest
 
     final SqlEngine engine = new MSQTaskSqlEngine(
         indexingServiceClient,
-        qf.queryJsonMapper().copy().registerModules(new MSQSqlModule().getJacksonModules())
+        qf.queryJsonMapper().copy().registerModules(new MSQSqlModule().getJacksonModules()),
+        new SegmentGenerationTerminalStageSpecFactory()
     );
 
     PlannerFactory plannerFactory = new PlannerFactory(
@@ -859,6 +862,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
   public abstract class MSQTester<Builder extends MSQTester<Builder>>
   {
     protected String sql = null;
+    protected MSQControllerTask taskSpec = null;
     protected Map<String, Object> queryContext = DEFAULT_MSQ_CONTEXT;
     protected List<MSQResultsReport.ColumnAndType> expectedRowSignature = null;
     protected MSQSpec expectedMSQSpec = null;
@@ -883,6 +887,12 @@ public class MSQTestBase extends BaseCalciteQueryTest
     public Builder setSql(String sql)
     {
       this.sql = sql;
+      return asBuilder();
+    }
+
+    public Builder setTaskSpec(MSQControllerTask taskSpec)
+    {
+      this.taskSpec = taskSpec;
       return asBuilder();
     }
 
@@ -1150,8 +1160,15 @@ public class MSQTestBase extends BaseCalciteQueryTest
 
     public void verifyResults()
     {
-      Preconditions.checkArgument(sql != null, "sql cannot be null");
-      Preconditions.checkArgument(queryContext != null, "queryContext cannot be null");
+      Preconditions.checkArgument(
+          sql != null || taskSpec != null,
+          "sql and taskSpec both cannot be null"
+      );
+      Preconditions.checkArgument(
+          sql == null || taskSpec == null,
+          "sql and taskSpec both cannot be provided in the same test"
+      );
+      Preconditions.checkArgument(sql == null || queryContext != null, "queryContext cannot be null");
       Preconditions.checkArgument(
           (expectedResultRows != null && expectedResultRows.isEmpty()) || expectedDataSource != null,
           "dataSource cannot be null when expectedResultRows is non-empty"
@@ -1167,7 +1184,15 @@ public class MSQTestBase extends BaseCalciteQueryTest
       Preconditions.checkArgument(expectedShardSpec != null, "shardSpecClass cannot be null");
       readyToRun();
       try {
-        String controllerId = runMultiStageQuery(sql, queryContext);
+        String controllerId;
+        if (sql != null) {
+          // Run the sql command.
+          controllerId = runMultiStageQuery(sql, queryContext);
+        } else {
+          // Run the task spec directly instead.
+          controllerId = TEST_CONTROLLER_TASK_ID;
+          indexingServiceClient.runTask(controllerId, taskSpec);
+        }
         if (expectedMSQFault != null || expectedMSQFaultClass != null) {
           MSQErrorReport msqErrorReport = getErrorReportOrThrow(controllerId);
           if (expectedMSQFault != null) {
@@ -1288,17 +1313,20 @@ public class MSQTestBase extends BaseCalciteQueryTest
           Assert.assertEquals(expectedDestinationIntervals, destination.getReplaceTimeChunks());
         }
         if (expectedSegments != null) {
+          final int timeIndex =
+              MSQResultsReport.ColumnAndType.toRowSignature(expectedRowSignature)
+                                            .indexOf(ColumnHolder.TIME_COLUMN_NAME);
           Assert.assertEquals(expectedSegments, segmentIdVsOutputRowsMap.keySet());
           for (Object[] row : transformedOutputRows) {
-            List<SegmentId> diskSegmentList = segmentIdVsOutputRowsMap.keySet()
-                                                                      .stream()
-                                                                      .filter(segmentId -> segmentId.getInterval()
-                                                                                                    .contains((Long) row[0]))
-                                                                      .filter(segmentId -> {
-                                                                        List<List<Object>> lists = segmentIdVsOutputRowsMap.get(segmentId);
-                                                                        return lists.contains(Arrays.asList(row));
-                                                                      })
-                                                                      .collect(Collectors.toList());
+            List<SegmentId> diskSegmentList = segmentIdVsOutputRowsMap
+                .keySet()
+                .stream()
+                .filter(segmentId -> segmentId.getInterval().contains((Long) row[timeIndex]))
+                .filter(segmentId -> {
+                  List<List<Object>> lists = segmentIdVsOutputRowsMap.get(segmentId);
+                  return lists.contains(Arrays.asList(row));
+                })
+                .collect(Collectors.toList());
             if (diskSegmentList.size() != 1) {
               throw new IllegalStateException("Single key in multiple partitions");
             }
@@ -1357,18 +1385,32 @@ public class MSQTestBase extends BaseCalciteQueryTest
         assertResultsEquals(sql, expectedResultRows, transformedOutputRows);
       }
       catch (Exception e) {
-        throw new ISE(e, "Query %s failed", sql);
+        throw new ISE(e, "Query %s failed", sql != null ? sql : taskSpec);
       }
     }
 
     public void verifyExecutionError()
     {
-      Preconditions.checkArgument(sql != null, "sql cannot be null");
-      Preconditions.checkArgument(queryContext != null, "queryContext cannot be null");
+      Preconditions.checkArgument(
+          sql != null || taskSpec != null,
+          "sql and taskSpec both cannot be null"
+      );
+      Preconditions.checkArgument(
+          sql == null || taskSpec == null,
+          "sql and taskSpec both cannot be provided in the same test"
+      );
+      Preconditions.checkArgument(sql == null || queryContext != null, "queryContext cannot be null");
       Preconditions.checkArgument(expectedExecutionErrorMatcher != null, "Execution error matcher cannot be null");
       readyToRun();
       try {
-        String controllerId = runMultiStageQuery(sql, queryContext);
+        String controllerId;
+        if (sql != null) {
+          controllerId = runMultiStageQuery(sql, queryContext);
+        } else {
+          // Run the task spec directly instead.
+          controllerId = TEST_CONTROLLER_TASK_ID;
+          indexingServiceClient.runTask(controllerId, taskSpec);
+        }
         getPayloadOrThrow(controllerId);
         Assert.fail(StringUtils.format("Query did not throw an exception (sql = [%s])", sql));
       }
@@ -1394,8 +1436,15 @@ public class MSQTestBase extends BaseCalciteQueryTest
     public Pair<MSQSpec, Pair<List<MSQResultsReport.ColumnAndType>, List<Object[]>>> runQueryWithResult()
     {
       readyToRun();
-      Preconditions.checkArgument(sql != null, "sql cannot be null");
-      Preconditions.checkArgument(queryContext != null, "queryContext cannot be null");
+      Preconditions.checkArgument(
+          sql != null || taskSpec != null,
+          "sql and taskSpec both cannot be null"
+      );
+      Preconditions.checkArgument(
+          sql == null || taskSpec == null,
+          "sql and taskSpec both cannot be provided in the same test"
+      );
+      Preconditions.checkArgument(sql == null || queryContext != null, "queryContext cannot be null");
 
       try {
         String controllerId = runMultiStageQuery(sql, queryContext);
@@ -1491,7 +1540,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
       }
       catch (Exception e) {
         if (expectedExecutionErrorMatcher == null) {
-          throw new ISE(e, "Query %s failed", sql);
+          throw new ISE(e, "Query %s failed", sql != null ? sql : taskSpec);
         }
         assertThat(e, expectedExecutionErrorMatcher);
         return null;
@@ -1512,7 +1561,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
       }
 
       Assert.assertEquals(expectedRowSignature, specAndResults.rhs.lhs);
-      assertResultsEquals(sql, expectedResultRows, specAndResults.rhs.rhs);
+      assertResultsEquals(sql != null ? sql : taskSpec.toString(), expectedResultRows, specAndResults.rhs.rhs);
       assertMSQSpec(expectedMSQSpec, specAndResults.lhs);
     }
 
@@ -1520,7 +1569,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
     {
       Preconditions.checkArgument(expectedExecutionErrorMatcher != null, "Execution error matcher cannot be null");
       if (runQueryWithResult() != null) {
-        throw new ISE("Query %s did not throw an exception", sql);
+        throw new ISE("Query %s did not throw an exception", sql != null ? sql : taskSpec);
       }
     }
   }

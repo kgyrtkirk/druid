@@ -25,6 +25,7 @@ import it.unimi.dsi.fastutil.ints.IntComparator;
 import it.unimi.dsi.fastutil.ints.IntList;
 import org.apache.druid.common.semantic.SemanticCreator;
 import org.apache.druid.common.semantic.SemanticUtils;
+import org.apache.druid.error.InvalidInput;
 import org.apache.druid.java.util.common.ISE;
 import org.apache.druid.java.util.common.guava.Sequences;
 import org.apache.druid.query.operator.ColumnWithDirection;
@@ -144,16 +145,36 @@ public class ArrayListRowsAndColumns<RowType> implements AppendableRowsAndColumn
   {
     if (!rowSignature.contains(name)) {
       final Column retVal = extraColumns.get(name);
+      if (retVal == null) {
+        return null;
+      }
       if (numRows() == rows.size()) {
         return retVal;
       }
       return new LimitedColumn(retVal, startOffset, endOffset);
     }
 
-    final Function<RowType, Object> adapterForValue = rowAdapter.columnFunction(name);
     final Optional<ColumnType> maybeColumnType = rowSignature.getColumnType(name);
     final ColumnType columnType = maybeColumnType.orElse(ColumnType.UNKNOWN_COMPLEX);
     final Comparator<Object> comparator = Comparator.nullsFirst(columnType.getStrategy());
+
+    final Function<RowType, Object> adapterForValue;
+    if (columnType.equals(ColumnType.STRING)) {
+      // special handling to reject MVDs
+      adapterForValue = f -> {
+        Object value = rowAdapter.columnFunction(name).apply(f);
+        if (value instanceof List) {
+          throw InvalidInput.exception(
+              "Encountered a multi value column [%s]. Window processing does not support MVDs. "
+              + "Consider using UNNEST or MV_TO_ARRAY.",
+              name
+          );
+        }
+        return value;
+      };
+    } else {
+      adapterForValue = rowAdapter.columnFunction(name);
+    }
 
     return new Column()
     {
