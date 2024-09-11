@@ -24,9 +24,11 @@ import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Binder;
+import com.google.inject.Provides;
 import com.google.inject.TypeLiteral;
 import org.apache.druid.guice.LazySingleton;
 import org.apache.druid.initialization.ServerInjectorBuilderTest.TestDruidModule;
+import org.apache.druid.java.util.emitter.EmittingLogger;
 import org.apache.druid.java.util.emitter.service.ServiceEmitter;
 import org.apache.druid.query.DefaultQueryConfig;
 import org.apache.druid.server.QueryScheduler;
@@ -60,7 +62,6 @@ public class TestSqlModule extends TestDruidModule
     TestRequestLogger testRequestLogger = new TestRequestLogger();
     binder.bind(RequestLogger.class).toInstance(testRequestLogger);
     binder.bind(CatalogResolver.class).toInstance(CatalogResolver.NULL_RESOLVER);
-    binder.bind(ServiceEmitter.class).to(NoopServiceEmitter.class);
     binder.bind(QueryScheduler.class)
         .toProvider(QuerySchedulerProvider.class)
         .in(LazySingleton.class);
@@ -68,5 +69,14 @@ public class TestSqlModule extends TestDruidModule
     binder.bind(AuthenticatorMapper.class).toInstance(CalciteTests.TEST_AUTHENTICATOR_MAPPER);
     binder.bind(AuthorizerMapper.class).toInstance(AuthTestUtils.TEST_AUTHORIZER_MAPPER);
     binder.bind(Escalator.class).toInstance(CalciteTests.TEST_AUTHENTICATOR_ESCALATOR);
+  }
+
+  @Provides
+  @LazySingleton
+  public ServiceEmitter getServiceEmitter()
+  {
+    NoopServiceEmitter serviceEmitter = new NoopServiceEmitter();
+    EmittingLogger.registerEmitter(serviceEmitter);
+    return serviceEmitter;
   }
 }

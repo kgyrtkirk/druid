@@ -140,7 +140,8 @@ public class KttmNestedComponentSupplier extends StandardComponentSupplier
             .inputFormat(NestedDataTestUtils.DEFAULT_JSON_INPUT_FORMAT)
             .inputTmpDir(new File(tmpDir, "tmpKttm"))
             .buildIncrementalIndex();
-      } finally {
+      }
+      finally {
         FileUtils.deleteDirectory(tmpDir);
       }
     }

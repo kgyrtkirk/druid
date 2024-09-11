@@ -47,6 +47,8 @@ import org.apache.druid.java.util.common.CloseableIterators;
 import org.apache.druid.java.util.common.DateTimes;
 import org.apache.druid.java.util.common.Pair;
 import org.apache.druid.java.util.common.parsers.CloseableIterator;
+import org.apache.druid.java.util.emitter.core.NoopEmitter;
+import org.apache.druid.java.util.emitter.service.ServiceEmitter;
 import org.apache.druid.java.util.http.client.HttpClient;
 import org.apache.druid.java.util.http.client.Request;
 import org.apache.druid.java.util.http.client.response.HttpResponseHandler;
@@ -276,7 +278,7 @@ public class CalciteTests
       final QueryRunnerFactoryConglomerate conglomerate
   )
   {
-    return QueryFrameworkUtils.createMockQueryLifecycleFactory(walker, conglomerate);
+    return QueryFrameworkUtils.createMockQueryLifecycleFactory(walker, conglomerate, new ServiceEmitter("dummy", "dummy", new NoopEmitter()));
   }
 
   public static SqlStatementFactory createSqlStatementFactory(

@@ -45,7 +45,6 @@ import org.apache.druid.server.QueryStackTests;
 import org.apache.druid.server.SegmentManager;
 import org.apache.druid.server.SpecificSegmentsQuerySegmentWalker;
 import org.apache.druid.server.log.NoopRequestLogger;
-import org.apache.druid.server.metrics.NoopServiceEmitter;
 import org.apache.druid.server.security.AuthConfig;
 import org.apache.druid.server.security.AuthorizerMapper;
 import org.apache.druid.sql.SqlLifecycleManager;
@@ -86,7 +85,8 @@ public class QueryFrameworkUtils
 
   public static QueryLifecycleFactory createMockQueryLifecycleFactory(
       final QuerySegmentWalker walker,
-      final QueryRunnerFactoryConglomerate conglomerate
+      final QueryRunnerFactoryConglomerate conglomerate,
+      final ServiceEmitter serviceEmitter
   )
   {
     return new QueryLifecycleFactory(
@@ -100,7 +100,7 @@ public class QueryFrameworkUtils
         },
         walker,
         new DefaultGenericQueryMetricsFactory(),
-        new ServiceEmitter("dummy", "dummy", new NoopEmitter()),
+        serviceEmitter,
         new NoopRequestLogger(),
         new AuthConfig(),
         CalciteTests.TEST_AUTHORIZER_MAPPER,
@@ -210,13 +210,14 @@ public class QueryFrameworkUtils
       final CatalogResolver catalog
   )
   {
+    ServiceEmitter serviceEmitter = injector.getInstance(ServiceEmitter.class);
     final BrokerSegmentMetadataCache cache = new BrokerSegmentMetadataCache(
-        createMockQueryLifecycleFactory(walker, conglomerate),
+        createMockQueryLifecycleFactory(walker, conglomerate, serviceEmitter),
         new TestTimelineServerView(walker.getSegments()),
         BrokerSegmentMetadataCacheConfig.create(),
         CalciteTests.TEST_AUTHENTICATOR_ESCALATOR,
         new InternalQueryConfig(),
-        new NoopServiceEmitter(),
+        serviceEmitter,
         new PhysicalDatasourceMetadataFactory(
             createDefaultJoinableFactory(injector),
             new SegmentManager(EasyMock.createMock(SegmentCacheManager.class))

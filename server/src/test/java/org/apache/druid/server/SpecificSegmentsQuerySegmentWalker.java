@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Ordering;
 import com.google.common.io.Closeables;
 import com.google.inject.Injector;
+import org.apache.druid.java.util.emitter.service.ServiceEmitter;
 import org.apache.druid.query.DataSource;
 import org.apache.druid.query.FrameBasedInlineDataSource;
 import org.apache.druid.query.InlineDataSource;
@@ -49,7 +50,6 @@ import org.apache.druid.segment.incremental.IncrementalIndex;
 import org.apache.druid.segment.join.JoinableFactory;
 import org.apache.druid.segment.join.JoinableFactoryWrapper;
 import org.apache.druid.server.initialization.ServerConfig;
-import org.apache.druid.server.metrics.NoopServiceEmitter;
 import org.apache.druid.timeline.DataSegment;
 import org.apache.druid.timeline.VersionedIntervalTimeline;
 import org.joda.time.Interval;
@@ -118,6 +118,7 @@ public class SpecificSegmentsQuerySegmentWalker implements QuerySegmentWalker, C
       final GroupByQueryConfig groupByQueryConfig
   )
   {
+    final ServiceEmitter serviceEmitter = injector.getInstance(ServiceEmitter.class);
     Map<String, VersionedIntervalTimeline<String, ReferenceCountingSegment>> timelines = new HashMap<>();
     return new SpecificSegmentsQuerySegmentWalker(
         timelines,
@@ -135,12 +136,12 @@ public class SpecificSegmentsQuerySegmentWalker implements QuerySegmentWalker, C
                 segmentWrangler,
                 joinableFactoryWrapper,
                 scheduler,
-                new NoopServiceEmitter()
+                serviceEmitter
             ),
             conglomerate,
             joinableFactoryWrapper.getJoinableFactory(),
             new ServerConfig(),
-            new NoopServiceEmitter()
+            serviceEmitter
         )
     );
   }

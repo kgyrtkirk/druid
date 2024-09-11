@@ -90,7 +90,6 @@ import org.apache.druid.server.SpecificSegmentsQuerySegmentWalker;
 import org.apache.druid.server.SubqueryGuardrailHelper;
 import org.apache.druid.server.SubqueryGuardrailHelperProvider;
 import org.apache.druid.server.coordination.ServerType;
-import org.apache.druid.server.emitter.EmitterModule;
 import org.apache.druid.server.http.BrokerResource;
 import org.apache.druid.server.http.SelfDiscoveryResource;
 import org.apache.druid.server.initialization.AuthorizerMapperModule;
@@ -139,6 +138,7 @@ public class ExposedAsBrokerQueryComponentSupplierWrapper implements QueryCompon
   @Override
   public void configureGuice(DruidInjectorBuilder builder)
   {
+    throw new IllegalStateException("This method should not be called");
   }
 
   @Override
@@ -251,7 +251,6 @@ public class ExposedAsBrokerQueryComponentSupplierWrapper implements QueryCompon
         ExtensionsModule.SecondaryModule.class,
         new DruidAuthModule(),
         TLSCertificateCheckerModule.class,
-        EmitterModule.class,
         HttpClientModule.global(),
         HttpClientModule.escalatedGlobal(),
         new HttpClientModule("druid.broker.http", Client.class, true),

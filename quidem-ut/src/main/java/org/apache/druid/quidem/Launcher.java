@@ -71,7 +71,7 @@ public class Launcher
 
   private boolean withAutoStart()
   {
-    return Boolean.valueOf(System.getProperty("quidem.record.autostart", "false"));
+    return Boolean.valueOf(System.getProperty("quidem.record.autostart", "true"));
   }
 
   public void shutdown()

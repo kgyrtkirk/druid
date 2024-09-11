@@ -38,6 +38,7 @@ import org.apache.druid.initialization.DruidModule;
 import org.apache.druid.initialization.ServiceInjectorBuilder;
 import org.apache.druid.java.util.common.RE;
 import org.apache.druid.java.util.common.io.Closer;
+import org.apache.druid.java.util.emitter.service.ServiceEmitter;
 import org.apache.druid.math.expr.ExprMacroTable;
 import org.apache.druid.query.GlobalTableDataSource;
 import org.apache.druid.query.QueryRunnerFactoryConglomerate;
@@ -621,7 +622,8 @@ public class SqlTestFramework
     {
       return QueryFrameworkUtils.createMockQueryLifecycleFactory(
           injector.getInstance(QuerySegmentWalker.class),
-          injector.getInstance(QueryRunnerFactoryConglomerate.class)
+          injector.getInstance(QueryRunnerFactoryConglomerate.class),
+          injector.getInstance(ServiceEmitter.class)
       );
     }
 
