@@ -229,6 +229,7 @@ public class DruidQueryGenerator
       final PartialDruidQuery partialDruidQuery;
       final List<Vertex> inputs;
       final JoinSupportTweaks jst;
+      private SourceDesc source;
 
       public PDQVertex(PartialDruidQuery partialDruidQuery, List<Vertex> inputs, JoinSupportTweaks jst)
       {
@@ -250,10 +251,19 @@ public class DruidQueryGenerator
         );
       }
 
+
+      private SourceDesc getSource()
+      {
+        if (source != null) {
+          return source;
+        }
+        return source = realGetSource();
+      }
+
       /**
        * Creates the {@link SourceDesc} for the current {@link Vertex}.
        */
-      private SourceDesc getSource()
+      private SourceDesc realGetSource()
       {
         List<SourceDesc> sourceDescs = new ArrayList<>();
         for (Vertex inputVertex : inputs) {

@@ -58,13 +58,7 @@ LogicalWindow(window#0=[window(order by [0] aggs [SUM($1)])])
             "aggregations" : [ {
               "type" : "count",
               "name" : "a0"
-            } ],
-            "context" : {
-              "debug" : "true",
-              "enableWindowing" : "true",
-              "sqlQueryId" : "f2dea824-b9b1-423e-8f01-2ed8bdc6c46d",
-              "sqlStringifyArrays" : false
-            }
+            } ]
           }
         },
         "right" : {
@@ -96,13 +90,7 @@ LogicalWindow(window#0=[window(order by [0] aggs [SUM($1)])])
             "aggregations" : [ {
               "type" : "count",
               "name" : "a0"
-            } ],
-            "context" : {
-              "debug" : "true",
-              "enableWindowing" : "true",
-              "sqlQueryId" : "f2dea824-b9b1-423e-8f01-2ed8bdc6c46d",
-              "sqlStringifyArrays" : false
-            }
+            } ]
           }
         },
         "rightPrefix" : "j0.",
@@ -115,12 +103,6 @@ LogicalWindow(window#0=[window(order by [0] aggs [SUM($1)])])
       },
       "resultFormat" : "compactedList",
       "columns" : [ "a0", "d0", "j0.a0" ],
-      "context" : {
-        "debug" : "true",
-        "enableWindowing" : "true",
-        "sqlQueryId" : "f2dea824-b9b1-423e-8f01-2ed8bdc6c46d",
-        "sqlStringifyArrays" : false
-      },
       "columnTypes" : [ "LONG", "STRING", "LONG" ],
       "granularity" : {
         "type" : "all"
@@ -131,12 +113,6 @@ LogicalWindow(window#0=[window(order by [0] aggs [SUM($1)])])
   "intervals" : {
     "type" : "LegacySegmentSpec",
     "intervals" : [ "-146136543-09-08T08:23:32.096Z/146140482-04-24T15:36:27.903Z" ]
-  },
-  "context" : {
-    "debug" : "true",
-    "enableWindowing" : "true",
-    "sqlQueryId" : "f2dea824-b9b1-423e-8f01-2ed8bdc6c46d",
-    "sqlStringifyArrays" : false
   },
   "outputSignature" : [ {
     "name" : "d0",
@@ -248,15 +224,7 @@ DruidWindow(window#0=[window(order by [0] aggs [SUM($1)])])
         "aggregations" : [ {
           "type" : "count",
           "name" : "a0"
-        } ],
-        "context" : {
-          "debug" : "true",
-          "enableWindowing" : "true",
-          "outputformat" : "MYSQL",
-          "plannerStrategy" : "DECOUPLED",
-          "sqlQueryId" : "82ec0abd-1c78-40c3-8510-96850b00a5a7",
-          "sqlStringifyArrays" : false
-        }
+        } ]
       }
     },
     "right" : {
@@ -288,15 +256,7 @@ DruidWindow(window#0=[window(order by [0] aggs [SUM($1)])])
         "aggregations" : [ {
           "type" : "count",
           "name" : "a0"
-        } ],
-        "context" : {
-          "debug" : "true",
-          "enableWindowing" : "true",
-          "outputformat" : "MYSQL",
-          "plannerStrategy" : "DECOUPLED",
-          "sqlQueryId" : "82ec0abd-1c78-40c3-8510-96850b00a5a7",
-          "sqlStringifyArrays" : false
-        }
+        } ]
       }
     },
     "rightPrefix" : "j0.",
@@ -306,14 +266,6 @@ DruidWindow(window#0=[window(order by [0] aggs [SUM($1)])])
   "intervals" : {
     "type" : "LegacySegmentSpec",
     "intervals" : [ "-146136543-09-08T08:23:32.096Z/146140482-04-24T15:36:27.903Z" ]
-  },
-  "context" : {
-    "debug" : "true",
-    "enableWindowing" : "true",
-    "outputformat" : "MYSQL",
-    "plannerStrategy" : "DECOUPLED",
-    "sqlQueryId" : "82ec0abd-1c78-40c3-8510-96850b00a5a7",
-    "sqlStringifyArrays" : false
   },
   "outputSignature" : [ {
     "name" : "d0",

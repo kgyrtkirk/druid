@@ -1,5 +1,5 @@
-# testLeftJoinSubqueryWithSelectorFilter@filter-rewrites-disabled case-crc:c16b9934
-# quidem testcase reason: EQUIV_PLAN
+# testLeftJoinSubqueryWithSelectorFilter@filter-rewrites-disabled case-crc:33b6cb8a
+# quidem testcase reason: IMPROVED_PLAN
 !set computeInnerJoinCostAsFilter false
 !set debug true
 !set defaultTimeout 300000
