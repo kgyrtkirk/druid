@@ -1,0 +1,144 @@
+SLF4J: Class path contains multiple SLF4J bindings.
+SLF4J: Found binding in [jar:file:/home/dev/.m2/repository/org/apache/logging/log4j/log4j-slf4j-impl/2.22.1/log4j-slf4j-impl-2.22.1.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: Found binding in [jar:file:/home/dev/.m2/repository/org/slf4j/slf4j-simple/1.7.36/slf4j-simple-1.7.36.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
+SLF4J: Actual binding is of type [org.apache.logging.slf4j.Log4jLoggerFactory]
+WARNING: An illegal reflective access operation has occurred
+WARNING: Illegal reflective access by com.google.inject.internal.cglib.core.$ReflectUtils$1 (file:/home/dev/.m2/repository/com/google/inject/guice/4.1.0/guice-4.1.0.jar) to method java.lang.ClassLoader.defineClass(java.lang.String,byte[],int,int,java.security.ProtectionDomain)
+WARNING: Please consider reporting this to the maintainers of com.google.inject.internal.cglib.core.$ReflectUtils$1
+WARNING: Use --illegal-access=warn to enable warnings of further illegal reflective access operations
+WARNING: All illegal access operations will be denied in a future release
+TIMESTAMP INFO [main] org.hibernate.validator.internal.util.Version - HV000001: Hibernate Validator 6.2.5.Final
+TIMESTAMP INFO [main] org.apache.druid.query.DruidProcessingConfig - Using up to [8,044,675,072] bytes of direct memory for computation buffers.
+TIMESTAMP INFO [main] org.apache.druid.query.DruidProcessingConfig - Auto sizing buffers to [574,619,648] bytes each for [11] processing and [2] merge buffers. If you run out of direct memory, you may need to set these parameters explicitly using the guidelines at https://druid.apache.org/docs/latest/operations/basic-cluster-tuning.html#processing-threads-buffers.
+TIMESTAMP INFO [main] org.apache.druid.query.DruidProcessingConfig - Using up to [8,044,675,072] bytes of direct memory for computation buffers.
+TIMESTAMP INFO [main] org.apache.druid.query.DruidProcessingConfig - Auto sizing buffers to [574,619,648] bytes each for [11] processing and [2] merge buffers. If you run out of direct memory, you may need to set these parameters explicitly using the guidelines at https://druid.apache.org/docs/latest/operations/basic-cluster-tuning.html#processing-threads-buffers.
+TIMESTAMP INFO [main] org.apache.druid.segment.nested.VariantColumnSerializer - Column [arrayString] serialized successfully.
+TIMESTAMP INFO [main] org.apache.druid.segment.nested.VariantColumnSerializer - Column [arrayStringNulls] serialized successfully.
+TIMESTAMP INFO [main] org.apache.druid.segment.nested.VariantColumnSerializer - Column [arrayLong] serialized successfully.
+TIMESTAMP INFO [main] org.apache.druid.segment.nested.VariantColumnSerializer - Column [arrayLongNulls] serialized successfully.
+TIMESTAMP INFO [main] org.apache.druid.segment.nested.VariantColumnSerializer - Column [arrayDouble] serialized successfully.
+TIMESTAMP INFO [main] org.apache.druid.segment.nested.VariantColumnSerializer - Column [arrayDoubleNulls] serialized successfully.
+TIMESTAMP INFO [main] org.apache.druid.segment.nested.VariantColumnSerializer - Column [arrayVariant] serialized successfully.
+TIMESTAMP INFO [main] org.apache.druid.segment.nested.VariantColumnSerializer - Column [arrayNoType] serialized successfully.
+TIMESTAMP INFO [main] org.apache.druid.segment.nested.NestedDataColumnSerializer - Column [arrayNestedLong] serialized successfully with [4] nested columns.
+TIMESTAMP INFO [main] org.apache.druid.segment.nested.NestedDataColumnSerializer - Column [arrayObject] serialized successfully with [5] nested columns.
+TIMESTAMP INFO [main] org.apache.druid.segment.nested.VariantColumnSerializer - Column [arrayString] serialized successfully.
+TIMESTAMP INFO [main] org.apache.druid.segment.nested.VariantColumnSerializer - Column [arrayStringNulls] serialized successfully.
+TIMESTAMP INFO [main] org.apache.druid.segment.nested.VariantColumnSerializer - Column [arrayLong] serialized successfully.
+TIMESTAMP INFO [main] org.apache.druid.segment.nested.VariantColumnSerializer - Column [arrayLongNulls] serialized successfully.
+TIMESTAMP INFO [main] org.apache.druid.segment.nested.VariantColumnSerializer - Column [arrayDouble] serialized successfully.
+TIMESTAMP INFO [main] org.apache.druid.segment.nested.VariantColumnSerializer - Column [arrayDoubleNulls] serialized successfully.
+TIMESTAMP INFO [main] org.apache.druid.segment.nested.VariantColumnSerializer - Column [arrayVariant] serialized successfully.
+TIMESTAMP INFO [main] org.apache.druid.segment.nested.VariantColumnSerializer - Column [arrayNoType] serialized successfully.
+TIMESTAMP INFO [main] org.apache.druid.segment.nested.NestedDataColumnSerializer - Column [arrayNestedLong] serialized successfully with [4] nested columns.
+TIMESTAMP INFO [main] org.apache.druid.segment.nested.NestedDataColumnSerializer - Column [arrayObject] serialized successfully with [5] nested columns.
+TIMESTAMP WARN [main] org.apache.druid.server.SubqueryGuardrailHelper - Failed to get the lookupManager for estimating lookup size. Skipping.
+TIMESTAMP INFO [main] org.apache.druid.server.SubqueryGuardrailHelper - Took [0] ms to initialize the SubqueryGuardrailHelper.
+TIMESTAMP INFO [main] org.apache.druid.server.SubqueryGuardrailHelper - Each query has a memory limit of [EpOCH4] bytes to materialize its subqueries' results if auto limit is used
+TIMESTAMP INFO [main] org.apache.druid.sql.calcite.schema.BrokerSegmentMetadataCache - Initializing cache.
+TIMESTAMP INFO [DruidSchema-Cache-0] org.apache.druid.sql.calcite.schema.BrokerSegmentMetadataCache - [arrays] has new signature: {__time:LONG, arrayString:ARRAY<STRING>, arrayStringNulls:ARRAY<STRING>, arrayLong:ARRAY<LONG>, arrayLongNulls:ARRAY<LONG>, arrayDouble:ARRAY<DOUBLE>, arrayDoubleNulls:ARRAY<DOUBLE>, arrayVariant:ARRAY<STRING>, arrayNoType:ARRAY<LONG>, arrayNestedLong:COMPLEX<json>, arrayObject:COMPLEX<json>, cnt:LONG}.
+TIMESTAMP INFO [DruidSchema-Cache-0] org.apache.druid.sql.calcite.schema.BrokerSegmentMetadataCache - [broadcast] has new signature: {__time:LONG, dim1:STRING, dim2:STRING, dim3:STRING, dim4:STRING, dim5:STRING, dim6:STRING, d1:DOUBLE, d2:DOUBLE, f1:FLOAT, f2:FLOAT, l1:LONG, l2:LONG, cnt:LONG, m1:FLOAT, m2:DOUBLE, unique_dim1:COMPLEX<hyperUnique>}.
+TIMESTAMP INFO [DruidSchema-Cache-0] org.apache.druid.sql.calcite.schema.BrokerSegmentMetadataCache - [foo] has new signature: {__time:LONG, dim1:STRING, dim2:STRING, dim3:STRING, cnt:LONG, m1:FLOAT, m2:DOUBLE, unique_dim1:COMPLEX<hyperUnique>}.
+TIMESTAMP INFO [DruidSchema-Cache-0] org.apache.druid.sql.calcite.schema.BrokerSegmentMetadataCache - [foo2] has new signature: {__time:LONG, dim1:STRING, dim2:STRING, dim3:LONG, cnt:LONG, m1:LONG, m2:DOUBLE, unique_dim1:COMPLEX<hyperUnique>}.
+TIMESTAMP INFO [DruidSchema-Cache-0] org.apache.druid.sql.calcite.schema.BrokerSegmentMetadataCache - [foo4] has new signature: {__time:LONG, dim1:STRING, dim2:STRING, dim3:STRING, cnt:LONG, m1:FLOAT, m2:DOUBLE, unique_dim1:COMPLEX<hyperUnique>}.
+TIMESTAMP INFO [DruidSchema-Cache-0] org.apache.druid.sql.calcite.schema.BrokerSegmentMetadataCache - [forbiddenDatasource] has new signature: {__time:LONG, dim1:STRING, dim2:STRING, cnt:LONG, m1:FLOAT, m2:DOUBLE, unique_dim1:COMPLEX<hyperUnique>}.
+TIMESTAMP INFO [DruidSchema-Cache-0] org.apache.druid.sql.calcite.schema.BrokerSegmentMetadataCache - [lotsocolumns] has new signature: {__time:LONG, dimHyperUnique:STRING, dimMultivalEnumerated:STRING, dimMultivalEnumerated2:STRING, dimMultivalSequentialWithNulls:STRING, dimSequential:STRING, dimSequentialHalfNull:STRING, dimUniform:STRING, dimZipf:STRING, metFloatNormal:STRING, metFloatZipf:STRING, metLongSequential:STRING, metLongUniform:STRING, count:LONG}.
+TIMESTAMP INFO [DruidSchema-Cache-0] org.apache.druid.sql.calcite.schema.BrokerSegmentMetadataCache - [numfoo] has new signature: {__time:LONG, dim1:STRING, dim2:STRING, dim3:STRING, dim4:STRING, dim5:STRING, dim6:STRING, d1:DOUBLE, d2:DOUBLE, f1:FLOAT, f2:FLOAT, l1:LONG, l2:LONG, cnt:LONG, m1:FLOAT, m2:DOUBLE, unique_dim1:COMPLEX<hyperUnique>}.
+TIMESTAMP INFO [DruidSchema-Cache-0] org.apache.druid.sql.calcite.schema.BrokerSegmentMetadataCache - [some_datasource] has new signature: {__time:LONG, dim1:STRING, dim2:STRING, dim3:STRING, cnt:LONG, m1:FLOAT, m2:DOUBLE, unique_dim1:COMPLEX<hyperUnique>}.
+TIMESTAMP INFO [DruidSchema-Cache-0] org.apache.druid.sql.calcite.schema.BrokerSegmentMetadataCache - [somexdatasource] has new signature: {__time:LONG, cnt_x:LONG, m1_x:FLOAT, m2_x:DOUBLE, unique_dim1_x:COMPLEX<hyperUnique>}.
+TIMESTAMP INFO [DruidSchema-Cache-0] org.apache.druid.sql.calcite.schema.BrokerSegmentMetadataCache - [visits] has new signature: {__time:LONG, user:STRING, country:STRING, city:STRING, cnt:LONG, m1:FLOAT, m2:DOUBLE, unique_dim1:COMPLEX<hyperUnique>}.
+TIMESTAMP INFO [DruidSchema-Cache-0] org.apache.druid.sql.calcite.schema.BrokerSegmentMetadataCache - [wikipedia] has new signature: {__time:LONG, channel:STRING, cityName:STRING, comment:STRING, countryIsoCode:STRING, countryName:STRING, isAnonymous:STRING, isMinor:STRING, isNew:STRING, isRobot:STRING, isUnpatrolled:STRING, metroCode:STRING, namespace:STRING, page:STRING, regionIsoCode:STRING, regionName:STRING, user:STRING, delta:LONG, added:LONG, deleted:LONG}.
+TIMESTAMP INFO [DruidSchema-Cache-0] org.apache.druid.sql.calcite.schema.BrokerSegmentMetadataCache - [wikipedia_first_last] has new signature: {__time:LONG, channel:STRING, cityName:STRING, comment:STRING, countryIsoCode:STRING, countryName:STRING, isAnonymous:STRING, isMinor:STRING, isNew:STRING, isRobot:STRING, isUnpatrolled:STRING, metroCode:STRING, namespace:STRING, page:STRING, regionIsoCode:STRING, regionName:STRING, user:STRING, double_first_added:COMPLEX<serializablePairLongDouble>, double_last_added:COMPLEX<serializablePairLongDouble>, float_first_added:COMPLEX<serializablePairLongFloat>, float_last_added:COMPLEX<serializablePairLongFloat>, long_first_added:COMPLEX<serializablePairLongLong>, long_last_added:COMPLEX<serializablePairLongLong>, string_first_added:COMPLEX<serializablePairLongString>, string_last_added:COMPLEX<serializablePairLongString>}.
+TIMESTAMP INFO [DruidSchema-Cache-0] org.apache.druid.segment.metadata.AbstractSegmentMetadataCache - BrokerSegmentMetadataCache initialized in [57] ms.
+TIMESTAMP INFO [DruidSchema-Cache-0] org.apache.druid.segment.metadata.AbstractSegmentMetadataCache - Metadata refresh stopped.
+TIMESTAMP INFO [main] org.eclipse.jetty.util.log - Logging initialized @8313ms to org.eclipse.jetty.util.log.Slf4jLog
+TIMESTAMP INFO [main] org.eclipse.jetty.server.Server - jetty-9.4.54.v20240208; built: IP:PORT:39.027Z; git: cef3fbd6d736a21e7d541a5db490381d95a2047d; jvm 11.0.24+8-LTS
+TIMESTAMP INFO [main] org.eclipse.jetty.server.AbstractConnector - Started ServerConnector@OBJ_ADDR{HTTP/1.1, (http/1.1)}{IP:PORT}
+TIMESTAMP INFO [main] org.eclipse.jetty.server.Server - Started @8386ms
+TIMESTAMP INFO [JDBCQueryExecutor-connection-GUID-statement-1] org.apache.druid.sql.calcite.planner.CalciteRulesManager - Start
+LogicalAggregate(group=[{0}], EXPR$1=[COUNT(DISTINCT $1)], EXPR$2=[COUNT(DISTINCT $2)], EXPR$3=[COUNT(DISTINCT $3) FILTER $4], EXPR$4=[COUNT(DISTINCT $3)]): rowcount = 10.0, cumulative cost = {215.0 rows, 601.0 cpu, 0.0 io}, id = 8
+  LogicalProject(EXPR$0=[TIME_FLOOR($0, 'PT1H')], page=[$13], $f2=[CASE(=($1, '#it.wikipedia'), $16, null:VARCHAR)], user=[$16], $f4=[IS TRUE(=($1, '#it.wikipedia'))]): rowcount = 100.0, cumulative cost = {200.0 rows, 601.0 cpu, 0.0 io}, id = 7
+    LogicalTableScan(table=[[druid, wikipedia]]): rowcount = 100.0, cumulative cost = {100.0 rows, 101.0 cpu, 0.0 io}, id = 6
+
+TIMESTAMP DEBUG [JDBCQueryExecutor-connection-GUID-statement-1] org.apache.calcite.plan.AbstractRelOptPlanner.rule_execution_summary - Rule Attempts Info for HepPlanner
+TIMESTAMP DEBUG [JDBCQueryExecutor-connection-GUID-statement-1] org.apache.calcite.plan.AbstractRelOptPlanner.rule_execution_summary - 
+Rules                                                                   Attempts           Time (us)
+FixIncorrectInExpansionTypes                                                   3                  99
+* Total                                                                        3                  99
+
+TIMESTAMP DEBUG [JDBCQueryExecutor-connection-GUID-statement-1] org.apache.calcite.plan.AbstractRelOptPlanner.rule_execution_summary - Rule Attempts Info for HepPlanner
+TIMESTAMP DEBUG [JDBCQueryExecutor-connection-GUID-statement-1] org.apache.calcite.plan.AbstractRelOptPlanner.rule_execution_summary - 
+Rules                                                                   Attempts           Time (us)
+* Total                                                                        0                   0
+
+TIMESTAMP INFO [JDBCQueryExecutor-connection-GUID-statement-1] org.apache.druid.sql.calcite.planner.CalciteRulesManager - Finished subquery program
+LogicalAggregate(group=[{0}], EXPR$1=[COUNT(DISTINCT $1)], EXPR$2=[COUNT(DISTINCT $2)], EXPR$3=[COUNT(DISTINCT $3) FILTER $4], EXPR$4=[COUNT(DISTINCT $3)]): rowcount = 10.0, cumulative cost = {215.0 rows, 601.0 cpu, 0.0 io}, id = 17
+  LogicalProject(EXPR$0=[TIME_FLOOR($0, 'PT1H')], page=[$13], $f2=[CASE(=($1, '#it.wikipedia'), $16, null:VARCHAR)], user=[$16], $f4=[IS TRUE(=($1, '#it.wikipedia'))]): rowcount = 100.0, cumulative cost = {200.0 rows, 601.0 cpu, 0.0 io}, id = 15
+    LogicalTableScan(table=[[druid, wikipedia]]): rowcount = 100.0, cumulative cost = {100.0 rows, 101.0 cpu, 0.0 io}, id = 6
+
+TIMESTAMP INFO [JDBCQueryExecutor-connection-GUID-statement-1] org.apache.druid.sql.calcite.planner.CalciteRulesManager - Finished decorrelate and trim fields program
+LogicalAggregate(group=[{0}], EXPR$1=[COUNT(DISTINCT $1)], EXPR$2=[COUNT(DISTINCT $2)], EXPR$3=[COUNT(DISTINCT $3) FILTER $4], EXPR$4=[COUNT(DISTINCT $3)]): rowcount = 10.0, cumulative cost = {215.0 rows, 601.0 cpu, 0.0 io}, id = 21
+  LogicalProject(EXPR$0=[TIME_FLOOR($0, 'PT1H')], page=[$13], $f2=[CASE(=($1, '#it.wikipedia'), $16, null:VARCHAR)], user=[$16], $f4=[IS TRUE(=($1, '#it.wikipedia'))]): rowcount = 100.0, cumulative cost = {200.0 rows, 601.0 cpu, 0.0 io}, id = 20
+    LogicalTableScan(table=[[druid, wikipedia]]): rowcount = 100.0, cumulative cost = {100.0 rows, 101.0 cpu, 0.0 io}, id = 6
+
+TIMESTAMP DEBUG [JDBCQueryExecutor-connection-GUID-statement-1] org.apache.calcite.plan.AbstractRelOptPlanner.rule_execution_summary - Rule Attempts Info for HepPlanner
+TIMESTAMP DEBUG [JDBCQueryExecutor-connection-GUID-statement-1] org.apache.calcite.plan.AbstractRelOptPlanner.rule_execution_summary - 
+Rules                                                                   Attempts           Time (us)
+CoalesceLookupRule                                                             3                  91
+CaseToCoalesceRule                                                             3                  79
+FlattenConcatRule                                                              3                  78
+RewriteFirstValueLastValueRule                                                 3                  53
+ReduceExpressionsRule(Project)                                                 1              12,553
+AggregatePullUpLookupRule                                                      1                  47
+* Total                                                                       14              12,901
+
+TIMESTAMP INFO [JDBCQueryExecutor-connection-GUID-statement-1] org.apache.druid.sql.calcite.planner.CalciteRulesManager - Finished expression reduction program
+LogicalAggregate(group=[{0}], EXPR$1=[COUNT(DISTINCT $1)], EXPR$2=[COUNT(DISTINCT $2)], EXPR$3=[COUNT(DISTINCT $3) FILTER $4], EXPR$4=[COUNT(DISTINCT $3)]): rowcount = 10.0, cumulative cost = {215.0 rows, 601.0 cpu, 0.0 io}, id = 25
+  LogicalProject(EXPR$0=[TIME_FLOOR($0, 'PT1H')], page=[$13], $f2=[CASE(=($1, '#it.wikipedia'), $16, null:VARCHAR)], user=[$16], $f4=[IS TRUE(=($1, '#it.wikipedia'))]): rowcount = 100.0, cumulative cost = {200.0 rows, 601.0 cpu, 0.0 io}, id = 23
+    LogicalTableScan(table=[[druid, wikipedia]]): rowcount = 100.0, cumulative cost = {100.0 rows, 101.0 cpu, 0.0 io}, id = 6
+
+TIMESTAMP DEBUG [JDBCQueryExecutor-connection-GUID-statement-1] org.apache.calcite.plan.AbstractRelOptPlanner.rule_execution_summary - Rule Attempts Info for HepPlanner
+TIMESTAMP DEBUG [JDBCQueryExecutor-connection-GUID-statement-1] org.apache.calcite.plan.AbstractRelOptPlanner.rule_execution_summary - 
+Rules                                                                   Attempts           Time (us)
+* Total                                                                        0                   0
+
+TIMESTAMP INFO [JDBCQueryExecutor-connection-GUID-statement-1] org.apache.druid.sql.calcite.planner.CalciteRulesManager - Finished pre-Volcano manipulation program
+LogicalAggregate(group=[{0}], EXPR$1=[COUNT(DISTINCT $1)], EXPR$2=[COUNT(DISTINCT $2)], EXPR$3=[COUNT(DISTINCT $3) FILTER $4], EXPR$4=[COUNT(DISTINCT $3)]): rowcount = 10.0, cumulative cost = {215.0 rows, 601.0 cpu, 0.0 io}, id = 30
+  LogicalProject(EXPR$0=[TIME_FLOOR($0, 'PT1H')], page=[$13], $f2=[CASE(=($1, '#it.wikipedia'), $16, null:VARCHAR)], user=[$16], $f4=[IS TRUE(=($1, '#it.wikipedia'))]): rowcount = 100.0, cumulative cost = {200.0 rows, 601.0 cpu, 0.0 io}, id = 28
+    LogicalTableScan(table=[[druid, wikipedia]]): rowcount = 100.0, cumulative cost = {100.0 rows, 101.0 cpu, 0.0 io}, id = 6
+
+TIMESTAMP DEBUG [JDBCQueryExecutor-connection-GUID-statement-1] org.apache.calcite.plan.AbstractRelOptPlanner.rule_execution_summary - Rule Attempts Info for HepPlanner
+TIMESTAMP DEBUG [JDBCQueryExecutor-connection-GUID-statement-1] org.apache.calcite.plan.AbstractRelOptPlanner.rule_execution_summary - 
+Rules                                                                   Attempts           Time (us)
+AggregateExpandDistinctAggregatesRule                                         11              52,561
+AggregateProjectMergeRule                                                     11                 254
+DruidAggregateRemoveRedundancyRule                                            10               1,865
+AggregateProjectPullUpConstantsRule                                            6                  15
+ProjectAggregatePruneUnusedCallRule                                            5                 117
+AggregateCaseToFilterRule                                                      1               3,904
+ProjectMergeRule                                                               1                 504
+* Total                                                                       45              59,220
+
+TIMESTAMP INFO [JDBCQueryExecutor-connection-GUID-statement-1] org.apache.druid.sql.calcite.planner.CalciteRulesManager - After DecoupledLogicalOptimizationProgram program
+LogicalAggregate(group=[{0}], EXPR$1=[COUNT($1) FILTER $3], EXPR$2=[COUNT($2) FILTER $6], EXPR$3=[COUNT($2) FILTER $4], EXPR$4=[COUNT($2) FILTER $5]): rowcount = 3.0, cumulative cost = {268.25 rows, 711.0 cpu, 0.0 io}, id = 65
+  LogicalProject($f0=[$0], page=[$1], user=[$2], $g_15=[=($4, 15)], $g_19_f_3=[AND(=($4, 19), IS TRUE($3))], $g_23=[=($4, 23)], $g_28_f_5=[AND(=($4, 28), IS TRUE($3))]): rowcount = 30.0, cumulative cost = {263.75 rows, 711.0 cpu, 0.0 io}, id = 62
+    LogicalAggregate(group=[{0, 1, 2, 3}], groups=[[{0, 1}, {0, 2, 3}, {0, 2}]], $g=[GROUPING($0, $1, $2, $3, $2, $3)]): rowcount = 30.0, cumulative cost = {233.75 rows, 501.0 cpu, 0.0 io}, id = 56
+      LogicalProject($f0=[TIME_FLOOR($0, 'PT1H')], page=[$13], user=[$16], $f4=[IS TRUE(=($1, '#it.wikipedia'))]): rowcount = 100.0, cumulative cost = {200.0 rows, 501.0 cpu, 0.0 io}, id = 52
+        LogicalTableScan(table=[[druid, wikipedia]]): rowcount = 100.0, cumulative cost = {100.0 rows, 101.0 cpu, 0.0 io}, id = 6
+
+TIMESTAMP DEBUG [JDBCQueryExecutor-connection-GUID-statement-1] org.apache.calcite.plan.AbstractRelOptPlanner.rule_execution_summary - Rule Attempts Info for VolcanoPlanner
+TIMESTAMP DEBUG [JDBCQueryExecutor-connection-GUID-statement-1] org.apache.calcite.plan.AbstractRelOptPlanner.rule_execution_summary - 
+Rules                                                                   Attempts           Time (us)
+DruidProjectRule(in:NONE,out:DRUID_LOGICAL)                                    2               1,603
+DruidAggregateRule(in:NONE,out:DRUID_LOGICAL)                                  2               1,071
+DruidTableScanRule(in:NONE,out:DRUID_LOGICAL)                                  1                 893
+* Total                                                                        5               3,567
+
+TIMESTAMP INFO [JDBCQueryExecutor-connection-GUID-statement-1] org.apache.druid.sql.calcite.planner.CalciteRulesManager - After logical volcano planner program
+DruidAggregate(group=[{0}], EXPR$1=[COUNT($1) FILTER $3], EXPR$2=[COUNT($2) FILTER $6], EXPR$3=[COUNT($2) FILTER $4], EXPR$4=[COUNT($2) FILTER $5], druid=[logical]): rowcount = 30.0, cumulative cost = {331.0 rows, 283.070001 cpu, 0.0 io}, id = 91
+  DruidProject($f0=[$0], page=[$1], user=[$2], $g_15=[=($4, 15)], $g_19_f_3=[AND(=($4, 19), IS TRUE($3))], $g_23=[=($4, 23)], $g_28_f_5=[AND(=($4, 28), IS TRUE($3))], druid=[logical]): rowcount = 300.0, cumulative cost = {301.0 rows, 267.050001 cpu, 0.0 io}, id = 90
+    DruidAggregate(group=[{0, 1, 2, 3}], groups=[[{0, 1}, {0, 2, 3}, {0, 2}]], $g=[GROUPING($0, $1, $2, $3, $2, $3)], druid=[logical]): rowcount = 300.0, cumulative cost = {301.0 rows, 267.05 cpu, 0.0 io}, id = 89
+      DruidProject($f0=[TIME_FLOOR($0, 'PT1H')], page=[$13], user=[$16], $f4=[IS TRUE(=($1, '#it.wikipedia'))], druid=[logical]): rowcount = 1000.0, cumulative cost = {1.0 rows, 251.0 cpu, 0.0 io}, id = 88
+        DruidTableScan(table=[[druid, wikipedia]], druid=[logical]): rowcount = 1000.0, cumulative cost = {tiny}, id = 78
+

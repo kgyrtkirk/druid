@@ -1,6 +1,7 @@
-#!set plannerStrategy DECOUPLED
+!set plannerStrategy DECOUPLED
 !set useApproximateCountDistinct false
 !set useGroupingSetForExactDistinct true
+!set debug true
 !use druidtest://?numMergeBuffers=4
 !set outputformat mysql
 
@@ -47,17 +48,20 @@ LogicalAggregate(group=[{0}], EXPR$1=[COUNT(DISTINCT $1)], EXPR$2=[COUNT(DISTINC
     LogicalTableScan(table=[[druid, wikipedia]])
 
 !convertedPlan
-LogicalAggregate(group=[{0}], EXPR$1=[COUNT(DISTINCT $1)], EXPR$2=[COUNT(DISTINCT $2)], EXPR$3=[COUNT(DISTINCT $3) FILTER $4], EXPR$4=[COUNT(DISTINCT $3)])
-  LogicalProject(EXPR$0=[TIME_FLOOR($0, 'PT1H')], page=[$13], $f2=[CASE(=($1, '#it.wikipedia'), $16, null:VARCHAR)], user=[$16], $f4=[IS TRUE(=($1, '#it.wikipedia'))])
-    LogicalTableScan(table=[[druid, wikipedia]])
-
-!logicalPlan
 LogicalProject($f0=[$0], EXPR$1=[$1], EXPR$2=[$2], EXPR$3=[$2], EXPR$4=[$3])
   LogicalAggregate(group=[{0}], EXPR$1=[COUNT($1) FILTER $3], EXPR$2=[COUNT($2) FILTER $4], EXPR$4=[COUNT($2) FILTER $5])
     LogicalProject($f0=[$0], page=[$1], user=[$2], $g_3=[=($4, 3)], $g_4_f_3=[AND(=($4, 4), IS TRUE($3))], $g_5=[=($4, 5)])
       LogicalAggregate(group=[{0, 1, 2, 3}], groups=[[{0, 1}, {0, 2, 3}, {0, 2}]], $g=[GROUPING($0, $1, $2, $3)])
         LogicalProject($f0=[TIME_FLOOR($0, 'PT1H')], page=[$13], user=[$16], $f4=[IS TRUE(=($1, '#it.wikipedia'))])
           LogicalTableScan(table=[[druid, wikipedia]])
+
+!logicalPlan
+DruidProject($f0=[$0], EXPR$1=[$1], EXPR$2=[$2], EXPR$3=[$2], EXPR$4=[$3], druid=[logical])
+  DruidAggregate(group=[{0}], EXPR$1=[COUNT($1) FILTER $3], EXPR$2=[COUNT($2) FILTER $4], EXPR$4=[COUNT($2) FILTER $5], druid=[logical])
+    DruidProject($f0=[$0], page=[$1], user=[$2], $g_3=[=($4, 3)], $g_4_f_3=[AND(=($4, 4), IS TRUE($3))], $g_5=[=($4, 5)], druid=[logical])
+      DruidAggregate(group=[{0, 1, 2, 3}], groups=[[{0, 1}, {0, 2, 3}, {0, 2}]], $g=[GROUPING($0, $1, $2, $3)], druid=[logical])
+        DruidProject($f0=[TIME_FLOOR($0, 'PT1H')], page=[$13], user=[$16], $f4=[IS TRUE(=($1, '#it.wikipedia'))], druid=[logical])
+          DruidTableScan(table=[[druid, wikipedia]], druid=[logical])
 
 !druidPlan
 {

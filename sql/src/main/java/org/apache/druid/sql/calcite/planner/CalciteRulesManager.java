@@ -498,6 +498,8 @@ public class CalciteRulesManager
       rules.addAll(FANCY_JOIN_RULES);
     }
 
+    rules.add(DruidAggregateRemoveRedundancyRule.instance());
+
     if (!plannerConfig.isUseApproximateCountDistinct()) {
       if (plannerConfig.isUseGroupingSetForExactDistinct()
           && plannerContext.featureAvailable(EngineFeature.GROUPING_SETS)) {
@@ -511,7 +513,6 @@ public class CalciteRulesManager
     rules.add(FilterJoinExcludePushToChildRule.FILTER_ON_JOIN_EXCLUDE_PUSH_TO_CHILD);
     rules.add(SortCollapseRule.instance());
     rules.add(ProjectAggregatePruneUnusedCallRule.instance());
-    rules.add(DruidAggregateRemoveRedundancyRule.instance());
 
     return rules.build();
   }
