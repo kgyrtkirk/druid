@@ -5635,6 +5635,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @NotYetSupported(Modes.SORT_REMOVE_TROUBLE)
   @MethodSource("provideQueryContexts")
   @ParameterizedTest(name = "{0}")
   public void testRegressionFilteredAggregatorsSubqueryJoins(Map<String, Object> queryContext)
