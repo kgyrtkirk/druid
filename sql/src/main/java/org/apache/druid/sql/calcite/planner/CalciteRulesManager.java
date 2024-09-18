@@ -276,22 +276,10 @@ public class CalciteRulesManager
   {
     final HepProgramBuilder builder = HepProgram.builder();
     builder.addMatchLimit(CalciteRulesManager.HEP_DEFAULT_MATCH_LIMIT);
-    builder.addGroupBegin();
     builder.addRuleCollection(baseRuleSet(plannerContext));
     builder.addRuleInstance(CoreRules.UNION_MERGE);
-    builder.addGroupEnd();
-
-
-    builder.addGroupBegin();
-
     builder.addRuleInstance(JoinExtractFilterRule.Config.DEFAULT.toRule());
-    builder.addGroupEnd();
-    builder.addGroupBegin();
     builder.addRuleInstance(FilterIntoJoinRuleConfig.DEFAULT.withPredicate(DruidJoinRule::isSupportedPredicate).toRule());
-    builder.addGroupEnd();
-
-
-
     return Programs.of(builder.build(), true, DefaultRelMetadataProvider.INSTANCE);
   }
 
