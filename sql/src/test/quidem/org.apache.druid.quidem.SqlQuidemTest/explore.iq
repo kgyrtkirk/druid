@@ -1,4 +1,4 @@
-# !set plannerStrategy DECOUPLED
+!set plannerStrategy DECOUPLED
 !use druidtest://?numMergeBuffers=3
 !set outputformat mysql
 
@@ -45,14 +45,14 @@ LogicalAggregate(group=[{0}], EXPR$1=[COUNT(DISTINCT $1)], EXPR$2=[COUNT(DISTINC
     LogicalTableScan(table=[[druid, wikipedia]])
 
 !convertedPlan
-LogicalAggregate(group=[{0}], EXPR$1=[COUNT(DISTINCT $1)], EXPR$2=[COUNT(DISTINCT $2)], EXPR$3=[COUNT(DISTINCT $3) FILTER $4], EXPR$4=[COUNT(DISTINCT $3)])
-  LogicalProject(EXPR$0=[TIME_FLOOR($0, 'PT1H')], page=[$13], $f2=[CASE(=($1, '#it.wikipedia'), $16, null:VARCHAR)], user=[$16], $f4=[IS TRUE(=($1, '#it.wikipedia'))])
-    LogicalTableScan(table=[[druid, wikipedia]])
-
-!logicalPlan
 LogicalAggregate(group=[{0}], EXPR$1=[COUNT(DISTINCT $1)], EXPR$2=[COUNT(DISTINCT $2) FILTER $3], EXPR$3=[COUNT(DISTINCT $2) FILTER $3], EXPR$4=[COUNT(DISTINCT $2)])
   LogicalProject($f0=[TIME_FLOOR($0, 'PT1H')], page=[$13], user=[$16], $f4=[IS TRUE(=($1, '#it.wikipedia'))])
     LogicalTableScan(table=[[druid, wikipedia]])
+
+!logicalPlan
+DruidAggregate(group=[{0}], EXPR$1=[COUNT(DISTINCT $1)], EXPR$2=[COUNT(DISTINCT $2) FILTER $3], EXPR$3=[COUNT(DISTINCT $2) FILTER $3], EXPR$4=[COUNT(DISTINCT $2)], druid=[logical])
+  DruidProject($f0=[TIME_FLOOR($0, 'PT1H')], page=[$13], user=[$16], $f4=[IS TRUE(=($1, '#it.wikipedia'))], druid=[logical])
+    DruidTableScan(table=[[druid, wikipedia]], druid=[logical])
 
 !druidPlan
 {
