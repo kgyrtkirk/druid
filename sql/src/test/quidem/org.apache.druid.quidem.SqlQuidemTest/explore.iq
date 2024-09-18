@@ -1,0 +1,136 @@
+# !set plannerStrategy DECOUPLED
+!use druidtest://?numMergeBuffers=3
+!set outputformat mysql
+
+SELECT
+  TIME_FLOOR("__time", 'PT1H') ,
+  COUNT(DISTINCT "page") ,
+  COUNT(DISTINCT CASE WHEN "channel" = '#it.wikipedia' THEN "user" END), 
+  COUNT(DISTINCT "user") FILTER (WHERE "channel" = '#it.wikipedia'),   COUNT(DISTINCT "user") 
+FROM "wikipedia"
+GROUP BY 1;
++-------------------------+--------+--------+--------+--------+
+| EXPR$0                  | EXPR$1 | EXPR$2 | EXPR$3 | EXPR$4 |
++-------------------------+--------+--------+--------+--------+
+| 2015-09-12 00:00:00.000 |    263 |      5 |      5 |    148 |
+| 2015-09-12 01:00:00.000 |   1091 |     14 |     14 |    499 |
+| 2015-09-12 02:00:00.000 |   1068 |     10 |     10 |    466 |
+| 2015-09-12 03:00:00.000 |    762 |     10 |     10 |    431 |
+| 2015-09-12 04:00:00.000 |    753 |      6 |      6 |    430 |
+| 2015-09-12 05:00:00.000 |   1211 |     10 |     10 |    443 |
+| 2015-09-12 06:00:00.000 |   2060 |     13 |     13 |    507 |
+| 2015-09-12 07:00:00.000 |   2184 |     21 |     21 |    589 |
+| 2015-09-12 08:00:00.000 |   1543 |     36 |     36 |    709 |
+| 2015-09-12 09:00:00.000 |   1639 |     43 |     43 |    785 |
+| 2015-09-12 10:00:00.000 |   1646 |     36 |     36 |    786 |
+| 2015-09-12 11:00:00.000 |   1526 |     39 |     39 |    811 |
+| 2015-09-12 12:00:00.000 |   1673 |     46 |     46 |    850 |
+| 2015-09-12 13:00:00.000 |   1915 |     43 |     43 |    918 |
+| 2015-09-12 14:00:00.000 |   1803 |     49 |     49 |    864 |
+| 2015-09-12 15:00:00.000 |   1840 |     36 |     36 |    948 |
+| 2015-09-12 16:00:00.000 |   1865 |     51 |     51 |    969 |
+| 2015-09-12 17:00:00.000 |   2172 |     37 |     37 |    934 |
+| 2015-09-12 18:00:00.000 |   2057 |     40 |     40 |    934 |
+| 2015-09-12 19:00:00.000 |   1910 |     32 |     32 |    920 |
+| 2015-09-12 20:00:00.000 |   1735 |     31 |     31 |    872 |
+| 2015-09-12 21:00:00.000 |   1686 |     39 |     39 |    866 |
+| 2015-09-12 22:00:00.000 |   1478 |     28 |     28 |    706 |
+| 2015-09-12 23:00:00.000 |   1422 |     20 |     20 |    628 |
++-------------------------+--------+--------+--------+--------+
+(24 rows)
+
+!ok
+LogicalAggregate(group=[{0}], EXPR$1=[COUNT(DISTINCT $1)], EXPR$2=[COUNT(DISTINCT $2)], EXPR$3=[COUNT(DISTINCT $3) FILTER $4], EXPR$4=[COUNT(DISTINCT $3)])
+  LogicalProject(EXPR$0=[TIME_FLOOR($0, 'PT1H')], page=[$13], $f2=[CASE(=($1, '#it.wikipedia'), $16, null:VARCHAR)], user=[$16], $f4=[IS TRUE(=($1, '#it.wikipedia'))])
+    LogicalTableScan(table=[[druid, wikipedia]])
+
+!convertedPlan
+LogicalAggregate(group=[{0}], EXPR$1=[COUNT(DISTINCT $1)], EXPR$2=[COUNT(DISTINCT $2)], EXPR$3=[COUNT(DISTINCT $3) FILTER $4], EXPR$4=[COUNT(DISTINCT $3)])
+  LogicalProject(EXPR$0=[TIME_FLOOR($0, 'PT1H')], page=[$13], $f2=[CASE(=($1, '#it.wikipedia'), $16, null:VARCHAR)], user=[$16], $f4=[IS TRUE(=($1, '#it.wikipedia'))])
+    LogicalTableScan(table=[[druid, wikipedia]])
+
+!logicalPlan
+LogicalAggregate(group=[{0}], EXPR$1=[COUNT(DISTINCT $1)], EXPR$2=[COUNT(DISTINCT $2) FILTER $3], EXPR$3=[COUNT(DISTINCT $2) FILTER $3], EXPR$4=[COUNT(DISTINCT $2)])
+  LogicalProject($f0=[TIME_FLOOR($0, 'PT1H')], page=[$13], user=[$16], $f4=[IS TRUE(=($1, '#it.wikipedia'))])
+    LogicalTableScan(table=[[druid, wikipedia]])
+
+!druidPlan
+{
+  "queryType" : "timeseries",
+  "dataSource" : {
+    "type" : "table",
+    "name" : "wikipedia"
+  },
+  "intervals" : {
+    "type" : "intervals",
+    "intervals" : [ "-146136543-09-08T08:23:32.096Z/146140482-04-24T15:36:27.903Z" ]
+  },
+  "granularity" : "HOUR",
+  "aggregations" : [ {
+    "type" : "cardinality",
+    "name" : "a0",
+    "fields" : [ {
+      "type" : "default",
+      "dimension" : "page",
+      "outputName" : "page",
+      "outputType" : "STRING"
+    } ],
+    "byRow" : false,
+    "round" : true
+  }, {
+    "type" : "filtered",
+    "aggregator" : {
+      "type" : "cardinality",
+      "name" : "a1",
+      "fields" : [ {
+        "type" : "default",
+        "dimension" : "user",
+        "outputName" : "user",
+        "outputType" : "STRING"
+      } ],
+      "byRow" : false,
+      "round" : true
+    },
+    "filter" : {
+      "type" : "equals",
+      "column" : "channel",
+      "matchValueType" : "STRING",
+      "matchValue" : "#it.wikipedia"
+    },
+    "name" : "a1"
+  }, {
+    "type" : "filtered",
+    "aggregator" : {
+      "type" : "cardinality",
+      "name" : "a2",
+      "fields" : [ {
+        "type" : "default",
+        "dimension" : "user",
+        "outputName" : "user",
+        "outputType" : "STRING"
+      } ],
+      "byRow" : false,
+      "round" : true
+    },
+    "filter" : {
+      "type" : "equals",
+      "column" : "channel",
+      "matchValueType" : "STRING",
+      "matchValue" : "#it.wikipedia"
+    },
+    "name" : "a2"
+  }, {
+    "type" : "cardinality",
+    "name" : "a3",
+    "fields" : [ {
+      "type" : "default",
+      "dimension" : "user",
+      "outputName" : "user",
+      "outputType" : "STRING"
+    } ],
+    "byRow" : false,
+    "round" : true
+  } ]
+}
+!nativePlan
+
