@@ -1,8 +1,8 @@
-# testVirtualColumnOnMVFilterJoinExpression@all_enabled@NullHandling=sql case-crc:04b89712
+# testVirtualColumnOnMVFilterJoinExpression@filter-rewrites-disabled case-crc:0b431ca5
 # quidem testcase reason: SLIGHTLY_WORSE_FILTER_PUSHED_TO_JOIN_OPERAND
 !set debug true
 !set defaultTimeout 300000
-!set enableJoinFilterRewrite true
+!set enableJoinFilterRewrite false
 !set enableJoinFilterRewriteValueColumnFilters true
 !set enableRewriteJoinToFilter true
 !set maxScatterGatherBytes 9223372036854775807

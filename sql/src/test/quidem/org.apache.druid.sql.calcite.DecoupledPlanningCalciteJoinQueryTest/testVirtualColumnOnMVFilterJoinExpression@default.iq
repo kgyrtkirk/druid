@@ -1,4 +1,4 @@
-# testVirtualColumnOnMVFilterJoinExpression@default@NullHandling=default case-crc:9cb8f271
+# testVirtualColumnOnMVFilterJoinExpression@default case-crc:9cb8f271
 # quidem testcase reason: SLIGHTLY_WORSE_FILTER_PUSHED_TO_JOIN_OPERAND
 !set debug true
 !set defaultTimeout 300000
