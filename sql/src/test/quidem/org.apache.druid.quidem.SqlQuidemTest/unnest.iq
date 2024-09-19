@@ -1,0 +1,91 @@
+!set plannerStrategy DECOUPLED
+!use druidtest://?numMergeBuffers=3
+!set outputformat mysql
+
+SELECT longs FROM druid.arrays, UNNEST(arrayLongNulls) as u(longs);
++-------+
+| longs |
++-------+
+|     1 |
+|     1 |
+|     1 |
+|     1 |
+|     1 |
+|     2 |
+|     2 |
+|     2 |
+|     2 |
+|     2 |
+|     2 |
+|     3 |
+|     3 |
+|     3 |
+|     3 |
+|     3 |
+|     3 |
+|     9 |
+|     9 |
+|       |
+|       |
+|       |
+|       |
+|       |
++-------+
+(24 rows)
+
+!ok
+LogicalProject(longs=[$12])
+  LogicalCorrelate(correlation=[$cor0], joinType=[inner], requiredColumns=[{4}])
+    LogicalTableScan(table=[[druid, arrays]])
+    LogicalProject(longs=[$0])
+      Uncollect
+        LogicalProject(arrayLongNulls=[$cor0.arrayLongNulls])
+          LogicalValues(tuples=[[{ 0 }]])
+
+!convertedPlan
+LogicalProject(longs=[$12])
+  LogicalCorrelate(correlation=[$cor0], joinType=[inner], requiredColumns=[{4}])
+    LogicalTableScan(table=[[druid, arrays]])
+    Uncollect
+      LogicalProject(arrayLongNulls=[$cor0.arrayLongNulls])
+        LogicalValues(tuples=[[{ 0 }]])
+
+!logicalPlan
+LogicalProject(longs=[$12])
+  LogicalCorrelate(correlation=[$cor0], joinType=[inner], requiredColumns=[{4}])
+    LogicalTableScan(table=[[druid, arrays]])
+    Uncollect
+      LogicalProject(arrayLongNulls=[$cor0.arrayLongNulls])
+        LogicalValues(tuples=[[{ 0 }]])
+
+!druidPlan
+{
+  "queryType" : "scan",
+  "dataSource" : {
+    "type" : "unnest",
+    "base" : {
+      "type" : "table",
+      "name" : "arrays"
+    },
+    "virtualColumn" : {
+      "type" : "expression",
+      "name" : "j0.unnest",
+      "expression" : "\"arrayLongNulls\"",
+      "outputType" : "ARRAY<LONG>"
+    },
+    "unnestFilter" : null
+  },
+  "intervals" : {
+    "type" : "intervals",
+    "intervals" : [ "-146136543-09-08T08:23:32.096Z/146140482-04-24T15:36:27.903Z" ]
+  },
+  "resultFormat" : "compactedList",
+  "columns" : [ "j0.unnest" ],
+  "columnTypes" : [ "LONG" ],
+  "granularity" : {
+    "type" : "all"
+  },
+  "legacy" : false
+}
+!nativePlan
+
