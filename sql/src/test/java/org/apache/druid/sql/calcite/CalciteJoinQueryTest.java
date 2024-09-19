@@ -678,7 +678,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.SLIGHTLY_WORSE_FILTER_PUSHED_TO_JOIN_OPERAND)
+  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.SLIGHTLY_WORSE_FILTER_PUSHED_TO_JOIN_OPERAND, separateDefaultModeTest = true)
   @MethodSource("provideQueryContexts")
   @ParameterizedTest(name = "{0}")
   public void testFilterAndGroupByLookupUsingJoinOperatorWithValueFilterPushdownMatchesNothing(Map<String, Object> queryContext)
@@ -760,7 +760,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.SLIGHTLY_WORSE_FILTER_PUSHED_TO_JOIN_OPERAND)
+  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.SLIGHTLY_WORSE_FILTER_PUSHED_TO_JOIN_OPERAND, separateDefaultModeTest = true)
   @MethodSource("provideQueryContexts")
   @ParameterizedTest(name = "{0}")
   public void testFilterAndGroupByLookupUsingJoinOperatorBackwards(Map<String, Object> queryContext)
@@ -816,7 +816,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.SLIGHTLY_WORSE_FILTER_PUSHED_TO_JOIN_OPERAND)
+  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.SLIGHTLY_WORSE_FILTER_PUSHED_TO_JOIN_OPERAND, separateDefaultModeTest = true)
   @MethodSource("provideQueryContexts")
   @ParameterizedTest(name = "{0}")
   public void testFilterAndGroupByLookupUsingJoinOperatorWithNotFilter(Map<String, Object> queryContext)
@@ -864,7 +864,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.SLIGHTLY_WORSE_FILTER_PUSHED_TO_JOIN_OPERAND)
+  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.SLIGHTLY_WORSE_FILTER_PUSHED_TO_JOIN_OPERAND, separateDefaultModeTest = true)
   @MethodSource("provideQueryContexts")
   @ParameterizedTest(name = "{0}")
   public void testJoinUnionTablesOnLookup(Map<String, Object> queryContext)
@@ -917,7 +917,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.SLIGHTLY_WORSE_FILTER_PUSHED_TO_JOIN_OPERAND)
+  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.SLIGHTLY_WORSE_FILTER_PUSHED_TO_JOIN_OPERAND, separateDefaultModeTest = true)
   @MethodSource("provideQueryContexts")
   @ParameterizedTest(name = "{0}")
   public void testFilterAndGroupByLookupUsingJoinOperator(Map<String, Object> queryContext)
@@ -1127,7 +1127,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.SLIGHTLY_WORSE_FILTER_PUSHED_TO_JOIN_OPERAND)
+  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.SLIGHTLY_WORSE_FILTER_PUSHED_TO_JOIN_OPERAND, separateDefaultModeTest = true)
   @MethodSource("provideQueryContexts")
   @ParameterizedTest(name = "{0}")
   public void testInnerJoinTableLookupLookupWithFilterWithOuterLimit(Map<String, Object> queryContext)
@@ -1171,7 +1171,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.SLIGHTLY_WORSE_FILTER_PUSHED_TO_JOIN_OPERAND)
+  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.SLIGHTLY_WORSE_FILTER_PUSHED_TO_JOIN_OPERAND, separateDefaultModeTest = true)
   @MethodSource("provideQueryContexts")
   @ParameterizedTest(name = "{0}")
   public void testInnerJoinTableLookupLookupWithFilterWithoutLimit(Map<String, Object> queryContext)
@@ -1213,7 +1213,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.SLIGHTLY_WORSE_FILTER_PUSHED_TO_JOIN_OPERAND)
+  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.SLIGHTLY_WORSE_FILTER_PUSHED_TO_JOIN_OPERAND, separateDefaultModeTest = true)
   @MethodSource("provideQueryContexts")
   @ParameterizedTest(name = "{0}")
   public void testInnerJoinTableLookupLookupWithFilterWithOuterLimitWithAllColumns(Map<String, Object> queryContext)
@@ -1258,7 +1258,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.SLIGHTLY_WORSE_FILTER_PUSHED_TO_JOIN_OPERAND)
+  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.SLIGHTLY_WORSE_FILTER_PUSHED_TO_JOIN_OPERAND, separateDefaultModeTest = true)
   @MethodSource("provideQueryContexts")
   @ParameterizedTest(name = "{0}")
   public void testInnerJoinTableLookupLookupWithFilterWithoutLimitWithAllColumns(Map<String, Object> queryContext)
@@ -2502,7 +2502,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.SLIGHTLY_WORSE_FILTER_PUSHED_TO_JOIN_OPERAND)
+  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.SLIGHTLY_WORSE_FILTER_PUSHED_TO_JOIN_OPERAND, separateDefaultModeTest = true)
   @MethodSource("provideQueryContexts")
   @ParameterizedTest(name = "{0}")
   public void testSelectOnLookupUsingRightJoinOperator(Map<String, Object> queryContext)
@@ -3930,7 +3930,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.SLIGHTLY_WORSE_FILTER_PUSHED_TO_JOIN_OPERAND)
+  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.SLIGHTLY_WORSE_FILTER_PUSHED_TO_JOIN_OPERAND, separateDefaultModeTest = true)
   @Test
   public void testSemiJoinWithOuterTimeExtractScan()
   {
@@ -3978,7 +3978,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.SLIGHTLY_WORSE_FILTER_PUSHED_TO_JOIN_OPERAND)
+  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.SLIGHTLY_WORSE_FILTER_PUSHED_TO_JOIN_OPERAND, separateDefaultModeTest = true)
   @MethodSource("provideQueryContexts")
   @ParameterizedTest(name = "{0}")
   public void testTwoSemiJoinsSimultaneously(Map<String, Object> queryContext)
@@ -4042,7 +4042,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.SLIGHTLY_WORSE_FILTER_PUSHED_TO_JOIN_OPERAND)
+  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.SLIGHTLY_WORSE_FILTER_PUSHED_TO_JOIN_OPERAND, separateDefaultModeTest = true)
   @MethodSource("provideQueryContexts")
   @ParameterizedTest(name = "{0}")
   public void testSemiAndAntiJoinSimultaneouslyUsingWhereInSubquery(Map<String, Object> queryContext)
@@ -4149,7 +4149,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.SLIGHTLY_WORSE_FILTER_PUSHED_TO_JOIN_OPERAND)
+  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.SLIGHTLY_WORSE_FILTER_PUSHED_TO_JOIN_OPERAND, separateDefaultModeTest = true)
   @MethodSource("provideQueryContexts")
   @ParameterizedTest(name = "{0}")
   public void testSemiAndAntiJoinSimultaneouslyUsingExplicitJoins(Map<String, Object> queryContext)
@@ -4218,7 +4218,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.SLIGHTLY_WORSE_FILTER_PUSHED_TO_JOIN_OPERAND)
+  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.SLIGHTLY_WORSE_FILTER_PUSHED_TO_JOIN_OPERAND, separateDefaultModeTest = true)
   @Test
   public void testSemiJoinWithOuterTimeExtractAggregateWithOrderBy()
   {
@@ -4790,7 +4790,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.SLIGHTLY_WORSE_FILTER_PUSHED_TO_JOIN_OPERAND)
+  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.SLIGHTLY_WORSE_FILTER_PUSHED_TO_JOIN_OPERAND, separateDefaultModeTest = true)
   @MethodSource("provideQueryContexts")
   @ParameterizedTest(name = "{0}")
   public void testUsingSubqueryAsPartOfAndFilter(Map<String, Object> queryContext)
@@ -5223,7 +5223,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.SLIGHTLY_WORSE_PLAN)
+  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.SLIGHTLY_WORSE_FILTER_PUSHED_TO_JOIN_OPERAND, separateDefaultModeTest = true)
   @MethodSource("provideQueryContexts")
   @ParameterizedTest(name = "{0}")
   public void testVirtualColumnOnMVFilterJoinExpression(Map<String, Object> queryContext)
@@ -5360,7 +5360,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.SLIGHTLY_WORSE_FILTER_PUSHED_TO_JOIN_OPERAND)
+  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.SLIGHTLY_WORSE_FILTER_PUSHED_TO_JOIN_OPERAND, separateDefaultModeTest = true)
   @MethodSource("provideQueryContexts")
   @ParameterizedTest(name = "{0}")
   public void testInnerJoinWithFilterPushdownAndManyFiltersEmptyResults(Map<String, Object> queryContext)
@@ -5468,7 +5468,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.SLIGHTLY_WORSE_FILTER_PUSHED_TO_JOIN_OPERAND)
+  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.SLIGHTLY_WORSE_FILTER_PUSHED_TO_JOIN_OPERAND, separateDefaultModeTest = true)
   @MethodSource("provideQueryContexts")
   @ParameterizedTest(name = "{0}")
   public void testInnerJoinWithFilterPushdownAndManyFiltersNonEmptyResults(Map<String, Object> queryContext)
