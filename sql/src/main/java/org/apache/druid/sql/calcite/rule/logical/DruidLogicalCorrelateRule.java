@@ -23,16 +23,13 @@ import org.apache.calcite.plan.RelTrait;
 import org.apache.calcite.plan.RelTraitSet;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.convert.ConverterRule;
-import org.apache.calcite.rel.core.Join;
-import org.apache.druid.error.InvalidSqlInput;
-import org.apache.druid.sql.calcite.rel.logical.DruidJoin;
+import org.apache.calcite.rel.logical.LogicalCorrelate;
 import org.apache.druid.sql.calcite.rel.logical.DruidLogicalConvention;
-import org.apache.druid.sql.calcite.rule.DruidJoinRule.ConditionAnalysis;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public class DruidUnnestRule extends ConverterRule
+public class DruidLogicalCorrelateRule extends ConverterRule
 {
-  public DruidUnnestRule(Class<? extends RelNode> clazz, RelTrait in, RelTrait out, String descriptionPrefix)
+  public DruidLogicalCorrelateRule(Class<? extends RelNode> clazz, RelTrait in, RelTrait out, String descriptionPrefix)
   {
     super(Config.INSTANCE.withConversion(clazz, in, out, descriptionPrefix));
   }
@@ -40,20 +37,11 @@ public class DruidUnnestRule extends ConverterRule
   @Override
   public @Nullable RelNode convert(RelNode rel)
   {
-    Join join = (Join) rel;
+    LogicalCorrelate join = (LogicalCorrelate) rel;
+
     RelTraitSet newTrait = join.getTraitSet().replace(DruidLogicalConvention.instance());
 
-    ConditionAnalysis analysis = org.apache.druid.sql.calcite.rule.DruidJoinRule.analyzeCondition(
-        join.getCondition(),
-        join.getLeft().getRowType(),
-        join.getCluster().getRexBuilder()
-    );
-
-    if (analysis.errorStr != null) {
-      // reject the query in case the anaysis detected any issues
-      throw InvalidSqlInput.exception(analysis.errorStr);
-    }
-    return new DruidJoin(
+    return new DruidLogicalCorrelate(
         join.getCluster(),
         newTrait,
         join.getHints(),
@@ -65,8 +53,8 @@ public class DruidUnnestRule extends ConverterRule
             join.getRight(),
             DruidLogicalConvention.instance()
         ),
-        analysis.getConditionWithUnsupportedSubConditionsIgnored(join.getCluster().getRexBuilder()),
-        join.getVariablesSet(),
+        join.getCorrelationId(),
+        join.getRequiredColumns(),
         join.getJoinType()
     );
   }
