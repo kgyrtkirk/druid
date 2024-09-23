@@ -280,6 +280,10 @@ public class CalciteRulesManager
     builder.addRuleInstance(CoreRules.UNION_MERGE);
     builder.addRuleInstance(JoinExtractFilterRule.Config.DEFAULT.toRule());
     builder.addRuleInstance(FilterIntoJoinRuleConfig.DEFAULT.withPredicate(DruidJoinRule::isSupportedPredicate).toRule());
+    builder.addRuleInstance(
+        new DruidJoinFilterTransposeRule()
+//        JoinProjectTransposeRule.Config.DEFAULT.toRule()
+        );
 
     return Programs.of(builder.build(), true, DefaultRelMetadataProvider.INSTANCE);
   }
