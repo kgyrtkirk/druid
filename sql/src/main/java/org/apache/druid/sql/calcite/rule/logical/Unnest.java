@@ -22,6 +22,7 @@ package org.apache.druid.sql.calcite.rule.logical;
 import org.apache.calcite.plan.RelOptCluster;
 import org.apache.calcite.plan.RelTraitSet;
 import org.apache.calcite.rel.RelNode;
+import org.apache.calcite.rel.RelWriter;
 import org.apache.calcite.rel.SingleRel;
 import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.rex.RexNode;
@@ -43,6 +44,13 @@ public abstract class Unnest extends SingleRel
   public final RexNode getUnnestExpr()
   {
     return unnestExpr;
+  }
+
+  @Override
+  public RelWriter explainTerms(RelWriter pw)
+  {
+    return super.explainTerms(pw)
+        .item("unnestExpr", unnestExpr);
   }
 
   @Override

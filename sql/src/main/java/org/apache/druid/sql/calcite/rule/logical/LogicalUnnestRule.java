@@ -23,7 +23,6 @@ import com.google.common.collect.Iterables;
 import org.apache.calcite.plan.RelOptRule;
 import org.apache.calcite.plan.RelOptRuleCall;
 import org.apache.calcite.plan.RelOptUtil;
-import org.apache.calcite.plan.RelTraitSet;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.core.Project;
 import org.apache.calcite.rel.core.Uncollect;
@@ -33,40 +32,19 @@ import org.apache.calcite.rel.rules.SubstitutionRule;
 import org.apache.calcite.rex.RexNode;
 import org.apache.calcite.tools.RelBuilder;
 import org.apache.druid.error.DruidException;
-import org.apache.druid.sql.calcite.rel.logical.DruidLogicalConvention;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 public class LogicalUnnestRule extends RelOptRule implements SubstitutionRule
 {
   public LogicalUnnestRule()
   {
-    super(operand(LogicalCorrelate.class,
-        some(operand(RelNode.class, any()),
-            operand(RelNode.class, any()))
-        ));
-  }
-
-  public @Nullable RelNode convert(RelNode rel)
-  {
-    LogicalCorrelate join = (LogicalCorrelate) rel;
-
-    RelTraitSet newTrait = join.getTraitSet().replace(DruidLogicalConvention.instance());
-
-    return new DruidLogicalCorrelate(
-        join.getCluster(),
-        newTrait,
-        join.getHints(),
-        convert(
-            join.getLeft(),
-            DruidLogicalConvention.instance()
-        ),
-        convert(
-            join.getRight(),
-            DruidLogicalConvention.instance()
-        ),
-        join.getCorrelationId(),
-        join.getRequiredColumns(),
-        join.getJoinType()
+    super(
+        operand(
+            LogicalCorrelate.class,
+            some(
+                operand(RelNode.class, any()),
+                operand(RelNode.class, any())
+            )
+        )
     );
   }
 
@@ -94,16 +72,16 @@ public class LogicalUnnestRule extends RelOptRule implements SubstitutionRule
 
     RelBuilder builder = call.builder();
     builder.push(left);
-    RelNode newNode = builder.push(new LogicalUnnest(
-        cor.getCluster(),
-        cor.getTraitSet(),
-        builder.build(),
-        expr,
-        cor.getRowType()
-    )).build();
-    call.transformTo(newNode
-
-    );
+    RelNode newNode = builder.push(
+        new LogicalUnnest(
+            cor.getCluster(),
+            cor.getTraitSet(),
+            builder.build(),
+            expr,
+            cor.getRowType()
+        )
+    ).build();
+    call.transformTo(newNode);
   }
 
   private RexNode unwrapUnnestExpression(RelNode rel)

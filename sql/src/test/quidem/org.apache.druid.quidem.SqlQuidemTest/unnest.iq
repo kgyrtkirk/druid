@@ -13,21 +13,21 @@ LogicalProject(longs=[$12])
 
 !convertedPlan
 LogicalProject(longs=[$12])
-  LogicalUnnest
+  LogicalUnnest(unnestExpr=[$cor0.arrayLongNulls])
     LogicalTableScan(table=[[druid, arrays]])
 
 !logicalPlan
 
-!here
+# !here
 DruidProject(longs=[$12], druid=[logical])
-  DruidUnnest
+  DruidUnnest(unnestExpr=[$cor0.arrayLongNulls])
     DruidTableScan(table=[[druid, arrays]], druid=[logical])
 
-!finalExecutionPlan
+!druidPlan
 
 !nativePlan
 
 
-LogicalPlan plan = calcite.plan();
-PhysicalQuery pq = DruidQueryGenerator.generate(plan);
+# LogicalPlan plan = calcite.plan();
+# PhysicalQuery pq = DruidQueryGenerator.generate(plan);
 
