@@ -39,6 +39,7 @@ import org.apache.calcite.rel.rules.CoreRules;
 import org.apache.calcite.rel.rules.DateRangeRules;
 import org.apache.calcite.rel.rules.FilterJoinRule.FilterIntoJoinRule.FilterIntoJoinRuleConfig;
 import org.apache.calcite.rel.rules.JoinExtractFilterRule;
+import org.apache.calcite.rel.rules.JoinProjectTransposeRule;
 import org.apache.calcite.rel.rules.JoinPushThroughJoinRule;
 import org.apache.calcite.rel.rules.ProjectMergeRule;
 import org.apache.calcite.rel.rules.PruneEmptyRules;
@@ -281,8 +282,13 @@ public class CalciteRulesManager
     builder.addRuleInstance(JoinExtractFilterRule.Config.DEFAULT.toRule());
     builder.addRuleInstance(FilterIntoJoinRuleConfig.DEFAULT.withPredicate(DruidJoinRule::isSupportedPredicate).toRule());
     builder.addRuleInstance(
+        JoinProjectTransposeRule.Config.LEFT.toRule()
+          );
+//    builder.addRuleInstance(
+//        JoinProjectTransposeRule.Config.RIGHT.toRule()
+//          );
+    builder.addRuleInstance(
         new DruidJoinFilterTransposeRule()
-//        JoinProjectTransposeRule.Config.DEFAULT.toRule()
         );
 
     return Programs.of(builder.build(), true, DefaultRelMetadataProvider.INSTANCE);

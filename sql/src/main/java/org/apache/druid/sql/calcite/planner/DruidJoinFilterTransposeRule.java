@@ -9,13 +9,19 @@ import org.apache.calcite.rel.core.Filter;
 import org.apache.calcite.rel.core.Join;
 import org.apache.calcite.rel.core.RelFactories;
 import org.apache.calcite.rel.rules.SemiJoinFilterTransposeRule;
-import org.apache.calcite.rel.rules.TransformationRule;
+import org.apache.calcite.rel.rules.SubstitutionRule;
 
 public class DruidJoinFilterTransposeRule
     extends RelRule<SemiJoinFilterTransposeRule.Config>
-    implements TransformationRule {
+    implements SubstitutionRule {
 
 
+  @Override
+  public boolean autoPruneOld()
+  {
+    return true;
+
+  }
   //~ Methods ----------------------------------------------------------------
 
 //  public interface Config extends SemiJoinFilterTransposeRule.Config {
@@ -37,21 +43,20 @@ public class DruidJoinFilterTransposeRule
   {
     super(SemiJoinFilterTransposeRule.Config.DEFAULT
         .withOperandSupplier(b0 ->
-        b0.operand(Join.class).inputs(
-            b00 -> b00.operand(RelNode.class).anyInputs(),
-            b1 -> b1.operand(Filter.class).anyInputs()))
+        b0.operand(Join.class).inputs(b1 ->
+            b1.operand(Filter.class).anyInputs()))
         .as(SemiJoinFilterTransposeRule.Config.class)
         );
   }
 
   @Override public void onMatch(RelOptRuleCall call) {
     final Join join = call.rel(0);
-    final Filter filter = call.rel(2);
+    final Filter filter = call.rel(1);
 
     Join newJoin = join.copy(join.getTraitSet(),
         ImmutableList.of(
-              join.getInput(0),
-              filter.getInput()
+              filter.getInput(),
+              join.getInput(1)
             )
         );
 
