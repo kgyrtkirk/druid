@@ -48,6 +48,6 @@ public class LogicalUnnest extends SingleRel
   @Override
   public RelNode copy(RelTraitSet traitSet, List<RelNode> inputs)
   {
-    return new LogicalUnnest(getCluster(), traitSet, input, unnestExpr, rowType);
+    return new LogicalUnnest(getCluster(), traitSet, inputs.get(0), unnestExpr, rowType);
   }
 }

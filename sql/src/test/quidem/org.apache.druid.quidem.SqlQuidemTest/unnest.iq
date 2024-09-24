@@ -13,19 +13,13 @@ LogicalProject(longs=[$12])
 
 !convertedPlan
 LogicalProject(longs=[$12])
-  LogicalCorrelate(correlation=[$cor0], joinType=[inner], requiredColumns=[{4}])
+  LogicalUnnest
     LogicalTableScan(table=[[druid, arrays]])
-    Uncollect
-      LogicalProject(arrayLongNulls=[$cor0.arrayLongNulls])
-        LogicalValues(tuples=[[{ 0 }]])
 
 !logicalPlan
 DruidProject(longs=[$12], druid=[logical])
-  DruidLogicalCorrelate(correlation=[$cor0], joinType=[inner], requiredColumns=[{4}])
+  DruidUnnest
     DruidTableScan(table=[[druid, arrays]], druid=[logical])
-    DruidUncollect
-      DruidProject(arrayLongNulls=[$cor0.arrayLongNulls], druid=[logical])
-        DruidValues(tuples=[[{ 0 }]])
 
 !druidPlan
 !nativePlan

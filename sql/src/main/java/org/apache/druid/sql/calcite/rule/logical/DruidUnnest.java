@@ -22,27 +22,35 @@ package org.apache.druid.sql.calcite.rule.logical;
 import org.apache.calcite.plan.RelOptCluster;
 import org.apache.calcite.plan.RelTraitSet;
 import org.apache.calcite.rel.RelNode;
-import org.apache.calcite.rel.core.Uncollect;
+import org.apache.calcite.rel.SingleRel;
+import org.apache.calcite.rel.type.RelDataType;
+import org.apache.calcite.rex.RexNode;
 import org.apache.druid.sql.calcite.rel.logical.DruidLogicalNode;
 
-import java.util.Collections;
 import java.util.List;
 
-public class DruidUncollect extends Uncollect implements DruidLogicalNode
+public class DruidUnnest extends SingleRel implements DruidLogicalNode
 {
-  public DruidUncollect(RelOptCluster cluster, RelTraitSet traitSet, RelNode input,
-      boolean withOrdinality, List<String> itemAliases)
+  private RexNode expr;
+
+  protected DruidUnnest(RelOptCluster cluster, RelTraitSet traits, RelNode input, RexNode expr, RelDataType relDataType)
   {
-    super(cluster, traitSet, input, withOrdinality, itemAliases);
+    super(cluster, traits, input);
+    this.expr = expr;
+    this.rowType=relDataType;
+
   }
 
   @Override
-  public DruidUncollect copy(RelTraitSet traitSet, RelNode newInput)
+  public RelNode copy(RelTraitSet traitSet, List<RelNode> inputs)
   {
-    return new DruidUncollect(
-        getCluster(), traitSet, newInput,
-        withOrdinality, Collections.emptyList()
-    );
+    return copy(traitSet, inputs.get(0));
+
+  }
+
+  public DruidUnnest copy(RelTraitSet traitSet, RelNode newInput)
+  {
+    return new DruidUnnest(getCluster(), traitSet, newInput, expr,rowType);
   }
 
 }

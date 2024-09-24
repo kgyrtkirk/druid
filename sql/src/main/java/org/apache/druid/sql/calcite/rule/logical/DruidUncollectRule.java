@@ -23,9 +23,7 @@ import org.apache.calcite.plan.RelTrait;
 import org.apache.calcite.plan.RelTraitSet;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.convert.ConverterRule;
-import org.apache.calcite.rel.core.Uncollect;
 import org.apache.druid.sql.calcite.rel.logical.DruidLogicalConvention;
-import java.util.Collections;
 
 public class DruidUncollectRule extends ConverterRule
 {
@@ -42,18 +40,18 @@ public class DruidUncollectRule extends ConverterRule
   @Override
   public RelNode convert(RelNode rel)
   {
-    Uncollect project = (Uncollect) rel;
+    LogicalUnnest project = (LogicalUnnest) rel;
     String ss = project.toString();
     RelTraitSet newTrait = project.getTraitSet().replace(DruidLogicalConvention.instance());
-    return new DruidUncollect(
+    return new DruidUnnest(
         rel.getCluster(),
         newTrait,
         convert(
             project.getInput(),
             DruidLogicalConvention.instance()
         ),
-        project.withOrdinality,
-        Collections.emptyList()
+        project.getUnnestExpr(),
+        project.getRowType()
     );
   }
 

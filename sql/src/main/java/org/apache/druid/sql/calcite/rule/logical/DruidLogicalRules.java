@@ -22,10 +22,8 @@ package org.apache.druid.sql.calcite.rule.logical;
 import com.google.common.collect.ImmutableList;
 import org.apache.calcite.plan.Convention;
 import org.apache.calcite.plan.RelOptRule;
-import org.apache.calcite.rel.core.Uncollect;
 import org.apache.calcite.rel.core.Window;
 import org.apache.calcite.rel.logical.LogicalAggregate;
-import org.apache.calcite.rel.logical.LogicalCorrelate;
 import org.apache.calcite.rel.logical.LogicalFilter;
 import org.apache.calcite.rel.logical.LogicalJoin;
 import org.apache.calcite.rel.logical.LogicalProject;
@@ -109,17 +107,18 @@ public class DruidLogicalRules
                 DruidJoinRule.class.getSimpleName()
             ),
             new DruidUncollectRule(
-                Uncollect.class,
+                LogicalUnnest.class,
                 Convention.NONE,
                 DruidLogicalConvention.instance(),
                 DruidUncollectRule.class.getSimpleName()
-            ),
-            new DruidLogicalCorrelateRule(
-                LogicalCorrelate.class,
-                Convention.NONE,
-                DruidLogicalConvention.instance(),
-                DruidLogicalCorrelateRule.class.getSimpleName()
             )
+//            ,
+//            new DruidLogicalCorrelateRule(
+//                LogicalCorrelate.class,
+//                Convention.NONE,
+//                DruidLogicalConvention.instance(),
+//                DruidLogicalCorrelateRule.class.getSimpleName()
+//            )
         )
     );
   }

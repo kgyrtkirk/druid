@@ -93,10 +93,11 @@ public class LogicalUnnestRule extends RelOptRule implements SubstitutionRule
     }
 
     RelBuilder builder = call.builder();
+    builder.push(left);
     RelNode newNode = builder.push(new LogicalUnnest(
         cor.getCluster(),
         cor.getTraitSet(),
-        left,
+        builder.build(),
         expr,
         cor.getRowType()
     )).build();
