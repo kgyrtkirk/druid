@@ -19,39 +19,37 @@
 
 package org.apache.druid.sql.calcite.rule.logical;
 
-import org.apache.calcite.plan.RelTrait;
+import org.apache.calcite.plan.RelOptCluster;
 import org.apache.calcite.plan.RelTraitSet;
 import org.apache.calcite.rel.RelNode;
-import org.apache.calcite.rel.convert.ConverterRule;
-import org.apache.calcite.rel.logical.LogicalValues;
-import org.apache.druid.sql.calcite.rel.logical.DruidLogicalConvention;
-import org.apache.druid.sql.calcite.rel.logical.DruidValues;
+import org.apache.calcite.rel.SingleRel;
+import org.apache.calcite.rel.type.RelDataType;
+import org.apache.calcite.rex.RexNode;
 
-/**
- * {@link ConverterRule} to convert {@link org.apache.calcite.rel.core.Values} to {@link DruidValues}
- */
-public class DruidValuesRule extends ConverterRule
+import java.util.List;
+
+public abstract class Unnest extends SingleRel
 {
-  public DruidValuesRule(
-      Class<? extends RelNode> clazz,
-      RelTrait in,
-      RelTrait out,
-      String descriptionPrefix
-  )
+  protected final RexNode unnestExpr;
+
+  protected Unnest(RelOptCluster cluster, RelTraitSet traits, RelNode input, RexNode unnestExpr,
+      RelDataType rowType)
   {
-    super(clazz, in, out, descriptionPrefix);
+    super(cluster, traits, input);
+    this.unnestExpr = unnestExpr;
+    this.rowType = rowType;
+  }
+
+  public final RexNode getUnnestExpr()
+  {
+    return unnestExpr;
   }
 
   @Override
-  public RelNode convert(RelNode rel)
+  public final RelNode copy(RelTraitSet traitSet, List<RelNode> inputs)
   {
-    LogicalValues values = (LogicalValues) rel;
-    RelTraitSet newTrait = values.getTraitSet().replace(DruidLogicalConvention.instance());
-    return new DruidValues(
-        values.getCluster(),
-        newTrait,
-        values.getRowType(),
-        values.getTuples()
-    );
+    return copy(traitSet, inputs.get(0));
   }
+
+  protected abstract RelNode copy(RelTraitSet traitSet, RelNode input);
 }

@@ -17,10 +17,17 @@ LogicalProject(longs=[$12])
     LogicalTableScan(table=[[druid, arrays]])
 
 !logicalPlan
+
+!here
 DruidProject(longs=[$12], druid=[logical])
   DruidUnnest
     DruidTableScan(table=[[druid, arrays]], druid=[logical])
 
-!druidPlan
+!finalExecutionPlan
+
 !nativePlan
+
+
+LogicalPlan plan = calcite.plan();
+PhysicalQuery pq = DruidQueryGenerator.generate(plan);
 

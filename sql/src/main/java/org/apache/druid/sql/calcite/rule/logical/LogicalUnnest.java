@@ -22,32 +22,20 @@ package org.apache.druid.sql.calcite.rule.logical;
 import org.apache.calcite.plan.RelOptCluster;
 import org.apache.calcite.plan.RelTraitSet;
 import org.apache.calcite.rel.RelNode;
-import org.apache.calcite.rel.SingleRel;
 import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.rex.RexNode;
 
-import java.util.List;
-
-public class LogicalUnnest extends SingleRel
+public class LogicalUnnest extends Unnest
 {
-  private RexNode unnestExpr;
-
   protected LogicalUnnest(RelOptCluster cluster, RelTraitSet traits, RelNode input, RexNode unnestExpr,
       RelDataType rowType)
   {
-    super(cluster, traits, input);
-    this.unnestExpr = unnestExpr;
-    this.rowType = rowType;
-  }
-
-  public RexNode getUnnestExpr()
-  {
-    return unnestExpr;
+    super(cluster, traits, input, unnestExpr, rowType);
   }
 
   @Override
-  public RelNode copy(RelTraitSet traitSet, List<RelNode> inputs)
+  protected RelNode copy(RelTraitSet traitSet, RelNode input)
   {
-    return new LogicalUnnest(getCluster(), traitSet, inputs.get(0), unnestExpr, rowType);
+    return new LogicalUnnest(getCluster(), traitSet, input, unnestExpr, rowType);
   }
 }
