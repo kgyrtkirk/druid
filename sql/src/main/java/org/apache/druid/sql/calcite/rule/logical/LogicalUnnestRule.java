@@ -24,10 +24,13 @@ import org.apache.calcite.plan.RelOptRuleCall;
 import org.apache.calcite.plan.RelOptRuleOperand;
 import org.apache.calcite.plan.RelTraitSet;
 import org.apache.calcite.rel.RelNode;
+import org.apache.calcite.rel.core.Project;
 import org.apache.calcite.rel.core.Uncollect;
 import org.apache.calcite.rel.logical.LogicalCorrelate;
+import org.apache.calcite.rel.logical.LogicalValues;
 import org.apache.calcite.rel.rules.SubstitutionRule;
 import org.apache.calcite.rex.RexNode;
+import org.apache.curator.shaded.com.google.common.collect.Iterables;
 import org.apache.druid.sql.calcite.rel.logical.DruidLogicalConvention;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -77,30 +80,39 @@ public class LogicalUnnestRule extends RelOptRule implements SubstitutionRule
     );
 
     LogicalCorrelate cor = call.rel(0);
-    a.matches(cor);
+    a.matches(cor.getRight());
 
     RexNode expr = unwrapUnnestExpression(cor.getRight());
     return false;
 
   }
 
-  /**
-   *
-   * @param rel
-   * @return
-   */
   private RexNode unwrapUnnestExpression(RelNode rel)
   {
-    // RelNode node = rel.stripped();
-    // if (node instanceof Uncollect) {
-    // Uncollect uncollect = (Uncollect) node;
-    // if(!uncollect.withOrdinality) {
-    // return
-    // }
-    // uncollect.
-    // return
-    // }
+    RelNode node = rel.stripped();
+    if (node instanceof Uncollect) {
+      Uncollect uncollect = (Uncollect) node;
+      if (!uncollect.withOrdinality) {
+        return unwrapProjectExpression(uncollect.getInput().stripped());
+      }
+    }
     return null;
+  }
+
+  private RexNode unwrapProjectExpression(RelNode rel)
+  {
+    if (rel instanceof Project) {
+      Project project = (Project) rel;
+      if (isValues(project.getInput().stripped())) {
+        return Iterables.getOnlyElement(project.getProjects());
+      }
+    }
+    return null;
+  }
+
+  private boolean isValues(RelNode input)
+  {
+    return (input instanceof LogicalValues);
   }
 
   public void onMatch(RelOptRuleCall call)
