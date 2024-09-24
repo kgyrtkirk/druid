@@ -19,9 +19,10 @@
 
 package org.apache.druid.sql.calcite.rule.logical;
 
+import com.google.common.collect.Iterables;
 import org.apache.calcite.plan.RelOptRule;
 import org.apache.calcite.plan.RelOptRuleCall;
-import org.apache.calcite.plan.RelOptRuleOperand;
+import org.apache.calcite.plan.RelOptUtil;
 import org.apache.calcite.plan.RelTraitSet;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.core.Project;
@@ -30,7 +31,8 @@ import org.apache.calcite.rel.logical.LogicalCorrelate;
 import org.apache.calcite.rel.logical.LogicalValues;
 import org.apache.calcite.rel.rules.SubstitutionRule;
 import org.apache.calcite.rex.RexNode;
-import org.apache.curator.shaded.com.google.common.collect.Iterables;
+import org.apache.calcite.tools.RelBuilder;
+import org.apache.druid.error.DruidException;
 import org.apache.druid.sql.calcite.rel.logical.DruidLogicalConvention;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -38,7 +40,10 @@ public class LogicalUnnestRule extends RelOptRule implements SubstitutionRule
 {
   public LogicalUnnestRule()
   {
-    super(operand(LogicalCorrelate.class, any()));
+    super(operand(LogicalCorrelate.class,
+        some(operand(RelNode.class, any()),
+            operand(RelNode.class, any()))
+        ));
   }
 
   public @Nullable RelNode convert(RelNode rel)
@@ -71,20 +76,33 @@ public class LogicalUnnestRule extends RelOptRule implements SubstitutionRule
     return true;
   }
 
-  @Override
-  public boolean matches(RelOptRuleCall call)
+  public boolean matches1(RelOptRuleCall call)
   {
-    RelOptRuleOperand a = operand(
-        Uncollect.class,
-        any()
-    );
-
     LogicalCorrelate cor = call.rel(0);
-    a.matches(cor.getRight());
-
     RexNode expr = unwrapUnnestExpression(cor.getRight());
-    return false;
+    return expr != null;
+  }
 
+  public void onMatch(RelOptRuleCall call)
+  {
+    LogicalCorrelate cor = call.rel(0);
+    RelNode left = call.rel(1);
+    RexNode expr = unwrapUnnestExpression(cor.getRight().stripped());
+    if (expr == null) {
+      throw DruidException.defensive("Couldn't process possible unnest for reltree: \n%s", RelOptUtil.toString(cor));
+    }
+
+    RelBuilder builder = call.builder();
+    RelNode newNode = builder.push(new LogicalUnnest(
+        cor.getCluster(),
+        cor.getTraitSet(),
+        left,
+        expr,
+        cor.getRowType()
+    )).build();
+    call.transformTo(newNode
+
+    );
   }
 
   private RexNode unwrapUnnestExpression(RelNode rel)
@@ -115,9 +133,4 @@ public class LogicalUnnestRule extends RelOptRule implements SubstitutionRule
     return (input instanceof LogicalValues);
   }
 
-  public void onMatch(RelOptRuleCall call)
-  {
-    LogicalCorrelate cor = call.rel(0);
-
-  }
 }
