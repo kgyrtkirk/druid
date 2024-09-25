@@ -33,19 +33,32 @@ import org.apache.calcite.rex.RexNode;
 import org.apache.calcite.tools.RelBuilder;
 import org.apache.druid.error.DruidException;
 
+/**
+ * Recognizes a LogicalUnnest operation in the plan.
+ *
+ * Matches on the layout:
+ * <pre>
+ *   LogicalCorrelate(correlation=[$cor0], joinType=[inner], requiredColumns=[{4}])
+ *     RelNodeSubtree
+ *     Uncollect
+ *       LogicalProject(arrayLongNulls=[$cor0.arrayLongNulls])
+ *         LogicalValues(tuples=[[{ 0 }]])
+ * </pre>
+ *
+ * Translates it to use a {@link LogicalUnnest} like:
+ * <pre>
+ *   LogicalUnnest(unnestExpr=[$cor0.arrayLongNulls])
+ *     RelNodeSubtree
+ * </pre>
+ *
+ * It raises an error for cases when {@link LogicalCorrelate} can't be translated
+ * as those are currently unsupported in Druid.
+ */
 public class LogicalUnnestRule extends RelOptRule implements SubstitutionRule
 {
   public LogicalUnnestRule()
   {
-    super(
-        operand(
-            LogicalCorrelate.class,
-            some(
-                operand(RelNode.class, any()),
-                operand(RelNode.class, any())
-            )
-        )
-    );
+    super(operand(LogicalCorrelate.class, any()));
   }
 
   @Override
@@ -58,14 +71,12 @@ public class LogicalUnnestRule extends RelOptRule implements SubstitutionRule
   public void onMatch(RelOptRuleCall call)
   {
     LogicalCorrelate cor = call.rel(0);
-    RelNode left = call.rel(1);
     RexNode expr = unwrapUnnestExpression(cor.getRight().stripped());
     if (expr == null) {
       throw DruidException.defensive("Couldn't process possible unnest for reltree: \n%s", RelOptUtil.toString(cor));
     }
-
     RelBuilder builder = call.builder();
-    builder.push(left);
+    builder.push(cor.getLeft());
     RelNode newNode = builder.push(
         new LogicalUnnest(
             cor.getCluster(),
