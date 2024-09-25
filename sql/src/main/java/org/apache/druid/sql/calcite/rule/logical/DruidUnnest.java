@@ -24,6 +24,8 @@ import org.apache.calcite.plan.RelTraitSet;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.rex.RexNode;
+import org.apache.druid.query.UnnestDataSource;
+import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.sql.calcite.planner.PlannerContext;
 import org.apache.druid.sql.calcite.planner.querygen.SourceDescProducer;
 import org.apache.druid.sql.calcite.rel.logical.DruidLogicalNode;
@@ -48,9 +50,15 @@ public class DruidUnnest extends Unnest implements DruidLogicalNode, SourceDescP
   public SourceDesc getSourceDesc(PlannerContext plannerContext, List<SourceDesc> sources)
   {
     SourceDesc inputDesc = sources.get(0);
-    if (true) {
-      throw new UnsupportedOperationException("DruidUnnest is not supported yet");
-    }
-    return null;//DruidJoinQueryRel.buildJoinSourceDesc(leftDesc, null, plannerContext, this, null);
+    UnnestDataSource ds = UnnestDataSource.create(inputDesc.dataSource, null, null);
+
+
+    RowSignature.builder()
+    .addAll(inputDesc.rowSignature)
+    .add(unnest1, unnestExpr.getType()));
+    RowSignature aa = inputDesc.rowSignature;
+    return new SourceDesc(        inputDesc.dataSource, aa    );
+    // return null;//DruidJoinQueryRel.buildJoinSourceDesc(leftDesc, null,
+    // plannerContext, this, null);
   }
 }
