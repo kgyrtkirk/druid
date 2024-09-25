@@ -54,13 +54,7 @@ public class LogicalUnnestRule extends RelOptRule implements SubstitutionRule
     return true;
   }
 
-  public boolean matches1(RelOptRuleCall call)
-  {
-    LogicalCorrelate cor = call.rel(0);
-    RexNode expr = unwrapUnnestExpression(cor.getRight());
-    return expr != null;
-  }
-
+  @Override
   public void onMatch(RelOptRuleCall call)
   {
     LogicalCorrelate cor = call.rel(0);
@@ -86,11 +80,11 @@ public class LogicalUnnestRule extends RelOptRule implements SubstitutionRule
 
   private RexNode unwrapUnnestExpression(RelNode rel)
   {
-    RelNode node = rel.stripped();
-    if (node instanceof Uncollect) {
-      Uncollect uncollect = (Uncollect) node;
+    rel = rel.stripped();
+    if (rel instanceof Uncollect) {
+      Uncollect uncollect = (Uncollect) rel;
       if (!uncollect.withOrdinality) {
-        return unwrapProjectExpression(uncollect.getInput().stripped());
+        return unwrapProjectExpression(uncollect.getInput());
       }
     }
     return null;
@@ -98,6 +92,7 @@ public class LogicalUnnestRule extends RelOptRule implements SubstitutionRule
 
   private RexNode unwrapProjectExpression(RelNode rel)
   {
+    rel = rel.stripped();
     if (rel instanceof Project) {
       Project project = (Project) rel;
       if (isValues(project.getInput().stripped())) {
@@ -107,9 +102,10 @@ public class LogicalUnnestRule extends RelOptRule implements SubstitutionRule
     return null;
   }
 
-  private boolean isValues(RelNode input)
+  private boolean isValues(RelNode rel)
   {
-    return (input instanceof LogicalValues);
+    rel = rel.stripped();
+    return (rel instanceof LogicalValues);
   }
 
 }
