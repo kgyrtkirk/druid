@@ -24,9 +24,13 @@ import org.apache.calcite.plan.RelTraitSet;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.rex.RexNode;
+import org.apache.druid.sql.calcite.planner.PlannerContext;
+import org.apache.druid.sql.calcite.planner.querygen.SourceDescProducer;
 import org.apache.druid.sql.calcite.rel.logical.DruidLogicalNode;
 
-public class DruidUnnest extends Unnest implements DruidLogicalNode
+import java.util.List;
+
+public class DruidUnnest extends Unnest implements DruidLogicalNode, SourceDescProducer
 {
   protected DruidUnnest(RelOptCluster cluster, RelTraitSet traits, RelNode input, RexNode unnestExpr,
       RelDataType rowType)
@@ -38,5 +42,15 @@ public class DruidUnnest extends Unnest implements DruidLogicalNode
   protected RelNode copy(RelTraitSet traitSet, RelNode input)
   {
     return new DruidUnnest(getCluster(), traitSet, input, unnestExpr, rowType);
+  }
+
+  @Override
+  public SourceDesc getSourceDesc(PlannerContext plannerContext, List<SourceDesc> sources)
+  {
+    SourceDesc inputDesc = sources.get(0);
+    if (true) {
+      throw new UnsupportedOperationException("DruidUnnest is not supported yet");
+    }
+    return null;//DruidJoinQueryRel.buildJoinSourceDesc(leftDesc, null, plannerContext, this, null);
   }
 }
