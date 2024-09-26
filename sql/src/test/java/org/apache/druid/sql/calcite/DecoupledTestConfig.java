@@ -42,6 +42,25 @@ public @interface DecoupledTestConfig
    */
   QuidemTestCaseReason quidemReason() default QuidemTestCaseReason.NONE;
 
+  /**
+   * Run the tests normally; however disable the native plan checks.
+   */
+  IgnoreQueriesReason ignoreExpectedQueriesReason() default IgnoreQueriesReason.NONE;
+
+  enum IgnoreQueriesReason  {
+    NONE,
+    /**
+     * The original planning was able to recognize a few more things for UNNEST;
+     * which resulted in better plans.
+     */
+    UNNEST_INPUT_CLEANUP;
+
+    public boolean isPresent()
+    {
+      return this != NONE;
+    }
+  }
+
   enum QuidemTestCaseReason
   {
     NONE,
