@@ -77,15 +77,16 @@ public class LogicalUnnestRule extends RelOptRule implements SubstitutionRule
     LogicalCorrelate cor = call.rel(0);
     UnnestConfiguration expr = unwrapUnnestConfigurationExpression(cor.getRight().stripped());
 
+    if (expr == null) {
+      throw DruidException.defensive("Couldn't process possible unnest for reltree: \n%s", RelOptUtil.toString(cor));
+    }
+
     expr.expr = new DruidCorrelateUnnestRel.CorrelatedFieldAccessToInputRef(cor.getCorrelationId())
         .apply(expr.expr);
 
     // final RexNode rexNodeToUnnest = getRexNodeToUnnest(cor.stripped(),
     // unnestDatasourceRel);
 
-    if (expr == null) {
-      throw DruidException.defensive("Couldn't process possible unnest for reltree: \n%s", RelOptUtil.toString(cor));
-    }
     RelBuilder builder = call.builder();
     builder.push(cor.getLeft());
     RelNode newNode = builder.push(
@@ -126,10 +127,10 @@ public class LogicalUnnestRule extends RelOptRule implements SubstitutionRule
   private UnnestConfiguration unwrapUnnestConfigurationExpression(RelNode rel)
   {
     rel = rel.stripped();
-    if( rel instanceof Filter) {
+    if (rel instanceof Filter) {
       Filter filter = (Filter) rel;
-      UnnestConfiguration conf = unwrapProjectExpression(filter.getInput());
-      if(conf !=null) {
+      UnnestConfiguration conf = unwrapUnnestConfigurationExpression(filter.getInput());
+      if (conf != null) {
         return conf.withFilter(filter.getCondition());
       }
     }

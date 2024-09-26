@@ -26,6 +26,7 @@ import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.rex.RexNode;
 import org.apache.druid.query.DataSource;
 import org.apache.druid.query.UnnestDataSource;
+import org.apache.druid.query.filter.DimFilter;
 import org.apache.druid.segment.VirtualColumn;
 import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.sql.calcite.expression.DruidExpression;
@@ -56,10 +57,6 @@ public class DruidUnnest extends Unnest implements DruidLogicalNode, SourceDescP
   public SourceDesc getSourceDesc(PlannerContext plannerContext, List<SourceDesc> sources)
   {
     SourceDesc inputDesc = sources.get(0);
-    UnnestDataSource ds = UnnestDataSource.create(inputDesc.dataSource, null, null);
-
-
-
 
     RexNode rexNodeToUnnest = unnestExpr;
     final DruidExpression expressionToUnnest = Expressions.toDruidExpression(
@@ -67,9 +64,6 @@ public class DruidUnnest extends Unnest implements DruidLogicalNode, SourceDescP
         inputDesc.rowSignature,
         unnestExpr
     );
-
-
-
 
     RowSignature correlateRowSignature = RowSignature.builder()
     .addAll(inputDesc.rowSignature)
@@ -95,7 +89,24 @@ public class DruidUnnest extends Unnest implements DruidLogicalNode, SourceDescP
             Calcites.getColumnTypeForRelDataType(rexNodeToUnnest.getType()),
             plannerContext.getExpressionParser()
         );
-    DataSource dataSource = UnnestDataSource.create(inputDesc.dataSource, virtualColumn, null);
+
+    RowSignature filterRowSignature = RowSignature.builder().add(
+        correlateRowSignature.getColumnName(correlateRowSignature.size() - 1),
+        correlateRowSignature.getColumnType(correlateRowSignature.size() - 1).get()
+    ).build();
+
+    DimFilter filter=null;
+    if(condition != null ) {
+
+      filter = Expressions.toFilter(
+          plannerContext,
+          filterRowSignature,
+          null,
+          condition
+      ) // .optimizeFilterOnly(filterRowSignature)
+;
+    }
+    DataSource dataSource = UnnestDataSource.create(inputDesc.dataSource, virtualColumn, filter);
     return new SourceDesc(        dataSource, correlateRowSignature    );
     // return null;//DruidJoinQueryRel.buildJoinSourceDesc(leftDesc, null,
     // plannerContext, this, null);
