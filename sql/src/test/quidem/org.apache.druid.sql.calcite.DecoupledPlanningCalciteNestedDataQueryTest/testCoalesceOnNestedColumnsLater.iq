@@ -24,13 +24,13 @@ select coalesce(long,c) as col  from druid.all_auto, unnest(json_value(arrayNest
 (8 rows)
 
 !ok
-LogicalProject(col=[COALESCE($2, $37)])
+LogicalProject(col=[CAST($2):BIGINT])
   LogicalUnnest(unnestExpr=[$36])
     LogicalProject(__time=[$0], str=[$1], long=[$2], double=[$3], bool=[$4], variant=[$5], variantNumeric=[$6], variantEmptyObj=[$7], variantEmtpyArray=[$8], variantWithArrays=[$9], obj=[$10], complexObj=[$11], arrayString=[$12], arrayStringNulls=[$13], arrayLong=[$14], arrayLongNulls=[$15], arrayDouble=[$16], arrayDoubleNulls=[$17], arrayVariant=[$18], arrayBool=[$19], arrayNestedLong=[$20], arrayObject=[$21], null=[$22], cstr=[$23], clong=[$24], cdouble=[$25], cObj=[$26], cstringArray=[$27], cLongArray=[$28], cDoubleArray=[$29], cEmptyArray=[$30], cEmptyObj=[$31], cNullArray=[$32], cEmptyObjectArray=[$33], cObjectArray=[$34], cnt=[$35], $f36=[CAST(JSON_VALUE_ARRAY_BIGINT($20, '$[1]')):BIGINT ARRAY])
       LogicalTableScan(table=[[druid, all_auto]])
 
 !logicalPlan
-DruidProject(col=[COALESCE($2, $37)], druid=[logical])
+DruidProject(col=[CAST($2):BIGINT], druid=[logical])
   DruidUnnest(unnestExpr=[$36])
     DruidProject(__time=[$0], str=[$1], long=[$2], double=[$3], bool=[$4], variant=[$5], variantNumeric=[$6], variantEmptyObj=[$7], variantEmtpyArray=[$8], variantWithArrays=[$9], obj=[$10], complexObj=[$11], arrayString=[$12], arrayStringNulls=[$13], arrayLong=[$14], arrayLongNulls=[$15], arrayDouble=[$16], arrayDoubleNulls=[$17], arrayVariant=[$18], arrayBool=[$19], arrayNestedLong=[$20], arrayObject=[$21], null=[$22], cstr=[$23], clong=[$24], cdouble=[$25], cObj=[$26], cstringArray=[$27], cLongArray=[$28], cDoubleArray=[$29], cEmptyArray=[$30], cEmptyObj=[$31], cNullArray=[$32], cEmptyObjectArray=[$33], cObjectArray=[$34], cnt=[$35], $f36=[CAST(JSON_VALUE_ARRAY_BIGINT($20, '$[1]')):BIGINT ARRAY], druid=[logical])
       DruidTableScan(table=[[druid, all_auto]], druid=[logical])
@@ -84,14 +84,8 @@ DruidProject(col=[COALESCE($2, $37)], druid=[logical])
     "type" : "intervals",
     "intervals" : [ "-146136543-09-08T08:23:32.096Z/146140482-04-24T15:36:27.903Z" ]
   },
-  "virtualColumns" : [ {
-    "type" : "expression",
-    "name" : "_v0",
-    "expression" : "nvl(\"long\",\"j0.unnest\")",
-    "outputType" : "LONG"
-  } ],
   "resultFormat" : "compactedList",
-  "columns" : [ "_v0" ],
+  "columns" : [ "long" ],
   "columnTypes" : [ "LONG" ],
   "granularity" : {
     "type" : "all"

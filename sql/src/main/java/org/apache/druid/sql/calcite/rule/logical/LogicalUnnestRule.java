@@ -24,6 +24,7 @@ import org.apache.calcite.plan.RelOptRule;
 import org.apache.calcite.plan.RelOptRuleCall;
 import org.apache.calcite.plan.RelOptUtil;
 import org.apache.calcite.rel.RelNode;
+import org.apache.calcite.rel.core.Filter;
 import org.apache.calcite.rel.core.Project;
 import org.apache.calcite.rel.core.Uncollect;
 import org.apache.calcite.rel.logical.LogicalCorrelate;
@@ -117,6 +118,9 @@ public class LogicalUnnestRule extends RelOptRule implements SubstitutionRule
   private UnnestConfiguration unwrapUnnestConfigurationExpression(RelNode rel)
   {
     rel = rel.stripped();
+    if( rel instanceof Filter) {
+      // FIXME
+    }
     if (rel instanceof Uncollect) {
       Uncollect uncollect = (Uncollect) rel;
       if (!uncollect.withOrdinality) {
