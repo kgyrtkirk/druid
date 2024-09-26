@@ -38,6 +38,7 @@ import org.apache.druid.sql.calcite.rel.DruidCorrelateUnnestRel;
  * Recognizes a LogicalUnnest operation in the plan.
  *
  * Matches on the layout:
+ *
  * <pre>
  *   LogicalCorrelate(correlation=[$cor0], joinType=[inner], requiredColumns=[{4}])
  *     RelNodeSubtree
@@ -47,13 +48,14 @@ import org.apache.druid.sql.calcite.rel.DruidCorrelateUnnestRel;
  * </pre>
  *
  * Translates it to use a {@link LogicalUnnest} like:
+ *
  * <pre>
  *   LogicalUnnest(unnestExpr=[$cor0.arrayLongNulls])
  *     RelNodeSubtree
  * </pre>
  *
- * It raises an error for cases when {@link LogicalCorrelate} can't be translated
- * as those are currently unsupported in Druid.
+ * It raises an error for cases when {@link LogicalCorrelate} can't be
+ * translated as those are currently unsupported in Druid.
  */
 public class LogicalUnnestRule extends RelOptRule implements SubstitutionRule
 {
@@ -72,13 +74,13 @@ public class LogicalUnnestRule extends RelOptRule implements SubstitutionRule
   public void onMatch(RelOptRuleCall call)
   {
     LogicalCorrelate cor = call.rel(0);
-    RexNode expr = unwrapUnnestExpression(cor.getRight().stripped());
+    UnnestConfiguration expr = unwrapUnnestConfigurationExpression(cor.getRight().stripped());
 
+    expr.expr = new DruidCorrelateUnnestRel.CorrelatedFieldAccessToInputRef(cor.getCorrelationId())
+        .apply(expr.expr);
 
-    expr=new DruidCorrelateUnnestRel.CorrelatedFieldAccessToInputRef(cor.getCorrelationId())
-    .apply(expr);
-
-//    final RexNode rexNodeToUnnest = getRexNodeToUnnest(cor.stripped(), unnestDatasourceRel);
+    // final RexNode rexNodeToUnnest = getRexNodeToUnnest(cor.stripped(),
+    // unnestDatasourceRel);
 
     if (expr == null) {
       throw DruidException.defensive("Couldn't process possible unnest for reltree: \n%s", RelOptUtil.toString(cor));
@@ -90,14 +92,29 @@ public class LogicalUnnestRule extends RelOptRule implements SubstitutionRule
             cor.getCluster(),
             cor.getTraitSet(),
             builder.build(),
-            expr,
+            expr.expr,
             cor.getRowType()
         )
     ).build();
     call.transformTo(newNode);
   }
 
-  private RexNode unwrapUnnestExpression(RelNode rel)
+  private static class UnnestConfiguration
+  {
+    public RexNode expr;
+
+    public UnnestConfiguration(RexNode unnestExpression)
+    {
+      expr = unnestExpression;
+    }
+
+    public static UnnestConfiguration ofExpression(RexNode unnestExpression)
+    {
+      return new UnnestConfiguration(unnestExpression);
+    }
+  }
+
+  private UnnestConfiguration unwrapUnnestConfigurationExpression(RelNode rel)
   {
     rel = rel.stripped();
     if (rel instanceof Uncollect) {
@@ -109,13 +126,13 @@ public class LogicalUnnestRule extends RelOptRule implements SubstitutionRule
     return null;
   }
 
-  private RexNode unwrapProjectExpression(RelNode rel)
+  private UnnestConfiguration unwrapProjectExpression(RelNode rel)
   {
     rel = rel.stripped();
     if (rel instanceof Project) {
       Project project = (Project) rel;
       if (isValues(project.getInput().stripped())) {
-        return Iterables.getOnlyElement(project.getProjects());
+        return UnnestConfiguration.ofExpression(Iterables.getOnlyElement(project.getProjects()));
       }
     }
     return null;
