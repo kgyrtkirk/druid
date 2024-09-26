@@ -1,0 +1,101 @@
+# testCoalesceOnNestedColumns@NullHandling=sql case-crc:8bd1e0fa
+# quidem testcase reason: UNNEST_EXTRA_SCAN
+!set debug true
+!set defaultTimeout 300000
+!set maxScatterGatherBytes 9223372036854775807
+!set plannerStrategy DECOUPLED
+!set sqlCurrentTimestamp 2000-01-01T00:00:00Z
+!set sqlQueryId dummy
+!set outputformat mysql
+!use druidtest:///?componentSupplier=NestedComponentSupplier
+select c,long,coalesce(c,long) as col  from druid.all_auto, unnest(json_value(arrayNestedLong, '$[1]' returning bigint array)) as u(c) ;
++---+------+-----+
+| c | long | col |
++---+------+-----+
+| 1 |    5 |   1 |
+| 2 |    5 |   2 |
+| 3 |    1 |   3 |
+| 3 |    4 |   3 |
+| 4 |    1 |   4 |
+| 4 |    4 |   4 |
+|   |    2 |   2 |
+|   |    5 |   5 |
++---+------+-----+
+(8 rows)
+
+!ok
+LogicalProject(c=[$37], long=[$2], col=[COALESCE($37, $2)])
+  LogicalUnnest(unnestExpr=[$36])
+    LogicalProject(__time=[$0], str=[$1], long=[$2], double=[$3], bool=[$4], variant=[$5], variantNumeric=[$6], variantEmptyObj=[$7], variantEmtpyArray=[$8], variantWithArrays=[$9], obj=[$10], complexObj=[$11], arrayString=[$12], arrayStringNulls=[$13], arrayLong=[$14], arrayLongNulls=[$15], arrayDouble=[$16], arrayDoubleNulls=[$17], arrayVariant=[$18], arrayBool=[$19], arrayNestedLong=[$20], arrayObject=[$21], null=[$22], cstr=[$23], clong=[$24], cdouble=[$25], cObj=[$26], cstringArray=[$27], cLongArray=[$28], cDoubleArray=[$29], cEmptyArray=[$30], cEmptyObj=[$31], cNullArray=[$32], cEmptyObjectArray=[$33], cObjectArray=[$34], cnt=[$35], $f36=[CAST(JSON_VALUE_ARRAY_BIGINT($20, '$[1]')):BIGINT ARRAY])
+      LogicalTableScan(table=[[druid, all_auto]])
+
+!logicalPlan
+DruidProject(c=[$37], long=[$2], col=[COALESCE($37, $2)], druid=[logical])
+  DruidUnnest(unnestExpr=[$36])
+    DruidProject(__time=[$0], str=[$1], long=[$2], double=[$3], bool=[$4], variant=[$5], variantNumeric=[$6], variantEmptyObj=[$7], variantEmtpyArray=[$8], variantWithArrays=[$9], obj=[$10], complexObj=[$11], arrayString=[$12], arrayStringNulls=[$13], arrayLong=[$14], arrayLongNulls=[$15], arrayDouble=[$16], arrayDoubleNulls=[$17], arrayVariant=[$18], arrayBool=[$19], arrayNestedLong=[$20], arrayObject=[$21], null=[$22], cstr=[$23], clong=[$24], cdouble=[$25], cObj=[$26], cstringArray=[$27], cLongArray=[$28], cDoubleArray=[$29], cEmptyArray=[$30], cEmptyObj=[$31], cNullArray=[$32], cEmptyObjectArray=[$33], cObjectArray=[$34], cnt=[$35], $f36=[CAST(JSON_VALUE_ARRAY_BIGINT($20, '$[1]')):BIGINT ARRAY], druid=[logical])
+      DruidTableScan(table=[[druid, all_auto]], druid=[logical])
+
+!druidPlan
+{
+  "queryType" : "scan",
+  "dataSource" : {
+    "type" : "unnest",
+    "base" : {
+      "type" : "query",
+      "query" : {
+        "queryType" : "scan",
+        "dataSource" : {
+          "type" : "table",
+          "name" : "all_auto"
+        },
+        "intervals" : {
+          "type" : "intervals",
+          "intervals" : [ "-146136543-09-08T08:23:32.096Z/146140482-04-24T15:36:27.903Z" ]
+        },
+        "virtualColumns" : [ {
+          "type" : "nested-field",
+          "columnName" : "arrayNestedLong",
+          "outputName" : "v0",
+          "expectedType" : "ARRAY<LONG>",
+          "pathParts" : [ {
+            "type" : "arrayElement",
+            "index" : 1
+          } ],
+          "processFromRaw" : false
+        } ],
+        "resultFormat" : "compactedList",
+        "columns" : [ "__time", "arrayBool", "arrayDouble", "arrayDoubleNulls", "arrayLong", "arrayLongNulls", "arrayNestedLong", "arrayObject", "arrayString", "arrayStringNulls", "arrayVariant", "bool", "cDoubleArray", "cEmptyArray", "cEmptyObj", "cEmptyObjectArray", "cLongArray", "cNullArray", "cObj", "cObjectArray", "cdouble", "clong", "cnt", "complexObj", "cstr", "cstringArray", "double", "long", "null", "obj", "str", "v0", "variant", "variantEmptyObj", "variantEmtpyArray", "variantNumeric", "variantWithArrays" ],
+        "columnTypes" : [ "LONG", "ARRAY<LONG>", "ARRAY<DOUBLE>", "ARRAY<DOUBLE>", "ARRAY<LONG>", "ARRAY<LONG>", "COMPLEX<json>", "COMPLEX<json>", "ARRAY<STRING>", "ARRAY<STRING>", "ARRAY<STRING>", "LONG", "ARRAY<DOUBLE>", "ARRAY<LONG>", "COMPLEX<json>", "COMPLEX<json>", "ARRAY<LONG>", "ARRAY<LONG>", "COMPLEX<json>", "COMPLEX<json>", "DOUBLE", "LONG", "LONG", "COMPLEX<json>", "STRING", "ARRAY<STRING>", "DOUBLE", "LONG", "STRING", "COMPLEX<json>", "STRING", "ARRAY<LONG>", "STRING", "COMPLEX<json>", "ARRAY<LONG>", "DOUBLE", "ARRAY<STRING>" ],
+        "granularity" : {
+          "type" : "all"
+        },
+        "legacy" : false
+      }
+    },
+    "virtualColumn" : {
+      "type" : "expression",
+      "name" : "j0.unnest",
+      "expression" : "\"v0\"",
+      "outputType" : "ARRAY<LONG>"
+    },
+    "unnestFilter" : null
+  },
+  "intervals" : {
+    "type" : "intervals",
+    "intervals" : [ "-146136543-09-08T08:23:32.096Z/146140482-04-24T15:36:27.903Z" ]
+  },
+  "virtualColumns" : [ {
+    "type" : "expression",
+    "name" : "_v0",
+    "expression" : "nvl(\"j0.unnest\",\"long\")",
+    "outputType" : "LONG"
+  } ],
+  "resultFormat" : "compactedList",
+  "columns" : [ "_v0", "j0.unnest", "long" ],
+  "columnTypes" : [ "LONG", "LONG", "LONG" ],
+  "granularity" : {
+    "type" : "all"
+  },
+  "legacy" : false
+}
+!nativePlan

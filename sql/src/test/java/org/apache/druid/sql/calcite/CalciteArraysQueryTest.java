@@ -93,8 +93,6 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
                   .put(QueryContexts.CTX_SQL_STRINGIFY_ARRAYS, false)
                   .build();
 
-  private static final ColumnType ColumnType1STRING = null;
-
   public static void assertResultsDeepEquals(String sql, List<Object[]> expected, List<Object[]> results)
   {
     for (int row = 0; row < results.size(); row++) {
@@ -117,6 +115,13 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
     } else {
       Assert.assertEquals(path, expected, actual);
     }
+  }
+
+  protected final ColumnType ColumnType1STRING = getNestedStringType();
+
+  protected ColumnType getNestedStringType()
+  {
+    return ColumnType.STRING;
   }
 
   @Test
