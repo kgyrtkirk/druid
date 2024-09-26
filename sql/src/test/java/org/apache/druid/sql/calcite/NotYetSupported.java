@@ -20,6 +20,7 @@
 package org.apache.druid.sql.calcite;
 
 import com.google.common.base.Throwables;
+import org.apache.calcite.plan.RelOptPlanner.CannotPlanException;
 import org.apache.druid.error.DruidException;
 import org.apache.druid.sql.calcite.rel.CannotBuildQueryException;
 import org.junit.AssumptionViolatedException;
@@ -96,7 +97,8 @@ public @interface NotYetSupported
     SORT_REMOVE_TROUBLE(DruidException.class, "Calcite assertion violated.*Sort\\.<init>"),
     SORT_REMOVE_CONSTANT_KEYS_CONFLICT(DruidException.class, "not enough rules"),
     REQUIRE_TIME_CONDITION(CannotBuildQueryException.class, "requireTimeCondition is enabled"),
-    ERROR_CANNOT_TRANSLATE_COUNT_DISTINCT(AssertionError.class, "Cannot translate aggregator.COUNT.DISTINCT");
+    ERROR_CANNOT_TRANSLATE_COUNT_DISTINCT(AssertionError.class, "Cannot translate aggregator.COUNT.DISTINCT"),
+    UNNEST_INLINED(CannotPlanException.class, "Missing conversion is Uncollect");
     // @formatter:on
 
     public Class<? extends Throwable> throwableClass;

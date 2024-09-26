@@ -68,6 +68,7 @@ import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.segment.join.JoinType;
 import org.apache.druid.segment.virtual.ExpressionVirtualColumn;
+import org.apache.druid.sql.calcite.NotYetSupported.Modes;
 import org.apache.druid.sql.calcite.filtration.Filtration;
 import org.apache.druid.sql.calcite.util.CalciteTests;
 import org.apache.druid.sql.calcite.util.SqlTestFramework.StandardComponentSupplier;
@@ -3885,6 +3886,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
 
   }
 
+  @NotYetSupported(Modes.UNNEST_INLINED)
   @Test
   public void testUnnestInline()
   {
@@ -3919,6 +3921,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @NotYetSupported(Modes.UNNEST_INLINED)
   @Test
   public void testUnnestInlineWithCount()
   {
@@ -5713,6 +5716,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @NotYetSupported(Modes.UNNEST_INLINED)
   @Test
   public void testUnnestWithConstant()
   {
