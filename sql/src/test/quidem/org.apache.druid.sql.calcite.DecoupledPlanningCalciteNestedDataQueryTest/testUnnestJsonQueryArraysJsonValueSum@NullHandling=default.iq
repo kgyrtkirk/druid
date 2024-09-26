@@ -1,4 +1,4 @@
-# testUnnestJsonQueryArraysJsonValue case-crc:d21c3b90
+# testUnnestJsonQueryArraysJsonValueSum@NullHandling=default case-crc:12786e07
 # quidem testcase reason: UNNEST_EXTRA_SCAN
 !set debug true
 !set defaultTimeout 300000
@@ -9,36 +9,31 @@
 !set sqlStringifyArrays false
 !set outputformat mysql
 !use druidtest:///?componentSupplier=NestedComponentSupplier
-SELECT json_value(objects, '$.x' returning bigint) as x, count(*) FROM druid.arrays, UNNEST(JSON_QUERY_ARRAY(arrayObject, '$')) as u(objects) GROUP BY 1;
-+------+--------+
-| x    | EXPR$1 |
-+------+--------+
-|    1 |      4 |
-| 1000 |      2 |
-|    2 |      8 |
-|    3 |      2 |
-|    4 |      2 |
-|      |     10 |
-+------+--------+
-(6 rows)
+SELECT sum(json_value(objects, '$.x' returning bigint)) as xs FROM druid.arrays, UNNEST(JSON_QUERY_ARRAY(arrayObject, '$')) as u(objects);
++------+
+| xs   |
++------+
+| 2034 |
++------+
+(1 row)
 
 !ok
-LogicalAggregate(group=[{0}], EXPR$1=[COUNT()])
-  LogicalProject(x=[JSON_VALUE_BIGINT($13, '$.x')])
+LogicalAggregate(group=[{}], xs=[SUM($0)])
+  LogicalProject($f0=[JSON_VALUE_BIGINT($13, '$.x')])
     LogicalUnnest(unnestExpr=[$12])
       LogicalProject(__time=[$0], arrayString=[$1], arrayStringNulls=[$2], arrayLong=[$3], arrayLongNulls=[$4], arrayDouble=[$5], arrayDoubleNulls=[$6], arrayVariant=[$7], arrayNoType=[$8], arrayNestedLong=[$9], arrayObject=[$10], cnt=[$11], $f12=[JSON_QUERY_ARRAY($10, '$')])
         LogicalTableScan(table=[[druid, arrays]])
 
 !logicalPlan
-DruidAggregate(group=[{0}], EXPR$1=[COUNT()], druid=[logical])
-  DruidProject(x=[JSON_VALUE_BIGINT($13, '$.x')], druid=[logical])
+DruidAggregate(group=[{}], xs=[SUM($0)], druid=[logical])
+  DruidProject($f0=[JSON_VALUE_BIGINT($13, '$.x')], druid=[logical])
     DruidUnnest(unnestExpr=[$12])
       DruidProject(__time=[$0], arrayString=[$1], arrayStringNulls=[$2], arrayLong=[$3], arrayLongNulls=[$4], arrayDouble=[$5], arrayDoubleNulls=[$6], arrayVariant=[$7], arrayNoType=[$8], arrayNestedLong=[$9], arrayObject=[$10], cnt=[$11], $f12=[JSON_QUERY_ARRAY($10, '$')], druid=[logical])
         DruidTableScan(table=[[druid, arrays]], druid=[logical])
 
 !druidPlan
 {
-  "queryType" : "groupBy",
+  "queryType" : "timeseries",
   "dataSource" : {
     "type" : "unnest",
     "base" : {
@@ -94,18 +89,10 @@ DruidAggregate(group=[{0}], EXPR$1=[COUNT()], druid=[logical])
   "granularity" : {
     "type" : "all"
   },
-  "dimensions" : [ {
-    "type" : "default",
-    "dimension" : "_v0",
-    "outputName" : "d0",
-    "outputType" : "LONG"
-  } ],
   "aggregations" : [ {
-    "type" : "count",
-    "name" : "a0"
-  } ],
-  "limitSpec" : {
-    "type" : "NoopLimitSpec"
-  }
+    "type" : "longSum",
+    "name" : "a0",
+    "fieldName" : "_v0"
+  } ]
 }
 !nativePlan

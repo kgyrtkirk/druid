@@ -159,7 +159,7 @@ public class QueryTestBuilder
 
   public QueryTestBuilder expectedQueries(List<Query<?>> expectedQueries)
   {
-//    this.expectedQueries = expectedQueries;
+    this.expectedQueries = expectedQueries;
     return this;
   }
 

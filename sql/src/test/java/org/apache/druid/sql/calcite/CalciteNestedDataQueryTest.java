@@ -6712,7 +6712,7 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.UNNEST_EXTRA_SCAN)
+  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.UNNEST_EXTRA_SCAN, separateDefaultModeTest = true)
   @Test
   public void testCoalesceOnNestedColumns()
   {
@@ -6763,7 +6763,7 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
         .run();
   }
 
-  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.UNNEST_EXTRA_SCAN)
+  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.UNNEST_EXTRA_SCAN, separateDefaultModeTest = true)
   @Test
   public void testCoalesceOnNestedColumnsLater()
   {
@@ -6992,7 +6992,7 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
         .run();
   }
 
-  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.UNNEST_EXTRA_SCAN)
+  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.UNNEST_EXTRA_SCAN, separateDefaultModeTest = true)
   @Test
   public void testUnnestJsonQueryArrays()
   {
@@ -7060,7 +7060,7 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
         .run();
   }
 
-  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.UNNEST_EXTRA_SCAN)
+  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.UNNEST_EXTRA_SCAN, separateDefaultModeTest = true)
   @Test
   public void testUnnestJsonQueryArraysJsonValue()
   {
@@ -7122,7 +7122,7 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
         .run();
   }
 
-  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.UNNEST_EXTRA_SCAN)
+  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.UNNEST_EXTRA_SCAN, separateDefaultModeTest = true)
   @Test
   public void testUnnestJsonQueryArraysJsonValueSum()
   {
