@@ -25,11 +25,13 @@ import org.apache.calcite.plan.RelOptUtil.InputFinder;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.core.Project;
 import org.apache.calcite.rel.rules.SubstitutionRule;
+import org.apache.calcite.rex.RexCall;
+import org.apache.calcite.rex.RexInputRef;
 import org.apache.calcite.rex.RexNode;
+import org.apache.calcite.sql.SqlKind;
 import org.apache.calcite.util.ImmutableBitSet;
 import org.apache.druid.error.DruidException;
-import org.apache.druid.sql.calcite.rel.DruidCorrelateUnnestRel;
-
+import org.apache.druid.sql.calcite.expression.builtin.MultiValueStringToArrayOperatorConversion;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -65,11 +67,10 @@ public class UnnestInputCleanupRule extends RelOptRule implements SubstitutionRu
 
     List<RexNode> projects = new ArrayList(project.getProjects());
     RexNode unnestInput = projects.get(inputIndex);
-    RexNode newInput = DruidCorrelateUnnestRel.unwrapMvToArray(unnestInput);
+    RexNode newInput = unwrapMvToArray(unnestInput);
 
     if(newInput != unnestInput) {
-      
-      
+
       projects.set(inputIndex, newInput);
 
       RelNode newInputRel = call.builder()
@@ -101,6 +102,29 @@ public class UnnestInputCleanupRule extends RelOptRule implements SubstitutionRu
 
 //    unnest.getUnnestExpr()
 //    call.transformTo(newNode);
+  }
+
+  /**
+   * Whether an expr is MV_TO_ARRAY of an input reference.
+   */
+  private static boolean isMvToArrayOfInputRef(final RexNode expr)
+  {
+    return expr.isA(SqlKind.OTHER_FUNCTION)
+           && ((RexCall) expr).op.equals(MultiValueStringToArrayOperatorConversion.SQL_FUNCTION)
+           && ((RexCall) expr).getOperands().get(0).isA(SqlKind.INPUT_REF);
+  }
+
+  /**
+   * Unwrap MV_TO_ARRAY at the outer layer of an expr, if it refers to an input ref.
+   */
+  public static RexNode unwrapMvToArray(final RexNode expr)
+  {
+    if (isMvToArrayOfInputRef(expr)) {
+      RexInputRef inputRef = (RexInputRef) ((RexCall) expr).getOperands().get(0);
+      return new RexInputRef(inputRef.getIndex(), expr.getType());
+    } else {
+      return expr;
+    }
   }
 
 }
