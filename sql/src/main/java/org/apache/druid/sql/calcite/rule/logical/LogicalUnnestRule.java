@@ -75,14 +75,14 @@ public class LogicalUnnestRule extends RelOptRule implements SubstitutionRule
   public void onMatch(RelOptRuleCall call)
   {
     LogicalCorrelate cor = call.rel(0);
-    UnnestConfiguration expr = unwrapUnnestConfigurationExpression(cor.getRight().stripped());
+    UnnestConfiguration unnestConfig = unwrapUnnestConfigurationExpression(cor.getRight().stripped());
 
-    if (expr == null) {
+    if (unnestConfig == null) {
       throw DruidException.defensive("Couldn't process possible unnest for reltree: \n%s", RelOptUtil.toString(cor));
     }
 
-    expr.expr = new DruidCorrelateUnnestRel.CorrelatedFieldAccessToInputRef(cor.getCorrelationId())
-        .apply(expr.expr);
+    unnestConfig.expr = new DruidCorrelateUnnestRel.CorrelatedFieldAccessToInputRef(cor.getCorrelationId())
+        .apply(unnestConfig.expr);
 
     // final RexNode rexNodeToUnnest = getRexNodeToUnnest(cor.stripped(),
     // unnestDatasourceRel);
@@ -94,9 +94,9 @@ public class LogicalUnnestRule extends RelOptRule implements SubstitutionRule
             cor.getCluster(),
             cor.getTraitSet(),
             builder.build(),
-            expr.expr,
+            unnestConfig.expr,
             cor.getRowType(),
-            expr.condition
+            unnestConfig.condition
         )
     ).build();
     call.transformTo(newNode);
