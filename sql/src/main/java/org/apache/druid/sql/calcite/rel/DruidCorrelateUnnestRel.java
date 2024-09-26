@@ -444,7 +444,7 @@ public class DruidCorrelateUnnestRel extends DruidRel<DruidCorrelateUnnestRel>
   /**
    * Unwrap MV_TO_ARRAY at the outer layer of an expr, if it refers to an input ref.
    */
-  private static RexNode unwrapMvToArray(final RexNode expr)
+  public static RexNode unwrapMvToArray(final RexNode expr)
   {
     if (isMvToArrayOfInputRef(expr)) {
       return ((RexCall) expr).getOperands().get(0);
@@ -532,7 +532,7 @@ public class DruidCorrelateUnnestRel extends DruidRel<DruidCorrelateUnnestRel>
     return unwrapMvToArray(rexNodeToUnnest);
   }
 
-  private static class ProjectUpdateShuttle extends RexShuttle
+  public static class ProjectUpdateShuttle extends RexShuttle
   {
     private RexNode nodeToBeAdded;
     private List<String> types;

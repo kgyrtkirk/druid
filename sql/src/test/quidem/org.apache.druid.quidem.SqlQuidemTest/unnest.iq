@@ -2,197 +2,74 @@
 !use druidtest://?numMergeBuffers=3
 !set outputformat mysql
 
-SELECT longs FROM druid.arrays, UNNEST(arrayLongNulls) as u(longs);
-LogicalProject(longs=[$12])
-  LogicalCorrelate(correlation=[$cor0], joinType=[inner], requiredColumns=[{4}])
-    LogicalTableScan(table=[[druid, arrays]])
-    LogicalProject(longs=[$0])
-      Uncollect
-        LogicalProject(arrayLongNulls=[$cor0.arrayLongNulls])
-          LogicalValues(tuples=[[{ 0 }]])
+SELECT d3 FROM druid.numfoo, UNNEST(MV_TO_ARRAY(dim3)) as unnested (d3);
+LogicalProject(d3=[$17])
+  LogicalProject(__time=[$0], dim1=[$1], dim2=[$2], dim3=[$3], dim4=[$4], dim5=[$5], dim6=[$6], d1=[$7], d2=[$8], f1=[$9], f2=[$10], l1=[$11], l2=[$12], cnt=[$13], m1=[$14], m2=[$15], unique_dim1=[$16], d3=[$18])
+    LogicalCorrelate(correlation=[$cor0], joinType=[inner], requiredColumns=[{17}])
+      LogicalProject(__time=[$0], dim1=[$1], dim2=[$2], dim3=[$3], dim4=[$4], dim5=[$5], dim6=[$6], d1=[$7], d2=[$8], f1=[$9], f2=[$10], l1=[$11], l2=[$12], cnt=[$13], m1=[$14], m2=[$15], unique_dim1=[$16], $f17=[MV_TO_ARRAY($3)])
+        LogicalTableScan(table=[[druid, numfoo]])
+      LogicalProject(d3=[$0])
+        Uncollect
+          LogicalProject(EXPR$0=[$cor0.$f17])
+            LogicalValues(tuples=[[{ 0 }]])
 
 !convertedPlan
 
 
-LogicalProject(longs=[$12])
-  LogicalUnnest(unnestExpr=[$cor0.arrayLongNulls])
-    LogicalTableScan(table=[[druid, arrays]])
+LogicalProject(d3=[$18])
+  LogicalUnnest(unnestExpr=[$17])
+    LogicalProject(__time=[$0], dim1=[$1], dim2=[$2], dim3=[$3], dim4=[$4], dim5=[$5], dim6=[$6], d1=[$7], d2=[$8], f1=[$9], f2=[$10], l1=[$11], l2=[$12], cnt=[$13], m1=[$14], m2=[$15], unique_dim1=[$16], dim30=[$3])
+      LogicalTableScan(table=[[druid, numfoo]])
 
 !logicalPlan
 
-DruidProject(longs=[$12], druid=[logical])
-  DruidUnnest(unnestExpr=[$cor0.arrayLongNulls])
-    DruidTableScan(table=[[druid, arrays]], druid=[logical])
+DruidProject(d3=[$18], druid=[logical])
+  DruidUnnest(unnestExpr=[$17])
+    DruidProject(__time=[$0], dim1=[$1], dim2=[$2], dim3=[$3], dim4=[$4], dim5=[$5], dim6=[$6], d1=[$7], d2=[$8], f1=[$9], f2=[$10], l1=[$11], l2=[$12], cnt=[$13], m1=[$14], m2=[$15], unique_dim1=[$16], dim30=[$3], druid=[logical])
+      DruidTableScan(table=[[druid, numfoo]], druid=[logical])
 
 !druidPlan
+{
+  "queryType" : "scan",
+  "dataSource" : {
+    "type" : "unnest",
+    "base" : {
+      "type" : "table",
+      "name" : "numfoo"
+    },
+    "virtualColumn" : {
+      "type" : "expression",
+      "name" : "j0.unnest",
+      "expression" : "\"dim3\"",
+      "outputType" : "ARRAY<STRING>"
+    },
+    "unnestFilter" : null
+  },
+  "intervals" : {
+    "type" : "intervals",
+    "intervals" : [ "-146136543-09-08T08:23:32.096Z/146140482-04-24T15:36:27.903Z" ]
+  },
+  "resultFormat" : "compactedList",
+  "columns" : [ "j0.unnest" ],
+  "columnTypes" : [ "STRING" ],
+  "granularity" : {
+    "type" : "all"
+  },
+  "legacy" : false
+}
 !nativePlan
-org.apache.calcite.avatica.AvaticaSqlException: Error -1 (00000) : Error while executing SQL "SELECT longs FROM druid.arrays, UNNEST(arrayLongNulls) as u(longs)": Remote driver error: QueryInterruptedException: null -> DruidException: null -> NullPointerException: (null exception message)
-	at org.apache.calcite.avatica.Helper.createException(Helper.java:54)
-	at org.apache.calcite.avatica.Helper.createException(Helper.java:41)
-	at org.apache.calcite.avatica.AvaticaStatement.executeInternal(AvaticaStatement.java:164)
-	at org.apache.calcite.avatica.AvaticaStatement.executeQuery(AvaticaStatement.java:228)
-	at net.hydromatic.quidem.Quidem.checkResult(Quidem.java:299)
-	at net.hydromatic.quidem.Quidem.access$2600(Quidem.java:57)
-	at net.hydromatic.quidem.Quidem$ContextImpl.checkResult(Quidem.java:1636)
-	at net.hydromatic.quidem.Quidem$CheckResultCommand.execute(Quidem.java:941)
-	at net.hydromatic.quidem.Quidem$CompositeCommand.execute(Quidem.java:1437)
-	at net.hydromatic.quidem.Quidem.execute(Quidem.java:190)
-	at org.apache.druid.quidem.DruidQuidemTestBase$DruidQuidemRunner.run(DruidQuidemTestBase.java:158)
-	at org.apache.druid.quidem.DruidQuidemTestBase.test(DruidQuidemTestBase.java:126)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
-	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
-	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
-	at java.base/java.lang.reflect.Method.invoke(Method.java:566)
-	at org.junit.platform.commons.util.ReflectionUtils.invokeMethod(ReflectionUtils.java:728)
-	at org.junit.jupiter.engine.execution.MethodInvocation.proceed(MethodInvocation.java:60)
-	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$ValidatingInvocation.proceed(InvocationInterceptorChain.java:131)
-	at org.junit.jupiter.engine.extension.TimeoutExtension.intercept(TimeoutExtension.java:156)
-	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestableMethod(TimeoutExtension.java:147)
-	at org.junit.jupiter.engine.extension.TimeoutExtension.interceptTestTemplateMethod(TimeoutExtension.java:94)
-	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker$ReflectiveInterceptorCall.lambda$ofVoidMethod$0(InterceptingExecutableInvoker.java:103)
-	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.lambda$invoke$0(InterceptingExecutableInvoker.java:93)
-	at org.junit.jupiter.engine.execution.InvocationInterceptorChain$InterceptedInvocation.proceed(InvocationInterceptorChain.java:106)
-	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.proceed(InvocationInterceptorChain.java:64)
-	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.chainAndInvoke(InvocationInterceptorChain.java:45)
-	at org.junit.jupiter.engine.execution.InvocationInterceptorChain.invoke(InvocationInterceptorChain.java:37)
-	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:92)
-	at org.junit.jupiter.engine.execution.InterceptingExecutableInvoker.invoke(InterceptingExecutableInvoker.java:86)
-	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.lambda$invokeTestMethod$7(TestMethodTestDescriptor.java:218)
-	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
-	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.invokeTestMethod(TestMethodTestDescriptor.java:214)
-	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:139)
-	at org.junit.jupiter.engine.descriptor.TestMethodTestDescriptor.execute(TestMethodTestDescriptor.java:69)
-	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:151)
-	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
-	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
-	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
-	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
-	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
-	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
-	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
-	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35)
-	at org.junit.platform.engine.support.hierarchical.NodeTestTask$DefaultDynamicTestExecutor.execute(NodeTestTask.java:226)
-	at org.junit.platform.engine.support.hierarchical.NodeTestTask$DefaultDynamicTestExecutor.execute(NodeTestTask.java:204)
-	at org.junit.jupiter.engine.descriptor.TestTemplateTestDescriptor.execute(TestTemplateTestDescriptor.java:142)
-	at org.junit.jupiter.engine.descriptor.TestTemplateTestDescriptor.lambda$execute$2(TestTemplateTestDescriptor.java:110)
-	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:195)
-	at java.base/java.util.stream.ReferencePipeline$2$1.accept(ReferencePipeline.java:177)
-	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:195)
-	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:195)
-	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:195)
-	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:195)
-	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.accept(ForEachOps.java:183)
-	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:195)
-	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1655)
-	at java.base/java.util.stream.ReferencePipeline$Head.forEach(ReferencePipeline.java:658)
-	at java.base/java.util.stream.ReferencePipeline$7$1.accept(ReferencePipeline.java:274)
-	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:195)
-	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:195)
-	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:195)
-	at java.base/java.util.Spliterators$ArraySpliterator.forEachRemaining(Spliterators.java:948)
-	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:484)
-	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:474)
-	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:497)
-	at java.base/java.util.stream.ReferencePipeline$7$1.accept(ReferencePipeline.java:274)
-	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:195)
-	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:195)
-	at java.base/java.util.stream.ReferencePipeline$3$1.accept(ReferencePipeline.java:195)
-	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1655)
-	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:484)
-	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:474)
-	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:497)
-	at java.base/java.util.stream.ReferencePipeline$7$1.accept(ReferencePipeline.java:274)
-	at java.base/java.util.ArrayList$ArrayListSpliterator.forEachRemaining(ArrayList.java:1655)
-	at java.base/java.util.stream.AbstractPipeline.copyInto(AbstractPipeline.java:484)
-	at java.base/java.util.stream.AbstractPipeline.wrapAndCopyInto(AbstractPipeline.java:474)
-	at java.base/java.util.stream.ForEachOps$ForEachOp.evaluateSequential(ForEachOps.java:150)
-	at java.base/java.util.stream.ForEachOps$ForEachOp$OfRef.evaluateSequential(ForEachOps.java:173)
-	at java.base/java.util.stream.AbstractPipeline.evaluate(AbstractPipeline.java:234)
-	at java.base/java.util.stream.ReferencePipeline.forEach(ReferencePipeline.java:497)
-	at org.junit.jupiter.engine.descriptor.TestTemplateTestDescriptor.execute(TestTemplateTestDescriptor.java:110)
-	at org.junit.jupiter.engine.descriptor.TestTemplateTestDescriptor.execute(TestTemplateTestDescriptor.java:44)
-	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:151)
-	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
-	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
-	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
-	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
-	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
-	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
-	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
-	at java.base/java.util.ArrayList.forEach(ArrayList.java:1541)
-	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
-	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)
-	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
-	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
-	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
-	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
-	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
-	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
-	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
-	at java.base/java.util.ArrayList.forEach(ArrayList.java:1541)
-	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.invokeAll(SameThreadHierarchicalTestExecutorService.java:41)
-	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$6(NodeTestTask.java:155)
-	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
-	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$8(NodeTestTask.java:141)
-	at org.junit.platform.engine.support.hierarchical.Node.around(Node.java:137)
-	at org.junit.platform.engine.support.hierarchical.NodeTestTask.lambda$executeRecursively$9(NodeTestTask.java:139)
-	at org.junit.platform.engine.support.hierarchical.ThrowableCollector.execute(ThrowableCollector.java:73)
-	at org.junit.platform.engine.support.hierarchical.NodeTestTask.executeRecursively(NodeTestTask.java:138)
-	at org.junit.platform.engine.support.hierarchical.NodeTestTask.execute(NodeTestTask.java:95)
-	at org.junit.platform.engine.support.hierarchical.SameThreadHierarchicalTestExecutorService.submit(SameThreadHierarchicalTestExecutorService.java:35)
-	at org.junit.platform.engine.support.hierarchical.HierarchicalTestExecutor.execute(HierarchicalTestExecutor.java:57)
-	at org.junit.platform.engine.support.hierarchical.HierarchicalTestEngine.execute(HierarchicalTestEngine.java:54)
-	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:147)
-	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:127)
-	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:90)
-	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.lambda$execute$0(EngineExecutionOrchestrator.java:55)
-	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.withInterceptedStreams(EngineExecutionOrchestrator.java:102)
-	at org.junit.platform.launcher.core.EngineExecutionOrchestrator.execute(EngineExecutionOrchestrator.java:54)
-	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:114)
-	at org.junit.platform.launcher.core.DefaultLauncher.execute(DefaultLauncher.java:95)
-	at org.junit.platform.launcher.core.DefaultLauncherSession$DelegatingLauncher.execute(DefaultLauncherSession.java:91)
-	at org.junit.platform.launcher.core.SessionPerRequestLauncher.execute(SessionPerRequestLauncher.java:60)
-	at org.eclipse.jdt.internal.junit5.runner.JUnit5TestReference.run(JUnit5TestReference.java:98)
-	at org.eclipse.jdt.internal.junit.runner.TestExecution.run(TestExecution.java:40)
-	at org.eclipse.jdt.internal.junit.runner.RemoteTestRunner.runTests(RemoteTestRunner.java:529)
-	at org.eclipse.jdt.internal.junit.runner.RemoteTestRunner.runTests(RemoteTestRunner.java:756)
-	at org.eclipse.jdt.internal.junit.runner.RemoteTestRunner.run(RemoteTestRunner.java:452)
-	at org.eclipse.jdt.internal.junit.runner.RemoteTestRunner.main(RemoteTestRunner.java:210)
-QueryInterruptedException{msg=null, code=Unknown exception, class=org.apache.druid.error.DruidException, host=null}
-	at org.apache.druid.query.QueryInterruptedException.wrapIfNeeded(QueryInterruptedException.java:113)
-	at org.apache.druid.sql.avatica.ErrorHandler.sanitize(ErrorHandler.java:82)
-	at org.apache.druid.sql.avatica.DruidMeta.mapException(DruidMeta.java:395)
-	at org.apache.druid.sql.avatica.DruidMeta.prepareAndExecute(DruidMeta.java:362)
-	at org.apache.calcite.avatica.remote.LocalService.apply(LocalService.java:212)
-	at org.apache.calcite.avatica.remote.Service$PrepareAndExecuteRequest.accept(Service.java:952)
-	at org.apache.calcite.avatica.remote.Service$PrepareAndExecuteRequest.accept(Service.java:904)
-	at org.apache.calcite.avatica.remote.AbstractHandler.apply(AbstractHandler.java:94)
-	at org.apache.calcite.avatica.remote.JsonHandler.apply(JsonHandler.java:52)
-	at org.apache.calcite.avatica.server.AvaticaJsonHandler.handle(AvaticaJsonHandler.java:133)
-	at org.apache.druid.sql.avatica.DruidAvaticaJsonHandler.handle(DruidAvaticaJsonHandler.java:61)
-	at org.eclipse.jetty.server.handler.HandlerWrapper.handle(HandlerWrapper.java:127)
-	at org.eclipse.jetty.server.Server.handle(Server.java:516)
-	at org.eclipse.jetty.server.HttpChannel.lambda$handle$1(HttpChannel.java:487)
-	at org.eclipse.jetty.server.HttpChannel.dispatch(HttpChannel.java:732)
-	at org.eclipse.jetty.server.HttpChannel.handle(HttpChannel.java:479)
-	at org.eclipse.jetty.server.HttpConnection.onFillable(HttpConnection.java:277)
-	at org.eclipse.jetty.io.AbstractConnection$ReadCallback.succeeded(AbstractConnection.java:311)
-	at org.eclipse.jetty.io.FillInterest.fillable(FillInterest.java:105)
-	at org.eclipse.jetty.io.ChannelEndPoint$1.run(ChannelEndPoint.java:104)
-	at org.eclipse.jetty.util.thread.strategy.EatWhatYouKill.runTask(EatWhatYouKill.java:338)
-	at org.eclipse.jetty.util.thread.strategy.EatWhatYouKill.doProduce(EatWhatYouKill.java:315)
-	at org.eclipse.jetty.util.thread.strategy.EatWhatYouKill.tryProduce(EatWhatYouKill.java:173)
-	at org.eclipse.jetty.util.thread.strategy.EatWhatYouKill.run(EatWhatYouKill.java:131)
-	at org.eclipse.jetty.util.thread.ReservedThreadExecutor$ReservedThread.run(ReservedThreadExecutor.java:409)
-	at org.eclipse.jetty.util.thread.QueuedThreadPool.r (stack truncated)
++----+
+| d3 |
++----+
+|    |
+| a  |
+| b  |
+| b  |
+| c  |
+| d  |
++----+
+(6 rows)
+
 !ok
 
 # LogicalPlan plan = calcite.plan();

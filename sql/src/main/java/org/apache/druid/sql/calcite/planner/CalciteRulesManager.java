@@ -72,6 +72,7 @@ import org.apache.druid.sql.calcite.rule.logical.DruidAggregateRemoveRedundancyR
 import org.apache.druid.sql.calcite.rule.logical.DruidJoinRule;
 import org.apache.druid.sql.calcite.rule.logical.DruidLogicalRules;
 import org.apache.druid.sql.calcite.rule.logical.LogicalUnnestRule;
+import org.apache.druid.sql.calcite.rule.logical.UnnestInputCleanupRule;
 import org.apache.druid.sql.calcite.run.EngineFeature;
 import org.apache.druid.sql.hook.DruidHook;
 
@@ -282,6 +283,7 @@ public class CalciteRulesManager
     builder.addRuleInstance(JoinExtractFilterRule.Config.DEFAULT.toRule());
     builder.addRuleInstance(FilterIntoJoinRuleConfig.DEFAULT.withPredicate(DruidJoinRule::isSupportedPredicate).toRule());
     builder.addRuleInstance(new LogicalUnnestRule());
+    builder.addRuleInstance(new UnnestInputCleanupRule());
     return Programs.of(builder.build(), true, DefaultRelMetadataProvider.INSTANCE);
   }
 
