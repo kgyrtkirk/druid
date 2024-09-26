@@ -21,6 +21,8 @@ package org.apache.druid.sql.calcite;
 
 import org.apache.calcite.rel.rules.CoreRules;
 import org.apache.druid.query.QueryContexts;
+import org.apache.druid.query.UnnestDataSource;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -114,7 +116,11 @@ public @interface DecoupledTestConfig
     /**
      * Strange things; needs more investigation
      */
-    IRRELEVANT_SCANQUERY;
+    IRRELEVANT_SCANQUERY,
+    /**
+     * Extra scan query under {@link UnnestDataSource}.
+     */
+    UNNEST_EXTRA_SCAN;
 
     public boolean isPresent()
     {

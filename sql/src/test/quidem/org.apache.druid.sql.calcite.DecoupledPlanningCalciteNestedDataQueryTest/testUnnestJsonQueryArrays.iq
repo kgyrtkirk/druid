@@ -1,0 +1,60 @@
+# testUnnestJsonQueryArrays case-crc:4110798b
+# quidem testcase reason: UNNEST_EXTRA_SCAN
+!set debug true
+!set defaultTimeout 300000
+!set maxScatterGatherBytes 9223372036854775807
+!set plannerStrategy DECOUPLED
+!set sqlCurrentTimestamp 2000-01-01T00:00:00Z
+!set sqlQueryId dummy
+!set sqlStringifyArrays false
+!set outputformat mysql
+!use druidtest:///?componentSupplier=NestedComponentSupplier
+SELECT objects FROM druid.arrays, UNNEST(JSON_QUERY_ARRAY(arrayObject, '$')) as u(objects);
++------------+
+| objects    |
++------------+
+| {"a":1}    |
+| {"a":1}    |
+| {"b":2}    |
+| {"b":2}    |
+| {"x":1000} |
+| {"x":1000} |
+| {"x":1}    |
+| {"x":1}    |
+| {"x":1}    |
+| {"x":1}    |
+| {"x":2}    |
+| {"x":2}    |
+| {"x":2}    |
+| {"x":2}    |
+| {"x":2}    |
+| {"x":2}    |
+| {"x":2}    |
+| {"x":2}    |
+| {"x":3}    |
+| {"x":3}    |
+| {"x":4}    |
+| {"x":4}    |
+| {"x":null} |
+| {"x":null} |
+| {"y":2000} |
+| {"y":2000} |
+|            |
+|            |
++------------+
+(28 rows)
+
+!ok
+LogicalProject(objects=[$13])
+  LogicalUnnest(unnestExpr=[$12])
+    LogicalProject(__time=[$0], arrayString=[$1], arrayStringNulls=[$2], arrayLong=[$3], arrayLongNulls=[$4], arrayDouble=[$5], arrayDoubleNulls=[$6], arrayVariant=[$7], arrayNoType=[$8], arrayNestedLong=[$9], arrayObject=[$10], cnt=[$11], $f12=[JSON_QUERY_ARRAY($10, '$')])
+      LogicalTableScan(table=[[druid, arrays]])
+
+!logicalPlan
+DruidProject(objects=[$13], druid=[logical])
+  DruidUnnest(unnestExpr=[$12])
+    DruidProject(__time=[$0], arrayString=[$1], arrayStringNulls=[$2], arrayLong=[$3], arrayLongNulls=[$4], arrayDouble=[$5], arrayDoubleNulls=[$6], arrayVariant=[$7], arrayNoType=[$8], arrayNestedLong=[$9], arrayObject=[$10], cnt=[$11], $f12=[JSON_QUERY_ARRAY($10, '$')], druid=[logical])
+      DruidTableScan(table=[[druid, arrays]], druid=[logical])
+
+!druidPlan
+!nativePlan

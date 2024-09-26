@@ -95,7 +95,8 @@ public @interface NotYetSupported
     UNNEST_NOT_SUPPORTED_CORRELATE_CONVERSION(DruidException.class, "Missing conversion( is|s are) LogicalCorrelate"),
     SORT_REMOVE_TROUBLE(DruidException.class, "Calcite assertion violated.*Sort\\.<init>"),
     SORT_REMOVE_CONSTANT_KEYS_CONFLICT(DruidException.class, "not enough rules"),
-    REQUIRE_TIME_CONDITION(CannotBuildQueryException.class, "requireTimeCondition is enabled");
+    REQUIRE_TIME_CONDITION(CannotBuildQueryException.class, "requireTimeCondition is enabled"),
+    ERROR_CANNOT_TRANSLATE_COUNT_DISTINCT(AssertionError.class, "Cannot translate aggregator.COUNT.DISTINCT");
     // @formatter:on
 
     public Class<? extends Throwable> throwableClass;
