@@ -24,7 +24,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 @ExtendWith(NotYetSupportedProcessor.class)
-public class DecoupledPlanningCalciteQueryTest1 extends CalciteQueryTest
+public class DecoupledPlanningCalciteArraysQueryTest extends CalciteArraysQueryTest
 {
   @RegisterExtension
   DecoupledExtension decoupledExtension = new DecoupledExtension(this);

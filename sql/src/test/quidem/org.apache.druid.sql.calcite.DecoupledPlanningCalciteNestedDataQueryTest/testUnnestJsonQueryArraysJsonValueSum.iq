@@ -32,4 +32,67 @@ DruidAggregate(group=[{}], xs=[SUM($0)], druid=[logical])
         DruidTableScan(table=[[druid, arrays]], druid=[logical])
 
 !druidPlan
+{
+  "queryType" : "timeseries",
+  "dataSource" : {
+    "type" : "unnest",
+    "base" : {
+      "type" : "query",
+      "query" : {
+        "queryType" : "scan",
+        "dataSource" : {
+          "type" : "table",
+          "name" : "arrays"
+        },
+        "intervals" : {
+          "type" : "intervals",
+          "intervals" : [ "-146136543-09-08T08:23:32.096Z/146140482-04-24T15:36:27.903Z" ]
+        },
+        "virtualColumns" : [ {
+          "type" : "expression",
+          "name" : "v0",
+          "expression" : "json_query_array(\"arrayObject\",'$')",
+          "outputType" : "ARRAY<COMPLEX<json>>"
+        } ],
+        "resultFormat" : "compactedList",
+        "columns" : [ "__time", "arrayDouble", "arrayDoubleNulls", "arrayLong", "arrayLongNulls", "arrayNestedLong", "arrayNoType", "arrayObject", "arrayString", "arrayStringNulls", "arrayVariant", "cnt", "v0" ],
+        "columnTypes" : [ "LONG", "ARRAY<DOUBLE>", "ARRAY<DOUBLE>", "ARRAY<LONG>", "ARRAY<LONG>", "COMPLEX<json>", "ARRAY<LONG>", "COMPLEX<json>", "ARRAY<STRING>", "ARRAY<STRING>", "ARRAY<STRING>", "LONG", "ARRAY<COMPLEX<json>>" ],
+        "granularity" : {
+          "type" : "all"
+        },
+        "legacy" : false
+      }
+    },
+    "virtualColumn" : {
+      "type" : "expression",
+      "name" : "j0.unnest",
+      "expression" : "\"v0\"",
+      "outputType" : "ARRAY<COMPLEX<json>>"
+    },
+    "unnestFilter" : null
+  },
+  "intervals" : {
+    "type" : "intervals",
+    "intervals" : [ "-146136543-09-08T08:23:32.096Z/146140482-04-24T15:36:27.903Z" ]
+  },
+  "virtualColumns" : [ {
+    "type" : "nested-field",
+    "columnName" : "j0.unnest",
+    "outputName" : "_v0",
+    "expectedType" : "LONG",
+    "pathParts" : [ {
+      "type" : "field",
+      "field" : "x"
+    } ],
+    "processFromRaw" : false
+  } ],
+  "granularity" : {
+    "type" : "all"
+  },
+  "aggregations" : [ {
+    "type" : "longSum",
+    "name" : "a0",
+    "fieldName" : "_v0"
+  } ]
+}
 !nativePlan
