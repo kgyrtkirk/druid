@@ -553,11 +553,6 @@ public abstract class QueryHandler extends SqlStatementHandler.BaseStatementHand
 
       plannerContext.dispatchHook(DruidHook.DRUID_PLAN, newRoot);
 
-      if (explain != null) {
-//        plannerContext.dispatchHook(DruidHook.NATIVE_PLAN, finalBaseQuery.getQuery());
-        return planExplanation(possiblyLimitedRoot, newRoot, true);
-      }
-
       DruidQueryGenerator generator = new DruidQueryGenerator(plannerContext, (DruidLogicalNode) newRoot, rexBuilder);
       DruidQuery baseQuery = generator.buildQuery();
       try {
