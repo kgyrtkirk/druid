@@ -24,10 +24,16 @@ import org.apache.calcite.plan.RelTraitSet;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.rex.RexNode;
+import org.apache.druid.query.DataSource;
 import org.apache.druid.query.UnnestDataSource;
+import org.apache.druid.segment.VirtualColumn;
 import org.apache.druid.segment.column.RowSignature;
+import org.apache.druid.sql.calcite.expression.DruidExpression;
+import org.apache.druid.sql.calcite.expression.Expressions;
+import org.apache.druid.sql.calcite.planner.Calcites;
 import org.apache.druid.sql.calcite.planner.PlannerContext;
 import org.apache.druid.sql.calcite.planner.querygen.SourceDescProducer;
+import org.apache.druid.sql.calcite.rel.DruidJoinQueryRel;
 import org.apache.druid.sql.calcite.rel.logical.DruidLogicalNode;
 
 import java.util.List;
@@ -53,11 +59,44 @@ public class DruidUnnest extends Unnest implements DruidLogicalNode, SourceDescP
     UnnestDataSource ds = UnnestDataSource.create(inputDesc.dataSource, null, null);
 
 
-    RowSignature.builder()
+
+
+    RexNode rexNodeToUnnest = unnestExpr;
+    final DruidExpression expressionToUnnest = Expressions.toDruidExpression(
+        plannerContext,
+        inputDesc.rowSignature,
+        unnestExpr
+    );
+
+
+
+
+    RowSignature correlateRowSignature = RowSignature.builder()
     .addAll(inputDesc.rowSignature)
-    .add(unnest1, unnestExpr.getType()));
-    RowSignature aa = inputDesc.rowSignature;
-    return new SourceDesc(        inputDesc.dataSource, aa    );
+//    .add("unnest1", unnestExpr.getType());
+    .build();
+
+    RelDataType unnestedType =        rowType.getFieldList().get(rowType.getFieldCount() - 1).getType();
+
+
+    correlateRowSignature=    DruidJoinQueryRel.computeJoinRowSignature(
+        inputDesc.rowSignature,
+        RowSignature.builder().add(
+            "unnest",
+            Calcites.getColumnTypeForRelDataType(unnestedType )
+        ).build(),
+        DruidJoinQueryRel.findExistingJoinPrefixes(inputDesc.dataSource)
+    ).rhs;
+
+
+    VirtualColumn virtualColumn =
+        expressionToUnnest.toVirtualColumn(
+            correlateRowSignature.getColumnName(correlateRowSignature.size() - 1),
+            Calcites.getColumnTypeForRelDataType(rexNodeToUnnest.getType()),
+            plannerContext.getExpressionParser()
+        );
+    DataSource dataSource = UnnestDataSource.create(inputDesc.dataSource, virtualColumn, null);
+    return new SourceDesc(        dataSource, correlateRowSignature    );
     // return null;//DruidJoinQueryRel.buildJoinSourceDesc(leftDesc, null,
     // plannerContext, this, null);
   }

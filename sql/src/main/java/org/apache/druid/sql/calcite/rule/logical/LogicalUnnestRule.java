@@ -32,6 +32,7 @@ import org.apache.calcite.rel.rules.SubstitutionRule;
 import org.apache.calcite.rex.RexNode;
 import org.apache.calcite.tools.RelBuilder;
 import org.apache.druid.error.DruidException;
+import org.apache.druid.sql.calcite.rel.DruidCorrelateUnnestRel;
 
 /**
  * Recognizes a LogicalUnnest operation in the plan.
@@ -72,6 +73,13 @@ public class LogicalUnnestRule extends RelOptRule implements SubstitutionRule
   {
     LogicalCorrelate cor = call.rel(0);
     RexNode expr = unwrapUnnestExpression(cor.getRight().stripped());
+
+
+    expr=new DruidCorrelateUnnestRel.CorrelatedFieldAccessToInputRef(cor.getCorrelationId())
+    .apply(expr);
+
+//    final RexNode rexNodeToUnnest = getRexNodeToUnnest(cor.stripped(), unnestDatasourceRel);
+
     if (expr == null) {
       throw DruidException.defensive("Couldn't process possible unnest for reltree: \n%s", RelOptUtil.toString(cor));
     }
