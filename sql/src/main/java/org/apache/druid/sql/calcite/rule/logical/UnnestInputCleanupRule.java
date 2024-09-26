@@ -73,22 +73,31 @@ public class UnnestInputCleanupRule extends RelOptRule implements SubstitutionRu
     RexNode newInput = unwrapMvToArray(call.builder().getRexBuilder(), unnestInput);
 
     if (newInput != unnestInput) {
-      projects.set(inputIndex, newInput);
-      RelNode newInputRel = call.builder()
-          .push(project.getInput())
-          .project(projects)
-          .build();
 
-      boolean projectsOneColumn = projects.size() - project.getInput().getRowType().getFieldCount() == 1;
-      if (false && projectsOneColumn && newInput.isA(SqlKind.FIELD_ACCESS) && newInputRel instanceof Project) {
-        // remove the project
+      if (false && inputIndex == projects.size() - 1) {
 
-        Project newProject = (Project) newInputRel;
-        RexNode newUnnestExpr = RelOptUtil.pushPastProject(unnest.getUnnestExpr(), newProject);
-        RexNode newConditionExpr = RelOptUtil.pushPastProject(unnest.condition, newProject);
+        RelNode newInputRel = call.builder()
+            .push(project.getInput())
+            .project(projects.subList(0, inputIndex))
+            .build();
+
+        // FIXME: most likely this project is merged with the above!
+        Project tmpProject = (Project) call.builder()
+            .push(newInputRel)
+            .projectPlus(newInput)
+            .build();
+
+        // Iterable<RexNode> tmpProjectFields =
+        // Iterables.concat(builder.fields(), Collections.singleton(newInput));
+
+        RexNode newUnnestExpr = RelOptUtil.pushPastProject(unnest.getUnnestExpr(), tmpProject);
+        RexNode newConditionExpr = null;
+        if (unnest.condition != null) {
+          newConditionExpr = RelOptUtil.pushPastProject(unnest.condition, tmpProject);
+        }
 
         RelNode newUnnest = new LogicalUnnest(
-            unnest.getCluster(), unnest.getTraitSet(), project.getInput(), newUnnestExpr,
+            unnest.getCluster(), unnest.getTraitSet(), newInputRel, newUnnestExpr,
             unnest.getRowType(), newConditionExpr
         );
         call.transformTo(newUnnest);
@@ -96,30 +105,19 @@ public class UnnestInputCleanupRule extends RelOptRule implements SubstitutionRu
 
       } else {
 
+        projects.set(inputIndex, newInput);
+        RelNode newInputRel = call.builder()
+            .push(project.getInput())
+            .project(projects)
+            .build();
+
         RelNode newUnnest = unnest.copy(unnest.getTraitSet(), newInputRel);
         call.transformTo(newUnnest);
         call.getPlanner().prune(unnest);
       }
+
     }
 
-    // final ProjectUpdateShuttle pus = new ProjectUpdateShuttle(
-    // unwrapMvToArray(rexNodeToUnnest),
-    // leftProject,
-    // dimensionToUpdate
-    // );
-    // final List<RexNode> out = pus.visitList(leftProject.getProjects());
-    // final RelDataType structType =
-    // RexUtil.createStructType(getCluster().getTypeFactory(), out,
-    // pus.getTypeNames());
-    // newProject = LogicalProject.create(
-    // leftProject.getInput(),
-    // leftProject.getHints(),
-    // out,
-    // structType
-    // );
-
-    // unnest.getUnnestExpr()
-    // call.transformTo(newNode);
   }
 
   /**

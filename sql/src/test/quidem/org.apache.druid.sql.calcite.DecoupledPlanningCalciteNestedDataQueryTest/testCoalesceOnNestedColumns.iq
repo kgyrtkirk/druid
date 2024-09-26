@@ -18,8 +18,8 @@ select c,long,coalesce(c,long) as col  from druid.all_auto, unnest(json_value(ar
 | 3 |    4 |   3 |
 | 4 |    1 |   4 |
 | 4 |    4 |   4 |
-|   |    2 |   0 |
-|   |    5 |   0 |
+|   |    2 |   2 |
+|   |    5 |   5 |
 +---+------+-----+
 (8 rows)
 
