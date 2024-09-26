@@ -76,7 +76,7 @@ DruidProject(col=[CAST($2):BIGINT], druid=[logical])
       "type" : "expression",
       "name" : "j0.unnest",
       "expression" : "\"v0\"",
-      "outputType" : "ARRAY<LONG>"
+      "outputType" : "LONG"
     },
     "unnestFilter" : null
   },

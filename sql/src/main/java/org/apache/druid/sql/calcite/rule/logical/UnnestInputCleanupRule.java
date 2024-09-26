@@ -123,9 +123,7 @@ public class UnnestInputCleanupRule extends RelOptRule implements SubstitutionRu
   public static RexNode unwrapMvToArray(RexBuilder rexBuilder, final RexNode expr)
   {
     if (isMvToArrayOfInputRef(expr)) {
-      RexInputRef inputRef = (RexInputRef) ((RexCall) expr).getOperands().get(0);
-      return inputRef;
-//return      rexBuilder.makeCast(expr.getType(), inputRef);
+      return ((RexCall) expr).getOperands().get(0);
     } else {
       return expr;
     }
