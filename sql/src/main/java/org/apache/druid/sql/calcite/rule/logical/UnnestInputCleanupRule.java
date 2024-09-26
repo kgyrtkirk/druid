@@ -21,13 +21,13 @@ package org.apache.druid.sql.calcite.rule.logical;
 
 import org.apache.calcite.plan.RelOptRule;
 import org.apache.calcite.plan.RelOptRuleCall;
-import org.apache.calcite.plan.RelOptUtil;
 import org.apache.calcite.plan.RelOptUtil.InputFinder;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.core.Project;
 import org.apache.calcite.rel.rules.SubstitutionRule;
 import org.apache.calcite.rex.RexBuilder;
 import org.apache.calcite.rex.RexCall;
+import org.apache.calcite.rex.RexInputRef;
 import org.apache.calcite.rex.RexNode;
 import org.apache.calcite.sql.SqlKind;
 import org.apache.calcite.util.ImmutableBitSet;
@@ -67,56 +67,49 @@ public class UnnestInputCleanupRule extends RelOptRule implements SubstitutionRu
     }
     int inputIndex = input.nextSetBit(0);
 
-    List<RexNode> projects = new ArrayList(project.getProjects());
+    List<RexNode> projects = new ArrayList<>(project.getProjects());
     RexNode unnestInput = projects.get(inputIndex);
 
-    RexNode newInput = unwrapMvToArray(call.builder().getRexBuilder(), unnestInput);
-
-    if (newInput != unnestInput) {
-
-      if (false && inputIndex == projects.size() - 1) {
-
-        RelNode newInputRel = call.builder()
-            .push(project.getInput())
-            .project(projects.subList(0, inputIndex))
-            .build();
-
-        // FIXME: most likely this project is merged with the above!
-        Project tmpProject = (Project) call.builder()
-            .push(newInputRel)
-            .projectPlus(newInput)
-            .build();
-
-        // Iterable<RexNode> tmpProjectFields =
-        // Iterables.concat(builder.fields(), Collections.singleton(newInput));
-
-        RexNode newUnnestExpr = RelOptUtil.pushPastProject(unnest.getUnnestExpr(), tmpProject);
-        RexNode newConditionExpr = null;
-        if (unnest.condition != null) {
-          newConditionExpr = RelOptUtil.pushPastProject(unnest.condition, tmpProject);
-        }
-
-        RelNode newUnnest = new LogicalUnnest(
-            unnest.getCluster(), unnest.getTraitSet(), newInputRel, newUnnestExpr,
-            unnest.getRowType(), newConditionExpr
-        );
-        call.transformTo(newUnnest);
-        call.getPlanner().prune(unnest);
-
-      } else {
-
-        projects.set(inputIndex, newInput);
-        RelNode newInputRel = call.builder()
-            .push(project.getInput())
-            .project(projects)
-            .build();
-
-        RelNode newUnnest = unnest.copy(unnest.getTraitSet(), newInputRel);
-        call.transformTo(newUnnest);
-        call.getPlanner().prune(unnest);
-      }
-
+    if(!(unnest.unnestExpr instanceof RexInputRef)) {
+      return;
     }
+    if((unnestInput instanceof RexInputRef)) {
+      return;
+    }
+
+    if (inputIndex != projects.size() - 1) {
+      return;
+    }
+
+    projects.set(inputIndex, call.builder().getRexBuilder().makeNullLiteral(unnestInput.getType()));
+    RelNode newInputRel = call.builder()
+        .push(project.getInput())
+        .project(projects)
+        .build();
+
+    RexNode newUnnestExpr = unnestInput;
+    RexNode newConditionExpr = null;
+
+    if (unnest.condition != null) {
+      // FIXME; think this thru
+      return;
+
+//      ImmutableBitSet input1 = InputFinder.analyze(unnest.condition).build();
+//      if(input1.nextSetBit(inputIndex) == -1) {
+//        // condition references at least the unwrapped
+//        return;
+//      }
+//      newConditionExpr = RelOptUtil.pushPastProject(unnest.condition, tmpProject);
+    }
+
+
+
+    RelNode newUnnest = new LogicalUnnest(
+        unnest.getCluster(), unnest.getTraitSet(), newInputRel, newUnnestExpr,
+        unnest.getRowType(), newConditionExpr
+    );
+    call.transformTo(newUnnest);
+    call.getPlanner().prune(unnest);
 
   }
 

@@ -283,7 +283,7 @@ public class CalciteRulesManager
     builder.addRuleInstance(JoinExtractFilterRule.Config.DEFAULT.toRule());
     builder.addRuleInstance(FilterIntoJoinRuleConfig.DEFAULT.withPredicate(DruidJoinRule::isSupportedPredicate).toRule());
     builder.addRuleInstance(new LogicalUnnestRule());
-    if(false) {
+    if(true) {
       builder.addRuleInstance(new UnnestInputCleanupRule());
     }
     return Programs.of(builder.build(), true, DefaultRelMetadataProvider.INSTANCE);
