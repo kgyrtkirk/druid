@@ -81,7 +81,11 @@ public class UnnestInputCleanupRule extends RelOptRule implements SubstitutionRu
       return;
     }
 
-    projects.set(inputIndex, call.builder().getRexBuilder().makeNullLiteral(unnestInput.getType()));
+    // Replace the unnest expression reference with an inputRef for #0
+    // this will enable all other parts to see this Project as a mapping; which
+    // will result in its removal (if empty).
+    projects.set(inputIndex, call.builder().getRexBuilder().makeInputRef(project.getInput(), 0));
+
     RelNode newInputRel = call.builder()
         .push(project.getInput())
         .project(projects)
