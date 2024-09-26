@@ -93,8 +93,8 @@ public class DruidUnnest extends Unnest implements DruidLogicalNode, SourceDescP
         expressionToUnnest.toVirtualColumn(
             correlateRowSignature.getColumnName(correlateRowSignature.size() - 1),
             Calcites.getColumnTypeForRelDataType(
-                rowType.getFieldList().get(rowType.getFieldCount()-1).getType()
-//                rexNodeToUnnest.getType()
+//                rowType.getFieldList().get(rowType.getFieldCount()-1).getType()
+                rexNodeToUnnest.getType()
                 ),
             plannerContext.getExpressionParser()
         );

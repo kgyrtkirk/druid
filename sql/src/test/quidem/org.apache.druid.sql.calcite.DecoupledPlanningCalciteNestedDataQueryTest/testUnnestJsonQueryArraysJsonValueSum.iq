@@ -67,7 +67,7 @@ DruidAggregate(group=[{}], xs=[SUM($0)], druid=[logical])
       "type" : "expression",
       "name" : "j0.unnest",
       "expression" : "\"v0\"",
-      "outputType" : "COMPLEX<json>"
+      "outputType" : "ARRAY<COMPLEX<json>>"
     },
     "unnestFilter" : null
   },
