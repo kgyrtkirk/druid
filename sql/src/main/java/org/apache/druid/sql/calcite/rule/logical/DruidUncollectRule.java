@@ -40,18 +40,18 @@ public class DruidUncollectRule extends ConverterRule
   @Override
   public RelNode convert(RelNode rel)
   {
-    LogicalUnnest project = (LogicalUnnest) rel;
-    String ss = project.toString();
-    RelTraitSet newTrait = project.getTraitSet().replace(DruidLogicalConvention.instance());
+    LogicalUnnest unnest = (LogicalUnnest) rel;
+    RelTraitSet newTrait = unnest.getTraitSet().replace(DruidLogicalConvention.instance());
     return new DruidUnnest(
         rel.getCluster(),
         newTrait,
         convert(
-            project.getInput(),
+            unnest.getInput(),
             DruidLogicalConvention.instance()
         ),
-        project.getUnnestExpr(),
-        project.getRowType()
+        unnest.getUnnestExpr(),
+        unnest.getRowType(),
+        unnest.condition
     );
   }
 

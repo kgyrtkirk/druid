@@ -32,13 +32,15 @@ import java.util.List;
 public abstract class Unnest extends SingleRel
 {
   protected final RexNode unnestExpr;
+  protected final RexNode condition;
 
   protected Unnest(RelOptCluster cluster, RelTraitSet traits, RelNode input, RexNode unnestExpr,
-      RelDataType rowType)
+      RelDataType rowType, RexNode condition)
   {
     super(cluster, traits, input);
     this.unnestExpr = unnestExpr;
     this.rowType = rowType;
+    this.condition = condition;
   }
 
   public final RexNode getUnnestExpr()

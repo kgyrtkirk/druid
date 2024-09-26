@@ -28,14 +28,14 @@ import org.apache.calcite.rex.RexNode;
 public class LogicalUnnest extends Unnest
 {
   protected LogicalUnnest(RelOptCluster cluster, RelTraitSet traits, RelNode input, RexNode unnestExpr,
-      RelDataType rowType)
+      RelDataType rowType, RexNode condition)
   {
-    super(cluster, traits, input, unnestExpr, rowType);
+    super(cluster, traits, input, unnestExpr, rowType, condition);
   }
 
   @Override
   protected RelNode copy(RelTraitSet traitSet, RelNode input)
   {
-    return new LogicalUnnest(getCluster(), traitSet, input, unnestExpr, rowType);
+    return new LogicalUnnest(getCluster(), traitSet, input, unnestExpr, rowType, condition);
   }
 }

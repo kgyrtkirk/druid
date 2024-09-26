@@ -41,15 +41,15 @@ import java.util.List;
 public class DruidUnnest extends Unnest implements DruidLogicalNode, SourceDescProducer
 {
   protected DruidUnnest(RelOptCluster cluster, RelTraitSet traits, RelNode input, RexNode unnestExpr,
-      RelDataType rowType)
+      RelDataType rowType, RexNode condition)
   {
-    super(cluster, traits, input, unnestExpr, rowType);
+    super(cluster, traits, input, unnestExpr, rowType, condition);
   }
 
   @Override
   protected RelNode copy(RelTraitSet traitSet, RelNode input)
   {
-    return new DruidUnnest(getCluster(), traitSet, input, unnestExpr, rowType);
+    return new DruidUnnest(getCluster(), traitSet, input, unnestExpr, rowType, condition);
   }
 
   @Override

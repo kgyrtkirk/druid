@@ -94,7 +94,8 @@ public class LogicalUnnestRule extends RelOptRule implements SubstitutionRule
             cor.getTraitSet(),
             builder.build(),
             expr.expr,
-            cor.getRowType()
+            cor.getRowType(),
+            expr.condition
         )
     ).build();
     call.transformTo(newNode);
@@ -103,15 +104,22 @@ public class LogicalUnnestRule extends RelOptRule implements SubstitutionRule
   private static class UnnestConfiguration
   {
     public RexNode expr;
+    private RexNode condition;
 
-    public UnnestConfiguration(RexNode unnestExpression)
+    public UnnestConfiguration(RexNode unnestExpression, RexNode condition)
     {
-      expr = unnestExpression;
+      this.expr = unnestExpression;
+      this.condition = condition;
     }
 
     public static UnnestConfiguration ofExpression(RexNode unnestExpression)
     {
-      return new UnnestConfiguration(unnestExpression);
+      return new UnnestConfiguration(unnestExpression, null);
+    }
+
+    public UnnestConfiguration withFilter(RexNode condition)
+    {
+      return new UnnestConfiguration(expr, condition);
     }
   }
 
@@ -119,7 +127,11 @@ public class LogicalUnnestRule extends RelOptRule implements SubstitutionRule
   {
     rel = rel.stripped();
     if( rel instanceof Filter) {
-      // FIXME
+      Filter filter = (Filter) rel;
+      UnnestConfiguration conf = unwrapProjectExpression(filter.getInput());
+      if(conf !=null) {
+        return conf.withFilter(filter.getCondition());
+      }
     }
     if (rel instanceof Uncollect) {
       Uncollect uncollect = (Uncollect) rel;
