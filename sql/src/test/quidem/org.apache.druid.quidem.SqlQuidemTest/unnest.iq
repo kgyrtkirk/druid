@@ -1,4 +1,4 @@
-!set plannerStrategy DECOUPLED
+#!set plannerStrategy DECOUPLED
 !use druidtest://?numMergeBuffers=3
 !set outputformat mysql
 
@@ -25,17 +25,23 @@ LogicalAggregate(group=[{0}], EXPR$1=[COUNT()])
 
 LogicalAggregate(group=[{0}], EXPR$1=[COUNT()])
   LogicalProject(x=[JSON_VALUE_BIGINT($13, '$.x')])
-    LogicalUnnest(unnestExpr=[$12])
+    LogicalCorrelate(correlation=[$cor0], joinType=[inner], requiredColumns=[{12}])
       LogicalProject(__time=[$0], arrayString=[$1], arrayStringNulls=[$2], arrayLong=[$3], arrayLongNulls=[$4], arrayDouble=[$5], arrayDoubleNulls=[$6], arrayVariant=[$7], arrayNoType=[$8], arrayNestedLong=[$9], arrayObject=[$10], cnt=[$11], $f12=[JSON_QUERY_ARRAY($10, '$')])
         LogicalTableScan(table=[[druid, arrays]])
+      Uncollect
+        LogicalProject(EXPR$0=[$cor0.$f12])
+          LogicalValues(tuples=[[{ 0 }]])
 
 !logicalPlan
 
-DruidAggregate(group=[{0}], EXPR$1=[COUNT()], druid=[logical])
-  DruidProject(x=[JSON_VALUE_BIGINT($13, '$.x')], druid=[logical])
-    DruidUnnest(unnestExpr=[$12])
-      DruidProject(__time=[$0], arrayString=[$1], arrayStringNulls=[$2], arrayLong=[$3], arrayLongNulls=[$4], arrayDouble=[$5], arrayDoubleNulls=[$6], arrayVariant=[$7], arrayNoType=[$8], arrayNestedLong=[$9], arrayObject=[$10], cnt=[$11], $f12=[JSON_QUERY_ARRAY($10, '$')], druid=[logical])
-        DruidTableScan(table=[[druid, arrays]], druid=[logical])
+LogicalAggregate(group=[{0}], EXPR$1=[COUNT()])
+  LogicalProject(x=[JSON_VALUE_BIGINT($13, '$.x')])
+    LogicalCorrelate(correlation=[$cor0], joinType=[inner], requiredColumns=[{12}])
+      LogicalProject(__time=[$0], arrayString=[$1], arrayStringNulls=[$2], arrayLong=[$3], arrayLongNulls=[$4], arrayDouble=[$5], arrayDoubleNulls=[$6], arrayVariant=[$7], arrayNoType=[$8], arrayNestedLong=[$9], arrayObject=[$10], cnt=[$11], $f12=[JSON_QUERY_ARRAY($10, '$')])
+        LogicalTableScan(table=[[druid, arrays]])
+      Uncollect
+        LogicalProject(EXPR$0=[$cor0.$f12])
+          LogicalValues(tuples=[[{ 0 }]])
 
 !druidPlan
 {
@@ -43,37 +49,14 @@ DruidAggregate(group=[{0}], EXPR$1=[COUNT()], druid=[logical])
   "dataSource" : {
     "type" : "unnest",
     "base" : {
-      "type" : "query",
-      "query" : {
-        "queryType" : "scan",
-        "dataSource" : {
-          "type" : "table",
-          "name" : "arrays"
-        },
-        "intervals" : {
-          "type" : "intervals",
-          "intervals" : [ "-146136543-09-08T08:23:32.096Z/146140482-04-24T15:36:27.903Z" ]
-        },
-        "virtualColumns" : [ {
-          "type" : "expression",
-          "name" : "v0",
-          "expression" : "json_query_array(\"arrayObject\",'$')",
-          "outputType" : "ARRAY<COMPLEX<json>>"
-        } ],
-        "resultFormat" : "compactedList",
-        "columns" : [ "__time", "arrayDouble", "arrayDoubleNulls", "arrayLong", "arrayLongNulls", "arrayNestedLong", "arrayNoType", "arrayObject", "arrayString", "arrayStringNulls", "arrayVariant", "cnt", "v0" ],
-        "columnTypes" : [ "LONG", "ARRAY<DOUBLE>", "ARRAY<DOUBLE>", "ARRAY<LONG>", "ARRAY<LONG>", "COMPLEX<json>", "ARRAY<LONG>", "COMPLEX<json>", "ARRAY<STRING>", "ARRAY<STRING>", "ARRAY<STRING>", "LONG", "ARRAY<COMPLEX<json>>" ],
-        "granularity" : {
-          "type" : "all"
-        },
-        "legacy" : false
-      }
+      "type" : "table",
+      "name" : "arrays"
     },
     "virtualColumn" : {
       "type" : "expression",
       "name" : "j0.unnest",
-      "expression" : "\"v0\"",
-      "outputType" : "COMPLEX<json>"
+      "expression" : "json_query_array(\"arrayObject\",'$')",
+      "outputType" : "ARRAY<COMPLEX<json>>"
     },
     "unnestFilter" : null
   },
@@ -84,7 +67,7 @@ DruidAggregate(group=[{0}], EXPR$1=[COUNT()], druid=[logical])
   "virtualColumns" : [ {
     "type" : "nested-field",
     "columnName" : "j0.unnest",
-    "outputName" : "_v0",
+    "outputName" : "v0",
     "expectedType" : "LONG",
     "pathParts" : [ {
       "type" : "field",
@@ -97,7 +80,7 @@ DruidAggregate(group=[{0}], EXPR$1=[COUNT()], druid=[logical])
   },
   "dimensions" : [ {
     "type" : "default",
-    "dimension" : "_v0",
+    "dimension" : "v0",
     "outputName" : "d0",
     "outputType" : "LONG"
   } ],
