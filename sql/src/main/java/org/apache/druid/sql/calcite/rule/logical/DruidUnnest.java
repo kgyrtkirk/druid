@@ -83,17 +83,21 @@ public class DruidUnnest extends Unnest implements DruidLogicalNode, SourceDescP
     ).rhs;
 
 
-    VirtualColumn virtualColumn =
-        expressionToUnnest.toVirtualColumn(
-            correlateRowSignature.getColumnName(correlateRowSignature.size() - 1),
-            Calcites.getColumnTypeForRelDataType(rexNodeToUnnest.getType()),
-            plannerContext.getExpressionParser()
-        );
-
     RowSignature filterRowSignature = RowSignature.builder().add(
         correlateRowSignature.getColumnName(correlateRowSignature.size() - 1),
         correlateRowSignature.getColumnType(correlateRowSignature.size() - 1).get()
     ).build();
+
+
+    VirtualColumn virtualColumn =
+        expressionToUnnest.toVirtualColumn(
+            correlateRowSignature.getColumnName(correlateRowSignature.size() - 1),
+            Calcites.getColumnTypeForRelDataType(
+                rowType.getFieldList().get(rowType.getFieldCount()-1).getType()
+//                rexNodeToUnnest.getType()
+                ),
+            plannerContext.getExpressionParser()
+        );
 
     DimFilter filter=null;
     if(condition != null ) {

@@ -25,6 +25,7 @@ import org.apache.calcite.plan.RelOptUtil.InputFinder;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.core.Project;
 import org.apache.calcite.rel.rules.SubstitutionRule;
+import org.apache.calcite.rex.RexBuilder;
 import org.apache.calcite.rex.RexCall;
 import org.apache.calcite.rex.RexInputRef;
 import org.apache.calcite.rex.RexNode;
@@ -67,7 +68,8 @@ public class UnnestInputCleanupRule extends RelOptRule implements SubstitutionRu
 
     List<RexNode> projects = new ArrayList(project.getProjects());
     RexNode unnestInput = projects.get(inputIndex);
-    RexNode newInput = unwrapMvToArray(unnestInput);
+
+    RexNode newInput = unwrapMvToArray(call.builder().getRexBuilder(),unnestInput);
 
     if(newInput != unnestInput) {
 
@@ -116,12 +118,14 @@ public class UnnestInputCleanupRule extends RelOptRule implements SubstitutionRu
 
   /**
    * Unwrap MV_TO_ARRAY at the outer layer of an expr, if it refers to an input ref.
+   * @param rexBuilder
    */
-  public static RexNode unwrapMvToArray(final RexNode expr)
+  public static RexNode unwrapMvToArray(RexBuilder rexBuilder, final RexNode expr)
   {
     if (isMvToArrayOfInputRef(expr)) {
       RexInputRef inputRef = (RexInputRef) ((RexCall) expr).getOperands().get(0);
-      return new RexInputRef(inputRef.getIndex(), expr.getType());
+      return inputRef;
+//return      rexBuilder.makeCast(expr.getType(), inputRef);
     } else {
       return expr;
     }
