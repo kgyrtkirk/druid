@@ -21,13 +21,13 @@ package org.apache.druid.sql.calcite.rule.logical;
 
 import org.apache.calcite.plan.RelOptRule;
 import org.apache.calcite.plan.RelOptRuleCall;
+import org.apache.calcite.plan.RelOptUtil;
 import org.apache.calcite.plan.RelOptUtil.InputFinder;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.core.Project;
 import org.apache.calcite.rel.rules.SubstitutionRule;
 import org.apache.calcite.rex.RexBuilder;
 import org.apache.calcite.rex.RexCall;
-import org.apache.calcite.rex.RexInputRef;
 import org.apache.calcite.rex.RexNode;
 import org.apache.calcite.sql.SqlKind;
 import org.apache.calcite.util.ImmutableBitSet;
@@ -72,17 +72,35 @@ public class UnnestInputCleanupRule extends RelOptRule implements SubstitutionRu
     RexNode newInput = unwrapMvToArray(call.builder().getRexBuilder(),unnestInput);
 
     if(newInput != unnestInput) {
-
       projects.set(inputIndex, newInput);
-
       RelNode newInputRel = call.builder()
           .push(project.getInput())
           .project(projects)
           .build();
 
-      RelNode newUnnest = unnest.copy(unnest.getTraitSet(), newInputRel);
-      call.transformTo(newUnnest);
-      call.getPlanner().prune(unnest);
+      boolean projectsOneColumn = projects.size() - project.getInput().getRowType().getFieldCount() == 1;
+      if (false && projectsOneColumn && newInput.isA(SqlKind.FIELD_ACCESS) && newInputRel instanceof Project) {
+        // remove the project
+
+        Project newProject=(Project) newInputRel;
+        RexNode newUnnestExpr = RelOptUtil.pushPastProject(unnest.getUnnestExpr(), newProject);
+        RexNode newConditionExpr = RelOptUtil.pushPastProject(unnest.condition, newProject);
+
+        RelNode newUnnest =
+            new LogicalUnnest(
+                unnest.getCluster(), unnest.getTraitSet(), project.getInput(), newUnnestExpr,
+                unnest.getRowType(), newConditionExpr
+            );
+        call.transformTo(newUnnest);
+        call.getPlanner().prune(unnest);
+
+      } else {
+
+
+        RelNode newUnnest = unnest.copy(unnest.getTraitSet(), newInputRel);
+        call.transformTo(newUnnest);
+        call.getPlanner().prune(unnest);
+      }
     }
 
 

@@ -93,6 +93,8 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
                   .put(QueryContexts.CTX_SQL_STRINGIFY_ARRAYS, false)
                   .build();
 
+  private static final ColumnType ColumnType1STRING = null;
+
   public static void assertResultsDeepEquals(String sql, List<Object[]> expected, List<Object[]> results)
   {
     for (int row = 0; row < results.size(); row++) {
@@ -5141,7 +5143,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
             Druids.newScanQueryBuilder()
                   .dataSource(UnnestDataSource.create(
                       new TableDataSource(CalciteTests.DATASOURCE3),
-                      expressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      expressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType1STRING),
                       null
                   ))
                   .intervals(querySegmentSpec(Filtration.eternity()))
