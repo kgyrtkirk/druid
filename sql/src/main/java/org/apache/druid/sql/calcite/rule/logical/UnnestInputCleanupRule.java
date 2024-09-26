@@ -39,7 +39,8 @@ import java.util.List;
 /**
  * Makes tweaks to LogicalUnnest input.
  *
- * Removes any MV_TO_ARRAY call if its present for the input of the {@link LogicalUnnest}.
+ * Removes any MV_TO_ARRAY call if its present for the input of the
+ * {@link LogicalUnnest}.
  *
  */
 public class UnnestInputCleanupRule extends RelOptRule implements SubstitutionRule
@@ -61,7 +62,7 @@ public class UnnestInputCleanupRule extends RelOptRule implements SubstitutionRu
     Project project = call.rel(1);
 
     ImmutableBitSet input = InputFinder.analyze(unnest.unnestExpr).build();
-    if(input.isEmpty()) {
+    if (input.isEmpty()) {
       throw DruidException.defensive("Found an unbound unnest expression.");
     }
     int inputIndex = input.nextSetBit(0);
@@ -69,9 +70,9 @@ public class UnnestInputCleanupRule extends RelOptRule implements SubstitutionRu
     List<RexNode> projects = new ArrayList(project.getProjects());
     RexNode unnestInput = projects.get(inputIndex);
 
-    RexNode newInput = unwrapMvToArray(call.builder().getRexBuilder(),unnestInput);
+    RexNode newInput = unwrapMvToArray(call.builder().getRexBuilder(), unnestInput);
 
-    if(newInput != unnestInput) {
+    if (newInput != unnestInput) {
       projects.set(inputIndex, newInput);
       RelNode newInputRel = call.builder()
           .push(project.getInput())
@@ -82,20 +83,18 @@ public class UnnestInputCleanupRule extends RelOptRule implements SubstitutionRu
       if (false && projectsOneColumn && newInput.isA(SqlKind.FIELD_ACCESS) && newInputRel instanceof Project) {
         // remove the project
 
-        Project newProject=(Project) newInputRel;
+        Project newProject = (Project) newInputRel;
         RexNode newUnnestExpr = RelOptUtil.pushPastProject(unnest.getUnnestExpr(), newProject);
         RexNode newConditionExpr = RelOptUtil.pushPastProject(unnest.condition, newProject);
 
-        RelNode newUnnest =
-            new LogicalUnnest(
-                unnest.getCluster(), unnest.getTraitSet(), project.getInput(), newUnnestExpr,
-                unnest.getRowType(), newConditionExpr
-            );
+        RelNode newUnnest = new LogicalUnnest(
+            unnest.getCluster(), unnest.getTraitSet(), project.getInput(), newUnnestExpr,
+            unnest.getRowType(), newConditionExpr
+        );
         call.transformTo(newUnnest);
         call.getPlanner().prune(unnest);
 
       } else {
-
 
         RelNode newUnnest = unnest.copy(unnest.getTraitSet(), newInputRel);
         call.transformTo(newUnnest);
@@ -103,25 +102,24 @@ public class UnnestInputCleanupRule extends RelOptRule implements SubstitutionRu
       }
     }
 
+    // final ProjectUpdateShuttle pus = new ProjectUpdateShuttle(
+    // unwrapMvToArray(rexNodeToUnnest),
+    // leftProject,
+    // dimensionToUpdate
+    // );
+    // final List<RexNode> out = pus.visitList(leftProject.getProjects());
+    // final RelDataType structType =
+    // RexUtil.createStructType(getCluster().getTypeFactory(), out,
+    // pus.getTypeNames());
+    // newProject = LogicalProject.create(
+    // leftProject.getInput(),
+    // leftProject.getHints(),
+    // out,
+    // structType
+    // );
 
-
-//    final ProjectUpdateShuttle pus = new ProjectUpdateShuttle(
-//        unwrapMvToArray(rexNodeToUnnest),
-//        leftProject,
-//        dimensionToUpdate
-//    );
-//    final List<RexNode> out = pus.visitList(leftProject.getProjects());
-//    final RelDataType structType = RexUtil.createStructType(getCluster().getTypeFactory(), out, pus.getTypeNames());
-//    newProject = LogicalProject.create(
-//        leftProject.getInput(),
-//        leftProject.getHints(),
-//        out,
-//        structType
-//    );
-
-
-//    unnest.getUnnestExpr()
-//    call.transformTo(newNode);
+    // unnest.getUnnestExpr()
+    // call.transformTo(newNode);
   }
 
   /**
@@ -130,12 +128,14 @@ public class UnnestInputCleanupRule extends RelOptRule implements SubstitutionRu
   private static boolean isMvToArrayOfInputRef(final RexNode expr)
   {
     return expr.isA(SqlKind.OTHER_FUNCTION)
-           && ((RexCall) expr).op.equals(MultiValueStringToArrayOperatorConversion.SQL_FUNCTION)
-           && ((RexCall) expr).getOperands().get(0).isA(SqlKind.INPUT_REF);
+        && ((RexCall) expr).op.equals(MultiValueStringToArrayOperatorConversion.SQL_FUNCTION)
+        && ((RexCall) expr).getOperands().get(0).isA(SqlKind.INPUT_REF);
   }
 
   /**
-   * Unwrap MV_TO_ARRAY at the outer layer of an expr, if it refers to an input ref.
+   * Unwrap MV_TO_ARRAY at the outer layer of an expr, if it refers to an input
+   * ref.
+   *
    * @param rexBuilder
    */
   public static RexNode unwrapMvToArray(RexBuilder rexBuilder, final RexNode expr)
