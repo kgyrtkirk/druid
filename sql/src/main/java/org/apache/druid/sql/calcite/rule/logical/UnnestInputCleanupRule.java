@@ -25,15 +25,11 @@ import org.apache.calcite.plan.RelOptUtil.InputFinder;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.core.Project;
 import org.apache.calcite.rel.rules.SubstitutionRule;
-import org.apache.calcite.rex.RexBuilder;
-import org.apache.calcite.rex.RexCall;
 import org.apache.calcite.rex.RexInputRef;
 import org.apache.calcite.rex.RexNode;
 import org.apache.calcite.rex.RexShuttle;
-import org.apache.calcite.sql.SqlKind;
 import org.apache.calcite.util.ImmutableBitSet;
 import org.apache.druid.error.DruidException;
-import org.apache.druid.sql.calcite.expression.builtin.MultiValueStringToArrayOperatorConversion;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -94,7 +90,6 @@ public class UnnestInputCleanupRule extends RelOptRule implements SubstitutionRu
       return;
     }
 
-    {
 
     RelNode newInputRel = call.builder()
         .push(project.getInput())
@@ -108,87 +103,6 @@ public class UnnestInputCleanupRule extends RelOptRule implements SubstitutionRu
     );
     call.transformTo(newUnnest);
     call.getPlanner().prune(unnest);
-
-  }
-//    if(true) {
-//      return;
-//    }
-//
-//
-//
-//    ImmutableBitSet unnestInputInputs = InputFinder.analyze(unnestInput).build();
-//    if (unnestInputInputs.cardinality() != 1) {
-//      return;
-//    }
-//
-//    int unnestInputInputIndex = unnestInputInputs.nextSetBit(0);
-//
-//    // Replace the unnest expression reference with an inputRef for #0
-//    // this will enable all other parts to see this Project as a mapping; which
-//    // will result in its removal (if empty).
-//    projects.set(inputIndex, call.builder().getRexBuilder().makeInputRef(project.getInput(), unnestInputInputIndex));
-//
-//    if (projects.size() < inputIndex
-//
-//    ) {
-//      // not yet syuppiorted
-//      return;
-//    }
-//
-//    RelNode newInputRel = call.builder()
-//        .push(project.getInput())
-//        .project(projects)
-//        .build();
-//
-//    RexNode newUnnestExpr = unnestInput;
-//    RexNode newConditionExpr = null;
-//
-//    if (unnest.condition != null) {
-//      // FIXME; think this thru
-//      return;
-//
-//      // ImmutableBitSet input1 = InputFinder.analyze(unnest.condition).build();
-//      // if(input1.nextSetBit(inputIndex) == -1) {
-//      // // condition references at least the unwrapped
-//      // return;
-//      // }
-//      // newConditionExpr = RelOptUtil.pushPastProject(unnest.condition,
-//      // tmpProject);
-//    }
-//
-//    RelNode newUnnest = new LogicalUnnest(
-//        unnest.getCluster(), unnest.getTraitSet(), newInputRel, newUnnestExpr,
-//        unnest.getRowType(), newConditionExpr
-//    );
-//    call.transformTo(newUnnest);
-//    call.getPlanner().prune(unnest);
-//
-  }
-
-
-  /**
-   * Whether an expr is MV_TO_ARRAY of an input reference.
-   */
-  private static boolean isMvToArrayOfInputRef(final RexNode expr)
-  {
-    return expr.isA(SqlKind.OTHER_FUNCTION)
-        && ((RexCall) expr).op.equals(MultiValueStringToArrayOperatorConversion.SQL_FUNCTION)
-        && ((RexCall) expr).getOperands().get(0).isA(SqlKind.INPUT_REF);
-  }
-
-  /**
-   * Unwrap MV_TO_ARRAY at the outer layer of an expr, if it refers to an input
-   * ref.
-   *
-   * @param rexBuilder
-   */
-  public static RexNode unwrapMvToArray(RexBuilder rexBuilder, final RexNode expr)
-  {
-    if (isMvToArrayOfInputRef(expr)) {
-      return ((RexCall) expr).getOperands().get(0);
-    } else {
-      return expr;
-    }
   }
 
   /**
