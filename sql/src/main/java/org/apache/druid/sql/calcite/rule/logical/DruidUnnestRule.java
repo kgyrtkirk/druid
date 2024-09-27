@@ -19,7 +19,7 @@
 
 package org.apache.druid.sql.calcite.rule.logical;
 
-import org.apache.calcite.plan.RelTrait;
+import org.apache.calcite.plan.Convention;
 import org.apache.calcite.plan.RelTraitSet;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.convert.ConverterRule;
@@ -27,14 +27,18 @@ import org.apache.druid.sql.calcite.rel.logical.DruidLogicalConvention;
 
 public class DruidUnnestRule extends ConverterRule
 {
+  private static Config CONFIG = Config.INSTANCE.withConversion(
+      LogicalUnnest.class,
+      Convention.NONE,
+      DruidLogicalConvention.instance(),
+      DruidUnnestRule.class.getSimpleName()
+  );
 
-  public DruidUnnestRule(
-      Class<? extends RelNode> clazz,
-      RelTrait in,
-      RelTrait out,
-      String descriptionPrefix)
+  public static final DruidUnnestRule INSTANCE = new DruidUnnestRule(CONFIG);
+
+  private DruidUnnestRule(Config config)
   {
-    super(clazz, in, out, descriptionPrefix);
+    super(config);
   }
 
   @Override

@@ -73,10 +73,8 @@ public class UnnestInputCleanupRule extends RelOptRule implements SubstitutionRu
 
     int inputIndex = input.nextSetBit(0);
 
-
     List<RexNode> projects = new ArrayList<>(project.getProjects());
     RexNode unnestInput = projects.get(inputIndex);
-
 
     projects.set(
         inputIndex,
@@ -121,6 +119,7 @@ public class UnnestInputCleanupRule extends RelOptRule implements SubstitutionRu
       this.replaceableIndex = replaceableIndex;
     }
 
+    @Override
     public RexNode visitInputRef(RexInputRef inputRef)
     {
       int newIndex = projects.indexOf(inputRef);

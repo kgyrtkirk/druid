@@ -106,6 +106,7 @@ public class DecoupledExtension implements BeforeEachCallback
 
     QueryTestBuilder builder = new QueryTestBuilder(testConfig)
     {
+      @Override
       public QueryTestBuilder expectedQueries(List<Query<?>> expectedQueries)
       {
         if (ignoreQueries) {

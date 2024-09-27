@@ -106,12 +106,7 @@ public class DruidLogicalRules
                 DruidLogicalConvention.instance(),
                 DruidJoinRule.class.getSimpleName()
             ),
-            new DruidUnnestRule(
-                LogicalUnnest.class,
-                Convention.NONE,
-                DruidLogicalConvention.instance(),
-                DruidUnnestRule.class.getSimpleName()
-            )
+            DruidUnnestRule.INSTANCE
         )
     );
   }
