@@ -47,7 +47,8 @@ public @interface DecoupledTestConfig
    */
   IgnoreQueriesReason ignoreExpectedQueriesReason() default IgnoreQueriesReason.NONE;
 
-  enum IgnoreQueriesReason  {
+  enum IgnoreQueriesReason
+  {
     NONE,
     /**
      * An extra ScanQuery to service a Project and/or Filter was added.

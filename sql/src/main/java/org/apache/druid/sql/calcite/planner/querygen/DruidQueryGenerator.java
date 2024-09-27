@@ -430,7 +430,7 @@ public class DruidQueryGenerator
         if (partialDruidQuery.stage() == Stage.SCAN) {
           return true;
         }
-        if (jst.filteredDatasourceAllowed() && partialDruidQuery.stage() == PartialDruidQuery.Stage.WHERE_FILTER ) {
+        if (jst.filteredDatasourceAllowed() && partialDruidQuery.stage() == PartialDruidQuery.Stage.WHERE_FILTER) {
           return true;
         }
         if (partialDruidQuery.stage() == PartialDruidQuery.Stage.SELECT_PROJECT &&

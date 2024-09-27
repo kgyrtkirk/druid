@@ -67,7 +67,9 @@ public class DruidUnnest extends Unnest implements DruidLogicalNode, SourceDescP
     ).build();
 
     VirtualColumn virtualColumn = buildUnnestVirtualColumn(
-        plannerContext, inputDesc, filterRowSignature.getColumnName(0)
+        plannerContext,
+        inputDesc,
+        filterRowSignature.getColumnName(0)
     );
 
     DimFilter dimFilter = buildDimFilter(plannerContext, inputDesc, filterRowSignature);

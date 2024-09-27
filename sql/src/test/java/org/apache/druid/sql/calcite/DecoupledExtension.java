@@ -113,7 +113,7 @@ public class DecoupledExtension implements BeforeEachCallback
         } else {
           return super.expectedQueries(expectedQueries);
         }
-      };
+      }
     }
         .cannotVectorize(baseTest.cannotVectorize)
         .skipVectorize(baseTest.skipVectorize);
