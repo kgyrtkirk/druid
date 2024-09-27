@@ -88,7 +88,7 @@ public class DruidUnnest extends Unnest implements DruidLogicalNode, SourceDescP
         null,
         filter
     );
-    return Filtration.create(dimFilter).optimizeFilterOnly(inputDesc.rowSignature).getDimFilter();
+    return Filtration.create(dimFilter).optimizeFilterOnly(filterRowSignature).getDimFilter();
   }
 
   private VirtualColumn buildUnnestVirtualColumn(PlannerContext plannerContext, SourceDesc inputDesc, String columnName)
