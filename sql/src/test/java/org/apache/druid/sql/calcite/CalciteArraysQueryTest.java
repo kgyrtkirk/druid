@@ -4362,7 +4362,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
                       UnnestDataSource.create(
                           UnnestDataSource.create(
                               new TableDataSource(CalciteTests.DATASOURCE3),
-                              expressionVirtualColumn1(
+                              expressionVirtualColumn(
                                   "j0.unnest",
                                   "string_to_array(\"dim1\",'\\u005C.')",
                                   ColumnType.STRING_ARRAY
@@ -5873,7 +5873,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
                           new TableDataSource(CalciteTests.DATASOURCE3),
                           range("m1", ColumnType.LONG, null, 10L, false, true)
                       ),
-                      expressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
                       in("j0.unnest", ImmutableSet.of("a", "b"))
                   ))
                   .intervals(querySegmentSpec(Filtration.eternity()))
@@ -5956,7 +5956,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
             Druids.newScanQueryBuilder()
                   .dataSource(UnnestDataSource.create(
                       new TableDataSource(CalciteTests.DATASOURCE3),
-                      expressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
                       not(equality("j0.unnest", "d", ColumnType.STRING))
                   ))
                   .intervals(querySegmentSpec(Filtration.eternity()))
@@ -5996,7 +5996,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
             Druids.newScanQueryBuilder()
                   .dataSource(UnnestDataSource.create(
                       new TableDataSource(CalciteTests.DATASOURCE3),
-                      expressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
                       equality("j0.unnest", "b", ColumnType.STRING)
                   ))
                   .intervals(querySegmentSpec(Filtration.eternity()))
@@ -6149,7 +6149,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
             Druids.newScanQueryBuilder()
                   .dataSource(UnnestDataSource.create(
                       new TableDataSource(CalciteTests.DATASOURCE3),
-                      expressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
                       in("j0.unnest", ImmutableSet.of("a", "b"))
                   ))
                   .intervals(querySegmentSpec(Filtration.eternity()))
@@ -6177,7 +6177,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
             Druids.newScanQueryBuilder()
                   .dataSource(UnnestDataSource.create(
                       new TableDataSource(CalciteTests.DATASOURCE3),
-                      expressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
                       in("j0.unnest", ImmutableSet.of("b", "d"))
                   ))
                   .intervals(querySegmentSpec(Filtration.eternity()))
@@ -6205,7 +6205,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
             Druids.newScanQueryBuilder()
                   .dataSource(UnnestDataSource.create(
                       new TableDataSource(CalciteTests.DATASOURCE3),
-                      expressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
                       or(
                           expressionFilter("(strlen(\"j0.unnest\") < 2)"),
                           equality("j0.unnest", "d", ColumnType.STRING)
