@@ -148,7 +148,7 @@ public abstract class DruidRel<T extends DruidRel<?>> extends AbstractRelNode
       }
       if (other instanceof DruidRel<?>) {
         DruidRel<?> druidRel = (DruidRel<?>) other;
-        if(druidRel.getPartialDruidQuery()!=null &&  druidRel.getPartialDruidQuery().leafRel()!=null) {
+        if (druidRel.getPartialDruidQuery() != null && druidRel.getPartialDruidQuery().leafRel() != null) {
           return druidRel.getPartialDruidQuery().leafRel();
         }
       }
