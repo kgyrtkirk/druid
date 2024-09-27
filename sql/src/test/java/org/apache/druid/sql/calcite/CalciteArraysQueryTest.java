@@ -4345,7 +4345,6 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @NotYetSupported(Modes.UNNEST_RESULT_MISMATCH)
   @DecoupledTestConfig(ignoreExpectedQueriesReason = IgnoreQueriesReason.UNNEST_INPUT_CLEANUP)
   @Test
   public void testUnnestTwice()
@@ -4363,7 +4362,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
                       UnnestDataSource.create(
                           UnnestDataSource.create(
                               new TableDataSource(CalciteTests.DATASOURCE3),
-                              expressionVirtualColumn(
+                              expressionVirtualColumn1(
                                   "j0.unnest",
                                   "string_to_array(\"dim1\",'\\u005C.')",
                                   ColumnType.STRING_ARRAY
@@ -4684,7 +4683,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
                           FilteredDataSource.create(
                               UnnestDataSource.create(
                                   new TableDataSource(CalciteTests.DATASOURCE5),
-                                  expressionVirtualColumn(
+                                  expressionVirtualColumn1(
                                       "j0.unnest",
                                       "\"dimMultivalEnumerated\"",
                                       ColumnType.STRING
@@ -4820,7 +4819,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
                               FilteredDataSource.create(
                                   UnnestDataSource.create(
                                       new TableDataSource(CalciteTests.DATASOURCE5),
-                                      expressionVirtualColumn(
+                                      expressionVirtualColumn1(
                                           "j0.unnest",
                                           "\"dimMultivalEnumerated\"",
                                           ColumnType.STRING
@@ -4836,7 +4835,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
                                       false
                                   )
                               ),
-                              expressionVirtualColumn(
+                              expressionVirtualColumn1(
                                   "_j0.unnest",
                                   "\"dimMultivalEnumerated\"",
                                   ColumnType.STRING
@@ -4848,7 +4847,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
                               equality("_j0.unnest", "Hello", ColumnType.STRING)
                           ) // (j0.unnest = Baz || _j0.unnest = Hello)
                       ),
-                      expressionVirtualColumn(
+                      expressionVirtualColumn1(
                           "__j0.unnest",
                           "\"dimMultivalEnumerated\"",
                           ColumnType.STRING
@@ -5239,7 +5238,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
         ImmutableList.of(Druids.newScanQueryBuilder()
                                .dataSource(UnnestDataSource.create(
                                    new TableDataSource(CalciteTests.DATASOURCE3),
-                                   expressionVirtualColumn(
+                                   expressionVirtualColumn1(
                                        "j0.unnest",
                                        "\"dim3\"",
                                        ColumnType.STRING
