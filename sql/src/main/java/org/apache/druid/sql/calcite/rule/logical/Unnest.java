@@ -32,7 +32,7 @@ import java.util.List;
 public abstract class Unnest extends SingleRel
 {
   protected final RexNode unnestExpr;
-  protected final RexNode condition;
+  protected final RexNode filter;
 
   protected Unnest(RelOptCluster cluster, RelTraitSet traits, RelNode input, RexNode unnestExpr,
       RelDataType rowType, RexNode condition)
@@ -40,7 +40,7 @@ public abstract class Unnest extends SingleRel
     super(cluster, traits, input);
     this.unnestExpr = unnestExpr;
     this.rowType = rowType;
-    this.condition = condition;
+    this.filter = condition;
   }
 
   public final RexNode getUnnestExpr()
@@ -53,7 +53,7 @@ public abstract class Unnest extends SingleRel
   {
     return super.explainTerms(pw)
         .item("unnestExpr", unnestExpr)
-        .itemIf("filter", condition, condition != null);
+        .itemIf("filter", filter, filter != null);
   }
 
   @Override

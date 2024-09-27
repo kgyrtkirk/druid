@@ -99,7 +99,7 @@ public class UnnestInputCleanupRule extends RelOptRule implements SubstitutionRu
 
     RelNode newUnnest = new LogicalUnnest(
         unnest.getCluster(), unnest.getTraitSet(), newInputRel, newUnnestExpr,
-        unnest.getRowType(), unnest.condition
+        unnest.getRowType(), unnest.filter
     );
     call.transformTo(newUnnest);
     call.getPlanner().prune(unnest);

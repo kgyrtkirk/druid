@@ -36,6 +36,6 @@ public class LogicalUnnest extends Unnest
   @Override
   protected RelNode copy(RelTraitSet traitSet, RelNode input)
   {
-    return new LogicalUnnest(getCluster(), traitSet, input, unnestExpr, rowType, condition);
+    return new LogicalUnnest(getCluster(), traitSet, input, unnestExpr, rowType, filter);
   }
 }

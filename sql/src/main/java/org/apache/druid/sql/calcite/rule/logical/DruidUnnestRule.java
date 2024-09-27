@@ -51,7 +51,7 @@ public class DruidUnnestRule extends ConverterRule
         ),
         unnest.getUnnestExpr(),
         unnest.getRowType(),
-        unnest.condition
+        unnest.filter
     );
   }
 }
