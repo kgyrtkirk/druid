@@ -560,16 +560,6 @@ public class BaseCalciteQueryTest extends CalciteTestBase
     return new ExpressionVirtualColumn(name, expression, outputType, CalciteTests.createExprMacroTable());
   }
 
-  public ExpressionVirtualColumn expressionVirtualColumn1(
-      final String name,
-      final String expression,
-      final ColumnType outputType
-  )
-  {
-    return nestedExpressionVirtualColumn(name, expression, outputType);
-  }
-
-
   /**
    * Optionally updates the VC defintion for the one planned by the decoupled planner.
    *

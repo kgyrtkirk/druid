@@ -4363,11 +4363,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
                               ),
                               null
                           ),
-                          expressionVirtualColumn1(
-                              "_j0.unnest",
-                              "\"dim3\"",
-                              ColumnType.STRING
-                          ),
+                          nestedExpressionVirtualColumn("_j0.unnest", "\"dim3\"", ColumnType.STRING),
                           null
                       )
                   )
@@ -4520,11 +4516,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
                               ),
                               in("j0.unnest", ImmutableList.of("1", "2"))
                           ),
-                          expressionVirtualColumn1(
-                              "_j0.unnest",
-                              "\"dim3\"",
-                              ColumnType.STRING
-                          ),
+                          nestedExpressionVirtualColumn("_j0.unnest", "\"dim3\"", ColumnType.STRING),
                           new LikeDimFilter("_j0.unnest", "_", null, null)
                       )
                   )
@@ -4578,11 +4570,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
                           FilteredDataSource.create(
                               UnnestDataSource.create(
                                   new TableDataSource(CalciteTests.DATASOURCE5),
-                                  expressionVirtualColumn1(
-                                      "j0.unnest",
-                                      "\"dimMultivalEnumerated\"",
-                                      ColumnType.STRING
-                                  ),
+                                  nestedExpressionVirtualColumn("j0.unnest", "\"dimMultivalEnumerated\"", ColumnType.STRING),
                                   null
                               ),
                               and(
@@ -4592,17 +4580,9 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
                                   equality("j0.unnest", "Baz", ColumnType.STRING)
                               )
                           ),
-                          expressionVirtualColumn1(
-                              "_j0.unnest",
-                              "\"dimMultivalEnumerated\"",
-                              ColumnType.STRING
-                          ), null
+                          nestedExpressionVirtualColumn("_j0.unnest", "\"dimMultivalEnumerated\"", ColumnType.STRING), null
                       ),
-                      expressionVirtualColumn1(
-                          "__j0.unnest",
-                          "\"dimMultivalEnumerated\"",
-                          ColumnType.STRING
-                      ),
+                      nestedExpressionVirtualColumn("__j0.unnest", "\"dimMultivalEnumerated\"", ColumnType.STRING),
                       null
                   )
               )
@@ -4810,11 +4790,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
                               FilteredDataSource.create(
                                   UnnestDataSource.create(
                                       new TableDataSource(CalciteTests.DATASOURCE5),
-                                      expressionVirtualColumn1(
-                                          "j0.unnest",
-                                          "\"dimMultivalEnumerated\"",
-                                          ColumnType.STRING
-                                      ),
+                                      nestedExpressionVirtualColumn("j0.unnest", "\"dimMultivalEnumerated\"", ColumnType.STRING),
                                       null
                                   ),
                                   NullHandling.sqlCompatible() ? equality("dimZipf", "27", ColumnType.LONG) : range(
@@ -4826,11 +4802,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
                                       false
                                   )
                               ),
-                              expressionVirtualColumn1(
-                                  "_j0.unnest",
-                                  "\"dimMultivalEnumerated\"",
-                                  ColumnType.STRING
-                              ),
+                              nestedExpressionVirtualColumn("_j0.unnest", "\"dimMultivalEnumerated\"", ColumnType.STRING),
                               null
                           ),
                           or(
@@ -4838,11 +4810,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
                               equality("_j0.unnest", "Hello", ColumnType.STRING)
                           ) // (j0.unnest = Baz || _j0.unnest = Hello)
                       ),
-                      expressionVirtualColumn1(
-                          "__j0.unnest",
-                          "\"dimMultivalEnumerated\"",
-                          ColumnType.STRING
-                      ),
+                      nestedExpressionVirtualColumn("__j0.unnest", "\"dimMultivalEnumerated\"", ColumnType.STRING),
                       equality("__j0.unnest", "World", ColumnType.STRING)
                   )
               )
@@ -4954,7 +4922,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
             GroupByQuery.builder()
                         .setDataSource(UnnestDataSource.create(
                             new TableDataSource(CalciteTests.DATASOURCE3),
-                            expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                            nestedExpressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
                             null
                         ))
                         .setInterval(querySegmentSpec(Filtration.eternity()))
@@ -5076,7 +5044,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
             new TopNQueryBuilder()
                 .dataSource(UnnestDataSource.create(
                     new TableDataSource(CalciteTests.DATASOURCE3),
-                    expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                    nestedExpressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
                     null
                 ))
                 .intervals(querySegmentSpec(Filtration.eternity()))
@@ -5114,7 +5082,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
             GroupByQuery.builder()
                         .setDataSource(UnnestDataSource.create(
                             new TableDataSource(CalciteTests.DATASOURCE3),
-                            expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                            nestedExpressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
                             null
                         ))
                         .setInterval(querySegmentSpec(Filtration.eternity()))
@@ -5151,7 +5119,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
             Druids.newScanQueryBuilder()
                   .dataSource(UnnestDataSource.create(
                       new TableDataSource(CalciteTests.DATASOURCE3),
-                      expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      nestedExpressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
                       null
                   ))
                   .intervals(querySegmentSpec(Filtration.eternity()))
@@ -5180,7 +5148,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
             Druids.newScanQueryBuilder()
                   .dataSource(UnnestDataSource.create(
                       new TableDataSource(CalciteTests.DATASOURCE3),
-                      expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      nestedExpressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
                       null
                   ))
                   .intervals(querySegmentSpec(Filtration.eternity()))
@@ -5222,11 +5190,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
         ImmutableList.of(Druids.newScanQueryBuilder()
                                .dataSource(UnnestDataSource.create(
                                    new TableDataSource(CalciteTests.DATASOURCE3),
-                                   expressionVirtualColumn1(
-                                       "j0.unnest",
-                                       "\"dim3\"",
-                                       ColumnType.STRING
-                                   ),
+                                   nestedExpressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
                                    equality("j0.unnest", "a", ColumnType.STRING)
                                ))
                                .intervals(querySegmentSpec(Filtration.eternity()))
@@ -5261,11 +5225,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
         ImmutableList.of(Druids.newScanQueryBuilder()
                                .dataSource(UnnestDataSource.create(
                                    new TableDataSource(CalciteTests.DATASOURCE3),
-                                   expressionVirtualColumn1(
-                                       "j0.unnest",
-                                       "\"dim3\"",
-                                       ColumnType.STRING
-                                   ),
+                                   nestedExpressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
                                    null
                                ))
                                .intervals(querySegmentSpec(Filtration.eternity()))
@@ -5304,7 +5264,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
                           new TableDataSource(CalciteTests.DATASOURCE3),
                           equality("dim2", "a", ColumnType.STRING)
                       ),
-                      expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      nestedExpressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
                       null
                   ))
                   .intervals(querySegmentSpec(Filtration.eternity()))
@@ -5335,7 +5295,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
                           new TableDataSource(CalciteTests.DATASOURCE3),
                           equality("dim2", "a", ColumnType.STRING)
                       ),
-                      expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      nestedExpressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
                       null
                   ))
                   .intervals(querySegmentSpec(Filtration.eternity()))
@@ -5371,7 +5331,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
                           new TableDataSource(CalciteTests.DATASOURCE3),
                           in("dim2", ImmutableList.of("a", "b"))
                       ),
-                      expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      nestedExpressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
                       null
                   ))
                   .intervals(querySegmentSpec(Filtration.eternity()))
@@ -5414,7 +5374,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
                               .context(QUERY_CONTEXT_UNNEST)
                               .build()
                       ),
-                      expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      nestedExpressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
                       null
                   ))
                   .intervals(querySegmentSpec(Filtration.eternity()))
@@ -5568,7 +5528,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
                           new TableDataSource(CalciteTests.DATASOURCE3),
                           in("dim2", ImmutableList.of("a", "b", "ab", "abc"))
                       ),
-                      expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      nestedExpressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
                       null
                   ))
                   .intervals(querySegmentSpec(Filtration.eternity()))
@@ -5806,7 +5766,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
             Druids.newScanQueryBuilder()
                   .dataSource(UnnestDataSource.create(
                       new TableDataSource(CalciteTests.DATASOURCE3),
-                      expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      nestedExpressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
                       null
                   ))
                   .intervals(querySegmentSpec(Filtration.eternity()))
@@ -5853,7 +5813,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
                           new TableDataSource(CalciteTests.DATASOURCE3),
                           range("m1", ColumnType.LONG, null, 10L, false, true)
                       ),
-                      expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      nestedExpressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
                       in("j0.unnest", ImmutableSet.of("a", "b"))
                   ))
                   .intervals(querySegmentSpec(Filtration.eternity()))
@@ -5910,7 +5870,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
             Druids.newScanQueryBuilder()
                   .dataSource(UnnestDataSource.create(
                       new TableDataSource(CalciteTests.DATASOURCE3),
-                      expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      nestedExpressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
                       in("j0.unnest", ImmutableSet.of("foo", "bar"))
                   ))
                   .intervals(querySegmentSpec(Filtration.eternity()))
@@ -5933,7 +5893,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
             Druids.newScanQueryBuilder()
                   .dataSource(UnnestDataSource.create(
                       new TableDataSource(CalciteTests.DATASOURCE3),
-                      expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      nestedExpressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
                       not(equality("j0.unnest", "d", ColumnType.STRING))
                   ))
                   .intervals(querySegmentSpec(Filtration.eternity()))
@@ -5972,7 +5932,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
             Druids.newScanQueryBuilder()
                   .dataSource(UnnestDataSource.create(
                       new TableDataSource(CalciteTests.DATASOURCE3),
-                      expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      nestedExpressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
                       equality("j0.unnest", "b", ColumnType.STRING)
                   ))
                   .intervals(querySegmentSpec(Filtration.eternity()))
@@ -6061,7 +6021,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
                               range("m2", ColumnType.LONG, null, 10L, false, true)
                           )
                       ),
-                      expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      nestedExpressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
                       equality("j0.unnest", "b", ColumnType.STRING)
                   ))
                   .intervals(querySegmentSpec(Filtration.eternity()))
@@ -6087,7 +6047,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
             Druids.newScanQueryBuilder()
                   .dataSource(UnnestDataSource.create(
                       new TableDataSource(CalciteTests.DATASOURCE3),
-                      expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      nestedExpressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
                       null
                   ))
                   .intervals(querySegmentSpec(Filtration.eternity()))
@@ -6120,7 +6080,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
             Druids.newScanQueryBuilder()
                   .dataSource(UnnestDataSource.create(
                       new TableDataSource(CalciteTests.DATASOURCE3),
-                      expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      nestedExpressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
                       in("j0.unnest", ImmutableSet.of("a", "b"))
                   ))
                   .intervals(querySegmentSpec(Filtration.eternity()))
@@ -6147,7 +6107,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
             Druids.newScanQueryBuilder()
                   .dataSource(UnnestDataSource.create(
                       new TableDataSource(CalciteTests.DATASOURCE3),
-                      expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      nestedExpressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
                       in("j0.unnest", ImmutableSet.of("b", "d"))
                   ))
                   .intervals(querySegmentSpec(Filtration.eternity()))
@@ -6174,7 +6134,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
             Druids.newScanQueryBuilder()
                   .dataSource(UnnestDataSource.create(
                       new TableDataSource(CalciteTests.DATASOURCE3),
-                      expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      nestedExpressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
                       or(
                           expressionFilter("(strlen(\"j0.unnest\") < 2)"),
                           equality("j0.unnest", "d", ColumnType.STRING)
@@ -6224,7 +6184,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
                               range("m2", ColumnType.LONG, null, 2L, false, true)
                           )
                       ),
-                      expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      nestedExpressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
                       null
                   ))
                   .intervals(querySegmentSpec(Filtration.eternity()))
@@ -6285,7 +6245,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
             Druids.newScanQueryBuilder()
                   .dataSource(UnnestDataSource.create(
                       new TableDataSource(CalciteTests.DATASOURCE3),
-                      expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      nestedExpressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
                       null
                   ))
                   .intervals(querySegmentSpec(Filtration.eternity()))
@@ -6318,7 +6278,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
             Druids.newScanQueryBuilder()
                   .dataSource(UnnestDataSource.create(
                       new TableDataSource(CalciteTests.DATASOURCE3),
-                      expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      nestedExpressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
                       null
                   ))
                   .intervals(querySegmentSpec(Filtration.eternity()))
@@ -6354,7 +6314,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
             Druids.newTimeseriesQueryBuilder()
                   .dataSource(UnnestDataSource.create(
                       new TableDataSource(CalciteTests.DATASOURCE3),
-                      expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      nestedExpressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
                       null
                   ))
                   .intervals(querySegmentSpec(Filtration.eternity()))
@@ -6379,7 +6339,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
             GroupByQuery.builder()
                         .setDataSource(UnnestDataSource.create(
                             new TableDataSource(CalciteTests.DATASOURCE3),
-                            expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                            nestedExpressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
                             null
                         ))
                         .setInterval(querySegmentSpec(Filtration.eternity()))
@@ -6433,7 +6393,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
             Druids.newTimeseriesQueryBuilder()
                   .dataSource(UnnestDataSource.create(
                       new TableDataSource(CalciteTests.DATASOURCE3),
-                      expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      nestedExpressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
                       null
                   ))
                   .intervals(querySegmentSpec(Filtration.eternity()))
@@ -6488,7 +6448,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
             GroupByQuery.builder()
                         .setDataSource(UnnestDataSource.create(
                             new TableDataSource(CalciteTests.DATASOURCE3),
-                            expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                            nestedExpressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
                             in("j0.unnest", ImmutableSet.of("a", "c"))
                         ))
                         .setInterval(querySegmentSpec(Filtration.eternity()))
@@ -6518,7 +6478,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
             GroupByQuery.builder()
                         .setDataSource(UnnestDataSource.create(
                             new TableDataSource(CalciteTests.DATASOURCE3),
-                            expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                            nestedExpressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
                             in("j0.unnest", ImmutableSet.of("a", "c"))
                         ))
                         .setInterval(querySegmentSpec(Filtration.eternity()))
@@ -6657,7 +6617,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
                           new TableDataSource(CalciteTests.DATASOURCE1),
                           range("__time", ColumnType.LONG, 946771200000L, 946858200000L, false, false)
                       ),
-                      expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      nestedExpressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
                       null
                   ))
                   .intervals(querySegmentSpec(Intervals.of("2000-01-02T00:00:00.000Z/2000-01-03T00:10:00.001Z")))
@@ -6731,7 +6691,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
                               range("__time", ColumnType.LONG, 946771200000L, 946858200000L, false, false)
                           )
                       ),
-                      expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      nestedExpressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
                       null
                   ))
                   .intervals(querySegmentSpec(Intervals.of("2000-01-02T00:00:00.000Z/2000-01-03T00:10:00.001Z")))
@@ -6765,7 +6725,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
                               range("__time", ColumnType.LONG, 946771200000L, 946858200000L, false, false)
                           )
                       ),
-                      expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      nestedExpressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
                       null
                   ))
                   .intervals(querySegmentSpec(Filtration.eternity()))
@@ -6800,7 +6760,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
                           expressionVirtualColumn("j0.unnest", "array(\"m1\",\"m2\")", ColumnType.FLOAT_ARRAY),
                           null
                       ),
-                      expressionVirtualColumn1("_j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      nestedExpressionVirtualColumn("_j0.unnest", "\"dim3\"", ColumnType.STRING),
                       null
                   ))
                   .intervals(querySegmentSpec(Intervals.of("2000-01-02T00:00:00.000Z/2000-01-03T00:10:00.001Z")))
@@ -6843,7 +6803,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
                           expressionVirtualColumn("_j0.unnest", "array(\"dim1\",\"dim2\")", ColumnType.STRING_ARRAY),
                           null
                       ),
-                      expressionVirtualColumn1("__j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      nestedExpressionVirtualColumn("__j0.unnest", "\"dim3\"", ColumnType.STRING),
                       null
                   ))
                   .intervals(querySegmentSpec(Intervals.of("2000-01-02T00:00:00.000Z/2000-01-03T00:10:00.001Z")))
@@ -7241,7 +7201,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
             Druids.newScanQueryBuilder()
                   .dataSource(UnnestDataSource.create(
                       new TableDataSource(CalciteTests.DATASOURCE3),
-                      expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      nestedExpressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
                       NullHandling.sqlCompatible()
                       ? expressionFilter("(substring(\"j0.unnest\", 0, -1) != 'b')")
                       : not(selector("j0.unnest", "b", new SubstringDimExtractionFn(0, null)))
@@ -7280,7 +7240,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
             Druids.newScanQueryBuilder()
                   .dataSource(UnnestDataSource.create(
                       new TableDataSource(CalciteTests.DATASOURCE3),
-                      expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      nestedExpressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
                       NullHandling.sqlCompatible()
                       ? expressionFilter("notnull(substring(\"j0.unnest\", 0, -1))")
                       : not(selector("j0.unnest", null, new SubstringDimExtractionFn(0, null)))
