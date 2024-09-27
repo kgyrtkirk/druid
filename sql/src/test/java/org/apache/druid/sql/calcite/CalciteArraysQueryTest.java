@@ -119,13 +119,6 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
     }
   }
 
-  protected final ColumnType ColumnType1STRING = getNestedStringType();
-
-  protected ColumnType getNestedStringType()
-  {
-    return ColumnType.STRING;
-  }
-
   @Test
   public void testSelectConstantArrayExpressionFromTable()
   {
@@ -5158,7 +5151,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
             Druids.newScanQueryBuilder()
                   .dataSource(UnnestDataSource.create(
                       new TableDataSource(CalciteTests.DATASOURCE3),
-                      expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType1STRING),
+                      expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
                       null
                   ))
                   .intervals(querySegmentSpec(Filtration.eternity()))
