@@ -410,7 +410,7 @@ public class DruidQueryGenerator
         if (canUnwrapSourceDesc()) {
           DruidQuery q = buildQuery(false);
           SourceDesc origInput = getSource();
-          DataSource dataSource = null;
+          DataSource dataSource;
           if (q.getFilter() == null) {
             dataSource = origInput.dataSource;
           } else {
