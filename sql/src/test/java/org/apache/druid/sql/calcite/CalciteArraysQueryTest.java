@@ -5816,7 +5816,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(ignoreExpectedQueriesReason = IgnoreQueriesReason.UNNEST_INPUT_CLEANUP)
+  @NotYetSupported(Modes.UNNEST_RESULT_MISMATCH)
   @Test
   public void testUnnestWithSQLFunctionOnUnnestedColumn()
   {
