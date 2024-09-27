@@ -52,7 +52,8 @@ public abstract class Unnest extends SingleRel
   public RelWriter explainTerms(RelWriter pw)
   {
     return super.explainTerms(pw)
-        .item("unnestExpr", unnestExpr);
+        .item("unnestExpr", unnestExpr)
+        .itemIf("filter", condition, condition != null);
   }
 
   @Override
