@@ -50,15 +50,14 @@ public @interface DecoupledTestConfig
   enum IgnoreQueriesReason  {
     NONE,
     /**
-     * The original planning was able to recognize a few more things for UNNEST;
-     * which resulted in better plans.
+     * An extra ScanQuery to service a Project and/or Filter was added.
      */
-    UNNEST_INPUT_CLEANUP,
-    UNNEST_INPUT_CLEANUP1;
+    UNNEST_INPUT_CLEANUP1,
+    UNNEST_EXTRA_SCANQUERY;
 
     public boolean isPresent()
     {
-      return this != NONE && this != UNNEST_INPUT_CLEANUP;
+      return this != NONE;
     }
   }
 

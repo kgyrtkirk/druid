@@ -52,7 +52,6 @@ import java.util.Map;
 
 public class CalciteCorrelatedQueryTest extends BaseCalciteQueryTest
 {
-  @DecoupledTestConfig(ignoreExpectedQueriesReason = IgnoreQueriesReason.UNNEST_INPUT_CLEANUP)
   @MethodSource("provideQueryContexts")
   @ParameterizedTest(name = "{0}")
   public void testCorrelatedSubquery(Map<String, Object> queryContext)
