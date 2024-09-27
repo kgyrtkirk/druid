@@ -24,7 +24,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
 import org.apache.druid.common.config.NullHandling;
+import org.apache.druid.error.DruidException;
 import org.apache.druid.guice.DruidInjectorBuilder;
+import org.apache.druid.java.util.common.Intervals;
 import org.apache.druid.java.util.common.StringEncoding;
 import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.java.util.common.granularity.Granularities;
@@ -78,7 +80,6 @@ import org.apache.druid.sql.calcite.BaseCalciteQueryTest;
 import org.apache.druid.sql.calcite.SqlTestFrameworkConfig;
 import org.apache.druid.sql.calcite.TempDirProducer;
 import org.apache.druid.sql.calcite.filtration.Filtration;
-import org.apache.druid.sql.calcite.planner.PlannerContext;
 import org.apache.druid.sql.calcite.util.CacheTestHelperModule.ResultCacheMode;
 import org.apache.druid.sql.calcite.util.CalciteTests;
 import org.apache.druid.sql.calcite.util.SqlTestFramework.StandardComponentSupplier;
@@ -86,6 +87,7 @@ import org.apache.druid.sql.calcite.util.TestDataBuilder;
 import org.apache.druid.sql.guice.SqlModule;
 import org.apache.druid.timeline.DataSegment;
 import org.apache.druid.timeline.partition.LinearShardSpec;
+import org.apache.druid.timeline.partition.NumberedShardSpec;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Period;
 import org.junit.Assert;
@@ -100,6 +102,10 @@ import java.util.stream.Collectors;
 @SqlTestFrameworkConfig.ComponentSupplier(HllSketchComponentSupplier.class)
 public class HllSketchSqlAggregatorTest extends BaseCalciteQueryTest
 {
+  static {
+    NullHandling.initializeForTests();
+  }
+
   private static final boolean ROUND = true;
 
   // For testHllSketchPostAggsGroupBy, testHllSketchPostAggsTimeseries
@@ -300,6 +306,15 @@ public class HllSketchSqlAggregatorTest extends BaseCalciteQueryTest
                      .size(0)
                      .build(),
           index
+      ).add(
+          DataSegment.builder()
+                     .dataSource(CalciteTests.WIKIPEDIA_FIRST_LAST)
+                     .interval(Intervals.of("2015-09-12/2015-09-13"))
+                     .version("1")
+                     .shardSpec(new NumberedShardSpec(0, 0))
+                     .size(0)
+                     .build(),
+          TestDataBuilder.makeWikipediaIndexWithAggregation(tempDirProducer.newTempFolder())
       );
     }
   }
@@ -506,6 +521,33 @@ public class HllSketchSqlAggregatorTest extends BaseCalciteQueryTest
             new Object[]{"a", 2L}
         )
     );
+  }
+
+  @Test
+  public void testApproxCountDistinctOnUnsupportedComplexColumn()
+  {
+    assertQueryIsUnplannable(
+        "SELECT COUNT(distinct double_first_added) FROM druid.wikipedia_first_last",
+        "Query could not be planned. A possible reason is [Using APPROX_COUNT_DISTINCT() or enabling "
+        + "approximation with COUNT(DISTINCT) is not supported for column type [COMPLEX<serializablePairLongDouble>]."
+        + " You can disable approximation by setting [useApproximateCountDistinct: false] in the query context."
+    );
+  }
+
+  @Test
+  public void testApproxCountDistinctFunctionOnUnsupportedComplexColumn()
+  {
+    DruidException druidException = Assert.assertThrows(
+        DruidException.class,
+        () -> testQuery(
+            "SELECT APPROX_COUNT_DISTINCT_DS_HLL(double_first_added) FROM druid.wikipedia_first_last",
+            ImmutableList.of(),
+            ImmutableList.of()
+        )
+    );
+    Assert.assertTrue(druidException.getMessage().contains(
+        "Cannot apply 'APPROX_COUNT_DISTINCT_DS_HLL' to arguments of type 'APPROX_COUNT_DISTINCT_DS_HLL(<COMPLEX<SERIALIZABLEPAIRLONGDOUBLE>>)'"
+    ));
   }
 
   @Test
@@ -1170,7 +1212,6 @@ public class HllSketchSqlAggregatorTest extends BaseCalciteQueryTest
   public void testHllWithOrderedWindowing()
   {
     testBuilder()
-        .queryContext(ImmutableMap.of(PlannerContext.CTX_ENABLE_WINDOW_FNS, true))
         .sql(
             "SELECT dim1,coalesce(cast(l1 as integer),-999),"
                 + " HLL_SKETCH_ESTIMATE( DS_HLL(dim1) OVER ( ORDER BY l1 ), true)"
@@ -1195,7 +1236,6 @@ public class HllSketchSqlAggregatorTest extends BaseCalciteQueryTest
   {
     for (int i = 0; i < 2; i++) {
       testBuilder()
-          .queryContext(ImmutableMap.of(PlannerContext.CTX_ENABLE_WINDOW_FNS, true))
           .sql(
               "SELECT "
                   + " TIME_FLOOR(__time, 'P1D') as dayLvl,\n"

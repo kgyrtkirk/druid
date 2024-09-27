@@ -30,10 +30,7 @@ This document describes the SQL language.
 
 Window functions are an [experimental](../development/experimental.md) feature.
 Development and testing are still at early stage. Feel free to try window functions and provide your feedback.
-Windows functions are not currently supported by multi-stage-query engine so you cannot use them in SQL-based ingestion. 
-
-
-Set the context parameter `enableWindowing: true` to use window functions.
+Windows functions are not currently supported by multi-stage-query engine so you cannot use them in SQL-based ingestion.
 
 :::
 
@@ -246,10 +243,7 @@ Druid has guardrail logic to prevent you from executing window function queries 
 
 For example:
 - You cannot set expressions as bounds for window frames.
-- You cannot use two FOLLOWING expressions in the window frame. For example: `ROWS BETWEEN 2 ROWS FOLLOWING and 3 ROWS FOLLOWING`.
 - You can only use a RANGE frames when both endpoints are unbounded or current row.
-
-If you write a query that violates one of these conditions, Druid throws an error: "The query contains a window frame which may return incorrect results. To disregard this warning, set `windowingStrictValidation` to false in the query context."
 
 ## Window function reference
 

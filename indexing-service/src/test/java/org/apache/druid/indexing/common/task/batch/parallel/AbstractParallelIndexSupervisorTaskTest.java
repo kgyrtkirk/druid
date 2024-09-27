@@ -96,10 +96,10 @@ import org.apache.druid.segment.loading.LocalDataSegmentPusherConfig;
 import org.apache.druid.segment.loading.NoopDataSegmentKiller;
 import org.apache.druid.segment.loading.StorageLocationConfig;
 import org.apache.druid.segment.metadata.CentralizedDatasourceSchemaConfig;
+import org.apache.druid.segment.realtime.ChatHandlerProvider;
+import org.apache.druid.segment.realtime.NoopChatHandlerProvider;
 import org.apache.druid.segment.realtime.appenderator.AppenderatorsManager;
 import org.apache.druid.segment.realtime.appenderator.SegmentIdWithShardSpec;
-import org.apache.druid.segment.realtime.firehose.ChatHandlerProvider;
-import org.apache.druid.segment.realtime.firehose.NoopChatHandlerProvider;
 import org.apache.druid.server.DruidNode;
 import org.apache.druid.server.security.AuthConfig;
 import org.apache.druid.server.security.AuthTestUtils;
@@ -163,7 +163,8 @@ public class AbstractParallelIndexSupervisorTaskTest extends IngestionTestBase
       null,
       false,
       false,
-      0
+      0,
+      null
   );
   public static final ParallelIndexTuningConfig DEFAULT_TUNING_CONFIG_FOR_PARALLEL_INDEXING =
       TuningConfigBuilder.forParallelIndexTask()
@@ -225,7 +226,6 @@ public class AbstractParallelIndexSupervisorTaskTest extends IngestionTestBase
     indexingServiceClient = new LocalOverlordClient(objectMapper, taskRunner);
     final TaskConfig taskConfig = new TaskConfigBuilder()
         .setShuffleDataLocations(ImmutableList.of(new StorageLocationConfig(temporaryFolder.newFolder(), null, null)))
-        .setBatchProcessingMode(TaskConfig.BATCH_PROCESSING_MODE_DEFAULT.name())
         .build();
     intermediaryDataManager = new LocalIntermediaryDataManager(new WorkerConfig(), taskConfig, null);
     remoteApiExecutor = Execs.singleThreaded("coordinator-api-executor");
@@ -616,7 +616,6 @@ public class AbstractParallelIndexSupervisorTaskTest extends IngestionTestBase
   public void prepareObjectMapper(ObjectMapper objectMapper, IndexIO indexIO)
   {
     final TaskConfig taskConfig = new TaskConfigBuilder()
-        .setBatchProcessingMode(TaskConfig.BATCH_PROCESSING_MODE_DEFAULT.name())
         .build();
 
     objectMapper.setInjectableValues(
@@ -652,7 +651,6 @@ public class AbstractParallelIndexSupervisorTaskTest extends IngestionTestBase
   protected TaskToolbox createTaskToolbox(Task task, TaskActionClient actionClient) throws IOException
   {
     TaskConfig config = new TaskConfigBuilder()
-        .setBatchProcessingMode(TaskConfig.BATCH_PROCESSING_MODE_DEFAULT.name())
         .build();
     CentralizedDatasourceSchemaConfig centralizedDatasourceSchemaConfig = CentralizedDatasourceSchemaConfig.create(true);
     return new TaskToolbox.Builder()

@@ -278,7 +278,6 @@ public class AggregationTestHelper implements Closeable
     ObjectMapper mapper = TestHelper.makeJsonMapper();
 
     ScanQueryQueryToolChest toolchest = new ScanQueryQueryToolChest(
-        new ScanQueryConfig(),
         DefaultGenericQueryMetricsFactory.instance()
     );
 
@@ -758,7 +757,7 @@ public class AggregationTestHelper implements Closeable
                 @Override
                 public Object accumulate(Object accumulated, Object in)
                 {
-                  yield();
+                  this.yield();
                   return in;
                 }
               }

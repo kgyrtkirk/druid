@@ -20,7 +20,6 @@
 package org.apache.druid.query.aggregation.variance.sql;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
 import org.apache.druid.common.config.NullHandling;
 import org.apache.druid.data.input.InputRow;
@@ -29,11 +28,11 @@ import org.apache.druid.data.input.impl.DimensionsSpec;
 import org.apache.druid.data.input.impl.DoubleDimensionSchema;
 import org.apache.druid.data.input.impl.FloatDimensionSchema;
 import org.apache.druid.data.input.impl.LongDimensionSchema;
+import org.apache.druid.error.DruidException;
 import org.apache.druid.guice.DruidInjectorBuilder;
 import org.apache.druid.java.util.common.granularity.Granularities;
 import org.apache.druid.math.expr.ExprMacroTable;
 import org.apache.druid.query.Druids;
-import org.apache.druid.query.QueryContexts;
 import org.apache.druid.query.QueryRunnerFactoryConglomerate;
 import org.apache.druid.query.aggregation.CountAggregatorFactory;
 import org.apache.druid.query.aggregation.DoubleSumAggregatorFactory;
@@ -63,7 +62,7 @@ import org.apache.druid.sql.calcite.BaseCalciteQueryTest;
 import org.apache.druid.sql.calcite.SqlTestFrameworkConfig;
 import org.apache.druid.sql.calcite.TempDirProducer;
 import org.apache.druid.sql.calcite.filtration.Filtration;
-import org.apache.druid.sql.calcite.planner.PlannerContext;
+import org.apache.druid.sql.calcite.run.EngineFeature;
 import org.apache.druid.sql.calcite.util.CalciteTests;
 import org.apache.druid.sql.calcite.util.SqlTestFramework.StandardComponentSupplier;
 import org.apache.druid.sql.calcite.util.TestDataBuilder;
@@ -72,6 +71,9 @@ import org.apache.druid.timeline.partition.LinearShardSpec;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @SqlTestFrameworkConfig.ComponentSupplier(VarianceComponentSupplier.class)
 public class VarianceSqlAggregatorTest extends BaseCalciteQueryTest
@@ -710,10 +712,6 @@ public class VarianceSqlAggregatorTest extends BaseCalciteQueryTest
             "select dim4, dim5, mod(m1, 3), var_pop(mod(m1, 3)) over (partition by dim4 order by dim5) c\n"
             + "from numfoo\n"
             + "group by dim4, dim5, mod(m1, 3)")
-        .queryContext(ImmutableMap.of(
-            PlannerContext.CTX_ENABLE_WINDOW_FNS, true,
-            QueryContexts.ENABLE_DEBUG, true
-        ))
         .expectedResults(ImmutableList.of(
             new Object[]{"a", "aa", 1.0D, 0.0D},
             new Object[]{"a", "ab", 2.0D, 0.25D},
@@ -723,5 +721,23 @@ public class VarianceSqlAggregatorTest extends BaseCalciteQueryTest
             new Object[]{"b", "ad", 1.0D, 0.6666666666666666D}
         ))
         .run();
+  }
+
+  @Test
+  public void testStddevNotSupportedOverWindow()
+  {
+    assumeFeatureAvailable(EngineFeature.WINDOW_FUNCTIONS);
+
+    DruidException e = assertThrows(
+        DruidException.class,
+        () -> testBuilder()
+            .sql("SELECT stddev(m1) OVER () from numfoo")
+            .run()
+    );
+
+    assertEquals(
+        "Query could not be planned. A possible reason is [Aggregation [STDDEV] is currently not supported for window functions]",
+        e.getMessage()
+    );
   }
 }
