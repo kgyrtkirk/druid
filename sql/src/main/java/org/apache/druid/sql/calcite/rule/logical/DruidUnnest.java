@@ -59,53 +59,68 @@ public class DruidUnnest extends Unnest implements DruidLogicalNode, SourceDescP
   {
     SourceDesc inputDesc = sources.get(0);
 
-    RexNode rexNodeToUnnest = unnestExpr;
-    final DruidExpression expressionToUnnest = Expressions.toDruidExpression(
-        plannerContext,
-        inputDesc.rowSignature,
-        unnestExpr
-    );
-
-    RowSignature outputRowSignature = RowSignature.builder()
-        .addAll(inputDesc.rowSignature)
-        .build();
-
-    RelDataType unnestedType = rowType.getFieldList().get(rowType.getFieldCount() - 1).getType();
-
-    outputRowSignature = DruidJoinQueryRel.computeJoinRowSignature(
-        inputDesc.rowSignature,
-        RowSignature.builder().add(
-            "unnest",
-            Calcites.getColumnTypeForRelDataType(unnestedType)
-        ).build(),
-        DruidJoinQueryRel.findExistingJoinPrefixes(inputDesc.dataSource)
-    ).rhs;
+    RowSignature outputRowSignature = computeRowOutputSignature(inputDesc);
 
     RowSignature filterRowSignature = RowSignature.builder().add(
         outputRowSignature.getColumnName(outputRowSignature.size() - 1),
         outputRowSignature.getColumnType(outputRowSignature.size() - 1).get()
     ).build();
 
+    VirtualColumn virtualColumn = buildUnnestVirtualColumn(
+        plannerContext, inputDesc, filterRowSignature.getColumnName(0)
+    );
+
+    DimFilter dimFilter = buildDimFilter(plannerContext, inputDesc, filterRowSignature);
+    DataSource dataSource = UnnestDataSource.create(inputDesc.dataSource, virtualColumn, dimFilter);
+    return new SourceDesc(dataSource, outputRowSignature);
+  }
+
+  private DimFilter buildDimFilter(PlannerContext plannerContext, SourceDesc inputDesc, RowSignature filterRowSignature)
+  {
+    if (filter == null) {
+      return null;
+    }
+    DimFilter dimFilter = Expressions.toFilter(
+        plannerContext,
+        filterRowSignature,
+        null,
+        filter
+    );
+    return Filtration.create(dimFilter).optimizeFilterOnly(inputDesc.rowSignature).getDimFilter();
+  }
+
+  private VirtualColumn buildUnnestVirtualColumn(PlannerContext plannerContext, SourceDesc inputDesc, String columnName)
+  {
+    final DruidExpression expressionToUnnest = Expressions.toDruidExpression(
+        plannerContext,
+        inputDesc.rowSignature,
+        unnestExpr
+    );
+
     VirtualColumn virtualColumn = expressionToUnnest.toVirtualColumn(
-        outputRowSignature.getColumnName(outputRowSignature.size() - 1),
+        columnName,
         Calcites.getColumnTypeForRelDataType(
-            // rowType.getFieldList().get(rowType.getFieldCount()-1).getType()
-            rexNodeToUnnest.getType()
+            unnestExpr.getType()
         ),
         plannerContext.getExpressionParser()
     );
+    return virtualColumn;
+  }
 
-    DimFilter dimFilter = null;
-    if (filter != null) {
-      dimFilter = Expressions.toFilter(
-          plannerContext,
-          filterRowSignature,
-          null,
-          filter
-      );
-      dimFilter = Filtration.create(dimFilter).optimizeFilterOnly(inputDesc.rowSignature).getDimFilter();
-    }
-    DataSource dataSource = UnnestDataSource.create(inputDesc.dataSource, virtualColumn, dimFilter);
-    return new SourceDesc(dataSource, outputRowSignature);
+  private RowSignature computeRowOutputSignature(SourceDesc inputDesc)
+  {
+    return DruidJoinQueryRel.computeJoinRowSignature(
+        inputDesc.rowSignature,
+        RowSignature.builder().add(
+            "unnest",
+            Calcites.getColumnTypeForRelDataType(getUnnestedType())
+        ).build(),
+        DruidJoinQueryRel.findExistingJoinPrefixes(inputDesc.dataSource)
+    ).rhs;
+  }
+
+  private RelDataType getUnnestedType()
+  {
+    return rowType.getFieldList().get(rowType.getFieldCount() - 1).getType();
   }
 }
