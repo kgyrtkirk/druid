@@ -6139,7 +6139,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  @NotYetSupported(Modes.UNNEST_NOT_SUPPORTED_CORRELATE_CONVERSION)
   public void testJoinsWithUnnestOnLeft()
   {
     // Segment map function of MSQ needs some work
@@ -6160,7 +6159,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
                     join(
                         UnnestDataSource.create(
                             new TableDataSource(CalciteTests.DATASOURCE1),
-                            expressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                            nestedExpressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
                             null
                         ),
                         new QueryDataSource(
@@ -6194,7 +6193,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  @NotYetSupported(Modes.UNNEST_NOT_SUPPORTED_CORRELATE_CONVERSION)
   public void testJoinsWithUnnestOverFilteredDSOnLeft()
   {
     // Segment map function of MSQ needs some work
@@ -6252,7 +6250,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  @NotYetSupported(Modes.UNNEST_NOT_SUPPORTED_CORRELATE_CONVERSION)
   public void testJoinsWithUnnestOverJoin()
   {
     // Segment map function of MSQ needs some work
@@ -6288,7 +6285,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
                                 "(\"dim2\" == \"j0.dim2\")",
                                 JoinType.INNER
                             ),
-                            expressionVirtualColumn("_j0.unnest", "\"dim3\"", ColumnType.STRING),
+                            nestedExpressionVirtualColumn("_j0.unnest", "\"dim3\"", ColumnType.STRING),
                             null
                         ),
                         new QueryDataSource(
@@ -6337,7 +6334,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  @NotYetSupported(Modes.UNNEST_NOT_SUPPORTED_CORRELATE_CONVERSION)
   public void testSelfJoinsWithUnnestOnLeftAndRight()
   {
     // Segment map function of MSQ needs some work
@@ -6358,7 +6354,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
                     join(
                         UnnestDataSource.create(
                             new TableDataSource(CalciteTests.DATASOURCE1),
-                            expressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                            nestedExpressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
                             null
                         ),
                         new QueryDataSource(
@@ -6366,7 +6362,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
                                 .intervals(querySegmentSpec(Filtration.eternity()))
                                 .dataSource(UnnestDataSource.create(
                                     new TableDataSource(CalciteTests.DATASOURCE1),
-                                    expressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                                    nestedExpressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
                                     null
                                 ))
                                 .columns("dim2", "j0.unnest")
@@ -6406,7 +6402,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
-  @NotYetSupported(Modes.UNNEST_NOT_SUPPORTED_CORRELATE_CONVERSION)
   public void testJoinsOverUnnestOverFilterDSOverJoin()
   {
     // Segment map function of MSQ needs some work

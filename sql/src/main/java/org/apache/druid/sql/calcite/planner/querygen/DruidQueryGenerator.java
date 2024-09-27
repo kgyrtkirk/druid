@@ -236,6 +236,11 @@ public class DruidQueryGenerator
       }
       return this == RIGHT;
     }
+
+    boolean filteredDatasourceAllowed()
+    {
+      return this == NONE;
+    }
   }
 
   /**
@@ -425,11 +430,11 @@ public class DruidQueryGenerator
         if (partialDruidQuery.stage() == Stage.SCAN) {
           return true;
         }
-        if (partialDruidQuery.stage() == PartialDruidQuery.Stage.WHERE_FILTER ) {
+        if (jst.filteredDatasourceAllowed() && partialDruidQuery.stage() == PartialDruidQuery.Stage.WHERE_FILTER ) {
           return true;
         }
         if (partialDruidQuery.stage() == PartialDruidQuery.Stage.SELECT_PROJECT &&
-//            partialDruidQuery.getWhereFilter() == null &&
+            (jst.filteredDatasourceAllowed() || partialDruidQuery.getWhereFilter() == null) &&
             partialDruidQuery.getSelectProject().isMapping()) {
           return true;
         }
