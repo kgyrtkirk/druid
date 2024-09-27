@@ -46,14 +46,14 @@ SELECT objects FROM druid.arrays, UNNEST(JSON_QUERY_ARRAY(arrayObject, '$')) as 
 
 !ok
 LogicalProject(objects=[$13])
-  LogicalUnnest(unnestExpr=[$12])
-    LogicalProject(__time=[$0], arrayString=[$1], arrayStringNulls=[$2], arrayLong=[$3], arrayLongNulls=[$4], arrayDouble=[$5], arrayDoubleNulls=[$6], arrayVariant=[$7], arrayNoType=[$8], arrayNestedLong=[$9], arrayObject=[$10], cnt=[$11], $f12=[JSON_QUERY_ARRAY($10, '$')])
+  LogicalUnnest(unnestExpr=[JSON_QUERY_ARRAY($10, '$')])
+    LogicalProject(__time=[$0], arrayString=[$1], arrayStringNulls=[$2], arrayLong=[$3], arrayLongNulls=[$4], arrayDouble=[$5], arrayDoubleNulls=[$6], arrayVariant=[$7], arrayNoType=[$8], arrayNestedLong=[$9], arrayObject=[$10], cnt=[$11], __time0=[$0])
       LogicalTableScan(table=[[druid, arrays]])
 
 !logicalPlan
 DruidProject(objects=[$13], druid=[logical])
-  DruidUnnest(unnestExpr=[$12])
-    DruidProject(__time=[$0], arrayString=[$1], arrayStringNulls=[$2], arrayLong=[$3], arrayLongNulls=[$4], arrayDouble=[$5], arrayDoubleNulls=[$6], arrayVariant=[$7], arrayNoType=[$8], arrayNestedLong=[$9], arrayObject=[$10], cnt=[$11], $f12=[JSON_QUERY_ARRAY($10, '$')], druid=[logical])
+  DruidUnnest(unnestExpr=[JSON_QUERY_ARRAY($10, '$')])
+    DruidProject(__time=[$0], arrayString=[$1], arrayStringNulls=[$2], arrayLong=[$3], arrayLongNulls=[$4], arrayDouble=[$5], arrayDoubleNulls=[$6], arrayVariant=[$7], arrayNoType=[$8], arrayNestedLong=[$9], arrayObject=[$10], cnt=[$11], __time0=[$0], druid=[logical])
       DruidTableScan(table=[[druid, arrays]], druid=[logical])
 
 !druidPlan
@@ -62,36 +62,13 @@ DruidProject(objects=[$13], druid=[logical])
   "dataSource" : {
     "type" : "unnest",
     "base" : {
-      "type" : "query",
-      "query" : {
-        "queryType" : "scan",
-        "dataSource" : {
-          "type" : "table",
-          "name" : "arrays"
-        },
-        "intervals" : {
-          "type" : "intervals",
-          "intervals" : [ "-146136543-09-08T08:23:32.096Z/146140482-04-24T15:36:27.903Z" ]
-        },
-        "virtualColumns" : [ {
-          "type" : "expression",
-          "name" : "v0",
-          "expression" : "json_query_array(\"arrayObject\",'$')",
-          "outputType" : "ARRAY<COMPLEX<json>>"
-        } ],
-        "resultFormat" : "compactedList",
-        "columns" : [ "__time", "arrayDouble", "arrayDoubleNulls", "arrayLong", "arrayLongNulls", "arrayNestedLong", "arrayNoType", "arrayObject", "arrayString", "arrayStringNulls", "arrayVariant", "cnt", "v0" ],
-        "columnTypes" : [ "LONG", "ARRAY<DOUBLE>", "ARRAY<DOUBLE>", "ARRAY<LONG>", "ARRAY<LONG>", "COMPLEX<json>", "ARRAY<LONG>", "COMPLEX<json>", "ARRAY<STRING>", "ARRAY<STRING>", "ARRAY<STRING>", "LONG", "ARRAY<COMPLEX<json>>" ],
-        "granularity" : {
-          "type" : "all"
-        },
-        "legacy" : false
-      }
+      "type" : "table",
+      "name" : "arrays"
     },
     "virtualColumn" : {
       "type" : "expression",
       "name" : "j0.unnest",
-      "expression" : "\"v0\"",
+      "expression" : "json_query_array(\"arrayObject\",'$')",
       "outputType" : "ARRAY<COMPLEX<json>>"
     },
     "unnestFilter" : null

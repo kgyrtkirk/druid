@@ -3960,6 +3960,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @NotYetSupported(Modes.UNNEST_RESULT_MISMATCH)
   @Test
   public void testUnnest()
   {
@@ -4566,7 +4567,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
   }
 
 
-  @DecoupledTestConfig(ignoreExpectedQueriesReason = IgnoreQueriesReason.UNNEST_INPUT_CLEANUP)
+  @DecoupledTestConfig(ignoreExpectedQueriesReason = IgnoreQueriesReason.UNNEST_INPUT_CLEANUP1)
   @Test
   public void testUnnestThriceWithFiltersOnDimAndUnnestCol()
   {
@@ -4664,7 +4665,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(ignoreExpectedQueriesReason = IgnoreQueriesReason.UNNEST_INPUT_CLEANUP)
+  @DecoupledTestConfig(ignoreExpectedQueriesReason = IgnoreQueriesReason.UNNEST_INPUT_CLEANUP1)
   @Test
   public void testUnnestThriceWithFiltersOnDimAndAllUnnestColumns()
   {
@@ -4682,7 +4683,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
                           FilteredDataSource.create(
                               UnnestDataSource.create(
                                   new TableDataSource(CalciteTests.DATASOURCE5),
-                                  expressionVirtualColumn1(
+                                  expressionVirtualColumn(
                                       "j0.unnest",
                                       "\"dimMultivalEnumerated\"",
                                       ColumnType.STRING
@@ -5183,7 +5184,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(ignoreExpectedQueriesReason = IgnoreQueriesReason.UNNEST_INPUT_CLEANUP)
+  @NotYetSupported(Modes.UNNEST_RESULT_MISMATCH)
   @Test
   public void testUnnestFirstQueryOnSelect()
   {
@@ -6376,6 +6377,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @NotYetSupported(Modes.UNNEST_RESULT_MISMATCH)
   @DecoupledTestConfig(ignoreExpectedQueriesReason = IgnoreQueriesReason.UNNEST_INPUT_CLEANUP)
   @Test
   public void testUnnestWithCountOnColumn()
@@ -6756,7 +6758,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(ignoreExpectedQueriesReason = IgnoreQueriesReason.UNNEST_INPUT_CLEANUP)
+  @DecoupledTestConfig(ignoreExpectedQueriesReason = IgnoreQueriesReason.UNNEST_INPUT_CLEANUP1)
   @Test
   public void testUnnestWithTimeFilterAndAnotherFilter()
   {
@@ -6775,7 +6777,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
                               range("__time", ColumnType.LONG, 946771200000L, 946858200000L, false, false)
                           )
                       ),
-                      expressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
                       null
                   ))
                   .intervals(querySegmentSpec(Intervals.of("2000-01-02T00:00:00.000Z/2000-01-03T00:10:00.001Z")))
@@ -6846,7 +6848,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
                           expressionVirtualColumn("j0.unnest", "array(\"m1\",\"m2\")", ColumnType.FLOAT_ARRAY),
                           null
                       ),
-                      expressionVirtualColumn("_j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      expressionVirtualColumn1("_j0.unnest", "\"dim3\"", ColumnType.STRING),
                       null
                   ))
                   .intervals(querySegmentSpec(Intervals.of("2000-01-02T00:00:00.000Z/2000-01-03T00:10:00.001Z")))

@@ -53,11 +53,12 @@ public @interface DecoupledTestConfig
      * The original planning was able to recognize a few more things for UNNEST;
      * which resulted in better plans.
      */
-    UNNEST_INPUT_CLEANUP;
+    UNNEST_INPUT_CLEANUP,
+    UNNEST_INPUT_CLEANUP1;
 
     public boolean isPresent()
     {
-      return this != NONE;
+      return this != NONE && this != UNNEST_INPUT_CLEANUP;
     }
   }
 
