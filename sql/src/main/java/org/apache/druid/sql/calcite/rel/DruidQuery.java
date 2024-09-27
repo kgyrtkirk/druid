@@ -1741,4 +1741,9 @@ public class DruidQuery
     }
     return builder.build();
   }
+
+  public DimFilter getFilter()
+  {
+    return filter;
+  }
 }

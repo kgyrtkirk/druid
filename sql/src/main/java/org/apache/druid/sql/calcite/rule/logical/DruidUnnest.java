@@ -31,6 +31,7 @@ import org.apache.druid.segment.VirtualColumn;
 import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.sql.calcite.expression.DruidExpression;
 import org.apache.druid.sql.calcite.expression.Expressions;
+import org.apache.druid.sql.calcite.filtration.Filtration;
 import org.apache.druid.sql.calcite.planner.Calcites;
 import org.apache.druid.sql.calcite.planner.PlannerContext;
 import org.apache.druid.sql.calcite.planner.querygen.SourceDescProducer;
@@ -109,6 +110,9 @@ public class DruidUnnest extends Unnest implements DruidLogicalNode, SourceDescP
           condition
       ) // .optimizeFilterOnly(filterRowSignature)
 ;
+      filter = Filtration.create(filter).optimize(inputDesc.rowSignature).getDimFilter();
+
+
     }
     DataSource dataSource = UnnestDataSource.create(inputDesc.dataSource, virtualColumn, filter);
     return new SourceDesc(        dataSource, correlateRowSignature    );

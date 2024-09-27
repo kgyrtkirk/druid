@@ -3972,7 +3972,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
             Druids.newScanQueryBuilder()
                   .dataSource(UnnestDataSource.create(
                       new TableDataSource(CalciteTests.DATASOURCE3),
-                      decoupledNestedVC(
+                      nestedDSDecoupledVC(
                       expressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING)),
                       null
                   ))
@@ -5208,7 +5208,6 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @NotYetSupported(Modes.UNNEST_RESULT_MISMATCH)
   @DecoupledTestConfig(ignoreExpectedQueriesReason = IgnoreQueriesReason.UNNEST_INPUT_CLEANUP)
   @Test
   public void testUnnestFirstQueryOnSelect()
@@ -6404,7 +6403,6 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @NotYetSupported(Modes.UNNEST_RESULT_MISMATCH)
   @DecoupledTestConfig(ignoreExpectedQueriesReason = IgnoreQueriesReason.UNNEST_INPUT_CLEANUP)
   @Test
   public void testUnnestWithCountOnColumn()
