@@ -140,7 +140,15 @@ public @interface DecoupledTestConfig
     /**
      * Extra scan query under {@link UnnestDataSource}.
      */
-    UNNEST_EXTRA_SCAN;
+    UNNEST_EXTRA_SCAN,
+    /**
+     * Extra virtualcolumn appeared; seemingly unused
+     */
+    UNUSED_VIRTUALCOLUMN,
+    /**
+     * Unnest uses a VC to access a constant like array(1,2,3).
+     */
+    UNNEST_VC_USES_PROJECTED_CONSTANT;
 
     public boolean isPresent()
     {
