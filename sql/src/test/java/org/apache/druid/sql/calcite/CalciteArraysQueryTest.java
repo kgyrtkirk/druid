@@ -6701,7 +6701,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
                           new TableDataSource(CalciteTests.DATASOURCE1),
                           range("__time", ColumnType.LONG, 946771200000L, 946858200000L, false, false)
                       ),
-                      expressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
                       null
                   ))
                   .intervals(querySegmentSpec(Intervals.of("2000-01-02T00:00:00.000Z/2000-01-03T00:10:00.001Z")))

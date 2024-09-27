@@ -110,7 +110,7 @@ public class DruidUnnest extends Unnest implements DruidLogicalNode, SourceDescP
           condition
       ) // .optimizeFilterOnly(filterRowSignature)
 ;
-      filter = Filtration.create(filter).optimize(inputDesc.rowSignature).getDimFilter();
+      filter = Filtration.create(filter).optimizeFilterOnly(inputDesc.rowSignature).getDimFilter();
 
 
     }

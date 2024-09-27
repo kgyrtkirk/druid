@@ -450,7 +450,9 @@ public class DruidQueryGenerator
    */
   public static FilteredDataSource makeFilteredDataSource(SourceDesc sd, DimFilter filter)
   {
-    DimFilter newFilter = Filtration.create(filter).optimize(sd.rowSignature).getDimFilter();
+
+    Filtration filtration = Filtration.create(filter).optimizeFilterOnly(sd.rowSignature);
+    DimFilter newFilter = filtration.getDimFilter();
     return FilteredDataSource.create(sd.dataSource, newFilter);
   }
 }
