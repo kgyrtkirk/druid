@@ -29,6 +29,7 @@ import org.apache.calcite.rex.RexBuilder;
 import org.apache.calcite.rex.RexCall;
 import org.apache.calcite.rex.RexInputRef;
 import org.apache.calcite.rex.RexNode;
+import org.apache.calcite.rex.RexShuttle;
 import org.apache.calcite.sql.SqlKind;
 import org.apache.calcite.util.ImmutableBitSet;
 import org.apache.druid.error.DruidException;
@@ -65,76 +66,105 @@ public class UnnestInputCleanupRule extends RelOptRule implements SubstitutionRu
     if (input.isEmpty()) {
       throw DruidException.defensive("Found an unbound unnest expression.");
     }
-    int inputIndex = input.nextSetBit(0);
 
-    if(input.cardinality() != 1 ) {
+    if (!(unnest.unnestExpr instanceof RexInputRef)) {
+      // could be supported; but is there a need?
       return;
     }
+    if (input.cardinality() != 1) {
+      return;
+    }
+
+    int inputIndex = input.nextSetBit(0);
+
 
     List<RexNode> projects = new ArrayList<>(project.getProjects());
     RexNode unnestInput = projects.get(inputIndex);
 
-    if(!(unnest.unnestExpr instanceof RexInputRef)) {
+
+    projects.set(
+        inputIndex,
+        call.builder().getRexBuilder().makeInputRef(project.getInput(), 0)
+    );
+
+    RexNode newUnnestExpr = unnestInput.accept(new ExpressionPullerRexShuttle(projects, inputIndex));
+
+    if (projects.size() != project.getProjects().size()) {
+      // lets leave this for later
       return;
     }
-    if((unnestInput instanceof RexInputRef)) {
-      return;
-    }
 
-    if (inputIndex != projects.size() - 1) {
-      return;
-    }
-
-    ImmutableBitSet unnestInputInputs = InputFinder.analyze(unnestInput).build();
-    if(unnestInputInputs.cardinality() != 1) {
-      return ;
-    }
-
-    int unnestInputInputIndex = unnestInputInputs.nextSetBit(0);
-
-    // Replace the unnest expression reference with an inputRef for #0
-    // this will enable all other parts to see this Project as a mapping; which
-    // will result in its removal (if empty).
-    projects.set(inputIndex, call.builder().getRexBuilder().makeInputRef(project.getInput(), unnestInputInputIndex));
-
-
-    if( projects.size() < inputIndex
-
-        ) {
-      // not yet syuppiorted
-      return;
-    }
+    {
 
     RelNode newInputRel = call.builder()
         .push(project.getInput())
         .project(projects)
         .build();
 
-    RexNode newUnnestExpr = unnestInput;
-    RexNode newConditionExpr = null;
-
-    if (unnest.condition != null) {
-      // FIXME; think this thru
-      return;
-
-//      ImmutableBitSet input1 = InputFinder.analyze(unnest.condition).build();
-//      if(input1.nextSetBit(inputIndex) == -1) {
-//        // condition references at least the unwrapped
-//        return;
-//      }
-//      newConditionExpr = RelOptUtil.pushPastProject(unnest.condition, tmpProject);
-    }
-
-
 
     RelNode newUnnest = new LogicalUnnest(
         unnest.getCluster(), unnest.getTraitSet(), newInputRel, newUnnestExpr,
-        unnest.getRowType(), newConditionExpr
+        unnest.getRowType(), unnest.condition
     );
     call.transformTo(newUnnest);
     call.getPlanner().prune(unnest);
 
   }
+//    if(true) {
+//      return;
+//    }
+//
+//
+//
+//    ImmutableBitSet unnestInputInputs = InputFinder.analyze(unnestInput).build();
+//    if (unnestInputInputs.cardinality() != 1) {
+//      return;
+//    }
+//
+//    int unnestInputInputIndex = unnestInputInputs.nextSetBit(0);
+//
+//    // Replace the unnest expression reference with an inputRef for #0
+//    // this will enable all other parts to see this Project as a mapping; which
+//    // will result in its removal (if empty).
+//    projects.set(inputIndex, call.builder().getRexBuilder().makeInputRef(project.getInput(), unnestInputInputIndex));
+//
+//    if (projects.size() < inputIndex
+//
+//    ) {
+//      // not yet syuppiorted
+//      return;
+//    }
+//
+//    RelNode newInputRel = call.builder()
+//        .push(project.getInput())
+//        .project(projects)
+//        .build();
+//
+//    RexNode newUnnestExpr = unnestInput;
+//    RexNode newConditionExpr = null;
+//
+//    if (unnest.condition != null) {
+//      // FIXME; think this thru
+//      return;
+//
+//      // ImmutableBitSet input1 = InputFinder.analyze(unnest.condition).build();
+//      // if(input1.nextSetBit(inputIndex) == -1) {
+//      // // condition references at least the unwrapped
+//      // return;
+//      // }
+//      // newConditionExpr = RelOptUtil.pushPastProject(unnest.condition,
+//      // tmpProject);
+//    }
+//
+//    RelNode newUnnest = new LogicalUnnest(
+//        unnest.getCluster(), unnest.getTraitSet(), newInputRel, newUnnestExpr,
+//        unnest.getRowType(), newConditionExpr
+//    );
+//    call.transformTo(newUnnest);
+//    call.getPlanner().prune(unnest);
+//
+  }
+
 
   /**
    * Whether an expr is MV_TO_ARRAY of an input reference.
@@ -161,4 +191,40 @@ public class UnnestInputCleanupRule extends RelOptRule implements SubstitutionRu
     }
   }
 
+  /**
+   * Pulls an expression thru a {@link Project}.
+   *
+   * May add new projections to the passed mutable list.
+   */
+  private static class ExpressionPullerRexShuttle extends RexShuttle
+  {
+    private final List<RexNode> projects;
+    private int replaceableIndex;
+
+    private ExpressionPullerRexShuttle(List<RexNode> projects, int replaceableIndex)
+    {
+      this.projects = projects;
+      this.replaceableIndex = replaceableIndex;
+    }
+
+    public RexNode visitInputRef(RexInputRef inputRef)
+    {
+      int newIndex = projects.indexOf(inputRef);
+      if (newIndex < 0) {
+        if (replaceableIndex >= 0) {
+          newIndex = replaceableIndex;
+          projects.set(replaceableIndex, inputRef);
+          replaceableIndex = -1;
+        } else {
+          newIndex = projects.size();
+          projects.add(inputRef);
+        }
+      }
+      if (newIndex == inputRef.getIndex()) {
+        return inputRef;
+      } else {
+        return new RexInputRef(newIndex, inputRef.getType());
+      }
+    }
+  }
 }

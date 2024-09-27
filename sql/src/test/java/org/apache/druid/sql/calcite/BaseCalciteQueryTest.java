@@ -77,7 +77,6 @@ import org.apache.druid.query.scan.ScanQuery;
 import org.apache.druid.query.spec.MultipleIntervalSegmentSpec;
 import org.apache.druid.query.spec.QuerySegmentSpec;
 import org.apache.druid.query.timeseries.TimeseriesQuery;
-import org.apache.druid.segment.VirtualColumn;
 import org.apache.druid.segment.column.ColumnHolder;
 import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.column.RowSignature;
@@ -561,6 +560,15 @@ public class BaseCalciteQueryTest extends CalciteTestBase
     return new ExpressionVirtualColumn(name, expression, outputType, CalciteTests.createExprMacroTable());
   }
 
+  public ExpressionVirtualColumn expressionVirtualColumn1(
+      final String name,
+      final String expression,
+      final ColumnType outputType
+  )
+  {
+    return nestedExpressionVirtualColumn(name, expression, outputType);
+  }
+
 
   /**
    * Optionally updates the VC defintion for the one planned by the decoupled planner.
@@ -569,7 +577,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
    *  * moves the mv_to_array into the VC
    *  * the type is an ARRAY
    */
-  public VirtualColumn nestedExpressionVirtualColumn(
+  public ExpressionVirtualColumn nestedExpressionVirtualColumn(
       String name,
       String expression,
       ColumnType outputType)
