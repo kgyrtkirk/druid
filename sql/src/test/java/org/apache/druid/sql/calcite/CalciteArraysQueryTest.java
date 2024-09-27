@@ -3960,7 +3960,6 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
     );
   }
 
-//  @DecoupledTestConfig(ignoreExpectedQueriesReason = IgnoreQueriesReason.UNNEST_INPUT_CLEANUP)
   @Test
   public void testUnnest()
   {
@@ -4527,7 +4526,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
                               ),
                               in("j0.unnest", ImmutableList.of("1", "2"))
                           ),
-                          expressionVirtualColumn(
+                          expressionVirtualColumn1(
                               "_j0.unnest",
                               "\"dim3\"",
                               ColumnType.STRING
@@ -4585,7 +4584,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
                           FilteredDataSource.create(
                               UnnestDataSource.create(
                                   new TableDataSource(CalciteTests.DATASOURCE5),
-                                  expressionVirtualColumn(
+                                  expressionVirtualColumn1(
                                       "j0.unnest",
                                       "\"dimMultivalEnumerated\"",
                                       ColumnType.STRING
@@ -4599,13 +4598,13 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
                                   equality("j0.unnest", "Baz", ColumnType.STRING)
                               )
                           ),
-                          expressionVirtualColumn(
+                          expressionVirtualColumn1(
                               "_j0.unnest",
                               "\"dimMultivalEnumerated\"",
                               ColumnType.STRING
                           ), null
                       ),
-                      expressionVirtualColumn(
+                      expressionVirtualColumn1(
                           "__j0.unnest",
                           "\"dimMultivalEnumerated\"",
                           ColumnType.STRING
@@ -5128,7 +5127,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
             GroupByQuery.builder()
                         .setDataSource(UnnestDataSource.create(
                             new TableDataSource(CalciteTests.DATASOURCE3),
-                            expressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                            expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
                             null
                         ))
                         .setInterval(querySegmentSpec(Filtration.eternity()))
@@ -5352,7 +5351,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
                           new TableDataSource(CalciteTests.DATASOURCE3),
                           equality("dim2", "a", ColumnType.STRING)
                       ),
-                      expressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
                       null
                   ))
                   .intervals(querySegmentSpec(Filtration.eternity()))
@@ -5388,7 +5387,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
                           new TableDataSource(CalciteTests.DATASOURCE3),
                           in("dim2", ImmutableList.of("a", "b"))
                       ),
-                      expressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
                       null
                   ))
                   .intervals(querySegmentSpec(Filtration.eternity()))
@@ -6415,7 +6414,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
             GroupByQuery.builder()
                         .setDataSource(UnnestDataSource.create(
                             new TableDataSource(CalciteTests.DATASOURCE3),
-                            expressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                            expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
                             null
                         ))
                         .setInterval(querySegmentSpec(Filtration.eternity()))
@@ -6471,7 +6470,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
             Druids.newTimeseriesQueryBuilder()
                   .dataSource(UnnestDataSource.create(
                       new TableDataSource(CalciteTests.DATASOURCE3),
-                      expressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
                       null
                   ))
                   .intervals(querySegmentSpec(Filtration.eternity()))
@@ -6811,7 +6810,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
                               range("__time", ColumnType.LONG, 946771200000L, 946858200000L, false, false)
                           )
                       ),
-                      expressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
                       null
                   ))
                   .intervals(querySegmentSpec(Filtration.eternity()))
@@ -6891,7 +6890,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
                           expressionVirtualColumn("_j0.unnest", "array(\"dim1\",\"dim2\")", ColumnType.STRING_ARRAY),
                           null
                       ),
-                      expressionVirtualColumn("__j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      expressionVirtualColumn1("__j0.unnest", "\"dim3\"", ColumnType.STRING),
                       null
                   ))
                   .intervals(querySegmentSpec(Intervals.of("2000-01-02T00:00:00.000Z/2000-01-03T00:10:00.001Z")))
