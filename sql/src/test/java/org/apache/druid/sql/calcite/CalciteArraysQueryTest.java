@@ -63,6 +63,7 @@ import org.apache.druid.query.scan.ScanQuery;
 import org.apache.druid.query.spec.MultipleIntervalSegmentSpec;
 import org.apache.druid.query.topn.DimensionTopNMetricSpec;
 import org.apache.druid.query.topn.TopNQueryBuilder;
+import org.apache.druid.segment.VirtualColumn;
 import org.apache.druid.segment.VirtualColumns;
 import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.column.RowSignature;
@@ -3971,7 +3972,8 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
             Druids.newScanQueryBuilder()
                   .dataSource(UnnestDataSource.create(
                       new TableDataSource(CalciteTests.DATASOURCE3),
-                      expressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      decoupledNestedVC(
+                      expressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING)),
                       null
                   ))
                   .intervals(querySegmentSpec(Filtration.eternity()))
@@ -4002,6 +4004,27 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
             new Object[]{null}
         )
     );
+  }
+
+  /**
+   * Optionally updates the VC defintion for the one planned by the decoupled planner.
+   *
+   * Compared to original plans; decoupled planner:
+   *  * moves the mv_to_array into the VC
+   *  * the type is an ARRAY
+   */
+  private VirtualColumn nestedDSDecoupledVC(ExpressionVirtualColumn vc)
+  {
+    if (testBuilder().isDecoupledMode()) {
+      return new ExpressionVirtualColumn(
+          vc.getOutputName(),
+          StringUtils.format("mv_to_array(%s)", vc.getExpression()),
+          vc.getParsedExpression().get(),
+          ColumnType.ofArray(vc.getOutputType())
+      );
+    } else {
+      return vc;
+    }
   }
 
   @Test
