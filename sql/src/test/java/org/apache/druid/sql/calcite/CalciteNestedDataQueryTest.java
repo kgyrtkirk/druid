@@ -75,7 +75,6 @@ import org.apache.druid.segment.virtual.NestedFieldVirtualColumn;
 import org.apache.druid.segment.writeout.OffHeapMemorySegmentWriteOutMediumFactory;
 import org.apache.druid.server.SpecificSegmentsQuerySegmentWalker;
 import org.apache.druid.sql.calcite.CalciteNestedDataQueryTest.NestedComponentSupplier;
-import org.apache.druid.sql.calcite.DecoupledTestConfig.QuidemTestCaseReason;
 import org.apache.druid.sql.calcite.NotYetSupported.Modes;
 import org.apache.druid.sql.calcite.filtration.Filtration;
 import org.apache.druid.sql.calcite.util.SqlTestFramework.StandardComponentSupplier;
@@ -6712,7 +6711,6 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.UNNEST_EXTRA_SCAN, separateDefaultModeTest = true)
   @Test
   public void testCoalesceOnNestedColumns()
   {
@@ -6763,7 +6761,6 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
         .run();
   }
 
-  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.UNNEST_EXTRA_SCAN, separateDefaultModeTest = true)
   @Test
   public void testCoalesceOnNestedColumnsLater()
   {
@@ -6992,7 +6989,6 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
         .run();
   }
 
-  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.UNNEST_EXTRA_SCAN, separateDefaultModeTest = true)
   @Test
   public void testUnnestJsonQueryArrays()
   {
@@ -7060,7 +7056,6 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
         .run();
   }
 
-  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.UNNEST_EXTRA_SCAN, separateDefaultModeTest = true)
   @Test
   public void testUnnestJsonQueryArraysJsonValue()
   {
@@ -7122,7 +7117,6 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
         .run();
   }
 
-  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.UNNEST_EXTRA_SCAN, separateDefaultModeTest = true)
   @Test
   public void testUnnestJsonQueryArraysJsonValueSum()
   {
