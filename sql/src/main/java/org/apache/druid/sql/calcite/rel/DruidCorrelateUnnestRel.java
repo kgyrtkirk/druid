@@ -595,7 +595,6 @@ public class DruidCorrelateUnnestRel extends DruidRel<DruidCorrelateUnnestRel>
           return new RexInputRef(fieldAccess.getField().getIndex(), fieldAccess.getType());
         }
       }
-
       return super.visitFieldAccess(fieldAccess);
     }
   }

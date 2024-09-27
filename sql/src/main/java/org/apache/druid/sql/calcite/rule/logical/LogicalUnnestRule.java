@@ -84,9 +84,6 @@ public class LogicalUnnestRule extends RelOptRule implements SubstitutionRule
     unnestConfig.expr = new DruidCorrelateUnnestRel.CorrelatedFieldAccessToInputRef(cor.getCorrelationId())
         .apply(unnestConfig.expr);
 
-    // final RexNode rexNodeToUnnest = getRexNodeToUnnest(cor.stripped(),
-    // unnestDatasourceRel);
-
     RelBuilder builder = call.builder();
     builder.push(cor.getLeft());
     RelNode newNode = builder.push(
@@ -160,5 +157,4 @@ public class LogicalUnnestRule extends RelOptRule implements SubstitutionRule
     rel = rel.stripped();
     return (rel instanceof LogicalValues);
   }
-
 }
