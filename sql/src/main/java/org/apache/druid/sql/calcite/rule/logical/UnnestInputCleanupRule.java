@@ -67,6 +67,10 @@ public class UnnestInputCleanupRule extends RelOptRule implements SubstitutionRu
     }
     int inputIndex = input.nextSetBit(0);
 
+    if(input.cardinality() != 1 ) {
+      return;
+    }
+
     List<RexNode> projects = new ArrayList<>(project.getProjects());
     RexNode unnestInput = projects.get(inputIndex);
 
@@ -81,10 +85,25 @@ public class UnnestInputCleanupRule extends RelOptRule implements SubstitutionRu
       return;
     }
 
+    ImmutableBitSet unnestInputInputs = InputFinder.analyze(unnestInput).build();
+    if(unnestInputInputs.cardinality() != 1) {
+      return ;
+    }
+
+    int unnestInputInputIndex = unnestInputInputs.nextSetBit(0);
+
     // Replace the unnest expression reference with an inputRef for #0
     // this will enable all other parts to see this Project as a mapping; which
     // will result in its removal (if empty).
-    projects.set(inputIndex, call.builder().getRexBuilder().makeInputRef(project.getInput(), 0));
+    projects.set(inputIndex, call.builder().getRexBuilder().makeInputRef(project.getInput(), unnestInputInputIndex));
+
+
+    if( projects.size() < inputIndex
+
+        ) {
+      // not yet syuppiorted
+      return;
+    }
 
     RelNode newInputRel = call.builder()
         .push(project.getInput())
