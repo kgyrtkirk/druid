@@ -67,40 +67,36 @@ public class DruidUnnest extends Unnest implements DruidLogicalNode, SourceDescP
     );
 
     RowSignature correlateRowSignature = RowSignature.builder()
-    .addAll(inputDesc.rowSignature)
-    .build();
+        .addAll(inputDesc.rowSignature)
+        .build();
 
-    RelDataType unnestedType =        rowType.getFieldList().get(rowType.getFieldCount() - 1).getType();
+    RelDataType unnestedType = rowType.getFieldList().get(rowType.getFieldCount() - 1).getType();
 
-
-    correlateRowSignature=    DruidJoinQueryRel.computeJoinRowSignature(
+    correlateRowSignature = DruidJoinQueryRel.computeJoinRowSignature(
         inputDesc.rowSignature,
         RowSignature.builder().add(
             "unnest",
-            Calcites.getColumnTypeForRelDataType(unnestedType )
+            Calcites.getColumnTypeForRelDataType(unnestedType)
         ).build(),
         DruidJoinQueryRel.findExistingJoinPrefixes(inputDesc.dataSource)
     ).rhs;
-
 
     RowSignature filterRowSignature = RowSignature.builder().add(
         correlateRowSignature.getColumnName(correlateRowSignature.size() - 1),
         correlateRowSignature.getColumnType(correlateRowSignature.size() - 1).get()
     ).build();
 
+    VirtualColumn virtualColumn = expressionToUnnest.toVirtualColumn(
+        correlateRowSignature.getColumnName(correlateRowSignature.size() - 1),
+        Calcites.getColumnTypeForRelDataType(
+            // rowType.getFieldList().get(rowType.getFieldCount()-1).getType()
+            rexNodeToUnnest.getType()
+        ),
+        plannerContext.getExpressionParser()
+    );
 
-    VirtualColumn virtualColumn =
-        expressionToUnnest.toVirtualColumn(
-            correlateRowSignature.getColumnName(correlateRowSignature.size() - 1),
-            Calcites.getColumnTypeForRelDataType(
-//                rowType.getFieldList().get(rowType.getFieldCount()-1).getType()
-                rexNodeToUnnest.getType()
-                ),
-            plannerContext.getExpressionParser()
-        );
-
-    DimFilter filter=null;
-    if(condition != null ) {
+    DimFilter filter = null;
+    if (condition != null) {
       filter = Expressions.toFilter(
           plannerContext,
           filterRowSignature,
@@ -110,7 +106,7 @@ public class DruidUnnest extends Unnest implements DruidLogicalNode, SourceDescP
       filter = Filtration.create(filter).optimizeFilterOnly(inputDesc.rowSignature).getDimFilter();
     }
     DataSource dataSource = UnnestDataSource.create(inputDesc.dataSource, virtualColumn, filter);
-    return new SourceDesc(        dataSource, correlateRowSignature    );
+    return new SourceDesc(dataSource, correlateRowSignature);
     // return null;//DruidJoinQueryRel.buildJoinSourceDesc(leftDesc, null,
     // plannerContext, this, null);
   }
