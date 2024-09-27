@@ -4954,7 +4954,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(ignoreExpectedQueriesReason = IgnoreQueriesReason.UNNEST_INPUT_CLEANUP)
+  @NotYetSupported(Modes.UNNEST_RESULT_MISMATCH)
   @Test
   public void testUnnestWithGroupBy()
   {
@@ -5375,7 +5375,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(ignoreExpectedQueriesReason = IgnoreQueriesReason.UNNEST_INPUT_CLEANUP)
+  @DecoupledTestConfig(ignoreExpectedQueriesReason = IgnoreQueriesReason.UNNEST_INPUT_CLEANUP1)
   @Test
   public void testUnnestWithInFiltersWithExpressionInInnerQuery()
   {
@@ -5827,7 +5827,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
             Druids.newScanQueryBuilder()
                   .dataSource(UnnestDataSource.create(
                       new TableDataSource(CalciteTests.DATASOURCE3),
-                      expressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
                       null
                   ))
                   .intervals(querySegmentSpec(Filtration.eternity()))
@@ -5934,7 +5934,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
             Druids.newScanQueryBuilder()
                   .dataSource(UnnestDataSource.create(
                       new TableDataSource(CalciteTests.DATASOURCE3),
-                      expressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
                       in("j0.unnest", ImmutableSet.of("foo", "bar"))
                   ))
                   .intervals(querySegmentSpec(Filtration.eternity()))
@@ -6117,7 +6117,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
             Druids.newScanQueryBuilder()
                   .dataSource(UnnestDataSource.create(
                       new TableDataSource(CalciteTests.DATASOURCE3),
-                      expressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
                       null
                   ))
                   .intervals(querySegmentSpec(Filtration.eternity()))
@@ -6920,7 +6920,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(ignoreExpectedQueriesReason = IgnoreQueriesReason.UNNEST_INPUT_CLEANUP)
+  @DecoupledTestConfig(ignoreExpectedQueriesReason = IgnoreQueriesReason.UNNEST_INPUT_CLEANUP1)
   @Test
   public void testUnnestWithTimeFilterInsideSubquery()
   {
@@ -6971,7 +6971,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(ignoreExpectedQueriesReason = IgnoreQueriesReason.UNNEST_INPUT_CLEANUP)
+  @DecoupledTestConfig(ignoreExpectedQueriesReason = IgnoreQueriesReason.UNNEST_INPUT_CLEANUP1)
   @Test
   public void testUnnestWithTimeFilterInsideSubqueryArrayColumns()
   {
@@ -7101,7 +7101,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(ignoreExpectedQueriesReason = IgnoreQueriesReason.UNNEST_INPUT_CLEANUP)
+  @DecoupledTestConfig(ignoreExpectedQueriesReason = IgnoreQueriesReason.UNNEST_INPUT_CLEANUP1)
   @Test
   public void testUnnestWithLookup()
   {
