@@ -68,7 +68,6 @@ public class DruidUnnest extends Unnest implements DruidLogicalNode, SourceDescP
 
     RowSignature correlateRowSignature = RowSignature.builder()
     .addAll(inputDesc.rowSignature)
-//    .add("unnest1", unnestExpr.getType());
     .build();
 
     RelDataType unnestedType =        rowType.getFieldList().get(rowType.getFieldCount() - 1).getType();
@@ -102,17 +101,13 @@ public class DruidUnnest extends Unnest implements DruidLogicalNode, SourceDescP
 
     DimFilter filter=null;
     if(condition != null ) {
-
       filter = Expressions.toFilter(
           plannerContext,
           filterRowSignature,
           null,
           condition
-      ) // .optimizeFilterOnly(filterRowSignature)
-;
+      );
       filter = Filtration.create(filter).optimizeFilterOnly(inputDesc.rowSignature).getDimFilter();
-
-
     }
     DataSource dataSource = UnnestDataSource.create(inputDesc.dataSource, virtualColumn, filter);
     return new SourceDesc(        dataSource, correlateRowSignature    );

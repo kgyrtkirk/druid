@@ -148,7 +148,13 @@ public @interface DecoupledTestConfig
     /**
      * Unnest uses a VC to access a constant like array(1,2,3).
      */
-    UNNEST_VC_USES_PROJECTED_CONSTANT;
+    UNNEST_VC_USES_PROJECTED_CONSTANT,
+    /**
+     * This should need some investigation.
+     *
+     * Its not invalid; just strange.
+     */
+    SCAN_QUERY_ON_FILTERED_DS_DOING_FILTERING;
 
     public boolean isPresent()
     {

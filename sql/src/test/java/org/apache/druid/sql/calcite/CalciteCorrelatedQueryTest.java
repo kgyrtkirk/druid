@@ -170,7 +170,7 @@ public class CalciteCorrelatedQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(ignoreExpectedQueriesReason = IgnoreQueriesReason.UNNEST_INPUT_CLEANUP)
+  @DecoupledTestConfig(ignoreExpectedQueriesReason = IgnoreQueriesReason.UNNEST_INPUT_CLEANUP1)
   @MethodSource("provideQueryContexts")
   @ParameterizedTest(name = "{0}")
   public void testCorrelatedSubqueryWithLeftFilter(Map<String, Object> queryContext)
@@ -356,7 +356,7 @@ public class CalciteCorrelatedQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(ignoreExpectedQueriesReason = IgnoreQueriesReason.UNNEST_INPUT_CLEANUP)
+  @DecoupledTestConfig(ignoreExpectedQueriesReason = IgnoreQueriesReason.UNNEST_INPUT_CLEANUP1)
   @MethodSource("provideQueryContexts")
   @ParameterizedTest(name = "{0}")
   public void testCorrelatedSubqueryWithCorrelatedQueryFilter(Map<String, Object> queryContext)
@@ -451,7 +451,7 @@ public class CalciteCorrelatedQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(ignoreExpectedQueriesReason = IgnoreQueriesReason.UNNEST_INPUT_CLEANUP)
+  @DecoupledTestConfig(ignoreExpectedQueriesReason = IgnoreQueriesReason.UNNEST_INPUT_CLEANUP1)
   @MethodSource("provideQueryContexts")
   @ParameterizedTest(name = "{0}")
   public void testCorrelatedSubqueryWithCorrelatedQueryFilter_Scan(Map<String, Object> queryContext)

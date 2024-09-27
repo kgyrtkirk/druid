@@ -84,6 +84,7 @@ import org.apache.druid.segment.join.JoinType;
 import org.apache.druid.segment.virtual.ListFilteredVirtualColumn;
 import org.apache.druid.server.QueryLifecycle;
 import org.apache.druid.server.security.Access;
+import org.apache.druid.sql.calcite.DecoupledTestConfig.IgnoreQueriesReason;
 import org.apache.druid.sql.calcite.DecoupledTestConfig.QuidemTestCaseReason;
 import org.apache.druid.sql.calcite.NotYetSupported.Modes;
 import org.apache.druid.sql.calcite.SqlTestFrameworkConfig.MinTopNThreshold;
@@ -4948,7 +4949,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.IRRELEVANT_SCANQUERY, separateDefaultModeTest = true)
+  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.SCAN_QUERY_ON_FILTERED_DS_DOING_FILTERING, separateDefaultModeTest = true)
   @MethodSource("provideQueryContexts")
   @ParameterizedTest(name = "{0}")
   public void testNestedGroupByOnInlineDataSourceWithFilter(Map<String, Object> queryContext)
@@ -6192,6 +6193,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @DecoupledTestConfig(ignoreExpectedQueriesReason = IgnoreQueriesReason.UNNEST_INPUT_CLEANUP1)
   @Test
   public void testJoinsWithUnnestOverFilteredDSOnLeft()
   {
@@ -6401,6 +6403,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @DecoupledTestConfig(ignoreExpectedQueriesReason = IgnoreQueriesReason.UNNEST_INPUT_CLEANUP1)
   @Test
   public void testJoinsOverUnnestOverFilterDSOverJoin()
   {

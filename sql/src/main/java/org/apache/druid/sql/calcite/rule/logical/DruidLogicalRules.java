@@ -112,13 +112,6 @@ public class DruidLogicalRules
                 DruidLogicalConvention.instance(),
                 DruidUncollectRule.class.getSimpleName()
             )
-//            ,
-//            new DruidLogicalCorrelateRule(
-//                LogicalCorrelate.class,
-//                Convention.NONE,
-//                DruidLogicalConvention.instance(),
-//                DruidLogicalCorrelateRule.class.getSimpleName()
-//            )
         )
     );
   }
