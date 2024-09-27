@@ -25,10 +25,10 @@ import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.convert.ConverterRule;
 import org.apache.druid.sql.calcite.rel.logical.DruidLogicalConvention;
 
-public class DruidUncollectRule extends ConverterRule
+public class DruidUnnestRule extends ConverterRule
 {
 
-  public DruidUncollectRule(
+  public DruidUnnestRule(
       Class<? extends RelNode> clazz,
       RelTrait in,
       RelTrait out,
@@ -54,5 +54,4 @@ public class DruidUncollectRule extends ConverterRule
         unnest.condition
     );
   }
-
 }
