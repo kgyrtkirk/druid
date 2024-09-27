@@ -4369,7 +4369,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
                               ),
                               null
                           ),
-                          expressionVirtualColumn(
+                          expressionVirtualColumn1(
                               "_j0.unnest",
                               "\"dim3\"",
                               ColumnType.STRING
@@ -5278,7 +5278,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
         ImmutableList.of(Druids.newScanQueryBuilder()
                                .dataSource(UnnestDataSource.create(
                                    new TableDataSource(CalciteTests.DATASOURCE3),
-                                   expressionVirtualColumn(
+                                   expressionVirtualColumn1(
                                        "j0.unnest",
                                        "\"dim3\"",
                                        ColumnType.STRING
@@ -6389,7 +6389,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
             Druids.newTimeseriesQueryBuilder()
                   .dataSource(UnnestDataSource.create(
                       new TableDataSource(CalciteTests.DATASOURCE3),
-                      expressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      expressionVirtualColumn1("j0.unnest", "\"dim3\"", ColumnType.STRING),
                       null
                   ))
                   .intervals(querySegmentSpec(Filtration.eternity()))
