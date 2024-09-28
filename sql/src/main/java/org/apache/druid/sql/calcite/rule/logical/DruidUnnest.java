@@ -72,12 +72,12 @@ public class DruidUnnest extends Unnest implements DruidLogicalNode, SourceDescP
         filterRowSignature.getColumnName(0)
     );
 
-    DimFilter dimFilter = buildDimFilter(plannerContext, inputDesc, filterRowSignature);
+    DimFilter dimFilter = buildDimFilter(plannerContext, filterRowSignature);
     DataSource dataSource = UnnestDataSource.create(inputDesc.dataSource, virtualColumn, dimFilter);
     return new SourceDesc(dataSource, outputRowSignature);
   }
 
-  private DimFilter buildDimFilter(PlannerContext plannerContext, SourceDesc inputDesc, RowSignature filterRowSignature)
+  private DimFilter buildDimFilter(PlannerContext plannerContext, RowSignature filterRowSignature)
   {
     if (filter == null) {
       return null;
