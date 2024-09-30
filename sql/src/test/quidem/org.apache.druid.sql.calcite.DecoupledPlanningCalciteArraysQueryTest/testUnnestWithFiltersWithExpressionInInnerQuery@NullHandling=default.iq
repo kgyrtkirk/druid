@@ -1,4 +1,4 @@
-# testUnnestWithInFiltersWithExpressionInInnerQuery case-crc:49354254
+# testUnnestWithFiltersWithExpressionInInnerQuery@NullHandling=default case-crc:fa9be8db
 # quidem testcase reason: UNNEST_EXTRA_SCAN
 !set debug true
 !set defaultTimeout 300000
@@ -9,28 +9,27 @@
 !set sqlStringifyArrays false
 !set outputformat mysql
 !use druidtest:///
-SELECT t,d3 FROM (select FLOOR(__time to hour) t, dim3 from druid.numfoo where dim2 IN ('a','b')), UNNEST(MV_TO_ARRAY(dim3)) as unnested (d3);
+SELECT t,d3 FROM (select FLOOR(__time to hour) t, dim3 from druid.numfoo where dim2='a'), UNNEST(MV_TO_ARRAY(dim3)) as unnested (d3);
 +-------------------------+----+
 | t                       | d3 |
 +-------------------------+----+
 | 2000-01-01 00:00:00.000 | a  |
 | 2000-01-01 00:00:00.000 | b  |
-| 2001-01-01 00:00:00.000 |    |
 +-------------------------+----+
-(3 rows)
+(2 rows)
 
 !ok
 LogicalProject(t=[$0], d3=[$3])
   LogicalUnnest(unnestExpr=[MV_TO_ARRAY($1)])
     LogicalProject($f0=[FLOOR($0, FLAG(HOUR))], dim3=[$3], __time=[$0])
-      LogicalFilter(condition=[SEARCH($2, Sarg['a':VARCHAR, 'b':VARCHAR]:VARCHAR)])
+      LogicalFilter(condition=[=($2, 'a')])
         LogicalTableScan(table=[[druid, numfoo]])
 
 !logicalPlan
 DruidProject(t=[$0], d3=[$3], druid=[logical])
   DruidUnnest(unnestExpr=[MV_TO_ARRAY($1)])
     DruidProject($f0=[FLOOR($0, FLAG(HOUR))], dim3=[$3], __time=[$0], druid=[logical])
-      DruidFilter(condition=[SEARCH($2, Sarg['a':VARCHAR, 'b':VARCHAR]:VARCHAR)])
+      DruidFilter(condition=[=($2, 'a')])
         DruidTableScan(table=[[druid, numfoo]], druid=[logical])
 
 !druidPlan
@@ -58,10 +57,9 @@ DruidProject(t=[$0], d3=[$3], druid=[logical])
         } ],
         "resultFormat" : "compactedList",
         "filter" : {
-          "type" : "inType",
-          "column" : "dim2",
-          "matchValueType" : "STRING",
-          "sortedValues" : [ "a", "b" ]
+          "type" : "selector",
+          "dimension" : "dim2",
+          "value" : "a"
         },
         "columns" : [ "__time", "dim3", "v0" ],
         "columnTypes" : [ "LONG", "STRING", "LONG" ],

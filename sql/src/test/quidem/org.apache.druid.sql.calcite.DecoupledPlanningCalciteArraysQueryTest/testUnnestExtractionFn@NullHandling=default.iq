@@ -1,4 +1,4 @@
-# testUnnestExtractionFn case-crc:404dc668
+# testUnnestExtractionFn@NullHandling=default case-crc:404dc668
 # quidem testcase reason: UNNEST_DIFFERENT_RESULTSET
 !set debug true
 !set defaultTimeout 300000

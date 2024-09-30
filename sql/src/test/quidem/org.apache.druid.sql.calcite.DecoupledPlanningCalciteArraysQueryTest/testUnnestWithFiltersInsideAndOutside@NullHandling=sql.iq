@@ -1,4 +1,4 @@
-# testUnnestWithFiltersInsideAndOutside case-crc:10c26262
+# testUnnestWithFiltersInsideAndOutside@NullHandling=sql case-crc:10c26262
 # quidem testcase reason: UNNEST_EXTRA_SCAN
 !set debug true
 !set defaultTimeout 300000
@@ -17,9 +17,10 @@ AND unnested.d3 <> 'b';
 +----+
 | d3 |
 +----+
+|    |
 | a  |
 +----+
-(1 row)
+(2 rows)
 
 !ok
 LogicalProject(d3=[$18])
@@ -62,15 +63,17 @@ DruidProject(d3=[$18], druid=[logical])
         "filter" : {
           "type" : "and",
           "fields" : [ {
-            "type" : "selector",
-            "dimension" : "dim2",
-            "value" : "a"
+            "type" : "equals",
+            "column" : "dim2",
+            "matchValueType" : "STRING",
+            "matchValue" : "a"
           }, {
             "type" : "not",
             "field" : {
-              "type" : "selector",
-              "dimension" : "dim1",
-              "value" : "foo"
+              "type" : "equals",
+              "column" : "dim1",
+              "matchValueType" : "STRING",
+              "matchValue" : "foo"
             }
           } ]
         },
@@ -91,9 +94,10 @@ DruidProject(d3=[$18], druid=[logical])
     "unnestFilter" : {
       "type" : "not",
       "field" : {
-        "type" : "selector",
-        "dimension" : "j0.unnest",
-        "value" : "b"
+        "type" : "equals",
+        "column" : "j0.unnest",
+        "matchValueType" : "STRING",
+        "matchValue" : "b"
       }
     }
   },
