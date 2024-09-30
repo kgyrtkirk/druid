@@ -2,61 +2,61 @@
 !use druidtest://?numMergeBuffers=3
 !set outputformat mysql
 
-#SELECT d3 FROM druid.numfoo, UNNEST(MV_TO_ARRAY(dim3)) as unnested (d3)
-SELECT
-            json_value(objects, '$.x' returning bigint) as x,
-             count(*)
-             FROM druid.arrays, UNNEST(JSON_QUERY_ARRAY(arrayObject, '$')) as u(objects)
-             GROUP BY 1;
-
-LogicalAggregate(group=[{0}], EXPR$1=[COUNT()])
-  LogicalProject(x=[JSON_VALUE_BIGINT($12, '$.x')])
-    LogicalProject(__time=[$0], arrayString=[$1], arrayStringNulls=[$2], arrayLong=[$3], arrayLongNulls=[$4], arrayDouble=[$5], arrayDoubleNulls=[$6], arrayVariant=[$7], arrayNoType=[$8], arrayNestedLong=[$9], arrayObject=[$10], cnt=[$11], objects=[$13])
-      LogicalCorrelate(correlation=[$cor0], joinType=[inner], requiredColumns=[{12}])
-        LogicalProject(__time=[$0], arrayString=[$1], arrayStringNulls=[$2], arrayLong=[$3], arrayLongNulls=[$4], arrayDouble=[$5], arrayDoubleNulls=[$6], arrayVariant=[$7], arrayNoType=[$8], arrayNestedLong=[$9], arrayObject=[$10], cnt=[$11], $f12=[JSON_QUERY_ARRAY($10, '$')])
-          LogicalTableScan(table=[[druid, arrays]])
-        LogicalProject(objects=[$0])
-          Uncollect
-            LogicalProject(EXPR$0=[$cor0.$f12])
-              LogicalValues(tuples=[[{ 0 }]])
+SELECT d3 FROM (select * from druid.numfoo where dim2='a'), UNNEST(MV_TO_ARRAY(dim3)) as unnested (d3);
+LogicalProject(d3=[$17])
+  LogicalProject(__time=[$0], dim1=[$1], dim2=[$2], dim3=[$3], dim4=[$4], dim5=[$5], dim6=[$6], d1=[$7], d2=[$8], f1=[$9], f2=[$10], l1=[$11], l2=[$12], cnt=[$13], m1=[$14], m2=[$15], unique_dim1=[$16], d3=[$18])
+    LogicalCorrelate(correlation=[$cor0], joinType=[inner], requiredColumns=[{17}])
+      LogicalProject(__time=[$0], dim1=[$1], dim2=[$2], dim3=[$3], dim4=[$4], dim5=[$5], dim6=[$6], d1=[$7], d2=[$8], f1=[$9], f2=[$10], l1=[$11], l2=[$12], cnt=[$13], m1=[$14], m2=[$15], unique_dim1=[$16], $f17=[MV_TO_ARRAY($3)])
+        LogicalFilter(condition=[=($2, 'a')])
+          LogicalTableScan(table=[[druid, numfoo]])
+      LogicalProject(d3=[$0])
+        Uncollect
+          LogicalProject(EXPR$0=[$cor0.$f17])
+            LogicalValues(tuples=[[{ 0 }]])
 
 !convertedPlan
 
 
-LogicalAggregate(group=[{0}], EXPR$1=[COUNT()])
-  LogicalProject(x=[JSON_VALUE_BIGINT($13, '$.x')])
-    LogicalCorrelate(correlation=[$cor0], joinType=[inner], requiredColumns=[{12}])
-      LogicalProject(__time=[$0], arrayString=[$1], arrayStringNulls=[$2], arrayLong=[$3], arrayLongNulls=[$4], arrayDouble=[$5], arrayDoubleNulls=[$6], arrayVariant=[$7], arrayNoType=[$8], arrayNestedLong=[$9], arrayObject=[$10], cnt=[$11], $f12=[JSON_QUERY_ARRAY($10, '$')])
-        LogicalTableScan(table=[[druid, arrays]])
-      Uncollect
-        LogicalProject(EXPR$0=[$cor0.$f12])
-          LogicalValues(tuples=[[{ 0 }]])
+LogicalProject(d3=[$18])
+  LogicalCorrelate(correlation=[$cor0], joinType=[inner], requiredColumns=[{17}])
+    LogicalProject(__time=[$0], dim1=[$1], dim2=[CAST('a':VARCHAR):VARCHAR], dim3=[$3], dim4=[$4], dim5=[$5], dim6=[$6], d1=[$7], d2=[$8], f1=[$9], f2=[$10], l1=[$11], l2=[$12], cnt=[$13], m1=[$14], m2=[$15], unique_dim1=[$16], $f17=[MV_TO_ARRAY($3)])
+      LogicalFilter(condition=[=($2, 'a')])
+        LogicalTableScan(table=[[druid, numfoo]])
+    Uncollect
+      LogicalProject(EXPR$0=[$cor0.$f17])
+        LogicalValues(tuples=[[{ 0 }]])
 
 !logicalPlan
 
-LogicalAggregate(group=[{0}], EXPR$1=[COUNT()])
-  LogicalProject(x=[JSON_VALUE_BIGINT($13, '$.x')])
-    LogicalCorrelate(correlation=[$cor0], joinType=[inner], requiredColumns=[{12}])
-      LogicalProject(__time=[$0], arrayString=[$1], arrayStringNulls=[$2], arrayLong=[$3], arrayLongNulls=[$4], arrayDouble=[$5], arrayDoubleNulls=[$6], arrayVariant=[$7], arrayNoType=[$8], arrayNestedLong=[$9], arrayObject=[$10], cnt=[$11], $f12=[JSON_QUERY_ARRAY($10, '$')])
-        LogicalTableScan(table=[[druid, arrays]])
-      Uncollect
-        LogicalProject(EXPR$0=[$cor0.$f12])
-          LogicalValues(tuples=[[{ 0 }]])
+LogicalProject(d3=[$17])
+  LogicalCorrelate(correlation=[$cor2], joinType=[inner], requiredColumns=[{3}])
+    LogicalFilter(condition=[=($2, 'a')])
+      LogicalTableScan(table=[[druid, numfoo]])
+    DruidUnnestRel(expr=[MV_TO_ARRAY($cor2.dim3)], filter=[null])
 
 !druidPlan
 {
-  "queryType" : "groupBy",
+  "queryType" : "scan",
   "dataSource" : {
     "type" : "unnest",
     "base" : {
-      "type" : "table",
-      "name" : "arrays"
+      "type" : "filter",
+      "base" : {
+        "type" : "table",
+        "name" : "numfoo"
+      },
+      "filter" : {
+        "type" : "equals",
+        "column" : "dim2",
+        "matchValueType" : "STRING",
+        "matchValue" : "a"
+      }
     },
     "virtualColumn" : {
       "type" : "expression",
       "name" : "j0.unnest",
-      "expression" : "json_query_array(\"arrayObject\",'$')",
-      "outputType" : "ARRAY<COMPLEX<json>>"
+      "expression" : "\"dim3\"",
+      "outputType" : "STRING"
     },
     "unnestFilter" : null
   },
@@ -64,46 +64,23 @@ LogicalAggregate(group=[{0}], EXPR$1=[COUNT()])
     "type" : "intervals",
     "intervals" : [ "-146136543-09-08T08:23:32.096Z/146140482-04-24T15:36:27.903Z" ]
   },
-  "virtualColumns" : [ {
-    "type" : "nested-field",
-    "columnName" : "j0.unnest",
-    "outputName" : "v0",
-    "expectedType" : "LONG",
-    "pathParts" : [ {
-      "type" : "field",
-      "field" : "x"
-    } ],
-    "processFromRaw" : false
-  } ],
+  "resultFormat" : "compactedList",
+  "columns" : [ "j0.unnest" ],
+  "columnTypes" : [ "STRING" ],
   "granularity" : {
     "type" : "all"
   },
-  "dimensions" : [ {
-    "type" : "default",
-    "dimension" : "v0",
-    "outputName" : "d0",
-    "outputType" : "LONG"
-  } ],
-  "aggregations" : [ {
-    "type" : "count",
-    "name" : "a0"
-  } ],
-  "limitSpec" : {
-    "type" : "NoopLimitSpec"
-  }
+  "legacy" : false
 }
 !nativePlan
-+------+--------+
-| x    | EXPR$1 |
-+------+--------+
-|    1 |      4 |
-| 1000 |      2 |
-|    2 |      8 |
-|    3 |      2 |
-|    4 |      2 |
-|      |     10 |
-+------+--------+
-(6 rows)
++----+
+| d3 |
++----+
+|    |
+| a  |
+| b  |
++----+
+(3 rows)
 
 !ok
 
