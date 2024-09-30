@@ -5250,6 +5250,49 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  public void testQuery1(
+      final String sql,
+      final Map<String, Object> queryContext,
+      final List<Query<?>> expectedQueries,
+      final List<Object[]> expectedResults
+  )
+  {
+    testBuilder()
+        .queryContext(queryContext)
+        .sql(sql)
+        .expectedResults(expectedResults)
+        .run();
+  }
+
+  @Test
+  public void testDim3Check()
+  {
+    testQuery1(
+        "SELECT dim3,mv_to_array(dim3) from numfoo where m1=4.0 or m1=5.0",
+        QUERY_CONTEXT_UNNEST,
+        ImmutableList.of(
+            Druids.newScanQueryBuilder()
+                  .dataSource(UnnestDataSource.create(
+                      FilteredDataSource.create(
+                          new TableDataSource(CalciteTests.DATASOURCE3),
+                          equality("dim2", "a", ColumnType.STRING)
+                      ),
+                      nestedExpressionVirtualColumn("j0.unnest", "\"dim3\"", ColumnType.STRING),
+                      null
+                  ))
+                  .intervals(querySegmentSpec(Filtration.eternity()))
+                  .resultFormat(ScanQuery.ResultFormat.RESULT_FORMAT_COMPACTED_LIST)
+                  .context(QUERY_CONTEXT_UNNEST)
+                  .columns(ImmutableList.of("j0.unnest"))
+                  .build()
+        ),
+        ImmutableList.of(
+            new Object[]{"", ImmutableList.of("")},
+            new Object[]{null, null}
+        )
+    );
+  }
+
   @DecoupledTestConfig(ignoreExpectedQueriesReason = IgnoreQueriesReason.UNNEST_EXTRA_SCANQUERY)
   @Test
   public void testUnnestWithFilters()

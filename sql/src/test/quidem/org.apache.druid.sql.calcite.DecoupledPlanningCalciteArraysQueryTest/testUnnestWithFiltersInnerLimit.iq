@@ -13,11 +13,10 @@ SELECT d3 FROM (select dim2,dim3 from druid.numfoo where dim2='a' LIMIT 2), UNNE
 +----+
 | d3 |
 +----+
-|    |
 | a  |
 | b  |
 +----+
-(3 rows)
+(2 rows)
 
 !ok
 LogicalProject(d3=[$3])
@@ -61,10 +60,9 @@ DruidProject(d3=[$3], druid=[logical])
         "resultFormat" : "compactedList",
         "limit" : 2,
         "filter" : {
-          "type" : "equals",
-          "column" : "dim2",
-          "matchValueType" : "STRING",
-          "matchValue" : "a"
+          "type" : "selector",
+          "dimension" : "dim2",
+          "value" : "a"
         },
         "columns" : [ "__time", "dim3", "v0" ],
         "columnTypes" : [ "LONG", "STRING", "STRING" ],

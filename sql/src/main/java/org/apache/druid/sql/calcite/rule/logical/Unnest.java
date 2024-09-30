@@ -43,9 +43,14 @@ public abstract class Unnest extends SingleRel
     this.filter = condition;
   }
 
-  public final RexNode getUnnestExpr()
+  public RexNode getUnnestExpr()
   {
     return unnestExpr;
+  }
+
+  public RexNode getFilter()
+  {
+    return filter;
   }
 
   @Override

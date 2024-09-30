@@ -36,7 +36,6 @@ import org.apache.druid.java.util.common.RE;
 import org.apache.druid.java.util.common.StringUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -78,7 +77,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  *
  */
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@ExtendWith(EnabledOnlyInSqlCompatibleMode.class)
+//@ExtendWith(EnabledOnlyInSqlCompatibleMode.class)
 public abstract class DruidQuidemTestBase
 {
   static {
