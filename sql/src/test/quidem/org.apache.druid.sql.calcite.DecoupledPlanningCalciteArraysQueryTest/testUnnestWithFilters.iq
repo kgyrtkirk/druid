@@ -1,5 +1,5 @@
-# testUnnestWithFiltersInnerLimit case-crc:1f5acfc8
-# quidem testcase reason: UNUSED_VIRTUALCOLUMN
+# testUnnestWithFilters case-crc:810b3e0d
+# quidem testcase reason: UNNEST_EXTRA_SCAN
 !set debug true
 !set defaultTimeout 300000
 !set maxScatterGatherBytes 9223372036854775807
@@ -9,7 +9,7 @@
 !set sqlStringifyArrays false
 !set outputformat mysql
 !use druidtest:///
-SELECT d3 FROM (select dim2,dim3 from druid.numfoo where dim2='a' LIMIT 2), UNNEST(MV_TO_ARRAY(dim3)) as unnested (d3);
+SELECT d3 FROM (select * from druid.numfoo where dim2='a'), UNNEST(MV_TO_ARRAY(dim3)) as unnested (d3);
 +----+
 | d3 |
 +----+
@@ -19,20 +19,18 @@ SELECT d3 FROM (select dim2,dim3 from druid.numfoo where dim2='a' LIMIT 2), UNNE
 (2 rows)
 
 !ok
-LogicalProject(d3=[$3])
-  LogicalUnnest(unnestExpr=[MV_TO_ARRAY($1)])
-    LogicalProject($f0=[CAST('a':VARCHAR):VARCHAR], dim3=[$3], __time=[$0])
-      LogicalSort(fetch=[2])
-        LogicalFilter(condition=[=($2, 'a')])
-          LogicalTableScan(table=[[druid, numfoo]])
+LogicalProject(d3=[$18])
+  LogicalUnnest(unnestExpr=[MV_TO_ARRAY($3)])
+    LogicalProject(__time=[$0], dim1=[$1], $f2=[CAST('a':VARCHAR):VARCHAR], dim3=[$3], dim4=[$4], dim5=[$5], dim6=[$6], d1=[$7], d2=[$8], f1=[$9], f2=[$10], l1=[$11], l2=[$12], cnt=[$13], m1=[$14], m2=[$15], unique_dim1=[$16], __time0=[$0])
+      LogicalFilter(condition=[=($2, 'a')])
+        LogicalTableScan(table=[[druid, numfoo]])
 
 !logicalPlan
-DruidProject(d3=[$3], druid=[logical])
-  DruidUnnest(unnestExpr=[MV_TO_ARRAY($1)])
-    DruidProject($f0=[CAST('a':VARCHAR):VARCHAR], dim3=[$3], __time=[$0], druid=[logical])
-      DruidSort(fetch=[2], druid=[logical])
-        DruidFilter(condition=[=($2, 'a')])
-          DruidTableScan(table=[[druid, numfoo]], druid=[logical])
+DruidProject(d3=[$18], druid=[logical])
+  DruidUnnest(unnestExpr=[MV_TO_ARRAY($3)])
+    DruidProject(__time=[$0], dim1=[$1], $f2=[CAST('a':VARCHAR):VARCHAR], dim3=[$3], dim4=[$4], dim5=[$5], dim6=[$6], d1=[$7], d2=[$8], f1=[$9], f2=[$10], l1=[$11], l2=[$12], cnt=[$13], m1=[$14], m2=[$15], unique_dim1=[$16], __time0=[$0], druid=[logical])
+      DruidFilter(condition=[=($2, 'a')])
+        DruidTableScan(table=[[druid, numfoo]], druid=[logical])
 
 !druidPlan
 {
@@ -58,14 +56,13 @@ DruidProject(d3=[$3], druid=[logical])
           "outputType" : "STRING"
         } ],
         "resultFormat" : "compactedList",
-        "limit" : 2,
         "filter" : {
           "type" : "selector",
           "dimension" : "dim2",
           "value" : "a"
         },
-        "columns" : [ "__time", "dim3", "v0" ],
-        "columnTypes" : [ "LONG", "STRING", "STRING" ],
+        "columns" : [ "__time", "cnt", "d1", "d2", "dim1", "dim3", "dim4", "dim5", "dim6", "f1", "f2", "l1", "l2", "m1", "m2", "unique_dim1", "v0" ],
+        "columnTypes" : [ "LONG", "LONG", "DOUBLE", "DOUBLE", "STRING", "STRING", "STRING", "STRING", "STRING", "FLOAT", "FLOAT", "LONG", "LONG", "FLOAT", "DOUBLE", "COMPLEX<hyperUnique>", "STRING" ],
         "granularity" : {
           "type" : "all"
         },

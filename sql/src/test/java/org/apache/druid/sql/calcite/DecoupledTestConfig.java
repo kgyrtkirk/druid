@@ -153,7 +153,11 @@ public @interface DecoupledTestConfig
      *
      * Its not invalid; just strange.
      */
-    SCAN_QUERY_ON_FILTERED_DS_DOING_FILTERING;
+    SCAN_QUERY_ON_FILTERED_DS_DOING_FILTERING,
+    /**
+     * New plan UNNEST-s a different resultset.
+     */
+    UNNEST_DIFFERENT_RESULTSET;
 
     public boolean isPresent()
     {

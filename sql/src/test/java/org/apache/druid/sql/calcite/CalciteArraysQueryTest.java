@@ -5250,7 +5250,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(ignoreExpectedQueriesReason = IgnoreQueriesReason.UNNEST_EXTRA_SCANQUERY)
+  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.UNNEST_EXTRA_SCAN)
   @Test
   public void testUnnestWithFilters()
   {
@@ -5281,7 +5281,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(ignoreExpectedQueriesReason = IgnoreQueriesReason.UNNEST_EXTRA_SCANQUERY)
+  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.UNNEST_EXTRA_SCAN)
   @Test
   public void testUnnestWithFiltersWithExpressionInInnerQuery()
   {
@@ -5317,7 +5317,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(ignoreExpectedQueriesReason = IgnoreQueriesReason.UNNEST_EXTRA_SCANQUERY)
+  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.UNNEST_EXTRA_SCAN)
   @Test
   public void testUnnestWithInFiltersWithExpressionInInnerQuery()
   {
@@ -5396,7 +5396,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(ignoreExpectedQueriesReason = IgnoreQueriesReason.UNNEST_EXTRA_SCANQUERY)
+  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.UNNEST_EXTRA_SCAN)
   @Test
   public void testUnnestWithFiltersInsideAndOutside()
   {
@@ -5883,6 +5883,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.UNNEST_DIFFERENT_RESULTSET)
   @Test
   public void testUnnestWithNotFiltersOnUnnestedColumn()
   {
@@ -6124,6 +6125,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.UNNEST_DIFFERENT_RESULTSET)
   @Test
   public void testUnnestWithMultipleOrFiltersOnVariationsOfUnnestedColumns()
   {
@@ -7191,6 +7193,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.UNNEST_DIFFERENT_RESULTSET)
   @Test
   public void testUnnestExtractionFn()
   {
