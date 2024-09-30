@@ -1,5 +1,5 @@
-# testUnnestWithNotFiltersOnUnnestedColumn case-crc:5e713740
-# quidem testcase reason: UNNEST_EXTRA_SCAN
+# testUnnestWithNotFiltersOnUnnestedColumn case-crc:5fc83255
+# quidem testcase reason: UNNEST_DIFFERENT_RESULTSET
 !set debug true
 !set defaultTimeout 300000
 !set maxScatterGatherBytes 9223372036854775807
