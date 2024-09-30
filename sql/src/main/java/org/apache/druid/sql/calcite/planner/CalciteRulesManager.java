@@ -45,6 +45,7 @@ import org.apache.calcite.rel.rules.PruneEmptyRules;
 import org.apache.calcite.sql.SqlExplainFormat;
 import org.apache.calcite.sql.SqlExplainLevel;
 import org.apache.calcite.sql2rel.RelDecorrelator;
+import org.apache.calcite.sql2rel.RelFieldTrimmer;
 import org.apache.calcite.tools.Program;
 import org.apache.calcite.tools.Programs;
 import org.apache.calcite.tools.RelBuilder;
@@ -278,7 +279,6 @@ public class CalciteRulesManager
     final HepProgramBuilder builder = HepProgram.builder();
     builder.addMatchLimit(CalciteRulesManager.HEP_DEFAULT_MATCH_LIMIT);
     builder.addRuleCollection(baseRuleSet(plannerContext));
-//    builder.addRuleInstance(ProjectCorrelateTransposeRule.Config.DEFAULT.toRule());
     builder.addRuleInstance(CoreRules.UNION_MERGE);
     builder.addRuleInstance(JoinExtractFilterRule.Config.DEFAULT.toRule());
     builder.addRuleInstance(FilterIntoJoinRuleConfig.DEFAULT.withPredicate(DruidJoinRule::isSupportedPredicate).toRule());
@@ -539,9 +539,7 @@ public class CalciteRulesManager
     {
       final RelBuilder relBuilder = RelFactories.LOGICAL_BUILDER.create(rel.getCluster(), null);
       final RelNode decorrelatedRel = RelDecorrelator.decorrelateQuery(rel, relBuilder);
-
-      RelNode trim = new DruidRelFieldTrimmer(null, relBuilder).trim(decorrelatedRel);
-      return trim;
+      return new RelFieldTrimmer(null, relBuilder).trim(decorrelatedRel);
     }
   }
 }
