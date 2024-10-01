@@ -21,6 +21,8 @@ package org.apache.druid.sql.calcite.planner;
 
 import org.apache.calcite.plan.RelOptUtil;
 import org.apache.calcite.rel.RelNode;
+import org.apache.calcite.rel.core.Calc;
+import org.apache.calcite.rel.logical.LogicalCorrelate;
 import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.rel.type.RelDataTypeField;
 import org.apache.calcite.rex.RexNode;
@@ -45,62 +47,70 @@ public class DruidRelFieldTrimmer extends RelFieldTrimmer
     super(validator, relBuilder);
   }
 
-  public TrimResult trimFields(LogicalUnnest unnest,
+public TrimResult trimFields(LogicalCorrelate correlate,
       ImmutableBitSet fieldsUsed,
       Set<RelDataTypeField> extraFields)
   {
-    LogicalUnnest filter = unnest;
-    final RelDataType rowType = filter.getRowType();
+
+    final RelDataType rowType = correlate.getRowType();
     final int fieldCount = rowType.getFieldCount();
-    final RexNode conditionExpr = filter.getFilter();
-    final RelNode input = filter.getInput();
+    final RelNode left = correlate.getLeft();
+    final RelNode right = correlate.getRight();
+    final RelDataType rightRowType = right.getRowType();
+    final int rightFieldCount = rightRowType.getFieldCount();
 
     // We use the fields used by the consumer, plus any fields used in the
     // filter.
-    final Set<RelDataTypeField> inputExtraFields =
+    final Set<RelDataTypeField> leftExtraFields =
+        new LinkedHashSet<>(extraFields);
+    final Set<RelDataTypeField> rightExtraFields =
         new LinkedHashSet<>(extraFields);
     RelOptUtil.InputFinder inputFinder =
-        new RelOptUtil.InputFinder(inputExtraFields, fieldsUsed);
-    RexNode unnestExpr = filter.getUnnestExpr();
-    unnestExpr.accept(inputFinder);
-    if (conditionExpr != null) {
-      conditionExpr.accept(inputFinder);
-    }
-    final ImmutableBitSet inputFieldsUsed = inputFinder.build();
+        new RelOptUtil.InputFinder(leftExtraFields, fieldsUsed);
+//    conditionExpr.accept(inputFinder);
+    final ImmutableBitSet leftFieldsUsed = inputFinder.build();
+    inputFinder = new RelOptUtil.InputFinder(rightExtraFields, fieldsUsed);
+//    conditionExpr.accept(inputFinder);
+    final ImmutableBitSet rightFieldsUsed = inputFinder.build();
 
-    // Create input with trimmed columns.
-    TrimResult trimResult =
-        trimChild(filter, input, inputFieldsUsed, inputExtraFields);
-    RelNode newInput = trimResult.left;
-    final Mapping inputMapping = trimResult.right;
 
-    // If the input is unchanged, and we need to project all columns,
+    leftFieldsUsed = leftFieldsUsed.union(correlate.getRequiredColumns());
+
+    //    leftFieldsUsed.(correlate.getRequiredColumns());
+    // Create left input with trimmed columns.
+    TrimResult leftTrimResult =
+        trimChild(correlate, left, leftFieldsUsed, leftExtraFields);
+    RelNode newLeft = leftTrimResult.left;
+    final Mapping leftMapping = leftTrimResult.right;
+
+    // Create right input with trimmed columns.
+    TrimResult rightTrimResult =
+        trimChild(correlate, right, rightFieldsUsed, rightExtraFields);
+    RelNode newRight = rightTrimResult.left;
+    final Mapping rightMapping = rightTrimResult.right;
+
+    // If the inputs are unchanged, and we need to project all columns,
     // there's nothing we can do.
-    if (newInput == input
+    if (newLeft == left
+        && newRight == right
         && fieldsUsed.cardinality() == fieldCount) {
-      return result(filter, Mappings.createIdentity(fieldCount));
+      return result(correlate, Mappings.createIdentity(fieldCount));
     }
 
-    // Build new logicalunnest and populate the mapping.
-    final RexVisitor<RexNode> shuttle =
-        new RexPermuteInputsShuttle(inputMapping, newInput);
-    RexNode newConditionExpr = null;
-    if(conditionExpr!=null) {
-      newConditionExpr = conditionExpr.accept(shuttle);
-    }
-    RexNode newUnnestExpr = unnestExpr.accept(shuttle);
+    // Build new correlate and populate the mapping.
+    final RexVisitor<RexNode> shuttle = null;
 
-    // Build new filter with trimmed input and condition.
-    RelBuilder relBuilder = null;
-    relBuilder.push(newInput)
-        .filter(filter.getVariablesSet(), newConditionExpr);
+//        new RexPermuteInputsShuttle(leftMapping, newLeft, rightMapping, newRight);
+//    RexNode newConditionExpr = conditionExpr.accept(shuttle);
 
-    // FIXME: inputMapping doesn't account for new col
+    // Build new correlate with trimmed inputs and condition.
+    final LogicalCorrelate newCorrelate =
+        correlate.copy(correlate.getTraitSet(),
+            newLeft,
+            newRight, correlate.getCorrelationId(),
+            correlate.getRequiredColumns(), correlate.getJoinType());
 
-    // The result has the same mapping as the input gave us. Sometimes we
-    // return fields that the consumer didn't ask for, because the filter
-    // needs them for its condition.
-    return result(relBuilder.build(), inputMapping, filter);
+    return result(newCorrelate, mapping);
   }
 
 }
