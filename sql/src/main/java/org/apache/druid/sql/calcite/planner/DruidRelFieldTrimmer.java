@@ -25,11 +25,13 @@ import org.apache.calcite.rel.core.Calc;
 import org.apache.calcite.rel.logical.LogicalCorrelate;
 import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.rel.type.RelDataTypeField;
+import org.apache.calcite.rel.type.RelDataTypeImpl;
 import org.apache.calcite.rex.RexNode;
 import org.apache.calcite.rex.RexPermuteInputsShuttle;
 import org.apache.calcite.rex.RexVisitor;
 import org.apache.calcite.sql.validate.SqlValidator;
 import org.apache.calcite.sql2rel.RelFieldTrimmer;
+import org.apache.calcite.sql2rel.RelFieldTrimmer.TrimResult;
 import org.apache.calcite.tools.RelBuilder;
 import org.apache.calcite.util.ImmutableBitSet;
 import org.apache.calcite.util.mapping.Mapping;
@@ -37,7 +39,10 @@ import org.apache.calcite.util.mapping.Mappings;
 import org.apache.druid.sql.calcite.rule.logical.LogicalUnnest;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 public class DruidRelFieldTrimmer extends RelFieldTrimmer
@@ -52,34 +57,51 @@ public TrimResult trimFields(LogicalCorrelate correlate,
       Set<RelDataTypeField> extraFields)
   {
 
-    final RelDataType rowType = correlate.getRowType();
-    final int fieldCount = rowType.getFieldCount();
-    final RelNode left = correlate.getLeft();
-    final RelNode right = correlate.getRight();
-    final RelDataType rightRowType = right.getRowType();
-    final int rightFieldCount = rightRowType.getFieldCount();
+//    final RelDataType rowType = correlate.getRowType();
+//    final int fieldCount = rowType.getFieldCount();
+//    final RelNode left = correlate.getLeft();
+//    final RelNode right = correlate.getRight();
+//    final RelDataType rightRowType = right.getRowType();
+//    final int rightFieldCount = rightRowType.getFieldCount();
+    if (!extraFields.isEmpty()) {
+      // bail out with generic trim
+      return trimFields((RelNode) correlate, fieldsUsed, extraFields);
+    }
 
-    // We use the fields used by the consumer, plus any fields used in the
-    // filter.
-    final Set<RelDataTypeField> leftExtraFields =
-        new LinkedHashSet<>(extraFields);
-    final Set<RelDataTypeField> rightExtraFields =
-        new LinkedHashSet<>(extraFields);
-    RelOptUtil.InputFinder inputFinder =
-        new RelOptUtil.InputFinder(leftExtraFields, fieldsUsed);
-//    conditionExpr.accept(inputFinder);
-    final ImmutableBitSet leftFieldsUsed = inputFinder.build();
-    inputFinder = new RelOptUtil.InputFinder(rightExtraFields, fieldsUsed);
-//    conditionExpr.accept(inputFinder);
-    final ImmutableBitSet rightFieldsUsed = inputFinder.build();
+    fieldsUsed = fieldsUsed.union(correlate.getRequiredColumns());
 
+    List<RelNode> newInputs = new ArrayList<>();
+    List<Mapping> inputMappings = new ArrayList<>();
+    @Deprecated
+    int changeCount=0;
+    int offset=0;
+    @Deprecated
+    int newFieldCount = 0;
+    for(RelNode input : correlate.getInputs())
+    {
+      final RelDataType inputRowType = input.getRowType();
+      final int inputFieldCount = inputRowType.getFieldCount();
 
-    leftFieldsUsed = leftFieldsUsed.union(correlate.getRequiredColumns());
+      ImmutableBitSet currentInputFieldsUsed = fieldsUsed
+          .intersect(ImmutableBitSet.range(offset, offset + inputFieldCount))
+          .shift(-offset);
 
-    //    leftFieldsUsed.(correlate.getRequiredColumns());
-    // Create left input with trimmed columns.
+      TrimResult trimResult =          trimChild(correlate, input, currentInputFieldsUsed, extraFields);
+
+      newInputs.add(trimResult.left);
+      if (trimResult.left != input) {
+        changeCount++;
+      }
+
+      final Mapping inputMapping = trimResult.right;
+      inputMappings.add(inputMapping);
+
+      offset += inputFieldCount;
+      newFieldCount += inputMapping.getTargetCount() ;
+    }
+
     TrimResult leftTrimResult =
-        trimChild(correlate, left, leftFieldsUsed, leftExtraFields);
+        trimChild(correlate, left, newFieldsUsed, extraFields);
     RelNode newLeft = leftTrimResult.left;
     final Mapping leftMapping = leftTrimResult.right;
 
