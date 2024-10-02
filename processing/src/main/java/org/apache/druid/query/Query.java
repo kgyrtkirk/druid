@@ -22,11 +22,14 @@ package org.apache.druid.query;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Ordering;
 import org.apache.druid.error.DruidException;
 import org.apache.druid.guice.annotations.ExtensionPoint;
 import org.apache.druid.java.util.common.HumanReadableBytes;
+import org.apache.druid.java.util.common.IAE;
 import org.apache.druid.java.util.common.granularity.Granularity;
 import org.apache.druid.query.datasourcemetadata.DataSourceMetadataQuery;
 import org.apache.druid.query.filter.DimFilter;
@@ -81,6 +84,11 @@ public interface Query<T>
   String WINDOW_OPERATOR = "windowOperator";
 
   DataSource getDataSource();
+
+  default List<DataSource> getDataSources()
+  {
+    return ImmutableList.of(getDataSource());
+  }
 
   boolean hasFilters();
 
@@ -284,5 +292,13 @@ public interface Query<T>
             i
         )
     );
+  }
+
+  default Query<T> withDataSources(List<DataSource> children)
+  {
+    if (children.size() != 1) {
+      throw new IAE("Must have exactly one child");
+    }
+    return withDataSource(Iterables.getOnlyElement(children));
   }
 }
