@@ -793,7 +793,10 @@ public class DruidQuery
   public static List<DimFilter> getAllFiltersUnderDataSource(DataSource d, List<DimFilter> dimFilterList)
   {
     if (d instanceof FilteredDataSource) {
-      dimFilterList.add(((FilteredDataSource) d).getFilter());
+      DimFilter filter = ((FilteredDataSource) d).getFilter();
+      if (filter != null) {
+        dimFilterList.add(filter);
+      }
     }
     for (DataSource ds : d.getChildren()) {
       dimFilterList.addAll(getAllFiltersUnderDataSource(ds, dimFilterList));
@@ -1497,13 +1500,16 @@ public class DruidQuery
     // This would cause MSQ queries to plan as
     // Window over an inner scan and avoid
     // leaf operators
+    boolean pushLeafOperator = plannerContext.queryContext()
+                                             .getBoolean(PlannerContext.CTX_ENABLE_RAC_TRANSFER_OVER_WIRE, false)
+                               && !plannerContext.featureAvailable(EngineFeature.WINDOW_LEAF_OPERATOR);
     return new WindowOperatorQuery(
         dataSource,
         new LegacySegmentSpec(Intervals.ETERNITY),
         plannerContext.queryContextMap(),
         windowing.getSignature(),
         operators,
-        plannerContext.featureAvailable(EngineFeature.WINDOW_LEAF_OPERATOR) ? ImmutableList.of() : null
+        pushLeafOperator ? null : ImmutableList.of()
     );
   }
 
@@ -1742,5 +1748,10 @@ public class DruidQuery
       builder.add(columnName, capabilities.toColumnType());
     }
     return builder.build();
+  }
+
+  public DimFilter getFilter()
+  {
+    return filter;
   }
 }
