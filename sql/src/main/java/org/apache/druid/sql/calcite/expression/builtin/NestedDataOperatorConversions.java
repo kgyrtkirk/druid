@@ -48,11 +48,13 @@ import org.apache.druid.java.util.common.IAE;
 import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.math.expr.Expr;
 import org.apache.druid.math.expr.InputBindings;
+import org.apache.druid.query.expression.NestedDataExpressions;
 import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.segment.nested.NestedPathFinder;
 import org.apache.druid.segment.nested.NestedPathPart;
 import org.apache.druid.segment.virtual.NestedFieldVirtualColumn;
+import org.apache.druid.sql.calcite.expression.DirectOperatorConversion;
 import org.apache.druid.sql.calcite.expression.DruidExpression;
 import org.apache.druid.sql.calcite.expression.Expressions;
 import org.apache.druid.sql.calcite.expression.OperatorConversions;
@@ -78,10 +80,21 @@ public class NestedDataOperatorConversions
       true
   );
 
+  public static final SqlReturnTypeInference NESTED_ARRAY_RETURN_TYPE_INFERENCE = opBinding ->
+      opBinding.getTypeFactory().createArrayType(
+          RowSignatures.makeComplexType(
+              opBinding.getTypeFactory(),
+              ColumnType.NESTED_DATA,
+              true
+          ),
+          -1
+      );
+
   public static class JsonPathsOperatorConversion implements SqlOperatorConversion
   {
+    private static final String FUNCTION_NAME = "json_paths";
     private static final SqlFunction SQL_FUNCTION = OperatorConversions
-        .operatorBuilder("JSON_PATHS")
+        .operatorBuilder(StringUtils.toUpperCase(FUNCTION_NAME))
         .operandTypeChecker(OperandTypes.ANY)
         .functionCategory(SqlFunctionCategory.USER_DEFINED_FUNCTION)
         .returnTypeArrayWithNullableElements(SqlTypeName.VARCHAR)
@@ -107,7 +120,7 @@ public class NestedDataOperatorConversions
           rexNode,
           druidExpressions -> DruidExpression.ofExpression(
               null,
-              DruidExpression.functionCall("json_paths"),
+              DruidExpression.functionCall(FUNCTION_NAME),
               druidExpressions
           )
       );
@@ -116,8 +129,9 @@ public class NestedDataOperatorConversions
 
   public static class JsonKeysOperatorConversion implements SqlOperatorConversion
   {
+    private static final String FUNCTION_NAME = "json_keys";
     private static final SqlFunction SQL_FUNCTION = OperatorConversions
-        .operatorBuilder("JSON_KEYS")
+        .operatorBuilder(StringUtils.toUpperCase(FUNCTION_NAME))
         .operandNames("expr", "path")
         .operandTypes(SqlTypeFamily.ANY, SqlTypeFamily.STRING)
         .literalOperands(1)
@@ -146,7 +160,7 @@ public class NestedDataOperatorConversions
           rexNode,
           druidExpressions -> DruidExpression.ofExpression(
               ColumnType.STRING_ARRAY,
-              DruidExpression.functionCall("json_keys"),
+              DruidExpression.functionCall(FUNCTION_NAME),
               druidExpressions
           )
       );
@@ -155,9 +169,9 @@ public class NestedDataOperatorConversions
 
   public static class JsonQueryOperatorConversion implements SqlOperatorConversion
   {
-    private static final String FUNCTION_NAME = StringUtils.toUpperCase("json_query");
+    private static final String FUNCTION_NAME = "json_query";
     private static final SqlFunction SQL_FUNCTION = OperatorConversions
-        .operatorBuilder(FUNCTION_NAME)
+        .operatorBuilder(StringUtils.toUpperCase(FUNCTION_NAME))
         .operandTypeChecker(
             OperandTypes.family(
                 SqlTypeFamily.ANY,
@@ -200,7 +214,7 @@ public class NestedDataOperatorConversions
       final Expr pathExpr = plannerContext.parseExpression(druidExpressions.get(1).getExpression());
       if (!pathExpr.isLiteral()) {
         // if path argument is not constant, just use a pure expression
-        return DruidExpression.ofFunctionCall(ColumnType.NESTED_DATA, "json_query", druidExpressions);
+        return DruidExpression.ofFunctionCall(ColumnType.NESTED_DATA, FUNCTION_NAME, druidExpressions);
       }
       // pre-normalize path so that the same expressions with different json path syntax are collapsed
       final String path = (String) pathExpr.eval(InputBindings.nilBindings()).value();
@@ -228,6 +242,26 @@ public class NestedDataOperatorConversions
         );
       }
       return DruidExpression.ofExpression(ColumnType.NESTED_DATA, builder, druidExpressions);
+    }
+  }
+
+  public static class JsonQueryArrayOperatorConversion extends DirectOperatorConversion
+  {
+    private static final SqlFunction SQL_FUNCTION = OperatorConversions
+        .operatorBuilder(StringUtils.toUpperCase(NestedDataExpressions.JsonQueryArrayExprMacro.NAME))
+        .operandTypeChecker(
+            OperandTypes.family(
+                SqlTypeFamily.ANY,
+                SqlTypeFamily.CHARACTER
+            )
+        )
+        .returnTypeInference(NESTED_ARRAY_RETURN_TYPE_INFERENCE.andThen(SqlTypeTransforms.FORCE_NULLABLE))
+        .functionCategory(SqlFunctionCategory.SYSTEM)
+        .build();
+
+    public JsonQueryArrayOperatorConversion()
+    {
+      super(SQL_FUNCTION, NestedDataExpressions.JsonQueryArrayExprMacro.NAME);
     }
   }
 
@@ -691,7 +725,7 @@ public class NestedDataOperatorConversions
   {
     private static final String FUNCTION_NAME = "json_object";
     private static final SqlFunction SQL_FUNCTION = OperatorConversions
-        .operatorBuilder(FUNCTION_NAME)
+        .operatorBuilder(StringUtils.toUpperCase(FUNCTION_NAME))
         .operandTypeChecker(OperandTypes.variadic(SqlOperandCountRanges.from(1)))
         .operandTypeInference((callBinding, returnType, operandTypes) -> {
           RelDataTypeFactory typeFactory = callBinding.getTypeFactory();
@@ -724,7 +758,7 @@ public class NestedDataOperatorConversions
           DruidExpression.ofExpression(
               ColumnType.NESTED_DATA,
               null,
-              DruidExpression.functionCall("json_object"),
+              DruidExpression.functionCall(FUNCTION_NAME),
               druidExpressions
           );
 
@@ -743,6 +777,52 @@ public class NestedDataOperatorConversions
       }
 
       return expressionFunction.create(druidExpressions);
+    }
+  }
+
+  public static class JsonMergeOperatorConversion implements SqlOperatorConversion
+  {
+    private static final String FUNCTION_NAME = "json_merge";
+    private static final SqlFunction SQL_FUNCTION = OperatorConversions
+        .operatorBuilder(FUNCTION_NAME)
+        .operandTypeChecker(OperandTypes.variadic(SqlOperandCountRanges.from(1)))
+        .operandTypeInference((callBinding, returnType, operandTypes) -> {
+          RelDataTypeFactory typeFactory = callBinding.getTypeFactory();
+          for (int i = 0; i < operandTypes.length; i++) {
+            operandTypes[i] = typeFactory.createTypeWithNullability(
+                typeFactory.createSqlType(SqlTypeName.ANY),
+                true
+            );
+          }
+        })
+        .returnTypeInference(NESTED_RETURN_TYPE_INFERENCE)
+        .functionCategory(SqlFunctionCategory.SYSTEM)
+        .build();
+
+    @Override
+    public SqlOperator calciteOperator()
+    {
+      return SQL_FUNCTION;
+    }
+
+    @Nullable
+    @Override
+    public DruidExpression toDruidExpression(
+        PlannerContext plannerContext,
+        RowSignature rowSignature,
+        RexNode rexNode
+    )
+    {
+      return OperatorConversions.convertCall(
+          plannerContext,
+          rowSignature,
+          rexNode,
+          druidExpressions -> DruidExpression.ofExpression(
+              ColumnType.NESTED_DATA,
+              DruidExpression.functionCall("json_merge"),
+              druidExpressions
+          )
+      );
     }
   }
 
@@ -777,7 +857,7 @@ public class NestedDataOperatorConversions
           rexNode,
           druidExpressions -> DruidExpression.ofExpression(
               ColumnType.NESTED_DATA,
-              DruidExpression.functionCall("to_json_string"),
+              DruidExpression.functionCall(FUNCTION_NAME),
               druidExpressions
           )
       );
@@ -815,7 +895,7 @@ public class NestedDataOperatorConversions
           rexNode,
           druidExpressions -> DruidExpression.ofExpression(
               ColumnType.NESTED_DATA,
-              DruidExpression.functionCall("parse_json"),
+              DruidExpression.functionCall(FUNCTION_NAME),
               druidExpressions
           )
       );
@@ -853,7 +933,7 @@ public class NestedDataOperatorConversions
           rexNode,
           druidExpressions -> DruidExpression.ofExpression(
               ColumnType.NESTED_DATA,
-              DruidExpression.functionCall("try_parse_json"),
+              DruidExpression.functionCall(FUNCTION_NAME),
               druidExpressions
           )
       );

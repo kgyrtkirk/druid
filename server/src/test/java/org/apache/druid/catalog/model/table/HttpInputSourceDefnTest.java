@@ -57,7 +57,7 @@ public class HttpInputSourceDefnTest extends BaseExternTableTest
   {
     mapper.setInjectableValues(new InjectableValues.Std().addValue(
         HttpInputSourceConfig.class,
-        new HttpInputSourceConfig(HttpInputSourceConfig.DEFAULT_ALLOWED_PROTOCOLS)
+        new HttpInputSourceConfig(HttpInputSourceConfig.DEFAULT_ALLOWED_PROTOCOLS, null)
     ));
   }
 
@@ -68,8 +68,8 @@ public class HttpInputSourceDefnTest extends BaseExternTableTest
     TableMetadata table = TableBuilder.external("foo")
         .inputSource(ImmutableMap.of("type", HttpInputSource.TYPE_KEY))
         .inputFormat(CSV_FORMAT)
-        .column("x", Columns.VARCHAR)
-        .column("y", Columns.BIGINT)
+        .column("x", Columns.STRING)
+        .column("y", Columns.LONG)
         .build();
     ResolvedTable resolved = registry.resolve(table.spec());
     assertThrows(IAE.class, () -> resolved.validate());
@@ -83,8 +83,8 @@ public class HttpInputSourceDefnTest extends BaseExternTableTest
         .inputSource(ImmutableMap.of("type", HttpInputSource.TYPE_KEY))
         .property(HttpInputSourceDefn.URI_TEMPLATE_PROPERTY, "http://example.com/")
         .inputFormat(CSV_FORMAT)
-        .column("x", Columns.VARCHAR)
-        .column("y", Columns.BIGINT)
+        .column("x", Columns.STRING)
+        .column("y", Columns.LONG)
         .build();
     ResolvedTable resolved = registry.resolve(table.spec());
     assertThrows(IAE.class, () -> resolved.validate());
@@ -99,12 +99,13 @@ public class HttpInputSourceDefnTest extends BaseExternTableTest
         null,
         null,
         null,
-        new HttpInputSourceConfig(null)
+        null,
+        new HttpInputSourceConfig(null, null)
     );
     TableMetadata table = TableBuilder.external("foo")
         .inputSource(toMap(inputSource))
-        .column("x", Columns.VARCHAR)
-        .column("y", Columns.BIGINT)
+        .column("x", Columns.STRING)
+        .column("y", Columns.LONG)
         .build();
     ResolvedTable resolved = registry.resolve(table.spec());
     assertThrows(IAE.class, () -> resolved.validate());
@@ -119,7 +120,8 @@ public class HttpInputSourceDefnTest extends BaseExternTableTest
         null,
         null,
         null,
-        new HttpInputSourceConfig(null)
+        null,
+        new HttpInputSourceConfig(null, null)
     );
     TableMetadata table = TableBuilder.external("foo")
         .inputSource(toMap(inputSource))
@@ -150,7 +152,8 @@ public class HttpInputSourceDefnTest extends BaseExternTableTest
         null,
         null,
         null,
-        new HttpInputSourceConfig(null)
+        null,
+        new HttpInputSourceConfig(null, null)
     );
     TableMetadata table = TableBuilder.external("foo")
         .inputSource(toMap(inputSource))
@@ -216,13 +219,14 @@ public class HttpInputSourceDefnTest extends BaseExternTableTest
         "bob",
         new DefaultPasswordProvider("secret"),
         null,
-        new HttpInputSourceConfig(null)
+        null,
+        new HttpInputSourceConfig(null, null)
     );
     TableMetadata table = TableBuilder.external("foo")
         .inputSource(toMap(inputSource))
         .inputFormat(CSV_FORMAT)
-        .column("x", Columns.VARCHAR)
-        .column("y", Columns.BIGINT)
+        .column("x", Columns.STRING)
+        .column("y", Columns.LONG)
         .build();
 
     // Check validation
@@ -256,8 +260,8 @@ public class HttpInputSourceDefnTest extends BaseExternTableTest
         .inputSource(ImmutableMap.of("type", HttpInputSource.TYPE_KEY))
         .inputFormat(CSV_FORMAT)
         .property(HttpInputSourceDefn.URI_TEMPLATE_PROPERTY, "http://foo.com/{}")
-        .column("x", Columns.VARCHAR)
-        .column("y", Columns.BIGINT)
+        .column("x", Columns.STRING)
+        .column("y", Columns.LONG)
         .build();
 
     // Check validation
@@ -272,11 +276,12 @@ public class HttpInputSourceDefnTest extends BaseExternTableTest
 
     // Get the partial table function
     TableFunction fn = externDefn.tableFn(resolved);
-    assertEquals(4, fn.parameters().size());
+    assertEquals(5, fn.parameters().size());
     assertTrue(hasParam(fn, HttpInputSourceDefn.URIS_PARAMETER));
     assertTrue(hasParam(fn, HttpInputSourceDefn.USER_PARAMETER));
     assertTrue(hasParam(fn, HttpInputSourceDefn.PASSWORD_PARAMETER));
     assertTrue(hasParam(fn, HttpInputSourceDefn.PASSWORD_ENV_VAR_PARAMETER));
+    assertTrue(hasParam(fn, HttpInputSourceDefn.HEADERS));
 
     // Convert to an external table.
     ExternalTableSpec externSpec = fn.apply(
@@ -305,8 +310,8 @@ public class HttpInputSourceDefnTest extends BaseExternTableTest
          ))
         .inputFormat(CSV_FORMAT)
         .property(HttpInputSourceDefn.URI_TEMPLATE_PROPERTY, "http://foo.com/{}")
-        .column("x", Columns.VARCHAR)
-        .column("y", Columns.BIGINT)
+        .column("x", Columns.STRING)
+        .column("y", Columns.LONG)
         .build();
 
     table.validate();
@@ -320,8 +325,9 @@ public class HttpInputSourceDefnTest extends BaseExternTableTest
 
     // Get the partial table function
     TableFunction fn = externDefn.tableFn(resolved);
-    assertEquals(1, fn.parameters().size());
+    assertEquals(2, fn.parameters().size());
     assertTrue(hasParam(fn, HttpInputSourceDefn.URIS_PARAMETER));
+    assertTrue(hasParam(fn, HttpInputSourceDefn.HEADERS));
 
     // Convert to an external table.
     ExternalTableSpec externSpec = fn.apply(
@@ -344,7 +350,8 @@ public class HttpInputSourceDefnTest extends BaseExternTableTest
         "bob",
         new DefaultPasswordProvider("secret"),
         null,
-        new HttpInputSourceConfig(null)
+         null,
+        new HttpInputSourceConfig(null, null)
     );
     TableMetadata table = TableBuilder.external("foo")
         .inputSource(httpToMap(inputSource))
@@ -382,13 +389,14 @@ public class HttpInputSourceDefnTest extends BaseExternTableTest
         "bob",
         new EnvironmentVariablePasswordProvider("SECRET"),
         null,
-        new HttpInputSourceConfig(null)
+        null,
+        new HttpInputSourceConfig(null, null)
     );
     TableMetadata table = TableBuilder.external("foo")
         .inputSource(toMap(inputSource))
         .inputFormat(CSV_FORMAT)
-        .column("x", Columns.VARCHAR)
-        .column("y", Columns.BIGINT)
+        .column("x", Columns.STRING)
+        .column("y", Columns.LONG)
         .build();
 
     // Check validation
@@ -415,14 +423,15 @@ public class HttpInputSourceDefnTest extends BaseExternTableTest
         "bob",
         new DefaultPasswordProvider("secret"),
         null,
-        new HttpInputSourceConfig(null)
+        null,
+        new HttpInputSourceConfig(null, null)
     );
     TableMetadata table = TableBuilder.external("foo")
         .inputSource(httpToMap(inputSource))
         .inputFormat(CSV_FORMAT)
         .property(HttpInputSourceDefn.URI_TEMPLATE_PROPERTY, "http://foo.com/{}")
-        .column("x", Columns.VARCHAR)
-        .column("y", Columns.BIGINT)
+        .column("x", Columns.STRING)
+        .column("y", Columns.LONG)
         .build();
 
     // Check validation
@@ -484,13 +493,14 @@ public class HttpInputSourceDefnTest extends BaseExternTableTest
         "bob",
         new EnvironmentVariablePasswordProvider("SECRET"),
         null,
-        new HttpInputSourceConfig(null)
+        null,
+        new HttpInputSourceConfig(null, null)
     );
     TableMetadata table = TableBuilder.external("foo")
         .inputSource(toMap(inputSource))
         .inputFormat(CSV_FORMAT)
-        .column("x", Columns.VARCHAR)
-        .column("y", Columns.BIGINT)
+        .column("x", Columns.STRING)
+        .column("y", Columns.LONG)
         .build();
 
     // Check validation
@@ -518,7 +528,6 @@ public class HttpInputSourceDefnTest extends BaseExternTableTest
       assertEquals("secret", ((DefaultPasswordProvider) sourceSpec.getHttpAuthenticationPasswordProvider()).getPassword());
     }
     assertEquals("http://foo.com/my.csv", sourceSpec.getUris().get(0).toString());
-
     // Just a sanity check: details of CSV conversion are tested elsewhere.
     CsvInputFormat csvFormat = (CsvInputFormat) externSpec.inputFormat;
     assertEquals(Arrays.asList("x", "y"), csvFormat.getColumns());

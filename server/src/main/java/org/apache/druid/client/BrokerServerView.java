@@ -36,6 +36,7 @@ import org.apache.druid.java.util.emitter.service.ServiceMetricEvent;
 import org.apache.druid.query.QueryRunner;
 import org.apache.druid.query.TableDataSource;
 import org.apache.druid.query.planning.DataSourceAnalysis;
+import org.apache.druid.segment.realtime.appenderator.SegmentSchemas;
 import org.apache.druid.server.coordination.DruidServerMetadata;
 import org.apache.druid.server.coordination.ServerType;
 import org.apache.druid.timeline.DataSegment;
@@ -43,6 +44,7 @@ import org.apache.druid.timeline.SegmentId;
 import org.apache.druid.timeline.VersionedIntervalTimeline;
 import org.apache.druid.timeline.partition.PartitionChunk;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -143,6 +145,12 @@ public class BrokerServerView implements TimelineServerView
             initialized.countDown();
             runTimelineCallbacks(TimelineCallback::timelineInitialized);
             return ServerView.CallbackAction.CONTINUE;
+          }
+
+          @Override
+          public CallbackAction segmentSchemasAnnounced(SegmentSchemas segmentSchemas)
+          {
+            return CallbackAction.CONTINUE;
           }
         },
         segmentFilter
@@ -389,6 +397,19 @@ public class BrokerServerView implements TimelineServerView
           }
       );
     }
+  }
+
+  @Override
+  public List<DruidServerMetadata> getDruidServerMetadatas()
+  {
+    // Override default implementation for better performance.
+    final List<DruidServerMetadata> retVal = new ArrayList<>(clients.size());
+
+    for (final QueryableDruidServer<?> server : clients.values()) {
+      retVal.add(server.getServer().getMetadata());
+    }
+
+    return retVal;
   }
 
   @Override

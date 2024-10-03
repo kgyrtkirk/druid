@@ -31,6 +31,7 @@ import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.RetryOneTime;
 import org.apache.curator.test.TestingServer;
 import org.apache.curator.test.Timing;
+import org.apache.druid.audit.AuditManager;
 import org.apache.druid.curator.PotentiallyGzippedCompressionProvider;
 import org.apache.druid.curator.discovery.LatchableServiceAnnouncer;
 import org.apache.druid.discovery.DruidLeaderSelector;
@@ -44,18 +45,21 @@ import org.apache.druid.indexing.common.actions.SegmentAllocationQueue;
 import org.apache.druid.indexing.common.actions.TaskActionClientFactory;
 import org.apache.druid.indexing.common.config.TaskStorageConfig;
 import org.apache.druid.indexing.common.task.NoopTask;
+import org.apache.druid.indexing.common.task.NoopTaskContextEnricher;
 import org.apache.druid.indexing.common.task.Task;
+import org.apache.druid.indexing.compact.CompactionScheduler;
+import org.apache.druid.indexing.overlord.DruidOverlord;
 import org.apache.druid.indexing.overlord.HeapMemoryTaskStorage;
 import org.apache.druid.indexing.overlord.IndexerMetadataStorageAdapter;
 import org.apache.druid.indexing.overlord.IndexerMetadataStorageCoordinator;
 import org.apache.druid.indexing.overlord.TaskLockbox;
 import org.apache.druid.indexing.overlord.TaskMaster;
+import org.apache.druid.indexing.overlord.TaskQueryTool;
 import org.apache.druid.indexing.overlord.TaskRunner;
 import org.apache.druid.indexing.overlord.TaskRunnerFactory;
 import org.apache.druid.indexing.overlord.TaskRunnerListener;
 import org.apache.druid.indexing.overlord.TaskRunnerWorkItem;
 import org.apache.druid.indexing.overlord.TaskStorage;
-import org.apache.druid.indexing.overlord.TaskStorageQueryAdapter;
 import org.apache.druid.indexing.overlord.WorkerTaskRunnerQueryAdapter;
 import org.apache.druid.indexing.overlord.autoscaling.ScalingStats;
 import org.apache.druid.indexing.overlord.config.DefaultTaskConfig;
@@ -64,6 +68,7 @@ import org.apache.druid.indexing.overlord.config.TaskQueueConfig;
 import org.apache.druid.indexing.overlord.duty.OverlordDutyExecutor;
 import org.apache.druid.indexing.overlord.supervisor.SupervisorManager;
 import org.apache.druid.indexing.test.TestIndexerMetadataStorageCoordinator;
+import org.apache.druid.jackson.DefaultObjectMapper;
 import org.apache.druid.java.util.common.Intervals;
 import org.apache.druid.java.util.common.Pair;
 import org.apache.druid.java.util.common.concurrent.Execs;
@@ -103,6 +108,7 @@ public class OverlordTest
   private TestingServer server;
   private Timing timing;
   private CuratorFramework curator;
+  private DruidOverlord overlord;
   private TaskMaster taskMaster;
   private TaskLockbox taskLockbox;
   private TaskStorage taskStorage;
@@ -148,11 +154,18 @@ public class OverlordTest
   public void setUp() throws Exception
   {
     req = EasyMock.createMock(HttpServletRequest.class);
-    EasyMock.expect(req.getAttribute(AuthConfig.DRUID_ALLOW_UNSECURED_PATH)).andReturn(null).anyTimes();
-    EasyMock.expect(req.getAttribute(AuthConfig.DRUID_AUTHORIZATION_CHECKED)).andReturn(null).anyTimes();
+    EasyMock.expect(req.getHeader(AuditManager.X_DRUID_AUTHOR)).andReturn("author").once();
+    EasyMock.expect(req.getHeader(AuditManager.X_DRUID_COMMENT)).andReturn("comment").once();
+    EasyMock.expect(req.getRemoteAddr()).andReturn("127.0.0.1").once();
     EasyMock.expect(req.getAttribute(AuthConfig.DRUID_AUTHENTICATION_RESULT)).andReturn(
         new AuthenticationResult("druid", "druid", null, null)
     ).anyTimes();
+    EasyMock.expect(req.getMethod()).andReturn("GET").anyTimes();
+    EasyMock.expect(req.getRequestURI()).andReturn("/request/uri").anyTimes();
+    EasyMock.expect(req.getQueryString()).andReturn("query=string").anyTimes();
+
+    EasyMock.expect(req.getAttribute(AuthConfig.DRUID_ALLOW_UNSECURED_PATH)).andReturn(null).anyTimes();
+    EasyMock.expect(req.getAttribute(AuthConfig.DRUID_AUTHORIZATION_CHECKED)).andReturn(null).anyTimes();
     req.setAttribute(AuthConfig.DRUID_AUTHORIZATION_CHECKED, true);
     EasyMock.expectLastCall().anyTimes();
     supervisorManager = EasyMock.createMock(SupervisorManager.class);
@@ -225,8 +238,13 @@ public class OverlordTest
     taskRunnerFactory.build().run(goodTask);
 
     taskMaster = new TaskMaster(
+        taskActionClientFactory,
+        supervisorManager
+    );
+    overlord = new DruidOverlord(
+        taskMaster,
         new TaskLockConfig(),
-        new TaskQueueConfig(null, new Period(1), null, new Period(10), null),
+        new TaskQueueConfig(null, new Period(1), null, new Period(10), null, null),
         new DefaultTaskConfig(),
         taskLockbox,
         taskStorage,
@@ -239,7 +257,10 @@ public class OverlordTest
         supervisorManager,
         EasyMock.createNiceMock(OverlordDutyExecutor.class),
         new TestDruidLeaderSelector(),
-        EasyMock.createNiceMock(SegmentAllocationQueue.class)
+        EasyMock.createNiceMock(SegmentAllocationQueue.class),
+        EasyMock.createNiceMock(CompactionScheduler.class),
+        new DefaultObjectMapper(),
+        new NoopTaskContextEnricher()
     );
     EmittingLogger.registerEmitter(serviceEmitter);
   }
@@ -248,28 +269,31 @@ public class OverlordTest
   public void testOverlordRun() throws Exception
   {
     // basic task master lifecycle test
-    taskMaster.start();
+    overlord.start();
     announcementLatch.await();
-    while (!taskMaster.isLeader()) {
+    while (!overlord.isLeader()) {
       // I believe the control will never reach here and thread will never sleep but just to be on safe side
       Thread.sleep(10);
     }
-    Assert.assertEquals(taskMaster.getCurrentLeader(), druidNode.getHostAndPort());
-    Assert.assertEquals(Optional.absent(), taskMaster.getRedirectLocation());
+    Assert.assertEquals(overlord.getCurrentLeader(), druidNode.getHostAndPort());
+    Assert.assertEquals(Optional.absent(), overlord.getRedirectLocation());
 
-    final TaskStorageQueryAdapter taskStorageQueryAdapter = new TaskStorageQueryAdapter(taskStorage, taskLockbox, taskMaster);
-    final WorkerTaskRunnerQueryAdapter workerTaskRunnerQueryAdapter = new WorkerTaskRunnerQueryAdapter(taskMaster, null);
+    final TaskQueryTool taskQueryTool
+        = new TaskQueryTool(taskStorage, taskLockbox, taskMaster, null, null);
+    final WorkerTaskRunnerQueryAdapter workerTaskRunnerQueryAdapter
+        = new WorkerTaskRunnerQueryAdapter(taskMaster, null);
     // Test Overlord resource stuff
+    AuditManager auditManager = EasyMock.createNiceMock(AuditManager.class);
     overlordResource = new OverlordResource(
+        overlord,
         taskMaster,
-        taskStorageQueryAdapter,
-        new IndexerMetadataStorageAdapter(taskStorageQueryAdapter, null),
+        taskQueryTool,
+        new IndexerMetadataStorageAdapter(taskStorage, null),
         null,
         null,
-        null,
+        auditManager,
         AuthTestUtils.TEST_AUTHORIZER_MAPPER,
         workerTaskRunnerQueryAdapter,
-        null,
         new AuthConfig()
     );
     Response response = overlordResource.getLeader();
@@ -338,8 +362,8 @@ public class OverlordTest
     Assert.assertEquals(1, (((List) response.getEntity()).size()));
     Assert.assertEquals(1, taskMaster.getStats().rowCount());
 
-    taskMaster.stop();
-    Assert.assertFalse(taskMaster.isLeader());
+    overlord.stop();
+    Assert.assertFalse(overlord.isLeader());
     Assert.assertEquals(0, taskMaster.getStats().rowCount());
 
     EasyMock.verify(taskActionClientFactory);

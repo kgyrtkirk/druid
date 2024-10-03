@@ -22,6 +22,8 @@ package org.apache.druid.msq.util;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import org.apache.druid.indexing.common.TaskLockType;
+import org.apache.druid.indexing.common.task.Tasks;
 import org.apache.druid.msq.indexing.destination.MSQSelectDestination;
 import org.apache.druid.msq.kernel.WorkerAssignmentStrategy;
 import org.apache.druid.query.BadQueryContextException;
@@ -45,6 +47,7 @@ import static org.apache.druid.msq.util.MultiStageQueryContext.CTX_FAULT_TOLERAN
 import static org.apache.druid.msq.util.MultiStageQueryContext.CTX_FINALIZE_AGGREGATIONS;
 import static org.apache.druid.msq.util.MultiStageQueryContext.CTX_MAX_NUM_TASKS;
 import static org.apache.druid.msq.util.MultiStageQueryContext.CTX_MSQ_MODE;
+import static org.apache.druid.msq.util.MultiStageQueryContext.CTX_REMOVE_NULL_BYTES;
 import static org.apache.druid.msq.util.MultiStageQueryContext.CTX_ROWS_IN_MEMORY;
 import static org.apache.druid.msq.util.MultiStageQueryContext.CTX_ROWS_PER_SEGMENT;
 import static org.apache.druid.msq.util.MultiStageQueryContext.CTX_SORT_ORDER;
@@ -218,17 +221,12 @@ public class MultiStageQueryContextTest
   @Test
   public void arrayIngestMode_unset_returnsDefaultValue()
   {
-    Assert.assertEquals(ArrayIngestMode.MVD, MultiStageQueryContext.getArrayIngestMode(QueryContext.empty()));
+    Assert.assertEquals(ArrayIngestMode.ARRAY, MultiStageQueryContext.getArrayIngestMode(QueryContext.empty()));
   }
 
   @Test
   public void arrayIngestMode_set_returnsCorrectValue()
   {
-    Assert.assertEquals(
-        ArrayIngestMode.NONE,
-        MultiStageQueryContext.getArrayIngestMode(QueryContext.of(ImmutableMap.of(CTX_ARRAY_INGEST_MODE, "none")))
-    );
-
     Assert.assertEquals(
         ArrayIngestMode.MVD,
         MultiStageQueryContext.getArrayIngestMode(QueryContext.of(ImmutableMap.of(CTX_ARRAY_INGEST_MODE, "mvd")))
@@ -243,6 +241,24 @@ public class MultiStageQueryContextTest
         BadQueryContextException.class,
         () ->
             MultiStageQueryContext.getArrayIngestMode(QueryContext.of(ImmutableMap.of(CTX_ARRAY_INGEST_MODE, "dummy")))
+    );
+  }
+
+  @Test
+  public void removeNullBytes_unset_returnsDefaultValue()
+  {
+    Assert.assertFalse(MultiStageQueryContext.removeNullBytes(QueryContext.empty()));
+  }
+
+  @Test
+  public void removeNullBytes_set_returnsCorrectValue()
+  {
+    Assert.assertTrue(
+        MultiStageQueryContext.removeNullBytes(QueryContext.of(ImmutableMap.of(CTX_REMOVE_NULL_BYTES, true)))
+    );
+
+    Assert.assertFalse(
+        MultiStageQueryContext.removeNullBytes(QueryContext.of(ImmutableMap.of(CTX_REMOVE_NULL_BYTES, false)))
     );
   }
 
@@ -294,9 +310,25 @@ public class MultiStageQueryContextTest
     );
   }
 
+  @Test
+  public void testUseConcurrentLocks()
+  {
+    final QueryContext context = QueryContext.of(ImmutableMap.of(Tasks.USE_CONCURRENT_LOCKS, true));
+
+    Assert.assertEquals(
+        TaskLockType.REPLACE,
+        MultiStageQueryContext.validateAndGetTaskLockType(context, true)
+    );
+
+    Assert.assertEquals(
+        TaskLockType.APPEND,
+        MultiStageQueryContext.validateAndGetTaskLockType(context, false)
+    );
+  }
+
   private static List<String> decodeSortOrder(@Nullable final String input)
   {
-    return MultiStageQueryContext.decodeSortOrder(input);
+    return MultiStageQueryContext.decodeList(MultiStageQueryContext.CTX_SORT_ORDER, input);
   }
 
   private static IndexSpec decodeIndexSpec(@Nullable final Object inputSpecObject)

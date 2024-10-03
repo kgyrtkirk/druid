@@ -55,13 +55,13 @@ jobs:
       coverage_failure: ${{ steps.set_outputs.outputs.coverage_failure }}
     steps:
       - name: checkout branch
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       # skip the "cache: maven" step from setup-java. We explicitly use a
       # different cache key since we cannot reuse it across commits.
-      - uses: actions/setup-java@v3
+      - uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: ${{ inputs.jdk }}
@@ -70,7 +70,7 @@ jobs:
       # we include github.sha in the cache key to make it specific to that build/jdk
       - name: Restore Maven repository
         id: maven-restore
-        uses: actions/cache/restore@v3
+        uses: actions/cache/restore@v4
         with:
           path: ~/.m2/repository
           key: maven-${{ runner.os }}-${{ inputs.jdk }}-${{ github.sha }}
@@ -116,6 +116,28 @@ jobs:
         env:
           MAVEN_PROJECTS: ${{ inputs.maven_projects }}
         run: ./.github/scripts/unit_tests_script.sh
+
+      - name: Check for .hprof files on failure
+        if: ${{ failure() }}
+        id: check_for_heap_dump
+        run: |
+          if ls ${GITHUB_WORKSPACE}/target/*.hprof 1> /dev/null 2>&1; then
+            echo "found_hprof=true" >> "$GITHUB_ENV"
+          else
+            echo "found_hprof=false" >> "$GITHUB_ENV"
+          fi
+
+      - name: Collect tarball hprof dumps if they exist on failure
+        if: ${{ failure() && env.found_hprof == 'true' }}
+        run: |
+          tar cvzf ${RUNNER_TEMP}/hprof-dumps.tgz ${GITHUB_WORKSPACE}/target/*.hprof
+
+      - name: Upload hprof dumps to GitHub if they exist on failure
+        if: ${{ failure() && env.found_hprof == 'true' }}
+        uses: actions/upload-artifact@master
+        with:
+          name: Hprof-${{ inputs.group }} hprof dumps (Compile=jdk${{ inputs.build_jdk }}, Run=jdk${{ inputs.runtime_jdk }})
+          path: ${{ runner.temp }}/hprof-dumps.tgz
 
       - name: set outputs on failure
         id: set_outputs

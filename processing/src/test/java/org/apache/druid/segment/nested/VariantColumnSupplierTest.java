@@ -24,7 +24,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
-import org.apache.druid.guice.NestedDataModule;
+import org.apache.druid.guice.BuiltInTypesModule;
 import org.apache.druid.java.util.common.concurrent.Execs;
 import org.apache.druid.java.util.common.io.Closer;
 import org.apache.druid.java.util.common.io.smoosh.FileSmoosher;
@@ -156,11 +156,18 @@ public class VariantColumnSupplierTest extends InitializedNullHandlingTest
       Arrays.asList(null, 3.3)
   );
 
+  static List<List<Object>> NO_TYPE_ARRAY = Arrays.asList(
+      Collections.emptyList(),
+      null,
+      Collections.emptyList(),
+      Arrays.asList(null, null)
+  );
+
 
   @BeforeClass
   public static void staticSetup()
   {
-    NestedDataModule.registerHandlersAndSerde();
+    BuiltInTypesModule.registerHandlersAndSerde();
   }
 
   @Parameterized.Parameters(name = "data = {0}")
@@ -186,7 +193,9 @@ public class VariantColumnSupplierTest extends InitializedNullHandlingTest
         new Object[]{"ARRAY<LONG>,ARRAY<STRING>,DOUBLE,LONG,STRING", VARIANT_SCALAR_AND_ARRAY, IndexSpec.DEFAULT},
         new Object[]{"ARRAY<LONG>,ARRAY<STRING>,DOUBLE,LONG,STRING", VARIANT_SCALAR_AND_ARRAY, fancy},
         new Object[]{"ARRAY<DOUBLE>,ARRAY<LONG>,ARRAY<STRING>", VARIANT_ARRAY, IndexSpec.DEFAULT},
-        new Object[]{"ARRAY<DOUBLE>,ARRAY<LONG>,ARRAY<STRING>", VARIANT_ARRAY, fancy}
+        new Object[]{"ARRAY<DOUBLE>,ARRAY<LONG>,ARRAY<STRING>", VARIANT_ARRAY, fancy},
+        new Object[]{"ARRAY<LONG>", NO_TYPE_ARRAY, IndexSpec.DEFAULT},
+        new Object[]{"ARRAY<LONG>", NO_TYPE_ARRAY, fancy}
     );
 
     return constructors;
@@ -254,6 +263,9 @@ public class VariantColumnSupplierTest extends InitializedNullHandlingTest
       for (ColumnType type : FieldTypeInfo.convertToSet(expectedTypes.getByteValue())) {
         expectedLogicalType = ColumnType.leastRestrictiveType(expectedLogicalType, type);
       }
+      if (expectedLogicalType == null && sortedFields.get(NestedPathFinder.JSON_PATH_ROOT).hasUntypedArray()) {
+        expectedLogicalType = ColumnType.LONG_ARRAY;
+      }
       VariantColumnSerializer serializer = new VariantColumnSerializer(
           fileNameBase,
           expectedTypes.getSingleType() == null ? null : expectedLogicalType,
@@ -305,8 +317,7 @@ public class VariantColumnSupplierTest extends InitializedNullHandlingTest
         ByteOrder.nativeOrder(),
         bitmapSerdeFactory,
         baseBuffer,
-        bob,
-        NestedFieldColumnIndexSupplierTest.ALWAYS_USE_INDEXES
+        bob
     );
     try (VariantColumn<?> column = (VariantColumn<?>) supplier.get()) {
       smokeTest(supplier, column, data, expectedTypes);
@@ -324,8 +335,7 @@ public class VariantColumnSupplierTest extends InitializedNullHandlingTest
         ByteOrder.nativeOrder(),
         bitmapSerdeFactory,
         baseBuffer,
-        bob,
-        NestedFieldColumnIndexSupplierTest.ALWAYS_USE_INDEXES
+        bob
     );
     final String expectedReason = "none";
     final AtomicReference<String> failureReason = new AtomicReference<>(expectedReason);

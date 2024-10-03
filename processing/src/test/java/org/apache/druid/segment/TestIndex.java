@@ -24,6 +24,7 @@ import com.google.common.base.Suppliers;
 import com.google.common.io.CharSource;
 import com.google.common.io.LineProcessor;
 import com.google.common.io.Resources;
+import org.apache.druid.data.input.ResourceInputSource;
 import org.apache.druid.data.input.impl.DelimitedParseSpec;
 import org.apache.druid.data.input.impl.DimensionSchema;
 import org.apache.druid.data.input.impl.DimensionsSpec;
@@ -37,6 +38,7 @@ import org.apache.druid.java.util.common.DateTimes;
 import org.apache.druid.java.util.common.FileUtils;
 import org.apache.druid.java.util.common.Intervals;
 import org.apache.druid.java.util.common.logger.Logger;
+import org.apache.druid.query.NestedDataTestUtils;
 import org.apache.druid.query.aggregation.AggregatorFactory;
 import org.apache.druid.query.aggregation.DoubleMaxAggregatorFactory;
 import org.apache.druid.query.aggregation.DoubleMinAggregatorFactory;
@@ -49,6 +51,7 @@ import org.apache.druid.query.aggregation.hyperloglog.HyperUniquesSerde;
 import org.apache.druid.query.expression.TestExprMacroTable;
 import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.column.StringEncodingStrategy;
+import org.apache.druid.segment.data.CompressionStrategy;
 import org.apache.druid.segment.data.FrontCodedIndexed;
 import org.apache.druid.segment.incremental.IncrementalIndex;
 import org.apache.druid.segment.incremental.IncrementalIndexSchema;
@@ -68,6 +71,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
+ *
  */
 public class TestIndex
 {
@@ -108,6 +112,23 @@ public class TestIndex
       new StringDimensionSchema("null_column")
   );
 
+  public static final List<DimensionSchema> DIMENSION_SCHEMAS_NON_TIME_ORDERED = Arrays.asList(
+      new StringDimensionSchema("market"),
+      new StringDimensionSchema("quality"),
+      new LongDimensionSchema("__time"),
+      new LongDimensionSchema("qualityLong"),
+      new FloatDimensionSchema("qualityFloat"),
+      new DoubleDimensionSchema("qualityDouble"),
+      new StringDimensionSchema("qualityNumericString"),
+      new LongDimensionSchema("longNumericNull"),
+      new FloatDimensionSchema("floatNumericNull"),
+      new DoubleDimensionSchema("doubleNumericNull"),
+      new StringDimensionSchema("placement"),
+      new StringDimensionSchema("placementish"),
+      new StringDimensionSchema("partial_null_column"),
+      new StringDimensionSchema("null_column")
+  );
+
   public static final List<DimensionSchema> DIMENSION_SCHEMAS_NO_BITMAP = Arrays.asList(
       new StringDimensionSchema("market", null, false),
       new StringDimensionSchema("quality", null, false),
@@ -125,7 +146,8 @@ public class TestIndex
   );
 
   public static final DimensionsSpec DIMENSIONS_SPEC = new DimensionsSpec(DIMENSION_SCHEMAS);
-
+  public static final DimensionsSpec DIMENSIONS_SPEC_NON_TIME_ORDERED =
+      new DimensionsSpec(DIMENSION_SCHEMAS_NON_TIME_ORDERED);
   public static final DimensionsSpec DIMENSIONS_SPEC_NO_BITMAPS = new DimensionsSpec(DIMENSION_SCHEMAS_NO_BITMAP);
 
   public static final String[] DOUBLE_METRICS = new String[]{"index", "indexMin", "indexMaxPlusTen"};
@@ -159,14 +181,33 @@ public class TestIndex
   private static Supplier<IncrementalIndex> realtimeIndex = Suppliers.memoize(
       () -> makeRealtimeIndex("druid.sample.numeric.tsv")
   );
+  private static Supplier<IncrementalIndex> nonTimeOrderedRealtimeIndex = Suppliers.memoize(
+      () -> makeRealtimeIndex("druid.sample.numeric.tsv", true, DIMENSIONS_SPEC_NON_TIME_ORDERED)
+  );
+  private static Supplier<IncrementalIndex> nonTimeOrderedNoRollupRealtimeIndex = Suppliers.memoize(
+      () -> makeRealtimeIndex("druid.sample.numeric.tsv", false, DIMENSIONS_SPEC_NON_TIME_ORDERED)
+  );
   private static Supplier<IncrementalIndex> noRollupRealtimeIndex = Suppliers.memoize(
       () -> makeRealtimeIndex("druid.sample.numeric.tsv", false)
   );
   private static Supplier<IncrementalIndex> noBitmapRealtimeIndex = Suppliers.memoize(
-      () -> makeRealtimeIndex("druid.sample.numeric.tsv", false, false)
+      () -> makeRealtimeIndex("druid.sample.numeric.tsv", false, DIMENSIONS_SPEC_NO_BITMAPS)
   );
   private static Supplier<QueryableIndex> mmappedIndex = Suppliers.memoize(
       () -> persistRealtimeAndLoadMMapped(realtimeIndex.get())
+  );
+
+  private static Supplier<QueryableIndex> mmappedIndexCompressedComplex = Suppliers.memoize(
+      () -> persistRealtimeAndLoadMMapped(
+          realtimeIndex.get(),
+          IndexSpec.builder().withComplexMetricCompression(CompressionStrategy.LZ4).build()
+      )
+  );
+  private static Supplier<QueryableIndex> nonTimeOrderedMmappedIndex = Suppliers.memoize(
+      () -> persistRealtimeAndLoadMMapped(nonTimeOrderedRealtimeIndex.get())
+  );
+  private static Supplier<QueryableIndex> nonTimeOrderedNoRollupMmappedIndex = Suppliers.memoize(
+      () -> persistRealtimeAndLoadMMapped(nonTimeOrderedNoRollupRealtimeIndex.get())
   );
   private static Supplier<QueryableIndex> noRollupMmappedIndex = Suppliers.memoize(
       () -> persistRealtimeAndLoadMMapped(noRollupRealtimeIndex.get())
@@ -222,6 +263,9 @@ public class TestIndex
                    .build()
       )
   );
+  private static Supplier<QueryableIndex> wikipediaMMappedIndex = Suppliers.memoize(
+      () -> persistRealtimeAndLoadMMapped(makeWikipediaIncrementalIndex())
+  );
 
   public static IncrementalIndex getIncrementalTestIndex()
   {
@@ -243,6 +287,11 @@ public class TestIndex
     return mmappedIndex.get();
   }
 
+  public static QueryableIndex getMMappedWikipediaIndex()
+  {
+    return wikipediaMMappedIndex.get();
+  }
+
   public static QueryableIndex getNoRollupMMappedTestIndex()
   {
     return noRollupMmappedIndex.get();
@@ -251,6 +300,26 @@ public class TestIndex
   public static QueryableIndex getNoBitmapMMappedTestIndex()
   {
     return noBitmapMmappedIndex.get();
+  }
+
+  public static IncrementalIndex getNonTimeOrderedRealtimeTestIndex()
+  {
+    return nonTimeOrderedRealtimeIndex.get();
+  }
+
+  public static IncrementalIndex getNonTimeOrderedNoRollupRealtimeTestIndex()
+  {
+    return nonTimeOrderedNoRollupRealtimeIndex.get();
+  }
+
+  public static QueryableIndex getNonTimeOrderedMMappedTestIndex()
+  {
+    return nonTimeOrderedMmappedIndex.get();
+  }
+
+  public static QueryableIndex getNonTimeOrderedNoRollupMMappedTestIndex()
+  {
+    return nonTimeOrderedNoRollupMmappedIndex.get();
   }
 
   public static QueryableIndex mergedRealtimeIndex()
@@ -263,6 +332,11 @@ public class TestIndex
     return frontCodedMmappedIndex.get();
   }
 
+  public static QueryableIndex getMMappedTestIndexCompressedComplex()
+  {
+    return mmappedIndexCompressedComplex.get();
+  }
+
   public static IncrementalIndex makeRealtimeIndex(final String resourceFilename)
   {
     return makeRealtimeIndex(resourceFilename, true);
@@ -270,13 +344,17 @@ public class TestIndex
 
   public static IncrementalIndex makeRealtimeIndex(final String resourceFilename, boolean rollup)
   {
-    return makeRealtimeIndex(resourceFilename, rollup, true);
+    return makeRealtimeIndex(resourceFilename, rollup, DIMENSIONS_SPEC);
   }
 
-  public static IncrementalIndex makeRealtimeIndex(final String resourceFilename, boolean rollup, boolean bitmap)
+  public static IncrementalIndex makeRealtimeIndex(
+      final String resourceFilename,
+      boolean rollup,
+      DimensionsSpec dimensionsSpec
+  )
   {
     CharSource stream = getResourceCharSource(resourceFilename);
-    return makeRealtimeIndex(stream, rollup, bitmap);
+    return makeRealtimeIndex(stream, rollup, dimensionsSpec);
   }
 
   public static CharSource getResourceCharSource(final String resourceFilename)
@@ -291,15 +369,19 @@ public class TestIndex
 
   public static IncrementalIndex makeRealtimeIndex(final CharSource source)
   {
-    return makeRealtimeIndex(source, true, true);
+    return makeRealtimeIndex(source, true, DIMENSIONS_SPEC);
   }
 
-  public static IncrementalIndex makeRealtimeIndex(final CharSource source, boolean rollup, boolean bitmap)
+  public static IncrementalIndex makeRealtimeIndex(
+      final CharSource source,
+      boolean rollup,
+      DimensionsSpec dimensionsSpec
+  )
   {
     final IncrementalIndexSchema schema = new IncrementalIndexSchema.Builder()
         .withMinTimestamp(DateTimes.of("2011-01-12T00:00:00.000Z").getMillis())
         .withTimestampSpec(new TimestampSpec("ds", "auto", null))
-        .withDimensionsSpec(bitmap ? DIMENSIONS_SPEC : DIMENSIONS_SPEC_NO_BITMAPS)
+        .withDimensionsSpec(dimensionsSpec)
         .withVirtualColumns(VIRTUAL_COLUMNS)
         .withMetrics(METRIC_AGGS)
         .withRollup(rollup)
@@ -318,6 +400,62 @@ public class TestIndex
       } else {
         noRollupRealtimeIndex = null;
       }
+      throw new RuntimeException(e);
+    }
+  }
+
+  public static IncrementalIndex makeWikipediaIncrementalIndex()
+  {
+    final List<DimensionSchema> dimensions = Arrays.asList(
+        new StringDimensionSchema("channel"),
+        new StringDimensionSchema("cityName"),
+        new StringDimensionSchema("comment"),
+        new StringDimensionSchema("countryIsoCode"),
+        new StringDimensionSchema("countryName"),
+        new StringDimensionSchema("isAnonymous"),
+        new StringDimensionSchema("isMinor"),
+        new StringDimensionSchema("isNew"),
+        new StringDimensionSchema("isRobot"),
+        new StringDimensionSchema("isUnpatrolled"),
+        new StringDimensionSchema("metroCode"),
+        new StringDimensionSchema("namespace"),
+        new StringDimensionSchema("page"),
+        new StringDimensionSchema("regionIsoCode"),
+        new StringDimensionSchema("regionName"),
+        new StringDimensionSchema("user"),
+        new LongDimensionSchema("delta"),
+        new LongDimensionSchema("added"),
+        new LongDimensionSchema("deleted")
+    );
+
+    final File tmpDir;
+    try {
+      tmpDir = FileUtils.createTempDir("test-index-input-source");
+      try {
+        return IndexBuilder
+            .create()
+            .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
+            .schema(new IncrementalIndexSchema.Builder()
+                        .withRollup(false)
+                        .withTimestampSpec(new TimestampSpec("time", null, null))
+                        .withDimensionsSpec(new DimensionsSpec(dimensions))
+                        .build()
+            )
+            .inputSource(
+                ResourceInputSource.of(
+                    TestIndex.class.getClassLoader(),
+                    "wikipedia/wikiticker-2015-09-12-sampled.json.gz"
+                )
+            )
+            .inputFormat(NestedDataTestUtils.DEFAULT_JSON_INPUT_FORMAT)
+            .inputTmpDir(new File(tmpDir, "tmpWikipedia1"))
+            .buildIncrementalIndex();
+      }
+      finally {
+        FileUtils.deleteDirectory(tmpDir);
+      }
+    }
+    catch (IOException e) {
       throw new RuntimeException(e);
     }
   }

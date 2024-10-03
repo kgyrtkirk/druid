@@ -78,7 +78,14 @@ import java.util.stream.Collectors;
  */
 public class DruidCorrelateUnnestRel extends DruidRel<DruidCorrelateUnnestRel>
 {
-  private static final TableDataSource DUMMY_DATA_SOURCE = new TableDataSource("__correlate_unnest__");
+  private static final TableDataSource DUMMY_DATA_SOURCE = new TableDataSource("__correlate_unnest__")
+  {
+    @Override
+    public boolean isConcrete()
+    {
+      return false;
+    }
+  };
   private static final String BASE_UNNEST_OUTPUT_COLUMN = "unnest";
 
   private final Correlate correlateRel;
@@ -130,7 +137,7 @@ public class DruidCorrelateUnnestRel extends DruidRel<DruidCorrelateUnnestRel>
   {
     return new DruidCorrelateUnnestRel(
         getCluster(),
-        newQueryBuilder.getTraitSet(getConvention()),
+        newQueryBuilder.getTraitSet(getConvention(), getPlannerContext()),
         correlateRel,
         newQueryBuilder,
         getPlannerContext()
@@ -201,7 +208,10 @@ public class DruidCorrelateUnnestRel extends DruidRel<DruidCorrelateUnnestRel>
     // with a reference to it on the right side
     // IN such a case we use a RexShuttle to remove the reference on the left
     // And rewrite the left project
-    if (unnestDatasourceRel.getInputRexNode().getKind() == SqlKind.FIELD_ACCESS) {
+    // Added the isSimpleExtraction() check to prevent a NPE
+    // When using an expression in the value to be unnested
+    // If the simpleExtraction is null, we do not create the shuttle to update the projects
+    if (unnestDatasourceRel.getInputRexNode().getKind() == SqlKind.FIELD_ACCESS && expressionToUnnest.isSimpleExtraction()) {
       final PartialDruidQuery leftPartialQueryToBeUpdated;
       if (leftDruidRel instanceof DruidOuterQueryRel) {
         leftPartialQueryToBeUpdated = ((DruidRel) leftDruidRel.getInputs().get(0)).getPartialDruidQuery();
@@ -453,7 +463,7 @@ public class DruidCorrelateUnnestRel extends DruidRel<DruidCorrelateUnnestRel>
   )
   {
     // Compute signature of the correlation operation. It's like a join: the left and right sides are concatenated.
-    // On the native query side, this is what is ultimately emitted by the UnnestStorageAdapter.
+    // On the native query side, this is what is ultimately emitted by the UnnestSegment.
     //
     // Ignore prefix (lhs) from computeJoinRowSignature; we don't need this since we will declare the name of the
     // single output column directly. (And we know it's the last column in the signature.)
@@ -567,7 +577,7 @@ public class DruidCorrelateUnnestRel extends DruidRel<DruidCorrelateUnnestRel>
   /**
    * Shuttle that replaces correlating variables with regular field accesses to the left-hand side.
    */
-  private static class CorrelatedFieldAccessToInputRef extends RexShuttle
+  public static class CorrelatedFieldAccessToInputRef extends RexShuttle
   {
     private final CorrelationId correlationId;
 
@@ -585,7 +595,6 @@ public class DruidCorrelateUnnestRel extends DruidRel<DruidCorrelateUnnestRel>
           return new RexInputRef(fieldAccess.getField().getIndex(), fieldAccess.getType());
         }
       }
-
       return super.visitFieldAccess(fieldAccess);
     }
   }

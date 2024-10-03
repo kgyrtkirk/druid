@@ -67,8 +67,7 @@ public class TombstoneHelperTest
     GranularitySpec granularitySpec = new UniformGranularitySpec(Granularities.DAY, null, false,
                                                                  Collections.singletonList(interval)
     );
-    DataSchema dataSchema =
-        new DataSchema("test", null, null, null, granularitySpec, null);
+    DataSchema dataSchema = DataSchema.builder().withDataSource("test").withGranularity(granularitySpec).build();
     // no segments will be pushed when all rows are thrown away, assume that:
     List<DataSegment> pushedSegments = Collections.emptyList();
 
@@ -93,8 +92,7 @@ public class TombstoneHelperTest
     GranularitySpec granularitySpec = new UniformGranularitySpec(Granularities.DAY, null, false,
                                                                  Collections.singletonList(interval)
     );
-    DataSchema dataSchema =
-        new DataSchema("test", null, null, null, granularitySpec, null);
+    DataSchema dataSchema = DataSchema.builder().withDataSource("test").withGranularity(granularitySpec).build();
     // no segments will be pushed when all rows are thrown away, assume that:
     List<DataSegment> pushedSegments = Collections.emptyList();
 
@@ -543,6 +541,42 @@ public class TombstoneHelperTest
             Intervals.of("3000-01-04/3000-01-05"),
             Intervals.of("4000-01-01T00:00:00.000Z/146140482-04-24T15:36:27.903Z")
         ),
+        tombstoneIntervals
+    );
+  }
+
+
+  @Test
+  public void testTombstoneIntervalsForReplaceOverEternityInterval() throws IOException
+  {
+    Interval usedInterval = Intervals.ETERNITY;
+    Interval replaceInterval = Intervals.ETERNITY;
+    List<Interval> dropIntervals = Intervals.ONLY_ETERNITY;
+    Granularity replaceGranularity = Granularities.YEAR;
+
+    DataSegment existingUsedSegment =
+        DataSegment.builder()
+                   .dataSource("test")
+                   .interval(usedInterval)
+                   .version("oldVersion")
+                   .size(100)
+                   .build();
+    Assert.assertFalse(existingUsedSegment.isTombstone());
+
+    Mockito.when(taskActionClient.submit(any(TaskAction.class)))
+           .thenReturn(Collections.singletonList(existingUsedSegment));
+    TombstoneHelper tombstoneHelper = new TombstoneHelper(taskActionClient);
+
+    Set<Interval> tombstoneIntervals = tombstoneHelper.computeTombstoneIntervalsForReplace(
+        dropIntervals,
+        ImmutableList.of(replaceInterval),
+        "test",
+        replaceGranularity,
+        MAX_BUCKETS
+    );
+
+    Assert.assertEquals(
+        ImmutableSet.of(Intervals.ETERNITY),
         tombstoneIntervals
     );
   }

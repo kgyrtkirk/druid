@@ -26,6 +26,7 @@ import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.java.util.common.io.smoosh.SmooshedFileMapper;
 import org.apache.druid.segment.column.ColumnBuilder;
 import org.apache.druid.segment.column.ColumnConfig;
+import org.apache.druid.segment.column.ColumnIndexSupplier;
 import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.column.StringEncodingStrategies;
 import org.apache.druid.segment.data.BitmapSerdeFactory;
@@ -35,6 +36,9 @@ import org.apache.druid.segment.data.FrontCodedIntArrayIndexed;
 import org.apache.druid.segment.data.GenericIndexed;
 import org.apache.druid.segment.data.Indexed;
 import org.apache.druid.segment.data.VByte;
+import org.apache.druid.segment.index.SimpleImmutableBitmapIndex;
+import org.apache.druid.segment.index.semantic.NullValueIndex;
+import org.apache.druid.segment.serde.ColumnSerializerUtils;
 import org.apache.druid.segment.serde.NestedCommonFormatColumnPartSerde;
 
 import javax.annotation.Nullable;
@@ -42,7 +46,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-public class NestedDataColumnSupplier implements Supplier<NestedCommonFormatColumn>
+public class NestedDataColumnSupplier implements Supplier<NestedCommonFormatColumn>, ColumnIndexSupplier
 {
   public static NestedDataColumnSupplier read(
       ColumnType logicalType,
@@ -76,7 +80,7 @@ public class NestedDataColumnSupplier implements Supplier<NestedCommonFormatColu
         final ByteBuffer stringDictionaryBuffer = NestedCommonFormatColumnPartSerde.loadInternalFile(
             mapper,
             columnName,
-            NestedCommonFormatColumnSerializer.STRING_DICTIONARY_FILE_NAME
+            ColumnSerializerUtils.STRING_DICTIONARY_FILE_NAME
         );
 
         stringDictionarySupplier = StringEncodingStrategies.getStringDictionarySupplier(
@@ -88,7 +92,7 @@ public class NestedDataColumnSupplier implements Supplier<NestedCommonFormatColu
         final ByteBuffer longDictionaryBuffer = NestedCommonFormatColumnPartSerde.loadInternalFile(
             mapper,
             columnName,
-            NestedCommonFormatColumnSerializer.LONG_DICTIONARY_FILE_NAME
+            ColumnSerializerUtils.LONG_DICTIONARY_FILE_NAME
         );
         longDictionarySupplier = FixedIndexed.read(
             longDictionaryBuffer,
@@ -99,7 +103,7 @@ public class NestedDataColumnSupplier implements Supplier<NestedCommonFormatColu
         final ByteBuffer doubleDictionaryBuffer = NestedCommonFormatColumnPartSerde.loadInternalFile(
             mapper,
             columnName,
-            NestedCommonFormatColumnSerializer.DOUBLE_DICTIONARY_FILE_NAME
+            ColumnSerializerUtils.DOUBLE_DICTIONARY_FILE_NAME
         );
         doubleDictionarySupplier = FixedIndexed.read(
             doubleDictionaryBuffer,
@@ -110,7 +114,7 @@ public class NestedDataColumnSupplier implements Supplier<NestedCommonFormatColu
         final ByteBuffer arrayDictionarybuffer = NestedCommonFormatColumnPartSerde.loadInternalFile(
             mapper,
             columnName,
-            NestedCommonFormatColumnSerializer.ARRAY_DICTIONARY_FILE_NAME
+            ColumnSerializerUtils.ARRAY_DICTIONARY_FILE_NAME
         );
         arrayDictionarySupplier = FrontCodedIntArrayIndexed.read(
             arrayDictionarybuffer,
@@ -122,7 +126,7 @@ public class NestedDataColumnSupplier implements Supplier<NestedCommonFormatColu
             NestedCommonFormatColumnSerializer.RAW_FILE_NAME
         );
         compressedRawColumnSupplier = CompressedVariableSizedBlobColumnSupplier.fromByteBuffer(
-            NestedCommonFormatColumnSerializer.getInternalFileName(
+            ColumnSerializerUtils.getInternalFileName(
                 columnName,
                 NestedCommonFormatColumnSerializer.RAW_FILE_NAME
             ),
@@ -135,7 +139,7 @@ public class NestedDataColumnSupplier implements Supplier<NestedCommonFormatColu
           final ByteBuffer nullIndexBuffer = NestedCommonFormatColumnPartSerde.loadInternalFile(
               mapper,
               columnName,
-              NestedCommonFormatColumnSerializer.NULL_BITMAP_FILE_NAME
+              ColumnSerializerUtils.NULL_BITMAP_FILE_NAME
           );
           nullValues = bitmapSerdeFactory.getObjectStrategy().fromByteBufferWithSize(nullIndexBuffer);
         } else {
@@ -241,5 +245,15 @@ public class NestedDataColumnSupplier implements Supplier<NestedCommonFormatColu
   public ColumnType getLogicalType()
   {
     return simpleType == null ? ColumnType.NESTED_DATA : simpleType;
+  }
+
+  @Nullable
+  @Override
+  public <T> T as(Class<T> clazz)
+  {
+    if (clazz.equals(NullValueIndex.class)) {
+      return (T) (NullValueIndex) () -> new SimpleImmutableBitmapIndex(nullValues);
+    }
+    return null;
   }
 }

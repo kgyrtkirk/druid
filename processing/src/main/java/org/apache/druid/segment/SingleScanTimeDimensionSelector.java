@@ -20,8 +20,10 @@
 package org.apache.druid.segment;
 
 import com.google.common.base.Preconditions;
-import com.google.common.base.Predicate;
+import org.apache.druid.error.DruidException;
+import org.apache.druid.query.Order;
 import org.apache.druid.query.extraction.ExtractionFn;
+import org.apache.druid.query.filter.DruidObjectPredicate;
 import org.apache.druid.query.filter.DruidPredicateFactory;
 import org.apache.druid.query.filter.ValueMatcher;
 import org.apache.druid.query.monomorphicprocessing.RuntimeShapeInspector;
@@ -43,7 +45,7 @@ public class SingleScanTimeDimensionSelector implements DimensionSelector
 {
   private final ExtractionFn extractionFn;
   private final BaseLongColumnValueSelector selector;
-  private final boolean descending;
+  private final Order timeOrder;
 
   private final List<String> timeValues = new ArrayList<>();
   private final SingleIndexedInt row = new SingleIndexedInt();
@@ -56,13 +58,17 @@ public class SingleScanTimeDimensionSelector implements DimensionSelector
   public SingleScanTimeDimensionSelector(
       BaseLongColumnValueSelector selector,
       @Nullable ExtractionFn extractionFn,
-      boolean descending
+      Order timeOrder
   )
   {
     Preconditions.checkNotNull(extractionFn, "time dimension must provide an extraction function");
     this.extractionFn = extractionFn;
     this.selector = selector;
-    this.descending = descending;
+    this.timeOrder = timeOrder;
+
+    if (timeOrder == Order.NONE) {
+      throw DruidException.defensive("Cannot use timeOrder[%s]", timeOrder);
+    }
   }
 
   @Override
@@ -95,15 +101,13 @@ public class SingleScanTimeDimensionSelector implements DimensionSelector
   @Override
   public ValueMatcher makeValueMatcher(final DruidPredicateFactory predicateFactory)
   {
-    final Predicate<String> predicate = predicateFactory.makeStringPredicate();
+    final DruidObjectPredicate<String> predicate = predicateFactory.makeStringPredicate();
     return new ValueMatcher()
     {
       @Override
       public boolean matches(boolean includeUnknown)
       {
-        final String rowVal = lookupName(getDimensionValueIndex());
-        final boolean matchNull = includeUnknown && predicateFactory.isNullInputUnknown();
-        return (matchNull && rowVal == null) || predicate.apply(lookupName(getDimensionValueIndex()));
+        return predicate.apply(lookupName(getDimensionValueIndex())).matches(includeUnknown);
       }
 
       @Override
@@ -132,7 +136,7 @@ public class SingleScanTimeDimensionSelector implements DimensionSelector
       // we can also avoid creating a dimension value and corresponding index
       // and use the current one
     } else if (timestamp != currentTimestamp) {
-      if (descending ? timestamp > currentTimestamp : timestamp < currentTimestamp) {
+      if (timeOrder == Order.ASCENDING ? timestamp < currentTimestamp : timestamp > currentTimestamp) {
         // re-using this selector for multiple scans would cause the same rows to return different IDs
         // we might want to re-visit if we ever need to do multiple scans with this dimension selector
         throw new IllegalStateException("cannot re-use time dimension selector for multiple scans");
@@ -200,6 +204,6 @@ public class SingleScanTimeDimensionSelector implements DimensionSelector
   {
     inspector.visit("selector", selector);
     inspector.visit("extractionFn", extractionFn);
-    inspector.visit("descending", descending);
+    inspector.visit("timeOrder", timeOrder);
   }
 }

@@ -45,7 +45,7 @@ public class AllUnknownBitmapColumnIndex implements BitmapColumnIndex
   }
 
   @Override
-  public double estimateSelectivity(int totalRows)
+  public int estimatedComputeCost()
   {
     return 0;
   }

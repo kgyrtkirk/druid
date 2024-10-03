@@ -29,6 +29,7 @@ import org.apache.druid.query.rowsandcols.column.ColumnAccessor;
 import org.apache.druid.segment.column.ColumnType;
 import org.junit.Assert;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -95,6 +96,13 @@ public class RowsAndColumnsHelper
   public RowsAndColumnsHelper expectColumn(String col, double[] expectedVals)
   {
     final ColumnHelper helper = columnHelper(col, expectedVals.length, ColumnType.DOUBLE);
+    helper.setExpectation(expectedVals);
+    return this;
+  }
+
+  public RowsAndColumnsHelper expectColumn(String col, float[] expectedVals)
+  {
+    final ColumnHelper helper = columnHelper(col, expectedVals.length, ColumnType.FLOAT);
     helper.setExpectation(expectedVals);
     return this;
   }
@@ -272,6 +280,17 @@ public class RowsAndColumnsHelper
             Assert.assertEquals(msg, 0, accessor.getLong(i));
           } else {
             Assert.assertEquals(msg, ((Long) expectedVal).longValue(), accessor.getLong(i));
+          }
+        } else if (expectedVal instanceof Object[]) {
+          Object actualVal = accessor.getObject(i);
+          if (expectedNulls[i]) {
+            Assert.assertNull(msg, accessor.getObject(i));
+          } else {
+            if (actualVal instanceof ArrayList) {
+              Assert.assertArrayEquals(msg, (Object[]) expectedVals[i], ((ArrayList<?>) actualVal).toArray());
+            } else {
+              Assert.assertArrayEquals(msg, (Object[]) expectedVals[i], (Object[]) actualVal);
+            }
           }
         } else {
           if (expectedNulls[i]) {

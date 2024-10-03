@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
 import com.google.common.primitives.Doubles;
 import org.apache.druid.collections.bitmap.ImmutableBitmap;
+import org.apache.druid.error.DruidException;
 import org.apache.druid.java.util.common.IAE;
 import org.apache.druid.java.util.common.ISE;
 import org.apache.druid.java.util.common.RE;
@@ -114,6 +115,7 @@ public abstract class CompressedNestedDataComplexColumn<TStringDictionary extend
   private final Supplier<TStringDictionary> stringDictionarySupplier;
   private final Supplier<FixedIndexed<Long>> longDictionarySupplier;
   private final Supplier<FixedIndexed<Double>> doubleDictionarySupplier;
+  @Nullable
   private final Supplier<FrontCodedIntArrayIndexed> arrayDictionarySupplier;
   private final SmooshedFileMapper fileMapper;
   private final String rootFieldPath;
@@ -308,8 +310,8 @@ public abstract class CompressedNestedDataComplexColumn<TStringDictionary extend
     return nullValues;
   }
 
-  @Nullable
   @Override
+  @Nullable
   public Object getRowValue(int rowNum)
   {
     if (nullValues.get(rowNum)) {
@@ -450,7 +452,10 @@ public abstract class CompressedNestedDataComplexColumn<TStringDictionary extend
   @Override
   public int getLength()
   {
-    return -1;
+    if (compressedRawColumn == null) {
+      compressedRawColumn = closer.register(compressedRawColumnSupplier.get());
+    }
+    return compressedRawColumn.size();
   }
 
   @Override
@@ -533,9 +538,14 @@ public abstract class CompressedNestedDataComplexColumn<TStringDictionary extend
       if (arrayFieldIndex >= 0) {
         final int elementNumber = ((NestedPathArrayElement) lastPath).getIndex();
         if (elementNumber < 0) {
-          throw new IAE("Cannot make array element selector for path [%s], negative array index not supported for this selector", path);
+          throw DruidException.forPersona(DruidException.Persona.USER)
+                              .ofCategory(DruidException.Category.INVALID_INPUT)
+                              .build("Cannot make array element selector for path [%s], negative array index not supported for this selector", path);
         }
-        DictionaryEncodedColumn<?> col = (DictionaryEncodedColumn<?>) getColumnHolder(arrayField, arrayFieldIndex).getColumn();
+        DictionaryEncodedColumn<?> col = (DictionaryEncodedColumn<?>) getColumnHolder(
+            arrayField,
+            arrayFieldIndex
+        ).getColumn();
         ColumnValueSelector arraySelector = col.makeColumnValueSelector(readableOffset);
         return new ColumnValueSelector<Object>()
         {
@@ -632,9 +642,14 @@ public abstract class CompressedNestedDataComplexColumn<TStringDictionary extend
       if (arrayFieldIndex >= 0) {
         final int elementNumber = ((NestedPathArrayElement) lastPath).getIndex();
         if (elementNumber < 0) {
-          throw new IAE("Cannot make array element selector for path [%s], negative array index not supported for this selector", path);
+          throw DruidException.forPersona(DruidException.Persona.USER)
+                              .ofCategory(DruidException.Category.INVALID_INPUT)
+                              .build("Cannot make array element selector for path [%s], negative array index not supported for this selector", path);
         }
-        DictionaryEncodedColumn<?> col = (DictionaryEncodedColumn<?>) getColumnHolder(arrayField, arrayFieldIndex).getColumn();
+        DictionaryEncodedColumn<?> col = (DictionaryEncodedColumn<?>) getColumnHolder(
+            arrayField,
+            arrayFieldIndex
+        ).getColumn();
         VectorObjectSelector arraySelector = col.makeVectorObjectSelector(readableOffset);
 
         return new VectorObjectSelector()
@@ -700,9 +715,14 @@ public abstract class CompressedNestedDataComplexColumn<TStringDictionary extend
       if (arrayFieldIndex >= 0) {
         final int elementNumber = ((NestedPathArrayElement) lastPath).getIndex();
         if (elementNumber < 0) {
-          throw new IAE("Cannot make array element selector for path [%s], negative array index not supported for this selector", path);
+          throw DruidException.forPersona(DruidException.Persona.USER)
+                              .ofCategory(DruidException.Category.INVALID_INPUT)
+                              .build("Cannot make array element selector for path [%s], negative array index not supported for this selector", path);
         }
-        DictionaryEncodedColumn<?> col = (DictionaryEncodedColumn<?>) getColumnHolder(arrayField, arrayFieldIndex).getColumn();
+        DictionaryEncodedColumn<?> col = (DictionaryEncodedColumn<?>) getColumnHolder(
+            arrayField,
+            arrayFieldIndex
+        ).getColumn();
         VectorObjectSelector arraySelector = col.makeVectorObjectSelector(readableOffset);
 
         return new VectorValueSelector()
@@ -914,13 +934,11 @@ public abstract class CompressedNestedDataComplexColumn<TStringDictionary extend
       );
       // we should check this someday soon, but for now just read it to push the buffer position ahead
       int flags = dataBuffer.getInt();
-      Preconditions.checkState(
-          flags == DictionaryEncodedColumnPartSerde.NO_FLAGS,
-          StringUtils.format(
-              "Unrecognized bits set in space reserved for future flags for field column [%s]",
-              field
-          )
-      );
+      if (flags != DictionaryEncodedColumnPartSerde.NO_FLAGS) {
+        throw DruidException.defensive(
+            "Unrecognized bits set in space reserved for future flags for field column [%s]", field
+        );
+      }
 
       final Supplier<FixedIndexed<Integer>> localDictionarySupplier = FixedIndexed.read(
           dataBuffer,
@@ -998,10 +1016,6 @@ public abstract class CompressedNestedDataComplexColumn<TStringDictionary extend
                    .setHasNulls(hasNull)
                    .setDictionaryEncodedColumnSupplier(columnSupplier);
 
-      final int size;
-      try (ColumnarInts throwAway = ints.get()) {
-        size = throwAway.size();
-      }
       columnBuilder.setIndexSupplier(
           new NestedFieldColumnIndexSupplier(
               types,
@@ -1012,9 +1026,9 @@ public abstract class CompressedNestedDataComplexColumn<TStringDictionary extend
               stringDictionarySupplier,
               longDictionarySupplier,
               doubleDictionarySupplier,
+              arrayDictionarySupplier,
               arrayElementDictionarySupplier,
-              arrayElementBitmaps,
-              size
+              arrayElementBitmaps
           ),
           true,
           false

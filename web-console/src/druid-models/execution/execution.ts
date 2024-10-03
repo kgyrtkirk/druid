@@ -18,6 +18,7 @@
 
 import { Column, QueryResult, SqlExpression, SqlQuery, SqlWithQuery } from '@druid-toolkit/query';
 
+import { maybeGetClusterCapacity } from '../../helpers';
 import {
   deepGet,
   deleteKeys,
@@ -32,7 +33,12 @@ import type { DruidEngine } from '../druid-engine/druid-engine';
 import { validDruidEngine } from '../druid-engine/druid-engine';
 import type { QueryContext } from '../query-context/query-context';
 import { Stages } from '../stages/stages';
-import type { MsqTaskPayloadResponse, MsqTaskReportResponse, TaskStatus } from '../task/task';
+import type {
+  MsqTaskPayloadResponse,
+  MsqTaskReportResponse,
+  SegmentLoadWaiterStatus,
+  TaskStatus,
+} from '../task/task';
 
 const IGNORE_CONTEXT_KEYS = [
   '__asyncIdentity__',
@@ -72,7 +78,7 @@ export type ExecutionDestination =
       numTotalRows?: number;
     }
   | { type: 'durableStorage'; numTotalRows?: number }
-  | { type: 'dataSource'; dataSource: string; numTotalRows?: number; loaded?: boolean };
+  | { type: 'dataSource'; dataSource: string; numTotalRows?: number };
 
 export interface ExecutionDestinationPage {
   id: number;
@@ -165,18 +171,6 @@ function formatPendingMessage(
   }
 }
 
-interface SegmentStatus {
-  duration: number;
-  onDemandSegments: number;
-  pendingSegments: number;
-  precachedSegments: number;
-  startTime: Date;
-  state: 'INIT' | 'WAITING' | 'SUCCESS';
-  totalSegments: number;
-  unknownSegments: number;
-  usedSegments: number;
-}
-
 export interface ExecutionValue {
   engine: DruidEngine;
   id: string;
@@ -195,11 +189,16 @@ export interface ExecutionValue {
   warnings?: ExecutionError[];
   capacityInfo?: CapacityInfo;
   _payload?: MsqTaskPayloadResponse;
-  segmentStatus?: SegmentStatus;
+  segmentStatus?: SegmentLoadWaiterStatus;
 }
 
 export class Execution {
+  static USE_TASK_PAYLOAD = true;
+  static USE_TASK_REPORTS = false;
   static INLINE_DATASOURCE_MARKER = '__query_select';
+
+  static getClusterCapacity: (() => Promise<CapacityInfo | undefined>) | undefined =
+    maybeGetClusterCapacity;
 
   static validAsyncState(status: string | undefined): status is AsyncState {
     return oneOf(status, 'ACCEPTED', 'RUNNING', 'FINISHED', 'FAILED');
@@ -236,7 +235,7 @@ export class Execution {
     sqlQuery?: string,
     queryContext?: QueryContext,
   ): Execution {
-    const { queryId, schema, result, errorDetails } = asyncSubmitResult;
+    const { queryId, schema, result, errorDetails, stages, counters, warnings } = asyncSubmitResult;
 
     let queryResult: QueryResult | undefined;
     if (schema && result?.sampleRecords) {
@@ -256,14 +255,17 @@ export class Execution {
       };
     }
 
+    const { createdAt, durationMs, state } = asyncSubmitResult;
     return new Execution({
       engine: 'sql-msq-task',
       id: queryId,
-      startTime: new Date(asyncSubmitResult.createdAt),
-      duration: asyncSubmitResult.durationMs,
-      status: Execution.normalizeAsyncState(asyncSubmitResult.state),
+      startTime: new Date(createdAt),
+      duration: durationMs >= 0 ? durationMs : undefined,
+      status: Execution.normalizeAsyncState(state),
       sqlQuery,
       queryContext,
+      stages: Array.isArray(stages) && counters ? new Stages(stages, counters) : undefined,
+      warnings: Array.isArray(warnings) ? warnings : undefined,
       error: executionError,
       destination:
         typeof result?.dataSource === 'string'
@@ -306,7 +308,7 @@ export class Execution {
     const startTime = new Date(deepGet(taskReport, 'multiStageQuery.payload.status.startTime'));
     const durationMs = deepGet(taskReport, 'multiStageQuery.payload.status.durationMs');
 
-    const segmentLoaderStatus = deepGet(
+    const segmentLoaderStatus: SegmentLoadWaiterStatus = deepGet(
       taskReport,
       'multiStageQuery.payload.status.segmentLoadWaiterStatus',
     );
@@ -334,7 +336,7 @@ export class Execution {
       status: Execution.normalizeTaskStatus(status),
       segmentStatus: segmentLoaderStatus,
       startTime: isNaN(startTime.getTime()) ? undefined : startTime,
-      duration: typeof durationMs === 'number' ? durationMs : undefined,
+      duration: typeof durationMs === 'number' && durationMs >= 0 ? durationMs : undefined,
       usageInfo: getUsageInfoFromStatusPayload(
         deepGet(taskReport, 'multiStageQuery.payload.status'),
       ),
@@ -389,7 +391,7 @@ export class Execution {
   public readonly error?: ExecutionError;
   public readonly warnings?: ExecutionError[];
   public readonly capacityInfo?: CapacityInfo;
-  public readonly segmentStatus?: SegmentStatus;
+  public readonly segmentStatus?: SegmentLoadWaiterStatus;
 
   public readonly _payload?: { payload: any; task: string };
 
@@ -440,6 +442,13 @@ export class Execution {
     };
   }
 
+  public changeEngine(engine: DruidEngine): Execution {
+    return new Execution({
+      ...this.valueOf(),
+      engine,
+    });
+  }
+
   public changeSqlQuery(sqlQuery: string, queryContext?: QueryContext): Execution {
     const value = this.valueOf();
 
@@ -447,7 +456,10 @@ export class Execution {
     value.queryContext = queryContext;
     const parsedQuery = parseSqlQuery(sqlQuery);
     if (value.result && (parsedQuery || queryContext)) {
-      value.result = value.result.attachQuery({ context: queryContext }, parsedQuery);
+      value.result = value.result.attachQuery(
+        { ...this.nativeQuery, context: queryContext },
+        parsedQuery,
+      );
     }
 
     return new Execution(value);
@@ -470,7 +482,10 @@ export class Execution {
   public changeResult(result: QueryResult): Execution {
     return new Execution({
       ...this.valueOf(),
-      result: result.attachQuery({}, this.sqlQuery ? parseSqlQuery(this.sqlQuery) : undefined),
+      result: result.attachQuery(
+        this.nativeQuery,
+        this.sqlQuery ? parseSqlQuery(this.sqlQuery) : undefined,
+      ),
     });
   }
 
@@ -522,19 +537,6 @@ export class Execution {
     return new Execution(value);
   }
 
-  public markDestinationDatasourceLoaded(): Execution {
-    const { destination } = this;
-    if (destination?.type !== 'dataSource') return this;
-
-    return new Execution({
-      ...this.valueOf(),
-      destination: {
-        ...destination,
-        loaded: true,
-      },
-    });
-  }
-
   public isProcessingData(): boolean {
     const { status, stages } = this;
     return Boolean(
@@ -556,11 +558,11 @@ export class Execution {
 
     switch (segmentStatus?.state) {
       case 'INIT':
-        label = 'Waiting for segments loading to start...';
+        label = 'Waiting for segment loading to start...';
         break;
 
       case 'WAITING':
-        label = 'Waiting for segments loading to complete...';
+        label = 'Waiting for segment loading to complete...';
         break;
 
       case 'SUCCESS':
@@ -577,17 +579,6 @@ export class Execution {
     };
   }
 
-  public isFullyComplete(): boolean {
-    if (this.isWaitingForQuery()) return false;
-
-    const { status, destination } = this;
-    if (status === 'SUCCESS' && destination?.type === 'dataSource') {
-      return Boolean(destination.loaded);
-    }
-
-    return true;
-  }
-
   public getIngestDatasource(): string | undefined {
     const { destination } = this;
     if (destination?.type !== 'dataSource') return;
@@ -598,10 +589,8 @@ export class Execution {
     return this.destination?.numTotalRows;
   }
 
-  public isSuccessfulInsert(): boolean {
-    return Boolean(
-      this.isFullyComplete() && this.getIngestDatasource() && this.status === 'SUCCESS',
-    );
+  public isSuccessfulIngest(): boolean {
+    return Boolean(this.status === 'SUCCESS' && this.getIngestDatasource());
   }
 
   public getErrorMessage(): string | undefined {

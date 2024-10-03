@@ -20,10 +20,7 @@
 package org.apache.druid.k8s.overlord.taskadapter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.cfg.MapperConfig;
-import com.fasterxml.jackson.databind.introspect.AnnotatedClass;
-import com.fasterxml.jackson.databind.introspect.AnnotatedClassResolver;
-import com.fasterxml.jackson.databind.jsontype.NamedType;
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import io.fabric8.kubernetes.api.model.EnvVar;
@@ -31,18 +28,13 @@ import io.fabric8.kubernetes.api.model.EnvVarBuilder;
 import io.fabric8.kubernetes.api.model.EnvVarSourceBuilder;
 import io.fabric8.kubernetes.api.model.ObjectFieldSelector;
 import io.fabric8.kubernetes.api.model.Pod;
-import io.fabric8.kubernetes.api.model.PodTemplate;
 import io.fabric8.kubernetes.api.model.batch.v1.Job;
 import io.fabric8.kubernetes.api.model.batch.v1.JobBuilder;
-import io.fabric8.kubernetes.client.utils.Serialization;
 import org.apache.commons.io.IOUtils;
 import org.apache.druid.error.DruidException;
 import org.apache.druid.error.InternalServerError;
-import org.apache.druid.guice.IndexingServiceModuleHelper;
 import org.apache.druid.indexing.common.config.TaskConfig;
 import org.apache.druid.indexing.common.task.Task;
-import org.apache.druid.java.util.common.IAE;
-import org.apache.druid.java.util.common.ISE;
 import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.java.util.common.logger.Logger;
 import org.apache.druid.k8s.overlord.KubernetesTaskRunnerConfig;
@@ -53,17 +45,12 @@ import org.apache.druid.k8s.overlord.common.KubernetesOverlordUtils;
 import org.apache.druid.server.DruidNode;
 import org.apache.druid.tasklogs.TaskLogs;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Properties;
 
 /**
  * A PodTemplate {@link TaskAdapter} to transform tasks to kubernetes jobs and kubernetes pods to tasks
@@ -84,30 +71,29 @@ public class PodTemplateTaskAdapter implements TaskAdapter
   public static final String TYPE = "customTemplateAdapter";
 
   private static final Logger log = new Logger(PodTemplateTaskAdapter.class);
-  private static final String TASK_PROPERTY = IndexingServiceModuleHelper.INDEXER_RUNNER_PROPERTY_PREFIX + ".k8s.podTemplate.%s";
 
   private final KubernetesTaskRunnerConfig taskRunnerConfig;
   private final TaskConfig taskConfig;
   private final DruidNode node;
   private final ObjectMapper mapper;
-  private final HashMap<String, PodTemplate> templates;
   private final TaskLogs taskLogs;
+  private final PodTemplateSelector podTemplateSelector;
 
   public PodTemplateTaskAdapter(
       KubernetesTaskRunnerConfig taskRunnerConfig,
       TaskConfig taskConfig,
       DruidNode node,
       ObjectMapper mapper,
-      Properties properties,
-      TaskLogs taskLogs
+      TaskLogs taskLogs,
+      PodTemplateSelector podTemplateSelector
   )
   {
     this.taskRunnerConfig = taskRunnerConfig;
     this.taskConfig = taskConfig;
     this.node = node;
     this.mapper = mapper;
-    this.templates = initializePodTemplates(properties);
     this.taskLogs = taskLogs;
+    this.podTemplateSelector = podTemplateSelector;
   }
 
   /**
@@ -126,22 +112,29 @@ public class PodTemplateTaskAdapter implements TaskAdapter
   @Override
   public Job fromTask(Task task) throws IOException
   {
-    PodTemplate podTemplate = templates.getOrDefault(task.getType(), templates.get("base"));
-    if (podTemplate == null) {
-      throw new ISE("Pod template spec not found for task type [%s]", task.getType());
+    Optional<PodTemplateWithName> selectedPodTemplate = podTemplateSelector.getPodTemplateForTask(task);
+    if (selectedPodTemplate == null || !selectedPodTemplate.isPresent()) {
+      throw InternalServerError.exception(
+          "Could not find pod template for task [%s]."
+              + " Check the overlord logs for errors selecting the pod template",
+          task.getId()
+      );
     }
+    PodTemplateWithName podTemplateWithName = podTemplateSelector.getPodTemplateForTask(task).get();
 
     return new JobBuilder()
         .withNewMetadata()
         .withName(new K8sTaskId(task).getK8sJobName())
         .addToLabels(getJobLabels(taskRunnerConfig, task))
         .addToAnnotations(getJobAnnotations(taskRunnerConfig, task))
+        .addToAnnotations(DruidK8sConstants.TASK_JOB_TEMPLATE, podTemplateWithName.getName())
         .endMetadata()
         .withNewSpec()
-        .withTemplate(podTemplate.getTemplate())
+        .withTemplate(podTemplateWithName.getPodTemplate().getTemplate())
         .editTemplate()
         .editOrNewMetadata()
         .addToAnnotations(getPodTemplateAnnotations(task))
+        .addToAnnotations(DruidK8sConstants.TASK_JOB_TEMPLATE, podTemplateWithName.getName())
         .addToLabels(getPodLabels(taskRunnerConfig, task))
         .endMetadata()
         .editSpec()
@@ -152,7 +145,9 @@ public class PodTemplateTaskAdapter implements TaskAdapter
         .endTemplate()
         .withActiveDeadlineSeconds(taskRunnerConfig.getTaskTimeout().toStandardDuration().getStandardSeconds())
         .withBackoffLimit(0)  // druid does not support an external system retrying failed tasks
-        .withTtlSecondsAfterFinished((int) taskRunnerConfig.getTaskCleanupDelay().toStandardDuration().getStandardSeconds())
+        .withTtlSecondsAfterFinished((int) taskRunnerConfig.getTaskCleanupDelay()
+                                                           .toStandardDuration()
+                                                           .getStandardSeconds())
         .endSpec()
         .build();
   }
@@ -185,10 +180,11 @@ public class PodTemplateTaskAdapter implements TaskAdapter
 
   private Task toTaskUsingDeepStorage(Job from) throws IOException
   {
-    com.google.common.base.Optional<InputStream> taskBody = taskLogs.streamTaskPayload(getTaskId(from).getOriginalTaskId());
+    Optional<InputStream> taskBody = taskLogs.streamTaskPayload(getTaskId(from).getOriginalTaskId());
     if (!taskBody.isPresent()) {
       throw InternalServerError.exception(
-          "Could not load task payload from deep storage for job [%s]. Check the overlord logs for errors uploading task payloads to deep storage.",
+          "Could not load task payload from deep storage for job [%s]."
+          + " Check the overlord logs for errors uploading task payloads to deep storage.",
           from.getMetadata().getName()
       );
     }
@@ -210,42 +206,6 @@ public class PodTemplateTaskAdapter implements TaskAdapter
     return new K8sTaskId(taskId);
   }
 
-  private HashMap<String, PodTemplate> initializePodTemplates(Properties properties)
-  {
-    HashMap<String, PodTemplate> podTemplateMap = new HashMap<>();
-    Optional<PodTemplate> basePodTemplate = loadPodTemplate("base", properties);
-    if (!basePodTemplate.isPresent()) {
-      throw new IAE("Pod template task adapter requires a base pod template to be specified");
-    }
-    podTemplateMap.put("base", basePodTemplate.get());
-
-    MapperConfig config = mapper.getDeserializationConfig();
-    AnnotatedClass cls = AnnotatedClassResolver.resolveWithoutSuperTypes(config, Task.class);
-    Collection<NamedType> taskSubtypes = mapper.getSubtypeResolver().collectAndResolveSubtypesByClass(config, cls);
-    for (NamedType namedType : taskSubtypes) {
-      String taskType = namedType.getName();
-      Optional<PodTemplate> template = loadPodTemplate(taskType, properties);
-      template.ifPresent(podTemplate -> podTemplateMap.put(taskType, podTemplate));
-    }
-    return podTemplateMap;
-  }
-
-  private Optional<PodTemplate> loadPodTemplate(String key, Properties properties)
-  {
-    String property = StringUtils.format(TASK_PROPERTY, key);
-    String podTemplateFile = properties.getProperty(property);
-    if (podTemplateFile == null) {
-      log.debug("Pod template file not specified for [%s]", key);
-      return Optional.empty();
-    }
-    try {
-      return Optional.of(Serialization.unmarshal(Files.newInputStream(new File(podTemplateFile).toPath()), PodTemplate.class));
-    }
-    catch (Exception e) {
-      throw new ISE(e, "Failed to load pod template file for [%s] at [%s]", property, podTemplateFile);
-    }
-  }
-
   private Collection<EnvVar> getEnv(Task task) throws IOException
   {
     List<EnvVar> envVars = Lists.newArrayList(
@@ -256,6 +216,10 @@ public class PodTemplateTaskAdapter implements TaskAdapter
         new EnvVarBuilder()
             .withName(DruidK8sConstants.TASK_ID_ENV)
             .withValue(task.getId())
+            .build(),
+        new EnvVarBuilder()
+            .withName(DruidK8sConstants.LOAD_BROADCAST_DATASOURCE_MODE_ENV)
+            .withValue(task.getBroadcastDatasourceLoadingSpec().getMode().toString())
             .build(),
         new EnvVarBuilder()
             .withName(DruidK8sConstants.LOAD_BROADCAST_SEGMENTS_ENV)
@@ -310,12 +274,12 @@ public class PodTemplateTaskAdapter implements TaskAdapter
   private Map<String, String> getJobAnnotations(KubernetesTaskRunnerConfig config, Task task)
   {
     return ImmutableMap.<String, String>builder()
-        .putAll(config.getAnnotations())
-        .put(DruidK8sConstants.TASK_ID, task.getId())
-        .put(DruidK8sConstants.TASK_TYPE, task.getType())
-        .put(DruidK8sConstants.TASK_GROUP_ID, task.getGroupId())
-        .put(DruidK8sConstants.TASK_DATASOURCE, task.getDataSource())
-        .build();
+                       .putAll(config.getAnnotations())
+                       .put(DruidK8sConstants.TASK_ID, task.getId())
+                       .put(DruidK8sConstants.TASK_TYPE, task.getType())
+                       .put(DruidK8sConstants.TASK_GROUP_ID, task.getGroupId())
+                       .put(DruidK8sConstants.TASK_DATASOURCE, task.getDataSource())
+                       .build();
   }
 
   private String getDruidLabel(String baseLabel)

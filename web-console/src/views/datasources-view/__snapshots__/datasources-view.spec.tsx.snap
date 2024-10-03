@@ -13,7 +13,7 @@ exports[`DatasourcesView matches snapshot 1`] = `
     />
     <Memo(MoreButton)
       altExtra={
-        <Blueprint4.MenuItem
+        <Blueprint5.MenuItem
           active={false}
           disabled={false}
           icon="compressed"
@@ -21,43 +21,40 @@ exports[`DatasourcesView matches snapshot 1`] = `
           label="(debug)"
           multiline={false}
           onClick={[Function]}
-          popoverProps={Object {}}
-          selected={false}
+          popoverProps={{}}
           shouldDismissPopover={true}
           text="Force compaction run"
         />
       }
     >
-      <Blueprint4.MenuItem
+      <Blueprint5.MenuItem
         active={false}
         disabled={true}
         icon="application"
         multiline={false}
         onClick={[Function]}
-        popoverProps={Object {}}
-        selected={false}
+        popoverProps={{}}
         shouldDismissPopover={true}
         text="View SQL query for table"
       />
-      <Blueprint4.MenuItem
+      <Blueprint5.MenuItem
         active={false}
         disabled={false}
         icon="edit"
         multiline={false}
         onClick={[Function]}
-        popoverProps={Object {}}
-        selected={false}
+        popoverProps={{}}
         shouldDismissPopover={true}
         text="Edit default retention rules"
       />
     </Memo(MoreButton)>
-    <Blueprint4.Switch
+    <Blueprint5.Switch
       checked={false}
       disabled={false}
       label="Show unused"
       onChange={[Function]}
     />
-    <Blueprint4.Switch
+    <Blueprint5.Switch
       checked={false}
       disabled={false}
       label="Show segment timeline"
@@ -65,29 +62,46 @@ exports[`DatasourcesView matches snapshot 1`] = `
     />
     <Memo(TableColumnSelector)
       columns={
-        Array [
+        [
           "Datasource name",
           "Availability",
           "Historical load/drop queues",
           "Total data size",
-          "Running tasks",
+          {
+            "label": "sys.tasks",
+            "text": "Running tasks",
+          },
           "Segment rows",
           "Segment size",
-          "Segment granularity",
+          {
+            "label": "𝑓(sys.segments)",
+            "text": "Segment granularity",
+          },
           "Total rows",
           "Avg. row size",
           "Replicated size",
-          "Compaction",
-          "% Compacted",
-          "Left to be compacted",
-          "Retention",
-          "Actions",
+          {
+            "label": "compaction API",
+            "text": "Compaction",
+          },
+          {
+            "label": "compaction API",
+            "text": "% Compacted",
+          },
+          {
+            "label": "compaction API",
+            "text": "Left to be compacted",
+          },
+          {
+            "label": "rules API",
+            "text": "Retention",
+          },
         ]
       }
       onChange={[Function]}
       onClose={[Function]}
       tableColumnsHidden={
-        Array [
+        [
           "Segment size",
           "Segment granularity",
         ]
@@ -118,7 +132,7 @@ exports[`DatasourcesView matches snapshot 1`] = `
     collapseOnPageChange={true}
     collapseOnSortingChange={true}
     column={
-      Object {
+      {
         "Aggregated": undefined,
         "Cell": undefined,
         "Expander": undefined,
@@ -134,24 +148,24 @@ exports[`DatasourcesView matches snapshot 1`] = `
         "filterMethod": undefined,
         "filterable": undefined,
         "footerClassName": "",
-        "footerStyle": Object {},
+        "footerStyle": {},
         "getFooterProps": [Function],
         "getHeaderProps": [Function],
         "getProps": [Function],
         "headerClassName": "",
-        "headerStyle": Object {},
+        "headerStyle": {},
         "minResizeWidth": 11,
         "minWidth": 100,
         "resizable": undefined,
         "show": true,
         "sortMethod": undefined,
         "sortable": undefined,
-        "style": Object {},
+        "style": {},
       }
     }
     columns={
-      Array [
-        Object {
+      [
+        {
           "Cell": [Function],
           "Header": <React.Fragment>
             Datasource
@@ -162,7 +176,7 @@ exports[`DatasourcesView matches snapshot 1`] = `
           "show": true,
           "width": 150,
         },
-        Object {
+        {
           "Cell": [Function],
           "Header": "Availability",
           "accessor": "num_segments",
@@ -172,7 +186,7 @@ exports[`DatasourcesView matches snapshot 1`] = `
           "sortMethod": [Function],
           "width": 220,
         },
-        Object {
+        {
           "Cell": [Function],
           "Header": <React.Fragment>
             Historical
@@ -185,7 +199,7 @@ exports[`DatasourcesView matches snapshot 1`] = `
           "show": true,
           "width": 180,
         },
-        Object {
+        {
           "Cell": [Function],
           "Header": <React.Fragment>
             Total
@@ -198,7 +212,7 @@ exports[`DatasourcesView matches snapshot 1`] = `
           "show": true,
           "width": 100,
         },
-        Object {
+        {
           "Cell": [Function],
           "Header": "Running tasks",
           "accessor": [Function],
@@ -207,7 +221,7 @@ exports[`DatasourcesView matches snapshot 1`] = `
           "show": true,
           "width": 200,
         },
-        Object {
+        {
           "Cell": [Function],
           "Header": <React.Fragment>
             Segment rows
@@ -220,7 +234,7 @@ exports[`DatasourcesView matches snapshot 1`] = `
           "show": true,
           "width": 230,
         },
-        Object {
+        {
           "Cell": [Function],
           "Header": <React.Fragment>
             Segment size
@@ -233,7 +247,7 @@ exports[`DatasourcesView matches snapshot 1`] = `
           "show": false,
           "width": 270,
         },
-        Object {
+        {
           "Cell": [Function],
           "Header": <React.Fragment>
             Segment
@@ -247,7 +261,7 @@ exports[`DatasourcesView matches snapshot 1`] = `
           "show": false,
           "width": 100,
         },
-        Object {
+        {
           "Cell": [Function],
           "Header": <React.Fragment>
             Total
@@ -260,7 +274,7 @@ exports[`DatasourcesView matches snapshot 1`] = `
           "show": true,
           "width": 110,
         },
-        Object {
+        {
           "Cell": [Function],
           "Header": <React.Fragment>
             Avg. row size
@@ -273,7 +287,7 @@ exports[`DatasourcesView matches snapshot 1`] = `
           "show": true,
           "width": 100,
         },
-        Object {
+        {
           "Cell": [Function],
           "Header": <React.Fragment>
             Replicated
@@ -286,7 +300,7 @@ exports[`DatasourcesView matches snapshot 1`] = `
           "show": true,
           "width": 100,
         },
-        Object {
+        {
           "Cell": [Function],
           "Header": "Compaction",
           "accessor": [Function],
@@ -295,7 +309,7 @@ exports[`DatasourcesView matches snapshot 1`] = `
           "show": true,
           "width": 180,
         },
-        Object {
+        {
           "Cell": [Function],
           "Header": <React.Fragment>
             % Compacted
@@ -309,7 +323,7 @@ exports[`DatasourcesView matches snapshot 1`] = `
           "show": true,
           "width": 200,
         },
-        Object {
+        {
           "Cell": [Function],
           "Header": <React.Fragment>
             Left to be
@@ -323,7 +337,7 @@ exports[`DatasourcesView matches snapshot 1`] = `
           "show": true,
           "width": 100,
         },
-        Object {
+        {
           "Cell": [Function],
           "Header": "Retention",
           "accessor": [Function],
@@ -332,29 +346,29 @@ exports[`DatasourcesView matches snapshot 1`] = `
           "show": true,
           "width": 200,
         },
-        Object {
+        {
           "Cell": [Function],
           "Header": "Actions",
           "accessor": "datasource",
           "filterable": false,
           "id": "actions",
-          "show": true,
+          "sortable": false,
           "width": 70,
         },
       ]
     }
-    data={Array []}
-    defaultExpanded={Object {}}
+    data={[]}
+    defaultExpanded={{}}
     defaultFilterMethod={[Function]}
-    defaultFiltered={Array []}
+    defaultFiltered={[]}
     defaultPage={0}
     defaultPageSize={50}
-    defaultResized={Array []}
+    defaultResized={[]}
     defaultSortDesc={false}
     defaultSortMethod={[Function]}
-    defaultSorted={Array []}
+    defaultSorted={[]}
     expanderDefaults={
-      Object {
+      {
         "filterable": false,
         "resizable": false,
         "sortable": false,
@@ -362,7 +376,7 @@ exports[`DatasourcesView matches snapshot 1`] = `
       }
     }
     filterable={true}
-    filtered={Array []}
+    filtered={[]}
     freezeWhenExpanded={false}
     getLoadingProps={[Function]}
     getNoDataProps={[Function]}
@@ -400,14 +414,14 @@ exports[`DatasourcesView matches snapshot 1`] = `
     originalKey="_original"
     pageJumpText="jump to page"
     pageSizeOptions={
-      Array [
+      [
         50,
         100,
         200,
       ]
     }
     pageText="Page"
-    pivotDefaults={Object {}}
+    pivotDefaults={{}}
     pivotIDKey="_pivotID"
     pivotValKey="_pivotVal"
     previousText="Previous"
@@ -421,7 +435,7 @@ exports[`DatasourcesView matches snapshot 1`] = `
     showPaginationBottom={true}
     showPaginationTop={false}
     sortable={true}
-    style={Object {}}
+    style={{}}
     subRowsKey="_subRows"
   />
 </div>

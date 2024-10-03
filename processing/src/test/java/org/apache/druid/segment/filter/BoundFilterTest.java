@@ -33,8 +33,8 @@ import org.apache.druid.query.extraction.JavaScriptExtractionFn;
 import org.apache.druid.query.filter.BoundDimFilter;
 import org.apache.druid.query.filter.Filter;
 import org.apache.druid.query.ordering.StringComparators;
+import org.apache.druid.segment.CursorFactory;
 import org.apache.druid.segment.IndexBuilder;
-import org.apache.druid.segment.StorageAdapter;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Rule;
@@ -46,6 +46,10 @@ import org.junit.runners.Parameterized;
 import java.io.Closeable;
 import java.util.List;
 
+/**
+ * Classic {@link BoundFilter} test. Consider adding tests to {@link RangeFilterTests} in addition to, or instead of
+ * here.
+ */
 @RunWith(Parameterized.class)
 public class BoundFilterTest extends BaseFilterTest
 {
@@ -58,7 +62,7 @@ public class BoundFilterTest extends BaseFilterTest
   public BoundFilterTest(
       String testName,
       IndexBuilder indexBuilder,
-      Function<IndexBuilder, Pair<StorageAdapter, Closeable>> finisher,
+      Function<IndexBuilder, Pair<CursorFactory, Closeable>> finisher,
       boolean cnf,
       boolean optimize
   )
@@ -812,6 +816,22 @@ public class BoundFilterTest extends BaseFilterTest
         ? ImmutableList.of("0", "3", "7")
         : ImmutableList.of("0")
     );
+
+    assertFilterMatches(
+        new BoundDimFilter(
+            "vd0-nvl-2",
+            "0",
+            null,
+            true,
+            false,
+            false,
+            null,
+            StringComparators.NUMERIC
+        ),
+        NullHandling.replaceWithDefault()
+        ? ImmutableList.of("1", "3", "4", "5", "6")
+        : ImmutableList.of("1", "2", "3", "4", "5", "6", "7")
+    );
   }
 
   @Test
@@ -895,8 +915,7 @@ public class BoundFilterTest extends BaseFilterTest
                   .withIgnoredFields(
                       "longPredicateSupplier",
                       "floatPredicateSupplier",
-                      "doublePredicateSupplier",
-                      "isNullUnknown"
+                      "doublePredicateSupplier"
                   )
                   .verify();
   }

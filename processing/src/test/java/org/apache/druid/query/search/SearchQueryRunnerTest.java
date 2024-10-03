@@ -94,7 +94,8 @@ public class SearchQueryRunnerTest extends InitializedNullHandlingTest
                 SELECTOR,
                 TOOL_CHEST,
                 QueryRunnerTestHelper.NOOP_QUERYWATCHER
-            )
+            ),
+            true
         )
     );
   }
@@ -109,7 +110,7 @@ public class SearchQueryRunnerTest extends InitializedNullHandlingTest
     this.runner = runner;
     this.decoratedRunner = FluentQueryRunner.create(runner, TOOL_CHEST)
         .applyPreMergeDecoration()
-        .mergeResults()
+        .mergeResults(true)
         .applyPostMergeDecoration();
   }
 

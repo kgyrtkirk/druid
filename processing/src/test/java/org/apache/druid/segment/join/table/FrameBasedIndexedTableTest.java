@@ -26,7 +26,6 @@ import it.unimi.dsi.fastutil.ints.IntBidirectionalIterator;
 import it.unimi.dsi.fastutil.ints.IntSortedSet;
 import org.apache.druid.common.config.NullHandling;
 import org.apache.druid.frame.Frame;
-import org.apache.druid.frame.FrameType;
 import org.apache.druid.frame.allocation.HeapMemoryAllocator;
 import org.apache.druid.frame.allocation.SingleMemoryAllocatorFactory;
 import org.apache.druid.frame.segment.FrameCursorUtils;
@@ -217,13 +216,12 @@ public class FrameBasedIndexedTableTest extends InitializedNullHandlingTest
   {
     cursorCloseablePair = IterableRowsCursorHelper.getCursorFromIterable(DATASOURCE_ROWS, ROW_SIGNATURE);
     Cursor cursor = cursorCloseablePair.lhs;
-    FrameWriterFactory frameWriterFactory = FrameWriters.makeFrameWriterFactory(
-        FrameType.COLUMNAR,
+    FrameWriterFactory frameWriterFactory = FrameWriters.makeColumnBasedFrameWriterFactory(
         new SingleMemoryAllocatorFactory(HeapMemoryAllocator.unlimited()),
         ROW_SIGNATURE,
         new ArrayList<>()
     );
-    Frame frame = Iterables.getOnlyElement(FrameCursorUtils.cursorToFrames(cursor, frameWriterFactory).toList());
+    Frame frame = Iterables.getOnlyElement(FrameCursorUtils.cursorToFramesSequence(cursor, frameWriterFactory).toList());
 
     dataSource = new FrameBasedInlineDataSource(
         ImmutableList.of(new FrameSignaturePair(frame, ROW_SIGNATURE)),

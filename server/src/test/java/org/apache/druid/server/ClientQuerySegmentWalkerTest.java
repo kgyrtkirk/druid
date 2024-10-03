@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.inject.Injector;
 import org.apache.druid.client.DirectDruidClient;
 import org.apache.druid.common.config.NullHandling;
 import org.apache.druid.java.util.common.Intervals;
@@ -31,8 +32,12 @@ import org.apache.druid.java.util.common.guava.Sequence;
 import org.apache.druid.java.util.common.guava.Sequences;
 import org.apache.druid.java.util.common.io.Closer;
 import org.apache.druid.java.util.common.logger.Logger;
+import org.apache.druid.java.util.emitter.core.Event;
+import org.apache.druid.java.util.emitter.core.EventMap;
+import org.apache.druid.java.util.metrics.StubServiceEmitter;
 import org.apache.druid.math.expr.ExprMacroTable;
 import org.apache.druid.query.DataSource;
+import org.apache.druid.query.DruidMetrics;
 import org.apache.druid.query.Druids;
 import org.apache.druid.query.FrameBasedInlineDataSource;
 import org.apache.druid.query.GlobalTableDataSource;
@@ -47,6 +52,7 @@ import org.apache.druid.query.QueryRunnerFactoryConglomerate;
 import org.apache.druid.query.QuerySegmentWalker;
 import org.apache.druid.query.QueryToolChestTestHelper;
 import org.apache.druid.query.ResourceLimitExceededException;
+import org.apache.druid.query.ResultSerializationMode;
 import org.apache.druid.query.SegmentDescriptor;
 import org.apache.druid.query.TableDataSource;
 import org.apache.druid.query.UnionDataSource;
@@ -72,8 +78,6 @@ import org.apache.druid.segment.SegmentWrangler;
 import org.apache.druid.segment.TestHelper;
 import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.column.RowSignature;
-import org.apache.druid.segment.data.ComparableList;
-import org.apache.druid.segment.data.ComparableStringArray;
 import org.apache.druid.segment.join.FrameBasedInlineJoinableFactory;
 import org.apache.druid.segment.join.InlineJoinableFactory;
 import org.apache.druid.segment.join.JoinConditionAnalysis;
@@ -215,6 +219,7 @@ public class ClientQuerySegmentWalkerTest
 
   private Closer closer;
   private QueryRunnerFactoryConglomerate conglomerate;
+  private final StubServiceEmitter emitter = new StubServiceEmitter();
 
   // Queries that are issued; checked by "testQuery" against its "expectedQueries" parameter.
   private final List<ExpectedQuery> issuedQueries = new ArrayList<>();
@@ -229,12 +234,13 @@ public class ClientQuerySegmentWalkerTest
   public void setUp()
   {
     closer = Closer.create();
+    emitter.flush();
     conglomerate = QueryStackTests.createQueryRunnerFactoryConglomerate(closer);
     scheduler = new ObservableQueryScheduler(
         8,
         ManualQueryPrioritizationStrategy.INSTANCE,
         NoQueryLaningStrategy.INSTANCE,
-        new ServerConfig()
+        new ServerConfig(false)
     );
     initWalker(ImmutableMap.of(), scheduler);
   }
@@ -404,6 +410,40 @@ public class ClientQuerySegmentWalkerTest
 
     Assert.assertEquals(1, scheduler.getTotalRun().get());
     Assert.assertEquals(1, scheduler.getTotalPrioritizedAndLaned().get());
+    Assert.assertEquals(1, scheduler.getTotalAcquired().get());
+    Assert.assertEquals(1, scheduler.getTotalReleased().get());
+  }
+
+  @Test
+  public void testGroupByOnGroupByOnInlineTable()
+  {
+    final GroupByQuery subquery =
+        (GroupByQuery) GroupByQuery.builder()
+                                   .setDataSource(FOO_INLINE)
+                                   .setGranularity(Granularities.ALL)
+                                   .setInterval(Collections.singletonList(INTERVAL))
+                                   .setDimensions(DefaultDimensionSpec.of("s"))
+                                   .build()
+                                   .withId("queryId");
+
+    final GroupByQuery query =
+        (GroupByQuery) GroupByQuery.builder()
+                                   .setDataSource(new QueryDataSource(subquery))
+                                   .setGranularity(Granularities.ALL)
+                                   .setInterval(Intervals.ONLY_ETERNITY)
+                                   .setAggregatorSpecs(new CountAggregatorFactory("cnt"))
+                                   .build()
+                                   .withId(DUMMY_QUERY_ID);
+
+    testQuery(
+        query,
+        // GroupBy handles its own subqueries; only the inner one will go to the cluster. Also, it gets a subquery id
+        ImmutableList.of(ExpectedQuery.local(query.withDataSource(new QueryDataSource(subquery.withSubQueryId("1.1"))))),
+        ImmutableList.of(new Object[]{3L})
+    );
+
+    Assert.assertEquals(1, scheduler.getTotalRun().get());
+    Assert.assertEquals(0, scheduler.getTotalPrioritizedAndLaned().get());
     Assert.assertEquals(1, scheduler.getTotalAcquired().get());
     Assert.assertEquals(1, scheduler.getTotalReleased().get());
   }
@@ -652,7 +692,6 @@ public class ClientQuerySegmentWalkerTest
     ScanQuery subquery = new Druids.ScanQueryBuilder().dataSource(MULTI)
                                                       .columns("s", "n")
                                                       .eternityInterval()
-                                                      .legacy(false)
                                                       .resultFormat(ScanQuery.ResultFormat.RESULT_FORMAT_COMPACTED_LIST)
                                                       .build();
     final GroupByQuery query =
@@ -703,7 +742,6 @@ public class ClientQuerySegmentWalkerTest
     ScanQuery subquery = new Druids.ScanQueryBuilder().dataSource(MULTI)
                                                       .columns("s", "n")
                                                       .eternityInterval()
-                                                      .legacy(false)
                                                       .resultFormat(ScanQuery.ResultFormat.RESULT_FORMAT_COMPACTED_LIST)
                                                       .build();
     final TopNQuery query =
@@ -801,7 +839,13 @@ public class ClientQuerySegmentWalkerTest
                                 .withId(DUMMY_QUERY_ID);
 
     expectedException.expect(ResourceLimitExceededException.class);
-    expectedException.expectMessage("Subquery generated results beyond maximum[2] rows");
+    expectedException.expectMessage(
+        "Cannot issue the query, subqueries generated results beyond maximum[2] rows. Try setting the "
+        + "'maxSubqueryBytes' in the query context to 'auto' for enabling byte based limit, which chooses an optimal "
+        + "limit based on memory size and result's heap usage or manually configure the values of either 'maxSubqueryBytes' "
+        + "or 'maxSubqueryRows' in the query context. Manually alter the value carefully as it can cause the broker to go out "
+        + "of memory."
+    );
 
     testQuery(query, ImmutableList.of(), ImmutableList.of());
   }
@@ -819,7 +863,6 @@ public class ClientQuerySegmentWalkerTest
               .dataSource(FOO)
               .intervals(new MultipleIntervalSegmentSpec(Intervals.ONLY_ETERNITY))
               .columns("s")
-              .legacy(false)
               .resultFormat(ScanQuery.ResultFormat.RESULT_FORMAT_COMPACTED_LIST)
               .build()
               .withId(DUMMY_QUERY_ID);
@@ -837,7 +880,6 @@ public class ClientQuerySegmentWalkerTest
                   )
               )
               .columns("v")
-              .legacy(false)
               .resultFormat(ScanQuery.ResultFormat.RESULT_FORMAT_COMPACTED_LIST)
               .build()
               .withId(DUMMY_QUERY_ID);
@@ -896,9 +938,121 @@ public class ClientQuerySegmentWalkerTest
                                 .withId(DUMMY_QUERY_ID);
 
     expectedException.expect(ResourceLimitExceededException.class);
-    expectedException.expectMessage("Subquery generated results beyond maximum[1] bytes");
+    expectedException.expectMessage(
+        "Cannot issue the query, subqueries generated results beyond maximum[1] bytes. Increase the "
+        + "JVM's memory or set the 'maxSubqueryBytes' in the query context to increase the space "
+        + "allocated for subqueries to materialize their results. Manually alter the value carefully as it can cause "
+        + "the broker to go out of memory."
+    );
 
     testQuery(query, ImmutableList.of(), ImmutableList.of());
+  }
+
+  @Test
+  public void testMetricsWithMaxSubqueryRowsEnabled()
+  {
+    final GroupByQuery subquery =
+        GroupByQuery.builder()
+                    .setDataSource(FOO)
+                    .setGranularity(Granularities.ALL)
+                    .setInterval(Collections.singletonList(INTERVAL))
+                    .setDimensions(DefaultDimensionSpec.of("s"))
+                    .build();
+
+    final TimeseriesQuery query =
+        (TimeseriesQuery) Druids.newTimeseriesQueryBuilder()
+                                .dataSource(new QueryDataSource(subquery))
+                                .granularity(Granularities.ALL)
+                                .intervals(Intervals.ONLY_ETERNITY)
+                                .aggregators(new CountAggregatorFactory("cnt"))
+                                .build()
+                                .withId(DUMMY_QUERY_ID);
+
+    testQuery(
+        query,
+        new ArrayList<>(ImmutableList.of(
+            ExpectedQuery.cluster(subquery.withId(DUMMY_QUERY_ID).withSubQueryId("1.1")),
+            ExpectedQuery.local(
+                query.withDataSource(
+                    InlineDataSource.fromIterable(
+                        ImmutableList.of(new Object[]{"x"}, new Object[]{"y"}, new Object[]{"z"}),
+                        RowSignature.builder().add("s", ColumnType.STRING).build()
+                    )
+                )
+            )
+        )),
+        ImmutableList.of(new Object[]{Intervals.ETERNITY.getStartMillis(), 3L})
+    );
+
+    List<Event> events = emitter.getEvents();
+
+    for (Event event : events) {
+      EventMap map = event.toMap();
+      if (ClientQuerySegmentWalker.ROWS_COUNT_METRIC.equals(map.get("metric"))) {
+        Assert.assertTrue(map.containsKey("host"));
+        Assert.assertTrue(map.containsKey("service"));
+        Assert.assertEquals(DUMMY_QUERY_ID, map.get(DruidMetrics.ID));
+        Assert.assertEquals("1.1", map.get(DruidMetrics.SUBQUERY_ID));
+        Assert.assertEquals(3, map.get("value"));
+      }
+    }
+  }
+
+  @Test
+  public void testMetricsWithMaxSubqueryBytesEnabled()
+  {
+    final GroupByQuery subquery =
+        GroupByQuery.builder()
+                    .setDataSource(FOO)
+                    .setGranularity(Granularities.ALL)
+                    .setInterval(Collections.singletonList(INTERVAL))
+                    .setDimensions(DefaultDimensionSpec.of("s"))
+                    .build();
+
+    final TimeseriesQuery query =
+        (TimeseriesQuery) Druids.newTimeseriesQueryBuilder()
+                                .dataSource(new QueryDataSource(subquery))
+                                .granularity(Granularities.ALL)
+                                .intervals(Intervals.ONLY_ETERNITY)
+                                .aggregators(new CountAggregatorFactory("cnt"))
+                                .context(ImmutableMap.of(QueryContexts.MAX_SUBQUERY_BYTES_KEY, "10000"))
+                                .build()
+                                .withId(DUMMY_QUERY_ID);
+
+    testQuery(
+        query,
+        new ArrayList<>(ImmutableList.of(
+            ExpectedQuery.cluster(subquery.withId(DUMMY_QUERY_ID).withSubQueryId("1.1")),
+            ExpectedQuery.local(
+                query.withDataSource(
+                    InlineDataSource.fromIterable(
+                        ImmutableList.of(new Object[]{"x"}, new Object[]{"y"}, new Object[]{"z"}),
+                        RowSignature.builder().add("s", ColumnType.STRING).build()
+                    )
+                )
+            )
+        )),
+        ImmutableList.of(new Object[]{Intervals.ETERNITY.getStartMillis(), 3L})
+    );
+
+    List<Event> events = emitter.getEvents();
+
+    for (Event event : events) {
+      EventMap map = event.toMap();
+      if (ClientQuerySegmentWalker.ROWS_COUNT_METRIC.equals(map.get("metric"))) {
+        Assert.assertTrue(map.containsKey("host"));
+        Assert.assertTrue(map.containsKey("service"));
+        Assert.assertEquals(DUMMY_QUERY_ID, map.get(DruidMetrics.ID));
+        Assert.assertEquals("1.1", map.get(DruidMetrics.SUBQUERY_ID));
+        Assert.assertEquals(3, map.get("value"));
+      } else if (ClientQuerySegmentWalker.BYTES_COUNT_METRIC.equals(map.get("metric"))) {
+        Assert.assertTrue(map.containsKey("host"));
+        Assert.assertTrue(map.containsKey("service"));
+        Assert.assertEquals(DUMMY_QUERY_ID, map.get(DruidMetrics.ID));
+        Assert.assertEquals("1.1", map.get(DruidMetrics.SUBQUERY_ID));
+        Assert.assertEquals(43L, map.get("value"));
+      }
+    }
   }
 
   @Test
@@ -922,10 +1076,10 @@ public class ClientQuerySegmentWalkerTest
         query,
         ImmutableList.of(ExpectedQuery.cluster(query)),
         ImmutableList.of(
-            new Object[]{new ComparableList(ImmutableList.of(1.0, 2.0))},
-            new Object[]{new ComparableList(ImmutableList.of(2.0, 4.0))},
-            new Object[]{new ComparableList(ImmutableList.of(3.0, 6.0))},
-            new Object[]{new ComparableList(ImmutableList.of(4.0, 8.0))}
+            new Object[]{new Object[]{1.0, 2.0}},
+            new Object[]{new Object[]{2.0, 4.0}},
+            new Object[]{new Object[]{3.0, 6.0}},
+            new Object[]{new Object[]{4.0, 8.0}}
         )
     );
   }
@@ -946,10 +1100,10 @@ public class ClientQuerySegmentWalkerTest
         query,
         ImmutableList.of(ExpectedQuery.cluster(query)),
         ImmutableList.of(
-            new Object[]{new ComparableList(ImmutableList.of(1.0, 2.0)).toString()},
-            new Object[]{new ComparableList(ImmutableList.of(2.0, 4.0)).toString()},
-            new Object[]{new ComparableList(ImmutableList.of(3.0, 6.0)).toString()},
-            new Object[]{new ComparableList(ImmutableList.of(4.0, 8.0)).toString()}
+            new Object[]{Arrays.toString(new Object[]{1.0, 2.0})},
+            new Object[]{Arrays.toString(new Object[]{2.0, 4.0})},
+            new Object[]{Arrays.toString(new Object[]{3.0, 6.0})},
+            new Object[]{Arrays.toString(new Object[]{4.0, 8.0})}
         )
     );
   }
@@ -1009,10 +1163,10 @@ public class ClientQuerySegmentWalkerTest
         query,
         ImmutableList.of(ExpectedQuery.cluster(query)),
         ImmutableList.of(
-            new Object[]{new ComparableList(ImmutableList.of(1L, 2L))},
-            new Object[]{new ComparableList(ImmutableList.of(2L, 4L))},
-            new Object[]{new ComparableList(ImmutableList.of(3L, 6L))},
-            new Object[]{new ComparableList(ImmutableList.of(4L, 8L))}
+            new Object[]{new Object[]{1L, 2L}},
+            new Object[]{new Object[]{2L, 4L}},
+            new Object[]{new Object[]{3L, 6L}},
+            new Object[]{new Object[]{4L, 8L}}
         )
     );
   }
@@ -1029,15 +1183,15 @@ public class ClientQuerySegmentWalkerTest
                                    .build()
                                    .withId(DUMMY_QUERY_ID);
 
-    // when we donot define an outputType, convert {@link ComparableList} to a string
+    // when we donot define an outputType, convert {@code Object[]} to a string
     testQuery(
         query,
         ImmutableList.of(ExpectedQuery.cluster(query)),
         ImmutableList.of(
-            new Object[]{new ComparableList(ImmutableList.of(1L, 2L)).toString()},
-            new Object[]{new ComparableList(ImmutableList.of(2L, 4L)).toString()},
-            new Object[]{new ComparableList(ImmutableList.of(3L, 6L)).toString()},
-            new Object[]{new ComparableList(ImmutableList.of(4L, 8L)).toString()}
+            new Object[]{Arrays.toString(new Object[]{1L, 2L})},
+            new Object[]{Arrays.toString(new Object[]{2L, 4L})},
+            new Object[]{Arrays.toString(new Object[]{3L, 6L})},
+            new Object[]{Arrays.toString(new Object[]{4L, 8L})}
         )
     );
   }
@@ -1092,10 +1246,10 @@ public class ClientQuerySegmentWalkerTest
         query,
         ImmutableList.of(ExpectedQuery.cluster(query)),
         ImmutableList.of(
-            new Object[]{ComparableStringArray.of("1.0", "2.0")},
-            new Object[]{ComparableStringArray.of("2.0", "4.0")},
-            new Object[]{ComparableStringArray.of("3.0", "6.0")},
-            new Object[]{ComparableStringArray.of("4.0", "8.0")}
+            new Object[]{new Object[]{"1.0", "2.0"}},
+            new Object[]{new Object[]{"2.0", "4.0"}},
+            new Object[]{new Object[]{"3.0", "6.0"}},
+            new Object[]{new Object[]{"4.0", "8.0"}}
         )
     );
   }
@@ -1116,10 +1270,10 @@ public class ClientQuerySegmentWalkerTest
         query,
         ImmutableList.of(ExpectedQuery.cluster(query)),
         ImmutableList.of(
-            new Object[]{ComparableStringArray.of("1.0", "2.0").toString()},
-            new Object[]{ComparableStringArray.of("2.0", "4.0").toString()},
-            new Object[]{ComparableStringArray.of("3.0", "6.0").toString()},
-            new Object[]{ComparableStringArray.of("4.0", "8.0").toString()}
+            new Object[]{Arrays.toString(new Object[]{"1.0", "2.0"})},
+            new Object[]{Arrays.toString(new Object[]{"2.0", "4.0"})},
+            new Object[]{Arrays.toString(new Object[]{"3.0", "6.0"})},
+            new Object[]{Arrays.toString(new Object[]{"4.0", "8.0"})}
         )
     );
   }
@@ -1480,7 +1634,9 @@ public class ClientQuerySegmentWalkerTest
       }
     }
 
+    Injector injector = QueryStackTests.injectorWithLookup();
     walker = QueryStackTests.createClientQuerySegmentWalker(
+        injector,
         new CapturingWalker(
             QueryStackTests.createClusterQuerySegmentWalker(
                 ImmutableMap.<String, VersionedIntervalTimeline<String, ReferenceCountingSegment>>builder()
@@ -1492,7 +1648,9 @@ public class ClientQuerySegmentWalkerTest
                     .put(ARRAY_UNKNOWN, makeTimeline(ARRAY_UNKNOWN, ARRAY_INLINE_UNKNOWN))
                     .build(),
                 conglomerate,
-                schedulerForTest
+                schedulerForTest,
+                new GroupByQueryConfig(),
+                injector
             ),
             ClusterOrLocal.CLUSTER
         ),
@@ -1501,13 +1659,15 @@ public class ClientQuerySegmentWalkerTest
                 conglomerate,
                 segmentWrangler,
                 joinableFactoryWrapper,
-                schedulerForTest
-                ),
+                schedulerForTest,
+                emitter
+            ),
             ClusterOrLocal.LOCAL
         ),
         conglomerate,
         joinableFactory,
-        serverConfig
+        serverConfig,
+        emitter
     );
   }
 
@@ -1552,19 +1712,20 @@ public class ClientQuerySegmentWalkerTest
     {
       Query<?> modifiedQuery;
       // Need to blast various parameters that will vary and aren't important to test for.
-      modifiedQuery = query.withOverriddenContext(
-          ImmutableMap.<String, Object>builder()
-              .put(DirectDruidClient.QUERY_FAIL_TIME, 0L)
-              .put(QueryContexts.DEFAULT_TIMEOUT_KEY, 0L)
-              .put(QueryContexts.FINALIZE_KEY, true)
-              .put(QueryContexts.MAX_SCATTER_GATHER_BYTES_KEY, 0L)
-              .put(GroupByQuery.CTX_KEY_SORT_BY_DIMS_FIRST, false)
-              .put(GroupByQueryConfig.CTX_KEY_ARRAY_RESULT_ROWS, true)
-              .put(GroupByQueryConfig.CTX_KEY_APPLY_LIMIT_PUSH_DOWN, true)
-              .put(GroupingEngine.CTX_KEY_OUTERMOST, true)
-              .put(GroupingEngine.CTX_KEY_FUDGE_TIMESTAMP, "1979")
-              .build()
-      );
+      ImmutableMap.Builder<String, Object> contextBuilder = ImmutableMap.builder();
+      contextBuilder.put(DirectDruidClient.QUERY_FAIL_TIME, 0L)
+                    .put(QueryContexts.DEFAULT_TIMEOUT_KEY, 0L)
+                    .put(QueryContexts.FINALIZE_KEY, true)
+                    .put(QueryContexts.MAX_SCATTER_GATHER_BYTES_KEY, 0L)
+                    .put(GroupByQuery.CTX_KEY_SORT_BY_DIMS_FIRST, false)
+                    .put(GroupByQueryConfig.CTX_KEY_ARRAY_RESULT_ROWS, true)
+                    .put(GroupByQueryConfig.CTX_KEY_APPLY_LIMIT_PUSH_DOWN, true)
+                    .put(GroupingEngine.CTX_KEY_OUTERMOST, true)
+                    .put(GroupingEngine.CTX_KEY_FUDGE_TIMESTAMP, "1979")
+                    .put(QueryContexts.QUERY_RESOURCE_ID, "dummy")
+                    .put(ResultSerializationMode.CTX_SERIALIZATION_PARAMETER, "blast");
+
+      modifiedQuery = query.withOverriddenContext(contextBuilder.build());
 
       if (modifiedQuery.getDataSource() instanceof FrameBasedInlineDataSource) {
         // Do round-trip serialization in order to replace FrameBasedInlineDataSource with InlineDataSource, so

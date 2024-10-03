@@ -19,7 +19,6 @@
 
 package org.apache.druid.k8s.overlord.taskadapter;
 
-import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.NamedType;
 import io.fabric8.kubernetes.api.model.Pod;
@@ -27,7 +26,6 @@ import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.batch.v1.Job;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.druid.guice.FirehoseModule;
 import org.apache.druid.indexing.common.TestUtils;
 import org.apache.druid.indexing.common.config.TaskConfig;
 import org.apache.druid.indexing.common.config.TaskConfigBuilder;
@@ -83,9 +81,6 @@ public class DruidPeonClientIntegrationTest
   {
     TestUtils utils = new TestUtils();
     jsonMapper = utils.getTestObjectMapper();
-    for (Module jacksonModule : new FirehoseModule().getJacksonModules()) {
-      jsonMapper.registerModule(jacksonModule);
-    }
     jsonMapper.registerSubtypes(
         new NamedType(ParallelIndexTuningConfig.class, "index_parallel"),
         new NamedType(IndexTask.IndexTuningConfig.class, "index")
@@ -125,9 +120,12 @@ public class DruidPeonClientIntegrationTest
         null
     );
     String taskBasePath = "/home/taskDir";
-    PeonCommandContext context = new PeonCommandContext(Collections.singletonList(
-        "sleep 10;  for i in `seq 1 1000`; do echo $i; done; exit 0"
-    ), new ArrayList<>(), new File(taskBasePath));
+    PeonCommandContext context = new PeonCommandContext(
+        Collections.singletonList("sleep 10;  for i in `seq 1 1000`; do echo $i; done; exit 0"),
+        new ArrayList<>(),
+        new File(taskBasePath),
+        config.getCpuCoreInMicro()
+    );
 
     Job job = adapter.createJobFromPodSpec(podSpec, task, context);
 

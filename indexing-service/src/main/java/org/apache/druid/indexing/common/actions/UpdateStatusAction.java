@@ -20,7 +20,6 @@
 package org.apache.druid.indexing.common.actions;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.common.base.Optional;
@@ -32,9 +31,7 @@ import java.util.Objects;
 
 public class UpdateStatusAction implements TaskAction<Void>
 {
-  @JsonIgnore
   private final String status;
-  @JsonIgnore
   private final TaskStatus statusFull;
 
   @Deprecated
@@ -86,12 +83,6 @@ public class UpdateStatusAction implements TaskAction<Void>
       taskRunner.get().updateStatus(task, result);
     }
     return null;
-  }
-
-  @Override
-  public boolean isAudited()
-  {
-    return true;
   }
 
   @Override

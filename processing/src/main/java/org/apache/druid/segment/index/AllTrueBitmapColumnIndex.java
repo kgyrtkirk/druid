@@ -40,9 +40,9 @@ public class AllTrueBitmapColumnIndex implements BitmapColumnIndex
   }
 
   @Override
-  public double estimateSelectivity(int totalRows)
+  public int estimatedComputeCost()
   {
-    return 1;
+    return 0;
   }
 
   @Override

@@ -21,13 +21,13 @@ package org.apache.druid.indexing.common.task.concurrent;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import org.apache.druid.indexing.common.MultipleFileTaskReportFileWriter;
 import org.apache.druid.indexing.common.TaskLock;
 import org.apache.druid.indexing.common.TaskStorageDirTracker;
 import org.apache.druid.indexing.common.TaskToolbox;
 import org.apache.druid.indexing.common.TaskToolboxFactory;
-import org.apache.druid.indexing.common.actions.RetrieveSegmentsToReplaceAction;
 import org.apache.druid.indexing.common.actions.RetrieveUsedSegmentsAction;
 import org.apache.druid.indexing.common.actions.TaskActionClient;
 import org.apache.druid.indexing.common.actions.TaskActionClientFactory;
@@ -35,6 +35,7 @@ import org.apache.druid.indexing.common.config.TaskConfig;
 import org.apache.druid.indexing.common.config.TaskConfigBuilder;
 import org.apache.druid.indexing.common.task.IngestionTestBase;
 import org.apache.druid.indexing.common.task.NoopTask;
+import org.apache.druid.indexing.common.task.NoopTaskContextEnricher;
 import org.apache.druid.indexing.common.task.Task;
 import org.apache.druid.indexing.common.task.TestAppenderatorsManager;
 import org.apache.druid.indexing.overlord.Segments;
@@ -52,7 +53,9 @@ import org.apache.druid.java.util.common.Intervals;
 import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.java.util.common.granularity.Granularities;
 import org.apache.druid.segment.IndexIO;
+import org.apache.druid.segment.TestDataSource;
 import org.apache.druid.segment.column.ColumnConfig;
+import org.apache.druid.segment.metadata.CentralizedDatasourceSchemaConfig;
 import org.apache.druid.segment.realtime.appenderator.SegmentIdWithShardSpec;
 import org.apache.druid.server.DruidNode;
 import org.apache.druid.server.metrics.NoopServiceEmitter;
@@ -103,8 +106,6 @@ public class ConcurrentReplaceAndAppendTest extends IngestionTestBase
   private static final Interval OCT_NOV_DEC_23 = Intervals.of("2023-10-01/2024-01-01");
   private static final Interval FIRST_OF_JAN_23 = Intervals.of("2023-01-01/2023-01-02");
 
-  private static final String WIKI = "wiki";
-
   private TaskQueue taskQueue;
   private TaskActionClientFactory taskActionClientFactory;
   private TaskActionClient dummyTaskActionClient;
@@ -136,13 +137,15 @@ public class ConcurrentReplaceAndAppendTest extends IngestionTestBase
     );
     taskQueue = new TaskQueue(
         new TaskLockConfig(),
-        new TaskQueueConfig(null, new Period(0L), null, null, null),
+        new TaskQueueConfig(null, new Period(0L), null, null, null, null),
         new DefaultTaskConfig(),
         getTaskStorage(),
         taskRunner,
         taskActionClientFactory,
         getLockbox(),
-        new NoopServiceEmitter()
+        new NoopServiceEmitter(),
+        getObjectMapper(),
+        new NoopTaskContextEnricher()
     );
     runningTasks.clear();
     taskQueue.start();
@@ -725,6 +728,7 @@ public class ConcurrentReplaceAndAppendTest extends IngestionTestBase
     // Append segment for Oct-Dec
     final DataSegment segmentV02 = asSegment(pendingSegment02);
     appendTask2.commitAppendSegments(segmentV02);
+    appendTask2.finishRunAndGetStatus();
     verifyIntervalHasUsedSegments(YEAR_23, segmentV02);
     verifyIntervalHasVisibleSegments(YEAR_23, segmentV02);
 
@@ -744,12 +748,14 @@ public class ConcurrentReplaceAndAppendTest extends IngestionTestBase
     // Append segment for Jan 1st
     final DataSegment segmentV01 = asSegment(pendingSegment01);
     appendTask.commitAppendSegments(segmentV01);
+    appendTask.finishRunAndGetStatus();
     verifyIntervalHasUsedSegments(YEAR_23, segmentV01, segmentV02);
     verifyIntervalHasVisibleSegments(YEAR_23, segmentV01, segmentV02);
 
     // Replace segment for whole year
     final DataSegment segmentV10 = createSegment(YEAR_23, v1);
     replaceTask.commitReplaceSegments(segmentV10);
+    replaceTask.finishRunAndGetStatus();
 
     final DataSegment segmentV11 = DataSegment.builder(segmentV01)
                                               .version(v1)
@@ -764,6 +770,7 @@ public class ConcurrentReplaceAndAppendTest extends IngestionTestBase
     // Append segment for quarter
     final DataSegment segmentV03 = asSegment(pendingSegment03);
     appendTask3.commitAppendSegments(segmentV03);
+    appendTask3.finishRunAndGetStatus();
 
     final DataSegment segmentV13 = DataSegment.builder(segmentV03)
                                               .version(v1)
@@ -894,6 +901,43 @@ public class ConcurrentReplaceAndAppendTest extends IngestionTestBase
     verifyInputSegments(replaceTask, JAN_23, segment1, segment2, segment3);
   }
 
+  @Test
+  public void testLockAllocateDayReplaceMonthAllocateAppend()
+  {
+    final SegmentIdWithShardSpec pendingSegmentV0
+        = appendTask.allocateSegmentForTimestamp(FIRST_OF_JAN_23.getStart(), Granularities.DAY);
+
+    final String v1 = replaceTask.acquireReplaceLockOn(JAN_23).getVersion();
+
+    final DataSegment segmentV10 = createSegment(JAN_23, v1);
+    replaceTask.commitReplaceSegments(segmentV10);
+    verifyIntervalHasUsedSegments(JAN_23, segmentV10);
+
+    final SegmentIdWithShardSpec pendingSegmentV1
+        = appendTask.allocateSegmentForTimestamp(FIRST_OF_JAN_23.getStart(), Granularities.DAY);
+    Assert.assertEquals(segmentV10.getVersion(), pendingSegmentV1.getVersion());
+
+    final DataSegment segmentV00 = asSegment(pendingSegmentV0);
+    final DataSegment segmentV11 = asSegment(pendingSegmentV1);
+    Set<DataSegment> appendSegments = appendTask.commitAppendSegments(segmentV00, segmentV11)
+                                                .getSegments();
+
+    Assert.assertEquals(3, appendSegments.size());
+    // Segment V11 is committed
+    Assert.assertTrue(appendSegments.remove(segmentV11));
+    // Segment V00 is also committed
+    Assert.assertTrue(appendSegments.remove(segmentV00));
+    // Segment V00 is upgraded to v1 with MONTH granularlity at the time of commit as V12
+    final DataSegment segmentV12 = Iterables.getOnlyElement(appendSegments);
+    Assert.assertEquals(v1, segmentV12.getVersion());
+    Assert.assertEquals(JAN_23, segmentV12.getInterval());
+    Assert.assertEquals(segmentV00.getLoadSpec(), segmentV12.getLoadSpec());
+
+    verifyIntervalHasUsedSegments(JAN_23, segmentV00, segmentV10, segmentV11, segmentV12);
+    verifyIntervalHasVisibleSegments(JAN_23, segmentV10, segmentV11, segmentV12);
+  }
+
+
   @Nullable
   private DataSegment findSegmentWith(String version, Map<String, Object> loadSpec, Set<DataSegment> segments)
   {
@@ -935,10 +979,10 @@ public class ConcurrentReplaceAndAppendTest extends IngestionTestBase
   private void verifySegments(Interval interval, Segments visibility, DataSegment... expectedSegments)
   {
     try {
+
       Collection<DataSegment> allUsedSegments = dummyTaskActionClient.submit(
           new RetrieveUsedSegmentsAction(
-              WIKI,
-              null,
+              TestDataSource.WIKI,
               ImmutableList.of(interval),
               visibility
           )
@@ -955,8 +999,8 @@ public class ConcurrentReplaceAndAppendTest extends IngestionTestBase
     try {
       final TaskActionClient taskActionClient = taskActionClientFactory.create(task);
       Collection<DataSegment> allUsedSegments = taskActionClient.submit(
-          new RetrieveSegmentsToReplaceAction(
-              WIKI,
+          new RetrieveUsedSegmentsAction(
+              TestDataSource.WIKI,
               Collections.singletonList(interval)
           )
       );
@@ -972,16 +1016,19 @@ public class ConcurrentReplaceAndAppendTest extends IngestionTestBase
       TaskActionClientFactory taskActionClientFactory
   )
   {
+    CentralizedDatasourceSchemaConfig centralizedDatasourceSchemaConfig = new CentralizedDatasourceSchemaConfig();
+    centralizedDatasourceSchemaConfig.setEnabled(true);
     TestTaskToolboxFactory.Builder builder = new TestTaskToolboxFactory.Builder()
         .setConfig(taskConfig)
         .setIndexIO(new IndexIO(getObjectMapper(), ColumnConfig.DEFAULT))
-        .setTaskActionClientFactory(taskActionClientFactory);
+        .setTaskActionClientFactory(taskActionClientFactory)
+        .setCentralizedTableSchemaConfig(centralizedDatasourceSchemaConfig);
     return new TestTaskToolboxFactory(builder)
     {
       @Override
       public TaskToolbox build(TaskConfig config, Task task)
       {
-        return createTaskToolbox(config, task);
+        return createTaskToolbox(config, task, null);
       }
     };
   }
@@ -989,7 +1036,7 @@ public class ConcurrentReplaceAndAppendTest extends IngestionTestBase
   private DataSegment createSegment(Interval interval, String version)
   {
     return DataSegment.builder()
-                      .dataSource(WIKI)
+                      .dataSource(TestDataSource.WIKI)
                       .interval(interval)
                       .version(version)
                       .size(100)
@@ -998,7 +1045,7 @@ public class ConcurrentReplaceAndAppendTest extends IngestionTestBase
 
   private ActionsTestTask createAndStartTask()
   {
-    ActionsTestTask task = new ActionsTestTask(WIKI, "test_" + groupId.incrementAndGet(), taskActionClientFactory);
+    ActionsTestTask task = new ActionsTestTask(TestDataSource.WIKI, "test_" + groupId.incrementAndGet(), taskActionClientFactory);
     taskQueue.add(task);
     runningTasks.add(task);
     return task;

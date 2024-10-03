@@ -19,12 +19,12 @@
 
 package org.apache.druid.k8s.overlord;
 
-import com.google.api.client.util.Lists;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -221,7 +221,7 @@ public class KubernetesTaskRunner implements TaskLogStreamer, TaskRunner
         synchronized (tasks) {
           workItem = tasks.get(taskId);
           if (workItem == null) {
-            log.error("Task [%s] disappeared", taskId);
+            log.warn("Task [%s] disappeared. This could happen if the task was canceled or if it crashed.", taskId);
             return;
           }
         }
@@ -263,11 +263,14 @@ public class KubernetesTaskRunner implements TaskLogStreamer, TaskRunner
       return;
     }
 
+    workItem.shutdown();
+    if (!workItem.getResult().isDone()) {
+      return;
+    }
     synchronized (tasks) {
       tasks.remove(taskid);
     }
-
-    workItem.shutdown();
+    
   }
 
   @Override
@@ -440,11 +443,17 @@ public class KubernetesTaskRunner implements TaskLogStreamer, TaskRunner
   @Override
   public TaskLocation getTaskLocation(String taskId)
   {
-    final KubernetesWorkItem workItem = tasks.get(taskId);
-    if (workItem == null) {
+    try {
+      final KubernetesWorkItem workItem = tasks.get(taskId);
+      if (workItem == null) {
+        return TaskLocation.unknown();
+      } else {
+        return workItem.getLocation();
+      }
+    }
+    catch (Exception e) {
+      log.warn("Unable to find location for task [%s]", taskId);
       return TaskLocation.unknown();
-    } else {
-      return workItem.getLocation();
     }
   }
 

@@ -18,11 +18,11 @@
 
 import {
   Button,
-  ButtonGroup,
   FormGroup,
   InputGroup,
   Intent,
   NumericInput,
+  SegmentedControl,
 } from '@blueprintjs/core';
 import { IconNames } from '@blueprintjs/icons';
 import type { JSX } from 'react';
@@ -57,7 +57,7 @@ export interface Field<M> {
     | 'json'
     | 'interval'
     | 'custom';
-  defaultValue?: any;
+  defaultValue?: Functor<M, any>;
   emptyValue?: any;
   suggestions?: Functor<M, Suggestion[]>;
   placeholder?: Functor<M, string>;
@@ -72,10 +72,6 @@ export interface Field<M> {
   hide?: Functor<M, boolean>;
   hideInMore?: Functor<M, boolean>;
   valueAdjustment?: (value: any) => any;
-  /**
-   * An optional callback to transform the value before it is set on the input
-   */
-  adjustValue?: (value: any) => any;
   adjustment?: (model: Partial<M>, oldModel: Partial<M>) => Partial<M>;
   issueWithValue?: (value: any) => string | undefined;
 
@@ -88,6 +84,7 @@ export interface Field<M> {
 }
 
 function toNumberOrUndefined(n: unknown): number | undefined {
+  if (n == null) return;
   const r = Number(n);
   return isNaN(r) ? undefined : r;
 }
@@ -134,7 +131,9 @@ export class AutoForm<T extends Record<string, any>> extends React.PureComponent
     const required = AutoForm.evaluateFunctor(field.required, model, false);
     return {
       required,
-      defaultValue: required ? undefined : field.defaultValue,
+      defaultValue: required
+        ? undefined
+        : AutoForm.evaluateFunctor(field.defaultValue, model as any, undefined),
       modelValue: deepGet(model as any, field.name),
     };
   }
@@ -382,33 +381,20 @@ export class AutoForm<T extends Record<string, any>> extends React.PureComponent
     const disabled = AutoForm.evaluateFunctor(field.disabled, model, false);
     const intent = required && modelValue == null ? AutoForm.REQUIRED_INTENT : undefined;
 
-    const adjustedValue = field.adjustValue ? field.adjustValue(shownValue) : shownValue;
-
     return (
-      <ButtonGroup large={large}>
-        <Button
-          intent={intent}
-          disabled={disabled}
-          active={adjustedValue === false}
-          onClick={() => {
-            this.fieldChange(field, false);
-            if (onFinalize) onFinalize();
-          }}
-        >
-          False
-        </Button>
-        <Button
-          intent={intent}
-          disabled={disabled}
-          active={adjustedValue === true}
-          onClick={() => {
-            this.fieldChange(field, true);
-            if (onFinalize) onFinalize();
-          }}
-        >
-          True
-        </Button>
-      </ButtonGroup>
+      <SegmentedControl
+        value={String(shownValue)}
+        onValueChange={v => {
+          this.fieldChange(field, v === 'true');
+          if (onFinalize) onFinalize();
+        }}
+        options={[
+          { value: 'false', label: 'False', disabled },
+          { value: 'true', label: 'True', disabled },
+        ]}
+        intent={intent}
+        small={!large}
+      />
     );
   }
 
