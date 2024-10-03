@@ -136,7 +136,8 @@ public class DruidJoinRule extends RelOptRule
     List<Interval> intervals = q.getQuery().getIntervals();
     boolean a = (intervals.size() == 0) || (intervals.size() == 1 && Intervals.isEternity(intervals.get(0)));
 
-    final boolean isLeftDirectAccessPossible = a && enableLeftScanDirect && (left instanceof DruidQueryRel);
+    boolean b = enableLeftScanDirect && (left instanceof DruidQueryRel);
+    final boolean isLeftDirectAccessPossible = a && b;
 
 
     if (!plannerContext.getJoinAlgorithm().requiresSubquery()
@@ -179,7 +180,7 @@ public class DruidJoinRule extends RelOptRule
       final Project rightProject = right.getPartialDruidQuery().getSelectProject();
 
       // Right-side projection expressions rewritten to be on top of the join.
-      
+
       for (final RexNode rexNode : RexUtil.shift(rightProject.getProjects(), newLeft.getRowType().getFieldCount())) {
         if (join.getJoinType().generatesNullsOnRight()) {
           newProjectExprs.add(makeNullableIfLiteral(rexNode, rexBuilder));
