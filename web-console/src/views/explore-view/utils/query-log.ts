@@ -16,9 +16,33 @@
  * limitations under the License.
  */
 
-import './grouping-table-module';
-import './record-table-module';
-import './time-chart-module';
-import './bar-chart-module';
-import './pie-chart-module';
-import './multi-axis-chart-module';
+interface QueryLogEntry {
+  time: Date;
+  sqlQuery: string;
+}
+
+const MAX_QUERIES_TO_LOG = 10;
+
+export class QueryLog {
+  private readonly queryLog: QueryLogEntry[] = [];
+
+  public length(): number {
+    return this.queryLog.length;
+  }
+
+  public addQuery(sqlQuery: string): void {
+    const { queryLog } = this;
+    queryLog.unshift({ time: new Date(), sqlQuery });
+    while (queryLog.length > MAX_QUERIES_TO_LOG) queryLog.pop();
+  }
+
+  public getLastQuery(): string | undefined {
+    return this.queryLog[0]?.sqlQuery;
+  }
+
+  public getFormatted(): string {
+    return this.queryLog
+      .map(({ time, sqlQuery }) => `At ${time.toISOString()} ran query:\n\n${sqlQuery}`)
+      .join('\n\n-----------------------------------------------------\n\n');
+  }
+}
