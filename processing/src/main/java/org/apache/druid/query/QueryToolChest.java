@@ -47,6 +47,7 @@ public abstract class QueryToolChest<ResultType, QueryType extends Query<ResultT
 {
   private final JavaType baseResultType;
   private final JavaType bySegmentResultType;
+  protected QueryToolChestWarehouse warehouse;
 
   protected QueryToolChest()
   {
@@ -421,5 +422,26 @@ public abstract class QueryToolChest<ResultType, QueryType extends Query<ResultT
   )
   {
     return Optional.empty();
+  }
+
+  public void setWarehouse(QueryToolChestWarehouse warehouse)
+  {
+    this.warehouse=warehouse;
+  }
+
+  public Optional<QueryRunner<ResultType>> executeQuery(
+      // ideally; it should know about the warehouse
+      QueryToolChestWarehouse warehouse,
+      Query<ResultType> query,
+      QuerySegmentWalker clientQuerySegmentWalker)
+  {
+    return Optional.empty();
+  }
+
+  public <T> boolean canExecuteFully(Query<T> query)
+  {
+    DataSource dataSourceFromQuery = query.getDataSource();
+    return (!(dataSourceFromQuery instanceof QueryDataSource)
+        || canPerformSubquery(((QueryDataSource) dataSourceFromQuery).getQuery()));
   }
 }
