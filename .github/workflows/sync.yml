@@ -33,7 +33,7 @@ jobs:
         branch: master
         pr_labels: upstream
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
         GITBOT_EMAIL: github-actions@github.com
         DRY_RUN: false
 
