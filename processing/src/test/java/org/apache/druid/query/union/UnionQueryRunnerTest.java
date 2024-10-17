@@ -17,13 +17,16 @@
  * under the License.
  */
 
-package org.apache.druid.query;
+package org.apache.druid.query.union;
 
-/**
- */
-public interface QueryRunnerFactoryConglomerate extends QueryToolChestWarehouse
+import org.junit.jupiter.api.Test;
+
+public class UnionQueryRunnerTest
 {
-  <T, QueryType extends Query<T>> QueryRunnerFactory<T, QueryType> findFactory(QueryType query);
+  @Test
+  public void test1()
+  {
 
-  <T, QueryType extends Query<T>> QueryExecutor<T> getQueryExecutor(QueryType query);
+    UnionQueryRunner uqr = new UnionQueryRunner(null, null);
+  }
 }
