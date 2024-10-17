@@ -7200,7 +7200,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.UNNEST_DIFFERENT_RESULTSET, separateDefaultModeTest = true)
+  // this is due to substring('',1') is null
   @Test
   public void testUnnestExtractionFn()
   {
@@ -7235,7 +7235,8 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
         ImmutableList.of(
             new Object[]{"a"},
             new Object[]{"c"},
-            new Object[]{"d"}
+            new Object[]{"d"},
+            new Object[]{""}
         )
     );
   }
