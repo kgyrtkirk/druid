@@ -66,11 +66,11 @@ public class PullCaseFromAggregatorRule extends RelOptRule implements Substituti
     final Project project = call.rel(1);
     final List<AggregateCall> newCalls =
         new ArrayList<>(aggregate.getAggCallList().size());
-    final List<RexNode> newProjects = new ArrayList<>(project.getProjects());
 
+    CaseToFilterRewriter cr = new CaseToFilterRewriter(project);
     for (AggregateCall aggregateCall : aggregate.getAggCallList()) {
       AggregateCall newCall =
-          transform(aggregateCall, project, newProjects);
+          cr.transform(aggregateCall, project, cr.newProjects);
 
       if (newCall == null) {
         newCalls.add(aggregateCall);
@@ -85,7 +85,7 @@ public class PullCaseFromAggregatorRule extends RelOptRule implements Substituti
 
     final RelBuilder relBuilder = call.builder()
         .push(project.getInput())
-        .project(newProjects);
+        .project(cr.newProjects);
 
     final RelBuilder.GroupKey groupKey =
         relBuilder.groupKey(aggregate.getGroupSet(), aggregate.getGroupSets());
@@ -97,67 +97,80 @@ public class PullCaseFromAggregatorRule extends RelOptRule implements Substituti
     call.getPlanner().prune(aggregate);
   }
 
-  private static @Nullable AggregateCall transform(AggregateCall call,
-      Project project, List<RexNode> newProjects) {
-    final int singleArg = soleArgument(call);
-    if (singleArg < 0) {
-      return null;
+  static class CaseToFilterRewriter {
+
+    public List<RexNode > newProjects;
+
+    public CaseToFilterRewriter(Project project)
+    {
+      newProjects = new ArrayList<>(project.getProjects());
     }
 
-    final RexNode rexNode = project.getProjects().get(singleArg);
-    if (!isThreeArgCase(rexNode)) {
-      return null;
+
+    private static @Nullable AggregateCall transform(AggregateCall call,
+        Project project, List<RexNode> newProjects) {
+      final int singleArg = soleArgument(call);
+      if (singleArg < 0) {
+        return null;
+      }
+
+      final RexNode rexNode = project.getProjects().get(singleArg);
+      if (!isThreeArgCase(rexNode)) {
+        return null;
+      }
+
+      final RelOptCluster cluster = project.getCluster();
+      final RexBuilder rexBuilder = cluster.getRexBuilder();
+      final RexCall caseCall = (RexCall) rexNode;
+
+      // If one arg is null and the other is not, reverse them and set "flip",
+      // which negates the filter.
+      final boolean flip = RexLiteral.isNullLiteral(caseCall.operands.get(1))
+          && !RexLiteral.isNullLiteral(caseCall.operands.get(2));
+      final RexNode arg1 = caseCall.operands.get(flip ? 2 : 1);
+      final RexNode arg2 = caseCall.operands.get(flip ? 1 : 2);
+
+      // Operand 1: Filter
+      final SqlPostfixOperator op =
+          flip ? SqlStdOperatorTable.IS_NOT_TRUE : SqlStdOperatorTable.IS_TRUE;
+      final RexNode filterFromCase =
+          rexBuilder.makeCall(op, caseCall.operands.get(0));
+
+      // Combine the CASE filter with an honest-to-goodness SQL FILTER, if the
+      // latter is present.
+      final RexNode filter;
+      if (call.filterArg >= 0) {
+        filter =
+            rexBuilder.makeCall(SqlStdOperatorTable.AND,
+                project.getProjects().get(call.filterArg),
+                filterFromCase);
+      } else {
+        filter = filterFromCase;
+      }
+
+      final SqlKind kind = call.getAggregation().getKind();
+      if (call.isDistinct()) {
+        return null;
+      }
+
+      // new part
+      if ((RexLiteral.isNullLiteral(arg2) // Case A1
+          && call.getAggregation().allowsFilter())
+          || (kind == SqlKind.SUM // Case A2
+              && isIntLiteral(arg2, BigDecimal.ZERO))) {
+        newProjects.add(arg1);
+        newProjects.add(filter);
+        return AggregateCall.create(call.getAggregation(), false,
+            false, false, call.rexList, ImmutableList.of(newProjects.size() - 2),
+            newProjects.size() - 1, null, RelCollations.EMPTY,
+            call.getType(), call.getName());
+      } else {
+        return null;
+      }
     }
 
-    final RelOptCluster cluster = project.getCluster();
-    final RexBuilder rexBuilder = cluster.getRexBuilder();
-    final RexCall caseCall = (RexCall) rexNode;
-
-    // If one arg is null and the other is not, reverse them and set "flip",
-    // which negates the filter.
-    final boolean flip = RexLiteral.isNullLiteral(caseCall.operands.get(1))
-        && !RexLiteral.isNullLiteral(caseCall.operands.get(2));
-    final RexNode arg1 = caseCall.operands.get(flip ? 2 : 1);
-    final RexNode arg2 = caseCall.operands.get(flip ? 1 : 2);
-
-    // Operand 1: Filter
-    final SqlPostfixOperator op =
-        flip ? SqlStdOperatorTable.IS_NOT_TRUE : SqlStdOperatorTable.IS_TRUE;
-    final RexNode filterFromCase =
-        rexBuilder.makeCall(op, caseCall.operands.get(0));
-
-    // Combine the CASE filter with an honest-to-goodness SQL FILTER, if the
-    // latter is present.
-    final RexNode filter;
-    if (call.filterArg >= 0) {
-      filter =
-          rexBuilder.makeCall(SqlStdOperatorTable.AND,
-              project.getProjects().get(call.filterArg),
-              filterFromCase);
-    } else {
-      filter = filterFromCase;
-    }
-
-    final SqlKind kind = call.getAggregation().getKind();
-    if (call.isDistinct()) {
-      return null;
-    }
-
-    // new part
-    if ((RexLiteral.isNullLiteral(arg2) // Case A1
-        && call.getAggregation().allowsFilter())
-        || (kind == SqlKind.SUM // Case A2
-            && isIntLiteral(arg2, BigDecimal.ZERO))) {
-      newProjects.add(arg1);
-      newProjects.add(filter);
-      return AggregateCall.create(call.getAggregation(), false,
-          false, false, call.rexList, ImmutableList.of(newProjects.size() - 2),
-          newProjects.size() - 1, null, RelCollations.EMPTY,
-          call.getType(), call.getName());
-    } else {
-      return null;
-    }
   }
+
 
   /** Returns the argument, if an aggregate call has a single argument,
    * otherwise -1. */
