@@ -112,11 +112,12 @@ public class PullCaseFromAggregatorRule extends RelOptRule implements Substituti
 
     public CaseToFilterRewriter(Project project, RelDataType aggregateRowType)
     {
+      cluster = project.getCluster();
+      rexBuilder = cluster.getRexBuilder();
+
       newCalls = new ArrayList<>();
       newProjects = new ArrayList<>(project.getProjects());
       newTopProjects = rexBuilder.identityProjects(aggregateRowType);
-      cluster = project.getCluster();
-      rexBuilder = cluster.getRexBuilder();
     }
 
     private void transform(AggregateCall call) {
