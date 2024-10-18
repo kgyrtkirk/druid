@@ -43,8 +43,6 @@ import org.apache.calcite.sql.SqlPostfixOperator;
 import org.apache.calcite.sql.fun.SqlStdOperatorTable;
 import org.apache.calcite.sql.type.SqlTypeName;
 import org.apache.calcite.tools.RelBuilder;
-import org.checkerframework.checker.nullness.qual.Nullable;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,22 +62,21 @@ public class PullCaseFromAggregatorRule extends RelOptRule implements Substituti
   {
     final Aggregate aggregate = call.rel(0);
     final Project project = call.rel(1);
-    final List<AggregateCall> newCalls =
-        new ArrayList<>(aggregate.getAggCallList().size());
 
     CaseToFilterRewriter cr = new CaseToFilterRewriter(project);
     for (AggregateCall aggregateCall : aggregate.getAggCallList()) {
-      AggregateCall newCall =
-          cr.transform(aggregateCall);
 
-      if (newCall == null) {
-        newCalls.add(aggregateCall);
-      } else {
-        newCalls.add(newCall);
-      }
+
+      cr.transform(aggregateCall);
+
+//      if (newCall == null) {
+//        newCalls.add(aggregateCall);
+//      } else {
+//        newCalls.add(newCall);
+//      }
     }
 
-    if (newCalls.equals(aggregate.getAggCallList())) {
+    if (cr.newCalls.equals(aggregate.getAggCallList())) {
       return;
     }
 
@@ -90,7 +87,7 @@ public class PullCaseFromAggregatorRule extends RelOptRule implements Substituti
     final RelBuilder.GroupKey groupKey =
         relBuilder.groupKey(aggregate.getGroupSet(), aggregate.getGroupSets());
 
-    relBuilder.aggregate(groupKey, newCalls)
+    relBuilder.aggregate(groupKey, cr.newCalls)
         .convert(aggregate.getRowType(), false);
 
     call.transformTo(relBuilder.build());
@@ -107,23 +104,28 @@ public class PullCaseFromAggregatorRule extends RelOptRule implements Substituti
     private RelOptCluster cluster;
     private RexBuilder rexBuilder;
 
+    private List<AggregateCall> newCalls;
+
     public CaseToFilterRewriter(Project project)
     {
+      newCalls = new ArrayList<>();
       newProjects = new ArrayList<>(project.getProjects());
       cluster = project.getCluster();
       rexBuilder = cluster.getRexBuilder();
     }
 
 
-    private @Nullable AggregateCall transform(AggregateCall call) {
+    private void transform(AggregateCall call) {
       final int singleArg = soleArgument(call);
       if (singleArg < 0) {
-        return null;
+        newCalls.add(call);
+        return;
       }
 
       final RexNode rexNode = newProjects.get(singleArg);
       if (!isThreeArgCase(rexNode)) {
-        return null;
+        newCalls.add(call);
+        return;
       }
 
       final RexCall caseCall = (RexCall) rexNode;
@@ -155,7 +157,8 @@ public class PullCaseFromAggregatorRule extends RelOptRule implements Substituti
 
       final SqlKind kind = call.getAggregation().getKind();
       if (call.isDistinct()) {
-        return null;
+        newCalls.add(call);
+        return;
       }
 
       // new part
@@ -165,12 +168,15 @@ public class PullCaseFromAggregatorRule extends RelOptRule implements Substituti
               && isIntLiteral(arg2, BigDecimal.ZERO))) {
         newProjects.add(arg1);
         newProjects.add(filter);
-        return AggregateCall.create(call.getAggregation(), false,
+        AggregateCall newAgg = AggregateCall.create(call.getAggregation(), false,
             false, false, call.rexList, ImmutableList.of(newProjects.size() - 2),
             newProjects.size() - 1, null, RelCollations.EMPTY,
             call.getType(), call.getName());
+        newCalls.add(newAgg);
+        return;
       } else {
-        return null;
+        newCalls.add(call);
+        return;
       }
     }
 
