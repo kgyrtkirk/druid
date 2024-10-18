@@ -70,7 +70,7 @@ public class PullCaseFromAggregatorRule extends RelOptRule implements Substituti
     CaseToFilterRewriter cr = new CaseToFilterRewriter(project);
     for (AggregateCall aggregateCall : aggregate.getAggCallList()) {
       AggregateCall newCall =
-          cr.transform(aggregateCall, project, cr.newProjects);
+          cr.transform(aggregateCall);
 
       if (newCall == null) {
         newCalls.add(aggregateCall);
@@ -99,28 +99,33 @@ public class PullCaseFromAggregatorRule extends RelOptRule implements Substituti
 
   static class CaseToFilterRewriter {
 
+    /**
+     * Old input projects are kept at the same locations; new might be added.
+     */
     public List<RexNode > newProjects;
+
+    private RelOptCluster cluster;
+    private RexBuilder rexBuilder;
 
     public CaseToFilterRewriter(Project project)
     {
       newProjects = new ArrayList<>(project.getProjects());
+      cluster = project.getCluster();
+      rexBuilder = cluster.getRexBuilder();
     }
 
 
-    private static @Nullable AggregateCall transform(AggregateCall call,
-        Project project, List<RexNode> newProjects) {
+    private @Nullable AggregateCall transform(AggregateCall call) {
       final int singleArg = soleArgument(call);
       if (singleArg < 0) {
         return null;
       }
 
-      final RexNode rexNode = project.getProjects().get(singleArg);
+      final RexNode rexNode = newProjects.get(singleArg);
       if (!isThreeArgCase(rexNode)) {
         return null;
       }
 
-      final RelOptCluster cluster = project.getCluster();
-      final RexBuilder rexBuilder = cluster.getRexBuilder();
       final RexCall caseCall = (RexCall) rexNode;
 
       // If one arg is null and the other is not, reverse them and set "flip",
@@ -142,7 +147,7 @@ public class PullCaseFromAggregatorRule extends RelOptRule implements Substituti
       if (call.filterArg >= 0) {
         filter =
             rexBuilder.makeCall(SqlStdOperatorTable.AND,
-                project.getProjects().get(call.filterArg),
+                newProjects.get(call.filterArg),
                 filterFromCase);
       } else {
         filter = filterFromCase;
