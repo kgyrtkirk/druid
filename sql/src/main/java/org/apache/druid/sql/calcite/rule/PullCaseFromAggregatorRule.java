@@ -28,8 +28,10 @@ import org.apache.calcite.rel.core.Aggregate;
 import org.apache.calcite.rel.core.AggregateCall;
 import org.apache.calcite.rel.core.Project;
 import org.apache.calcite.rel.rules.SubstitutionRule;
+import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.rex.RexBuilder;
 import org.apache.calcite.rex.RexCall;
+import org.apache.calcite.rex.RexInputRef;
 import org.apache.calcite.rex.RexLiteral;
 import org.apache.calcite.rex.RexNode;
 import org.apache.calcite.rex.RexOver;
@@ -43,6 +45,8 @@ import org.apache.calcite.sql.SqlPostfixOperator;
 import org.apache.calcite.sql.fun.SqlStdOperatorTable;
 import org.apache.calcite.sql.type.SqlTypeName;
 import org.apache.calcite.tools.RelBuilder;
+import org.apache.calcite.util.Util;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -63,17 +67,9 @@ public class PullCaseFromAggregatorRule extends RelOptRule implements Substituti
     final Aggregate aggregate = call.rel(0);
     final Project project = call.rel(1);
 
-    CaseToFilterRewriter cr = new CaseToFilterRewriter(project);
+    CaseToFilterRewriter cr = new CaseToFilterRewriter(project, aggregate.getRowType());
     for (AggregateCall aggregateCall : aggregate.getAggCallList()) {
-
-
       cr.transform(aggregateCall);
-
-//      if (newCall == null) {
-//        newCalls.add(aggregateCall);
-//      } else {
-//        newCalls.add(newCall);
-//      }
     }
 
     if (cr.newCalls.equals(aggregate.getAggCallList())) {
@@ -94,26 +90,34 @@ public class PullCaseFromAggregatorRule extends RelOptRule implements Substituti
     call.getPlanner().prune(aggregate);
   }
 
+  //
+  /** Creates a list of {@link org.apache.calcite.rex.RexInputRef} expressions,
+   * projecting the fields of a given record type. */
+  public static List<RexNode> identityProjects(final RelDataType rowType) {
+    return Util.transform(rowType.getFieldList(),
+        input -> new RexInputRef(input.getIndex(), input.getType()));
+  }
+
   static class CaseToFilterRewriter {
 
     /**
      * Old input projects are kept at the same locations; new might be added.
      */
-    public List<RexNode > newProjects;
+    public List<RexNode> newProjects;
+    private List<AggregateCall> newCalls;
+    private List<RexNode> newTopProjects;
 
     private RelOptCluster cluster;
     private RexBuilder rexBuilder;
 
-    private List<AggregateCall> newCalls;
-
-    public CaseToFilterRewriter(Project project)
+    public CaseToFilterRewriter(Project project, RelDataType aggregateRowType)
     {
       newCalls = new ArrayList<>();
       newProjects = new ArrayList<>(project.getProjects());
+      newTopProjects = rexBuilder.identityProjects(aggregateRowType);
       cluster = project.getCluster();
       rexBuilder = cluster.getRexBuilder();
     }
-
 
     private void transform(AggregateCall call) {
       final int singleArg = soleArgument(call);
