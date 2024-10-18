@@ -17,13 +17,29 @@
  * under the License.
  */
 
-package org.apache.druid.query;
+package org.apache.druid.query.union;
+
+import org.apache.druid.java.util.common.guava.Sequence;
 
 /**
+ * Holds the resulting Sequence for a union query branch.
+ *
+ * Caveat: the index of the ResultUnionResult in the output sequence is in line
+ * with the index of the executed query.
  */
-public interface QueryRunnerFactoryConglomerate extends QueryToolChestWarehouse
+public class UnionResult
 {
-  <T, QueryType extends Query<T>> QueryRunnerFactory<T, QueryType> findFactory(QueryType query);
+  private final Sequence<?> seq;
 
-  <T, QueryType extends Query<T>> QueryExecutor<T> getQueryExecutor(QueryType query);
+  public UnionResult(Sequence<?> seq)
+  {
+    this.seq = seq;
+  }
+
+  public <T> Sequence<T> getResults()
+  {
+    return (Sequence<T>) seq;
+
+  }
+
 }

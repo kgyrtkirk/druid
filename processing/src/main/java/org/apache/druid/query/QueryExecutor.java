@@ -20,10 +20,12 @@
 package org.apache.druid.query;
 
 /**
+ * Executes the query by utilizing the given walker.
  */
-public interface QueryRunnerFactoryConglomerate extends QueryToolChestWarehouse
+public interface QueryExecutor<T>
 {
-  <T, QueryType extends Query<T>> QueryRunnerFactory<T, QueryType> findFactory(QueryType query);
-
-  <T, QueryType extends Query<T>> QueryExecutor<T> getQueryExecutor(QueryType query);
+  QueryRunner<T> makeQueryRunner(
+      Query<T> query,
+      QuerySegmentWalker walker
+  );
 }
