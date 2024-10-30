@@ -55,7 +55,6 @@ import org.apache.druid.sql.calcite.rel.DruidJoinQueryRel;
 import org.apache.druid.sql.calcite.rel.DruidQueryRel;
 import org.apache.druid.sql.calcite.rel.DruidRel;
 import org.apache.druid.sql.calcite.rel.PartialDruidQuery;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -130,19 +129,27 @@ public class DruidJoinRule extends RelOptRule
     plannerContext.setPlanningError(conditionAnalysis.errorStr);
     final boolean isLeftDirectAccessPossible = enableLeftScanDirect && (left instanceof DruidQueryRel);
 
+
     if (!plannerContext.getJoinAlgorithm().requiresSubquery()
-        && left.getPartialDruidQuery().stage() == PartialDruidQuery.Stage.SELECT_PROJECT
+        && (left.getPartialDruidQuery().stage() == PartialDruidQuery.Stage.SELECT_PROJECT ||
+            left.getPartialDruidQuery().stage() == PartialDruidQuery.Stage.WHERE_FILTER )
         && (isLeftDirectAccessPossible || left.getPartialDruidQuery().getWhereFilter() == null)) {
       // Swap the left-side projection above the join, so the left side is a simple scan or mapping. This helps us
       // avoid subqueries.
       final RelNode leftScan = left.getPartialDruidQuery().getScan();
       final Project leftProject = left.getPartialDruidQuery().getSelectProject();
+      if(leftProject == null) {
+        for (int i = 0; i < left.getRowType().getFieldCount(); i++) {
+          newProjectExprs.add(rexBuilder.makeInputRef(join.getRowType().getFieldList().get(i).getType(), i));
+        }
+      } else {
+        // Left-side projection expressions rewritten to be on top of the join.
+        newProjectExprs.addAll(leftProject.getProjects());
+        conditionAnalysis = conditionAnalysis.pushThroughLeftProject(leftProject);
+      }
       leftFilter = left.getPartialDruidQuery().getWhereFilter();
 
-      // Left-side projection expressions rewritten to be on top of the join.
-      newProjectExprs.addAll(leftProject.getProjects());
       newLeft = left.withPartialQuery(PartialDruidQuery.create(leftScan));
-      conditionAnalysis = conditionAnalysis.pushThroughLeftProject(leftProject);
     } else {
       // Leave left as-is. Write input refs that do nothing.
       for (int i = 0; i < left.getRowType().getFieldCount(); i++) {
@@ -164,7 +171,7 @@ public class DruidJoinRule extends RelOptRule
       final Project rightProject = right.getPartialDruidQuery().getSelectProject();
 
       // Right-side projection expressions rewritten to be on top of the join.
-      
+
       for (final RexNode rexNode : RexUtil.shift(rightProject.getProjects(), newLeft.getRowType().getFieldCount())) {
         if (join.getJoinType().generatesNullsOnRight()) {
           newProjectExprs.add(makeNullableIfLiteral(rexNode, rexBuilder));
