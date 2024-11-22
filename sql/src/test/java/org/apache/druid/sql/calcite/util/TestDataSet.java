@@ -45,15 +45,27 @@ import java.util.stream.Collectors;
 
 public interface TestDataSet
 {
-
   public static final String TIMESTAMP_COLUMN = TestDataBuilder.TIMESTAMP_COLUMN;
 
-  public static final TestDataSet NUMFOO = new NumFoo();
+  public static final AbstractTestDataset NUMFOO = new NumFoo();
 
+  String getName();
   QueryableIndex makeIndex(File tmpDir);
 
   static abstract class AbstractTestDataset implements TestDataSet
   {
+    protected final String name;
+
+    protected AbstractTestDataset(String name)
+    {
+      this.name = name;
+    }
+
+    @Override
+    public String getName()
+    {
+      return name;
+    }
     @Override
     public final QueryableIndex makeIndex(File tmpDir)
     {
@@ -83,6 +95,10 @@ public interface TestDataSet
 
   static class NumFoo extends AbstractTestDataset
   {
+    protected NumFoo()
+    {
+      super("numfoo");
+    }
 
     protected final InputRowSchema getInputRowSchema()
     {
