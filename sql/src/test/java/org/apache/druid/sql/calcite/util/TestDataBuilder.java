@@ -780,13 +780,15 @@ public class TestDataBuilder
         .rows(FORBIDDEN_ROWS)
         .buildMMappedIndex();
 
-    final QueryableIndex indexNumericDims = IndexBuilder
+    final QueryableIndex indexNumericDims0 = IndexBuilder
         .create()
         .tmpDir(new File(tmpDir, "3"))
         .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
         .schema(INDEX_SCHEMA_NUMERIC_DIMS)
         .rows(ROWS1_WITH_NUMERIC_DIMS)
         .buildMMappedIndex();
+
+    final QueryableIndex indexNumericDims = TestDataSet.NUMFOO.makeIndex(new File(tmpDir, "3"));
 
     final QueryableIndex index4 = IndexBuilder
         .create()
@@ -1202,12 +1204,12 @@ public class TestDataBuilder
     return new MapBasedInputRow(DateTimes.ISO_DATE_OPTIONAL_TIME.parse(time), dimensions, event);
   }
 
-  public static InputRow createRow(final ImmutableMap<String, ?> map)
+  public static InputRow createRow(final Map<String, ?> map)
   {
     return MapInputRowParser.parse(FOO_SCHEMA, (Map<String, Object>) map);
   }
 
-  public static InputRow createRow(final ImmutableMap<String, ?> map, InputRowSchema inputRowSchema)
+  public static InputRow createRow(final Map<String, ?> map, InputRowSchema inputRowSchema)
   {
     return MapInputRowParser.parse(inputRowSchema, (Map<String, Object>) map);
   }

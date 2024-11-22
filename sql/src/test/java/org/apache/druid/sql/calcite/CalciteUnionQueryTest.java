@@ -279,23 +279,19 @@ public class CalciteUnionQueryTest extends BaseCalciteQueryTest
   @Test
   public void testUnionIsUnplannableInNative()
   {
-    String sql = "SELECT dim2, dim1, m1 FROM foo2 UNION SELECT dim1, dim2, m1 FROM foo";
+    String sql = "SELECT dim2, dim1, m1 FROM numfoo UNION SELECT dim1, dim2, m1 FROM numfoo";
     if (testBuilder().isDecoupledMode()) {
-      // UnionToDistinctRule
       testBuilder()
           .sql(sql)
-          .expectedResults(ImmutableList.of(new Object[] {"def", 2L}))
           .expectedResults(
+              ResultMatchMode.RELAX_NULLS,
               ImmutableList.of(
-                  new Object[] {null, "10.1", 2.0F},
-                  new Object[] {null, "abc", 6.0F},
-                  new Object[] {"", "2", 3.0F},
-                  new Object[] {"a", "", 1.0F},
-                  new Object[] {"a", "1", 4.0F},
-                  new Object[] {"abc", "def", 5.0F},
-                  new Object[] {"en", "druid", 1.0F},
-                  new Object[] {"he", "\u05D3\u05E8\u05D5\u05D0\u05D9\u05D3", 1.0F},
-                  new Object[] {"ru", "\u0434\u0440\u0443\u0438\u0434", 1.0F}
+                  new Object[]{null, "10.1", 2.0F},
+                  new Object[]{null, "abc", 6.0F},
+                  new Object[]{"", "2", 3.0F},
+                  new Object[]{"a", "", 1.0F},
+                  new Object[]{"a", "1", 4.0F},
+                  new Object[]{"abc", "def", 5.0F}
               )
           )
           .run();
