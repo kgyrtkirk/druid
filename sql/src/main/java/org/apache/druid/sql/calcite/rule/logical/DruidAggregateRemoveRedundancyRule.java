@@ -37,8 +37,6 @@ import org.apache.calcite.util.ImmutableBitSet;
 import org.apache.calcite.util.Util;
 import org.apache.calcite.util.mapping.Mappings;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.immutables.value.Value;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -54,7 +52,6 @@ import java.util.Set;
  * This is updated version of {@link org.apache.calcite.rel.rules.AggregateProjectMergeRule}
  * to be able to handle expressions.
  */
-@Value.Enclosing
 public class DruidAggregateRemoveRedundancyRule
     extends RelOptRule
     implements TransformationRule
