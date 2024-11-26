@@ -20,6 +20,7 @@ import org.apache.calcite.plan.RelOptCluster;
 import org.apache.calcite.plan.RelOptRuleCall;
 import org.apache.calcite.plan.RelRule;
 import org.apache.calcite.rel.RelCollations;
+import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.core.Aggregate;
 import org.apache.calcite.rel.core.AggregateCall;
 import org.apache.calcite.rel.core.Project;
@@ -37,7 +38,6 @@ import org.apache.calcite.sql.fun.SqlStdOperatorTable;
 import org.apache.calcite.sql.type.SqlTypeName;
 import org.apache.calcite.tools.RelBuilder;
 import org.apache.calcite.tools.RelBuilderFactory;
-
 import com.google.common.collect.ImmutableList;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.immutables.value.Value;
@@ -106,38 +106,20 @@ public class DruidAggregateCaseToFilterRule
         new ArrayList<>(aggregate.getAggCallList().size());
     final List<RexNode> newProjects = new ArrayList<>(project.getProjects());
 
-    LocalAggBuilder lab = new LocalAggBuilder(project);
+    LocalAggBuilder lab = new LocalAggBuilder(call.builder(), project);
 
     for (AggregateCall aggregateCall : aggregate.getAggCallList()) {
       lab.add(aggregateCall);
     }
 
-    for (AggregateCall aggregateCall : aggregate.getAggCallList()) {
-      AggregateCall newCall =
-          transform(aggregateCall, project, newProjects);
-
-      if (newCall == null) {
-        newCalls.add(aggregateCall);
-      } else {
-        newCalls.add(newCall);
-      }
-    }
-
-    if (newCalls.equals(aggregate.getAggCallList())) {
+    if (lab.aggs.equals(aggregate.getAggCallList())) {
+      // no progress
       return;
     }
 
-    final RelBuilder relBuilder = call.builder()
-        .push(project.getInput())
-        .project(newProjects);
+    RelNode newRel = lab.build(aggregate);
 
-    final RelBuilder.GroupKey groupKey =
-        relBuilder.groupKey(aggregate.getGroupSet(), aggregate.getGroupSets());
-
-    relBuilder.aggregate(groupKey, newCalls)
-        .convert(aggregate.getRowType(), false);
-
-    call.transformTo(relBuilder.build());
+    call.transformTo(newRel);
     call.getPlanner().prune(aggregate);
   }
 
@@ -184,20 +166,48 @@ public class DruidAggregateCaseToFilterRule
   /**
    * Helper class to aid building the output {@link Aggregate}.
    */
-  private static class LocalAggBuilder {
+  private static class LocalAggBuilder
+  {
+    private RelBuilder builder;
+    private List<AggregateCall> aggs;
+    private List<RexNode> newProjects;
+    private Project oldProject;
+
+
+    public LocalAggBuilder(RelBuilder builder, Project project)
+    {
+      this.builder = builder;
+      this.oldProject = project;
+      this.newProjects = new ArrayList<RexNode>(project.getProjects());
+    }
+
+    public RelNode build(Aggregate oldAggregate)
+    {
+      Aggregate aggregate = oldAggregate;
+      final RelBuilder relBuilder = builder
+          .push(oldProject.getInput())
+          .project(newProjects);
+
+      final RelBuilder.GroupKey groupKey =
+          relBuilder.groupKey(aggregate.getGroupSet(), aggregate.getGroupSets());
+
+      relBuilder.aggregate(groupKey, aggs)
+          .convert(aggregate.getRowType(), false);
+
+      return relBuilder.build();
+    }
 
     public void add(AggregateCall aggregateCall)
     {
-      if(true)
-      {
-        throw new RuntimeException("FIXME: Unimplemented!");
+      @Nullable
+      AggregateCall a = transform(aggregateCall, null, newProjects);
+      if(a==null) {
+        a=aggregateCall;
       }
-
+      aggs.add(a);
     }
 
-
   }
-
 
   private static @Nullable AggregateCall transform0(AggregateCall call,
       Project project, List<RexNode> newProjects) {
@@ -221,7 +231,7 @@ public class DruidAggregateCaseToFilterRule
       );
 
 
-      AggregateCall possibleRet = transform2(c, call);
+//      AggregateCall possibleRet = transform2(c, call);
     }
 
     if (!isThreeArgCase(rexNode)) {
