@@ -35,13 +35,7 @@ import org.apache.calcite.rex.RexBuilder;
 import org.apache.calcite.rex.RexCall;
 import org.apache.calcite.rex.RexLiteral;
 import org.apache.calcite.rex.RexNode;
-import org.apache.calcite.rex.RexOver;
-import org.apache.calcite.rex.RexShuttle;
-import org.apache.calcite.rex.RexWindow;
-import org.apache.calcite.rex.RexWindowBound;
-import org.apache.calcite.sql.SqlAggFunction;
 import org.apache.calcite.sql.SqlKind;
-import org.apache.calcite.sql.SqlOperator;
 import org.apache.calcite.sql.SqlPostfixOperator;
 import org.apache.calcite.sql.fun.SqlStdOperatorTable;
 import org.apache.calcite.sql.type.SqlTypeName;
@@ -146,6 +140,7 @@ public class DruidAggregateCaseToFilterRule extends RelOptRule implements Substi
       return null;
     }
 
+
     if (kind == SqlKind.COUNT // Case C
         && arg1.isA(SqlKind.LITERAL)
         && !RexLiteral.isNullLiteral(arg1)
@@ -249,69 +244,5 @@ public class DruidAggregateCaseToFilterRule extends RelOptRule implements Substi
     return rexNode instanceof RexLiteral
         && SqlTypeName.INT_TYPES.contains(rexNode.getType().getSqlTypeName())
         && value.equals(((RexLiteral) rexNode).getValueAs(BigDecimal.class));
-  }
-
-  private static class RewriteShuttle extends RexShuttle
-  {
-    private final RexBuilder rexBuilder;
-
-    public RewriteShuttle(RexBuilder rexBuilder)
-    {
-      this.rexBuilder = rexBuilder;
-    }
-
-    @Override
-    public RexNode visitOver(RexOver over)
-    {
-      SqlOperator operator = over.getOperator();
-      RexWindow window = over.getWindow();
-      RexWindowBound upperBound = window.getUpperBound();
-      RexWindowBound lowerBound = window.getLowerBound();
-
-      if (window.orderKeys.size() > 0) {
-        if (operator.getKind() == SqlKind.LAST_VALUE && !upperBound.isUnbounded()) {
-          if (upperBound.isCurrentRow()) {
-            return rewriteToReferenceCurrentRow(over);
-          }
-        }
-        if (operator.getKind() == SqlKind.FIRST_VALUE && !lowerBound.isUnbounded()) {
-          if (lowerBound.isCurrentRow()) {
-            return rewriteToReferenceCurrentRow(over);
-          }
-        }
-      }
-      return super.visitOver(over);
-    }
-
-    private RexNode rewriteToReferenceCurrentRow(RexOver over)
-    {
-      // could remove `last_value( x ) over ( .... order by y )`
-      // best would be to: return over.getOperands().get(0);
-      // however that make some queries too good
-      return makeOver(
-          over,
-          over.getWindow(),
-          SqlStdOperatorTable.LAG,
-          ImmutableList.of(over.getOperands().get(0), rexBuilder.makeBigintLiteral(BigDecimal.ZERO))
-      );
-    }
-
-    private RexNode makeOver(RexOver over, RexWindow window, SqlAggFunction aggFunction, List<RexNode> operands)
-    {
-      return rexBuilder.makeOver(
-          over.type,
-          aggFunction,
-          operands,
-          window.partitionKeys,
-          window.orderKeys,
-          window.getLowerBound(),
-          window.getUpperBound(),
-          window.isRows(),
-          true,
-          false,
-          over.isDistinct(),
-          over.ignoreNulls()
-      );
-    }
   }
 }
