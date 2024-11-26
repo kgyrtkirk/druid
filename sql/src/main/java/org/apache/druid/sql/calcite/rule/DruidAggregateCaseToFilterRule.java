@@ -101,6 +101,7 @@ public class DruidAggregateCaseToFilterRule extends RelOptRule implements Substi
     if (singleArg < 0) {
       return null;
     }
+    ImmutableFoobarValue a;
 
     final RexNode rexNode = project.getProjects().get(singleArg);
     if (!isThreeArgCase(rexNode)) {
