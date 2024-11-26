@@ -39,13 +39,11 @@ import org.apache.calcite.tools.RelBuilder;
 import org.apache.calcite.tools.RelBuilderFactory;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.immutables.value.Value;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -143,7 +141,6 @@ public class DruidAggregateCaseToFilterRule
     return transform0(call, project, newProjects);
   }
 
-
   private static class RexIf
   {
     public final RexNode condition;
@@ -163,6 +160,9 @@ public class DruidAggregateCaseToFilterRule
         return null;
       }
       final RexCall caseCall = (RexCall) rexNode;
+
+      // If one arg is null and the other is not, reverse them and set "flip",
+      // which negates the filter.
       final boolean flip = RexLiteral.isNullLiteral(caseCall.operands.get(1))
           && !RexLiteral.isNullLiteral(caseCall.operands.get(2));
       final RexNode arg1 = caseCall.operands.get(flip ? 2 : 1);
@@ -183,20 +183,21 @@ public class DruidAggregateCaseToFilterRule
       return null;
     }
 
-
     final RexNode rexNode = project.getProjects().get(singleArg);
     final RelOptCluster cluster = project.getCluster();
     final RexBuilder rexBuilder = cluster.getRexBuilder();
-    RexIf c = RexIf.of(rexBuilder, rexNode);
-    if (c == null) {
-      return null;
+    if (false) {
+      RexIf c = RexIf.of(rexBuilder, rexNode);
+      if (c == null) {
+        return null;
+      }
+
+      final RexNode filter = RexUtil.composeConjunction(
+          rexBuilder,
+          ImmutableList.of(c.condition, getFilterExpr(call, project))
+      );
+
     }
-
-    final RexNode filter = RexUtil.composeConjunction(
-        rexBuilder,
-        ImmutableList.of(c.getCondition()), getFilterExpr(call, project)
-    );
-
 
     if (!isThreeArgCase(rexNode)) {
       return null;
