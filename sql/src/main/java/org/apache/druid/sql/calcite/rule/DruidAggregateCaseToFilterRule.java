@@ -106,6 +106,12 @@ public class DruidAggregateCaseToFilterRule
         new ArrayList<>(aggregate.getAggCallList().size());
     final List<RexNode> newProjects = new ArrayList<>(project.getProjects());
 
+    LocalAggBuilder lab = new LocalAggBuilder(project);
+
+    for (AggregateCall aggregateCall : aggregate.getAggCallList()) {
+      lab.add(aggregateCall);
+    }
+
     for (AggregateCall aggregateCall : aggregate.getAggCallList()) {
       AggregateCall newCall =
           transform(aggregateCall, project, newProjects);
@@ -173,8 +179,25 @@ public class DruidAggregateCaseToFilterRule
 
       return new RexIf(filterFromCase, arg1, arg2);
     }
+  }
+
+  /**
+   * Helper class to aid building the output {@link Aggregate}.
+   */
+  private static class LocalAggBuilder {
+
+    public void add(AggregateCall aggregateCall)
+    {
+      if(true)
+      {
+        throw new RuntimeException("FIXME: Unimplemented!");
+      }
+
+    }
+
 
   }
+
 
   private static @Nullable AggregateCall transform0(AggregateCall call,
       Project project, List<RexNode> newProjects) {
@@ -197,6 +220,8 @@ public class DruidAggregateCaseToFilterRule
           ImmutableList.of(c.condition, getFilterExpr(call, project))
       );
 
+
+      AggregateCall possibleRet = transform2(c, call);
     }
 
     if (!isThreeArgCase(rexNode)) {
@@ -231,6 +256,13 @@ public class DruidAggregateCaseToFilterRule
     }
 
     final SqlKind kind = call.getAggregation().getKind();
+
+
+
+
+
+
+
     if (call.isDistinct()) {
       // Just one style supported:
       //   COUNT(DISTINCT CASE WHEN x = 'foo' THEN y END)
