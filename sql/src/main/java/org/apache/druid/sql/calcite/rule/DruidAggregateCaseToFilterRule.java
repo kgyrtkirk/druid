@@ -168,10 +168,10 @@ public class DruidAggregateCaseToFilterRule
    */
   private static class LocalAggBuilder
   {
-    private final RelBuilder builder;
-    private final List<AggregateCall> aggs = new ArrayList<AggregateCall>();
-    private final List<RexNode> newProjects;
-    private final Project oldProject;
+    private RelBuilder builder;
+    private List<AggregateCall> aggs;
+    private List<RexNode> newProjects;
+    private Project oldProject;
 
 
     public LocalAggBuilder(RelBuilder builder, Project project)
@@ -200,12 +200,13 @@ public class DruidAggregateCaseToFilterRule
     public void add(AggregateCall aggregateCall)
     {
       @Nullable
-      AggregateCall a = transform(aggregateCall, oldProject, newProjects);
-      if (a == null) {
-        a = aggregateCall;
+      AggregateCall a = transform(aggregateCall, null, newProjects);
+      if(a==null) {
+        a=aggregateCall;
       }
       aggs.add(a);
     }
+
   }
 
   private static @Nullable AggregateCall transform0(AggregateCall call,
@@ -294,15 +295,12 @@ public class DruidAggregateCaseToFilterRule
     //
     // A1: AGG(CASE WHEN x = 'foo' THEN expr END)
     //   => AGG(expr) FILTER (x = 'foo')
-    // A2: SUM(CASE WHEN x = 'foo' THEN cnt ELSE 0 END)
+    // A2: SUM0(CASE WHEN x = 'foo' THEN cnt ELSE 0 END)
     //   => SUM0(cnt) FILTER (x = 'foo')
+    // B: SUM0(CASE WHEN x = 'foo' THEN 1 ELSE 0 END)
+    //   => COUNT() FILTER (x = 'foo')
     // C: COUNT(CASE WHEN x = 'foo' THEN 'dummy' END)
     //   => COUNT() FILTER (x = 'foo')
-    // B: SUM(CASE WHEN x = 'foo' THEN 1 ELSE 0 END)
-    //   => SUM(1) FILTER (x = 'foo')
-
-    // SUM( CASE COND THEN X END) =>
-    // CASE WHEN COUNT() FILTER COND > 0 THEN SUM(x) FILTER COND ELSE 0 END
 
     if (kind == SqlKind.COUNT // Case C
         && arg1.isA(SqlKind.LITERAL)
@@ -313,7 +311,7 @@ public class DruidAggregateCaseToFilterRule
           false, call.rexList, ImmutableList.of(), newProjects.size() - 1, null,
           RelCollations.EMPTY, call.getType(),
           call.getName());
-    } else if (kind == SqlKind.SUM // Case B
+    } else if (kind == SqlKind.SUM0 // Case B
         && isIntLiteral(arg1, BigDecimal.ONE)
         && isIntLiteral(arg2, BigDecimal.ZERO)) {
 
@@ -327,7 +325,7 @@ public class DruidAggregateCaseToFilterRule
           RelCollations.EMPTY, dataType, call.getName());
     } else if ((RexLiteral.isNullLiteral(arg2) // Case A1
             && call.getAggregation().allowsFilter())
-        || (kind == SqlKind.SUM // Case A2
+        || (kind == SqlKind.SUM0 // Case A2
             && isIntLiteral(arg2, BigDecimal.ZERO))) {
       newProjects.add(arg1);
       newProjects.add(filter);
