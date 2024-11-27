@@ -206,7 +206,7 @@ public class DruidAggregateCaseToFilterRule2 extends RelOptRule implements Subst
 
       RelDataType newType = rexBuilder.getTypeFactory().createTypeWithNullability(call.getType(), true);
       return AggregateCall.create(
-          call.getAggregation(),
+          SqlStdOperatorTable.SUM0,
           false,
           false,
           true,
@@ -215,7 +215,8 @@ public class DruidAggregateCaseToFilterRule2 extends RelOptRule implements Subst
           newProjects.size() - 1,
           null,
           RelCollations.EMPTY,
-          newType, call.getName()
+          newType,
+          call.getName()
       );
     }
 

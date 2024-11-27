@@ -169,7 +169,7 @@ public class DruidAggregateCaseToFilterRule
   private static class LocalAggBuilder
   {
     private RelBuilder builder;
-    private List<AggregateCall> aggs;
+    private List<AggregateCall> aggs = new ArrayList<>();
     private List<RexNode> newProjects;
     private Project oldProject;
 
@@ -267,12 +267,6 @@ public class DruidAggregateCaseToFilterRule
 
     final SqlKind kind = call.getAggregation().getKind();
 
-
-
-
-
-
-
     if (call.isDistinct()) {
       // Just one style supported:
       //   COUNT(DISTINCT CASE WHEN x = 'foo' THEN y END)
@@ -333,6 +327,23 @@ public class DruidAggregateCaseToFilterRule
           false, false, call.rexList, ImmutableList.of(newProjects.size() - 2),
           newProjects.size() - 1, null, RelCollations.EMPTY,
           call.getType(), call.getName());
+    } else if (kind == SqlKind.SUM && isIntLiteral(arg2, BigDecimal.ZERO)) {
+      newProjects.add(arg1);
+      newProjects.add(filter);
+
+      RelDataType newType = rexBuilder.getTypeFactory().createTypeWithNullability(call.getType(), true);
+      return AggregateCall.create(
+          call.getAggregation(),
+          false,
+          false,
+          true,
+          call.rexList,
+          ImmutableList.of(newProjects.size() - 2),
+          newProjects.size() - 1,
+          null,
+          RelCollations.EMPTY,
+          newType, call.getName()
+      );
     } else {
       return null;
     }
