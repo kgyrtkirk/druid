@@ -308,7 +308,6 @@ public class DruidAggregateCaseToFilterRule
     } else if (kind == SqlKind.SUM0 // Case B
         && isIntLiteral(arg1, BigDecimal.ONE)
         && isIntLiteral(arg2, BigDecimal.ZERO)) {
-
       newProjects.add(filter);
       final RelDataTypeFactory typeFactory = cluster.getTypeFactory();
       final RelDataType dataType =
@@ -327,22 +326,28 @@ public class DruidAggregateCaseToFilterRule
           false, false, call.rexList, ImmutableList.of(newProjects.size() - 2),
           newProjects.size() - 1, null, RelCollations.EMPTY,
           call.getType(), call.getName());
-    } else if (kind == SqlKind.SUM && isIntLiteral(arg2, BigDecimal.ZERO)) {
-      newProjects.add(arg1);
-      newProjects.add(filter);
+    } else if (kind == SqlKind.SUM && isIntLiteral(arg2, BigDecimal.ZERO) && isIntLiteral(arg1, BigDecimal.ONE)) {
+//      RexNode eq = rexBuilder.makeCall(SqlStdOperatorTable.EQUALS, filterFromCase);
+      final RelDataTypeFactory typeFactory = cluster.getTypeFactory();
+      RexNode newSumArg = rexBuilder.makeAbstractCast(typeFactory.createSqlType(SqlTypeName.BIGINT),filterFromCase
 
-      RelDataType newType = rexBuilder.getTypeFactory().createTypeWithNullability(call.getType(), true);
+          );
+      newProjects.add(newSumArg);
+      //      newProjects.add(filter);
+
+      RelDataType newType = call.getType();//rexBuilder.getTypeFactory().createTypeWithNullability(call.getType(), false);
       return AggregateCall.create(
           call.getAggregation(),
           false,
           false,
           true,
           call.rexList,
-          ImmutableList.of(newProjects.size() - 2),
-          newProjects.size() - 1,
+          ImmutableList.of(newProjects.size() - 1),
+          call.filterArg,
           null,
           RelCollations.EMPTY,
-          newType, call.getName()
+          newType,
+          call.getName()
       );
     } else {
       return null;
