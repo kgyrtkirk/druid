@@ -5405,42 +5405,18 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
   @Test
   public void testFilteredAggregationWithNotIn()
   {
-    testQuery(
-        "SELECT\n"
-        + "COUNT(*) filter(WHERE dim1 NOT IN ('1')),\n"
-        + "COUNT(dim2) filter(WHERE dim1 NOT IN ('1'))\n"
-        + "FROM druid.foo",
-        ImmutableList.of(
-            Druids.newTimeseriesQueryBuilder()
-                  .dataSource(CalciteTests.DATASOURCE1)
-                  .intervals(querySegmentSpec(Filtration.eternity()))
-                  .granularity(Granularities.ALL)
-                  .aggregators(
-                      aggregators(
-                          new FilteredAggregatorFactory(
-                              new CountAggregatorFactory("a0"),
-                              not(equality("dim1", "1", ColumnType.STRING))
-                          ),
-                          new FilteredAggregatorFactory(
-                              new CountAggregatorFactory("a1"),
-                              and(
-                                  notNull("dim2"),
-                                  not(equality("dim1", "1", ColumnType.STRING))
-                              )
-                          )
-                      )
-                  )
-                  .context(QUERY_CONTEXT_DEFAULT)
-                  .build()
-        ),
-        NullHandling.replaceWithDefault() ?
-        ImmutableList.of(
-            new Object[]{5L, 2L}
-        ) :
-        ImmutableList.of(
-            new Object[]{5L, 3L}
-        )
-    );
+    testBuilder()
+    .sql("SELECT\n"
+            + "sum(f1) \n"
+            + "FROM druid.numfoo where f1 is null")
+    .expectedResults(NullHandling.replaceWithDefault() ?
+            ImmutableList.of(
+                new Object[]{5L, 2L}
+            ) :
+            ImmutableList.of(
+                new Object[]{5L, 3L}
+            ))
+    .run();
   }
 
   @Test
