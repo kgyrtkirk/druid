@@ -200,7 +200,7 @@ public class DruidAggregateCaseToFilterRule
     public void add(AggregateCall aggregateCall)
     {
       @Nullable
-      AggregateCall a = transform(aggregateCall, null, newProjects);
+      AggregateCall a = transform(aggregateCall, oldProject, newProjects);
       if(a==null) {
         a=aggregateCall;
       }
