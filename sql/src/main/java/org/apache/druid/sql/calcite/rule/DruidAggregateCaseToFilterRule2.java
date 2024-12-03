@@ -60,6 +60,22 @@ public class DruidAggregateCaseToFilterRule2 extends RelOptRule implements Subst
   }
 
   @Override
+  public boolean matches(final RelOptRuleCall call)
+  {
+    final Aggregate aggregate = call.rel(0);
+    final Project project = call.rel(1);
+
+    for (AggregateCall aggregateCall : aggregate.getAggCallList()) {
+      final int singleArg = soleArgument(aggregateCall);
+      if (singleArg >= 0
+          && isThreeArgCase(project.getProjects().get(singleArg))) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  @Override
   public void onMatch(RelOptRuleCall call)
   {
     final Aggregate aggregate = call.rel(0);
@@ -135,89 +151,60 @@ public class DruidAggregateCaseToFilterRule2 extends RelOptRule implements Subst
       filter = filterFromCase;
     }
 
+    RelDataTypeFactory typeFactory = rexBuilder.getTypeFactory();
     final SqlKind kind = call.getAggregation().getKind();
     if (call.isDistinct()) {
       return null;
     }
 
+    // Rewrites
+    // D1: SUM(CASE WHEN x = 'foo' THEN cnt ELSE 0 END)
+    //   => SUM0(cnt) FILTER (x = 'foo')
+    // D2: SUM(CASE WHEN x = 'foo' THEN 1 ELSE 0 END)
+    //   => COUNT() FILTER (x = 'foo')
+    //
+    // https://issues.apache.org/jira/browse/CALCITE-5953
+    // have restricted this rewrite as in case there are no rows it may not be equvivalent;
+    // however it may have some performance impact in Druid
+    if (kind == SqlKind.SUM && isIntLiteral(arg2, BigDecimal.ZERO)) {
+      if (isIntLiteral(arg1, BigDecimal.ONE)) { // D2
+        newProjects.add(filter);
+        final RelDataType dataType = typeFactory.createTypeWithNullability(
+            typeFactory.createSqlType(SqlTypeName.BIGINT), false
+        );
+        return AggregateCall.create(
+            SqlStdOperatorTable.COUNT,
+            false,
+            false,
+            false,
+            call.rexList,
+            ImmutableList.of(),
+            newProjects.size() - 1,
+            null,
+            RelCollations.EMPTY,
+            dataType,
+            call.getName()
+        );
 
-    if (kind == SqlKind.COUNT // Case C
-        && arg1.isA(SqlKind.LITERAL)
-        && !RexLiteral.isNullLiteral(arg1)
-        && RexLiteral.isNullLiteral(arg2)) {
-      newProjects.add(filter);
-      return AggregateCall.create(
-          SqlStdOperatorTable.COUNT,
-          false,
-          false,
-          false,
-          call.rexList,
-          ImmutableList.of(),
-          newProjects.size() - 1,
-          null,
-          RelCollations.EMPTY, call.getType(),
-          call.getName()
-      );
-    } else if (kind == SqlKind.SUM0 // Case B
-        && isIntLiteral(arg1, BigDecimal.ONE)
-        && isIntLiteral(arg2, BigDecimal.ZERO)) {
+      } else { // D1
+        newProjects.add(arg1);
+        newProjects.add(filter);
 
-      newProjects.add(filter);
-      final RelDataTypeFactory typeFactory = cluster.getTypeFactory();
-      final RelDataType dataType = typeFactory.createTypeWithNullability(
-          typeFactory.createSqlType(SqlTypeName.BIGINT), false
-      );
-      return AggregateCall.create(
-          SqlStdOperatorTable.COUNT,
-          false,
-          false,
-          false,
-          call.rexList,
-          ImmutableList.of(),
-          newProjects.size() - 1,
-          null,
-          RelCollations.EMPTY,
-          dataType,
-          call.getName()
-      );
-    } else if ((RexLiteral.isNullLiteral(arg2) // Case A1
-        && call.getAggregation().allowsFilter())
-        || (kind == SqlKind.SUM0 // Case A2
-            && isIntLiteral(arg2, BigDecimal.ZERO))) {
-      newProjects.add(arg1);
-      newProjects.add(filter);
-      return AggregateCall.create(
-          call.getAggregation(),
-          false,
-          false,
-          false,
-          call.rexList,
-          ImmutableList.of(newProjects.size() - 2),
-          newProjects.size() - 1,
-          null,
-          RelCollations.EMPTY,
-          call.getType(),
-          call.getName()
-      );
-
-    } else if (kind == SqlKind.SUM && isIntLiteral(arg2, BigDecimal.ZERO)) {
-      newProjects.add(arg1);
-      newProjects.add(filter);
-
-      RelDataType newType = rexBuilder.getTypeFactory().createTypeWithNullability(call.getType(), true);
-      return AggregateCall.create(
-          SqlStdOperatorTable.SUM0,
-          false,
-          false,
-          true,
-          call.rexList,
-          ImmutableList.of(newProjects.size() - 2),
-          newProjects.size() - 1,
-          null,
-          RelCollations.EMPTY,
-          newType,
-          call.getName()
-      );
+        RelDataType newType = typeFactory.createTypeWithNullability(call.getType(), true);
+        return AggregateCall.create(
+            call.getAggregation(),
+            false,
+            false,
+            false,
+            call.rexList,
+            ImmutableList.of(newProjects.size() - 2),
+            newProjects.size() - 1,
+            null,
+            RelCollations.EMPTY,
+            newType,
+            call.getName()
+        );
+      }
     }
 
     return null;

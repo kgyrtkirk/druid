@@ -129,6 +129,7 @@ public class DruidAggregateCaseToFilterRule
     return transform0(call, project, newProjects);
   }
 
+
   private static class RexIf
   {
     public final RexNode condition;
@@ -329,9 +330,8 @@ public class DruidAggregateCaseToFilterRule
     } else if (kind == SqlKind.SUM && isIntLiteral(arg2, BigDecimal.ZERO) && isIntLiteral(arg1, BigDecimal.ONE)) {
 //      RexNode eq = rexBuilder.makeCall(SqlStdOperatorTable.EQUALS, filterFromCase);
       final RelDataTypeFactory typeFactory = cluster.getTypeFactory();
-      RexNode newSumArg = rexBuilder.makeAbstractCast(typeFactory.createSqlType(SqlTypeName.BIGINT),filterFromCase
-
-          );
+      RexNode newSumArg = rexBuilder
+          .makeAbstractCast(typeFactory.createSqlType(SqlTypeName.BIGINT), filterFromCase, false);
       newProjects.add(newSumArg);
       //      newProjects.add(filter);
 
@@ -340,7 +340,7 @@ public class DruidAggregateCaseToFilterRule
           call.getAggregation(),
           false,
           false,
-          true,
+          false,
           call.rexList,
           ImmutableList.of(newProjects.size() - 1),
           call.filterArg,

@@ -55,6 +55,7 @@ import org.apache.druid.sql.calcite.rule.AggregatePullUpLookupRule;
 import org.apache.druid.sql.calcite.rule.CaseToCoalesceRule;
 import org.apache.druid.sql.calcite.rule.CoalesceLookupRule;
 import org.apache.druid.sql.calcite.rule.DruidAggregateCaseToFilterRule;
+import org.apache.druid.sql.calcite.rule.DruidAggregateCaseToFilterRule2;
 import org.apache.druid.sql.calcite.rule.DruidLogicalValuesRule;
 import org.apache.druid.sql.calcite.rule.DruidRelToDruidRule;
 import org.apache.druid.sql.calcite.rule.DruidRules;
@@ -360,7 +361,12 @@ public class CalciteRulesManager
       builder.addRuleInstance(new CoalesceLookupRule());
       builder.addRuleInstance(new RewriteFirstValueLastValueRule());
       builder.addRuleInstance(CoreRules.AGGREGATE_REMOVE);
-      builder.addRuleInstance(DruidAggregateCaseToFilterRule.Config.DEFAULT.toRule());
+      if(true) {
+        builder.addRuleInstance(DruidAggregateCaseToFilterRule.Config.DEFAULT.toRule());
+      } else {
+        builder.addRuleInstance(new DruidAggregateCaseToFilterRule2());
+      }
+
     }
 
     // Remaining rules run as a single group until fixpoint.
