@@ -481,7 +481,7 @@ public class CalciteSelectQueryTest extends BaseCalciteQueryTest
             + "BITWISE_COMPLEMENT(l1),\n"
             + "BITWISE_SHIFT_LEFT(l1, 2),\n"
             + "BITWISE_SHIFT_RIGHT(l1, 2),\n"
-            + "BITWISE_CONVERT_DOUBLE_TO_LONG_BITS(d1),\n"
+            + "BITWISE_CONVERT_DOUBLE_TO_LONG_BITS(dbl1),\n"
             + "BITWISE_CONVERT_LONG_BITS_TO_DOUBLE(l1)\n"
             + "FROM numfoo",
         ImmutableList.of(
@@ -497,7 +497,7 @@ public class CalciteSelectQueryTest extends BaseCalciteQueryTest
                     expressionVirtualColumn("v3", "bitwiseComplement(\"l1\")", ColumnType.LONG),
                     expressionVirtualColumn("v4", "bitwiseShiftLeft(\"l1\",2)", ColumnType.LONG),
                     expressionVirtualColumn("v5", "bitwiseShiftRight(\"l1\",2)", ColumnType.LONG),
-                    expressionVirtualColumn("v6", "bitwiseConvertDoubleToLongBits(\"d1\")", ColumnType.LONG),
+                    expressionVirtualColumn("v6", "bitwiseConvertDoubleToLongBits(\"dbl1\")", ColumnType.LONG),
                     expressionVirtualColumn("v7", "bitwiseConvertLongBitsToDouble(\"l1\")", ColumnType.DOUBLE)
                 )
                 .context(QUERY_CONTEXT_DEFAULT)
@@ -579,7 +579,7 @@ public class CalciteSelectQueryTest extends BaseCalciteQueryTest
         "SELECT\n"
             + "SAFE_DIVIDE(f1, f2),\n"
             + "SAFE_DIVIDE(l1, l2),\n"
-            + "SAFE_DIVIDE(d2, d1),\n"
+            + "SAFE_DIVIDE(dbl2, dbl1),\n"
             + "SAFE_DIVIDE(l1, f1)\n"
             + "FROM numfoo",
         ImmutableList.of(
@@ -591,7 +591,7 @@ public class CalciteSelectQueryTest extends BaseCalciteQueryTest
                 .virtualColumns(
                     expressionVirtualColumn("v0", "safe_divide(\"f1\",\"f2\")", ColumnType.FLOAT),
                     expressionVirtualColumn("v1", "safe_divide(\"l1\",\"l2\")", ColumnType.LONG),
-                    expressionVirtualColumn("v2", "safe_divide(\"d2\",\"d1\")", ColumnType.DOUBLE),
+                    expressionVirtualColumn("v2", "safe_divide(\"dbl2\",\"dbl1\")", ColumnType.DOUBLE),
                     expressionVirtualColumn("v3", "safe_divide(\"l1\",\"f1\")", ColumnType.FLOAT)
                 )
                 .context(QUERY_CONTEXT_DEFAULT)
@@ -631,7 +631,7 @@ public class CalciteSelectQueryTest extends BaseCalciteQueryTest
   public void testSelectStarWithDimFilter()
   {
     testQuery(
-        PLANNER_CONFIG_DEFAULT_NO_COMPLEX_SERDE,
+        PLANNER_CONFIG_DEFAULT,
         QUERY_CONTEXT_DEFAULT,
         "SELECT * FROM druid.foo WHERE dim1 > 'd' OR dim2 = 'a'",
         CalciteTests.REGULAR_USER_AUTH_RESULT,
@@ -652,9 +652,9 @@ public class CalciteSelectQueryTest extends BaseCalciteQueryTest
                 .build()
         ),
         ImmutableList.of(
-            new Object[]{timestamp("2000-01-01"), "", "a", "[\"a\",\"b\"]", 1L, 1.0f, 1.0d, HLLC_STRING},
-            new Object[]{timestamp("2001-01-01"), "1", "a", "", 1L, 4.0f, 4.0d, HLLC_STRING},
-            new Object[]{timestamp("2001-01-02"), "def", "abc", NULL_STRING, 1L, 5.0f, 5.0d, HLLC_STRING}
+            new Object[]{timestamp("2000-01-01"), "", "a", "[\"a\",\"b\"]", 1L, 1.0f, 1.0d, "\"AQAAAEAAAA==\""},
+            new Object[]{timestamp("2001-01-01"), "1", "a", "", 1L, 4.0f, 4.0d, "\"AQAAAQAAAAFREA==\""},
+            new Object[]{timestamp("2001-01-02"), "def", "abc", NULL_STRING, 1L, 5.0f, 5.0d, "\"AQAAAQAAAACyEA==\""}
         )
     );
   }
@@ -1140,7 +1140,7 @@ public class CalciteSelectQueryTest extends BaseCalciteQueryTest
   public void testSelectStar()
   {
     testQuery(
-        PLANNER_CONFIG_DEFAULT_NO_COMPLEX_SERDE,
+        PLANNER_CONFIG_DEFAULT,
         QUERY_CONTEXT_DEFAULT,
         "SELECT * FROM druid.foo",
         CalciteTests.REGULAR_USER_AUTH_RESULT,
@@ -1155,12 +1155,12 @@ public class CalciteSelectQueryTest extends BaseCalciteQueryTest
                 .build()
         ),
         ImmutableList.of(
-            new Object[]{timestamp("2000-01-01"), "", "a", "[\"a\",\"b\"]", 1L, 1f, 1.0, HLLC_STRING},
-            new Object[]{timestamp("2000-01-02"), "10.1", NULL_STRING, "[\"b\",\"c\"]", 1L, 2f, 2.0, HLLC_STRING},
-            new Object[]{timestamp("2000-01-03"), "2", "", "d", 1L, 3f, 3.0, HLLC_STRING},
-            new Object[]{timestamp("2001-01-01"), "1", "a", "", 1L, 4f, 4.0, HLLC_STRING},
-            new Object[]{timestamp("2001-01-02"), "def", "abc", NULL_STRING, 1L, 5f, 5.0, HLLC_STRING},
-            new Object[]{timestamp("2001-01-03"), "abc", NULL_STRING, NULL_STRING, 1L, 6f, 6.0, HLLC_STRING}
+            new Object[]{timestamp("2000-01-01"), "", "a", "[\"a\",\"b\"]", 1L, 1f, 1.0, "\"AQAAAEAAAA==\""},
+            new Object[]{timestamp("2000-01-02"), "10.1", NULL_STRING, "[\"b\",\"c\"]", 1L, 2f, 2.0, "\"AQAAAQAAAAHNBA==\""},
+            new Object[]{timestamp("2000-01-03"), "2", "", "d", 1L, 3f, 3.0, "\"AQAAAQAAAAOzAg==\""},
+            new Object[]{timestamp("2001-01-01"), "1", "a", "", 1L, 4f, 4.0, "\"AQAAAQAAAAFREA==\""},
+            new Object[]{timestamp("2001-01-02"), "def", "abc", NULL_STRING, 1L, 5f, 5.0, "\"AQAAAQAAAACyEA==\""},
+            new Object[]{timestamp("2001-01-03"), "abc", NULL_STRING, NULL_STRING, 1L, 6f, 6.0, "\"AQAAAQAAAAEkAQ==\""}
         )
     );
   }
@@ -1356,7 +1356,7 @@ public class CalciteSelectQueryTest extends BaseCalciteQueryTest
   public void testSelectStarWithLimit()
   {
     testQuery(
-        PLANNER_CONFIG_DEFAULT_NO_COMPLEX_SERDE,
+        PLANNER_CONFIG_DEFAULT,
         QUERY_CONTEXT_DEFAULT,
         "SELECT * FROM druid.foo LIMIT 2",
         CalciteTests.REGULAR_USER_AUTH_RESULT,
@@ -1372,8 +1372,8 @@ public class CalciteSelectQueryTest extends BaseCalciteQueryTest
                 .build()
         ),
         ImmutableList.of(
-            new Object[]{timestamp("2000-01-01"), "", "a", "[\"a\",\"b\"]", 1L, 1.0f, 1.0, HLLC_STRING},
-            new Object[]{timestamp("2000-01-02"), "10.1", NULL_STRING, "[\"b\",\"c\"]", 1L, 2.0f, 2.0, HLLC_STRING}
+            new Object[]{timestamp("2000-01-01"), "", "a", "[\"a\",\"b\"]", 1L, 1.0f, 1.0, "\"AQAAAEAAAA==\""},
+            new Object[]{timestamp("2000-01-02"), "10.1", NULL_STRING, "[\"b\",\"c\"]", 1L, 2.0f, 2.0, "\"AQAAAQAAAAHNBA==\""}
         )
     );
   }
@@ -1382,7 +1382,7 @@ public class CalciteSelectQueryTest extends BaseCalciteQueryTest
   public void testSelectStarWithLimitAndOffset()
   {
     testQuery(
-        PLANNER_CONFIG_DEFAULT_NO_COMPLEX_SERDE,
+        PLANNER_CONFIG_DEFAULT,
         QUERY_CONTEXT_DEFAULT,
         "SELECT * FROM druid.foo LIMIT 2 OFFSET 1",
         CalciteTests.REGULAR_USER_AUTH_RESULT,
@@ -1399,8 +1399,8 @@ public class CalciteSelectQueryTest extends BaseCalciteQueryTest
                 .build()
         ),
         ImmutableList.of(
-            new Object[]{timestamp("2000-01-02"), "10.1", NULL_STRING, "[\"b\",\"c\"]", 1L, 2.0f, 2.0, HLLC_STRING},
-            new Object[]{timestamp("2000-01-03"), "2", "", "d", 1L, 3f, 3.0, HLLC_STRING}
+            new Object[]{timestamp("2000-01-02"), "10.1", NULL_STRING, "[\"b\",\"c\"]", 1L, 2.0f, 2.0, "\"AQAAAQAAAAHNBA==\""},
+            new Object[]{timestamp("2000-01-03"), "2", "", "d", 1L, 3f, 3.0, "\"AQAAAQAAAAOzAg==\""}
         )
     );
   }
@@ -1464,7 +1464,7 @@ public class CalciteSelectQueryTest extends BaseCalciteQueryTest
   public void testSelectStarWithLimitTimeDescending()
   {
     testQuery(
-        PLANNER_CONFIG_DEFAULT_NO_COMPLEX_SERDE,
+        PLANNER_CONFIG_DEFAULT,
         QUERY_CONTEXT_DEFAULT,
         "SELECT * FROM druid.foo ORDER BY __time DESC LIMIT 2",
         CalciteTests.REGULAR_USER_AUTH_RESULT,
@@ -1481,8 +1481,8 @@ public class CalciteSelectQueryTest extends BaseCalciteQueryTest
                 .build()
         ),
         ImmutableList.of(
-            new Object[]{timestamp("2001-01-03"), "abc", NULL_STRING, NULL_STRING, 1L, 6f, 6d, HLLC_STRING},
-            new Object[]{timestamp("2001-01-02"), "def", "abc", NULL_STRING, 1L, 5f, 5d, HLLC_STRING}
+            new Object[]{timestamp("2001-01-03"), "abc", NULL_STRING, NULL_STRING, 1L, 6f, 6d, "\"AQAAAQAAAAEkAQ==\""},
+            new Object[]{timestamp("2001-01-02"), "def", "abc", NULL_STRING, 1L, 5f, 5d, "\"AQAAAQAAAACyEA==\""}
         )
     );
   }
@@ -1491,7 +1491,7 @@ public class CalciteSelectQueryTest extends BaseCalciteQueryTest
   public void testSelectStarWithoutLimitTimeAscending()
   {
     testQuery(
-        PLANNER_CONFIG_DEFAULT_NO_COMPLEX_SERDE,
+        PLANNER_CONFIG_DEFAULT,
         QUERY_CONTEXT_DEFAULT,
         "SELECT * FROM druid.foo ORDER BY __time",
         CalciteTests.REGULAR_USER_AUTH_RESULT,
@@ -1508,12 +1508,12 @@ public class CalciteSelectQueryTest extends BaseCalciteQueryTest
                 .build()
         ),
         ImmutableList.of(
-            new Object[]{timestamp("2000-01-01"), "", "a", "[\"a\",\"b\"]", 1L, 1f, 1.0, HLLC_STRING},
-            new Object[]{timestamp("2000-01-02"), "10.1", NULL_STRING, "[\"b\",\"c\"]", 1L, 2f, 2.0, HLLC_STRING},
-            new Object[]{timestamp("2000-01-03"), "2", "", "d", 1L, 3f, 3.0, HLLC_STRING},
-            new Object[]{timestamp("2001-01-01"), "1", "a", "", 1L, 4f, 4.0, HLLC_STRING},
-            new Object[]{timestamp("2001-01-02"), "def", "abc", NULL_STRING, 1L, 5f, 5.0, HLLC_STRING},
-            new Object[]{timestamp("2001-01-03"), "abc", NULL_STRING, NULL_STRING, 1L, 6f, 6.0, HLLC_STRING}
+            new Object[]{timestamp("2000-01-01"), "", "a", "[\"a\",\"b\"]", 1L, 1f, 1.0, "\"AQAAAEAAAA==\""},
+            new Object[]{timestamp("2000-01-02"), "10.1", NULL_STRING, "[\"b\",\"c\"]", 1L, 2f, 2.0, "\"AQAAAQAAAAHNBA==\""},
+            new Object[]{timestamp("2000-01-03"), "2", "", "d", 1L, 3f, 3.0, "\"AQAAAQAAAAOzAg==\""},
+            new Object[]{timestamp("2001-01-01"), "1", "a", "", 1L, 4f, 4.0, "\"AQAAAQAAAAFREA==\""},
+            new Object[]{timestamp("2001-01-02"), "def", "abc", NULL_STRING, 1L, 5f, 5.0, "\"AQAAAQAAAACyEA==\""},
+            new Object[]{timestamp("2001-01-03"), "abc", NULL_STRING, NULL_STRING, 1L, 6f, 6.0, "\"AQAAAQAAAAEkAQ==\""}
         )
     );
   }
@@ -2143,7 +2143,7 @@ public class CalciteSelectQueryTest extends BaseCalciteQueryTest
     // possibly pollute the cache
     // https://github.com/apache/druid/issues/16552
     testBuilder()
-        .sql("select dim1,d1 from numfoo where 0.0 < d1 and d1 < 1.25 group by dim1,d1")
+        .sql("select dim1,dbl1 from numfoo where 0.0 < dbl1 and dbl1 < 1.25 group by dim1,dbl1")
         .expectedResults(
             ImmutableList.of(
                 new Object[] {"", 1.0D}
@@ -2152,7 +2152,7 @@ public class CalciteSelectQueryTest extends BaseCalciteQueryTest
         .run();
 
     testBuilder()
-        .sql("select dim1,d1 from numfoo where 0.0 < d1 and d1 < 1.75 group by dim1,d1")
+        .sql("select dim1,dbl1 from numfoo where 0.0 < dbl1 and dbl1 < 1.75 group by dim1,dbl1")
         .expectedResults(
             ImmutableList.of(
                 new Object[] {"", 1.0D},
