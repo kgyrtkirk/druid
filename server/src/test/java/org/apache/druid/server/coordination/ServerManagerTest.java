@@ -48,6 +48,7 @@ import org.apache.druid.query.BaseQuery;
 import org.apache.druid.query.ConcatQueryRunner;
 import org.apache.druid.query.DataSource;
 import org.apache.druid.query.DefaultQueryMetrics;
+import org.apache.druid.query.DefaultQueryRunnerFactoryConglomerate;
 import org.apache.druid.query.Druids;
 import org.apache.druid.query.ForwardingQueryProcessingPool;
 import org.apache.druid.query.NoopQueryRunner;
@@ -77,7 +78,6 @@ import org.apache.druid.segment.ReferenceCountingSegment;
 import org.apache.druid.segment.Segment;
 import org.apache.druid.segment.TestHelper;
 import org.apache.druid.segment.TestIndex;
-import org.apache.druid.segment.join.JoinableFactoryWrapperTest;
 import org.apache.druid.segment.loading.LeastBytesUsedStorageLocationSelectorStrategy;
 import org.apache.druid.segment.loading.SegmentLoaderConfig;
 import org.apache.druid.segment.loading.SegmentLoadingException;
@@ -188,19 +188,12 @@ public class ServerManagerTest
     queryNotifyLatch = new CountDownLatch(1);
     factory = new MyQueryRunnerFactory(queryWaitLatch, queryWaitYieldLatch, queryNotifyLatch);
     serverManagerExec = Execs.multiThreaded(2, "ServerManagerTest-%d");
+    QueryRunnerFactoryConglomerate conglomerate = DefaultQueryRunnerFactoryConglomerate.buildFromQueryRunnerFactories(ImmutableMap
+        .<Class<? extends Query>, QueryRunnerFactory>builder()
+        .put(SearchQuery.class, factory)
+        .build());
     serverManager = new ServerManager(
-        new QueryRunnerFactoryConglomerate()
-        {
-          @Override
-          public <T, QueryType extends Query<T>> QueryRunnerFactory<T, QueryType> findFactory(QueryType query)
-          {
-            if (query instanceof SearchQuery) {
-              return (QueryRunnerFactory) factory;
-            } else {
-              return null;
-            }
-          }
-        },
+        conglomerate,
         new NoopServiceEmitter(),
         new ForwardingQueryProcessingPool(serverManagerExec),
         new ForegroundCachePopulator(new DefaultObjectMapper(), new CachePopulatorStats(), -1),
@@ -208,7 +201,6 @@ public class ServerManagerTest
         new LocalCacheProvider().get(),
         new CacheConfig(),
         segmentManager,
-        JoinableFactoryWrapperTest.NOOP_JOINABLE_FACTORY_WRAPPER,
         new ServerConfig()
     );
 
@@ -599,7 +591,6 @@ public class ServerManagerTest
         new BaseQuery<Object>(
             new TableDataSource("test"),
             new MultipleSpecificSegmentSpec(descriptors),
-            false,
             new HashMap<>()
         )
         {

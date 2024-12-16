@@ -26,6 +26,18 @@ The upgrade notes assume that you are upgrading from the Druid version that imme
 
 For the full release notes for a specific version, see the [releases page](https://github.com/apache/druid/releases).
 
+## Announcements
+
+#### Front-coded dictionaries
+
+In Druid 32.0.0, the front coded dictionaries feature will be turned on by default. Front-coded dictionaries reduce storage and improve performance by optimizing for strings where the front part looks similar.
+
+Once this feature is on, you cannot easily downgrade to an earlier version that does not support the feature. 
+
+For more information, see [Migration guide: front-coded dictionaries](./migr-front-coded-dict.md).
+
+If you're already using this feature, you don't need to take any action. 
+
 ## 30.0.0
 
 ### Upgrade notes
@@ -62,7 +74,7 @@ The following are the changes to the default values for the Coordinator service:
 
 #### `GoogleTaskLogs` upload buffer size
 
-Changed the upload buffer size in `GoogleTaskLogs` to 1 MB instead of 15 MB to allow more uploads in parallel and prevent the MiddleManager service from running out of memory.
+Changed the upload buffer size in `GoogleTaskLogs` to 1 MB instead of 15 MB to allow more uploads in parallel and prevent the Middle Manager service from running out of memory.
 
 [#16236](https://github.com/apache/druid/pull/16236)
 

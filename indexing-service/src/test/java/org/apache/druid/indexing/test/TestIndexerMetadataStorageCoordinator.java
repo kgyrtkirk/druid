@@ -35,6 +35,7 @@ import org.apache.druid.metadata.ReplaceTaskLock;
 import org.apache.druid.segment.SegmentSchemaMapping;
 import org.apache.druid.segment.realtime.appenderator.SegmentIdWithShardSpec;
 import org.apache.druid.timeline.DataSegment;
+import org.apache.druid.timeline.SegmentTimeline;
 import org.apache.druid.timeline.partition.PartialShardSpec;
 import org.joda.time.DateTime;
 import org.joda.time.Interval;
@@ -85,9 +86,9 @@ public class TestIndexerMetadataStorageCoordinator implements IndexerMetadataSto
   }
 
   @Override
-  public List<DataSegment> retrieveAllUsedSegments(String dataSource, Segments visibility)
+  public Set<DataSegment> retrieveAllUsedSegments(String dataSource, Segments visibility)
   {
-    return ImmutableList.of();
+    return ImmutableSet.of();
   }
 
   @Override
@@ -97,13 +98,13 @@ public class TestIndexerMetadataStorageCoordinator implements IndexerMetadataSto
   }
 
   @Override
-  public List<DataSegment> retrieveUsedSegmentsForIntervals(
+  public Set<DataSegment> retrieveUsedSegmentsForIntervals(
       String dataSource,
       List<Interval> intervals,
       Segments visibility
   )
   {
-    return ImmutableList.of();
+    return ImmutableSet.of();
   }
 
   @Override
@@ -137,6 +138,12 @@ public class TestIndexerMetadataStorageCoordinator implements IndexerMetadataSto
   }
 
   @Override
+  public Set<DataSegment> retrieveSegmentsById(String dataSource, Set<String> segmentIds)
+  {
+    return Collections.emptySet();
+  }
+
+  @Override
   public int markSegmentsAsUnusedWithinInterval(String dataSource, Interval interval)
   {
     return 0;
@@ -162,7 +169,8 @@ public class TestIndexerMetadataStorageCoordinator implements IndexerMetadataSto
       String dataSource,
       Interval interval,
       boolean skipSegmentLineageCheck,
-      List<SegmentCreateRequest> requests
+      List<SegmentCreateRequest> requests,
+      boolean isTimeChunk
   )
   {
     return Collections.emptyMap();
@@ -306,6 +314,38 @@ public class TestIndexerMetadataStorageCoordinator implements IndexerMetadataSto
   public List<PendingSegmentRecord> getPendingSegments(String datasource, Interval interval)
   {
     throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public Map<String, String> retrieveUpgradedFromSegmentIds(
+      final String dataSource,
+      final Set<String> segmentIds
+  )
+  {
+    return Collections.emptyMap();
+  }
+
+  @Override
+  public Map<String, Set<String>> retrieveUpgradedToSegmentIds(
+      final String dataSource,
+      final Set<String> segmentIds
+  )
+  {
+    return Collections.emptyMap();
+  }
+
+  @Override
+  public SegmentTimeline getSegmentTimelineForAllocation(
+      String dataSource,
+      Interval interval,
+      boolean skipSegmentPayloadFetchForAllocation
+  )
+  {
+    return SegmentTimeline.forSegments(retrieveUsedSegmentsForIntervals(
+        dataSource,
+        Collections.singletonList(interval),
+        Segments.INCLUDING_OVERSHADOWED
+    ));
   }
 
   public Set<DataSegment> getPublished()
