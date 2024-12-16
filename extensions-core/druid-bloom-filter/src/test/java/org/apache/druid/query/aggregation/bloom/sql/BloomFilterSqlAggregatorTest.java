@@ -125,13 +125,13 @@ public class BloomFilterSqlAggregatorTest extends BaseCalciteQueryTest
   {
     cannotVectorize();
 
-    BloomKFilter expected1 = new BloomKFilter(TEST_NUM_ENTRIES);
+    BloomKFilter expectedbl1 = new BloomKFilter(TEST_NUM_ENTRIES);
     for (InputRow row : TestDataBuilder.ROWS1_WITH_NUMERIC_DIMS) {
       String raw = NullHandling.emptyToNullIfNeeded((String) row.getRaw("dim1"));
       if (raw == null) {
-        expected1.addBytes(null, 0, 0);
+        expectedbl1.addBytes(null, 0, 0);
       } else {
-        expected1.addString(raw);
+        expectedbl1.addString(raw);
       }
     }
 
@@ -148,7 +148,7 @@ public class BloomFilterSqlAggregatorTest extends BaseCalciteQueryTest
                   .aggregators(
                       ImmutableList.of(
                           new BloomFilterAggregatorFactory(
-                              "a0:agg",
+                              "a0",
                               new DefaultDimensionSpec("dim1", "a0:dim1"),
                               TEST_NUM_ENTRIES
                           )
@@ -159,8 +159,8 @@ public class BloomFilterSqlAggregatorTest extends BaseCalciteQueryTest
         ),
         ImmutableList.of(
             new Object[]{
-                queryFramework().queryJsonMapper().writeValueAsString(expected1),
-                queryFramework().queryJsonMapper().writeValueAsString(expected1)
+                queryFramework().queryJsonMapper().writeValueAsString(expectedbl1),
+                queryFramework().queryJsonMapper().writeValueAsString(expectedbl1)
             }
         )
     );
@@ -171,14 +171,14 @@ public class BloomFilterSqlAggregatorTest extends BaseCalciteQueryTest
   {
     cannotVectorize();
 
-    BloomKFilter expected1 = new BloomKFilter(TEST_NUM_ENTRIES);
+    BloomKFilter expectedbl1 = new BloomKFilter(TEST_NUM_ENTRIES);
     BloomKFilter expected2 = new BloomKFilter(TEST_NUM_ENTRIES);
     for (InputRow row : TestDataBuilder.ROWS1_WITH_NUMERIC_DIMS) {
       String raw = NullHandling.emptyToNullIfNeeded((String) row.getRaw("dim1"));
       if (raw == null) {
-        expected1.addBytes(null, 0, 0);
+        expectedbl1.addBytes(null, 0, 0);
       } else {
-        expected1.addString(raw);
+        expectedbl1.addString(raw);
       }
       List<String> lst = row.getDimension("dim2");
       if (lst.size() == 0) {
@@ -207,12 +207,12 @@ public class BloomFilterSqlAggregatorTest extends BaseCalciteQueryTest
               .aggregators(
                   ImmutableList.of(
                       new BloomFilterAggregatorFactory(
-                          "a0:agg",
+                          "a0",
                           new DefaultDimensionSpec("dim1", "a0:dim1"),
                           TEST_NUM_ENTRIES
                       ),
                       new BloomFilterAggregatorFactory(
-                          "a1:agg",
+                          "a1",
                           new DefaultDimensionSpec("dim2", "a1:dim2"),
                           TEST_NUM_ENTRIES
                       )
@@ -223,7 +223,7 @@ public class BloomFilterSqlAggregatorTest extends BaseCalciteQueryTest
         ),
         ImmutableList.of(
             new Object[] {
-                jsonMapper.writeValueAsString(expected1),
+                jsonMapper.writeValueAsString(expectedbl1),
                 jsonMapper.writeValueAsString(expected2)
             }
         )
@@ -235,14 +235,14 @@ public class BloomFilterSqlAggregatorTest extends BaseCalciteQueryTest
   {
     cannotVectorize();
 
-    BloomKFilter expected1 = new BloomKFilter(TEST_NUM_ENTRIES);
+    BloomKFilter expectedbl1 = new BloomKFilter(TEST_NUM_ENTRIES);
     for (InputRow row : TestDataBuilder.ROWS1_WITH_NUMERIC_DIMS) {
       String raw = NullHandling.emptyToNullIfNeeded((String) row.getRaw("dim1"));
       // empty string extractionFn produces null
       if (raw == null || "".equals(raw)) {
-        expected1.addBytes(null, 0, 0);
+        expectedbl1.addBytes(null, 0, 0);
       } else {
-        expected1.addString(raw.substring(0, 1));
+        expectedbl1.addString(raw.substring(0, 1));
       }
     }
 
@@ -258,7 +258,7 @@ public class BloomFilterSqlAggregatorTest extends BaseCalciteQueryTest
                   .aggregators(
                       ImmutableList.of(
                           new BloomFilterAggregatorFactory(
-                              "a0:agg",
+                              "a0",
                               new ExtractionDimensionSpec(
                                   "dim1",
                                   "a0:dim1",
@@ -272,7 +272,7 @@ public class BloomFilterSqlAggregatorTest extends BaseCalciteQueryTest
                   .build()
         ),
         ImmutableList.of(
-            new Object[]{queryFramework().queryJsonMapper().writeValueAsString(expected1)}
+            new Object[]{queryFramework().queryJsonMapper().writeValueAsString(expectedbl1)}
         )
     );
   }
@@ -308,7 +308,7 @@ public class BloomFilterSqlAggregatorTest extends BaseCalciteQueryTest
                   .aggregators(
                       ImmutableList.of(
                           new BloomFilterAggregatorFactory(
-                              "a0:agg",
+                              "a0",
                               new DefaultDimensionSpec("l1", "a0:l1", ColumnType.LONG),
                               TEST_NUM_ENTRIES
                           )
@@ -327,17 +327,17 @@ public class BloomFilterSqlAggregatorTest extends BaseCalciteQueryTest
   public void testBloomFilterAggLongVirtualColumn() throws Exception
   {
     cannotVectorize();
-    BloomKFilter expected1 = new BloomKFilter(TEST_NUM_ENTRIES);
+    BloomKFilter expectedbl1 = new BloomKFilter(TEST_NUM_ENTRIES);
     for (InputRow row : TestDataBuilder.ROWS1_WITH_NUMERIC_DIMS) {
       Object raw = row.getRaw("l1");
       if (raw == null) {
         if (NullHandling.replaceWithDefault()) {
-          expected1.addLong(NullHandling.defaultLongValue());
+          expectedbl1.addLong(NullHandling.defaultLongValue());
         } else {
-          expected1.addBytes(null, 0, 0);
+          expectedbl1.addBytes(null, 0, 0);
         }
       } else {
-        expected1.addLong(2 * ((Number) raw).longValue());
+        expectedbl1.addLong(2 * ((Number) raw).longValue());
       }
     }
 
@@ -361,7 +361,7 @@ public class BloomFilterSqlAggregatorTest extends BaseCalciteQueryTest
                   .aggregators(
                       ImmutableList.of(
                           new BloomFilterAggregatorFactory(
-                              "a0:agg",
+                              "a0",
                               new DefaultDimensionSpec("v0", "a0:v0"),
                               TEST_NUM_ENTRIES
                           )
@@ -371,7 +371,7 @@ public class BloomFilterSqlAggregatorTest extends BaseCalciteQueryTest
                   .build()
         ),
         ImmutableList.of(
-            new Object[]{queryFramework().queryJsonMapper().writeValueAsString(expected1)}
+            new Object[]{queryFramework().queryJsonMapper().writeValueAsString(expectedbl1)}
         )
     );
   }
@@ -381,17 +381,17 @@ public class BloomFilterSqlAggregatorTest extends BaseCalciteQueryTest
   {
     cannotVectorize();
 
-    BloomKFilter expected1 = new BloomKFilter(TEST_NUM_ENTRIES);
+    BloomKFilter expectedbl1 = new BloomKFilter(TEST_NUM_ENTRIES);
     for (InputRow row : TestDataBuilder.ROWS1_WITH_NUMERIC_DIMS) {
       Object raw = row.getRaw("f1");
       if (raw == null) {
         if (NullHandling.replaceWithDefault()) {
-          expected1.addFloat(NullHandling.defaultFloatValue());
+          expectedbl1.addFloat(NullHandling.defaultFloatValue());
         } else {
-          expected1.addBytes(null, 0, 0);
+          expectedbl1.addBytes(null, 0, 0);
         }
       } else {
-        expected1.addFloat(2 * ((Number) raw).floatValue());
+        expectedbl1.addFloat(2 * ((Number) raw).floatValue());
       }
     }
 
@@ -415,7 +415,7 @@ public class BloomFilterSqlAggregatorTest extends BaseCalciteQueryTest
                   .aggregators(
                       ImmutableList.of(
                           new BloomFilterAggregatorFactory(
-                              "a0:agg",
+                              "a0",
                               new DefaultDimensionSpec("v0", "a0:v0"),
                               TEST_NUM_ENTRIES
                           )
@@ -425,7 +425,7 @@ public class BloomFilterSqlAggregatorTest extends BaseCalciteQueryTest
                   .build()
         ),
         ImmutableList.of(
-            new Object[]{queryFramework().queryJsonMapper().writeValueAsString(expected1)}
+            new Object[]{queryFramework().queryJsonMapper().writeValueAsString(expectedbl1)}
         )
     );
   }
@@ -435,23 +435,23 @@ public class BloomFilterSqlAggregatorTest extends BaseCalciteQueryTest
   {
     cannotVectorize();
 
-    BloomKFilter expected1 = new BloomKFilter(TEST_NUM_ENTRIES);
+    BloomKFilter expectedbl1 = new BloomKFilter(TEST_NUM_ENTRIES);
     for (InputRow row : TestDataBuilder.ROWS1_WITH_NUMERIC_DIMS) {
-      Object raw = row.getRaw("d1");
+      Object raw = row.getRaw("dbl1");
       if (raw == null) {
         if (NullHandling.replaceWithDefault()) {
-          expected1.addDouble(NullHandling.defaultDoubleValue());
+          expectedbl1.addDouble(NullHandling.defaultDoubleValue());
         } else {
-          expected1.addBytes(null, 0, 0);
+          expectedbl1.addBytes(null, 0, 0);
         }
       } else {
-        expected1.addDouble(2 * ((Number) raw).doubleValue());
+        expectedbl1.addDouble(2 * ((Number) raw).doubleValue());
       }
     }
 
     testQuery(
         "SELECT\n"
-        + "BLOOM_FILTER(d1 * 2, 1000)\n"
+        + "BLOOM_FILTER(dbl1 * 2, 1000)\n"
         + "FROM numfoo",
         ImmutableList.of(
             Druids.newTimeseriesQueryBuilder()
@@ -461,7 +461,7 @@ public class BloomFilterSqlAggregatorTest extends BaseCalciteQueryTest
                   .virtualColumns(
                       new ExpressionVirtualColumn(
                           "v0",
-                          "(\"d1\" * 2)",
+                          "(\"dbl1\" * 2)",
                           ColumnType.DOUBLE,
                           TestExprMacroTable.INSTANCE
                       )
@@ -469,7 +469,7 @@ public class BloomFilterSqlAggregatorTest extends BaseCalciteQueryTest
                   .aggregators(
                       ImmutableList.of(
                           new BloomFilterAggregatorFactory(
-                              "a0:agg",
+                              "a0",
                               new DefaultDimensionSpec("v0", "a0:v0"),
                               TEST_NUM_ENTRIES
                           )
@@ -479,7 +479,7 @@ public class BloomFilterSqlAggregatorTest extends BaseCalciteQueryTest
                   .build()
         ),
         ImmutableList.of(
-            new Object[]{queryFramework().queryJsonMapper().writeValueAsString(expected1)}
+            new Object[]{queryFramework().queryJsonMapper().writeValueAsString(expectedbl1)}
         )
     );
   }
@@ -490,7 +490,7 @@ public class BloomFilterSqlAggregatorTest extends BaseCalciteQueryTest
     // makes empty bloom filters
     cannotVectorize();
 
-    BloomKFilter expected1 = new BloomKFilter(TEST_NUM_ENTRIES);
+    BloomKFilter expectedbl1 = new BloomKFilter(TEST_NUM_ENTRIES);
     BloomKFilter expected2 = new BloomKFilter(TEST_NUM_ENTRIES);
 
     ObjectMapper jsonMapper = queryFramework().queryJsonMapper();
@@ -508,12 +508,12 @@ public class BloomFilterSqlAggregatorTest extends BaseCalciteQueryTest
                   .aggregators(
                       ImmutableList.of(
                           new BloomFilterAggregatorFactory(
-                              "a0:agg",
+                              "a0",
                               new DefaultDimensionSpec("dim1", "a0:dim1"),
                               TEST_NUM_ENTRIES
                           ),
                           new BloomFilterAggregatorFactory(
-                              "a1:agg",
+                              "a1",
                               new DefaultDimensionSpec("l1", "a1:l1", ColumnType.LONG),
                               TEST_NUM_ENTRIES
                           )
@@ -524,7 +524,7 @@ public class BloomFilterSqlAggregatorTest extends BaseCalciteQueryTest
         ),
         ImmutableList.of(
             new Object[] {
-                jsonMapper.writeValueAsString(expected1),
+                jsonMapper.writeValueAsString(expectedbl1),
                 jsonMapper.writeValueAsString(expected2)
             }
         )
@@ -537,7 +537,7 @@ public class BloomFilterSqlAggregatorTest extends BaseCalciteQueryTest
     // makes empty bloom filters
     cannotVectorize();
 
-    BloomKFilter expected1 = new BloomKFilter(TEST_NUM_ENTRIES);
+    BloomKFilter expectedbl1 = new BloomKFilter(TEST_NUM_ENTRIES);
     BloomKFilter expected2 = new BloomKFilter(TEST_NUM_ENTRIES);
 
     ObjectMapper jsonMapper = queryFramework().queryJsonMapper();
@@ -554,12 +554,12 @@ public class BloomFilterSqlAggregatorTest extends BaseCalciteQueryTest
                         .setDimFilter(equality("dim2", "a", ColumnType.STRING))
                         .setGranularity(Granularities.ALL)
                         .setVirtualColumns(expressionVirtualColumn("v0", "'a'", ColumnType.STRING))
-                        .setDimensions(new DefaultDimensionSpec("v0", "_d0", ColumnType.STRING))
+                        .setDimensions(new DefaultDimensionSpec("v0", "d0", ColumnType.STRING))
                         .setAggregatorSpecs(
                             aggregators(
                                 new FilteredAggregatorFactory(
                                     new BloomFilterAggregatorFactory(
-                                        "a0:agg",
+                                        "a0",
                                         new DefaultDimensionSpec("dim1", "a0:dim1"),
                                         TEST_NUM_ENTRIES
                                     ),
@@ -567,7 +567,7 @@ public class BloomFilterSqlAggregatorTest extends BaseCalciteQueryTest
                                 ),
                                 new FilteredAggregatorFactory(
                                     new BloomFilterAggregatorFactory(
-                                        "a1:agg",
+                                        "a1",
                                         new DefaultDimensionSpec("l1", "a1:l1", ColumnType.LONG),
                                         TEST_NUM_ENTRIES
                                     ),
@@ -581,7 +581,7 @@ public class BloomFilterSqlAggregatorTest extends BaseCalciteQueryTest
         ImmutableList.of(
             new Object[] {
                 "a",
-                jsonMapper.writeValueAsString(expected1),
+                jsonMapper.writeValueAsString(expectedbl1),
                 jsonMapper.writeValueAsString(expected2)
             }
         )

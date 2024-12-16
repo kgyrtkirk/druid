@@ -325,42 +325,47 @@ public class GroupByLimitPushDownInsufficientBufferTest extends InitializedNullH
     };
 
     final Supplier<GroupByQueryConfig> configSupplier = Suppliers.ofInstance(config);
-    GroupByResourcesReservationPool groupByResourcesReservationPool = new GroupByResourcesReservationPool(
+
+    final GroupByStatsProvider groupByStatsProvider = new GroupByStatsProvider();
+
+    final GroupByResourcesReservationPool groupByResourcesReservationPool = new GroupByResourcesReservationPool(
         mergePool,
         config
     );
-    GroupByResourcesReservationPool tooSmallGroupByResourcesReservationPool = new GroupByResourcesReservationPool(
+    final GroupByResourcesReservationPool tooSmallGroupByResourcesReservationPool = new GroupByResourcesReservationPool(
         tooSmallMergePool,
         config
     );
     final GroupingEngine groupingEngine = new GroupingEngine(
         druidProcessingConfig,
         configSupplier,
-        bufferPool,
         groupByResourcesReservationPool,
         TestHelper.makeJsonMapper(),
         new ObjectMapper(new SmileFactory()),
-        NOOP_QUERYWATCHER
+        NOOP_QUERYWATCHER,
+        groupByStatsProvider
     );
 
     final GroupingEngine tooSmallEngine = new GroupingEngine(
         tooSmallDruidProcessingConfig,
         configSupplier,
-        bufferPool2,
         tooSmallGroupByResourcesReservationPool,
         TestHelper.makeJsonMapper(),
         new ObjectMapper(new SmileFactory()),
-        NOOP_QUERYWATCHER
+        NOOP_QUERYWATCHER,
+        groupByStatsProvider
     );
 
     groupByFactory = new GroupByQueryRunnerFactory(
         groupingEngine,
-        new GroupByQueryQueryToolChest(groupingEngine, groupByResourcesReservationPool)
+        new GroupByQueryQueryToolChest(groupingEngine, groupByResourcesReservationPool),
+        bufferPool
     );
 
     tooSmallGroupByFactory = new GroupByQueryRunnerFactory(
         tooSmallEngine,
-        new GroupByQueryQueryToolChest(tooSmallEngine, tooSmallGroupByResourcesReservationPool)
+        new GroupByQueryQueryToolChest(tooSmallEngine, tooSmallGroupByResourcesReservationPool),
+        bufferPool2
     );
   }
 
