@@ -26,9 +26,11 @@ import org.apache.druid.error.DruidException;
 import org.apache.druid.math.expr.Expr;
 import org.apache.druid.math.expr.ExprEval;
 import org.apache.druid.math.expr.ExprMacroTable;
+import org.apache.druid.math.expr.ExpressionProcessing;
 import org.apache.druid.math.expr.ExpressionType;
 import org.apache.druid.math.expr.Parser;
 import org.apache.druid.query.expression.TestExprMacroTable;
+import org.apache.druid.query.groupby.DeferExpressionDimensions;
 import org.apache.druid.segment.ColumnInspector;
 import org.apache.druid.segment.column.ColumnCapabilities;
 import org.apache.druid.segment.column.ColumnCapabilitiesImpl;
@@ -234,6 +236,28 @@ public class ExpressionPlannerTest extends InitializedNullHandlingTest
     Assert.assertNull(thePlan.getOutputType());
     Assert.assertNull(thePlan.inferColumnCapabilities(null));
     // no we cannot
+
+    Assert.assertFalse(
+        DeferExpressionDimensions.SINGLE_STRING.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+    Assert.assertFalse(
+        DeferExpressionDimensions.FIXED_WIDTH_NON_NUMERIC.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+    Assert.assertFalse(
+        DeferExpressionDimensions.FIXED_WIDTH.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
   }
 
   @Test
@@ -269,6 +293,28 @@ public class ExpressionPlannerTest extends InitializedNullHandlingTest
     Assert.assertFalse(inferred.hasMultipleValues().isMaybeTrue());
     Assert.assertFalse(inferred.hasBitmapIndexes());
     Assert.assertFalse(inferred.hasSpatialIndexes());
+
+    Assert.assertFalse(
+        DeferExpressionDimensions.SINGLE_STRING.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+    Assert.assertFalse(
+        DeferExpressionDimensions.FIXED_WIDTH_NON_NUMERIC.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+    Assert.assertFalse(
+        DeferExpressionDimensions.FIXED_WIDTH.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
   }
 
   @Test
@@ -348,6 +394,27 @@ public class ExpressionPlannerTest extends InitializedNullHandlingTest
     Assert.assertFalse(inferred.hasMultipleValues().isMaybeTrue());
     Assert.assertFalse(inferred.hasBitmapIndexes());
     Assert.assertFalse(inferred.hasSpatialIndexes());
+    Assert.assertFalse(
+        DeferExpressionDimensions.SINGLE_STRING.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+    Assert.assertFalse(
+        DeferExpressionDimensions.FIXED_WIDTH_NON_NUMERIC.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+    Assert.assertTrue(
+        DeferExpressionDimensions.FIXED_WIDTH.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
   }
 
   @Test
@@ -386,6 +453,30 @@ public class ExpressionPlannerTest extends InitializedNullHandlingTest
     Assert.assertFalse(inferred.hasMultipleValues().isMaybeTrue());
     Assert.assertTrue(inferred.hasBitmapIndexes());
     Assert.assertFalse(inferred.hasSpatialIndexes());
+
+    Assert.assertFalse(
+        DeferExpressionDimensions.SINGLE_STRING.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+    // innately deferrable
+    Assert.assertFalse(
+        DeferExpressionDimensions.FIXED_WIDTH_NON_NUMERIC.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+    Assert.assertFalse(
+        DeferExpressionDimensions.FIXED_WIDTH.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+
 
     // multiple input columns
     thePlan = plan("concat(scalar_dictionary_string, scalar_dictionary_string_nonunique)");
@@ -430,6 +521,29 @@ public class ExpressionPlannerTest extends InitializedNullHandlingTest
     Assert.assertFalse(inferred.hasBitmapIndexes());
     Assert.assertFalse(inferred.hasSpatialIndexes());
 
+    Assert.assertFalse(
+        DeferExpressionDimensions.SINGLE_STRING.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+    Assert.assertTrue(
+        DeferExpressionDimensions.FIXED_WIDTH_NON_NUMERIC.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+    Assert.assertTrue(
+        DeferExpressionDimensions.FIXED_WIDTH.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+
+
     // array output of dictionary encoded string are not considered single scalar/mappable, nor vectorizable
     thePlan = plan("array(scalar_dictionary_string)");
     Assert.assertTrue(
@@ -446,6 +560,27 @@ public class ExpressionPlannerTest extends InitializedNullHandlingTest
             ExpressionPlan.Trait.SINGLE_INPUT_SCALAR,
             ExpressionPlan.Trait.SINGLE_INPUT_MAPPABLE,
             ExpressionPlan.Trait.VECTORIZABLE
+        )
+    );
+    Assert.assertFalse(
+        DeferExpressionDimensions.SINGLE_STRING.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+    Assert.assertTrue(
+        DeferExpressionDimensions.FIXED_WIDTH_NON_NUMERIC.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+    Assert.assertTrue(
+        DeferExpressionDimensions.FIXED_WIDTH.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
         )
     );
   }
@@ -481,6 +616,29 @@ public class ExpressionPlannerTest extends InitializedNullHandlingTest
     Assert.assertTrue(inferred.hasBitmapIndexes());
     Assert.assertFalse(inferred.hasSpatialIndexes());
 
+    Assert.assertFalse(
+        DeferExpressionDimensions.SINGLE_STRING.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+    Assert.assertFalse(
+        DeferExpressionDimensions.FIXED_WIDTH_NON_NUMERIC.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+    Assert.assertFalse(
+        DeferExpressionDimensions.FIXED_WIDTH.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+
+
     thePlan = plan("concat(scalar_string, multi_dictionary_string_nonunique)");
     Assert.assertTrue(
         thePlan.is(
@@ -509,6 +667,28 @@ public class ExpressionPlannerTest extends InitializedNullHandlingTest
     Assert.assertNotNull(inferred);
     Assert.assertEquals(ValueType.STRING, inferred.getType());
     Assert.assertTrue(inferred.hasMultipleValues().isTrue());
+
+    Assert.assertFalse(
+        DeferExpressionDimensions.SINGLE_STRING.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+    Assert.assertFalse(
+        DeferExpressionDimensions.FIXED_WIDTH_NON_NUMERIC.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+    Assert.assertFalse(
+        DeferExpressionDimensions.FIXED_WIDTH.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
 
     thePlan = plan("concat(multi_dictionary_string, multi_dictionary_string_nonunique)");
     Assert.assertTrue(
@@ -541,6 +721,28 @@ public class ExpressionPlannerTest extends InitializedNullHandlingTest
     Assert.assertEquals(ValueType.STRING, inferred.getType());
     Assert.assertTrue(inferred.hasMultipleValues().isTrue());
 
+    Assert.assertFalse(
+        DeferExpressionDimensions.SINGLE_STRING.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+    Assert.assertFalse(
+        DeferExpressionDimensions.FIXED_WIDTH_NON_NUMERIC.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+    Assert.assertFalse(
+        DeferExpressionDimensions.FIXED_WIDTH.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+
     thePlan = plan("array_append(multi_dictionary_string, 'foo')");
     Assert.assertTrue(
         thePlan.is(
@@ -554,6 +756,27 @@ public class ExpressionPlannerTest extends InitializedNullHandlingTest
             ExpressionPlan.Trait.UNKNOWN_INPUTS,
             ExpressionPlan.Trait.NON_SCALAR_INPUTS,
             ExpressionPlan.Trait.VECTORIZABLE
+        )
+    );
+    Assert.assertFalse(
+        DeferExpressionDimensions.SINGLE_STRING.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+    Assert.assertFalse(
+        DeferExpressionDimensions.FIXED_WIDTH_NON_NUMERIC.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+    Assert.assertFalse(
+        DeferExpressionDimensions.FIXED_WIDTH.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
         )
     );
   }
@@ -582,6 +805,27 @@ public class ExpressionPlannerTest extends InitializedNullHandlingTest
         )
     );
     Assert.assertEquals(ExpressionType.STRING, thePlan.getOutputType());
+    Assert.assertFalse(
+        DeferExpressionDimensions.SINGLE_STRING.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+    Assert.assertFalse(
+        DeferExpressionDimensions.FIXED_WIDTH_NON_NUMERIC.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+    Assert.assertFalse(
+        DeferExpressionDimensions.FIXED_WIDTH.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
 
     thePlan = plan("concat(multi_dictionary_string, multi_dictionary_string_nonunique)");
     Assert.assertTrue(
@@ -631,6 +875,28 @@ public class ExpressionPlannerTest extends InitializedNullHandlingTest
     // incomplete and unknown skip output type since we don't reliably know
     Assert.assertNull(thePlan.getOutputType());
     Assert.assertNull(thePlan.inferColumnCapabilities(null));
+
+    Assert.assertFalse(
+        DeferExpressionDimensions.SINGLE_STRING.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+    Assert.assertFalse(
+        DeferExpressionDimensions.FIXED_WIDTH_NON_NUMERIC.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+    Assert.assertFalse(
+        DeferExpressionDimensions.FIXED_WIDTH.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
   }
 
   @Test
@@ -667,14 +933,78 @@ public class ExpressionPlannerTest extends InitializedNullHandlingTest
     Assert.assertEquals("array_append(\"scalar_string\", 'x')", thePlan.getAppliedFoldExpression("__acc").stringify());
     Assert.assertEquals(ExpressionType.STRING_ARRAY, thePlan.getOutputType());
 
+    Assert.assertFalse(
+        DeferExpressionDimensions.SINGLE_STRING.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+    Assert.assertFalse(
+        DeferExpressionDimensions.FIXED_WIDTH_NON_NUMERIC.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+    Assert.assertFalse(
+        DeferExpressionDimensions.FIXED_WIDTH.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+
     // multi-valued are cool too
     thePlan = plan("array_append(multi_dictionary_string, 'x')");
     assertArrayInAndOut(thePlan);
+    Assert.assertFalse(
+        DeferExpressionDimensions.SINGLE_STRING.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+    Assert.assertFalse(
+        DeferExpressionDimensions.FIXED_WIDTH_NON_NUMERIC.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+    Assert.assertFalse(
+        DeferExpressionDimensions.FIXED_WIDTH.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
 
     // what about incomplete inputs with arrays? they are not reported as incomplete because they are treated as arrays
     thePlan = plan("array_append(string_unknown, 'x')");
     assertArrayInAndOut(thePlan);
     Assert.assertEquals(ExpressionType.STRING_ARRAY, thePlan.getOutputType());
+    Assert.assertFalse(
+        DeferExpressionDimensions.SINGLE_STRING.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+    Assert.assertFalse(
+        DeferExpressionDimensions.FIXED_WIDTH_NON_NUMERIC.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+    Assert.assertFalse(
+        DeferExpressionDimensions.FIXED_WIDTH.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
 
     // what about if it is the scalar argument? there it is
     thePlan = plan("array_append(multi_dictionary_string, string_unknown)");
@@ -696,13 +1026,76 @@ public class ExpressionPlannerTest extends InitializedNullHandlingTest
     );
     // incomplete and unknown skip output type since we don't reliably know
     Assert.assertNull(thePlan.getOutputType());
+    Assert.assertFalse(
+        DeferExpressionDimensions.SINGLE_STRING.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+    Assert.assertFalse(
+        DeferExpressionDimensions.FIXED_WIDTH_NON_NUMERIC.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+    Assert.assertFalse(
+        DeferExpressionDimensions.FIXED_WIDTH.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
 
     // array types are cool too
     thePlan = plan("array_append(string_array_1, 'x')");
     assertArrayInAndOut(thePlan);
+    Assert.assertFalse(
+        DeferExpressionDimensions.SINGLE_STRING.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+    Assert.assertFalse(
+        DeferExpressionDimensions.FIXED_WIDTH_NON_NUMERIC.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+    Assert.assertFalse(
+        DeferExpressionDimensions.FIXED_WIDTH.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
 
     thePlan = plan("array_append(string_array_1, 'x')");
     assertArrayInAndOut(thePlan);
+    Assert.assertFalse(
+        DeferExpressionDimensions.SINGLE_STRING.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+    Assert.assertFalse(
+        DeferExpressionDimensions.FIXED_WIDTH_NON_NUMERIC.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+    Assert.assertFalse(
+        DeferExpressionDimensions.FIXED_WIDTH.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
   }
 
 
@@ -732,6 +1125,28 @@ public class ExpressionPlannerTest extends InitializedNullHandlingTest
     );
     Assert.assertEquals(ExpressionType.STRING, thePlan.getOutputType());
 
+    Assert.assertFalse(
+        DeferExpressionDimensions.SINGLE_STRING.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+    Assert.assertFalse(
+        DeferExpressionDimensions.FIXED_WIDTH_NON_NUMERIC.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+    Assert.assertFalse(
+        DeferExpressionDimensions.FIXED_WIDTH.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+
     // what about a multi-valued input
     thePlan = plan("array_to_string(array_append(scalar_string, multi_dictionary_string), ',')");
     Assert.assertTrue(
@@ -746,10 +1161,10 @@ public class ExpressionPlannerTest extends InitializedNullHandlingTest
             ExpressionPlan.Trait.SINGLE_INPUT_MAPPABLE,
             ExpressionPlan.Trait.NON_SCALAR_OUTPUT,
             ExpressionPlan.Trait.INCOMPLETE_INPUTS,
-            ExpressionPlan.Trait.UNKNOWN_INPUTS,
-            ExpressionPlan.Trait.VECTORIZABLE
+            ExpressionPlan.Trait.UNKNOWN_INPUTS
         )
     );
+    assertFallbackVectorizable(thePlan);
 
     Assert.assertEquals(
         "array_to_string(map((\"multi_dictionary_string\") -> array_append(\"scalar_string\", \"multi_dictionary_string\"), \"multi_dictionary_string\"), ',')",
@@ -761,6 +1176,28 @@ public class ExpressionPlannerTest extends InitializedNullHandlingTest
     );
     // why is this null
     Assert.assertEquals(ExpressionType.STRING, thePlan.getOutputType());
+
+    Assert.assertFalse(
+        DeferExpressionDimensions.SINGLE_STRING.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+    Assert.assertFalse(
+        DeferExpressionDimensions.FIXED_WIDTH_NON_NUMERIC.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+    Assert.assertFalse(
+        DeferExpressionDimensions.FIXED_WIDTH.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
   }
 
   @Test
@@ -825,10 +1262,10 @@ public class ExpressionPlannerTest extends InitializedNullHandlingTest
             ExpressionPlan.Trait.UNKNOWN_INPUTS,
             ExpressionPlan.Trait.INCOMPLETE_INPUTS,
             ExpressionPlan.Trait.NEEDS_APPLIED,
-            ExpressionPlan.Trait.NON_SCALAR_INPUTS,
-            ExpressionPlan.Trait.VECTORIZABLE
+            ExpressionPlan.Trait.NON_SCALAR_INPUTS
         )
     );
+    assertFallbackVectorizable(thePlan);
     Assert.assertEquals(ExpressionType.LONG_ARRAY, thePlan.getOutputType());
 
     thePlan = plan("array(long1, double1)");
@@ -864,6 +1301,29 @@ public class ExpressionPlannerTest extends InitializedNullHandlingTest
         ColumnType.NESTED_DATA.getComplexTypeName(),
         inferred.getComplexTypeName()
     );
+
+    Assert.assertFalse(
+        DeferExpressionDimensions.SINGLE_STRING.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+    // all numeric inputs so these are true
+    Assert.assertTrue(
+        DeferExpressionDimensions.FIXED_WIDTH_NON_NUMERIC.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+    Assert.assertTrue(
+        DeferExpressionDimensions.FIXED_WIDTH.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
   }
 
   @Test
@@ -882,10 +1342,11 @@ public class ExpressionPlannerTest extends InitializedNullHandlingTest
     );
     Assert.assertTrue(
         thePlan.is(
-            ExpressionPlan.Trait.SINGLE_INPUT_SCALAR,
-            ExpressionPlan.Trait.VECTORIZABLE
+            ExpressionPlan.Trait.SINGLE_INPUT_SCALAR
         )
     );
+    assertFallbackVectorizable(thePlan);
+
     Assert.assertEquals(ExpressionType.STRING, thePlan.getOutputType());
     ColumnCapabilities inferred = thePlan.inferColumnCapabilities(
         ExpressionType.toColumnType(thePlan.getOutputType())
@@ -895,6 +1356,28 @@ public class ExpressionPlannerTest extends InitializedNullHandlingTest
         inferred.getType()
     );
     Assert.assertFalse(inferred.isDictionaryEncoded().isMaybeTrue());
+
+    Assert.assertFalse(
+        DeferExpressionDimensions.SINGLE_STRING.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+    Assert.assertFalse(
+        DeferExpressionDimensions.FIXED_WIDTH_NON_NUMERIC.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
+    Assert.assertFalse(
+        DeferExpressionDimensions.FIXED_WIDTH.useDeferredGroupBySelector(
+            thePlan,
+            thePlan.getAnalysis().getRequiredBindingsList(),
+            SYNTHETIC_INSPECTOR
+        )
+    );
   }
 
   private static ExpressionPlan plan(String expression)
@@ -916,10 +1399,10 @@ public class ExpressionPlannerTest extends InitializedNullHandlingTest
             ExpressionPlan.Trait.NON_SCALAR_OUTPUT,
             ExpressionPlan.Trait.INCOMPLETE_INPUTS,
             ExpressionPlan.Trait.UNKNOWN_INPUTS,
-            ExpressionPlan.Trait.NEEDS_APPLIED,
-            ExpressionPlan.Trait.VECTORIZABLE
+            ExpressionPlan.Trait.NEEDS_APPLIED
         )
     );
+    assertFallbackVectorizable(thePlan);
   }
 
   private static void assertArrayInAndOut(ExpressionPlan thePlan)
@@ -936,10 +1419,28 @@ public class ExpressionPlannerTest extends InitializedNullHandlingTest
             ExpressionPlan.Trait.SINGLE_INPUT_MAPPABLE,
             ExpressionPlan.Trait.INCOMPLETE_INPUTS,
             ExpressionPlan.Trait.UNKNOWN_INPUTS,
-            ExpressionPlan.Trait.NEEDS_APPLIED,
-            ExpressionPlan.Trait.VECTORIZABLE
+            ExpressionPlan.Trait.NEEDS_APPLIED
         )
     );
+    assertFallbackVectorizable(thePlan);
+  }
+
+
+  private static void assertFallbackVectorizable(ExpressionPlan thePlan)
+  {
+    if (ExpressionProcessing.allowVectorizeFallback()) {
+      Assert.assertTrue(
+          thePlan.is(
+              ExpressionPlan.Trait.VECTORIZABLE
+          )
+      );
+    } else {
+      Assert.assertFalse(
+          thePlan.is(
+              ExpressionPlan.Trait.VECTORIZABLE
+          )
+      );
+    }
   }
 
   private static class TestMacroTable extends ExprMacroTable

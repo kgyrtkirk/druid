@@ -44,8 +44,8 @@ import org.apache.druid.java.util.http.client.HttpClient;
 import org.apache.druid.metadata.IndexerSQLMetadataStorageCoordinator;
 import org.apache.druid.metadata.TestDerbyConnector;
 import org.apache.druid.query.Query;
+import org.apache.druid.query.QueryRunnerFactoryConglomerate;
 import org.apache.druid.query.QueryRunnerTestHelper;
-import org.apache.druid.query.QueryToolChestWarehouse;
 import org.apache.druid.query.QueryWatcher;
 import org.apache.druid.query.aggregation.LongSumAggregatorFactory;
 import org.apache.druid.query.spec.MultipleIntervalSegmentSpec;
@@ -178,13 +178,8 @@ public class DatasourceOptimizerTest extends CuratorTestBase
               Lists.newArrayList("dim1", "dim2", "dim3", "dim4"),
               1024 * 1024
           );
-          try {
-            metadataStorageCoordinator.commitSegments(Sets.newHashSet(segment), null);
-            announceSegmentForServer(druidServer, segment, zkPathsConfig, jsonMapper);
-          }
-          catch (IOException e) {
-            return false;
-          }
+          metadataStorageCoordinator.commitSegments(Sets.newHashSet(segment), null);
+          announceSegmentForServer(druidServer, segment, zkPathsConfig, jsonMapper);
           return true;
         }
     );
@@ -203,13 +198,8 @@ public class DatasourceOptimizerTest extends CuratorTestBase
               Lists.newArrayList("dim1", "dim2", "dim3"),
               1024
           );
-          try {
-            metadataStorageCoordinator.commitSegments(Sets.newHashSet(segment), null);
-            announceSegmentForServer(druidServer, segment, zkPathsConfig, jsonMapper);
-          }
-          catch (IOException e) {
-            return false;
-          }
+          metadataStorageCoordinator.commitSegments(Sets.newHashSet(segment), null);
+          announceSegmentForServer(druidServer, segment, zkPathsConfig, jsonMapper);
           return true;
         }
     );
@@ -317,7 +307,7 @@ public class DatasourceOptimizerTest extends CuratorTestBase
 
     DirectDruidClientFactory druidClientFactory = new DirectDruidClientFactory(
         new NoopServiceEmitter(),
-        EasyMock.createMock(QueryToolChestWarehouse.class),
+        EasyMock.createMock(QueryRunnerFactoryConglomerate.class),
         EasyMock.createMock(QueryWatcher.class),
         getSmileMapper(),
         EasyMock.createMock(HttpClient.class)
