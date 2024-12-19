@@ -45,6 +45,7 @@ import org.apache.druid.math.expr.ExprEval;
 import org.apache.druid.math.expr.ExpressionProcessing;
 import org.apache.druid.query.DataSource;
 import org.apache.druid.query.Druids;
+import org.apache.druid.query.JoinAlgorithm;
 import org.apache.druid.query.JoinDataSource;
 import org.apache.druid.query.Query;
 import org.apache.druid.query.QueryContexts;
@@ -584,7 +585,8 @@ public class BaseCalciteQueryTest extends CalciteTestBase
       String rightPrefix,
       String condition,
       JoinType joinType,
-      DimFilter filter
+      DimFilter filter,
+      JoinAlgorithm joinAlgorithm
   )
   {
     return JoinDataSource.create(
@@ -595,7 +597,28 @@ public class BaseCalciteQueryTest extends CalciteTestBase
         joinType,
         filter,
         CalciteTests.createExprMacroTable(),
-        CalciteTests.createJoinableFactoryWrapper()
+        CalciteTests.createJoinableFactoryWrapper(),
+        joinAlgorithm
+    );
+  }
+
+  public static JoinDataSource join(
+      DataSource left,
+      DataSource right,
+      String rightPrefix,
+      String condition,
+      JoinType joinType,
+      DimFilter filter
+  )
+  {
+    return join(
+        left,
+        right,
+        rightPrefix,
+        condition,
+        joinType,
+        filter,
+        JoinAlgorithm.BROADCAST
     );
   }
 
@@ -1369,7 +1392,7 @@ public class BaseCalciteQueryTest extends CalciteTestBase
   private static List<DataSource> recursivelyClearDatasource(final List<DataSource> dataSources,
       ObjectMapper queryJsonMapper)
   {
-    List<DataSource> ret = new ArrayList<DataSource>();
+    List<DataSource> ret = new ArrayList<>();
     for (DataSource dataSource : dataSources) {
       ret.add(recursivelyClearContext(dataSource, queryJsonMapper));
     }
@@ -1653,5 +1676,21 @@ public class BaseCalciteQueryTest extends CalciteTestBase
       throw new RuntimeException(e);
     }
     return file;
+  }
+
+  /**
+   * Adds shadowing in non-decoupled mode planning.
+   *
+   * Due to some circumstances - DruidUnnestRel have exposed all columns during planning;
+   * which made the VC registry to see some columns which are not selected ; and as a result
+   * it renamed some columns with underscores.
+   */
+  public String ds(String colName)
+  {
+    if (testBuilder().isDecoupledMode()) {
+      return colName;
+    } else {
+      return "_" + colName;
+    }
   }
 }

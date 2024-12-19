@@ -50,6 +50,7 @@ import org.apache.druid.msq.test.CounterSnapshotMatcher;
 import org.apache.druid.msq.test.MSQTestBase;
 import org.apache.druid.msq.util.MultiStageQueryContext;
 import org.apache.druid.query.InlineDataSource;
+import org.apache.druid.query.JoinAlgorithm;
 import org.apache.druid.query.LookupDataSource;
 import org.apache.druid.query.OrderBy;
 import org.apache.druid.query.Query;
@@ -81,7 +82,6 @@ import org.apache.druid.sql.calcite.external.ExternalDataSource;
 import org.apache.druid.sql.calcite.filtration.Filtration;
 import org.apache.druid.sql.calcite.planner.ColumnMapping;
 import org.apache.druid.sql.calcite.planner.ColumnMappings;
-import org.apache.druid.sql.calcite.planner.JoinAlgorithm;
 import org.apache.druid.sql.calcite.planner.PlannerContext;
 import org.apache.druid.sql.calcite.util.CalciteTests;
 import org.hamcrest.CoreMatchers;
@@ -1043,7 +1043,9 @@ public class MSQSelectTest extends MSQTestBase
                                 DruidExpression.ofColumn(ColumnType.FLOAT, "m1"),
                                 DruidExpression.ofColumn(ColumnType.FLOAT, "j0.m1")
                             ),
-                            JoinType.INNER
+                            JoinType.INNER,
+                            null,
+                            joinAlgorithm
                         )
                     )
                     .setInterval(querySegmentSpec(Filtration.eternity()))
@@ -2492,12 +2494,11 @@ public class MSQSelectTest extends MSQTestBase
                 new QueryDataSource(
                     newScanQueryBuilder()
                         .dataSource("foo")
-                        .virtualColumns(expressionVirtualColumn("v0", "0", ColumnType.LONG))
-                        .columns("v0")
+                        .columns("__time")
                         .columnTypes(ColumnType.LONG)
                         .context(defaultScanQueryContext(
                             queryContext,
-                            RowSignature.builder().add("v0", ColumnType.LONG).build()
+                            RowSignature.builder().add("__time", ColumnType.LONG).build()
                         ))
                         .intervals(querySegmentSpec(Intervals.ETERNITY))
                         .build()
@@ -2516,14 +2517,21 @@ public class MSQSelectTest extends MSQTestBase
                                         "a0",
                                         "1",
                                         ColumnType.LONG
+                                    ),
+                                    expressionPostAgg(
+                                        "p0",
+                                        "(CAST(floor(100), 'DOUBLE') == \"d0\")",
+                                        ColumnType.LONG
                                     )
                                 )
                                 .build()
 
                 ),
                 "j0.",
-                "(CAST(floor(100), 'DOUBLE') == \"j0.d0\")",
-                JoinType.LEFT
+                "(1 == \"j0.p0\")",
+                JoinType.LEFT,
+                null,
+                JoinAlgorithm.SORT_MERGE
             )
         )
         .setAggregatorSpecs(
