@@ -88,6 +88,7 @@ import org.apache.druid.sql.calcite.CalciteNestedDataQueryTest;
 import org.apache.druid.sql.calcite.TempDirProducer;
 import org.apache.druid.sql.calcite.util.CalciteTests;
 import org.apache.druid.sql.calcite.util.TestDataBuilder;
+import org.apache.druid.sql.calcite.util.TestDataSet;
 import org.apache.druid.timeline.DataSegment;
 import org.apache.druid.timeline.SegmentId;
 import org.apache.druid.timeline.partition.LinearShardSpec;
@@ -110,9 +111,7 @@ import static org.apache.druid.sql.calcite.util.CalciteTests.DATASOURCE3;
 import static org.apache.druid.sql.calcite.util.CalciteTests.DATASOURCE5;
 import static org.apache.druid.sql.calcite.util.CalciteTests.WIKIPEDIA;
 import static org.apache.druid.sql.calcite.util.TestDataBuilder.INDEX_SCHEMA_LOTS_O_COLUMNS;
-import static org.apache.druid.sql.calcite.util.TestDataBuilder.INDEX_SCHEMA_NUMERIC_DIMS;
 import static org.apache.druid.sql.calcite.util.TestDataBuilder.ROWS1;
-import static org.apache.druid.sql.calcite.util.TestDataBuilder.ROWS1_WITH_NUMERIC_DIMS;
 import static org.apache.druid.sql.calcite.util.TestDataBuilder.ROWS2;
 import static org.apache.druid.sql.calcite.util.TestDataBuilder.ROWS_LOTS_OF_COLUMNS;
 import static org.mockito.ArgumentMatchers.any;
@@ -323,13 +322,7 @@ public class CalciteMSQTestsHelper
         break;
       case DATASOURCE3:
       case CalciteTests.BROADCAST_DATASOURCE:
-        index = IndexBuilder
-            .create()
-            .tmpDir(tempFolderProducer.apply("tmpDir"))
-            .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
-            .schema(INDEX_SCHEMA_NUMERIC_DIMS)
-            .rows(ROWS1_WITH_NUMERIC_DIMS)
-            .buildMMappedIndex();
+        index = TestDataSet.NUMFOO.makeIndex(tempFolderProducer.apply("tmpDir"));
         break;
       case DATASOURCE5:
         index = IndexBuilder
