@@ -242,7 +242,7 @@ public class CalciteMSQTestsHelper
       SegmentId segmentId
   )
   {
-    final QueryableIndex index;
+    QueryableIndex index = null;
     switch (segmentId.getDataSource()) {
       case WIKIPEDIA:
         try {
@@ -300,7 +300,6 @@ public class CalciteMSQTestsHelper
             .rows(ROWS2)
             .buildMMappedIndex();
         break;
-      case CalciteTests.DATASOURCE3b:
       case CalciteTests.BROADCAST_DATASOURCE:
         index = TestDataSet.NUMFOO.makeIndex(tempFolderProducer.apply("tmpDir"));
         break;
@@ -445,42 +444,16 @@ public class CalciteMSQTestsHelper
       case CalciteTests.BENCHMARK_DATASOURCE:
         index = TestDataBuilder.getQueryableIndexForBenchmarkDatasource();
         break;
-      default:
-        throw new ISE("Cannot query segment %s in test runner", segmentId);
-
     }
-    Segment segment = new Segment()
-    {
-      @Override
-      public SegmentId getId()
-      {
-        return segmentId;
-      }
+    if (TestDataSet.NUMFOO.getName().equals(segmentId.getDataSource())) {
+      index = TestDataSet.NUMFOO.makeIndex(tempFolderProducer.apply("tmpDir"));
+    }
 
-      @Override
-      public Interval getDataInterval()
-      {
-        return segmentId.getInterval();
-      }
+    if (index == null) {
+      throw new ISE("Cannot query segment %s in test runner", segmentId);
+    }
 
-      @Nullable
-      @Override
-      public QueryableIndex asQueryableIndex()
-      {
-        return index;
-      }
-
-      @Override
-      public CursorFactory asCursorFactory()
-      {
-        return new QueryableIndexCursorFactory(index);
-      }
-
-      @Override
-      public void close()
-      {
-      }
-    };
+    Segment segment = new MSQTestSegment(segmentId, index);
     DataSegment dataSegment = DataSegment.builder()
                                          .dataSource(segmentId.getDataSource())
                                          .interval(segmentId.getInterval())
@@ -489,5 +462,47 @@ public class CalciteMSQTestsHelper
                                          .size(0)
                                          .build();
     return () -> new ReferenceCountingResourceHolder<>(new CompleteSegment(dataSegment, segment), Closer.create());
+  }
+
+  private static final class MSQTestSegment implements Segment
+  {
+    private final SegmentId segmentId;
+    private final QueryableIndex index;
+
+    private MSQTestSegment(SegmentId segmentId, QueryableIndex index)
+    {
+      this.segmentId = segmentId;
+      this.index = index;
+    }
+
+    @Override
+    public SegmentId getId()
+    {
+      return segmentId;
+    }
+
+    @Override
+    public Interval getDataInterval()
+    {
+      return segmentId.getInterval();
+    }
+
+    @Nullable
+    @Override
+    public QueryableIndex asQueryableIndex()
+    {
+      return index;
+    }
+
+    @Override
+    public CursorFactory asCursorFactory()
+    {
+      return new QueryableIndexCursorFactory(index);
+    }
+
+    @Override
+    public void close()
+    {
+    }
   }
 }
