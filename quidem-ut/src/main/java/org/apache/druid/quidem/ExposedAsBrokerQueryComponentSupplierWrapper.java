@@ -20,6 +20,7 @@
 package org.apache.druid.quidem;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.AbstractModule;
 import com.google.inject.Key;
@@ -44,7 +45,6 @@ import org.apache.druid.guice.AnnouncerModule;
 import org.apache.druid.guice.BrokerProcessingModule;
 import org.apache.druid.guice.BrokerServiceModule;
 import org.apache.druid.guice.CoordinatorDiscoveryModule;
-import org.apache.druid.guice.DruidInjectorBuilder;
 import org.apache.druid.guice.ExpressionModule;
 import org.apache.druid.guice.ExtensionsModule;
 import org.apache.druid.guice.JacksonConfigManagerModule;
@@ -125,15 +125,18 @@ public class ExposedAsBrokerQueryComponentSupplierWrapper extends QueryComponent
   }
 
   @Override
-  public void configureGuice(DruidInjectorBuilder builder, List<Module> overrideModules)
+  public DruidModule getCoreModule()
   {
-    super.configureGuice(builder, overrideModules);
+    Builder<Module> modules = ImmutableList.builder();
+    modules.add(super.getCoreModule());
+    modules.addAll(forServerModules());
 
-    installForServerModules(builder);
+    modules.add(new BrokerProcessingModule());
+    modules.addAll(brokerModules());
+    modules.add(new QuidemCaptureModule());
 
-    builder.add(new BrokerProcessingModule());
-    builder.addAll(brokerModules());
-    builder.add(QuidemCaptureModule.class);
+    return DruidModuleCollection.of(modules.build());
+
   }
 
   @Override
@@ -171,15 +174,14 @@ public class ExposedAsBrokerQueryComponentSupplierWrapper extends QueryComponent
   /**
    * Closely related to {@link CoreInjectorBuilder#forServer()}
    */
-  private void installForServerModules(DruidInjectorBuilder builder)
+  private List<Module> forServerModules()
   {
-
-    builder.add(
+    return ImmutableList.of(
         new Log4jShutterDownerModule(),
-        ExtensionsModule.SecondaryModule.class,
+        new ExtensionsModule.SecondaryModule(),
         new DruidAuthModule(),
-        TLSCertificateCheckerModule.class,
-        EmitterModule.class,
+        new TLSCertificateCheckerModule(),
+        new EmitterModule(),
         HttpClientModule.global(),
         HttpClientModule.escalatedGlobal(),
         new HttpClientModule("druid.broker.http", Client.class, true),

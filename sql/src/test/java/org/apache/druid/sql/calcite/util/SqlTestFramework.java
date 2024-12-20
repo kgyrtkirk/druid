@@ -412,7 +412,10 @@ public class SqlTestFramework
     @Override
     public DruidModule getOverrideModule()
     {
-      return DruidModuleCollection.of();
+      return DruidModuleCollection.of(
+          new TestSetupModule(),
+          new TestSchemaSetupModule()
+      );
     }
 
     /**
@@ -596,6 +599,7 @@ public class SqlTestFramework
     private CatalogResolver catalogResolver = CatalogResolver.NULL_RESOLVER;
     private List<Module> overrideModules = new ArrayList<>();
     private SqlTestFrameworkConfig config;
+    private Closer resourceCloser = Closer.create();
 
     public Builder(QueryComponentSupplier componentSupplier)
     {
@@ -721,17 +725,10 @@ public class SqlTestFramework
    * This is an intermediate solution: the ultimate solution is to create things
    * in Guice itself.
    */
-  private class TestSetupModule implements DruidModule
+  public static class TestSetupModule implements DruidModule
   {
-    private final Builder builder;
-
-    public TestSetupModule(Builder builder)
-    {
-      this.builder = builder;
-    }
-
     @Provides
-    TempDirProducer getTempDirProducer()
+    TempDirProducer getTempDirProducer(Builder builder)
     {
       return builder.componentSupplier.getTempDirProducer();
     }
@@ -766,7 +763,6 @@ public class SqlTestFramework
             .annotatedWith(Global.class)
             .to(TestBufferPool.class);
 
-
       TestRequestLogger testRequestLogger = new TestRequestLogger();
       binder.bind(RequestLogger.class).toInstance(testRequestLogger);
     }
@@ -779,7 +775,7 @@ public class SqlTestFramework
 
     @Provides
     @LazySingleton
-    public TopNQueryConfig makeTopNQueryConfig()
+    public TopNQueryConfig makeTopNQueryConfig(Builder builder)
     {
       return new TopNQueryConfig()
       {
@@ -838,45 +834,32 @@ public class SqlTestFramework
 
     @Provides
     @LazySingleton
-    public DruidProcessingConfig makeProcessingConfig()
+    public DruidProcessingConfig makeProcessingConfig(Builder builder)
     {
       return QueryStackTests.getProcessingConfig(builder.mergeBufferCount);
     }
 
     @Provides
     @LazySingleton
-    public TestBufferPool makeTestBufferPool()
+    public TestBufferPool makeTestBufferPool(Builder builder)
     {
-      return QueryStackTests.makeTestBufferPool(resourceCloser);
+      return QueryStackTests.makeTestBufferPool(builder.resourceCloser);
     }
 
     @Provides
     @LazySingleton
-    public TestGroupByBuffers makeTestGroupByBuffers(DruidProcessingConfig processingConfig)
+    public TestGroupByBuffers makeTestGroupByBuffers(DruidProcessingConfig processingConfig, Builder builder)
     {
-      return QueryStackTests.makeGroupByBuffers(resourceCloser, processingConfig);
+      return QueryStackTests.makeGroupByBuffers(builder.resourceCloser, processingConfig);
     }
 
     @Provides
     @LazySingleton
-    public JoinableFactoryWrapper joinableFactoryWrapper(final Injector injector)
+    public JoinableFactoryWrapper joinableFactoryWrapper(final Injector injector, Builder builder)
     {
       return builder.componentSupplier.createJoinableFactoryWrapper(
           injector.getInstance(LookupExtractorFactoryContainerProvider.class)
       );
-    }
-
-    @Provides
-    @LazySingleton
-    public SpecificSegmentsQuerySegmentWalker specificSegmentsQuerySegmentWalker(final Injector injector)
-    {
-      SpecificSegmentsQuerySegmentWalker walker = componentSupplier.createQuerySegmentWalker(
-          injector.getInstance(QueryRunnerFactoryConglomerate.class),
-          injector.getInstance(JoinableFactoryWrapper.class),
-          injector
-      );
-      resourceCloser.register(walker);
-      return walker;
     }
 
     @Provides
@@ -891,23 +874,54 @@ public class SqlTestFramework
 
     @Provides
     @LazySingleton
-    ViewManager createViewManager()
+    ViewManager createViewManager(Builder builder)
     {
-      return componentSupplier.getPlannerComponentSupplier().createViewManager();
+      return builder.componentSupplier.getPlannerComponentSupplier().createViewManager();
     }
+
+    @Provides
+    SqlTestFrameworkConfig getTestConfig(Builder builder)
+    {
+      return builder.config;
+    }
+
+    @Provides
+    @Named("quidem")
+    public URI getDruidTestURI(SqlTestFrameworkConfig config)
+    {
+      return config.getDruidTestURI();
+    }
+
+    @Provides
+    @Named("isExplainSupported")
+    public Boolean isExplainSupported(Builder builder)
+    {
+      return builder.componentSupplier.isExplainSupported();
+    }
+
+    @Provides
+    public QueryWatcher getQueryWatcher()
+    {
+      return QueryRunnerTestHelper.NOOP_QUERYWATCHER;
+    }
+  }
+
+  public static class TestSchemaSetupModule implements DruidModule
+  {
 
     @Provides
     @LazySingleton
     private DruidSchema makeDruidSchema(
         final Injector injector,
         QueryRunnerFactoryConglomerate conglomerate,
-        QuerySegmentWalker walker)
+        QuerySegmentWalker walker,
+        Builder builder)
     {
       return QueryFrameworkUtils.createMockSchema(
           injector,
           conglomerate,
           (SpecificSegmentsQuerySegmentWalker) walker,
-          componentSupplier.getPlannerComponentSupplier().createSchemaManager(),
+          builder.componentSupplier.getPlannerComponentSupplier().createSchemaManager(),
           builder.catalogResolver
       );
     }
@@ -947,29 +961,22 @@ public class SqlTestFramework
     }
 
     @Provides
-    SqlTestFrameworkConfig getTestConfig()
+    @LazySingleton
+    public SpecificSegmentsQuerySegmentWalker specificSegmentsQuerySegmentWalker(final Injector injector, Builder builder)
     {
-      return builder.config;
+      SpecificSegmentsQuerySegmentWalker walker = builder.componentSupplier.createQuerySegmentWalker(
+          injector.getInstance(QueryRunnerFactoryConglomerate.class),
+          injector.getInstance(JoinableFactoryWrapper.class),
+          injector
+      );
+      builder.resourceCloser.register(walker);
+      return walker;
     }
 
-    @Provides
-    @Named("quidem")
-    public URI getDruidTestURI()
-    {
-      return getTestConfig().getDruidTestURI();
-    }
 
-    @Provides
-    @Named("isExplainSupported")
-    public Boolean isExplainSupported()
+    @Override
+    public void configure(Binder binder)
     {
-      return builder.componentSupplier.isExplainSupported();
-    }
-
-    @Provides
-    public QueryWatcher getQueryWatcher()
-    {
-      return QueryRunnerTestHelper.NOOP_QUERYWATCHER;
     }
   }
 
@@ -977,7 +984,6 @@ public class SqlTestFramework
 
   private final Builder builder;
   private final QueryComponentSupplier componentSupplier;
-  private final Closer resourceCloser = Closer.create();
   private final Injector injector;
   private final AuthorizerMapper authorizerMapper = CalciteTests.TEST_AUTHORIZER_MAPPER;
   private final SqlEngine engine;
@@ -1000,7 +1006,7 @@ public class SqlTestFramework
     ArrayList<Module> overrideModules = new ArrayList<>(builder.overrideModules);
 
     injectorBuilder.add(componentSupplier.getCoreModule());
-    overrideModules.add(new TestSetupModule(builder));
+    injectorBuilder.addModule(binder -> binder.bind(Builder.class).toInstance(builder));
     overrideModules.add(componentSupplier.getOverrideModule());
     builder.componentSupplier.configureGuice(injectorBuilder, overrideModules);
 
@@ -1079,7 +1085,7 @@ public class SqlTestFramework
   public void close()
   {
     try {
-      resourceCloser.close();
+      builder.resourceCloser.close();
       componentSupplier.close();
     }
     catch (IOException e) {

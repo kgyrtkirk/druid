@@ -114,9 +114,10 @@ public class ThetaSketchSqlAggregatorTest extends BaseCalciteQueryTest
       );
     }
 
+    @Override
     public DruidModule getCoreModule()
     {
-      return new DruidModuleCollection(super.getCoreModule(), new SketchModule());
+      return DruidModuleCollection.of(super.getCoreModule(), new SketchModule());
     }
 
     @Override

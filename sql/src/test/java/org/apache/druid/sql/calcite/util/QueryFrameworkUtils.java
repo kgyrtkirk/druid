@@ -139,7 +139,7 @@ public class QueryFrameworkUtils
         CalciteTests.createMockSystemSchema(druidSchema, walker, authorizerMapper);
 
     LookupSchema lookupSchema = createMockLookupSchema(injector);
-    DruidOperatorTable createOperatorTable = createOperatorTable(injector);
+    DruidOperatorTable operatorTable = createOperatorTable(injector);
 
     return createMockRootSchema(
         plannerConfig,
@@ -148,7 +148,7 @@ public class QueryFrameworkUtils
         druidSchema,
         systemSchema,
         lookupSchema,
-        createOperatorTable
+        operatorTable
     );
   }
 
@@ -159,7 +159,7 @@ public class QueryFrameworkUtils
       DruidSchema druidSchema,
       SystemSchema systemSchema,
       LookupSchema lookupSchema,
-      DruidOperatorTable createOperatorTable
+      DruidOperatorTable operatorTable
   )
   {
     ViewSchema viewSchema = viewManager != null ? new ViewSchema(viewManager) : null;
@@ -182,7 +182,7 @@ public class QueryFrameworkUtils
         new InformationSchema(
             catalog,
             authorizerMapper,
-            createOperatorTable
+            operatorTable
         );
     rootSchema.add(CalciteTests.DRUID_SCHEMA_NAME, druidSchema);
     rootSchema.add(INFORMATION_SCHEMA_NAME, informationSchema);

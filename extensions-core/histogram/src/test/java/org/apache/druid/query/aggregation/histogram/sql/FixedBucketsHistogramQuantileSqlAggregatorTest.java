@@ -75,9 +75,10 @@ public class FixedBucketsHistogramQuantileSqlAggregatorTest extends BaseCalciteQ
       super(tempFolderProducer);
     }
 
+    @Override
     public DruidModule getCoreModule()
     {
-      return new DruidModuleCollection(super.getCoreModule(), new ApproximateHistogramDruidModule());
+      return DruidModuleCollection.of(super.getCoreModule(), new ApproximateHistogramDruidModule());
     }
 
     @Override
