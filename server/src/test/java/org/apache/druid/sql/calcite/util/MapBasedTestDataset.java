@@ -86,7 +86,7 @@ public abstract class MapBasedTestDataset implements TestDataSet
         .buildMMappedIndex();
   }
 
-  protected final Iterable<InputRow> getRows()
+  public final Iterable<InputRow> getRows()
   {
     return getRawRows()
         .stream()

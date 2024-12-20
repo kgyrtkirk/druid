@@ -94,7 +94,7 @@ public class BloomFilterSqlAggregatorTest extends BaseCalciteQueryTest
     cannotVectorize();
 
     BloomKFilter expectedbl1 = new BloomKFilter(TEST_NUM_ENTRIES);
-    for (InputRow row : TestDataBuilder.ROWS1_WITH_NUMERIC_DIMS) {
+    for (InputRow row : TestDataSet.NUMFOO.getRows()) {
       String raw = NullHandling.emptyToNullIfNeeded((String) row.getRaw("dim1"));
       if (raw == null) {
         expectedbl1.addBytes(null, 0, 0);
@@ -110,7 +110,7 @@ public class BloomFilterSqlAggregatorTest extends BaseCalciteQueryTest
         + "FROM numfoo",
         ImmutableList.of(
             Druids.newTimeseriesQueryBuilder()
-                  .dataSource(CalciteTests.DATASOURCE3)
+                  .dataSource(TestDataSet.NUMFOO.getName())
                   .intervals(new MultipleIntervalSegmentSpec(ImmutableList.of(Filtration.eternity())))
                   .granularity(Granularities.ALL)
                   .aggregators(
@@ -141,7 +141,7 @@ public class BloomFilterSqlAggregatorTest extends BaseCalciteQueryTest
 
     BloomKFilter expectedbl1 = new BloomKFilter(TEST_NUM_ENTRIES);
     BloomKFilter expected2 = new BloomKFilter(TEST_NUM_ENTRIES);
-    for (InputRow row : TestDataBuilder.ROWS1_WITH_NUMERIC_DIMS) {
+    for (InputRow row : TestDataSet.NUMFOO.getRows()) {
       String raw = NullHandling.emptyToNullIfNeeded((String) row.getRaw("dim1"));
       if (raw == null) {
         expectedbl1.addBytes(null, 0, 0);
@@ -251,7 +251,7 @@ public class BloomFilterSqlAggregatorTest extends BaseCalciteQueryTest
     cannotVectorize();
 
     BloomKFilter expected3 = new BloomKFilter(TEST_NUM_ENTRIES);
-    for (InputRow row : TestDataBuilder.ROWS1_WITH_NUMERIC_DIMS) {
+    for (InputRow row : TestDataSet.NUMFOO.getRows()) {
       Object raw = row.getRaw("l1");
       if (raw == null) {
         if (NullHandling.replaceWithDefault()) {
@@ -296,7 +296,7 @@ public class BloomFilterSqlAggregatorTest extends BaseCalciteQueryTest
   {
     cannotVectorize();
     BloomKFilter expectedbl1 = new BloomKFilter(TEST_NUM_ENTRIES);
-    for (InputRow row : TestDataBuilder.ROWS1_WITH_NUMERIC_DIMS) {
+    for (InputRow row : TestDataSet.NUMFOO.getRows()) {
       Object raw = row.getRaw("l1");
       if (raw == null) {
         if (NullHandling.replaceWithDefault()) {
@@ -350,7 +350,7 @@ public class BloomFilterSqlAggregatorTest extends BaseCalciteQueryTest
     cannotVectorize();
 
     BloomKFilter expectedbl1 = new BloomKFilter(TEST_NUM_ENTRIES);
-    for (InputRow row : TestDataBuilder.ROWS1_WITH_NUMERIC_DIMS) {
+    for (InputRow row : TestDataSet.NUMFOO.getRows()) {
       Object raw = row.getRaw("f1");
       if (raw == null) {
         if (NullHandling.replaceWithDefault()) {
@@ -404,7 +404,7 @@ public class BloomFilterSqlAggregatorTest extends BaseCalciteQueryTest
     cannotVectorize();
 
     BloomKFilter expectedbl1 = new BloomKFilter(TEST_NUM_ENTRIES);
-    for (InputRow row : TestDataBuilder.ROWS1_WITH_NUMERIC_DIMS) {
+    for (InputRow row : TestDataSet.NUMFOO.getRows()) {
       Object raw = row.getRaw("dbl1");
       if (raw == null) {
         if (NullHandling.replaceWithDefault()) {
