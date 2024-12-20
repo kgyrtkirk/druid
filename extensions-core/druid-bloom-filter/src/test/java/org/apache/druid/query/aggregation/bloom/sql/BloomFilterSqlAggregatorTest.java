@@ -29,8 +29,6 @@ import org.apache.druid.initialization.DruidModule;
 import org.apache.druid.java.util.common.granularity.Granularities;
 import org.apache.druid.query.Druids;
 import org.apache.druid.query.QueryRunnerFactoryConglomerate;
-import org.apache.druid.query.aggregation.CountAggregatorFactory;
-import org.apache.druid.query.aggregation.DoubleSumAggregatorFactory;
 import org.apache.druid.query.aggregation.FilteredAggregatorFactory;
 import org.apache.druid.query.aggregation.bloom.BloomFilterAggregatorFactory;
 import org.apache.druid.query.aggregation.bloom.sql.BloomFilterSqlAggregatorTest.BloomFilterSqlAggComponentSupplier;
@@ -44,7 +42,6 @@ import org.apache.druid.query.spec.MultipleIntervalSegmentSpec;
 import org.apache.druid.segment.IndexBuilder;
 import org.apache.druid.segment.QueryableIndex;
 import org.apache.druid.segment.column.ColumnType;
-import org.apache.druid.segment.incremental.IncrementalIndexSchema;
 import org.apache.druid.segment.join.JoinableFactoryWrapper;
 import org.apache.druid.segment.virtual.ExpressionVirtualColumn;
 import org.apache.druid.segment.writeout.OffHeapMemorySegmentWriteOutMediumFactory;
@@ -94,16 +91,7 @@ public class BloomFilterSqlAggregatorTest extends BaseCalciteQueryTest
           IndexBuilder.create()
                       .tmpDir(tempDirProducer.newTempFolder())
                       .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
-                      .schema(
-                          new IncrementalIndexSchema.Builder()
-                              .withMetrics(
-                                  new CountAggregatorFactory("cnt"),
-                                  new DoubleSumAggregatorFactory("m1", "m1")
-                              )
-                              .withDimensionsSpec(TestDataBuilder.INDEX_SCHEMA_NUMERIC_DIMS.getDimensionsSpec())
-                              .withRollup(false)
-                              .build()
-                      )
+                      .schema(TestDataBuilder.INDEX_SCHEMA_NUMERIC_DIMS)
                       .rows(TestDataBuilder.ROWS1_WITH_NUMERIC_DIMS)
                       .buildMMappedIndex();
 
