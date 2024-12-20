@@ -112,6 +112,8 @@ public class CalciteTests
   public static final String DATASOURCE1 = "foo";
   public static final String DATASOURCE2 = "foo2";
   public static final String DATASOURCE3 = TestDataSet.NUMFOO.getName();
+  @Deprecated
+  public static final String DATASOURCE3b = "numfoo";
   public static final String DATASOURCE4 = "foo4";
   public static final String DATASOURCE5 = "lotsocolumns";
   public static final String ARRAYS_DATASOURCE = "arrays";

@@ -28,6 +28,7 @@ import org.apache.druid.data.input.impl.DimensionsSpec;
 import org.apache.druid.data.input.impl.DoubleDimensionSchema;
 import org.apache.druid.data.input.impl.FloatDimensionSchema;
 import org.apache.druid.data.input.impl.LongDimensionSchema;
+import org.apache.druid.data.input.impl.MapInputRowParser;
 import org.apache.druid.data.input.impl.TimestampSpec;
 import org.apache.druid.query.aggregation.CountAggregatorFactory;
 import org.apache.druid.query.aggregation.DoubleSumAggregatorFactory;
@@ -37,6 +38,8 @@ import org.apache.druid.segment.IndexBuilder;
 import org.apache.druid.segment.QueryableIndex;
 import org.apache.druid.segment.incremental.IncrementalIndexSchema;
 import org.apache.druid.segment.writeout.OffHeapMemorySegmentWriteOutMediumFactory;
+import org.apache.druid.timeline.DataSegment;
+import org.apache.druid.timeline.partition.LinearShardSpec;
 
 import java.io.File;
 import java.util.List;
@@ -59,6 +62,19 @@ public abstract class MapBasedTestDataset implements TestDataSet
   }
 
   @Override
+  public final DataSegment makeSegment(final QueryableIndex index)
+  {
+    DataSegment segment = DataSegment.builder()
+        .dataSource(name)
+        .interval(index.getDataInterval())
+        .version("1")
+        .shardSpec(new LinearShardSpec(0))
+        .size(0)
+        .build();
+    return segment;
+  }
+
+  @Override
   public final QueryableIndex makeIndex(File tmpDir)
   {
     return IndexBuilder
@@ -74,8 +90,13 @@ public abstract class MapBasedTestDataset implements TestDataSet
   {
     return getRawRows()
         .stream()
-        .map(raw -> TestDataBuilder.createRow(raw, getInputRowSchema()))
+        .map(raw -> createRow(raw, getInputRowSchema()))
         .collect(Collectors.toList());
+  }
+
+  public static InputRow createRow(final Map<String, ?> map, InputRowSchema inputRowSchema)
+  {
+    return MapInputRowParser.parse(inputRowSchema, (Map<String, Object>) map);
   }
 
   protected abstract InputRowSchema getInputRowSchema();

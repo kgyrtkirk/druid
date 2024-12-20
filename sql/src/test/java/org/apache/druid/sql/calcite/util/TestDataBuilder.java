@@ -117,7 +117,7 @@ public class TestDataBuilder
 {
   private static final ObjectMapper MAPPER = new DefaultObjectMapper();
 
-  public static final String TIMESTAMP_COLUMN = "t";
+  public static final String TIMESTAMP_COLUMN = TestDataSet.TIMESTAMP_COLUMN;
   public static final GlobalTableDataSource CUSTOM_TABLE = new GlobalTableDataSource(CalciteTests.BROADCAST_DATASOURCE);
 
   public static QueryableIndex QUERYABLE_INDEX_FOR_BENCHMARK_DATASOURCE = null;
@@ -889,16 +889,9 @@ public class TestDataBuilder
                    .size(0)
                    .build(),
         forbiddenIndex
-    ).add(
-        DataSegment.builder()
-                   .dataSource(CalciteTests.DATASOURCE3)
-                   .interval(indexNumericDims.getDataInterval())
-                   .version("1")
-                   .shardSpec(new LinearShardSpec(0))
-                   .size(0)
-                   .build(),
-        indexNumericDims
-    ).add(
+    )
+    .add(TestDataSet.NUMFOO, new File(tmpDir, "3"))
+    .add(
         DataSegment.builder()
                    .dataSource(CalciteTests.DATASOURCE4)
                    .interval(index4.getDataInterval())

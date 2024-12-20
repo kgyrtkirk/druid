@@ -104,7 +104,6 @@ import java.util.function.Supplier;
 import static org.apache.druid.sql.calcite.util.CalciteTests.ARRAYS_DATASOURCE;
 import static org.apache.druid.sql.calcite.util.CalciteTests.DATASOURCE1;
 import static org.apache.druid.sql.calcite.util.CalciteTests.DATASOURCE2;
-import static org.apache.druid.sql.calcite.util.CalciteTests.DATASOURCE3;
 import static org.apache.druid.sql.calcite.util.CalciteTests.DATASOURCE5;
 import static org.apache.druid.sql.calcite.util.CalciteTests.WIKIPEDIA;
 import static org.apache.druid.sql.calcite.util.TestDataBuilder.INDEX_SCHEMA_LOTS_O_COLUMNS;
@@ -301,7 +300,7 @@ public class CalciteMSQTestsHelper
             .rows(ROWS2)
             .buildMMappedIndex();
         break;
-      case DATASOURCE3:
+      case CalciteTests.DATASOURCE3b:
       case CalciteTests.BROADCAST_DATASOURCE:
         index = TestDataSet.NUMFOO.makeIndex(tempFolderProducer.apply("tmpDir"));
         break;

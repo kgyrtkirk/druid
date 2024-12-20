@@ -20,16 +20,20 @@
 package org.apache.druid.sql.calcite.util;
 
 import org.apache.druid.segment.QueryableIndex;
+import org.apache.druid.timeline.DataSegment;
+
 import java.io.File;
 
 public interface TestDataSet
 {
-  public static final String TIMESTAMP_COLUMN = TestDataBuilder.TIMESTAMP_COLUMN;
+  public static final String TIMESTAMP_COLUMN = "t";
 
   public static final MapBasedTestDataset NUMFOO = new MapBasedTestDataset.NumFoo();
 
   String getName();
 
   QueryableIndex makeIndex(File tmpDir);
+
+  DataSegment makeSegment(QueryableIndex index);
 
 }
