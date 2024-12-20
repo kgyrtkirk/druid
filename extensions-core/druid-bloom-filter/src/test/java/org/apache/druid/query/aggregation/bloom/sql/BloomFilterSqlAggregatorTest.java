@@ -39,12 +39,9 @@ import org.apache.druid.query.extraction.SubstringDimExtractionFn;
 import org.apache.druid.query.filter.BloomKFilter;
 import org.apache.druid.query.groupby.GroupByQuery;
 import org.apache.druid.query.spec.MultipleIntervalSegmentSpec;
-import org.apache.druid.segment.IndexBuilder;
-import org.apache.druid.segment.QueryableIndex;
 import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.join.JoinableFactoryWrapper;
 import org.apache.druid.segment.virtual.ExpressionVirtualColumn;
-import org.apache.druid.segment.writeout.OffHeapMemorySegmentWriteOutMediumFactory;
 import org.apache.druid.server.SpecificSegmentsQuerySegmentWalker;
 import org.apache.druid.sql.calcite.BaseCalciteQueryTest;
 import org.apache.druid.sql.calcite.SqlTestFrameworkConfig;
@@ -54,8 +51,7 @@ import org.apache.druid.sql.calcite.util.CalciteTests;
 import org.apache.druid.sql.calcite.util.DruidModuleCollection;
 import org.apache.druid.sql.calcite.util.SqlTestFramework.StandardComponentSupplier;
 import org.apache.druid.sql.calcite.util.TestDataBuilder;
-import org.apache.druid.timeline.DataSegment;
-import org.apache.druid.timeline.partition.LinearShardSpec;
+import org.apache.druid.sql.calcite.util.TestDataSet;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -65,7 +61,7 @@ public class BloomFilterSqlAggregatorTest extends BaseCalciteQueryTest
 {
   private static final int TEST_NUM_ENTRIES = 1000;
 
-  private static final String DATA_SOURCE = "numfoo";
+  private static final String DATA_SOURCE = TestDataSet.NUMFOO.getName();
 
   public static class BloomFilterSqlAggComponentSupplier extends StandardComponentSupplier
   {
@@ -87,24 +83,8 @@ public class BloomFilterSqlAggregatorTest extends BaseCalciteQueryTest
         final Injector injector
     )
     {
-      final QueryableIndex index =
-          IndexBuilder.create()
-                      .tmpDir(tempDirProducer.newTempFolder())
-                      .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
-                      .schema(TestDataBuilder.INDEX_SCHEMA_NUMERIC_DIMS)
-                      .rows(TestDataBuilder.ROWS1_WITH_NUMERIC_DIMS)
-                      .buildMMappedIndex();
-
-      return SpecificSegmentsQuerySegmentWalker.createWalker(injector, conglomerate).add(
-          DataSegment.builder()
-                     .dataSource(DATA_SOURCE)
-                     .interval(index.getDataInterval())
-                     .version("1")
-                     .shardSpec(new LinearShardSpec(0))
-                     .size(0)
-                     .build(),
-          index
-      );
+      return SpecificSegmentsQuerySegmentWalker.createWalker(injector, conglomerate)
+          .add(TestDataSet.NUMFOO, tempDirProducer.newTempFolder());
     }
   }
 
