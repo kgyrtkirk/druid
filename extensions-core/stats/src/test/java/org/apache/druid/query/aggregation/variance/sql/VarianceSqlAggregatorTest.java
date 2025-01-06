@@ -23,11 +23,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Injector;
 import org.apache.druid.common.config.NullHandling;
 import org.apache.druid.data.input.InputRow;
-import org.apache.druid.data.input.impl.DimensionSchema;
-import org.apache.druid.data.input.impl.DimensionsSpec;
-import org.apache.druid.data.input.impl.DoubleDimensionSchema;
-import org.apache.druid.data.input.impl.FloatDimensionSchema;
-import org.apache.druid.data.input.impl.LongDimensionSchema;
 import org.apache.druid.error.DruidException;
 import org.apache.druid.initialization.DruidModule;
 import org.apache.druid.java.util.common.granularity.Granularities;
@@ -67,6 +62,7 @@ import org.apache.druid.sql.calcite.util.CalciteTests;
 import org.apache.druid.sql.calcite.util.DruidModuleCollection;
 import org.apache.druid.sql.calcite.util.SqlTestFramework.StandardComponentSupplier;
 import org.apache.druid.sql.calcite.util.TestDataBuilder;
+import org.apache.druid.sql.calcite.util.TestDataSet;
 import org.apache.druid.timeline.DataSegment;
 import org.apache.druid.timeline.partition.LinearShardSpec;
 import org.junit.jupiter.api.Test;
@@ -101,6 +97,11 @@ public class VarianceSqlAggregatorTest extends BaseCalciteQueryTest
     {
       ComplexMetrics.registerSerde(VarianceSerde.TYPE_NAME, new VarianceSerde());
 
+      TestDataSet.NUMFOO.withAdditionMetrics(
+          new VarianceAggregatorFactory("var1", "m1", null, null)
+          );
+
+
       final QueryableIndex index =
           IndexBuilder.create(CalciteTests.getJsonMapper().registerModules(new DruidStatsModule().getJacksonModules()))
                       .tmpDir(tempDirProducer.newTempFolder())
@@ -108,14 +109,7 @@ public class VarianceSqlAggregatorTest extends BaseCalciteQueryTest
                       .schema(
                           new IncrementalIndexSchema.Builder()
                               .withDimensionsSpec(
-                                  new DimensionsSpec(
-                                      ImmutableList.<DimensionSchema>builder()
-                                                   .addAll(DimensionsSpec.getDefaultSchemas(ImmutableList.of("dim1", "dim2", "dim3")))
-                                                   .add(new DoubleDimensionSchema("dbl1"))
-                                                   .add(new FloatDimensionSchema("f1"))
-                                                   .add(new LongDimensionSchema("l1"))
-                                                   .build()
-                                  )
+                                  TestDataSet.NUMFOO.getInputRowSchema().getDimensionsSpec()
                               )
                               .withMetrics(
                                   new CountAggregatorFactory("cnt"),

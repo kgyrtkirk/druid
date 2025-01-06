@@ -50,7 +50,6 @@ import org.apache.druid.sql.calcite.filtration.Filtration;
 import org.apache.druid.sql.calcite.util.CalciteTests;
 import org.apache.druid.sql.calcite.util.DruidModuleCollection;
 import org.apache.druid.sql.calcite.util.SqlTestFramework.StandardComponentSupplier;
-import org.apache.druid.sql.calcite.util.TestDataBuilder;
 import org.apache.druid.sql.calcite.util.TestDataSet;
 import org.junit.jupiter.api.Test;
 
@@ -60,8 +59,6 @@ import java.util.List;
 public class BloomFilterSqlAggregatorTest extends BaseCalciteQueryTest
 {
   private static final int TEST_NUM_ENTRIES = 1000;
-
-  private static final String DATA_SOURCE = TestDataSet.NUMFOO.getName();
 
   public static class BloomFilterSqlAggComponentSupplier extends StandardComponentSupplier
   {
@@ -204,7 +201,7 @@ public class BloomFilterSqlAggregatorTest extends BaseCalciteQueryTest
     cannotVectorize();
 
     BloomKFilter expectedbl1 = new BloomKFilter(TEST_NUM_ENTRIES);
-    for (InputRow row : TestDataBuilder.ROWS1_WITH_NUMERIC_DIMS) {
+    for (InputRow row : TestDataSet.NUMFOO.getRows()) {
       String raw = NullHandling.emptyToNullIfNeeded((String) row.getRaw("dim1"));
       // empty string extractionFn produces null
       if (raw == null || "".equals(raw)) {

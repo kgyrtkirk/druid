@@ -99,11 +99,11 @@ public abstract class MapBasedTestDataset implements TestDataSet
     return MapInputRowParser.parse(inputRowSchema, (Map<String, Object>) map);
   }
 
-  protected abstract InputRowSchema getInputRowSchema();
+  public abstract InputRowSchema getInputRowSchema();
 
-  protected abstract IncrementalIndexSchema getIndexSchema();
+  public abstract IncrementalIndexSchema getIndexSchema();
 
-  protected abstract List<Map<String, Object>> getRawRows();
+  public abstract List<Map<String, Object>> getRawRows();
 
 
   static class NumFoo extends MapBasedTestDataset
@@ -113,7 +113,7 @@ public abstract class MapBasedTestDataset implements TestDataSet
       super("numfoo");
     }
 
-    protected final InputRowSchema getInputRowSchema()
+    public final InputRowSchema getInputRowSchema()
     {
       return new InputRowSchema(
           new TimestampSpec(TIMESTAMP_COLUMN, "iso", null),
@@ -143,7 +143,7 @@ public abstract class MapBasedTestDataset implements TestDataSet
       );
     }
 
-    protected IncrementalIndexSchema getIndexSchema()
+    public IncrementalIndexSchema getIndexSchema()
     {
       return new IncrementalIndexSchema.Builder()
           .withMetrics(
@@ -157,7 +157,7 @@ public abstract class MapBasedTestDataset implements TestDataSet
           .build();
     }
 
-    protected List<Map<String, Object>> getRawRows()
+    public List<Map<String, Object>> getRawRows()
     {
       return ImmutableList.of(
           ImmutableMap.<String, Object>builder()
