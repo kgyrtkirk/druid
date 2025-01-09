@@ -14948,10 +14948,6 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  /**
-   * see {@link TestDataBuilder#RAW_ROWS1_WITH_NUMERIC_DIMS}
-   * for the input data source of this test
-   */
   @Test
   public void testHumanReadableFormatFunction()
   {

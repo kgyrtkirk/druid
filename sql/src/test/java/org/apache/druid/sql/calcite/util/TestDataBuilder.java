@@ -25,7 +25,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
+import com.google.common.collect.Lists;
 import com.google.inject.Injector;
+import org.apache.curator.shaded.com.google.common.collect.Iterables;
 import org.apache.druid.data.input.InputRow;
 import org.apache.druid.data.input.InputRowSchema;
 import org.apache.druid.data.input.MapBasedInputRow;
@@ -246,19 +248,6 @@ public class TestDataBuilder
       .withRollup(false)
       .build();
 
-  // FIXME remove
-  @Deprecated
-  public static final IncrementalIndexSchema INDEX_SCHEMA_NUMERIC_DIMS = new IncrementalIndexSchema.Builder()
-      .withMetrics(
-          new CountAggregatorFactory("cnt"),
-          new FloatSumAggregatorFactory("m1", "m1"),
-          new DoubleSumAggregatorFactory("m2", "m2"),
-          new HyperUniquesAggregatorFactory("unique_dim1", "dim1")
-      )
-      .withDimensionsSpec(NUMFOO_SCHEMA.getDimensionsSpec())
-      .withRollup(false)
-      .build();
-
   public static final IncrementalIndexSchema INDEX_SCHEMA_LOTS_O_COLUMNS = new IncrementalIndexSchema.Builder()
       .withMetrics(
           new CountAggregatorFactory("count")
@@ -473,11 +462,6 @@ public class TestDataBuilder
                   .build()
   );
 
-  // FIXME remove
-  @Deprecated
-  public static final List<InputRow> ROWS1_WITH_NUMERIC_DIMS =
-      RAW_ROWS1_WITH_NUMERIC_DIMS.stream().map(raw -> createRow(raw, NUMFOO_SCHEMA)).collect(Collectors.toList());
-
   public static final List<ImmutableMap<String, Object>> RAW_ROWS2 = ImmutableList.of(
       ImmutableMap.<String, Object>builder()
                   .put("t", "2000-01-01")
@@ -596,7 +580,9 @@ public class TestDataBuilder
       toRow("2021-01-03T01:00:00Z", USER_VISIT_DIMS, ImmutableMap.of("user", "foo", "country", "USA", "city", "M"))
   );
 
-  private static final InlineDataSource JOINABLE_BACKING_DATA = InlineDataSource.fromIterable(
+  // FIXME
+  @Deprecated
+  private static final InlineDataSource JOINABLE_BACKING_DATA1 = InlineDataSource.fromIterable(
       RAW_ROWS1_WITH_NUMERIC_DIMS.stream().map(x -> new Object[]{
           x.get("dim1"),
           x.get("dim2"),
@@ -624,6 +610,17 @@ public class TestDataBuilder
                   .add("l2", ColumnType.LONG)
                   .build()
   );
+
+  private static final InlineDataSource JOINABLE_BACKING_DATA = toInlineDataSource(TestDataSet.NUMFOO);
+
+  static InlineDataSource toInlineDataSource(MapBasedTestDataset dataset)
+  {
+    RowSignature sig = dataset.getInputRowSignature();
+    List<String> columnNames = sig.getColumnNames();
+    Iterable<Object[]> rows = Iterables
+        .transform(dataset.getRawRows(), row -> Lists.transform(columnNames, row::get).toArray());
+    return InlineDataSource.fromIterable(rows, sig);
+  }
 
   private static final Set<String> KEY_COLUMNS = ImmutableSet.of("dim4");
 

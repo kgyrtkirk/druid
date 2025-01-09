@@ -37,6 +37,8 @@ import org.apache.druid.query.aggregation.FloatSumAggregatorFactory;
 import org.apache.druid.query.aggregation.hyperloglog.HyperUniquesAggregatorFactory;
 import org.apache.druid.segment.IndexBuilder;
 import org.apache.druid.segment.QueryableIndex;
+import org.apache.druid.segment.column.RowSignature;
+import org.apache.druid.segment.column.RowSignature.Builder;
 import org.apache.druid.segment.incremental.IncrementalIndexSchema;
 import org.apache.druid.segment.writeout.OffHeapMemorySegmentWriteOutMediumFactory;
 import org.apache.druid.timeline.DataSegment;
@@ -107,6 +109,15 @@ public abstract class MapBasedTestDataset implements TestDataSet
   public static InputRow createRow(final Map<String, ?> map, InputRowSchema inputRowSchema)
   {
     return MapInputRowParser.parse(inputRowSchema, (Map<String, Object>) map);
+  }
+
+  public RowSignature getInputRowSignature()
+  {
+    Builder rsBuilder = RowSignature.builder();
+    for (DimensionSchema dimensionSchema : getInputRowSchema().getDimensionsSpec().getDimensions()) {
+      rsBuilder.add(dimensionSchema.getName(), dimensionSchema.getColumnType());
+    }
+    return rsBuilder.build();
   }
 
   public abstract InputRowSchema getInputRowSchema();
@@ -248,4 +259,5 @@ public abstract class MapBasedTestDataset implements TestDataSet
         );
     }
   }
+
 }

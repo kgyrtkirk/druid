@@ -35,5 +35,4 @@ public interface TestDataSet
   QueryableIndex makeIndex(File tmpDir);
 
   DataSegment makeSegment(QueryableIndex index);
-
 }
