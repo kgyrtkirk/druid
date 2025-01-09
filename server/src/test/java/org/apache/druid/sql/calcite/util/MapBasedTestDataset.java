@@ -163,6 +163,18 @@ public abstract class MapBasedTestDataset implements TestDataSet
       );
     }
 
+
+    @Override
+    public List<AggregatorFactory> getMetrics()
+    {
+        return ImmutableList.of(
+            new CountAggregatorFactory("cnt"),
+            new FloatSumAggregatorFactory("m1", "m1"),
+            new DoubleSumAggregatorFactory("m2", "m2"),
+            new HyperUniquesAggregatorFactory("unique_dim1", "dim1")
+        );
+    }
+
     public List<Map<String, Object>> getRawRows()
     {
       return ImmutableList.of(
@@ -246,17 +258,6 @@ public abstract class MapBasedTestDataset implements TestDataSet
               .put("dim6", "6")
               .build()
       );
-    }
-
-    @Override
-    public List<AggregatorFactory> getMetrics()
-    {
-        return ImmutableList.of(
-            new CountAggregatorFactory("cnt"),
-            new FloatSumAggregatorFactory("m1", "m1"),
-            new DoubleSumAggregatorFactory("m2", "m2"),
-            new HyperUniquesAggregatorFactory("unique_dim1", "dim1")
-        );
     }
   }
 
