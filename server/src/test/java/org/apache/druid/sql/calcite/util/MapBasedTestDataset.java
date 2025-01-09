@@ -30,6 +30,7 @@ import org.apache.druid.data.input.impl.FloatDimensionSchema;
 import org.apache.druid.data.input.impl.LongDimensionSchema;
 import org.apache.druid.data.input.impl.MapInputRowParser;
 import org.apache.druid.data.input.impl.TimestampSpec;
+import org.apache.druid.query.aggregation.AggregatorFactory;
 import org.apache.druid.query.aggregation.CountAggregatorFactory;
 import org.apache.druid.query.aggregation.DoubleSumAggregatorFactory;
 import org.apache.druid.query.aggregation.FloatSumAggregatorFactory;
@@ -86,6 +87,15 @@ public abstract class MapBasedTestDataset implements TestDataSet
         .buildMMappedIndex();
   }
 
+  public IncrementalIndexSchema getIndexSchema()
+  {
+    return new IncrementalIndexSchema.Builder()
+        .withMetrics(getMetrics().toArray(new AggregatorFactory[0]))
+        .withDimensionsSpec(getInputRowSchema().getDimensionsSpec())
+        .withRollup(false)
+        .build();
+  }
+
   public final Iterable<InputRow> getRows()
   {
     return getRawRows()
@@ -101,12 +111,11 @@ public abstract class MapBasedTestDataset implements TestDataSet
 
   public abstract InputRowSchema getInputRowSchema();
 
-  public abstract IncrementalIndexSchema getIndexSchema();
-
   public abstract List<Map<String, Object>> getRawRows();
 
+  public abstract List<AggregatorFactory> getMetrics();
 
-  static class NumFoo extends MapBasedTestDataset
+  public static class NumFoo extends MapBasedTestDataset
   {
     protected NumFoo()
     {
@@ -141,20 +150,6 @@ public abstract class MapBasedTestDataset implements TestDataSet
           ),
           null
       );
-    }
-
-    public IncrementalIndexSchema getIndexSchema()
-    {
-      return new IncrementalIndexSchema.Builder()
-          .withMetrics(
-              new CountAggregatorFactory("cnt"),
-              new FloatSumAggregatorFactory("m1", "m1"),
-              new DoubleSumAggregatorFactory("m2", "m2"),
-              new HyperUniquesAggregatorFactory("unique_dim1", "dim1")
-          )
-          .withDimensionsSpec(getInputRowSchema().getDimensionsSpec())
-          .withRollup(false)
-          .build();
     }
 
     public List<Map<String, Object>> getRawRows()
@@ -241,6 +236,16 @@ public abstract class MapBasedTestDataset implements TestDataSet
               .build()
       );
     }
-  }
 
+    @Override
+    public List<AggregatorFactory> getMetrics()
+    {
+        return ImmutableList.of(
+            new CountAggregatorFactory("cnt"),
+            new FloatSumAggregatorFactory("m1", "m1"),
+            new DoubleSumAggregatorFactory("m2", "m2"),
+            new HyperUniquesAggregatorFactory("unique_dim1", "dim1")
+        );
+    }
+  }
 }

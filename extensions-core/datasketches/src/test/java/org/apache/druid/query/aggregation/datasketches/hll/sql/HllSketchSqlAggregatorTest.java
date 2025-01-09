@@ -81,6 +81,7 @@ import org.apache.druid.sql.calcite.SqlTestFrameworkConfig;
 import org.apache.druid.sql.calcite.TempDirProducer;
 import org.apache.druid.sql.calcite.filtration.Filtration;
 import org.apache.druid.sql.calcite.util.CacheTestHelperModule.ResultCacheMode;
+import org.apache.druid.sql.calcite.util.MapBasedTestDataset.NumFoo;
 import org.apache.druid.sql.calcite.util.CalciteTests;
 import org.apache.druid.sql.calcite.util.DruidModuleCollection;
 import org.apache.druid.sql.calcite.util.SqlTestFramework.StandardComponentSupplier;
@@ -244,8 +245,50 @@ public class HllSketchSqlAggregatorTest extends BaseCalciteQueryTest
       )
   );
 
+
+  static MyFoo LOCAL_FOO = new MyFoo();
+
+  static class MyFoo extends NumFoo
+  {
+    @Override
+    public List<AggregatorFactory> getMetrics()
+    {
+      return ImmutableList.<AggregatorFactory>builder()
+          .add(new CountAggregatorFactory("cnt"))
+          .add(new DoubleSumAggregatorFactory("m1", "m1"))
+          .add(new HllSketchBuildAggregatorFactory("hllsketch_dim1", "dim1", null, null, null, false, ROUND))
+          .add(new HllSketchBuildAggregatorFactory("hllsketch_dim3", "dim3", null, null, null, false, false))
+          .add(new HllSketchBuildAggregatorFactory("hllsketch_m1", "m1", null, null, null, false, ROUND))
+          .add(new HllSketchBuildAggregatorFactory("hllsketch_f1", "f1", null, null, null, false, ROUND))
+          .add(new HllSketchBuildAggregatorFactory("hllsketch_l1", "l1", null, null, null, false, ROUND))
+          .add(new HllSketchBuildAggregatorFactory("hllsketch_dbl1", "dbl1", null, null, null, false, ROUND)).build();
+    }
+
+    /**
+     * Default implementation adds withDimensionsSpec
+     * which makes a testcase fail
+     */
+    public IncrementalIndexSchema getIndexSchema()
+    {
+      return new IncrementalIndexSchema.Builder()
+          .withMetrics(getMetrics().toArray(new AggregatorFactory[0]))
+          .withRollup(false)
+          .build();
+    }
+
+    @Override
+    public String getName()
+    {
+      return CalciteTests.DATASOURCE1;
+    }
+  }
+
+  private static final String DATASOURCE1 = LOCAL_FOO.getName();
+
+
   public static class HllSketchComponentSupplier extends StandardComponentSupplier
   {
+
     public HllSketchComponentSupplier(TempDirProducer tempFolderProducer)
     {
       super(tempFolderProducer);
@@ -299,14 +342,17 @@ public class HllSketchSqlAggregatorTest extends BaseCalciteQueryTest
 
       return SpecificSegmentsQuerySegmentWalker.createWalker(injector, conglomerate).add(
           DataSegment.builder()
-                     .dataSource(CalciteTests.DATASOURCE1)
+                     .dataSource(CalciteTests.DATASOURCE2)
                      .interval(index.getDataInterval())
                      .version("1")
                      .shardSpec(new LinearShardSpec(0))
                      .size(0)
                      .build(),
           index
-      ).add(
+      )
+          .add(LOCAL_FOO, tempDirProducer.newTempFolder())
+
+          .add(
           DataSegment.builder()
                      .dataSource(CalciteTests.WIKIPEDIA_FIRST_LAST)
                      .interval(Intervals.of("2015-09-12/2015-09-13"))
