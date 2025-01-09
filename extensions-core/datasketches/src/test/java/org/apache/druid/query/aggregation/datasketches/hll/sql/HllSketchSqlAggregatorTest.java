@@ -66,15 +66,12 @@ import org.apache.druid.query.timeseries.TimeseriesQuery;
 import org.apache.druid.query.topn.InvertedTopNMetricSpec;
 import org.apache.druid.query.topn.NumericTopNMetricSpec;
 import org.apache.druid.query.topn.TopNQueryBuilder;
-import org.apache.druid.segment.IndexBuilder;
-import org.apache.druid.segment.QueryableIndex;
 import org.apache.druid.segment.VirtualColumn;
 import org.apache.druid.segment.VirtualColumns;
 import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.incremental.IncrementalIndexSchema;
 import org.apache.druid.segment.join.JoinableFactoryWrapper;
 import org.apache.druid.segment.virtual.ExpressionVirtualColumn;
-import org.apache.druid.segment.writeout.OffHeapMemorySegmentWriteOutMediumFactory;
 import org.apache.druid.server.SpecificSegmentsQuerySegmentWalker;
 import org.apache.druid.sql.calcite.BaseCalciteQueryTest;
 import org.apache.druid.sql.calcite.SqlTestFrameworkConfig;
@@ -88,7 +85,6 @@ import org.apache.druid.sql.calcite.util.SqlTestFramework.StandardComponentSuppl
 import org.apache.druid.sql.calcite.util.TestDataBuilder;
 import org.apache.druid.sql.guice.SqlModule;
 import org.apache.druid.timeline.DataSegment;
-import org.apache.druid.timeline.partition.LinearShardSpec;
 import org.apache.druid.timeline.partition.NumberedShardSpec;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Period;
@@ -318,40 +314,8 @@ public class HllSketchSqlAggregatorTest extends BaseCalciteQueryTest
     )
     {
       HllSketchModule.registerSerde();
-      final QueryableIndex index = IndexBuilder
-          .create()
-          .tmpDir(tempDirProducer.newTempFolder())
-          .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
-          .schema(
-              new IncrementalIndexSchema.Builder()
-                  .withMetrics(
-                      new CountAggregatorFactory("cnt"),
-                      new DoubleSumAggregatorFactory("m1", "m1"),
-                      new HllSketchBuildAggregatorFactory("hllsketch_dim1", "dim1", null, null, null, false, ROUND),
-                      new HllSketchBuildAggregatorFactory("hllsketch_dim3", "dim3", null, null, null, false, false),
-                      new HllSketchBuildAggregatorFactory("hllsketch_m1", "m1", null, null, null, false, ROUND),
-                      new HllSketchBuildAggregatorFactory("hllsketch_f1", "f1", null, null, null, false, ROUND),
-                      new HllSketchBuildAggregatorFactory("hllsketch_l1", "l1", null, null, null, false, ROUND),
-                      new HllSketchBuildAggregatorFactory("hllsketch_dbl1", "dbl1", null, null, null, false, ROUND)
-                  )
-                  .withRollup(false)
-                  .build()
-          )
-          .rows(TestDataBuilder.ROWS1_WITH_NUMERIC_DIMS)
-          .buildMMappedIndex();
-
-      return SpecificSegmentsQuerySegmentWalker.createWalker(injector, conglomerate).add(
-          DataSegment.builder()
-                     .dataSource(CalciteTests.DATASOURCE2)
-                     .interval(index.getDataInterval())
-                     .version("1")
-                     .shardSpec(new LinearShardSpec(0))
-                     .size(0)
-                     .build(),
-          index
-      )
+      return SpecificSegmentsQuerySegmentWalker.createWalker(injector, conglomerate)
           .add(LOCAL_FOO, tempDirProducer.newTempFolder())
-
           .add(
           DataSegment.builder()
                      .dataSource(CalciteTests.WIKIPEDIA_FIRST_LAST)
