@@ -226,3 +226,9 @@ jobs:
         with:
           name: Druid logs web-checks
           path: druid-logs.tgz
+
+  actions-timeline:
+    needs: [web-checks,intellij-inspections,openrewrite,static-checks]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: Kesin11/actions-timeline@v2
