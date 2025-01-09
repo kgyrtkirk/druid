@@ -197,5 +197,6 @@ jobs:
   actions-timeline:
     needs: [revised-its,standard-its,unit-tests,unit-tests-phase2,set-env-var,build]
     runs-on: ubuntu-latest
+    if: ${{ always() }}
     steps:
       - uses: Kesin11/actions-timeline@v2

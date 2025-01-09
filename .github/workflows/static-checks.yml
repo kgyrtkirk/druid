@@ -230,5 +230,6 @@ jobs:
   actions-timeline:
     needs: [web-checks,intellij-inspections,openrewrite,static-checks]
     runs-on: ubuntu-latest
+    if: ${{ always() }}
     steps:
       - uses: Kesin11/actions-timeline@v2
