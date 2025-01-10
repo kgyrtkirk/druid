@@ -23,10 +23,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
 import org.apache.druid.common.config.NullHandling;
-import org.apache.druid.guice.DruidInjectorBuilder;
+import org.apache.druid.initialization.DruidModule;
 import org.apache.druid.java.util.common.Intervals;
 import org.apache.druid.java.util.common.granularity.Granularities;
 import org.apache.druid.query.Druids;
+import org.apache.druid.query.JoinAlgorithm;
 import org.apache.druid.query.JoinDataSource;
 import org.apache.druid.query.QueryContexts;
 import org.apache.druid.query.QueryDataSource;
@@ -68,6 +69,7 @@ import org.apache.druid.sql.calcite.SqlTestFrameworkConfig;
 import org.apache.druid.sql.calcite.TempDirProducer;
 import org.apache.druid.sql.calcite.filtration.Filtration;
 import org.apache.druid.sql.calcite.util.CalciteTests;
+import org.apache.druid.sql.calcite.util.DruidModuleCollection;
 import org.apache.druid.sql.calcite.util.SqlTestFramework.StandardComponentSupplier;
 import org.apache.druid.sql.calcite.util.TestDataBuilder;
 import org.apache.druid.timeline.DataSegment;
@@ -90,10 +92,9 @@ public class DoublesSketchSqlAggregatorTest extends BaseCalciteQueryTest
     }
 
     @Override
-    public void configureGuice(DruidInjectorBuilder builder)
+    public DruidModule getCoreModule()
     {
-      super.configureGuice(builder);
-      builder.addModule(new DoublesSketchModule());
+      return DruidModuleCollection.of(super.getCoreModule(), new DoublesSketchModule());
     }
 
     @Override
@@ -390,7 +391,8 @@ public class DoublesSketchSqlAggregatorTest extends BaseCalciteQueryTest
                         JoinType.INNER,
                         null,
                         TestExprMacroTable.INSTANCE,
-                        null
+                        null,
+                        JoinAlgorithm.BROADCAST
                     )
                 )
                 .intervals(querySegmentSpec(Intervals.ETERNITY))
