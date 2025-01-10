@@ -25,7 +25,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
+import com.google.common.collect.Lists;
 import com.google.inject.Injector;
+import org.apache.curator.shaded.com.google.common.collect.Iterables;
 import org.apache.druid.data.input.InputRow;
 import org.apache.druid.data.input.InputRowSchema;
 import org.apache.druid.data.input.MapBasedInputRow;
@@ -33,7 +35,6 @@ import org.apache.druid.data.input.ResourceInputSource;
 import org.apache.druid.data.input.impl.DimensionSchema;
 import org.apache.druid.data.input.impl.DimensionsSpec;
 import org.apache.druid.data.input.impl.DoubleDimensionSchema;
-import org.apache.druid.data.input.impl.FloatDimensionSchema;
 import org.apache.druid.data.input.impl.JsonInputFormat;
 import org.apache.druid.data.input.impl.LongDimensionSchema;
 import org.apache.druid.data.input.impl.MapInputRowParser;
@@ -72,7 +73,6 @@ import org.apache.druid.segment.IndexSpec;
 import org.apache.druid.segment.QueryableIndex;
 import org.apache.druid.segment.SegmentWrangler;
 import org.apache.druid.segment.TestIndex;
-import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.segment.column.StringEncodingStrategy;
 import org.apache.druid.segment.generator.GeneratorBasicSchemas;
@@ -117,7 +117,7 @@ public class TestDataBuilder
 {
   private static final ObjectMapper MAPPER = new DefaultObjectMapper();
 
-  public static final String TIMESTAMP_COLUMN = "t";
+  public static final String TIMESTAMP_COLUMN = TestDataSet.TIMESTAMP_COLUMN;
   public static final GlobalTableDataSource CUSTOM_TABLE = new GlobalTableDataSource(CalciteTests.BROADCAST_DATASOURCE);
 
   public static QueryableIndex QUERYABLE_INDEX_FOR_BENCHMARK_DATASOURCE = null;
@@ -155,29 +155,6 @@ public class TestDataBuilder
       new TimestampSpec(TIMESTAMP_COLUMN, "iso", null),
       new DimensionsSpec(
           DimensionsSpec.getDefaultSchemas(ImmutableList.of("dim1", "dim2", "dim3"))
-      ),
-      null
-  );
-
-  private static final InputRowSchema NUMFOO_SCHEMA = new InputRowSchema(
-      new TimestampSpec(TIMESTAMP_COLUMN, "iso", null),
-      new DimensionsSpec(
-          ImmutableList.<DimensionSchema>builder()
-                       .addAll(DimensionsSpec.getDefaultSchemas(ImmutableList.of(
-                           "dim1",
-                           "dim2",
-                           "dim3",
-                           "dim4",
-                           "dim5",
-                           "dim6"
-                       )))
-                       .add(new DoubleDimensionSchema("dbl1"))
-                       .add(new DoubleDimensionSchema("dbl2"))
-                       .add(new FloatDimensionSchema("f1"))
-                       .add(new FloatDimensionSchema("f2"))
-                       .add(new LongDimensionSchema("l1"))
-                       .add(new LongDimensionSchema("l2"))
-                       .build()
       ),
       null
   );
@@ -241,17 +218,6 @@ public class TestDataBuilder
           new DoubleSumAggregatorFactory("m2_x", "m2_x"),
           new HyperUniquesAggregatorFactory("unique_dim1_x", "dim1_x")
       )
-      .withRollup(false)
-      .build();
-
-  public static final IncrementalIndexSchema INDEX_SCHEMA_NUMERIC_DIMS = new IncrementalIndexSchema.Builder()
-      .withMetrics(
-          new CountAggregatorFactory("cnt"),
-          new FloatSumAggregatorFactory("m1", "m1"),
-          new DoubleSumAggregatorFactory("m2", "m2"),
-          new HyperUniquesAggregatorFactory("unique_dim1", "dim1")
-      )
-      .withDimensionsSpec(NUMFOO_SCHEMA.getDimensionsSpec())
       .withRollup(false)
       .build();
 
@@ -385,90 +351,6 @@ public class TestDataBuilder
   public static final List<InputRow> ROWS1 =
       RAW_ROWS1.stream().map(TestDataBuilder::createRow).collect(Collectors.toList());
 
-  public static final List<ImmutableMap<String, Object>> RAW_ROWS1_WITH_NUMERIC_DIMS = ImmutableList.of(
-      ImmutableMap.<String, Object>builder()
-                  .put("t", "2000-01-01")
-                  .put("m1", "1.0")
-                  .put("m2", "1.0")
-                  .put("dbl1", 1.0)
-                  .put("f1", 1.0f)
-                  .put("l1", 7L)
-                  .put("dim1", "")
-                  .put("dim2", ImmutableList.of("a"))
-                  .put("dim3", ImmutableList.of("a", "b"))
-                  .put("dim4", "a")
-                  .put("dim5", "aa")
-                  .put("dim6", "1")
-                  .build(),
-      ImmutableMap.<String, Object>builder()
-                  .put("t", "2000-01-02")
-                  .put("m1", "2.0")
-                  .put("m2", "2.0")
-                  .put("dbl1", 1.7)
-                  .put("dbl2", 1.7)
-                  .put("f1", 0.1f)
-                  .put("f2", 0.1f)
-                  .put("l1", 325323L)
-                  .put("l2", 325323L)
-                  .put("dim1", "10.1")
-                  .put("dim2", ImmutableList.of())
-                  .put("dim3", ImmutableList.of("b", "c"))
-                  .put("dim4", "a")
-                  .put("dim5", "ab")
-                  .put("dim6", "2")
-                  .build(),
-      ImmutableMap.<String, Object>builder()
-                  .put("t", "2000-01-03")
-                  .put("m1", "3.0")
-                  .put("m2", "3.0")
-                  .put("dbl1", 0.0)
-                  .put("dbl2", 0.0)
-                  .put("f1", 0.0)
-                  .put("f2", 0.0)
-                  .put("l1", 0)
-                  .put("l2", 0)
-                  .put("dim1", "2")
-                  .put("dim2", ImmutableList.of(""))
-                  .put("dim3", ImmutableList.of("d"))
-                  .put("dim4", "a")
-                  .put("dim5", "ba")
-                  .put("dim6", "3")
-                  .build(),
-      ImmutableMap.<String, Object>builder()
-                  .put("t", "2001-01-01")
-                  .put("m1", "4.0")
-                  .put("m2", "4.0")
-                  .put("dim1", "1")
-                  .put("dim2", ImmutableList.of("a"))
-                  .put("dim3", ImmutableList.of(""))
-                  .put("dim4", "b")
-                  .put("dim5", "ad")
-                  .put("dim6", "4")
-                  .build(),
-      ImmutableMap.<String, Object>builder()
-                  .put("t", "2001-01-02")
-                  .put("m1", "5.0")
-                  .put("m2", "5.0")
-                  .put("dim1", "def")
-                  .put("dim2", ImmutableList.of("abc"))
-                  .put("dim3", ImmutableList.of())
-                  .put("dim4", "b")
-                  .put("dim5", "aa")
-                  .put("dim6", "5")
-                  .build(),
-      ImmutableMap.<String, Object>builder()
-                  .put("t", "2001-01-03")
-                  .put("m1", "6.0")
-                  .put("m2", "6.0")
-                  .put("dim1", "abc")
-                  .put("dim4", "b")
-                  .put("dim5", "ab")
-                  .put("dim6", "6")
-                  .build()
-  );
-  public static final List<InputRow> ROWS1_WITH_NUMERIC_DIMS =
-      RAW_ROWS1_WITH_NUMERIC_DIMS.stream().map(raw -> createRow(raw, NUMFOO_SCHEMA)).collect(Collectors.toList());
-
   public static final List<ImmutableMap<String, Object>> RAW_ROWS2 = ImmutableList.of(
       ImmutableMap.<String, Object>builder()
                   .put("t", "2000-01-01")
@@ -587,34 +469,16 @@ public class TestDataBuilder
       toRow("2021-01-03T01:00:00Z", USER_VISIT_DIMS, ImmutableMap.of("user", "foo", "country", "USA", "city", "M"))
   );
 
-  private static final InlineDataSource JOINABLE_BACKING_DATA = InlineDataSource.fromIterable(
-      RAW_ROWS1_WITH_NUMERIC_DIMS.stream().map(x -> new Object[]{
-          x.get("dim1"),
-          x.get("dim2"),
-          x.get("dim3"),
-          x.get("dim4"),
-          x.get("dim5"),
-          x.get("dbl1"),
-          x.get("dbl2"),
-          x.get("f1"),
-          x.get("f2"),
-          x.get("l1"),
-          x.get("l2")
-      }).collect(Collectors.toList()),
-      RowSignature.builder()
-                  .add("dim1", ColumnType.STRING)
-                  .add("dim2", ColumnType.STRING)
-                  .add("dim3", ColumnType.STRING)
-                  .add("dim4", ColumnType.STRING)
-                  .add("dim5", ColumnType.STRING)
-                  .add("dbl1", ColumnType.DOUBLE)
-                  .add("dbl2", ColumnType.DOUBLE)
-                  .add("f1", ColumnType.FLOAT)
-                  .add("f2", ColumnType.FLOAT)
-                  .add("l1", ColumnType.LONG)
-                  .add("l2", ColumnType.LONG)
-                  .build()
-  );
+  private static final InlineDataSource JOINABLE_BACKING_DATA = toInlineDataSource(TestDataSet.NUMFOO);
+
+  static InlineDataSource toInlineDataSource(MapBasedTestDataset dataset)
+  {
+    RowSignature sig = dataset.getInputRowSignature();
+    List<String> columnNames = sig.getColumnNames();
+    Iterable<Object[]> rows = Iterables
+        .transform(dataset.getRawRows(), row -> Lists.transform(columnNames, row::get).toArray());
+    return InlineDataSource.fromIterable(rows, sig);
+  }
 
   private static final Set<String> KEY_COLUMNS = ImmutableSet.of("dim4");
 
@@ -780,13 +644,7 @@ public class TestDataBuilder
         .rows(FORBIDDEN_ROWS)
         .buildMMappedIndex();
 
-    final QueryableIndex indexNumericDims = IndexBuilder
-        .create()
-        .tmpDir(new File(tmpDir, "3"))
-        .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
-        .schema(INDEX_SCHEMA_NUMERIC_DIMS)
-        .rows(ROWS1_WITH_NUMERIC_DIMS)
-        .buildMMappedIndex();
+    final QueryableIndex indexNumericDims = TestDataSet.NUMFOO.makeIndex(new File(tmpDir, "3"));
 
     final QueryableIndex index4 = IndexBuilder
         .create()
@@ -886,16 +744,9 @@ public class TestDataBuilder
                    .size(0)
                    .build(),
         forbiddenIndex
-    ).add(
-        DataSegment.builder()
-                   .dataSource(CalciteTests.DATASOURCE3)
-                   .interval(indexNumericDims.getDataInterval())
-                   .version("1")
-                   .shardSpec(new LinearShardSpec(0))
-                   .size(0)
-                   .build(),
-        indexNumericDims
-    ).add(
+    )
+    .add(TestDataSet.NUMFOO, new File(tmpDir, "3"))
+    .add(
         DataSegment.builder()
                    .dataSource(CalciteTests.DATASOURCE4)
                    .interval(index4.getDataInterval())
@@ -1202,12 +1053,12 @@ public class TestDataBuilder
     return new MapBasedInputRow(DateTimes.ISO_DATE_OPTIONAL_TIME.parse(time), dimensions, event);
   }
 
-  public static InputRow createRow(final ImmutableMap<String, ?> map)
+  public static InputRow createRow(final Map<String, ?> map)
   {
     return MapInputRowParser.parse(FOO_SCHEMA, (Map<String, Object>) map);
   }
 
-  public static InputRow createRow(final ImmutableMap<String, ?> map, InputRowSchema inputRowSchema)
+  public static InputRow createRow(final Map<String, ?> map, InputRowSchema inputRowSchema)
   {
     return MapInputRowParser.parse(inputRowSchema, (Map<String, Object>) map);
   }

@@ -21,19 +21,14 @@ package org.apache.druid.query.aggregation.variance.sql;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Injector;
-import org.apache.druid.common.config.NullHandling;
 import org.apache.druid.data.input.InputRow;
-import org.apache.druid.data.input.impl.DimensionSchema;
-import org.apache.druid.data.input.impl.DimensionsSpec;
-import org.apache.druid.data.input.impl.DoubleDimensionSchema;
-import org.apache.druid.data.input.impl.FloatDimensionSchema;
-import org.apache.druid.data.input.impl.LongDimensionSchema;
 import org.apache.druid.error.DruidException;
 import org.apache.druid.initialization.DruidModule;
 import org.apache.druid.java.util.common.granularity.Granularities;
 import org.apache.druid.math.expr.ExprMacroTable;
 import org.apache.druid.query.Druids;
 import org.apache.druid.query.QueryRunnerFactoryConglomerate;
+import org.apache.druid.query.aggregation.AggregatorFactory;
 import org.apache.druid.query.aggregation.CountAggregatorFactory;
 import org.apache.druid.query.aggregation.DoubleSumAggregatorFactory;
 import org.apache.druid.query.aggregation.FilteredAggregatorFactory;
@@ -49,14 +44,10 @@ import org.apache.druid.query.groupby.orderby.DefaultLimitSpec;
 import org.apache.druid.query.groupby.orderby.OrderByColumnSpec;
 import org.apache.druid.query.ordering.StringComparators;
 import org.apache.druid.query.spec.MultipleIntervalSegmentSpec;
-import org.apache.druid.segment.IndexBuilder;
-import org.apache.druid.segment.QueryableIndex;
 import org.apache.druid.segment.column.ColumnType;
-import org.apache.druid.segment.incremental.IncrementalIndexSchema;
 import org.apache.druid.segment.join.JoinableFactoryWrapper;
 import org.apache.druid.segment.serde.ComplexMetrics;
 import org.apache.druid.segment.virtual.ExpressionVirtualColumn;
-import org.apache.druid.segment.writeout.OffHeapMemorySegmentWriteOutMediumFactory;
 import org.apache.druid.server.SpecificSegmentsQuerySegmentWalker;
 import org.apache.druid.sql.calcite.BaseCalciteQueryTest;
 import org.apache.druid.sql.calcite.SqlTestFrameworkConfig;
@@ -65,10 +56,8 @@ import org.apache.druid.sql.calcite.filtration.Filtration;
 import org.apache.druid.sql.calcite.run.EngineFeature;
 import org.apache.druid.sql.calcite.util.CalciteTests;
 import org.apache.druid.sql.calcite.util.DruidModuleCollection;
+import org.apache.druid.sql.calcite.util.MapBasedTestDataset.NumFoo;
 import org.apache.druid.sql.calcite.util.SqlTestFramework.StandardComponentSupplier;
-import org.apache.druid.sql.calcite.util.TestDataBuilder;
-import org.apache.druid.timeline.DataSegment;
-import org.apache.druid.timeline.partition.LinearShardSpec;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -79,6 +68,21 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @SqlTestFrameworkConfig.ComponentSupplier(VarianceComponentSupplier.class)
 public class VarianceSqlAggregatorTest extends BaseCalciteQueryTest
 {
+  static MyNumFoo LOCAL_NUMFOO = new MyNumFoo();
+
+  static class MyNumFoo extends NumFoo
+  {
+    @Override
+    public List<AggregatorFactory> getMetrics()
+    {
+      return ImmutableList.<AggregatorFactory>builder()
+          .add(new CountAggregatorFactory("cnt"))
+          .add(new DoubleSumAggregatorFactory("m1", "m1"))
+          .add(new VarianceAggregatorFactory("var1", "m1", null, null))
+          .build();
+    }
+  }
+
   public static class VarianceComponentSupplier extends StandardComponentSupplier
   {
     public VarianceComponentSupplier(TempDirProducer tempFolderProducer)
@@ -100,44 +104,8 @@ public class VarianceSqlAggregatorTest extends BaseCalciteQueryTest
     )
     {
       ComplexMetrics.registerSerde(VarianceSerde.TYPE_NAME, new VarianceSerde());
-
-      final QueryableIndex index =
-          IndexBuilder.create(CalciteTests.getJsonMapper().registerModules(new DruidStatsModule().getJacksonModules()))
-                      .tmpDir(tempDirProducer.newTempFolder())
-                      .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
-                      .schema(
-                          new IncrementalIndexSchema.Builder()
-                              .withDimensionsSpec(
-                                  new DimensionsSpec(
-                                      ImmutableList.<DimensionSchema>builder()
-                                                   .addAll(DimensionsSpec.getDefaultSchemas(ImmutableList.of("dim1", "dim2", "dim3")))
-                                                   .add(new DoubleDimensionSchema("dbl1"))
-                                                   .add(new FloatDimensionSchema("f1"))
-                                                   .add(new LongDimensionSchema("l1"))
-                                                   .build()
-                                  )
-                              )
-                              .withMetrics(
-                                  new CountAggregatorFactory("cnt"),
-                                  new DoubleSumAggregatorFactory("m1", "m1"),
-                                  new VarianceAggregatorFactory("var1", "m1", null, null)
-                              )
-                              .withRollup(false)
-                              .build()
-                      )
-                      .rows(TestDataBuilder.ROWS1_WITH_NUMERIC_DIMS)
-                      .buildMMappedIndex();
-
-      return SpecificSegmentsQuerySegmentWalker.createWalker(injector, conglomerate).add(
-          DataSegment.builder()
-                     .dataSource(CalciteTests.DATASOURCE3)
-                     .interval(index.getDataInterval())
-                     .version("1")
-                     .shardSpec(new LinearShardSpec(0))
-                     .size(0)
-                     .build(),
-          index
-      );
+      return SpecificSegmentsQuerySegmentWalker.createWalker(injector, conglomerate)
+          .add(new MyNumFoo(), tempDirProducer.newTempFolder());
     }
   }
 
@@ -162,10 +130,6 @@ public class VarianceSqlAggregatorTest extends BaseCalciteQueryTest
         int v = ((Integer) raw).intValue() * multiply;
         holder.add(v);
       }
-    } else {
-      if (NullHandling.replaceWithDefault()) {
-        holder.add(0.0f);
-      }
     }
   }
 
@@ -175,7 +139,7 @@ public class VarianceSqlAggregatorTest extends BaseCalciteQueryTest
     VarianceAggregatorCollector holder1 = new VarianceAggregatorCollector();
     VarianceAggregatorCollector holder2 = new VarianceAggregatorCollector();
     VarianceAggregatorCollector holder3 = new VarianceAggregatorCollector();
-    for (InputRow row : TestDataBuilder.ROWS1_WITH_NUMERIC_DIMS) {
+    for (InputRow row : LOCAL_NUMFOO.getRows()) {
       Object raw1 = row.getRaw("dbl1");
       Object raw2 = row.getRaw("f1");
       Object raw3 = row.getRaw("l1");
@@ -223,7 +187,7 @@ public class VarianceSqlAggregatorTest extends BaseCalciteQueryTest
     VarianceAggregatorCollector holder1 = new VarianceAggregatorCollector();
     VarianceAggregatorCollector holder2 = new VarianceAggregatorCollector();
     VarianceAggregatorCollector holder3 = new VarianceAggregatorCollector();
-    for (InputRow row : TestDataBuilder.ROWS1_WITH_NUMERIC_DIMS) {
+    for (InputRow row : LOCAL_NUMFOO.getRows()) {
       Object raw1 = row.getRaw("dbl1");
       Object raw2 = row.getRaw("f1");
       Object raw3 = row.getRaw("l1");
@@ -271,7 +235,7 @@ public class VarianceSqlAggregatorTest extends BaseCalciteQueryTest
     VarianceAggregatorCollector holder1 = new VarianceAggregatorCollector();
     VarianceAggregatorCollector holder2 = new VarianceAggregatorCollector();
     VarianceAggregatorCollector holder3 = new VarianceAggregatorCollector();
-    for (InputRow row : TestDataBuilder.ROWS1_WITH_NUMERIC_DIMS) {
+    for (InputRow row : LOCAL_NUMFOO.getRows()) {
       Object raw1 = row.getRaw("dbl1");
       Object raw2 = row.getRaw("f1");
       Object raw3 = row.getRaw("l1");
@@ -327,7 +291,7 @@ public class VarianceSqlAggregatorTest extends BaseCalciteQueryTest
     VarianceAggregatorCollector holder1 = new VarianceAggregatorCollector();
     VarianceAggregatorCollector holder2 = new VarianceAggregatorCollector();
     VarianceAggregatorCollector holder3 = new VarianceAggregatorCollector();
-    for (InputRow row : TestDataBuilder.ROWS1_WITH_NUMERIC_DIMS) {
+    for (InputRow row : LOCAL_NUMFOO.getRows()) {
       Object raw1 = row.getRaw("dbl1");
       Object raw2 = row.getRaw("f1");
       Object raw3 = row.getRaw("l1");
@@ -381,7 +345,7 @@ public class VarianceSqlAggregatorTest extends BaseCalciteQueryTest
     VarianceAggregatorCollector holder1 = new VarianceAggregatorCollector();
     VarianceAggregatorCollector holder2 = new VarianceAggregatorCollector();
     VarianceAggregatorCollector holder3 = new VarianceAggregatorCollector();
-    for (InputRow row : TestDataBuilder.ROWS1_WITH_NUMERIC_DIMS) {
+    for (InputRow row : LOCAL_NUMFOO.getRows()) {
       Object raw1 = row.getRaw("dbl1");
       Object raw2 = row.getRaw("f1");
       Object raw3 = row.getRaw("l1");
@@ -438,16 +402,11 @@ public class VarianceSqlAggregatorTest extends BaseCalciteQueryTest
   @Test
   public void testVarianceOrderBy()
   {
-    List<Object[]> expectedResults = NullHandling.sqlCompatible()
-                                     ? ImmutableList.of(
+    List<Object[]> expectedResults = ImmutableList.of(
         new Object[]{"a", 0.0},
         new Object[]{null, 0.0},
         new Object[]{"", 0.0},
         new Object[]{"abc", null}
-    ) : ImmutableList.of(
-        new Object[]{"a", 0.5},
-        new Object[]{"", 0.003333333432674409},
-        new Object[]{"abc", 0.0}
     );
 
     testQuery(
@@ -515,9 +474,7 @@ public class VarianceSqlAggregatorTest extends BaseCalciteQueryTest
         ),
         ResultMatchMode.EQUALS_EPS,
         ImmutableList.of(
-            NullHandling.replaceWithDefault()
-            ? new Object[]{3.61497656362466, 3.960008417499471, 3.960008417499471, 15.681666666666667}
-            : new Object[]{4.074582459862878, 4.990323970779185, 4.990323970779185, 24.903333333333332}
+            new Object[]{4.074582459862878, 4.990323970779185, 4.990323970779185, 24.903333333333332}
         )
     );
   }
@@ -541,7 +498,7 @@ public class VarianceSqlAggregatorTest extends BaseCalciteQueryTest
                   .dataSource(CalciteTests.DATASOURCE3)
                   .intervals(querySegmentSpec(Filtration.eternity()))
                   .granularity(Granularities.ALL)
-                  .filters(numericEquality("dim2", 0L, ColumnType.LONG))
+                  .filters(equality("dim2", 0L, ColumnType.LONG))
                   .aggregators(
                       new VarianceAggregatorFactory("a0:agg", "dbl1", "population", "double"),
                       new VarianceAggregatorFactory("a1:agg", "dbl1", "sample", "double"),
@@ -566,9 +523,7 @@ public class VarianceSqlAggregatorTest extends BaseCalciteQueryTest
         ),
         ResultMatchMode.EQUALS_EPS,
         ImmutableList.of(
-            NullHandling.replaceWithDefault()
-            ? new Object[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}
-            : new Object[]{null, null, null, null, null, null, null, null}
+            new Object[]{null, null, null, null, null, null, null, null}
         )
     );
   }
@@ -647,9 +602,7 @@ public class VarianceSqlAggregatorTest extends BaseCalciteQueryTest
         ),
         ResultMatchMode.EQUALS_EPS,
         ImmutableList.of(
-            NullHandling.replaceWithDefault()
-            ? new Object[]{"a", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}
-            : new Object[]{"a", null, null, null, null, null, null, null, null}
+            new Object[]{"a", null, null, null, null, null, null, null, null}
         )
     );
   }

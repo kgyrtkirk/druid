@@ -23,7 +23,6 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Injector;
-import org.apache.druid.common.config.NullHandling;
 import org.apache.druid.error.DruidException;
 import org.apache.druid.initialization.DruidModule;
 import org.apache.druid.java.util.common.Intervals;
@@ -81,6 +80,7 @@ import org.apache.druid.sql.calcite.SqlTestFrameworkConfig;
 import org.apache.druid.sql.calcite.TempDirProducer;
 import org.apache.druid.sql.calcite.filtration.Filtration;
 import org.apache.druid.sql.calcite.util.CacheTestHelperModule.ResultCacheMode;
+import org.apache.druid.sql.calcite.util.MapBasedTestDataset.NumFoo;
 import org.apache.druid.sql.calcite.util.CalciteTests;
 import org.apache.druid.sql.calcite.util.DruidModuleCollection;
 import org.apache.druid.sql.calcite.util.SqlTestFramework.StandardComponentSupplier;
@@ -103,10 +103,6 @@ import java.util.stream.Collectors;
 @SqlTestFrameworkConfig.ComponentSupplier(HllSketchComponentSupplier.class)
 public class HllSketchSqlAggregatorTest extends BaseCalciteQueryTest
 {
-  static {
-    NullHandling.initializeForTests();
-  }
-
   private static final boolean ROUND = true;
 
   // For testHllSketchPostAggsGroupBy, testHllSketchPostAggsTimeseries
@@ -244,8 +240,50 @@ public class HllSketchSqlAggregatorTest extends BaseCalciteQueryTest
       )
   );
 
+
+  static MyFoo LOCAL_FOO = new MyFoo();
+
+  static class MyFoo extends NumFoo
+  {
+    @Override
+    public List<AggregatorFactory> getMetrics()
+    {
+      return ImmutableList.<AggregatorFactory>builder()
+          .add(new CountAggregatorFactory("cnt"))
+          .add(new DoubleSumAggregatorFactory("m1", "m1"))
+          .add(new HllSketchBuildAggregatorFactory("hllsketch_dim1", "dim1", null, null, null, false, ROUND))
+          .add(new HllSketchBuildAggregatorFactory("hllsketch_dim3", "dim3", null, null, null, false, false))
+          .add(new HllSketchBuildAggregatorFactory("hllsketch_m1", "m1", null, null, null, false, ROUND))
+          .add(new HllSketchBuildAggregatorFactory("hllsketch_f1", "f1", null, null, null, false, ROUND))
+          .add(new HllSketchBuildAggregatorFactory("hllsketch_l1", "l1", null, null, null, false, ROUND))
+          .add(new HllSketchBuildAggregatorFactory("hllsketch_dbl1", "dbl1", null, null, null, false, ROUND)).build();
+    }
+
+    /**
+     * Default implementation adds withDimensionsSpec
+     * which makes a testcase fail
+     */
+    public IncrementalIndexSchema getIndexSchema()
+    {
+      return new IncrementalIndexSchema.Builder()
+          .withMetrics(getMetrics().toArray(new AggregatorFactory[0]))
+          .withRollup(false)
+          .build();
+    }
+
+    @Override
+    public String getName()
+    {
+      return CalciteTests.DATASOURCE1;
+    }
+  }
+
+  private static final String DATASOURCE1 = LOCAL_FOO.getName();
+
+
   public static class HllSketchComponentSupplier extends StandardComponentSupplier
   {
+
     public HllSketchComponentSupplier(TempDirProducer tempFolderProducer)
     {
       super(tempFolderProducer);
@@ -275,38 +313,9 @@ public class HllSketchSqlAggregatorTest extends BaseCalciteQueryTest
     )
     {
       HllSketchModule.registerSerde();
-      final QueryableIndex index = IndexBuilder
-          .create()
-          .tmpDir(tempDirProducer.newTempFolder())
-          .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
-          .schema(
-              new IncrementalIndexSchema.Builder()
-                  .withMetrics(
-                      new CountAggregatorFactory("cnt"),
-                      new DoubleSumAggregatorFactory("m1", "m1"),
-                      new HllSketchBuildAggregatorFactory("hllsketch_dim1", "dim1", null, null, null, false, ROUND),
-                      new HllSketchBuildAggregatorFactory("hllsketch_dim3", "dim3", null, null, null, false, false),
-                      new HllSketchBuildAggregatorFactory("hllsketch_m1", "m1", null, null, null, false, ROUND),
-                      new HllSketchBuildAggregatorFactory("hllsketch_f1", "f1", null, null, null, false, ROUND),
-                      new HllSketchBuildAggregatorFactory("hllsketch_l1", "l1", null, null, null, false, ROUND),
-                      new HllSketchBuildAggregatorFactory("hllsketch_dbl1", "dbl1", null, null, null, false, ROUND)
-                  )
-                  .withRollup(false)
-                  .build()
-          )
-          .rows(TestDataBuilder.ROWS1_WITH_NUMERIC_DIMS)
-          .buildMMappedIndex();
-
-      return SpecificSegmentsQuerySegmentWalker.createWalker(injector, conglomerate).add(
-          DataSegment.builder()
-                     .dataSource(CalciteTests.DATASOURCE1)
-                     .interval(index.getDataInterval())
-                     .version("1")
-                     .shardSpec(new LinearShardSpec(0))
-                     .size(0)
-                     .build(),
-          index
-      ).add(
+      return SpecificSegmentsQuerySegmentWalker.createWalker(injector, conglomerate)
+          .add(LOCAL_FOO, tempDirProducer.newTempFolder())
+          .add(
           DataSegment.builder()
                      .dataSource(CalciteTests.WIKIPEDIA_FIRST_LAST)
                      .interval(Intervals.of("2015-09-12/2015-09-13"))
@@ -334,17 +343,9 @@ public class HllSketchSqlAggregatorTest extends BaseCalciteQueryTest
                        + "  APPROX_COUNT_DISTINCT_DS_HLL(hllsketch_dim1, CAST(21 AS BIGINT))\n" // also native column
                        + "FROM druid.foo";
 
-    final List<Object[]> expectedResults;
-
-    if (NullHandling.replaceWithDefault()) {
-      expectedResults = ImmutableList.of(
-          new Object[]{6L, 2L, 2L, 1L, 2L, 5L, 5L, 5L}
-      );
-    } else {
-      expectedResults = ImmutableList.of(
-          new Object[]{6L, 2L, 2L, 1L, 1L, 5L, 5L, 5L}
-      );
-    }
+    final List<Object[]> expectedResults = ImmutableList.of(
+        new Object[]{6L, 2L, 2L, 1L, 1L, 5L, 5L, 5L}
+    );
 
     testQuery(
         sql,
@@ -456,12 +457,7 @@ public class HllSketchSqlAggregatorTest extends BaseCalciteQueryTest
                         .setInterval(new MultipleIntervalSegmentSpec(ImmutableList.of(Filtration.eternity())))
                         .setGranularity(Granularities.ALL)
                         .setAggregatorSpecs(
-                            NullHandling.replaceWithDefault()
-                            ? Arrays.asList(
-                                new DoubleSumAggregatorFactory("_a0:sum", "a0"),
-                                new CountAggregatorFactory("_a0:count")
-                            )
-                            : Arrays.asList(
+                            Arrays.asList(
                                 new DoubleSumAggregatorFactory("_a0:sum", "a0"),
                                 new FilteredAggregatorFactory(
                                     new CountAggregatorFactory("_a0:count"),
@@ -513,12 +509,8 @@ public class HllSketchSqlAggregatorTest extends BaseCalciteQueryTest
                         .setContext(QUERY_CONTEXT_DEFAULT)
                         .build()
         ),
-        NullHandling.sqlCompatible()
-        ? ImmutableList.of(
+        ImmutableList.of(
             new Object[]{null, 2L},
-            new Object[]{"a", 2L}
-        )
-        : ImmutableList.of(
             new Object[]{"a", 2L}
         )
     );
@@ -904,7 +896,7 @@ public class HllSketchSqlAggregatorTest extends BaseCalciteQueryTest
         ImmutableList.of(Druids.newTimeseriesQueryBuilder()
                                .dataSource(CalciteTests.DATASOURCE1)
                                .intervals(querySegmentSpec(Filtration.eternity()))
-                               .filters(numericEquality("dim2", 0L, ColumnType.LONG))
+                               .filters(equality("dim2", 0L, ColumnType.LONG))
                                .granularity(Granularities.ALL)
                                .aggregators(
                                    aggregators(

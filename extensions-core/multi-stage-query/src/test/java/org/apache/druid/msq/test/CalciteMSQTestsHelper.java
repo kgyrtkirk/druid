@@ -85,6 +85,7 @@ import org.apache.druid.sql.calcite.CalciteNestedDataQueryTest;
 import org.apache.druid.sql.calcite.TempDirProducer;
 import org.apache.druid.sql.calcite.util.CalciteTests;
 import org.apache.druid.sql.calcite.util.TestDataBuilder;
+import org.apache.druid.sql.calcite.util.TestDataSet;
 import org.apache.druid.timeline.DataSegment;
 import org.apache.druid.timeline.SegmentId;
 import org.apache.druid.timeline.partition.LinearShardSpec;
@@ -103,13 +104,10 @@ import java.util.function.Supplier;
 import static org.apache.druid.sql.calcite.util.CalciteTests.ARRAYS_DATASOURCE;
 import static org.apache.druid.sql.calcite.util.CalciteTests.DATASOURCE1;
 import static org.apache.druid.sql.calcite.util.CalciteTests.DATASOURCE2;
-import static org.apache.druid.sql.calcite.util.CalciteTests.DATASOURCE3;
 import static org.apache.druid.sql.calcite.util.CalciteTests.DATASOURCE5;
 import static org.apache.druid.sql.calcite.util.CalciteTests.WIKIPEDIA;
 import static org.apache.druid.sql.calcite.util.TestDataBuilder.INDEX_SCHEMA_LOTS_O_COLUMNS;
-import static org.apache.druid.sql.calcite.util.TestDataBuilder.INDEX_SCHEMA_NUMERIC_DIMS;
 import static org.apache.druid.sql.calcite.util.TestDataBuilder.ROWS1;
-import static org.apache.druid.sql.calcite.util.TestDataBuilder.ROWS1_WITH_NUMERIC_DIMS;
 import static org.apache.druid.sql.calcite.util.TestDataBuilder.ROWS2;
 import static org.apache.druid.sql.calcite.util.TestDataBuilder.ROWS_LOTS_OF_COLUMNS;
 import static org.mockito.ArgumentMatchers.any;
@@ -244,7 +242,7 @@ public class CalciteMSQTestsHelper
       SegmentId segmentId
   )
   {
-    final QueryableIndex index;
+    QueryableIndex index = null;
     switch (segmentId.getDataSource()) {
       case WIKIPEDIA:
         try {
@@ -302,15 +300,8 @@ public class CalciteMSQTestsHelper
             .rows(ROWS2)
             .buildMMappedIndex();
         break;
-      case DATASOURCE3:
       case CalciteTests.BROADCAST_DATASOURCE:
-        index = IndexBuilder
-            .create()
-            .tmpDir(tempFolderProducer.apply("tmpDir"))
-            .segmentWriteOutMediumFactory(OffHeapMemorySegmentWriteOutMediumFactory.instance())
-            .schema(INDEX_SCHEMA_NUMERIC_DIMS)
-            .rows(ROWS1_WITH_NUMERIC_DIMS)
-            .buildMMappedIndex();
+        index = TestDataSet.NUMFOO.makeIndex(tempFolderProducer.apply("tmpDir"));
         break;
       case DATASOURCE5:
         index = IndexBuilder
@@ -453,42 +444,16 @@ public class CalciteMSQTestsHelper
       case CalciteTests.BENCHMARK_DATASOURCE:
         index = TestDataBuilder.getQueryableIndexForBenchmarkDatasource();
         break;
-      default:
-        throw new ISE("Cannot query segment %s in test runner", segmentId);
-
     }
-    Segment segment = new Segment()
-    {
-      @Override
-      public SegmentId getId()
-      {
-        return segmentId;
-      }
+    if (TestDataSet.NUMFOO.getName().equals(segmentId.getDataSource())) {
+      index = TestDataSet.NUMFOO.makeIndex(tempFolderProducer.apply("tmpDir"));
+    }
 
-      @Override
-      public Interval getDataInterval()
-      {
-        return segmentId.getInterval();
-      }
+    if (index == null) {
+      throw new ISE("Cannot query segment %s in test runner", segmentId);
+    }
 
-      @Nullable
-      @Override
-      public QueryableIndex asQueryableIndex()
-      {
-        return index;
-      }
-
-      @Override
-      public CursorFactory asCursorFactory()
-      {
-        return new QueryableIndexCursorFactory(index);
-      }
-
-      @Override
-      public void close()
-      {
-      }
-    };
+    Segment segment = new MSQTestSegment(segmentId, index);
     DataSegment dataSegment = DataSegment.builder()
                                          .dataSource(segmentId.getDataSource())
                                          .interval(segmentId.getInterval())
@@ -497,5 +462,47 @@ public class CalciteMSQTestsHelper
                                          .size(0)
                                          .build();
     return () -> new ReferenceCountingResourceHolder<>(new CompleteSegment(dataSegment, segment), Closer.create());
+  }
+
+  private static final class MSQTestSegment implements Segment
+  {
+    private final SegmentId segmentId;
+    private final QueryableIndex index;
+
+    private MSQTestSegment(SegmentId segmentId, QueryableIndex index)
+    {
+      this.segmentId = segmentId;
+      this.index = index;
+    }
+
+    @Override
+    public SegmentId getId()
+    {
+      return segmentId;
+    }
+
+    @Override
+    public Interval getDataInterval()
+    {
+      return segmentId.getInterval();
+    }
+
+    @Nullable
+    @Override
+    public QueryableIndex asQueryableIndex()
+    {
+      return index;
+    }
+
+    @Override
+    public CursorFactory asCursorFactory()
+    {
+      return new QueryableIndexCursorFactory(index);
+    }
+
+    @Override
+    public void close()
+    {
+    }
   }
 }
