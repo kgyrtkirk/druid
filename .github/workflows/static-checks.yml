@@ -112,7 +112,7 @@ jobs:
         if: ${{ matrix.java == '8' }}
         run: ${MVN} spotbugs:check --fail-at-end -pl '!benchmarks'
 
-  intellij-inspections:
+  inspections:
     strategy:
       fail-fast: false
     runs-on: ubuntu-latest
@@ -228,7 +228,7 @@ jobs:
           path: druid-logs.tgz
 
   actions-timeline:
-    needs: [web-checks,intellij-inspections,openrewrite,static-checks]
+    needs: [web-checks,inspections,openrewrite,static-checks]
     runs-on: ubuntu-latest
     if: ${{ always() }}
     steps:
