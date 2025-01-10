@@ -19,7 +19,6 @@
 
 package org.apache.druid.benchmark.indexing;
 
-import org.apache.druid.common.config.NullHandling;
 import org.apache.druid.java.util.common.logger.Logger;
 import org.apache.druid.js.JavaScriptConfig;
 import org.apache.druid.query.aggregation.hyperloglog.HyperUniquesSerde;
@@ -35,6 +34,7 @@ import org.apache.druid.query.ordering.StringComparators;
 import org.apache.druid.query.search.ContainsSearchQuerySpec;
 import org.apache.druid.segment.Cursor;
 import org.apache.druid.segment.CursorBuildSpec;
+import org.apache.druid.segment.CursorFactory;
 import org.apache.druid.segment.CursorHolder;
 import org.apache.druid.segment.DimensionSelector;
 import org.apache.druid.segment.data.IndexedInts;
@@ -44,8 +44,8 @@ import org.apache.druid.segment.generator.GeneratorSchemaInfo;
 import org.apache.druid.segment.incremental.AppendableIndexSpec;
 import org.apache.druid.segment.incremental.IncrementalIndex;
 import org.apache.druid.segment.incremental.IncrementalIndexCreator;
+import org.apache.druid.segment.incremental.IncrementalIndexCursorFactory;
 import org.apache.druid.segment.incremental.IncrementalIndexSchema;
-import org.apache.druid.segment.incremental.IncrementalIndexStorageAdapter;
 import org.apache.druid.segment.serde.ComplexMetrics;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
@@ -88,10 +88,6 @@ public class IncrementalIndexReadBenchmark
 
   private static final Logger log = new Logger(IncrementalIndexReadBenchmark.class);
   private static final int RNG_SEED = 9999;
-
-  static {
-    NullHandling.initializeForTests();
-  }
 
   private AppendableIndexSpec appendableIndexSpec;
   private IncrementalIndex incIndex;
@@ -147,8 +143,8 @@ public class IncrementalIndexReadBenchmark
   @OutputTimeUnit(TimeUnit.MICROSECONDS)
   public void read(Blackhole blackhole)
   {
-    IncrementalIndexStorageAdapter sa = new IncrementalIndexStorageAdapter(incIndex);
-    try (final CursorHolder cursorHolder = makeCursor(sa, null)) {
+    final CursorFactory cursorFactory = new IncrementalIndexCursorFactory(incIndex);
+    try (final CursorHolder cursorHolder = makeCursor(cursorFactory, null)) {
       Cursor cursor = cursorHolder.asCursor();
 
       List<DimensionSelector> selectors = new ArrayList<>();
@@ -183,8 +179,8 @@ public class IncrementalIndexReadBenchmark
         )
     );
 
-    IncrementalIndexStorageAdapter sa = new IncrementalIndexStorageAdapter(incIndex);
-    try (final CursorHolder cursorHolder = makeCursor(sa, filter)) {
+    IncrementalIndexCursorFactory cursorFactory = new IncrementalIndexCursorFactory(incIndex);
+    try (final CursorHolder cursorHolder = makeCursor(cursorFactory, filter)) {
       Cursor cursor = cursorHolder.asCursor();
 
       List<DimensionSelector> selectors = new ArrayList<>();
@@ -204,14 +200,14 @@ public class IncrementalIndexReadBenchmark
     }
   }
 
-  private CursorHolder makeCursor(IncrementalIndexStorageAdapter sa, DimFilter filter)
+  private CursorHolder makeCursor(CursorFactory factory, DimFilter filter)
   {
     CursorBuildSpec.CursorBuildSpecBuilder builder = CursorBuildSpec.builder()
                                                                     .setInterval(schemaInfo.getDataInterval());
     if (filter != null) {
       builder.setFilter(filter.toFilter());
     }
-    return sa.makeCursorHolder(builder.build());
+    return factory.makeCursorHolder(builder.build());
   }
 
   private static DimensionSelector makeDimensionSelector(Cursor cursor, String name)

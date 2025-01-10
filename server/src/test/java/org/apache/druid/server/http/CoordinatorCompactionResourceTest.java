@@ -22,9 +22,9 @@ package org.apache.druid.server.http;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import org.apache.druid.client.indexing.NoopOverlordClient;
 import org.apache.druid.error.DruidExceptionMatcher;
 import org.apache.druid.error.ErrorResponse;
+import org.apache.druid.rpc.indexing.NoopOverlordClient;
 import org.apache.druid.rpc.indexing.OverlordClient;
 import org.apache.druid.server.compaction.CompactionStatistics;
 import org.apache.druid.server.compaction.CompactionStatusResponse;
@@ -50,6 +50,7 @@ public class CoordinatorCompactionResourceTest
   private final AutoCompactionSnapshot expectedSnapshot = new AutoCompactionSnapshot(
       dataSourceName,
       AutoCompactionSnapshot.AutoCompactionScheduleStatus.RUNNING,
+      null,
       1,
       1,
       1,

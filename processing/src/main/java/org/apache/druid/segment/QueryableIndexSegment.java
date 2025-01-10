@@ -39,15 +39,15 @@ public class QueryableIndexSegment implements Segment
       .makeAsMap(QueryableIndexSegment.class);
 
   private final QueryableIndex index;
-  private final QueryableIndexStorageAdapter storageAdapter;
+  private final QueryableIndexCursorFactory cursorFactory;
   private final TimeBoundaryInspector timeBoundaryInspector;
   private final SegmentId segmentId;
 
   public QueryableIndexSegment(QueryableIndex index, final SegmentId segmentId)
   {
     this.index = index;
-    this.storageAdapter = new QueryableIndexStorageAdapter(index);
     this.timeBoundaryInspector = QueryableIndexTimeBoundaryInspector.create(index);
+    this.cursorFactory = new QueryableIndexCursorFactory(index, timeBoundaryInspector);
     this.segmentId = segmentId;
   }
 
@@ -70,9 +70,9 @@ public class QueryableIndexSegment implements Segment
   }
 
   @Override
-  public StorageAdapter asStorageAdapter()
+  public CursorFactory asCursorFactory()
   {
-    return storageAdapter;
+    return cursorFactory;
   }
 
   @Override
@@ -97,6 +97,12 @@ public class QueryableIndexSegment implements Segment
 
     if (TimeBoundaryInspector.class.equals(clazz)) {
       return (T) timeBoundaryInspector;
+    } else if (Metadata.class.equals(clazz)) {
+      return (T) index.getMetadata();
+    } else if (PhysicalSegmentInspector.class.equals(clazz)) {
+      return (T) new QueryableIndexPhysicalSegmentInspector(index);
+    } else if (TopNOptimizationInspector.class.equals(clazz)) {
+      return (T) new SimpleTopNOptimizationInspector(true);
     }
 
     return Segment.super.as(clazz);

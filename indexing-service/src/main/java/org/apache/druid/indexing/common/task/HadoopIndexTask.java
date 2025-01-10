@@ -31,7 +31,7 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
-import org.apache.commons.lang.BooleanUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.druid.indexer.DataSegmentAndIndexZipFilePath;
 import org.apache.druid.indexer.HadoopDruidDetermineConfigurationJob;
 import org.apache.druid.indexer.HadoopDruidIndexerConfig;
@@ -677,7 +677,7 @@ public class HadoopIndexTask extends HadoopTask implements ChatHandler
 
   private TaskReport.ReportMap getTaskCompletionReports()
   {
-    return buildIngestionStatsReport(ingestionState, errorMsg, null, null);
+    return buildIngestionStatsAndContextReport(ingestionState, errorMsg, null, null);
   }
 
   @Override
@@ -921,9 +921,7 @@ public class HadoopIndexTask extends HadoopTask implements ChatHandler
   public static class HadoopRenameSegmentIndexFilesRunner
   {
     TypeReference<List<DataSegmentAndIndexZipFilePath>> LIST_DATA_SEGMENT_AND_INDEX_ZIP_FILE_PATH =
-        new TypeReference<List<DataSegmentAndIndexZipFilePath>>()
-        {
-        };
+        new TypeReference<>() {};
 
     public void runTask(String[] args) throws Exception
     {
@@ -963,9 +961,7 @@ public class HadoopIndexTask extends HadoopTask implements ChatHandler
   public static class HadoopIndexerGeneratorCleanupRunner
   {
     TypeReference<List<DataSegmentAndIndexZipFilePath>> LIST_DATA_SEGMENT_AND_INDEX_ZIP_FILE_PATH =
-        new TypeReference<List<DataSegmentAndIndexZipFilePath>>()
-        {
-        };
+        new TypeReference<>() {};
 
     public void runTask(String[] args) throws Exception
     {

@@ -26,7 +26,6 @@ import com.google.inject.Injector;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql2rel.SqlToRelConverter;
 import org.apache.commons.io.FileUtils;
-import org.apache.druid.common.config.NullHandling;
 import org.apache.druid.java.util.common.Numbers;
 import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.java.util.common.parsers.TimestampParser;
@@ -37,13 +36,11 @@ import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.segment.column.ValueType;
 import org.apache.druid.segment.join.JoinableFactoryWrapper;
 import org.apache.druid.server.SpecificSegmentsQuerySegmentWalker;
-import org.apache.druid.sql.calcite.DisableUnless.DisableUnlessRule;
 import org.apache.druid.sql.calcite.DrillWindowQueryTest.DrillComponentSupplier;
 import org.apache.druid.sql.calcite.NotYetSupported.Modes;
 import org.apache.druid.sql.calcite.NotYetSupported.NotYetSupportedProcessor;
 import org.apache.druid.sql.calcite.QueryTestRunner.QueryResults;
 import org.apache.druid.sql.calcite.planner.PlannerCaptureHook;
-import org.apache.druid.sql.calcite.planner.PlannerContext;
 import org.apache.druid.sql.calcite.util.SqlTestFramework.StandardComponentSupplier;
 import org.apache.druid.sql.calcite.util.TestDataBuilder;
 import org.joda.time.DateTime;
@@ -80,6 +77,7 @@ import java.util.stream.Collectors;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /**
  * These test cases are borrowed from the drill-test-framework at
@@ -98,13 +96,6 @@ import static org.junit.Assert.fail;
 @SqlTestFrameworkConfig.ComponentSupplier(DrillComponentSupplier.class)
 public class DrillWindowQueryTest extends BaseCalciteQueryTest
 {
-  static {
-    NullHandling.initializeForTests();
-  }
-
-  @RegisterExtension
-  public DisableUnlessRule disableWhenNonSqlCompat = DisableUnless.SQL_COMPATIBLE;
-
   @RegisterExtension
   public NotYetSupportedProcessor ignoreProcessor = new NotYetSupportedProcessor();
 
@@ -114,8 +105,11 @@ public class DrillWindowQueryTest extends BaseCalciteQueryTest
   @Test
   public void ensureAllDeclared() throws Exception
   {
+    assumeTrue(DrillWindowQueryTest.class.equals(getClass()));
+
     final URL windowQueriesUrl = ClassLoader.getSystemResource("drill/window/queries/");
     Path windowFolder = new File(windowQueriesUrl.toURI()).toPath();
+
 
     Set<String> allCases = FileUtils
         .streamFiles(windowFolder.toFile(), true, "q")
@@ -413,7 +407,6 @@ public class DrillWindowQueryTest extends BaseCalciteQueryTest
   protected Map<String, Object> getQueryContext()
   {
     return ImmutableMap.of(
-        PlannerContext.CTX_ENABLE_WINDOW_FNS, true,
         PlannerCaptureHook.NEED_CAPTURE_HOOK, true,
         QueryContexts.ENABLE_DEBUG, true
     );
@@ -7731,13 +7724,10 @@ public class DrillWindowQueryTest extends BaseCalciteQueryTest
     windowQueryTest();
   }
 
-  // This test gives the following error on sql-native engine:
-  // Column[w0] of type[class org.apache.druid.query.rowsandcols.column.ColumnAccessorBasedColumn] cannot be sorted.
   @DrillTest("druid_queries/empty_and_non_empty_over/wikipedia_query_1")
   @Test
   public void test_empty_and_non_empty_over_wikipedia_query_1()
   {
-    sqlNativeIncompatible();
     windowQueryTest();
   }
 
@@ -7800,6 +7790,20 @@ public class DrillWindowQueryTest extends BaseCalciteQueryTest
   @DrillTest("druid_queries/array_concat_agg/multiple_partition_columns_1")
   @Test
   public void test_array_concat_agg_with_multiple_partition_columns_1()
+  {
+    windowQueryTest();
+  }
+
+  @DrillTest("druid_queries/array_concat_agg/only_sorting_column_1")
+  @Test
+  public void test_array_concat_agg_with_only_sorting_column_1()
+  {
+    windowQueryTest();
+  }
+
+  @DrillTest("druid_queries/array_concat_agg/empty_over_1")
+  @Test
+  public void test_array_concat_agg_with_empty_over_1()
   {
     windowQueryTest();
   }

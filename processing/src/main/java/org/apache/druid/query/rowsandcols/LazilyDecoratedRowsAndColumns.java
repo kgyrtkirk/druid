@@ -39,15 +39,15 @@ import org.apache.druid.query.operator.OffsetLimit;
 import org.apache.druid.query.rowsandcols.column.Column;
 import org.apache.druid.query.rowsandcols.column.ColumnAccessor;
 import org.apache.druid.query.rowsandcols.concrete.ColumnBasedFrameRowsAndColumns;
+import org.apache.druid.query.rowsandcols.concrete.FrameRowsAndColumns;
 import org.apache.druid.query.rowsandcols.semantic.ColumnSelectorFactoryMaker;
 import org.apache.druid.query.rowsandcols.semantic.DefaultRowsAndColumnsDecorator;
 import org.apache.druid.query.rowsandcols.semantic.RowsAndColumnsDecorator;
-import org.apache.druid.query.rowsandcols.semantic.WireTransferable;
 import org.apache.druid.segment.ColumnSelectorFactory;
 import org.apache.druid.segment.Cursor;
 import org.apache.druid.segment.CursorBuildSpec;
+import org.apache.druid.segment.CursorFactory;
 import org.apache.druid.segment.CursorHolder;
-import org.apache.druid.segment.StorageAdapter;
 import org.apache.druid.segment.VirtualColumns;
 import org.apache.druid.segment.column.ColumnCapabilities;
 import org.apache.druid.segment.column.RowSignature;
@@ -77,6 +77,7 @@ public class LazilyDecoratedRowsAndColumns implements RowsAndColumns
   private OffsetLimit limit;
   private LinkedHashSet<String> viewableColumns;
   private List<ColumnWithDirection> ordering;
+  private final Integer allocatorCapacity;
 
   public LazilyDecoratedRowsAndColumns(
       RowsAndColumns base,
@@ -85,7 +86,8 @@ public class LazilyDecoratedRowsAndColumns implements RowsAndColumns
       VirtualColumns virtualColumns,
       OffsetLimit limit,
       List<ColumnWithDirection> ordering,
-      LinkedHashSet<String> viewableColumns
+      LinkedHashSet<String> viewableColumns,
+      Long allocatorCapacity
   )
   {
     this.base = base;
@@ -95,6 +97,7 @@ public class LazilyDecoratedRowsAndColumns implements RowsAndColumns
     this.limit = limit;
     this.ordering = ordering;
     this.viewableColumns = viewableColumns;
+    this.allocatorCapacity = allocatorCapacity != null ? allocatorCapacity.intValue() : 200 << 20;
   }
 
   @Override
@@ -150,16 +153,10 @@ public class LazilyDecoratedRowsAndColumns implements RowsAndColumns
 
   @SuppressWarnings("unused")
   @SemanticCreator
-  public WireTransferable toWireTransferable()
+  public FrameRowsAndColumns toFrameRowsAndColumns()
   {
-    return () -> {
-      final Pair<byte[], RowSignature> materialized = materialize();
-      if (materialized == null) {
-        return new byte[]{};
-      } else {
-        return materialized.lhs;
-      }
-    };
+    maybeMaterialize();
+    return base.as(FrameRowsAndColumns.class);
   }
 
   private void maybeMaterialize()
@@ -185,11 +182,11 @@ public class LazilyDecoratedRowsAndColumns implements RowsAndColumns
       throw new ISE("Cannot reorder[%s] scan data right now", ordering);
     }
 
-    final StorageAdapter as = base.as(StorageAdapter.class);
+    final CursorFactory as = base.as(CursorFactory.class);
     if (as == null) {
       return naiveMaterialize(base);
     } else {
-      return materializeStorageAdapter(as);
+      return materializeCursorFactory(as);
     }
   }
 
@@ -205,7 +202,7 @@ public class LazilyDecoratedRowsAndColumns implements RowsAndColumns
   }
 
   @Nullable
-  private Pair<byte[], RowSignature> materializeStorageAdapter(StorageAdapter as)
+  private Pair<byte[], RowSignature> materializeCursorFactory(CursorFactory cursorFactory)
   {
     final Collection<String> cols;
     if (viewableColumns != null) {
@@ -228,7 +225,7 @@ public class LazilyDecoratedRowsAndColumns implements RowsAndColumns
     if (virtualColumns != null) {
       builder.setVirtualColumns(virtualColumns);
     }
-    try (final CursorHolder cursorHolder = as.makeCursorHolder(builder.build())) {
+    try (final CursorHolder cursorHolder = cursorFactory.makeCursorHolder(builder.build())) {
       final Cursor cursor = cursorHolder.asCursor();
 
       if (cursor == null) {
@@ -274,7 +271,7 @@ public class LazilyDecoratedRowsAndColumns implements RowsAndColumns
       }
 
       final FrameWriterFactory frameWriterFactory = FrameWriters.makeColumnBasedFrameWriterFactory(
-          new ArenaMemoryAllocatorFactory(200 << 20), // 200 MB, because, why not?
+          new ArenaMemoryAllocatorFactory(allocatorCapacity),
           signature,
           sortColumns
       );
@@ -373,8 +370,7 @@ public class LazilyDecoratedRowsAndColumns implements RowsAndColumns
     // is being left as an exercise for the future.
 
     final RowSignature.Builder sigBob = RowSignature.builder();
-    final ArenaMemoryAllocatorFactory memFactory = new ArenaMemoryAllocatorFactory(200 << 20);
-
+    final ArenaMemoryAllocatorFactory memFactory = new ArenaMemoryAllocatorFactory(allocatorCapacity);
 
     for (String column : columnsToGenerate) {
       final Column racColumn = rac.findColumn(column);

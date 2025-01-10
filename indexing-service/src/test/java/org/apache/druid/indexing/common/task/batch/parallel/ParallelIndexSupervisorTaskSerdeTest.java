@@ -20,7 +20,6 @@
 package org.apache.druid.indexing.common.task.batch.parallel;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.druid.common.config.NullHandling;
 import org.apache.druid.data.input.impl.CsvInputFormat;
 import org.apache.druid.data.input.impl.DimensionsSpec;
 import org.apache.druid.data.input.impl.LocalInputSource;
@@ -34,7 +33,6 @@ import org.apache.druid.indexing.common.task.TaskResource;
 import org.apache.druid.indexing.common.task.TuningConfigBuilder;
 import org.apache.druid.java.util.common.Intervals;
 import org.apache.druid.java.util.common.granularity.Granularities;
-import org.apache.druid.query.aggregation.AggregatorFactory;
 import org.apache.druid.query.aggregation.LongSumAggregatorFactory;
 import org.apache.druid.segment.indexing.DataSchema;
 import org.apache.druid.segment.indexing.granularity.UniformGranularitySpec;
@@ -54,10 +52,6 @@ import java.util.Map;
 
 public class ParallelIndexSupervisorTaskSerdeTest
 {
-  static {
-    NullHandling.initializeForTests();
-  }
-
   private static final ObjectMapper OBJECT_MAPPER = new TestUtils().getTestObjectMapper();
   private static final List<Interval> INTERVALS = Collections.singletonList(Intervals.of("2018/2019"));
 
@@ -183,7 +177,7 @@ public class ParallelIndexSupervisorTaskSerdeTest
 
     private final ParallelIndexIOConfig ioConfig = new ParallelIndexIOConfig(
         new LocalInputSource(new File("tmp"), "test_*"),
-        new CsvInputFormat(Arrays.asList("ts", "dim", "val"), null, null, false, 0),
+        new CsvInputFormat(Arrays.asList("ts", "dim", "val"), null, null, false, 0, null),
         false,
         null
     );
@@ -220,16 +214,19 @@ public class ParallelIndexSupervisorTaskSerdeTest
 
     ParallelIndexIngestionSpec build()
     {
-      DataSchema dataSchema = new DataSchema(
-          "dataSource",
-          TIMESTAMP_SPEC,
-          DIMENSIONS_SPEC,
-          new AggregatorFactory[]{
-              new LongSumAggregatorFactory("val", "val")
-          },
-          new UniformGranularitySpec(Granularities.DAY, Granularities.MINUTE, inputIntervals),
-          null
-      );
+      DataSchema dataSchema = DataSchema.builder()
+                                        .withDataSource("datasource")
+                                        .withTimestamp(TIMESTAMP_SPEC)
+                                        .withDimensions(DIMENSIONS_SPEC)
+                                        .withAggregators(new LongSumAggregatorFactory("val", "val"))
+                                        .withGranularity(
+                                            new UniformGranularitySpec(
+                                                Granularities.DAY,
+                                                Granularities.MINUTE,
+                                                inputIntervals
+                                            )
+                                        )
+                                        .build();
 
       ParallelIndexTuningConfig tuningConfig = TuningConfigBuilder
           .forParallelIndexTask()

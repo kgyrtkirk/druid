@@ -32,7 +32,6 @@ import org.apache.druid.client.DruidServer;
 import org.apache.druid.client.FilteredServerInventoryView;
 import org.apache.druid.client.ServerInventoryView;
 import org.apache.druid.client.ServerView;
-import org.apache.druid.client.indexing.NoopOverlordClient;
 import org.apache.druid.discovery.DiscoveryDruidNode;
 import org.apache.druid.discovery.DruidLeaderClient;
 import org.apache.druid.discovery.DruidNodeDiscovery;
@@ -53,6 +52,7 @@ import org.apache.druid.java.util.http.client.response.HttpResponseHandler;
 import org.apache.druid.math.expr.ExprMacroTable;
 import org.apache.druid.query.QueryRunnerFactoryConglomerate;
 import org.apache.druid.query.QuerySegmentWalker;
+import org.apache.druid.rpc.indexing.NoopOverlordClient;
 import org.apache.druid.rpc.indexing.OverlordClient;
 import org.apache.druid.segment.join.JoinableFactory;
 import org.apache.druid.segment.join.JoinableFactoryWrapper;
@@ -130,6 +130,7 @@ public class CalciteTests
   public static final String ALL_TYPES_UNIQ_PARQUET = "allTypsUniq.parquet";
   public static final String FEW_ROWS_ALL_DATA_PARQUET = "fewRowsAllData.parquet";
   public static final String T_ALL_TYPE_PARQUET = "t_alltype.parquet";
+  public static final String BENCHMARK_DATASOURCE = "benchmark_ds";
 
   public static final String TEST_SUPERUSER_NAME = "testSuperuser";
   public static final AuthorizerMapper TEST_AUTHORIZER_MAPPER = new AuthorizerMapper(null)
@@ -424,7 +425,7 @@ public class CalciteTests
           @Nullable Integer maxCompletedTasks
       )
       {
-        List<TaskStatusPlus> tasks = new ArrayList<TaskStatusPlus>();
+        List<TaskStatusPlus> tasks = new ArrayList<>();
         tasks.add(createTaskStatus("id1", DATASOURCE1, 10L));
         tasks.add(createTaskStatus("id1", DATASOURCE1, 1L));
         tasks.add(createTaskStatus("id2", DATASOURCE2, 20L));

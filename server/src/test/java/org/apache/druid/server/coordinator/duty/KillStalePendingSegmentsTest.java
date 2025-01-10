@@ -21,7 +21,6 @@ package org.apache.druid.server.coordinator.duty;
 
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
-import org.apache.druid.client.indexing.NoopOverlordClient;
 import org.apache.druid.indexer.RunnerTaskState;
 import org.apache.druid.indexer.TaskLocation;
 import org.apache.druid.indexer.TaskState;
@@ -30,6 +29,7 @@ import org.apache.druid.java.util.common.CloseableIterators;
 import org.apache.druid.java.util.common.DateTimes;
 import org.apache.druid.java.util.common.Intervals;
 import org.apache.druid.java.util.common.parsers.CloseableIterator;
+import org.apache.druid.rpc.indexing.NoopOverlordClient;
 import org.apache.druid.segment.TestDataSource;
 import org.apache.druid.server.coordinator.CoordinatorDynamicConfig;
 import org.apache.druid.server.coordinator.DruidCoordinatorRuntimeParams;
@@ -175,7 +175,7 @@ public class KillStalePendingSegmentsTest
 
   private DruidCoordinatorRuntimeParams.Builder createParamsWithDatasources(String... datasources)
   {
-    DruidCoordinatorRuntimeParams.Builder builder = DruidCoordinatorRuntimeParams.newBuilder(DateTimes.nowUtc());
+    DruidCoordinatorRuntimeParams.Builder builder = DruidCoordinatorRuntimeParams.builder();
 
     // Create a dummy for each of the datasources so that they get added to the timeline
     Set<DataSegment> usedSegments = new HashSet<>();

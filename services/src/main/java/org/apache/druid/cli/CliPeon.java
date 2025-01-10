@@ -25,7 +25,6 @@ import com.github.rvesse.airline.annotations.Command;
 import com.github.rvesse.airline.annotations.Option;
 import com.github.rvesse.airline.annotations.restrictions.Required;
 import com.google.common.base.Supplier;
-import com.google.common.base.Suppliers;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -47,7 +46,6 @@ import org.apache.druid.curator.ZkEnablementConfig;
 import org.apache.druid.discovery.NodeRole;
 import org.apache.druid.guice.Binders;
 import org.apache.druid.guice.CacheModule;
-import org.apache.druid.guice.DruidProcessingModule;
 import org.apache.druid.guice.IndexingServiceInputSourceModule;
 import org.apache.druid.guice.IndexingServiceTaskLogsModule;
 import org.apache.druid.guice.IndexingServiceTuningConfigModule;
@@ -58,6 +56,7 @@ import org.apache.druid.guice.LazySingleton;
 import org.apache.druid.guice.LifecycleModule;
 import org.apache.druid.guice.ManageLifecycle;
 import org.apache.druid.guice.ManageLifecycleServer;
+import org.apache.druid.guice.PeonProcessingModule;
 import org.apache.druid.guice.PolyBind;
 import org.apache.druid.guice.QueryRunnerFactoryModule;
 import org.apache.druid.guice.QueryableModule;
@@ -91,6 +90,7 @@ import org.apache.druid.indexing.overlord.IndexerMetadataStorageCoordinator;
 import org.apache.druid.indexing.overlord.SingleTaskBackgroundRunner;
 import org.apache.druid.indexing.overlord.TaskRunner;
 import org.apache.druid.indexing.overlord.TaskStorage;
+import org.apache.druid.indexing.seekablestream.SeekableStreamIndexTask;
 import org.apache.druid.indexing.worker.executor.ExecutorLifecycle;
 import org.apache.druid.indexing.worker.executor.ExecutorLifecycleConfig;
 import org.apache.druid.indexing.worker.shuffle.DeepStorageIntermediaryDataManager;
@@ -123,6 +123,7 @@ import org.apache.druid.segment.realtime.appenderator.PeonAppenderatorsManager;
 import org.apache.druid.server.DruidNode;
 import org.apache.druid.server.ResponseContextConfig;
 import org.apache.druid.server.SegmentManager;
+import org.apache.druid.server.coordination.BroadcastDatasourceLoadingSpec;
 import org.apache.druid.server.coordination.SegmentBootstrapper;
 import org.apache.druid.server.coordination.ServerType;
 import org.apache.druid.server.coordination.ZkCoordinator;
@@ -133,6 +134,7 @@ import org.apache.druid.server.initialization.jetty.JettyServerInitializer;
 import org.apache.druid.server.lookup.cache.LookupLoadingSpec;
 import org.apache.druid.server.metrics.DataSourceTaskIdHolder;
 import org.apache.druid.server.metrics.ServiceStatusMonitor;
+import org.apache.druid.storage.local.LocalTmpStorageConfig;
 import org.apache.druid.tasklogs.TaskPayloadManager;
 import org.eclipse.jetty.server.Server;
 
@@ -176,11 +178,25 @@ public class CliPeon extends GuiceRunnable
   private boolean isZkEnabled = true;
 
   /**
+   * <p> This option is deprecated, see {@link #loadBroadcastDatasourcesMode} option. </p>
+   *
    * If set to "true", the peon will bind classes necessary for loading broadcast segments. This is used for
    * queryable tasks, such as streaming ingestion tasks.
+   *
    */
-  @Option(name = "--loadBroadcastSegments", title = "loadBroadcastSegments", description = "Enable loading of broadcast segments")
+  @Deprecated
+  @Option(name = "--loadBroadcastSegments", title = "loadBroadcastSegments",
+      description = "Enable loading of broadcast segments. This option is deprecated and will be removed in a"
+                    + " future release. Use --loadBroadcastDatasourceMode instead.")
   public String loadBroadcastSegments = "false";
+
+  /**
+   * Broadcast datasource loading mode. The peon will bind classes necessary required for loading broadcast segments if
+   * the mode is {@link BroadcastDatasourceLoadingSpec.Mode#ALL} or {@link BroadcastDatasourceLoadingSpec.Mode#ONLY_REQUIRED}.
+   */
+  @Option(name = "--loadBroadcastDatasourceMode", title = "loadBroadcastDatasourceMode",
+      description = "Specify the broadcast datasource loading mode for the peon. Supported values are ALL, NONE, ONLY_REQUIRED.")
+  public String loadBroadcastDatasourcesMode = BroadcastDatasourceLoadingSpec.Mode.ALL.toString();
 
   @Option(name = "--taskId", title = "taskId", description = "TaskId for fetching task.json remotely")
   public String taskId = "";
@@ -205,7 +221,7 @@ public class CliPeon extends GuiceRunnable
   protected List<? extends Module> getModules()
   {
     return ImmutableList.of(
-        new DruidProcessingModule(),
+        new PeonProcessingModule(),
         new QueryableModule(),
         new QueryRunnerFactoryModule(),
         new SegmentWranglerModule(),
@@ -274,7 +290,11 @@ public class CliPeon extends GuiceRunnable
             binder.bind(ServerTypeConfig.class).toInstance(new ServerTypeConfig(ServerType.fromString(serverType)));
             LifecycleModule.register(binder, Server.class);
 
-            if ("true".equals(loadBroadcastSegments)) {
+            final BroadcastDatasourceLoadingSpec.Mode mode =
+                BroadcastDatasourceLoadingSpec.Mode.valueOf(loadBroadcastDatasourcesMode);
+            if ("true".equals(loadBroadcastSegments)
+                || mode == BroadcastDatasourceLoadingSpec.Mode.ALL
+                || mode == BroadcastDatasourceLoadingSpec.Mode.ONLY_REQUIRED) {
               binder.install(new BroadcastSegmentLoadingModule());
             }
           }
@@ -284,19 +304,7 @@ public class CliPeon extends GuiceRunnable
           @Named(ServiceStatusMonitor.HEARTBEAT_TAGS_BINDING)
           public Supplier<Map<String, Object>> heartbeatDimensions(Task task)
           {
-            ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
-            builder.put(DruidMetrics.TASK_ID, task.getId());
-            builder.put(DruidMetrics.DATASOURCE, task.getDataSource());
-            builder.put(DruidMetrics.TASK_TYPE, task.getType());
-            builder.put(DruidMetrics.GROUP_ID, task.getGroupId());
-            Map<String, Object> tags = task.getContextValue(DruidMetrics.TAGS);
-            if (tags != null && !tags.isEmpty()) {
-              builder.put(DruidMetrics.TAGS, tags);
-            }
-
-            return Suppliers.ofInstance(
-                builder.build()
-            );
+            return () -> CliPeon.heartbeatDimensions(task);
           }
 
           @Provides
@@ -339,6 +347,29 @@ public class CliPeon extends GuiceRunnable
           public LookupLoadingSpec getLookupsToLoad(final Task task)
           {
             return task.getLookupLoadingSpec();
+          }
+
+          @Provides
+          @LazySingleton
+          @Named(DataSourceTaskIdHolder.BROADCAST_DATASOURCES_TO_LOAD_FOR_TASK)
+          public BroadcastDatasourceLoadingSpec getBroadcastDatasourcesToLoad(final Task task)
+          {
+            return task.getBroadcastDatasourceLoadingSpec();
+          }
+
+          @Provides
+          @LazySingleton
+          public LocalTmpStorageConfig getLocalTmpStorage()
+          {
+            File tmpDir = new File(taskDirPath, "tmp");
+            try {
+              org.apache.druid.java.util.common.FileUtils.mkdirp(tmpDir);
+            }
+            catch (IOException e) {
+              log.error("Failed to create tmp directory for the task");
+              throw new RuntimeException(e);
+            }
+            return () -> tmpDir;
           }
         },
         new QueryablePeonModule(),
@@ -536,6 +567,29 @@ public class CliPeon extends GuiceRunnable
     );
     shuffleClientBiddy.addBinding("local").to(HttpShuffleClient.class).in(LazySingleton.class);
     shuffleClientBiddy.addBinding("deepstore").to(DeepStorageShuffleClient.class).in(LazySingleton.class);
+  }
+
+  static Map<String, Object> heartbeatDimensions(Task task)
+  {
+    ImmutableMap.Builder<String, Object> builder = ImmutableMap.builder();
+    builder.put(DruidMetrics.TASK_ID, task.getId());
+    builder.put(DruidMetrics.DATASOURCE, task.getDataSource());
+    builder.put(DruidMetrics.TASK_TYPE, task.getType());
+    builder.put(DruidMetrics.GROUP_ID, task.getGroupId());
+    Map<String, Object> tags = task.getContextValue(DruidMetrics.TAGS);
+    if (tags != null && !tags.isEmpty()) {
+      builder.put(DruidMetrics.TAGS, tags);
+    }
+
+    if (task instanceof SeekableStreamIndexTask) {
+      SeekableStreamIndexTask streamingTask = (SeekableStreamIndexTask) task;
+      String status = streamingTask.getCurrentRunnerStatus();
+      if (status != null) {
+        builder.put(DruidMetrics.STATUS, status);
+      }
+    }
+
+    return builder.build();
   }
 
   public class BroadcastSegmentLoadingModule implements Module

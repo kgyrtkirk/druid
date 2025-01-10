@@ -24,7 +24,6 @@ import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableList;
 import org.apache.druid.collections.bitmap.BitmapFactory;
-import org.apache.druid.java.util.common.DateTimes;
 import org.apache.druid.java.util.common.io.Closer;
 import org.apache.druid.java.util.common.logger.Logger;
 import org.apache.druid.query.BaseQuery;
@@ -34,6 +33,7 @@ import org.apache.druid.query.Order;
 import org.apache.druid.query.OrderBy;
 import org.apache.druid.query.Query;
 import org.apache.druid.query.QueryContext;
+import org.apache.druid.query.QueryContexts;
 import org.apache.druid.query.QueryMetrics;
 import org.apache.druid.query.aggregation.AggregatorFactory;
 import org.apache.druid.query.filter.Filter;
@@ -57,6 +57,7 @@ import org.apache.druid.segment.vector.VectorColumnSelectorFactory;
 import org.apache.druid.segment.vector.VectorCursor;
 import org.apache.druid.segment.vector.VectorOffset;
 import org.apache.druid.utils.CloseableUtils;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.joda.time.Interval;
 
 import javax.annotation.Nullable;
@@ -85,7 +86,8 @@ public class QueryableIndexCursorHolder implements CursorHolder
 
   public QueryableIndexCursorHolder(
       QueryableIndex index,
-      CursorBuildSpec cursorBuildSpec
+      CursorBuildSpec cursorBuildSpec,
+      TimeBoundaryInspector timeBoundaryInspector
   )
   {
     this.index = index;
@@ -108,10 +110,12 @@ public class QueryableIndexCursorHolder implements CursorHolder
     this.resourcesSupplier = Suppliers.memoize(
         () -> new CursorResources(
             index,
+            timeBoundaryInspector,
             virtualColumns,
             Cursors.getTimeOrdering(ordering),
             interval,
             filter,
+            cursorBuildSpec.getQueryContext().getBoolean(QueryContexts.CURSOR_AUTO_ARRANGE_FILTERS, true),
             metrics
         )
     );
@@ -157,9 +161,8 @@ public class QueryableIndexCursorHolder implements CursorHolder
     final CursorResources resources = resourcesSupplier.get();
     final FilterBundle filterBundle = resources.filterBundle;
     final int numRows = resources.numRows;
-    final long minDataTimestamp = resources.minDataTimestamp;
-    final long maxDataTimestamp = resources.maxDataTimestamp;
-    final NumericColumn timestamps = resources.timestamps;
+    final long minDataTimestamp = resources.timeBoundaryInspector.getMinTime().getMillis();
+    final long maxDataTimestamp = resources.timeBoundaryInspector.getMaxTime().getMillis();
     final ColumnCache columnCache = resources.columnCache;
     final Order timeOrder = resources.timeOrder;
 
@@ -178,13 +181,13 @@ public class QueryableIndexCursorHolder implements CursorHolder
 
     if (timeOrder == Order.ASCENDING) {
       for (; baseOffset.withinBounds(); baseOffset.increment()) {
-        if (timestamps.getLongSingleValueRow(baseOffset.getOffset()) >= timeStart) {
+        if (resources.getTimestampsColumn().getLongSingleValueRow(baseOffset.getOffset()) >= timeStart) {
           break;
         }
       }
     } else if (timeOrder == Order.DESCENDING) {
       for (; baseOffset.withinBounds(); baseOffset.increment()) {
-        if (timestamps.getLongSingleValueRow(baseOffset.getOffset()) < timeEnd) {
+        if (resources.getTimestampsColumn().getLongSingleValueRow(baseOffset.getOffset()) < timeEnd) {
           break;
         }
       }
@@ -195,14 +198,14 @@ public class QueryableIndexCursorHolder implements CursorHolder
     if (timeOrder == Order.ASCENDING) {
       offset = new AscendingTimestampCheckingOffset(
           baseOffset,
-          timestamps,
+          resources.getTimestampsColumn(),
           timeEnd,
           maxDataTimestamp < timeEnd
       );
     } else if (timeOrder == Order.DESCENDING) {
       offset = new DescendingTimestampCheckingOffset(
           baseOffset,
-          timestamps,
+          resources.getTimestampsColumn(),
           timeStart,
           minDataTimestamp >= timeStart
       );
@@ -212,11 +215,9 @@ public class QueryableIndexCursorHolder implements CursorHolder
     }
 
     final Offset baseCursorOffset = offset.clone();
-    final ColumnSelectorFactory columnSelectorFactory = new QueryableIndexColumnSelectorFactory(
-        virtualColumns,
-        Cursors.getTimeOrdering(ordering),
-        baseCursorOffset.getBaseReadableOffset(),
-        columnCache
+    final ColumnSelectorFactory columnSelectorFactory = makeColumnSelectorFactoryForOffset(
+        columnCache,
+        baseCursorOffset
     );
     // filterBundle will only be null if the filter itself is null, otherwise check to see if the filter
     // needs to use a value matcher
@@ -244,13 +245,10 @@ public class QueryableIndexCursorHolder implements CursorHolder
   {
     final CursorResources resources = resourcesSupplier.get();
     final FilterBundle filterBundle = resources.filterBundle;
-    final long minDataTimestamp = resources.minDataTimestamp;
-    final long maxDataTimestamp = resources.maxDataTimestamp;
-    final NumericColumn timestamps = resources.timestamps;
+    final long minDataTimestamp = resources.timeBoundaryInspector.getMinTime().getMillis();
+    final long maxDataTimestamp = resources.timeBoundaryInspector.getMaxTime().getMillis();
     final ColumnCache columnCache = resources.columnCache;
     final Order timeOrder = resources.timeOrder;
-    // Wrap the remainder of cursor setup in a try, so if an error is encountered while setting it up, we don't
-    // leak columns in the ColumnCache.
 
     // sanity check
     if (!canVectorize()) {
@@ -267,13 +265,13 @@ public class QueryableIndexCursorHolder implements CursorHolder
     final int endOffset;
 
     if (timeOrder != Order.NONE && interval.getStartMillis() > minDataTimestamp) {
-      startOffset = timeSearch(timestamps, interval.getStartMillis(), 0, index.getNumRows());
+      startOffset = timeSearch(resources.getTimestampsColumn(), interval.getStartMillis(), 0, index.getNumRows());
     } else {
       startOffset = 0;
     }
 
     if (timeOrder != Order.NONE && interval.getEndMillis() <= maxDataTimestamp) {
-      endOffset = timeSearch(timestamps, interval.getEndMillis(), startOffset, index.getNumRows());
+      endOffset = timeSearch(resources.getTimestampsColumn(), interval.getEndMillis(), startOffset, index.getNumRows());
     } else {
       endOffset = index.getNumRows();
     }
@@ -325,7 +323,20 @@ public class QueryableIndexCursorHolder implements CursorHolder
   }
 
 
-  private VectorColumnSelectorFactory makeVectorColumnSelectorFactoryForOffset(
+  protected ColumnSelectorFactory makeColumnSelectorFactoryForOffset(
+      ColumnCache columnCache,
+      Offset baseOffset
+  )
+  {
+    return new QueryableIndexColumnSelectorFactory(
+        virtualColumns,
+        Cursors.getTimeOrdering(ordering),
+        baseOffset.getBaseReadableOffset(),
+        columnCache
+    );
+  }
+
+  protected VectorColumnSelectorFactory makeVectorColumnSelectorFactoryForOffset(
       ColumnCache columnCache,
       VectorOffset baseOffset
   )
@@ -346,7 +357,6 @@ public class QueryableIndexCursorHolder implements CursorHolder
    * @param timestamp  the timestamp to search for
    * @param startIndex first index to search, inclusive
    * @param endIndex   last index to search, exclusive
-   *
    * @return first index that has a timestamp equal to, or greater, than "timestamp"
    */
   @VisibleForTesting
@@ -650,26 +660,29 @@ public class QueryableIndexCursorHolder implements CursorHolder
   private static final class CursorResources implements Closeable
   {
     private final Closer closer;
-    private final long minDataTimestamp;
-    private final long maxDataTimestamp;
+    private final TimeBoundaryInspector timeBoundaryInspector;
     private final int numRows;
     @Nullable
     private final FilterBundle filterBundle;
-    private final NumericColumn timestamps;
     private final Order timeOrder;
     private final ColumnCache columnCache;
+    @MonotonicNonNull
+    private NumericColumn timestamps;
 
     private CursorResources(
         QueryableIndex index,
+        TimeBoundaryInspector timeBoundaryInspector,
         VirtualColumns virtualColumns,
         Order timeOrder,
         Interval interval,
         @Nullable Filter filter,
+        boolean cursorAutoArrangeFilters,
         @Nullable QueryMetrics<? extends Query<?>> metrics
     )
     {
       this.closer = Closer.create();
       this.columnCache = new ColumnCache(index, closer);
+      this.timeBoundaryInspector = timeBoundaryInspector;
       final ColumnSelectorColumnIndexSelector bitmapIndexSelector = new ColumnSelectorColumnIndexSelector(
           index.getBitmapFactoryForDimensions(),
           virtualColumns,
@@ -677,17 +690,14 @@ public class QueryableIndexCursorHolder implements CursorHolder
       );
       try {
         this.numRows = index.getNumRows();
-        this.timestamps = (NumericColumn) columnCache.getColumn(ColumnHolder.TIME_COLUMN_NAME);
-        this.minDataTimestamp = DateTimes.utc(timestamps.getLongSingleValueRow(0)).getMillis();
-        this.maxDataTimestamp = DateTimes.utc(timestamps.getLongSingleValueRow(timestamps.length() - 1)).getMillis();
         this.filterBundle = makeFilterBundle(
             computeFilterWithIntervalIfNeeded(
+                timeBoundaryInspector,
                 timeOrder,
-                this.minDataTimestamp,
-                this.maxDataTimestamp,
                 interval,
                 filter
             ),
+            cursorAutoArrangeFilters,
             bitmapIndexSelector,
             numRows,
             metrics
@@ -699,6 +709,14 @@ public class QueryableIndexCursorHolder implements CursorHolder
       }
     }
 
+    public NumericColumn getTimestampsColumn()
+    {
+      if (timestamps == null) {
+        timestamps = (NumericColumn) columnCache.getColumn(ColumnHolder.TIME_COLUMN_NAME);
+      }
+      return timestamps;
+    }
+
     @Override
     public void close() throws IOException
     {
@@ -708,13 +726,14 @@ public class QueryableIndexCursorHolder implements CursorHolder
 
   /**
    * Create a {@link FilterBundle} for a cursor hold instance.
-   *
+   * <p>
    * The provided filter must include the query-level interface if needed. To compute this properly, use
    * {@link #computeFilterWithIntervalIfNeeded}.
    */
   @Nullable
   private static FilterBundle makeFilterBundle(
       @Nullable final Filter filter,
+      boolean cursorAutoArrangeFilters,
       final ColumnSelectorColumnIndexSelector bitmapIndexSelector,
       final int numRows,
       @Nullable final QueryMetrics<?> metrics
@@ -732,8 +751,11 @@ public class QueryableIndexCursorHolder implements CursorHolder
       return null;
     }
     final long bitmapConstructionStartNs = System.nanoTime();
-    final FilterBundle filterBundle = filter.makeFilterBundle(
+    final FilterBundle filterBundle = new FilterBundle.Builder(
+        filter,
         bitmapIndexSelector,
+        cursorAutoArrangeFilters
+    ).build(
         bitmapResultFactory,
         numRows,
         numRows,
@@ -765,20 +787,20 @@ public class QueryableIndexCursorHolder implements CursorHolder
    */
   @Nullable
   private static Filter computeFilterWithIntervalIfNeeded(
+      final TimeBoundaryInspector timeBoundaryInspector,
       final Order timeOrder,
-      final long minDataTimestamp,
-      final long maxDataTimestamp,
       final Interval interval,
       @Nullable final Filter filter
   )
   {
     if (timeOrder == Order.NONE
-        && (minDataTimestamp < interval.getStartMillis() || maxDataTimestamp >= interval.getEndMillis())) {
+        && (timeBoundaryInspector.getMinTime().getMillis() < interval.getStartMillis()
+            || timeBoundaryInspector.getMaxTime().getMillis() >= interval.getEndMillis())) {
       final RangeFilter timeFilter = new RangeFilter(
           ColumnHolder.TIME_COLUMN_NAME,
           ColumnType.LONG,
-          minDataTimestamp < interval.getStartMillis() ? interval.getStartMillis() : null,
-          maxDataTimestamp >= interval.getEndMillis() ? interval.getEndMillis() : null,
+          timeBoundaryInspector.getMinTime().getMillis() < interval.getStartMillis() ? interval.getStartMillis() : null,
+          timeBoundaryInspector.getMaxTime().getMillis() >= interval.getEndMillis() ? interval.getEndMillis() : null,
           false,
           true,
           null

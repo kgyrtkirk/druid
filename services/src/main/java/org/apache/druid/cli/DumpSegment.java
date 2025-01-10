@@ -75,8 +75,8 @@ import org.apache.druid.segment.CursorHolder;
 import org.apache.druid.segment.DimensionSelector;
 import org.apache.druid.segment.IndexIO;
 import org.apache.druid.segment.QueryableIndex;
+import org.apache.druid.segment.QueryableIndexCursorFactory;
 import org.apache.druid.segment.QueryableIndexSegment;
-import org.apache.druid.segment.QueryableIndexStorageAdapter;
 import org.apache.druid.segment.SimpleAscendingOffset;
 import org.apache.druid.segment.column.BaseColumn;
 import org.apache.druid.segment.column.ColumnHolder;
@@ -252,7 +252,7 @@ public class DumpSegment extends GuiceRunnable
         null
     );
     withOutputStream(
-        new Function<OutputStream, Object>()
+        new Function<>()
         {
           @Override
           public Object apply(final OutputStream out)
@@ -260,7 +260,7 @@ public class DumpSegment extends GuiceRunnable
             evaluateSequenceForSideEffects(
                 Sequences.map(
                     executeQuery(injector, index, query),
-                    new Function<SegmentAnalysis, Object>()
+                    new Function<>()
                     {
                       @Override
                       public Object apply(SegmentAnalysis analysis)
@@ -295,21 +295,21 @@ public class DumpSegment extends GuiceRunnable
       throws IOException
   {
     final ObjectMapper objectMapper = injector.getInstance(Key.get(ObjectMapper.class, Json.class));
-    final QueryableIndexStorageAdapter adapter = new QueryableIndexStorageAdapter(index);
+    final QueryableIndexCursorFactory cursorFactory = new QueryableIndexCursorFactory(index);
     final DimFilter filter = filterJson != null ? objectMapper.readValue(filterJson, DimFilter.class) : null;
 
     final CursorBuildSpec buildSpec = CursorBuildSpec.builder()
                                                      .setFilter(Filters.toFilter(filter))
                                                      .build();
 
-    try (final CursorHolder cursorHolder = adapter.makeCursorHolder(buildSpec)) {
+    try (final CursorHolder cursorHolder = cursorFactory.makeCursorHolder(buildSpec)) {
       final Cursor cursor = cursorHolder.asCursor();
       if (cursor == null) {
         return;
       }
 
       withOutputStream(
-          new Function<OutputStream, Object>()
+          new Function<>()
           {
             @Override
             public Object apply(final OutputStream out)

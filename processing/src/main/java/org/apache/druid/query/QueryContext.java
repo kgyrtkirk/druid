@@ -26,7 +26,6 @@ import org.apache.druid.java.util.common.granularity.Granularity;
 import org.apache.druid.query.QueryContexts.Vectorize;
 import org.apache.druid.query.filter.InDimFilter;
 import org.apache.druid.query.filter.TypedInFilter;
-import org.apache.druid.segment.QueryableIndexStorageAdapter;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -341,7 +340,7 @@ public class QueryContext
 
   public int getVectorSize()
   {
-    return getVectorSize(QueryableIndexStorageAdapter.DEFAULT_VECTOR_SIZE);
+    return getVectorSize(QueryContexts.DEFAULT_VECTOR_SIZE);
   }
 
   public int getVectorSize(int defaultSize)
@@ -367,6 +366,11 @@ public class QueryContext
   public boolean isUseNestedForUnknownTypeInSubquery(boolean defaultUseNestedForUnkownTypeInSubquery)
   {
     return getBoolean(QueryContexts.USE_NESTED_FOR_UNKNOWN_TYPE_IN_SUBQUERY, defaultUseNestedForUnkownTypeInSubquery);
+  }
+
+  public boolean isUseNestedForUnknownTypeInSubquery()
+  {
+    return isUseNestedForUnknownTypeInSubquery(QueryContexts.DEFAULT_USE_NESTED_FOR_UNKNOWN_TYPE_IN_SUBQUERY);
   }
 
   public int getUncoveredIntervalsLimit()
@@ -621,6 +625,15 @@ public class QueryContext
     );
   }
 
+  public boolean isExtendedFilteredSumRewrite()
+  {
+    return getBoolean(
+        QueryContexts.EXTENDED_FILTERED_SUM_REWRITE_ENABLED,
+        QueryContexts.DEFAULT_EXTENDED_FILTERED_SUM_REWRITE_ENABLED
+    );
+  }
+
+
   public QueryResourceId getQueryResourceId()
   {
     return new QueryResourceId(getString(QueryContexts.QUERY_RESOURCE_ID));
@@ -656,5 +669,14 @@ public class QueryContext
     return "QueryContext{" +
            "context=" + context +
            '}';
+  }
+
+  public boolean isDecoupledMode()
+  {
+    String value = getString(
+        QueryContexts.CTX_NATIVE_QUERY_SQL_PLANNING_MODE,
+        QueryContexts.NATIVE_QUERY_SQL_PLANNING_MODE_COUPLED
+    );
+    return QueryContexts.NATIVE_QUERY_SQL_PLANNING_MODE_DECOUPLED.equals(value);
   }
 }

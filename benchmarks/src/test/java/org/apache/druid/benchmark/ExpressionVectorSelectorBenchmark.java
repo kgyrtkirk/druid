@@ -20,7 +20,6 @@
 package org.apache.druid.benchmark;
 
 import com.google.common.collect.ImmutableList;
-import org.apache.druid.common.config.NullHandling;
 import org.apache.druid.java.util.common.granularity.Granularities;
 import org.apache.druid.java.util.common.io.Closer;
 import org.apache.druid.math.expr.Expr;
@@ -35,7 +34,7 @@ import org.apache.druid.segment.Cursor;
 import org.apache.druid.segment.CursorBuildSpec;
 import org.apache.druid.segment.CursorHolder;
 import org.apache.druid.segment.QueryableIndex;
-import org.apache.druid.segment.QueryableIndexStorageAdapter;
+import org.apache.druid.segment.QueryableIndexCursorFactory;
 import org.apache.druid.segment.VirtualColumns;
 import org.apache.druid.segment.generator.GeneratorBasicSchemas;
 import org.apache.druid.segment.generator.GeneratorSchemaInfo;
@@ -73,10 +72,6 @@ import java.util.concurrent.TimeUnit;
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 public class ExpressionVectorSelectorBenchmark
 {
-  static {
-    NullHandling.initializeForTests();
-  }
-
   @Param({"1000000"})
   private int rowsPerSegment;
 
@@ -155,7 +150,7 @@ public class ExpressionVectorSelectorBenchmark
                                                      .setVirtualColumns(virtualColumns)
                                                      .build();
     final CursorHolder cursorHolder = closer.register(
-        new QueryableIndexStorageAdapter(index).makeCursorHolder(buildSpec)
+        new QueryableIndexCursorFactory(index).makeCursorHolder(buildSpec)
     );
     if (vectorize) {
       VectorCursor cursor = cursorHolder.asVectorCursor();

@@ -117,6 +117,7 @@ Guice
 HDFS
 HLL
 HashSet
+HashSets
 Homebrew
 html
 HyperLogLog
@@ -242,6 +243,7 @@ TLS
 tls
 TopN
 TopNs
+tryParseNumbers
 UI
 UIs
 UPSERT
@@ -384,6 +386,7 @@ json_paths
 json_query
 json_query_array
 json_value
+json_merge
 karlkfi
 kbps
 kerberos
@@ -410,6 +413,7 @@ maxNumSegments
 max_map_count
 memcached
 mergeable
+mergeability
 metadata
 metastores
 millis
@@ -559,6 +563,7 @@ timestamps
 to_json_string
 tradeoffs
 transformSpec
+transactionally
 try_parse_json
 tsv
 ulimit
@@ -2418,3 +2423,10 @@ quantilesFromDDSketch
 quantileFromDDSketch
 collapsingLowestDense
 snapshotVersion
+
+- ../docs/development/extensions-core/catalog.md
+ColumnSpec
+PropertyKeyName
+PropertyValueType
+tableSpec
+TableSpec

@@ -158,7 +158,7 @@ public class ScanQueryResultOrderingTest extends InitializedNullHandlingTest
 
     // Try every limit up to one past the total number of rows.
     final Set<Integer> limits = new TreeSet<>();
-    final int totalNumRows = SEGMENTS.stream().mapToInt(s -> s.asStorageAdapter().getNumRows()).sum();
+    int totalNumRows = 19;
     for (int i = 0; i <= totalNumRows + 1; i++) {
       limits.add(i);
     }
@@ -323,7 +323,7 @@ public class ScanQueryResultOrderingTest extends InitializedNullHandlingTest
                      .map(
                          runners ->
                              queryRunnerFactory.getToolchest().mergeResults(
-                                 new QueryRunner<ScanResultValue>()
+                                 new QueryRunner<>()
                                  {
                                    @Override
                                    public Sequence<ScanResultValue> run(

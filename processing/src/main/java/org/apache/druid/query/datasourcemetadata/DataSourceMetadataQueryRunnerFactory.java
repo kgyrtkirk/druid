@@ -85,7 +85,7 @@ public class DataSourceMetadataQueryRunnerFactory
 
     public DataSourceMetadataQueryRunner(Segment segment)
     {
-      this.segmentInterval = segment.asStorageAdapter().getInterval();
+      this.segmentInterval = segment.getDataInterval();
       this.inspector = segment.as(MaxIngestedEventTimeInspector.class);
     }
 
@@ -103,7 +103,7 @@ public class DataSourceMetadataQueryRunnerFactory
       final DataSourceMetadataQuery legacyQuery = (DataSourceMetadataQuery) query;
 
       return new BaseSequence<>(
-          new BaseSequence.IteratorMaker<Result<DataSourceMetadataResultValue>, Iterator<Result<DataSourceMetadataResultValue>>>()
+          new BaseSequence.IteratorMaker<>()
           {
             @Override
             public Iterator<Result<DataSourceMetadataResultValue>> make()

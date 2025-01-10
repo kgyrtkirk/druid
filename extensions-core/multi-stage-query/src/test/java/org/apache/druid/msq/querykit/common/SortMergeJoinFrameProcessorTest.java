@@ -24,7 +24,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.primitives.Ints;
 import com.google.common.util.concurrent.ListenableFuture;
-import org.apache.druid.common.config.NullHandling;
 import org.apache.druid.common.guava.FutureUtils;
 import org.apache.druid.frame.allocation.ArenaMemoryAllocator;
 import org.apache.druid.frame.allocation.SingleMemoryAllocatorFactory;
@@ -45,8 +44,8 @@ import org.apache.druid.msq.indexing.error.TooManyRowsWithSameKeyFault;
 import org.apache.druid.msq.input.ReadableInput;
 import org.apache.druid.msq.querykit.FrameProcessorTestBase;
 import org.apache.druid.msq.test.LimitedFrameWriterFactory;
+import org.apache.druid.segment.CursorFactory;
 import org.apache.druid.segment.RowBasedSegment;
-import org.apache.druid.segment.StorageAdapter;
 import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.segment.join.JoinTestHelper;
@@ -896,16 +895,9 @@ public class SortMergeJoinFrameProcessorTest extends FrameProcessorTestBase
     final String countryNameForNull;
     final Long countryNumberForNull;
 
-    if (NullHandling.sqlCompatible()) {
-      countryCodeForNull = null;
-      countryNameForNull = null;
-      countryNumberForNull = null;
-    } else {
-      // In default-value mode, null country number from the left-hand table converts to zero, which matches Australia.
-      countryCodeForNull = "AU";
-      countryNameForNull = "Australia";
-      countryNumberForNull = 0L;
-    }
+    countryCodeForNull = null;
+    countryNameForNull = null;
+    countryNumberForNull = null;
 
     final List<List<Object>> expectedRows = Lists.newArrayList(
         Arrays.asList("Agama mossambica", null, countryCodeForNull, countryNameForNull, countryNumberForNull),
@@ -938,12 +930,6 @@ public class SortMergeJoinFrameProcessorTest extends FrameProcessorTestBase
         Arrays.asList("Orange Soda", "MatchNothing", null, null, null),
         Arrays.asList("History of Fourems", "MMMM", "MMMM", "Fourems", 205L)
     );
-
-    if (!NullHandling.sqlCompatible()) {
-      // Sorting order is different in default-value mode, since 0 and null collapse.
-      // "Peremptory norm" moves before "Rallicula".
-      expectedRows.add(3, expectedRows.remove(5));
-    }
 
     assertResult(processor, outputChannel.readable(), joinSignature, expectedRows);
   }
@@ -991,16 +977,9 @@ public class SortMergeJoinFrameProcessorTest extends FrameProcessorTestBase
     final String countryNameForNull;
     final Long countryNumberForNull;
 
-    if (NullHandling.sqlCompatible()) {
-      countryCodeForNull = null;
-      countryNameForNull = null;
-      countryNumberForNull = null;
-    } else {
-      // In default-value mode, null country number from the left-hand table converts to zero, which matches Australia.
-      countryCodeForNull = "AU";
-      countryNameForNull = "Australia";
-      countryNumberForNull = 0L;
-    }
+    countryCodeForNull = null;
+    countryNameForNull = null;
+    countryNumberForNull = null;
 
     final List<List<Object>> expectedRows = Lists.newArrayList(
         Arrays.asList("Agama mossambica", null, countryCodeForNull, countryNameForNull, countryNumberForNull),
@@ -1033,12 +1012,6 @@ public class SortMergeJoinFrameProcessorTest extends FrameProcessorTestBase
         Arrays.asList("Orange Soda", "MatchNothing", null, null, null),
         Arrays.asList("History of Fourems", "MMMM", "MMMM", "Fourems", 205L)
     );
-
-    if (!NullHandling.sqlCompatible()) {
-      // Sorting order is different in default-value mode, since 0 and null collapse.
-      // "Peremptory norm" moves before "Rallicula".
-      expectedRows.add(3, expectedRows.remove(5));
-    }
 
     assertResult(processor, outputChannel.readable(), joinSignature, expectedRows);
   }
@@ -1491,17 +1464,17 @@ public class SortMergeJoinFrameProcessorTest extends FrameProcessorTestBase
             signature
         )
     )) {
-      final StorageAdapter adapter = segment.asStorageAdapter();
-      return makeChannelFromAdapter(adapter, keyColumns);
+      final CursorFactory cursorFactory = segment.asCursorFactory();
+      return makeChannelFromCursorFactory(cursorFactory, keyColumns);
     }
   }
 
-  private ReadableInput makeChannelFromAdapter(
-      final StorageAdapter adapter,
+  private ReadableInput makeChannelFromCursorFactory(
+      final CursorFactory cursorFactory,
       final List<KeyColumn> keyColumns
   ) throws IOException
   {
-    return makeChannelFromAdapter(adapter, keyColumns, rowsPerInputFrame);
+    return makeChannelFromCursorFactory(cursorFactory, keyColumns, rowsPerInputFrame);
   }
 
   private FrameWriterFactory makeFrameWriterFactory(final RowSignature signature)

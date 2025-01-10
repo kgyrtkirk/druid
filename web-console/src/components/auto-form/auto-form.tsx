@@ -57,7 +57,7 @@ export interface Field<M> {
     | 'json'
     | 'interval'
     | 'custom';
-  defaultValue?: any;
+  defaultValue?: Functor<M, any>;
   emptyValue?: any;
   suggestions?: Functor<M, Suggestion[]>;
   placeholder?: Functor<M, string>;
@@ -131,7 +131,9 @@ export class AutoForm<T extends Record<string, any>> extends React.PureComponent
     const required = AutoForm.evaluateFunctor(field.required, model, false);
     return {
       required,
-      defaultValue: required ? undefined : field.defaultValue,
+      defaultValue: required
+        ? undefined
+        : AutoForm.evaluateFunctor(field.defaultValue, model as any, undefined),
       modelValue: deepGet(model as any, field.name),
     };
   }
@@ -537,7 +539,6 @@ export class AutoForm<T extends Record<string, any>> extends React.PureComponent
           text={showMore ? 'Show less' : 'Show more'}
           rightIcon={showMore ? IconNames.CHEVRON_UP : IconNames.CHEVRON_DOWN}
           minimal
-          fill
           onClick={() => {
             this.setState(({ showMore }) => ({ showMore: !showMore }));
           }}

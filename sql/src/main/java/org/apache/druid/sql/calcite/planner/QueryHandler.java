@@ -62,6 +62,8 @@ import org.apache.druid.java.util.common.guava.BaseSequence;
 import org.apache.druid.java.util.common.guava.Sequences;
 import org.apache.druid.java.util.emitter.EmittingLogger;
 import org.apache.druid.query.Query;
+import org.apache.druid.query.QueryContexts;
+import org.apache.druid.query.explain.ExplainAttributes;
 import org.apache.druid.server.QueryResponse;
 import org.apache.druid.server.security.Action;
 import org.apache.druid.server.security.Resource;
@@ -113,7 +115,7 @@ public abstract class QueryHandler extends SqlStatementHandler.BaseStatementHand
     CalcitePlanner planner = handlerContext.planner();
     SqlNode validatedQueryNode;
     try {
-      validatedQueryNode = planner.validate(rewriteParameters(root));
+      validatedQueryNode = planner.validate(root);
     }
     catch (ValidationException e) {
       throw DruidPlanner.translateException(e);
@@ -127,24 +129,6 @@ public abstract class QueryHandler extends SqlStatementHandler.BaseStatementHand
     validatedQueryNode.accept(resourceCollectorShuttle);
     resourceActions = resourceCollectorShuttle.getResourceActions();
     return validatedQueryNode;
-  }
-
-  private SqlNode rewriteParameters(SqlNode original)
-  {
-    // Uses {@link SqlParameterizerShuttle} to rewrite {@link SqlNode} to swap out any
-    // {@link org.apache.calcite.sql.SqlDynamicParam} early for their {@link SqlLiteral}
-    // replacement.
-    //
-    // Parameter replacement is done only if the client provides parameter values.
-    // If this is a PREPARE-only, then there will be no values even if the statement contains
-    // parameters. If this is a PLAN, then we'll catch later the case that the statement
-    // contains parameters, but no values were provided.
-    PlannerContext plannerContext = handlerContext.plannerContext();
-    if (plannerContext.getParameters().isEmpty()) {
-      return original;
-    } else {
-      return original.accept(new SqlParameterizerShuttle(plannerContext));
-    }
   }
 
   @Override
@@ -359,7 +343,7 @@ public abstract class QueryHandler extends SqlStatementHandler.BaseStatementHand
                   @Override
                   public QueryHandler.EnumeratorIterator<Object[]> make()
                   {
-                    return new QueryHandler.EnumeratorIterator<>(new Iterator<Object[]>()
+                    return new QueryHandler.EnumeratorIterator<>(new Iterator<>()
                     {
                       @Override
                       public boolean hasNext()
@@ -406,7 +390,7 @@ public abstract class QueryHandler extends SqlStatementHandler.BaseStatementHand
         if (plannerContext.getPlannerConfig().isUseNativeQueryExplain()) {
           DruidRel<?> druidRel = (DruidRel<?>) rel;
           try {
-            explanation = explainSqlPlanAsNativeQueries(relRoot, druidRel);
+            explanation = explainSqlPlanAsNativeQueries(plannerContext, relRoot, druidRel);
           }
           catch (Exception ex) {
             log.warn(ex, "Unable to translate to a native Druid query. Resorting to legacy Druid explain plan.");
@@ -453,7 +437,7 @@ public abstract class QueryHandler extends SqlStatementHandler.BaseStatementHand
    * @return A string representing an array of native queries that correspond to the given SQL query, in JSON format
    * @throws JsonProcessingException
    */
-  private String explainSqlPlanAsNativeQueries(final RelRoot relRoot, DruidRel<?> rel) throws JsonProcessingException
+  private String explainSqlPlanAsNativeQueries(PlannerContext plannerContext, final RelRoot relRoot, DruidRel<?> rel) throws JsonProcessingException
   {
     ObjectMapper jsonMapper = handlerContext.jsonMapper();
     List<DruidQuery> druidQueryList;
@@ -470,6 +454,9 @@ public abstract class QueryHandler extends SqlStatementHandler.BaseStatementHand
 
     for (DruidQuery druidQuery : druidQueryList) {
       Query<?> nativeQuery = druidQuery.getQuery();
+
+      plannerContext.dispatchHook(DruidHook.NATIVE_PLAN, nativeQuery);
+
       ObjectNode objectNode = jsonMapper.createObjectNode();
       objectNode.set("query", jsonMapper.convertValue(nativeQuery, ObjectNode.class));
       objectNode.set("signature", jsonMapper.convertValue(druidQuery.getOutputRowSignature(), ArrayNode.class));
@@ -555,7 +542,7 @@ public abstract class QueryHandler extends SqlStatementHandler.BaseStatementHand
 
     if (plannerContext.getPlannerConfig()
                       .getNativeQuerySqlPlanningMode()
-                      .equals(PlannerConfig.NATIVE_QUERY_SQL_PLANNING_MODE_DECOUPLED)
+                      .equals(QueryContexts.NATIVE_QUERY_SQL_PLANNING_MODE_DECOUPLED)
     ) {
       RelNode newRoot = parameterized;
       newRoot = planner.transform(
@@ -581,6 +568,11 @@ public abstract class QueryHandler extends SqlStatementHandler.BaseStatementHand
       }
       DruidQuery finalBaseQuery = baseQuery;
       final Supplier<QueryResponse<Object[]>> resultsSupplier = () -> plannerContext.getQueryMaker().runQuery(finalBaseQuery);
+
+      if (explain != null) {
+        plannerContext.dispatchHook(DruidHook.NATIVE_PLAN, finalBaseQuery.getQuery());
+        return planExplanation(possiblyLimitedRoot, newRoot, true);
+      }
 
       return new PlannerResult(resultsSupplier, finalBaseQuery.getOutputRowType());
     } else {
@@ -688,9 +680,10 @@ public abstract class QueryHandler extends SqlStatementHandler.BaseStatementHand
                           .build(exception, "Unhandled Query Planning Failure, see broker logs for details");
     } else {
       // Planning errors are more like hints: it isn't guaranteed that the planning error is actually what went wrong.
-      // For this reason, we consider these as targetting a more expert persona, i.e. the admin instead of the actual
-      // user.
-      throw DruidException.forPersona(DruidException.Persona.ADMIN)
+      // Even though the errors could be targetted to a more expert persona the errors aren't leaking any privileged
+      // information about the cluster that an admin might care about. The errors that are user resolvable are worth
+      // the potential confusion that a user might face with one that requires an expert persona.
+      throw DruidException.forPersona(DruidException.Persona.USER)
                           .ofCategory(DruidException.Category.INVALID_INPUT)
                           .build(
                               exception,
@@ -736,7 +729,8 @@ public abstract class QueryHandler extends SqlStatementHandler.BaseStatementHand
       final RelDataTypeFactory typeFactory = rootQueryRel.rel.getCluster().getTypeFactory();
       return handlerContext.engine().resultTypeForSelect(
           typeFactory,
-          rootQueryRel.validatedRowType
+          rootQueryRel.validatedRowType,
+          handlerContext.plannerContext().queryContextMap()
       );
     }
 

@@ -89,6 +89,7 @@ import org.apache.druid.segment.transform.ExpressionTransform;
 import org.apache.druid.segment.transform.TransformSpec;
 import org.apache.druid.timeline.DataSegment;
 import org.easymock.EasyMock;
+import org.joda.time.Duration;
 import org.joda.time.Period;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -785,7 +786,8 @@ public class KinesisIndexTaskTest extends SeekableStreamIndexTaskTestBase
             "awsEndpoint",
             null,
             null,
-            null
+            null,
+            Duration.standardHours(2).getStandardMinutes()
         )
     );
 
@@ -847,7 +849,8 @@ public class KinesisIndexTaskTest extends SeekableStreamIndexTaskTestBase
             "awsEndpoint",
             null,
             null,
-            null
+            null,
+            Duration.standardHours(2).getStandardMinutes()
         )
     );
 
@@ -1946,7 +1949,8 @@ public class KinesisIndexTaskTest extends SeekableStreamIndexTaskTestBase
             "awsEndpoint",
             null,
             null,
-            null
+            null,
+            Duration.standardHours(2).getStandardMinutes()
         ),
         context
     );
@@ -2108,7 +2112,8 @@ public class KinesisIndexTaskTest extends SeekableStreamIndexTaskTestBase
             "awsEndpoint",
             null,
             null,
-            null
+            null,
+            Duration.standardHours(2).getStandardMinutes()
         ),
         context
     );
@@ -2309,7 +2314,8 @@ public class KinesisIndexTaskTest extends SeekableStreamIndexTaskTestBase
             "awsEndpoint",
             null,
             null,
-            null
+            null,
+            Duration.standardHours(2).getStandardMinutes()
         ),
         null
     );
@@ -2374,7 +2380,8 @@ public class KinesisIndexTaskTest extends SeekableStreamIndexTaskTestBase
         maxSavedParseExceptions,
         maxRecordsPerPoll,
         maxBytesPerPoll,
-        intermediateHandoffPeriod
+        intermediateHandoffPeriod,
+        null
     );
     return createTask(taskId, dataSchema, ioConfig, tuningConfig, context);
   }
@@ -2411,33 +2418,22 @@ public class KinesisIndexTaskTest extends SeekableStreamIndexTaskTestBase
 
   private static DataSchema cloneDataSchema(final DataSchema dataSchema)
   {
-    return new DataSchema(
-        dataSchema.getDataSource(),
-        dataSchema.getTimestampSpec(),
-        dataSchema.getDimensionsSpec(),
-        dataSchema.getAggregators(),
-        dataSchema.getGranularitySpec(),
-        dataSchema.getTransformSpec(),
-        dataSchema.getParserMap(),
-        OBJECT_MAPPER
-    );
+    return DataSchema.builder(dataSchema).withObjectMapper(OBJECT_MAPPER).build();
   }
 
   @Override
   protected QueryRunnerFactoryConglomerate makeQueryRunnerConglomerate()
   {
-    return new DefaultQueryRunnerFactoryConglomerate(
-        ImmutableMap.of(
-            TimeseriesQuery.class,
-            new TimeseriesQueryRunnerFactory(
-                new TimeseriesQueryQueryToolChest(),
-                new TimeseriesQueryEngine(),
-                (query, future) -> {
-                  // do nothing
-                }
-            )
+    return DefaultQueryRunnerFactoryConglomerate.buildFromQueryRunnerFactories(ImmutableMap.of(
+        TimeseriesQuery.class,
+        new TimeseriesQueryRunnerFactory(
+            new TimeseriesQueryQueryToolChest(),
+            new TimeseriesQueryEngine(),
+            (query, future) -> {
+              // do nothing
+            }
         )
-    );
+    ));
   }
 
   private void makeToolboxFactory() throws IOException

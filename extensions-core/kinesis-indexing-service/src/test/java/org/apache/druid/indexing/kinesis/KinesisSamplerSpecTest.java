@@ -27,7 +27,6 @@ import com.google.common.collect.ImmutableSet;
 import org.apache.druid.client.indexing.SamplerResponse;
 import org.apache.druid.client.indexing.SamplerSpec;
 import org.apache.druid.common.aws.AWSCredentialsConfig;
-import org.apache.druid.common.config.NullHandling;
 import org.apache.druid.data.input.impl.DimensionsSpec;
 import org.apache.druid.data.input.impl.FloatDimensionSchema;
 import org.apache.druid.data.input.impl.InputRowParser;
@@ -49,7 +48,6 @@ import org.apache.druid.jackson.DefaultObjectMapper;
 import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.java.util.common.granularity.Granularities;
 import org.apache.druid.java.util.common.parsers.JSONPathSpec;
-import org.apache.druid.query.aggregation.AggregatorFactory;
 import org.apache.druid.query.aggregation.CountAggregatorFactory;
 import org.apache.druid.query.aggregation.DoubleSumAggregatorFactory;
 import org.apache.druid.segment.indexing.DataSchema;
@@ -75,29 +73,25 @@ public class KinesisSamplerSpecTest extends EasyMockSupport
 {
   private static final String STREAM = "sampling";
   private static final String SHARD_ID = "1";
-  private static final DataSchema DATA_SCHEMA = new DataSchema(
-      "test_ds",
-      new TimestampSpec("timestamp", "iso", null),
-      new DimensionsSpec(
-          Arrays.asList(
-              new StringDimensionSchema("dim1"),
-              new StringDimensionSchema("dim1t"),
-              new StringDimensionSchema("dim2"),
-              new LongDimensionSchema("dimLong"),
-              new FloatDimensionSchema("dimFloat")
-          )
-      ),
-      new AggregatorFactory[]{
-          new DoubleSumAggregatorFactory("met1sum", "met1"),
-          new CountAggregatorFactory("rows")
-      },
-      new UniformGranularitySpec(Granularities.DAY, Granularities.NONE, null),
-      null
-  );
-
-  static {
-    NullHandling.initializeForTests();
-  }
+  private static final DataSchema DATA_SCHEMA =
+      DataSchema.builder()
+                .withDataSource("test_ds")
+                .withTimestamp(new TimestampSpec("timestamp", "iso", null))
+                .withDimensions(
+                    new StringDimensionSchema("dim1"),
+                    new StringDimensionSchema("dim1t"),
+                    new StringDimensionSchema("dim2"),
+                    new LongDimensionSchema("dimLong"),
+                    new FloatDimensionSchema("dimFloat")
+                )
+                .withAggregators(
+                    new DoubleSumAggregatorFactory("met1sum", "met1"),
+                    new CountAggregatorFactory("rows")
+                )
+                .withGranularity(
+                    new UniformGranularitySpec(Granularities.DAY, Granularities.NONE, null)
+                )
+                .build();
 
   private final KinesisRecordSupplier recordSupplier = mock(KinesisRecordSupplier.class);
 
@@ -192,17 +186,18 @@ public class KinesisSamplerSpecTest extends EasyMockSupport
     );
     InputRowParser parser = new StringInputRowParser(new JSONParseSpec(timestampSpec, dimensionsSpec, JSONPathSpec.DEFAULT, null, null), "UTF8");
 
-    DataSchema dataSchema = new DataSchema(
-        "test_ds",
-        objectMapper.readValue(objectMapper.writeValueAsBytes(parser), Map.class),
-        new AggregatorFactory[]{
-            new DoubleSumAggregatorFactory("met1sum", "met1"),
-            new CountAggregatorFactory("rows")
-        },
-        new UniformGranularitySpec(Granularities.DAY, Granularities.NONE, null),
-        null,
-        objectMapper
-    );
+    DataSchema dataSchema = DataSchema.builder()
+                                      .withDataSource("test_ds")
+                                      .withParserMap(
+                                          objectMapper.readValue(objectMapper.writeValueAsBytes(parser), Map.class)
+                                      )
+                                      .withAggregators(
+                                          new DoubleSumAggregatorFactory("met1sum", "met1"),
+                                          new CountAggregatorFactory("rows")
+                                      )
+                                      .withGranularity(new UniformGranularitySpec(Granularities.DAY, Granularities.NONE, null))
+                                      .withObjectMapper(objectMapper)
+                                      .build();
 
     KinesisSupervisorSpec supervisorSpec = new KinesisSupervisorSpec(
         null,
