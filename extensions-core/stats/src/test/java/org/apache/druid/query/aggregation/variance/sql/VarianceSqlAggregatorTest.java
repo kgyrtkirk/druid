@@ -21,7 +21,6 @@ package org.apache.druid.query.aggregation.variance.sql;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Injector;
-import org.apache.druid.common.config.NullHandling;
 import org.apache.druid.data.input.InputRow;
 import org.apache.druid.error.DruidException;
 import org.apache.druid.initialization.DruidModule;
@@ -130,10 +129,6 @@ public class VarianceSqlAggregatorTest extends BaseCalciteQueryTest
       } else if (raw instanceof Integer) {
         int v = ((Integer) raw).intValue() * multiply;
         holder.add(v);
-      }
-    } else {
-      if (NullHandling.replaceWithDefault()) {
-        holder.add(0.0f);
       }
     }
   }
@@ -407,16 +402,11 @@ public class VarianceSqlAggregatorTest extends BaseCalciteQueryTest
   @Test
   public void testVarianceOrderBy()
   {
-    List<Object[]> expectedResults = NullHandling.sqlCompatible()
-                                     ? ImmutableList.of(
+    List<Object[]> expectedResults = ImmutableList.of(
         new Object[]{"a", 0.0},
         new Object[]{null, 0.0},
         new Object[]{"", 0.0},
         new Object[]{"abc", null}
-    ) : ImmutableList.of(
-        new Object[]{"a", 0.5},
-        new Object[]{"", 0.003333333432674409},
-        new Object[]{"abc", 0.0}
     );
 
     testQuery(
@@ -484,9 +474,7 @@ public class VarianceSqlAggregatorTest extends BaseCalciteQueryTest
         ),
         ResultMatchMode.EQUALS_EPS,
         ImmutableList.of(
-            NullHandling.replaceWithDefault()
-            ? new Object[]{3.61497656362466, 3.960008417499471, 3.960008417499471, 15.681666666666667}
-            : new Object[]{4.074582459862878, 4.990323970779185, 4.990323970779185, 24.903333333333332}
+            new Object[]{4.074582459862878, 4.990323970779185, 4.990323970779185, 24.903333333333332}
         )
     );
   }
@@ -510,7 +498,7 @@ public class VarianceSqlAggregatorTest extends BaseCalciteQueryTest
                   .dataSource(CalciteTests.DATASOURCE3)
                   .intervals(querySegmentSpec(Filtration.eternity()))
                   .granularity(Granularities.ALL)
-                  .filters(numericEquality("dim2", 0L, ColumnType.LONG))
+                  .filters(equality("dim2", 0L, ColumnType.LONG))
                   .aggregators(
                       new VarianceAggregatorFactory("a0:agg", "dbl1", "population", "double"),
                       new VarianceAggregatorFactory("a1:agg", "dbl1", "sample", "double"),
@@ -535,9 +523,7 @@ public class VarianceSqlAggregatorTest extends BaseCalciteQueryTest
         ),
         ResultMatchMode.EQUALS_EPS,
         ImmutableList.of(
-            NullHandling.replaceWithDefault()
-            ? new Object[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}
-            : new Object[]{null, null, null, null, null, null, null, null}
+            new Object[]{null, null, null, null, null, null, null, null}
         )
     );
   }
@@ -616,9 +602,7 @@ public class VarianceSqlAggregatorTest extends BaseCalciteQueryTest
         ),
         ResultMatchMode.EQUALS_EPS,
         ImmutableList.of(
-            NullHandling.replaceWithDefault()
-            ? new Object[]{"a", 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}
-            : new Object[]{"a", null, null, null, null, null, null, null, null}
+            new Object[]{"a", null, null, null, null, null, null, null, null}
         )
     );
   }
