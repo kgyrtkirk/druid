@@ -32,7 +32,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
 @JsonTypeName("query")
@@ -109,13 +108,12 @@ public class QueryDataSource implements DataSource
   }
 
   @Override
-  public Function<SegmentReference, SegmentReference> createSegmentMapFunction(
-      Query query,
-      AtomicLong cpuTime
-  )
+  public Function<SegmentReference, SegmentReference> createSegmentMapFunction(SegmentMapConfig cfg)
   {
-    final Query<?> subQuery = this.getQuery();
-    return subQuery.getDataSource().createSegmentMapFunction(subQuery, cpuTime);
+    // FIXME: not sure about this
+    final Query subQuery = this.getQuery();
+    SegmentMapConfig newCfg = SegmentMapConfig.of(subQuery);
+    return subQuery.getDataSource().createSegmentMapFunction(newCfg);
   }
 
   @Override

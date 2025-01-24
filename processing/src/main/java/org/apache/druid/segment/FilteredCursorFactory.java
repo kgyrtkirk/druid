@@ -19,6 +19,7 @@
 
 package org.apache.druid.segment;
 
+import com.google.common.collect.Iterables;
 import org.apache.druid.query.filter.DimFilter;
 import org.apache.druid.query.filter.Filter;
 import org.apache.druid.segment.column.ColumnCapabilities;
@@ -35,42 +36,64 @@ public class FilteredCursorFactory implements CursorFactory
   private final CursorFactory delegate;
   @Nullable
   private final DimFilter filter;
+  private final VirtualColumns virtualColumns;
 
-  public FilteredCursorFactory(CursorFactory delegate, @Nullable DimFilter filter)
+  public FilteredCursorFactory(
+      CursorFactory delegate,
+      @Nullable DimFilter filter,
+      @Nullable VirtualColumns virtualColumns)
   {
     this.delegate = delegate;
     this.filter = filter;
+    this.virtualColumns = virtualColumns == null ? VirtualColumns.EMPTY : virtualColumns;
   }
 
   @Override
   public CursorHolder makeCursorHolder(CursorBuildSpec spec)
   {
     final CursorBuildSpec.CursorBuildSpecBuilder buildSpecBuilder = CursorBuildSpec.builder(spec);
-    final Filter newFilter;
-    final Set<String> physicalColumns;
-    if (filter != null) {
-      if (spec.getFilter() == null) {
-        newFilter = filter.toFilter();
-      } else {
-        newFilter = Filters.and(Arrays.asList(spec.getFilter(), filter.toFilter()));
+
+    // FIXME maybeAnd
+    buildSpecBuilder.setFilter(Filters.conjunction(spec.getFilter(), getFilter()));
+    buildSpecBuilder.setVirtualColumns(
+        VirtualColumns.fromIterable(
+            Iterables.concat(
+                Arrays.asList(spec.getVirtualColumns().getVirtualColumns()),
+                Arrays.asList(virtualColumns.getVirtualColumns())
+            )
+        )
+    );
+    buildSpecBuilder.setPhysicalColumns(getPhysicalColumns(spec));
+
+    return delegate.makeCursorHolder(buildSpecBuilder.build());
+  }
+
+  private Set<String> getPhysicalColumns(CursorBuildSpec spec)
+  {
+    Set<String> physicalColumns = spec.getPhysicalColumns();
+    if (physicalColumns != null) {
+      physicalColumns = new HashSet<>(physicalColumns);
+      for (VirtualColumn vc : virtualColumns.getVirtualColumns()) {
+        physicalColumns.addAll(vc.requiredColumns());
       }
-      if (spec.getPhysicalColumns() != null) {
-        physicalColumns = new HashSet<>(spec.getPhysicalColumns());
+      if (filter != null) {
         for (String column : filter.getRequiredColumns()) {
-          if (!spec.getVirtualColumns().exists(column)) {
+          if (!spec.getVirtualColumns().exists(column) && !virtualColumns.exists(column)) {
             physicalColumns.add(column);
           }
         }
-      } else {
-        physicalColumns = null;
       }
-    } else {
-      newFilter = spec.getFilter();
-      physicalColumns = spec.getPhysicalColumns();
+      return physicalColumns;
     }
-    buildSpecBuilder.setFilter(newFilter)
-                    .setPhysicalColumns(physicalColumns);
-    return delegate.makeCursorHolder(buildSpecBuilder.build());
+    return null;
+  }
+
+  private Filter getFilter()
+  {
+    if (filter == null) {
+      return null;
+    }
+    return filter.toFilter();
   }
 
   @Override

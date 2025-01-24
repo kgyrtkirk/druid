@@ -63,8 +63,8 @@ import org.apache.druid.query.aggregation.LongMinAggregatorFactory;
 import org.apache.druid.query.aggregation.PostAggregator;
 import org.apache.druid.query.aggregation.SimpleLongAggregatorFactory;
 import org.apache.druid.query.dimension.DimensionSpec;
-import org.apache.druid.query.filter.AndDimFilter;
 import org.apache.druid.query.filter.DimFilter;
+import org.apache.druid.query.filter.DimFilters;
 import org.apache.druid.query.groupby.GroupByQuery;
 import org.apache.druid.query.groupby.having.DimFilterHavingSpec;
 import org.apache.druid.query.groupby.orderby.DefaultLimitSpec;
@@ -846,7 +846,7 @@ public class DruidQuery
       }
       final boolean useIntervalFiltering = canUseIntervalFiltering(filteredDataSource);
       final Filtration baseFiltration = toFiltration(
-          new AndDimFilter(dimFilterList),
+          DimFilters.conjunction(dimFilterList),
           virtualColumnRegistry.getFullRowSignature(),
           useIntervalFiltering
       );
@@ -1756,5 +1756,10 @@ public class DruidQuery
   public DimFilter getFilter()
   {
     return filter;
+  }
+
+  public VirtualColumns getVirtualColumns()
+  {
+    return virtualColumnRegistry.build(Collections.emptySet());
   }
 }

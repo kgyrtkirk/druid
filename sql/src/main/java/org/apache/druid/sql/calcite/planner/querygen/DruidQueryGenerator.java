@@ -35,6 +35,7 @@ import org.apache.druid.query.FilteredDataSource;
 import org.apache.druid.query.QueryDataSource;
 import org.apache.druid.query.UnionDataSource;
 import org.apache.druid.query.filter.DimFilter;
+import org.apache.druid.segment.VirtualColumns;
 import org.apache.druid.sql.calcite.filtration.Filtration;
 import org.apache.druid.sql.calcite.planner.PlannerContext;
 import org.apache.druid.sql.calcite.planner.querygen.DruidQueryGenerator.PDQVertexFactory.PDQVertex;
@@ -234,7 +235,8 @@ public class DruidQueryGenerator
 
     boolean filteredDatasourceAllowed()
     {
-      return joinType == JoinPosition.NONE;
+//      return joinType == JoinPosition.NONE;
+      return joinType != JoinPosition.RIGHT;
     }
 
     boolean finalizeSubQuery()
@@ -452,11 +454,7 @@ public class DruidQueryGenerator
           DruidQuery q = buildQuery(false);
           SourceDesc origInput = getSource();
           DataSource dataSource;
-          if (q.getFilter() == null) {
-            dataSource = origInput.dataSource;
-          } else {
-            dataSource = makeFilteredDataSource(origInput, q.getFilter());
-          }
+          dataSource = makeFilteredDataSource(origInput, q.getFilter(), q.getVirtualColumns());
           return new SourceDesc(dataSource, q.getOutputRowSignature());
         }
         throw DruidException.defensive("Can't unwrap source of vertex[%s]", partialDruidQuery);
@@ -477,6 +475,9 @@ public class DruidQueryGenerator
         if (partialDruidQuery.stage() == PartialDruidQuery.Stage.SELECT_PROJECT &&
             (tweaks.filteredDatasourceAllowed() || partialDruidQuery.getWhereFilter() == null) &&
             mayDiscardSelectProject()) {
+          return true;
+        }
+        if (partialDruidQuery.stage() == PartialDruidQuery.Stage.SELECT_PROJECT && tweaks.filteredDatasourceAllowed()) {
           return true;
         }
         return false;
@@ -531,12 +532,24 @@ public class DruidQueryGenerator
    * This method should not live here.
    *
    * The fact that {@link Filtration} have to be run on the filter is out-of scope here.
+   * @param virtualColumns
    */
-  public static FilteredDataSource makeFilteredDataSource(SourceDesc sd, DimFilter filter)
+  public static DataSource makeFilteredDataSource(SourceDesc sd, DimFilter filter, VirtualColumns virtualColumns)
   {
+    if (virtualColumns.isEmpty() && filter == null) {
+      return sd.dataSource;
+    }
+    DimFilter newFilter = makeOptimizedFilter(sd, filter);
+    return FilteredDataSource.create(sd.dataSource, newFilter, virtualColumns);
+  }
 
+  private static DimFilter makeOptimizedFilter(SourceDesc sd, DimFilter filter)
+  {
+    if (filter == null) {
+      return null;
+    }
     Filtration filtration = Filtration.create(filter).optimizeFilterOnly(sd.rowSignature);
     DimFilter newFilter = filtration.getDimFilter();
-    return FilteredDataSource.create(sd.dataSource, newFilter);
+    return newFilter;
   }
 }
