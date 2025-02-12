@@ -19,11 +19,16 @@
 
 package org.apache.druid.segment;
 
+import com.google.common.collect.Iterables;
 import org.apache.druid.query.filter.DimFilter;
+import org.apache.druid.query.filter.Filter;
 import org.apache.druid.segment.column.ColumnCapabilities;
 import org.apache.druid.segment.column.RowSignature;
+import org.apache.druid.segment.filter.Filters;
 
 import javax.annotation.Nullable;
+
+import java.util.Arrays;
 
 public class FilteredCursorFactory implements CursorFactory
 {
@@ -31,7 +36,9 @@ public class FilteredCursorFactory implements CursorFactory
   @Nullable
   private final DimFilter filter;
 
-  public FilteredCursorFactory(CursorFactory delegate, @Nullable DimFilter filter)
+  public FilteredCursorFactory(
+      CursorFactory delegate,
+      @Nullable DimFilter filter)
   {
     this.delegate = delegate;
     this.filter = filter;
@@ -40,10 +47,27 @@ public class FilteredCursorFactory implements CursorFactory
   @Override
   public CursorHolder makeCursorHolder(CursorBuildSpec spec)
   {
+    final CursorBuildSpec.CursorBuildSpecBuilder buildSpecBuilder = CursorBuildSpec.builder(spec);
+
+    buildSpecBuilder.setFilter(Filters.conjunction(spec.getFilter(), getFilter()));
+    buildSpecBuilder.setVirtualColumns(
+        VirtualColumns.fromIterable(
+            Iterables.concat(
+                Arrays.asList(spec.getVirtualColumns().getVirtualColumns())
+            )
+        )
+    );
+    buildSpecBuilder.setPhysicalColumns(spec.getPhysicalColumns());
+
+    return delegate.makeCursorHolder(buildSpecBuilder.build());
+  }
+
+  private Filter getFilter()
+  {
     if (filter == null) {
-      return delegate.makeCursorHolder(spec);
+      return null;
     }
-    return delegate.makeCursorHolder(CursorBuildSpec.builder(spec).andFilter(filter.toFilter()).build());
+    return filter.toFilter();
   }
 
   @Override

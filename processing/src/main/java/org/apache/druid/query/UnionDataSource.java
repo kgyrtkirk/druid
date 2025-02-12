@@ -143,7 +143,7 @@ public class UnionDataSource implements DataSource
   }
 
   @Override
-  public Function<SegmentReference, SegmentReference> createSegmentMapFunction(Query query)
+  public Function<SegmentReference, SegmentReference> createSegmentMapFunction(SegmentMapConfig cfg)
   {
     return Function.identity();
   }

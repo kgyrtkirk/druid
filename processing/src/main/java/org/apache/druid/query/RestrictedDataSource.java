@@ -122,9 +122,9 @@ public class RestrictedDataSource implements DataSource
   }
 
   @Override
-  public Function<SegmentReference, SegmentReference> createSegmentMapFunction(Query query)
+  public Function<SegmentReference, SegmentReference> createSegmentMapFunction(SegmentMapConfig cfg)
   {
-    final Function<SegmentReference, SegmentReference> segmentMapFn = base.createSegmentMapFunction(query);
+    final Function<SegmentReference, SegmentReference> segmentMapFn = base.createSegmentMapFunction(cfg);
     return baseSegment -> new RestrictedSegment(segmentMapFn.apply(baseSegment), policy);
   }
 

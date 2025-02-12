@@ -24,7 +24,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import org.apache.druid.java.util.common.IAE;
 import org.apache.druid.query.DataSource;
-import org.apache.druid.query.Query;
 import org.apache.druid.query.planning.DataSourceAnalysis;
 import org.apache.druid.segment.SegmentReference;
 
@@ -95,16 +94,17 @@ public class InputNumberDataSource implements DataSource
     return true;
   }
 
-  @Override
-  public Function<SegmentReference, SegmentReference> createSegmentMapFunction(Query query)
-  {
-    return Function.identity();
-  }
 
   @Override
   public DataSource withUpdatedDataSource(DataSource newSource)
   {
     return newSource;
+  }
+
+  @Override
+  public Function<SegmentReference, SegmentReference> createSegmentMapFunction(SegmentMapConfig query)
+  {
+    return Function.identity();
   }
 
   @Override

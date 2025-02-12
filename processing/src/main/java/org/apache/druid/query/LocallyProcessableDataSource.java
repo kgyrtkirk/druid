@@ -17,40 +17,20 @@
  * under the License.
  */
 
-package org.apache.druid.segment;
+package org.apache.druid.query;
 
-import org.apache.druid.query.filter.DimFilter;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import org.apache.druid.error.DruidException;
 
-// FIXME
-public class FilteredSegment extends WrappedSegmentReference
+/**
+ * Marks that the datasource is locally processable.
+ *
+ */
+public interface LocallyProcessableDataSource extends DataSource
 {
-  @Nullable
-  private final DimFilter filter;
-
-  public FilteredSegment(
-      SegmentReference delegate,
-      @Nullable DimFilter filter
-  )
-  {
-    super(delegate);
-    this.filter = filter;
-  }
-
-  @Override
-  public CursorFactory asCursorFactory()
-  {
-    return new FilteredCursorFactory(delegate.asCursorFactory(), filter);
-  }
-
-  @Nullable
-  @Override
-  public <T> T as(@Nonnull Class<T> clazz)
-  {
-    if (TopNOptimizationInspector.class.equals(clazz)) {
-      return (T) new SimpleTopNOptimizationInspector(filter == null);
+  default DataSource getInput() {
+    if(getChildren().size() != 1 ) {
+      throw DruidException.defensive("fds");
     }
-    return super.as(clazz);
+    return getChildren().get(0);
   }
 }

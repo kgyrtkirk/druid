@@ -20,6 +20,8 @@
 package org.apache.druid.query;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableList;
 import org.apache.druid.java.util.common.IAE;
@@ -27,7 +29,6 @@ import org.apache.druid.query.filter.DimFilter;
 import org.apache.druid.query.planning.DataSourceAnalysis;
 import org.apache.druid.segment.FilteredSegment;
 import org.apache.druid.segment.SegmentReference;
-
 import javax.annotation.Nullable;
 
 import java.util.List;
@@ -48,6 +49,7 @@ import java.util.function.Function;
  * putting more work to be done at the broker level. This pushes the operations down to the
  * segments and is more performant.
  */
+@JsonInclude(Include.NON_DEFAULT)
 public class FilteredDataSource implements DataSource
 {
   private final DataSource base;
@@ -65,6 +67,12 @@ public class FilteredDataSource implements DataSource
     return filter;
   }
 
+  // To provide defaults for Jackson
+  private FilteredDataSource()
+  {
+    this(null, null);
+  }
+
   private FilteredDataSource(DataSource base, @Nullable DimFilter filter)
   {
     this.base = base;
@@ -74,10 +82,10 @@ public class FilteredDataSource implements DataSource
   @JsonCreator
   public static FilteredDataSource create(
       @JsonProperty("base") DataSource base,
-      @JsonProperty("filter") @Nullable DimFilter f
+      @JsonProperty("filter") @Nullable DimFilter filter
   )
   {
-    return new FilteredDataSource(base, f);
+    return new FilteredDataSource(base, filter);
   }
 
   @Override
@@ -121,9 +129,13 @@ public class FilteredDataSource implements DataSource
   }
 
   @Override
-  public Function<SegmentReference, SegmentReference> createSegmentMapFunction(Query query)
+  public Function<SegmentReference, SegmentReference> createSegmentMapFunction(SegmentMapConfig cfg)
   {
-    final Function<SegmentReference, SegmentReference> segmentMapFn = base.createSegmentMapFunction(query);
+    SegmentMapConfig newCfg = cfg;
+
+    final Function<SegmentReference, SegmentReference> segmentMapFn = base.createSegmentMapFunction(
+        newCfg
+    );
     return baseSegment -> new FilteredSegment(segmentMapFn.apply(baseSegment), filter);
   }
 
@@ -137,9 +149,9 @@ public class FilteredDataSource implements DataSource
   public String toString()
   {
     return "FilteredDataSource{" +
-           "base=" + base +
-           ", filter='" + filter + '\'' +
-           '}';
+        "base=" + base +
+        ", filter='" + filter + "'" +
+        '}';
   }
 
   @Override

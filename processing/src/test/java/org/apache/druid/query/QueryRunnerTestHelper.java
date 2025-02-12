@@ -33,6 +33,7 @@ import org.apache.druid.java.util.common.guava.Sequence;
 import org.apache.druid.java.util.common.guava.Sequences;
 import org.apache.druid.js.JavaScriptConfig;
 import org.apache.druid.math.expr.ExprMacroTable;
+import org.apache.druid.query.DataSource.SegmentMapConfig;
 import org.apache.druid.query.aggregation.AggregatorFactory;
 import org.apache.druid.query.aggregation.CountAggregatorFactory;
 import org.apache.druid.query.aggregation.DoubleMaxAggregatorFactory;
@@ -558,7 +559,7 @@ public class QueryRunnerTestHelper
   {
     final DataSource base = query.getDataSource();
 
-    final SegmentReference segmentReference = base.createSegmentMapFunction(query)
+    final SegmentReference segmentReference = base.createSegmentMapFunction(SegmentMapConfig.of(query))
                                                   .apply(ReferenceCountingSegment.wrapRootGenerationSegment(adapter));
     return makeQueryRunner(factory, segmentReference, runnerName);
   }
