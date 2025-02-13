@@ -36,6 +36,7 @@ import org.joda.time.Duration;
 import org.joda.time.Interval;
 
 import javax.annotation.Nullable;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -110,8 +111,7 @@ public abstract class BaseQuery<T> implements Query<T>
   @VisibleForTesting
   public static QuerySegmentSpec getQuerySegmentSpecForLookUp(BaseQuery<?> query)
   {
-    DataSource queryDataSource = query.getDataSource();
-    return queryDataSource.getAnalysis()
+    return query.getDataSourceAnalysis()
                              .getBaseQuerySegmentSpec()
                              .orElseGet(query::getQuerySegmentSpec);
   }
