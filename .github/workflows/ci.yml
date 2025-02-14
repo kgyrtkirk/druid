@@ -66,6 +66,6 @@ jobs:
     uses: ./.github/workflows/worker.yml
     if: ${{ !contains( github.event.pull_request.labels.*.name, 'jacoco:skip') }}
     with:
-      script: PROJECTWIDE=$${{github.event.label.name == 'jacoco:projectwide' }} .github/scripts/create-jacoco-coverage-report.sh
+      script: PROJECTWIDE=${{github.event.label.name == 'jacoco:projectwide' }} .github/scripts/create-jacoco-coverage-report.sh
       artifacts_to_download: "unit-test-reports-*"
       key: "jacoco-coverage-report"
