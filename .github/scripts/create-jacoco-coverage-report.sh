@@ -30,7 +30,9 @@ mvn -B install -DskipTests -P skip-static-checks -Dweb.console.skip=true -Dmaven
 # If there are multiple jacoco.exec files present in any module, merge them into a single jacoco.exec file for that module.
 mvn jacoco:merge
 
-mvn jacoco:report
+[ "$PROJECTWIDE" == "true" ] && JACOCO_ARGS+=" -Djacoco.dataFile=$PWD/target/jacoco.exec"
+
+mvn jacoco:report $JACOCO_ARGS
 
 changed_files="$(git diff --name-only origin/${GITHUB_BASE_REF}...HEAD | grep "\.java$" || [[ $? == 1 ]])"
 
