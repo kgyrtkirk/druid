@@ -22,6 +22,32 @@ on:
         required: false
         type: string
         default: '17'
+  push:
+    paths-ignore:
+      - '**/*.md'
+      - 'dev/**'
+      - 'distribution/bin/**'
+      - 'docs/**'
+      - 'examples/**/jupyter-notebooks/**'
+      - 'web-console/**'
+      - 'website/**'
+    branches:
+      - master
+      - '[0-9]+.[0-9]+.[0-9]+' # release branches
+      - '[0-9]+.[0-9]+.[0-9]+-[A-Za-z0-9]+' # release branches
+  pull_request:
+    paths-ignore:
+      - '**/*.md'
+      - 'dev/**'
+      - 'distribution/bin/**'
+      - 'docs/**'
+      - 'examples/**/jupyter-notebooks/**'
+      - 'web-console/**'
+      - 'website/**'
+    branches:
+      - master
+      - '[0-9]+.[0-9]+.[0-9]+' # release branches
+      - '[0-9]+.[0-9]+.[0-9]+-[A-Za-z0-9]+' # release branches
 
 jobs:
   run-unit-tests:
