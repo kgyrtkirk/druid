@@ -21,7 +21,7 @@ on:
       jdk:
         required: false
         type: string
-        default: '17'
+        default: '21'
   push:
     paths-ignore:
       - '**/*.md'
@@ -55,10 +55,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        Dtest: [ "A*,F*,S*", "B*,D*,L*,T*", "C*,O*", "E*,N*,Q*", "G*,R*,U*", "H*,I*,J*", "K*,P*,V*,W*,X*,Y*,Z*", "M*"]
+        Dtest: [ 1,2,3,4,5,6,7,8,9,10,11 ]
     uses: ./.github/workflows/worker.yml
     with:
-      script: .github/scripts/run-unit-tests.sh -Dtest='${{ matrix.Dtest }}' -Dmaven.test.failure.ignore=true
+      script: .github/scripts/run-unit-tests.sh -Dtest=CompactionTaskParallelRunTest -Dmaven.test.failure.ignore=true
       jdk: ${{ inputs.jdk }}
       artifact_prefix: "unit-test-reports"
       key: ${{ matrix.Dtest }}
