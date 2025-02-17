@@ -22,5 +22,6 @@ set -x
 OPTS+=" -Dsurefire.failIfNoSpecifiedTests=false -P skip-static-checks -Dweb.console.skip=true"
 OPTS+=" -Djacoco.destFile=target/jacoco-${HASH}.exec"
 OPTS+=" -pl indexing-service/ -Dmaven.test.failure.ignore=true"
+
 mvn -B $OPTS install -DskipTests -am
-mvn -B $OPTS test -Dmaven.test.failure.ignore=true
+mvn -B $OPTS test -Dmaven.test.failure.ignore=true "-DjfrProfilerArgLine=$JFR_PROFILER_ARG_LINE"
