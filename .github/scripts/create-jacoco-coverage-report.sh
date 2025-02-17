@@ -32,7 +32,7 @@ mvn jacoco:merge
 
 mvn jacoco:report
 
-changed_files="$(git diff --name-only origin/${GITHUB_BASE_REF}...HEAD | grep "\.java$" || [[ $? == 1 ]])"
+changed_files="$(git diff --name-only origin/${GITHUB_BASE_REF}...HEAD | grep '\.java$' || [[ $? == 1 ]])"
 
 echo "Changed files:"
 for f in ${changed_files}
