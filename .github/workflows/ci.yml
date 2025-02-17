@@ -52,7 +52,7 @@ jobs:
         Dtest: [ 1,2,3,4,5,6,7,8,9,10,11 ]
     uses: ./.github/workflows/worker.yml
     with:
-      script: .github/scripts/run-unit-tests.sh -Dtest=CompactionTaskParallelRunTest -Dmaven.test.failure.ignore=true
+      script: .github/scripts/run-unit-tests.sh
       jdk: 21
       artifact_prefix: "unit-test-reports"
       key: ${{ matrix.Dtest }}
