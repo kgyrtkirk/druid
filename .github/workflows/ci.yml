@@ -16,12 +16,6 @@
 name: "CI"
 
 on:
-  workflow_call:
-    inputs:
-      jdk:
-        required: false
-        type: string
-        default: '21'
   push:
     paths-ignore:
       - '**/*.md'
@@ -59,7 +53,7 @@ jobs:
     uses: ./.github/workflows/worker.yml
     with:
       script: .github/scripts/run-unit-tests.sh -Dtest=CompactionTaskParallelRunTest -Dmaven.test.failure.ignore=true
-      jdk: ${{ inputs.jdk }}
+      jdk: 21
       artifact_prefix: "unit-test-reports"
       key: ${{ matrix.Dtest }}
 
