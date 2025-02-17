@@ -17,8 +17,9 @@
  * under the License.
  */
 
-package org.apache.druid.sql.calcite;
+package org.apache.druid;
 
+import org.apache.druid.java.util.common.Intervals;
 import org.apache.druid.java.util.common.granularity.Granularities;
 import org.apache.druid.query.QueryDataSource;
 import org.apache.druid.query.aggregation.SerializablePairLongStringComplexMetricSerde;
@@ -27,7 +28,6 @@ import org.apache.druid.query.groupby.GroupByQuery;
 import org.apache.druid.query.spec.MultipleIntervalSegmentSpec;
 import org.apache.druid.query.spec.QuerySegmentSpec;
 import org.apache.druid.segment.column.ColumnType;
-import org.apache.druid.sql.calcite.filtration.Filtration;
 import org.joda.time.Interval;
 import org.junit.jupiter.api.Test;
 
@@ -37,20 +37,52 @@ import java.util.Set;
 
 import static org.junit.Assert.assertFalse;
 
-public class UTest
+public class BTest
 {
   public static QuerySegmentSpec querySegmentSpec(final Interval... intervals)
   {
     return new MultipleIntervalSegmentSpec(Arrays.asList(intervals));
   }
 
+  // A
+  // B
+  // C
+  // E
+  // G
+  // H
+  // K
+  @Test
+  public void asd0()
+  {
+    QueryDataSource queryDataSource = extracted();
+
+    Set<String> t = queryDataSource.getTableNames();
+    assertFalse(t.isEmpty());
+  }
   @Test
   public void asd()
   {
-    Set<String> t = new QueryDataSource(
+    QueryDataSource queryDataSource = extracted();
+
+    Set<String> t = queryDataSource.getTableNames2B();
+    assertFalse(t.isEmpty());
+  }
+
+  @Test
+  public void asd2()
+  {
+    QueryDataSource queryDataSource = extracted();
+
+    Set<String> t = queryDataSource.getTableNames2X("B");
+    assertFalse(t.isEmpty());
+  }
+
+  private QueryDataSource extracted()
+  {
+    QueryDataSource queryDataSource = new QueryDataSource(
         GroupByQuery.builder()
             .setDataSource("wikipedia_first_last")
-            .setInterval(querySegmentSpec(Filtration.eternity()))
+            .setInterval(querySegmentSpec(Intervals.ETERNITY))
             .setGranularity(Granularities.ALL)
             .setDimensions(
                 new DefaultDimensionSpec(
@@ -61,8 +93,8 @@ public class UTest
             )
             .setContext(new HashMap<>())
             .build()
-    ).getTableNames2();
-    assertFalse(t.isEmpty());
+    );
+    return queryDataSource;
   }
 
 }

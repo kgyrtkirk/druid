@@ -56,15 +56,6 @@ public class QueryDataSource implements DataSource
     return names;
   }
 
-  public Set<String> getTableNames2()
-  {
-    Set<String> names = new HashSet<>();
-    for (DataSource ds : getQueryDataSources()) {
-      names.addAll(ds.getTableNames());
-    }
-    return names;
-  }
-
   @JsonProperty
   public Query getQuery()
   {
@@ -174,4 +165,131 @@ public class QueryDataSource implements DataSource
   {
     return query.hashCode();
   }
+
+  // A
+  // B
+  // C
+  // E
+  // G
+  // H
+  // K
+
+  public Set<String> getTableNames2A()
+  {
+    Set<String> names = new HashSet<>();
+    for (DataSource ds : getQueryDataSources()) {
+      names.addAll(ds.getTableNames());
+    }
+    return names;
+  }
+
+  public Set<String> getTableNames2B()
+  {
+    Set<String> names = new HashSet<>();
+    for (DataSource ds : getQueryDataSources()) {
+      names.addAll(ds.getTableNames());
+    }
+    return names;
+  }
+
+  public Set<String> getTableNames2C()
+  {
+    Set<String> names = new HashSet<>();
+    for (DataSource ds : getQueryDataSources()) {
+      names.addAll(ds.getTableNames());
+    }
+    return names;
+  }
+
+  public Set<String> getTableNames2E()
+  {
+    Set<String> names = new HashSet<>();
+    for (DataSource ds : getQueryDataSources()) {
+      names.addAll(ds.getTableNames());
+    }
+    return names;
+  }
+
+  public Set<String> getTableNames2G()
+  {
+    Set<String> names = new HashSet<>();
+    for (DataSource ds : getQueryDataSources()) {
+      names.addAll(ds.getTableNames());
+    }
+    return names;
+  }
+
+  public Set<String> getTableNames2H()
+  {
+    Set<String> names = new HashSet<>();
+    for (DataSource ds : getQueryDataSources()) {
+      names.addAll(ds.getTableNames());
+    }
+    return names;
+  }
+
+  public Set<String> getTableNames2K()
+  {
+    Set<String> names = new HashSet<>();
+    for (DataSource ds : getQueryDataSources()) {
+      names.addAll(ds.getTableNames());
+    }
+    return names;
+  }
+
+  public Set<String> getTableNames2X(String s)
+  {
+    // A
+    // B
+    // C
+    // E
+    // G
+    // H
+    // K
+    Set<String> names = new HashSet<>();
+    if("A".equals(s)) {
+      for (DataSource ds : getQueryDataSources()) {
+        names.addAll(ds.getTableNames());
+      }
+      return names;
+    }
+    if("B".equals(s)) {
+      for (DataSource ds : getQueryDataSources()) {
+        names.addAll(ds.getTableNames());
+      }
+      return names;
+    }
+    if("C".equals(s)) {
+      for (DataSource ds : getQueryDataSources()) {
+        names.addAll(ds.getTableNames());
+      }
+      return names;
+    }
+    if("E".equals(s)) {
+      for (DataSource ds : getQueryDataSources()) {
+        names.addAll(ds.getTableNames());
+      }
+      return names;
+    }
+    if("G".equals(s)) {
+      for (DataSource ds : getQueryDataSources()) {
+        names.addAll(ds.getTableNames());
+      }
+      return names;
+    }
+    if("H".equals(s)) {
+      for (DataSource ds : getQueryDataSources()) {
+        names.addAll(ds.getTableNames());
+      }
+      return names;
+    }
+    if("K".equals(s)) {
+      for (DataSource ds : getQueryDataSources()) {
+        names.addAll(ds.getTableNames());
+      }
+      return names;
+    }
+    return null;
+  }
+
 }
