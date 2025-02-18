@@ -61,7 +61,7 @@ jobs:
       - name: test profiling
         run: |
           ./.github/scripts/setup_test_profiling_env.sh ${{ inputs.jdk }} ${{ github.run_id }} \
-          ${{ github.run_number }} ${{ github.run_attempt }} ${{ inputs.module }} >> $GITHUB_ENV
+          ${{ github.run_number }} ${{ github.run_attempt }} ${{ inputs.key }} >> $GITHUB_ENV
 
       - name: Download required artifacts
         if: ${{ inputs.artifacts_to_download != '' }}
