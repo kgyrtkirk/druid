@@ -120,18 +120,6 @@ public class DataSourceAnalysis2 implements DataSourceAnalysis
   }
 
   /**
-   * If {@link #getBaseDataSource()} is a {@link UnionDataSource}, returns it. Otherwise, returns an empty Optional.
-   */
-  public Optional<UnionDataSource> getBaseUnionDataSource()
-  {
-    if (baseDataSource instanceof UnionDataSource) {
-      return Optional.of((UnionDataSource) baseDataSource);
-    } else {
-      return Optional.empty();
-    }
-  }
-
-  /**
    * Returns the bottom-most (i.e. innermost) {@link Query} from a possible stack of outer queries at the root of
    * the datasource tree. This is the query that will be applied to the base datasource plus any joinables that might
    * be present.

@@ -91,12 +91,6 @@ public interface DataSourceAnalysis
   public TableDataSource getBaseTableDataSource();
 
   /**
-   * If {@link #getBaseDataSource()} is a {@link UnionDataSource}, returns it.
-   * Otherwise, returns an empty Optional.
-   */
-  public Optional<UnionDataSource> getBaseUnionDataSource();
-
-  /**
    * If the original data source is a join data source and there is a DimFilter
    * on the base table data source, that DimFilter is returned here
    */

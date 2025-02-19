@@ -51,11 +51,12 @@ public class UnionDataSourceQueryRunner<T> implements QueryRunner<T>
     Query<T> query = queryPlus.getQuery();
 
     final DataSourceAnalysis analysis = query.getDataSourceAnalysis();
+    DataSource baseDataSource = analysis.getBaseDataSource();
 
-    if (analysis.isConcreteBased() && analysis.isTableBased() && analysis.getBaseUnionDataSource().isPresent()) {
+    if (analysis.isConcreteBased() && analysis.isTableBased() && baseDataSource instanceof UnionDataSource) {
       // Union of tables.
 
-      final UnionDataSource unionDataSource = analysis.getBaseUnionDataSource().get();
+      final UnionDataSource unionDataSource = (UnionDataSource) baseDataSource;
 
       if (unionDataSource.getDataSourcesAsTableDataSources().isEmpty()) {
         // Shouldn't happen, because UnionDataSource doesn't allow empty unions.
