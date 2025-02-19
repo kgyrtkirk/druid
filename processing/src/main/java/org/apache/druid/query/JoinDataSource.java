@@ -300,13 +300,18 @@ public class JoinDataSource implements DataSource
   @Override
   public DataSource withUpdatedDataSource(DataSource newSource)
   {
-    if(true) {
-      throw DruidException.defensive("this would cause issues");
-    }
     DataSource current = newSource;
-    DimFilter joinBaseFilter = getAnalysis().getJoinBaseTableFilter().orElse(null);
+    DataSourceAnalysis analysis = getAnalysis();
+    DataSourceAnalysis3 safeAnalysis = getSafeAnalysisForDataSource();
 
-    for (final PreJoinableClause clause : ((DataSourceAnalysis3)getAnalysis()).getPreJoinableClauses()) {
+    if (analysis.getBaseDataSource() != safeAnalysis.getBaseDataSource()) {
+      throw DruidException
+          .defensive("Join datasource analysis mismatches the safe one ; this could cause correctness issues.");
+    }
+
+    DimFilter joinBaseFilter = safeAnalysis.getJoinBaseTableFilter().orElse(null);
+
+    for (final PreJoinableClause clause : safeAnalysis.getPreJoinableClauses()) {
       current = clause.makeUpdatedJoinDataSource(current, joinBaseFilter, this.joinableFactoryWrapper);
       joinBaseFilter = null;
     }
