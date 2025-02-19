@@ -332,15 +332,16 @@ public class JoinDataSource implements DataSource
       keyBuilder.appendCacheable(right);
     }
 
-    final List<PreJoinableClause> clauses = ((DataSourceAnalysis3)getAnalysis()).getPreJoinableClauses();
+    DataSourceAnalysis3 analysis = (DataSourceAnalysis3) getAnalysis();
+    final List<PreJoinableClause> clauses = analysis.getPreJoinableClauses();
     if (clauses.isEmpty()) {
       throw new IAE("No join clauses to build the cache key for data source [%s]", this);
     }
 
     final CacheKeyBuilder keyBuilder;
     keyBuilder = new CacheKeyBuilder(JoinableFactoryWrapper.JOIN_OPERATION);
-    if (getAnalysis().getJoinBaseTableFilter().isPresent()) {
-      keyBuilder.appendCacheable(getAnalysis().getJoinBaseTableFilter().get());
+    if (analysis.getJoinBaseTableFilter().isPresent()) {
+      keyBuilder.appendCacheable(analysis.getJoinBaseTableFilter().get());
     }
     for (PreJoinableClause clause : clauses) {
       final Optional<byte[]> bytes =

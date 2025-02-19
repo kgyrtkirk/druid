@@ -511,7 +511,6 @@ public class DataSourceAnalysisTest
     Assert.assertFalse(analysis.isConcreteBased());
     Assert.assertFalse(analysis.isTableBased());
     Assert.assertEquals(queryDataSource, analysis.getBaseDataSource());
-    Assert.assertEquals(null, analysis.getJoinBaseTableFilter().orElse(null));
     Assert.assertThrows(DruidException.class, () -> analysis.getBaseTableDataSource());
     Assert.assertEquals(new MultipleIntervalSegmentSpec(MILLENIUM_INTERVALS), analysis.getEffectiveQuerySegmentSpec());
     Assert.assertFalse(analysis.isGlobal());
@@ -579,7 +578,6 @@ public class DataSourceAnalysisTest
     Assert.assertFalse(analysis.isConcreteBased());
     Assert.assertFalse(analysis.isTableBased());
     Assert.assertEquals(queryDataSource, analysis.getBaseDataSource());
-    Assert.assertEquals(null, analysis.getJoinBaseTableFilter().orElse(null));
     Assert.assertThrows(DruidException.class, () -> analysis.getBaseTableDataSource());
     Assert.assertEquals(new MultipleIntervalSegmentSpec(MILLENIUM_INTERVALS), analysis.getEffectiveQuerySegmentSpec());
     Assert.assertFalse(analysis.isGlobal());

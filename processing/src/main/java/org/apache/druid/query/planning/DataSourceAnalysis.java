@@ -24,9 +24,7 @@ import org.apache.druid.query.DataSource;
 import org.apache.druid.query.TableDataSource;
 import org.apache.druid.query.UnionDataSource;
 import org.apache.druid.query.UnnestDataSource;
-import org.apache.druid.query.filter.DimFilter;
 import org.apache.druid.query.spec.QuerySegmentSpec;
-import java.util.Optional;
 
 /**
  * Analysis of a datasource for purposes of deciding how to execute a particular
@@ -89,12 +87,6 @@ public interface DataSourceAnalysis
    *           {@link TableDataSource}.
    */
   public TableDataSource getBaseTableDataSource();
-
-  /**
-   * If the original data source is a join data source and there is a DimFilter
-   * on the base table data source, that DimFilter is returned here
-   */
-  public Optional<DimFilter> getJoinBaseTableFilter();
 
   /**
    * The applicable {@link QuerySegmentSpec} for this vertex.
