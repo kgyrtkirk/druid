@@ -131,14 +131,6 @@ public interface DataSourceAnalysis
   public boolean isTableBased();
 
   /**
-   * Returns true if this datasource is both (see {@link #isConcreteBased()} and
-   * {@link #isTableBased()}. This is an important property, because it
-   * corresponds to datasources that can be handled by Druid's distributed query
-   * stack.
-   */
-  public boolean isConcreteAndTableBased();
-
-  /**
    * Returns true if this datasource is made out of a join operation
    */
   public boolean isJoin();

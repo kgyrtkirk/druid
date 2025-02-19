@@ -925,7 +925,8 @@ public class DruidQuery
       return true;
     }
 
-    if (dataSource.getAnalysis().isConcreteAndTableBased()) {
+    DataSourceAnalysis analysis = dataSource.getAnalysis();
+    if (analysis.isConcreteBased() && analysis.isTableBased()) {
       // Always OK: queries on concrete tables (regular Druid datasources) use segment-based cursors
       // (IncrementalIndex or QueryableIndex). These clip query interval to data interval, making wide query
       // intervals safer. They do not have special checks for granularity and interval safety.

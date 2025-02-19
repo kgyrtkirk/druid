@@ -75,7 +75,6 @@ public class DataSourceAnalysisTest
 
     Assert.assertTrue(analysis.isConcreteBased());
     Assert.assertTrue(analysis.isTableBased());
-    Assert.assertTrue(analysis.isConcreteAndTableBased());
     Assert.assertEquals(TABLE_FOO, analysis.getBaseDataSource());
     Assert.assertEquals(TABLE_FOO, analysis.getBaseTableDataSource());
     Assert.assertEquals(Optional.empty(), analysis.getBaseUnionDataSource());
@@ -92,7 +91,6 @@ public class DataSourceAnalysisTest
 
     Assert.assertTrue(analysis.isConcreteBased());
     Assert.assertTrue(analysis.isTableBased());
-    Assert.assertTrue(analysis.isConcreteAndTableBased());
     Assert.assertEquals(TABLE_FOO, analysis.getBaseDataSource());
     Assert.assertEquals(TABLE_FOO, analysis.getBaseTableDataSource());
     Assert.assertEquals(Optional.empty(), analysis.getBaseUnionDataSource());
@@ -116,7 +114,6 @@ public class DataSourceAnalysisTest
 
     Assert.assertTrue(analysis.isConcreteBased());
     Assert.assertTrue(analysis.isTableBased());
-    Assert.assertTrue(analysis.isConcreteAndTableBased());
     /**
      * The right expectation would be TABLE_FOO.
      * However right now MSQ wierdly depends on join identifying RestrictedDataSource as a non-vertex boundary.
@@ -139,7 +136,6 @@ public class DataSourceAnalysisTest
 
     Assert.assertTrue(analysis.isConcreteBased());
     Assert.assertTrue(analysis.isTableBased());
-    Assert.assertTrue(analysis.isConcreteAndTableBased());
     Assert.assertEquals(unionDataSource, analysis.getBaseDataSource());
     Assert.assertThrows(DruidException.class, () -> analysis.getBaseTableDataSource());
     Assert.assertEquals(Optional.of(unionDataSource), analysis.getBaseUnionDataSource());
@@ -157,7 +153,6 @@ public class DataSourceAnalysisTest
 
     Assert.assertTrue(analysis.isConcreteBased());
     Assert.assertTrue(analysis.isTableBased());
-    Assert.assertTrue(analysis.isConcreteAndTableBased());
     Assert.assertEquals(TABLE_FOO, analysis.getBaseDataSource());
     Assert.assertEquals(TABLE_FOO, analysis.getBaseTableDataSource());
     Assert.assertEquals(Optional.empty(), analysis.getBaseUnionDataSource());
@@ -176,7 +171,6 @@ public class DataSourceAnalysisTest
 
     Assert.assertFalse(analysis.isConcreteBased());
     Assert.assertFalse(analysis.isTableBased());
-    Assert.assertFalse(analysis.isConcreteAndTableBased());
     Assert.assertEquals(queryDataSource, analysis.getBaseDataSource());
     Assert.assertThrows(DruidException.class, () -> analysis.getBaseTableDataSource());
     Assert.assertEquals(Optional.empty(), analysis.getBaseUnionDataSource());
@@ -193,7 +187,6 @@ public class DataSourceAnalysisTest
 
     Assert.assertTrue(analysis.isConcreteBased());
     Assert.assertFalse(analysis.isTableBased());
-    Assert.assertFalse(analysis.isConcreteAndTableBased());
     Assert.assertEquals(LOOKUP_LOOKYLOO, analysis.getBaseDataSource());
     Assert.assertThrows(DruidException.class, () -> analysis.getBaseTableDataSource());
     Assert.assertEquals(Optional.empty(), analysis.getBaseUnionDataSource());
@@ -211,7 +204,6 @@ public class DataSourceAnalysisTest
 
     Assert.assertFalse(analysis.isConcreteBased());
     Assert.assertFalse(analysis.isTableBased());
-    Assert.assertFalse(analysis.isConcreteAndTableBased());
     Assert.assertEquals(queryDataSource, analysis.getBaseDataSource());
     Assert.assertThrows(DruidException.class, () -> analysis.getBaseTableDataSource());
     Assert.assertEquals(Optional.empty(), analysis.getBaseUnionDataSource());
@@ -228,7 +220,6 @@ public class DataSourceAnalysisTest
 
     Assert.assertTrue(analysis.isConcreteBased());
     Assert.assertFalse(analysis.isTableBased());
-    Assert.assertFalse(analysis.isConcreteAndTableBased());
     Assert.assertEquals(INLINE, analysis.getBaseDataSource());
     Assert.assertThrows(DruidException.class, () -> analysis.getBaseTableDataSource());
     Assert.assertEquals(Optional.empty(), analysis.getBaseUnionDataSource());
@@ -528,7 +519,6 @@ public class DataSourceAnalysisTest
 
     Assert.assertFalse(analysis.isConcreteBased());
     Assert.assertFalse(analysis.isTableBased());
-    Assert.assertFalse(analysis.isConcreteAndTableBased());
     Assert.assertEquals(queryDataSource, analysis.getBaseDataSource());
     Assert.assertEquals(null, analysis.getJoinBaseTableFilter().orElse(null));
     Assert.assertThrows(DruidException.class, () -> analysis.getBaseTableDataSource());
@@ -598,7 +588,6 @@ public class DataSourceAnalysisTest
 
     Assert.assertFalse(analysis.isConcreteBased());
     Assert.assertFalse(analysis.isTableBased());
-    Assert.assertFalse(analysis.isConcreteAndTableBased());
     Assert.assertEquals(queryDataSource, analysis.getBaseDataSource());
     Assert.assertEquals(null, analysis.getJoinBaseTableFilter().orElse(null));
     Assert.assertThrows(DruidException.class, () -> analysis.getBaseTableDataSource());

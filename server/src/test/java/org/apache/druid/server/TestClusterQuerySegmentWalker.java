@@ -115,7 +115,7 @@ public class TestClusterQuerySegmentWalker implements QuerySegmentWalker
     return (queryPlus, responseContext) -> {
       final DataSourceAnalysis analysis = queryPlus.getQuery().getDataSource().getAnalysis();
 
-      if (!analysis.isConcreteAndTableBased()) {
+      if (!(analysis.isConcreteBased() && analysis.isTableBased())) {
         throw new ISE("Cannot handle datasource: %s", queryPlus.getQuery().getDataSource());
       }
 
@@ -141,7 +141,7 @@ public class TestClusterQuerySegmentWalker implements QuerySegmentWalker
 
     final DataSourceAnalysis analysis = dataSourceFromQuery.getAnalysis();
 
-    if (!analysis.isConcreteAndTableBased()) {
+    if (!(analysis.isConcreteBased() && analysis.isTableBased())) {
       throw new ISE("Cannot handle datasource: %s", dataSourceFromQuery);
     }
 
