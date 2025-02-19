@@ -890,7 +890,7 @@ public class DruidQuery
   private static boolean canUseIntervalFiltering(final DataSource dataSource)
   {
     final DataSourceAnalysis analysis = dataSource.getAnalysis();
-    return !analysis.getBaseQuery().isPresent() && analysis.isTableBased();
+    return analysis.isTableBased();
   }
 
   private static Filtration toFiltration(
