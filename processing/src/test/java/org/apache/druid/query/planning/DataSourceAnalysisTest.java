@@ -50,7 +50,6 @@ import org.joda.time.Interval;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -81,7 +80,6 @@ public class DataSourceAnalysisTest
     Assert.assertEquals(TABLE_FOO, analysis.getBaseTableDataSource());
     Assert.assertEquals(Optional.empty(), analysis.getBaseUnionDataSource());
     Assert.assertEquals(new MultipleIntervalSegmentSpec(MILLENIUM_INTERVALS), analysis.getEffectiveQuerySegmentSpec());
-    Assert.assertEquals(Collections.emptyList(), analysis.getPreJoinableClauses());
     Assert.assertFalse(analysis.isGlobal());
     Assert.assertFalse(analysis.isJoin());
     Assert.assertTrue(analysis.isBaseColumn("foo"));
@@ -99,7 +97,6 @@ public class DataSourceAnalysisTest
     Assert.assertEquals(TABLE_FOO, analysis.getBaseTableDataSource());
     Assert.assertEquals(Optional.empty(), analysis.getBaseUnionDataSource());
     Assert.assertThrows(DruidException.class, () -> analysis.getEffectiveQuerySegmentSpec());
-    Assert.assertEquals(Collections.emptyList(), analysis.getPreJoinableClauses());
     Assert.assertFalse(analysis.isGlobal());
     Assert.assertFalse(analysis.isJoin());
     Assert.assertTrue(analysis.isBaseColumn("foo"));
@@ -147,7 +144,6 @@ public class DataSourceAnalysisTest
     Assert.assertThrows(DruidException.class, () -> analysis.getBaseTableDataSource());
     Assert.assertEquals(Optional.of(unionDataSource), analysis.getBaseUnionDataSource());
     Assert.assertThrows(DruidException.class, () -> analysis.getEffectiveQuerySegmentSpec());
-    Assert.assertEquals(Collections.emptyList(), analysis.getPreJoinableClauses());
     Assert.assertEquals(unionDataSource.isGlobal(), analysis.isGlobal());
     Assert.assertFalse(analysis.isJoin());
     Assert.assertTrue(analysis.isBaseColumn("foo"));
@@ -166,7 +162,6 @@ public class DataSourceAnalysisTest
     Assert.assertEquals(TABLE_FOO, analysis.getBaseTableDataSource());
     Assert.assertEquals(Optional.empty(), analysis.getBaseUnionDataSource());
     Assert.assertEquals(new MultipleIntervalSegmentSpec(MILLENIUM_INTERVALS), analysis.getEffectiveQuerySegmentSpec());
-    Assert.assertEquals(Collections.emptyList(), analysis.getPreJoinableClauses());
     Assert.assertFalse(analysis.isGlobal());
     Assert.assertFalse(analysis.isJoin());
     Assert.assertTrue(analysis.isBaseColumn("foo"));
@@ -186,7 +181,6 @@ public class DataSourceAnalysisTest
     Assert.assertThrows(DruidException.class, () -> analysis.getBaseTableDataSource());
     Assert.assertEquals(Optional.empty(), analysis.getBaseUnionDataSource());
     Assert.assertThrows(DruidException.class, () -> analysis.getEffectiveQuerySegmentSpec());
-    Assert.assertEquals(Collections.emptyList(), analysis.getPreJoinableClauses());
     Assert.assertFalse(analysis.isGlobal());
     Assert.assertFalse(analysis.isJoin());
     Assert.assertFalse(analysis.isBaseColumn("foo"));
@@ -204,7 +198,6 @@ public class DataSourceAnalysisTest
     Assert.assertThrows(DruidException.class, () -> analysis.getBaseTableDataSource());
     Assert.assertEquals(Optional.empty(), analysis.getBaseUnionDataSource());
     Assert.assertThrows(DruidException.class, () -> analysis.getEffectiveQuerySegmentSpec());
-    Assert.assertEquals(Collections.emptyList(), analysis.getPreJoinableClauses());
     Assert.assertTrue(analysis.isGlobal());
     Assert.assertFalse(analysis.isJoin());
     Assert.assertTrue(analysis.isBaseColumn("foo"));
@@ -223,7 +216,6 @@ public class DataSourceAnalysisTest
     Assert.assertThrows(DruidException.class, () -> analysis.getBaseTableDataSource());
     Assert.assertEquals(Optional.empty(), analysis.getBaseUnionDataSource());
     Assert.assertThrows(DruidException.class, () -> analysis.getEffectiveQuerySegmentSpec());
-    Assert.assertEquals(Collections.emptyList(), analysis.getPreJoinableClauses());
     Assert.assertTrue(analysis.isGlobal());
     Assert.assertFalse(analysis.isJoin());
     Assert.assertFalse(analysis.isBaseColumn("foo"));
@@ -241,7 +233,6 @@ public class DataSourceAnalysisTest
     Assert.assertThrows(DruidException.class, () -> analysis.getBaseTableDataSource());
     Assert.assertEquals(Optional.empty(), analysis.getBaseUnionDataSource());
     Assert.assertThrows(DruidException.class, () -> analysis.getEffectiveQuerySegmentSpec());
-    Assert.assertEquals(Collections.emptyList(), analysis.getPreJoinableClauses());
     Assert.assertEquals(INLINE.isGlobal(), analysis.isGlobal());
     Assert.assertTrue(analysis.isGlobal());
     Assert.assertFalse(analysis.isJoin());
@@ -272,7 +263,7 @@ public class DataSourceAnalysisTest
             JoinType.FULL
         );
 
-    final DataSourceAnalysis analysis = joinDataSource.getAnalysis();
+    final DataSourceAnalysis3 analysis = (DataSourceAnalysis3) joinDataSource.getAnalysis();
 
     Assert.assertTrue(analysis.isConcreteBased());
     Assert.assertTrue(analysis.isTableBased());
@@ -322,7 +313,7 @@ public class DataSourceAnalysisTest
             JoinType.FULL
         );
 
-    final DataSourceAnalysis analysis = joinDataSource.getAnalysis();
+    final DataSourceAnalysis3 analysis = (DataSourceAnalysis3) joinDataSource.getAnalysis();
 
     Assert.assertTrue(analysis.isConcreteBased());
     Assert.assertTrue(analysis.isTableBased());
@@ -379,7 +370,7 @@ public class DataSourceAnalysisTest
             JoinType.RIGHT
         );
 
-    final DataSourceAnalysis analysis = joinDataSource.getAnalysis();
+    final DataSourceAnalysis3 analysis = (DataSourceAnalysis3) joinDataSource.getAnalysis();
 
     Assert.assertTrue(analysis.isConcreteBased());
     Assert.assertTrue(analysis.isTableBased());
@@ -428,7 +419,7 @@ public class DataSourceAnalysisTest
             TrueDimFilter.instance()
         );
 
-    final DataSourceAnalysis analysis = joinDataSource.getAnalysis();
+    final DataSourceAnalysis3 analysis = (DataSourceAnalysis3) joinDataSource.getAnalysis();
 
     Assert.assertTrue(analysis.isConcreteBased());
     Assert.assertTrue(analysis.isTableBased());
@@ -463,7 +454,7 @@ public class DataSourceAnalysisTest
         TrueDimFilter.instance()
     );
 
-    final DataSourceAnalysis analysis = joinDataSource.getAnalysis();
+    final DataSourceAnalysis3 analysis = (DataSourceAnalysis3) joinDataSource.getAnalysis();
 
     Assert.assertFalse(analysis.isConcreteBased());
     Assert.assertTrue(analysis.isTableBased());
@@ -495,7 +486,7 @@ public class DataSourceAnalysisTest
         JoinType.INNER
     );
 
-    final DataSourceAnalysis analysis = joinDataSource.getAnalysis();
+    final DataSourceAnalysis3 analysis = (DataSourceAnalysis3) joinDataSource.getAnalysis();
 
     Assert.assertTrue(analysis.isConcreteBased());
     Assert.assertTrue(analysis.isTableBased());
@@ -543,10 +534,6 @@ public class DataSourceAnalysisTest
     Assert.assertThrows(DruidException.class, () -> analysis.getBaseTableDataSource());
     Assert.assertEquals(Optional.empty(), analysis.getBaseUnionDataSource());
     Assert.assertEquals(new MultipleIntervalSegmentSpec(MILLENIUM_INTERVALS), analysis.getEffectiveQuerySegmentSpec());
-    Assert.assertEquals(
-        Collections.emptyList(),
-        analysis.getPreJoinableClauses()
-    );
     Assert.assertFalse(analysis.isGlobal());
     Assert.assertFalse(analysis.isJoin());
     Assert.assertFalse(analysis.isBaseColumn("foo"));
@@ -573,7 +560,7 @@ public class DataSourceAnalysisTest
         .setGranularity(Granularities.ALL)
         .build();
 
-    final DataSourceAnalysis analysis = query.getDataSourceAnalysis();
+    final DataSourceAnalysis3 analysis = (DataSourceAnalysis3) query.getDataSourceAnalysis();
 
     Assert.assertTrue(analysis.isConcreteBased());
     Assert.assertTrue(analysis.isTableBased());
@@ -633,7 +620,7 @@ public class DataSourceAnalysisTest
         JoinType.INNER
     );
 
-    final DataSourceAnalysis analysis = joinDataSource.getAnalysis();
+    final DataSourceAnalysis3 analysis = (DataSourceAnalysis3) joinDataSource.getAnalysis();
 
     Assert.assertTrue(analysis.isConcreteBased());
     Assert.assertFalse(analysis.isTableBased());
@@ -665,7 +652,7 @@ public class DataSourceAnalysisTest
         JoinType.INNER
     );
 
-    final DataSourceAnalysis analysis = joinDataSource.getAnalysis();
+    final DataSourceAnalysis3 analysis = (DataSourceAnalysis3) joinDataSource.getAnalysis();
 
     Assert.assertFalse(analysis.isConcreteBased());
     Assert.assertFalse(analysis.isTableBased());

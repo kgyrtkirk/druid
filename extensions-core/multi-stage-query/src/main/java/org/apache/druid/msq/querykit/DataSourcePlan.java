@@ -59,6 +59,7 @@ import org.apache.druid.query.UnnestDataSource;
 import org.apache.druid.query.filter.DimFilter;
 import org.apache.druid.query.filter.DimFilterUtils;
 import org.apache.druid.query.planning.DataSourceAnalysis;
+import org.apache.druid.query.planning.DataSourceAnalysis3;
 import org.apache.druid.query.planning.PreJoinableClause;
 import org.apache.druid.query.spec.MultipleIntervalSegmentSpec;
 import org.apache.druid.query.spec.QuerySegmentSpec;
@@ -600,7 +601,7 @@ public class DataSourcePlan
   )
   {
     final QueryDefinitionBuilder subQueryDefBuilder = QueryDefinition.builder(queryKitSpec.getQueryId());
-    final DataSourceAnalysis analysis = dataSource.getSafeAnalysisForDataSource();
+    final DataSourceAnalysis3 analysis = dataSource.getSafeAnalysisForDataSource();
 
     final DataSourcePlan basePlan = forDataSource(
         queryKitSpec,

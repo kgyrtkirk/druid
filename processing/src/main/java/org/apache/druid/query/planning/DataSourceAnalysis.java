@@ -26,7 +26,6 @@ import org.apache.druid.query.UnionDataSource;
 import org.apache.druid.query.UnnestDataSource;
 import org.apache.druid.query.filter.DimFilter;
 import org.apache.druid.query.spec.QuerySegmentSpec;
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -111,12 +110,6 @@ public interface DataSourceAnalysis
    * necessary correct.
    */
   public QuerySegmentSpec getEffectiveQuerySegmentSpec();
-
-  /**
-   * Returns join clauses corresponding to joinable leaf datasources (every leaf
-   * except the bottom-leftmost).
-   */
-  public List<PreJoinableClause> getPreJoinableClauses();
 
   /**
    * Returns true if this datasource can be computed by the core Druid query

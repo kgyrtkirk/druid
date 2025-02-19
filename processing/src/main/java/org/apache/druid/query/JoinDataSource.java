@@ -99,7 +99,6 @@ public class JoinDataSource implements DataSource
   private final JoinableFactoryWrapper joinableFactoryWrapper;
   private final JoinAlgorithm joinAlgorithm;
   private static final Logger log = new Logger(JoinDataSource.class);
-  private final DataSourceAnalysis analysis;
 
   private JoinDataSource(
       DataSource left,
@@ -120,8 +119,6 @@ public class JoinDataSource implements DataSource
     this.leftFilter = validateLeftFilter(left, leftFilter);
     this.joinableFactoryWrapper = joinableFactoryWrapper;
     this.joinAlgorithm = JoinAlgorithm.BROADCAST.equals(joinAlgorithm) ? null : joinAlgorithm;
-
-    this.analysis = this.getAnalysisForDataSource();
   }
 
   /**
@@ -144,7 +141,7 @@ public class JoinDataSource implements DataSource
         left,
         right,
         StringUtils.nullToEmptyNonDruidDataString(rightPrefix),
-        JoinConditionAnalysis.forExpression(
+        JoinConditiongetAnalysis().forExpression(
             Preconditions.checkNotNull(condition, "condition"),
             StringUtils.nullToEmptyNonDruidDataString(rightPrefix),
             macroTable
@@ -303,10 +300,13 @@ public class JoinDataSource implements DataSource
   @Override
   public DataSource withUpdatedDataSource(DataSource newSource)
   {
+    if(true) {
+      throw DruidException.defensive("this would cause issues");
+    }
     DataSource current = newSource;
-    DimFilter joinBaseFilter = analysis.getJoinBaseTableFilter().orElse(null);
+    DimFilter joinBaseFilter = getAnalysis().getJoinBaseTableFilter().orElse(null);
 
-    for (final PreJoinableClause clause : analysis.getPreJoinableClauses()) {
+    for (final PreJoinableClause clause : ((DataSourceAnalysis3)getAnalysis()).getPreJoinableClauses()) {
       current = clause.makeUpdatedJoinDataSource(current, joinBaseFilter, this.joinableFactoryWrapper);
       joinBaseFilter = null;
     }
@@ -316,15 +316,15 @@ public class JoinDataSource implements DataSource
   @Override
   public byte[] getCacheKey()
   {
-    final List<PreJoinableClause> clauses = analysis.getPreJoinableClauses();
+    final List<PreJoinableClause> clauses = getAnalysis().getPreJoinableClauses();
     if (clauses.isEmpty()) {
       throw new IAE("No join clauses to build the cache key for data source [%s]", this);
     }
 
     final CacheKeyBuilder keyBuilder;
     keyBuilder = new CacheKeyBuilder(JoinableFactoryWrapper.JOIN_OPERATION);
-    if (analysis.getJoinBaseTableFilter().isPresent()) {
-      keyBuilder.appendCacheable(analysis.getJoinBaseTableFilter().get());
+    if (getAnalysis().getJoinBaseTableFilter().isPresent()) {
+      keyBuilder.appendCacheable(getAnalysis().getJoinBaseTableFilter().get());
     }
     for (PreJoinableClause clause : clauses) {
       final Optional<byte[]> bytes =
@@ -346,7 +346,7 @@ public class JoinDataSource implements DataSource
   @Override
   public DataSourceAnalysis getAnalysis()
   {
-    return analysis;
+    return getAnalysisForDataSource();
   }
 
   @JsonProperty("joinAlgorithm")
@@ -408,7 +408,7 @@ public class JoinDataSource implements DataSource
   @Override
   public Function<SegmentReference, SegmentReference> createSegmentMapFunction(Query query)
   {
-    DataSourceAnalysis safeAnalysis = getSafeAnalysisForDataSource();
+    DataSourceAnalysis3 safeAnalysis = getSafeAnalysisForDataSource();
     List<PreJoinableClause> clauses = safeAnalysis.getPreJoinableClauses();
     Filter baseFilter = safeAnalysis.getJoinBaseTableFilter().map(Filters::toFilter).orElse(null);
 
@@ -485,7 +485,7 @@ public class JoinDataSource implements DataSource
     return flattenJoin(this, true);
   }
 
-  public DataSourceAnalysis getSafeAnalysisForDataSource()
+  public DataSourceAnalysis3 getSafeAnalysisForDataSource()
   {
     return flattenJoin(this, false);
   }
@@ -497,7 +497,7 @@ public class JoinDataSource implements DataSource
    *
    * @throws IllegalArgumentException if dataSource cannot be fully flattened.
    */
-  private static DataSourceAnalysis flattenJoin(final JoinDataSource dataSource, boolean vertexBoundary)
+  private static DataSourceAnalysis3 flattenJoin(final JoinDataSource dataSource, boolean vertexBoundary)
   {
     DataSource current = dataSource;
     DimFilter currentDimFilter = TrueDimFilter.instance();
