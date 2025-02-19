@@ -110,7 +110,7 @@ public class DataSourceAnalysis2 implements DataSourceAnalysis
    * note that this may not be true even {@link #isConcreteAndTableBased()} is true - in cases when the base
    * datasource is a {@link UnionDataSource} of {@link TableDataSource}.
    */
-  public TableDataSource getBaseTableDataSource()
+  public final TableDataSource getBaseTableDataSource()
   {
     if (baseDataSource instanceof TableDataSource) {
       return (TableDataSource) baseDataSource;

@@ -119,23 +119,6 @@ public class DataSourceAnalysis3 extends DataSourceAnalysis2
   }
 
   /**
-   * Unwraps the {@link #getBaseDataSource()} if its a {@link TableDataSource}.
-   *
-   * @throws An error of type {@link DruidException.Category#DEFENSIVE} if the {@link BaseDataSource} is not a table.
-   *
-   * note that this may not be true even {@link #isConcreteAndTableBased()} is true - in cases when the base
-   * datasource is a {@link UnionDataSource} of {@link TableDataSource}.
-   */
-  public TableDataSource getBaseTableDataSource()
-  {
-    if (baseDataSource instanceof TableDataSource) {
-      return (TableDataSource) baseDataSource;
-    } else {
-      throw DruidException.defensive("Base dataSource[%s] is not a table!", baseDataSource);
-    }
-  }
-
-  /**
    * If {@link #getBaseDataSource()} is a {@link UnionDataSource}, returns it. Otherwise, returns an empty Optional.
    */
   public Optional<UnionDataSource> getBaseUnionDataSource()
