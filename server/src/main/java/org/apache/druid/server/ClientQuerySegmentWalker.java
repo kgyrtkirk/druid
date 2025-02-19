@@ -310,7 +310,9 @@ public class ClientQuerySegmentWalker implements QuerySegmentWalker
     // 2) Must be based on globally available data (so we have a copy here on the Broker).
     // 3) If there is an outer query, it must be handleable by the query toolchest (the local walker does not handle
     //    subqueries on its own).
-    return analysis.isConcreteBased() && !analysis.isConcreteAndTableBased() && analysis.isGlobal()
+    return analysis.isConcreteBased()
+        && !analysis.isTableBased()
+        && analysis.isGlobal()
         && toolChest.canExecuteFully(query);
   }
 
@@ -326,8 +328,9 @@ public class ClientQuerySegmentWalker implements QuerySegmentWalker
     // 1) Must be based on a concrete table (the only shape the Druid cluster can handle).
     // 2) If there is an outer query, it must be handleable by the query toolchest (the cluster walker does not handle
     //    subqueries on its own).
-    return analysis.isConcreteAndTableBased()
-           && toolChest.canExecuteFully(query);
+    return analysis.isConcreteBased()
+        && analysis.isTableBased()
+        && toolChest.canExecuteFully(query);
   }
 
 
