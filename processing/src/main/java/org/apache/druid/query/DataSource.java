@@ -21,6 +21,7 @@ package org.apache.druid.query;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import org.apache.druid.java.util.common.Cacheable;
 import org.apache.druid.query.planning.DataSourceAnalysis;
 import org.apache.druid.query.planning.PreJoinableClause;
 import org.apache.druid.query.policy.Policy;
@@ -48,7 +49,7 @@ import java.util.stream.Collectors;
     @JsonSubTypes.Type(value = FilteredDataSource.class, name = "filter"),
     @JsonSubTypes.Type(value = RestrictedDataSource.class, name = "restrict")
 })
-public interface DataSource
+public interface DataSource extends Cacheable
 {
   /**
    * Returns the names of all table datasources involved in this query. Does not include names for non-tables, like

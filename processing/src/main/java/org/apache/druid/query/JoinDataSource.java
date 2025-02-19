@@ -141,7 +141,7 @@ public class JoinDataSource implements DataSource
         left,
         right,
         StringUtils.nullToEmptyNonDruidDataString(rightPrefix),
-        JoinConditiongetAnalysis().forExpression(
+        JoinConditionAnalysis.forExpression(
             Preconditions.checkNotNull(condition, "condition"),
             StringUtils.nullToEmptyNonDruidDataString(rightPrefix),
             macroTable
@@ -316,7 +316,18 @@ public class JoinDataSource implements DataSource
   @Override
   public byte[] getCacheKey()
   {
-    final List<PreJoinableClause> clauses = getAnalysis().getPreJoinableClauses();
+    if (true) {
+      // FIXME: should this be any better?
+      return null;
+    }
+    if (false) {
+      final CacheKeyBuilder keyBuilder;
+      keyBuilder = new CacheKeyBuilder(JoinableFactoryWrapper.JOIN_OPERATION);
+      keyBuilder.appendCacheable(left);
+      keyBuilder.appendCacheable(right);
+    }
+
+    final List<PreJoinableClause> clauses = ((DataSourceAnalysis3)getAnalysis()).getPreJoinableClauses();
     if (clauses.isEmpty()) {
       throw new IAE("No join clauses to build the cache key for data source [%s]", this);
     }
