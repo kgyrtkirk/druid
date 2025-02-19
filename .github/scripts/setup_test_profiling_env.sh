@@ -16,13 +16,15 @@
 #!/bin/bash
 
 set -e
+set -x
 
 JAR_INPUT_FILE="jfr-profiler-1.0.0.jar"
 JAR_OUTPUT_FILE="jfr-profiler.jar"
 ENV_VAR="JFR_PROFILER_ARG_LINE"
 
 if [ "$#" -ne 5 ]; then
-    echo "usage: $0 <jdk_version> <run_id> <run_number> <run_attempt> <module>"
+  echo "usage: $0 <jdk_version> <run_id> <run_number> <run_attempt> <module>"
+  exit 1
 fi
 
 if [[ "$1" -ge "17" ]];
