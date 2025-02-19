@@ -20,8 +20,10 @@
 package org.apache.druid.query.planning;
 
 import org.apache.druid.error.DruidException;
+import org.apache.druid.java.util.common.IAE;
 import org.apache.druid.java.util.common.Intervals;
 import org.apache.druid.query.DataSource;
+import org.apache.druid.query.JoinDataSource;
 import org.apache.druid.query.Query;
 import org.apache.druid.query.RestrictedDataSource;
 import org.apache.druid.query.TableDataSource;
@@ -30,9 +32,10 @@ import org.apache.druid.query.UnnestDataSource;
 import org.apache.druid.query.filter.DimFilter;
 import org.apache.druid.query.spec.MultipleIntervalSegmentSpec;
 import org.apache.druid.query.spec.QuerySegmentSpec;
+import org.apache.druid.segment.join.JoinPrefixUtils;
+
 import javax.annotation.Nullable;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -73,25 +76,38 @@ import java.util.Optional;
  * layer (or the end user in the case of native queries), is responsible for containing the smarts to structure the
  * tree in a way that will lead to optimal execution.
  */
-public class DataSourceAnalysis2 implements DataSourceAnalysis
+public class DataSourceAnalysis3 extends DataSourceAnalysis2
 {
   private final DataSource baseDataSource;
   @Nullable
+  private final Query<?> baseQuery;
+  @Nullable
+  private final DimFilter joinBaseTableFilter;
+  private final List<PreJoinableClause> preJoinableClauses;
+  @Nullable
   private final QuerySegmentSpec querySegmentSpec;
 
-  public DataSourceAnalysis2(
+  public DataSourceAnalysis3(
       DataSource baseDataSource,
+      @Nullable Query<?> baseQuery,
+      @Nullable DimFilter joinBaseTableFilter,
+      List<PreJoinableClause> preJoinableClauses,
+      @Nullable
       QuerySegmentSpec querySegmentSpec
   )
   {
-    this.baseDataSource = baseDataSource;
-    this.querySegmentSpec = querySegmentSpec;
-  }
+    super(baseDataSource, querySegmentSpec);
+    if (baseDataSource instanceof JoinDataSource) {
+      // The base cannot be a join (this is a class invariant).
+      // If it happens, it's a bug in the datasource analyzer.
+      throw new IAE("Base dataSource cannot be a join! Original base datasource was: %s", baseDataSource);
+    }
 
-  public DataSourceAnalysis2(DataSource ds, Object object, Object object2,
-      List<Object> emptyList, QuerySegmentSpec querySegmentSpec)
-  {
-    this(ds, querySegmentSpec);
+    this.baseDataSource = baseDataSource;
+    this.baseQuery = baseQuery;
+    this.joinBaseTableFilter = joinBaseTableFilter;
+    this.preJoinableClauses = preJoinableClauses;
+    this.querySegmentSpec = querySegmentSpec;
   }
 
   /**
@@ -140,7 +156,7 @@ public class DataSourceAnalysis2 implements DataSourceAnalysis
    */
   public Optional<Query<?>> getBaseQuery()
   {
-    return Optional.empty();
+    return Optional.ofNullable(baseQuery);
   }
 
   /**
@@ -149,7 +165,7 @@ public class DataSourceAnalysis2 implements DataSourceAnalysis
    */
   public Optional<DimFilter> getJoinBaseTableFilter()
   {
-    return Optional.empty();
+    return Optional.ofNullable(joinBaseTableFilter);
   }
 
   /**
@@ -171,7 +187,7 @@ public class DataSourceAnalysis2 implements DataSourceAnalysis
    */
   public List<PreJoinableClause> getPreJoinableClauses()
   {
-    return Collections.emptyList();
+    return preJoinableClauses;
   }
 
   /**
@@ -180,7 +196,8 @@ public class DataSourceAnalysis2 implements DataSourceAnalysis
    */
   public boolean isConcreteBased()
   {
-    return baseDataSource.isConcrete() ;
+    return baseDataSource.isConcrete() && preJoinableClauses.stream()
+                                                            .allMatch(clause -> clause.getDataSource().isGlobal());
   }
 
   /**
@@ -224,7 +241,7 @@ public class DataSourceAnalysis2 implements DataSourceAnalysis
    */
   public boolean isJoin()
   {
-    return false;
+    return !preJoinableClauses.isEmpty();
   }
 
   /**
@@ -232,6 +249,16 @@ public class DataSourceAnalysis2 implements DataSourceAnalysis
    */
   public boolean isBaseColumn(final String column)
   {
+    if (baseQuery != null) {
+      return false;
+    }
+
+    for (final PreJoinableClause clause : preJoinableClauses) {
+      if (JoinPrefixUtils.isPrefixedBy(column, clause.getPrefix())) {
+        return false;
+      }
+    }
+
     return true;
   }
 
@@ -244,7 +271,7 @@ public class DataSourceAnalysis2 implements DataSourceAnalysis
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    DataSourceAnalysis2 that = (DataSourceAnalysis2) o;
+    DataSourceAnalysis3 that = (DataSourceAnalysis3) o;
     return Objects.equals(baseDataSource, that.baseDataSource) && Objects.equals(querySegmentSpec, that.querySegmentSpec);
   }
 
@@ -258,9 +285,10 @@ public class DataSourceAnalysis2 implements DataSourceAnalysis
   public String toString()
   {
     return "DataSourceAnalysis{" +
-        ", baseDataSource=" + baseDataSource +
-        ", querySegmentSpec=" + querySegmentSpec +
-        "}";
+           ", baseDataSource=" + baseDataSource +
+           ", baseQuery=" + baseQuery +
+           ", preJoinableClauses=" + preJoinableClauses +
+           '}';
   }
 
   /**
@@ -268,17 +296,25 @@ public class DataSourceAnalysis2 implements DataSourceAnalysis
    */
   public boolean isGlobal()
   {
+    for (PreJoinableClause preJoinableClause : preJoinableClauses) {
+      if (!preJoinableClause.getDataSource().isGlobal()) {
+        return false;
+      }
+    }
     return baseDataSource.isGlobal();
   }
 
-  public DataSourceAnalysis2 maybeWithQuerySegmentSpec(QuerySegmentSpec newQuerySegmentSpec)
+  public DataSourceAnalysis3 maybeWithQuerySegmentSpec(QuerySegmentSpec newQuerySegmentSpec)
   {
     if (newQuerySegmentSpec == null) {
       newQuerySegmentSpec = new MultipleIntervalSegmentSpec(Intervals.ONLY_ETERNITY);
     }
     if (querySegmentSpec == null) {
-      return new DataSourceAnalysis2(
+      return new DataSourceAnalysis3(
           baseDataSource,
+          baseQuery,
+          joinBaseTableFilter,
+          preJoinableClauses,
           newQuerySegmentSpec
       );
     }

@@ -41,7 +41,7 @@ import org.apache.druid.query.filter.DimFilters;
 import org.apache.druid.query.filter.Filter;
 import org.apache.druid.query.filter.TrueDimFilter;
 import org.apache.druid.query.planning.DataSourceAnalysis;
-import org.apache.druid.query.planning.DataSourceAnalysis2;
+import org.apache.druid.query.planning.DataSourceAnalysis3;
 import org.apache.druid.query.planning.PreJoinableClause;
 import org.apache.druid.segment.SegmentReference;
 import org.apache.druid.segment.filter.Filters;
@@ -534,7 +534,7 @@ public class JoinDataSource implements DataSource
     // going-up order. So reverse them.
     Collections.reverse(preJoinableClauses);
 
-    return new DataSourceAnalysis2(current, null, currentDimFilter, preJoinableClauses, null);
+    return new DataSourceAnalysis3(current, null, currentDimFilter, preJoinableClauses, null);
   }
 
 
