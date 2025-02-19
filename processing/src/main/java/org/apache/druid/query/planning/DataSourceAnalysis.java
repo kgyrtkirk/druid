@@ -21,7 +21,6 @@ package org.apache.druid.query.planning;
 
 import org.apache.druid.error.DruidException;
 import org.apache.druid.query.DataSource;
-import org.apache.druid.query.Query;
 import org.apache.druid.query.TableDataSource;
 import org.apache.druid.query.UnionDataSource;
 import org.apache.druid.query.UnnestDataSource;
@@ -98,17 +97,6 @@ public interface DataSourceAnalysis
    * Otherwise, returns an empty Optional.
    */
   public Optional<UnionDataSource> getBaseUnionDataSource();
-
-  /**
-   * Returns the bottom-most (i.e. innermost) {@link Query} from a possible
-   * stack of outer queries at the root of the datasource tree. This is the
-   * query that will be applied to the base datasource plus any joinables that
-   * might be present.
-   *
-   * @return the query associated with the base datasource if is true, else
-   *         empty
-   */
-  public Optional<Query<?>> getBaseQuery();
 
   /**
    * If the original data source is a join data source and there is a DimFilter
