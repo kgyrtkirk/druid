@@ -25,6 +25,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.google.common.base.Preconditions;
 import org.apache.druid.java.util.common.IAE;
 import org.apache.druid.query.planning.DataSourceAnalysis;
+import org.apache.druid.query.planning.DataSourceAnalysis2;
 import org.apache.druid.query.policy.Policy;
 import org.apache.druid.segment.SegmentReference;
 
@@ -131,7 +132,7 @@ public class TableDataSource implements DataSource
   @Override
   public DataSourceAnalysis getAnalysis()
   {
-    return new DataSourceAnalysis(this, null, null, Collections.emptyList(), null);
+    return new DataSourceAnalysis2(this, null, null, Collections.emptyList(), null);
   }
 
   @Override
