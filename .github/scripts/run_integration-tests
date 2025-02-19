@@ -20,6 +20,7 @@ set -x
 
 OPTS+=" -B -ntp -nsu -Dsurefire.failIfNoSpecifiedTests=false -Pskip-static-checks -Dweb.console.skip=true"
 
+export DOCKER_IP=127.0.0.1
 export MYSQL_DRIVER_CLASSNAME=com.mysql.jdbc.Driver
 
 mvn $OPTS install -DskipTests -Pdist
