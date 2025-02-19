@@ -24,6 +24,17 @@ on:
         default: '17'
 
 jobs:
+
+  run-it:
+    name: "it"
+    strategy:
+      fail-fast: false
+    uses: ./.github/workflows/worker.yml
+    with:
+      script: .github/scripts/run_integration-tests
+      jdk: ${{ inputs.jdk }}
+      key: run_integration-tests
+
   run-unit-tests:
     name: "unit tests"
     strategy:
@@ -32,7 +43,7 @@ jobs:
         Dtest: [ "A*,F*,S*", "B*,D*,L*,T*", "C*,O*", "E*,N*,Q*", "G*,R*,U*", "H*,I*,J*", "K*,P*,V*,W*,X*,Y*,Z*", "M*"]
     uses: ./.github/workflows/worker.yml
     with:
-      script: .github/scripts/run-unit-tests.sh -Dtest='${{ matrix.Dtest }}' -Dmaven.test.failure.ignore=true
+      script: .github/scripts/run_unit-tests -Dtest='${{ matrix.Dtest }}' -Dmaven.test.failure.ignore=true
       jdk: ${{ inputs.jdk }}
       artifact_prefix: "unit-test-reports"
       key: ${{ matrix.Dtest }}
