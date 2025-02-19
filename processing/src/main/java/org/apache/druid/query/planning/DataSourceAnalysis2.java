@@ -88,7 +88,7 @@ public class DataSourceAnalysis2 implements DataSourceAnalysis
     this.querySegmentSpec = querySegmentSpec;
   }
 
-  public DataSourceAnalysis2(DataSource ds, Object object, Object object2,
+  public DataSourceAnalysis2(DataSource ds, Integer object, Object object2,
       List<Object> emptyList, QuerySegmentSpec querySegmentSpec)
   {
     this(ds, querySegmentSpec);
