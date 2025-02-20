@@ -322,14 +322,14 @@ public class JoinDataSource implements DataSource
   public byte[] getCacheKey()
   {
     if (true) {
-      // FIXME: should this be any better?
-      return null;
-    }
-    if (false) {
       final CacheKeyBuilder keyBuilder;
       keyBuilder = new CacheKeyBuilder(JoinableFactoryWrapper.JOIN_OPERATION);
+      keyBuilder.appendCacheable(leftFilter);
+      keyBuilder.appendCacheable(conditionAnalysis);
+      keyBuilder.appendCacheable(joinType);
       keyBuilder.appendCacheable(left);
       keyBuilder.appendCacheable(right);
+      return keyBuilder.build();
     }
 
     DataSourceAnalysis3 analysis = (DataSourceAnalysis3) getAnalysis();

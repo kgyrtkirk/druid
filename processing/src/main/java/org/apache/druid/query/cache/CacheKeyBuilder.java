@@ -170,6 +170,7 @@ public class CacheKeyBuilder
   private final List<Item> items = new ArrayList<>();
   private final byte id;
   private int size;
+  private boolean invalidKey;
 
   public CacheKeyBuilder(byte id)
   {
@@ -267,7 +268,12 @@ public class CacheKeyBuilder
 
   public CacheKeyBuilder appendCacheable(@Nullable Cacheable input)
   {
-    appendItem(CACHEABLE_KEY, cacheableToByteArray(input));
+    byte[] cacheableToByteArray = cacheableToByteArray(input);
+    if (cacheableToByteArray == null) {
+      invalidKey  = true;
+      return this;
+    }
+    appendItem(CACHEABLE_KEY, cacheableToByteArray);
     return this;
   }
 
@@ -308,6 +314,9 @@ public class CacheKeyBuilder
 
   public byte[] build()
   {
+    if(invalidKey) {
+      return null;
+    }
     final ByteBuffer buffer = ByteBuffer.allocate(size);
     buffer.put(id);
 

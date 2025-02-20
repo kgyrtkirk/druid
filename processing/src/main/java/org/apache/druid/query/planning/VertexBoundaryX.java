@@ -35,11 +35,11 @@ import org.apache.druid.query.Query;
  * an execution may process an entire dag of datasource in some cases
  * (joindatasource) ; or collapse some into the execution (filter)
  */
-public class VertexBoundary
+public class VertexBoundaryX
 {
   protected final Query<?> topQuery;
 
-  private VertexBoundary(Query<?> topQuery)
+  private VertexBoundaryX(Query<?> topQuery)
   {
     this.topQuery = topQuery;
   }
