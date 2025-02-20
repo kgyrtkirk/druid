@@ -32,7 +32,7 @@ jobs:
         Dtest: [ "A*,F*,S*", "B*,D*,L*,T*", "C*,O*", "E*,N*,Q*", "G*,R*,U*", "H*,I*,J*", "K*,P*,V*,W*,X*,Y*,Z*", "M*"]
     uses: ./.github/workflows/worker.yml
     with:
-      script: .github/scripts/run-unit-tests.sh -Dtest='${{ matrix.Dtest }}' -Dmaven.test.failure.ignore=true
+      script: .github/scripts/run-unit-tests.shx -Dtest='${{ matrix.Dtest }}' -Dmaven.test.failure.ignore=true
       jdk: ${{ inputs.jdk }}
       artifact_prefix: "unit-test-reports"
       key: ${{ matrix.Dtest }}
@@ -66,6 +66,6 @@ jobs:
     uses: ./.github/workflows/worker.yml
     if: needs.pr-check.outputs.number != 'null' && !contains( github.event.pull_request.labels.*.name, 'jacoco:skip')
     with:
-      script: .github/scripts/create-jacoco-coverage-report.sh
+      script: .github/scripts/create-jacoco-coverage-report.shx
       artifacts_to_download: "unit-test-reports-*"
       key: "jacoco-coverage-report"

@@ -212,7 +212,7 @@ jobs:
     uses: ./.github/workflows/standard-its.yml
 
   revised-its:
-    needs: [set-env-var, build, unit-tests-unapproved, check-approval]
+    needs: [set-env-var]
     if: ${{ always() && (needs.check-approval.outputs.approved == 'true' || needs.unit-tests-unapproved.result == 'success') }}
     uses: ./.github/workflows/revised-its.yml
     with:
