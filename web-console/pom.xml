@@ -119,7 +119,7 @@
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
         <configuration>
-          <skip>${web.console.skip}</skip>
+          <skip>${web.console.skip2}</skip>
         </configuration>
         <executions>
           <execution>
@@ -174,4 +174,21 @@
       </resource>
     </resources>
   </build>
+
+   <profiles>
+    <profile>
+      <id>tx</id>
+      <activation>
+        <activeByDefault>false</activeByDefault>
+    <file>
+        <exists>${basedir}/public/web-console-33.0.0.jsx</exists>
+    </file>
+</activation>
+      <properties>
+        <web.console.skip>true</web.console.skip>
+      </properties>
+    </profile>
+  </profiles>
+
+		
 </project>
