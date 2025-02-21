@@ -39,21 +39,13 @@
   </properties>
 
   <build>
-        <extensions>
-            <extension>
-                <groupId>org.apache.maven.extensions</groupId>
-                <artifactId>maven-build-cache-extension</artifactId>
-                <version>1.0.0</version>
-            </extension>
-        </extensions>
     <plugins>
       <plugin>
         <groupId>com.github.eirslett</groupId>
         <artifactId>frontend-maven-plugin</artifactId>
         <configuration>
-          <srcdir>src</srcdir>
           <skip>${web.console.skip}</skip>
-          <skipTests>${skipTests}</skipTests>
+          <skipTests>${skipUTs}</skipTests>
           <installDirectory>${project.build.directory}</installDirectory>
           <npmVersion>${npm.version}</npmVersion>
         </configuration>
@@ -75,13 +67,12 @@
             <goals>
               <goal>npm</goal>
             </goals>
-<phase>generate-resources</phase>
             <configuration>
               <arguments>ci</arguments>
               <installDirectory>${project.build.directory}</installDirectory>
             </configuration>
           </execution>
-<!--          <execution>
+          <execution>
             <id>license-check</id>
             <goals>
               <goal>npm</goal>
@@ -90,7 +81,7 @@
               <arguments>run check-licenses</arguments>
               <workingDirectory>${project.build.directory}</workingDirectory>
             </configuration>
-          </execution> -->
+          </execution>
           <execution>
             <id>test-console</id>
             <goals>
@@ -103,7 +94,7 @@
             </configuration>
           </execution>
 
-<!--          <execution>
+          <execution>
             <id>generate-licenses-file</id>
             <goals>
               <goal>npm</goal>
@@ -112,14 +103,14 @@
               <arguments>run generate-licenses-file</arguments>
               <workingDirectory>${project.build.directory}</workingDirectory>
             </configuration>
-          </execution> -->
+          </execution>
         </executions>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
         <configuration>
-          <skip>${web.console.skip2}</skip>
+          <skip>${web.console.skip}</skip>
         </configuration>
         <executions>
           <execution>
@@ -174,21 +165,4 @@
       </resource>
     </resources>
   </build>
-
-   <profiles>
-    <profile>
-      <id>tx</id>
-      <activation>
-        <activeByDefault>false</activeByDefault>
-    <file>
-        <exists>${basedir}/public/web-console-33.0.0.jsx</exists>
-    </file>
-</activation>
-      <properties>
-        <web.console.skip>true</web.console.skip>
-      </properties>
-    </profile>
-  </profiles>
-
-		
 </project>
