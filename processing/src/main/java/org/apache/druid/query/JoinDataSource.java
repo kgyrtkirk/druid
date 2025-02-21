@@ -302,7 +302,7 @@ public class JoinDataSource implements DataSource
   {
     DataSource current = newSource;
     DataSourceAnalysis analysis = getAnalysis();
-    DataSourceAnalysis3 safeAnalysis = getSafeAnalysisForDataSource();
+    DataSourceAnalysis3 safeAnalysis = getJoinAnalysisForDataSource();
 
     if (analysis.getBaseDataSource() != safeAnalysis.getBaseDataSource()) {
       throw DruidException
@@ -425,9 +425,9 @@ public class JoinDataSource implements DataSource
   @Override
   public Function<SegmentReference, SegmentReference> createSegmentMapFunction(Query query)
   {
-    DataSourceAnalysis3 safeAnalysis = getSafeAnalysisForDataSource();
-    List<PreJoinableClause> clauses = safeAnalysis.getPreJoinableClauses();
-    Filter baseFilter = safeAnalysis.getJoinBaseTableFilter().map(Filters::toFilter).orElse(null);
+    DataSourceAnalysis3 joinAnalysis = getJoinAnalysisForDataSource();
+    List<PreJoinableClause> clauses = joinAnalysis.getPreJoinableClauses();
+    Filter baseFilter = joinAnalysis.getJoinBaseTableFilter().map(Filters::toFilter).orElse(null);
 
     if (clauses.isEmpty()) {
       throw DruidException.defensive("A JoinDataSource with no join clauses should not be mapped.");
@@ -475,8 +475,8 @@ public class JoinDataSource implements DataSource
                 .orElse(null)
         )
     );
-    final Function<SegmentReference, SegmentReference> baseMapFn = safeAnalysis.getBaseDataSource().createSegmentMapFunction(query);
-    return baseSegment -> newHashJoinSegment(
+    final Function<SegmentReference, SegmentReference> baseMapFn = joinAnalysis.getBaseDataSource().createSegmentMapFunction(query);
+    return baseSegment -> createHashJoinSegment(
         baseMapFn.apply(baseSegment),
         baseFilterToUse,
         clausesToUse,
@@ -484,7 +484,7 @@ public class JoinDataSource implements DataSource
     );
   }
 
-  private SegmentReference newHashJoinSegment(
+  private SegmentReference createHashJoinSegment(
       SegmentReference sourceSegment,
       Filter baseFilterToUse,
       List<JoinableClause> clausesToUse,
@@ -496,25 +496,29 @@ public class JoinDataSource implements DataSource
     return new HashJoinSegment(sourceSegment, baseFilterToUse, clausesToUse, joinFilterPreAnalysis);
   }
 
-
   private DataSourceAnalysis getAnalysisForDataSource()
   {
-    return flattenJoin(this, true);
-  }
-
-  public DataSourceAnalysis3 getSafeAnalysisForDataSource()
-  {
-    return flattenJoin(this, false);
+    return constructAnalysis(this, true);
   }
 
   /**
-   * Flatten a datasource into two parts: the left-hand side datasource (the 'base' datasource), and a list of join
-   * clauses, if any.
-   * @param vertexBoundary if the returned analysis should cover the vertexboundary.
+   * Computes the DataSourceAnalysis with join boundaries.
+   *
+   * It will only process what the join datasource could handle in one go - and not more.
+   */
+  public DataSourceAnalysis3 getJoinAnalysisForDataSource()
+  {
+    return constructAnalysis(this, false);
+  }
+
+  /**
+   * Builds the DataSourceAnalysis for this join.
+   *
+   * @param vertexBoundary if the returned analysis should go up to the vertex boundary.
    *
    * @throws IllegalArgumentException if dataSource cannot be fully flattened.
    */
-  private static DataSourceAnalysis3 flattenJoin(final JoinDataSource dataSource, boolean vertexBoundary)
+  private static DataSourceAnalysis3 constructAnalysis(final JoinDataSource dataSource, boolean vertexBoundary)
   {
     DataSource current = dataSource;
     DimFilter currentDimFilter = TrueDimFilter.instance();
