@@ -41,6 +41,7 @@ import org.apache.druid.query.filter.DimFilters;
 import org.apache.druid.query.filter.Filter;
 import org.apache.druid.query.filter.TrueDimFilter;
 import org.apache.druid.query.planning.DataSourceAnalysis;
+import org.apache.druid.query.planning.DataSourceAnalysis3;
 import org.apache.druid.query.planning.PreJoinableClause;
 import org.apache.druid.segment.SegmentReference;
 import org.apache.druid.segment.filter.Filters;
@@ -98,7 +99,6 @@ public class JoinDataSource implements DataSource
   private final JoinableFactoryWrapper joinableFactoryWrapper;
   private final JoinAlgorithm joinAlgorithm;
   private static final Logger log = new Logger(JoinDataSource.class);
-  private final DataSourceAnalysis analysis;
 
   private JoinDataSource(
       DataSource left,
@@ -119,8 +119,6 @@ public class JoinDataSource implements DataSource
     this.leftFilter = validateLeftFilter(left, leftFilter);
     this.joinableFactoryWrapper = joinableFactoryWrapper;
     this.joinAlgorithm = JoinAlgorithm.BROADCAST.equals(joinAlgorithm) ? null : joinAlgorithm;
-
-    this.analysis = this.getAnalysisForDataSource();
   }
 
   /**
@@ -303,9 +301,17 @@ public class JoinDataSource implements DataSource
   public DataSource withUpdatedDataSource(DataSource newSource)
   {
     DataSource current = newSource;
-    DimFilter joinBaseFilter = analysis.getJoinBaseTableFilter().orElse(null);
+    DataSourceAnalysis analysis = getAnalysis();
+    DataSourceAnalysis3 safeAnalysis = getJoinAnalysisForDataSource();
 
-    for (final PreJoinableClause clause : analysis.getPreJoinableClauses()) {
+    if (analysis.getBaseDataSource() != safeAnalysis.getBaseDataSource()) {
+      throw DruidException
+          .defensive("Join datasource analysis mismatches the safe one ; this could cause correctness issues.");
+    }
+
+    DimFilter joinBaseFilter = safeAnalysis.getJoinBaseTableFilter().orElse(null);
+
+    for (final PreJoinableClause clause : safeAnalysis.getPreJoinableClauses()) {
       current = clause.makeUpdatedJoinDataSource(current, joinBaseFilter, this.joinableFactoryWrapper);
       joinBaseFilter = null;
     }
@@ -315,6 +321,18 @@ public class JoinDataSource implements DataSource
   @Override
   public byte[] getCacheKey()
   {
+    if (true) {
+      final CacheKeyBuilder keyBuilder;
+      keyBuilder = new CacheKeyBuilder(JoinableFactoryWrapper.JOIN_OPERATION);
+      keyBuilder.appendCacheable(leftFilter);
+      keyBuilder.appendCacheable(conditionAnalysis);
+      keyBuilder.appendCacheable(joinType);
+      keyBuilder.appendCacheable(left);
+      keyBuilder.appendCacheable(right);
+      return keyBuilder.build();
+    }
+
+    DataSourceAnalysis3 analysis = (DataSourceAnalysis3) getAnalysis();
     final List<PreJoinableClause> clauses = analysis.getPreJoinableClauses();
     if (clauses.isEmpty()) {
       throw new IAE("No join clauses to build the cache key for data source [%s]", this);
@@ -345,7 +363,7 @@ public class JoinDataSource implements DataSource
   @Override
   public DataSourceAnalysis getAnalysis()
   {
-    return analysis;
+    return getAnalysisForDataSource();
   }
 
   @JsonProperty("joinAlgorithm")
@@ -407,7 +425,7 @@ public class JoinDataSource implements DataSource
   @Override
   public Function<SegmentReference, SegmentReference> createSegmentMapFunction(Query query)
   {
-    DataSourceAnalysis joinAnalysis = getJoinAnalysisForDataSource();
+    DataSourceAnalysis3 joinAnalysis = getJoinAnalysisForDataSource();
     List<PreJoinableClause> clauses = joinAnalysis.getPreJoinableClauses();
     Filter baseFilter = joinAnalysis.getJoinBaseTableFilter().map(Filters::toFilter).orElse(null);
 
@@ -488,7 +506,7 @@ public class JoinDataSource implements DataSource
    *
    * It will only process what the join datasource could handle in one go - and not more.
    */
-  public DataSourceAnalysis getJoinAnalysisForDataSource()
+  public DataSourceAnalysis3 getJoinAnalysisForDataSource()
   {
     return constructAnalysis(this, false);
   }
@@ -500,7 +518,7 @@ public class JoinDataSource implements DataSource
    *
    * @throws IllegalArgumentException if dataSource cannot be fully flattened.
    */
-  private static DataSourceAnalysis constructAnalysis(final JoinDataSource dataSource, boolean vertexBoundary)
+  private static DataSourceAnalysis3 constructAnalysis(final JoinDataSource dataSource, boolean vertexBoundary)
   {
     DataSource current = dataSource;
     DimFilter currentDimFilter = TrueDimFilter.instance();
@@ -537,7 +555,7 @@ public class JoinDataSource implements DataSource
     // going-up order. So reverse them.
     Collections.reverse(preJoinableClauses);
 
-    return new DataSourceAnalysis(current, null, currentDimFilter, preJoinableClauses, null);
+    return new DataSourceAnalysis3(current, null, currentDimFilter, preJoinableClauses, null);
   }
 
 

@@ -581,7 +581,7 @@ public class JoinDataSourceTest
     );
 
     byte[] cacheKey1 = joinDataSource.getCacheKey();
-    Assert.assertEquals(cacheKey1.length, 0);
+    Assert.assertNull(cacheKey1);
   }
 
   private static class JoinableFactoryWithCacheKey extends NoopJoinableFactory
