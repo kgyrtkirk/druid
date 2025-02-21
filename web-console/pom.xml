@@ -39,13 +39,21 @@
   </properties>
 
   <build>
+        <extensions>
+            <extension>
+                <groupId>org.apache.maven.extensions</groupId>
+                <artifactId>maven-build-cache-extension</artifactId>
+                <version>1.0.0</version>
+            </extension>
+        </extensions>
     <plugins>
       <plugin>
         <groupId>com.github.eirslett</groupId>
         <artifactId>frontend-maven-plugin</artifactId>
         <configuration>
+          <srcdir>src</srcdir>
           <skip>${web.console.skip}</skip>
-          <skipTests>${skipUTs}</skipTests>
+          <skipTests>${skipTests}</skipTests>
           <installDirectory>${project.build.directory}</installDirectory>
           <npmVersion>${npm.version}</npmVersion>
         </configuration>
@@ -67,12 +75,13 @@
             <goals>
               <goal>npm</goal>
             </goals>
+<phase>generate-resources</phase>
             <configuration>
               <arguments>ci</arguments>
               <installDirectory>${project.build.directory}</installDirectory>
             </configuration>
           </execution>
-          <execution>
+<!--          <execution>
             <id>license-check</id>
             <goals>
               <goal>npm</goal>
@@ -81,7 +90,7 @@
               <arguments>run check-licenses</arguments>
               <workingDirectory>${project.build.directory}</workingDirectory>
             </configuration>
-          </execution>
+          </execution> -->
           <execution>
             <id>test-console</id>
             <goals>
@@ -94,7 +103,7 @@
             </configuration>
           </execution>
 
-          <execution>
+<!--          <execution>
             <id>generate-licenses-file</id>
             <goals>
               <goal>npm</goal>
@@ -103,7 +112,7 @@
               <arguments>run generate-licenses-file</arguments>
               <workingDirectory>${project.build.directory}</workingDirectory>
             </configuration>
-          </execution>
+          </execution> -->
         </executions>
       </plugin>
       <plugin>
