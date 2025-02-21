@@ -23,6 +23,7 @@ import org.apache.druid.error.DruidException;
 import org.apache.druid.java.util.common.IAE;
 import org.apache.druid.java.util.common.Intervals;
 import org.apache.druid.query.DataSource;
+import org.apache.druid.query.FilteredDataSource;
 import org.apache.druid.query.JoinDataSource;
 import org.apache.druid.query.Query;
 import org.apache.druid.query.RestrictedDataSource;
@@ -30,12 +31,16 @@ import org.apache.druid.query.TableDataSource;
 import org.apache.druid.query.UnionDataSource;
 import org.apache.druid.query.UnnestDataSource;
 import org.apache.druid.query.filter.DimFilter;
+import org.apache.druid.query.filter.DimFilters;
+import org.apache.druid.query.filter.TrueDimFilter;
 import org.apache.druid.query.spec.MultipleIntervalSegmentSpec;
 import org.apache.druid.query.spec.QuerySegmentSpec;
 import org.apache.druid.segment.join.JoinPrefixUtils;
 
 import javax.annotation.Nullable;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -303,4 +308,34 @@ public class DataSourceAnalysis3 extends DataSourceAnalysis2
     }
     return this;
   }
+
+  public static DataSourceAnalysis3 constructAnalysis(final JoinDataSource dataSource)
+  {
+    DataSource current = dataSource;
+    DimFilter currentDimFilter = TrueDimFilter.instance();
+    final List<PreJoinableClause> preJoinableClauses = new ArrayList<>();
+
+    do {
+      if (current instanceof JoinDataSource) {
+        final JoinDataSource joinDataSource = (JoinDataSource) current;
+        currentDimFilter = DimFilters.conjunction(currentDimFilter, joinDataSource.getLeftFilter());
+        PreJoinableClause e = new PreJoinableClause(joinDataSource);
+        preJoinableClauses.add(e);
+        current = joinDataSource.getLeft();
+        continue;
+      }
+      break;
+    } while (true);
+
+    if (currentDimFilter == TrueDimFilter.instance()) {
+      currentDimFilter = null;
+    }
+
+    // Join clauses were added in the order we saw them while traversing down, but we need to apply them in the
+    // going-up order. So reverse them.
+    Collections.reverse(preJoinableClauses);
+
+    return new DataSourceAnalysis3(current, null, currentDimFilter, preJoinableClauses, null);
+  }
+
 }

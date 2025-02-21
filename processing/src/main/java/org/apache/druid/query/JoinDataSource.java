@@ -508,7 +508,7 @@ public class JoinDataSource implements DataSource
    */
   public DataSourceAnalysis3 getJoinAnalysisForDataSource()
   {
-    return constructAnalysis(this, false);
+    return DataSourceAnalysis3.constructAnalysis(this);
   }
 
   /**
