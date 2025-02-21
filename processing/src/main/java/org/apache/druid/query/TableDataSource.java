@@ -65,6 +65,11 @@ public class TableDataSource implements DataSource
     return Collections.singleton(name);
   }
 
+  public Set<String> getTableNames2()
+  {
+    return Collections.singleton(name);
+  }
+
   @Override
   public List<DataSource> getChildren()
   {
