@@ -78,13 +78,9 @@ public interface DataSourceAnalysis
   /**
    * Unwraps the {@link #getBaseDataSource()} if its a {@link TableDataSource}.
    *
-   * @throws An
-   *           error of type {@link DruidException.Category#DEFENSIVE} if the
+   * @throws DruidException
+   *           A {@link DruidException.Category#DEFENSIVE} will be throw if
    *           {@link BaseDataSource} is not a table.
-   *
-   *           note that this may not be true even
-   *           base datasource is a {@link UnionDataSource} of
-   *           {@link TableDataSource}.
    */
   public TableDataSource getBaseTableDataSource();
 
@@ -132,5 +128,8 @@ public interface DataSourceAnalysis
    */
   public boolean isGlobal();
 
+  /**
+   * Captures the inner-most {@link QuerySegmentSpec}.
+   */
   public DataSourceAnalysis maybeWithQuerySegmentSpec(QuerySegmentSpec newQuerySegmentSpec);
 }
