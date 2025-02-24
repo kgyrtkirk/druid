@@ -181,4 +181,14 @@ public class MSQSpec
       return new MSQSpec(query, columnMappings, destination, assignmentStrategy, tuningConfig);
     }
   }
+
+  public Object getQueryId()
+  {
+    if(true)
+    {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+    return null;
+
+  }
 }
