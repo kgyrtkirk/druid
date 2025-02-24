@@ -19,6 +19,8 @@
 
 package org.apache.druid.query.planning;
 
+import org.apache.druid.error.DruidException;
+import org.apache.druid.query.BaseQuery;
 import org.apache.druid.query.DataSource;
 import org.apache.druid.query.Query;
 
@@ -29,7 +31,7 @@ import org.apache.druid.query.Query;
  * beyond their inital design:
  *
  * Multiple queries might be executed in one stage: <br/>
- * there is one query type which is collapsed at exection time (GroupBy).
+ * The GroupBy query could be collapsed at exection time).
  *
  * Dag of datasources: <br/>
  * an execution may process an entire dag of datasource in some cases
@@ -46,14 +48,15 @@ public class ExecutionVertex
 
   public static ExecutionVertex of(Query<?> query)
   {
-//    Vertex
+    ExecutionVertexExplorer executionVertexExplorer = new ExecutionVertexExplorer();
+    executionVertexExplorer.visit(query);
+    query.getDataSource();
     return new ExecutionVertex(query);
   }
 
   public DataSource getBaseDataSource()
   {
-    if(true)
-    {
+    if (true) {
       throw new RuntimeException("FIXME: Unimplemented!");
     }
     return null;
@@ -68,11 +71,58 @@ public class ExecutionVertex
 
   public boolean isTableBased()
   {
+    if (true) {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+    return false;
+
+  }
+
+  static class ExecutionVertexExplorer
+  {
+
+    public void visit(Query<?> query)
+    {
+      // if(query instanceof BaseQuery<?>) {
+      // BaseQuery<?> baseQuery = (BaseQuery<?>) query;
+      // DataSource oldDataSource = baseQuery.getDataSource();
+      // DataSource newDataSource = visit(oldDataSource);
+      // if(oldDataSource!=newDataSource) {
+      // baseQuery = baseQuery.withDataSource(newDataSource);
+      // }
+      //
+      // }
+      throw DruidException.defensive("fixme");
+
+    }
+
+    private DataSource visit(DataSource dataSource)
+    {
+      if (true) {
+        throw new RuntimeException("FIXME: Unimplemented!");
+      }
+      return null;
+
+    }
+
+  }
+
+  public static DataSourceAnalysis of1(BaseQuery<?> baseQuery)
+  {
+    if (true) {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+    return null;
+
+  }
+
+  public static DruidException ofIllegal(Object dataSource)
+  {
     if(true)
     {
       throw new RuntimeException("FIXME: Unimplemented!");
     }
-    return false;
+    return null;
 
   }
 }

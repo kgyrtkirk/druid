@@ -25,6 +25,7 @@ import org.apache.druid.query.LocatedSegmentDescriptor;
 import org.apache.druid.query.SegmentDescriptor;
 import org.apache.druid.query.TableDataSource;
 import org.apache.druid.query.planning.DataSourceAnalysis;
+import org.apache.druid.query.planning.ExecutionVertex;
 import org.apache.druid.server.coordination.DruidServerMetadata;
 import org.apache.druid.timeline.TimelineLookup;
 import org.apache.druid.timeline.TimelineObjectHolder;
@@ -57,7 +58,7 @@ public class ServerViewUtil
       int numCandidates
   )
   {
-    final DataSourceAnalysis analysis = datasource.getAnalysis();
+    final DataSourceAnalysis analysis = ExecutionVertex.of1(datasource);
     final Optional<? extends TimelineLookup<String, ServerSelector>> maybeTimeline = serverView.getTimeline(analysis.getBaseTableDataSource());
     if (!maybeTimeline.isPresent()) {
       return Collections.emptyList();

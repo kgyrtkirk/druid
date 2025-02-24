@@ -77,6 +77,7 @@ import org.apache.druid.query.operator.ScanOperatorFactory;
 import org.apache.druid.query.operator.WindowOperatorQuery;
 import org.apache.druid.query.ordering.StringComparator;
 import org.apache.druid.query.planning.DataSourceAnalysis;
+import org.apache.druid.query.planning.ExecutionVertex;
 import org.apache.druid.query.scan.ScanQuery;
 import org.apache.druid.query.spec.LegacySegmentSpec;
 import org.apache.druid.query.timeboundary.TimeBoundaryQuery;
@@ -889,8 +890,9 @@ public class DruidQuery
    */
   private static boolean canUseIntervalFiltering(final DataSource dataSource)
   {
-    final DataSourceAnalysis analysis = dataSource.getAnalysis();
-    return analysis.isTableBased();
+    throw ExecutionVertex.ofIllegal(dataSource);
+//    final DataSourceAnalysis analysis = dataSource.getAnalysis();
+//    return analysis.isTableBased();
   }
 
   private static Filtration toFiltration(
@@ -925,7 +927,10 @@ public class DruidQuery
       return true;
     }
 
-    DataSourceAnalysis analysis = dataSource.getAnalysis();
+    if(true) {
+      throw ExecutionVertex.ofIllegal(dataSource);
+    }
+    DataSourceAnalysis analysis = null;//dataSource.getAnalysis();
     if (analysis.isConcreteBased() && analysis.isTableBased()) {
       // Always OK: queries on concrete tables (regular Druid datasources) use segment-based cursors
       // (IncrementalIndex or QueryableIndex). These clip query interval to data interval, making wide query
