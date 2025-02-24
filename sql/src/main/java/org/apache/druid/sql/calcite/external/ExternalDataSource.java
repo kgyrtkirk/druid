@@ -28,8 +28,6 @@ import org.apache.druid.data.input.InputSource;
 import org.apache.druid.java.util.common.IAE;
 import org.apache.druid.query.DataSource;
 import org.apache.druid.query.Query;
-import org.apache.druid.query.planning.DataSourceAnalysis;
-import org.apache.druid.query.planning.DataSourceAnalysis2;
 import org.apache.druid.segment.SegmentReference;
 import org.apache.druid.segment.column.RowSignature;
 
@@ -140,12 +138,6 @@ public class ExternalDataSource implements DataSource
   public byte[] getCacheKey()
   {
     return null;
-  }
-
-  @Override
-  public DataSourceAnalysis getAnalysis()
-  {
-    return new DataSourceAnalysis2(this, null, null, Collections.emptyList(), null);
   }
 
   @Override

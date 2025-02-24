@@ -113,7 +113,7 @@ public class TestClusterQuerySegmentWalker implements QuerySegmentWalker
     // Strange, but true. Required to get authentic behavior with UnionDataSources. (Although, it would be great if
     // this wasn't required.)
     return (queryPlus, responseContext) -> {
-      final DataSourceAnalysis analysis = queryPlus.getQuery().getDataSource().getAnalysis();
+      final DataSourceAnalysis analysis = queryPlus.getQuery().getDataSourceAnalysis();
 
       if (!(analysis.isConcreteBased() && analysis.isTableBased())) {
         throw new ISE("Cannot handle datasource: %s", queryPlus.getQuery().getDataSource());
@@ -139,7 +139,7 @@ public class TestClusterQuerySegmentWalker implements QuerySegmentWalker
       throw new ISE("Unknown query type[%s].", query.getClass());
     }
 
-    final DataSourceAnalysis analysis = dataSourceFromQuery.getAnalysis();
+    final DataSourceAnalysis analysis = query.getDataSourceAnalysis();
 
     if (!(analysis.isConcreteBased() && analysis.isTableBased())) {
       throw new ISE("Cannot handle datasource: %s", dataSourceFromQuery);

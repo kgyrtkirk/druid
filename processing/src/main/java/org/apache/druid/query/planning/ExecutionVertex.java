@@ -23,6 +23,7 @@ import org.apache.druid.error.DruidException;
 import org.apache.druid.query.BaseQuery;
 import org.apache.druid.query.DataSource;
 import org.apache.druid.query.Query;
+import org.apache.druid.query.TableDataSource;
 
 /**
  * Represents the native engine's execution vertex.
@@ -117,6 +118,16 @@ public class ExecutionVertex
   }
 
   public static DruidException ofIllegal(Object dataSource)
+  {
+    if(true)
+    {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+    return null;
+
+  }
+
+  public TableDataSource getBaseTableDataSource()
   {
     if(true)
     {

@@ -287,12 +287,6 @@ public class UnionQuery implements Query<Object>
     {
       return delegate.getCacheKey();
     }
-
-    @Override
-    public DataSourceAnalysis getAnalysis()
-    {
-      throw methodNotSupported();
-    }
   }
 
   public static DruidException methodNotSupported()

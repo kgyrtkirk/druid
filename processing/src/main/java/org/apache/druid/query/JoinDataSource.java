@@ -297,25 +297,32 @@ public class JoinDataSource implements DataSource
                                  .collect(Collectors.toSet());
   }
 
+  @Deprecated
   @Override
   public DataSource withUpdatedDataSource(DataSource newSource)
   {
-    DataSource current = newSource;
-    DataSourceAnalysis analysis = getAnalysis();
-    DataSourceAnalysis3 safeAnalysis = getJoinAnalysisForDataSource();
-
-    if (analysis.getBaseDataSource() != safeAnalysis.getBaseDataSource()) {
+    if(true)
+     {
       throw DruidException
-          .defensive("Join datasource analysis mismatches the safe one ; this could cause correctness issues.");
+      .defensive("should be removed");
+//    DataSource current = newSource;
+//    DataSourceAnalysis analysis = getAnalysis();
+//    DataSourceAnalysis3 safeAnalysis = getJoinAnalysisForDataSource();
+//
+//    if (analysis.getBaseDataSource() != safeAnalysis.getBaseDataSource()) {
+//      throw DruidException
+//          .defensive("Join datasource analysis mismatches the safe one ; this could cause correctness issues.");
+//    }
+//
+//    DimFilter joinBaseFilter = safeAnalysis.getJoinBaseTableFilter().orElse(null);
+//
+//    for (final PreJoinableClause clause : safeAnalysis.getPreJoinableClauses()) {
+//      current = clause.makeUpdatedJoinDataSource(current, joinBaseFilter, this.joinableFactoryWrapper);
+//      joinBaseFilter = null;
+//    }
+//    return current;
     }
-
-    DimFilter joinBaseFilter = safeAnalysis.getJoinBaseTableFilter().orElse(null);
-
-    for (final PreJoinableClause clause : safeAnalysis.getPreJoinableClauses()) {
-      current = clause.makeUpdatedJoinDataSource(current, joinBaseFilter, this.joinableFactoryWrapper);
-      joinBaseFilter = null;
-    }
-    return current;
+    return newSource;
   }
 
   @Override
@@ -332,7 +339,7 @@ public class JoinDataSource implements DataSource
       return keyBuilder.build();
     }
 
-    DataSourceAnalysis3 analysis = (DataSourceAnalysis3) getAnalysis();
+    DataSourceAnalysis3 analysis = null;//getAnalysis();
     final List<PreJoinableClause> clauses = analysis.getPreJoinableClauses();
     if (clauses.isEmpty()) {
       throw new IAE("No join clauses to build the cache key for data source [%s]", this);
@@ -358,12 +365,6 @@ public class JoinDataSource implements DataSource
       keyBuilder.appendString(clause.getJoinType().name());
     }
     return keyBuilder.build();
-  }
-
-  @Override
-  public DataSourceAnalysis getAnalysis()
-  {
-    return getAnalysisForDataSource();
   }
 
   @JsonProperty("joinAlgorithm")

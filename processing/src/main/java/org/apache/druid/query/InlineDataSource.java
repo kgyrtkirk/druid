@@ -26,8 +26,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import org.apache.druid.java.util.common.IAE;
-import org.apache.druid.query.planning.DataSourceAnalysis;
-import org.apache.druid.query.planning.DataSourceAnalysis2;
 import org.apache.druid.segment.RowAdapter;
 import org.apache.druid.segment.SegmentReference;
 import org.apache.druid.segment.column.ColumnType;
@@ -258,12 +256,6 @@ public class InlineDataSource implements DataSource
   public byte[] getCacheKey()
   {
     return null;
-  }
-
-  @Override
-  public DataSourceAnalysis getAnalysis()
-  {
-    return new DataSourceAnalysis2(this, null, null, Collections.emptyList(), null);
   }
 
   /**

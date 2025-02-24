@@ -86,7 +86,7 @@ public class DataSourceAnalysisTest
   @Test
   public void testRestricted()
   {
-    final DataSourceAnalysis analysis = RESTRICTED_FOO.getAnalysis();
+    final DataSourceAnalysis analysis = makeScanQuery(RESTRICTED_FOO).getDataSourceAnalysis();
 
     Assert.assertTrue(analysis.isConcreteBased());
     Assert.assertTrue(analysis.isTableBased());
@@ -128,8 +128,10 @@ public class DataSourceAnalysisTest
   @Test
   public void testUnion()
   {
+
+
     final UnionDataSource unionDataSource = new UnionDataSource(ImmutableList.of(TABLE_FOO, TABLE_BAR));
-    final DataSourceAnalysis analysis = unionDataSource.getAnalysis();
+    final DataSourceAnalysis analysis = makeScanQuery(unionDataSource).getDataSourceAnalysis();
 
     Assert.assertTrue(analysis.isConcreteBased());
     Assert.assertTrue(analysis.isTableBased());
@@ -162,7 +164,7 @@ public class DataSourceAnalysisTest
   {
     final UnionDataSource unionDataSource = new UnionDataSource(ImmutableList.of(TABLE_FOO, TABLE_BAR));
     final QueryDataSource queryDataSource = makeQueryDS(unionDataSource);
-    final DataSourceAnalysis analysis = queryDataSource.getAnalysis();
+    final DataSourceAnalysis analysis = makeScanQuery(queryDataSource).getDataSourceAnalysis();//queryDataSource.getAnalysis();
 
     Assert.assertFalse(analysis.isConcreteBased());
     Assert.assertFalse(analysis.isTableBased());
@@ -177,7 +179,7 @@ public class DataSourceAnalysisTest
   @Test
   public void testLookup()
   {
-    final DataSourceAnalysis analysis = LOOKUP_LOOKYLOO.getAnalysis();
+    final DataSourceAnalysis analysis = makeScanQuery(LOOKUP_LOOKYLOO).getDataSourceAnalysis();
 
     Assert.assertTrue(analysis.isConcreteBased());
     Assert.assertFalse(analysis.isTableBased());
@@ -193,7 +195,7 @@ public class DataSourceAnalysisTest
   public void testQueryOnLookup()
   {
     final QueryDataSource queryDataSource = makeQueryDS(LOOKUP_LOOKYLOO);
-    final DataSourceAnalysis analysis = queryDataSource.getAnalysis();
+    final DataSourceAnalysis analysis = makeScanQuery(queryDataSource).getDataSourceAnalysis();
 
     Assert.assertFalse(analysis.isConcreteBased());
     Assert.assertFalse(analysis.isTableBased());
@@ -208,7 +210,7 @@ public class DataSourceAnalysisTest
   @Test
   public void testInline()
   {
-    final DataSourceAnalysis analysis = INLINE.getAnalysis();
+    final DataSourceAnalysis analysis = makeScanQuery(INLINE).getDataSourceAnalysis();
 
     Assert.assertTrue(analysis.isConcreteBased());
     Assert.assertFalse(analysis.isTableBased());
@@ -245,7 +247,7 @@ public class DataSourceAnalysisTest
             JoinType.FULL
         );
 
-    final DataSourceAnalysis3 analysis = (DataSourceAnalysis3) joinDataSource.getAnalysis();
+    final DataSourceAnalysis3 analysis = makeScanQuery(joinDataSource).getJoinDataSourceAnalysis();
 
     Assert.assertTrue(analysis.isConcreteBased());
     Assert.assertTrue(analysis.isTableBased());
@@ -295,7 +297,7 @@ public class DataSourceAnalysisTest
             JoinType.FULL
         );
 
-    final DataSourceAnalysis3 analysis = (DataSourceAnalysis3) joinDataSource.getAnalysis();
+    final DataSourceAnalysis3 analysis = makeScanQuery(joinDataSource).getJoinDataSourceAnalysis();
 
     Assert.assertTrue(analysis.isConcreteBased());
     Assert.assertTrue(analysis.isTableBased());
@@ -352,7 +354,7 @@ public class DataSourceAnalysisTest
             JoinType.RIGHT
         );
 
-    final DataSourceAnalysis3 analysis = (DataSourceAnalysis3) joinDataSource.getAnalysis();
+    final DataSourceAnalysis3 analysis = makeScanQuery(joinDataSource).getJoinDataSourceAnalysis();
 
     Assert.assertTrue(analysis.isConcreteBased());
     Assert.assertTrue(analysis.isTableBased());
@@ -401,7 +403,7 @@ public class DataSourceAnalysisTest
             TrueDimFilter.instance()
         );
 
-    final DataSourceAnalysis3 analysis = (DataSourceAnalysis3) joinDataSource.getAnalysis();
+    final DataSourceAnalysis3 analysis = makeScanQuery(joinDataSource).getJoinDataSourceAnalysis();
 
     Assert.assertTrue(analysis.isConcreteBased());
     Assert.assertTrue(analysis.isTableBased());
@@ -436,7 +438,7 @@ public class DataSourceAnalysisTest
         TrueDimFilter.instance()
     );
 
-    final DataSourceAnalysis3 analysis = (DataSourceAnalysis3) joinDataSource.getAnalysis();
+    final DataSourceAnalysis3 analysis = makeScanQuery(joinDataSource).getJoinDataSourceAnalysis();
 
     Assert.assertFalse(analysis.isConcreteBased());
     Assert.assertTrue(analysis.isTableBased());
@@ -468,7 +470,7 @@ public class DataSourceAnalysisTest
         JoinType.INNER
     );
 
-    final DataSourceAnalysis3 analysis = (DataSourceAnalysis3) joinDataSource.getAnalysis();
+    final DataSourceAnalysis3 analysis = makeScanQuery(joinDataSource).getJoinDataSourceAnalysis();
 
     Assert.assertTrue(analysis.isConcreteBased());
     Assert.assertTrue(analysis.isTableBased());
@@ -596,7 +598,7 @@ public class DataSourceAnalysisTest
         JoinType.INNER
     );
 
-    final DataSourceAnalysis3 analysis = (DataSourceAnalysis3) joinDataSource.getAnalysis();
+    final DataSourceAnalysis3 analysis = makeScanQuery(joinDataSource).getJoinDataSourceAnalysis();
 
     Assert.assertTrue(analysis.isConcreteBased());
     Assert.assertFalse(analysis.isTableBased());
@@ -628,7 +630,7 @@ public class DataSourceAnalysisTest
         JoinType.INNER
     );
 
-    final DataSourceAnalysis3 analysis = (DataSourceAnalysis3) joinDataSource.getAnalysis();
+    final DataSourceAnalysis3 analysis = makeScanQuery(joinDataSource).getJoinDataSourceAnalysis();
 
     Assert.assertFalse(analysis.isConcreteBased());
     Assert.assertFalse(analysis.isTableBased());

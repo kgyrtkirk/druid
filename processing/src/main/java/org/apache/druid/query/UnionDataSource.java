@@ -26,12 +26,9 @@ import com.google.common.collect.ImmutableList;
 import org.apache.druid.error.DruidException;
 import org.apache.druid.java.util.common.IAE;
 import org.apache.druid.java.util.common.ISE;
-import org.apache.druid.query.planning.DataSourceAnalysis;
-import org.apache.druid.query.planning.DataSourceAnalysis2;
 import org.apache.druid.segment.SegmentReference;
 import org.apache.druid.utils.CollectionUtils;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
@@ -159,12 +156,6 @@ public class UnionDataSource implements DataSource
   public byte[] getCacheKey()
   {
     return null;
-  }
-
-  @Override
-  public DataSourceAnalysis getAnalysis()
-  {
-    return new DataSourceAnalysis2(this, null, null, Collections.emptyList(), null);
   }
 
   @Override
