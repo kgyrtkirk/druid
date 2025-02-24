@@ -164,7 +164,7 @@ public class DataSourceAnalysisTest
   {
     final UnionDataSource unionDataSource = new UnionDataSource(ImmutableList.of(TABLE_FOO, TABLE_BAR));
     final QueryDataSource queryDataSource = makeQueryDS(unionDataSource);
-    final DataSourceAnalysis analysis = makeScanQuery(queryDataSource).getDataSourceAnalysis();//queryDataSource.getAnalysis();
+    final ExecutionVertex analysis = extracted(queryDataSource);//queryDataSource.getAnalysis();
 
     Assert.assertFalse(analysis.isConcreteBased());
     Assert.assertFalse(analysis.isTableBased());
@@ -195,7 +195,7 @@ public class DataSourceAnalysisTest
   public void testQueryOnLookup()
   {
     final QueryDataSource queryDataSource = makeQueryDS(LOOKUP_LOOKYLOO);
-    final DataSourceAnalysis analysis = makeScanQuery(queryDataSource).getDataSourceAnalysis();
+    final ExecutionVertex analysis = extracted(queryDataSource);
 
     Assert.assertFalse(analysis.isConcreteBased());
     Assert.assertFalse(analysis.isTableBased());
@@ -508,7 +508,7 @@ public class DataSourceAnalysisTest
             )
         );
 
-    final DataSourceAnalysis analysis = makeScanQuery(queryDataSource).getDataSourceAnalysis();
+    final ExecutionVertex analysis = extracted(queryDataSource);
 
     Assert.assertFalse(analysis.isConcreteBased());
     Assert.assertFalse(analysis.isTableBased());
@@ -519,6 +519,11 @@ public class DataSourceAnalysisTest
     Assert.assertFalse(analysis.isJoin());
     Assert.assertFalse(analysis.isBaseColumn("foo"));
     Assert.assertFalse(analysis.isBaseColumn("1.foo"));
+  }
+
+  private ExecutionVertex extracted(final QueryDataSource queryDataSource)
+  {
+    return ExecutionVertex.of(makeScanQuery(queryDataSource));
   }
 
   @Test
@@ -575,7 +580,7 @@ public class DataSourceAnalysisTest
             )
         );
 
-    final DataSourceAnalysis analysis = makeScanQuery(queryDataSource).getDataSourceAnalysis();
+    final ExecutionVertex analysis = extracted(queryDataSource);
 
     Assert.assertFalse(analysis.isConcreteBased());
     Assert.assertFalse(analysis.isTableBased());

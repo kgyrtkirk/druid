@@ -167,4 +167,34 @@ public class ExecutionVertex
     return false;
 
   }
+
+  public boolean isGlobal()
+  {
+    if(true)
+    {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+    return false;
+
+  }
+
+  public boolean isJoin()
+  {
+    if(true)
+    {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+    return false;
+
+  }
+
+  public boolean isBaseColumn(String string)
+  {
+    if(true)
+    {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+    return false;
+
+  }
 }
