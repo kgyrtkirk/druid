@@ -29,7 +29,7 @@ import org.apache.druid.java.util.common.guava.MergeSequence;
 import org.apache.druid.java.util.common.guava.Sequence;
 import org.apache.druid.java.util.common.guava.Sequences;
 import org.apache.druid.query.context.ResponseContext;
-import org.apache.druid.query.planning.DataSourceAnalysis;
+import org.apache.druid.query.planning.ExecutionVertex;
 
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -50,10 +50,10 @@ public class UnionDataSourceQueryRunner<T> implements QueryRunner<T>
   {
     Query<T> query = queryPlus.getQuery();
 
-    final DataSourceAnalysis analysis = query.getDataSourceAnalysis();
-    DataSource baseDataSource = analysis.getBaseDataSource();
+    ExecutionVertex ev = ExecutionVertex.of(query);
+    DataSource baseDataSource = ev.getBaseDataSource();
 
-    if (analysis.isConcreteBased() && analysis.isTableBased() && baseDataSource instanceof UnionDataSource) {
+    if (ev.isConcreteBased() && ev.isTableBased() && baseDataSource instanceof UnionDataSource) {
       // Union of tables.
 
       final UnionDataSource unionDataSource = (UnionDataSource) baseDataSource;

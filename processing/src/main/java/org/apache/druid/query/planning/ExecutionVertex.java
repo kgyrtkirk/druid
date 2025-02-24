@@ -19,11 +19,11 @@
 
 package org.apache.druid.query.planning;
 
+import org.apache.druid.query.DataSource;
 import org.apache.druid.query.Query;
 
 /**
- * Identifies and answers questions regarding the native engine's vertex
- * boundary.
+ * Represents the native engine's execution vertex.
  *
  * I believe due to evolutional purposes there are some concepts which went
  * beyond their inital design:
@@ -35,13 +35,44 @@ import org.apache.druid.query.Query;
  * an execution may process an entire dag of datasource in some cases
  * (joindatasource) ; or collapse some into the execution (filter)
  */
-public class VertexBoundaryX
+public class ExecutionVertex
 {
   protected final Query<?> topQuery;
 
-  private VertexBoundaryX(Query<?> topQuery)
+  private ExecutionVertex(Query<?> topQuery)
   {
     this.topQuery = topQuery;
   }
 
+  public static ExecutionVertex of(Query<?> query)
+  {
+//    Vertex
+    return new ExecutionVertex(query);
+  }
+
+  public DataSource getBaseDataSource()
+  {
+    if(true)
+    {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+    return null;
+
+  }
+
+  // FIXME: correct apidcos?
+  public boolean isConcreteBased()
+  {
+    return getBaseDataSource().isConcrete();
+  }
+
+  public boolean isTableBased()
+  {
+    if(true)
+    {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+    return false;
+
+  }
 }
