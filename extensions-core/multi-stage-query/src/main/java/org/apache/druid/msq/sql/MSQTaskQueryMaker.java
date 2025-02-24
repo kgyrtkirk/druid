@@ -294,9 +294,11 @@ public class MSQTaskQueryMaker implements QueryMaker
     boolean isReindex = MSQControllerTask.isReplaceInputDataSourceTask(druidQuery.getQuery(), destination);
     nativeQueryContextOverrides.put(MultiStageQueryContext.CTX_IS_REINDEX, isReindex);
 
+    QueryContext queryContext = QueryContext.of(QueryContexts.override(druidQuery.getQuery().getContext(), nativeQueryContextOverrides));
     final MSQSpec querySpec =
         MSQSpec.builder()
                .query(druidQuery.getQuery().withOverriddenContext(nativeQueryContextOverrides))
+               .queryContext(queryContext)
                .columnMappings(new ColumnMappings(QueryUtils.buildColumnMappings(fieldMapping, druidQuery)))
                .destination(destination)
                .assignmentStrategy(MultiStageQueryContext.getAssignmentStrategy(sqlQueryContext))
