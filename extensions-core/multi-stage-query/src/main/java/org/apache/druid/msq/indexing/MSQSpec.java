@@ -174,7 +174,9 @@ public class MSQSpec
     private WorkerAssignmentStrategy assignmentStrategy = WorkerAssignmentStrategy.MAX;
     private MSQTuningConfig tuningConfig;
     private List<AggregatorFactory> compactionMetrics = Collections.emptyList();
+    private QueryContext queryContext;
 
+    @Deprecated
     public Builder query(Query<?> query)
     {
       this.query = query;
@@ -218,6 +220,12 @@ public class MSQSpec
       }
 
       return new MSQSpec(query, columnMappings, destination, assignmentStrategy, tuningConfig, compactionMetrics );
+    }
+
+    public Builder queryContext(QueryContext queryContext)
+    {
+      this.queryContext = queryContext;
+      return this;
     }
   }
 }
