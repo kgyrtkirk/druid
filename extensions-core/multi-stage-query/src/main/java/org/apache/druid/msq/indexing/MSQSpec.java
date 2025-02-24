@@ -27,8 +27,11 @@ import org.apache.druid.msq.indexing.destination.TaskReportMSQDestination;
 import org.apache.druid.msq.kernel.WorkerAssignmentStrategy;
 import org.apache.druid.query.Query;
 import org.apache.druid.query.QueryContext;
+import org.apache.druid.query.aggregation.AggregatorFactory;
 import org.apache.druid.sql.calcite.planner.ColumnMappings;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -39,6 +42,20 @@ public class MSQSpec
   private final MSQDestination destination;
   private final WorkerAssignmentStrategy assignmentStrategy;
   private final MSQTuningConfig tuningConfig;
+  @JsonProperty("compactionMetricSpec")
+  private final List<AggregatorFactory> compactionMetricSpec;
+
+  // jackson defaults
+
+  public MSQSpec()
+  {
+    query = null;
+    columnMappings = null;
+    destination = null;
+    assignmentStrategy = null;
+    tuningConfig = null;
+    compactionMetricSpec = Collections.emptyList();
+  }
 
   @JsonCreator
   public MSQSpec(
@@ -46,7 +63,8 @@ public class MSQSpec
       @JsonProperty("columnMappings") ColumnMappings columnMappings,
       @JsonProperty("destination") MSQDestination destination,
       @JsonProperty("assignmentStrategy") WorkerAssignmentStrategy assignmentStrategy,
-      @JsonProperty("tuningConfig") MSQTuningConfig tuningConfig
+      @JsonProperty("tuningConfig") MSQTuningConfig tuningConfig,
+      @JsonProperty("compactionMetricSpec") List<AggregatorFactory> compactionMetricSpec1
   )
   {
     this.query = Preconditions.checkNotNull(query, "query");
@@ -54,6 +72,7 @@ public class MSQSpec
     this.destination = Preconditions.checkNotNull(destination, "destination");
     this.assignmentStrategy = Preconditions.checkNotNull(assignmentStrategy, "assignmentStrategy");
     this.tuningConfig = Preconditions.checkNotNull(tuningConfig, "tuningConfig");
+    this.compactionMetricSpec = compactionMetricSpec1;
   }
 
   public static Builder builder()
@@ -96,6 +115,12 @@ public class MSQSpec
     return tuningConfig;
   }
 
+  @JsonProperty("compactionMetricSpec")
+  public List<AggregatorFactory> getCompactionMetricSpec()
+  {
+    return compactionMetricSpec;
+  }
+
   public MSQSpec withOverriddenContext(Map<String, Object> contextOverride)
   {
     if (contextOverride == null || contextOverride.isEmpty()) {
@@ -106,7 +131,8 @@ public class MSQSpec
           columnMappings,
           destination,
           assignmentStrategy,
-          tuningConfig
+          tuningConfig,
+          compactionMetricSpec
       );
     }
   }
@@ -141,6 +167,7 @@ public class MSQSpec
     private MSQDestination destination = TaskReportMSQDestination.instance();
     private WorkerAssignmentStrategy assignmentStrategy = WorkerAssignmentStrategy.MAX;
     private MSQTuningConfig tuningConfig;
+    private List<AggregatorFactory> compactionMetrics = Collections.emptyList();
 
     public Builder query(Query<?> query)
     {
@@ -172,13 +199,19 @@ public class MSQSpec
       return this;
     }
 
+    public Builder compactionMetrics(List<AggregatorFactory> compactionMetrics)
+    {
+      this.compactionMetrics=compactionMetrics;
+      return this;
+    }
+
     public MSQSpec build()
     {
       if (destination == null) {
         destination = TaskReportMSQDestination.instance();
       }
 
-      return new MSQSpec(query, columnMappings, destination, assignmentStrategy, tuningConfig);
+      return new MSQSpec(query, columnMappings, destination, assignmentStrategy, tuningConfig, compactionMetrics );
     }
   }
 

@@ -159,7 +159,6 @@ import org.apache.druid.msq.util.MSQFutureUtils;
 import org.apache.druid.msq.util.MultiStageQueryContext;
 import org.apache.druid.query.QueryContext;
 import org.apache.druid.query.aggregation.AggregatorFactory;
-import org.apache.druid.query.groupby.GroupByQuery;
 import org.apache.druid.segment.IndexSpec;
 import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.column.RowSignature;
@@ -1673,23 +1672,7 @@ public class ControllerImpl implements Controller
     CompactionTransformSpec transformSpec = TransformSpec.NONE.equals(dataSchema.getTransformSpec())
                                             ? null
                                             : CompactionTransformSpec.of(dataSchema.getTransformSpec());
-    List<AggregatorFactory> metricsSpec = Collections.emptyList();
-
-    if (querySpec.getQuery() instanceof GroupByQuery) {
-      // For group-by queries, the aggregators are transformed to their combining factories in the dataschema, resulting
-      // in a mismatch between schema in compaction spec and the one in compaction state. Sourcing the original
-      // AggregatorFactory definition for aggregators in the dataSchema, therefore, directly from the querySpec.
-      GroupByQuery groupByQuery = (GroupByQuery) querySpec.getQuery();
-      // Collect all aggregators that are part of the current dataSchema, since a non-rollup query (isRollup() is false)
-      // moves metrics columns to dimensions in the final schema.
-      Set<String> aggregatorsInDataSchema = Arrays.stream(dataSchema.getAggregators())
-                                                  .map(AggregatorFactory::getName)
-                                                  .collect(Collectors.toSet());
-      metricsSpec = groupByQuery.getAggregatorSpecs()
-                                .stream()
-                                .filter(aggregatorFactory -> aggregatorsInDataSchema.contains(aggregatorFactory.getName()))
-                                .collect(Collectors.toList());
-    }
+    List<AggregatorFactory> metricsSpec = querySpec.getCompactionMetricSpec();
 
     IndexSpec indexSpec = tuningConfig.getIndexSpec();
 
