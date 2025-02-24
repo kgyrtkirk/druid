@@ -24,6 +24,7 @@ import org.apache.druid.query.BaseQuery;
 import org.apache.druid.query.DataSource;
 import org.apache.druid.query.Query;
 import org.apache.druid.query.TableDataSource;
+import org.apache.druid.query.spec.QuerySegmentSpec;
 
 /**
  * Represents the native engine's execution vertex.
@@ -128,6 +129,16 @@ public class ExecutionVertex
   }
 
   public TableDataSource getBaseTableDataSource()
+  {
+    if(true)
+    {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+    return null;
+
+  }
+
+  public QuerySegmentSpec getEffectiveQuerySegmentSpec()
   {
     if(true)
     {

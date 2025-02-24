@@ -123,11 +123,23 @@ public abstract class BaseQuery<T> implements Query<T>
 //    return ret.maybeWithQuerySegmentSpec(getQuerySegmentSpec());
   }
 
+  public ExecutionVertex getDataSourceAnalysis2()
+  {
+    return ExecutionVertex.of(this);
+//    DataSourceAnalysis ret;
+//    if (mayCollapseQueryDataSource()) {
+//      ret = ((QueryDataSource) getDataSource()).getQuery().getDataSourceAnalysis();
+//    } else {
+//      ret = getDataSource().getAnalysis();
+//    }
+//    return ret.maybeWithQuerySegmentSpec(getQuerySegmentSpec());
+  }
+
 
   @VisibleForTesting
   public static QuerySegmentSpec getQuerySegmentSpecForLookUp(BaseQuery<?> query)
   {
-    return query.getDataSourceAnalysis()
+    return query.getDataSourceAnalysis2()
         .getEffectiveQuerySegmentSpec();
   }
 
