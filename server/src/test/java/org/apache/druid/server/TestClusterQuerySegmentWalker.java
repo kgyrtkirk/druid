@@ -45,6 +45,7 @@ import org.apache.druid.query.SegmentDescriptor;
 import org.apache.druid.query.context.ResponseContext.Keys;
 import org.apache.druid.query.groupby.GroupByQueryRunnerTestHelper;
 import org.apache.druid.query.planning.DataSourceAnalysis;
+import org.apache.druid.query.planning.ExecutionVertex;
 import org.apache.druid.query.spec.SpecificSegmentQueryRunner;
 import org.apache.druid.query.spec.SpecificSegmentSpec;
 import org.apache.druid.segment.ReferenceCountingSegment;
@@ -139,13 +140,15 @@ public class TestClusterQuerySegmentWalker implements QuerySegmentWalker
       throw new ISE("Unknown query type[%s].", query.getClass());
     }
 
+    ExecutionVertex ev = ExecutionVertex.of(query);
     final DataSourceAnalysis analysis = query.getDataSourceAnalysis();
 
+    // FIXME what's the question here?
     if (!(analysis.isConcreteBased() && analysis.isTableBased())) {
       throw new ISE("Cannot handle datasource: %s", dataSourceFromQuery);
     }
 
-    final String dataSourceName = analysis.getBaseTableDataSource().getName();
+    final String dataSourceName = ev.getBaseTableDataSource().getName();
 
     final QueryToolChest<T, Query<T>> toolChest = factory.getToolchest();
 
