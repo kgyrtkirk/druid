@@ -25,6 +25,7 @@ import com.google.common.base.Preconditions;
 import org.apache.druid.msq.indexing.destination.MSQDestination;
 import org.apache.druid.msq.indexing.destination.TaskReportMSQDestination;
 import org.apache.druid.msq.kernel.WorkerAssignmentStrategy;
+import org.apache.druid.query.BaseQuery;
 import org.apache.druid.query.Query;
 import org.apache.druid.query.QueryContext;
 import org.apache.druid.query.aggregation.AggregatorFactory;
@@ -121,6 +122,11 @@ public class MSQSpec
     return compactionMetricSpec;
   }
 
+  public String getId()
+  {
+    return getContext().getString(BaseQuery.QUERY_ID);
+  }
+
   public MSQSpec withOverriddenContext(Map<String, Object> contextOverride)
   {
     if (contextOverride == null || contextOverride.isEmpty()) {
@@ -213,11 +219,5 @@ public class MSQSpec
 
       return new MSQSpec(query, columnMappings, destination, assignmentStrategy, tuningConfig, compactionMetrics );
     }
-  }
-
-  public Object getQueryId()
-  {
-    return getQuery().getSqlQueryId();
-
   }
 }

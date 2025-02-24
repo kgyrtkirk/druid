@@ -552,7 +552,7 @@ public class ControllerImpl implements Controller
                               .sum();
     }
 
-    log.debug("Processed bytes[%d] for query[%s].", totalProcessedBytes, querySpec.getQueryId());
+    log.debug("Processed bytes[%d] for query[%s].", totalProcessedBytes, querySpec.getId());
     context.emitMetric("ingest/input/bytes", totalProcessedBytes);
   }
 
