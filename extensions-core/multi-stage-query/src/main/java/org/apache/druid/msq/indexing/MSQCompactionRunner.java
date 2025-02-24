@@ -269,7 +269,9 @@ public class MSQCompactionRunner implements CompactionRunner
       boolean isReindex = MSQControllerTask.isReplaceInputDataSourceTask(query, destination);
       final ImmutableMap<String, Object> queryContext = ImmutableMap.<String, Object>builder()
           .putAll(query.getContext())
-          .put(MultiStageQueryContext.CTX_IS_REINDEX, isReindex).build();
+          // I don't suspect that this is really necessary - but this is the equiv behaviour
+          .put(MultiStageQueryContext.CTX_IS_REINDEX, isReindex)
+          .build();
 
       MSQSpec msqSpec = MSQSpec.builder()
                                .query(query)
