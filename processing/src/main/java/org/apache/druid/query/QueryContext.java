@@ -19,6 +19,7 @@
 
 package org.apache.druid.query;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.druid.java.util.common.HumanReadableBytes;
 import org.apache.druid.java.util.common.StringUtils;
@@ -55,6 +56,7 @@ public class QueryContext
 {
   private static final QueryContext EMPTY = new QueryContext(null);
 
+  @JsonValue
   private final Map<String, Object> context;
 
   public QueryContext(Map<String, Object> context)
@@ -678,5 +680,10 @@ public class QueryContext
         QueryContexts.NATIVE_QUERY_SQL_PLANNING_MODE_COUPLED
     );
     return QueryContexts.NATIVE_QUERY_SQL_PLANNING_MODE_DECOUPLED.equals(value);
+  }
+
+  public QueryContext override(Map<String, Object> contextOverride)
+  {
+    return QueryContext.of(QueryContexts.override(asMap(), contextOverride));
   }
 }

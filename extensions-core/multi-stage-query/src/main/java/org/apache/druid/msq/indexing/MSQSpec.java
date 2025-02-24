@@ -45,6 +45,8 @@ public class MSQSpec
   private final MSQTuningConfig tuningConfig;
   @JsonProperty("compactionMetricSpec")
   private final List<AggregatorFactory> compactionMetricSpec;
+  @JsonProperty("queryContext")
+  private final QueryContext queryContext;
 
   // jackson defaults
 
@@ -56,6 +58,7 @@ public class MSQSpec
     assignmentStrategy = null;
     tuningConfig = null;
     compactionMetricSpec = Collections.emptyList();
+    queryContext = QueryContext.empty();
   }
 
   @JsonCreator
@@ -65,7 +68,8 @@ public class MSQSpec
       @JsonProperty("destination") MSQDestination destination,
       @JsonProperty("assignmentStrategy") WorkerAssignmentStrategy assignmentStrategy,
       @JsonProperty("tuningConfig") MSQTuningConfig tuningConfig,
-      @JsonProperty("compactionMetricSpec") List<AggregatorFactory> compactionMetricSpec1
+      @JsonProperty("compactionMetricSpec") List<AggregatorFactory> compactionMetricSpec1,
+      @JsonProperty("queryContext") QueryContext queryContext
   )
   {
     this.query = Preconditions.checkNotNull(query, "query");
@@ -74,6 +78,7 @@ public class MSQSpec
     this.assignmentStrategy = Preconditions.checkNotNull(assignmentStrategy, "assignmentStrategy");
     this.tuningConfig = Preconditions.checkNotNull(tuningConfig, "tuningConfig");
     this.compactionMetricSpec = compactionMetricSpec1;
+    this.queryContext = queryContext;
   }
 
   public static Builder builder()
@@ -89,7 +94,7 @@ public class MSQSpec
 
   public QueryContext getContext()
   {
-    return query.context();
+    return queryContext;
   }
 
   @JsonProperty("columnMappings")
@@ -138,7 +143,8 @@ public class MSQSpec
           destination,
           assignmentStrategy,
           tuningConfig,
-          compactionMetricSpec
+          compactionMetricSpec,
+          queryContext.override(contextOverride)
       );
     }
   }
@@ -219,7 +225,7 @@ public class MSQSpec
         destination = TaskReportMSQDestination.instance();
       }
 
-      return new MSQSpec(query, columnMappings, destination, assignmentStrategy, tuningConfig, compactionMetrics );
+      return new MSQSpec(query, columnMappings, destination, assignmentStrategy, tuningConfig, compactionMetrics, queryContext);
     }
 
     public Builder queryContext(QueryContext queryContext)
