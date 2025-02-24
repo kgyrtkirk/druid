@@ -65,6 +65,7 @@ import org.apache.druid.query.RetryQueryRunnerConfig;
 import org.apache.druid.query.SegmentDescriptor;
 import org.apache.druid.query.TableDataSource;
 import org.apache.druid.query.planning.DataSourceAnalysis;
+import org.apache.druid.query.planning.ExecutionVertex;
 import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.segment.join.JoinableFactory;
 import org.apache.druid.server.initialization.ServerConfig;
@@ -303,6 +304,12 @@ public class ClientQuerySegmentWalker implements QuerySegmentWalker
    */
   private <T> boolean canRunQueryUsingLocalWalker(Query<T> query)
   {
+    ExecutionVertex ev = ExecutionVertex.of(query);
+    if(true) {
+      // FIXME: ideally this should be: clusterClient.couldExecute(ev)?
+      return ev.canRunQueryUsingLocalWalker();
+    }
+
     final DataSourceAnalysis analysis = query.getDataSourceAnalysis();
     final QueryToolChest<T, Query<T>> toolChest = conglomerate.getToolChest(query);
 
@@ -322,6 +329,12 @@ public class ClientQuerySegmentWalker implements QuerySegmentWalker
    */
   private <T> boolean canRunQueryUsingClusterWalker(Query<T> query)
   {
+    ExecutionVertex ev = ExecutionVertex.of(query);
+    if(true) {
+      // FIXME: ideally this should be: clusterClient.couldExecute(ev)?
+      return ev.canRunQueryUsingClusterWalker();
+    }
+
     final QueryToolChest<T, Query<T>> toolChest = conglomerate.getToolChest(query);
     final DataSourceAnalysis analysis = query.getDataSourceAnalysis();
 

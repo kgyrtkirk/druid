@@ -147,4 +147,24 @@ public class ExecutionVertex
     return null;
 
   }
+
+  public boolean canRunQueryUsingClusterWalker()
+  {
+    if(true)
+    {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+    return false;
+
+  }
+
+  public boolean canRunQueryUsingLocalWalker()
+  {
+    if(true)
+    {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+    return false;
+
+  }
 }
