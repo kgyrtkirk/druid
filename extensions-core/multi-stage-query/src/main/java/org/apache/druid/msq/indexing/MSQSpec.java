@@ -217,11 +217,7 @@ public class MSQSpec
 
   public Object getQueryId()
   {
-    if(true)
-    {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-    return null;
+    return getQuery().getSqlQueryId();
 
   }
 }
