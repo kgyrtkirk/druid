@@ -241,6 +241,7 @@ import static org.apache.druid.sql.calcite.util.CalciteTests.WIKIPEDIA;
 import static org.apache.druid.sql.calcite.util.TestDataBuilder.ROWS1;
 import static org.apache.druid.sql.calcite.util.TestDataBuilder.ROWS2;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
@@ -861,10 +862,12 @@ public class MSQTestBase extends BaseCalciteQueryTest
 
   private void assertMSQSpec(MSQSpec expectedMSQSpec, MSQSpec querySpecForTask)
   {
-    Assert.assertEquals(expectedMSQSpec.getQuery(), querySpecForTask.getQuery());
+    //    Assert.assertEquals(expectedMSQSpec.getQuery(), querySpecForTask.getQuery());
+    fail("expectedMSQSpec.getQuery()");
     Assert.assertEquals(expectedMSQSpec.getAssignmentStrategy(), querySpecForTask.getAssignmentStrategy());
     Assert.assertEquals(expectedMSQSpec.getColumnMappings(), querySpecForTask.getColumnMappings());
     Assert.assertEquals(expectedMSQSpec.getDestination(), querySpecForTask.getDestination());
+
   }
 
   private void assertTuningConfig(
