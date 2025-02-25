@@ -26,14 +26,10 @@ import org.apache.druid.indexing.common.actions.TaskActionClient;
 import org.apache.druid.java.util.common.io.Closer;
 import org.apache.druid.java.util.emitter.service.ServiceEmitter;
 import org.apache.druid.msq.indexing.MSQSpec;
-import org.apache.druid.msq.indexing.MSQSpec0;
 import org.apache.druid.msq.input.InputSpecSlicer;
 import org.apache.druid.msq.input.table.SegmentsInputSlice;
 import org.apache.druid.msq.input.table.TableInputSpec;
 import org.apache.druid.msq.kernel.controller.ControllerQueryKernelConfig;
-import org.apache.druid.msq.querykit.QueryKit;
-import org.apache.druid.msq.querykit.QueryKitSpec;
-import org.apache.druid.query.Query;
 import org.apache.druid.server.DruidNode;
 
 import java.io.File;
@@ -42,7 +38,7 @@ import java.io.File;
  * Context used by multi-stage query controllers. Useful because it allows test fixtures to provide their own
  * implementations.
  */
-public interface ControllerContext
+public interface ControllerContext extends QueryKitSpecFactory
 {
   /**
    * Configuration for {@link org.apache.druid.msq.kernel.controller.ControllerQueryKernel}.
@@ -119,15 +115,4 @@ public interface ControllerContext
    * Client for communicating with workers.
    */
   WorkerClient newWorkerClient();
-
-  /**
-   * Create a {@link QueryKitSpec}. This method provides controller contexts a way to customize parameters around the
-   * number of workers and partitions.
-   */
-  QueryKitSpec makeQueryKitSpec(
-      QueryKit<Query<?>> queryKit,
-      String queryId,
-      MSQSpec0 querySpec,
-      ControllerQueryKernelConfig queryKernelConfig
-  );
 }

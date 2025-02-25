@@ -24,7 +24,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import org.apache.druid.java.util.common.ISE;
 import org.apache.druid.msq.indexing.MSQControllerTask;
-import org.apache.druid.msq.indexing.MSQSpec;
 import org.apache.druid.msq.indexing.MSQSpec0;
 import org.apache.druid.msq.indexing.MSQTuningConfig;
 import org.apache.druid.msq.indexing.destination.DataSourceMSQDestination;
@@ -75,11 +74,11 @@ public class QueryKitBasedMSQPlanner
   private final Query<?> query;
 
 
-  public QueryKitBasedMSQPlanner(ControllerContext context, MSQSpec querySpec, ResultsContext resultsContext,
-      ControllerQueryKernelConfig queryKernelConfig, String queryId, Query<?> query)
+  public QueryKitBasedMSQPlanner(QueryKitSpecFactory context, MSQSpec0 querySpec, ResultsContext resultsContext,
+      ControllerQueryKernelConfig queryKernelConfig, String queryId, Query<?> query, ObjectMapper jsonMapper)
   {
     this.querySpec = querySpec;
-    this.jsonMapper = context.jsonMapper();
+    this.jsonMapper = jsonMapper;
     this.tuningConfig = querySpec.getTuningConfig();
     this.columnMappings = querySpec.getColumnMappings();
     this.destination = querySpec.getDestination();
@@ -87,7 +86,7 @@ public class QueryKitBasedMSQPlanner
     this.query = query;
     this.resultsContext = resultsContext;
     this.queryKitSpec = context.makeQueryKitSpec(
-        makeQueryControllerToolKit(querySpec.getContext(), context.jsonMapper()), queryId, querySpec,
+        makeQueryControllerToolKit(querySpec.getContext(), jsonMapper), queryId, querySpec,
         queryKernelConfig
     );
   }
