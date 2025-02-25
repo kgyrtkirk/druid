@@ -24,21 +24,30 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import org.apache.druid.msq.indexing.destination.MSQDestination;
 import org.apache.druid.msq.indexing.destination.TaskReportMSQDestination;
+import org.apache.druid.msq.kernel.QueryDefinition;
 import org.apache.druid.msq.kernel.WorkerAssignmentStrategy;
+import org.apache.druid.query.BaseQuery;
 import org.apache.druid.query.Query;
 import org.apache.druid.query.QueryContext;
+import org.apache.druid.query.aggregation.AggregatorFactory;
 import org.apache.druid.sql.calcite.planner.ColumnMappings;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public class MSQSpec
+public class MSQSpec extends MSQSpec0
 {
   private final Query<?> query;
-  private final ColumnMappings columnMappings;
-  private final MSQDestination destination;
-  private final WorkerAssignmentStrategy assignmentStrategy;
-  private final MSQTuningConfig tuningConfig;
+
+  // jackson defaults
+
+  public MSQSpec()
+  {
+    super();
+    this.query = null;
+  }
 
   @JsonCreator
   public MSQSpec(
@@ -46,14 +55,13 @@ public class MSQSpec
       @JsonProperty("columnMappings") ColumnMappings columnMappings,
       @JsonProperty("destination") MSQDestination destination,
       @JsonProperty("assignmentStrategy") WorkerAssignmentStrategy assignmentStrategy,
-      @JsonProperty("tuningConfig") MSQTuningConfig tuningConfig
+      @JsonProperty("tuningConfig") MSQTuningConfig tuningConfig,
+      @JsonProperty("compactionMetricSpec") List<AggregatorFactory> compactionMetricSpec1,
+      @JsonProperty("queryContext") QueryContext queryContext
   )
   {
+    super(columnMappings, destination, assignmentStrategy, tuningConfig, compactionMetricSpec1, queryContext);
     this.query = Preconditions.checkNotNull(query, "query");
-    this.columnMappings = Preconditions.checkNotNull(columnMappings, "columnMappings");
-    this.destination = Preconditions.checkNotNull(destination, "destination");
-    this.assignmentStrategy = Preconditions.checkNotNull(assignmentStrategy, "assignmentStrategy");
-    this.tuningConfig = Preconditions.checkNotNull(tuningConfig, "tuningConfig");
   }
 
   public static Builder builder()
@@ -67,33 +75,9 @@ public class MSQSpec
     return query;
   }
 
-  public QueryContext getContext()
+  public String getId()
   {
-    return query.context();
-  }
-
-  @JsonProperty("columnMappings")
-  public ColumnMappings getColumnMappings()
-  {
-    return columnMappings;
-  }
-
-  @JsonProperty
-  public MSQDestination getDestination()
-  {
-    return destination;
-  }
-
-  @JsonProperty
-  public WorkerAssignmentStrategy getAssignmentStrategy()
-  {
-    return assignmentStrategy;
-  }
-
-  @JsonProperty
-  public MSQTuningConfig getTuningConfig()
-  {
-    return tuningConfig;
+    return getContext().getString(BaseQuery.QUERY_ID);
   }
 
   public MSQSpec withOverriddenContext(Map<String, Object> contextOverride)
@@ -106,7 +90,9 @@ public class MSQSpec
           columnMappings,
           destination,
           assignmentStrategy,
-          tuningConfig
+          tuningConfig,
+          compactionMetricSpec,
+          queryContext.override(contextOverride)
       );
     }
   }
@@ -141,7 +127,10 @@ public class MSQSpec
     private MSQDestination destination = TaskReportMSQDestination.instance();
     private WorkerAssignmentStrategy assignmentStrategy = WorkerAssignmentStrategy.MAX;
     private MSQTuningConfig tuningConfig;
+    private List<AggregatorFactory> compactionMetrics = Collections.emptyList();
+    private QueryContext queryContext;
 
+    @Deprecated
     public Builder query(Query<?> query)
     {
       this.query = query;
@@ -172,13 +161,30 @@ public class MSQSpec
       return this;
     }
 
+    public Builder compactionMetrics(List<AggregatorFactory> compactionMetrics)
+    {
+      this.compactionMetrics=compactionMetrics;
+      return this;
+    }
+
     public MSQSpec build()
     {
       if (destination == null) {
         destination = TaskReportMSQDestination.instance();
       }
 
-      return new MSQSpec(query, columnMappings, destination, assignmentStrategy, tuningConfig);
+      return new MSQSpec(query, columnMappings, destination, assignmentStrategy, tuningConfig, compactionMetrics, queryContext);
     }
+
+    public Builder queryContext(QueryContext queryContext)
+    {
+      this.queryContext = queryContext;
+      return this;
+    }
+  }
+
+  public QueryDefinition getQueryDef()
+  {
+    return queryDefinition;
   }
 }
