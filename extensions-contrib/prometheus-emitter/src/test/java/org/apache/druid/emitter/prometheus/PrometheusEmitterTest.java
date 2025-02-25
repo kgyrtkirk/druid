@@ -19,8 +19,10 @@
 
 package org.apache.druid.emitter.prometheus;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.prometheus.client.Collector;
+import io.prometheus.client.Collector.MetricFamilySamples;
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.exporter.HTTPServer;
 import io.prometheus.client.exporter.PushGateway;
@@ -31,6 +33,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -50,6 +53,7 @@ public class PrometheusEmitterTest
     Emitter emitter = prometheusEmitterModule.getEmitter(config);
     ServiceMetricEvent build = ServiceMetricEvent.builder()
                                                  .setDimension("server", "druid-data01.vpc.region")
+//                                                 .setDimension("dataSource", "druid-data01.vpc.region")
                                                  .setMetric("segment/loadQueue/count", 10)
                                                  .build(ImmutableMap.of("service", "historical", "host", "druid.test.cn"));
     Assert.assertEquals("historical", build.getService());
@@ -59,6 +63,31 @@ public class PrometheusEmitterTest
     Double count = CollectorRegistry.defaultRegistry.getSampleValue(
         "druid_segment_loadqueue_count", new String[]{"druid_service", "server"}, new String[]{"historical", "druid_data01_vpc_region"}
     );
+    Assert.assertEquals(10, count.intValue());
+  }
+
+  @Test
+  public void testEmitterList()
+  {
+    CollectorRegistry.defaultRegistry.clear();
+    PrometheusEmitterConfig config = new PrometheusEmitterConfig(PrometheusEmitterConfig.Strategy.exporter, null, null, 0, null, false, true, 60, null, false, null);
+    PrometheusEmitterModule prometheusEmitterModule = new PrometheusEmitterModule();
+    Emitter emitter = prometheusEmitterModule.getEmitter(config);
+    ServiceMetricEvent build = ServiceMetricEvent.builder()
+                                                 .setDimension("serverx", "yt")
+                                                 .setMetric("query/time", 10)
+                                                 .setDimension("ds", "a")
+                                                 .build(ImmutableMap.of("service", "historical", "host", "druid.test.cn"));
+    Assert.assertEquals("yt", build.getUserDims().get("serverx"));
+    Assert.assertEquals("historical", build.getService());
+    Assert.assertEquals("druid.test.cn", build.getHost());
+    Assert.assertFalse(build.getUserDims().isEmpty());
+    emitter.emit(build);
+    Double count = CollectorRegistry.defaultRegistry.getSampleValue(
+        "druid_query_time");//, new String[]{"druid_service", "serverx"}, new String[]{"historical", "yt"}    );
+    Enumeration<MetricFamilySamples> a = CollectorRegistry.defaultRegistry.metricFamilySamples();
+    System.out.println(a);
+
     Assert.assertEquals(10, count.intValue());
   }
 
@@ -209,17 +238,17 @@ public class PrometheusEmitterTest
     PrometheusEmitterModule prometheusEmitterModule = new PrometheusEmitterModule();
     Emitter emitter = prometheusEmitterModule.getEmitter(config);
     ServiceMetricEvent build = ServiceMetricEvent.builder()
-            .setDimension("dataSource", "test")
+            .setDimension("dataSource", ImmutableList.of("test"))
             .setDimension("taskType", "index_parallel")
             .setMetric("task/run/time", 500)
             .build(ImmutableMap.of("service", "overlord", "host", "druid.test.cn"));
     emitter.emit(build);
     double assertEpsilon = 0.0001;
     Assert.assertEquals(0.0, CollectorRegistry.defaultRegistry.getSampleValue(
-            "namespace_task_run_time_bucket", new String[]{"dataSource", "druid_service", "host_name", "taskType", "le"}, new String[]{"test", "overlord", "druid.test.cn", "index_parallel", "0.1"}
+            "namespace_task_run_time_bucket", new String[]{"dataSource", "druid_service", "host_name", "taskType", "le"}, new String[]{"_test_", "overlord", "druid.test.cn", "index_parallel", "0.1"}
     ), assertEpsilon);
     Assert.assertEquals(1.0, CollectorRegistry.defaultRegistry.getSampleValue(
-            "namespace_task_run_time_bucket", new String[]{"dataSource", "druid_service", "host_name", "taskType", "le"}, new String[]{"test", "overlord", "druid.test.cn", "index_parallel", "0.5"}
+            "namespace_task_run_time_bucket", new String[]{"dataSource", "druid_service", "host_name", "taskType", "le"}, new String[]{"_test_", "overlord", "druid.test.cn", "index_parallel", "0.5"}
     ), assertEpsilon);
   }
 
@@ -272,7 +301,7 @@ public class PrometheusEmitterTest
         null,
         true,
         true,
-        60, 
+        60,
         null,
         false,
         null

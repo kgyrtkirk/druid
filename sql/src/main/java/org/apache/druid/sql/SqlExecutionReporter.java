@@ -107,7 +107,6 @@ public class SqlExecutionReporter
                             .stream()
                             .map(action -> action.getResource().getName())
                             .collect(Collectors.toList())
-                            .toString()
         );
       }
       metricBuilder.setDimension("remoteAddress", StringUtils.nullToEmptyNonDruidDataString(remoteAddress));
