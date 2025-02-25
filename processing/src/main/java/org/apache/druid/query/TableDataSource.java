@@ -24,7 +24,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.google.common.base.Preconditions;
 import org.apache.druid.java.util.common.IAE;
-import org.apache.druid.query.planning.DataSourceAnalysis;
 import org.apache.druid.query.policy.Policy;
 import org.apache.druid.segment.SegmentReference;
 
@@ -125,13 +124,7 @@ public class TableDataSource implements DataSource
   @Override
   public byte[] getCacheKey()
   {
-    return new byte[0];
-  }
-
-  @Override
-  public DataSourceAnalysis getAnalysis()
-  {
-    return new DataSourceAnalysis(this, null, null, Collections.emptyList(), null);
+    return getName().getBytes();
   }
 
   @Override

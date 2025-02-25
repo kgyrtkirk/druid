@@ -36,6 +36,7 @@ import org.apache.druid.query.QuerySegmentWalker;
 import org.apache.druid.query.UnionDataSource;
 import org.apache.druid.query.filter.DimFilter;
 import org.apache.druid.query.planning.DataSourceAnalysis;
+import org.apache.druid.query.planning.DataSourceAnalysis2;
 import org.apache.druid.query.spec.QuerySegmentSpec;
 import org.apache.druid.segment.SegmentReference;
 import org.apache.druid.segment.column.RowSignature;
@@ -221,7 +222,7 @@ public class UnionQuery implements Query<Object>
   public DataSourceAnalysis getDataSourceAnalysis()
   {
     OpaqueDataSourceCover ds = new OpaqueDataSourceCover(new UnionDataSource(getDataSources()));
-    return new DataSourceAnalysis(ds, null, null, Collections.emptyList(), null);
+    return new DataSourceAnalysis2(ds, null, null, Collections.emptyList(), null);
   }
 
   private static class OpaqueDataSourceCover implements DataSource
@@ -285,12 +286,6 @@ public class UnionQuery implements Query<Object>
     public byte[] getCacheKey()
     {
       return delegate.getCacheKey();
-    }
-
-    @Override
-    public DataSourceAnalysis getAnalysis()
-    {
-      throw methodNotSupported();
     }
   }
 

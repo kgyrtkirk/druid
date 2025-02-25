@@ -24,7 +24,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableList;
 import org.apache.druid.java.util.common.IAE;
 import org.apache.druid.query.filter.DimFilter;
-import org.apache.druid.query.planning.DataSourceAnalysis;
 import org.apache.druid.segment.SegmentReference;
 import org.apache.druid.segment.UnnestSegment;
 import org.apache.druid.segment.VirtualColumn;
@@ -155,14 +154,6 @@ public class UnnestDataSource implements DataSource
     // create an appropriate cac
     return null;
   }
-
-  @Override
-  public DataSourceAnalysis getAnalysis()
-  {
-    final DataSource current = this.getBase();
-    return current.getAnalysis();
-  }
-
 
   @Override
   public String toString()

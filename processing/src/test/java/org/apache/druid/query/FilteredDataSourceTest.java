@@ -101,12 +101,6 @@ public class FilteredDataSourceTest extends InitializedNullHandlingTest
   }
 
   @Test
-  public void test_withAnalysis()
-  {
-    Assert.assertTrue(filteredFooDataSource.getAnalysis().equals(fooDataSource.getAnalysis()));
-  }
-
-  @Test
   public void test_equals()
   {
     EqualsVerifier.forClass(FilteredDataSource.class).usingGetClass().withNonnullFields("base").verify();

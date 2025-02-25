@@ -31,6 +31,7 @@ import org.apache.druid.java.util.common.granularity.Granularities;
 import org.apache.druid.java.util.common.granularity.Granularity;
 import org.apache.druid.java.util.common.granularity.PeriodGranularity;
 import org.apache.druid.query.planning.DataSourceAnalysis;
+import org.apache.druid.query.planning.ExecutionVertex;
 import org.apache.druid.query.spec.QuerySegmentSpec;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Duration;
@@ -112,20 +113,33 @@ public abstract class BaseQuery<T> implements Query<T>
   @Override
   public DataSourceAnalysis getDataSourceAnalysis()
   {
-    DataSourceAnalysis ret;
-    if (mayCollapseQueryDataSource()) {
-      ret = ((QueryDataSource) getDataSource()).getQuery().getDataSourceAnalysis();
-    } else {
-      ret = getDataSource().getAnalysis();
-    }
-    return ret.maybeWithQuerySegmentSpec(getQuerySegmentSpec());
+    return ExecutionVertex.of1(this);
+//    DataSourceAnalysis ret;
+//    if (mayCollapseQueryDataSource()) {
+//      ret = ((QueryDataSource) getDataSource()).getQuery().getDataSourceAnalysis();
+//    } else {
+//      ret = getDataSource().getAnalysis();
+//    }
+//    return ret.maybeWithQuerySegmentSpec(getQuerySegmentSpec());
+  }
+
+  public ExecutionVertex getDataSourceAnalysis2()
+  {
+    return ExecutionVertex.of(this);
+//    DataSourceAnalysis ret;
+//    if (mayCollapseQueryDataSource()) {
+//      ret = ((QueryDataSource) getDataSource()).getQuery().getDataSourceAnalysis();
+//    } else {
+//      ret = getDataSource().getAnalysis();
+//    }
+//    return ret.maybeWithQuerySegmentSpec(getQuerySegmentSpec());
   }
 
 
   @VisibleForTesting
   public static QuerySegmentSpec getQuerySegmentSpecForLookUp(BaseQuery<?> query)
   {
-    return query.getDataSourceAnalysis()
+    return query.getDataSourceAnalysis2()
         .getEffectiveQuerySegmentSpec();
   }
 
