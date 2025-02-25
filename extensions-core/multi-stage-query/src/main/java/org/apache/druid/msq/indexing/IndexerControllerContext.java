@@ -242,7 +242,7 @@ public class IndexerControllerContext implements ControllerContext
   public QueryKitSpec makeQueryKitSpec(
       final QueryKit<Query<?>> queryKit,
       final String queryId,
-      final MSQSpec querySpec,
+      final MSQSpec0 querySpec,
       final ControllerQueryKernelConfig queryKernelConfig
   )
   {

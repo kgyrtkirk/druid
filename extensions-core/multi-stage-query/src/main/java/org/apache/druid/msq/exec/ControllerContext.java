@@ -26,6 +26,7 @@ import org.apache.druid.indexing.common.actions.TaskActionClient;
 import org.apache.druid.java.util.common.io.Closer;
 import org.apache.druid.java.util.emitter.service.ServiceEmitter;
 import org.apache.druid.msq.indexing.MSQSpec;
+import org.apache.druid.msq.indexing.MSQSpec0;
 import org.apache.druid.msq.input.InputSpecSlicer;
 import org.apache.druid.msq.input.table.SegmentsInputSlice;
 import org.apache.druid.msq.input.table.TableInputSpec;
@@ -126,7 +127,7 @@ public interface ControllerContext
   QueryKitSpec makeQueryKitSpec(
       QueryKit<Query<?>> queryKit,
       String queryId,
-      MSQSpec querySpec,
+      MSQSpec0 querySpec,
       ControllerQueryKernelConfig queryKernelConfig
   );
 }
