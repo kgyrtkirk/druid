@@ -226,6 +226,12 @@ public class DartControllerContext implements ControllerContext
       final ControllerQueryKernelConfig queryKernelConfig
   )
   {
+    return extracted(queryKit, queryId, querySpec, queryKernelConfig);
+  }
+
+  public static QueryKitSpec extracted(final QueryKit<Query<?>> queryKit, final String queryId, final MSQSpec0 querySpec,
+      final ControllerQueryKernelConfig queryKernelConfig)
+  {
     final QueryContext queryContext = querySpec.getContext();
     return new QueryKitSpec(
         queryKit,
