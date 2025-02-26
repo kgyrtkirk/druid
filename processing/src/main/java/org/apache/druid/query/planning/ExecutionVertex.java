@@ -27,10 +27,13 @@ import org.apache.druid.query.TableDataSource;
 import org.apache.druid.query.UnionDataSource;
 import org.apache.druid.query.spec.QuerySegmentSpec;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Represents the native engine's execution vertex.
  *
- * I believe due to evolutional purposes there are some concepts which went
+ * Most likely due to evolutional purposes there are some concepts which went
  * beyond their inital design:
  *
  * Multiple queries might be executed in one stage: <br/>
@@ -54,7 +57,7 @@ public class ExecutionVertex
   public static ExecutionVertex of(Query<?> query)
   {
     ExecutionVertexExplorer executionVertexExplorer = new ExecutionVertexExplorer();
-    executionVertexExplorer.visit(query);
+    executionVertexExplorer.traverse(query);
     query.getDataSource();
     return new ExecutionVertex(query);
   }
@@ -73,21 +76,20 @@ public class ExecutionVertex
   public boolean isTableBased()
   {
     return baseDataSource instanceof TableDataSource;
-//        || baseDataSource instanceof RestrictedDataSource
-//        || (baseDataSource instanceof UnionDataSource &&
-//            baseDataSource.getChildren()
-//                .stream()
-//                .allMatch(ds -> ds instanceof TableDataSource))
-//        || (baseDataSource instanceof UnnestDataSource &&
-//            baseDataSource.getChildren()
-//                .stream()
-//                .allMatch(ds -> ds instanceof TableDataSource)));
+    // || baseDataSource instanceof RestrictedDataSource
+    // || (baseDataSource instanceof UnionDataSource &&
+    // baseDataSource.getChildren()
+    // .stream()
+    // .allMatch(ds -> ds instanceof TableDataSource))
+    // || (baseDataSource instanceof UnnestDataSource &&
+    // baseDataSource.getChildren()
+    // .stream()
+    // .allMatch(ds -> ds instanceof TableDataSource)));
   }
-
 
   static abstract class ExecutionVertexShuttle
   {
-    public Query<?> visit(Query<?> query)
+    public Query<?> traverse(Query<?> query)
     {
       if (query instanceof BaseQuery<?>) {
         BaseQuery<?> baseQuery = (BaseQuery<?>) query;
@@ -103,22 +105,39 @@ public class ExecutionVertex
     public abstract DataSource visit(DataSource dataSource);
 
   }
+
   static class ExecutionVertexExplorer extends ExecutionVertexShuttle
   {
 
     boolean discoveringBase = true;
 
-    public Query<?> visit(Query<?> query)
+    public final Query<?> traverse(Query<?> query)
     {
       if (query instanceof BaseQuery<?>) {
         BaseQuery<?> baseQuery = (BaseQuery<?>) query;
         DataSource oldDataSource = baseQuery.getDataSource();
-        DataSource newDataSource = visit(oldDataSource);
+        DataSource newDataSource = traverse(oldDataSource);
         if (oldDataSource != newDataSource) {
-          return baseQuery.withDataSource(newDataSource);
+          query = baseQuery.withDataSource(newDataSource);
         }
+      } else {
+        throw DruidException.defensive("Can't traverse a query[%s]!", query);
       }
-      return query;
+      return visitQuery(query);
+    }
+
+    public DataSource traverse(DataSource oldDataSource)
+    {
+      List<DataSource> children = oldDataSource.getChildren();
+      List<DataSource> newChildren = new ArrayList<>();
+      boolean changed = false;
+      for (DataSource oldDS : children) {
+        DataSource newDS = traverse(oldDS);
+        newChildren.add(newDS);
+        changed |= (oldDS != newDS);
+      }
+      DataSource newDataSource = changed ? oldDataSource.withChildren(newChildren) : oldDataSource;
+      return visit(newDataSource);
     }
 
     public DataSource visit(DataSource dataSource)
@@ -128,6 +147,11 @@ public class ExecutionVertex
       }
       return null;
 
+    }
+
+    private Query<?> visitQuery(Query<?> query)
+    {
+      return query;
     }
 
   }
@@ -140,10 +164,14 @@ public class ExecutionVertex
   /**
    * Unwraps the {@link #getBaseDataSource()} if its a {@link TableDataSource}.
    *
-   * @throws An error of type {@link DruidException.Category#DEFENSIVE} if the {@link BaseDataSource} is not a table.
+   * @throws An
+   *           error of type {@link DruidException.Category#DEFENSIVE} if the
+   *           {@link BaseDataSource} is not a table.
    *
-   * note that this may not be true even {@link #isConcreteAndTableBased()} is true - in cases when the base
-   * datasource is a {@link UnionDataSource} of {@link TableDataSource}.
+   *           note that this may not be true even
+   *           {@link #isConcreteAndTableBased()} is true - in cases when the
+   *           base datasource is a {@link UnionDataSource} of
+   *           {@link TableDataSource}.
    */
   public final TableDataSource getBaseTableDataSource()
   {
@@ -157,7 +185,8 @@ public class ExecutionVertex
   /**
    * The applicable {@link QuerySegmentSpec} for this vertex.
    *
-   * There might be more queries inside a single vertex; so the outer one is not necessary correct.
+   * There might be more queries inside a single vertex; so the outer one is not
+   * necessary correct.
    */
   public QuerySegmentSpec getEffectiveQuerySegmentSpec()
   {
@@ -175,7 +204,7 @@ public class ExecutionVertex
 
   public boolean canRunQueryUsingLocalWalker()
   {
-      throw new RuntimeException("FIXME: Unimplemented!");
+    throw new RuntimeException("FIXME: Unimplemented!");
   }
 
   @Deprecated
@@ -195,6 +224,6 @@ public class ExecutionVertex
   @Deprecated
   public boolean isBaseColumn(String string)
   {
-    return true;//dsa.isBaseColumn(string);
+    return true;// dsa.isBaseColumn(string);
   }
 }
