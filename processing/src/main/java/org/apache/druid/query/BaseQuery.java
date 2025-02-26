@@ -30,7 +30,6 @@ import org.apache.druid.guice.annotations.ExtensionPoint;
 import org.apache.druid.java.util.common.granularity.Granularities;
 import org.apache.druid.java.util.common.granularity.Granularity;
 import org.apache.druid.java.util.common.granularity.PeriodGranularity;
-import org.apache.druid.query.planning.DataSourceAnalysis;
 import org.apache.druid.query.planning.ExecutionVertex;
 import org.apache.druid.query.spec.QuerySegmentSpec;
 import org.joda.time.DateTimeZone;
@@ -108,19 +107,6 @@ public abstract class BaseQuery<T> implements Query<T>
   public QueryRunner<T> getRunner(QuerySegmentWalker walker)
   {
     return getQuerySegmentSpecForLookUp(this).lookup(this, walker);
-  }
-
-  @Override
-  public DataSourceAnalysis getDataSourceAnalysis()
-  {
-    return ExecutionVertex.of1(this);
-//    DataSourceAnalysis ret;
-//    if (mayCollapseQueryDataSource()) {
-//      ret = ((QueryDataSource) getDataSource()).getQuery().getDataSourceAnalysis();
-//    } else {
-//      ret = getDataSource().getAnalysis();
-//    }
-//    return ret.maybeWithQuerySegmentSpec(getQuerySegmentSpec());
   }
 
   public ExecutionVertex getDataSourceAnalysis2()

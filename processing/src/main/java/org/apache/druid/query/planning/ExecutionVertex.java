@@ -24,6 +24,7 @@ import org.apache.druid.query.BaseQuery;
 import org.apache.druid.query.DataSource;
 import org.apache.druid.query.Query;
 import org.apache.druid.query.TableDataSource;
+import org.apache.druid.query.UnionDataSource;
 import org.apache.druid.query.spec.QuerySegmentSpec;
 
 /**
@@ -42,6 +43,8 @@ import org.apache.druid.query.spec.QuerySegmentSpec;
 public class ExecutionVertex
 {
   protected final Query<?> topQuery;
+  private DataSource baseDataSource;
+  private QuerySegmentSpec querySegmentSpec;
 
   private ExecutionVertex(Query<?> topQuery)
   {
@@ -58,11 +61,7 @@ public class ExecutionVertex
 
   public DataSource getBaseDataSource()
   {
-    if (true) {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-    return null;
-
+    return baseDataSource;
   }
 
   // FIXME: correct apidcos?
@@ -73,29 +72,54 @@ public class ExecutionVertex
 
   public boolean isTableBased()
   {
-    if (true) {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-    return false;
-
+    return baseDataSource instanceof TableDataSource;
+//        || baseDataSource instanceof RestrictedDataSource
+//        || (baseDataSource instanceof UnionDataSource &&
+//            baseDataSource.getChildren()
+//                .stream()
+//                .allMatch(ds -> ds instanceof TableDataSource))
+//        || (baseDataSource instanceof UnnestDataSource &&
+//            baseDataSource.getChildren()
+//                .stream()
+//                .allMatch(ds -> ds instanceof TableDataSource)));
   }
 
-  static class ExecutionVertexExplorer
+
+  static abstract class ExecutionVertexShuttle
   {
-
-    public void visit(Query<?> query)
+    public Query<?> visit(Query<?> query)
     {
-      // if(query instanceof BaseQuery<?>) {
-      // BaseQuery<?> baseQuery = (BaseQuery<?>) query;
-      // DataSource oldDataSource = baseQuery.getDataSource();
-      // DataSource newDataSource = visit(oldDataSource);
-      // if(oldDataSource!=newDataSource) {
-      // baseQuery = baseQuery.withDataSource(newDataSource);
-      // }
-      //
-      // }
-      throw DruidException.defensive("fixme");
+      if (query instanceof BaseQuery<?>) {
+        BaseQuery<?> baseQuery = (BaseQuery<?>) query;
+        DataSource oldDataSource = baseQuery.getDataSource();
+        DataSource newDataSource = visit(oldDataSource);
+        if (oldDataSource != newDataSource) {
+          return baseQuery.withDataSource(newDataSource);
+        }
+      }
+      return query;
+    }
 
+    public abstract DataSource visit(DataSource dataSource);
+
+  }
+  static class ExecutionVertexExplorer extends ExecutionVertexShuttle
+  {
+  boolean discoveringBase = true;
+
+    boolean discoveringBase = true;
+
+    public Query<?> visit(Query<?> query)
+    {
+      if (query instanceof BaseQuery<?>) {
+        BaseQuery<?> baseQuery = (BaseQuery<?>) query;
+        DataSource oldDataSource = baseQuery.getDataSource();
+        DataSource newDataSource = visit(oldDataSource);
+        if (oldDataSource != newDataSource) {
+          return baseQuery.withDataSource(newDataSource);
+        }
+      }
+      return query;
     }
 
     private DataSource visit(DataSource dataSource)
@@ -109,92 +133,69 @@ public class ExecutionVertex
 
   }
 
-  public static DataSourceAnalysis of1(BaseQuery<?> baseQuery)
-  {
-    if (true) {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-    return null;
-
-  }
-
   public static DruidException ofIllegal(Object dataSource)
   {
-    if(true)
-    {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-    return null;
-
+    return DruidException.defensive("Asd");
   }
 
-  public TableDataSource getBaseTableDataSource()
+  /**
+   * Unwraps the {@link #getBaseDataSource()} if its a {@link TableDataSource}.
+   *
+   * @throws An error of type {@link DruidException.Category#DEFENSIVE} if the {@link BaseDataSource} is not a table.
+   *
+   * note that this may not be true even {@link #isConcreteAndTableBased()} is true - in cases when the base
+   * datasource is a {@link UnionDataSource} of {@link TableDataSource}.
+   */
+  public final TableDataSource getBaseTableDataSource()
   {
-    if(true)
-    {
-      throw new RuntimeException("FIXME: Unimplemented!");
+    if (baseDataSource instanceof TableDataSource) {
+      return (TableDataSource) baseDataSource;
+    } else {
+      throw DruidException.defensive("Base dataSource[%s] is not a table!", baseDataSource);
     }
-    return null;
-
   }
 
+  /**
+   * The applicable {@link QuerySegmentSpec} for this vertex.
+   *
+   * There might be more queries inside a single vertex; so the outer one is not necessary correct.
+   */
   public QuerySegmentSpec getEffectiveQuerySegmentSpec()
   {
-    if(true)
-    {
-      throw new RuntimeException("FIXME: Unimplemented!");
+    if (querySegmentSpec == null) {
+      throw DruidException
+          .defensive("Can't answer this question. Please obtain a datasource analysis from the Query object!");
     }
-    return null;
-
+    return querySegmentSpec;
   }
 
   public boolean canRunQueryUsingClusterWalker()
   {
-    if(true)
-    {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-    return false;
-
+    throw new RuntimeException("FIXME: Unimplemented!");
   }
 
   public boolean canRunQueryUsingLocalWalker()
   {
-    if(true)
-    {
       throw new RuntimeException("FIXME: Unimplemented!");
-    }
-    return false;
-
   }
 
+  @Deprecated
   public boolean isGlobal()
   {
-    if(true)
-    {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-    return false;
+    return baseDataSource.isGlobal();
 
   }
 
+  @Deprecated
   public boolean isJoin()
   {
-    if(true)
-    {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
     return false;
 
   }
 
+  @Deprecated
   public boolean isBaseColumn(String string)
   {
-    if(true)
-    {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-    return false;
-
+    return true;//dsa.isBaseColumn(string);
   }
 }

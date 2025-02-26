@@ -318,4 +318,9 @@ public interface Query<T>
   {
     return null;
   }
+
+default  DataSourceAnalysis getDataSourceAnalysis1() {
+    throw DruidException.defensive("Usage of this method is not supported on this query type!");
+
+  }
 }

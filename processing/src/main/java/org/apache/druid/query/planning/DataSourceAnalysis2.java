@@ -220,6 +220,7 @@ public class DataSourceAnalysis2 implements DataSourceAnalysis
    */
   public boolean isBaseColumn(final String column)
   {
+    // FIXME
     return true;
   }
 
