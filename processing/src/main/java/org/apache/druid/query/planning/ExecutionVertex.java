@@ -82,11 +82,11 @@ public class ExecutionVertex
   public boolean isTableBased()
   {
     return baseDataSource instanceof TableDataSource
-    // || baseDataSource instanceof RestrictedDataSource
-     || (baseDataSource instanceof UnionDataSource &&
-     baseDataSource.getChildren()
-     .stream()
-     .allMatch(ds -> ds instanceof TableDataSource));
+        // || baseDataSource instanceof RestrictedDataSource
+        || (baseDataSource instanceof UnionDataSource &&
+            baseDataSource.getChildren()
+                .stream()
+                .allMatch(ds -> ds instanceof TableDataSource));
     // || (baseDataSource instanceof UnnestDataSource &&
     // baseDataSource.getChildren()
     // .stream()
@@ -124,21 +124,32 @@ public class ExecutionVertex
     {
       try {
         parents.push(dataSource);
-//        if (!mayVisitDataSource(dataSource)) {
-//          return dataSource;
-//        }
-        List<DataSource> children = dataSource.getChildren();
-        List<DataSource> newChildren = new ArrayList<>();
-        boolean changed = false;
-        if (mayVisitDataSource(dataSource)) {
-          for (DataSource oldDS : children) {
-            DataSource newDS = traverse(oldDS);
-            newChildren.add(newDS);
-            changed |= (oldDS != newDS);
+        if (dataSource instanceof QueryDataSource) {
+          QueryDataSource queryDataSource = (QueryDataSource) dataSource;
+          if (mayVisitDataSource(dataSource)) {
+            Query<?> oldQuery = queryDataSource.getQuery();
+            Query<?> newQuery = traverse(oldQuery);
+            if (oldQuery != newQuery) {
+              dataSource = new QueryDataSource(newQuery);
+            }
           }
+          return dataSource;
+        } else {
+
+          List<DataSource> children = dataSource.getChildren();
+          List<DataSource> newChildren = new ArrayList<>();
+          boolean changed = false;
+          if (mayVisitDataSource(dataSource)) {
+            for (DataSource oldDS : children) {
+              DataSource newDS = traverse(oldDS);
+              newChildren.add(newDS);
+              changed |= (oldDS != newDS);
+            }
+          }
+          DataSource newDataSource = changed ? dataSource.withChildren(newChildren) : dataSource;
+          return visit(newDataSource);
+
         }
-        DataSource newDataSource = changed ? dataSource.withChildren(newChildren) : dataSource;
-        return visit(newDataSource);
       } finally {
         parents.pop();
       }
