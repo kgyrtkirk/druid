@@ -125,16 +125,18 @@ public class ExecutionVertex
     {
       try {
         parents.push(dataSource);
-        if (!mayVisitDataSource(dataSource)) {
-          return dataSource;
-        }
+//        if (!mayVisitDataSource(dataSource)) {
+//          return dataSource;
+//        }
         List<DataSource> children = dataSource.getChildren();
         List<DataSource> newChildren = new ArrayList<>();
         boolean changed = false;
-        for (DataSource oldDS : children) {
-          DataSource newDS = traverse(oldDS);
-          newChildren.add(newDS);
-          changed |= (oldDS != newDS);
+        if (mayVisitDataSource(dataSource)) {
+          for (DataSource oldDS : children) {
+            DataSource newDS = traverse(oldDS);
+            newChildren.add(newDS);
+            changed |= (oldDS != newDS);
+          }
         }
         DataSource newDataSource = changed ? dataSource.withChildren(newChildren) : dataSource;
         return visit(newDataSource);
@@ -183,6 +185,9 @@ public class ExecutionVertex
           Query<?> parentQuery = (Query<?>) possibleParentQuery;
           return parentQuery.mayCollapseQueryDataSource();
         }
+      }
+      if (dataSource instanceof UnionDataSource) {
+        return false;
       }
       return true;
     }
