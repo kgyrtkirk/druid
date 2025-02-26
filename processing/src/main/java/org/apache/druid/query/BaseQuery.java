@@ -31,7 +31,6 @@ import org.apache.druid.java.util.common.granularity.Granularities;
 import org.apache.druid.java.util.common.granularity.Granularity;
 import org.apache.druid.java.util.common.granularity.PeriodGranularity;
 import org.apache.druid.query.planning.ExecutionVertex;
-import org.apache.druid.query.planning.ExecutionVertex.ExecutionVertexExplorer;
 import org.apache.druid.query.spec.QuerySegmentSpec;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Duration;
@@ -267,16 +266,5 @@ public abstract class BaseQuery<T> implements Query<T>
   {
     // Must use getDuration() instead of "duration" because duration is lazily computed.
     return Objects.hash(dataSource, context, querySegmentSpec, getDuration(), granularity);
-  }
-
-  @Override
-  public final void accept(ExecutionVertexExplorer executionVertexExplorer)
-  {
-    DataSource oldDataSource = getDataSource();
-    DataSource newDataSource = oldDataSource.accept(executionVertexExplorer);
-    if (newDataSource != oldDataSource) {
-      return withDataSource(newDataSource);
-    }
-
   }
 }

@@ -23,7 +23,6 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import org.apache.druid.java.util.common.Cacheable;
 import org.apache.druid.query.planning.DataSourceAnalysis;
-import org.apache.druid.query.planning.ExecutionVertex.ExecutionVertexExplorer;
 import org.apache.druid.query.planning.PreJoinableClause;
 import org.apache.druid.query.policy.Policy;
 import org.apache.druid.segment.SegmentReference;
@@ -153,6 +152,4 @@ public interface DataSource extends Cacheable
    * @return the cache key to be used as part of query cache key
    */
   byte[] getCacheKey();
-
-  DataSource accept(ExecutionVertexExplorer executionVertexExplorer);
 }
