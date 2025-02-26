@@ -105,7 +105,6 @@ public class ExecutionVertex
   }
   static class ExecutionVertexExplorer extends ExecutionVertexShuttle
   {
-  boolean discoveringBase = true;
 
     boolean discoveringBase = true;
 
@@ -122,7 +121,7 @@ public class ExecutionVertex
       return query;
     }
 
-    private DataSource visit(DataSource dataSource)
+    public DataSource visit(DataSource dataSource)
     {
       if (true) {
         throw new RuntimeException("FIXME: Unimplemented!");
