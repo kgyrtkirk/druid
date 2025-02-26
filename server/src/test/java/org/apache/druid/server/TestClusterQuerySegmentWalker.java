@@ -44,7 +44,6 @@ import org.apache.druid.query.ReferenceCountingSegmentQueryRunner;
 import org.apache.druid.query.SegmentDescriptor;
 import org.apache.druid.query.context.ResponseContext.Keys;
 import org.apache.druid.query.groupby.GroupByQueryRunnerTestHelper;
-import org.apache.druid.query.planning.DataSourceAnalysis;
 import org.apache.druid.query.planning.ExecutionVertex;
 import org.apache.druid.query.spec.SpecificSegmentQueryRunner;
 import org.apache.druid.query.spec.SpecificSegmentSpec;
@@ -114,13 +113,13 @@ public class TestClusterQuerySegmentWalker implements QuerySegmentWalker
     // Strange, but true. Required to get authentic behavior with UnionDataSources. (Although, it would be great if
     // this wasn't required.)
     return (queryPlus, responseContext) -> {
-      final DataSourceAnalysis analysis = queryPlus.getQuery().getDataSourceAnalysis();
+      ExecutionVertex ev = ExecutionVertex.of(queryPlus.getQuery());
 
-      if (!(analysis.isConcreteBased() && analysis.isTableBased())) {
+      if (!(ev.isConcreteBased() && ev.isTableBased())) {
         throw new ISE("Cannot handle datasource: %s", queryPlus.getQuery().getDataSource());
       }
 
-      final String dataSourceName = analysis.getBaseTableDataSource().getName();
+      final String dataSourceName = ev.getBaseTableDataSource().getName();
 
       FunctionalIterable<SegmentDescriptor> segmentDescriptors = FunctionalIterable
           .create(intervals)

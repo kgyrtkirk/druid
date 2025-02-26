@@ -76,7 +76,6 @@ import org.apache.druid.query.operator.OperatorFactory;
 import org.apache.druid.query.operator.ScanOperatorFactory;
 import org.apache.druid.query.operator.WindowOperatorQuery;
 import org.apache.druid.query.ordering.StringComparator;
-import org.apache.druid.query.planning.DataSourceAnalysis;
 import org.apache.druid.query.planning.ExecutionVertex;
 import org.apache.druid.query.scan.ScanQuery;
 import org.apache.druid.query.spec.LegacySegmentSpec;
@@ -890,9 +889,8 @@ public class DruidQuery
    */
   private static boolean canUseIntervalFiltering(final DataSource dataSource)
   {
-    throw ExecutionVertex.ofIllegal(dataSource);
-//    final DataSourceAnalysis analysis = dataSource.getAnalysis();
-//    return analysis.isTableBased();
+    ExecutionVertex ev = ExecutionVertex.ofIllegal(dataSource);
+    return ev.isTableBased();
   }
 
   private static Filtration toFiltration(
@@ -927,11 +925,8 @@ public class DruidQuery
       return true;
     }
 
-    if(true) {
-      throw ExecutionVertex.ofIllegal(dataSource);
-    }
-    DataSourceAnalysis analysis = null;//dataSource.getAnalysis();
-    if (analysis.isConcreteBased() && analysis.isTableBased()) {
+    ExecutionVertex ev = ExecutionVertex.ofIllegal(dataSource);
+    if (ev.isConcreteBased() && ev.isTableBased()) {
       // Always OK: queries on concrete tables (regular Druid datasources) use segment-based cursors
       // (IncrementalIndex or QueryableIndex). These clip query interval to data interval, making wide query
       // intervals safer. They do not have special checks for granularity and interval safety.

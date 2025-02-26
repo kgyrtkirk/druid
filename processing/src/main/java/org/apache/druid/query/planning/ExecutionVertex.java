@@ -23,10 +23,12 @@ import org.apache.druid.error.DruidException;
 import org.apache.druid.java.util.common.Intervals;
 import org.apache.druid.query.BaseQuery;
 import org.apache.druid.query.DataSource;
+import org.apache.druid.query.Druids;
 import org.apache.druid.query.Query;
 import org.apache.druid.query.QueryDataSource;
 import org.apache.druid.query.TableDataSource;
 import org.apache.druid.query.UnionDataSource;
+import org.apache.druid.query.scan.ScanQuery;
 import org.apache.druid.query.spec.MultipleIntervalSegmentSpec;
 import org.apache.druid.query.spec.QuerySegmentSpec;
 import org.postgresql.ds.common.BaseDataSource;
@@ -159,7 +161,7 @@ public class ExecutionVertex
 
     public ExecutionVertexExplorer(Query<?> query)
     {
-      topQuery=query;
+      topQuery = query;
       traverse(query);
     }
 
@@ -215,9 +217,14 @@ public class ExecutionVertex
     }
   }
 
-  public static DruidException ofIllegal(Object dataSource)
+  public static ExecutionVertex ofIllegal(DataSource dataSource)
   {
-    return DruidException.defensive("Asd");
+    ScanQuery query = Druids
+        .newScanQueryBuilder()
+        .intervals(new MultipleIntervalSegmentSpec(Intervals.ONLY_ETERNITY))
+        .dataSource(dataSource)
+        .build();
+    return ExecutionVertex.of(query);
   }
 
   /**
@@ -263,7 +270,9 @@ public class ExecutionVertex
 
   public boolean canRunQueryUsingLocalWalker()
   {
-    throw new RuntimeException("FIXME: Unimplemented!");
+    return isConcreteBased()
+        && !isTableBased()
+        && isGlobal();
   }
 
   @Deprecated
