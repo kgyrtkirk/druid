@@ -57,6 +57,7 @@ import org.apache.druid.msq.exec.WorkerStorageParameters;
 import org.apache.druid.msq.indexing.IndexerControllerContext;
 import org.apache.druid.msq.indexing.IndexerTableInputSpecSlicer;
 import org.apache.druid.msq.indexing.MSQSpec;
+import org.apache.druid.msq.indexing.MSQSpec0;
 import org.apache.druid.msq.indexing.MSQWorkerTask;
 import org.apache.druid.msq.indexing.MSQWorkerTaskLauncher;
 import org.apache.druid.msq.indexing.MSQWorkerTaskLauncher.MSQWorkerTaskLauncherConfig;
@@ -288,7 +289,7 @@ public class MSQTestControllerContext implements ControllerContext
   public QueryKitSpec makeQueryKitSpec(
       final QueryKit<Query<?>> queryKit,
       final String queryId,
-      final MSQSpec querySpec,
+      final MSQSpec0 querySpec,
       final ControllerQueryKernelConfig queryKernelConfig
   )
   {
