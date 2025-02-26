@@ -31,7 +31,6 @@ import org.apache.druid.query.UnionDataSource;
 import org.apache.druid.query.scan.ScanQuery;
 import org.apache.druid.query.spec.MultipleIntervalSegmentSpec;
 import org.apache.druid.query.spec.QuerySegmentSpec;
-import org.postgresql.ds.common.BaseDataSource;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -237,7 +236,7 @@ public class ExecutionVertex
    *
    * @throws An
    *           error of type {@link DruidException.Category#DEFENSIVE} if the
-   *           {@link BaseDataSource} is not a table.
+   *           {@link #getBaseDataSource()} is not a table.
    *
    *           note that this may not be true even
    *           {@link #isConcreteAndTableBased()} is true - in cases when the
