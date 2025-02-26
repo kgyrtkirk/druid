@@ -34,6 +34,7 @@ import org.apache.druid.query.groupby.GroupByQuery;
 import org.apache.druid.query.metadata.metadata.SegmentMetadataQuery;
 import org.apache.druid.query.operator.WindowOperatorQuery;
 import org.apache.druid.query.planning.DataSourceAnalysis;
+import org.apache.druid.query.planning.ExecutionVertex.ExecutionVertexExplorer;
 import org.apache.druid.query.scan.ScanQuery;
 import org.apache.druid.query.search.SearchQuery;
 import org.apache.druid.query.select.SelectQuery;
@@ -323,4 +324,6 @@ default  DataSourceAnalysis getDataSourceAnalysis1() {
     throw DruidException.defensive("Usage of this method is not supported on this query type!");
 
   }
+
+  void accept(ExecutionVertexExplorer executionVertexExplorer);
 }
