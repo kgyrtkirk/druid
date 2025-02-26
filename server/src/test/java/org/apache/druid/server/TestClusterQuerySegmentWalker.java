@@ -141,10 +141,9 @@ public class TestClusterQuerySegmentWalker implements QuerySegmentWalker
     }
 
     ExecutionVertex ev = ExecutionVertex.of(query);
-    final DataSourceAnalysis analysis = query.getDataSourceAnalysis();
 
     // FIXME what's the question here?
-    if (!(analysis.isConcreteBased() && analysis.isTableBased())) {
+    if (!(ev.isConcreteBased() && ev.isTableBased())) {
       throw new ISE("Cannot handle datasource: %s", dataSourceFromQuery);
     }
 

@@ -330,7 +330,7 @@ public class ClientQuerySegmentWalker implements QuerySegmentWalker
   private <T> boolean canRunQueryUsingClusterWalker(Query<T> query)
   {
     ExecutionVertex ev = ExecutionVertex.of(query);
-    if(false) {
+    if(true) {
       // FIXME: ideally this should be: clusterClient.couldExecute(ev)?
       return ev.canRunQueryUsingClusterWalker();
     }

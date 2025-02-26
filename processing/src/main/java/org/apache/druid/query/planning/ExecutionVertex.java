@@ -20,15 +20,20 @@
 package org.apache.druid.query.planning;
 
 import org.apache.druid.error.DruidException;
+import org.apache.druid.java.util.common.Intervals;
 import org.apache.druid.query.BaseQuery;
 import org.apache.druid.query.DataSource;
 import org.apache.druid.query.Query;
+import org.apache.druid.query.QueryDataSource;
 import org.apache.druid.query.TableDataSource;
 import org.apache.druid.query.UnionDataSource;
+import org.apache.druid.query.spec.MultipleIntervalSegmentSpec;
 import org.apache.druid.query.spec.QuerySegmentSpec;
+import org.postgresql.ds.common.BaseDataSource;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 /**
  * Represents the native engine's execution vertex.
@@ -49,17 +54,17 @@ public class ExecutionVertex
   private DataSource baseDataSource;
   private QuerySegmentSpec querySegmentSpec;
 
-  private ExecutionVertex(Query<?> topQuery)
+  private ExecutionVertex(ExecutionVertexExplorer explorer)
   {
-    this.topQuery = topQuery;
+    this.topQuery = explorer.topQuery;
+    this.baseDataSource = explorer.baseDataSource;
+    this.querySegmentSpec = explorer.querySegmentSpec;
   }
 
   public static ExecutionVertex of(Query<?> query)
   {
-    ExecutionVertexExplorer executionVertexExplorer = new ExecutionVertexExplorer();
-    executionVertexExplorer.traverse(query);
-    query.getDataSource();
-    return new ExecutionVertex(query);
+    ExecutionVertexExplorer explorer = new ExecutionVertexExplorer(query);
+    return new ExecutionVertex(explorer);
   }
 
   public DataSource getBaseDataSource()
@@ -89,71 +94,125 @@ public class ExecutionVertex
 
   static abstract class ExecutionVertexShuttle
   {
-    public Query<?> traverse(Query<?> query)
+    protected Stack<Object> parents = new Stack<>();
+
+    protected final Query<?> traverse(Query<?> query)
     {
-      if (query instanceof BaseQuery<?>) {
-        BaseQuery<?> baseQuery = (BaseQuery<?>) query;
-        DataSource oldDataSource = baseQuery.getDataSource();
-        DataSource newDataSource = visit(oldDataSource);
-        if (oldDataSource != newDataSource) {
-          return baseQuery.withDataSource(newDataSource);
+      try {
+        parents.push(query);
+        if (!mayVisitQuery(query)) {
+          return query;
         }
+        if (query instanceof BaseQuery<?>) {
+          BaseQuery<?> baseQuery = (BaseQuery<?>) query;
+          DataSource oldDataSource = baseQuery.getDataSource();
+          DataSource newDataSource = traverse(oldDataSource);
+          if (oldDataSource != newDataSource) {
+            query = baseQuery.withDataSource(newDataSource);
+          }
+        } else {
+          throw DruidException.defensive("Can't traverse a query[%s]!", query);
+        }
+        return visitQuery(query);
+      } finally {
+        parents.pop();
       }
-      return query;
     }
 
-    public abstract DataSource visit(DataSource dataSource);
+    protected final DataSource traverse(DataSource dataSource)
+    {
+      try {
+        parents.push(dataSource);
+        if (!mayVisitDataSource(dataSource)) {
+          return dataSource;
+        }
+        List<DataSource> children = dataSource.getChildren();
+        List<DataSource> newChildren = new ArrayList<>();
+        boolean changed = false;
+        for (DataSource oldDS : children) {
+          DataSource newDS = traverse(oldDS);
+          newChildren.add(newDS);
+          changed |= (oldDS != newDS);
+        }
+        DataSource newDataSource = changed ? dataSource.withChildren(newChildren) : dataSource;
+        return visit(newDataSource);
+      } finally {
+        parents.pop();
+      }
+    }
 
+    protected abstract boolean mayVisitQuery(Query<?> query);
+
+    protected abstract boolean mayVisitDataSource(DataSource dataSource);
+
+    protected abstract DataSource visit(DataSource dataSource);
+
+    protected abstract Query<?> visitQuery(Query<?> query);
   }
 
   static class ExecutionVertexExplorer extends ExecutionVertexShuttle
   {
-
     boolean discoveringBase = true;
+    private DataSource baseDataSource;
+    private QuerySegmentSpec querySegmentSpec;
+    protected Query<?> topQuery;
 
-    public final Query<?> traverse(Query<?> query)
+    public ExecutionVertexExplorer(Query<?> query)
     {
-      if (query instanceof BaseQuery<?>) {
-        BaseQuery<?> baseQuery = (BaseQuery<?>) query;
-        DataSource oldDataSource = baseQuery.getDataSource();
-        DataSource newDataSource = traverse(oldDataSource);
-        if (oldDataSource != newDataSource) {
-          query = baseQuery.withDataSource(newDataSource);
+      topQuery=query;
+      traverse(query);
+    }
+
+    @Override
+    protected boolean mayVisitQuery(Query<?> query)
+    {
+      return true;
+    }
+
+    @Override
+    protected boolean mayVisitDataSource(DataSource dataSource)
+    {
+      if (parents.size() < 2) {
+        return true;
+      }
+      if (dataSource instanceof QueryDataSource) {
+        Object possibleParentQuery = parents.get(parents.size() - 2);
+        if (possibleParentQuery instanceof Query) {
+          Query<?> parentQuery = (Query<?>) possibleParentQuery;
+          return parentQuery.mayCollapseQueryDataSource();
         }
-      } else {
-        throw DruidException.defensive("Can't traverse a query[%s]!", query);
       }
-      return visitQuery(query);
+      return true;
     }
 
-    public DataSource traverse(DataSource oldDataSource)
+    @Override
+    protected DataSource visit(DataSource dataSource)
     {
-      List<DataSource> children = oldDataSource.getChildren();
-      List<DataSource> newChildren = new ArrayList<>();
-      boolean changed = false;
-      for (DataSource oldDS : children) {
-        DataSource newDS = traverse(oldDS);
-        newChildren.add(newDS);
-        changed |= (oldDS != newDS);
+      if (discoveringBase) {
+        baseDataSource = dataSource;
+        discoveringBase = false;
       }
-      DataSource newDataSource = changed ? oldDataSource.withChildren(newChildren) : oldDataSource;
-      return visit(newDataSource);
+      return dataSource;
     }
 
-    public DataSource visit(DataSource dataSource)
+    @Override
+    protected Query<?> visitQuery(Query<?> query)
     {
-      if (true) {
-        throw new RuntimeException("FIXME: Unimplemented!");
+      if (querySegmentSpec == null) {
+        querySegmentSpec = getQuerySegmentSpec(query);
       }
-      return null;
-
-    }
-
-    private Query<?> visitQuery(Query<?> query)
-    {
       return query;
     }
 
+    private QuerySegmentSpec getQuerySegmentSpec(Query<?> query)
+    {
+      if (query instanceof BaseQuery) {
+        BaseQuery<?> baseQuery = (BaseQuery<?>) query;
+        return baseQuery.getQuerySegmentSpec();
+      } else {
+        return new MultipleIntervalSegmentSpec(Intervals.ONLY_ETERNITY);
+      }
+    }
   }
 
   public static DruidException ofIllegal(Object dataSource)
@@ -199,7 +258,7 @@ public class ExecutionVertex
 
   public boolean canRunQueryUsingClusterWalker()
   {
-    throw new RuntimeException("FIXME: Unimplemented!");
+    return isConcreteBased() && isTableBased();
   }
 
   public boolean canRunQueryUsingLocalWalker()
