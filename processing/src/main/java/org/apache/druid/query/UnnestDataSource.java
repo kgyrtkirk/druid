@@ -21,6 +21,8 @@ package org.apache.druid.query;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.collect.ImmutableList;
+import org.apache.druid.java.util.common.IAE;
 import org.apache.druid.query.filter.DimFilter;
 import org.apache.druid.segment.SegmentReference;
 import org.apache.druid.segment.UnnestSegment;
@@ -28,7 +30,9 @@ import org.apache.druid.segment.VirtualColumn;
 
 import javax.annotation.Nullable;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 
 /**
@@ -39,8 +43,9 @@ import java.util.function.Function;
  * the name of the column that will hold the unnested values
  * and an allowlist serving as a filter of which values in the MVD will be unnested.
  */
-public class UnnestDataSource extends ChainedDataSource<DataSource>
+public class UnnestDataSource implements DataSource
 {
+  private final DataSource base;
   private final VirtualColumn virtualColumn;
 
   @Nullable
@@ -52,7 +57,7 @@ public class UnnestDataSource extends ChainedDataSource<DataSource>
       DimFilter unnestFilter
   )
   {
-    super(dataSource);
+    this.base = dataSource;
     this.virtualColumn = virtualColumn;
     this.unnestFilter = unnestFilter;
   }
@@ -68,6 +73,12 @@ public class UnnestDataSource extends ChainedDataSource<DataSource>
     return new UnnestDataSource(base, virtualColumn, unnestFilter);
   }
 
+  @JsonProperty("base")
+  public DataSource getBase()
+  {
+    return base;
+  }
+
   @JsonProperty("virtualColumn")
   public VirtualColumn getVirtualColumn()
   {
@@ -78,6 +89,28 @@ public class UnnestDataSource extends ChainedDataSource<DataSource>
   public DimFilter getUnnestFilter()
   {
     return unnestFilter;
+  }
+
+  @Override
+  public Set<String> getTableNames()
+  {
+    return base.getTableNames();
+  }
+
+  @Override
+  public List<DataSource> getChildren()
+  {
+    return ImmutableList.of(base);
+  }
+
+  @Override
+  public DataSource withChildren(List<DataSource> children)
+  {
+    if (children.size() != 1) {
+      throw new IAE("Expected [1] child, got [%d]", children.size());
+    }
+
+    return new UnnestDataSource(children.get(0), virtualColumn, unnestFilter);
   }
 
   @Override

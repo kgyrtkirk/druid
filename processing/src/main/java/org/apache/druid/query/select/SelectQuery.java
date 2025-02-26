@@ -27,7 +27,6 @@ import org.apache.druid.query.Query;
 import org.apache.druid.query.QueryRunner;
 import org.apache.druid.query.QuerySegmentWalker;
 import org.apache.druid.query.filter.DimFilter;
-import org.apache.druid.query.planning.ExecutionVertex.ExecutionVertexExplorer;
 import org.apache.druid.query.spec.QuerySegmentSpec;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Duration;
@@ -156,12 +155,6 @@ public class SelectQuery implements Query<Object>
 
   @Override
   public Query<Object> withDataSource(DataSource dataSource)
-  {
-    throw new RuntimeException(REMOVED_ERROR_MESSAGE);
-  }
-
-  @Override
-  public Query<?> accept(ExecutionVertexExplorer executionVertexExplorer)
   {
     throw new RuntimeException(REMOVED_ERROR_MESSAGE);
   }

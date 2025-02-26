@@ -26,7 +26,6 @@ import com.google.common.collect.ImmutableList;
 import org.apache.druid.error.DruidException;
 import org.apache.druid.java.util.common.IAE;
 import org.apache.druid.java.util.common.ISE;
-import org.apache.druid.query.planning.ExecutionVertex.ExecutionVertexExplorer;
 import org.apache.druid.segment.SegmentReference;
 import org.apache.druid.utils.CollectionUtils;
 
@@ -191,16 +190,5 @@ public class UnionDataSource implements DataSource
   public static boolean isCompatibleDataSource(DataSource dataSource)
   {
     return (dataSource instanceof TableDataSource || dataSource instanceof InlineDataSource);
-  }
-
-  @Override
-  public DataSource accept(ExecutionVertexExplorer executionVertexExplorer)
-  {
-    if(true)
-    {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-    return null;
-
   }
 }

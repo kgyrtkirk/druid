@@ -24,7 +24,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableList;
 import org.apache.druid.java.util.common.IAE;
 import org.apache.druid.query.filter.DimFilter;
-import org.apache.druid.query.planning.ExecutionVertex.ExecutionVertexExplorer;
 import org.apache.druid.segment.FilteredSegment;
 import org.apache.druid.segment.SegmentReference;
 
@@ -32,6 +31,7 @@ import javax.annotation.Nullable;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 
 /**
@@ -47,9 +47,16 @@ import java.util.function.Function;
  * putting more work to be done at the broker level. This pushes the operations down to the
  * segments and is more performant.
  */
-public class FilteredDataSource extends ChainedDataSource
+public class FilteredDataSource implements DataSource
 {
+  private final DataSource base;
   private final DimFilter filter;
+
+  @JsonProperty("base")
+  public DataSource getBase()
+  {
+    return base;
+  }
 
   @JsonProperty("filter")
   public DimFilter getFilter()
@@ -59,7 +66,7 @@ public class FilteredDataSource extends ChainedDataSource
 
   private FilteredDataSource(DataSource base, @Nullable DimFilter filter)
   {
-    super(base);
+    this.base = base;
     this.filter = filter;
   }
 
@@ -70,6 +77,28 @@ public class FilteredDataSource extends ChainedDataSource
   )
   {
     return new FilteredDataSource(base, f);
+  }
+
+  @Override
+  public Set<String> getTableNames()
+  {
+    return base.getTableNames();
+  }
+
+  @Override
+  public List<DataSource> getChildren()
+  {
+    return ImmutableList.of(base);
+  }
+
+  @Override
+  public DataSource withChildren(List<DataSource> children)
+  {
+    if (children.size() != 1) {
+      throw new IAE("Expected [1] child, got [%d]", children.size());
+    }
+
+    return new FilteredDataSource(children.get(0), filter);
   }
 
   @Override

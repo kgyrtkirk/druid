@@ -32,7 +32,6 @@ import org.apache.druid.query.QueryRunner;
 import org.apache.druid.query.QuerySegmentWalker;
 import org.apache.druid.query.filter.DimFilter;
 import org.apache.druid.query.groupby.GroupByQuery;
-import org.apache.druid.query.planning.ExecutionVertex.ExecutionVertexExplorer;
 import org.apache.druid.query.spec.QuerySegmentSpec;
 import org.apache.druid.query.timeseries.TimeseriesQuery;
 import org.apache.druid.query.topn.TopNQuery;
@@ -58,12 +57,12 @@ import java.util.Objects;
 public class MaterializedViewQuery<T> implements Query<T>
 {
   public static final String TYPE = "view";
-  private final Query<T> query;
+  private final Query query;
   private final DataSourceOptimizer optimizer;
 
   @JsonCreator
   public MaterializedViewQuery(
-      @JsonProperty("query") Query<T> query,
+      @JsonProperty("query") Query query,
       @JacksonInject DataSourceOptimizer optimizer
   )
   {
@@ -76,7 +75,7 @@ public class MaterializedViewQuery<T> implements Query<T>
   }
 
   @JsonProperty("query")
-  public Query<T> getQuery()
+  public Query getQuery()
   {
     return query;
   }
@@ -113,7 +112,7 @@ public class MaterializedViewQuery<T> implements Query<T>
   @Override
   public QueryRunner<T> getRunner(QuerySegmentWalker walker)
   {
-    return ((BaseQuery<T>) query).getQuerySegmentSpec().lookup(this, walker);
+    return ((BaseQuery) query).getQuerySegmentSpec().lookup(this, walker);
   }
 
   @Override
@@ -154,21 +153,21 @@ public class MaterializedViewQuery<T> implements Query<T>
   }
 
   @Override
-  public MaterializedViewQuery<T> withOverriddenContext(Map<String, Object> contextOverride)
+  public MaterializedViewQuery withOverriddenContext(Map<String, Object> contextOverride)
   {
-    return new MaterializedViewQuery<>(query.withOverriddenContext(contextOverride), optimizer);
+    return new MaterializedViewQuery(query.withOverriddenContext(contextOverride), optimizer);
   }
 
   @Override
-  public MaterializedViewQuery<T> withQuerySegmentSpec(QuerySegmentSpec spec)
+  public MaterializedViewQuery withQuerySegmentSpec(QuerySegmentSpec spec)
   {
-    return new MaterializedViewQuery<>(query.withQuerySegmentSpec(spec), optimizer);
+    return new MaterializedViewQuery(query.withQuerySegmentSpec(spec), optimizer);
   }
 
   @Override
-  public MaterializedViewQuery<T> withId(String id)
+  public MaterializedViewQuery withId(String id)
   {
-    return new MaterializedViewQuery<>(query.withId(id), optimizer);
+    return new MaterializedViewQuery(query.withId(id), optimizer);
   }
 
   @Override
@@ -191,9 +190,9 @@ public class MaterializedViewQuery<T> implements Query<T>
   }
 
   @Override
-  public MaterializedViewQuery<T> withDataSource(DataSource dataSource)
+  public MaterializedViewQuery withDataSource(DataSource dataSource)
   {
-    return new MaterializedViewQuery<>(query.withDataSource(dataSource), optimizer);
+    return new MaterializedViewQuery(query.withDataSource(dataSource), optimizer);
   }
 
   @Override
@@ -213,7 +212,7 @@ public class MaterializedViewQuery<T> implements Query<T>
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    MaterializedViewQuery<T> other = (MaterializedViewQuery) o;
+    MaterializedViewQuery other = (MaterializedViewQuery) o;
     return other.getQuery().equals(query);
   }
 
@@ -221,14 +220,6 @@ public class MaterializedViewQuery<T> implements Query<T>
   public int hashCode()
   {
     return Objects.hash(TYPE, query);
-  }
-
-  @Override
-  public Query<?> accept(ExecutionVertexExplorer executionVertexExplorer)
-  {
-    Query<?> newQuery = query.accept(executionVertexExplorer);
-    MaterializedViewQuery<T> ds = newQuery == query ? this : new MaterializedViewQuery(newQuery, optimizer);
-    return executionVertexExplorer.visit(ds);
   }
 
 }

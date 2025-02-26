@@ -27,7 +27,6 @@ import org.apache.druid.data.input.InputFormat;
 import org.apache.druid.data.input.InputSource;
 import org.apache.druid.java.util.common.IAE;
 import org.apache.druid.query.DataSource;
-import org.apache.druid.query.LeafDataSource;
 import org.apache.druid.query.Query;
 import org.apache.druid.segment.SegmentReference;
 import org.apache.druid.segment.column.RowSignature;
@@ -47,7 +46,7 @@ import java.util.function.Function;
  * This class is exercised in CalciteInsertDmlTest but is not currently exposed to end users.
  */
 @JsonTypeName("external")
-public class ExternalDataSource extends LeafDataSource
+public class ExternalDataSource implements DataSource
 {
   private final InputSource inputSource;
   private final InputFormat inputFormat;
@@ -87,6 +86,22 @@ public class ExternalDataSource extends LeafDataSource
   public Set<String> getTableNames()
   {
     return Collections.emptySet();
+  }
+
+  @Override
+  public List<DataSource> getChildren()
+  {
+    return Collections.emptyList();
+  }
+
+  @Override
+  public DataSource withChildren(final List<DataSource> children)
+  {
+    if (!children.isEmpty()) {
+      throw new IAE("Cannot accept children");
+    }
+
+    return this;
   }
 
   @Override

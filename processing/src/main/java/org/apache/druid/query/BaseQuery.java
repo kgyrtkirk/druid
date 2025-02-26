@@ -270,11 +270,13 @@ public abstract class BaseQuery<T> implements Query<T>
   }
 
   @Override
-  public final Query<?> accept(ExecutionVertexExplorer executionVertexExplorer)
+  public final void accept(ExecutionVertexExplorer executionVertexExplorer)
   {
     DataSource oldDataSource = getDataSource();
     DataSource newDataSource = oldDataSource.accept(executionVertexExplorer);
-    Query<?> newQuery = (newDataSource == oldDataSource) ? this : withDataSource(newDataSource);
-    return executionVertexExplorer.visit(newQuery);
+    if (newDataSource != oldDataSource) {
+      return withDataSource(newDataSource);
+    }
+
   }
 }

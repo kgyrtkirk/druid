@@ -22,9 +22,11 @@ package org.apache.druid.query;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
+import org.apache.druid.java.util.common.IAE;
 import org.apache.druid.segment.SegmentReference;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
@@ -38,7 +40,7 @@ import java.util.function.Function;
  * The "lookupName" referred to here should be provided by a
  * {@link org.apache.druid.query.lookup.LookupExtractorFactoryContainerProvider}.
  */
-public class LookupDataSource extends LeafDataSource
+public class LookupDataSource implements DataSource
 {
   private final String lookupName;
 
@@ -60,6 +62,22 @@ public class LookupDataSource extends LeafDataSource
   public String getLookupName()
   {
     return lookupName;
+  }
+
+  @Override
+  public List<DataSource> getChildren()
+  {
+    return Collections.emptyList();
+  }
+
+  @Override
+  public DataSource withChildren(List<DataSource> children)
+  {
+    if (!children.isEmpty()) {
+      throw new IAE("Cannot accept children");
+    }
+
+    return this;
   }
 
   @Override

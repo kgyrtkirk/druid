@@ -33,7 +33,6 @@ import org.apache.druid.java.util.common.granularity.Granularities;
 import org.apache.druid.java.util.common.granularity.Granularity;
 import org.apache.druid.query.aggregation.CountAggregatorFactory;
 import org.apache.druid.query.filter.DimFilter;
-import org.apache.druid.query.planning.ExecutionVertex.ExecutionVertexExplorer;
 import org.apache.druid.query.spec.QuerySegmentSpec;
 import org.apache.druid.segment.DimensionHandlerUtils;
 import org.joda.time.DateTimeZone;
@@ -548,17 +547,6 @@ public class QueryContextTest
     public Query<Integer> withOverriddenContext(Map<String, Object> contextOverride)
     {
       return new LegacyContextQuery(contextOverride);
-    }
-
-    @Override
-    public Query<?> accept(ExecutionVertexExplorer executionVertexExplorer)
-    {
-      if(true)
-      {
-        throw new RuntimeException("FIXME: Unimplemented!");
-      }
-      return null;
-
     }
   }
 }

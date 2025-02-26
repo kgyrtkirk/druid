@@ -48,7 +48,7 @@ import java.util.stream.IntStream;
  * The rows are backed by an Iterable, which can be lazy or not. Lazy datasources will only be iterated if someone calls
  * {@link #getRows()} and iterates the result, or until someone calls {@link #getRowsAsList()}.
  */
-public class InlineDataSource extends LeafDataSource
+public class InlineDataSource implements DataSource
 {
   private final Iterable<Object[]> rows;
   private final RowSignature signature;
@@ -204,6 +204,22 @@ public class InlineDataSource extends LeafDataSource
   public boolean rowsAreArrayList()
   {
     return rows instanceof ArrayList;
+  }
+
+  @Override
+  public List<DataSource> getChildren()
+  {
+    return Collections.emptyList();
+  }
+
+  @Override
+  public DataSource withChildren(List<DataSource> children)
+  {
+    if (!children.isEmpty()) {
+      throw new IAE("Cannot accept children");
+    }
+
+    return this;
   }
 
   @Override

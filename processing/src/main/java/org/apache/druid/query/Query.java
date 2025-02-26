@@ -325,5 +325,5 @@ default  DataSourceAnalysis getDataSourceAnalysis1() {
 
   }
 
-  Query<?> accept(ExecutionVertexExplorer executionVertexExplorer);
+  void accept(ExecutionVertexExplorer executionVertexExplorer);
 }
