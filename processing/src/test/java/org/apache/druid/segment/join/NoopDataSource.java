@@ -21,6 +21,7 @@ package org.apache.druid.segment.join;
 
 import org.apache.druid.query.DataSource;
 import org.apache.druid.query.Query;
+import org.apache.druid.query.planning.ExecutionVertex.ExecutionVertexExplorer;
 import org.apache.druid.segment.SegmentReference;
 
 import java.util.List;
@@ -84,5 +85,11 @@ public class NoopDataSource implements DataSource
   public byte[] getCacheKey()
   {
     return new byte[]{};
+  }
+
+  @Override
+  public DataSource accept(ExecutionVertexExplorer executionVertexExplorer)
+  {
+    return executionVertexExplorer.visit(this);
   }
 }

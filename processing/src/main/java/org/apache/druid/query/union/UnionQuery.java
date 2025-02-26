@@ -37,6 +37,7 @@ import org.apache.druid.query.UnionDataSource;
 import org.apache.druid.query.filter.DimFilter;
 import org.apache.druid.query.planning.DataSourceAnalysis;
 import org.apache.druid.query.planning.DataSourceAnalysis2;
+import org.apache.druid.query.planning.ExecutionVertex.ExecutionVertexExplorer;
 import org.apache.druid.query.spec.QuerySegmentSpec;
 import org.apache.druid.segment.SegmentReference;
 import org.apache.druid.segment.column.RowSignature;
@@ -287,6 +288,17 @@ public class UnionQuery implements Query<Object>
     {
       return delegate.getCacheKey();
     }
+
+    @Override
+    public DataSource accept(ExecutionVertexExplorer executionVertexExplorer)
+    {
+      if(true)
+      {
+        throw new RuntimeException("FIXME: Unimplemented!");
+      }
+      return null;
+
+    }
   }
 
   public static DruidException methodNotSupported()
@@ -298,5 +310,16 @@ public class UnionQuery implements Query<Object>
   public RowSignature getResultRowSignature(Finalization finalization)
   {
     return queries.get(0).getResultRowSignature(finalization);
+  }
+
+  @Override
+  public Query<?> accept(ExecutionVertexExplorer executionVertexExplorer)
+  {
+    if(true)
+    {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+    return null;
+
   }
 }

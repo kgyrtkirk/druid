@@ -42,6 +42,7 @@ import org.apache.druid.query.filter.Filter;
 import org.apache.druid.query.filter.TrueDimFilter;
 import org.apache.druid.query.planning.DataSourceAnalysis;
 import org.apache.druid.query.planning.DataSourceAnalysis3;
+import org.apache.druid.query.planning.ExecutionVertex.ExecutionVertexExplorer;
 import org.apache.druid.query.planning.PreJoinableClause;
 import org.apache.druid.segment.SegmentReference;
 import org.apache.druid.segment.filter.Filters;
@@ -575,5 +576,16 @@ public class JoinDataSource implements DataSource
     );
 
     return leftFilter;
+  }
+
+  @Override
+  public DataSource accept(ExecutionVertexExplorer executionVertexExplorer)
+  {
+    if(true)
+    {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+    return null;
+
   }
 }

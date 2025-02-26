@@ -140,6 +140,7 @@ import org.junit.Assert;
 import org.junit.internal.matchers.ThrowableMessageMatcher;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -422,6 +423,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @Timeout(5)
   @Test
   public void testFilterScalarFunctionsOnInformationSchemaRoutines()
   {

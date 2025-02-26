@@ -20,12 +20,15 @@
 package org.apache.druid.query.planning;
 
 import org.apache.druid.error.DruidException;
+import org.apache.druid.java.util.common.Intervals;
 import org.apache.druid.query.BaseQuery;
 import org.apache.druid.query.DataSource;
 import org.apache.druid.query.Query;
 import org.apache.druid.query.TableDataSource;
 import org.apache.druid.query.UnionDataSource;
+import org.apache.druid.query.spec.MultipleIntervalSegmentSpec;
 import org.apache.druid.query.spec.QuerySegmentSpec;
+import org.postgresql.ds.common.BaseDataSource;
 
 /**
  * Represents the native engine's execution vertex.
@@ -53,9 +56,8 @@ public class ExecutionVertex
 
   public static ExecutionVertex of(Query<?> query)
   {
-    ExecutionVertexExplorer executionVertexExplorer = new ExecutionVertexExplorer();
+    ExecutionVertexExplorer executionVertexExplorer = new ExecutionVertexExplorer1();
     query.accept(executionVertexExplorer);
-
 
     executionVertexExplorer.visit(query);
     query.getDataSource();
@@ -76,61 +78,55 @@ public class ExecutionVertex
   public boolean isTableBased()
   {
     return baseDataSource instanceof TableDataSource;
-//        || baseDataSource instanceof RestrictedDataSource
-//        || (baseDataSource instanceof UnionDataSource &&
-//            baseDataSource.getChildren()
-//                .stream()
-//                .allMatch(ds -> ds instanceof TableDataSource))
-//        || (baseDataSource instanceof UnnestDataSource &&
-//            baseDataSource.getChildren()
-//                .stream()
-//                .allMatch(ds -> ds instanceof TableDataSource)));
+    // || baseDataSource instanceof RestrictedDataSource
+    // || (baseDataSource instanceof UnionDataSource &&
+    // baseDataSource.getChildren()
+    // .stream()
+    // .allMatch(ds -> ds instanceof TableDataSource))
+    // || (baseDataSource instanceof UnnestDataSource &&
+    // baseDataSource.getChildren()
+    // .stream()
+    // .allMatch(ds -> ds instanceof TableDataSource)));
   }
 
-
-  static abstract class ExecutionVertexShuttle
+  public static interface ExecutionVertexExplorer
   {
-    public Query<?> visit(Query<?> query)
-    {
-      if (query instanceof BaseQuery<?>) {
-        BaseQuery<?> baseQuery = (BaseQuery<?>) query;
-        DataSource oldDataSource = baseQuery.getDataSource();
-        DataSource newDataSource = visit(oldDataSource);
-        if (oldDataSource != newDataSource) {
-          return baseQuery.withDataSource(newDataSource);
-        }
-      }
-      return query;
-    }
+    public Query<?> visit(Query<?> query);
 
-    public abstract DataSource visit(DataSource dataSource);
-
+    public DataSource visit(DataSource dataSource);
   }
-  public static class ExecutionVertexExplorer extends ExecutionVertexShuttle
-  {
 
+  public static class ExecutionVertexExplorer1 implements ExecutionVertexExplorer
+  {
     boolean discoveringBase = true;
+    private QuerySegmentSpec querySegmentSpec = null;
+    private DataSource baseDataSource;
 
     public Query<?> visit(Query<?> query)
     {
-      if (query instanceof BaseQuery<?>) {
-        BaseQuery<?> baseQuery = (BaseQuery<?>) query;
-        DataSource oldDataSource = baseQuery.getDataSource();
-        DataSource newDataSource = visit(oldDataSource);
-        if (oldDataSource != newDataSource) {
-          return baseQuery.withDataSource(newDataSource);
-        }
+      if (querySegmentSpec == null) {
+        querySegmentSpec = getQuerySegmentSpec(query);
       }
       return query;
     }
 
     public DataSource visit(DataSource dataSource)
     {
-      if (true) {
-        throw new RuntimeException("FIXME: Unimplemented!");
+      if (discoveringBase) {
+        baseDataSource = dataSource;
+        discoveringBase = false;
       }
-      return null;
+      return dataSource;
+    }
 
+    private QuerySegmentSpec getQuerySegmentSpec(Query<?> query)
+    {
+      if (query instanceof BaseQuery) {
+        BaseQuery<?> baseQuery = (BaseQuery<?>) query;
+        return baseQuery.getQuerySegmentSpec();
+      } else {
+        return new MultipleIntervalSegmentSpec(Intervals.ONLY_ETERNITY);
+      }
     }
 
   }
@@ -143,10 +139,14 @@ public class ExecutionVertex
   /**
    * Unwraps the {@link #getBaseDataSource()} if its a {@link TableDataSource}.
    *
-   * @throws An error of type {@link DruidException.Category#DEFENSIVE} if the {@link BaseDataSource} is not a table.
+   * @throws An
+   *           error of type {@link DruidException.Category#DEFENSIVE} if the
+   *           {@link BaseDataSource} is not a table.
    *
-   * note that this may not be true even {@link #isConcreteAndTableBased()} is true - in cases when the base
-   * datasource is a {@link UnionDataSource} of {@link TableDataSource}.
+   *           note that this may not be true even
+   *           {@link #isConcreteAndTableBased()} is true - in cases when the
+   *           base datasource is a {@link UnionDataSource} of
+   *           {@link TableDataSource}.
    */
   public final TableDataSource getBaseTableDataSource()
   {
@@ -160,13 +160,13 @@ public class ExecutionVertex
   /**
    * The applicable {@link QuerySegmentSpec} for this vertex.
    *
-   * There might be more queries inside a single vertex; so the outer one is not necessary correct.
+   * There might be more queries inside a single vertex; so the outer one is not
+   * necessary correct.
    */
   public QuerySegmentSpec getEffectiveQuerySegmentSpec()
   {
     if (querySegmentSpec == null) {
-      throw DruidException
-          .defensive("Can't answer this question. Please obtain a datasource analysis from the Query object!");
+      throw DruidException.defensive("Can't answer this question!");
     }
     return querySegmentSpec;
   }
@@ -178,7 +178,7 @@ public class ExecutionVertex
 
   public boolean canRunQueryUsingLocalWalker()
   {
-      throw new RuntimeException("FIXME: Unimplemented!");
+    throw new RuntimeException("FIXME: Unimplemented!");
   }
 
   @Deprecated
@@ -198,6 +198,6 @@ public class ExecutionVertex
   @Deprecated
   public boolean isBaseColumn(String string)
   {
-    return true;//dsa.isBaseColumn(string);
+    return true;// dsa.isBaseColumn(string);
   }
 }

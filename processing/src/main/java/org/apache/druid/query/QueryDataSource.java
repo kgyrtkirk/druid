@@ -24,6 +24,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.google.common.base.Preconditions;
 import org.apache.druid.java.util.common.IAE;
+import org.apache.druid.query.planning.ExecutionVertex.ExecutionVertexExplorer;
 import org.apache.druid.query.union.UnionQuery;
 import org.apache.druid.segment.SegmentReference;
 
@@ -153,5 +154,13 @@ public class QueryDataSource implements DataSource
   public int hashCode()
   {
     return query.hashCode();
+  }
+
+  @Override
+  public DataSource accept(ExecutionVertexExplorer executionVertexExplorer)
+  {
+    Query<?> newQuery = query.accept(executionVertexExplorer);
+    QueryDataSource ds = newQuery == query ? this : new QueryDataSource(newQuery);
+    return executionVertexExplorer.visit(ds);
   }
 }

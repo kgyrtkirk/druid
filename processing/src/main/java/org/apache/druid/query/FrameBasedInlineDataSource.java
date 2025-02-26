@@ -21,7 +21,6 @@ package org.apache.druid.query;
 
 import org.apache.druid.frame.Frame;
 import org.apache.druid.frame.read.FrameReader;
-import org.apache.druid.java.util.common.IAE;
 import org.apache.druid.java.util.common.guava.Sequence;
 import org.apache.druid.java.util.common.guava.Sequences;
 import org.apache.druid.segment.BaseObjectColumnValueSelector;
@@ -50,7 +49,7 @@ import java.util.stream.Collectors;
  * {@link #rowSignature}. For frames that donot contain the columns present in the {@link #rowSignature}, they are
  * populated with {@code null}.
  */
-public class FrameBasedInlineDataSource implements DataSource
+public class FrameBasedInlineDataSource extends LeafDataSource
 {
 
   final List<FrameSignaturePair> frames;
@@ -132,22 +131,6 @@ public class FrameBasedInlineDataSource implements DataSource
   public Set<String> getTableNames()
   {
     return Collections.emptySet();
-  }
-
-  @Override
-  public List<DataSource> getChildren()
-  {
-    return Collections.emptyList();
-  }
-
-  @Override
-  public DataSource withChildren(List<DataSource> children)
-  {
-    if (!children.isEmpty()) {
-      throw new IAE("Cannot accept children");
-    }
-
-    return this;
   }
 
   @Override

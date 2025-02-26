@@ -42,17 +42,9 @@ import java.util.function.Function;
  * A RestrictedDataSource means the base TableDataSource has policy imposed. A table without any policy should never be
  * transformed to a RestrictedDataSource. Druid internal system and admin users would have a {@link NoRestrictionPolicy}.
  */
-public class RestrictedDataSource implements DataSource
+public class RestrictedDataSource extends ChainedDataSource<TableDataSource>
 {
-  private final TableDataSource base;
-
   private final Policy policy;
-
-  @JsonProperty("base")
-  public TableDataSource getBase()
-  {
-    return base;
-  }
 
   @JsonProperty("policy")
   public Policy getPolicy()
@@ -62,7 +54,7 @@ public class RestrictedDataSource implements DataSource
 
   RestrictedDataSource(TableDataSource base, Policy policy)
   {
-    this.base = base;
+    super(base);
     this.policy = policy;
   }
 
@@ -79,28 +71,6 @@ public class RestrictedDataSource implements DataSource
       throw new IAE("Policy can't be null for RestrictedDataSource");
     }
     return new RestrictedDataSource((TableDataSource) base, policy);
-  }
-
-  @Override
-  public Set<String> getTableNames()
-  {
-    return base.getTableNames();
-  }
-
-  @Override
-  public List<DataSource> getChildren()
-  {
-    return ImmutableList.of(base);
-  }
-
-  @Override
-  public DataSource withChildren(List<DataSource> children)
-  {
-    if (children.size() != 1) {
-      throw new IAE("Expected [1] child, got [%d]", children.size());
-    }
-
-    return create(children.get(0), policy);
   }
 
   @Override
