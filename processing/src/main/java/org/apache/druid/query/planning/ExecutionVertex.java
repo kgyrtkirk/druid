@@ -54,6 +54,9 @@ public class ExecutionVertex
   public static ExecutionVertex of(Query<?> query)
   {
     ExecutionVertexExplorer executionVertexExplorer = new ExecutionVertexExplorer();
+    query.accept(executionVertexExplorer);
+
+
     executionVertexExplorer.visit(query);
     query.getDataSource();
     return new ExecutionVertex(query);
@@ -103,7 +106,7 @@ public class ExecutionVertex
     public abstract DataSource visit(DataSource dataSource);
 
   }
-  static class ExecutionVertexExplorer extends ExecutionVertexShuttle
+  public static class ExecutionVertexExplorer extends ExecutionVertexShuttle
   {
 
     boolean discoveringBase = true;
