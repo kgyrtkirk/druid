@@ -82,12 +82,12 @@ public class ExecutionVertex
 
   public boolean isTableBased()
   {
-    return baseDataSource instanceof TableDataSource;
+    return baseDataSource instanceof TableDataSource
     // || baseDataSource instanceof RestrictedDataSource
-    // || (baseDataSource instanceof UnionDataSource &&
-    // baseDataSource.getChildren()
-    // .stream()
-    // .allMatch(ds -> ds instanceof TableDataSource))
+     || (baseDataSource instanceof UnionDataSource &&
+     baseDataSource.getChildren()
+     .stream()
+     .allMatch(ds -> ds instanceof TableDataSource));
     // || (baseDataSource instanceof UnnestDataSource &&
     // baseDataSource.getChildren()
     // .stream()
