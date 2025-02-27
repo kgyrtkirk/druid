@@ -139,12 +139,6 @@ public class UnnestDataSource implements DataSource
   }
 
   @Override
-  public DataSource withUpdatedDataSource(DataSource newSource)
-  {
-    return new UnnestDataSource(newSource, virtualColumn, unnestFilter);
-  }
-
-  @Override
   public byte[] getCacheKey()
   {
     // The column being unnested would need to be part of the cache key

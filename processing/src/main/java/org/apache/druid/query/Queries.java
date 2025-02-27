@@ -179,6 +179,21 @@ public class Queries
   }
 
   /**
+   * Rewrite "query" to refer to some specific base datasource, instead of the one it currently refers to.
+   *
+   * Unlike the seemingly-similar {@link Query#withDataSource}, this will walk down the datasource tree and replace
+   * only the base datasource (in the sense defined in {@link DataSourceAnalysis}).
+   */
+  public static Query withBaseDataSource(final Query query, final DataSource newBaseDataSource)
+  {
+    ExecutionVertex ev = ExecutionVertex.of(query);
+    if(!ev.isProcessable()) {
+      throw DruidException.defensive("Its unsafe to replace the BaseDataSource of a non-processable query [%s]", query);
+    }
+    return ev.buildQueryWithBaseDataSource(newBaseDataSource);
+  }
+
+  /**
    * Helper for implementations of {@link Query#getRequiredColumns()}. Returns the list of columns that will be read
    * out of a datasource by a query that uses the provided objects in the usual way.
    *

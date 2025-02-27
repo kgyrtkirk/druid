@@ -75,12 +75,6 @@ public class NoopDataSource implements DataSource
   }
 
   @Override
-  public DataSource withUpdatedDataSource(DataSource newSource)
-  {
-    return newSource;
-  }
-
-  @Override
   public byte[] getCacheKey()
   {
     return new byte[]{};

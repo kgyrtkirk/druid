@@ -128,11 +128,6 @@ public class ExternalDataSource implements DataSource
     return Function.identity();
   }
 
-  @Override
-  public DataSource withUpdatedDataSource(DataSource newSource)
-  {
-    return newSource;
-  }
 
   @Override
   public byte[] getCacheKey()

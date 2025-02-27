@@ -129,12 +129,6 @@ public class RestrictedDataSource implements DataSource
   }
 
   @Override
-  public DataSource withUpdatedDataSource(DataSource newSource)
-  {
-    return create(newSource, policy);
-  }
-
-  @Override
   public DataSource withPolicies(Map<String, Optional<Policy>> policyMap)
   {
     if (!policyMap.containsKey(base.getName())) {

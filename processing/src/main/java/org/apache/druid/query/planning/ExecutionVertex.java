@@ -362,16 +362,6 @@ public class ExecutionVertex
     return true;
   }
 
-  public DataSourceAnalysis getX()
-  {
-    if(true)
-    {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-    return null;
-
-  }
-
   public Query buildQueryWithBaseDataSource(DataSource newBaseDataSource)
   {
     return new ReplaceBaseDataSource(baseDataSource, newBaseDataSource).traverse(topQuery);

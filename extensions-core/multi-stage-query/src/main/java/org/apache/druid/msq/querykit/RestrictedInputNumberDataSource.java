@@ -120,11 +120,6 @@ public class RestrictedInputNumberDataSource implements DataSource
     return baseSegment -> new RestrictedSegment(baseSegment, policy);
   }
 
-  @Override
-  public DataSource withUpdatedDataSource(DataSource newSource)
-  {
-    return newSource;
-  }
 
   @Override
   public byte[] getCacheKey()

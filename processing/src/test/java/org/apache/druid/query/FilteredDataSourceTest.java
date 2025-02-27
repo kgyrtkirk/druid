@@ -93,14 +93,6 @@ public class FilteredDataSourceTest extends InitializedNullHandlingTest
   }
 
   @Test
-  public void test_withUpdatedDataSource()
-  {
-    FilteredDataSource newFilteredDataSource = (FilteredDataSource) filteredFooDataSource.withUpdatedDataSource(
-        new TableDataSource("bar"));
-    Assert.assertTrue(newFilteredDataSource.getBase().equals(barDataSource));
-  }
-
-  @Test
   public void test_equals()
   {
     EqualsVerifier.forClass(FilteredDataSource.class).usingGetClass().withNonnullFields("base").verify();

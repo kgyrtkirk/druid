@@ -105,12 +105,6 @@ public class TableDataSource implements DataSource
   }
 
   @Override
-  public DataSource withUpdatedDataSource(DataSource newSource)
-  {
-    return newSource;
-  }
-
-  @Override
   public DataSource withPolicies(Map<String, Optional<Policy>> policyMap)
   {
     Optional<Policy> policy = policyMap.getOrDefault(name, Optional.empty());

@@ -267,12 +267,6 @@ public class UnionQuery implements Query<Object>
     }
 
     @Override
-    public DataSource withUpdatedDataSource(DataSource newSource)
-    {
-      throw methodNotSupported();
-    }
-
-    @Override
     public byte[] getCacheKey()
     {
       return delegate.getCacheKey();

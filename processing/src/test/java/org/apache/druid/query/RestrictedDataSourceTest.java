@@ -105,14 +105,6 @@ public class RestrictedDataSourceTest
   }
 
   @Test
-  public void test_withUpdatedDataSource()
-  {
-    RestrictedDataSource newRestrictedDataSource = (RestrictedDataSource) restrictedFooDataSource.withUpdatedDataSource(
-        new TableDataSource("bar"));
-    Assert.assertEquals(newRestrictedDataSource.getBase(), barDataSource);
-  }
-
-  @Test
   public void test_equals()
   {
     EqualsVerifier.forClass(RestrictedDataSource.class).usingGetClass().withNonnullFields("base", "policy").verify();

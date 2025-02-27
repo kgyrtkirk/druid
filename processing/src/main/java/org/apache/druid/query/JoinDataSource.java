@@ -536,13 +536,15 @@ public class JoinDataSource implements DataSource
   @Nullable
   private static DimFilter validateLeftFilter(final DataSource leftDataSource, @Nullable final DimFilter leftFilter)
   {
+    if (leftFilter == null || TrueDimFilter.instance().equals(leftFilter)) {
+      return null;
+    }
     // Currently we only support leftFilter when applied to concrete leaf datasources (ones with no children).
     // Note that this mean we don't support unions of table, even though this would be reasonable to add in the future.
     Preconditions.checkArgument(
-        leftFilter == null || (leftDataSource.isProcessable() && leftDataSource.getChildren().isEmpty()),
+        leftDataSource.isProcessable() && leftDataSource.getChildren().isEmpty(),
         "left filter is only supported if left data source is direct table access"
     );
-
     return leftFilter;
   }
 

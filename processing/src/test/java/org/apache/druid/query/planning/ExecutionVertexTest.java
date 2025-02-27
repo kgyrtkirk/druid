@@ -63,8 +63,8 @@ public class ExecutionVertexTest
       TABLE_FOO,
       NoRestrictionPolicy.instance()
   );
-  private static final LookupDataSource LOOKUP_LOOKYLOO = new LookupDataSource("lookyloo");
-  private static final InlineDataSource INLINE = InlineDataSource.fromIterable(
+  public static final LookupDataSource LOOKUP_LOOKYLOO = new LookupDataSource("lookyloo");
+  public static final InlineDataSource INLINE = InlineDataSource.fromIterable(
       ImmutableList.of(new Object[0]),
       RowSignature.builder().add("column", ColumnType.STRING).build()
   );

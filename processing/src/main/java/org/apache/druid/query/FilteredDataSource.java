@@ -127,12 +127,6 @@ public class FilteredDataSource implements DataSource
   }
 
   @Override
-  public DataSource withUpdatedDataSource(DataSource newSource)
-  {
-    return new FilteredDataSource(newSource, filter);
-  }
-
-  @Override
   public String toString()
   {
     return "FilteredDataSource{" +

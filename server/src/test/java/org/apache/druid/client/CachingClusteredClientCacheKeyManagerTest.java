@@ -175,7 +175,6 @@ public class CachingClusteredClientCacheKeyManagerTest extends EasyMockSupport
   @Test
   public void testComputeEtag_noEffectifBySegment()
   {
-    expect(dataSourceAnalysis.isJoin()).andReturn(false);
     reset(query);
 
     expect(query.getDataSource()).andReturn(new NoopDataSource());
@@ -194,7 +193,6 @@ public class CachingClusteredClientCacheKeyManagerTest extends EasyMockSupport
   @Test
   public void testComputeEtag_noEffectIfUseAndPopulateFalse()
   {
-    expect(dataSourceAnalysis.isJoin()).andReturn(false);
     expect(query.getDataSource()).andReturn(new NoopDataSource());
     replayAll();
     CachingClusteredClient.CacheKeyManager<Object> keyManager = new CachingClusteredClient.CacheKeyManager<>(

@@ -102,12 +102,6 @@ public class InputNumberDataSource implements DataSource
   }
 
   @Override
-  public DataSource withUpdatedDataSource(DataSource newSource)
-  {
-    return newSource;
-  }
-
-  @Override
   public byte[] getCacheKey()
   {
     return null;
