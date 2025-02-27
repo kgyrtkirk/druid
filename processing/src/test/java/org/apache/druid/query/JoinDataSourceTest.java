@@ -26,10 +26,9 @@ import com.google.common.collect.Iterators;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.math.expr.ExprMacroTable;
+import org.apache.druid.query.JoinDataSource.JoinDataSourceAnalysis;
 import org.apache.druid.query.filter.InDimFilter;
 import org.apache.druid.query.filter.TrueDimFilter;
-import org.apache.druid.query.planning.DataSourceAnalysis;
-import org.apache.druid.query.planning.ExecutionVertex;
 import org.apache.druid.query.policy.NoRestrictionPolicy;
 import org.apache.druid.segment.TestHelper;
 import org.apache.druid.segment.column.ColumnType;
@@ -134,7 +133,7 @@ public class JoinDataSourceTest
   @Test
   public void test_isConcrete_tableToLookup()
   {
-    Assert.assertFalse(joinTableToLookup.isConcrete());
+    Assert.assertTrue(joinTableToLookup.isConcrete());
   }
 
   @Test
@@ -171,7 +170,7 @@ public class JoinDataSourceTest
     EqualsVerifier.forClass(JoinDataSource.class)
                   .usingGetClass()
                   .withNonnullFields("left", "right", "rightPrefix", "conditionAnalysis", "joinType")
-                  .withIgnoredFields("joinableFactoryWrapper", "analysis")
+                  .withIgnoredFields("joinableFactoryWrapper")
                   .verify();
   }
 
@@ -474,7 +473,7 @@ public class JoinDataSourceTest
         null,
         JoinAlgorithm.BROADCAST
     );
-    DataSourceAnalysis analysis = (DataSourceAnalysis) ExecutionVertex.ofIllegal(dataSource);
+    JoinDataSourceAnalysis analysis = dataSource.getJoinAnalysisForDataSource();
     Assert.assertEquals("table1", analysis.getBaseDataSource().getTableNames().iterator().next());
   }
 
@@ -499,7 +498,7 @@ public class JoinDataSourceTest
         null,
         JoinAlgorithm.BROADCAST
     );
-    DataSourceAnalysis analysis = (DataSourceAnalysis) ExecutionVertex.ofIllegal(dataSource);
+    JoinDataSourceAnalysis analysis = dataSource.getJoinAnalysisForDataSource();
     Assert.assertEquals("table1", analysis.getBaseDataSource().getTableNames().iterator().next());
   }
 
@@ -521,7 +520,7 @@ public class JoinDataSourceTest
         null,
         JoinAlgorithm.BROADCAST
     );
-    DataSourceAnalysis analysis = (DataSourceAnalysis) ExecutionVertex.ofIllegal(dataSource);
+    JoinDataSourceAnalysis analysis = dataSource.getJoinAnalysisForDataSource();
     Assert.assertEquals(left, analysis.getBaseDataSource());
     Assert.assertEquals("table1", analysis.getBaseDataSource().getTableNames().iterator().next());
   }

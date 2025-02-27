@@ -24,6 +24,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
@@ -502,6 +503,7 @@ public class JoinDataSource implements DataSource
    *
    * It will only process what the join datasource could handle in one go - and not more.
    */
+  @VisibleForTesting
   public JoinDataSourceAnalysis getJoinAnalysisForDataSource()
   {
     return JoinDataSourceAnalysis.constructAnalysis(this);

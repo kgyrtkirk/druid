@@ -239,7 +239,7 @@ public abstract class BaseLeafFrameProcessorFactory extends BaseFrameProcessorFa
 
   /**
    * Read base inputs, where "base" is meant in the same sense as in
-   * {@link org.apache.druid.query.planning.DataSourceAnalysis}: the primary datasource that drives query processing.
+   * {@link ExecutionVertex}: the primary datasource that drives query processing.
    */
   private static Iterable<ReadableInput> readBaseInputs(
       final StageDefinition stageDef,
