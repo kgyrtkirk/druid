@@ -331,11 +331,14 @@ public class ExecutionVertex
 
   public boolean canRunQueryUsingClusterWalker()
   {
+    // Must be based on a concrete table (the only shape the Druid cluster can handle).
     return isConcreteBased() && isTableBased();
   }
 
   public boolean canRunQueryUsingLocalWalker()
   {
+    // Must be based on a concrete datasource that is not a table.
+    // Must be based on globally available data (so we have a copy here on the Broker).
     return isConcreteBased()
         && !isTableBased()
         && isGlobal();
