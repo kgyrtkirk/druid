@@ -65,7 +65,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -301,42 +300,13 @@ public class JoinDataSource implements DataSource
   @Override
   public byte[] getCacheKey()
   {
-    if (true) {
-      final CacheKeyBuilder keyBuilder;
-      keyBuilder = new CacheKeyBuilder(JoinableFactoryWrapper.JOIN_OPERATION);
-      keyBuilder.appendCacheable(leftFilter);
-      keyBuilder.appendCacheable(conditionAnalysis);
-      keyBuilder.appendCacheable(joinType);
-      keyBuilder.appendCacheable(left);
-      keyBuilder.appendCacheable(right);
-      return keyBuilder.build();
-    }
-
-    JoinDataSourceAnalysis analysis = null;//getAnalysis();
-    final List<PreJoinableClause> clauses = analysis.getPreJoinableClauses();
-    if (clauses.isEmpty()) {
-      throw new IAE("No join clauses to build the cache key for data source [%s]", this);
-    }
-
     final CacheKeyBuilder keyBuilder;
     keyBuilder = new CacheKeyBuilder(JoinableFactoryWrapper.JOIN_OPERATION);
-    if (analysis.getJoinBaseTableFilter().isPresent()) {
-      keyBuilder.appendCacheable(analysis.getJoinBaseTableFilter().get());
-    }
-    for (PreJoinableClause clause : clauses) {
-      final Optional<byte[]> bytes =
-          joinableFactoryWrapper.getJoinableFactory()
-                                .computeJoinCacheKey(clause.getDataSource(), clause.getCondition());
-      if (!bytes.isPresent()) {
-        // Encountered a data source which didn't support cache yet
-        log.debug("skipping caching for join since [%s] does not support caching", clause.getDataSource());
-        return new byte[]{};
-      }
-      keyBuilder.appendByteArray(bytes.get());
-      keyBuilder.appendString(clause.getCondition().getOriginalExpression());
-      keyBuilder.appendString(clause.getPrefix());
-      keyBuilder.appendString(clause.getJoinType().name());
-    }
+    keyBuilder.appendCacheable(leftFilter);
+    keyBuilder.appendCacheable(conditionAnalysis);
+    keyBuilder.appendCacheable(joinType);
+    keyBuilder.appendCacheable(left);
+    keyBuilder.appendCacheable(right);
     return keyBuilder.build();
   }
 
