@@ -171,9 +171,8 @@ public class ExecutionVertex
               dataSource = new QueryDataSource(newQuery);
             }
           }
-          return dataSource;
+          return visit(dataSource);
         } else {
-
           List<DataSource> children = dataSource.getChildren();
           List<DataSource> newChildren = new ArrayList<>();
           boolean changed = false;
@@ -244,16 +243,30 @@ public class ExecutionVertex
     protected DataSource visit(DataSource dataSource)
     {
       if (discoveringBase) {
+        if(!isLeftLeaning()) {
+          throw DruidException.defensive("Asdf");
+        }
+
         baseDataSource = dataSource;
         discoveringBase = false;
       }
       return dataSource;
     }
 
+    private boolean isLeftLeaning()
+    {
+      for (EVNode evNode : parents) {
+        if (evNode.index != null && evNode.index != 0) {
+          return false;
+        }
+      }
+      return true;
+    }
+
     @Override
     protected Query<?> visitQuery(Query<?> query)
     {
-      if (querySegmentSpec == null) {
+      if (querySegmentSpec == null && isLeftLeaning()) {
         querySegmentSpec = getQuerySegmentSpec(query);
       }
       return query;
