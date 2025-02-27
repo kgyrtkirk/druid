@@ -26,6 +26,7 @@ import com.google.common.collect.Iterators;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.math.expr.ExprMacroTable;
+import org.apache.druid.query.filter.FalseDimFilter;
 import org.apache.druid.query.filter.InDimFilter;
 import org.apache.druid.query.filter.TrueDimFilter;
 import org.apache.druid.query.planning.JoinDataSourceAnalysis;
@@ -38,15 +39,17 @@ import org.apache.druid.segment.join.JoinableFactoryWrapper;
 import org.apache.druid.segment.join.NoopJoinableFactory;
 import org.apache.druid.segment.virtual.ExpressionVirtualColumn;
 import org.easymock.Mock;
+import org.hamcrest.CoreMatchers;
+import org.hamcrest.MatcherAssert;
 import org.junit.Assert;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
 public class JoinDataSourceTest
@@ -81,8 +84,6 @@ public class JoinDataSourceTest
       JoinAlgorithm.BROADCAST
 
   );
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
   @Mock
   private JoinableFactoryWrapper joinableFactoryWrapper;
 
@@ -151,9 +152,11 @@ public class JoinDataSourceTest
   @Test
   public void test_withChildren_empty()
   {
-    expectedException.expect(IllegalArgumentException.class);
-    expectedException.expectMessage("Expected [2] children, got [0]");
-    joinTableToTable.withChildren(Collections.emptyList());
+    IllegalArgumentException e = assertThrows(
+        IllegalArgumentException.class,
+        () -> joinTableToTable.withChildren(Collections.emptyList())
+    );
+    MatcherAssert.assertThat(e.getMessage(), CoreMatchers.containsString("Expected [2] children, got [0]"));
   }
 
   @Test
@@ -201,18 +204,23 @@ public class JoinDataSourceTest
   @Test
   public void testException_leftFilterOnNonTableSource()
   {
-    expectedException.expect(IllegalArgumentException.class);
-    expectedException.expectMessage("left filter is only supported if left data source is direct table access");
-    JoinDataSource.create(
-        new QueryDataSource(Mockito.mock(Query.class)),
-        new TableDataSource("table"),
-        "j.",
-        "x == \"j.x\"",
-        JoinType.LEFT,
-        TrueDimFilter.instance(),
-        ExprMacroTable.nil(),
-        null,
-        JoinAlgorithm.BROADCAST
+    IllegalArgumentException e = assertThrows(
+        IllegalArgumentException.class,
+        () -> JoinDataSource.create(
+            new QueryDataSource(Mockito.mock(Query.class)),
+            new TableDataSource("table"),
+            "j.",
+            "x == \"j.x\"",
+            JoinType.LEFT,
+            FalseDimFilter.instance(),
+            ExprMacroTable.nil(),
+            null,
+            JoinAlgorithm.BROADCAST
+        )
+    );
+    MatcherAssert.assertThat(
+        e.getMessage(),
+        CoreMatchers.containsString("left filter is only supported if left data source is direct table access")
     );
   }
 
@@ -230,7 +238,7 @@ public class JoinDataSourceTest
         null,
         JoinAlgorithm.BROADCAST
     );
-    Assert.assertEquals(TrueDimFilter.instance(), dataSource.getLeftFilter());
+    Assert.assertEquals(null, dataSource.getLeftFilter());
   }
 
   @Test
