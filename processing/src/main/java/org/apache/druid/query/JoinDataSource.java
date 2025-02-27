@@ -41,7 +41,7 @@ import org.apache.druid.query.filter.DimFilters;
 import org.apache.druid.query.filter.Filter;
 import org.apache.druid.query.filter.TrueDimFilter;
 import org.apache.druid.query.planning.DataSourceAnalysis;
-import org.apache.druid.query.planning.DataSourceAnalysis3;
+import org.apache.druid.query.planning.JoinDataSourceAnalysis;
 import org.apache.druid.query.planning.PreJoinableClause;
 import org.apache.druid.segment.SegmentReference;
 import org.apache.druid.segment.filter.Filters;
@@ -339,7 +339,7 @@ public class JoinDataSource implements DataSource
       return keyBuilder.build();
     }
 
-    DataSourceAnalysis3 analysis = null;//getAnalysis();
+    JoinDataSourceAnalysis analysis = null;//getAnalysis();
     final List<PreJoinableClause> clauses = analysis.getPreJoinableClauses();
     if (clauses.isEmpty()) {
       throw new IAE("No join clauses to build the cache key for data source [%s]", this);
@@ -426,7 +426,7 @@ public class JoinDataSource implements DataSource
   @Override
   public Function<SegmentReference, SegmentReference> createSegmentMapFunction(Query query)
   {
-    DataSourceAnalysis3 joinAnalysis = getJoinAnalysisForDataSource();
+    JoinDataSourceAnalysis joinAnalysis = getJoinAnalysisForDataSource();
     List<PreJoinableClause> clauses = joinAnalysis.getPreJoinableClauses();
     Filter baseFilter = joinAnalysis.getJoinBaseTableFilter().map(Filters::toFilter).orElse(null);
 
@@ -502,9 +502,9 @@ public class JoinDataSource implements DataSource
    *
    * It will only process what the join datasource could handle in one go - and not more.
    */
-  public DataSourceAnalysis3 getJoinAnalysisForDataSource()
+  public JoinDataSourceAnalysis getJoinAnalysisForDataSource()
   {
-    return DataSourceAnalysis3.constructAnalysis(this);
+    return JoinDataSourceAnalysis.constructAnalysis(this);
   }
 
   /**
@@ -514,7 +514,7 @@ public class JoinDataSource implements DataSource
    *
    * @throws IllegalArgumentException if dataSource cannot be fully flattened.
    */
-  private static DataSourceAnalysis3 constructAnalysis(final JoinDataSource dataSource, boolean vertexBoundary)
+  private static JoinDataSourceAnalysis constructAnalysis(final JoinDataSource dataSource, boolean vertexBoundary)
   {
     DataSource current = dataSource;
     DimFilter currentDimFilter = TrueDimFilter.instance();
@@ -551,7 +551,7 @@ public class JoinDataSource implements DataSource
     // going-up order. So reverse them.
     Collections.reverse(preJoinableClauses);
 
-    return new DataSourceAnalysis3(current, null, currentDimFilter, preJoinableClauses, null);
+    return new JoinDataSourceAnalysis(current, null, currentDimFilter, preJoinableClauses, null);
   }
 
 

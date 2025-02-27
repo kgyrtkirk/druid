@@ -231,7 +231,7 @@ public class DataSourceAnalysisTest
         );
 
     final ExecutionVertex ev = ExecutionVertex.of(makeScanQuery(joinDataSource));
-    final DataSourceAnalysis3 analysis = joinDataSource.getJoinAnalysisForDataSource();
+    final JoinDataSourceAnalysis analysis = joinDataSource.getJoinAnalysisForDataSource();
 
     Assert.assertFalse(ev.isExecutable());
     Assert.assertTrue(ev.isTableBased());
@@ -278,7 +278,7 @@ public class DataSourceAnalysisTest
         );
 
     final ExecutionVertex analysis = ExecutionVertex.of(makeScanQuery(joinDataSource));
-    final DataSourceAnalysis3 analysis1 = joinDataSource.getJoinAnalysisForDataSource();
+    final JoinDataSourceAnalysis analysis1 = joinDataSource.getJoinAnalysisForDataSource();
 
     Assert.assertFalse(analysis.isExecutable());
     Assert.assertTrue(analysis.isTableBased());
@@ -331,7 +331,7 @@ public class DataSourceAnalysisTest
         );
 
     final ExecutionVertex analysis = ExecutionVertex.of(makeScanQuery(joinDataSource));
-    final DataSourceAnalysis3 analysis1 = joinDataSource.getJoinAnalysisForDataSource();
+    final JoinDataSourceAnalysis analysis1 = joinDataSource.getJoinAnalysisForDataSource();
 
     Assert.assertFalse(analysis.isExecutable());
     Assert.assertTrue(analysis.isTableBased());
@@ -378,7 +378,7 @@ public class DataSourceAnalysisTest
         );
 
     final ExecutionVertex ev = ExecutionVertex.of(makeScanQuery(joinDataSource));
-    final DataSourceAnalysis3 analysis = joinDataSource.getJoinAnalysisForDataSource();
+    final JoinDataSourceAnalysis analysis = joinDataSource.getJoinAnalysisForDataSource();
 
     Assert.assertFalse(ev.isExecutable());
     Assert.assertTrue(ev.isTableBased());
@@ -411,7 +411,7 @@ public class DataSourceAnalysisTest
     );
 
     final ExecutionVertex analysis = ExecutionVertex.of(makeScanQuery(joinDataSource));
-    final DataSourceAnalysis3 analysis1 = joinDataSource.getJoinAnalysisForDataSource();
+    final JoinDataSourceAnalysis analysis1 = joinDataSource.getJoinAnalysisForDataSource();
 
     Assert.assertFalse(analysis.isExecutable());
     Assert.assertTrue(analysis.isTableBased());
@@ -441,7 +441,7 @@ public class DataSourceAnalysisTest
     );
 
     final ExecutionVertex ev = ExecutionVertex.of(makeScanQuery(joinDataSource));
-    final DataSourceAnalysis3 analysis1 = joinDataSource.getJoinAnalysisForDataSource();
+    final JoinDataSourceAnalysis analysis1 = joinDataSource.getJoinAnalysisForDataSource();
 
     Assert.assertTrue(ev.isExecutable());
     Assert.assertTrue(ev.isTableBased());
@@ -509,7 +509,7 @@ public class DataSourceAnalysisTest
         .build();
 
     final ExecutionVertex ev = ExecutionVertex.of(query);
-    final DataSourceAnalysis3 analysis = joinDataSource.getJoinAnalysisForDataSource();
+    final JoinDataSourceAnalysis analysis = joinDataSource.getJoinAnalysisForDataSource();
 
     Assert.assertTrue(ev.isExecutable());
     Assert.assertTrue(ev.isTableBased());
@@ -564,7 +564,7 @@ Assert.assertEquals(null, analysis.getJoinBaseTableFilter().orElse(null));
     );
 
     final ExecutionVertex ev = ExecutionVertex.of(makeScanQuery(joinDataSource));
-    final DataSourceAnalysis3 analysis1 = joinDataSource.getJoinAnalysisForDataSource();
+    final JoinDataSourceAnalysis analysis1 = joinDataSource.getJoinAnalysisForDataSource();
 
     Assert.assertTrue(ev.isExecutable());
     Assert.assertFalse(ev.isTableBased());
@@ -594,7 +594,7 @@ Assert.assertEquals(null, analysis.getJoinBaseTableFilter().orElse(null));
     );
 
     final ExecutionVertex ev = ExecutionVertex.of(makeScanQuery(joinDataSource));
-    final DataSourceAnalysis3 analysis1 = joinDataSource.getJoinAnalysisForDataSource();
+    final JoinDataSourceAnalysis analysis1 = joinDataSource.getJoinAnalysisForDataSource();
 
     Assert.assertFalse(ev.isExecutable());
     Assert.assertFalse(ev.isTableBased());
