@@ -168,7 +168,7 @@ public class DataSourceAnalysis2 implements DataSourceAnalysis
    */
   public boolean isConcreteBased()
   {
-    return baseDataSource.isConcrete() ;
+    return baseDataSource.isProcessable() ;
   }
 
   /**

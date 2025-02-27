@@ -117,7 +117,7 @@ public class ExternalDataSource implements DataSource
   }
 
   @Override
-  public boolean isConcrete()
+  public boolean isProcessable()
   {
     return false;
   }

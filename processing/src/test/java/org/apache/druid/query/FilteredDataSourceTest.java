@@ -69,7 +69,7 @@ public class FilteredDataSourceTest extends InitializedNullHandlingTest
   @Test
   public void test_isConcrete()
   {
-    Assert.assertTrue(filteredFooDataSource.isConcrete());
+    Assert.assertTrue(filteredFooDataSource.isProcessable());
   }
 
   @Test

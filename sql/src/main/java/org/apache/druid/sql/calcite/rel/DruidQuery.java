@@ -1476,7 +1476,7 @@ public class DruidQuery
     }
 
     // This is not yet supported
-    if (dataSource.isConcrete()) {
+    if (dataSource.isProcessable()) {
       return null;
     }
     if (dataSource instanceof TableDataSource) {
@@ -1538,7 +1538,7 @@ public class DruidQuery
       return null;
     }
 
-    if (dataSource.isConcrete()) {
+    if (dataSource.isProcessable()) {
       // Currently only non-time orderings of subqueries are allowed.
       setPlanningErrorOrderByNonTimeIsUnsupported();
       return null;

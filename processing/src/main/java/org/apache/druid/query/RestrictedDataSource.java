@@ -116,9 +116,9 @@ public class RestrictedDataSource implements DataSource
   }
 
   @Override
-  public boolean isConcrete()
+  public boolean isProcessable()
   {
-    return base.isConcrete();
+    return base.isProcessable();
   }
 
   @Override

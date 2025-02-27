@@ -163,7 +163,7 @@ public class FrameBasedInlineDataSource implements DataSource
   }
 
   @Override
-  public boolean isConcrete()
+  public boolean isProcessable()
   {
     return true;
   }

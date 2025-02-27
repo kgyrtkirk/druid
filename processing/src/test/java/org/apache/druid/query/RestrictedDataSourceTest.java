@@ -81,7 +81,7 @@ public class RestrictedDataSourceTest
   @Test
   public void test_isConcrete()
   {
-    Assert.assertTrue(restrictedFooDataSource.isConcrete());
+    Assert.assertTrue(restrictedFooDataSource.isProcessable());
   }
 
   @Test

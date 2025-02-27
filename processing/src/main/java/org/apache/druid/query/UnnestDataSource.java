@@ -126,9 +126,9 @@ public class UnnestDataSource implements DataSource
   }
 
   @Override
-  public boolean isConcrete()
+  public boolean isProcessable()
   {
-    return base.isConcrete();
+    return base.isProcessable();
   }
 
   @Override

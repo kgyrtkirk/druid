@@ -109,7 +109,7 @@ public class RestrictedInputNumberDataSource implements DataSource
   }
 
   @Override
-  public boolean isConcrete()
+  public boolean isProcessable()
   {
     return true;
   }

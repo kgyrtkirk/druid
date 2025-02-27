@@ -89,7 +89,7 @@ public class InputNumberDataSource implements DataSource
   }
 
   @Override
-  public boolean isConcrete()
+  public boolean isProcessable()
   {
     // InputNumberDataSource represents InputSpecs, which are scannable via Segment adapters.
     return true;

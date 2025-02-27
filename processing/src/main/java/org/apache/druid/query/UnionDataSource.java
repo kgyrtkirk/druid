@@ -135,9 +135,9 @@ public class UnionDataSource implements DataSource
   }
 
   @Override
-  public boolean isConcrete()
+  public boolean isProcessable()
   {
-    return dataSources.stream().allMatch(DataSource::isConcrete);
+    return dataSources.stream().allMatch(DataSource::isProcessable);
   }
 
   @Override

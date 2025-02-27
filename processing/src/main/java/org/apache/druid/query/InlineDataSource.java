@@ -235,7 +235,7 @@ public class InlineDataSource implements DataSource
   }
 
   @Override
-  public boolean isConcrete()
+  public boolean isProcessable()
   {
     return true;
   }

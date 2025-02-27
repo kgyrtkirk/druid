@@ -84,7 +84,7 @@ public class ExecutionVertex
   // FIXME rename
   public boolean isExecutable()
   {
-    return getBaseDataSource().isConcrete() && allRightsAreGlobal;
+    return getBaseDataSource().isProcessable() && allRightsAreGlobal;
 //topQuery.getDataSource().isConcrete();
   }
 

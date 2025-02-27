@@ -101,7 +101,7 @@ public class QueryDataSource implements DataSource
   }
 
   @Override
-  public boolean isConcrete()
+  public boolean isProcessable()
   {
     return false;
   }

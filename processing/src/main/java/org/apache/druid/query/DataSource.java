@@ -22,7 +22,7 @@ package org.apache.druid.query;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import org.apache.druid.java.util.common.Cacheable;
-import org.apache.druid.query.planning.DataSourceAnalysis;
+import org.apache.druid.query.planning.ExecutionVertex;
 import org.apache.druid.query.planning.PreJoinableClause;
 import org.apache.druid.query.policy.Policy;
 import org.apache.druid.segment.SegmentReference;
@@ -76,8 +76,10 @@ public interface DataSource extends Cacheable
   boolean isCacheable(boolean isBroker);
 
   /**
-   * Returns true if all servers have a full copy of this datasource. True for things like inline, lookup, etc, or
-   * for queries of those.
+   * Decides if this datasource can be accessed globally.
+   *
+   * This means that all servers have a full copy of this datasource.
+   * True for things like inline, lookup, etc, or for queries of those.
    * <p>
    * Currently this is coupled with joinability - if this returns true then the query engine expects there exists a
    * {@link org.apache.druid.segment.join.JoinableFactory} which might build a
@@ -91,18 +93,14 @@ public interface DataSource extends Cacheable
   boolean isGlobal();
 
   /**
-   * Returns true if this datasource can be the base datasource of query processing.
+   * Communicates that this {@link DataSource} can be directly used to run a {@link Query}.
    * <p>
-   * Base datasources drive query processing. If the base datasource is {@link TableDataSource}, for example, queries
-   * are processed in parallel on data servers. If the base datasource is {@link InlineDataSource}, queries are
-   * processed on the Broker. See {@link DataSourceAnalysis#getBaseDataSource()} for further discussion.
-   * <p>
-   * Datasources that are *not* concrete must be pre-processed in some way before they can be processed by the main
-   * query stack. For example, {@link QueryDataSource} must be executed first and substituted with its results.
-   *
-   * @see DataSourceAnalysis#isConcreteBased() which uses this
+   * Processable examples are Tables / Inline datasources.
+   * Non-processable ones are those which need further pre-processing before running them.
+   * </p>
+   * Processing boundaries are identified {@link ExecutionVertex}.
    */
-  boolean isConcrete();
+  boolean isProcessable();
 
   /**
    * Returns a segment function on to how to segment should be modified.

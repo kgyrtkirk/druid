@@ -255,9 +255,9 @@ public class UnionQuery implements Query<Object>
     }
 
     @Override
-    public boolean isConcrete()
+    public boolean isProcessable()
     {
-      return delegate.isConcrete();
+      return delegate.isProcessable();
     }
 
     @Override
