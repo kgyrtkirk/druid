@@ -19,20 +19,13 @@
 
 package org.apache.druid.query.planning;
 
-import org.apache.druid.error.DruidException;
 import org.apache.druid.java.util.common.IAE;
-import org.apache.druid.java.util.common.Intervals;
 import org.apache.druid.query.DataSource;
 import org.apache.druid.query.JoinDataSource;
 import org.apache.druid.query.Query;
-import org.apache.druid.query.RestrictedDataSource;
-import org.apache.druid.query.TableDataSource;
-import org.apache.druid.query.UnionDataSource;
-import org.apache.druid.query.UnnestDataSource;
 import org.apache.druid.query.filter.DimFilter;
 import org.apache.druid.query.filter.DimFilters;
 import org.apache.druid.query.filter.TrueDimFilter;
-import org.apache.druid.query.spec.MultipleIntervalSegmentSpec;
 import org.apache.druid.query.spec.QuerySegmentSpec;
 import org.apache.druid.segment.join.JoinPrefixUtils;
 
@@ -84,12 +77,8 @@ public class DataSourceAnalysis3
 {
   private final DataSource baseDataSource;
   @Nullable
-  private final Query<?> baseQuery;
-  @Nullable
   private final DimFilter joinBaseTableFilter;
   private final List<PreJoinableClause> preJoinableClauses;
-  @Nullable
-  private final QuerySegmentSpec querySegmentSpec;
 
   public DataSourceAnalysis3(
       DataSource baseDataSource,
@@ -107,10 +96,8 @@ public class DataSourceAnalysis3
     }
 
     this.baseDataSource = baseDataSource;
-    this.baseQuery = baseQuery;
     this.joinBaseTableFilter = joinBaseTableFilter;
     this.preJoinableClauses = preJoinableClauses;
-    this.querySegmentSpec = querySegmentSpec;
   }
 
   /**
@@ -119,30 +106,6 @@ public class DataSourceAnalysis3
   public DataSource getBaseDataSource()
   {
     return baseDataSource;
-  }
-
-  /**
-   * If {@link #getBaseDataSource()} is a {@link UnionDataSource}, returns it. Otherwise, returns an empty Optional.
-   */
-  public Optional<UnionDataSource> getBaseUnionDataSource()
-  {
-    if (baseDataSource instanceof UnionDataSource) {
-      return Optional.of((UnionDataSource) baseDataSource);
-    } else {
-      return Optional.empty();
-    }
-  }
-
-  /**
-   * Returns the bottom-most (i.e. innermost) {@link Query} from a possible stack of outer queries at the root of
-   * the datasource tree. This is the query that will be applied to the base datasource plus any joinables that might
-   * be present.
-   *
-   * @return the query associated with the base datasource if  is true, else empty
-   */
-  public Optional<Query<?>> getBaseQuery()
-  {
-    return Optional.ofNullable(baseQuery);
   }
 
   /**
@@ -155,96 +118,22 @@ public class DataSourceAnalysis3
   }
 
   /**
-   * The applicable {@link QuerySegmentSpec} for this vertex.
-   *
-   * There might be more queries inside a single vertex; so the outer one is not necessary correct.
-   */
-  public QuerySegmentSpec getEffectiveQuerySegmentSpec()
-  {
-    if (querySegmentSpec == null) {
-      throw DruidException
-          .defensive("Can't answer this question. Please obtain a datasource analysis from the Query object!");
-    }
-    return querySegmentSpec;
-  }
-
-  /**
    * Returns join clauses corresponding to joinable leaf datasources (every leaf except the bottom-leftmost).
    */
   public List<PreJoinableClause> getPreJoinableClauses()
   {
     return preJoinableClauses;
   }
-
-  /**
-   * Returns true if this datasource can be computed by the core Druid query stack via a scan of a concrete base
-   * datasource. All other datasources involved, if any, must be global.
-   */
-  public boolean isConcreteBased()
-  {
-    return baseDataSource.isConcrete() && preJoinableClauses.stream()
-                                                            .allMatch(clause -> clause.getDataSource().isGlobal());
-  }
-
-  /**
-   * Returns whether this datasource is one of:
-   *
-   * <ul>
-   *   <li>{@link TableDataSource}</li>
-   *   <li>{@link UnionDataSource} composed entirely of {@link TableDataSource}</li>
-   *   <li>{@link UnnestDataSource} composed entirely of {@link TableDataSource}</li>
-   * </ul>
-   */
-  public boolean isTableBased()
-  {
-    return (baseDataSource instanceof TableDataSource
-            || baseDataSource instanceof RestrictedDataSource
-            || (baseDataSource instanceof UnionDataSource &&
-                baseDataSource.getChildren()
-                              .stream()
-                              .allMatch(ds -> ds instanceof TableDataSource))
-            || (baseDataSource instanceof UnnestDataSource &&
-                baseDataSource.getChildren()
-                              .stream()
-                              .allMatch(ds -> ds instanceof TableDataSource)));
-  }
-
-  /**
-   * Returns true if this datasource is both (see {@link #isConcreteBased()} and {@link #isTableBased()}.
-   * This is an important property, because it corresponds to datasources that can be handled by Druid's distributed
-   * query stack.
-   */
-  public boolean isConcreteAndTableBased()
-  {
-    // At the time of writing this comment, UnionDataSource children are required to be tables, so the instanceof
-    // check is redundant. But in the future, we will likely want to support unions of things other than tables,
-    // so check anyway for future-proofing.
-    return isConcreteBased() && isTableBased();
-  }
-
-  /**
-   * Returns true if this datasource is made out of a join operation
-   */
-  public boolean isJoin()
-  {
-    return !preJoinableClauses.isEmpty();
-  }
-
   /**
    * Returns whether "column" on the analyzed datasource refers to a column from the base datasource.
    */
   public boolean isBaseColumn(final String column)
   {
-    if (baseQuery != null) {
-      return false;
-    }
-
     for (final PreJoinableClause clause : preJoinableClauses) {
       if (JoinPrefixUtils.isPrefixedBy(column, clause.getPrefix())) {
         return false;
       }
     }
-
     return true;
   }
 
@@ -258,13 +147,13 @@ public class DataSourceAnalysis3
       return false;
     }
     DataSourceAnalysis3 that = (DataSourceAnalysis3) o;
-    return Objects.equals(baseDataSource, that.baseDataSource) && Objects.equals(querySegmentSpec, that.querySegmentSpec);
+    return Objects.equals(baseDataSource, that.baseDataSource);
   }
 
   @Override
   public int hashCode()
   {
-    return Objects.hash(baseDataSource, querySegmentSpec);
+    return Objects.hash(baseDataSource);
   }
 
   @Override
@@ -272,40 +161,10 @@ public class DataSourceAnalysis3
   {
     return "DataSourceAnalysis{" +
            ", baseDataSource=" + baseDataSource +
-           ", baseQuery=" + baseQuery +
            ", preJoinableClauses=" + preJoinableClauses +
            '}';
   }
 
-  /**
-   * {@link DataSource#isGlobal()}.
-   */
-  public boolean isGlobal()
-  {
-    for (PreJoinableClause preJoinableClause : preJoinableClauses) {
-      if (!preJoinableClause.getDataSource().isGlobal()) {
-        return false;
-      }
-    }
-    return baseDataSource.isGlobal();
-  }
-
-  public DataSourceAnalysis3 maybeWithQuerySegmentSpec(QuerySegmentSpec newQuerySegmentSpec)
-  {
-    if (newQuerySegmentSpec == null) {
-      newQuerySegmentSpec = new MultipleIntervalSegmentSpec(Intervals.ONLY_ETERNITY);
-    }
-    if (querySegmentSpec == null) {
-      return new DataSourceAnalysis3(
-          baseDataSource,
-          baseQuery,
-          joinBaseTableFilter,
-          preJoinableClauses,
-          newQuerySegmentSpec
-      );
-    }
-    return this;
-  }
 
   public static DataSourceAnalysis3 constructAnalysis(final JoinDataSource dataSource)
   {

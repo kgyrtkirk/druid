@@ -238,7 +238,6 @@ public class DataSourceAnalysisTest
     Assert.assertEquals(TABLE_FOO, ev.getBaseDataSource());
     Assert.assertEquals(TABLE_FOO, ev.getBaseTableDataSource());
     Assert.assertEquals(Optional.empty(), analysis.getJoinBaseTableFilter());
-    Assert.assertEquals(Optional.empty(), analysis.getBaseUnionDataSource());
     Assert.assertEquals(new MultipleIntervalSegmentSpec(MILLENIUM_INTERVALS), ev.getEffectiveQuerySegmentSpec());
     Assert.assertEquals(
         ImmutableList.of(
@@ -339,7 +338,6 @@ public class DataSourceAnalysisTest
     Assert.assertEquals(TABLE_FOO, analysis.getBaseDataSource());
     Assert.assertEquals(TABLE_FOO, analysis.getBaseTableDataSource());
     Assert.assertEquals(Optional.empty(), analysis1.getJoinBaseTableFilter());
-    Assert.assertEquals(Optional.empty(), analysis1.getBaseUnionDataSource());
     Assert.assertEquals(new MultipleIntervalSegmentSpec(MILLENIUM_INTERVALS), analysis.getEffectiveQuerySegmentSpec());
     Assert.assertEquals(
         ImmutableList.of(
@@ -449,7 +447,6 @@ public class DataSourceAnalysisTest
     Assert.assertTrue(ev.isTableBased());
     Assert.assertThrows(DruidException.class, () -> ev.getBaseTableDataSource());
     Assert.assertEquals(Optional.empty(), analysis1.getJoinBaseTableFilter());
-    Assert.assertEquals(Optional.of(unionDataSource), analysis1.getBaseUnionDataSource());
     Assert.assertEquals(unionDataSource, ev.getBaseDataSource());
     Assert.assertEquals(new MultipleIntervalSegmentSpec(MILLENIUM_INTERVALS), ev.getEffectiveQuerySegmentSpec());
     Assert.assertEquals(
@@ -599,12 +596,10 @@ Assert.assertEquals(null, analysis.getJoinBaseTableFilter().orElse(null));
     final ExecutionVertex ev = ExecutionVertex.of(makeScanQuery(joinDataSource));
     final DataSourceAnalysis3 analysis1 = joinDataSource.getJoinAnalysisForDataSource();
 
-    Assert.assertFalse(analysis1.isConcreteBased());
     Assert.assertFalse(ev.isExecutable());
     Assert.assertFalse(ev.isTableBased());
     Assert.assertEquals(LOOKUP_LOOKYLOO, ev.getBaseDataSource());
     Assert.assertThrows(DruidException.class, () -> ev.getBaseTableDataSource());
-    Assert.assertEquals(Optional.empty(), analysis1.getBaseUnionDataSource());
     Assert.assertEquals(new MultipleIntervalSegmentSpec(MILLENIUM_INTERVALS), ev.getEffectiveQuerySegmentSpec());
     Assert.assertEquals(Optional.empty(), analysis1.getJoinBaseTableFilter());
     Assert.assertEquals(
