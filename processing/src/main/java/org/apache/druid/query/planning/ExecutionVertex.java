@@ -107,7 +107,7 @@ public class ExecutionVertex
         if (query instanceof BaseQuery<?>) {
           BaseQuery<?> baseQuery = (BaseQuery<?>) query;
           DataSource oldDataSource = baseQuery.getDataSource();
-          DataSource newDataSource = traverse(oldDataSource);
+          DataSource newDataSource = traverse(oldDataSource, null);
           if (oldDataSource != newDataSource) {
             query = baseQuery.withDataSource(newDataSource);
           }
@@ -120,7 +120,7 @@ public class ExecutionVertex
       }
     }
 
-    protected final DataSource traverse(DataSource dataSource)
+    protected final DataSource traverse(DataSource dataSource, Integer index)
     {
       try {
         parents.push(dataSource);
@@ -140,8 +140,9 @@ public class ExecutionVertex
           List<DataSource> newChildren = new ArrayList<>();
           boolean changed = false;
           if (mayVisitDataSource(dataSource)) {
-            for (DataSource oldDS : children) {
-              DataSource newDS = traverse(oldDS);
+            for (int i = 0; i < children.size(); i++) {
+              DataSource oldDS = children.get(i);
+              DataSource newDS = traverse(oldDS, i);
               newChildren.add(newDS);
               changed |= (oldDS != newDS);
             }

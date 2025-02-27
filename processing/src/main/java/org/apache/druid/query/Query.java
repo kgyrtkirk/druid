@@ -297,6 +297,11 @@ public interface Query<T>
     throw DruidException.defensive("Usage of this method is not supported on this query type!");
   }
 
+  default DataSourceAnalysis getDataSourceAnalysis1()
+  {
+    throw DruidException.defensive("Usage of this method is not supported on this query type!");
+  }
+
   /**
    * Signals that the execution of this query could also transparently handle
    * the input {@link QueryDataSource} as well.
@@ -317,10 +322,5 @@ public interface Query<T>
   default RowSignature getResultRowSignature(RowSignature.Finalization finalization)
   {
     return null;
-  }
-
-default  DataSourceAnalysis getDataSourceAnalysis1() {
-    throw DruidException.defensive("Usage of this method is not supported on this query type!");
-
   }
 }

@@ -310,7 +310,7 @@ public class ClientQuerySegmentWalker implements QuerySegmentWalker
       return ev.canRunQueryUsingLocalWalker();
     }
 
-    final DataSourceAnalysis analysis = query.getDataSourceAnalysis();
+    final DataSourceAnalysis analysis = query.getDataSourceAnalysis1();
     final QueryToolChest<T, Query<T>> toolChest = conglomerate.getToolChest(query);
 
     // 1) Must be based on a concrete datasource that is not a table.
@@ -336,7 +336,7 @@ public class ClientQuerySegmentWalker implements QuerySegmentWalker
     }
 
     final QueryToolChest<T, Query<T>> toolChest = conglomerate.getToolChest(query);
-    final DataSourceAnalysis analysis = query.getDataSourceAnalysis();
+    final DataSourceAnalysis analysis = query.getDataSourceAnalysis1();
 
     // 1) Must be based on a concrete table (the only shape the Druid cluster can handle).
     // 2) If there is an outer query, it must be handleable by the query toolchest (the cluster walker does not handle

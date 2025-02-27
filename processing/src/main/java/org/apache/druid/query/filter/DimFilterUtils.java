@@ -20,6 +20,7 @@
 package org.apache.druid.query.filter;
 
 import com.google.common.base.Function;
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.RangeSet;
 import org.apache.druid.query.planning.DataSourceAnalysis;
@@ -162,13 +163,13 @@ public class DimFilterUtils
    */
   public static Set<String> onlyBaseFields(
       final Set<String> fields,
-      final DataSourceAnalysis dataSourceAnalysis
+      final Predicate<String> isBaseColumnFn
   )
   {
     final Set<String> retVal = new HashSet<>();
 
     for (final String field : fields) {
-      if (dataSourceAnalysis.isBaseColumn(field)) {
+      if (isBaseColumnFn.apply(field)) {
         retVal.add(field);
       }
     }

@@ -609,7 +609,7 @@ public class DataSourcePlan
         analysis.getBaseDataSource(),
         querySegmentSpec,
         filter,
-        filter == null ? null : DimFilterUtils.onlyBaseFields(filterFields, analysis),
+        filter == null ? null : DimFilterUtils.onlyBaseFields(filterFields, analysis::isBaseColumn),
         Math.max(minStageNumber, subQueryDefBuilder.getNextStageNumber()),
         broadcast
     );
