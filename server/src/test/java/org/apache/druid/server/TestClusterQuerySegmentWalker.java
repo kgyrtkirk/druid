@@ -115,7 +115,7 @@ public class TestClusterQuerySegmentWalker implements QuerySegmentWalker
     return (queryPlus, responseContext) -> {
       ExecutionVertex ev = ExecutionVertex.of(queryPlus.getQuery());
 
-      if (!(ev.isConcreteBased() && ev.isTableBased())) {
+      if (!(ev.isExecutable() && ev.isTableBased())) {
         throw new ISE("Cannot handle datasource: %s", queryPlus.getQuery().getDataSource());
       }
 
@@ -142,7 +142,7 @@ public class TestClusterQuerySegmentWalker implements QuerySegmentWalker
     ExecutionVertex ev = ExecutionVertex.of(query);
 
     // FIXME what's the question here?
-    if (!(ev.isConcreteBased() && ev.isTableBased())) {
+    if (!(ev.isExecutable() && ev.isTableBased())) {
       throw new ISE("Cannot handle datasource: %s", dataSourceFromQuery);
     }
 

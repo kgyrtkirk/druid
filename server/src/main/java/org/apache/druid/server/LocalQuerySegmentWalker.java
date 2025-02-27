@@ -85,7 +85,7 @@ public class LocalQuerySegmentWalker implements QuerySegmentWalker
     final DataSource dataSourceFromQuery = query.getDataSource();
 
     // FIXME: what's the question here?
-    if (!ev.isConcreteBased() || !dataSourceFromQuery.isGlobal()) {
+    if (!ev.isExecutable() || !dataSourceFromQuery.isGlobal()) {
       throw new IAE("Cannot query dataSource locally: %s", dataSourceFromQuery);
     }
 

@@ -926,7 +926,7 @@ public class DruidQuery
     }
 
     ExecutionVertex ev = ExecutionVertex.ofIllegal(dataSource);
-    if (ev.isConcreteBased() && ev.isTableBased()) {
+    if (ev.isExecutable() && ev.isTableBased()) {
       // Always OK: queries on concrete tables (regular Druid datasources) use segment-based cursors
       // (IncrementalIndex or QueryableIndex). These clip query interval to data interval, making wide query
       // intervals safer. They do not have special checks for granularity and interval safety.

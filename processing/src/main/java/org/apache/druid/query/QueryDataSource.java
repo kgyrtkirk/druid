@@ -97,7 +97,7 @@ public class QueryDataSource implements DataSource
   @Override
   public boolean isGlobal()
   {
-    return query.getDataSource().isGlobal();
+    return false;//query.getDataSource().isGlobal();
   }
 
   @Override

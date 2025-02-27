@@ -58,6 +58,7 @@ public class ExecutionVertex
   protected final DataSource baseDataSource;
   protected final QuerySegmentSpec querySegmentSpec;
   protected final List<String> joinPrefixes;
+  protected boolean allRightsAreGlobal;
 
   private ExecutionVertex(ExecutionVertexExplorer explorer)
   {
@@ -65,6 +66,7 @@ public class ExecutionVertex
     this.baseDataSource = explorer.baseDataSource;
     this.querySegmentSpec = explorer.querySegmentSpec;
     this.joinPrefixes = explorer.joinPrefixes;
+    this.allRightsAreGlobal = explorer.allRightsAreGlobal;
   }
 
   public static ExecutionVertex of(Query<?> query)
@@ -80,9 +82,10 @@ public class ExecutionVertex
 
   // FIXME: correct apidcos?
   // FIXME rename
-  public boolean isConcreteBased()
+  public boolean isExecutable()
   {
-    return topQuery.getDataSource().isConcrete();
+    return getBaseDataSource().isConcrete() && allRightsAreGlobal;
+//topQuery.getDataSource().isConcrete();
   }
 
   public boolean isTableBased()
@@ -215,6 +218,7 @@ public class ExecutionVertex
     QuerySegmentSpec querySegmentSpec;
     Query<?> topQuery;
     List<String> joinPrefixes = new ArrayList<String>();
+    boolean allRightsAreGlobal = true;
 
     public ExecutionVertexExplorer(Query<?> query)
     {
@@ -260,7 +264,9 @@ public class ExecutionVertex
       if (!leaf &&  dataSource instanceof JoinDataSource) {
         JoinDataSource joinDataSource = (JoinDataSource) dataSource;
         joinPrefixes.add(joinDataSource.getRightPrefix());
-
+      }
+      if(leaf && !isLeftLeaning()) {
+        allRightsAreGlobal &= dataSource.isGlobal();
       }
       return dataSource;
     }
@@ -340,23 +346,12 @@ public class ExecutionVertex
 
   public boolean canRunQueryUsingClusterWalker()
   {
-    // Must be based on a concrete table (the only shape the Druid cluster can handle).
-    return isConcreteBased() && isTableBased();
+    return isExecutable() && isTableBased();
   }
 
   public boolean canRunQueryUsingLocalWalker()
   {
-    // Must be based on a concrete datasource that is not a table.
-    // Must be based on globally available data (so we have a copy here on the Broker).
-    return isConcreteBased()
-        && !isTableBased()
-        && isGlobal();
-  }
-
-  public boolean isGlobal()
-  {
-    return topQuery.getDataSource().isGlobal();
-
+    return isExecutable() && !isTableBased();
   }
 
   public boolean isJoin()
