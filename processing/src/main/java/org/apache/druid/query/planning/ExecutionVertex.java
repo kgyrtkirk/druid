@@ -25,6 +25,7 @@ import org.apache.druid.java.util.common.Intervals;
 import org.apache.druid.query.BaseQuery;
 import org.apache.druid.query.DataSource;
 import org.apache.druid.query.Druids;
+import org.apache.druid.query.JoinDataSource;
 import org.apache.druid.query.Query;
 import org.apache.druid.query.QueryDataSource;
 import org.apache.druid.query.TableDataSource;
@@ -32,6 +33,7 @@ import org.apache.druid.query.UnionDataSource;
 import org.apache.druid.query.scan.ScanQuery;
 import org.apache.druid.query.spec.MultipleIntervalSegmentSpec;
 import org.apache.druid.query.spec.QuerySegmentSpec;
+import org.apache.druid.segment.join.JoinPrefixUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,14 +55,16 @@ import java.util.Stack;
 public class ExecutionVertex
 {
   protected final Query<?> topQuery;
-  private DataSource baseDataSource;
-  private QuerySegmentSpec querySegmentSpec;
+  protected final DataSource baseDataSource;
+  protected final QuerySegmentSpec querySegmentSpec;
+  protected final List<String> joinPrefixes;
 
   private ExecutionVertex(ExecutionVertexExplorer explorer)
   {
     this.topQuery = explorer.topQuery;
     this.baseDataSource = explorer.baseDataSource;
     this.querySegmentSpec = explorer.querySegmentSpec;
+    this.joinPrefixes = explorer.joinPrefixes;
   }
 
   public static ExecutionVertex of(Query<?> query)
@@ -139,7 +143,7 @@ public class ExecutionVertex
     {
       try {
         parents.push(new EVNode(query, null));
-        if (!mayVisitQuery(query)) {
+        if (!mayTraverseQuery(query)) {
           return query;
         }
         if (query instanceof BaseQuery<?>) {
@@ -164,7 +168,7 @@ public class ExecutionVertex
         parents.push(new EVNode(dataSource, index));
         if (dataSource instanceof QueryDataSource) {
           QueryDataSource queryDataSource = (QueryDataSource) dataSource;
-          if (mayVisitDataSource(dataSource)) {
+          if (mayTraverseDataSource(dataSource)) {
             Query<?> oldQuery = queryDataSource.getQuery();
             Query<?> newQuery = traverse(oldQuery);
             if (oldQuery != newQuery) {
@@ -176,7 +180,7 @@ public class ExecutionVertex
           List<DataSource> children = dataSource.getChildren();
           List<DataSource> newChildren = new ArrayList<>();
           boolean changed = false;
-          if (mayVisitDataSource(dataSource)) {
+          if (mayTraverseDataSource(dataSource)) {
             for (int i = 0; i < children.size(); i++) {
               DataSource oldDS = children.get(i);
               DataSource newDS = traverse(oldDS, i);
@@ -193,9 +197,9 @@ public class ExecutionVertex
       }
     }
 
-    protected abstract boolean mayVisitQuery(Query<?> query);
+    protected abstract boolean mayTraverseQuery(Query<?> query);
 
-    protected abstract boolean mayVisitDataSource(DataSource dataSource);
+    protected abstract boolean mayTraverseDataSource(DataSource dataSource);
 
     protected abstract DataSource visit(DataSource dataSource);
 
@@ -205,9 +209,10 @@ public class ExecutionVertex
   static class ExecutionVertexExplorer extends ExecutionVertexShuttle
   {
     boolean discoveringBase = true;
-    private DataSource baseDataSource;
-    private QuerySegmentSpec querySegmentSpec;
-    protected Query<?> topQuery;
+    DataSource baseDataSource;
+    QuerySegmentSpec querySegmentSpec;
+    Query<?> topQuery;
+    List<String> joinPrefixes = new ArrayList<String>();
 
     public ExecutionVertexExplorer(Query<?> query)
     {
@@ -216,13 +221,13 @@ public class ExecutionVertex
     }
 
     @Override
-    protected boolean mayVisitQuery(Query<?> query)
+    protected boolean mayTraverseQuery(Query<?> query)
     {
       return true;
     }
 
     @Override
-    protected boolean mayVisitDataSource(DataSource dataSource)
+    protected boolean mayTraverseDataSource(DataSource dataSource)
     {
       if (parents.size() < 2) {
         return true;
@@ -249,6 +254,11 @@ public class ExecutionVertex
 
         baseDataSource = dataSource;
         discoveringBase = false;
+      }
+      if ( dataSource instanceof JoinDataSource) {
+        JoinDataSource joinDataSource = (JoinDataSource) dataSource;
+        joinPrefixes.add(joinDataSource.getRightPrefix());
+
       }
       return dataSource;
     }
@@ -351,16 +361,19 @@ public class ExecutionVertex
 
   }
 
-  @Deprecated
   public boolean isJoin()
   {
-    return false;
+    return !joinPrefixes.isEmpty();
 
   }
 
-  @Deprecated
-  public boolean isBaseColumn(String string)
+  public boolean isBaseColumn(String columnName)
   {
-    return true;// dsa.isBaseColumn(string);
+    for (String prefix : joinPrefixes) {
+      if (JoinPrefixUtils.isPrefixedBy(columnName, prefix)) {
+        return false;
+      }
+    }
+    return true;
   }
 }
