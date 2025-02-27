@@ -59,7 +59,6 @@ import org.apache.druid.query.UnionDataSource;
 import org.apache.druid.query.UnnestDataSource;
 import org.apache.druid.query.filter.DimFilter;
 import org.apache.druid.query.filter.DimFilterUtils;
-import org.apache.druid.query.planning.DataSourceAnalysis;
 import org.apache.druid.query.planning.PreJoinableClause;
 import org.apache.druid.query.spec.MultipleIntervalSegmentSpec;
 import org.apache.druid.query.spec.QuerySegmentSpec;
@@ -793,10 +792,7 @@ public class DataSourcePlan
   /**
    * Verify that the provided {@link QuerySegmentSpec} is a {@link MultipleIntervalSegmentSpec} with
    * interval {@link Intervals#ETERNITY}. If not, throw an {@link UnsupportedOperationException}.
-   * <p>
-   * Anywhere this appears is a place that we do not support using the "intervals" parameter of a query
-   * (i.e., {@link org.apache.druid.query.BaseQuery#getQuerySegmentSpec()}) for time filtering.
-   * <p>
+   *
    * We don't need to support this for anything that is not {@link DataSourceAnalysis#isTableBased()}, because
    * the SQL layer avoids "intervals" in other cases. See
    * {@link org.apache.druid.sql.calcite.rel.DruidQuery#canUseIntervalFiltering(DataSource)}.

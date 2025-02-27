@@ -28,7 +28,6 @@ import org.apache.druid.guice.annotations.PublicApi;
 import org.apache.druid.query.aggregation.AggregatorFactory;
 import org.apache.druid.query.aggregation.PostAggregator;
 import org.apache.druid.query.filter.DimFilter;
-import org.apache.druid.query.planning.DataSourceAnalysis;
 import org.apache.druid.query.planning.ExecutionVertex;
 import org.apache.druid.query.spec.MultipleSpecificSegmentSpec;
 import org.apache.druid.segment.VirtualColumn;
@@ -177,17 +176,6 @@ public class Queries
       }
     }
     return retVal;
-  }
-
-  /**
-   * Rewrite "query" to refer to some specific base datasource, instead of the one it currently refers to.
-   *
-   * Unlike the seemingly-similar {@link Query#withDataSource}, this will walk down the datasource tree and replace
-   * only the base datasource (in the sense defined in {@link DataSourceAnalysis}).
-   */
-  public static <T> Query<T> withBaseDataSource(final Query<T> query, final DataSource newBaseDataSource)
-  {
-    return query.withDataSource(query.getDataSource().withUpdatedDataSource(newBaseDataSource));
   }
 
   /**

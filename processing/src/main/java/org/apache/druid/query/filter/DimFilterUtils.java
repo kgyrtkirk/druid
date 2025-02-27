@@ -23,7 +23,6 @@ import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.RangeSet;
-import org.apache.druid.query.planning.DataSourceAnalysis;
 import org.apache.druid.timeline.partition.ShardSpec;
 
 import javax.annotation.Nullable;
@@ -156,10 +155,7 @@ public class DimFilterUtils
   }
 
   /**
-   * Returns a copy of "fields" only including base fields from {@link DataSourceAnalysis}.
-   *
-   * @param fields             field list, must be nonnull
-   * @param dataSourceAnalysis analyzed datasource
+   * Returns a copy of "fields" filtered by the predicate function.
    */
   public static Set<String> onlyBaseFields(
       final Set<String> fields,

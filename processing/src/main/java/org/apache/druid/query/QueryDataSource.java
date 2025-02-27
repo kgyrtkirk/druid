@@ -113,12 +113,6 @@ public class QueryDataSource implements DataSource
   }
 
   @Override
-  public DataSource withUpdatedDataSource(DataSource newSource)
-  {
-    return new QueryDataSource(query.withDataSource(query.getDataSource().withUpdatedDataSource(newSource)));
-  }
-
-  @Override
   public byte[] getCacheKey()
   {
     return null;

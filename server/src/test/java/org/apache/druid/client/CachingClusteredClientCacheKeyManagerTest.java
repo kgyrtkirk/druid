@@ -28,7 +28,6 @@ import org.apache.druid.query.DataSource;
 import org.apache.druid.query.Query;
 import org.apache.druid.query.QueryContext;
 import org.apache.druid.query.QueryContexts;
-import org.apache.druid.query.planning.DataSourceAnalysis;
 import org.apache.druid.segment.join.JoinableFactoryWrapper;
 import org.apache.druid.segment.join.NoopDataSource;
 import org.apache.druid.timeline.DataSegment;
@@ -58,8 +57,6 @@ public class CachingClusteredClientCacheKeyManagerTest extends EasyMockSupport
   private Query<Object> query;
   @Mock
   private JoinableFactoryWrapper joinableFactoryWrapper;
-  @Mock
-  private DataSourceAnalysis dataSourceAnalysis;
   @Mock
   private DataSource dataSource;
 

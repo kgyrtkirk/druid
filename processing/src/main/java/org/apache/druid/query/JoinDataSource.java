@@ -41,7 +41,6 @@ import org.apache.druid.query.filter.DimFilter;
 import org.apache.druid.query.filter.DimFilters;
 import org.apache.druid.query.filter.Filter;
 import org.apache.druid.query.filter.TrueDimFilter;
-import org.apache.druid.query.planning.DataSourceAnalysis;
 import org.apache.druid.query.planning.PreJoinableClause;
 import org.apache.druid.query.spec.QuerySegmentSpec;
 import org.apache.druid.segment.SegmentReference;
@@ -298,33 +297,6 @@ public class JoinDataSource implements DataSource
                                  .collect(Collectors.toSet());
   }
 
-  @Deprecated
-  @Override
-  public DataSource withUpdatedDataSource(DataSource newSource)
-  {
-    if(true)
-     {
-      throw DruidException
-      .defensive("should be removed");
-//    DataSource current = newSource;
-//    DataSourceAnalysis analysis = getAnalysis();
-//    DataSourceAnalysis3 safeAnalysis = getJoinAnalysisForDataSource();
-//
-//    if (analysis.getBaseDataSource() != safeAnalysis.getBaseDataSource()) {
-//      throw DruidException
-//          .defensive("Join datasource analysis mismatches the safe one ; this could cause correctness issues.");
-//    }
-//
-//    DimFilter joinBaseFilter = safeAnalysis.getJoinBaseTableFilter().orElse(null);
-//
-//    for (final PreJoinableClause clause : safeAnalysis.getPreJoinableClauses()) {
-//      current = clause.makeUpdatedJoinDataSource(current, joinBaseFilter, this.joinableFactoryWrapper);
-//      joinBaseFilter = null;
-//    }
-//    return current;
-    }
-    return newSource;
-  }
 
   @Override
   public byte[] getCacheKey()

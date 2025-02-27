@@ -108,14 +108,6 @@ public interface DataSource extends Cacheable
   Function<SegmentReference, SegmentReference> createSegmentMapFunction(Query query);
 
   /**
-   * Returns an updated datasource based on the specified new source.
-   *
-   * @param newSource the new datasource to be used to update an existing query
-   * @return the updated datasource to be used
-   */
-  DataSource withUpdatedDataSource(DataSource newSource);
-
-  /**
    * Returns an updated datasource based on the policy restrictions on tables.
    * <p>
    * If this datasource contains no table, no changes should occur.
