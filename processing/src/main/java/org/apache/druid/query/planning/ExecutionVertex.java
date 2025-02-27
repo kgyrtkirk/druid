@@ -379,4 +379,50 @@ public class ExecutionVertex
     return null;
 
   }
+
+  public Query buildQueryWithBaseDataSource(DataSource newBaseDataSource)
+  {
+    return new ReplaceBaseDataSource(baseDataSource, newBaseDataSource).traverse(topQuery);
+  }
+
+  static class ReplaceBaseDataSource extends ExecutionVertexShuttle {
+
+    private DataSource newBaseDataSource;
+    private DataSource oldBaseDataSource;
+
+    public ReplaceBaseDataSource(DataSource oldBaseDataSource, DataSource newBaseDataSource)
+    {
+      this.oldBaseDataSource = oldBaseDataSource;
+      this.newBaseDataSource = newBaseDataSource;
+    }
+
+    @Override
+    protected boolean mayTraverseQuery(Query<?> query)
+    {
+      return true;
+    }
+
+    @Override
+    protected boolean mayTraverseDataSource(EVNode evNode)
+    {
+      return true;
+    }
+
+    @Override
+    protected DataSource visit(DataSource dataSource, boolean leaf)
+    {
+      if (dataSource == oldBaseDataSource) {
+        return newBaseDataSource;
+      }
+      return dataSource;
+    }
+
+    @Override
+    protected Query<?> visitQuery(Query<?> query)
+    {
+      return query;
+    }
+
+  }
+
 }

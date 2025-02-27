@@ -84,7 +84,7 @@ public class UnionDataSourceQueryRunner<T> implements QueryRunner<T>
                     (Function<Pair<TableDataSource, Integer>, Sequence<T>>) singleSourceWithIndex ->
                         baseRunner.run(
                             queryPlus.withQuery(
-                                Queries.withBaseDataSource(query, singleSourceWithIndex.lhs)
+                                ev.buildQueryWithBaseDataSource(singleSourceWithIndex.lhs)
                                        // assign the subqueryId. this will be used to validate that every query servers
                                        // have responded per subquery in RetryQueryRunner
                                        .withSubQueryId(generateSubqueryId(
