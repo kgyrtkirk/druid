@@ -19,6 +19,7 @@
 
 package org.apache.druid.query.planning;
 
+import com.google.common.base.Preconditions;
 import org.apache.druid.error.DruidException;
 import org.apache.druid.java.util.common.Intervals;
 import org.apache.druid.query.BaseQuery;
@@ -93,14 +94,51 @@ public class ExecutionVertex
     // .allMatch(ds -> ds instanceof TableDataSource)));
   }
 
+  /**
+   * Execution vertex node.
+   *
+   * Can be a {@link Query} or a {@link DataSource}.
+   */
+  static class EVNode
+  {
+    final DataSource dataSource;
+    final Query<?> query;
+    final Integer index;
+
+    EVNode(DataSource dataSource, Integer index)
+    {
+      this.dataSource = dataSource;
+      this.query = null;
+      this.index = index;
+    }
+
+    EVNode(Query<?> query, Integer index)
+    {
+      this.dataSource = null;
+      this.query = query;
+      this.index = index;
+    }
+
+    public boolean isQuery()
+    {
+      return query != null;
+    }
+
+    public Query<?> getQuery()
+    {
+      Preconditions.checkNotNull(query, "query is null!");
+      return query;
+    }
+  }
+
   static abstract class ExecutionVertexShuttle
   {
-    protected Stack<Object> parents = new Stack<>();
+    protected Stack<EVNode> parents = new Stack<>();
 
     protected final Query<?> traverse(Query<?> query)
     {
       try {
-        parents.push(query);
+        parents.push(new EVNode(query, null));
         if (!mayVisitQuery(query)) {
           return query;
         }
@@ -123,7 +161,7 @@ public class ExecutionVertex
     protected final DataSource traverse(DataSource dataSource, Integer index)
     {
       try {
-        parents.push(dataSource);
+        parents.push(new EVNode(dataSource, index));
         if (dataSource instanceof QueryDataSource) {
           QueryDataSource queryDataSource = (QueryDataSource) dataSource;
           if (mayVisitDataSource(dataSource)) {
@@ -191,10 +229,9 @@ public class ExecutionVertex
         return true;
       }
       if (dataSource instanceof QueryDataSource) {
-        Object possibleParentQuery = parents.get(parents.size() - 2);
-        if (possibleParentQuery instanceof Query) {
-          Query<?> parentQuery = (Query<?>) possibleParentQuery;
-          return parentQuery.mayCollapseQueryDataSource();
+        EVNode parentNode = parents.get(parents.size() - 2);
+        if (parentNode.isQuery()) {
+          return parentNode.getQuery().mayCollapseQueryDataSource();
         }
       }
       if (dataSource instanceof UnionDataSource) {
