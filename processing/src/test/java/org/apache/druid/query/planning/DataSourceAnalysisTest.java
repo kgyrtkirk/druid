@@ -75,7 +75,7 @@ public class DataSourceAnalysisTest
     ScanQuery makeScanQuery = makeScanQuery(TABLE_FOO);
     final ExecutionVertex ev = ExecutionVertex.of(makeScanQuery);
 
-    Assert.assertTrue(ev.isExecutable());
+    Assert.assertTrue(ev.isProcessable());
     Assert.assertTrue(ev.isTableBased());
     Assert.assertEquals(TABLE_FOO, ev.getBaseDataSource());
     Assert.assertEquals(TABLE_FOO, ev.getBaseTableDataSource());
@@ -89,7 +89,7 @@ public class DataSourceAnalysisTest
   {
     final ExecutionVertex ev = ExecutionVertex.of(makeScanQuery(RESTRICTED_FOO));
 
-    Assert.assertTrue(ev.isExecutable());
+    Assert.assertTrue(ev.isProcessable());
     Assert.assertTrue(ev.isTableBased());
     Assert.assertEquals(TABLE_FOO, ev.getBaseDataSource());
     Assert.assertEquals(TABLE_FOO, ev.getBaseTableDataSource());
@@ -110,7 +110,7 @@ public class DataSourceAnalysisTest
 
     final ExecutionVertex ev = ExecutionVertex.of(makeScanQuery(ds));
 
-    Assert.assertTrue(ev.isExecutable());
+    Assert.assertTrue(ev.isProcessable());
     Assert.assertTrue(ev.isTableBased());
     Assert.assertEquals(TABLE_FOO, ev.getBaseDataSource());
     Assert.assertEquals(TABLE_FOO, ev.getBaseTableDataSource());
@@ -125,7 +125,7 @@ public class DataSourceAnalysisTest
     final UnionDataSource unionDataSource = new UnionDataSource(ImmutableList.of(TABLE_FOO, TABLE_BAR));
     final ExecutionVertex ev = ExecutionVertex.of(makeScanQuery(unionDataSource));
 
-    Assert.assertTrue(ev.isExecutable());
+    Assert.assertTrue(ev.isProcessable());
     Assert.assertTrue(ev.isTableBased());
     Assert.assertEquals(unionDataSource, ev.getBaseDataSource());
     Assert.assertThrows(DruidException.class, () -> ev.getBaseTableDataSource());
@@ -141,7 +141,7 @@ public class DataSourceAnalysisTest
     final ExecutionVertex ev = ExecutionVertex.of(makeGroupByQuery(queryDataSource));
 
     Assert.assertTrue(ev.isTableBased());
-    Assert.assertTrue(ev.isExecutable());
+    Assert.assertTrue(ev.isProcessable());
     Assert.assertEquals(TABLE_FOO, ev.getBaseDataSource());
     Assert.assertEquals(TABLE_FOO, ev.getBaseTableDataSource());
     Assert.assertEquals(new MultipleIntervalSegmentSpec(MILLENIUM_INTERVALS), ev.getEffectiveQuerySegmentSpec());
@@ -156,7 +156,7 @@ public class DataSourceAnalysisTest
     final QueryDataSource queryDataSource = makeQueryDS(unionDataSource);
     final ExecutionVertex ev = ExecutionVertex.of(makeScanQuery(queryDataSource));//queryDataSource.getAnalysis();
 
-    Assert.assertFalse(ev.isExecutable());
+    Assert.assertFalse(ev.isProcessable());
     Assert.assertFalse(ev.isTableBased());
     Assert.assertEquals(queryDataSource, ev.getBaseDataSource());
     Assert.assertThrows(DruidException.class, () -> ev.getBaseTableDataSource());
@@ -170,7 +170,7 @@ public class DataSourceAnalysisTest
   {
     final ExecutionVertex ev = ExecutionVertex.of(makeScanQuery(LOOKUP_LOOKYLOO));
 
-    Assert.assertTrue(ev.isExecutable());
+    Assert.assertTrue(ev.isProcessable());
     Assert.assertFalse(ev.isTableBased());
     Assert.assertEquals(LOOKUP_LOOKYLOO, ev.getBaseDataSource());
     Assert.assertThrows(DruidException.class, () -> ev.getBaseTableDataSource());
@@ -185,7 +185,7 @@ public class DataSourceAnalysisTest
     final QueryDataSource queryDataSource = makeQueryDS(LOOKUP_LOOKYLOO);
     final ExecutionVertex ev = ExecutionVertex.of(makeScanQuery(queryDataSource));
 
-    Assert.assertFalse(ev.isExecutable());
+    Assert.assertFalse(ev.isProcessable());
     Assert.assertFalse(ev.isTableBased());
     Assert.assertEquals(queryDataSource, ev.getBaseDataSource());
     Assert.assertEquals(new MultipleIntervalSegmentSpec(MILLENIUM_INTERVALS), ev.getEffectiveQuerySegmentSpec());
@@ -198,7 +198,7 @@ public class DataSourceAnalysisTest
   {
     final ExecutionVertex ev = ExecutionVertex.of(makeScanQuery(INLINE));
 
-    Assert.assertTrue(ev.isExecutable());
+    Assert.assertTrue(ev.isProcessable());
     Assert.assertFalse(ev.isTableBased());
     Assert.assertEquals(INLINE, ev.getBaseDataSource());
     Assert.assertThrows(DruidException.class, () -> ev.getBaseTableDataSource());
@@ -234,7 +234,7 @@ public class DataSourceAnalysisTest
     final ExecutionVertex ev = ExecutionVertex.of(makeScanQuery(joinDataSource));
     final JoinDataSourceAnalysis analysis = joinDataSource.getJoinAnalysisForDataSource();
 
-    Assert.assertFalse(ev.isExecutable());
+    Assert.assertFalse(ev.isProcessable());
     Assert.assertTrue(ev.isTableBased());
     Assert.assertEquals(TABLE_FOO, ev.getBaseDataSource());
     Assert.assertEquals(TABLE_FOO, ev.getBaseTableDataSource());
@@ -278,28 +278,28 @@ public class DataSourceAnalysisTest
             JoinType.FULL
         );
 
-    final ExecutionVertex analysis = ExecutionVertex.of(makeScanQuery(joinDataSource));
-    final JoinDataSourceAnalysis analysis1 = joinDataSource.getJoinAnalysisForDataSource();
+    final ExecutionVertex ev = ExecutionVertex.of(makeScanQuery(joinDataSource));
+    final JoinDataSourceAnalysis analysis = joinDataSource.getJoinAnalysisForDataSource();
 
-    Assert.assertFalse(analysis.isExecutable());
-    Assert.assertTrue(analysis.isTableBased());
-    Assert.assertEquals(TABLE_FOO, analysis.getBaseDataSource());
-    Assert.assertEquals(TABLE_FOO, analysis.getBaseTableDataSource());
-    Assert.assertEquals(null, analysis1.getJoinBaseTableFilter().orElse(null));
-    Assert.assertEquals(new MultipleIntervalSegmentSpec(MILLENIUM_INTERVALS), analysis.getEffectiveQuerySegmentSpec());
+    Assert.assertFalse(ev.isProcessable());
+    Assert.assertTrue(ev.isTableBased());
+    Assert.assertEquals(TABLE_FOO, ev.getBaseDataSource());
+    Assert.assertEquals(TABLE_FOO, ev.getBaseTableDataSource());
+    Assert.assertEquals(null, analysis.getJoinBaseTableFilter().orElse(null));
+    Assert.assertEquals(new MultipleIntervalSegmentSpec(MILLENIUM_INTERVALS), ev.getEffectiveQuerySegmentSpec());
     Assert.assertEquals(
         ImmutableList.of(
             new PreJoinableClause((JoinDataSource) ((JoinDataSource) joinDataSource.getLeft()).getLeft()),
             new PreJoinableClause((JoinDataSource) joinDataSource.getLeft()),
             new PreJoinableClause(joinDataSource)
         ),
-        analysis1.getPreJoinableClauses()
+        analysis.getPreJoinableClauses()
     );
-    Assert.assertTrue(analysis.isJoin());
-    Assert.assertTrue(analysis.isBaseColumn("foo"));
-    Assert.assertFalse(analysis.isBaseColumn("1.foo"));
-    Assert.assertFalse(analysis.isBaseColumn("2.foo"));
-    Assert.assertFalse(analysis.isBaseColumn("3.foo"));
+    Assert.assertTrue(ev.isJoin());
+    Assert.assertTrue(ev.isBaseColumn("foo"));
+    Assert.assertFalse(ev.isBaseColumn("1.foo"));
+    Assert.assertFalse(ev.isBaseColumn("2.foo"));
+    Assert.assertFalse(ev.isBaseColumn("3.foo"));
   }
 
   @Test
@@ -331,26 +331,26 @@ public class DataSourceAnalysisTest
             JoinType.RIGHT
         );
 
-    final ExecutionVertex analysis = ExecutionVertex.of(makeScanQuery(joinDataSource));
-    final JoinDataSourceAnalysis analysis1 = joinDataSource.getJoinAnalysisForDataSource();
+    final ExecutionVertex ev = ExecutionVertex.of(makeScanQuery(joinDataSource));
+    final JoinDataSourceAnalysis analysis = joinDataSource.getJoinAnalysisForDataSource();
 
-    Assert.assertFalse(analysis.isExecutable());
-    Assert.assertTrue(analysis.isTableBased());
-    Assert.assertEquals(TABLE_FOO, analysis.getBaseDataSource());
-    Assert.assertEquals(TABLE_FOO, analysis.getBaseTableDataSource());
-    Assert.assertEquals(Optional.empty(), analysis1.getJoinBaseTableFilter());
-    Assert.assertEquals(new MultipleIntervalSegmentSpec(MILLENIUM_INTERVALS), analysis.getEffectiveQuerySegmentSpec());
+    Assert.assertFalse(ev.isProcessable());
+    Assert.assertTrue(ev.isTableBased());
+    Assert.assertEquals(TABLE_FOO, ev.getBaseDataSource());
+    Assert.assertEquals(TABLE_FOO, ev.getBaseTableDataSource());
+    Assert.assertEquals(Optional.empty(), analysis.getJoinBaseTableFilter());
+    Assert.assertEquals(new MultipleIntervalSegmentSpec(MILLENIUM_INTERVALS), ev.getEffectiveQuerySegmentSpec());
     Assert.assertEquals(
         ImmutableList.of(
             new PreJoinableClause(joinDataSource)
         ),
-        analysis1.getPreJoinableClauses()
+        analysis.getPreJoinableClauses()
     );
-    Assert.assertTrue(analysis.isJoin());
-    Assert.assertTrue(analysis.isBaseColumn("foo"));
-    Assert.assertTrue(analysis.isBaseColumn("1.foo"));
-    Assert.assertTrue(analysis.isBaseColumn("2.foo"));
-    Assert.assertFalse(analysis.isBaseColumn("3.foo"));
+    Assert.assertTrue(ev.isJoin());
+    Assert.assertTrue(ev.isBaseColumn("foo"));
+    Assert.assertTrue(ev.isBaseColumn("1.foo"));
+    Assert.assertTrue(ev.isBaseColumn("2.foo"));
+    Assert.assertFalse(ev.isBaseColumn("3.foo"));
   }
 
   @Test
@@ -381,7 +381,7 @@ public class DataSourceAnalysisTest
     final ExecutionVertex ev = ExecutionVertex.of(makeScanQuery(joinDataSource));
     final JoinDataSourceAnalysis analysis = joinDataSource.getJoinAnalysisForDataSource();
 
-    Assert.assertFalse(ev.isExecutable());
+    Assert.assertFalse(ev.isProcessable());
     Assert.assertTrue(ev.isTableBased());
     Assert.assertEquals(TABLE_FOO, ev.getBaseDataSource());
     Assert.assertEquals(TABLE_FOO, ev.getBaseTableDataSource());
@@ -411,23 +411,23 @@ public class DataSourceAnalysisTest
         TrueDimFilter.instance()
     );
 
-    final ExecutionVertex analysis = ExecutionVertex.of(makeScanQuery(joinDataSource));
-    final JoinDataSourceAnalysis analysis1 = joinDataSource.getJoinAnalysisForDataSource();
+    final ExecutionVertex ev = ExecutionVertex.of(makeScanQuery(joinDataSource));
+    final JoinDataSourceAnalysis analysis = joinDataSource.getJoinAnalysisForDataSource();
 
-    Assert.assertFalse(analysis.isExecutable());
-    Assert.assertTrue(analysis.isTableBased());
-    Assert.assertEquals(TABLE_FOO, analysis.getBaseDataSource());
-    Assert.assertEquals(null, analysis1.getJoinBaseTableFilter().orElse(null));
-    Assert.assertEquals(TABLE_FOO, analysis.getBaseTableDataSource());
+    Assert.assertFalse(ev.isProcessable());
+    Assert.assertTrue(ev.isTableBased());
+    Assert.assertEquals(TABLE_FOO, ev.getBaseDataSource());
+    Assert.assertEquals(null, analysis.getJoinBaseTableFilter().orElse(null));
+    Assert.assertEquals(TABLE_FOO, ev.getBaseTableDataSource());
     Assert.assertEquals(
         ImmutableList.of(
             new PreJoinableClause(joinDataSource)
         ),
-        analysis1.getPreJoinableClauses()
+        analysis.getPreJoinableClauses()
     );
-    Assert.assertTrue(analysis.isJoin());
-    Assert.assertTrue(analysis.isBaseColumn("foo"));
-    Assert.assertFalse(analysis.isBaseColumn("1.foo"));
+    Assert.assertTrue(ev.isJoin());
+    Assert.assertTrue(ev.isBaseColumn("foo"));
+    Assert.assertFalse(ev.isBaseColumn("1.foo"));
   }
 
   @Test
@@ -444,7 +444,7 @@ public class DataSourceAnalysisTest
     final ExecutionVertex ev = ExecutionVertex.of(makeScanQuery(joinDataSource));
     final JoinDataSourceAnalysis analysis1 = joinDataSource.getJoinAnalysisForDataSource();
 
-    Assert.assertTrue(ev.isExecutable());
+    Assert.assertTrue(ev.isProcessable());
     Assert.assertTrue(ev.isTableBased());
     Assert.assertThrows(DruidException.class, () -> ev.getBaseTableDataSource());
     Assert.assertEquals(Optional.empty(), analysis1.getJoinBaseTableFilter());
@@ -477,16 +477,16 @@ public class DataSourceAnalysisTest
             )
         );
 
-    final ExecutionVertex analysis = ExecutionVertex.of(makeScanQuery(queryDataSource));
+    final ExecutionVertex ev = ExecutionVertex.of(makeScanQuery(queryDataSource));
 
-    Assert.assertFalse(analysis.isExecutable());
-    Assert.assertFalse(analysis.isTableBased());
-    Assert.assertEquals(queryDataSource, analysis.getBaseDataSource());
-    Assert.assertThrows(DruidException.class, () -> analysis.getBaseTableDataSource());
-    Assert.assertEquals(new MultipleIntervalSegmentSpec(MILLENIUM_INTERVALS), analysis.getEffectiveQuerySegmentSpec());
-    Assert.assertFalse(analysis.isJoin());
-    Assert.assertTrue(analysis.isBaseColumn("foo"));
-    Assert.assertTrue(analysis.isBaseColumn("1.foo"));
+    Assert.assertFalse(ev.isProcessable());
+    Assert.assertFalse(ev.isTableBased());
+    Assert.assertEquals(queryDataSource, ev.getBaseDataSource());
+    Assert.assertThrows(DruidException.class, () -> ev.getBaseTableDataSource());
+    Assert.assertEquals(new MultipleIntervalSegmentSpec(MILLENIUM_INTERVALS), ev.getEffectiveQuerySegmentSpec());
+    Assert.assertFalse(ev.isJoin());
+    Assert.assertTrue(ev.isBaseColumn("foo"));
+    Assert.assertTrue(ev.isBaseColumn("1.foo"));
   }
 
   @Test
@@ -512,9 +512,9 @@ public class DataSourceAnalysisTest
     final ExecutionVertex ev = ExecutionVertex.of(query);
     final JoinDataSourceAnalysis analysis = joinDataSource.getJoinAnalysisForDataSource();
 
-    Assert.assertTrue(ev.isExecutable());
+    Assert.assertTrue(ev.isProcessable());
     Assert.assertTrue(ev.isTableBased());
-    Assert.assertTrue(ev.isExecutable());
+    Assert.assertTrue(ev.isProcessable());
     Assert.assertEquals(TABLE_FOO, ev.getBaseDataSource());
     Assert.assertEquals(TABLE_FOO, ev.getBaseTableDataSource());
 Assert.assertEquals(null, analysis.getJoinBaseTableFilter().orElse(null));
@@ -544,7 +544,7 @@ Assert.assertEquals(null, analysis.getJoinBaseTableFilter().orElse(null));
 
     final ExecutionVertex ev = ExecutionVertex.of(makeScanQuery(queryDataSource));
 
-    Assert.assertFalse(ev.isExecutable());
+    Assert.assertFalse(ev.isProcessable());
     Assert.assertFalse(ev.isTableBased());
     Assert.assertEquals(queryDataSource, ev.getBaseDataSource());
     Assert.assertThrows(DruidException.class, () -> ev.getBaseTableDataSource());
@@ -565,19 +565,19 @@ Assert.assertEquals(null, analysis.getJoinBaseTableFilter().orElse(null));
     );
 
     final ExecutionVertex ev = ExecutionVertex.of(makeScanQuery(joinDataSource));
-    final JoinDataSourceAnalysis analysis1 = joinDataSource.getJoinAnalysisForDataSource();
+    final JoinDataSourceAnalysis analysis = joinDataSource.getJoinAnalysisForDataSource();
 
-    Assert.assertTrue(ev.isExecutable());
+    Assert.assertTrue(ev.isProcessable());
     Assert.assertFalse(ev.isTableBased());
     Assert.assertEquals(LOOKUP_LOOKYLOO, ev.getBaseDataSource());
     Assert.assertThrows(DruidException.class, () -> ev.getBaseTableDataSource());
     Assert.assertEquals(new MultipleIntervalSegmentSpec(MILLENIUM_INTERVALS), ev.getEffectiveQuerySegmentSpec());
-    Assert.assertEquals(Optional.empty(), analysis1.getJoinBaseTableFilter());
+    Assert.assertEquals(Optional.empty(), analysis.getJoinBaseTableFilter());
     Assert.assertEquals(
         ImmutableList.of(
             new PreJoinableClause(joinDataSource)
         ),
-        analysis1.getPreJoinableClauses()
+        analysis.getPreJoinableClauses()
     );
     Assert.assertTrue(ev.isJoin());
     Assert.assertTrue(ev.isBaseColumn("foo"));
@@ -595,19 +595,19 @@ Assert.assertEquals(null, analysis.getJoinBaseTableFilter().orElse(null));
     );
 
     final ExecutionVertex ev = ExecutionVertex.of(makeScanQuery(joinDataSource));
-    final JoinDataSourceAnalysis analysis1 = joinDataSource.getJoinAnalysisForDataSource();
+    final JoinDataSourceAnalysis analysis = joinDataSource.getJoinAnalysisForDataSource();
 
-    Assert.assertFalse(ev.isExecutable());
+    Assert.assertFalse(ev.isProcessable());
     Assert.assertFalse(ev.isTableBased());
     Assert.assertEquals(LOOKUP_LOOKYLOO, ev.getBaseDataSource());
     Assert.assertThrows(DruidException.class, () -> ev.getBaseTableDataSource());
     Assert.assertEquals(new MultipleIntervalSegmentSpec(MILLENIUM_INTERVALS), ev.getEffectiveQuerySegmentSpec());
-    Assert.assertEquals(Optional.empty(), analysis1.getJoinBaseTableFilter());
+    Assert.assertEquals(Optional.empty(), analysis.getJoinBaseTableFilter());
     Assert.assertEquals(
         ImmutableList.of(
             new PreJoinableClause(joinDataSource)
         ),
-        analysis1.getPreJoinableClauses()
+        analysis.getPreJoinableClauses()
     );
     Assert.assertTrue(ev.isJoin());
     Assert.assertTrue(ev.isBaseColumn("foo"));

@@ -53,7 +53,7 @@ public class UnionDataSourceQueryRunner<T> implements QueryRunner<T>
     ExecutionVertex ev = ExecutionVertex.of(query);
     DataSource baseDataSource = ev.getBaseDataSource();
 
-    if (ev.isExecutable() && ev.isTableBased() && baseDataSource instanceof UnionDataSource) {
+    if (ev.isProcessable() && ev.isTableBased() && baseDataSource instanceof UnionDataSource) {
       // Union of tables.
 
       final UnionDataSource unionDataSource = (UnionDataSource) baseDataSource;

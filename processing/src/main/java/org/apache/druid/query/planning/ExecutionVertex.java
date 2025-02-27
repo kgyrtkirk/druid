@@ -80,26 +80,18 @@ public class ExecutionVertex
     return baseDataSource;
   }
 
-  // FIXME: correct apidcos?
-  // FIXME rename
-  public boolean isExecutable()
+  public boolean isProcessable()
   {
     return getBaseDataSource().isProcessable() && allRightsAreGlobal;
-//topQuery.getDataSource().isConcrete();
   }
 
   public boolean isTableBased()
   {
     return baseDataSource instanceof TableDataSource
-        // || baseDataSource instanceof RestrictedDataSource
         || (baseDataSource instanceof UnionDataSource &&
             baseDataSource.getChildren()
                 .stream()
                 .allMatch(ds -> ds instanceof TableDataSource));
-    // || (baseDataSource instanceof UnnestDataSource &&
-    // baseDataSource.getChildren()
-    // .stream()
-    // .allMatch(ds -> ds instanceof TableDataSource)));
   }
 
   /**
@@ -346,12 +338,12 @@ public class ExecutionVertex
 
   public boolean canRunQueryUsingClusterWalker()
   {
-    return isExecutable() && isTableBased();
+    return isProcessable() && isTableBased();
   }
 
   public boolean canRunQueryUsingLocalWalker()
   {
-    return isExecutable() && !isTableBased();
+    return isProcessable() && !isTableBased();
   }
 
   public boolean isJoin()
