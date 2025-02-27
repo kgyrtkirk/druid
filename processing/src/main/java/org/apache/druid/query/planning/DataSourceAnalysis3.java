@@ -23,7 +23,6 @@ import org.apache.druid.error.DruidException;
 import org.apache.druid.java.util.common.IAE;
 import org.apache.druid.java.util.common.Intervals;
 import org.apache.druid.query.DataSource;
-import org.apache.druid.query.FilteredDataSource;
 import org.apache.druid.query.JoinDataSource;
 import org.apache.druid.query.Query;
 import org.apache.druid.query.RestrictedDataSource;
@@ -81,7 +80,7 @@ import java.util.Optional;
  * layer (or the end user in the case of native queries), is responsible for containing the smarts to structure the
  * tree in a way that will lead to optimal execution.
  */
-public class DataSourceAnalysis3 extends DataSourceAnalysis2
+public class DataSourceAnalysis3
 {
   private final DataSource baseDataSource;
   @Nullable
@@ -101,7 +100,6 @@ public class DataSourceAnalysis3 extends DataSourceAnalysis2
       QuerySegmentSpec querySegmentSpec
   )
   {
-    super(baseDataSource, querySegmentSpec);
     if (baseDataSource instanceof JoinDataSource) {
       // The base cannot be a join (this is a class invariant).
       // If it happens, it's a bug in the datasource analyzer.

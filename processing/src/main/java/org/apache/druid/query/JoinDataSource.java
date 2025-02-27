@@ -497,11 +497,6 @@ public class JoinDataSource implements DataSource
     return new HashJoinSegment(sourceSegment, baseFilterToUse, clausesToUse, joinFilterPreAnalysis);
   }
 
-  private DataSourceAnalysis getAnalysisForDataSource()
-  {
-    return constructAnalysis(this, true);
-  }
-
   /**
    * Computes the DataSourceAnalysis with join boundaries.
    *
