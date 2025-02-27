@@ -118,7 +118,7 @@ public class TableDataSource implements DataSource
   @Override
   public byte[] getCacheKey()
   {
-    return getName().getBytes();
+    return new byte[0];
   }
 
   @Override
