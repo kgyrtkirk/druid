@@ -33,10 +33,7 @@ import org.apache.druid.query.Query;
 import org.apache.druid.query.QueryContexts;
 import org.apache.druid.query.QueryRunner;
 import org.apache.druid.query.QuerySegmentWalker;
-import org.apache.druid.query.UnionDataSource;
 import org.apache.druid.query.filter.DimFilter;
-import org.apache.druid.query.planning.DataSourceAnalysis;
-import org.apache.druid.query.planning.DataSourceAnalysis2;
 import org.apache.druid.query.spec.QuerySegmentSpec;
 import org.apache.druid.segment.SegmentReference;
 import org.apache.druid.segment.column.RowSignature;
@@ -216,13 +213,6 @@ public class UnionQuery implements Query<Object>
   public String toString()
   {
     return "UnionQuery [context=" + context + ", queries=" + queries + "]";
-  }
-
-  @Override
-  public DataSourceAnalysis getDataSourceAnalysis()
-  {
-    OpaqueDataSourceCover ds = new OpaqueDataSourceCover(new UnionDataSource(getDataSources()));
-    return new DataSourceAnalysis2(ds, null, null, Collections.emptyList(), null);
   }
 
   private static class OpaqueDataSourceCover implements DataSource

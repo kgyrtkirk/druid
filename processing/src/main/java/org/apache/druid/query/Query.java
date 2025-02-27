@@ -34,7 +34,6 @@ import org.apache.druid.query.groupby.GroupByQuery;
 import org.apache.druid.query.metadata.metadata.SegmentMetadataQuery;
 import org.apache.druid.query.operator.WindowOperatorQuery;
 import org.apache.druid.query.planning.DataSourceAnalysis;
-import org.apache.druid.query.planning.ExecutionVertex;
 import org.apache.druid.query.scan.ScanQuery;
 import org.apache.druid.query.search.SearchQuery;
 import org.apache.druid.query.select.SelectQuery;
@@ -291,11 +290,6 @@ public interface Query<T>
             i
         )
     );
-  }
-
-  default DataSourceAnalysis getDataSourceAnalysis()
-  {
-    return ExecutionVertex.of(this).getX();
   }
 
   default DataSourceAnalysis getDataSourceAnalysis1()

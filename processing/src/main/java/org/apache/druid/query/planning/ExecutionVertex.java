@@ -354,7 +354,6 @@ public class ExecutionVertex
         && isGlobal();
   }
 
-  @Deprecated
   public boolean isGlobal()
   {
     return baseDataSource.isGlobal();
