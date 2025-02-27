@@ -84,8 +84,7 @@ public class LocalQuerySegmentWalker implements QuerySegmentWalker
     ExecutionVertex ev = ExecutionVertex.of(query);
     final DataSource dataSourceFromQuery = query.getDataSource();
 
-    // FIXME: what's the question here?
-    if (!ev.isExecutable() || !dataSourceFromQuery.isGlobal()) {
+    if (!ev.canRunQueryUsingLocalWalker()) {
       throw new IAE("Cannot query dataSource locally: %s", dataSourceFromQuery);
     }
 
@@ -97,6 +96,8 @@ public class LocalQuerySegmentWalker implements QuerySegmentWalker
 
     final AtomicLong cpuAccumulator = new AtomicLong(0L);
 
+    // FIXME: possible bug?  dataSourceFromQuery is QueryDataSource ; query is GBY with canPerformSubquery
+    // segmentMapFn will ignore all DS maps ass QDS will return identity
     final Function<SegmentReference, SegmentReference> segmentMapFn = dataSourceFromQuery
         .createSegmentMapFunction(query);
 
