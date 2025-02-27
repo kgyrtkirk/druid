@@ -286,10 +286,11 @@ public class ExecutionVertex
     {
       if (query instanceof BaseQuery) {
         BaseQuery<?> baseQuery = (BaseQuery<?>) query;
-        return baseQuery.getQuerySegmentSpec();
-      } else {
-        return new MultipleIntervalSegmentSpec(Intervals.ONLY_ETERNITY);
+        if (baseQuery.getQuerySegmentSpec() != null) {
+          return baseQuery.getQuerySegmentSpec();
+        }
       }
+      return new MultipleIntervalSegmentSpec(Intervals.ONLY_ETERNITY);
     }
   }
 
@@ -404,7 +405,17 @@ public class ExecutionVertex
     {
       return query;
     }
-
   }
 
+  @Override
+  public boolean equals(Object obj)
+  {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public int hashCode()
+  {
+    throw new UnsupportedOperationException();
+  }
 }

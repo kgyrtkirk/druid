@@ -20,7 +20,6 @@
 package org.apache.druid.query.planning;
 
 import com.google.common.collect.ImmutableList;
-import nl.jqno.equalsverifier.EqualsVerifier;
 import org.apache.druid.error.DruidException;
 import org.apache.druid.java.util.common.Intervals;
 import org.apache.druid.java.util.common.StringUtils;
@@ -52,6 +51,8 @@ import org.junit.Test;
 
 import java.util.List;
 import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ExecutionVertexTest
 {
@@ -614,14 +615,15 @@ Assert.assertEquals(null, analysis.getJoinBaseTableFilter().orElse(null));
   }
 
   @Test
-  public void testEquals()
+  public void testHashCodeIsNotSupported()
   {
-    EqualsVerifier.forClass(ExecutionVertex.class)
-                  .usingGetClass()
-                  .withNonnullFields("baseDataSource")
-                  // These fields are not necessary, because they're wholly determined by "dataSource"
-                  .withIgnoredFields("baseQuery", "preJoinableClauses", "joinBaseTableFilter")
-                  .verify();
+    assertThrows(Exception.class, () -> ExecutionVertex.of(makeScanQuery(TABLE_FOO)).hashCode());
+  }
+
+  @Test
+  public void testEqualsIsNotSupported()
+  {
+    assertThrows(Exception.class, () -> ExecutionVertex.of(makeScanQuery(TABLE_FOO)).equals(null));
   }
 
   /**
