@@ -40,7 +40,6 @@ import org.apache.druid.query.OrderBy;
 import org.apache.druid.query.Queries;
 import org.apache.druid.query.filter.DimFilter;
 import org.apache.druid.query.operator.OffsetLimit;
-import org.apache.druid.query.planning.DataSourceAnalysis3;
 import org.apache.druid.query.spec.QuerySegmentSpec;
 import org.apache.druid.segment.VirtualColumn;
 import org.apache.druid.segment.VirtualColumns;
@@ -680,15 +679,5 @@ public class ScanQuery extends BaseQuery<ScanResultValue>
     }
     // Unknown type. In the future, it would be nice to have a way to fill these in.
     return null;
-  }
-
-  public DataSourceAnalysis3 getJoinDataSourceAnalysis()
-  {
-    if(true)
-    {
-      throw new RuntimeException("FIXME: Unimplemented!");
-    }
-    return null;
-
   }
 }

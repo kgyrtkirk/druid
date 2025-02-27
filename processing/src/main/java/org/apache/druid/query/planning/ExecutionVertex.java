@@ -79,9 +79,10 @@ public class ExecutionVertex
   }
 
   // FIXME: correct apidcos?
+  // FIXME rename
   public boolean isConcreteBased()
   {
-    return getBaseDataSource().isConcrete();
+    return topQuery.getDataSource().isConcrete();
   }
 
   public boolean isTableBased()
@@ -166,21 +167,22 @@ public class ExecutionVertex
     {
       try {
         parents.push(new EVNode(dataSource, index));
+        boolean traverse = mayTraverseDataSource(parents.peek());
         if (dataSource instanceof QueryDataSource) {
           QueryDataSource queryDataSource = (QueryDataSource) dataSource;
-          if (mayTraverseDataSource(dataSource)) {
+          if (traverse) {
             Query<?> oldQuery = queryDataSource.getQuery();
             Query<?> newQuery = traverse(oldQuery);
             if (oldQuery != newQuery) {
               dataSource = new QueryDataSource(newQuery);
             }
           }
-          return visit(dataSource);
+          return visit(dataSource, !traverse);
         } else {
           List<DataSource> children = dataSource.getChildren();
           List<DataSource> newChildren = new ArrayList<>();
           boolean changed = false;
-          if (mayTraverseDataSource(dataSource)) {
+          if (traverse) {
             for (int i = 0; i < children.size(); i++) {
               DataSource oldDS = children.get(i);
               DataSource newDS = traverse(oldDS, i);
@@ -189,7 +191,7 @@ public class ExecutionVertex
             }
           }
           DataSource newDataSource = changed ? dataSource.withChildren(newChildren) : dataSource;
-          return visit(newDataSource);
+          return visit(newDataSource, !traverse);
 
         }
       } finally {
@@ -199,9 +201,9 @@ public class ExecutionVertex
 
     protected abstract boolean mayTraverseQuery(Query<?> query);
 
-    protected abstract boolean mayTraverseDataSource(DataSource dataSource);
+    protected abstract boolean mayTraverseDataSource(EVNode evNode);
 
-    protected abstract DataSource visit(DataSource dataSource);
+    protected abstract DataSource visit(DataSource dataSource, boolean leaf);
 
     protected abstract Query<?> visitQuery(Query<?> query);
   }
@@ -227,35 +229,35 @@ public class ExecutionVertex
     }
 
     @Override
-    protected boolean mayTraverseDataSource(DataSource dataSource)
+    protected boolean mayTraverseDataSource(EVNode node)
     {
       if (parents.size() < 2) {
         return true;
       }
-      if (dataSource instanceof QueryDataSource) {
+      if (node.index != null && node.index > 0) {
+        return false;
+      }
+      if (node.dataSource instanceof QueryDataSource) {
         EVNode parentNode = parents.get(parents.size() - 2);
         if (parentNode.isQuery()) {
           return parentNode.getQuery().mayCollapseQueryDataSource();
         }
       }
-      if (dataSource instanceof UnionDataSource) {
+      if (node.dataSource instanceof UnionDataSource) {
         return false;
       }
       return true;
     }
 
     @Override
-    protected DataSource visit(DataSource dataSource)
+    protected DataSource visit(DataSource dataSource, boolean leaf)
     {
       if (discoveringBase) {
-        if(!isLeftLeaning()) {
-          throw DruidException.defensive("Asdf");
-        }
-
         baseDataSource = dataSource;
         discoveringBase = false;
       }
-      if ( dataSource instanceof JoinDataSource) {
+
+      if (!leaf &&  dataSource instanceof JoinDataSource) {
         JoinDataSource joinDataSource = (JoinDataSource) dataSource;
         joinPrefixes.add(joinDataSource.getRightPrefix());
 
@@ -332,10 +334,7 @@ public class ExecutionVertex
    */
   public QuerySegmentSpec getEffectiveQuerySegmentSpec()
   {
-    if (querySegmentSpec == null) {
-      throw DruidException
-          .defensive("Can't answer this question. Please obtain a datasource analysis from the Query object!");
-    }
+    Preconditions.checkNotNull(querySegmentSpec, "querySegmentSpec is null!");
     return querySegmentSpec;
   }
 
@@ -356,7 +355,7 @@ public class ExecutionVertex
 
   public boolean isGlobal()
   {
-    return baseDataSource.isGlobal();
+    return topQuery.getDataSource().isGlobal();
 
   }
 

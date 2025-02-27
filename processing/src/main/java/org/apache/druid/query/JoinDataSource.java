@@ -277,7 +277,7 @@ public class JoinDataSource implements DataSource
   @Override
   public boolean isConcrete()
   {
-    return false;
+    return left.isConcrete() && right.isGlobal();
   }
 
   /**

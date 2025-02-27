@@ -113,13 +113,8 @@ public class DataSourceAnalysisTest
 
     Assert.assertTrue(ev.isConcreteBased());
     Assert.assertTrue(ev.isTableBased());
-    /**
-     * The right expectation would be TABLE_FOO.
-     * However right now MSQ wierdly depends on join identifying RestrictedDataSource as a non-vertex boundary.
-     * That should be fixed when this test will be fixed.
-     */
-    Assert.assertEquals(RESTRICTED_FOO, ev.getBaseDataSource());
-    Assert.assertThrows(DruidException.class, () -> ev.getBaseTableDataSource());
+    Assert.assertEquals(TABLE_FOO, ev.getBaseDataSource());
+    Assert.assertEquals(TABLE_FOO, ev.getBaseTableDataSource());
     Assert.assertEquals(new MultipleIntervalSegmentSpec(MILLENIUM_INTERVALS), ev.getEffectiveQuerySegmentSpec());
     Assert.assertFalse(ev.isGlobal());
     Assert.assertTrue(ev.isJoin());
@@ -148,8 +143,8 @@ public class DataSourceAnalysisTest
     final QueryDataSource queryDataSource = makeQueryDS(TABLE_FOO);
     final ExecutionVertex ev = ExecutionVertex.of(makeGroupByQuery(queryDataSource));
 
-    Assert.assertTrue(ev.isConcreteBased());
     Assert.assertTrue(ev.isTableBased());
+    Assert.assertTrue(ev.isConcreteBased());
     Assert.assertEquals(TABLE_FOO, ev.getBaseDataSource());
     Assert.assertEquals(TABLE_FOO, ev.getBaseTableDataSource());
     Assert.assertEquals(new MultipleIntervalSegmentSpec(MILLENIUM_INTERVALS), ev.getEffectiveQuerySegmentSpec());
@@ -172,22 +167,22 @@ public class DataSourceAnalysisTest
     Assert.assertEquals(new MultipleIntervalSegmentSpec(MILLENIUM_INTERVALS), ev.getEffectiveQuerySegmentSpec());
     Assert.assertFalse(ev.isGlobal());
     Assert.assertFalse(ev.isJoin());
-    Assert.assertFalse(ev.isBaseColumn("foo"));
+    Assert.assertTrue(ev.isBaseColumn("foo"));
   }
 
   @Test
   public void testLookup()
   {
-    final DataSourceAnalysis analysis = ExecutionVertex.of(makeScanQuery(LOOKUP_LOOKYLOO)).getX();
+    final ExecutionVertex ev = ExecutionVertex.of(makeScanQuery(LOOKUP_LOOKYLOO));
 
-    Assert.assertTrue(analysis.isConcreteBased());
-    Assert.assertFalse(analysis.isTableBased());
-    Assert.assertEquals(LOOKUP_LOOKYLOO, analysis.getBaseDataSource());
-    Assert.assertThrows(DruidException.class, () -> analysis.getBaseTableDataSource());
-    Assert.assertThrows(DruidException.class, () -> analysis.getEffectiveQuerySegmentSpec());
-    Assert.assertTrue(analysis.isGlobal());
-    Assert.assertFalse(analysis.isJoin());
-    Assert.assertTrue(analysis.isBaseColumn("foo"));
+    Assert.assertTrue(ev.isConcreteBased());
+    Assert.assertFalse(ev.isTableBased());
+    Assert.assertEquals(LOOKUP_LOOKYLOO, ev.getBaseDataSource());
+    Assert.assertThrows(DruidException.class, () -> ev.getBaseTableDataSource());
+    Assert.assertEquals(new MultipleIntervalSegmentSpec(MILLENIUM_INTERVALS), ev.getEffectiveQuerySegmentSpec());
+    Assert.assertTrue(ev.isGlobal());
+    Assert.assertFalse(ev.isJoin());
+    Assert.assertTrue(ev.isBaseColumn("foo"));
   }
 
   @Test
@@ -202,8 +197,7 @@ public class DataSourceAnalysisTest
     Assert.assertEquals(new MultipleIntervalSegmentSpec(MILLENIUM_INTERVALS), ev.getEffectiveQuerySegmentSpec());
     Assert.assertTrue(ev.isGlobal());
     Assert.assertFalse(ev.isJoin());
-    // FIXME: how this could have been false?
-    Assert.assertFalse(ev.isBaseColumn("foo"));
+    Assert.assertTrue(ev.isBaseColumn("foo"));
   }
 
   @Test
@@ -215,7 +209,7 @@ public class DataSourceAnalysisTest
     Assert.assertFalse(ev.isTableBased());
     Assert.assertEquals(INLINE, ev.getBaseDataSource());
     Assert.assertThrows(DruidException.class, () -> ev.getBaseTableDataSource());
-    Assert.assertThrows(DruidException.class, () -> ev.getEffectiveQuerySegmentSpec());
+    Assert.assertEquals(new MultipleIntervalSegmentSpec(MILLENIUM_INTERVALS), ev.getEffectiveQuerySegmentSpec());
     Assert.assertEquals(INLINE.isGlobal(), ev.isGlobal());
     Assert.assertTrue(ev.isGlobal());
     Assert.assertFalse(ev.isJoin());
@@ -246,17 +240,16 @@ public class DataSourceAnalysisTest
             JoinType.FULL
         );
 
-    final DataSourceAnalysis3 analysis = makeScanQuery(joinDataSource).getJoinDataSourceAnalysis();
+    final ExecutionVertex ev = ExecutionVertex.of(makeScanQuery(joinDataSource));
+    final DataSourceAnalysis3 analysis = joinDataSource.getJoinAnalysisForDataSource();
 
-    Assert.assertTrue(analysis.isConcreteBased());
-    Assert.assertTrue(analysis.isTableBased());
-    Assert.assertTrue(analysis.isConcreteAndTableBased());
-    Assert.assertEquals(TABLE_FOO, analysis.getBaseDataSource());
-    Assert.assertEquals(TABLE_FOO, analysis.getBaseTableDataSource());
+    Assert.assertTrue(ev.isConcreteBased());
+    Assert.assertTrue(ev.isTableBased());
+    Assert.assertEquals(TABLE_FOO, ev.getBaseDataSource());
+    Assert.assertEquals(TABLE_FOO, ev.getBaseTableDataSource());
     Assert.assertEquals(Optional.empty(), analysis.getJoinBaseTableFilter());
     Assert.assertEquals(Optional.empty(), analysis.getBaseUnionDataSource());
-    Assert.assertEquals(Optional.empty(), analysis.getBaseUnionDataSource());
-    Assert.assertThrows(DruidException.class, () -> analysis.getEffectiveQuerySegmentSpec());
+    Assert.assertEquals(new MultipleIntervalSegmentSpec(MILLENIUM_INTERVALS), ev.getEffectiveQuerySegmentSpec());
     Assert.assertEquals(
         ImmutableList.of(
             new PreJoinableClause((JoinDataSource) ((JoinDataSource) joinDataSource.getLeft()).getLeft()),
@@ -265,13 +258,13 @@ public class DataSourceAnalysisTest
         ),
         analysis.getPreJoinableClauses()
     );
-    Assert.assertEquals(joinDataSource.isGlobal(), analysis.isGlobal());
-    Assert.assertFalse(analysis.isGlobal());
-    Assert.assertTrue(analysis.isJoin());
-    Assert.assertTrue(analysis.isBaseColumn("foo"));
-    Assert.assertFalse(analysis.isBaseColumn("1.foo"));
-    Assert.assertFalse(analysis.isBaseColumn("2.foo"));
-    Assert.assertFalse(analysis.isBaseColumn("3.foo"));
+    Assert.assertEquals(joinDataSource.isGlobal(), ev.isGlobal());
+    Assert.assertFalse(ev.isGlobal());
+    Assert.assertTrue(ev.isJoin());
+    Assert.assertTrue(ev.isBaseColumn("foo"));
+    Assert.assertFalse(ev.isBaseColumn("1.foo"));
+    Assert.assertFalse(ev.isBaseColumn("2.foo"));
+    Assert.assertFalse(ev.isBaseColumn("3.foo"));
   }
 
   @Test
@@ -296,24 +289,22 @@ public class DataSourceAnalysisTest
             JoinType.FULL
         );
 
-    final DataSourceAnalysis3 analysis = makeScanQuery(joinDataSource).getJoinDataSourceAnalysis();
+    final ExecutionVertex analysis = ExecutionVertex.of(makeScanQuery(joinDataSource));
+    final DataSourceAnalysis3 analysis1 = joinDataSource.getJoinAnalysisForDataSource();
 
     Assert.assertTrue(analysis.isConcreteBased());
     Assert.assertTrue(analysis.isTableBased());
-    Assert.assertTrue(analysis.isConcreteAndTableBased());
     Assert.assertEquals(TABLE_FOO, analysis.getBaseDataSource());
     Assert.assertEquals(TABLE_FOO, analysis.getBaseTableDataSource());
-    Assert.assertEquals(null, analysis.getJoinBaseTableFilter().orElse(null));
-    Assert.assertEquals(Optional.empty(), analysis.getBaseUnionDataSource());
-    Assert.assertEquals(Optional.empty(), analysis.getBaseUnionDataSource());
-    Assert.assertThrows(DruidException.class, () -> analysis.getEffectiveQuerySegmentSpec());
+    Assert.assertEquals(null, analysis1.getJoinBaseTableFilter().orElse(null));
+    Assert.assertEquals(new MultipleIntervalSegmentSpec(MILLENIUM_INTERVALS), analysis.getEffectiveQuerySegmentSpec());
     Assert.assertEquals(
         ImmutableList.of(
             new PreJoinableClause((JoinDataSource) ((JoinDataSource) joinDataSource.getLeft()).getLeft()),
             new PreJoinableClause((JoinDataSource) joinDataSource.getLeft()),
             new PreJoinableClause(joinDataSource)
         ),
-        analysis.getPreJoinableClauses()
+        analysis1.getPreJoinableClauses()
     );
     Assert.assertEquals(joinDataSource.isGlobal(), analysis.isGlobal());
     Assert.assertFalse(analysis.isGlobal());
@@ -353,21 +344,21 @@ public class DataSourceAnalysisTest
             JoinType.RIGHT
         );
 
-    final DataSourceAnalysis3 analysis = makeScanQuery(joinDataSource).getJoinDataSourceAnalysis();
+    final ExecutionVertex analysis = ExecutionVertex.of(makeScanQuery(joinDataSource));
+    final DataSourceAnalysis3 analysis1 = joinDataSource.getJoinAnalysisForDataSource();
 
     Assert.assertTrue(analysis.isConcreteBased());
     Assert.assertTrue(analysis.isTableBased());
-    Assert.assertTrue(analysis.isConcreteAndTableBased());
     Assert.assertEquals(TABLE_FOO, analysis.getBaseDataSource());
     Assert.assertEquals(TABLE_FOO, analysis.getBaseTableDataSource());
-    Assert.assertEquals(Optional.empty(), analysis.getJoinBaseTableFilter());
-    Assert.assertEquals(Optional.empty(), analysis.getBaseUnionDataSource());
-    Assert.assertThrows(DruidException.class, () -> analysis.getEffectiveQuerySegmentSpec());
+    Assert.assertEquals(Optional.empty(), analysis1.getJoinBaseTableFilter());
+    Assert.assertEquals(Optional.empty(), analysis1.getBaseUnionDataSource());
+    Assert.assertEquals(new MultipleIntervalSegmentSpec(MILLENIUM_INTERVALS), analysis.getEffectiveQuerySegmentSpec());
     Assert.assertEquals(
         ImmutableList.of(
             new PreJoinableClause(joinDataSource)
         ),
-        analysis.getPreJoinableClauses()
+        analysis1.getPreJoinableClauses()
     );
     Assert.assertFalse(analysis.isGlobal());
     Assert.assertTrue(analysis.isJoin());
@@ -402,28 +393,27 @@ public class DataSourceAnalysisTest
             TrueDimFilter.instance()
         );
 
-    final DataSourceAnalysis3 analysis = makeScanQuery(joinDataSource).getJoinDataSourceAnalysis();
+    final ExecutionVertex ev = ExecutionVertex.of(makeScanQuery(joinDataSource));
+    final DataSourceAnalysis3 analysis = joinDataSource.getJoinAnalysisForDataSource();
 
-    Assert.assertTrue(analysis.isConcreteBased());
-    Assert.assertTrue(analysis.isTableBased());
-    Assert.assertTrue(analysis.isConcreteAndTableBased());
-    Assert.assertEquals(TABLE_FOO, analysis.getBaseDataSource());
-    Assert.assertEquals(TABLE_FOO, analysis.getBaseTableDataSource());
+    Assert.assertTrue(ev.isConcreteBased());
+    Assert.assertTrue(ev.isTableBased());
+    Assert.assertEquals(TABLE_FOO, ev.getBaseDataSource());
+    Assert.assertEquals(TABLE_FOO, ev.getBaseTableDataSource());
     Assert.assertEquals(null, analysis.getJoinBaseTableFilter().orElse(null));
-    Assert.assertEquals(Optional.empty(), analysis.getBaseUnionDataSource());
-    Assert.assertThrows(DruidException.class, () -> analysis.getEffectiveQuerySegmentSpec());
+    Assert.assertEquals(new MultipleIntervalSegmentSpec(MILLENIUM_INTERVALS), ev.getEffectiveQuerySegmentSpec());
     Assert.assertEquals(
         ImmutableList.of(
             new PreJoinableClause(joinDataSource)
         ),
         analysis.getPreJoinableClauses()
     );
-    Assert.assertFalse(analysis.isGlobal());
-    Assert.assertTrue(analysis.isJoin());
-    Assert.assertTrue(analysis.isBaseColumn("foo"));
-    Assert.assertTrue(analysis.isBaseColumn("1.foo"));
-    Assert.assertTrue(analysis.isBaseColumn("2.foo"));
-    Assert.assertFalse(analysis.isBaseColumn("3.foo"));
+    Assert.assertFalse(ev.isGlobal());
+    Assert.assertTrue(ev.isJoin());
+    Assert.assertTrue(ev.isBaseColumn("foo"));
+    Assert.assertTrue(ev.isBaseColumn("1.foo"));
+    Assert.assertTrue(ev.isBaseColumn("2.foo"));
+    Assert.assertFalse(ev.isBaseColumn("3.foo"));
   }
 
   @Test
@@ -437,20 +427,19 @@ public class DataSourceAnalysisTest
         TrueDimFilter.instance()
     );
 
-    final DataSourceAnalysis3 analysis = makeScanQuery(joinDataSource).getJoinDataSourceAnalysis();
+    final ExecutionVertex analysis = ExecutionVertex.of(makeScanQuery(joinDataSource));
+    final DataSourceAnalysis3 analysis1 = joinDataSource.getJoinAnalysisForDataSource();
 
     Assert.assertFalse(analysis.isConcreteBased());
     Assert.assertTrue(analysis.isTableBased());
-    Assert.assertFalse(analysis.isConcreteAndTableBased());
     Assert.assertEquals(TABLE_FOO, analysis.getBaseDataSource());
-    Assert.assertEquals(null, analysis.getJoinBaseTableFilter().orElse(null));
+    Assert.assertEquals(null, analysis1.getJoinBaseTableFilter().orElse(null));
     Assert.assertEquals(TABLE_FOO, analysis.getBaseTableDataSource());
-    Assert.assertEquals(Optional.empty(), analysis.getBaseUnionDataSource());
     Assert.assertEquals(
         ImmutableList.of(
             new PreJoinableClause(joinDataSource)
         ),
-        analysis.getPreJoinableClauses()
+        analysis1.getPreJoinableClauses()
     );
     Assert.assertFalse(analysis.isGlobal());
     Assert.assertTrue(analysis.isJoin());
@@ -469,26 +458,26 @@ public class DataSourceAnalysisTest
         JoinType.INNER
     );
 
-    final DataSourceAnalysis3 analysis = makeScanQuery(joinDataSource).getJoinDataSourceAnalysis();
+    final ExecutionVertex ev = ExecutionVertex.of(makeScanQuery(joinDataSource));
+    final DataSourceAnalysis3 analysis1 = joinDataSource.getJoinAnalysisForDataSource();
 
-    Assert.assertTrue(analysis.isConcreteBased());
-    Assert.assertTrue(analysis.isTableBased());
-    Assert.assertTrue(analysis.isConcreteAndTableBased());
-    Assert.assertThrows(DruidException.class, () -> analysis.getBaseTableDataSource());
-    Assert.assertEquals(Optional.empty(), analysis.getJoinBaseTableFilter());
-    Assert.assertEquals(Optional.of(unionDataSource), analysis.getBaseUnionDataSource());
-    Assert.assertEquals(unionDataSource, analysis.getBaseDataSource());
-    Assert.assertThrows(DruidException.class, () -> analysis.getEffectiveQuerySegmentSpec());
+    Assert.assertTrue(ev.isConcreteBased());
+    Assert.assertTrue(ev.isTableBased());
+    Assert.assertThrows(DruidException.class, () -> ev.getBaseTableDataSource());
+    Assert.assertEquals(Optional.empty(), analysis1.getJoinBaseTableFilter());
+    Assert.assertEquals(Optional.of(unionDataSource), analysis1.getBaseUnionDataSource());
+    Assert.assertEquals(unionDataSource, ev.getBaseDataSource());
+    Assert.assertEquals(new MultipleIntervalSegmentSpec(MILLENIUM_INTERVALS), ev.getEffectiveQuerySegmentSpec());
     Assert.assertEquals(
         ImmutableList.of(
             new PreJoinableClause(joinDataSource)
         ),
-        analysis.getPreJoinableClauses()
+        analysis1.getPreJoinableClauses()
     );
-    Assert.assertFalse(analysis.isGlobal());
-    Assert.assertTrue(analysis.isJoin());
-    Assert.assertTrue(analysis.isBaseColumn("foo"));
-    Assert.assertFalse(analysis.isBaseColumn("1.foo"));
+    Assert.assertFalse(ev.isGlobal());
+    Assert.assertTrue(ev.isJoin());
+    Assert.assertTrue(ev.isBaseColumn("foo"));
+    Assert.assertFalse(ev.isBaseColumn("1.foo"));
   }
 
   @Test
@@ -516,8 +505,8 @@ public class DataSourceAnalysisTest
     Assert.assertEquals(new MultipleIntervalSegmentSpec(MILLENIUM_INTERVALS), analysis.getEffectiveQuerySegmentSpec());
     Assert.assertFalse(analysis.isGlobal());
     Assert.assertFalse(analysis.isJoin());
-    Assert.assertFalse(analysis.isBaseColumn("foo"));
-    Assert.assertFalse(analysis.isBaseColumn("1.foo"));
+    Assert.assertTrue(analysis.isBaseColumn("foo"));
+    Assert.assertTrue(analysis.isBaseColumn("1.foo"));
   }
 
   @Test
@@ -598,19 +587,19 @@ Assert.assertEquals(null, analysis.getJoinBaseTableFilter().orElse(null));
     );
 
     final ExecutionVertex ev = ExecutionVertex.of(makeScanQuery(joinDataSource));
-    final DataSourceAnalysis3 analysis = makeScanQuery(joinDataSource).getJoinDataSourceAnalysis();
+    final DataSourceAnalysis3 analysis1 = joinDataSource.getJoinAnalysisForDataSource();
 
     Assert.assertTrue(ev.isConcreteBased());
     Assert.assertFalse(ev.isTableBased());
     Assert.assertEquals(LOOKUP_LOOKYLOO, ev.getBaseDataSource());
     Assert.assertThrows(DruidException.class, () -> ev.getBaseTableDataSource());
-    Assert.assertThrows(DruidException.class, () -> ev.getEffectiveQuerySegmentSpec());
-    Assert.assertEquals(Optional.empty(), analysis.getJoinBaseTableFilter());
+    Assert.assertEquals(new MultipleIntervalSegmentSpec(MILLENIUM_INTERVALS), ev.getEffectiveQuerySegmentSpec());
+    Assert.assertEquals(Optional.empty(), analysis1.getJoinBaseTableFilter());
     Assert.assertEquals(
         ImmutableList.of(
             new PreJoinableClause(joinDataSource)
         ),
-        analysis.getPreJoinableClauses()
+        analysis1.getPreJoinableClauses()
     );
     Assert.assertTrue(ev.isGlobal());
     Assert.assertTrue(ev.isJoin());
@@ -629,14 +618,15 @@ Assert.assertEquals(null, analysis.getJoinBaseTableFilter().orElse(null));
     );
 
     final ExecutionVertex ev = ExecutionVertex.of(makeScanQuery(joinDataSource));
-    final DataSourceAnalysis3 analysis1 = makeScanQuery(joinDataSource).getJoinDataSourceAnalysis();
+    final DataSourceAnalysis3 analysis1 = joinDataSource.getJoinAnalysisForDataSource();
 
+    Assert.assertFalse(analysis1.isConcreteBased());
     Assert.assertFalse(ev.isConcreteBased());
     Assert.assertFalse(ev.isTableBased());
     Assert.assertEquals(LOOKUP_LOOKYLOO, ev.getBaseDataSource());
     Assert.assertThrows(DruidException.class, () -> ev.getBaseTableDataSource());
     Assert.assertEquals(Optional.empty(), analysis1.getBaseUnionDataSource());
-    Assert.assertThrows(DruidException.class, () -> ev.getEffectiveQuerySegmentSpec());
+    Assert.assertEquals(new MultipleIntervalSegmentSpec(MILLENIUM_INTERVALS), ev.getEffectiveQuerySegmentSpec());
     Assert.assertEquals(Optional.empty(), analysis1.getJoinBaseTableFilter());
     Assert.assertEquals(
         ImmutableList.of(
