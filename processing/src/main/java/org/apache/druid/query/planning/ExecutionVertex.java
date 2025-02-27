@@ -376,4 +376,14 @@ public class ExecutionVertex
     }
     return true;
   }
+
+  public DataSourceAnalysis getX()
+  {
+    if(true)
+    {
+      throw new RuntimeException("FIXME: Unimplemented!");
+    }
+    return null;
+
+  }
 }
