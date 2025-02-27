@@ -24,7 +24,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import org.apache.druid.msq.indexing.destination.MSQDestination;
 import org.apache.druid.msq.indexing.destination.TaskReportMSQDestination;
-import org.apache.druid.msq.kernel.QueryDefinition;
 import org.apache.druid.msq.kernel.WorkerAssignmentStrategy;
 import org.apache.druid.query.BaseQuery;
 import org.apache.druid.query.Query;
@@ -42,7 +41,6 @@ public class MSQSpec extends MSQSpec0
   private final Query<?> query;
 
   // jackson defaults
-
   public MSQSpec()
   {
     super();
@@ -172,7 +170,6 @@ public class MSQSpec extends MSQSpec0
       if (destination == null) {
         destination = TaskReportMSQDestination.instance();
       }
-
       return new MSQSpec(query, columnMappings, destination, assignmentStrategy, tuningConfig, compactionMetrics, queryContext);
     }
 
@@ -181,10 +178,5 @@ public class MSQSpec extends MSQSpec0
       this.queryContext = queryContext;
       return this;
     }
-  }
-
-  public QueryDefinition getQueryDef()
-  {
-    return queryDefinition;
   }
 }
