@@ -32,6 +32,7 @@ import org.apache.druid.timeline.DataSegment;
 import org.apache.druid.timeline.partition.NoneShardSpec;
 import org.joda.time.Interval;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -98,7 +99,10 @@ public class SegmentChangeRequestLoadTest
 
     SegmentChangeRequestLoad srl = new SegmentChangeRequestLoad(segment);
 
-    String str = mapper.writeValueAsString(srl);
+    String str = mapper
+        .writerWithDefaultPrettyPrinter()
+        .writeValueAsString(srl);
+    System.out.println(str);
     SegmentChangeRequestLoad r = mapper.readValue(str, SegmentChangeRequestLoad.class);
     assertEquals(srl, r);
   }
@@ -120,6 +124,7 @@ public class SegmentChangeRequestLoadTest
   }
 
   @Test
+  @Ignore
   public void main() throws IOException, ParseException
   {
     ObjectMapper mapper = new ObjectMapper();

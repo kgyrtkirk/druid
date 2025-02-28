@@ -22,21 +22,77 @@ package org.apache.druid.server.coordination;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import org.apache.druid.jackson.CommaListJoinDeserializer;
 import org.apache.druid.java.util.common.StringUtils;
+import org.apache.druid.timeline.CompactionState;
 import org.apache.druid.timeline.DataSegment;
+import org.apache.druid.timeline.partition.ShardSpec;
+import org.joda.time.Interval;
 
 import javax.annotation.Nullable;
+
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
  */
 public class SegmentChangeRequestLoad implements DataSegmentChangeRequest
 {
+  private static class Serialized extends DataSegment {
+    @JsonProperty
+    int age;
+    @JsonCreator
+    public Serialized(
+        @JsonProperty("dataSource") String dataSource,
+        @JsonProperty("interval") Interval interval,
+        @JsonProperty("version") String version,
+        // use `Map` *NOT* `LoadSpec` because we want to do lazy materialization
+        // to prevent dependency pollution
+        @JsonProperty("loadSpec") @Nullable Map<String, Object> loadSpec,
+        @JsonProperty("dimensions") @JsonDeserialize(using = CommaListJoinDeserializer.class) @Nullable List<String> dimensions,
+        @JsonProperty("metrics") @JsonDeserialize(using = CommaListJoinDeserializer.class) @Nullable List<String> metrics,
+        @JsonProperty("shardSpec") @Nullable ShardSpec shardSpec,
+        @JsonProperty("lastCompactionState") @Nullable CompactionState lastCompactionState,
+        @JsonProperty("binaryVersion") Integer binaryVersion,
+        @JsonProperty("size") long size,
+    @JsonProperty("age") int age)
 
-  @JsonProperty("s")
+    {
+      super(
+          dataSource,
+          interval,
+          version,
+          loadSpec,
+          dimensions,
+          metrics,
+          shardSpec,
+          lastCompactionState,
+          binaryVersion,
+          size,
+          PruneSpecsHolder.DEFAULT
+      );
+      this.age=age;
+    }
+    public Serialized(DataSegment segment, int something)
+    {
+      this(segment.getDataSource(),
+      segment.getInterval(),
+      segment.getVersion(),
+      segment.getLoadSpec(),
+      segment.getDimensions(),
+      segment.getMetrics(),
+      segment.getShardSpec(),
+      segment.getLastCompactionState(),
+      segment.getBinaryVersion(),
+      segment.getSize(),
+      something);
+    }
+  }
+
   final public int something;
 
-  @JsonUnwrapped
   private final DataSegment segment;
 
   /**
@@ -45,12 +101,18 @@ public class SegmentChangeRequestLoad implements DataSegmentChangeRequest
    */
   @JsonCreator
   public SegmentChangeRequestLoad(
-      @JsonProperty("s") int something1,
-      @JsonUnwrapped LoadableDataSegment segment
+      @JsonUnwrapped Serialized s
   )
   {
-    this.segment = segment;
-    this.something = 3;
+    this.segment = DataSegment.builder(s).build();
+    this.something = s.age;
+  }
+
+  @JsonUnwrapped
+  private Serialized buildSer() {
+
+return    new Serialized(segment,something);
+
   }
 
   public SegmentChangeRequestLoad(
