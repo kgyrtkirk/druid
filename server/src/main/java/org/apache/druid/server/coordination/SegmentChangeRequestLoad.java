@@ -32,6 +32,11 @@ import java.util.Objects;
  */
 public class SegmentChangeRequestLoad implements DataSegmentChangeRequest
 {
+
+  @JsonProperty("s")
+  final public int something;
+
+  @JsonUnwrapped
   private final DataSegment segment;
 
   /**
@@ -40,10 +45,12 @@ public class SegmentChangeRequestLoad implements DataSegmentChangeRequest
    */
   @JsonCreator
   public SegmentChangeRequestLoad(
+      @JsonProperty("s") int something1,
       @JsonUnwrapped LoadableDataSegment segment
   )
   {
     this.segment = segment;
+    this.something = 3;
   }
 
   public SegmentChangeRequestLoad(
@@ -51,6 +58,7 @@ public class SegmentChangeRequestLoad implements DataSegmentChangeRequest
   )
   {
     this.segment = segment;
+    this.something = 33;
   }
 
 
@@ -60,8 +68,6 @@ public class SegmentChangeRequestLoad implements DataSegmentChangeRequest
     handler.addSegment(segment, callback);
   }
 
-  @JsonProperty
-  @JsonUnwrapped
   public DataSegment getSegment()
   {
     return segment;

@@ -238,6 +238,8 @@ public class ExecutionVertex
         if (parentNode.isQuery()) {
           return parentNode.getQuery().mayCollapseQueryDataSource();
         }
+        QueryDataSource queryDataSource = (QueryDataSource) node.dataSource;
+        return node.dataSource.isGlobal();
       }
       if (node.dataSource instanceof UnionDataSource) {
         return false;
