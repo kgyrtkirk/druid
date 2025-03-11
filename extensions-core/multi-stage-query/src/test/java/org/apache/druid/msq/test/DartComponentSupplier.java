@@ -25,6 +25,8 @@ import com.google.inject.Injector;
 import com.google.inject.Provides;
 import org.apache.druid.collections.NonBlockingPool;
 import org.apache.druid.discovery.DruidNodeDiscoveryProvider;
+import org.apache.druid.guice.IndexingServiceTuningConfigModule;
+import org.apache.druid.guice.JoinableFactoryModule;
 import org.apache.druid.guice.LazySingleton;
 import org.apache.druid.guice.annotations.EscalatedGlobal;
 import org.apache.druid.guice.annotations.Merging;
@@ -38,6 +40,9 @@ import org.apache.druid.msq.dart.guice.DartModules;
 import org.apache.druid.msq.dart.guice.DartWorkerMemoryManagementModule;
 import org.apache.druid.msq.dart.guice.DartWorkerModule;
 import org.apache.druid.msq.exec.Worker;
+import org.apache.druid.msq.guice.MSQExternalDataSourceModule;
+import org.apache.druid.msq.guice.MSQIndexingModule;
+import org.apache.druid.msq.test.CalciteMSQTestsHelper.MSQTestModule;
 import org.apache.druid.query.TestBufferPool;
 import org.apache.druid.rpc.ServiceClientFactory;
 import org.apache.druid.rpc.guice.ServiceClientModule;
@@ -47,6 +52,7 @@ import org.apache.druid.sql.avatica.DruidMeta;
 import org.apache.druid.sql.calcite.TempDirProducer;
 import org.apache.druid.sql.calcite.run.SqlEngine;
 import org.apache.druid.sql.calcite.util.DruidModuleCollection;
+import org.apache.druid.sql.calcite.util.SqlTestFramework.QueryComponentSupplierDelegate;
 import org.apache.druid.sql.calcite.util.SqlTestFramework.StandardComponentSupplier;
 
 import java.nio.ByteBuffer;
@@ -54,7 +60,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-public class DartComponentSupplier extends AbstractMSQComponentSupplierDelegate
+public class DartComponentSupplier extends QueryComponentSupplierDelegate
 {
   public DartComponentSupplier(TempDirProducer tempFolderProducer)
   {
@@ -76,6 +82,11 @@ public class DartComponentSupplier extends AbstractMSQComponentSupplierDelegate
         new DartControllerModule(),
         new DartWorkerModule(),
         new DartWorkerMemoryManagementModule(),
+        new IndexingServiceTuningConfigModule(),
+        new JoinableFactoryModule(),
+        new MSQExternalDataSourceModule(),
+        new MSQIndexingModule(),
+        new MSQTestModule(),
         new DartTestCoreModule()
     );
   }
@@ -105,7 +116,6 @@ public class DartComponentSupplier extends AbstractMSQComponentSupplierDelegate
     final ServiceClientFactory getServiceClientFactory(HttpClient ht)
     {
       return ServiceClientModule.makeServiceClientFactory(ht);
-
     }
 
     @Provides

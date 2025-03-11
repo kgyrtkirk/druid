@@ -20,11 +20,10 @@
 package org.apache.druid.msq.exec;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableList;
-import com.google.inject.Injector;
+import com.google.inject.Binder;
 import com.google.inject.Provides;
 import org.apache.druid.guice.LazySingleton;
-import org.apache.druid.indexing.overlord.ThreadingTaskRunner;
+import org.apache.druid.indexing.common.actions.TaskActionClient;
 import org.apache.druid.initialization.ServerInjectorBuilderTest.TestDruidModule;
 import org.apache.druid.msq.guice.MultiStageQuery;
 import org.apache.druid.msq.indexing.destination.SegmentGenerationTerminalStageSpecFactory;
@@ -60,44 +59,6 @@ public class TestMSQSqlModule extends TestDruidModule
 
   @Provides
   @LazySingleton
-  private MSQTestOverlordServiceClient makeOverlordServiceClient(
-      ObjectMapper queryJsonMapper,
-      Injector injector,
-      WorkerMemoryParameters workerMemoryParameters)
-  {
-    final MSQTestOverlordServiceClient indexingServiceClient = new MSQTestOverlordServiceClient(
-        queryJsonMapper,
-        injector,
-        new MSQTestTaskActionClient(queryJsonMapper, injector),
-        workerMemoryParameters,
-        ImmutableList.of()
-    );
-    return indexingServiceClient;
-  }
-
-//  @Provides
-  @LazySingleton
-  private MSQTestOverlordServiceClient makeOverlordServiceClient1(
-      ObjectMapper queryJsonMapper,
-      Injector injector,
-      WorkerMemoryParameters workerMemoryParameters)
-  {
-    new ThreadingTaskRunner(null, null, null, null, queryJsonMapper, null, null, null, null);
-    final MSQTestOverlordServiceClient indexingServiceClient = new MSQTestOverlordServiceClient(
-        queryJsonMapper,
-        injector,
-        new MSQTestTaskActionClient(queryJsonMapper, injector),
-        workerMemoryParameters,
-        ImmutableList.of()
-    );
-    return indexingServiceClient;
-  }
-
-
-
-
-  @Provides
-  @LazySingleton
   private WorkerMemoryParameters makeWorkerMemoryParameters()
   {
     return MSQTestBase.makeTestWorkerMemoryParameters();
@@ -108,5 +69,11 @@ public class TestMSQSqlModule extends TestDruidModule
   public DruidMeta createMeta(MSQDruidMeta druidMeta)
   {
     return druidMeta;
+  }
+
+  @Override
+  public void configure(Binder binder)
+  {
+    binder.bind(TaskActionClient.class).to(MSQTestTaskActionClient.class);
   }
 }

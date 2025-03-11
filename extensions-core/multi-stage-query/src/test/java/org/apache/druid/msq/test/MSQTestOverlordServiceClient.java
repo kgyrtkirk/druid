@@ -25,6 +25,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 import org.apache.calcite.sql.type.SqlTypeName;
 import org.apache.druid.client.ImmutableSegmentLoadInfo;
@@ -52,6 +53,7 @@ import org.joda.time.DateTime;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -72,6 +74,17 @@ public class MSQTestOverlordServiceClient extends NoopOverlordClient
   public static final DateTime QUEUE_INSERTION_TIME = DateTimes.of("2023-05-31T12:01Z");
 
   public static final long DURATION = 100L;
+
+  @Inject
+  public MSQTestOverlordServiceClient(
+      ObjectMapper objectMapper,
+      Injector injector,
+      TaskActionClient taskActionClient,
+      WorkerMemoryParameters workerMemoryParameters
+  )
+  {
+    this(objectMapper, injector, taskActionClient, workerMemoryParameters, Collections.emptyList());
+  }
 
   public MSQTestOverlordServiceClient(
       ObjectMapper objectMapper,

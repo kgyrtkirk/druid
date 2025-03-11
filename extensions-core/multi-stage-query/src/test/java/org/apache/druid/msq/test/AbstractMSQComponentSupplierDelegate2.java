@@ -21,22 +21,25 @@ package org.apache.druid.msq.test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Injector;
+import org.apache.druid.guice.IndexingServiceTuningConfigModule;
+import org.apache.druid.guice.JoinableFactoryModule;
 import org.apache.druid.initialization.DruidModule;
-import org.apache.druid.msq.exec.TestMSQSqlModule;
+import org.apache.druid.msq.guice.MSQExternalDataSourceModule;
+import org.apache.druid.msq.guice.MSQIndexingModule;
 import org.apache.druid.msq.sql.MSQTaskSqlEngine;
-import org.apache.druid.msq.test.CalciteMSQTestsHelper.MSQTestModule;
 import org.apache.druid.server.QueryLifecycleFactory;
 import org.apache.druid.sql.calcite.run.SqlEngine;
 import org.apache.druid.sql.calcite.util.DruidModuleCollection;
 import org.apache.druid.sql.calcite.util.SqlTestFramework.QueryComponentSupplier;
+import org.apache.druid.sql.calcite.util.SqlTestFramework.QueryComponentSupplierDelegate;
 
 /**
  * Upgrade an existing QueryComponentSupplier to support MSQ tests.
  */
-public class AbstractMSQComponentSupplierDelegate extends AbstractMSQComponentSupplierDelegate2
+public class AbstractMSQComponentSupplierDelegate2 extends QueryComponentSupplierDelegate
 {
 
-  public AbstractMSQComponentSupplierDelegate(QueryComponentSupplier delegate)
+  public AbstractMSQComponentSupplierDelegate2(QueryComponentSupplier delegate)
   {
     super(delegate);
   }
@@ -46,8 +49,10 @@ public class AbstractMSQComponentSupplierDelegate extends AbstractMSQComponentSu
   {
     return DruidModuleCollection.of(
         super.getCoreModule(),
-        new MSQTestModule(),
-        new TestMSQSqlModule()
+        new IndexingServiceTuningConfigModule(),
+        new JoinableFactoryModule(),
+        new MSQExternalDataSourceModule(),
+        new MSQIndexingModule()
     );
   }
 
