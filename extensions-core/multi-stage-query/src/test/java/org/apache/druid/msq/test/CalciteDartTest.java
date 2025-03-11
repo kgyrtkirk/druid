@@ -21,7 +21,10 @@ package org.apache.druid.msq.test;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.inject.Injector;
 import org.apache.druid.msq.dart.controller.sql.DartSqlEngine;
+import org.apache.druid.msq.test.DartComponentSupplier.I1;
+import org.apache.druid.msq.test.DartComponentSupplier.I1Factory;
 import org.apache.druid.sql.calcite.BaseCalciteQueryTest;
 import org.apache.druid.sql.calcite.QueryTestBuilder;
 import org.apache.druid.sql.calcite.SqlTestFrameworkConfig;
@@ -141,4 +144,17 @@ public class CalciteDartTest extends BaseCalciteQueryTest
         )
         .run();
   }
+
+
+  @Test
+  public void testComplexFromFoo1() throws Exception
+  {
+    Injector i = queryFrameworkRule.get().injector();
+    I1Factory instance = i.getInstance(I1Factory.class);
+    I1 e = instance.make(22);
+    e.i();
+
+  }
+
+
 }

@@ -21,8 +21,11 @@ package org.apache.druid.msq.test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Binder;
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Provides;
+import com.google.inject.assistedinject.Assisted;
+import com.google.inject.assistedinject.FactoryModuleBuilder;
 import org.apache.druid.collections.NonBlockingPool;
 import org.apache.druid.discovery.DruidNodeDiscoveryProvider;
 import org.apache.druid.guice.IndexingServiceTuningConfigModule;
@@ -127,7 +130,46 @@ public class DartComponentSupplier extends QueryComponentSupplierDelegate
     @Override
     public void configure(Binder binder)
     {
+      binder.install(
+          new FactoryModuleBuilder()
+              .implement(I1.class, C1.class)
+              .build(I1Factory.class)
+      );
     }
+
+  }
+
+  static interface I1Factory
+  {
+    public I1 make(int asd);
+  }
+
+  static interface I1
+  {
+    public void i();
+  }
+
+  static class C1 implements I1
+  {
+
+    private int asd;
+    private DartSqlEngine e;
+
+    @Inject
+    C1(
+        DartSqlEngine e,
+        @Assisted int asd)
+    {
+      this.e = e;
+      this.asd = asd;
+    }
+
+    @Override
+    public void i()
+    {
+      System.out.println("x" + asd+" " +e);
+    }
+
   }
 
   static class DartTestOverrideModule implements DruidModule
