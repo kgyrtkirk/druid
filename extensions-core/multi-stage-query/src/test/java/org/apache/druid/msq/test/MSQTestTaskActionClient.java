@@ -21,7 +21,6 @@ package org.apache.druid.msq.test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
-import com.google.inject.Inject;
 import com.google.inject.Injector;
 import org.apache.druid.indexing.common.TaskLockType;
 import org.apache.druid.indexing.common.TimeChunkLock;
@@ -59,7 +58,6 @@ public class MSQTestTaskActionClient implements TaskActionClient
   private final Set<DataSegment> publishedSegments = new HashSet<>();
   private final Injector injector;
 
-  @Inject
   public MSQTestTaskActionClient(
       ObjectMapper mapper,
       Injector injector
