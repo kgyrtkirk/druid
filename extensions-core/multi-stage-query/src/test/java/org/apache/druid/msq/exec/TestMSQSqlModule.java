@@ -75,7 +75,7 @@ public class TestMSQSqlModule extends TestDruidModule
     return indexingServiceClient;
   }
 
-  @Provides
+//  @Provides
   @LazySingleton
   private MSQTestOverlordServiceClient makeOverlordServiceClient1(
       ObjectMapper queryJsonMapper,
