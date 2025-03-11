@@ -689,6 +689,17 @@ public class QueryContext
 
   public QueryContext override(Map<String, Object> contextOverride)
   {
+    if (contextOverride == null || contextOverride.isEmpty()) {
+      return this;
+    }
     return QueryContext.of(QueryContexts.override(asMap(), contextOverride));
+  }
+
+  public QueryContext override(QueryContext queryContext)
+  {
+    if(queryContext == null || queryContext.isEmpty()) {
+      return this;
+    }
+    return override(queryContext.asMap());
   }
 }

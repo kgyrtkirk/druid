@@ -173,7 +173,10 @@ public class MSQSpec extends MSQSpec0
       if (destination == null) {
         destination = TaskReportMSQDestination.instance();
       }
-      return new MSQSpec(query, columnMappings, destination, assignmentStrategy, tuningConfig, compactionMetrics, queryContext);
+      return new MSQSpec(
+          query, columnMappings, destination, assignmentStrategy, tuningConfig, compactionMetrics,
+          query.context().override(queryContext)
+      );
     }
 
     public Builder queryContext(QueryContext queryContext)
