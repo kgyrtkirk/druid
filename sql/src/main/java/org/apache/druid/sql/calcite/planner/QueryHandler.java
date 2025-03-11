@@ -539,6 +539,8 @@ public abstract class QueryHandler extends SqlStatementHandler.BaseStatementHand
     );
     QueryValidations.validateLogicalQueryForDruid(handlerContext.plannerContext(), parameterized);
     CalcitePlanner planner = handlerContext.planner();
+    final RelDataType rowType;
+    final Supplier<QueryResponse<Object[]>> resultsSupplier;
 
     if (plannerContext.getPlannerConfig()
                       .getNativeQuerySqlPlanningMode()
@@ -567,14 +569,14 @@ public abstract class QueryHandler extends SqlStatementHandler.BaseStatementHand
         throw new RuntimeException(e);
       }
       DruidQuery finalBaseQuery = baseQuery;
-      final Supplier<QueryResponse<Object[]>> resultsSupplier = () -> plannerContext.getQueryMaker().runQuery(finalBaseQuery);
 
       if (explain != null) {
         plannerContext.dispatchHook(DruidHook.NATIVE_PLAN, finalBaseQuery.getQuery());
         return planExplanation(possiblyLimitedRoot, newRoot, true);
       }
+      resultsSupplier = () -> plannerContext.getQueryMaker().runQuery(finalBaseQuery);
+      rowType=finalBaseQuery.getOutputRowType();
 
-      return new PlannerResult(resultsSupplier, finalBaseQuery.getOutputRowType());
     } else {
       final DruidRel<?> druidRel = (DruidRel<?>) planner.transform(
           CalciteRulesManager.DRUID_CONVENTION_RULES,
@@ -592,30 +594,30 @@ public abstract class QueryHandler extends SqlStatementHandler.BaseStatementHand
         return planExplanation(possiblyLimitedRoot, druidRel, true);
       } else {
         // Compute row type.
-        final RelDataType rowType = prepareResult.getReturnedRowType();
+        rowType = prepareResult.getReturnedRowType();
 
         // Start the query.
-        final Supplier<QueryResponse<Object[]>> resultsSupplier = () -> {
-          // sanity check
-          final Set<ResourceAction> readResourceActions =
-              plannerContext.getResourceActions()
-                            .stream()
-                            .filter(action -> action.getAction() == Action.READ)
-                            .collect(Collectors.toSet());
-          Preconditions.checkState(
-              readResourceActions.isEmpty() == druidRel.getDataSourceNames().isEmpty()
-              // The resources found in the plannerContext can be less than the datasources in
-              // the query plan, because the query planner can eliminate empty tables by replacing
-              // them with InlineDataSource of empty rows.
-              || readResourceActions.size() >= druidRel.getDataSourceNames().size(),
-              "Authorization sanity check failed"
-          );
-
-          return druidRel.runQuery();
-        };
-
-        return new PlannerResult(resultsSupplier, rowType);
+        resultsSupplier = druidRel::runQuery;
       }
+
+      final Supplier<QueryResponse<Object[]>> finalResultSupplier = () -> {
+        final Set<ResourceAction> readResourceActions = plannerContext.getResourceActions()
+            .stream()
+            .filter(action -> action.getAction() == Action.READ)
+            .collect(Collectors.toSet());
+        Preconditions.checkState(
+            readResourceActions.isEmpty() == druidRel.getDataSourceNames().isEmpty()
+                // The resources found in the plannerContext can be less than
+                // the datasources in
+                // the query plan, because the query planner can eliminate empty
+                // tables by replacing
+                // them with InlineDataSource of empty rows.
+                || readResourceActions.size() >= druidRel.getDataSourceNames().size(),
+            "Authorization sanity check failed"
+        );
+        return resultsSupplier.get();
+      };
+      return new PlannerResult(finalResultSupplier, rowType);
     }
   }
 
