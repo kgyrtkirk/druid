@@ -20,7 +20,9 @@
 package org.apache.druid.msq.indexing;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.google.common.base.Preconditions;
 import org.apache.druid.msq.indexing.MSQSpec.Builder;
 import org.apache.druid.msq.indexing.destination.MSQDestination;
@@ -42,6 +44,7 @@ public abstract class MSQSpec0
   @JsonProperty("compactionMetricSpec")
   protected final List<AggregatorFactory> compactionMetricSpec;
   @JsonProperty("queryContext")
+  @JsonInclude(value = Include.NON_NULL)
   protected final QueryContext queryContext;
 
   public MSQSpec0()
@@ -69,7 +72,7 @@ public abstract class MSQSpec0
     this.assignmentStrategy = Preconditions.checkNotNull(assignmentStrategy, "assignmentStrategy");
     this.tuningConfig = Preconditions.checkNotNull(tuningConfig, "tuningConfig");
     this.compactionMetricSpec = compactionMetricSpec1;
-    this.queryContext = queryContext;
+    this.queryContext = queryContext == null ? QueryContext.empty() : queryContext;
   }
 
   public static Builder builder()

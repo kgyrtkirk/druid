@@ -373,7 +373,7 @@ public class MSQCompactionRunnerTest
     Assert.assertEquals(getExpectedTuningConfig(), actualMSQSpec.getTuningConfig());
     Assert.assertEquals(getExpectedDestination(), actualMSQSpec.getDestination());
 
-    Query<?> query = null;//actualMSQSpec.getQuery();
+    Query<?> query = actualMSQSpec.getQuery();
     Assert.assertTrue(query instanceof ScanQuery);
     ScanQuery scanQuery = (ScanQuery) query;
 
@@ -452,7 +452,7 @@ public class MSQCompactionRunnerTest
 
     MSQSpec actualMSQSpec = Iterables.getOnlyElement(msqControllerTasks).getQuerySpec();
 
-    Query<?> query = null;//actualMSQSpec.getQuery();
+    Query<?> query = actualMSQSpec.getQuery();
     Assert.assertTrue(query instanceof ScanQuery);
     ScanQuery scanQuery = (ScanQuery) query;
 
@@ -505,7 +505,7 @@ public class MSQCompactionRunnerTest
     Assert.assertEquals(getExpectedTuningConfig(), actualMSQSpec.getTuningConfig());
     Assert.assertEquals(getExpectedDestination(), actualMSQSpec.getDestination());
 
-    Query<?> query = null;//actualMSQSpec.getQuery();
+    Query<?> query = actualMSQSpec.getQuery();
     Assert.assertTrue(query instanceof GroupByQuery);
     GroupByQuery groupByQuery = (GroupByQuery) query;
 

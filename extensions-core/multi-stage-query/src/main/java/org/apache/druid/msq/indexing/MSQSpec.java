@@ -20,7 +20,9 @@
 package org.apache.druid.msq.indexing;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.google.common.base.Preconditions;
 import org.apache.druid.msq.indexing.destination.MSQDestination;
 import org.apache.druid.msq.indexing.destination.TaskReportMSQDestination;
@@ -36,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+@JsonInclude(value = Include.NON_NULL)
 public class MSQSpec extends MSQSpec0
 {
   private final Query<?> query;

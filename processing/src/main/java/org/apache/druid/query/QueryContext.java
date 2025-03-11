@@ -20,7 +20,9 @@
 package org.apache.druid.query;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.druid.java.util.common.HumanReadableBytes;
 import org.apache.druid.java.util.common.StringUtils;
@@ -57,6 +59,7 @@ public class QueryContext
 {
   private static final QueryContext EMPTY = new QueryContext(null);
 
+  @JsonInclude(value = Include.NON_NULL)
   @JsonValue
   private final Map<String, Object> context;
 
