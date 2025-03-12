@@ -26,6 +26,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.google.common.base.Preconditions;
 import org.apache.druid.msq.indexing.MSQSpec.Builder;
 import org.apache.druid.msq.indexing.destination.MSQDestination;
+import org.apache.druid.msq.kernel.QueryDefinition;
 import org.apache.druid.msq.kernel.WorkerAssignmentStrategy;
 import org.apache.druid.query.BaseQuery;
 import org.apache.druid.query.QueryContext;
@@ -41,11 +42,9 @@ public abstract class MSQSpec0
   protected final MSQDestination destination;
   protected final WorkerAssignmentStrategy assignmentStrategy;
   protected final MSQTuningConfig tuningConfig;
-  @JsonProperty("compactionMetricSpec")
   protected final List<AggregatorFactory> compactionMetricSpec;
-  @JsonProperty("queryContext")
-  @JsonInclude(value = Include.NON_NULL)
   protected final QueryContext queryContext;
+  protected final QueryDefinition queryDef;
 
   public MSQSpec0()
   {
@@ -55,6 +54,7 @@ public abstract class MSQSpec0
     tuningConfig = null;
     compactionMetricSpec = Collections.emptyList();
     queryContext = QueryContext.empty();
+    queryDef = null;
   }
 
   @JsonCreator
@@ -64,7 +64,8 @@ public abstract class MSQSpec0
       @JsonProperty("assignmentStrategy") WorkerAssignmentStrategy assignmentStrategy,
       @JsonProperty("tuningConfig") MSQTuningConfig tuningConfig,
       @JsonProperty("compactionMetricSpec") List<AggregatorFactory> compactionMetricSpec1,
-      @JsonProperty("queryContext") QueryContext queryContext
+      @JsonProperty("queryContext") QueryContext queryContext,
+      @JsonProperty("queryDef") QueryDefinition queryDef
   )
   {
     this.columnMappings = Preconditions.checkNotNull(columnMappings, "columnMappings");
@@ -73,6 +74,7 @@ public abstract class MSQSpec0
     this.tuningConfig = Preconditions.checkNotNull(tuningConfig, "tuningConfig");
     this.compactionMetricSpec = compactionMetricSpec1;
     this.queryContext = queryContext == null ? QueryContext.empty() : queryContext;
+    this.queryDef = queryDef;
   }
 
   public static Builder builder()
@@ -80,6 +82,8 @@ public abstract class MSQSpec0
     return new Builder();
   }
 
+  @JsonProperty("queryContext")
+  @JsonInclude(value = Include.NON_DEFAULT)
   public QueryContext getContext()
   {
     return queryContext;
@@ -118,5 +122,12 @@ public abstract class MSQSpec0
   public String getId()
   {
     return getContext().getString(BaseQuery.QUERY_ID);
+  }
+
+  @JsonProperty("queryDef")
+  @JsonInclude(value = Include.NON_NULL)
+  public QueryDefinition getQueryDef()
+  {
+    return queryDef;
   }
 }

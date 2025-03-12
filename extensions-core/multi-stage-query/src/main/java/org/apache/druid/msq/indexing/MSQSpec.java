@@ -20,12 +20,11 @@
 package org.apache.druid.msq.indexing;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.google.common.base.Preconditions;
 import org.apache.druid.msq.indexing.destination.MSQDestination;
 import org.apache.druid.msq.indexing.destination.TaskReportMSQDestination;
+import org.apache.druid.msq.kernel.QueryDefinition;
 import org.apache.druid.msq.kernel.WorkerAssignmentStrategy;
 import org.apache.druid.query.BaseQuery;
 import org.apache.druid.query.Query;
@@ -38,7 +37,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-@JsonInclude(value = Include.NON_NULL)
+/**
+ * Legacy MSQSpec with a native query in it.
+ *
+ * Should only be used on task submission API to help ensure correct behaviour during upgrade.
+ */
 public class MSQSpec extends MSQSpec0
 {
   private final Query<?> query;
@@ -50,6 +53,20 @@ public class MSQSpec extends MSQSpec0
     this.query = null;
   }
 
+  public MSQSpec(
+      @JsonProperty("query") Query<?> query,
+      @JsonProperty("columnMappings") ColumnMappings columnMappings,
+      @JsonProperty("destination") MSQDestination destination,
+      @JsonProperty("assignmentStrategy") WorkerAssignmentStrategy assignmentStrategy,
+      @JsonProperty("tuningConfig") MSQTuningConfig tuningConfig,
+      @JsonProperty("compactionMetricSpec") List<AggregatorFactory> compactionMetricSpec1,
+      @JsonProperty("queryContext") QueryContext queryContext)
+  {
+    this(
+        query, columnMappings, destination, assignmentStrategy, tuningConfig, compactionMetricSpec1, queryContext, null
+    );
+  }
+
   @JsonCreator
   public MSQSpec(
       @JsonProperty("query") Query<?> query,
@@ -58,10 +75,11 @@ public class MSQSpec extends MSQSpec0
       @JsonProperty("assignmentStrategy") WorkerAssignmentStrategy assignmentStrategy,
       @JsonProperty("tuningConfig") MSQTuningConfig tuningConfig,
       @JsonProperty("compactionMetricSpec") List<AggregatorFactory> compactionMetricSpec1,
-      @JsonProperty("queryContext") QueryContext queryContext
+      @JsonProperty("queryContext") QueryContext queryContext,
+      @JsonProperty("queryDef") QueryDefinition queryDef
   )
   {
-    super(columnMappings, destination, assignmentStrategy, tuningConfig, compactionMetricSpec1, queryContext);
+    super(columnMappings, destination, assignmentStrategy, tuningConfig, compactionMetricSpec1, queryContext, queryDef);
     this.query = Preconditions.checkNotNull(query, "query");
   }
 
@@ -130,11 +148,18 @@ public class MSQSpec extends MSQSpec0
     private MSQTuningConfig tuningConfig;
     private List<AggregatorFactory> compactionMetrics = Collections.emptyList();
     private QueryContext queryContext;
+    private QueryDefinition queryDef;
 
     @Deprecated
     public Builder query(Query<?> query)
     {
       this.query = query;
+      return this;
+    }
+
+    public Builder queryDef(QueryDefinition queryDef)
+    {
+      this.queryDef = queryDef;
       return this;
     }
 
@@ -175,7 +200,8 @@ public class MSQSpec extends MSQSpec0
       }
       return new MSQSpec(
           query, columnMappings, destination, assignmentStrategy, tuningConfig, compactionMetrics,
-          query.context().override(queryContext)
+          query.context().override(queryContext),
+          queryDef
       );
     }
 

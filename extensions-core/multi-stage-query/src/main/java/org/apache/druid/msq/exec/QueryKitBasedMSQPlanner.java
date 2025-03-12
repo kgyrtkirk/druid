@@ -250,5 +250,4 @@ public class QueryKitBasedMSQPlanner
       throw new ISE("Unsupported destination [%s]", destination);
     }
   }
-
 }
