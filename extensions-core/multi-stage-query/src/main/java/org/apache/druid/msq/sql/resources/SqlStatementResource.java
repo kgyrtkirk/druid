@@ -50,7 +50,7 @@ import org.apache.druid.java.util.common.logger.Logger;
 import org.apache.druid.msq.exec.ResultsContext;
 import org.apache.druid.msq.guice.MultiStageQuery;
 import org.apache.druid.msq.indexing.MSQControllerTask;
-import org.apache.druid.msq.indexing.MSQSpec;
+import org.apache.druid.msq.indexing.MSQSpec0;
 import org.apache.druid.msq.indexing.destination.DurableStorageMSQDestination;
 import org.apache.druid.msq.indexing.destination.MSQDestination;
 import org.apache.druid.msq.indexing.destination.MSQSelectDestination;
@@ -715,7 +715,7 @@ public class SqlStatementResource
     );
   }
 
-  private ResultFormat getPreferredResultFormat(String resultFormatParam, MSQSpec msqSpec)
+  private ResultFormat getPreferredResultFormat(String resultFormatParam, MSQSpec0 msqSpec)
   {
     if (resultFormatParam == null) {
       return QueryContexts.getAsEnum(
