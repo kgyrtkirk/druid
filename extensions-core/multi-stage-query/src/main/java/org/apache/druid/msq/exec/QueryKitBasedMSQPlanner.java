@@ -74,8 +74,15 @@ public class QueryKitBasedMSQPlanner
   private final Query<?> query;
 
 
-  public QueryKitBasedMSQPlanner(QueryKitSpecFactory context, MSQSpec0 querySpec, ResultsContext resultsContext,
-      ControllerQueryKernelConfig queryKernelConfig, String queryId, Query<?> query, ObjectMapper jsonMapper)
+  public QueryKitBasedMSQPlanner(
+      QueryKitSpecFactory context,
+      MSQSpec0 querySpec,
+      ResultsContext resultsContext,
+      ControllerQueryKernelConfig queryKernelConfig,
+      String queryId,
+      Query<?> query,
+      ObjectMapper jsonMapper
+    )
   {
     this.querySpec = querySpec;
     this.jsonMapper = jsonMapper;

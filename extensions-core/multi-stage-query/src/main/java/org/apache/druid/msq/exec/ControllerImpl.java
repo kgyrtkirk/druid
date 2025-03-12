@@ -633,19 +633,22 @@ public class ControllerImpl implements Controller
 
     final QueryContext queryContext = querySpec.getContext();
 
-    QueryKitBasedMSQPlanner qkPlanner = new QueryKitBasedMSQPlanner(
-        context,
-        querySpec,
-        resultsContext,
-        queryKernelConfig,
-        queryId,
-        querySpec.getQuery(),
-        context.jsonMapper()
-    );
+    final QueryDefinition queryDef;
+    if (querySpec.getQueryDef() == null) {
+      QueryKitBasedMSQPlanner qkPlanner = new QueryKitBasedMSQPlanner(
+          context,
+          querySpec,
+          resultsContext,
+          queryKernelConfig,
+          queryId,
+          querySpec.getQuery(),
+          context.jsonMapper()
+      );
 
-    final QueryDefinition queryDef = qkPlanner.makeQueryDefinition();
-    final QueryDefinition queryDef1 = querySpec.getQueryDef();
-
+      queryDef = qkPlanner.makeQueryDefinition();
+    } else {
+      queryDef = querySpec.getQueryDef();
+    }
 
     ensureExportLocationEmpty(context, querySpec.getDestination());
 
