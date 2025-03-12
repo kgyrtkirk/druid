@@ -22,10 +22,8 @@ package org.apache.druid.msq.exec;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
-import org.apache.druid.error.DruidException;
 import org.apache.druid.java.util.common.ISE;
 import org.apache.druid.msq.indexing.MSQControllerTask;
-import org.apache.druid.msq.indexing.MSQSpec;
 import org.apache.druid.msq.indexing.MSQSpec0;
 import org.apache.druid.msq.indexing.MSQTuningConfig;
 import org.apache.druid.msq.indexing.destination.DataSourceMSQDestination;
@@ -253,15 +251,4 @@ public class QueryKitBasedMSQPlanner
     }
   }
 
-  public static MSQSpec0 upgradeSafeMSQSpec(MSQSpec0 origSpec)
-  {
-    if(origSpec.getQueryDef() != null ) {
-      return origSpec;
-    }
-    if (origSpec instanceof MSQSpec && ((MSQSpec) origSpec).getQuery() != null) {
-      throw DruidException.defensive("Fds");
-    }
-    return origSpec;
-
-  }
 }

@@ -368,7 +368,7 @@ public class MSQCompactionRunnerTest
 
     MSQControllerTask msqControllerTask = Iterables.getOnlyElement(msqControllerTasks);
 
-    MSQSpec actualMSQSpec = (MSQSpec) msqControllerTask.getQuerySpec();
+    MSQSpec actualMSQSpec = msqControllerTask.getQuerySpec();
 
     Assert.assertEquals(getExpectedTuningConfig(), actualMSQSpec.getTuningConfig());
     Assert.assertEquals(getExpectedDestination(), actualMSQSpec.getDestination());
@@ -450,7 +450,7 @@ public class MSQCompactionRunnerTest
         Collections.singletonMap(COMPACTION_INTERVAL, dataSchema)
     );
 
-    MSQSpec actualMSQSpec = (MSQSpec) Iterables.getOnlyElement(msqControllerTasks).getQuerySpec();
+    MSQSpec actualMSQSpec = Iterables.getOnlyElement(msqControllerTasks).getQuerySpec();
 
     Query<?> query = actualMSQSpec.getQuery();
     Assert.assertTrue(query instanceof ScanQuery);
@@ -500,7 +500,7 @@ public class MSQCompactionRunnerTest
 
     MSQControllerTask msqControllerTask = Iterables.getOnlyElement(msqControllerTasks);
 
-    MSQSpec actualMSQSpec = (MSQSpec) msqControllerTask.getQuerySpec();
+    MSQSpec actualMSQSpec = msqControllerTask.getQuerySpec();
 
     Assert.assertEquals(getExpectedTuningConfig(), actualMSQSpec.getTuningConfig());
     Assert.assertEquals(getExpectedDestination(), actualMSQSpec.getDestination());

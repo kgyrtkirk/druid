@@ -26,7 +26,6 @@ import org.apache.druid.indexing.common.actions.TaskActionClient;
 import org.apache.druid.java.util.common.io.Closer;
 import org.apache.druid.java.util.emitter.service.ServiceEmitter;
 import org.apache.druid.msq.indexing.MSQSpec;
-import org.apache.druid.msq.indexing.MSQSpec0;
 import org.apache.druid.msq.input.InputSpecSlicer;
 import org.apache.druid.msq.input.table.SegmentsInputSlice;
 import org.apache.druid.msq.input.table.TableInputSpec;
@@ -44,7 +43,7 @@ public interface ControllerContext extends QueryKitSpecFactory
   /**
    * Configuration for {@link org.apache.druid.msq.kernel.controller.ControllerQueryKernel}.
    */
-  ControllerQueryKernelConfig queryKernelConfig(String queryId, MSQSpec0 querySpec);
+  ControllerQueryKernelConfig queryKernelConfig(String queryId, MSQSpec querySpec);
 
   /**
    * Callback from the controller implementation to "register" the controller. Used in the indexing task implementation
@@ -99,7 +98,7 @@ public interface ControllerContext extends QueryKitSpecFactory
    */
   WorkerManager newWorkerManager(
       String queryId,
-      MSQSpec0 querySpec,
+      MSQSpec querySpec,
       ControllerQueryKernelConfig queryKernelConfig,
       WorkerFailureListener workerFailureListener
   );

@@ -50,7 +50,6 @@ import org.apache.druid.msq.exec.Controller;
 import org.apache.druid.msq.exec.ControllerContext;
 import org.apache.druid.msq.exec.ControllerImpl;
 import org.apache.druid.msq.exec.MSQTasks;
-import org.apache.druid.msq.exec.QueryKitBasedMSQPlanner;
 import org.apache.druid.msq.exec.ResultsContext;
 import org.apache.druid.msq.indexing.destination.DataSourceMSQDestination;
 import org.apache.druid.msq.indexing.destination.DurableStorageMSQDestination;
@@ -190,7 +189,7 @@ public class MSQControllerTask extends AbstractTask implements ClientTaskQuery, 
   }
 
   @JsonProperty("spec")
-  public MSQSpec0 getQuerySpec()
+  public MSQSpec getQuerySpec()
   {
     return querySpec;
   }
@@ -287,7 +286,7 @@ public class MSQControllerTask extends AbstractTask implements ClientTaskQuery, 
 
     controller = new ControllerImpl(
         this.getId(),
-        QueryKitBasedMSQPlanner.upgradeSafeMSQSpec(querySpec),
+        querySpec,
         new ResultsContext(getSqlTypeNames(), getSqlResultsContext()),
         context
     );
@@ -360,7 +359,7 @@ public class MSQControllerTask extends AbstractTask implements ClientTaskQuery, 
   /**
    * Checks whether the task is an ingestion into a Druid datasource.
    */
-  public static boolean isIngestion(final MSQSpec0 querySpec)
+  public static boolean isIngestion(final MSQSpec querySpec)
   {
     return isIngestion(querySpec.getDestination());
   }

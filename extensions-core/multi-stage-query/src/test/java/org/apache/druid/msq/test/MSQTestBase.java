@@ -95,7 +95,6 @@ import org.apache.druid.msq.guice.MultiStageQuery;
 import org.apache.druid.msq.indexing.InputChannelFactory;
 import org.apache.druid.msq.indexing.MSQControllerTask;
 import org.apache.druid.msq.indexing.MSQSpec;
-import org.apache.druid.msq.indexing.MSQSpec0;
 import org.apache.druid.msq.indexing.MSQTuningConfig;
 import org.apache.druid.msq.indexing.destination.DataSourceMSQDestination;
 import org.apache.druid.msq.indexing.destination.SegmentGenerationTerminalStageSpecFactory;
@@ -860,7 +859,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
     return payload.getStatus().getErrorReport();
   }
 
-  private void assertMSQSpec(MSQSpec0 expectedMSQSpec, MSQSpec0 querySpecForTask)
+  private void assertMSQSpec(MSQSpec expectedMSQSpec, MSQSpec querySpecForTask)
   {
     // Assert.assertEquals(expectedMSQSpec.getQuery(),
     // querySpecForTask.getQuery());
@@ -913,7 +912,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
     protected Map<String, Object> queryContext = DEFAULT_MSQ_CONTEXT;
     protected List<TypedValue> dynamicParameters = new ArrayList<>();
     protected List<MSQResultsReport.ColumnAndType> expectedRowSignature = null;
-    protected MSQSpec0 expectedMSQSpec = null;
+    protected MSQSpec expectedMSQSpec = null;
     protected MSQTuningConfig expectedTuningConfig = null;
     protected Set<SegmentId> expectedSegments = null;
     protected CompactionState expectedLastCompactionState = null;
@@ -1275,7 +1274,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
         verifyCounters(reportPayload.getCounters());
 
         MSQControllerTask msqControllerTask = indexingServiceClient.getMSQControllerTask(controllerId);
-        MSQSpec foundSpec = (MSQSpec) msqControllerTask.getQuerySpec();
+        MSQSpec foundSpec = msqControllerTask.getQuerySpec();
         verifyLookupLoadingInfoInTaskContext(msqControllerTask.getContext());
         log.info(
             "found generated segments: %s",
@@ -1489,7 +1488,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
 
     // Made the visibility public to aid adding ut's easily with minimum parameters to set.
     @Nullable
-    public Pair<MSQSpec0, Pair<List<MSQResultsReport.ColumnAndType>, List<Object[]>>> runQueryWithResult()
+    public Pair<MSQSpec, Pair<List<MSQResultsReport.ColumnAndType>, List<Object[]>>> runQueryWithResult()
     {
       readyToRun();
       Preconditions.checkArgument(
@@ -1533,7 +1532,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
           MSQControllerTask msqControllerTask = indexingServiceClient.getMSQControllerTask(controllerId);
           verifyLookupLoadingInfoInTaskContext(msqControllerTask.getContext());
 
-          final MSQSpec0 spec = msqControllerTask.getQuerySpec();
+          final MSQSpec spec = msqControllerTask.getQuerySpec();
           final List<Object[]> rows;
 
           if (spec.getDestination() instanceof TaskReportMSQDestination) {
@@ -1610,7 +1609,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
         Preconditions.checkArgument(expectedRowSignature != null, "Row signature cannot be null");
         Preconditions.checkArgument(expectedMSQSpec != null, "MultiStageQuery Query spec cannot be null ");
       }
-      Pair<MSQSpec0, Pair<List<MSQResultsReport.ColumnAndType>, List<Object[]>>> specAndResults = runQueryWithResult();
+      Pair<MSQSpec, Pair<List<MSQResultsReport.ColumnAndType>, List<Object[]>>> specAndResults = runQueryWithResult();
 
       if (specAndResults == null) { // A fault was expected and the assertion has been done in the runQueryWithResult
         return;

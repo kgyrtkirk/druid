@@ -26,7 +26,6 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.google.common.base.Preconditions;
 import org.apache.druid.msq.indexing.MSQSpec.Builder;
 import org.apache.druid.msq.indexing.destination.MSQDestination;
-import org.apache.druid.msq.kernel.QueryDefinition;
 import org.apache.druid.msq.kernel.WorkerAssignmentStrategy;
 import org.apache.druid.query.BaseQuery;
 import org.apache.druid.query.QueryContext;
@@ -47,9 +46,6 @@ public abstract class MSQSpec0
   @JsonProperty("queryContext")
   @JsonInclude(value = Include.NON_NULL)
   protected final QueryContext queryContext;
-  @JsonProperty
-  @JsonInclude(value = Include.NON_NULL)
-  protected final QueryDefinition queryDef;
 
   public MSQSpec0()
   {
@@ -59,7 +55,6 @@ public abstract class MSQSpec0
     tuningConfig = null;
     compactionMetricSpec = Collections.emptyList();
     queryContext = QueryContext.empty();
-    queryDef = null;
   }
 
   @JsonCreator
@@ -69,8 +64,7 @@ public abstract class MSQSpec0
       @JsonProperty("assignmentStrategy") WorkerAssignmentStrategy assignmentStrategy,
       @JsonProperty("tuningConfig") MSQTuningConfig tuningConfig,
       @JsonProperty("compactionMetricSpec") List<AggregatorFactory> compactionMetricSpec1,
-      @JsonProperty("queryContext") QueryContext queryContext,
-      @JsonProperty("queryDef") QueryDefinition queryDef
+      @JsonProperty("queryContext") QueryContext queryContext
   )
   {
     this.columnMappings = Preconditions.checkNotNull(columnMappings, "columnMappings");
@@ -79,7 +73,6 @@ public abstract class MSQSpec0
     this.tuningConfig = Preconditions.checkNotNull(tuningConfig, "tuningConfig");
     this.compactionMetricSpec = compactionMetricSpec1;
     this.queryContext = queryContext == null ? QueryContext.empty() : queryContext;
-    this.queryDef = queryDef;
   }
 
   public static Builder builder()
@@ -125,10 +118,5 @@ public abstract class MSQSpec0
   public String getId()
   {
     return getContext().getString(BaseQuery.QUERY_ID);
-  }
-
-  public QueryDefinition getQueryDef()
-  {
-    return queryDef;
   }
 }

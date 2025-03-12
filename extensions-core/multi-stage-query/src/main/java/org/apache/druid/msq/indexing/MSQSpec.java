@@ -26,7 +26,6 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.google.common.base.Preconditions;
 import org.apache.druid.msq.indexing.destination.MSQDestination;
 import org.apache.druid.msq.indexing.destination.TaskReportMSQDestination;
-import org.apache.druid.msq.kernel.QueryDefinition;
 import org.apache.druid.msq.kernel.WorkerAssignmentStrategy;
 import org.apache.druid.query.BaseQuery;
 import org.apache.druid.query.Query;
@@ -59,11 +58,10 @@ public class MSQSpec extends MSQSpec0
       @JsonProperty("assignmentStrategy") WorkerAssignmentStrategy assignmentStrategy,
       @JsonProperty("tuningConfig") MSQTuningConfig tuningConfig,
       @JsonProperty("compactionMetricSpec") List<AggregatorFactory> compactionMetricSpec1,
-      @JsonProperty("queryContext") QueryContext queryContext,
-      @JsonProperty("queryDef") QueryDefinition queryDef
+      @JsonProperty("queryContext") QueryContext queryContext
   )
   {
-    super(columnMappings, destination, assignmentStrategy, tuningConfig, compactionMetricSpec1, queryContext, queryDef);
+    super(columnMappings, destination, assignmentStrategy, tuningConfig, compactionMetricSpec1, queryContext);
     this.query = Preconditions.checkNotNull(query, "query");
   }
 
@@ -95,8 +93,7 @@ public class MSQSpec extends MSQSpec0
           assignmentStrategy,
           tuningConfig,
           compactionMetricSpec,
-          queryContext.override(contextOverride),
-          queryDef
+          queryContext.override(contextOverride)
       );
     }
   }
@@ -133,18 +130,11 @@ public class MSQSpec extends MSQSpec0
     private MSQTuningConfig tuningConfig;
     private List<AggregatorFactory> compactionMetrics = Collections.emptyList();
     private QueryContext queryContext;
-    private QueryDefinition queryDef;
 
     @Deprecated
     public Builder query(Query<?> query)
     {
       this.query = query;
-      return this;
-    }
-
-    public Builder queryDef(QueryDefinition queryDef)
-    {
-      this.queryDef = queryDef;
       return this;
     }
 
@@ -185,8 +175,7 @@ public class MSQSpec extends MSQSpec0
       }
       return new MSQSpec(
           query, columnMappings, destination, assignmentStrategy, tuningConfig, compactionMetrics,
-          query.context().override(queryContext),
-          queryDef
+          query.context().override(queryContext)
       );
     }
 

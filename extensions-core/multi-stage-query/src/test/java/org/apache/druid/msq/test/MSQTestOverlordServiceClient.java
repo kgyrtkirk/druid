@@ -38,12 +38,10 @@ import org.apache.druid.java.util.common.DateTimes;
 import org.apache.druid.java.util.common.ISE;
 import org.apache.druid.msq.exec.Controller;
 import org.apache.druid.msq.exec.ControllerImpl;
-import org.apache.druid.msq.exec.QueryKitBasedMSQPlanner;
 import org.apache.druid.msq.exec.QueryListener;
 import org.apache.druid.msq.exec.ResultsContext;
 import org.apache.druid.msq.exec.WorkerMemoryParameters;
 import org.apache.druid.msq.indexing.MSQControllerTask;
-import org.apache.druid.msq.indexing.MSQSpec;
 import org.apache.druid.msq.indexing.destination.MSQDestination;
 import org.apache.druid.msq.indexing.report.MSQResultsReport;
 import org.apache.druid.msq.indexing.report.MSQStatusReport;
@@ -113,7 +111,7 @@ public class MSQTestOverlordServiceClient extends NoopOverlordClient
 
       controller = new ControllerImpl(
           cTask.getId(),
-          QueryKitBasedMSQPlanner.upgradeSafeMSQSpec(cTask.getQuerySpec()),
+          cTask.getQuerySpec(),
           new ResultsContext(cTask.getSqlTypeNames(), cTask.getSqlResultsContext()),
           msqTestControllerContext
       );
