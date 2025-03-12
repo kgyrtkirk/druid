@@ -211,4 +211,12 @@ public class MSQSpec extends MSQSpec0
       return this;
     }
   }
+
+  public MSQSpec withQueryDef(QueryDefinition newQueryDef)
+  {
+    return new MSQSpec(
+        query, columnMappings, destination, assignmentStrategy, tuningConfig, compactionMetricSpec, queryContext,
+        newQueryDef
+    );
+  }
 }

@@ -638,13 +638,14 @@ public class ControllerImpl implements Controller
     // should be removed after 33 is released
     if (querySpec.getQueryDef() == null) {
       QueryKitBasedMSQPlanner qkPlanner = new QueryKitBasedMSQPlanner(
-          context,
           querySpec,
           resultsContext,
-          queryKernelConfig,
-          queryId,
           querySpec.getQuery(),
-          context.jsonMapper()
+          context.jsonMapper(),
+          context.makeQueryKitSpec(
+              QueryKitBasedMSQPlanner.makeQueryControllerToolKit(querySpec.getContext(), context.jsonMapper()), queryId, querySpec,
+              queryKernelConfig
+          )
       );
       queryDef = qkPlanner.makeQueryDefinition();
     } else {

@@ -36,7 +36,6 @@ import org.apache.druid.msq.input.stage.StageInputSpec;
 import org.apache.druid.msq.kernel.QueryDefinition;
 import org.apache.druid.msq.kernel.QueryDefinitionBuilder;
 import org.apache.druid.msq.kernel.StageDefinition;
-import org.apache.druid.msq.kernel.controller.ControllerQueryKernelConfig;
 import org.apache.druid.msq.querykit.MultiQueryKit;
 import org.apache.druid.msq.querykit.QueryKit;
 import org.apache.druid.msq.querykit.QueryKitSpec;
@@ -75,13 +74,11 @@ public class QueryKitBasedMSQPlanner
 
 
   public QueryKitBasedMSQPlanner(
-      QueryKitSpecFactory context,
       MSQSpec0 querySpec,
       ResultsContext resultsContext,
-      ControllerQueryKernelConfig queryKernelConfig,
-      String queryId,
       Query<?> query,
-      ObjectMapper jsonMapper
+      ObjectMapper jsonMapper,
+      QueryKitSpec queryKitSpec
     )
   {
     this.querySpec = querySpec;
@@ -92,14 +89,11 @@ public class QueryKitBasedMSQPlanner
     this.queryContext = querySpec.getContext();
     this.query = query;
     this.resultsContext = resultsContext;
-    this.queryKitSpec = context.makeQueryKitSpec(
-        makeQueryControllerToolKit(querySpec.getContext(), jsonMapper), queryId, querySpec,
-        queryKernelConfig
-    );
+    this.queryKitSpec = queryKitSpec;
   }
 
   @SuppressWarnings("rawtypes")
-  static QueryKit<Query<?>> makeQueryControllerToolKit(QueryContext queryContext, ObjectMapper jsonMapper)
+  public static QueryKit<Query<?>> makeQueryControllerToolKit(QueryContext queryContext, ObjectMapper jsonMapper)
   {
     final Map<Class<? extends Query>, QueryKit> kitMap =
         ImmutableMap.<Class<? extends Query>, QueryKit>builder()
@@ -118,7 +112,7 @@ public class QueryKitBasedMSQPlanner
   }
 
   @SuppressWarnings("unchecked")
-  QueryDefinition makeQueryDefinition()
+  public QueryDefinition makeQueryDefinition()
   {
     boolean ingestion = MSQControllerTask.isIngestion(destination);
     final Query<?> queryToPlan;
