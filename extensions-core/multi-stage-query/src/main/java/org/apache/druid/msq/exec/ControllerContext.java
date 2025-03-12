@@ -38,7 +38,7 @@ import java.io.File;
  * Context used by multi-stage query controllers. Useful because it allows test fixtures to provide their own
  * implementations.
  */
-public interface ControllerContext extends QueryKitSpecFactory
+public interface ControllerContext
 {
   /**
    * Configuration for {@link org.apache.druid.msq.kernel.controller.ControllerQueryKernel}.

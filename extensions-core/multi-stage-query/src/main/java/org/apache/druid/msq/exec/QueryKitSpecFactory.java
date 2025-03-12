@@ -20,6 +20,7 @@
 package org.apache.druid.msq.exec;
 
 import org.apache.druid.msq.indexing.MSQSpec0;
+import org.apache.druid.msq.indexing.MSQTuningConfig;
 import org.apache.druid.msq.kernel.controller.ControllerQueryKernelConfig;
 import org.apache.druid.msq.querykit.QueryKit;
 import org.apache.druid.msq.querykit.QueryKitSpec;
@@ -37,4 +38,7 @@ public interface QueryKitSpecFactory
       MSQSpec0 querySpec,
       ControllerQueryKernelConfig queryKernelConfig
   );
+
+  QueryKitSpec makeQueryKitSpec(QueryKit<Query<?>> queryKit, String queryId, MSQTuningConfig tuningConfig,
+      ControllerQueryKernelConfig queryKernelConfig);
 }

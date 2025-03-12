@@ -33,6 +33,7 @@ import org.apache.druid.query.Query;
 public class MSQQueryKitSpecFactory implements QueryKitSpecFactory
 {
 
+
   private DruidProcessingConfig processingConfig;
 
   @Inject

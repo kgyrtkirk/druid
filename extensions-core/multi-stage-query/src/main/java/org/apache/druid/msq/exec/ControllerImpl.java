@@ -264,6 +264,8 @@ public class ControllerImpl implements Controller
   private final ConcurrentHashMap<Integer, OutputChannelMode> stageOutputChannelModesForLiveReports =
       new ConcurrentHashMap<>();
 
+  private final QueryKitSpecFactory queryKitSpecFactory;
+
   private WorkerSketchFetcher workerSketchFetcher;
 
   // WorkerNumber -> WorkOrders which need to be retried and our determined by the controller.
@@ -289,13 +291,15 @@ public class ControllerImpl implements Controller
       final String queryId,
       final MSQSpec querySpec,
       final ResultsContext resultsContext,
-      final ControllerContext controllerContext
+      final ControllerContext controllerContext,
+      final QueryKitSpecFactory queryKitSpecFactory
   )
   {
     this.queryId = Preconditions.checkNotNull(queryId, "queryId");
     this.querySpec = Preconditions.checkNotNull(querySpec, "querySpec");
     this.resultsContext = Preconditions.checkNotNull(resultsContext, "resultsContext");
     this.context = Preconditions.checkNotNull(controllerContext, "controllerContext");
+    this.queryKitSpecFactory = queryKitSpecFactory;
   }
 
   @Override
@@ -642,7 +646,7 @@ public class ControllerImpl implements Controller
           resultsContext,
           querySpec.getQuery(),
           context.jsonMapper(),
-          context.makeQueryKitSpec(
+          queryKitSpecFactory.makeQueryKitSpec(
               QueryKitBasedMSQPlanner.makeQueryControllerToolKit(querySpec.getContext(), context.jsonMapper()), queryId, querySpec,
               queryKernelConfig
           )
