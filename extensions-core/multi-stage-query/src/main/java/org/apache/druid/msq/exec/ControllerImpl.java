@@ -644,6 +644,9 @@ public class ControllerImpl implements Controller
     );
 
     final QueryDefinition queryDef = qkPlanner.makeQueryDefinition();
+    final QueryDefinition queryDef1 = querySpec.getQueryDef();
+
+
     ensureExportLocationEmpty(context, querySpec.getDestination());
 
     if (log.isDebugEnabled()) {
