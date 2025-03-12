@@ -33,6 +33,7 @@ import org.apache.druid.java.util.common.guava.Sequence;
 import org.apache.druid.java.util.common.jackson.JacksonUtils;
 import org.apache.druid.java.util.common.logger.Logger;
 import org.apache.druid.msq.dart.controller.ControllerHolder;
+import org.apache.druid.msq.dart.controller.DartControllerContextFactory;
 import org.apache.druid.msq.dart.controller.DartControllerRegistry;
 import org.apache.druid.msq.dart.guice.DartControllerConfig;
 import org.apache.druid.msq.exec.Controller;
@@ -69,6 +70,7 @@ import java.util.Optional;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
@@ -87,18 +89,40 @@ public class DartQueryMaker implements QueryMaker
   private static final Logger log = new Logger(DartQueryMaker.class);
 
   private final List<Entry<Integer, String>> fieldMapping;
+  private final DartControllerContextFactory controllerContextFactory;
   private final PlannerContext plannerContext;
-  private final DartSqlEngine dartEngine;
+
+  /**
+   * Controller registry, used to register and remove controllers as they start and finish.
+   */
+  private final DartControllerRegistry controllerRegistry;
+
+  /**
+   * Controller config.
+   */
+  private final DartControllerConfig controllerConfig;
+
+  /**
+   * Executor for {@link #runWithoutReport(ControllerHolder)}. Number of thread is equal to
+   * {@link DartControllerConfig#getConcurrentQueries()}, which limits the number of concurrent controllers.
+   */
+  private final ExecutorService controllerExecutor;
 
   public DartQueryMaker(
       List<Entry<Integer, String>> fieldMapping,
+      DartControllerContextFactory controllerContextFactory,
       PlannerContext plannerContext,
-      DartSqlEngine dartEngine
+      DartControllerRegistry controllerRegistry,
+      DartControllerConfig controllerConfig,
+      ExecutorService controllerExecutor
   )
   {
     this.fieldMapping = fieldMapping;
+    this.controllerContextFactory = controllerContextFactory;
     this.plannerContext = plannerContext;
-    this.dartEngine = dartEngine;
+    this.controllerRegistry = controllerRegistry;
+    this.controllerConfig = controllerConfig;
+    this.controllerExecutor = controllerExecutor;
   }
 
   @Override
@@ -118,9 +142,8 @@ public class DartQueryMaker implements QueryMaker
         MSQTaskQueryMaker.getTypes(druidQuery, fieldMapping, plannerContext);
 
     final String dartQueryId = druidQuery.getQuery().context().getString(DartSqlEngine.CTX_DART_QUERY_ID);
-    final ControllerContext controllerContext = dartEngine.getControllerContextFactory().newContext(dartQueryId);
-
-    final ControllerImpl controller = new ControllerImpl(
+    final ControllerContext controllerContext = controllerContextFactory.newContext(dartQueryId);
+    final ControllerImpl controller = newControllerImpl(
         dartQueryId,
         querySpec,
         new ResultsContext(
@@ -147,7 +170,7 @@ public class DartQueryMaker implements QueryMaker
 
     // Register controller before submitting anything to controllerExeuctor, so it shows up in
     // "active controllers" lists.
-    dartEngine.getControllerRegistry().register(controllerHolder);
+    controllerRegistry.register(controllerHolder);
 
     try {
       // runWithReport, runWithoutReport are responsible for calling controllerRegistry.deregister(controllerHolder)
@@ -158,9 +181,15 @@ public class DartQueryMaker implements QueryMaker
     }
     catch (Throwable e) {
       // Error while calling runWithReport or runWithoutReport. Deregister controller immediately.
-      dartEngine.getControllerRegistry().deregister(controllerHolder);
+      controllerRegistry.deregister(controllerHolder);
       throw e;
     }
+  }
+
+  private ControllerImpl newControllerImpl(String dartQueryId, MSQSpec querySpec, ResultsContext resultsContext,
+      ControllerContext controllerContext)
+  {
+    return new ControllerImpl(dartQueryId, querySpec, resultsContext, controllerContext);
   }
 
   /**
@@ -176,7 +205,7 @@ public class DartQueryMaker implements QueryMaker
 
     // Run in controllerExecutor. Control doesn't really *need* to be moved to another thread, but we have to
     // use the controllerExecutor anyway, to ensure we respect the concurrentQueries configuration.
-    reportFuture = dartEngine.getControllerExecutor().submit(() -> {
+    reportFuture = controllerExecutor.submit(() -> {
       final String threadName = Thread.currentThread().getName();
 
       try {
@@ -187,7 +216,7 @@ public class DartQueryMaker implements QueryMaker
             TaskReportMSQDestination.instance(),
             () -> new LimitedOutputStream(
                 baos,
-                dartEngine.getControllerConfig().getMaxQueryReportSize(),
+                controllerConfig.getMaxQueryReportSize(),
                 limit -> StringUtils.format(
                     "maxQueryReportSize[%,d] exceeded. "
                     + "Try limiting the result set for your query, or run it with %s[false]",
@@ -211,7 +240,7 @@ public class DartQueryMaker implements QueryMaker
         }
       }
       finally {
-        dartEngine.getControllerRegistry().deregister(controllerHolder);
+        controllerRegistry.deregister(controllerHolder);
         Thread.currentThread().setName(threadName);
       }
     });
@@ -290,7 +319,7 @@ public class DartQueryMaker implements QueryMaker
      */
     private void submitController()
     {
-      dartEngine.getControllerExecutor().submit(() -> {
+      controllerExecutor.submit(() -> {
         final Controller controller = controllerHolder.getController();
         final String threadName = Thread.currentThread().getName();
 
@@ -315,7 +344,7 @@ public class DartQueryMaker implements QueryMaker
           );
         }
         finally {
-          dartEngine.getControllerRegistry().deregister(controllerHolder);
+          controllerRegistry.deregister(controllerHolder);
           Thread.currentThread().setName(threadName);
         }
       });
