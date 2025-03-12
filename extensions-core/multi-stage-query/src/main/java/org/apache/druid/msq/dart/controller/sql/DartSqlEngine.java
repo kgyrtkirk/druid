@@ -29,6 +29,7 @@ import org.apache.druid.error.DruidException;
 import org.apache.druid.java.util.common.IAE;
 import org.apache.druid.java.util.common.concurrent.Execs;
 import org.apache.druid.msq.dart.controller.DartControllerContextFactory;
+import org.apache.druid.msq.dart.controller.DartControllerFactory;
 import org.apache.druid.msq.dart.controller.DartControllerRegistry;
 import org.apache.druid.msq.dart.controller.http.DartSqlResource;
 import org.apache.druid.msq.dart.guice.DartControllerConfig;
@@ -71,18 +72,21 @@ public class DartSqlEngine implements SqlEngine
   private final DartControllerRegistry controllerRegistry;
   private final DartControllerConfig controllerConfig;
   private final ExecutorService controllerExecutor;
+  private final DartControllerFactory controllerFactory;
 
   @Inject
   public DartSqlEngine(
       DartControllerContextFactory controllerContextFactory,
       DartControllerRegistry controllerRegistry,
-      DartControllerConfig controllerConfig
+      DartControllerConfig controllerConfig,
+      DartControllerFactory controllerFactory
   )
   {
     this(
         controllerContextFactory,
         controllerRegistry,
         controllerConfig,
+        controllerFactory,
         Execs.multiThreaded(controllerConfig.getConcurrentQueries(), "dart-controller-%s")
     );
   }
@@ -91,6 +95,7 @@ public class DartSqlEngine implements SqlEngine
       DartControllerContextFactory controllerContextFactory,
       DartControllerRegistry controllerRegistry,
       DartControllerConfig controllerConfig,
+      DartControllerFactory controllerFactory,
       ExecutorService controllerExecutor
   )
   {
@@ -98,6 +103,7 @@ public class DartSqlEngine implements SqlEngine
     this.controllerRegistry = controllerRegistry;
     this.controllerConfig = controllerConfig;
     this.controllerExecutor = controllerExecutor;
+    this.controllerFactory = controllerFactory;
   }
 
   @Override
@@ -177,11 +183,8 @@ public class DartSqlEngine implements SqlEngine
   {
     return new DartQueryMaker(
         relRoot.fields,
-        controllerContextFactory,
         plannerContext,
-        controllerRegistry,
-        controllerConfig,
-        controllerExecutor
+        this
     );
   }
 
@@ -194,5 +197,30 @@ public class DartSqlEngine implements SqlEngine
   {
     // Defensive, because we expect this method will not be called without the CAN_INSERT and CAN_REPLACE features.
     throw DruidException.defensive("Cannot execute DML commands with engine[%s]", name());
+  }
+
+  public DartControllerContextFactory getControllerContextFactory()
+  {
+    return controllerContextFactory;
+  }
+
+  public DartControllerRegistry getControllerRegistry()
+  {
+    return controllerRegistry;
+  }
+
+  public DartControllerConfig getControllerConfig()
+  {
+    return controllerConfig;
+  }
+
+  public ExecutorService getControllerExecutor()
+  {
+    return controllerExecutor;
+  }
+
+  public DartControllerFactory getControllerFactory()
+  {
+    return controllerFactory;
   }
 }

@@ -35,6 +35,7 @@ import org.apache.druid.java.util.common.concurrent.Execs;
 import org.apache.druid.java.util.common.jackson.JacksonUtils;
 import org.apache.druid.msq.dart.controller.ControllerHolder;
 import org.apache.druid.msq.dart.controller.DartControllerRegistry;
+import org.apache.druid.msq.dart.controller.LegacyDartControllerFactory;
 import org.apache.druid.msq.dart.controller.sql.DartQueryMaker;
 import org.apache.druid.msq.dart.controller.sql.DartSqlClient;
 import org.apache.druid.msq.dart.controller.sql.DartSqlClients;
@@ -88,6 +89,7 @@ import org.mockito.MockitoAnnotations;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Response;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -186,6 +188,7 @@ public class DartSqlResourceTest extends MSQTestBase
           }
         },
         objectMapper.convertValue(ImmutableMap.of(), DartControllerConfig.class),
+        new LegacyDartControllerFactory(),
         controllerExecutor = Execs.multiThreaded(
             MAX_CONTROLLERS,
             StringUtils.encodeForFormat(getClass().getSimpleName() + "-controller-exec")
