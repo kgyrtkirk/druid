@@ -143,7 +143,7 @@ public class DartQueryMaker implements QueryMaker
 
     final String dartQueryId = druidQuery.getQuery().context().getString(DartSqlEngine.CTX_DART_QUERY_ID);
     final ControllerContext controllerContext = controllerContextFactory.newContext(dartQueryId);
-    final ControllerImpl controller = new ControllerImpl(
+    final ControllerImpl controller = newControllerImpl(
         dartQueryId,
         querySpec,
         new ResultsContext(
@@ -184,6 +184,12 @@ public class DartQueryMaker implements QueryMaker
       controllerRegistry.deregister(controllerHolder);
       throw e;
     }
+  }
+
+  private ControllerImpl newControllerImpl(String dartQueryId, MSQSpec querySpec, ResultsContext resultsContext,
+      ControllerContext controllerContext)
+  {
+    return new ControllerImpl(dartQueryId, querySpec, resultsContext, controllerContext);
   }
 
   /**

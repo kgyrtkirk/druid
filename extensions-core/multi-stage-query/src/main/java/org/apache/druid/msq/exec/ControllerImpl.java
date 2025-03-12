@@ -158,7 +158,6 @@ import org.apache.druid.msq.statistics.PartialKeyStatisticsInformation;
 import org.apache.druid.msq.util.IntervalUtils;
 import org.apache.druid.msq.util.MSQFutureUtils;
 import org.apache.druid.msq.util.MultiStageQueryContext;
-import org.apache.druid.query.Query;
 import org.apache.druid.query.QueryContext;
 import org.apache.druid.query.aggregation.AggregatorFactory;
 import org.apache.druid.segment.IndexSpec;
@@ -634,14 +633,13 @@ public class ControllerImpl implements Controller
 
     final QueryContext queryContext = querySpec.getContext();
 
-    Query<?> query = querySpec.getQuery();
     QueryKitBasedMSQPlanner qkPlanner = new QueryKitBasedMSQPlanner(
         context,
         querySpec,
         resultsContext,
         queryKernelConfig,
         queryId,
-        query,
+        querySpec.getQuery(),
         context.jsonMapper()
     );
 
