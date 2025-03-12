@@ -2778,4 +2778,10 @@ public class ControllerImpl implements Controller
   {
     void onSuccess(String workerId, int workerNumber);
   }
+
+  @Override
+  public ControllerContext getControllerContext()
+  {
+    return context;
+  }
 }

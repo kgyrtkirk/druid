@@ -34,6 +34,7 @@ import org.apache.druid.java.util.common.jackson.JacksonUtils;
 import org.apache.druid.java.util.common.logger.Logger;
 import org.apache.druid.msq.dart.controller.ControllerHolder;
 import org.apache.druid.msq.dart.controller.DartControllerContextFactory;
+import org.apache.druid.msq.dart.controller.DartControllerFactory;
 import org.apache.druid.msq.dart.controller.DartControllerRegistry;
 import org.apache.druid.msq.dart.guice.DartControllerConfig;
 import org.apache.druid.msq.exec.Controller;
@@ -114,6 +115,7 @@ public class DartQueryMaker implements QueryMaker
       PlannerContext plannerContext,
       DartControllerRegistry controllerRegistry,
       DartControllerConfig controllerConfig,
+      DartControllerFactory controllerFactory,
       ExecutorService controllerExecutor
   )
   {
