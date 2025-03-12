@@ -806,7 +806,6 @@ public class DartSqlResourceTest extends MSQTestBase
     final AuthenticationResult authenticationResult = makeAuthenticationResult(identity);
     final ControllerHolder holder = new ControllerHolder(
         controller,
-        null,
         "sid",
         "SELECT 1",
         "localhost:1001",

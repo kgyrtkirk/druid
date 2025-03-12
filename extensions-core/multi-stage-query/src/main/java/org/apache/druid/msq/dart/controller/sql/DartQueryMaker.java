@@ -157,7 +157,6 @@ public class DartQueryMaker implements QueryMaker
 
     final ControllerHolder controllerHolder = new ControllerHolder(
         controller,
-        controllerContext,
         plannerContext.getSqlQueryId(),
         plannerContext.getSql(),
         controllerContext.selfNode().getHostAndPortToUse(),
