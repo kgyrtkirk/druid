@@ -48,11 +48,9 @@ import org.apache.druid.msq.indexing.destination.MSQSelectDestination;
 import org.apache.druid.msq.indexing.destination.MSQTerminalStageSpecFactory;
 import org.apache.druid.msq.indexing.destination.TaskReportMSQDestination;
 import org.apache.druid.msq.kernel.QueryDefinition;
-import org.apache.druid.msq.querykit.QueryKit;
 import org.apache.druid.msq.querykit.QueryKitSpec;
 import org.apache.druid.msq.util.MSQTaskQueryMakerUtils;
 import org.apache.druid.msq.util.MultiStageQueryContext;
-import org.apache.druid.query.Query;
 import org.apache.druid.query.QueryContext;
 import org.apache.druid.query.QueryContexts;
 import org.apache.druid.query.aggregation.AggregatorFactory;
@@ -144,8 +142,15 @@ public class MSQTaskQueryMaker implements QueryMaker
         SqlResults.Context.fromPlannerContext(plannerContext)
     );
 
-    QueryKit<Query<?>> qk = null;
-    QueryKitSpec queryKitSpec = null;
+    QueryContext queryContext = druidQuery.getQuery().context();
+    QueryKitSpec queryKitSpec = queryKitSpecFactory.makeQueryKitSpec(
+        QueryKitBasedMSQPlanner.makeQueryControllerToolKit(queryContext, jsonMapper),
+        taskId,
+        makeMSQTuningConfig(plannerContext),
+        queryContext,
+        null
+    );
+
     final MSQControllerTask controllerTask = new MSQControllerTask(
         taskId,
         makeQuerySpec(targetDataSource, druidQuery, resultsContext, terminalStageSpecFactory, queryKitSpec),
@@ -227,21 +232,7 @@ public class MSQTaskQueryMaker implements QueryMaker
                     }
                   });
 
-    final int maxNumTasks = MultiStageQueryContext.getMaxNumTasks(sqlQueryContext);
-
-    if (maxNumTasks < 2) {
-      throw InvalidInput.exception(
-          "MSQ context maxNumTasks [%,d] cannot be less than 2, since at least 1 controller and 1 worker is necessary",
-          maxNumTasks
-      );
-    }
-
     // This parameter is used internally for the number of worker tasks only, so we subtract 1
-    final int maxNumWorkers = maxNumTasks - 1;
-    final int rowsPerSegment = MultiStageQueryContext.getRowsPerSegment(sqlQueryContext);
-    final int maxRowsInMemory = MultiStageQueryContext.getRowsInMemory(sqlQueryContext);
-    final Integer maxNumSegments = MultiStageQueryContext.getMaxNumSegments(sqlQueryContext);
-    final IndexSpec indexSpec = MultiStageQueryContext.getIndexSpec(sqlQueryContext, plannerContext.getJsonMapper());
     final boolean finalizeAggregations = MultiStageQueryContext.isFinalizeAggregations(sqlQueryContext);
 
     final List<Interval> replaceTimeChunks =
@@ -340,6 +331,7 @@ public class MSQTaskQueryMaker implements QueryMaker
     nativeQueryContextOverrides.put(MultiStageQueryContext.CTX_IS_REINDEX, isReindex);
 
     QueryContext queryContext = QueryContext.of(QueryContexts.override(druidQuery.getQuery().getContext(), nativeQueryContextOverrides));
+
     final MSQSpec querySpec =
         MSQSpec.builder()
                .query(druidQuery.getQuery().withOverriddenContext(nativeQueryContextOverrides))
@@ -347,13 +339,34 @@ public class MSQTaskQueryMaker implements QueryMaker
                .columnMappings(new ColumnMappings(QueryUtils.buildColumnMappings(fieldMapping, druidQuery)))
                .destination(destination)
                .assignmentStrategy(MultiStageQueryContext.getAssignmentStrategy(sqlQueryContext))
-               .tuningConfig(new MSQTuningConfig(maxNumWorkers, maxRowsInMemory, rowsPerSegment, maxNumSegments, indexSpec))
+               .tuningConfig(makeMSQTuningConfig(plannerContext))
                .build();
 
     MSQTaskQueryMakerUtils.validateRealtimeReindex(querySpec.getContext(), querySpec.getDestination(), druidQuery.getQuery());
 
 
     return querySpec.withOverriddenContext(nativeQueryContext);
+  }
+
+  private static MSQTuningConfig makeMSQTuningConfig(final PlannerContext plannerContext)
+  {
+    final QueryContext sqlQueryContext = plannerContext.queryContext();
+    final int maxNumTasks = MultiStageQueryContext.getMaxNumTasks(sqlQueryContext);
+
+    if (maxNumTasks < 2) {
+      throw InvalidInput.exception(
+          "MSQ context maxNumTasks [%,d] cannot be less than 2, since at least 1 controller and 1 worker is necessary",
+          maxNumTasks
+      );
+    }
+
+    final int maxNumWorkers = maxNumTasks - 1;
+    final int rowsPerSegment = MultiStageQueryContext.getRowsPerSegment(sqlQueryContext);
+    final int maxRowsInMemory = MultiStageQueryContext.getRowsInMemory(sqlQueryContext);
+    final Integer maxNumSegments = MultiStageQueryContext.getMaxNumSegments(sqlQueryContext);
+    final IndexSpec indexSpec = MultiStageQueryContext.getIndexSpec(sqlQueryContext, plannerContext.getJsonMapper());
+    MSQTuningConfig tuningConfig = new MSQTuningConfig(maxNumWorkers, maxRowsInMemory, rowsPerSegment, maxNumSegments, indexSpec);
+    return tuningConfig;
   }
 
   public static List<Pair<SqlTypeName, ColumnType>> getTypes(
