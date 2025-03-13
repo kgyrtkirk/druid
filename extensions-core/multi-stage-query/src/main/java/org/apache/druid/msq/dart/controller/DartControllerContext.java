@@ -38,14 +38,10 @@ import org.apache.druid.msq.exec.WorkerFailureListener;
 import org.apache.druid.msq.exec.WorkerManager;
 import org.apache.druid.msq.indexing.IndexerControllerContext;
 import org.apache.druid.msq.indexing.MSQSpec;
-import org.apache.druid.msq.indexing.MSQSpec0;
 import org.apache.druid.msq.indexing.destination.TaskReportMSQDestination;
 import org.apache.druid.msq.input.InputSpecSlicer;
 import org.apache.druid.msq.kernel.controller.ControllerQueryKernelConfig;
-import org.apache.druid.msq.querykit.QueryKit;
-import org.apache.druid.msq.querykit.QueryKitSpec;
 import org.apache.druid.msq.util.MultiStageQueryContext;
-import org.apache.druid.query.Query;
 import org.apache.druid.query.QueryContext;
 import org.apache.druid.server.DruidNode;
 import org.apache.druid.server.coordination.DruidServerMetadata;
@@ -153,7 +149,7 @@ public class DartControllerContext implements ControllerContext
         .destination(TaskReportMSQDestination.instance())
         .maxConcurrentStages(maxConcurrentStages)
         .maxRetainedPartitionSketchBytes(memoryParameters.getPartitionStatisticsMaxRetainedBytes())
-        .workerContextMap(IndexerControllerContext.makeWorkerContextMap(querySpec, false, maxConcurrentStages))
+        .workerContextMap(IndexerControllerContext.makeWorkerContextMap(querySpec.getContext(), querySpec.getDestination(), false, maxConcurrentStages))
         .build();
   }
 
@@ -216,30 +212,6 @@ public class DartControllerContext implements ControllerContext
   public void registerController(Controller controller, Closer closer)
   {
     closer.register(workerClient);
-  }
-
-  @Override
-  public QueryKitSpec makeQueryKitSpec(
-      final QueryKit<Query<?>> queryKit,
-      final String queryId,
-      final MSQSpec0 querySpec,
-      final ControllerQueryKernelConfig queryKernelConfig
-  )
-  {
-    final QueryContext queryContext = querySpec.getContext();
-    return new QueryKitSpec(
-        queryKit,
-        queryId,
-        queryKernelConfig.getWorkerIds().size(),
-        queryContext.getInt(
-            CTX_MAX_NON_LEAF_WORKER_COUNT,
-            DEFAULT_MAX_NON_LEAF_WORKER_COUNT
-        ),
-        MultiStageQueryContext.getTargetPartitionsPerWorkerWithDefault(
-            queryContext,
-            DEFAULT_TARGET_PARTITIONS_PER_WORKER
-        )
-    );
   }
 
   @Override

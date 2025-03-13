@@ -25,6 +25,8 @@ import org.junit.Test;
 
 import java.nio.ByteBuffer;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 /**
  *
  */
@@ -87,4 +89,11 @@ public class StringUtilsTest
     Assert.assertEquals(ByteBuffer.wrap(StringUtils.toUtf8("foo")), StringUtils.toUtf8ByteBuffer("foo"));
     Assert.assertEquals(ByteBuffer.wrap(StringUtils.toUtf8("🙂")), StringUtils.toUtf8ByteBuffer("🙂"));
   }
+
+  @Test
+  public void testReplace()
+  {
+    assertEquals("axdaxd", StringUtils.replace("asdasd", "s", "x"));
+  }
+
 }

@@ -51,6 +51,7 @@ import org.apache.druid.msq.indexing.report.MSQResultsReport;
 import org.apache.druid.msq.indexing.report.MSQStatusReport;
 import org.apache.druid.msq.indexing.report.MSQTaskReportPayload;
 import org.apache.druid.msq.kernel.QueryDefinition;
+import org.apache.druid.msq.sql.DartQueryKitSpecFactory;
 import org.apache.druid.msq.sql.MSQTaskQueryMaker;
 import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.server.QueryResponse;
@@ -150,7 +151,8 @@ public class DartQueryMaker implements QueryMaker
         dartQueryId,
         querySpec,
         resultsContext,
-        controllerContext
+        controllerContext,
+        new DartQueryKitSpecFactory()
     );
 
     final ControllerHolder controllerHolder = new ControllerHolder(
@@ -197,12 +199,13 @@ public class DartQueryMaker implements QueryMaker
     );
 
     ControllerContext context = controllerContext;
+
     final QueryDefinition queryDef = new QueryKitBasedMSQPlanner(
         querySpec,
         resultsContext,
         querySpec.getQuery(),
         plannerContext.getJsonMapper(),
-        controllerContext.makeQueryKitSpec(
+        new DartQueryKitSpecFactory().makeQueryKitSpec(
             QueryKitBasedMSQPlanner.makeQueryControllerToolKit(querySpec.getContext(), context.jsonMapper()),
             dartQueryId, querySpec,
             controllerContext.queryKernelConfig(dartQueryId, querySpec)
