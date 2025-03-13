@@ -44,6 +44,7 @@ import org.apache.druid.java.util.common.ISE;
 import org.apache.druid.java.util.common.concurrent.Execs;
 import org.apache.druid.java.util.common.io.Closer;
 import org.apache.druid.java.util.common.logger.Logger;
+import org.apache.druid.msq.dart.controller.DartControllerContextFactory;
 import org.apache.druid.msq.exec.Controller;
 import org.apache.druid.msq.exec.ControllerContext;
 import org.apache.druid.msq.exec.ControllerMemoryParameters;
@@ -62,10 +63,7 @@ import org.apache.druid.msq.indexing.MSQWorkerTaskLauncher;
 import org.apache.druid.msq.indexing.MSQWorkerTaskLauncher.MSQWorkerTaskLauncherConfig;
 import org.apache.druid.msq.input.InputSpecSlicer;
 import org.apache.druid.msq.kernel.controller.ControllerQueryKernelConfig;
-import org.apache.druid.msq.querykit.QueryKit;
-import org.apache.druid.msq.querykit.QueryKitSpec;
 import org.apache.druid.msq.util.MultiStageQueryContext;
-import org.apache.druid.query.Query;
 import org.apache.druid.query.QueryContext;
 import org.apache.druid.rpc.indexing.NoopOverlordClient;
 import org.apache.druid.rpc.indexing.OverlordClient;
@@ -84,7 +82,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
-public class MSQTestControllerContext implements ControllerContext
+public class MSQTestControllerContext implements ControllerContext, DartControllerContextFactory
 {
   private static final Logger log = new Logger(MSQTestControllerContext.class);
   private static final int NUM_WORKERS = 4;
@@ -285,23 +283,6 @@ public class MSQTestControllerContext implements ControllerContext
   }
 
   @Override
-  public QueryKitSpec makeQueryKitSpec(
-      final QueryKit<Query<?>> queryKit,
-      final String queryId,
-      final MSQSpec querySpec,
-      final ControllerQueryKernelConfig queryKernelConfig
-  )
-  {
-    return new QueryKitSpec(
-        queryKit,
-        queryId,
-        querySpec.getTuningConfig().getMaxNumWorkers(),
-        querySpec.getTuningConfig().getMaxNumWorkers(),
-        1
-    );
-  }
-
-  @Override
   public void emitMetric(String metric, Number value)
   {
   }
@@ -386,5 +367,11 @@ public class MSQTestControllerContext implements ControllerContext
   public WorkerClient newWorkerClient()
   {
     return new MSQTestWorkerClient(inMemoryWorkers);
+  }
+
+  @Override
+  public ControllerContext newContext(String queryId)
+  {
+    return this;
   }
 }

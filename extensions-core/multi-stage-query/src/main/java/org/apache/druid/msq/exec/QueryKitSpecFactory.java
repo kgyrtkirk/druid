@@ -17,23 +17,25 @@
  * under the License.
  */
 
-package org.apache.druid.msq.dart.worker;
+package org.apache.druid.msq.exec;
 
-import com.google.common.util.concurrent.ListenableFuture;
-import org.apache.druid.msq.dart.controller.DartWorkerManager;
-import org.apache.druid.msq.exec.WorkerClient;
+import org.apache.druid.msq.indexing.MSQTuningConfig;
+import org.apache.druid.msq.kernel.controller.ControllerQueryKernelConfig;
+import org.apache.druid.msq.querykit.QueryKit;
+import org.apache.druid.msq.querykit.QueryKitSpec;
+import org.apache.druid.query.Query;
+import org.apache.druid.query.QueryContext;
 
-public interface DartWorkerClient extends WorkerClient
+public interface QueryKitSpecFactory
 {
   /**
-   * Close a single worker's clients. Used when that worker fails, so we stop trying to contact it.
-   *
-   * @param workerHost worker host:port
+   * Create a {@link QueryKitSpec}. This method provides controller contexts a way to customize parameters around the
+   * number of workers and partitions.
    */
-  void closeClient(String hostAndPort);
-
-  /**
-   * Stops a worker. Dart-only API, used by the {@link DartWorkerManager}.
-   */
-  ListenableFuture<?> stopWorker(String workerId);
+  QueryKitSpec makeQueryKitSpec(
+      QueryKit<Query<?>> queryKit,
+      String queryId,
+      MSQTuningConfig tuningConfig,
+      QueryContext queryContext,
+      ControllerQueryKernelConfig queryKernelConfig);
 }
