@@ -48,11 +48,9 @@ import org.apache.druid.msq.indexing.destination.MSQSelectDestination;
 import org.apache.druid.msq.indexing.destination.MSQTerminalStageSpecFactory;
 import org.apache.druid.msq.indexing.destination.TaskReportMSQDestination;
 import org.apache.druid.msq.kernel.QueryDefinition;
-import org.apache.druid.msq.querykit.QueryKit;
 import org.apache.druid.msq.querykit.QueryKitSpec;
 import org.apache.druid.msq.util.MSQTaskQueryMakerUtils;
 import org.apache.druid.msq.util.MultiStageQueryContext;
-import org.apache.druid.query.Query;
 import org.apache.druid.query.QueryContext;
 import org.apache.druid.query.QueryContexts;
 import org.apache.druid.query.aggregation.AggregatorFactory;
@@ -144,13 +142,7 @@ public class MSQTaskQueryMaker implements QueryMaker
         SqlResults.Context.fromPlannerContext(plannerContext)
     );
 
-    QueryKit<Query<?>> qk = null;
-    QueryKitSpec queryKitSpec = queryKitSpecFactory.makeQueryKitSpec(
-        qk,
-        taskId,
-        null,
-        null
-        );
+    QueryKitSpec queryKitSpec = queryKitSpecFactory.makeQueryKitSpec(null, taskId, null, null);
     final MSQControllerTask controllerTask = new MSQControllerTask(
         taskId,
         makeQuerySpec(targetDataSource, druidQuery, resultsContext, terminalStageSpecFactory, queryKitSpec),

@@ -647,10 +647,7 @@ public class ControllerImpl implements Controller
           querySpec.getQuery(),
           context.jsonMapper(),
           queryKitSpecFactory.makeQueryKitSpec(
-              QueryKitBasedMSQPlanner.makeQueryControllerToolKit(querySpec.getContext(), context.jsonMapper()),
-              queryId,
-              querySpec.getTuningConfig(),
-              querySpec.getContext(),
+              QueryKitBasedMSQPlanner.makeQueryControllerToolKit(querySpec.getContext(), context.jsonMapper()), queryId, querySpec,
               queryKernelConfig
           )
       );

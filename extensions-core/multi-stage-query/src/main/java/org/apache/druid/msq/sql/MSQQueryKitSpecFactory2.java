@@ -19,34 +19,49 @@
 
 package org.apache.druid.msq.sql;
 
-import org.apache.druid.msq.dart.controller.DartControllerContext;
+import com.google.inject.Inject;
 import org.apache.druid.msq.exec.QueryKitSpecFactory;
+import org.apache.druid.msq.indexing.MSQSpec0;
 import org.apache.druid.msq.indexing.MSQTuningConfig;
 import org.apache.druid.msq.kernel.controller.ControllerQueryKernelConfig;
 import org.apache.druid.msq.querykit.QueryKit;
 import org.apache.druid.msq.querykit.QueryKitSpec;
 import org.apache.druid.msq.util.MultiStageQueryContext;
+import org.apache.druid.query.DruidProcessingConfig;
 import org.apache.druid.query.Query;
-import org.apache.druid.query.QueryContext;
 
-public class DartQueryKitSpecFactory implements QueryKitSpecFactory
+public class MSQQueryKitSpecFactory2 implements QueryKitSpecFactory
 {
-  @Override
-  public QueryKitSpec makeQueryKitSpec(QueryKit<Query<?>> queryKit, String queryId, MSQTuningConfig tuningConfig,
-      QueryContext queryContext, final ControllerQueryKernelConfig queryKernelConfig)
+  public QueryKitSpec makeQueryKitSpec(
+      final QueryKit<Query<?>> queryKit,
+      final String queryId,
+      final MSQSpec0 querySpec,
+      final ControllerQueryKernelConfig queryKernelConfig
+  )
   {
+    final QueryContext queryContext = querySpec.getContext();
     return new QueryKitSpec(
         queryKit,
         queryId,
         queryKernelConfig.getWorkerIds().size(),
         queryContext.getInt(
-            DartControllerContext.CTX_MAX_NON_LEAF_WORKER_COUNT,
-            DartControllerContext.DEFAULT_MAX_NON_LEAF_WORKER_COUNT
+            CTX_MAX_NON_LEAF_WORKER_COUNT,
+            DEFAULT_MAX_NON_LEAF_WORKER_COUNT
         ),
         MultiStageQueryContext.getTargetPartitionsPerWorkerWithDefault(
             queryContext,
-            DartControllerContext.DEFAULT_TARGET_PARTITIONS_PER_WORKER
+            DEFAULT_TARGET_PARTITIONS_PER_WORKER
         )
     );
   }
+
+
+  private DruidProcessingConfig processingConfig;
+
+  @Inject
+  public MSQQueryKitSpecFactory2(DruidProcessingConfig processingConfig)
+  {
+    this.processingConfig = processingConfig;
+  }
+
 }

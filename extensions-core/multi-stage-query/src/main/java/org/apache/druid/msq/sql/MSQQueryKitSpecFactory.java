@@ -21,6 +21,7 @@ package org.apache.druid.msq.sql;
 
 import com.google.inject.Inject;
 import org.apache.druid.msq.exec.QueryKitSpecFactory;
+import org.apache.druid.msq.indexing.MSQSpec0;
 import org.apache.druid.msq.indexing.MSQTuningConfig;
 import org.apache.druid.msq.kernel.controller.ControllerQueryKernelConfig;
 import org.apache.druid.msq.querykit.QueryKit;
@@ -28,10 +29,11 @@ import org.apache.druid.msq.querykit.QueryKitSpec;
 import org.apache.druid.msq.util.MultiStageQueryContext;
 import org.apache.druid.query.DruidProcessingConfig;
 import org.apache.druid.query.Query;
-import org.apache.druid.query.QueryContext;
 
 public class MSQQueryKitSpecFactory implements QueryKitSpecFactory
 {
+
+
   private DruidProcessingConfig processingConfig;
 
   @Inject
@@ -41,8 +43,28 @@ public class MSQQueryKitSpecFactory implements QueryKitSpecFactory
   }
 
   @Override
+  public QueryKitSpec makeQueryKitSpec(QueryKit<Query<?>> queryKit, String queryId, MSQSpec0 querySpec,
+      ControllerQueryKernelConfig queryKernelConfig)
+  {
+    MSQTuningConfig tuningConfig = querySpec.getTuningConfig();
+    return new QueryKitSpec(
+        queryKit,
+        queryId,
+        tuningConfig.getMaxNumWorkers(),
+        tuningConfig.getMaxNumWorkers(),
+
+        // Assume tasks are symmetric: workers have the same number of processors available as a controller.
+        // Create one partition per processor per task, for maximum parallelism.
+        MultiStageQueryContext.getTargetPartitionsPerWorkerWithDefault(
+            querySpec.getContext(),
+            processingConfig.getNumThreads()
+        )
+    );
+  }
+
+  @Override
   public QueryKitSpec makeQueryKitSpec(QueryKit<Query<?>> queryKit, String queryId, MSQTuningConfig tuningConfig,
-      QueryContext queryContext, ControllerQueryKernelConfig queryKernelConfig)
+      ControllerQueryKernelConfig queryKernelConfig)
   {
     return new QueryKitSpec(
         queryKit,
@@ -53,7 +75,7 @@ public class MSQQueryKitSpecFactory implements QueryKitSpecFactory
         // Assume tasks are symmetric: workers have the same number of processors available as a controller.
         // Create one partition per processor per task, for maximum parallelism.
         MultiStageQueryContext.getTargetPartitionsPerWorkerWithDefault(
-            queryContext,
+            querySpec.getContext(),
             processingConfig.getNumThreads()
         )
     );
