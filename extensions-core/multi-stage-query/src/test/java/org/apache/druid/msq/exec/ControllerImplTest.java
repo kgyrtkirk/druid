@@ -28,6 +28,10 @@ import org.apache.druid.msq.indexing.error.InsertLockPreemptedFault;
 import org.apache.druid.msq.indexing.error.MSQException;
 import org.apache.druid.msq.kernel.StageDefinition;
 import org.apache.druid.msq.kernel.StageId;
+import org.apache.druid.quidem.ProjectPathUtils;
+import org.apache.maven.artifact.versioning.ComparableVersion;
+import org.apache.maven.model.Model;
+import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.easymock.EasyMock;
 import org.junit.After;
 import org.junit.Assert;
@@ -35,10 +39,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.Collections;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doReturn;
 
 public class ControllerImplTest
@@ -205,6 +211,16 @@ public class ControllerImplTest
     );
   }
 
+  @Test
+  public void testRemovalIsNeeded() throws Exception
+  {
+    File rootPom = ProjectPathUtils.getPathFromProjectRoot("pom.xml");
+    MavenXpp3Reader mavenreader = new MavenXpp3Reader();
+    Model model = mavenreader.read(new FileReader(rootPom));
+    ComparableVersion version = new ComparableVersion(model.getVersion());
+    ComparableVersion v34 = new ComparableVersion("34.0.0-SNAPSHOT");
+    assertEquals(-1, version.compareTo(v34));
+  }
 
   @After
   public void tearDown() throws Exception

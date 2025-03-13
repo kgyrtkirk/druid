@@ -207,7 +207,9 @@ public class DartQueryMaker implements QueryMaker
         plannerContext.getJsonMapper(),
         new DartQueryKitSpecFactory().makeQueryKitSpec(
             QueryKitBasedMSQPlanner.makeQueryControllerToolKit(querySpec.getContext(), context.jsonMapper()),
-            dartQueryId, querySpec,
+            dartQueryId,
+            querySpec.getTuningConfig(),
+            querySpec.getContext(),
             controllerContext.queryKernelConfig(dartQueryId, querySpec)
         )
     ).makeQueryDefinition();

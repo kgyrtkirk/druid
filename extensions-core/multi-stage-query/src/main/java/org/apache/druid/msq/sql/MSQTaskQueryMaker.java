@@ -145,12 +145,7 @@ public class MSQTaskQueryMaker implements QueryMaker
     );
 
     QueryKit<Query<?>> qk = null;
-    QueryKitSpec queryKitSpec = queryKitSpecFactory.makeQueryKitSpec(
-        qk,
-        taskId,
-        null,
-        null
-        );
+    QueryKitSpec queryKitSpec = null;
     final MSQControllerTask controllerTask = new MSQControllerTask(
         taskId,
         makeQuerySpec(targetDataSource, druidQuery, resultsContext, terminalStageSpecFactory, queryKitSpec),
