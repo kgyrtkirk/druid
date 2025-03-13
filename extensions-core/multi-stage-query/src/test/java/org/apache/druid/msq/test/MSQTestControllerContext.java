@@ -282,24 +282,6 @@ public class MSQTestControllerContext implements ControllerContext, DartControll
     return IndexerControllerContext.makeQueryKernelConfig(querySpec, new ControllerMemoryParameters(100_000_000));
   }
 
-  // FIXME
-//  @Override
-//  public QueryKitSpec makeQueryKitSpec(
-//      final QueryKit<Query<?>> queryKit,
-//      final String queryId,
-//      final MSQSpec0 querySpec,
-//      final ControllerQueryKernelConfig queryKernelConfig
-//  )
-//  {
-//    return new QueryKitSpec(
-//        queryKit,
-//        queryId,
-//        querySpec.getTuningConfig().getMaxNumWorkers(),
-//        querySpec.getTuningConfig().getMaxNumWorkers(),
-//        1
-//    );
-//  }
-
   @Override
   public void emitMetric(String metric, Number value)
   {
