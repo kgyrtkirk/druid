@@ -20,12 +20,19 @@
 package org.apache.druid.msq.dart.controller.sql;
 
 import com.google.inject.Inject;
+import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.RelRoot;
 import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.rel.type.RelDataTypeFactory;
 import org.apache.calcite.tools.ValidationException;
 import org.apache.druid.error.DruidException;
+import org.apache.druid.msq.kernel.QueryDefinition;
+import org.apache.druid.server.QueryResponse;
 import org.apache.druid.sql.calcite.planner.PlannerContext;
+import org.apache.druid.sql.calcite.planner.PlannerResult;
+import org.apache.druid.sql.calcite.planner.Stage10X;
+import org.apache.druid.sql.calcite.rel.DruidQuery;
+import org.apache.druid.sql.calcite.rel.logical.DruidLogicalNode;
 import org.apache.druid.sql.calcite.run.EngineFeature;
 import org.apache.druid.sql.calcite.run.QueryMaker;
 import org.apache.druid.sql.calcite.run.SqlEngine;
@@ -83,7 +90,11 @@ public class QkSqlEngine implements SqlEngine
   @Override
   public QueryMaker buildQueryMakerForSelect(RelRoot relRoot, PlannerContext plannerContext) throws ValidationException
   {
-    return delegate.buildQueryMakerForSelect(relRoot, plannerContext);
+    return new QkQueryMaker(
+        plannerContext,
+        delegate.buildQueryMakerForSelect(relRoot, plannerContext)
+    );
+
   }
 
   @Override
@@ -94,4 +105,66 @@ public class QkSqlEngine implements SqlEngine
   {
     throw DruidException.defensive("Not yet supported in this mode");
   }
+
+  static class QkQueryMaker implements QueryMaker ,Stage10X
+  {
+
+    private PlannerContext plannerContext;
+    private DartQueryMaker dartQueryMaker;
+
+    public QkQueryMaker(PlannerContext plannerContext, QueryMaker buildQueryMakerForSelect)
+    {
+      this.plannerContext = plannerContext;
+      this.dartQueryMaker = (DartQueryMaker) buildQueryMakerForSelect;
+
+    }
+
+    @Override
+    public QueryResponse<Object[]> runQuery(DruidQuery druidQuery)
+    {
+      return dartQueryMaker.runQuery(druidQuery);
+    }
+
+    @Override
+    // DruidJoin
+    //   Druid
+    public PlannerResult buildPlannerResult(DruidLogicalNode newRoot)
+    {
+      QueryDefinition queryDef = null;
+      QueryResponse<Object[]> a = dartQueryMaker.runQueryDef(queryDef, null);
+      return new PlannerResult(() -> a, null);
+
+    }
+
+    @Override
+    public PlannerResult buildPlannerResult2(DruidQuery druidQuery)
+    {
+      if(true)
+      {
+        throw new RuntimeException("FIXME: Unimplemented!");
+      }
+      return null;
+
+    }
+
+  }
+
+  // @Override
+  // public PlannerResult buildPlannerResult(RelNode newRoot)
+  // {
+  // throw DruidException.defensive("Not yet supported in this mode");
+  //// Object queryDef = new MSQQueryGenerator().generateQuery(newRoot);
+  //// return delegate.buildPlannerResult(newRoot);
+  // }
+  //
+  // @Override
+  // public PlannerResult buildPlannerResult2(DruidQuery druidQuery)
+  // {
+  // delegate.buildQueryMakerForInsert(null, null, null);
+  // if (true) {
+  // throw new RuntimeException("FIXME: Unimplemented!");
+  // }
+  // return null;
+  //
+  // }
 }

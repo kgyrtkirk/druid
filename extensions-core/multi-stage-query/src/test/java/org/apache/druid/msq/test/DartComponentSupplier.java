@@ -32,7 +32,7 @@ import org.apache.druid.initialization.DruidModule;
 import org.apache.druid.java.util.http.client.HttpClient;
 import org.apache.druid.msq.dart.Dart;
 import org.apache.druid.msq.dart.controller.DartControllerContextFactory;
-import org.apache.druid.msq.dart.controller.sql.DartSqlEngine;
+import org.apache.druid.msq.dart.controller.sql.QkSqlEngine;
 import org.apache.druid.msq.dart.guice.DartControllerModule;
 import org.apache.druid.msq.dart.guice.DartModules;
 import org.apache.druid.msq.dart.guice.DartWorkerMemoryManagementModule;
@@ -95,7 +95,7 @@ public class DartComponentSupplier extends AbstractMSQComponentSupplierDelegate
       ObjectMapper queryJsonMapper,
       Injector injector)
   {
-    return injector.getInstance(DartSqlEngine.class);
+    return injector.getInstance(QkSqlEngine.class);
   }
 
   static class DartTestCoreModule implements DruidModule

@@ -296,7 +296,6 @@ public class MSQTaskQueryMaker implements QueryMaker
           replaceTimeChunks,
           null,
           terminalStageSpecFactory.createTerminalStageSpec(
-              druidQuery,
               plannerContext
           )
       );

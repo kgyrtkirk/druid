@@ -540,6 +540,7 @@ public abstract class QueryHandler extends SqlStatementHandler.BaseStatementHand
     QueryValidations.validateLogicalQueryForDruid(handlerContext.plannerContext(), parameterized);
     CalcitePlanner planner = handlerContext.planner();
 
+
     if (plannerContext.getPlannerConfig()
                       .getNativeQuerySqlPlanningMode()
                       .equals(QueryContexts.NATIVE_QUERY_SQL_PLANNING_MODE_DECOUPLED)
@@ -554,6 +555,11 @@ public abstract class QueryHandler extends SqlStatementHandler.BaseStatementHand
       );
 
       plannerContext.dispatchHook(DruidHook.DRUID_PLAN, newRoot);
+
+      if(queryMaker instanceof Stage10X) {
+        Stage10X stage10x = (Stage10X)queryMaker;
+        return stage10x.buildPlannerResult(newRoot);
+      }
 
       DruidQueryGenerator generator = new DruidQueryGenerator(plannerContext, (DruidLogicalNode) newRoot, rexBuilder);
       DruidQuery baseQuery = generator.buildQuery();
@@ -593,6 +599,13 @@ public abstract class QueryHandler extends SqlStatementHandler.BaseStatementHand
       } else {
         // Compute row type.
         final RelDataType rowType = prepareResult.getReturnedRowType();
+
+        if(queryMaker instanceof Stage10X) {
+          Stage10X stage10x = (Stage10X)queryMaker;
+          return stage10x.buildPlannerResult2(druidRel.toDruidQuery(false));
+//          return ((Stage10X) queryMaker).buildPlannerResult(newRoot);
+        }
+
 
         // Start the query.
         final Supplier<QueryResponse<Object[]>> resultsSupplier = () -> {
