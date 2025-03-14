@@ -376,27 +376,16 @@ public class MSQTaskQueryMaker implements QueryMaker
       final PlannerContext plannerContext
   )
   {
-    final boolean finalizeAggregations = MultiStageQueryContext.isFinalizeAggregations(plannerContext.queryContext());
-    if(finalizeAggregations) {
-      return getTypesFinalized(druidQuery, fieldMapping, plannerContext);
-    }else {
-      return getTypesIntermediate(druidQuery, fieldMapping, plannerContext);
-    }
-  }
-
-  public static List<Pair<SqlTypeName, ColumnType>> getTypesFinalized(
-      final DruidQuery druidQuery,
-      final List<Entry<Integer, String>> fieldMapping,
-      final PlannerContext plannerContext
-  )
-  {
-    RowSignature outputRowSignature = druidQuery.getOutputRowSignature();
     RelDataType outputRowType = druidQuery.getOutputRowType();
-    final boolean finalizeAggregations = MultiStageQueryContext.isFinalizeAggregations(plannerContext.queryContext());
-
+    RowSignature outputRowSignature = druidQuery.getOutputRowSignature();
     // For assistance computing return types if !finalizeAggregations.
-    final Map<String, ColumnType> aggregationIntermediateTypeMap =
-        finalizeAggregations ? null /* Not needed */ : buildAggregationIntermediateTypeMap(druidQuery);
+    final Map<String, ColumnType> aggregationIntermediateTypeMap;
+    if (MultiStageQueryContext.isFinalizeAggregations(plannerContext.queryContext())) {
+      /* Not needed */
+      aggregationIntermediateTypeMap = Collections.emptyMap();
+    } else {
+      aggregationIntermediateTypeMap = buildAggregationIntermediateTypeMap(druidQuery);
+    }
 
     final List<Pair<SqlTypeName, ColumnType>> retVal = new ArrayList<>();
 
@@ -405,52 +394,14 @@ public class MSQTaskQueryMaker implements QueryMaker
 
       final SqlTypeName sqlTypeName;
 
-      if (!finalizeAggregations && aggregationIntermediateTypeMap.containsKey(queryColumn)) {
+      if (aggregationIntermediateTypeMap.containsKey(queryColumn)) {
         final ColumnType druidType = aggregationIntermediateTypeMap.get(queryColumn);
         sqlTypeName = new RowSignatures.ComplexSqlType(SqlTypeName.OTHER, druidType, true).getSqlTypeName();
       } else {
         sqlTypeName = outputRowType.getFieldList().get(entry.getKey()).getType().getSqlTypeName();
       }
 
-      final ColumnType columnType =
-          outputRowSignature.getColumnType(queryColumn).orElse(ColumnType.STRING);
-
-      retVal.add(Pair.of(sqlTypeName, columnType));
-    }
-
-    return retVal;
-  }
-
-  public static List<Pair<SqlTypeName, ColumnType>> getTypesIntermediate(
-      final DruidQuery druidQuery,
-      final List<Entry<Integer, String>> fieldMapping,
-      final PlannerContext plannerContext
-  )
-  {
-    RowSignature outputRowSignature = druidQuery.getOutputRowSignature();
-    RelDataType outputRowType = druidQuery.getOutputRowType();
-    final boolean finalizeAggregations = MultiStageQueryContext.isFinalizeAggregations(plannerContext.queryContext());
-
-    // For assistance computing return types if !finalizeAggregations.
-    final Map<String, ColumnType> aggregationIntermediateTypeMap =
-        finalizeAggregations ? null /* Not needed */ : buildAggregationIntermediateTypeMap(druidQuery);
-
-    final List<Pair<SqlTypeName, ColumnType>> retVal = new ArrayList<>();
-
-    for (final Entry<Integer, String> entry : fieldMapping) {
-      final String queryColumn = outputRowSignature.getColumnName(entry.getKey());
-
-      final SqlTypeName sqlTypeName;
-
-      if (!finalizeAggregations && aggregationIntermediateTypeMap.containsKey(queryColumn)) {
-        final ColumnType druidType = aggregationIntermediateTypeMap.get(queryColumn);
-        sqlTypeName = new RowSignatures.ComplexSqlType(SqlTypeName.OTHER, druidType, true).getSqlTypeName();
-      } else {
-        sqlTypeName = outputRowType.getFieldList().get(entry.getKey()).getType().getSqlTypeName();
-      }
-
-      final ColumnType columnType =
-          outputRowSignature.getColumnType(queryColumn).orElse(ColumnType.STRING);
+      final ColumnType columnType = outputRowSignature.getColumnType(queryColumn).orElse(ColumnType.STRING);
 
       retVal.add(Pair.of(sqlTypeName, columnType));
     }
