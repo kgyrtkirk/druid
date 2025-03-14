@@ -22,6 +22,7 @@ package org.apache.druid.msq.dart.controller.sql;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Iterators;
 import org.apache.calcite.sql.type.SqlTypeName;
+import org.apache.druid.error.DruidException;
 import org.apache.druid.io.LimitedOutputStream;
 import org.apache.druid.java.util.common.DateTimes;
 import org.apache.druid.java.util.common.Either;
@@ -53,6 +54,7 @@ import org.apache.druid.msq.indexing.report.MSQTaskReportPayload;
 import org.apache.druid.msq.kernel.QueryDefinition;
 import org.apache.druid.msq.sql.DartQueryKitSpecFactory;
 import org.apache.druid.msq.sql.MSQTaskQueryMaker;
+import org.apache.druid.msq.util.MultiStageQueryContext;
 import org.apache.druid.query.QueryContext;
 import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.server.QueryResponse;
@@ -131,8 +133,13 @@ public class DartQueryMaker implements QueryMaker
 
   public QueryResponse<Object[]> runQueryDef(QueryDefinition queryDef, QueryContext context)
   {
+
     if (!plannerContext.getAuthorizationResult().allowAccessWithNoRestriction()) {
       throw new ForbiddenException(plannerContext.getAuthorizationResult().getErrorMessage());
+    }
+
+    if(!MultiStageQueryContext.isFinalizeAggregations(plannerContext.queryContext())) {
+      throw DruidException.defensive("Non-finalized execution is not supported!");
     }
 
     final List<Pair<SqlTypeName, ColumnType>> types =
@@ -145,7 +152,13 @@ public class DartQueryMaker implements QueryMaker
         SqlResults.Context.fromPlannerContext(plannerContext)
     );
 
-    final MSQSpec querySpec = extracted(druidQuery, dartQueryId, controllerContext, resultsContext);
+    final MSQSpec querySpec = MSQTaskQueryMaker.makeQuerySpec0(
+        null,
+        null,
+        fieldMapping,
+        plannerContext,
+        null // Only used for DML, which this isn't
+    ).withQueryDef(queryDef);
 
     final ControllerImpl controller = new ControllerImpl(
         dartQueryId,
@@ -164,7 +177,7 @@ public class DartQueryMaker implements QueryMaker
         DateTimes.nowUtc()
     );
 
-    final boolean fullReport = druidQuery.getQuery().context().getBoolean(
+    final boolean fullReport = context.getBoolean(
         DartSqlEngine.CTX_FULL_REPORT,
         DartSqlEngine.CTX_FULL_REPORT_DEFAULT
     );

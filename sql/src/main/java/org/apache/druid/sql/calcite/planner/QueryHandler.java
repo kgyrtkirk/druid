@@ -558,7 +558,7 @@ public abstract class QueryHandler extends SqlStatementHandler.BaseStatementHand
 
       if(queryMaker instanceof Stage10X) {
         Stage10X stage10x = (Stage10X)queryMaker;
-        return stage10x.buildPlannerResult(newRoot);
+        return stage10x.buildPlannerResult((DruidLogicalNode) newRoot);
       }
 
       DruidQueryGenerator generator = new DruidQueryGenerator(plannerContext, (DruidLogicalNode) newRoot, rexBuilder);

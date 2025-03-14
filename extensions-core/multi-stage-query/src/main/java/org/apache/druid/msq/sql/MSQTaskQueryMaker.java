@@ -22,6 +22,7 @@ package org.apache.druid.msq.sql;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Preconditions;
+import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.runtime.Hook;
 import org.apache.calcite.sql.type.SqlTypeName;
 import org.apache.druid.common.guava.FutureUtils;
@@ -57,6 +58,7 @@ import org.apache.druid.query.aggregation.AggregatorFactory;
 import org.apache.druid.rpc.indexing.OverlordClient;
 import org.apache.druid.segment.IndexSpec;
 import org.apache.druid.segment.column.ColumnType;
+import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.server.QueryResponse;
 import org.apache.druid.server.lookup.cache.LookupLoadingSpec;
 import org.apache.druid.sql.calcite.parser.DruidSqlIngest;
@@ -375,6 +377,22 @@ public class MSQTaskQueryMaker implements QueryMaker
   )
   {
     final boolean finalizeAggregations = MultiStageQueryContext.isFinalizeAggregations(plannerContext.queryContext());
+    if(finalizeAggregations) {
+      return getTypesFinalized(druidQuery, fieldMapping, plannerContext);
+    }else {
+      return getTypesIntermediate(druidQuery, fieldMapping, plannerContext);
+    }
+  }
+
+  public static List<Pair<SqlTypeName, ColumnType>> getTypesFinalized(
+      final DruidQuery druidQuery,
+      final List<Entry<Integer, String>> fieldMapping,
+      final PlannerContext plannerContext
+  )
+  {
+    RowSignature outputRowSignature = druidQuery.getOutputRowSignature();
+    RelDataType outputRowType = druidQuery.getOutputRowType();
+    final boolean finalizeAggregations = MultiStageQueryContext.isFinalizeAggregations(plannerContext.queryContext());
 
     // For assistance computing return types if !finalizeAggregations.
     final Map<String, ColumnType> aggregationIntermediateTypeMap =
@@ -383,7 +401,7 @@ public class MSQTaskQueryMaker implements QueryMaker
     final List<Pair<SqlTypeName, ColumnType>> retVal = new ArrayList<>();
 
     for (final Entry<Integer, String> entry : fieldMapping) {
-      final String queryColumn = druidQuery.getOutputRowSignature().getColumnName(entry.getKey());
+      final String queryColumn = outputRowSignature.getColumnName(entry.getKey());
 
       final SqlTypeName sqlTypeName;
 
@@ -391,11 +409,48 @@ public class MSQTaskQueryMaker implements QueryMaker
         final ColumnType druidType = aggregationIntermediateTypeMap.get(queryColumn);
         sqlTypeName = new RowSignatures.ComplexSqlType(SqlTypeName.OTHER, druidType, true).getSqlTypeName();
       } else {
-        sqlTypeName = druidQuery.getOutputRowType().getFieldList().get(entry.getKey()).getType().getSqlTypeName();
+        sqlTypeName = outputRowType.getFieldList().get(entry.getKey()).getType().getSqlTypeName();
       }
 
       final ColumnType columnType =
-          druidQuery.getOutputRowSignature().getColumnType(queryColumn).orElse(ColumnType.STRING);
+          outputRowSignature.getColumnType(queryColumn).orElse(ColumnType.STRING);
+
+      retVal.add(Pair.of(sqlTypeName, columnType));
+    }
+
+    return retVal;
+  }
+
+  public static List<Pair<SqlTypeName, ColumnType>> getTypesIntermediate(
+      final DruidQuery druidQuery,
+      final List<Entry<Integer, String>> fieldMapping,
+      final PlannerContext plannerContext
+  )
+  {
+    RowSignature outputRowSignature = druidQuery.getOutputRowSignature();
+    RelDataType outputRowType = druidQuery.getOutputRowType();
+    final boolean finalizeAggregations = MultiStageQueryContext.isFinalizeAggregations(plannerContext.queryContext());
+
+    // For assistance computing return types if !finalizeAggregations.
+    final Map<String, ColumnType> aggregationIntermediateTypeMap =
+        finalizeAggregations ? null /* Not needed */ : buildAggregationIntermediateTypeMap(druidQuery);
+
+    final List<Pair<SqlTypeName, ColumnType>> retVal = new ArrayList<>();
+
+    for (final Entry<Integer, String> entry : fieldMapping) {
+      final String queryColumn = outputRowSignature.getColumnName(entry.getKey());
+
+      final SqlTypeName sqlTypeName;
+
+      if (!finalizeAggregations && aggregationIntermediateTypeMap.containsKey(queryColumn)) {
+        final ColumnType druidType = aggregationIntermediateTypeMap.get(queryColumn);
+        sqlTypeName = new RowSignatures.ComplexSqlType(SqlTypeName.OTHER, druidType, true).getSqlTypeName();
+      } else {
+        sqlTypeName = outputRowType.getFieldList().get(entry.getKey()).getType().getSqlTypeName();
+      }
+
+      final ColumnType columnType =
+          outputRowSignature.getColumnType(queryColumn).orElse(ColumnType.STRING);
 
       retVal.add(Pair.of(sqlTypeName, columnType));
     }

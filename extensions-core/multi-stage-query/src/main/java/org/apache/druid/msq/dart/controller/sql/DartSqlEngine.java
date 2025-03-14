@@ -177,6 +177,7 @@ public class DartSqlEngine implements SqlEngine
   {
     return new DartQueryMaker(
         relRoot.fields,
+        controllerContextFactory,
         plannerContext,
         controllerRegistry,
         controllerConfig,
