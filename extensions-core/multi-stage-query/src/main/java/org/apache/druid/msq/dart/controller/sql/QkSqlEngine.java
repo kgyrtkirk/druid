@@ -20,13 +20,18 @@
 package org.apache.druid.msq.dart.controller.sql;
 
 import com.google.inject.Inject;
-import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.RelRoot;
 import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.rel.type.RelDataTypeFactory;
 import org.apache.calcite.tools.ValidationException;
 import org.apache.druid.error.DruidException;
+import org.apache.druid.msq.exec.ControllerContext;
+import org.apache.druid.msq.exec.QueryKitBasedMSQPlanner;
+import org.apache.druid.msq.indexing.MSQSpec;
 import org.apache.druid.msq.kernel.QueryDefinition;
+import org.apache.druid.msq.sql.DartQueryKitSpecFactory;
+import org.apache.druid.msq.sql.MSQTaskQueryMaker;
+import org.apache.druid.query.QueryContext;
 import org.apache.druid.server.QueryResponse;
 import org.apache.druid.sql.calcite.planner.PlannerContext;
 import org.apache.druid.sql.calcite.planner.PlannerResult;
@@ -38,7 +43,9 @@ import org.apache.druid.sql.calcite.run.QueryMaker;
 import org.apache.druid.sql.calcite.run.SqlEngine;
 import org.apache.druid.sql.destination.IngestDestination;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 public class QkSqlEngine implements SqlEngine
 {
@@ -139,14 +146,43 @@ public class QkSqlEngine implements SqlEngine
     @Override
     public PlannerResult buildPlannerResult2(DruidQuery druidQuery)
     {
-      if(true)
-      {
-        throw new RuntimeException("FIXME: Unimplemented!");
-      }
-      return null;
+      QueryContext queryContext = druidQuery.getQuery().context();
 
+      QueryDefinition queryDef = buildQueryDef(druidQuery, dartQueryMaker.fieldMapping, queryContext);
+
+      QueryResponse<Object[]> a = dartQueryMaker.runQueryDef(queryDef, queryContext);
+      return new PlannerResult(() -> a, null);
     }
 
+    private QueryDefinition buildQueryDef(DruidQuery druidQuery, List<Entry<Integer, String>> fieldMapping, QueryContext queryContext)
+    {
+      final MSQSpec querySpec = MSQTaskQueryMaker.makeQuerySpec0(
+          null,
+          druidQuery,
+          fieldMapping,
+          plannerContext,
+          null // Only used for DML, which this isn't
+      );
+
+      final String dartQueryId = queryContext.getString(DartSqlEngine.CTX_DART_QUERY_ID);
+      ControllerContext controllerContext = dartQueryMaker.newControllerContext(dartQueryId);
+
+      final QueryDefinition queryDef = new QueryKitBasedMSQPlanner(
+          querySpec,
+          dartQueryMaker.makeDefaultResultContext(),
+          querySpec.getQuery(),
+          plannerContext.getJsonMapper(),
+          new DartQueryKitSpecFactory().makeQueryKitSpec(
+              QueryKitBasedMSQPlanner.makeQueryControllerToolKit(querySpec.getContext(), plannerContext.getJsonMapper()),
+              dartQueryId,
+              querySpec.getTuningConfig(),
+              querySpec.getContext(),
+              controllerContext.queryKernelConfig(dartQueryId, querySpec)
+          )
+      ).makeQueryDefinition();
+      return queryDef;
+
+    }
   }
 
   // @Override

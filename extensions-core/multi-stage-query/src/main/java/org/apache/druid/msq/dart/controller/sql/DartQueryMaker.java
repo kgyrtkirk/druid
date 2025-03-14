@@ -94,7 +94,7 @@ public class DartQueryMaker implements QueryMaker
 {
   private static final Logger log = new Logger(DartQueryMaker.class);
 
-  private final List<Entry<Integer, String>> fieldMapping;
+  final List<Entry<Integer, String>> fieldMapping;
   private final DartControllerContextFactory controllerContextFactory;
   private final PlannerContext plannerContext;
 
@@ -144,10 +144,7 @@ public class DartQueryMaker implements QueryMaker
 
     final String dartQueryId = context.getString(DartSqlEngine.CTX_DART_QUERY_ID);
     final ControllerContext controllerContext = controllerContextFactory.newContext(dartQueryId);
-    final ResultsContext resultsContext = new ResultsContext(
-        null,     // not mandatory
-        SqlResults.Context.fromPlannerContext(plannerContext)
-    );
+    final ResultsContext resultsContext = makeDefaultResultContext();
 
     final MSQSpec querySpec = MSQTaskQueryMaker.makeQuerySpec0(
         null,
@@ -584,5 +581,20 @@ public class DartQueryMaker implements QueryMaker
     {
       rowBuffer.put(Either.error(e));
     }
+  }
+
+  // ugly hack
+  public ControllerContext newControllerContext(String dartQueryId)
+  {
+    return controllerContextFactory.newContext(dartQueryId);
+  }
+
+  public ResultsContext makeDefaultResultContext()
+  {
+    final ResultsContext resultsContext = new ResultsContext(
+        null,     // not mandatory
+        SqlResults.Context.fromPlannerContext(plannerContext)
+    );
+    return resultsContext;
   }
 }
