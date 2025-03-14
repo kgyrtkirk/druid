@@ -142,13 +142,10 @@ public class DartQueryMaker implements QueryMaker
       throw DruidException.defensive("Non-finalized execution is not supported!");
     }
 
-    final List<Pair<SqlTypeName, ColumnType>> types =
-        MSQTaskQueryMaker.getTypes(druidQuery, fieldMapping, plannerContext);
-
     final String dartQueryId = context.getString(DartSqlEngine.CTX_DART_QUERY_ID);
     final ControllerContext controllerContext = controllerContextFactory.newContext(dartQueryId);
     final ResultsContext resultsContext = new ResultsContext(
-        types.stream().map(p -> p.lhs).collect(Collectors.toList()),
+        null,     // not mandatory
         SqlResults.Context.fromPlannerContext(plannerContext)
     );
 
