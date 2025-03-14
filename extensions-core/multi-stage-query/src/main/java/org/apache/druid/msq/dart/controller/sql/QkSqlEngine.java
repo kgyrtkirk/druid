@@ -148,13 +148,14 @@ public class QkSqlEngine implements SqlEngine
     {
       QueryContext queryContext = druidQuery.getQuery().context();
 
-      QueryDefinition queryDef = buildQueryDef(druidQuery, dartQueryMaker.fieldMapping, queryContext);
+      MSQSpec queryDef = buildQueryDef(druidQuery, dartQueryMaker.fieldMapping, queryContext);
 
-      QueryResponse<Object[]> a = dartQueryMaker.runQueryDef(queryDef, queryContext);
+//      QueryResponse<Object[]> a = dartQueryMaker.runQueryDef(queryDef, queryContext);
+      QueryResponse<Object[]> a = dartQueryMaker.runMSQSpec(queryDef, queryContext);
       return new PlannerResult(() -> a, null);
     }
 
-    private QueryDefinition buildQueryDef(DruidQuery druidQuery, List<Entry<Integer, String>> fieldMapping, QueryContext queryContext)
+    private MSQSpec buildQueryDef(DruidQuery druidQuery, List<Entry<Integer, String>> fieldMapping, QueryContext queryContext)
     {
       final MSQSpec querySpec = MSQTaskQueryMaker.makeQuerySpec0(
           null,
@@ -180,7 +181,7 @@ public class QkSqlEngine implements SqlEngine
               controllerContext.queryKernelConfig(dartQueryId, querySpec)
           )
       ).makeQueryDefinition();
-      return queryDef;
+      return querySpec.withQueryDef(queryDef);
 
     }
   }

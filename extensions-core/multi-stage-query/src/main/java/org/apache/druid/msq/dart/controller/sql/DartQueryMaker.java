@@ -131,6 +131,8 @@ public class DartQueryMaker implements QueryMaker
     this.controllerExecutor = controllerExecutor;
   }
 
+
+
   public QueryResponse<Object[]> runQueryDef(QueryDefinition queryDef, QueryContext context)
   {
 
@@ -142,9 +144,6 @@ public class DartQueryMaker implements QueryMaker
       throw DruidException.defensive("Non-finalized execution is not supported!");
     }
 
-    final String dartQueryId = context.getString(DartSqlEngine.CTX_DART_QUERY_ID);
-    final ControllerContext controllerContext = controllerContextFactory.newContext(dartQueryId);
-    final ResultsContext resultsContext = makeDefaultResultContext();
 
     final MSQSpec querySpec = MSQTaskQueryMaker.makeQuerySpec0(
         null,
@@ -154,6 +153,23 @@ public class DartQueryMaker implements QueryMaker
         null // Only used for DML, which this isn't
     ).withQueryDef(queryDef);
 
+    return extracted(context, querySpec);
+
+  }
+
+
+
+  public QueryResponse<Object[]> runMSQSpec(MSQSpec queryDef, QueryContext queryContext)
+  {
+    return extracted(queryContext, queryDef);
+  }
+
+
+  public QueryResponse<Object[]> extracted(QueryContext context, final MSQSpec querySpec)
+  {
+    final String dartQueryId = context.getString(DartSqlEngine.CTX_DART_QUERY_ID);
+    final ControllerContext controllerContext = controllerContextFactory.newContext(dartQueryId);
+    final ResultsContext resultsContext = makeDefaultResultContext();
     final ControllerImpl controller = new ControllerImpl(
         dartQueryId,
         querySpec,
@@ -192,7 +208,6 @@ public class DartQueryMaker implements QueryMaker
       controllerRegistry.deregister(controllerHolder);
       throw e;
     }
-
   }
 
   public QueryResponse<Object[]> runQuery(DruidQuery druidQuery)
@@ -597,4 +612,7 @@ public class DartQueryMaker implements QueryMaker
     );
     return resultsContext;
   }
+
+
+
 }
