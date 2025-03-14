@@ -51,7 +51,7 @@ public class CalciteDartTest extends BaseCalciteQueryTest
   {
     testBuilder()
         .sql("SELECT 1")
-        .expectedResults(ImmutableList.of(new Object[] {1}))
+        .expectedResults(ImmutableList.of(new Object[] {1L}))
         .run();
   }
 
@@ -62,12 +62,12 @@ public class CalciteDartTest extends BaseCalciteQueryTest
         .sql("SELECT 2 from foo order by dim1")
         .expectedResults(
             ImmutableList.of(
-                new Object[] {2},
-                new Object[] {2},
-                new Object[] {2},
-                new Object[] {2},
-                new Object[] {2},
-                new Object[] {2}
+                new Object[] {2L},
+                new Object[] {2L},
+                new Object[] {2L},
+                new Object[] {2L},
+                new Object[] {2L},
+                new Object[] {2L}
             )
         )
         .run();
@@ -81,8 +81,8 @@ public class CalciteDartTest extends BaseCalciteQueryTest
         .sql("SELECT 2 from foo limit 2")
         .expectedResults(
             ImmutableList.of(
-                new Object[] {2},
-                new Object[] {2}
+                new Object[] {2L},
+                new Object[] {2L}
             )
         )
         .run();
@@ -114,10 +114,10 @@ public class CalciteDartTest extends BaseCalciteQueryTest
         .sql("SELECT 3 from foo group by dim2")
         .expectedResults(
             ImmutableList.of(
-                new Object[] {3},
-                new Object[] {3},
-                new Object[] {3},
-                new Object[] {3}
+                new Object[] {3L},
+                new Object[] {3L},
+                new Object[] {3L},
+                new Object[] {3L}
             )
         )
         .run();
