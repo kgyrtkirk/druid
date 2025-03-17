@@ -1,7 +1,7 @@
 name: "Chk"
 on:
   pull_request:
-    types: [created]
+    types: [created,opened,labeled,synchronize]
 
 jobs:
   test:
@@ -15,3 +15,11 @@ jobs:
             **Hello**
             🌏
             !
+      - uses: actions/checkout@v4
+      - name: add worktree
+        run: |
+         git fetch origin exec-boundary
+         git worktree add exec-boundary exec-boundary
+         git log -n1
+         cd exec-boundary
+         git log -n1
