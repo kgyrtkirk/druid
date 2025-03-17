@@ -1,0 +1,25 @@
+name: "Chk"
+on:
+  pull_request:
+    types: [created,opened,labeled,synchronize]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: mshick/add-pr-comment@v2
+        with:
+          message: |
+            **Hello**
+            🌏
+            !
+      - uses: actions/checkout@v4
+      - name: add worktree
+        run: |
+         git fetch origin exec-boundary
+         git worktree add exec-boundary exec-boundary
+         git log -n1
+         cd exec-boundary
+         git log -n1

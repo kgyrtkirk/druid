@@ -79,6 +79,7 @@
     "lodash.debounce": "^4.0.8",
     "lodash.escape": "^4.0.1",
     "memoize-one": "^5.2.1",
+    "node-sass": "^9.0.0",
     "numeral": "^2.0.6",
     "react": "^18.3.1",
     "react-ace": "^10.1.0",
