@@ -21,6 +21,7 @@ package org.apache.druid.sql.calcite.planner;
 
 import org.apache.calcite.rel.core.Join;
 import org.apache.calcite.rel.hint.RelHint;
+import org.apache.druid.error.DruidException;
 import org.apache.druid.query.JoinAlgorithm;
 import org.apache.druid.sql.calcite.rel.DruidQuery;
 
@@ -50,11 +51,18 @@ public class QueryUtils
   )
   {
     final List<ColumnMapping> columnMappings = new ArrayList<>();
+    List<String> names =new ArrayList<>();
     for (final Entry<Integer, String> entry : fieldMapping) {
       final String queryColumn = druidQuery.getOutputRowSignature().getColumnName(entry.getKey());
       final String outputColumn = entry.getValue();
       columnMappings.add(new ColumnMapping(queryColumn, outputColumn));
+      names.add(outputColumn);
     }
+    List<String> n2 = druidQuery.getOutputRowSignature().getColumnNames();
+    if(names.size() != n2 .size() && false) {
+      throw DruidException.defensive("fdfg");
+    }
+
 
     return columnMappings;
   }
