@@ -148,6 +148,7 @@ public class DartQueryMaker implements QueryMaker
     final MSQSpec querySpec = MSQTaskQueryMaker.makeQuerySpec0(
         null,
         null,
+        context,
         fieldMapping,
         plannerContext,
         null // Only used for DML, which this isn't
@@ -274,6 +275,7 @@ public class DartQueryMaker implements QueryMaker
     final MSQSpec querySpec = MSQTaskQueryMaker.makeQuerySpec0(
         null,
         druidQuery,
+        druidQuery.getQuery().context(),
         fieldMapping,
         plannerContext,
         null // Only used for DML, which this isn't

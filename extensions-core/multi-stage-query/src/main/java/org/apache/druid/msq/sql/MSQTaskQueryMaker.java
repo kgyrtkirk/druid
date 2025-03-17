@@ -180,6 +180,7 @@ public class MSQTaskQueryMaker implements QueryMaker
     final MSQSpec querySpec = makeQuerySpec0(
         targetDataSource,
         druidQuery,
+        druidQuery.getQuery().context(),
         fieldMapping,
         plannerContext,
         terminalStageSpecFactory
@@ -199,6 +200,7 @@ public class MSQTaskQueryMaker implements QueryMaker
   public static MSQSpec makeQuerySpec0(
       @Nullable final IngestDestination targetDataSource,
       final DruidQuery druidQuery,
+      QueryContext queryContext3,
       final List<Entry<Integer, String>> fieldMapping,
       final PlannerContext plannerContext,
       final MSQTerminalStageSpecFactory terminalStageSpecFactory
@@ -328,14 +330,15 @@ public class MSQTaskQueryMaker implements QueryMaker
 
     // This flag is to ensure backward compatibility, as brokers are upgraded after indexers/middlemanagers.
     nativeQueryContextOverrides.put(MultiStageQueryContext.WINDOW_FUNCTION_OPERATOR_TRANSFORMATION, true);
-    boolean isReindex = MSQControllerTask.isReplaceInputDataSourceTask(druidQuery.getQuery(), destination);
+    boolean isReindex = false ;// FIXME MSQControllerTask.isReplaceInputDataSourceTask(druidQuery.getQuery(), destination);
     nativeQueryContextOverrides.put(MultiStageQueryContext.CTX_IS_REINDEX, isReindex);
 
-    QueryContext queryContext = QueryContext.of(QueryContexts.override(druidQuery.getQuery().getContext(), nativeQueryContextOverrides));
+
+    QueryContext queryContext = queryContext3.override(nativeQueryContextOverrides);
 
     final MSQSpec querySpec =
         MSQSpec.builder()
-               .query(druidQuery.getQuery().withOverriddenContext(nativeQueryContextOverrides))
+               .query(druidQuery==null?null:druidQuery.getQuery().withOverriddenContext(nativeQueryContextOverrides))
                .queryContext(queryContext)
                .columnMappings(new ColumnMappings(QueryUtils.buildColumnMappings(fieldMapping, druidQuery)))
                .destination(destination)

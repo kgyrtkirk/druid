@@ -138,7 +138,8 @@ public class QkSqlEngine implements SqlEngine
     public PlannerResult buildPlannerResult(DruidLogicalNode newRoot)
     {
       QueryDefinition queryDef = null;
-      QueryResponse<Object[]> a = dartQueryMaker.runQueryDef(queryDef, null);
+      QueryContext context = plannerContext.queryContext();
+      QueryResponse<Object[]> a = dartQueryMaker.runQueryDef(queryDef, context);
       return new PlannerResult(() -> a, null);
 
     }
@@ -160,6 +161,7 @@ public class QkSqlEngine implements SqlEngine
       final MSQSpec querySpec = MSQTaskQueryMaker.makeQuerySpec0(
           null,
           druidQuery,
+          druidQuery.getQuery().context(),
           fieldMapping,
           plannerContext,
           null // Only used for DML, which this isn't
