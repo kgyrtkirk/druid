@@ -20,6 +20,7 @@
 package org.apache.druid.msq.kernel;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
@@ -29,6 +30,7 @@ import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import org.apache.druid.java.util.common.IAE;
 import org.apache.druid.java.util.common.ISE;
+import org.apache.druid.query.QueryContext;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -49,18 +51,26 @@ public class QueryDefinition
 {
   private final Map<StageId, StageDefinition> stageDefinitions;
   private final StageId finalStage;
+  @JsonProperty("context")
+  @JsonInclude(JsonInclude.Include.NON_NULL)
+  final QueryContext context;
 
   private QueryDefinition(
       final Map<StageId, StageDefinition> stageDefinitions,
-      final StageId finalStage
+      final StageId finalStage,
+      QueryContext context1
   )
   {
     this.stageDefinitions = stageDefinitions;
     this.finalStage = finalStage;
+    this.context = context1;
   }
 
   @JsonCreator
-  static QueryDefinition create(@JsonProperty("stages") final List<StageDefinition> stageDefinitions)
+  static QueryDefinition create(
+      @JsonProperty("stages") final List<StageDefinition> stageDefinitions,
+      @JsonProperty("context") QueryContext context
+      )
   {
     final Map<StageId, StageDefinition> stageMap = new HashMap<>();
     final Set<StageId> nonFinalStages = new HashSet<>();
@@ -89,7 +99,8 @@ public class QueryDefinition
     if (finalStageCandidates == 1) {
       return new QueryDefinition(
           stageMap,
-          Iterables.getOnlyElement(Sets.difference(stageMap.keySet(), nonFinalStages))
+          Iterables.getOnlyElement(Sets.difference(stageMap.keySet(), nonFinalStages)),
+          context
       );
     } else {
       throw new IAE("Must have a single final stage, but found [%d] candidates", finalStageCandidates);
