@@ -138,7 +138,7 @@ public class QkSqlEngine implements SqlEngine
     public PlannerResult buildPlannerResult(DruidLogicalNode newRoot)
     {
 
-      QueryDefinitionTranslator qdt = new QueryDefinitionTranslator (plannerContext, newRoot);
+      QueryDefinitionTranslator qdt = new QueryDefinitionTranslator(plannerContext, newRoot);
 
       QueryDefinition queryDef = qdt.translate(newRoot);
 

@@ -411,7 +411,7 @@ public class DataSourcePlan
     );
   }
 
-  private static DataSourcePlan forInline(
+  public static DataSourcePlan forInline(
       final InlineDataSource dataSource,
       final boolean broadcast
   )

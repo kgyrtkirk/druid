@@ -19,25 +19,182 @@
 
 package org.apache.druid.msq.dart.controller.sql;
 
+import org.apache.calcite.rel.RelNode;
+import org.apache.druid.error.DruidException;
+import org.apache.druid.msq.input.InputSpec;
 import org.apache.druid.msq.kernel.QueryDefinition;
+import org.apache.druid.msq.kernel.QueryDefinitionBuilder;
+import org.apache.druid.msq.kernel.StageDefinition;
+import org.apache.druid.msq.kernel.StageDefinitionBuilder;
+import org.apache.druid.msq.querykit.DataSourcePlan;
+import org.apache.druid.query.DataSource;
+import org.apache.druid.query.InlineDataSource;
 import org.apache.druid.sql.calcite.planner.PlannerContext;
+import org.apache.druid.sql.calcite.planner.querygen.DruidQueryGenerator.DruidNodeStack;
+import org.apache.druid.sql.calcite.planner.querygen.SourceDescProducer.SourceDesc;
 import org.apache.druid.sql.calcite.rel.logical.DruidLogicalNode;
+import org.apache.druid.sql.calcite.rel.logical.DruidValues;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class QueryDefinitionTranslator
 {
 
+  private static final String IRRELEVANT = "irrelevant";
   private DruidLogicalNode logicalRoot;
   private PlannerContext plannerContext;
+  private AtomicInteger stageIdSeq = new AtomicInteger(1);
+  private QDVertexFactory vertexFactory;
 
   public QueryDefinitionTranslator(PlannerContext plannerContext, DruidLogicalNode logicalRoot)
   {
     this.plannerContext = plannerContext;
     this.logicalRoot = logicalRoot;
+    this.vertexFactory = new QDVertexFactory(plannerContext);
   }
 
-  public QueryDefinition translate(DruidLogicalNode newRoot)
+  public QueryDefinition translate(DruidLogicalNode relRoot)
   {
-    return null;
+    DruidNodeStack stack = new DruidNodeStack();
+    stack.push(relRoot);
+    Vertex vertex = buildVertexFor(stack);
+    QueryDefinitionBuilder qdb = QueryDefinition.builder(plannerContext.getSqlQueryId());
+    return vertex.build(qdb).build();
+  }
+
+  private Vertex buildVertexFor(DruidNodeStack stack)
+  {
+    List<Vertex> newInputs = new ArrayList<>();
+
+    for (RelNode input : stack.peekNode().getInputs()) {
+      stack.push((DruidLogicalNode) input, newInputs.size());
+      newInputs.add(buildVertexFor(stack));
+      stack.pop();
+    }
+    Vertex vertex = processNodeWithInputs(stack, newInputs);
+    return vertex;
+  }
+
+  private Vertex processNodeWithInputs(DruidNodeStack stack, List<Vertex> newInputs)
+  {
+    DruidLogicalNode node = stack.peekNode();
+    Optional<Vertex> vertex = buildRootVertex(node);
+    if (vertex.isPresent()) {
+      return vertex.get();
+    }
+    if (newInputs.size() == 1) {
+      Vertex inputVertex = newInputs.get(0);
+      Optional<Vertex> newVertex = inputVertex.extendWith(stack);
+      if (newVertex.isPresent()) {
+        return newVertex.get();
+      }
+    }
+    throw DruidException.defensive().build("Unable to process relNode[%s]", node);
+  }
+
+  private Optional<Vertex> buildRootVertex(DruidLogicalNode node)
+  {
+    if (node instanceof DruidValues) {
+      return translateValues((DruidValues) node);
+    }
+    return Optional.empty();
+  }
+
+  // this is a hack for now
+  private Optional<Vertex> translateValues(DruidValues node)
+  {
+    SourceDesc sd = node.getSourceDesc(plannerContext, Collections.emptyList());
+    DataSource ds = sd.dataSource;
+    InlineDataSource ids = (InlineDataSource) ds;
+    DataSourcePlan dsp = DataSourcePlan.forInline(ids, false);
+    List<InputSpec> isp = dsp.getInputSpecs();
+
+    QueryDefinitionBuilder qdb = QueryDefinition.builder(IRRELEVANT);
+    StageDefinitionBuilder sdb = StageDefinition.builder(stageIdSeq.incrementAndGet());
+    sdb.inputs(isp);
+    Vertex vertex = vertexFactory.createVertex(sdb, Collections.emptyList());
+    return Optional.of(vertex);
+  }
+
+  protected static class QDVertexFactory
+  {
+    private final PlannerContext plannerContext;
+
+    public QDVertexFactory(PlannerContext plannerContext)
+    {
+      this.plannerContext = plannerContext;
+    }
+
+    Vertex createVertex( StageDefinitionBuilder qdb, List<Vertex> inputs)
+    {
+      return new PDQVertex(qdb, inputs);
+    }
+
+    public class PDQVertex implements Vertex
+    {
+      final StageDefinitionBuilder sdb;
+      final List<Vertex> inputs;
+
+      public PDQVertex(StageDefinitionBuilder qdb, List<Vertex> inputs)
+      {
+        this.sdb = qdb.copy();
+        this.inputs = inputs;
+      }
+
+      @Override
+      public QueryDefinitionBuilder build(QueryDefinitionBuilder qdbx)
+      {
+        for (Vertex vertex : inputs) {
+          qdbx = vertex.build(qdbx);
+        }
+        return qdbx.add(sdb);
+      }
+
+      /**
+       * Extends the the current partial query with the new parent if possible.
+       */
+      @Override
+      public Optional<Vertex> extendWith(DruidNodeStack stack)
+      {
+        Optional<StageDefinitionBuilder> newPartialQuery = extendStage(stack);
+        if (!newPartialQuery.isPresent()) {
+          return Optional.empty();
+        }
+        if (true) {
+          throw DruidException.defensive("afs");
+        }
+        return Optional.of(createVertex(newPartialQuery.get(), inputs));
+      }
+
+      private Optional<StageDefinitionBuilder> extendStage(DruidNodeStack stack)
+      {
+        if (true) {
+          throw new RuntimeException("FIXME: Unimplemented!");
+        }
+        return null;
+      }
+    }
+  }
+
+  /**
+   * Execution dag vertex - encapsulates a list of operators.
+   */
+  private interface Vertex
+  {
+    /**
+     * Builds the query.
+     */
+    QueryDefinitionBuilder build(QueryDefinitionBuilder qdbx);
+
+    /**
+     * Extends the current vertex to include the specified parent.
+     */
+    Optional<Vertex> extendWith(DruidNodeStack stack);
+
   }
 
 }
