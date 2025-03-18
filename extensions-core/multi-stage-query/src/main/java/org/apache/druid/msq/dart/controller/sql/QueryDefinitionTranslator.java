@@ -21,6 +21,7 @@ package org.apache.druid.msq.dart.controller.sql;
 
 import org.apache.calcite.rel.RelNode;
 import org.apache.druid.error.DruidException;
+import org.apache.druid.java.util.common.Intervals;
 import org.apache.druid.msq.input.InputSpec;
 import org.apache.druid.msq.kernel.MixShuffleSpec;
 import org.apache.druid.msq.kernel.QueryDefinition;
@@ -32,6 +33,7 @@ import org.apache.druid.msq.querykit.scan.ScanQueryFrameProcessorFactory;
 import org.apache.druid.query.DataSource;
 import org.apache.druid.query.Druids;
 import org.apache.druid.query.InlineDataSource;
+import org.apache.druid.query.TableDataSource;
 import org.apache.druid.query.scan.ScanQuery;
 import org.apache.druid.query.spec.QuerySegmentSpec;
 import org.apache.druid.segment.column.RowSignature;
@@ -39,6 +41,7 @@ import org.apache.druid.sql.calcite.planner.PlannerContext;
 import org.apache.druid.sql.calcite.planner.querygen.DruidQueryGenerator.DruidNodeStack;
 import org.apache.druid.sql.calcite.planner.querygen.SourceDescProducer.SourceDesc;
 import org.apache.druid.sql.calcite.rel.logical.DruidLogicalNode;
+import org.apache.druid.sql.calcite.rel.logical.DruidTableScan;
 import org.apache.druid.sql.calcite.rel.logical.DruidValues;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -106,7 +109,34 @@ public class QueryDefinitionTranslator
     if (node instanceof DruidValues) {
       return translateValues((DruidValues) node);
     }
+    if (node instanceof DruidTableScan) {
+      return translateTableScan((DruidTableScan) node);
+    }
     return Optional.empty();
+  }
+
+  private Optional<Vertex> translateTableScan(DruidTableScan node)
+  {
+    SourceDesc sd = node.getSourceDesc(plannerContext, Collections.emptyList());
+    DataSource ds = sd.dataSource;
+    TableDataSource ids = (TableDataSource) ds;
+    DataSourcePlan dsp = DataSourcePlan.forTable(ids,
+        Intervals.ONLY_ETERNITY,
+        null,null,
+        false);
+    List<InputSpec> isp = dsp.getInputSpecs();
+
+
+
+    QueryDefinitionBuilder qdb = QueryDefinition.builder(IRRELEVANT);
+    StageDefinitionBuilder sdb = StageDefinition.builder(stageIdSeq.incrementAndGet())
+        .inputs(isp)
+        .signature(sd.rowSignature)
+        .shuffleSpec(MixShuffleSpec.instance())
+        .processorFactory(makeScanProcessorFactory(dsp.getNewDataSource(), sd.rowSignature));
+
+    Vertex vertex = vertexFactory.createVertex(sdb, Collections.emptyList());
+    return Optional.of(vertex);
   }
 
   // this is a hack for now
@@ -204,22 +234,13 @@ public class QueryDefinitionTranslator
       @Override
       public Optional<Vertex> extendWith(DruidNodeStack stack)
       {
-        Optional<StageDefinitionBuilder> newPartialQuery = extendStage(stack);
-        if (!newPartialQuery.isPresent()) {
-          return Optional.empty();
-        }
-        if (true) {
-          throw DruidException.defensive("afs");
-        }
-        return Optional.of(createVertex(newPartialQuery.get(), inputs));
+        Optional<StageDefinitionBuilder> newStage = extendStage(stack);
+        return newStage.map(sdb -> createVertex(sdb, inputs));
       }
 
       private Optional<StageDefinitionBuilder> extendStage(DruidNodeStack stack)
       {
-        if (true) {
-          throw new RuntimeException("FIXME: Unimplemented!");
-        }
-        return null;
+        return Optional.empty();
       }
     }
   }

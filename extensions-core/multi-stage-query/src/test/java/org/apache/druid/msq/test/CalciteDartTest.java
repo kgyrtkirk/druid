@@ -111,6 +111,24 @@ public class CalciteDartTest extends BaseCalciteQueryTest
   }
 
   @Test
+  public void testSelectStarFromFoo()
+  {
+    testBuilder()
+        .sql("SELECT * from foo")
+        .expectedResults(
+            ImmutableList.of(
+                new Object[] {""},
+                new Object[] {"10.1"},
+                new Object[] {"2"},
+                new Object[] {"1"},
+                new Object[] {"def"},
+                new Object[] {"abc"}
+            )
+        )
+        .run();
+  }
+
+  @Test
   public void testGby()
   {
     testBuilder()

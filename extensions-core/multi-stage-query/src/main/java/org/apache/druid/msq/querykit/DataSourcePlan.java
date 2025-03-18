@@ -358,7 +358,7 @@ public class DataSourcePlan
     return broadcastInputs.size() == inputSpecs.size();
   }
 
-  private static DataSourcePlan forTable(
+  public static DataSourcePlan forTable(
       final TableDataSource dataSource,
       final List<Interval> intervals,
       @Nullable final DimFilter filter,
