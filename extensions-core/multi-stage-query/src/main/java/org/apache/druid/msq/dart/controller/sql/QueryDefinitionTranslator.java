@@ -41,6 +41,7 @@ import org.apache.druid.sql.calcite.planner.PlannerContext;
 import org.apache.druid.sql.calcite.planner.querygen.DruidQueryGenerator.DruidNodeStack;
 import org.apache.druid.sql.calcite.planner.querygen.SourceDescProducer.SourceDesc;
 import org.apache.druid.sql.calcite.rel.logical.DruidLogicalNode;
+import org.apache.druid.sql.calcite.rel.logical.DruidProject;
 import org.apache.druid.sql.calcite.rel.logical.DruidTableScan;
 import org.apache.druid.sql.calcite.rel.logical.DruidValues;
 import java.util.ArrayList;
@@ -100,8 +101,22 @@ public class QueryDefinitionTranslator
       if (newVertex.isPresent()) {
         return newVertex.get();
       }
+      Optional<Vertex> seq = buildSequenceVertex(stack, newInputs.get(0));
+      if (seq.isPresent()) {
+        return seq.get();
+      }
     }
     throw DruidException.defensive().build("Unable to process relNode[%s]", node);
+  }
+
+  private Optional<Vertex> buildSequenceVertex(DruidNodeStack stack, Vertex vertex)
+  {
+    DruidLogicalNode node = stack.peekNode();
+    if (node instanceof DruidProject) {
+//      return makeScanProcessorFactory(vertex.null, null);
+    }
+    return Optional.empty();
+
   }
 
   private Optional<Vertex> buildRootVertex(DruidLogicalNode node)
@@ -165,7 +180,8 @@ public class QueryDefinitionTranslator
   {
 
     ScanQuery s = Druids.newScanQueryBuilder()
-    .dataSource(dataSource)
+//        .dataSource(dataSource)
+        .dataSource(IRRELEVANT)
     .intervals(QuerySegmentSpec.DEFAULT)
     .columns(rowSignature.getColumnNames())
     .columnTypes(rowSignature.getColumnTypes())
