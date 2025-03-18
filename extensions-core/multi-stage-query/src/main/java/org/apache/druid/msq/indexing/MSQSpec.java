@@ -21,7 +21,6 @@ package org.apache.druid.msq.indexing;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.base.Preconditions;
 import org.apache.druid.msq.indexing.destination.MSQDestination;
 import org.apache.druid.msq.indexing.destination.TaskReportMSQDestination;
 import org.apache.druid.msq.kernel.QueryDefinition;
@@ -80,7 +79,7 @@ public class MSQSpec extends MSQSpec0
   )
   {
     super(columnMappings, destination, assignmentStrategy, tuningConfig, compactionMetricSpec1, queryContext, queryDef);
-    this.query = Preconditions.checkNotNull(query, "query");
+    this.query = query;//Preconditions.checkNotNull(query, "query");
   }
 
   public static Builder builder()
@@ -105,7 +104,7 @@ public class MSQSpec extends MSQSpec0
       return this;
     } else {
       return new MSQSpec(
-          query.withOverriddenContext(contextOverride),
+          query != null ? query.withOverriddenContext(contextOverride) : null,
           columnMappings,
           destination,
           assignmentStrategy,
@@ -198,9 +197,14 @@ public class MSQSpec extends MSQSpec0
       if (destination == null) {
         destination = TaskReportMSQDestination.instance();
       }
+      QueryContext neqQCTX = QueryContext.empty();
+      if (query != null) {
+        neqQCTX = query.context();
+      }
+      neqQCTX = neqQCTX .override(queryContext);
       return new MSQSpec(
           query, columnMappings, destination, assignmentStrategy, tuningConfig, compactionMetrics,
-          query.context().override(queryContext),
+          neqQCTX,
           queryDef
       );
     }

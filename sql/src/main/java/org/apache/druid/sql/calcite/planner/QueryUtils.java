@@ -51,7 +51,7 @@ public class QueryUtils
   {
     final List<ColumnMapping> columnMappings = new ArrayList<>();
     for (final Entry<Integer, String> entry : fieldMapping) {
-      final String queryColumn = druidQuery.getOutputRowSignature().getColumnName(entry.getKey());
+      final String queryColumn = entry.getValue() ; // FIXME druidQuery.getOutputRowSignature().getColumnName(entry.getKey());
       final String outputColumn = entry.getValue();
       columnMappings.add(new ColumnMapping(queryColumn, outputColumn));
     }

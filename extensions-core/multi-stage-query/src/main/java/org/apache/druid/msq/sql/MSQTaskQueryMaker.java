@@ -346,7 +346,7 @@ public class MSQTaskQueryMaker implements QueryMaker
                .tuningConfig(makeMSQTuningConfig(plannerContext))
                .build();
 
-    MSQTaskQueryMakerUtils.validateRealtimeReindex(querySpec.getContext(), querySpec.getDestination(), druidQuery.getQuery());
+//  FIXME  MSQTaskQueryMakerUtils.validateRealtimeReindex(querySpec.getContext(), querySpec.getDestination(), druidQuery.getQuery());
 
 
     return querySpec.withOverriddenContext(nativeQueryContext);

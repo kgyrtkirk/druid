@@ -22,19 +22,24 @@ package org.apache.druid.msq.dart.controller.sql;
 import org.apache.calcite.rel.RelNode;
 import org.apache.druid.error.DruidException;
 import org.apache.druid.msq.input.InputSpec;
+import org.apache.druid.msq.kernel.MixShuffleSpec;
 import org.apache.druid.msq.kernel.QueryDefinition;
 import org.apache.druid.msq.kernel.QueryDefinitionBuilder;
 import org.apache.druid.msq.kernel.StageDefinition;
 import org.apache.druid.msq.kernel.StageDefinitionBuilder;
 import org.apache.druid.msq.querykit.DataSourcePlan;
+import org.apache.druid.msq.querykit.scan.ScanQueryFrameProcessorFactory;
 import org.apache.druid.query.DataSource;
+import org.apache.druid.query.Druids;
 import org.apache.druid.query.InlineDataSource;
+import org.apache.druid.query.scan.ScanQuery;
+import org.apache.druid.query.spec.QuerySegmentSpec;
+import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.sql.calcite.planner.PlannerContext;
 import org.apache.druid.sql.calcite.planner.querygen.DruidQueryGenerator.DruidNodeStack;
 import org.apache.druid.sql.calcite.planner.querygen.SourceDescProducer.SourceDesc;
 import org.apache.druid.sql.calcite.rel.logical.DruidLogicalNode;
 import org.apache.druid.sql.calcite.rel.logical.DruidValues;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -113,11 +118,43 @@ public class QueryDefinitionTranslator
     DataSourcePlan dsp = DataSourcePlan.forInline(ids, false);
     List<InputSpec> isp = dsp.getInputSpecs();
 
+
+
     QueryDefinitionBuilder qdb = QueryDefinition.builder(IRRELEVANT);
-    StageDefinitionBuilder sdb = StageDefinition.builder(stageIdSeq.incrementAndGet());
-    sdb.inputs(isp);
+    StageDefinitionBuilder sdb = StageDefinition.builder(stageIdSeq.incrementAndGet())
+        .inputs(isp)
+        .signature(sd.rowSignature)
+        .shuffleSpec(MixShuffleSpec.instance())
+        .processorFactory(makeScanProcessorFactory(dsp.getNewDataSource(), sd.rowSignature));
+
     Vertex vertex = vertexFactory.createVertex(sdb, Collections.emptyList());
     return Optional.of(vertex);
+  }
+
+  private ScanQueryFrameProcessorFactory makeScanProcessorFactory(DataSource dataSource, RowSignature rowSignature)
+  {
+
+    ScanQuery s = Druids.newScanQueryBuilder()
+    .dataSource(dataSource)
+    .intervals(QuerySegmentSpec.DEFAULT)
+    .columns(rowSignature.getColumnNames())
+    .columnTypes(rowSignature.getColumnTypes())
+//    .columns("cnt", "m1", "v0", "v1")
+//    .columnTypes(ColumnType.LONG, ColumnType.FLOAT, ColumnType.LONG, ColumnType.LONG)
+    .build();
+
+
+    return new ScanQueryFrameProcessorFactory(s);
+//    Druids.newScanQueryBuilder()
+//          .dataSource("irrelevant")
+//          .intervals(QuerySegmentSpec.DEFAULT)
+//
+//    if(true)
+//    {
+//      throw new RuntimeException("FIXME: Unimplemented!");
+//    }
+//    return null;
+
   }
 
   protected static class QDVertexFactory
@@ -151,7 +188,14 @@ public class QueryDefinitionTranslator
         for (Vertex vertex : inputs) {
           qdbx = vertex.build(qdbx);
         }
-        return qdbx.add(sdb);
+        StageDefinitionBuilder finalizedStage = finalizeStage();
+
+        return qdbx.add(finalizedStage);
+      }
+
+      private StageDefinitionBuilder finalizeStage()
+      {
+        return sdb;
       }
 
       /**
