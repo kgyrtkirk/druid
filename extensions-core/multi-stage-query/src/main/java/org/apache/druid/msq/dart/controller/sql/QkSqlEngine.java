@@ -137,7 +137,11 @@ public class QkSqlEngine implements SqlEngine
     //   Druid
     public PlannerResult buildPlannerResult(DruidLogicalNode newRoot)
     {
-      QueryDefinition queryDef = null;
+
+      QueryDefinitionTranslator qdt = new QueryDefinitionTranslator (plannerContext, newRoot);
+
+      QueryDefinition queryDef = qdt.translate(newRoot);
+
       QueryContext context = plannerContext.queryContext();
       QueryResponse<Object[]> a = dartQueryMaker.runQueryDef(queryDef, context);
       return new PlannerResult(() -> a, null);

@@ -51,25 +51,31 @@ public class QueryDefinition
 {
   private final Map<StageId, StageDefinition> stageDefinitions;
   private final StageId finalStage;
-  @JsonProperty("context")
+
+  @JsonProperty("ext")
   @JsonInclude(JsonInclude.Include.NON_NULL)
-  final QueryContext context;
+  private final QDExtension ext;
+
+  static class QDExtension
+  {
+    public QueryContext context;
+  }
 
   private QueryDefinition(
       final Map<StageId, StageDefinition> stageDefinitions,
       final StageId finalStage,
-      QueryContext context1
+      QDExtension ext1
   )
   {
     this.stageDefinitions = stageDefinitions;
     this.finalStage = finalStage;
-    this.context = context1;
+    this.ext = ext1;
   }
 
   @JsonCreator
   static QueryDefinition create(
       @JsonProperty("stages") final List<StageDefinition> stageDefinitions,
-      @JsonProperty("context") QueryContext context
+      @JsonProperty("context") QDExtension ext
       )
   {
     final Map<StageId, StageDefinition> stageMap = new HashMap<>();
@@ -97,10 +103,11 @@ public class QueryDefinition
     final int finalStageCandidates = stageMap.size() - nonFinalStages.size();
 
     if (finalStageCandidates == 1) {
+
       return new QueryDefinition(
           stageMap,
           Iterables.getOnlyElement(Sets.difference(stageMap.keySet(), nonFinalStages)),
-          context
+          ext
       );
     } else {
       throw new IAE("Must have a single final stage, but found [%d] candidates", finalStageCandidates);
