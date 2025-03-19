@@ -148,7 +148,8 @@ public class QueryDefinitionTranslator
         .inputs(isp)
         .signature(sd.rowSignature)
         .shuffleSpec(MixShuffleSpec.instance())
-        .processorFactory(makeScanProcessorFactory(dsp.getNewDataSource(), sd.rowSignature));
+        .processorFactory(makeScanProcessorFactory(dsp.getNewDataSource(), sd.rowSignature))
+        ;
 
     Vertex vertex = vertexFactory.createVertex(sdb, Collections.emptyList());
     return Optional.of(vertex);
@@ -164,6 +165,7 @@ public class QueryDefinitionTranslator
     List<InputSpec> isp = dsp.getInputSpecs();
 
 
+// InlineDataFrameProcessorFactory
 
     QueryDefinitionBuilder qdb = QueryDefinition.builder(IRRELEVANT);
     StageDefinitionBuilder sdb = StageDefinition.builder(stageIdSeq.incrementAndGet())
@@ -185,6 +187,7 @@ public class QueryDefinitionTranslator
     .intervals(QuerySegmentSpec.DEFAULT)
     .columns(rowSignature.getColumnNames())
     .columnTypes(rowSignature.getColumnTypes())
+//    .virtualColumns(null)
 //    .columns("cnt", "m1", "v0", "v1")
 //    .columnTypes(ColumnType.LONG, ColumnType.FLOAT, ColumnType.LONG, ColumnType.LONG)
     .build();
@@ -200,6 +203,7 @@ public class QueryDefinitionTranslator
 //      throw new RuntimeException("FIXME: Unimplemented!");
 //    }
 //    return null;
+
 
   }
 
