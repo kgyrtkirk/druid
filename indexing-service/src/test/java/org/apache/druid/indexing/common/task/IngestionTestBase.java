@@ -127,7 +127,7 @@ public abstract class IngestionTestBase extends InitializedNullHandlingTest
   private final ObjectMapper objectMapper = testUtils.getTestObjectMapper();
   private final boolean useSegmentMetadataCache;
   private SegmentCacheManagerFactory segmentCacheManagerFactory;
-  private TaskStorage taskStorage;
+  protected TaskStorage taskStorage;
   private IndexerSQLMetadataStorageCoordinator storageCoordinator;
   private SegmentsMetadataManager segmentsMetadataManager;
   private TaskLockbox lockbox;

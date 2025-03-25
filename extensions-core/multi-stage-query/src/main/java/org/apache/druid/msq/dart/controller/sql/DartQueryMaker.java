@@ -22,6 +22,7 @@ package org.apache.druid.msq.dart.controller.sql;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Iterators;
 import org.apache.calcite.sql.type.SqlTypeName;
+import org.apache.druid.error.DruidException;
 import org.apache.druid.io.LimitedOutputStream;
 import org.apache.druid.java.util.common.DateTimes;
 import org.apache.druid.java.util.common.Either;
@@ -39,6 +40,7 @@ import org.apache.druid.msq.dart.guice.DartControllerConfig;
 import org.apache.druid.msq.exec.Controller;
 import org.apache.druid.msq.exec.ControllerContext;
 import org.apache.druid.msq.exec.ControllerImpl;
+import org.apache.druid.msq.exec.QueryKitBasedMSQPlanner;
 import org.apache.druid.msq.exec.QueryListener;
 import org.apache.druid.msq.exec.ResultsContext;
 import org.apache.druid.msq.indexing.MSQSpec;
@@ -49,7 +51,11 @@ import org.apache.druid.msq.indexing.error.MSQErrorReport;
 import org.apache.druid.msq.indexing.report.MSQResultsReport;
 import org.apache.druid.msq.indexing.report.MSQStatusReport;
 import org.apache.druid.msq.indexing.report.MSQTaskReportPayload;
+import org.apache.druid.msq.kernel.QueryDefinition;
+import org.apache.druid.msq.sql.DartQueryKitSpecFactory;
 import org.apache.druid.msq.sql.MSQTaskQueryMaker;
+import org.apache.druid.msq.util.MultiStageQueryContext;
+import org.apache.druid.query.QueryContext;
 import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.server.QueryResponse;
 import org.apache.druid.server.security.ForbiddenException;
@@ -88,7 +94,7 @@ public class DartQueryMaker implements QueryMaker
 {
   private static final Logger log = new Logger(DartQueryMaker.class);
 
-  private final List<Entry<Integer, String>> fieldMapping;
+  final List<Entry<Integer, String>> fieldMapping;
   private final DartControllerContextFactory controllerContextFactory;
   private final PlannerContext plannerContext;
 
@@ -125,37 +131,114 @@ public class DartQueryMaker implements QueryMaker
     this.controllerExecutor = controllerExecutor;
   }
 
-  @Override
+
+
+  public QueryResponse<Object[]> runQueryDef(QueryDefinition queryDef, QueryContext context)
+  {
+
+    if (!plannerContext.getAuthorizationResult().allowAccessWithNoRestriction()) {
+      throw new ForbiddenException(plannerContext.getAuthorizationResult().getErrorMessage());
+    }
+
+    if(!MultiStageQueryContext.isFinalizeAggregations(plannerContext.queryContext())) {
+      throw DruidException.defensive("Non-finalized execution is not supported!");
+    }
+
+
+    final MSQSpec querySpec = MSQTaskQueryMaker.makeQuerySpec0(
+        null,
+        null,
+        context,
+        fieldMapping,
+        plannerContext,
+        null // Only used for DML, which this isn't
+    ).withQueryDef(queryDef);
+
+    return extracted(context, querySpec);
+
+  }
+
+
+
+  public QueryResponse<Object[]> runMSQSpec(MSQSpec queryDef, QueryContext queryContext)
+  {
+    return extracted(queryContext, queryDef);
+  }
+
+
+  public QueryResponse<Object[]> extracted(QueryContext context, final MSQSpec querySpec)
+  {
+    final String dartQueryId = context.getString(DartSqlEngine.CTX_DART_QUERY_ID);
+    final ControllerContext controllerContext = controllerContextFactory.newContext(dartQueryId);
+    final ResultsContext resultsContext = makeDefaultResultContext();
+    final ControllerImpl controller = new ControllerImpl(
+        dartQueryId,
+        querySpec,
+        resultsContext,
+        controllerContext,
+        new DartQueryKitSpecFactory()
+    );
+
+    final ControllerHolder controllerHolder = new ControllerHolder(
+        controller,
+        plannerContext.getSqlQueryId(),
+        plannerContext.getSql(),
+        controllerContext.selfNode().getHostAndPortToUse(),
+        plannerContext.getAuthenticationResult(),
+        DateTimes.nowUtc()
+    );
+
+    final boolean fullReport = context.getBoolean(
+        DartSqlEngine.CTX_FULL_REPORT,
+        DartSqlEngine.CTX_FULL_REPORT_DEFAULT
+    );
+
+    // Register controller before submitting anything to controllerExeuctor, so it shows up in
+    // "active controllers" lists.
+    controllerRegistry.register(controllerHolder);
+
+    try {
+      // runWithReport, runWithoutReport are responsible for calling controllerRegistry.deregister(controllerHolder)
+      // when their work is done.
+      final Sequence<Object[]> results =
+          fullReport ? runWithReport(controllerHolder) : runWithoutReport(controllerHolder);
+      return QueryResponse.withEmptyContext(results);
+    }
+    catch (Throwable e) {
+      // Error while calling runWithReport or runWithoutReport. Deregister controller immediately.
+      controllerRegistry.deregister(controllerHolder);
+      throw e;
+    }
+  }
+
   public QueryResponse<Object[]> runQuery(DruidQuery druidQuery)
   {
     if (!plannerContext.getAuthorizationResult().allowAccessWithNoRestriction()) {
       throw new ForbiddenException(plannerContext.getAuthorizationResult().getErrorMessage());
     }
-    final MSQSpec querySpec = MSQTaskQueryMaker.makeQuerySpec(
-        null,
-        druidQuery,
-        fieldMapping,
-        plannerContext,
-        null // Only used for DML, which this isn't
-    );
+
     final List<Pair<SqlTypeName, ColumnType>> types =
         MSQTaskQueryMaker.getTypes(druidQuery, fieldMapping, plannerContext);
 
     final String dartQueryId = druidQuery.getQuery().context().getString(DartSqlEngine.CTX_DART_QUERY_ID);
     final ControllerContext controllerContext = controllerContextFactory.newContext(dartQueryId);
+    final ResultsContext resultsContext = new ResultsContext(
+        types.stream().map(p -> p.lhs).collect(Collectors.toList()),
+        SqlResults.Context.fromPlannerContext(plannerContext)
+    );
+
+    final MSQSpec querySpec = extracted(druidQuery, dartQueryId, controllerContext, resultsContext);
+
     final ControllerImpl controller = new ControllerImpl(
         dartQueryId,
         querySpec,
-        new ResultsContext(
-            types.stream().map(p -> p.lhs).collect(Collectors.toList()),
-            SqlResults.Context.fromPlannerContext(plannerContext)
-        ),
-        controllerContext
+        resultsContext,
+        controllerContext,
+        new DartQueryKitSpecFactory()
     );
 
     final ControllerHolder controllerHolder = new ControllerHolder(
         controller,
-        controllerContext,
         plannerContext.getSqlQueryId(),
         plannerContext.getSql(),
         controllerContext.selfNode().getHostAndPortToUse(),
@@ -184,6 +267,36 @@ public class DartQueryMaker implements QueryMaker
       controllerRegistry.deregister(controllerHolder);
       throw e;
     }
+  }
+
+  private MSQSpec extracted(DruidQuery druidQuery, final String dartQueryId, final ControllerContext controllerContext,
+      final ResultsContext resultsContext)
+  {
+    final MSQSpec querySpec = MSQTaskQueryMaker.makeQuerySpec0(
+        null,
+        druidQuery,
+        druidQuery.getQuery().context(),
+        fieldMapping,
+        plannerContext,
+        null // Only used for DML, which this isn't
+    );
+
+    ControllerContext context = controllerContext;
+
+    final QueryDefinition queryDef = new QueryKitBasedMSQPlanner(
+        querySpec,
+        resultsContext,
+        querySpec.getQuery(),
+        plannerContext.getJsonMapper(),
+        new DartQueryKitSpecFactory().makeQueryKitSpec(
+            QueryKitBasedMSQPlanner.makeQueryControllerToolKit(querySpec.getContext(), context.jsonMapper()),
+            dartQueryId,
+            querySpec.getTuningConfig(),
+            querySpec.getContext(),
+            controllerContext.queryKernelConfig(dartQueryId, querySpec)
+        )
+    ).makeQueryDefinition();
+    return querySpec.withQueryDef(queryDef);
   }
 
   /**
@@ -486,4 +599,22 @@ public class DartQueryMaker implements QueryMaker
       rowBuffer.put(Either.error(e));
     }
   }
+
+  // ugly hack
+  public ControllerContext newControllerContext(String dartQueryId)
+  {
+    return controllerContextFactory.newContext(dartQueryId);
+  }
+
+  public ResultsContext makeDefaultResultContext()
+  {
+    final ResultsContext resultsContext = new ResultsContext(
+        null,     // not mandatory
+        SqlResults.Context.fromPlannerContext(plannerContext)
+    );
+    return resultsContext;
+  }
+
+
+
 }

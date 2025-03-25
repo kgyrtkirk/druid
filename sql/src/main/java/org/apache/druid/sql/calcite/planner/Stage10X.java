@@ -17,18 +17,17 @@
  * under the License.
  */
 
-package org.apache.druid.msq.indexing.destination;
+package org.apache.druid.sql.calcite.planner;
 
-import org.apache.druid.sql.calcite.planner.PlannerContext;
+import org.apache.druid.sql.calcite.rel.DruidQuery;
+import org.apache.druid.sql.calcite.rel.logical.DruidLogicalNode;
 
-/**
- * Configures ingestion queries to create new segments with the results in all cases.
- */
-public class SegmentGenerationTerminalStageSpecFactory implements MSQTerminalStageSpecFactory
+public interface Stage10X
 {
-  @Override
-  public TerminalStageSpec createTerminalStageSpec(PlannerContext plannerContext)
-  {
-    return SegmentGenerationStageSpec.instance();
-  }
+
+
+  PlannerResult buildPlannerResult2(DruidQuery druidQuery);
+
+  PlannerResult buildPlannerResult(DruidLogicalNode newRoot);
+
 }
