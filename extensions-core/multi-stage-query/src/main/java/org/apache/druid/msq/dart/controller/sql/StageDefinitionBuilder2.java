@@ -56,9 +56,31 @@ public class StageDefinitionBuilder2 implements IStageDef
     this.plannerContext = plannerContext2;
   }
 
+
+  private static final String IRRELEVANT = "irrelevant";
+
+  @Override
   public StageDefinitionBuilder finalizeStage()
   {
-    return null;
+    StageDefinitionBuilder sdb = StageDefinition.builder(stageIdSeq.incrementAndGet())
+        .inputs(inputs)
+        .signature(signature)
+        .shuffleSpec(MixShuffleSpec.instance())
+        .processorFactory(makeScanProcessorFactory(null, signature));
+    return sdb;
+  }
+
+
+  private ScanQueryFrameProcessorFactory makeScanProcessorFactory(DataSource dataSource, RowSignature rowSignature)
+  {
+    ScanQuery s = Druids.newScanQueryBuilder()
+        .dataSource(IRRELEVANT)
+        .intervals(QuerySegmentSpec.DEFAULT)
+        .columns(rowSignature.getColumnNames())
+        .columnTypes(rowSignature.getColumnTypes())
+        .build();
+
+    return new ScanQueryFrameProcessorFactory(s);
   }
 
   public IStageDef extendWith(DruidNodeStack stack)
@@ -109,16 +131,12 @@ public class StageDefinitionBuilder2 implements IStageDef
           .signature(outputRowSignature)
           .shuffleSpec(MixShuffleSpec.instance())
           .processorFactory(makeScanProcessorFactory(null, outputRowSignature));
-      return sdb
-
-      ;
+      return sdb;
     }
 
-    private static final String IRRELEVANT = "irrelevant";
 
     private ScanQueryFrameProcessorFactory makeScanProcessorFactory(DataSource dataSource, RowSignature rowSignature)
     {
-
       ScanQuery s = Druids.newScanQueryBuilder()
           .dataSource(IRRELEVANT)
           .intervals(QuerySegmentSpec.DEFAULT)
@@ -128,7 +146,6 @@ public class StageDefinitionBuilder2 implements IStageDef
           .build();
 
       return new ScanQueryFrameProcessorFactory(s);
-
     }
 
     @Override
