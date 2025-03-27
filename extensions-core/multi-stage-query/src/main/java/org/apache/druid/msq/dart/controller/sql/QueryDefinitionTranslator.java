@@ -218,6 +218,11 @@ public class QueryDefinitionTranslator
 
     Vertex createVertex( StageDefinitionBuilder qdb, List<Vertex> inputs)
     {
+      return new StageVertex(new StageDefinitionBuilder2(qdb), inputs);
+    }
+
+    Vertex createVertex( StageDefinitionBuilder2 qdb, List<Vertex> inputs)
+    {
       return new StageVertex(qdb, inputs);
     }
 
@@ -226,9 +231,9 @@ public class QueryDefinitionTranslator
       final StageDefinitionBuilder2 sdb;
       final List<Vertex> inputs;
 
-      public StageVertex(StageDefinitionBuilder qdb, List<Vertex> inputs)
+      public StageVertex(StageDefinitionBuilder2 qdb, List<Vertex> inputs)
       {
-        this.sdb = new StageDefinitionBuilder2(qdb);
+        this.sdb = qdb;
         this.inputs = inputs;
       }
 
@@ -254,13 +259,14 @@ public class QueryDefinitionTranslator
       @Override
       public Optional<Vertex> extendWith(DruidNodeStack stack)
       {
-        Optional<StageDefinitionBuilder> newStage = extendStage(stack);
+        Optional<StageDefinitionBuilder2> newStage = extendStage(stack);
         return newStage.map(sdb -> createVertex(sdb, inputs));
       }
 
-      private Optional<StageDefinitionBuilder> extendStage(DruidNodeStack stack)
+      @Deprecated
+      private Optional<StageDefinitionBuilder2> extendStage(DruidNodeStack stack)
       {
-        return Optional.empty();
+        return sdb.extendWith(stack);
       }
     }
   }

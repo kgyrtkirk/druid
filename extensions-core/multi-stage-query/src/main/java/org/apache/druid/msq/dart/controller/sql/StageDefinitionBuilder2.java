@@ -20,11 +20,19 @@
 package org.apache.druid.msq.dart.controller.sql;
 
 import org.apache.druid.msq.kernel.StageDefinitionBuilder;
+import org.apache.druid.segment.column.RowSignature;
+import org.apache.druid.sql.calcite.planner.PlannerContext;
+import org.apache.druid.sql.calcite.planner.querygen.DruidQueryGenerator.DruidNodeStack;
+import org.apache.druid.sql.calcite.rel.Projection;
+import org.apache.druid.sql.calcite.rel.VirtualColumnRegistry;
+import org.apache.druid.sql.calcite.rel.logical.DruidProject;
+
+import java.util.Optional;
 
 public class StageDefinitionBuilder2
 {
-
   private StageDefinitionBuilder qdb;
+  private Projection projection;
 
   public StageDefinitionBuilder2(StageDefinitionBuilder qdb)
   {
@@ -34,6 +42,20 @@ public class StageDefinitionBuilder2
   public StageDefinitionBuilder finalizeStage()
   {
     return qdb;
+  }
+
+  public Optional<StageDefinitionBuilder2> extendWith(DruidNodeStack stack)
+  {
+
+    if (stack.peekNode() instanceof DruidProject && projection == null) {
+
+      DruidProject project = (DruidProject) stack.peekNode();
+      VirtualColumnRegistry virtualColumnRegistry = null;
+      RowSignature inputRowSignature = null;
+      PlannerContext plannerContext = null;
+      projection = Projection.preAggregation(project,plannerContext,inputRowSignature, virtualColumnRegistry);
+    }
+    return Optional.empty();
   }
 
 }
