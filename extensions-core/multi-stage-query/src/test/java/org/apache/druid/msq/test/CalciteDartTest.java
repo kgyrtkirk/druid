@@ -111,6 +111,19 @@ public class CalciteDartTest extends BaseCalciteQueryTest
   }
 
   @Test
+  public void testFiltered()
+  {
+    testBuilder()
+        .sql("SELECT dim1 from foo where dim1 = 'abc'")
+        .expectedResults(
+            ImmutableList.of(
+                new Object[] {"abc"}
+            )
+        )
+        .run();
+  }
+
+  @Test
   public void testColumnFromFoo()
   {
     testBuilder()
