@@ -147,13 +147,14 @@ public class Expressions
    */
   @Nullable
   public static List<DruidExpression> toDruidExpressions(
+      final PlannerContext plannerContext,
       final RowSignature rowSignature,
       final List<RexNode> rexNodes
   )
   {
     final List<DruidExpression> retVal = new ArrayList<>(rexNodes.size());
     for (RexNode rexNode : rexNodes) {
-      final DruidExpression druidExpression = toDruidExpression(rowSignature, rexNode);
+      final DruidExpression druidExpression = toDruidExpression(plannerContext, rowSignature, rexNode);
       if (druidExpression == null) {
         return null;
       }
@@ -177,6 +178,7 @@ public class Expressions
    */
   @Nullable
   public static List<DruidExpression> toDruidExpressionsWithPostAggOperands(
+      final PlannerContext plannerContext,
       final RowSignature rowSignature,
       final List<RexNode> rexNodes,
       final PostAggregatorVisitor postAggregatorVisitor
@@ -185,6 +187,7 @@ public class Expressions
     final List<DruidExpression> retVal = new ArrayList<>(rexNodes.size());
     for (RexNode rexNode : rexNodes) {
       final DruidExpression druidExpression = toDruidExpressionWithPostAggOperands(
+          plannerContext,
           rowSignature,
           rexNode,
           postAggregatorVisitor
@@ -213,11 +216,13 @@ public class Expressions
    */
   @Nullable
   public static DruidExpression toDruidExpression(
+      final PlannerContext plannerContext,
       final RowSignature rowSignature,
       final RexNode rexNode
   )
   {
     return toDruidExpressionWithPostAggOperands(
+        plannerContext,
         rowSignature,
         rexNode,
         null
@@ -226,6 +231,7 @@ public class Expressions
 
   @Nullable
   public static DruidExpression toDruidExpressionWithPostAggOperands(
+      final PlannerContext plannerContext,
       final RowSignature rowSignature,
       final RexNode rexNode,
       @Nullable final PostAggregatorVisitor postAggregatorVisitor
@@ -239,9 +245,9 @@ public class Expressions
           StringUtils.format("Unexpected OVER expression during translation [%s]", rexNode)
       );
     } else if (rexNode instanceof RexCall) {
-      return rexCallToDruidExpression(rowSignature, rexNode, postAggregatorVisitor);
+      return rexCallToDruidExpression(plannerContext, rowSignature, rexNode, postAggregatorVisitor);
     } else if (kind == SqlKind.LITERAL) {
-      final DruidLiteral eval = calciteLiteralToDruidLiteral(rexNode);
+      final DruidLiteral eval = calciteLiteralToDruidLiteral(plannerContext, rexNode);
       return eval != null ? DruidExpression.ofLiteral(eval) : null;
     } else {
       // Can't translate.
@@ -266,6 +272,7 @@ public class Expressions
   }
 
   private static DruidExpression rexCallToDruidExpression(
+      final PlannerContext plannerContext,
       final RowSignature rowSignature,
       final RexNode rexNode,
       final PostAggregatorVisitor postAggregatorVisitor
@@ -284,6 +291,7 @@ public class Expressions
       if (postAggregatorVisitor != null) {
         // try making postagg first
         PostAggregator postAggregator = conversion.toPostAggregator(
+            plannerContext,
             rowSignature,
             rexNode,
             postAggregatorVisitor
@@ -297,6 +305,7 @@ public class Expressions
       }
 
       DruidExpression expression = conversion.toDruidExpressionWithPostAggOperands(
+          plannerContext,
           rowSignature,
           rexNode,
           postAggregatorVisitor
@@ -519,7 +528,7 @@ public class Expressions
     } else if (kind == SqlKind.IS_NULL || kind == SqlKind.IS_NOT_NULL) {
       final RexNode operand = Iterables.getOnlyElement(((RexCall) rexNode).getOperands());
 
-      final DruidExpression druidExpression = toDruidExpression(rowSignature, operand);
+      final DruidExpression druidExpression = toDruidExpression(plannerContext, rowSignature, operand);
       if (druidExpression == null) {
         return null;
       }
@@ -624,7 +633,7 @@ public class Expressions
         flippedKind = kind;
       }
 
-      final DruidExpression rhsExpression = toDruidExpression(rowSignature, rhs);
+      final DruidExpression rhsExpression = toDruidExpression(plannerContext, rowSignature, rhs);
       final Expr rhsParsed = rhsExpression != null
                              ? plannerContext.parseExpression(rhsExpression.getExpression())
                              : null;
@@ -634,7 +643,7 @@ public class Expressions
       }
 
       // Translate lhs to a DruidExpression.
-      final DruidExpression lhsExpression = toDruidExpression(rowSignature, lhs);
+      final DruidExpression lhsExpression = toDruidExpression(plannerContext, rowSignature, lhs);
       if (lhsExpression == null) {
         return null;
       }
@@ -823,7 +832,7 @@ public class Expressions
       final RexNode rexNode
   )
   {
-    final DruidExpression druidExpression = toDruidExpression(rowSignature, rexNode);
+    final DruidExpression druidExpression = toDruidExpression(plannerContext, rowSignature, rexNode);
 
     if (druidExpression != null) {
       return new ExpressionDimFilter(

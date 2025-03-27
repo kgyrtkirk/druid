@@ -225,6 +225,7 @@ public class Projection
 
   public static Projection preAggregation(
       final Project project,
+      final PlannerContext plannerContext,
       final RowSignature inputRowSignature,
       final VirtualColumnRegistry virtualColumnRegistry
   )
@@ -233,6 +234,7 @@ public class Projection
 
     for (final RexNode rexNode : project.getProjects()) {
       final DruidExpression expression = Expressions.toDruidExpression(
+          plannerContext,
           inputRowSignature,
           rexNode
       );

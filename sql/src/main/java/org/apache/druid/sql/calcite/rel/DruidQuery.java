@@ -458,6 +458,7 @@ public class DruidQuery
    */
   private static List<DimensionExpression> computeDimensions(
       final PartialDruidQuery partialQuery,
+      final PlannerContext plannerContext,
       final RowSignature rowSignature,
       final VirtualColumnRegistry virtualColumnRegistry,
       final RelDataTypeFactory typeFactory
@@ -477,7 +478,7 @@ public class DruidQuery
           partialQuery.getSelectProject(),
           i
       );
-      final DruidExpression druidExpression = Expressions.toDruidExpression(rowSignature, rexNode);
+      final DruidExpression druidExpression = Expressions.toDruidExpression(plannerContext, rowSignature, rexNode);
       if (druidExpression == null) {
         throw new CannotBuildQueryException(aggregate, rexNode);
       }

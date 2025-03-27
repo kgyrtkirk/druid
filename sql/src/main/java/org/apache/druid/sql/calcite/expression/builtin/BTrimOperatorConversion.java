@@ -31,6 +31,7 @@ import org.apache.druid.sql.calcite.expression.DruidExpression;
 import org.apache.druid.sql.calcite.expression.OperatorConversions;
 import org.apache.druid.sql.calcite.expression.SqlOperatorConversion;
 import org.apache.druid.sql.calcite.planner.Calcites;
+import org.apache.druid.sql.calcite.planner.PlannerContext;
 
 public class BTrimOperatorConversion implements SqlOperatorConversion
 {
@@ -50,11 +51,13 @@ public class BTrimOperatorConversion implements SqlOperatorConversion
 
   @Override
   public DruidExpression toDruidExpression(
+      final PlannerContext plannerContext,
       final RowSignature rowSignature,
       final RexNode rexNode
   )
   {
     return OperatorConversions.convertCall(
+        plannerContext,
         rowSignature,
         rexNode,
         druidExpressions -> {

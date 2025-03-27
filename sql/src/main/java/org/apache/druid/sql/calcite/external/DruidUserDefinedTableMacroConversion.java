@@ -29,6 +29,8 @@ import org.apache.druid.catalog.model.table.TableFunction;
 import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.sql.calcite.expression.DruidExpression;
 import org.apache.druid.sql.calcite.expression.SqlOperatorConversion;
+import org.apache.druid.sql.calcite.planner.PlannerContext;
+
 import javax.annotation.Nullable;
 
 /**
@@ -48,7 +50,7 @@ public abstract class DruidUserDefinedTableMacroConversion implements SqlOperato
   {
     this(
         name,
-        registry.inputSourceDefnFor(tableType).adHocTableFn(),
+        ((InputSourceDefn) registry.inputSourceDefnFor(tableType)).adHocTableFn(),
         jsonMapper
     );
   }
@@ -72,7 +74,7 @@ public abstract class DruidUserDefinedTableMacroConversion implements SqlOperato
 
   @Nullable
   @Override
-  public DruidExpression toDruidExpression(RowSignature rowSignature, RexNode rexNode)
+  public DruidExpression toDruidExpression(PlannerContext plannerContext, RowSignature rowSignature, RexNode rexNode)
   {
     return null;
   }

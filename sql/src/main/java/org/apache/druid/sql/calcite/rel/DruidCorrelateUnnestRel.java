@@ -173,6 +173,7 @@ public class DruidCorrelateUnnestRel extends DruidRel<DruidCorrelateUnnestRel>
       }
     }
     final DruidExpression expressionToUnnest = Expressions.toDruidExpression(
+        getPlannerContext(),
         leftDataSourceSignature,
         rexNodeToUnnest
     );

@@ -43,11 +43,13 @@ public class PositionOperatorConversion implements SqlOperatorConversion
 
   @Override
   public DruidExpression toDruidExpression(
+      final PlannerContext plannerContext,
       final RowSignature rowSignature,
       final RexNode rexNode
   )
   {
     return OperatorConversions.convertCall(
+        plannerContext,
         rowSignature,
         rexNode,
         druidExpressions -> DruidExpression.ofExpression(

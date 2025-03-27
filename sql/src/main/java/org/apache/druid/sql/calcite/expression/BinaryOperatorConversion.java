@@ -50,6 +50,7 @@ public class BinaryOperatorConversion implements SqlOperatorConversion
 
   @Override
   public DruidExpression toDruidExpression(
+      final PlannerContext plannerContext,
       final RowSignature rowSignature,
       final RexNode rexNode
   )
@@ -65,12 +66,14 @@ public class BinaryOperatorConversion implements SqlOperatorConversion
   @Nullable
   @Override
   public DruidExpression toDruidExpressionWithPostAggOperands(
+      PlannerContext plannerContext,
       RowSignature rowSignature,
       RexNode rexNode,
       PostAggregatorVisitor postAggregatorVisitor
   )
   {
     return OperatorConversions.convertCallWithPostAggOperands(
+        plannerContext,
         rowSignature,
         rexNode,
         getOperatorFunction(rexNode),
