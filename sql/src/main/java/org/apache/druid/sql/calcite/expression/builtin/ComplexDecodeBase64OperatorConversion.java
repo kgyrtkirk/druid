@@ -32,7 +32,6 @@ import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.sql.calcite.expression.DruidExpression;
 import org.apache.druid.sql.calcite.expression.OperatorConversions;
 import org.apache.druid.sql.calcite.expression.SqlOperatorConversion;
-import org.apache.druid.sql.calcite.planner.PlannerContext;
 import org.apache.druid.sql.calcite.table.RowSignatures;
 
 import javax.annotation.Nullable;
@@ -69,13 +68,11 @@ public class ComplexDecodeBase64OperatorConversion implements SqlOperatorConvers
   @Nullable
   @Override
   public DruidExpression toDruidExpression(
-      PlannerContext plannerContext,
       RowSignature rowSignature,
       RexNode rexNode
   )
   {
     return OperatorConversions.convertCall(
-        plannerContext,
         rowSignature,
         rexNode,
         druidExpressions -> {

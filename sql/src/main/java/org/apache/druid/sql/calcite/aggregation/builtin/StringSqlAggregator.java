@@ -100,7 +100,7 @@ public class StringSqlAggregator implements SqlAggregator
         .getArgList()
         .stream()
         .map(i -> inputAccessor.getField(i))
-        .map(rexNode -> Expressions.toDruidExpression(plannerContext, inputAccessor.getInputRowSignature(), rexNode))
+        .map(rexNode -> Expressions.toDruidExpression( inputAccessor.getInputRowSignature(), rexNode))
         .collect(Collectors.toList());
 
     if (arguments.stream().anyMatch(Objects::isNull)) {

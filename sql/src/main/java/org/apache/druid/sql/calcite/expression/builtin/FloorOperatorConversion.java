@@ -44,7 +44,6 @@ public class FloorOperatorConversion implements SqlOperatorConversion
   @Override
   @Nullable
   public DruidExpression toDruidExpression(
-      final PlannerContext plannerContext,
       final RowSignature rowSignature,
       final RexNode rexNode
   )

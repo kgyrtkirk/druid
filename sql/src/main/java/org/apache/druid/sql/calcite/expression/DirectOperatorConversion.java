@@ -49,13 +49,11 @@ public class DirectOperatorConversion implements SqlOperatorConversion
 
   @Override
   public DruidExpression toDruidExpression(
-      final PlannerContext plannerContext,
       final RowSignature rowSignature,
       final RexNode rexNode
   )
   {
     return OperatorConversions.convertDirectCall(
-        plannerContext,
         rowSignature,
         rexNode,
         druidFunctionName
@@ -70,7 +68,6 @@ public class DirectOperatorConversion implements SqlOperatorConversion
   @Nullable
   @Override
   public DruidExpression toDruidExpressionWithPostAggOperands(
-      PlannerContext plannerContext,
       RowSignature rowSignature,
       RexNode rexNode,
       PostAggregatorVisitor postAggregatorVisitor

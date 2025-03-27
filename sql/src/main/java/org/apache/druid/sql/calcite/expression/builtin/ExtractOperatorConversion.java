@@ -66,7 +66,6 @@ public class ExtractOperatorConversion implements SqlOperatorConversion
 
   @Override
   public DruidExpression toDruidExpression(
-      final PlannerContext plannerContext,
       final RowSignature rowSignature,
       final RexNode rexNode
   )
@@ -77,7 +76,7 @@ public class ExtractOperatorConversion implements SqlOperatorConversion
     final TimeUnitRange calciteUnit = (TimeUnitRange) flag.getValue();
     final RexNode arg = call.getOperands().get(1);
 
-    final DruidExpression input = Expressions.toDruidExpression(plannerContext, rowSignature, arg);
+    final DruidExpression input = Expressions.toDruidExpression(rowSignature, arg);
     if (input == null) {
       return null;
     }

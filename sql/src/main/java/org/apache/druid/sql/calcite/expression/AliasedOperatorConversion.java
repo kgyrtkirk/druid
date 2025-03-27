@@ -58,24 +58,22 @@ public class AliasedOperatorConversion implements SqlOperatorConversion
 
   @Override
   public DruidExpression toDruidExpression(
-      final PlannerContext plannerContext,
       final RowSignature rowSignature,
       final RexNode rexNode
   )
   {
-    return baseConversion.toDruidExpression(plannerContext, rowSignature, rexNode);
+    return baseConversion.toDruidExpression(rowSignature, rexNode);
   }
 
   @Nullable
   @Override
   public DruidExpression toDruidExpressionWithPostAggOperands(
-      PlannerContext plannerContext,
       RowSignature rowSignature,
       RexNode rexNode,
       PostAggregatorVisitor postAggregatorVisitor
   )
   {
-    return baseConversion.toDruidExpression(plannerContext, rowSignature, rexNode);
+    return baseConversion.toDruidExpression(rowSignature, rexNode);
   }
 
   @Nullable

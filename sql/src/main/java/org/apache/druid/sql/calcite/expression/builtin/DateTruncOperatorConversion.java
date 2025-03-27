@@ -80,13 +80,11 @@ public class DateTruncOperatorConversion implements SqlOperatorConversion
 
   @Override
   public DruidExpression toDruidExpression(
-      final PlannerContext plannerContext,
       final RowSignature rowSignature,
       final RexNode rexNode
   )
   {
     return OperatorConversions.convertCall(
-        plannerContext,
         rowSignature,
         rexNode,
         inputExpressions -> {

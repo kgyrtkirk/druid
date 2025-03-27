@@ -54,7 +54,7 @@ public class CoalesceOperatorConversion implements SqlOperatorConversion
 
   @Nullable
   @Override
-  public DruidExpression toDruidExpression(PlannerContext plannerContext, RowSignature rowSignature, RexNode rexNode)
+  public DruidExpression toDruidExpression(RowSignature rowSignature, RexNode rexNode)
   {
     return OperatorConversions.convertDirectCall(
         plannerContext,
@@ -67,7 +67,6 @@ public class CoalesceOperatorConversion implements SqlOperatorConversion
   @Nullable
   @Override
   public DruidExpression toDruidExpressionWithPostAggOperands(
-      PlannerContext plannerContext,
       RowSignature rowSignature,
       RexNode rexNode,
       PostAggregatorVisitor postAggregatorVisitor

@@ -134,7 +134,6 @@ public class OperatorConversions
 
   @Nullable
   public static DruidExpression convertCall(
-      final PlannerContext plannerContext,
       final RowSignature rowSignature,
       final RexNode rexNode,
       final DruidExpression.DruidExpressionCreator expressionFunction
@@ -143,7 +142,6 @@ public class OperatorConversions
     final RexCall call = (RexCall) rexNode;
 
     final List<DruidExpression> druidExpressions = Expressions.toDruidExpressions(
-        plannerContext,
         rowSignature,
         call.getOperands()
     );
@@ -206,7 +204,6 @@ public class OperatorConversions
 
   @Nullable
   public static DruidExpression convertCallWithPostAggOperands(
-      final PlannerContext plannerContext,
       final RowSignature rowSignature,
       final RexNode rexNode,
       final DruidExpression.DruidExpressionCreator expressionFunction,
@@ -216,7 +213,6 @@ public class OperatorConversions
     final RexCall call = (RexCall) rexNode;
 
     final List<DruidExpression> druidExpressions = Expressions.toDruidExpressionsWithPostAggOperands(
-        plannerContext,
         rowSignature,
         call.getOperands(),
         postAggregatorVisitor

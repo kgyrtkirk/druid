@@ -329,7 +329,7 @@ public class ExpressionTestHelper
       final boolean deepCompare
   )
   {
-    DruidExpression expression = Expressions.toDruidExpression(PLANNER_CONTEXT, rowSignature, rexNode);
+    DruidExpression expression = Expressions.toDruidExpression(rowSignature, rexNode);
     Assert.assertNotNull(expression);
     if (deepCompare) {
       Assert.assertEquals("Expression for: " + rexNode, expectedExpression, expression);

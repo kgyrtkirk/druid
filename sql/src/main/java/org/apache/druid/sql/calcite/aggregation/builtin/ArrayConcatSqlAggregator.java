@@ -85,7 +85,7 @@ public class ArrayConcatSqlAggregator implements SqlAggregator
       }
       maxSizeBytes = ((Number) RexLiteral.value(maxBytes)).intValue();
     }
-    final DruidExpression arg = Expressions.toDruidExpression(plannerContext, inputAccessor.getInputRowSignature(), arguments.get(0));
+    final DruidExpression arg = Expressions.toDruidExpression(inputAccessor.getInputRowSignature(), arguments.get(0));
     final ExprMacroTable macroTable = plannerContext.getPlannerToolbox().exprMacroTable();
 
     final String fieldName;

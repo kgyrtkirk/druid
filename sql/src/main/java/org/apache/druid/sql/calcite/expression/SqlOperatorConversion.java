@@ -51,7 +51,6 @@ public interface SqlOperatorConversion
    */
   @Nullable
   DruidExpression toDruidExpression(
-      PlannerContext plannerContext,
       RowSignature rowSignature,
       RexNode rexNode
   );
@@ -71,13 +70,12 @@ public interface SqlOperatorConversion
    */
   @Nullable
   default DruidExpression toDruidExpressionWithPostAggOperands(
-      PlannerContext plannerContext,
       RowSignature rowSignature,
       RexNode rexNode,
       PostAggregatorVisitor postAggregatorVisitor
   )
   {
-    return toDruidExpression(plannerContext, rowSignature, rexNode);
+    return toDruidExpression(rowSignature, rexNode);
   }
 
   /**
