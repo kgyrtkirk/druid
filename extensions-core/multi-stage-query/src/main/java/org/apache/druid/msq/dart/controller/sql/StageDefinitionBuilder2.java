@@ -47,7 +47,8 @@ public class StageDefinitionBuilder2
   private static AtomicInteger stageIdSeq = new AtomicInteger(1);
   private PlannerContext plannerContext;
 
-  public class AbstractStage implements IStageDef {
+  public class AbstractStage implements IStageDef
+  {
 
     protected final List<InputSpec> inputs;
     protected final RowSignature signature;
@@ -71,7 +72,8 @@ public class StageDefinitionBuilder2
     }
   }
 
-  public class RootStage extends AbstractStage   {
+  public class RootStage extends AbstractStage
+  {
 
     public RootStage(RowSignature signature, List<InputSpec> inputs)
     {
@@ -80,7 +82,7 @@ public class StageDefinitionBuilder2
 
     public RootStage(RootStage root, RowSignature signature1)
     {
-      super(signature1 , root.inputs);
+      super(signature1, root.inputs);
     }
 
     @Override
@@ -97,28 +99,31 @@ public class StageDefinitionBuilder2
     @Override
     public IStageDef extendWith(DruidNodeStack stack)
     {
-//      if (stack.peekNode() instanceof DruidFilter) {
-//
-//
-//        DruidFilter druidFilter = (DruidFilter) stack.peekNode();
-//        FilteredStageDefinition filteredStage = FilteredStageDefinition.create(this, druidFilter);
-//
-//        return filteredStage;
-//        DruidFilter filter = (DruidFilter) stack.peekNode();
-//        VirtualColumnRegistry virtualColumnRegistry = VirtualColumnRegistry.create(
-//            signature,
-//            plannerContext.getExpressionParser(),
-//            plannerContext.getPlannerConfig().isForceExpressionVirtualColumns()
-//        );
-//
-//        DimFilter dimFilter = DruidQuery.getDimFilter(plannerContext, signature, virtualColumnRegistry, filter);
-//
-//        return new FilteredStageDefinition(
-//            this,
-//            virtualColumnRegistry.build(Collections.emptySet()),
-//            preAggregation.getOutputRowSignature()
-//        );
-//      }
+      // if (stack.peekNode() instanceof DruidFilter) {
+      //
+      //
+      // DruidFilter druidFilter = (DruidFilter) stack.peekNode();
+      // FilteredStageDefinition filteredStage =
+      // FilteredStageDefinition.create(this, druidFilter);
+      //
+      // return filteredStage;
+      // DruidFilter filter = (DruidFilter) stack.peekNode();
+      // VirtualColumnRegistry virtualColumnRegistry =
+      // VirtualColumnRegistry.create(
+      // signature,
+      // plannerContext.getExpressionParser(),
+      // plannerContext.getPlannerConfig().isForceExpressionVirtualColumns()
+      // );
+      //
+      // DimFilter dimFilter = DruidQuery.getDimFilter(plannerContext,
+      // signature, virtualColumnRegistry, filter);
+      //
+      // return new FilteredStageDefinition(
+      // this,
+      // virtualColumnRegistry.build(Collections.emptySet()),
+      // preAggregation.getOutputRowSignature()
+      // );
+      // }
 
       if (stack.peekNode() instanceof DruidProject) {
         DruidProject project = (DruidProject) stack.peekNode();
@@ -127,7 +132,8 @@ public class StageDefinitionBuilder2
             plannerContext.getExpressionParser(),
             plannerContext.getPlannerConfig().isForceExpressionVirtualColumns()
         );
-        Projection preAggregation = Projection.preAggregation(project, plannerContext, signature, virtualColumnRegistry);
+        Projection preAggregation = Projection
+            .preAggregation(project, plannerContext, signature, virtualColumnRegistry);
 
         return new ProjectStageDefinition(
             this,
@@ -146,7 +152,6 @@ public class StageDefinitionBuilder2
 
   private static final String IRRELEVANT = "irrelevant";
 
-
   private ScanQueryFrameProcessorFactory makeScanProcessorFactory(DataSource dataSource, RowSignature rowSignature)
   {
     ScanQuery s = Druids.newScanQueryBuilder()
@@ -159,40 +164,20 @@ public class StageDefinitionBuilder2
     return new ScanQueryFrameProcessorFactory(s);
   }
 
-
-
   class ProjectStageDefinition extends RootStage
   {
     private VirtualColumns virtualColumns;
 
-    public ProjectStageDefinition(RootStage root, VirtualColumns virtualColumns2, RowSignature rowSignature)
+    public ProjectStageDefinition(RootStage root, VirtualColumns virtualColumns, RowSignature rowSignature)
     {
-      super(root,rowSignature);
-      this.virtualColumns = virtualColumns2;
+      super(root, rowSignature);
+      this.virtualColumns = virtualColumns;
     }
 
     @Override
     public StageDefinitionBuilder finalizeStage()
     {
-      StageDefinitionBuilder sdb = StageDefinition.builder(stageIdSeq.incrementAndGet())
-          .inputs(inputs)
-          .signature(signature)
-          .shuffleSpec(MixShuffleSpec.instance())
-          .processorFactory(makeScanProcessorFactory(null, signature));
-      return sdb;
-    }
-
-    private ScanQueryFrameProcessorFactory makeScanProcessorFactory(DataSource dataSource, RowSignature rowSignature)
-    {
-      ScanQuery s = Druids.newScanQueryBuilder()
-          .dataSource(IRRELEVANT)
-          .intervals(QuerySegmentSpec.DEFAULT)
-          .virtualColumns(virtualColumns)
-          .columns(rowSignature.getColumnNames())
-          .columnTypes(rowSignature.getColumnTypes())
-          .build();
-
-      return new ScanQueryFrameProcessorFactory(s);
+      return makeScanStage(virtualColumns, signature, inputs);
     }
 
     @Override
@@ -200,7 +185,27 @@ public class StageDefinitionBuilder2
     {
       return null;
     }
+  }
 
+  private StageDefinitionBuilder makeScanStage(
+      VirtualColumns virtualColumns2,
+      RowSignature signature2,
+      List<InputSpec> inputs2)
+  {
+    ScanQuery s = Druids.newScanQueryBuilder()
+        .dataSource(IRRELEVANT)
+        .intervals(QuerySegmentSpec.DEFAULT)
+        .virtualColumns(virtualColumns2)
+        .columns(signature2.getColumnNames())
+        .columnTypes(signature2.getColumnTypes())
+        .build();
+    ScanQueryFrameProcessorFactory scanProcessorFactory = new ScanQueryFrameProcessorFactory(s);
+    StageDefinitionBuilder sdb = StageDefinition.builder(stageIdSeq.incrementAndGet())
+        .inputs(inputs2)
+        .signature(signature2)
+        .shuffleSpec(MixShuffleSpec.instance())
+        .processorFactory(scanProcessorFactory);
+    return sdb;
   }
 
 }
