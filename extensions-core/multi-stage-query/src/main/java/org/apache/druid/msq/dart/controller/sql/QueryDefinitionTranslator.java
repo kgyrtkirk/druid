@@ -218,17 +218,17 @@ public class QueryDefinitionTranslator
 
     Vertex createVertex( StageDefinitionBuilder qdb, List<Vertex> inputs)
     {
-      return new PDQVertex(qdb, inputs);
+      return new StageVertex(qdb, inputs);
     }
 
-    public class PDQVertex implements Vertex
+    public class StageVertex implements Vertex
     {
-      final StageDefinitionBuilder sdb;
+      final StageDefinitionBuilder2 sdb;
       final List<Vertex> inputs;
 
-      public PDQVertex(StageDefinitionBuilder qdb, List<Vertex> inputs)
+      public StageVertex(StageDefinitionBuilder qdb, List<Vertex> inputs)
       {
-        this.sdb = qdb.copy();
+        this.sdb = new StageDefinitionBuilder2(qdb);
         this.inputs = inputs;
       }
 
@@ -245,7 +245,7 @@ public class QueryDefinitionTranslator
 
       private StageDefinitionBuilder finalizeStage()
       {
-        return sdb;
+        return sdb.finalizeStage();
       }
 
       /**
