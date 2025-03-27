@@ -19,7 +19,11 @@
 
 package org.apache.druid.msq.dart.controller.sql;
 
+import org.apache.calcite.plan.RelOptCluster;
+import org.apache.calcite.plan.RelTraitSet;
+import org.apache.calcite.rel.AbstractRelNode;
 import org.apache.calcite.rel.RelNode;
+import org.apache.calcite.rel.type.RelDataType;
 import org.apache.druid.error.DruidException;
 import org.apache.druid.java.util.common.Intervals;
 import org.apache.druid.msq.input.InputSpec;
@@ -39,7 +43,9 @@ import org.apache.druid.query.spec.QuerySegmentSpec;
 import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.sql.calcite.planner.PlannerContext;
 import org.apache.druid.sql.calcite.planner.querygen.DruidQueryGenerator.DruidNodeStack;
+import org.apache.druid.sql.calcite.planner.querygen.SourceDescProducer;
 import org.apache.druid.sql.calcite.planner.querygen.SourceDescProducer.SourceDesc;
+import org.apache.druid.sql.calcite.rel.PartialDruidQuery;
 import org.apache.druid.sql.calcite.rel.logical.DruidLogicalNode;
 import org.apache.druid.sql.calcite.rel.logical.DruidProject;
 import org.apache.druid.sql.calcite.rel.logical.DruidTableScan;
@@ -122,12 +128,20 @@ public class QueryDefinitionTranslator
   private Optional<Vertex> buildRootVertex(DruidLogicalNode node)
   {
     if (node instanceof DruidValues) {
-      return translateValues((DruidValues) node);
+      return dx((DruidValues)node);
     }
     if (node instanceof DruidTableScan) {
-      return translateTableScan((DruidTableScan) node);
+      return dx((DruidTableScan) node);
     }
     return Optional.empty();
+  }
+
+  private Optional<Vertex> dx(SourceDescProducer node)
+  {
+    SourceDesc sd = node.getSourceDesc(plannerContext, Collections.emptyList());
+    Vertex vertex = vertexFactory.createVertex(sd, Collections.emptyList());
+    return Optional.of(vertex);
+
   }
 
   private Optional<Vertex> translateTableScan(DruidTableScan node)
@@ -143,7 +157,6 @@ public class QueryDefinitionTranslator
 
 
 
-    QueryDefinitionBuilder qdb = QueryDefinition.builder(IRRELEVANT);
     StageDefinitionBuilder sdb = StageDefinition.builder(stageIdSeq.incrementAndGet())
         .inputs(isp)
         .signature(sd.rowSignature)
@@ -151,7 +164,7 @@ public class QueryDefinitionTranslator
         .processorFactory(makeScanProcessorFactory(dsp.getNewDataSource(), sd.rowSignature))
         ;
 
-    Vertex vertex = vertexFactory.createVertex(sdb, Collections.emptyList());
+    Vertex vertex = null;//vertexFactory.createVertex(sdb, Collections.emptyList());
     return Optional.of(vertex);
   }
 
@@ -164,17 +177,13 @@ public class QueryDefinitionTranslator
     DataSourcePlan dsp = DataSourcePlan.forInline(ids, false);
     List<InputSpec> isp = dsp.getInputSpecs();
 
-
-// InlineDataFrameProcessorFactory
-
-    QueryDefinitionBuilder qdb = QueryDefinition.builder(IRRELEVANT);
     StageDefinitionBuilder sdb = StageDefinition.builder(stageIdSeq.incrementAndGet())
         .inputs(isp)
         .signature(sd.rowSignature)
         .shuffleSpec(MixShuffleSpec.instance())
         .processorFactory(makeScanProcessorFactory(dsp.getNewDataSource(), sd.rowSignature));
 
-    Vertex vertex = vertexFactory.createVertex(sdb, Collections.emptyList());
+    Vertex vertex = null;//vertexFactory.createVertex(sdb, Collections.emptyList());
     return Optional.of(vertex);
   }
 
@@ -216,19 +225,20 @@ public class QueryDefinitionTranslator
       this.plannerContext = plannerContext;
     }
 
-    Vertex createVertex( StageDefinitionBuilder qdb, List<Vertex> inputs)
+    Vertex createVertex( SourceDesc sd, List<Vertex> inputs)
     {
-      return new PDQVertex(qdb, inputs);
+      return new QDVertex(sd, inputs);
     }
 
-    public class PDQVertex implements Vertex
+    public class QDVertex implements Vertex
     {
-      final StageDefinitionBuilder sdb;
+//      final StageDefinitionBuilder sdb;
       final List<Vertex> inputs;
+      final SourceDesc sd;
 
-      public PDQVertex(StageDefinitionBuilder qdb, List<Vertex> inputs)
+      public QDVertex(SourceDesc sd, List<Vertex> inputs)
       {
-        this.sdb = qdb.copy();
+        this.sd = sd;
         this.inputs = inputs;
       }
 
@@ -245,7 +255,7 @@ public class QueryDefinitionTranslator
 
       private StageDefinitionBuilder finalizeStage()
       {
-        return sdb;
+        return null;
       }
 
       /**
@@ -255,13 +265,33 @@ public class QueryDefinitionTranslator
       public Optional<Vertex> extendWith(DruidNodeStack stack)
       {
         Optional<StageDefinitionBuilder> newStage = extendStage(stack);
-        return newStage.map(sdb -> createVertex(sdb, inputs));
+        return newStage.map(sdb -> createVertex(null, inputs));
       }
 
       private Optional<StageDefinitionBuilder> extendStage(DruidNodeStack stack)
       {
+        PartialDruidQuery.create(new DummyRelNode(stack.peekNode().getCluster(), RelTraitSet.createEmpty()));
         return Optional.empty();
       }
+    }
+  }
+
+  static class DummyRelNode extends AbstractRelNode {
+
+    protected DummyRelNode(RelOptCluster cluster, RelTraitSet traitSet)
+    {
+      super(cluster, traitSet);
+    }
+
+    @Override
+    protected RelDataType deriveRowType()
+    {
+      if(true)
+      {
+        throw new RuntimeException("FIXME: Unimplemented!");
+      }
+      return super.deriveRowType();
+
     }
   }
 
