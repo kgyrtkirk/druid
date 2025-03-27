@@ -19,6 +19,7 @@
 
 package org.apache.druid.msq.dart.controller.sql;
 
+import org.apache.druid.error.DruidException;
 import org.apache.druid.msq.input.InputSpec;
 import org.apache.druid.msq.kernel.MixShuffleSpec;
 import org.apache.druid.msq.kernel.StageDefinition;
@@ -42,32 +43,98 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 //@Value.Immutable
-public class StageDefinitionBuilder2 implements IStageDef
+public class StageDefinitionBuilder2
 {
-  private List<InputSpec> inputs;
+  private static AtomicInteger stageIdSeq = new AtomicInteger(1);
   private PlannerContext plannerContext;
-  // output signature
-  private RowSignature signature;
 
-  public StageDefinitionBuilder2(List<InputSpec> inputs1, RowSignature signature1, PlannerContext plannerContext2)
+  public class AbstractStage implements IStageDef {
+
+    protected final List<InputSpec> inputs;
+    protected final RowSignature signature;
+
+    public AbstractStage(RowSignature signature, List<InputSpec> inputs)
+    {
+      this.inputs = inputs;
+      this.signature = signature;
+    }
+
+    @Override
+    public StageDefinitionBuilder finalizeStage()
+    {
+      throw DruidException.defensive("This should have been implemented - or not reach this point!");
+    }
+
+    @Override
+    public IStageDef extendWith(DruidNodeStack stack)
+    {
+      return null;
+    }
+  }
+
+  public class RootStage extends AbstractStage   {
+
+    public RootStage(RowSignature signature, List<InputSpec> inputs)
+    {
+      super(signature, inputs);
+    }
+
+    @Override
+    public StageDefinitionBuilder finalizeStage()
+    {
+      StageDefinitionBuilder sdb = StageDefinition.builder(stageIdSeq.incrementAndGet())
+          .inputs(inputs)
+          .signature(signature)
+          .shuffleSpec(MixShuffleSpec.instance())
+          .processorFactory(makeScanProcessorFactory(null, signature));
+      return sdb;
+    }
+
+    @Override
+    public IStageDef extendWith(DruidNodeStack stack)
+    {
+      if (false && stack.peekNode() instanceof DruidFilter) {
+        DruidProject project = (DruidProject) stack.peekNode();
+        VirtualColumnRegistry virtualColumnRegistry = VirtualColumnRegistry.create(
+            signature,
+            plannerContext.getExpressionParser(),
+            plannerContext.getPlannerConfig().isForceExpressionVirtualColumns()
+        );
+        Projection preAggregation = Projection.preAggregation(project, plannerContext, signature, virtualColumnRegistry);
+
+        return new ProjectStageDefinition(
+            inputs,
+            virtualColumnRegistry.build(Collections.emptySet()),
+            preAggregation.getOutputRowSignature()
+        );
+      }
+
+      if (stack.peekNode() instanceof DruidProject) {
+        DruidProject project = (DruidProject) stack.peekNode();
+        VirtualColumnRegistry virtualColumnRegistry = VirtualColumnRegistry.create(
+            signature,
+            plannerContext.getExpressionParser(),
+            plannerContext.getPlannerConfig().isForceExpressionVirtualColumns()
+        );
+        Projection preAggregation = Projection.preAggregation(project, plannerContext, signature, virtualColumnRegistry);
+
+        return new ProjectStageDefinition(
+            inputs,
+            virtualColumnRegistry.build(Collections.emptySet()),
+            preAggregation.getOutputRowSignature()
+        );
+      }
+      return null;
+    }
+  }
+
+  public StageDefinitionBuilder2(PlannerContext plannerContext2)
   {
-    this.inputs = inputs1;
-    this.signature = signature1;
     this.plannerContext = plannerContext2;
   }
 
   private static final String IRRELEVANT = "irrelevant";
 
-  @Override
-  public StageDefinitionBuilder finalizeStage()
-  {
-    StageDefinitionBuilder sdb = StageDefinition.builder(stageIdSeq.incrementAndGet())
-        .inputs(inputs)
-        .signature(signature)
-        .shuffleSpec(MixShuffleSpec.instance())
-        .processorFactory(makeScanProcessorFactory(null, signature));
-    return sdb;
-  }
 
   private ScanQueryFrameProcessorFactory makeScanProcessorFactory(DataSource dataSource, RowSignature rowSignature)
   {
@@ -81,43 +148,7 @@ public class StageDefinitionBuilder2 implements IStageDef
     return new ScanQueryFrameProcessorFactory(s);
   }
 
-  public IStageDef extendWith(DruidNodeStack stack)
-  {
-    if (false && stack.peekNode() instanceof DruidFilter) {
-      DruidProject project = (DruidProject) stack.peekNode();
-      VirtualColumnRegistry virtualColumnRegistry = VirtualColumnRegistry.create(
-          signature,
-          plannerContext.getExpressionParser(),
-          plannerContext.getPlannerConfig().isForceExpressionVirtualColumns()
-      );
-      Projection preAggregation = Projection.preAggregation(project, plannerContext, signature, virtualColumnRegistry);
 
-      return new ProjectStageDefinition(
-          inputs,
-          virtualColumnRegistry.build(Collections.emptySet()),
-          preAggregation.getOutputRowSignature()
-      );
-    }
-
-    if (stack.peekNode() instanceof DruidProject) {
-      DruidProject project = (DruidProject) stack.peekNode();
-      VirtualColumnRegistry virtualColumnRegistry = VirtualColumnRegistry.create(
-          signature,
-          plannerContext.getExpressionParser(),
-          plannerContext.getPlannerConfig().isForceExpressionVirtualColumns()
-      );
-      Projection preAggregation = Projection.preAggregation(project, plannerContext, signature, virtualColumnRegistry);
-
-      return new ProjectStageDefinition(
-          inputs,
-          virtualColumnRegistry.build(Collections.emptySet()),
-          preAggregation.getOutputRowSignature()
-      );
-    }
-    return null;
-  }
-
-  private static AtomicInteger stageIdSeq = new AtomicInteger(1);
 
   static class ProjectStageDefinition implements IStageDef
   {

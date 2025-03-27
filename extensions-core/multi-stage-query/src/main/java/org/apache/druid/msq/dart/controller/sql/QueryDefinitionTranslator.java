@@ -150,8 +150,10 @@ public class QueryDefinitionTranslator
         .processorFactory(makeScanProcessorFactory(dsp.getNewDataSource(), sd.rowSignature))
         ;
 
+    StageDefinitionBuilder2 p = new StageDefinitionBuilder2(plannerContext);
+    p.new RootStage(null, isp);
         Vertex vertex = vertexFactory
-            .createVertex(new StageDefinitionBuilder2(isp, sd.rowSignature, plannerContext), Collections.emptyList());
+            .createVertex(p.new RootStage(sd.rowSignature, isp), Collections.emptyList());
         //    Vertex vertex2 = vertexFactory.createVertex(isp,sd.rowSignature, Collections.emptyList());
     return Optional.of(vertex);
   }
@@ -175,8 +177,9 @@ public class QueryDefinitionTranslator
         .shuffleSpec(MixShuffleSpec.instance())
         .processorFactory(makeScanProcessorFactory(dsp.getNewDataSource(), sd.rowSignature));
 
+    StageDefinitionBuilder2 p = new StageDefinitionBuilder2(plannerContext);
     Vertex vertex = vertexFactory
-        .createVertex(new StageDefinitionBuilder2(isp, sd.rowSignature, plannerContext), Collections.emptyList());
+        .createVertex(p.new RootStage(sd.rowSignature, isp), Collections.emptyList());
     return Optional.of(vertex);
   }
 
