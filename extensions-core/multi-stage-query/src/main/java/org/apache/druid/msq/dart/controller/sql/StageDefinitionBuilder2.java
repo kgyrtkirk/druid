@@ -34,6 +34,7 @@ import org.apache.druid.sql.calcite.planner.PlannerContext;
 import org.apache.druid.sql.calcite.planner.querygen.DruidQueryGenerator.DruidNodeStack;
 import org.apache.druid.sql.calcite.rel.Projection;
 import org.apache.druid.sql.calcite.rel.VirtualColumnRegistry;
+import org.apache.druid.sql.calcite.rel.logical.DruidFilter;
 import org.apache.druid.sql.calcite.rel.logical.DruidProject;
 
 import java.util.Collections;
@@ -43,11 +44,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 //@Value.Immutable
 public class StageDefinitionBuilder2 implements IStageDef
 {
-
-  private RowSignature signature;
-  private Projection projection;
-  private PlannerContext plannerContext;
   private List<InputSpec> inputs;
+  private PlannerContext plannerContext;
+  // output signature
+  private RowSignature signature;
 
   public StageDefinitionBuilder2(List<InputSpec> inputs1, RowSignature signature1, PlannerContext plannerContext2)
   {
@@ -55,7 +55,6 @@ public class StageDefinitionBuilder2 implements IStageDef
     this.signature = signature1;
     this.plannerContext = plannerContext2;
   }
-
 
   private static final String IRRELEVANT = "irrelevant";
 
@@ -69,7 +68,6 @@ public class StageDefinitionBuilder2 implements IStageDef
         .processorFactory(makeScanProcessorFactory(null, signature));
     return sdb;
   }
-
 
   private ScanQueryFrameProcessorFactory makeScanProcessorFactory(DataSource dataSource, RowSignature rowSignature)
   {
@@ -85,7 +83,7 @@ public class StageDefinitionBuilder2 implements IStageDef
 
   public IStageDef extendWith(DruidNodeStack stack)
   {
-    if (stack.peekNode() instanceof DruidProject && projection == null) {
+    if (false && stack.peekNode() instanceof DruidFilter) {
       DruidProject project = (DruidProject) stack.peekNode();
       VirtualColumnRegistry virtualColumnRegistry = VirtualColumnRegistry.create(
           signature,
@@ -99,11 +97,23 @@ public class StageDefinitionBuilder2 implements IStageDef
           virtualColumnRegistry.build(Collections.emptySet()),
           preAggregation.getOutputRowSignature()
       );
-      // preAggregation.getOutputRowSignature();
-      // return withProjection(preAggregation);
-
     }
 
+    if (stack.peekNode() instanceof DruidProject) {
+      DruidProject project = (DruidProject) stack.peekNode();
+      VirtualColumnRegistry virtualColumnRegistry = VirtualColumnRegistry.create(
+          signature,
+          plannerContext.getExpressionParser(),
+          plannerContext.getPlannerConfig().isForceExpressionVirtualColumns()
+      );
+      Projection preAggregation = Projection.preAggregation(project, plannerContext, signature, virtualColumnRegistry);
+
+      return new ProjectStageDefinition(
+          inputs,
+          virtualColumnRegistry.build(Collections.emptySet()),
+          preAggregation.getOutputRowSignature()
+      );
+    }
     return null;
   }
 
@@ -133,7 +143,6 @@ public class StageDefinitionBuilder2 implements IStageDef
           .processorFactory(makeScanProcessorFactory(null, outputRowSignature));
       return sdb;
     }
-
 
     private ScanQueryFrameProcessorFactory makeScanProcessorFactory(DataSource dataSource, RowSignature rowSignature)
     {
