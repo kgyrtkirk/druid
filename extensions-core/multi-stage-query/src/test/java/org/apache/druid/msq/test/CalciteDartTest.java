@@ -59,7 +59,7 @@ public class CalciteDartTest extends BaseCalciteQueryTest
   }
 
   @Test
-  public void testSelectFromFoo()
+  public void testOrderBy()
   {
     testBuilder()
         .sql("SELECT 2 from foo order by dim1")
