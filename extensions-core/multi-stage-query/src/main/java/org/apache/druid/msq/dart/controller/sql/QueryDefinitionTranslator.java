@@ -218,7 +218,7 @@ public class QueryDefinitionTranslator
 
     Vertex createVertex( StageDefinitionBuilder qdb, List<Vertex> inputs)
     {
-      return new StageVertex(new StageDefinitionBuilder2(qdb), inputs);
+      return new StageVertex(new StageDefinitionBuilder2(qdb, plannerContext), inputs);
     }
 
     Vertex createVertex( StageDefinitionBuilder2 qdb, List<Vertex> inputs)
