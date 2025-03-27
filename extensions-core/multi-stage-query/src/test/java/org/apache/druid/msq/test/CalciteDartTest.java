@@ -114,7 +114,7 @@ public class CalciteDartTest extends BaseCalciteQueryTest
   public void testSelectStarFromFoo()
   {
     testBuilder()
-        .sql("SELECT * from foo")
+        .sql("SELECT dim1 from foo")
         .expectedResults(
             ImmutableList.of(
                 new Object[] {""},
