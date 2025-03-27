@@ -35,7 +35,6 @@ import org.apache.druid.sql.calcite.planner.PlannerContext;
 import org.apache.druid.sql.calcite.planner.querygen.DruidQueryGenerator.DruidNodeStack;
 import org.apache.druid.sql.calcite.rel.Projection;
 import org.apache.druid.sql.calcite.rel.VirtualColumnRegistry;
-import org.apache.druid.sql.calcite.rel.logical.DruidFilter;
 import org.apache.druid.sql.calcite.rel.logical.DruidProject;
 
 import java.util.Collections;
@@ -79,6 +78,11 @@ public class StageDefinitionBuilder2
       super(signature, inputs);
     }
 
+    public RootStage(RootStage root, RowSignature signature1)
+    {
+      super(signature1 , root.inputs);
+    }
+
     @Override
     public StageDefinitionBuilder finalizeStage()
     {
@@ -93,21 +97,28 @@ public class StageDefinitionBuilder2
     @Override
     public IStageDef extendWith(DruidNodeStack stack)
     {
-      if (false && stack.peekNode() instanceof DruidFilter) {
-        DruidProject project = (DruidProject) stack.peekNode();
-        VirtualColumnRegistry virtualColumnRegistry = VirtualColumnRegistry.create(
-            signature,
-            plannerContext.getExpressionParser(),
-            plannerContext.getPlannerConfig().isForceExpressionVirtualColumns()
-        );
-        Projection preAggregation = Projection.preAggregation(project, plannerContext, signature, virtualColumnRegistry);
-
-        return new ProjectStageDefinition(
-            inputs,
-            virtualColumnRegistry.build(Collections.emptySet()),
-            preAggregation.getOutputRowSignature()
-        );
-      }
+//      if (stack.peekNode() instanceof DruidFilter) {
+//
+//
+//        DruidFilter druidFilter = (DruidFilter) stack.peekNode();
+//        FilteredStageDefinition filteredStage = FilteredStageDefinition.create(this, druidFilter);
+//
+//        return filteredStage;
+//        DruidFilter filter = (DruidFilter) stack.peekNode();
+//        VirtualColumnRegistry virtualColumnRegistry = VirtualColumnRegistry.create(
+//            signature,
+//            plannerContext.getExpressionParser(),
+//            plannerContext.getPlannerConfig().isForceExpressionVirtualColumns()
+//        );
+//
+//        DimFilter dimFilter = DruidQuery.getDimFilter(plannerContext, signature, virtualColumnRegistry, filter);
+//
+//        return new FilteredStageDefinition(
+//            this,
+//            virtualColumnRegistry.build(Collections.emptySet()),
+//            preAggregation.getOutputRowSignature()
+//        );
+//      }
 
       if (stack.peekNode() instanceof DruidProject) {
         DruidProject project = (DruidProject) stack.peekNode();
@@ -119,7 +130,7 @@ public class StageDefinitionBuilder2
         Projection preAggregation = Projection.preAggregation(project, plannerContext, signature, virtualColumnRegistry);
 
         return new ProjectStageDefinition(
-            inputs,
+            this,
             virtualColumnRegistry.build(Collections.emptySet()),
             preAggregation.getOutputRowSignature()
         );
@@ -150,18 +161,14 @@ public class StageDefinitionBuilder2
 
 
 
-  static class ProjectStageDefinition implements IStageDef
+  class ProjectStageDefinition extends RootStage
   {
-    private List<InputSpec> inputs;
     private VirtualColumns virtualColumns;
-    private RowSignature outputRowSignature;
 
-    public ProjectStageDefinition(List<InputSpec> inputs, VirtualColumns virtualColumns2,
-        RowSignature outputRowSignature)
+    public ProjectStageDefinition(RootStage root, VirtualColumns virtualColumns2, RowSignature rowSignature)
     {
-      this.inputs = inputs;
+      super(root,rowSignature);
       this.virtualColumns = virtualColumns2;
-      this.outputRowSignature = outputRowSignature;
     }
 
     @Override
@@ -169,9 +176,9 @@ public class StageDefinitionBuilder2
     {
       StageDefinitionBuilder sdb = StageDefinition.builder(stageIdSeq.incrementAndGet())
           .inputs(inputs)
-          .signature(outputRowSignature)
+          .signature(signature)
           .shuffleSpec(MixShuffleSpec.instance())
-          .processorFactory(makeScanProcessorFactory(null, outputRowSignature));
+          .processorFactory(makeScanProcessorFactory(null, signature));
       return sdb;
     }
 

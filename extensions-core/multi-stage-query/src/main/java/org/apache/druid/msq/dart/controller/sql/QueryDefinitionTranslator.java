@@ -259,7 +259,7 @@ public class QueryDefinitionTranslator
       @Override
       public Optional<Vertex> extendWith(DruidNodeStack stack)
       {
-        Optional<IStageDef> newStage = Optional.of(sdb.extendWith(stack));
+        Optional<IStageDef> newStage = Optional.ofNullable(sdb.extendWith(stack));
         return newStage.map(sdb -> createVertex(sdb, inputs));
       }
     }
