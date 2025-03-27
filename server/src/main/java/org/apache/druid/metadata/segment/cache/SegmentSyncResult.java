@@ -17,38 +17,41 @@
  * under the License.
  */
 
-package org.apache.druid.quidem;
+package org.apache.druid.metadata.segment.cache;
 
-import org.junit.jupiter.api.Test;
+import org.apache.druid.timeline.SegmentId;
 
-import java.io.File;
-import java.io.IOException;
+import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
-
-public class QTest extends DruidQuidemTestBase
+/**
+ * Result of syncing a datasource cache with segments polled from metadata store.
+ */
+public class SegmentSyncResult
 {
-  public QTest()
+  private final int deleted;
+  private final int updated;
+  private final Set<SegmentId> expiredIds;
+
+  public SegmentSyncResult(int deleted, int updated, Set<SegmentId> expiredIds)
   {
-    super(new DruidQuidemCommandHandler());
+    this.deleted = deleted;
+    this.updated = updated;
+    this.expiredIds = expiredIds;
   }
 
-  @Override
-  protected File getTestRoot()
+  public int getDeleted()
   {
-    return ProjectPathUtils.getPathFromProjectRoot("quidem-ut/src/test/quidem/" + getClass().getName());
+    return deleted;
   }
 
-  @Test
-  public void ensureNoRecordFilesPresent() throws IOException
+  public int getUpdated()
   {
-    // ensure that the captured ones are saved into this test's input path
-    assertEquals(QuidemCaptureResource.RECORD_PATH, getTestRoot());
-    for (String name : getFileNames()) {
-      if (name.startsWith("record-")) {
-        fail("Record file found: " + name);
-      }
-    }
+    return updated;
   }
+
+  public Set<SegmentId> getExpiredIds()
+  {
+    return expiredIds;
+  }
+
 }
