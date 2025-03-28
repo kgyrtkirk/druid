@@ -160,7 +160,7 @@ public class CalciteDartTest extends BaseCalciteQueryTest
   }
 
   @Test
-  public void testGby()
+  public void testGroupBy()
   {
     testBuilder()
         .sql("SELECT 3 from foo group by dim2")
@@ -176,7 +176,7 @@ public class CalciteDartTest extends BaseCalciteQueryTest
   }
 
   @Test
-  public void testComplexFromFoo()
+  public void testSubQuery()
   {
     String sql = "SELECT dim1, COUNT(*) FROM druid.foo "
         + "WHERE dim1 NOT IN ('ghi', 'abc', 'def') AND dim1 IS NOT NULL "
