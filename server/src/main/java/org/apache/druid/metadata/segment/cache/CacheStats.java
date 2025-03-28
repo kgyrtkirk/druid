@@ -17,38 +17,43 @@
  * under the License.
  */
 
-package org.apache.druid.quidem;
+package org.apache.druid.metadata.segment.cache;
 
-import org.junit.jupiter.api.Test;
-
-import java.io.File;
-import java.io.IOException;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
-
-public class QTest extends DruidQuidemTestBase
+/**
+ * Summary of current contents of the cache.
+ */
+public class CacheStats
 {
-  public QTest()
+  private final int numUsedSegments;
+  private final int numUnusedSegments;
+  private final int numIntervals;
+  private final int numPendingSegments;
+
+  public CacheStats(int numIntervals, int numUsedSegments, int numUnusedSegments, int numPendingSegments)
   {
-    super(new DruidQuidemCommandHandler());
+    this.numUsedSegments = numUsedSegments;
+    this.numUnusedSegments = numUnusedSegments;
+    this.numIntervals = numIntervals;
+    this.numPendingSegments = numPendingSegments;
   }
 
-  @Override
-  protected File getTestRoot()
+  public int getNumUsedSegments()
   {
-    return ProjectPathUtils.getPathFromProjectRoot("quidem-ut/src/test/quidem/" + getClass().getName());
+    return numUsedSegments;
   }
 
-  @Test
-  public void ensureNoRecordFilesPresent() throws IOException
+  public int getNumUnusedSegments()
   {
-    // ensure that the captured ones are saved into this test's input path
-    assertEquals(QuidemCaptureResource.RECORD_PATH, getTestRoot());
-    for (String name : getFileNames()) {
-      if (name.startsWith("record-")) {
-        fail("Record file found: " + name);
-      }
-    }
+    return numUnusedSegments;
+  }
+
+  public int getNumIntervals()
+  {
+    return numIntervals;
+  }
+
+  public int getNumPendingSegments()
+  {
+    return numPendingSegments;
   }
 }
