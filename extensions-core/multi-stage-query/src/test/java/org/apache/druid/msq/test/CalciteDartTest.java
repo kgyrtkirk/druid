@@ -163,7 +163,7 @@ public class CalciteDartTest extends BaseCalciteQueryTest
   public void testGroupBy()
   {
     testBuilder()
-        .sql("SELECT 3 from foo group by dim2")
+        .sql("SELECT dim2 from foo group by dim2")
         .expectedResults(
             ImmutableList.of(
                 new Object[] {3L},
