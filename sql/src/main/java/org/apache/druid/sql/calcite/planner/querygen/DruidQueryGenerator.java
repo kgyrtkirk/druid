@@ -73,7 +73,7 @@ public class DruidQueryGenerator
    * Its main purpose is to provide access to parent nodes;
    * so that context sensitive logics can be formalized with it.
    */
-  public static class DruidNodeStack
+  static class DruidNodeStack
   {
     static class Entry
     {
