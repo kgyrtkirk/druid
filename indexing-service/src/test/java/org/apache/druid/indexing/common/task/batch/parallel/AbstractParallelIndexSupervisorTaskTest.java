@@ -67,7 +67,6 @@ import org.apache.druid.indexing.common.task.Tasks;
 import org.apache.druid.indexing.common.task.TestAppenderatorsManager;
 import org.apache.druid.indexing.common.task.TuningConfigBuilder;
 import org.apache.druid.indexing.overlord.Segments;
-import org.apache.druid.indexing.overlord.TaskStorage;
 import org.apache.druid.indexing.worker.config.WorkerConfig;
 import org.apache.druid.indexing.worker.shuffle.IntermediaryDataManager;
 import org.apache.druid.indexing.worker.shuffle.LocalIntermediaryDataManager;
@@ -234,7 +233,7 @@ public class AbstractParallelIndexSupervisorTaskTest extends IngestionTestBase
     localDeepStorage = temporaryFolder.newFolder("localStorage");
     taskRunner = new SimpleThreadingTaskRunner(testName.getMethodName());
     objectMapper = getObjectMapper();
-    indexingServiceClient = new LocalOverlordClient(objectMapper, taskRunner, taskStorage);
+    indexingServiceClient = new LocalOverlordClient(objectMapper, taskRunner);
     final TaskConfig taskConfig = new TaskConfigBuilder()
         .setShuffleDataLocations(ImmutableList.of(new StorageLocationConfig(temporaryFolder.newFolder(), null, null)))
         .build();
@@ -498,17 +497,15 @@ public class AbstractParallelIndexSupervisorTaskTest extends IngestionTestBase
     }
   }
 
-  public static class LocalOverlordClient extends NoopOverlordClient
+  public class LocalOverlordClient extends NoopOverlordClient
   {
     private final ObjectMapper objectMapper;
     private final SimpleThreadingTaskRunner taskRunner;
-    private final TaskStorage taskStorage;
 
-    public LocalOverlordClient(ObjectMapper objectMapper, SimpleThreadingTaskRunner taskRunner, TaskStorage taskStorage)
+    public LocalOverlordClient(ObjectMapper objectMapper, SimpleThreadingTaskRunner taskRunner)
     {
       this.objectMapper = objectMapper;
       this.taskRunner = taskRunner;
-      this.taskStorage = taskStorage;
     }
 
     @Override
@@ -527,7 +524,7 @@ public class AbstractParallelIndexSupervisorTaskTest extends IngestionTestBase
 
     private TaskReport.ReportMap getLiveReportsForTask(String taskId)
     {
-      final Optional<Task> taskOptional = taskStorage.getTask(taskId);
+      final Optional<Task> taskOptional = getTaskStorage().getTask(taskId);
       if (!taskOptional.isPresent()) {
         return null;
       }
@@ -591,7 +588,7 @@ public class AbstractParallelIndexSupervisorTaskTest extends IngestionTestBase
     @Override
     public ListenableFuture<TaskStatusResponse> taskStatus(String taskId)
     {
-      final Optional<Task> task = taskStorage.getTask(taskId);
+      final Optional<Task> task = getTaskStorage().getTask(taskId);
       final String groupId = task.isPresent() ? task.get().getGroupId() : null;
       final String taskType = task.isPresent() ? task.get().getType() : null;
       final TaskStatus taskStatus = taskRunner.getStatus(taskId);
