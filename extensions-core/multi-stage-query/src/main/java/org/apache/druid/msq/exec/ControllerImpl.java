@@ -638,8 +638,6 @@ public class ControllerImpl implements Controller
     final QueryContext queryContext = querySpec.getContext();
 
     final QueryDefinition queryDef;
-    // This conditional along with the atomic queryDef holder and other things
-    // should be removed after 33 is released
     if (querySpec.getQueryDef() == null) {
       QueryKitBasedMSQPlanner qkPlanner = new QueryKitBasedMSQPlanner(
           querySpec,
