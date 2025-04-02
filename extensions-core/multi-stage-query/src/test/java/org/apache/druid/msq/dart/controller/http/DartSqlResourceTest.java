@@ -88,6 +88,7 @@ import org.mockito.MockitoAnnotations;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Response;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -803,7 +804,6 @@ public class DartSqlResourceTest extends MSQTestBase
     final AuthenticationResult authenticationResult = makeAuthenticationResult(identity);
     final ControllerHolder holder = new ControllerHolder(
         controller,
-        null,
         "sid",
         "SELECT 1",
         "localhost:1001",
