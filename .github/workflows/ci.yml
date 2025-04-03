@@ -48,6 +48,7 @@ jobs:
       matrix:
         pattern: [ "A*,F*,S*", "B*,D*,L*,T*" ]
         jdk: [ "11", "21.0.4" ]
+    runs-on: ubuntu-latest
     steps:
       - name: Publish Test Report
         run: ls
