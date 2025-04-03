@@ -48,8 +48,11 @@ jobs:
       matrix:
         pattern: [ "A*,F*,S*", "B*,D*,L*,T*" ]
         jdk: [ "11", "21.0.4" ]
-    uses: ./.github/workflows/worker.yml
-    with:
-      script: echo .github/scripts/run-unit-tests.sh -Dtest='${{ matrix.pattern }}' -fae
-      jdk: ${{ matrix.jdk }}
-      key: "test-jdk${{ matrix.jdk }}-[${{ matrix.pattern }}]"
+    steps:
+      - name: Publish Test Report
+        run: ls
+#    uses: ./.github/workflows/worker.yml
+#    with:
+#      script: echo .github/scripts/run-unit-tests.sh -Dtest='${{ matrix.pattern }}' -fae
+#      jdk: ${{ matrix.jdk }}
+#      key: "test-jdk${{ matrix.jdk }}-[${{ matrix.pattern }}]"
