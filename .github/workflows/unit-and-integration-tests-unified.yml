@@ -88,54 +88,12 @@ jobs:
         run: |
           echo ./it.sh ci
 
-  # check if it is a PR and if it is approved. For approved PRs, we do not want to run tests sequentially
-  check-approval:
-    runs-on: ubuntu-latest
-    outputs:
-      approved: ${{ steps.check.outputs.isApproved }}
-    steps:
-      - name: Check if Triggered by a PR
-        id: determine-trigger
-        run: |
-          if [ "${{ github.event_name }}" == "pull_request" ]; then
-            echo "isPR=true" >> $GITHUB_ENV
-          else
-            echo "isPR=false" >> $GITHUB_ENV
-          fi
-
-      - name: Check PR Approval (if applicable)
-        id: check
-        if: ${{ env.isPR == 'true' }}
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const reviews = await github.rest.pulls.listReviews({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.payload.pull_request.number
-            });
-            const approved = reviews.data.some(review => review.state === 'APPROVED');
-            core.setOutput("isApproved", approved);
-
-      - name: Default to Approved for Branch
-        id: default-check
-        if: ${{ env.isPR == 'false' }}
-        run: echo "::set-output name=isApproved::true"
-
-  unit-tests-unapproved:
+  unit-tests:
     name: "unit tests - PR unapproved"
     uses: ./.github/workflows/ci.yml
-    needs: [check-approval]
-    if: ${{ needs.check-approval.outputs.approved != 'true' }}
-
-  unit-tests-approved:
-    name: "unit tests - PR approved"
-    uses: ./.github/workflows/ci.yml
-    needs: [check-approval]
-    if: ${{ needs.check-approval.outputs.approved == 'true' }}
 
   actions-timeline:
-    needs: [build, unit-tests-approved, unit-tests-unapproved]
+    needs: [build, unit-tests]
     runs-on: ubuntu-latest
     if: ${{ !cancelled() }}
     steps:
