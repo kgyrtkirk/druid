@@ -16,25 +16,6 @@
 name: "X"
 
 on:
-  push:
-    paths-ignore:
-      - '**/*.md'
-      - 'dev/**'
-      - 'docs/**'
-    branches:
-      - master
-      - '[0-9]+.[0-9]+.[0-9]+' # release branches
-      - '[0-9]+.[0-9]+.[0-9]+-[A-Za-z0-9]+' # release branches
-  pull_request:
-    paths-ignore:
-      - '**/*.md'
-      - 'dev/**'
-      - 'docs/**'
-    # The branches below must be a subset of the branches above
-    branches:
-      - master
-      - '[0-9]+.[0-9]+.[0-9]+' # release branches
-      - '[0-9]+.[0-9]+.[0-9]+-[A-Za-z0-9]+' # release branches
   workflow_call:
 
 jobs:
