@@ -24,9 +24,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Injector;
 import com.google.inject.Provides;
 import org.apache.druid.guice.LazySingleton;
+import org.apache.druid.indexing.overlord.ThreadingTaskRunner;
 import org.apache.druid.initialization.ServerInjectorBuilderTest.TestDruidModule;
 import org.apache.druid.msq.guice.MultiStageQuery;
 import org.apache.druid.msq.indexing.destination.SegmentGenerationTerminalStageSpecFactory;
+import org.apache.druid.msq.sql.MSQQueryKitSpecFactory;
 import org.apache.druid.msq.sql.MSQTaskSqlEngine;
 import org.apache.druid.msq.test.MSQTestBase;
 import org.apache.druid.msq.test.MSQTestOverlordServiceClient;
@@ -52,9 +54,10 @@ public class TestMSQSqlModule extends TestDruidModule
   @LazySingleton
   public MSQTaskSqlEngine createEngine(
       ObjectMapper queryJsonMapper,
-      MSQTestOverlordServiceClient indexingServiceClient)
+      MSQTestOverlordServiceClient indexingServiceClient,
+      MSQQueryKitSpecFactory queryKitSpecFactory)
   {
-    return new MSQTaskSqlEngine(indexingServiceClient, queryJsonMapper, new SegmentGenerationTerminalStageSpecFactory());
+    return new MSQTaskSqlEngine(indexingServiceClient, queryJsonMapper, new SegmentGenerationTerminalStageSpecFactory(), queryKitSpecFactory);
   }
 
   @Provides
@@ -73,6 +76,27 @@ public class TestMSQSqlModule extends TestDruidModule
     );
     return indexingServiceClient;
   }
+
+//  @Provides
+  @LazySingleton
+  private MSQTestOverlordServiceClient makeOverlordServiceClient1(
+      ObjectMapper queryJsonMapper,
+      Injector injector,
+      WorkerMemoryParameters workerMemoryParameters)
+  {
+    new ThreadingTaskRunner(null, null, null, null, queryJsonMapper, null, null, null, null);
+    final MSQTestOverlordServiceClient indexingServiceClient = new MSQTestOverlordServiceClient(
+        queryJsonMapper,
+        injector,
+        new MSQTestTaskActionClient(queryJsonMapper, injector),
+        workerMemoryParameters,
+        ImmutableList.of()
+    );
+    return indexingServiceClient;
+  }
+
+
+
 
   @Provides
   @LazySingleton
