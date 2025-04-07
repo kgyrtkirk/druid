@@ -37,9 +37,9 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * Legacy MSQSpec with a native query in it.
+ * Old MSQSpec with a native query in it.
  *
- * Should only be used on task submission API to help ensure correct behaviour during upgrade.
+ * Usage of this class should be avoided in favor of {@link MSQSpec0}.
  */
 public class MSQSpec extends MSQSpec0
 {
