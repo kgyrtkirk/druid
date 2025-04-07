@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
 # this work for additional information regarding copyright ownership.
@@ -12,13 +14,25 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#--------------------------------------------------------------------
 
-from template import BaseTemplate, generate
+# Helps to calculate new balancing
+# on the output a simple knapsack should be done...right now that's manual
 
-class Template(BaseTemplate):
+set -e
 
-    # No kafka dependency in this cluster
-    def define_kafka(self):
-        pass
+find . -name 'TEST*xml' |
+# <testsuite ... name="org.apache.druid.query.policy.NoRestrictionPolicyTest" time="0.071" ...>
+xargs sed -nr '/^<testsuite/s/.*name=\"([^\"]+)\".*time=\"([^\"]+)\".*/\1\t\2/p' |
+# org.apache.druid.server.RequestLogLineTest      0.052
+sed -r 's/[^\t]+\.(.)[^\t.]+\t/\1\t/' > test_times
 
-generate(__file__, Template())
+for c in {A..Z} ;do
+ echo -n "$c    ";
+ (echo 0;grep "^$c" test_times| cut -f 2)|paste -s -d + -|bc
+done | sort -k 2 -nr
+# final output is a table like
+# <letter>	<sumTime>
+# C	88
+
+
