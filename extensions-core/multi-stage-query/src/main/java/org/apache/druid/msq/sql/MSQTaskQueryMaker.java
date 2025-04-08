@@ -296,6 +296,116 @@ public class MSQTaskQueryMaker implements QueryMaker
     return querySpec.withOverriddenContext(nativeQueryContext);
   }
 
+  public static List<Pair<SqlTypeName, ColumnType>> getTypes(
+      final DruidQuery druidQuery,
+      final List<Entry<Integer, String>> fieldMapping,
+      final PlannerContext plannerContext
+  )
+  {
+    RelDataType outputRowType = druidQuery.getOutputRowType();
+    RowSignature outputRowSignature = druidQuery.getOutputRowSignature();
+    // For assistance computing return types if !finalizeAggregations.
+    final Map<String, ColumnType> aggregationIntermediateTypeMap;
+    if (MultiStageQueryContext.isFinalizeAggregations(plannerContext.queryContext())) {
+      /* Not needed */
+      aggregationIntermediateTypeMap = Collections.emptyMap();
+    } else {
+      aggregationIntermediateTypeMap = buildAggregationIntermediateTypeMap(druidQuery);
+    }
+
+    final List<Pair<SqlTypeName, ColumnType>> retVal = new ArrayList<>();
+
+    for (final Entry<Integer, String> entry : fieldMapping) {
+      final String queryColumn = outputRowSignature.getColumnName(entry.getKey());
+
+      final SqlTypeName sqlTypeName;
+
+      if (aggregationIntermediateTypeMap.containsKey(queryColumn)) {
+        final ColumnType druidType = aggregationIntermediateTypeMap.get(queryColumn);
+        sqlTypeName = new RowSignatures.ComplexSqlType(SqlTypeName.OTHER, druidType, true).getSqlTypeName();
+      } else {
+        sqlTypeName = outputRowType.getFieldList().get(entry.getKey()).getType().getSqlTypeName();
+      }
+
+      final ColumnType columnType = outputRowSignature.getColumnType(queryColumn).orElse(ColumnType.STRING);
+
+      retVal.add(Pair.of(sqlTypeName, columnType));
+    }
+
+    return retVal;
+  }
+
+  private static Map<String, ColumnType> buildAggregationIntermediateTypeMap(final DruidQuery druidQuery)
+  {
+    final Grouping grouping = druidQuery.getGrouping();
+
+    if (grouping == null) {
+      return Collections.emptyMap();
+    }
+
+    final Map<String, ColumnType> retVal = new HashMap<>();
+
+    for (final AggregatorFactory aggregatorFactory : grouping.getAggregatorFactories()) {
+      retVal.put(aggregatorFactory.getName(), aggregatorFactory.getIntermediateType());
+    }
+
+    return retVal;
+  }
+
+  private static Object getSegmentGranularity(PlannerContext plannerContext)
+  {
+    Object segmentGranularity =
+        Optional.ofNullable(plannerContext.queryContext().get(DruidSqlInsert.SQL_INSERT_SEGMENT_GRANULARITY))
+            .orElseGet(() -> {
+              try {
+                return plannerContext.getJsonMapper().writeValueAsString(DEFAULT_SEGMENT_GRANULARITY);
+              }
+              catch (JsonProcessingException e) {
+                // This would only be thrown if we are unable to serialize the DEFAULT_SEGMENT_GRANULARITY,
+                // which we don't expect to happen.
+                throw DruidException.defensive().build(e, "Unable to serialize DEFAULT_SEGMENT_GRANULARITY");
+              }
+            });
+    return segmentGranularity;
+  }
+
+  private static List<Interval> getReplaceIntervals(QueryContext sqlQueryContext)
+  {
+    final List<Interval> replaceTimeChunks =
+        Optional.ofNullable(sqlQueryContext.get(DruidSqlReplace.SQL_REPLACE_TIME_CHUNKS))
+            .map(
+                s -> {
+                  if (s instanceof String && "all".equals(StringUtils.toLowerCase((String) s))) {
+                    return Intervals.ONLY_ETERNITY;
+                  } else {
+                    final String[] parts = ((String) s).split("\\s*,\\s*");
+                    final List<Interval> intervals = new ArrayList<>();
+
+                    for (final String part : parts) {
+                      intervals.add(Intervals.of(part));
+                    }
+
+                    return intervals;
+                  }
+                }
+            )
+            .orElse(null);
+    return replaceTimeChunks;
+  }
+
+  private static MSQDestination buildExportDestination(IngestDestination targetDataSource, QueryContext sqlQueryContext)
+  {
+    final MSQDestination destination;
+    ExportDestination exportDestination = ((ExportDestination) targetDataSource);
+    ResultFormat format = ResultFormat.fromString(sqlQueryContext.getString(DruidSqlIngest.SQL_EXPORT_FILE_FORMAT));
+
+    destination = new ExportMSQDestination(
+        exportDestination.getStorageConnectorProvider(),
+        format
+    );
+    return destination;
+  }
+
   private static MSQDestination buildTableDestination(
       IngestDestination targetDataSource,
       List<Entry<Integer, String>> fieldMapping,
@@ -347,19 +457,6 @@ public class MSQTaskQueryMaker implements QueryMaker
     return destination;
   }
 
-  private static MSQDestination buildExportDestination(final IngestDestination targetDataSource, final QueryContext sqlQueryContext)
-  {
-    final MSQDestination destination;
-    ExportDestination exportDestination = ((ExportDestination) targetDataSource);
-    ResultFormat format = ResultFormat.fromString(sqlQueryContext.getString(DruidSqlIngest.SQL_EXPORT_FILE_FORMAT));
-
-    destination = new ExportMSQDestination(
-        exportDestination.getStorageConnectorProvider(),
-        format
-    );
-    return destination;
-  }
-
   private static MSQTuningConfig makeMSQTuningConfig(final PlannerContext plannerContext)
   {
     final QueryContext sqlQueryContext = plannerContext.queryContext();
@@ -379,104 +476,6 @@ public class MSQTaskQueryMaker implements QueryMaker
     final IndexSpec indexSpec = MultiStageQueryContext.getIndexSpec(sqlQueryContext, plannerContext.getJsonMapper());
     MSQTuningConfig tuningConfig = new MSQTuningConfig(maxNumWorkers, maxRowsInMemory, rowsPerSegment, maxNumSegments, indexSpec);
     return tuningConfig;
-  }
-
-  public static List<Pair<SqlTypeName, ColumnType>> getTypes(
-      final DruidQuery druidQuery,
-      final List<Entry<Integer, String>> fieldMapping,
-      final PlannerContext plannerContext
-  )
-  {
-    RelDataType outputRowType = druidQuery.getOutputRowType();
-    RowSignature outputRowSignature = druidQuery.getOutputRowSignature();
-    // For assistance computing return types if !finalizeAggregations.
-    final Map<String, ColumnType> aggregationIntermediateTypeMap;
-    if (MultiStageQueryContext.isFinalizeAggregations(plannerContext.queryContext())) {
-      /* Not needed */
-      aggregationIntermediateTypeMap = Collections.emptyMap();
-    } else {
-      aggregationIntermediateTypeMap = buildAggregationIntermediateTypeMap(druidQuery);
-    }
-
-    final List<Pair<SqlTypeName, ColumnType>> retVal = new ArrayList<>();
-
-    for (final Entry<Integer, String> entry : fieldMapping) {
-      final String queryColumn = outputRowSignature.getColumnName(entry.getKey());
-
-      final SqlTypeName sqlTypeName;
-
-      if (aggregationIntermediateTypeMap.containsKey(queryColumn)) {
-        final ColumnType druidType = aggregationIntermediateTypeMap.get(queryColumn);
-        sqlTypeName = new RowSignatures.ComplexSqlType(SqlTypeName.OTHER, druidType, true).getSqlTypeName();
-      } else {
-        sqlTypeName = outputRowType.getFieldList().get(entry.getKey()).getType().getSqlTypeName();
-      }
-
-      final ColumnType columnType = outputRowSignature.getColumnType(queryColumn).orElse(ColumnType.STRING);
-
-      retVal.add(Pair.of(sqlTypeName, columnType));
-    }
-
-    return retVal;
-  }
-
-  private static Object getSegmentGranularity(final PlannerContext plannerContext)
-  {
-    Object segmentGranularity =
-        Optional.ofNullable(plannerContext.queryContext().get(DruidSqlInsert.SQL_INSERT_SEGMENT_GRANULARITY))
-            .orElseGet(() -> {
-              try {
-                return plannerContext.getJsonMapper().writeValueAsString(DEFAULT_SEGMENT_GRANULARITY);
-              }
-              catch (JsonProcessingException e) {
-                // This would only be thrown if we are unable to serialize the DEFAULT_SEGMENT_GRANULARITY,
-                // which we don't expect to happen.
-                throw DruidException.defensive().build(e, "Unable to serialize DEFAULT_SEGMENT_GRANULARITY");
-              }
-            });
-    return segmentGranularity;
-  }
-
-
-  private static List<Interval> getReplaceIntervals(final QueryContext sqlQueryContext)
-  {
-    final List<Interval> replaceTimeChunks =
-        Optional.ofNullable(sqlQueryContext.get(DruidSqlReplace.SQL_REPLACE_TIME_CHUNKS))
-            .map(
-                s -> {
-                  if (s instanceof String && "all".equals(StringUtils.toLowerCase((String) s))) {
-                    return Intervals.ONLY_ETERNITY;
-                  } else {
-                    final String[] parts = ((String) s).split("\\s*,\\s*");
-                    final List<Interval> intervals = new ArrayList<>();
-
-                    for (final String part : parts) {
-                      intervals.add(Intervals.of(part));
-                    }
-
-                    return intervals;
-                  }
-                }
-            )
-            .orElse(null);
-    return replaceTimeChunks;
-  }
-
-  private static Map<String, ColumnType> buildAggregationIntermediateTypeMap(final DruidQuery druidQuery)
-  {
-    final Grouping grouping = druidQuery.getGrouping();
-
-    if (grouping == null) {
-      return Collections.emptyMap();
-    }
-
-    final Map<String, ColumnType> retVal = new HashMap<>();
-
-    for (final AggregatorFactory aggregatorFactory : grouping.getAggregatorFactories()) {
-      retVal.put(aggregatorFactory.getName(), aggregatorFactory.getIntermediateType());
-    }
-
-    return retVal;
   }
 
   private static List<AggregateProjectionSpec> getProjections(
