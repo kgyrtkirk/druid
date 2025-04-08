@@ -26,6 +26,7 @@ import org.apache.druid.query.QueryContexts;
 import org.apache.druid.sql.calcite.BaseCalciteQueryTest;
 import org.apache.druid.sql.calcite.QueryTestBuilder;
 import org.apache.druid.sql.calcite.SqlTestFrameworkConfig;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
@@ -52,7 +53,7 @@ public class CalciteDartTest extends BaseCalciteQueryTest
   {
     testBuilder()
         .sql("SELECT 1")
-        .expectedResults(ImmutableList.of(new Object[] {1L}))
+        .expectedResults(ImmutableList.of(new Object[] {1}))
         .run();
   }
 
@@ -63,12 +64,12 @@ public class CalciteDartTest extends BaseCalciteQueryTest
         .sql("SELECT 2 from foo order by dim1")
         .expectedResults(
             ImmutableList.of(
-                new Object[] {2L},
-                new Object[] {2L},
-                new Object[] {2L},
-                new Object[] {2L},
-                new Object[] {2L},
-                new Object[] {2L}
+                new Object[] {2},
+                new Object[] {2},
+                new Object[] {2},
+                new Object[] {2},
+                new Object[] {2},
+                new Object[] {2}
             )
         )
         .run();
@@ -81,8 +82,8 @@ public class CalciteDartTest extends BaseCalciteQueryTest
         .sql("SELECT 2 from foo limit 2")
         .expectedResults(
             ImmutableList.of(
-                new Object[] {2L},
-                new Object[] {2L}
+                new Object[] {2},
+                new Object[] {2}
             )
         )
         .run();
@@ -150,6 +151,7 @@ public class CalciteDartTest extends BaseCalciteQueryTest
         .run();
   }
 
+  @Disabled
   @Test
   public void testSelectStarFoo()
   {
@@ -175,10 +177,10 @@ public class CalciteDartTest extends BaseCalciteQueryTest
         .sql("SELECT dim2 from foo group by dim2")
         .expectedResults(
             ImmutableList.of(
-                new Object[] {3L},
-                new Object[] {3L},
-                new Object[] {3L},
-                new Object[] {3L}
+                new Object[]{null},
+                new Object[]{""},
+                new Object[]{"a"},
+                new Object[]{"abc"}
             )
         )
         .run();

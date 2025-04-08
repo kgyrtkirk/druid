@@ -129,13 +129,16 @@ public class MSQSpec extends MSQSpec0
            && Objects.equals(columnMappings, that.columnMappings)
            && Objects.equals(destination, that.destination)
            && Objects.equals(assignmentStrategy, that.assignmentStrategy)
-           && Objects.equals(tuningConfig, that.tuningConfig);
+           && Objects.equals(tuningConfig, that.tuningConfig)
+           && Objects.equals(compactionMetricSpec, that.compactionMetricSpec)
+           && Objects.equals(queryContext, that.queryContext)
+           && Objects.equals(queryDef, that.queryDef);
   }
 
   @Override
   public int hashCode()
   {
-    return Objects.hash(query, columnMappings, destination, assignmentStrategy, tuningConfig);
+    return Objects.hash(query, columnMappings, destination, assignmentStrategy, tuningConfig, compactionMetricSpec, queryContext, queryDef);
   }
 
   public static class Builder
