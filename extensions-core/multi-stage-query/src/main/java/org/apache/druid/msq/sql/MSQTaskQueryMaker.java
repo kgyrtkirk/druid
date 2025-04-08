@@ -197,7 +197,7 @@ public class MSQTaskQueryMaker implements QueryMaker
     if (msqMode != null) {
       MSQMode.populateDefaultQueryContext(msqMode, nativeQueryContext);
     }
-    Object segmentGranularity = getSegmentGranularity(plannerContext);
+    final Object segmentGranularity = getSegmentGranularity(plannerContext);
 
     // This parameter is used internally for the number of worker tasks only, so we subtract 1
     final boolean finalizeAggregations = MultiStageQueryContext.isFinalizeAggregations(sqlQueryContext);
@@ -243,7 +243,7 @@ public class MSQTaskQueryMaker implements QueryMaker
 
     // This flag is to ensure backward compatibility, as brokers are upgraded after indexers/middlemanagers.
     nativeQueryContextOverrides.put(MultiStageQueryContext.WINDOW_FUNCTION_OPERATOR_TRANSFORMATION, true);
-    boolean isReindex = false ;// FIXME MSQControllerTask.isReplaceInputDataSourceTask(druidQuery.getQuery(), destination);
+    boolean isReindex = MSQControllerTask.isReplaceInputDataSourceTask(druidQuery.getQuery(), destination);
     nativeQueryContextOverrides.put(MultiStageQueryContext.CTX_IS_REINDEX, isReindex);
 
 
