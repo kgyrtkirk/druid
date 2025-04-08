@@ -26,18 +26,20 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.Futures;
 import org.apache.druid.indexer.report.TaskReport;
+import org.apache.druid.indexing.common.TaskLockType;
 import org.apache.druid.java.util.common.DateTimes;
+import org.apache.druid.java.util.common.IAE;
 import org.apache.druid.java.util.common.ISE;
 import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.java.util.common.concurrent.Execs;
 import org.apache.druid.java.util.common.jackson.JacksonUtils;
 import org.apache.druid.msq.dart.controller.ControllerHolder;
-import org.apache.druid.msq.dart.controller.DartControllerContext;
 import org.apache.druid.msq.dart.controller.DartControllerRegistry;
 import org.apache.druid.msq.dart.controller.sql.DartQueryMaker;
 import org.apache.druid.msq.dart.controller.sql.DartSqlClient;
 import org.apache.druid.msq.dart.controller.sql.DartSqlClients;
 import org.apache.druid.msq.dart.controller.sql.DartSqlEngine;
+import org.apache.druid.msq.dart.guice.DartControllerConfig;
 import org.apache.druid.msq.exec.Controller;
 import org.apache.druid.msq.indexing.error.CanceledFault;
 import org.apache.druid.msq.indexing.error.InvalidNullByteFault;
@@ -45,7 +47,9 @@ import org.apache.druid.msq.indexing.error.MSQErrorReport;
 import org.apache.druid.msq.indexing.error.MSQFaultUtils;
 import org.apache.druid.msq.indexing.report.MSQTaskReport;
 import org.apache.druid.msq.test.MSQTestBase;
+import org.apache.druid.msq.test.MSQTestControllerContext;
 import org.apache.druid.query.DefaultQueryConfig;
+import org.apache.druid.query.QueryContext;
 import org.apache.druid.query.QueryContexts;
 import org.apache.druid.server.DruidNode;
 import org.apache.druid.server.QueryStackTests;
@@ -61,9 +65,6 @@ import org.apache.druid.server.security.ForbiddenException;
 import org.apache.druid.sql.SqlLifecycleManager;
 import org.apache.druid.sql.SqlStatementFactory;
 import org.apache.druid.sql.SqlToolbox;
-import org.apache.druid.sql.calcite.SqlTestFrameworkConfig;
-import org.apache.druid.sql.calcite.SqlTestFrameworkConfig.ConfigurationInstance;
-import org.apache.druid.sql.calcite.SqlTestFrameworkConfig.SqlTestFrameworkConfigStore;
 import org.apache.druid.sql.calcite.planner.CalciteRulesManager;
 import org.apache.druid.sql.calcite.planner.CatalogResolver;
 import org.apache.druid.sql.calcite.planner.PlannerConfig;
@@ -87,6 +88,7 @@ import org.mockito.MockitoAnnotations;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Response;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -160,39 +162,36 @@ public class DartSqlResourceTest extends MSQTestBase
   @Mock
   private HttpServletRequest httpServletRequest2;
 
-
-  @Mock
-  private DartControllerContext  controllerContextMock;
-
-  static final SqlTestFrameworkConfigStore CONFIG_STORE = new SqlTestFrameworkConfigStore(x -> x);
-
   @BeforeEach
-  void setUp() throws Exception
+  void setUp()
   {
     mockCloser = MockitoAnnotations.openMocks(this);
 
-    SqlTestFrameworkConfig sqlTestFrameworkConfig = SqlTestFrameworkConfig.fromURL("druidtest:///?componentSupplier=DartComponentSupplier");
-    ConfigurationInstance cfgInstance = CONFIG_STORE.getConfigurationInstance(sqlTestFrameworkConfig);
-
-
-    final DartSqlEngine engine = (DartSqlEngine) cfgInstance.framework.engine();
-//    new DartSqlEngine(
-//        queryId -> controllerContextMock,
-//        controllerRegistry = new DartControllerRegistry()
-//        {
-//          @Override
-//          public void register(ControllerHolder holder)
-//          {
-//            super.register(holder);
-//            controllerRegistered.countDown();
-//          }
-//        },
-//        objectMapper.convertValue(ImmutableMap.of(), DartControllerConfig.class),
-//        controllerExecutor = Execs.multiThreaded(
-//            MAX_CONTROLLERS,
-//            StringUtils.encodeForFormat(getClass().getSimpleName() + "-controller-exec")
-//        )
-//    );
+    final DartSqlEngine engine = new DartSqlEngine(
+        queryId -> new MSQTestControllerContext(
+            objectMapper,
+            injector,
+            null /* not used in this test */,
+            workerMemoryParameters,
+            loadedSegmentsMetadata,
+            TaskLockType.APPEND,
+            QueryContext.empty()
+        ),
+        controllerRegistry = new DartControllerRegistry()
+        {
+          @Override
+          public void register(ControllerHolder holder)
+          {
+            super.register(holder);
+            controllerRegistered.countDown();
+          }
+        },
+        objectMapper.convertValue(ImmutableMap.of(), DartControllerConfig.class),
+        controllerExecutor = Execs.multiThreaded(
+            MAX_CONTROLLERS,
+            StringUtils.encodeForFormat(getClass().getSimpleName() + "-controller-exec")
+        )
+    );
 
     final DruidSchemaCatalog rootSchema = QueryFrameworkUtils.createMockRootSchema(
         CalciteTests.INJECTOR,
@@ -254,15 +253,15 @@ public class DartSqlResourceTest extends MSQTestBase
     mockCloser.close();
 
     // shutdown(), not shutdownNow(), to ensure controllers stop timely on their own.
-//    controllerExecutor.shutdown();
+    controllerExecutor.shutdown();
 
-//    if (!controllerExecutor.awaitTermination(1, TimeUnit.MINUTES)) {
-//      throw new IAE("controllerExecutor.awaitTermination() timed out");
-//    }
+    if (!controllerExecutor.awaitTermination(1, TimeUnit.MINUTES)) {
+      throw new IAE("controllerExecutor.awaitTermination() timed out");
+    }
 
     // Ensure that controllerRegistry has nothing in it at the conclusion of each test. Verifies that controllers
     // are fully cleaned up.
-//    Assertions.assertEquals(0, controllerRegistry.getAllHolders().size(), "controllerRegistry.getAllHolders().size()");
+    Assertions.assertEquals(0, controllerRegistry.getAllHolders().size(), "controllerRegistry.getAllHolders().size()");
   }
 
   @Test
