@@ -50,7 +50,6 @@ import org.apache.druid.msq.indexing.destination.DataSourceMSQDestination;
 import org.apache.druid.msq.kernel.WorkerAssignmentStrategy;
 import org.apache.druid.msq.util.MultiStageQueryContext;
 import org.apache.druid.query.OrderBy;
-import org.apache.druid.query.Query;
 import org.apache.druid.query.aggregation.AggregatorFactory;
 import org.apache.druid.query.aggregation.CountAggregatorFactory;
 import org.apache.druid.query.aggregation.LongSumAggregatorFactory;
@@ -81,6 +80,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import javax.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -402,9 +402,8 @@ public class MSQCompactionRunnerTest
     Assert.assertEquals(getExpectedTuningConfig(), actualMSQSpec.getTuningConfig());
     Assert.assertEquals(getExpectedDestination(), actualMSQSpec.getDestination());
 
-    Query<?> query = actualMSQSpec.getQuery();
-    Assert.assertTrue(query instanceof ScanQuery);
-    ScanQuery scanQuery = (ScanQuery) query;
+    Assert.assertTrue(actualMSQSpec.getQuery() instanceof ScanQuery);
+    ScanQuery scanQuery = (ScanQuery) actualMSQSpec.getQuery();
 
     List<String> expectedColumns = new ArrayList<>();
     List<ColumnType> expectedColumnTypes = new ArrayList<>();
@@ -481,9 +480,8 @@ public class MSQCompactionRunnerTest
 
     MSQSpec actualMSQSpec = Iterables.getOnlyElement(msqControllerTasks).getQuerySpec();
 
-    Query<?> query = actualMSQSpec.getQuery();
-    Assert.assertTrue(query instanceof ScanQuery);
-    ScanQuery scanQuery = (ScanQuery) query;
+    Assert.assertTrue(actualMSQSpec.getQuery() instanceof ScanQuery);
+    ScanQuery scanQuery = (ScanQuery) actualMSQSpec.getQuery();
 
     // Dimensions should already list __time and the order should remain intact
     Assert.assertEquals(
@@ -535,9 +533,8 @@ public class MSQCompactionRunnerTest
     Assert.assertEquals(getExpectedTuningConfig(), actualMSQSpec.getTuningConfig());
     Assert.assertEquals(getExpectedDestination(), actualMSQSpec.getDestination());
 
-    Query<?> query = actualMSQSpec.getQuery();
-    Assert.assertTrue(query instanceof GroupByQuery);
-    GroupByQuery groupByQuery = (GroupByQuery) query;
+    Assert.assertTrue(actualMSQSpec.getQuery() instanceof GroupByQuery);
+    GroupByQuery groupByQuery = (GroupByQuery) actualMSQSpec.getQuery();
 
     Assert.assertEquals(dimFilter, groupByQuery.getFilter());
     Assert.assertEquals(

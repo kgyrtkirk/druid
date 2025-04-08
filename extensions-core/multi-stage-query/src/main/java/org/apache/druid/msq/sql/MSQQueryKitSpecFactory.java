@@ -41,8 +41,12 @@ public class MSQQueryKitSpecFactory implements QueryKitSpecFactory
   }
 
   @Override
-  public QueryKitSpec makeQueryKitSpec(QueryKit<Query<?>> queryKit, String queryId, MSQTuningConfig tuningConfig,
-      QueryContext queryContext, ControllerQueryKernelConfig queryKernelConfig)
+  public QueryKitSpec makeQueryKitSpec(
+      QueryKit<Query<?>> queryKit,
+      String queryId,
+      MSQTuningConfig tuningConfig,
+      QueryContext queryContext,
+      ControllerQueryKernelConfig queryKernelConfig)
   {
     return new QueryKitSpec(
         queryKit,

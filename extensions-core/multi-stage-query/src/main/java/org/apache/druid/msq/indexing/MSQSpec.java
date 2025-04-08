@@ -197,14 +197,22 @@ public class MSQSpec extends MSQSpec0
       if (destination == null) {
         destination = TaskReportMSQDestination.instance();
       }
-      QueryContext neqQCTX = QueryContext.empty();
+
+      QueryContext newCtx = QueryContext.empty();
       if (query != null) {
-        neqQCTX = query.context();
+        newCtx = query.context();
+      } else {
+        newCtx = QueryContext.empty();
       }
-      neqQCTX = neqQCTX .override(queryContext);
+      newCtx = newCtx.override(queryContext);
       return new MSQSpec(
-          query, columnMappings, destination, assignmentStrategy, tuningConfig, compactionMetrics,
-          neqQCTX,
+          query,
+          columnMappings,
+          destination,
+          assignmentStrategy,
+          tuningConfig,
+          compactionMetrics,
+          newCtx,
           queryDef
       );
     }
@@ -219,7 +227,13 @@ public class MSQSpec extends MSQSpec0
   public MSQSpec withQueryDef(QueryDefinition newQueryDef)
   {
     return new MSQSpec(
-        query, columnMappings, destination, assignmentStrategy, tuningConfig, compactionMetricSpec, queryContext,
+        query,
+        columnMappings,
+        destination,
+        assignmentStrategy,
+        tuningConfig,
+        compactionMetricSpec,
+        queryContext,
         newQueryDef
     );
   }
