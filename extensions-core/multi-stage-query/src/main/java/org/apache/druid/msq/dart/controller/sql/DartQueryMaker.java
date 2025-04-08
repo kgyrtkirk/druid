@@ -91,7 +91,7 @@ public class DartQueryMaker implements QueryMaker
 {
   private static final Logger log = new Logger(DartQueryMaker.class);
 
-  final List<Entry<Integer, String>> fieldMapping;
+  private final List<Entry<Integer, String>> fieldMapping;
   private final DartControllerContextFactory controllerContextFactory;
   private final PlannerContext plannerContext;
 
@@ -128,6 +128,7 @@ public class DartQueryMaker implements QueryMaker
     this.controllerExecutor = controllerExecutor;
   }
 
+  @Override
   public QueryResponse<Object[]> runQuery(DruidQuery druidQuery)
   {
     if (!plannerContext.getAuthorizationResult().allowAccessWithNoRestriction()) {
@@ -197,6 +198,10 @@ public class DartQueryMaker implements QueryMaker
         plannerContext,
         null // Only used for DML, which this isn't
     );
+
+    if(true) {
+      return querySpec;
+    }
 
     ControllerContext context = controllerContext;
 
@@ -516,22 +521,4 @@ public class DartQueryMaker implements QueryMaker
       rowBuffer.put(Either.error(e));
     }
   }
-
-  // ugly hack
-  public ControllerContext newControllerContext(String dartQueryId)
-  {
-    return controllerContextFactory.newContext(dartQueryId);
-  }
-
-  public ResultsContext makeDefaultResultContext()
-  {
-    final ResultsContext resultsContext = new ResultsContext(
-        null,     // not mandatory
-        SqlResults.Context.fromPlannerContext(plannerContext)
-    );
-    return resultsContext;
-  }
-
-
-
 }
