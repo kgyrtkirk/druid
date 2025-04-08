@@ -326,16 +326,16 @@ public class MSQTaskQueryMaker implements QueryMaker
   {
     Object segmentGranularity =
         Optional.ofNullable(plannerContext.queryContext().get(DruidSqlInsert.SQL_INSERT_SEGMENT_GRANULARITY))
-            .orElseGet(() -> {
-              try {
-                return plannerContext.getJsonMapper().writeValueAsString(DEFAULT_SEGMENT_GRANULARITY);
-              }
-              catch (JsonProcessingException e) {
-                // This would only be thrown if we are unable to serialize the DEFAULT_SEGMENT_GRANULARITY,
-                // which we don't expect to happen.
-                throw DruidException.defensive().build(e, "Unable to serialize DEFAULT_SEGMENT_GRANULARITY");
-              }
-            });
+                .orElseGet(() -> {
+                  try {
+                    return plannerContext.getJsonMapper().writeValueAsString(DEFAULT_SEGMENT_GRANULARITY);
+                  }
+                  catch (JsonProcessingException e) {
+                    // This would only be thrown if we are unable to serialize the DEFAULT_SEGMENT_GRANULARITY,
+                    // which we don't expect to happen.
+                    throw DruidException.defensive().build(e, "Unable to serialize DEFAULT_SEGMENT_GRANULARITY");
+                  }
+                });
     return segmentGranularity;
   }
 
@@ -343,23 +343,23 @@ public class MSQTaskQueryMaker implements QueryMaker
   {
     final List<Interval> replaceTimeChunks =
         Optional.ofNullable(sqlQueryContext.get(DruidSqlReplace.SQL_REPLACE_TIME_CHUNKS))
-            .map(
-                s -> {
-                  if (s instanceof String && "all".equals(StringUtils.toLowerCase((String) s))) {
-                    return Intervals.ONLY_ETERNITY;
-                  } else {
-                    final String[] parts = ((String) s).split("\\s*,\\s*");
-                    final List<Interval> intervals = new ArrayList<>();
+                .map(
+                    s -> {
+                      if (s instanceof String && "all".equals(StringUtils.toLowerCase((String) s))) {
+                        return Intervals.ONLY_ETERNITY;
+                      } else {
+                        final String[] parts = ((String) s).split("\\s*,\\s*");
+                        final List<Interval> intervals = new ArrayList<>();
 
-                    for (final String part : parts) {
-                      intervals.add(Intervals.of(part));
+                        for (final String part : parts) {
+                          intervals.add(Intervals.of(part));
+                        }
+
+                        return intervals;
+                      }
                     }
-
-                    return intervals;
-                  }
-                }
-            )
-            .orElse(null);
+                )
+                .orElse(null);
     return replaceTimeChunks;
   }
 
