@@ -48,7 +48,6 @@ import org.apache.druid.msq.indexing.report.MSQStatusReport;
 import org.apache.druid.msq.indexing.report.MSQTaskReport;
 import org.apache.druid.msq.indexing.report.MSQTaskReportPayload;
 import org.apache.druid.msq.sql.MSQQueryKitSpecFactory;
-import org.apache.druid.query.DruidProcessingConfig;
 import org.apache.druid.rpc.indexing.NoopOverlordClient;
 import org.joda.time.DateTime;
 
@@ -116,7 +115,7 @@ public class MSQTestOverlordServiceClient extends NoopOverlordClient
           cTask.getQuerySpec(),
           new ResultsContext(cTask.getSqlTypeNames(), cTask.getSqlResultsContext()),
           msqTestControllerContext,
-          new MSQQueryKitSpecFactory(new DruidProcessingConfig())
+          injector.getInstance(MSQQueryKitSpecFactory.class)
       );
 
       inMemoryControllers.put(controller.queryId(), controller);

@@ -570,11 +570,12 @@ public class MSQTestBase extends BaseCalciteQueryTest
         CatalogResolver.NULL_RESOLVER
     );
 
+
     final SqlEngine engine = new MSQTaskSqlEngine(
         indexingServiceClient,
         qf.queryJsonMapper().copy().registerModules(new MSQSqlModule().getJacksonModules()),
         new SegmentGenerationTerminalStageSpecFactory(),
-        new MSQQueryKitSpecFactory(new DruidProcessingConfig())
+        injector.getInstance(MSQQueryKitSpecFactory.class)
     );
 
     PlannerFactory plannerFactory = new PlannerFactory(
