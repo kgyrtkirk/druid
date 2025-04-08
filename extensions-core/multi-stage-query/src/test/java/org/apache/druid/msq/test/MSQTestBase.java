@@ -858,10 +858,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
 
   private void assertMSQSpec(MSQSpec expectedMSQSpec, MSQSpec querySpecForTask)
   {
-    // Assert.assertEquals(expectedMSQSpec.getQuery(),
-    // querySpecForTask.getQuery());
-    // FIXME: some assertion things might be missing here
-    // fail("expectedMSQSpec.getQuery()");
+    Assert.assertEquals(expectedMSQSpec.getQuery(), querySpecForTask.getQuery());
     Assert.assertEquals(expectedMSQSpec.getAssignmentStrategy(), querySpecForTask.getAssignmentStrategy());
     Assert.assertEquals(expectedMSQSpec.getColumnMappings(), querySpecForTask.getColumnMappings());
     Assert.assertEquals(expectedMSQSpec.getDestination(), querySpecForTask.getDestination());
