@@ -238,15 +238,15 @@ public class MSQTaskQueryMaker implements QueryMaker
     final MSQDestination destination;
 
     if (targetDataSource instanceof ExportDestination) {
-      destination = buildExportDestination(targetDataSource, sqlQueryContext);
+      destination = buildExportDestination((ExportDestination) targetDataSource, sqlQueryContext);
     } else if (targetDataSource instanceof TableDestination) {
       destination = buildTableDestination(
           targetDataSource,
           fieldMapping,
           plannerContext,
           terminalStageSpecFactory,
-          sqlQueryContext,
           segmentGranularity,
+          sqlQueryContext,
           replaceTimeChunks
       );
     } else {
@@ -393,10 +393,10 @@ public class MSQTaskQueryMaker implements QueryMaker
     return replaceTimeChunks;
   }
 
-  private static MSQDestination buildExportDestination(IngestDestination targetDataSource, QueryContext sqlQueryContext)
+  private static MSQDestination buildExportDestination(ExportDestination targetDataSource, QueryContext sqlQueryContext)
   {
     final MSQDestination destination;
-    ExportDestination exportDestination = ((ExportDestination) targetDataSource);
+    ExportDestination exportDestination = targetDataSource;
     ResultFormat format = ResultFormat.fromString(sqlQueryContext.getString(DruidSqlIngest.SQL_EXPORT_FILE_FORMAT));
 
     destination = new ExportMSQDestination(
@@ -411,8 +411,8 @@ public class MSQTaskQueryMaker implements QueryMaker
       List<Entry<Integer, String>> fieldMapping,
       PlannerContext plannerContext,
       MSQTerminalStageSpecFactory terminalStageSpecFactory,
-      final QueryContext sqlQueryContext,
       Object segmentGranularity,
+      final QueryContext sqlQueryContext,
       final List<Interval> replaceTimeChunks)
   {
     final MSQDestination destination;
