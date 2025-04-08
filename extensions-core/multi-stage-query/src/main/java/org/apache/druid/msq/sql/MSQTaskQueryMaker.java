@@ -41,7 +41,6 @@ import org.apache.druid.java.util.common.granularity.Granularities;
 import org.apache.druid.java.util.common.granularity.Granularity;
 import org.apache.druid.java.util.common.guava.Sequences;
 import org.apache.druid.msq.exec.MSQTasks;
-import org.apache.druid.msq.exec.QueryKitBasedMSQPlanner;
 import org.apache.druid.msq.exec.QueryKitSpecFactory;
 import org.apache.druid.msq.exec.ResultsContext;
 import org.apache.druid.msq.indexing.MSQControllerTask;
@@ -54,8 +53,6 @@ import org.apache.druid.msq.indexing.destination.MSQDestination;
 import org.apache.druid.msq.indexing.destination.MSQSelectDestination;
 import org.apache.druid.msq.indexing.destination.MSQTerminalStageSpecFactory;
 import org.apache.druid.msq.indexing.destination.TaskReportMSQDestination;
-import org.apache.druid.msq.kernel.QueryDefinition;
-import org.apache.druid.msq.querykit.QueryKitSpec;
 import org.apache.druid.msq.util.MSQTaskQueryMakerUtils;
 import org.apache.druid.msq.util.MultiStageQueryContext;
 import org.apache.druid.query.QueryContext;
@@ -150,18 +147,18 @@ public class MSQTaskQueryMaker implements QueryMaker
         SqlResults.Context.fromPlannerContext(plannerContext)
     );
 
-    QueryContext queryContext = druidQuery.getQuery().context();
-    QueryKitSpec queryKitSpec = queryKitSpecFactory.makeQueryKitSpec(
-        QueryKitBasedMSQPlanner.makeQueryControllerToolKit(queryContext, jsonMapper),
-        taskId,
-        makeMSQTuningConfig(plannerContext),
-        queryContext,
-        null
+    final MSQSpec querySpec = makeQuerySpec0(
+        targetDataSource,
+        druidQuery,
+        druidQuery.getQuery().context(),
+        fieldMapping,
+        plannerContext,
+        terminalStageSpecFactory
     );
 
     final MSQControllerTask controllerTask = new MSQControllerTask(
         taskId,
-        makeQuerySpec(targetDataSource, druidQuery, resultsContext, terminalStageSpecFactory, queryKitSpec),
+        querySpec,
         MSQTaskQueryMakerUtils.maskSensitiveJsonKeys(plannerContext.getSql()),
         plannerContext.queryContextMap(),
         resultsContext.getSqlResultsContext(),
@@ -175,38 +172,10 @@ public class MSQTaskQueryMaker implements QueryMaker
   }
 
 
-  public MSQSpec makeQuerySpec(
-      @Nullable final IngestDestination targetDataSource,
-      DruidQuery druidQuery,
-      final ResultsContext resultsContext,
-      final MSQTerminalStageSpecFactory terminalStageSpecFactory,
-      final QueryKitSpec queryKitSpec
-      )
-  {
-    final MSQSpec querySpec = makeQuerySpec0(
-        targetDataSource,
-        druidQuery,
-        druidQuery.getQuery().context(),
-        fieldMapping,
-        plannerContext,
-        terminalStageSpecFactory
-    );
-
-    final QueryDefinition queryDef = new QueryKitBasedMSQPlanner(
-        querySpec,
-        resultsContext,
-        querySpec.getQuery(),
-        plannerContext.getJsonMapper(),
-        queryKitSpec
-    ).makeQueryDefinition();
-    return querySpec.withQueryDef(queryDef);
-  }
-
-
   public static MSQSpec makeQuerySpec0(
       @Nullable final IngestDestination targetDataSource,
       final DruidQuery druidQuery,
-      QueryContext queryContext3,
+      final QueryContext queryContext3,
       final List<Entry<Integer, String>> fieldMapping,
       final PlannerContext plannerContext,
       final MSQTerminalStageSpecFactory terminalStageSpecFactory
