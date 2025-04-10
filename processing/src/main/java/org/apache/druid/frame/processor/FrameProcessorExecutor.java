@@ -224,7 +224,7 @@ public class FrameProcessorExecutor
 
         final String threadName = Thread.currentThread().getName();
         boolean canceled = false;
-        Either<Throwable, ReturnOrAwait<T>> retVal;
+        Either<Throwable, ReturnOrAwait<T>> retVal = null;
 
         try {
           if (Thread.interrupted()) {
@@ -256,6 +256,18 @@ public class FrameProcessorExecutor
 
               if (!cancelableProcessors.containsEntry(cancellationId, processor)) {
                 // Processor has been canceled by one of the "cancel" methods. They will handle cleanup.
+//                if(retVal.isValue()) {
+//                  ReturnOrAwait<T> a = retVal.valueOrThrow();
+//                  if(a instanceof FrameProcessor) {
+//                    FrameProcessor frameProcessor = (FrameProcessor) a;
+//                    try {
+//                      frameProcessor.cleanup();
+//                    }
+//                    catch (IOException e) {
+//                      throw new RuntimeException("Unexpected excepotion during clenaup", e);
+//                    }
+//                  }
+//                }
                 canceled = true;
               }
             }
