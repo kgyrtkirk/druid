@@ -45,16 +45,14 @@ FROM
 ARRAY
 !error
 
-# TESTCASE: test_subquery_with_where TEST_ID: A2_B46_C4 TYPE: NEGATIVE TEST
-SELECT a_int,
-       count(*) cnt
+# TESTCASE: test_subquery_with_where TEST_ID: A2_B46_C5 TYPE: NEGATIVE TEST
+SELECT a_int
 FROM
   (SELECT *
-   FROM test_array
-   WHERE a_int NOT IN
-       (SELECT a_int
-        FROM test_array))
-GROUP BY a_int;
+   FROM test_array)
+WHERE a_int NOT IN
+    (SELECT a_int
+     FROM test_array);
 ARRAY
 !error
 
