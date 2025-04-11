@@ -23,25 +23,25 @@ ARRAY
 !error
 
 
-# TESTCASE: test_subquery_with_where TEST_ID: A2_B46_C2 TYPE: NEGATIVE TEST
-SELECT a_int,
-       count(*) cnt
-FROM test_array
-WHERE a_int NOT IN
-    (SELECT a_int
-     FROM test_array)
-GROUP BY a_int;
-ARRAY
-!error
-
-# TESTCASE: test_subquery_with_where TEST_ID: A2_B46_C3 TYPE: NEGATIVE TEST
+# TESTCASE: test_subquery_with_where TEST_ID: A2_B46_C5 TYPE: NEGATIVE TEST
 SELECT a_int
 FROM
   (SELECT *
-   FROM test_array
-   WHERE a_int NOT IN
-       (SELECT a_int
-        FROM test_array));
+   FROM test_array)
+WHERE a_int NOT IN
+    (SELECT a_int
+     FROM test_array);
+ARRAY
+!error
+
+# TESTCASE: test_subquery_with_where TEST_ID: A2_B46_C5 TYPE: NEGATIVE TEST
+SELECT a_int
+FROM
+  (SELECT *
+   FROM test_array)
+WHERE a_int NOT IN
+    (SELECT a_int
+     FROM test_array);
 ARRAY
 !error
 
