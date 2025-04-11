@@ -1,0 +1,13 @@
+!set dartQueryId 00000000-0000-0000-0000-000000000000
+!set useApproximateCountDistinct false
+!use druidtest://?componentSupplier=DartComponentSupplier&datasets=sql/src/test/quidem/qatests/qaArray/sql&numMergeBuffers=3
+!set outputformat mysql
+
+# TESTCASE: test_group_by TEST_ID: A24_B5 TYPE: NEGATIVE TEST
+SELECT json_query(a_nested, '$[7][7]') c,
+       count(*) cnt
+FROM test_array
+GROUP BY rollup(json_query(a_nested, '$[7][7]'));
+QueryNotSupported
+!error
+

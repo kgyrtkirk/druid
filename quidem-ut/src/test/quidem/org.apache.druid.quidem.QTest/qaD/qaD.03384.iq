@@ -1,0 +1,15 @@
+!set dartQueryId 00000000-0000-0000-0000-000000000000
+!set useApproximateCountDistinct false
+!use druidtest://?componentSupplier=DartComponentSupplier&datasets=sql/src/test/quidem/qatests/qaArray/sql&numMergeBuffers=3
+!set outputformat mysql
+
+# TESTCASE: test_union_all TEST_ID: A9_B1 TYPE: NEGATIVE TEST
+SELECT c
+FROM
+  (SELECT json_value(a_nested, '$[7][2]' RETURNING decimal array) c
+   FROM test_array
+   UNION ALL SELECT json_value(a_nested, '$[7][2]' RETURNING decimal array) c
+   FROM test_array);
+SQL requires union
+!error
+

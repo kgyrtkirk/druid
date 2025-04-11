@@ -1,0 +1,22 @@
+!set dartQueryId 00000000-0000-0000-0000-000000000000
+!set useApproximateCountDistinct false
+!use druidtest://?componentSupplier=DartComponentSupplier&datasets=sql/src/test/quidem/qatests/qaArray/sql&numMergeBuffers=3
+!set outputformat mysql
+
+# TESTCASE: test_subquery_with_where TEST_ID: A1_B40_C8 TYPE: POSITIVE TEST
+WITH t1 AS
+  (SELECT *
+   FROM test_array
+   WHERE a_bool NOT BETWEEN json_value(a_nested, '$[0]' RETURNING boolean array) AND json_value(a_nested, '$[7][0]' RETURNING boolean array))
+SELECT a_bool,
+       count(*) cnt
+FROM t1
+GROUP BY a_bool;
++--------+-----+
+| a_bool | cnt |
++--------+-----+
++--------+-----+
+(0 rows)
+
+!ok
+
