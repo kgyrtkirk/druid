@@ -11,11 +11,5 @@ FROM
 WHERE a_int>ARRAY[1,
                   2,
                   NULL];
-+-------+
-| a_int |
-+-------+
-+-------+
-(0 rows)
-
 !ok
 

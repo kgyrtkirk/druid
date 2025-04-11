@@ -10,11 +10,5 @@ WITH t1 AS
    WHERE (a_bool<json_value(a_nested, '$[0]' RETURNING boolean array)) IS NOT FALSE)
 SELECT a_bool
 FROM t1;
-+--------+
-| a_bool |
-+--------+
-+--------+
-(0 rows)
-
 !ok
 

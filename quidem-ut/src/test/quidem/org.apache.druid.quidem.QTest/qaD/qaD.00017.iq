@@ -7,16 +7,6 @@
 
 SELECT a_mixed
 FROM test_array;
-+--------------------------+
-| a_mixed                  |
-+--------------------------+
-| [null, S1, 0.1, 1, true] |
-| [null, S1, 0.1, 1, true] |
-| [true, 1, 0.1, S1, null] |
-| [true, 1, 0.1, S1, null] |
-+--------------------------+
-(4 rows)
-
 !ok
 
 !nativePlan

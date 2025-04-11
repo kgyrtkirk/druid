@@ -11,13 +11,5 @@ FROM
    FROM test_array
    WHERE array_to_string(a_int, ',') like '%')
 GROUP BY a_int;
-+--------------+-----+
-| a_int        | cnt |
-+--------------+-----+
-| [1, 2, null] |   2 |
-| [null, 2, 1] |   2 |
-+--------------+-----+
-(2 rows)
-
 !ok
 

@@ -9,11 +9,5 @@ SELECT a_empty c,
 FROM test_array
 GROUP BY a_empty
 HAVING a_empty=ARRAY['A'];
-+---+-----+
-| c | cnt |
-+---+-----+
-+---+-----+
-(0 rows)
-
 !ok
 

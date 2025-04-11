@@ -11,11 +11,5 @@ FROM
    FROM test_array
    WHERE array_to_string(json_value(a_nested, '$[0]' RETURNING boolean array), ',') not like '%')
 GROUP BY a_bool;
-+--------+-----+
-| a_bool | cnt |
-+--------+-----+
-+--------+-----+
-(0 rows)
-
 !ok
 

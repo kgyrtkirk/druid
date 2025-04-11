@@ -12,11 +12,5 @@ FROM
 WHERE a_float=ARRAY[0.1,
                     0.2]
 GROUP BY a_float;
-+---------+-----+
-| a_float | cnt |
-+---------+-----+
-+---------+-----+
-(0 rows)
-
 !ok
 

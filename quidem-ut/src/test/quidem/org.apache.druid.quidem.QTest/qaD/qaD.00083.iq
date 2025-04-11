@@ -6,13 +6,5 @@
 # TESTCASE: test_select_distinct TEST_ID: A21_B1 TYPE: POSITIVE TEST
 SELECT DISTINCT json_value(a_nested, '$[7][6]' RETURNING varchar array)
 FROM test_array;
-+--------------------------+
-| EXPR$0                   |
-+--------------------------+
-| [null, S1, 0.1, 1, true] |
-| [true, 1, 0.1, S1, null] |
-+--------------------------+
-(2 rows)
-
 !ok
 

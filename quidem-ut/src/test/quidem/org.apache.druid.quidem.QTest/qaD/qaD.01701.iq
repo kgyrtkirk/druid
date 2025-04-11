@@ -7,11 +7,5 @@
 SELECT a_float
 FROM test_array
 WHERE array_to_string(json_value(a_nested, '$[2]' RETURNING decimal array), ',') not like '%';
-+---------+
-| a_float |
-+---------+
-+---------+
-(0 rows)
-
 !ok
 

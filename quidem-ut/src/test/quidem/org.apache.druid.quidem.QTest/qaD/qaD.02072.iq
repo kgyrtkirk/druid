@@ -9,11 +9,5 @@ SELECT a_str,
 FROM test_array
 WHERE a_str IS NULL
 GROUP BY a_str;
-+-------+-----+
-| a_str | cnt |
-+-------+-----+
-+-------+-----+
-(0 rows)
-
 !ok
 

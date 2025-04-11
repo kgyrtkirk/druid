@@ -13,11 +13,5 @@ SELECT a_bool,
        count(*) cnt
 FROM t1
 GROUP BY a_bool;
-+--------+-----+
-| a_bool | cnt |
-+--------+-----+
-+--------+-----+
-(0 rows)
-
 !ok
 

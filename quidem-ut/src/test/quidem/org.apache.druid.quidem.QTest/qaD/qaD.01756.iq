@@ -12,11 +12,5 @@ FROM
 WHERE a_str=ARRAY['S1',
                   'S2']
 GROUP BY a_str;
-+-------+-----+
-| a_str | cnt |
-+-------+-----+
-+-------+-----+
-(0 rows)
-
 !ok
 

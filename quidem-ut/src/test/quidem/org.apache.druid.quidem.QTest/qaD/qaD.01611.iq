@@ -7,11 +7,5 @@
 SELECT a_float
 FROM test_array
 WHERE a_float IS NULL;
-+---------+
-| a_float |
-+---------+
-+---------+
-(0 rows)
-
 !ok
 

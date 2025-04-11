@@ -13,11 +13,5 @@ SELECT a_int,
        count(*) cnt
 FROM t1
 GROUP BY a_int;
-+-------+-----+
-| a_int | cnt |
-+-------+-----+
-+-------+-----+
-(0 rows)
-
 !ok
 

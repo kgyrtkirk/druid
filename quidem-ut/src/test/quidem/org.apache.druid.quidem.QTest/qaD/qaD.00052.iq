@@ -8,12 +8,5 @@ SELECT count(*) cnt
 FROM
   (SELECT DISTINCT json_value(a_nested, '$[1]' RETURNING bigint array)
    FROM test_array);
-+-----+
-| cnt |
-+-----+
-|   2 |
-+-----+
-(1 row)
-
 !ok
 

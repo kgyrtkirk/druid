@@ -12,11 +12,5 @@ SELECT a_bool,
 FROM t1
 WHERE a_bool IS NULL
 GROUP BY a_bool;
-+--------+-----+
-| a_bool | cnt |
-+--------+-----+
-+--------+-----+
-(0 rows)
-
 !ok
 

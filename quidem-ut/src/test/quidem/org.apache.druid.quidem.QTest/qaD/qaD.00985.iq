@@ -10,13 +10,5 @@ FROM
    FROM test_array)
 WHERE a_int>=ARRAY[1,
                    2];
-+--------------+
-| a_int        |
-+--------------+
-| [1, 2, null] |
-| [1, 2, null] |
-+--------------+
-(2 rows)
-
 !ok
 

@@ -11,11 +11,5 @@ WHERE a_bool=ARRAY[1,
                    2,
                    3]
 GROUP BY a_bool;
-+--------+-----+
-| a_bool | cnt |
-+--------+-----+
-+--------+-----+
-(0 rows)
-
 !ok
 

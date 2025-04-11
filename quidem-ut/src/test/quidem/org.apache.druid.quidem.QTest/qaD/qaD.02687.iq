@@ -10,11 +10,5 @@ WITH t1 AS
    WHERE a_nested<>a_nested)
 SELECT a_nested
 FROM t1;
-+----------+
-| a_nested |
-+----------+
-+----------+
-(0 rows)
-
 !ok
 

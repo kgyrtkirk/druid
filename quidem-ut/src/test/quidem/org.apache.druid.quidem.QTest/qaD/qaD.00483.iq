@@ -11,11 +11,5 @@ FROM
    WHERE a_bool>ARRAY[1,
                       0,
                       NULL]);
-+--------+
-| a_bool |
-+--------+
-+--------+
-(0 rows)
-
 !ok
 

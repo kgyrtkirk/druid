@@ -10,11 +10,5 @@ FROM test_array
 WHERE a_nested NOT IN (a_nested,
                        a_nested)
 GROUP BY a_nested;
-+----------+-----+
-| a_nested | cnt |
-+----------+-----+
-+----------+-----+
-(0 rows)
-
 !ok
 

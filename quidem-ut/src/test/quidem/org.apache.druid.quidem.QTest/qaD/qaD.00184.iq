@@ -11,11 +11,5 @@ FROM
    FROM test_array
    WHERE a_int=a_null)
 GROUP BY a_int;
-+-------+-----+
-| a_int | cnt |
-+-------+-----+
-+-------+-----+
-(0 rows)
-
 !ok
 

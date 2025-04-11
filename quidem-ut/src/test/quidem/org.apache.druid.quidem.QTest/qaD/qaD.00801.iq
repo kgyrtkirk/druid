@@ -8,11 +8,5 @@ SELECT a_bool
 FROM test_array
 WHERE a_bool NOT IN (json_value(a_nested, '$[0]' RETURNING boolean array),
                      json_value(a_nested, '$[7][0]' RETURNING boolean array));
-+--------+
-| a_bool |
-+--------+
-+--------+
-(0 rows)
-
 !ok
 

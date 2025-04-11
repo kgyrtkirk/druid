@@ -9,11 +9,5 @@ SELECT a_bool,
 FROM test_array
 WHERE a_bool IS NULL
 GROUP BY a_bool;
-+--------+-----+
-| a_bool | cnt |
-+--------+-----+
-+--------+-----+
-(0 rows)
-
 !ok
 

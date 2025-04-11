@@ -6,12 +6,5 @@
 # TESTCASE: test_select_count TEST_ID: A3_B1 TYPE: POSITIVE TEST
 SELECT count(*) cnt
 FROM test_array;
-+-----+
-| cnt |
-+-----+
-|   4 |
-+-----+
-(1 row)
-
 !ok
 

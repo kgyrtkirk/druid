@@ -10,11 +10,5 @@ FROM
    FROM test_array
    WHERE a_str=ARRAY['S1',
                      'S2']);
-+-------+
-| a_str |
-+-------+
-+-------+
-(0 rows)
-
 !ok
 

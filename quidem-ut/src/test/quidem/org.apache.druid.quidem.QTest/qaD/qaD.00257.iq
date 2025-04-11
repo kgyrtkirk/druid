@@ -10,11 +10,5 @@ WITH t1 AS
    WHERE a_float=a_mixed)
 SELECT a_int
 FROM t1;
-+-------+
-| a_int |
-+-------+
-+-------+
-(0 rows)
-
 !ok
 

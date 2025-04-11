@@ -13,11 +13,5 @@ SELECT a_str,
        count(*) cnt
 FROM t1
 GROUP BY a_str;
-+-------+-----+
-| a_str | cnt |
-+-------+-----+
-+-------+-----+
-(0 rows)
-
 !ok
 

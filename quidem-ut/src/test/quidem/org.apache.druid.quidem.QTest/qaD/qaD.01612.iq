@@ -9,11 +9,5 @@ SELECT a_float,
 FROM test_array
 WHERE a_float IS NULL
 GROUP BY a_float;
-+---------+-----+
-| a_float | cnt |
-+---------+-----+
-+---------+-----+
-(0 rows)
-
 !ok
 

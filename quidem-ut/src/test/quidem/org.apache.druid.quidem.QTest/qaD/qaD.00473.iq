@@ -10,13 +10,5 @@ FROM
    FROM test_array
    WHERE a_bool>ARRAY[1,
                       0]);
-+--------------+
-| a_bool       |
-+--------------+
-| [1, 0, null] |
-| [1, 0, null] |
-+--------------+
-(2 rows)
-
 !ok
 

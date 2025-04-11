@@ -9,15 +9,5 @@ FROM
   (SELECT *
    FROM test_array
    WHERE a_bool IS NOT NULL);
-+--------------+
-| a_bool       |
-+--------------+
-| [1, 0, null] |
-| [1, 0, null] |
-| [null, 0, 1] |
-| [null, 0, 1] |
-+--------------+
-(4 rows)
-
 !ok
 

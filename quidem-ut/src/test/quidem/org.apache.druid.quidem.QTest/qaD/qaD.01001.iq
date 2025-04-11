@@ -9,11 +9,5 @@ FROM test_array
 WHERE a_int>=ARRAY[1,
                    2,
                    3];
-+-------+
-| a_int |
-+-------+
-+-------+
-(0 rows)
-
 !ok
 

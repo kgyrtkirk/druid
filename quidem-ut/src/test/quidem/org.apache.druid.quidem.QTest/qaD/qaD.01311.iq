@@ -9,11 +9,5 @@ FROM test_array
 WHERE a_float=ARRAY[0.1,
                     0.2,
                     0.3];
-+---------+
-| a_float |
-+---------+
-+---------+
-(0 rows)
-
 !ok
 

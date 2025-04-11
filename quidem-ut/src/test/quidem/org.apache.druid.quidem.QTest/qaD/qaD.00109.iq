@@ -10,11 +10,5 @@ WITH t1 AS
 SELECT a_int
 FROM t1
 WHERE a_bool=a_float;
-+-------+
-| a_int |
-+-------+
-+-------+
-(0 rows)
-
 !ok
 

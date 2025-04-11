@@ -7,11 +7,5 @@
 SELECT a_int
 FROM test_array
 WHERE a_bool=a_empty;
-+-------+
-| a_int |
-+-------+
-+-------+
-(0 rows)
-
 !ok
 

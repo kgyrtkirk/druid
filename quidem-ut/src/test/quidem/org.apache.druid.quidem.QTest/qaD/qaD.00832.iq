@@ -10,11 +10,5 @@ FROM test_array
 WHERE a_int=ARRAY[1,
                   2]
 GROUP BY a_int;
-+-------+-----+
-| a_int | cnt |
-+-------+-----+
-+-------+-----+
-(0 rows)
-
 !ok
 

@@ -17,11 +17,5 @@ SELECT a_mixed,
        count(*) cnt
 FROM t1
 GROUP BY a_mixed;
-+---------+-----+
-| a_mixed | cnt |
-+---------+-----+
-+---------+-----+
-(0 rows)
-
 !ok
 

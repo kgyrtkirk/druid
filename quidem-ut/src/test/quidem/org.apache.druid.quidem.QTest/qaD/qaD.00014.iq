@@ -7,16 +7,6 @@
 
 SELECT a_empty
 FROM test_array;
-+---------+
-| a_empty |
-+---------+
-| []      |
-| []      |
-| []      |
-| []      |
-+---------+
-(4 rows)
-
 !ok
 
 !nativePlan

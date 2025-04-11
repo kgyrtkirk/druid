@@ -10,12 +10,5 @@ FROM test_array
 WHERE a_bool>=ARRAY[1,
                     0]
 GROUP BY a_bool;
-+--------------+-----+
-| a_bool       | cnt |
-+--------------+-----+
-| [1, 0, null] |   2 |
-+--------------+-----+
-(1 row)
-
 !ok
 

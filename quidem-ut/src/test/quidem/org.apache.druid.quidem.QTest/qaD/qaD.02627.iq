@@ -10,11 +10,5 @@ WITH t1 AS
    WHERE array_to_string(json_value(a_nested, '$[6]' RETURNING varchar array), ',') not like '%')
 SELECT a_mixed
 FROM t1;
-+---------+
-| a_mixed |
-+---------+
-+---------+
-(0 rows)
-
 !ok
 

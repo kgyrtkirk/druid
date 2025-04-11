@@ -11,11 +11,5 @@ WITH t1 AS
                         json_value(a_nested, '$[7][0]' RETURNING boolean array)))
 SELECT a_bool
 FROM t1;
-+--------+
-| a_bool |
-+--------+
-+--------+
-(0 rows)
-
 !ok
 

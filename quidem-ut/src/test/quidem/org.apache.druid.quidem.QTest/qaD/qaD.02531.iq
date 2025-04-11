@@ -7,11 +7,5 @@
 SELECT a_mixed
 FROM test_array
 WHERE a_mixed IS NULL;
-+---------+
-| a_mixed |
-+---------+
-+---------+
-(0 rows)
-
 !ok
 

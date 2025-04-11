@@ -10,15 +10,5 @@ WHERE NOT (a_int<=json_value(a_nested, '$[1]' RETURNING bigint array))
   OR NOT (a_int>=json_value(a_nested, '$[7][1]' RETURNING bigint array))
   OR a_int=json_value(a_nested, '$[1]' RETURNING bigint array)
   OR a_int<>json_value(a_nested, '$[7][1]' RETURNING bigint array);
-+--------------+
-| a_int        |
-+--------------+
-| [1, 2, null] |
-| [1, 2, null] |
-| [null, 2, 1] |
-| [null, 2, 1] |
-+--------------+
-(4 rows)
-
 !ok
 

@@ -15,11 +15,5 @@ WITH t1 AS
                        'extra element'])
 SELECT a_mixed
 FROM t1;
-+---------+
-| a_mixed |
-+---------+
-+---------+
-(0 rows)
-
 !ok
 

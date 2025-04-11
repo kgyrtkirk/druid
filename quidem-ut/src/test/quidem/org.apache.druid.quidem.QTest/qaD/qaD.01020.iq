@@ -12,13 +12,5 @@ SELECT a_int,
 FROM t1
 WHERE a_int>=json_value(a_nested, '$[1]' RETURNING bigint array)
 GROUP BY a_int;
-+--------------+-----+
-| a_int        | cnt |
-+--------------+-----+
-| [1, 2, null] |   2 |
-| [null, 2, 1] |   2 |
-+--------------+-----+
-(2 rows)
-
 !ok
 

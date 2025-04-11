@@ -16,11 +16,5 @@ FROM
                        NULL,
                        'extra element'])
 GROUP BY a_mixed;
-+---------+-----+
-| a_mixed | cnt |
-+---------+-----+
-+---------+-----+
-(0 rows)
-
 !ok
 

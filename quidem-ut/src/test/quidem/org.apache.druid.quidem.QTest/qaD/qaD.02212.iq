@@ -12,11 +12,5 @@ WHERE a_mixed=ARRAY['true',
                     '0.1',
                     'S1']
 GROUP BY a_mixed;
-+---------+-----+
-| a_mixed | cnt |
-+---------+-----+
-+---------+-----+
-(0 rows)
-
 !ok
 

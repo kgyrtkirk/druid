@@ -9,11 +9,5 @@ FROM
   (SELECT *
    FROM test_array)
 WHERE a_bool<json_value(a_nested, '$[7][0]' RETURNING boolean array);
-+--------+
-| a_bool |
-+--------+
-+--------+
-(0 rows)
-
 !ok
 

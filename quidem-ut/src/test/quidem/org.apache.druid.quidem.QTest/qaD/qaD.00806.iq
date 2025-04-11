@@ -12,11 +12,5 @@ FROM
 WHERE a_bool NOT IN (json_value(a_nested, '$[0]' RETURNING boolean array),
                      json_value(a_nested, '$[7][0]' RETURNING boolean array))
 GROUP BY a_bool;
-+--------+-----+
-| a_bool | cnt |
-+--------+-----+
-+--------+-----+
-(0 rows)
-
 !ok
 

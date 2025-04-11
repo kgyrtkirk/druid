@@ -9,11 +9,5 @@ SELECT a_int,
 FROM test_array
 WHERE a_int NOT BETWEEN json_value(a_nested, '$[1]' RETURNING bigint array) AND json_value(a_nested, '$[7][1]' RETURNING bigint array)
 GROUP BY a_int;
-+-------+-----+
-| a_int | cnt |
-+-------+-----+
-+-------+-----+
-(0 rows)
-
 !ok
 

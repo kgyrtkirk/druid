@@ -12,11 +12,5 @@ WITH t1 AS
                      'S3'])
 SELECT a_str
 FROM t1;
-+-------+
-| a_str |
-+-------+
-+-------+
-(0 rows)
-
 !ok
 

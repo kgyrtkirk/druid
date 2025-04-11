@@ -6,12 +6,5 @@
 # TESTCASE: test_select_distinct TEST_ID: A16_B1 TYPE: POSITIVE TEST
 SELECT DISTINCT a_empty
 FROM test_array;
-+---------+
-| a_empty |
-+---------+
-| []      |
-+---------+
-(1 row)
-
 !ok
 

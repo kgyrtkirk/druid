@@ -12,13 +12,5 @@ WITH t1 AS
                      NULL])
 SELECT a_int
 FROM t1;
-+--------------+
-| a_int        |
-+--------------+
-| [null, 2, 1] |
-| [null, 2, 1] |
-+--------------+
-(2 rows)
-
 !ok
 

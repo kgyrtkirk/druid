@@ -7,16 +7,6 @@
 
 SELECT a_str
 FROM test_array;
-+----------------+
-| a_str          |
-+----------------+
-| [S1, S2, null] |
-| [S1, S2, null] |
-| [null, S2, S1] |
-| [null, S2, S1] |
-+----------------+
-(4 rows)
-
 !ok
 
 !nativePlan

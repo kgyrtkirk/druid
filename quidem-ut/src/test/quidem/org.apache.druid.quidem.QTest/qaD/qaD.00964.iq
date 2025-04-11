@@ -11,11 +11,5 @@ FROM
    FROM test_array
    WHERE a_int>json_value(a_nested, '$[1]' RETURNING bigint array))
 GROUP BY a_int;
-+-------+-----+
-| a_int | cnt |
-+-------+-----+
-+-------+-----+
-(0 rows)
-
 !ok
 

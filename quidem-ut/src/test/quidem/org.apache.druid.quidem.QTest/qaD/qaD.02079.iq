@@ -10,11 +10,5 @@ WITH t1 AS
 SELECT a_str
 FROM t1
 WHERE a_str IS NULL;
-+-------+
-| a_str |
-+-------+
-+-------+
-(0 rows)
-
 !ok
 

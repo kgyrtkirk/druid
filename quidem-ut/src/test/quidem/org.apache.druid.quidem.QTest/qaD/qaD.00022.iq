@@ -7,16 +7,6 @@
 
 SELECT json_value(a_nested, '$[7][7]' RETURNING varchar array)
 FROM test_array;
-+--------+
-| EXPR$0 |
-+--------+
-|        |
-|        |
-|        |
-|        |
-+--------+
-(4 rows)
-
 !ok
 
 !nativePlan

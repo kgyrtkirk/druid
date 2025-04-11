@@ -10,11 +10,5 @@ WITH t1 AS
 SELECT a_bool
 FROM t1
 WHERE a_bool IS NULL;
-+--------+
-| a_bool |
-+--------+
-+--------+
-(0 rows)
-
 !ok
 

@@ -9,11 +9,5 @@ SELECT json_value(a_nested, '$[5]' RETURNING varchar array) c,
 FROM test_array
 GROUP BY json_value(a_nested, '$[5]' RETURNING varchar array)
 HAVING json_value(a_nested, '$[5]' RETURNING varchar array)=ARRAY['A'];
-+---+-----+
-| c | cnt |
-+---+-----+
-+---+-----+
-(0 rows)
-
 !ok
 

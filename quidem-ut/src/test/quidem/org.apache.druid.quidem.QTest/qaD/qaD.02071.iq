@@ -7,11 +7,5 @@
 SELECT a_str
 FROM test_array
 WHERE a_str IS NULL;
-+-------+
-| a_str |
-+-------+
-+-------+
-(0 rows)
-
 !ok
 

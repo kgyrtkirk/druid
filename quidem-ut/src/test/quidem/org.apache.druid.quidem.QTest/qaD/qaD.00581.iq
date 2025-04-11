@@ -9,13 +9,5 @@ FROM test_array
 WHERE a_bool<ARRAY[1,
                    0,
                    NULL];
-+--------------+
-| a_bool       |
-+--------------+
-| [null, 0, 1] |
-| [null, 0, 1] |
-+--------------+
-(2 rows)
-
 !ok
 

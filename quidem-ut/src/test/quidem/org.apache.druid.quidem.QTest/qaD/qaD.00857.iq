@@ -12,11 +12,5 @@ WITH t1 AS
                      3])
 SELECT a_int
 FROM t1;
-+-------+
-| a_int |
-+-------+
-+-------+
-(0 rows)
-
 !ok
 

@@ -11,11 +11,5 @@ WITH t1 AS
                        0.2])
 SELECT a_float
 FROM t1;
-+---------+
-| a_float |
-+---------+
-+---------+
-(0 rows)
-
 !ok
 

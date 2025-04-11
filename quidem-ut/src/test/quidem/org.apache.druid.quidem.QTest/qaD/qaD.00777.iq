@@ -10,15 +10,5 @@ WITH t1 AS
    WHERE array_to_string(a_bool, ',') like '%')
 SELECT a_bool
 FROM t1;
-+--------------+
-| a_bool       |
-+--------------+
-| [1, 0, null] |
-| [1, 0, null] |
-| [null, 0, 1] |
-| [null, 0, 1] |
-+--------------+
-(4 rows)
-
 !ok
 

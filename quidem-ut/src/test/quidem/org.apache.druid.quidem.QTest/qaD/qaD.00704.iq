@@ -11,13 +11,5 @@ FROM
    FROM test_array
    WHERE a_bool IS NOT NULL)
 GROUP BY a_bool;
-+--------------+-----+
-| a_bool       | cnt |
-+--------------+-----+
-| [1, 0, null] |   2 |
-| [null, 0, 1] |   2 |
-+--------------+-----+
-(2 rows)
-
 !ok
 

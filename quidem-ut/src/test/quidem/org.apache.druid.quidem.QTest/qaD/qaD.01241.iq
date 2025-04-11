@@ -7,11 +7,5 @@
 SELECT a_int
 FROM test_array
 WHERE array_to_string(json_value(a_nested, '$[1]' RETURNING bigint array), ',') not like '%';
-+-------+
-| a_int |
-+-------+
-+-------+
-(0 rows)
-
 !ok
 

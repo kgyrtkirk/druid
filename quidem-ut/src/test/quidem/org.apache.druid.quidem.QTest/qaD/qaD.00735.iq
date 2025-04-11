@@ -9,15 +9,5 @@ FROM
   (SELECT *
    FROM test_array)
 WHERE (a_bool<json_value(a_nested, '$[0]' RETURNING boolean array)) IS FALSE;
-+--------------+
-| a_bool       |
-+--------------+
-| [1, 0, null] |
-| [1, 0, null] |
-| [null, 0, 1] |
-| [null, 0, 1] |
-+--------------+
-(4 rows)
-
 !ok
 

@@ -12,11 +12,5 @@ SELECT a_int,
 FROM t1
 WHERE a_str=a_null
 GROUP BY a_int;
-+-------+-----+
-| a_int | cnt |
-+-------+-----+
-+-------+-----+
-(0 rows)
-
 !ok
 

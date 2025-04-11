@@ -11,11 +11,5 @@ FROM
    FROM test_array)
 WHERE a_mixed IS NULL
 GROUP BY a_mixed;
-+---------+-----+
-| a_mixed | cnt |
-+---------+-----+
-+---------+-----+
-(0 rows)
-
 !ok
 

@@ -8,11 +8,5 @@ SELECT a_nested
 FROM test_array
 WHERE a_nested NOT IN (a_nested,
                        a_nested);
-+----------+
-| a_nested |
-+----------+
-+----------+
-(0 rows)
-
 !ok
 

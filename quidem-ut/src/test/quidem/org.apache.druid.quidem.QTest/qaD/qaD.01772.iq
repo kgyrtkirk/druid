@@ -11,11 +11,5 @@ WHERE a_str=ARRAY['S1',
                   'S2',
                   'S3']
 GROUP BY a_str;
-+-------+-----+
-| a_str | cnt |
-+-------+-----+
-+-------+-----+
-(0 rows)
-
 !ok
 

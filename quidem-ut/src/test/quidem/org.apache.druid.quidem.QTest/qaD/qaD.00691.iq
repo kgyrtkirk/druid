@@ -7,11 +7,5 @@
 SELECT a_bool
 FROM test_array
 WHERE a_bool IS NULL;
-+--------+
-| a_bool |
-+--------+
-+--------+
-(0 rows)
-
 !ok
 

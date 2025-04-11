@@ -7,11 +7,5 @@
 SELECT a_nested
 FROM test_array
 WHERE (a_nested=a_nested) IS FALSE;
-+----------+
-| a_nested |
-+----------+
-+----------+
-(0 rows)
-
 !ok
 

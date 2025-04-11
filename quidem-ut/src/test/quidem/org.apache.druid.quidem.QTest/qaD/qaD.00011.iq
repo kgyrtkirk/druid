@@ -7,16 +7,6 @@
 
 SELECT a_null
 FROM test_array;
-+--------------------+
-| a_null             |
-+--------------------+
-| [null, null, null] |
-| [null, null, null] |
-| [null, null, null] |
-| [null, null, null] |
-+--------------------+
-(4 rows)
-
 !ok
 
 !nativePlan

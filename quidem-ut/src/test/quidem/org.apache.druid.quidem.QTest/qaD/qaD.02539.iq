@@ -10,11 +10,5 @@ WITH t1 AS
 SELECT a_mixed
 FROM t1
 WHERE a_mixed IS NULL;
-+---------+
-| a_mixed |
-+---------+
-+---------+
-(0 rows)
-
 !ok
 

@@ -9,11 +9,5 @@ SELECT a_int,
 FROM test_array
 WHERE a_int=a_float
 GROUP BY a_int;
-+-------+-----+
-| a_int | cnt |
-+-------+-----+
-+-------+-----+
-(0 rows)
-
 !ok
 

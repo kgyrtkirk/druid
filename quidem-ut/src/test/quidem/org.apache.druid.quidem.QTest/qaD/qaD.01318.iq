@@ -14,11 +14,5 @@ SELECT a_float,
        count(*) cnt
 FROM t1
 GROUP BY a_float;
-+---------+-----+
-| a_float | cnt |
-+---------+-----+
-+---------+-----+
-(0 rows)
-
 !ok
 

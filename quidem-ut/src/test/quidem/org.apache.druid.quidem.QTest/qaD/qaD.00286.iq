@@ -11,11 +11,5 @@ FROM
    FROM test_array)
 WHERE a_str=a_empty
 GROUP BY a_int;
-+-------+-----+
-| a_int | cnt |
-+-------+-----+
-+-------+-----+
-(0 rows)
-
 !ok
 

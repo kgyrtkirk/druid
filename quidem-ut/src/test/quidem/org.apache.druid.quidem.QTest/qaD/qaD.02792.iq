@@ -9,11 +9,5 @@ SELECT a_nested,
 FROM test_array
 WHERE (a_nested=a_nested) IS FALSE
 GROUP BY a_nested;
-+----------+-----+
-| a_nested | cnt |
-+----------+-----+
-+----------+-----+
-(0 rows)
-
 !ok
 

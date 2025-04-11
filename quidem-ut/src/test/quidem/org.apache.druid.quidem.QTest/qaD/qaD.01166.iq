@@ -11,13 +11,5 @@ FROM
    FROM test_array)
 WHERE a_int IS NOT NULL
 GROUP BY a_int;
-+--------------+-----+
-| a_int        | cnt |
-+--------------+-----+
-| [1, 2, null] |   2 |
-| [null, 2, 1] |   2 |
-+--------------+-----+
-(2 rows)
-
 !ok
 

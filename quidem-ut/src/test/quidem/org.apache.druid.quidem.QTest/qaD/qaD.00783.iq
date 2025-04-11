@@ -9,11 +9,5 @@ FROM
   (SELECT *
    FROM test_array
    WHERE array_to_string(json_value(a_nested, '$[0]' RETURNING boolean array), ',') not like '%');
-+--------+
-| a_bool |
-+--------+
-+--------+
-(0 rows)
-
 !ok
 

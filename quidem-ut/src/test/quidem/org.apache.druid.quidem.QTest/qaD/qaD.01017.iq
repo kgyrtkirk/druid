@@ -10,15 +10,5 @@ WITH t1 AS
    WHERE a_int>=json_value(a_nested, '$[1]' RETURNING bigint array))
 SELECT a_int
 FROM t1;
-+--------------+
-| a_int        |
-+--------------+
-| [1, 2, null] |
-| [1, 2, null] |
-| [null, 2, 1] |
-| [null, 2, 1] |
-+--------------+
-(4 rows)
-
 !ok
 

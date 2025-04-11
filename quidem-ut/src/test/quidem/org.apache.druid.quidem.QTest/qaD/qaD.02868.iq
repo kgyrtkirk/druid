@@ -13,11 +13,5 @@ SELECT a_nested,
        count(*) cnt
 FROM t1
 GROUP BY a_nested;
-+----------+-----+
-| a_nested | cnt |
-+----------+-----+
-+----------+-----+
-(0 rows)
-
 !ok
 

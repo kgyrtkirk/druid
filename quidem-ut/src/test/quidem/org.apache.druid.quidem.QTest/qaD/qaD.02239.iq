@@ -15,11 +15,5 @@ WHERE a_mixed=ARRAY['true',
                     'S1',
                     NULL,
                     'extra element'];
-+---------+
-| a_mixed |
-+---------+
-+---------+
-(0 rows)
-
 !ok
 

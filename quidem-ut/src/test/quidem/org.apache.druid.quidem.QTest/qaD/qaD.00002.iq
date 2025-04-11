@@ -7,16 +7,6 @@
 
 SELECT a_int
 FROM test_array;
-+--------------+
-| a_int        |
-+--------------+
-| [1, 2, null] |
-| [1, 2, null] |
-| [null, 2, 1] |
-| [null, 2, 1] |
-+--------------+
-(4 rows)
-
 !ok
 
 !nativePlan

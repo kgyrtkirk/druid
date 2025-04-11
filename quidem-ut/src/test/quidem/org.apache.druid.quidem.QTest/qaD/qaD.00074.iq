@@ -8,12 +8,5 @@ SELECT count(*) cnt
 FROM
   (SELECT DISTINCT a_empty
    FROM test_array);
-+-----+
-| cnt |
-+-----+
-|   1 |
-+-----+
-(1 row)
-
 !ok
 

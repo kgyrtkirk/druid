@@ -10,15 +10,5 @@ WITH t1 AS
 SELECT a_int
 FROM t1
 WHERE array_to_string(a_int, ',') like '%';
-+--------------+
-| a_int        |
-+--------------+
-| [1, 2, null] |
-| [1, 2, null] |
-| [null, 2, 1] |
-| [null, 2, 1] |
-+--------------+
-(4 rows)
-
 !ok
 
