@@ -299,10 +299,6 @@ public abstract class DruidQuidemTestBase
         if (outFile.exists()) {
           outFile.delete();
         }
-      }else {
-        if (outFile.exists()) {
-          outFile.delete();
-        }
       }
     }
 
