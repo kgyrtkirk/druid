@@ -284,7 +284,7 @@ public class FrameProcessorExecutor
         if (canceled) {
           return Optional.empty();
         } else {
-          if(retVal.isError()) {
+          if(false && retVal.isError()) {
             try {
               processor.cleanup();
             }

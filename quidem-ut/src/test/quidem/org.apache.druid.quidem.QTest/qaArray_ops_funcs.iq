@@ -1,6 +1,12 @@
 !set useApproximateCountDistinct false
 !use druidtest://?componentSupplier=StandardComponentSupplier&datasets=sql/src/test/quidem/qatests/qaArray/ops_funcs&numMergeBuffers=3
 !set outputformat mysql
+
+
+#-------------------------------------------------------------------------
+# TESTCASE: test_ops TEST_ID: A1_B1_C1_D1 TYPE: NEGATIVE TEST
+#-------------------------------------------------------------------------
+
 SELECT count(*) cnt
 FROM test_array;
 +-----+

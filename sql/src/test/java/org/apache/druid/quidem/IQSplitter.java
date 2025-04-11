@@ -21,6 +21,7 @@ package org.apache.druid.quidem;
 
 import org.apache.curator.shaded.com.google.common.collect.Iterables;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +39,8 @@ public class IQSplitter
   {
     File in = ProjectPathUtils
         .getPathFromProjectRoot("quidem-ut/src/test/quidem/org.apache.druid.quidem.QTest/qaArray_sql.dart.iq");
-    File outDir = new File(in.getParentFile(), "xqaArr");
+    String id = "qaD";
+    File outDir = new File(in.getParentFile(), id);
     outDir.mkdirs();
 
     String pattern = "# TESTCASE:";
@@ -57,15 +59,24 @@ public class IQSplitter
         if (idx == 0) {
           preamble = new ArrayList<>(testCase);
         } else {
-          String name = String.format("xqaArr.%05d.iq", idx);
-          File outFile = new File(outDir, name);
-          Iterable<String> caseLines = Iterables.concat(preamble, testCase);
-          Files.write(outFile.toPath(), caseLines);
+
+          extracted(id, outDir, preamble, testCase, idx);
         }
         testCase.clear();
         idx++;
       }
       testCase.add(string);
     }
+    extracted(id, outDir, preamble, testCase, idx);
+    System.out.println("idx" + idx);
+  }
+
+  private void extracted(String id, File outDir, List<String> preamble, List<String> testCase, int idx)
+      throws IOException
+  {
+    String name = String.format("%s.%05d.iq", id, idx);
+    File outFile = new File(outDir, name);
+    Iterable<String> caseLines = Iterables.concat(preamble, testCase);
+    Files.write(outFile.toPath(), caseLines);
   }
 }

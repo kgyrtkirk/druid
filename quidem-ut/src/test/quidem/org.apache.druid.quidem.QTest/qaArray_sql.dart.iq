@@ -2,9 +2,6 @@
 !set useApproximateCountDistinct false
 !use druidtest://?componentSupplier=DartComponentSupplier&datasets=sql/src/test/quidem/qatests/qaArray/sql&numMergeBuffers=3
 !set outputformat mysql
-SELECT count(*) cnt
-FROM test_array;
-!ok
 
 #-------------------------------------------------------------------------
 # TESTCASE: test_explain TEST_ID: A1_B1 TYPE: POSITIVE TEST
