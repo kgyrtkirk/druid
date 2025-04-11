@@ -28,6 +28,10 @@ import javax.validation.constraints.Min;
 
 public class CuratorConfig
 {
+
+  @JsonProperty("pathChildrenCacheStrategy")
+  private boolean pathChildrenCacheStrategy = true;
+
   public static final String CONFIG_PREFIX = "druid.zk.service";
 
   static final String HOST = "host";

@@ -258,6 +258,7 @@ public class FrameProcessorExecutor
               if (!cancelableProcessors.containsEntry(cancellationId, processor)) {
                 // Processor has been canceled by one of the "cancel" methods. They will handle cleanup.
                 if(retVal.isValue()) {
+                  int asd = 1;
 //                  throw DruidException.defensive("Problematic case#2");
                 }
 //                  ReturnOrAwait<T> a = retVal.valueOrThrow();
@@ -284,7 +285,9 @@ public class FrameProcessorExecutor
         if (canceled) {
           return Optional.empty();
         } else {
-          if(false && retVal.isError()) {
+          if(true && retVal.isError()) {
+            int xa=1;
+            if(false) {
             try {
               processor.cleanup();
             }
@@ -292,6 +295,7 @@ public class FrameProcessorExecutor
               throw new RuntimeException();
             }
             throw DruidException.defensive(retVal.error(), "Problematic case#1");
+            }
           }
           return Optional.of(retVal.valueOrThrow());
         }

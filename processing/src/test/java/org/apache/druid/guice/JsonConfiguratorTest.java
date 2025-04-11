@@ -130,9 +130,19 @@ public class JsonConfiguratorTest
   public void testMissingConfigList()
   {
     final JsonConfigurator configurator = new JsonConfigurator(jsonMapper, validator);
-    properties.setProperty(PROP_PREFIX + "prop1", "prop1");
+    properties.setProperty(PROP_PREFIX + "prop1", "prop1value");
     final MappableObject obj = configurator.configurate(properties, PROP_PREFIX, MappableObject.class);
-    Assert.assertEquals("prop1", obj.prop1);
+    Assert.assertEquals("prop1value", obj.prop1);
+    Assert.assertEquals(ImmutableList.of(), obj.prop1List);
+  }
+
+  @Test
+  public void testDefault()
+  {
+    final JsonConfigurator configurator = new JsonConfigurator(jsonMapper, validator);
+    properties.setProperty(PROP_PREFIX + "val", "1");
+    final MappableObject obj = configurator.configurate(properties, PROP_PREFIX, MappableObject.class);
+    Assert.assertEquals(1, obj.defVal);
     Assert.assertEquals(ImmutableList.of(), obj.prop1List);
   }
 
@@ -222,6 +232,7 @@ public class JsonConfiguratorTest
     Assert.assertEquals("value2", obj.prop2);
   }
 
+
   @Test
   public void testPropertyInterpolationUndefinedException()
   {
@@ -244,16 +255,29 @@ class MappableObject
   @JsonProperty("prop2.prop.2")
   final String prop2;
 
-  @JsonCreator
+  @JsonProperty("val")
+  int defVal = 7;
+
   protected MappableObject(
       @JsonProperty("prop1") final String prop1,
       @JsonProperty("prop1List") final List<String> prop1List,
       @JsonProperty("prop2.prop.2") final String prop2
   )
   {
+    this(prop1, prop1List, prop2, 8);
+  }
+  @JsonCreator
+  protected MappableObject(
+      @JsonProperty("prop1") final String prop1,
+      @JsonProperty("prop1List") final List<String> prop1List,
+      @JsonProperty("prop2.prop.2") final String prop2,
+      @JsonProperty("val") final int val
+  )
+  {
     this.prop1 = prop1;
     this.prop1List = prop1List == null ? ImmutableList.of() : prop1List;
     this.prop2 = prop2;
+    this.defVal = val;
   }
 
 
