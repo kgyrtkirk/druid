@@ -19,7 +19,6 @@
 
 package org.apache.druid.curator;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.druid.guice.JsonConfigTesterBase;
 import org.junit.Assert;
 import org.junit.Test;
@@ -56,24 +55,4 @@ public class CuratorConfigTest extends JsonConfigTesterBase<CuratorConfig>
     Assert.assertEquals("digest", config.getAuthScheme());
     Assert.assertEquals(29, config.getMaxZkRetries());
   }
-
-
-  @Test
-  public void testCreate1() throws Exception
-  {
-    CuratorConfig config = CuratorConfig.create("foo:2181,bar:2181");
-    ObjectMapper om = new ObjectMapper();
-    Object s = om.writeValueAsString(config);
-    System.out.println(s);
-
-
-
-
-    Assert.assertEquals("foo:2181,bar:2181", config.getZkHosts());
-    Assert.assertEquals(false, config.getEnableAcl());
-    Assert.assertNull(config.getZkUser());
-    Assert.assertEquals("digest", config.getAuthScheme());
-    Assert.assertEquals(29, config.getMaxZkRetries());
-  }
-
 }
