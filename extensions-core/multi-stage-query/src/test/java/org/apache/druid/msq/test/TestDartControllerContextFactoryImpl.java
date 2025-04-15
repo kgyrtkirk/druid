@@ -92,9 +92,10 @@ public class TestDartControllerContextFactoryImpl extends DartControllerContextF
     };
   }
 
+  private final ExecutorService EXECUTOR = Executors.newCachedThreadPool();
+
   public class DartTestWorkerClient extends MSQTestWorkerClient implements DartWorkerClient
   {
-    private final ExecutorService EXECUTOR = Executors.newCachedThreadPool();
 
     public DartTestWorkerClient()
     {

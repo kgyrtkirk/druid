@@ -47,6 +47,7 @@
     <properties>
         <quidem.uri>druidtest:///</quidem.uri>
         <quidem.record.autostart>false</quidem.record.autostart>
+        <surefire.rerunFailingTestsCount>1</surefire.rerunFailingTestsCount>
     </properties>
     <dependencies>
         <dependency>

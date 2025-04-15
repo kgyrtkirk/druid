@@ -33,6 +33,7 @@ import com.google.common.util.concurrent.SettableFuture;
 import com.google.errorprone.annotations.concurrent.GuardedBy;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
+import org.apache.druid.error.DruidException;
 import org.apache.druid.frame.channel.ReadableFrameChannel;
 import org.apache.druid.frame.channel.WritableFrameChannel;
 import org.apache.druid.frame.processor.manager.ProcessorManager;
@@ -224,7 +225,7 @@ public class FrameProcessorExecutor
 
         final String threadName = Thread.currentThread().getName();
         boolean canceled = false;
-        Either<Throwable, ReturnOrAwait<T>> retVal;
+        Either<Throwable, ReturnOrAwait<T>> retVal = null;
 
         try {
           if (Thread.interrupted()) {
@@ -256,6 +257,22 @@ public class FrameProcessorExecutor
 
               if (!cancelableProcessors.containsEntry(cancellationId, processor)) {
                 // Processor has been canceled by one of the "cancel" methods. They will handle cleanup.
+                if(retVal.isValue()) {
+                  int asd = 1;
+//                  throw DruidException.defensive("Problematic case#2");
+                }
+//                  ReturnOrAwait<T> a = retVal.valueOrThrow();
+//                  if(a instanceof FrameProcessor) {
+//                    FrameProcessor frameProcessor = (FrameProcessor) a;
+//                    try {
+//                      frameProcessor.cleanup();
+//                    }
+//                    catch (IOException e) {
+//                      throw new RuntimeException("Unexpected excepotion during clenaup", e);
+//                    }
+//                  }
+//                }
+                /// must close
                 canceled = true;
               }
             }
@@ -268,6 +285,18 @@ public class FrameProcessorExecutor
         if (canceled) {
           return Optional.empty();
         } else {
+          if(true && retVal.isError()) {
+            int xa=1;
+            if(false) {
+            try {
+              processor.cleanup();
+            }
+            catch (IOException e) {
+              throw new RuntimeException();
+            }
+            throw DruidException.defensive(retVal.error(), "Problematic case#1");
+            }
+          }
           return Optional.of(retVal.valueOrThrow());
         }
       }
