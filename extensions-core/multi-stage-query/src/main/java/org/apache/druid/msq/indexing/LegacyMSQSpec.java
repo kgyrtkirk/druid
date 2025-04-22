@@ -217,4 +217,19 @@ public class LegacyMSQSpec extends MSQSpec
       return this;
     }
   }
+
+  // FIXME not necessery needed trright now
+  public LegacyMSQSpec withQueryDef(QueryDefinition newQueryDef)
+  {
+    return new LegacyMSQSpec(
+        query,
+        getColumnMappings(),
+        getDestination(),
+        getAssignmentStrategy(),
+        getTuningConfig(),
+        getCompactionMetricSpec(),
+        getContext(),
+        newQueryDef
+    );
+  }
 }
