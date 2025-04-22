@@ -145,7 +145,7 @@ public class DartQueryMaker implements QueryMaker
     }
 
 
-    final LegacyMSQSpec querySpec = MSQTaskQueryMaker.makeQuerySpec0(
+    final LegacyMSQSpec querySpec = MSQTaskQueryMaker.makeLegacyMSQSpec(
         null,
         null,
         context,

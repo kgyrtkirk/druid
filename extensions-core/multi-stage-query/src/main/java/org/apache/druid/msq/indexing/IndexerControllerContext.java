@@ -119,7 +119,7 @@ public class IndexerControllerContext implements ControllerContext
   @Override
   public ControllerQueryKernelConfig queryKernelConfig(
       final String queryId,
-      final LegacyMSQSpec querySpec
+      final MSQSpec querySpec
   )
   {
     final ControllerMemoryParameters memoryParameters =
@@ -240,7 +240,7 @@ public class IndexerControllerContext implements ControllerContext
    * Helper method for {@link #queryKernelConfig(String, LegacyMSQSpec)}. Also used in tests.
    */
   public static ControllerQueryKernelConfig makeQueryKernelConfig(
-      final LegacyMSQSpec querySpec,
+      final MSQSpec querySpec,
       final ControllerMemoryParameters memoryParameters
   )
   {

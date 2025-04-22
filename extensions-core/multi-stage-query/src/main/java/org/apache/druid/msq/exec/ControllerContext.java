@@ -44,7 +44,7 @@ public interface ControllerContext
   /**
    * Configuration for {@link org.apache.druid.msq.kernel.controller.ControllerQueryKernel}.
    */
-  ControllerQueryKernelConfig queryKernelConfig(String queryId, LegacyMSQSpec querySpec);
+  ControllerQueryKernelConfig queryKernelConfig(String queryId, MSQSpec querySpec);
 
   /**
    * Callback from the controller implementation to "register" the controller. Used in the indexing task implementation

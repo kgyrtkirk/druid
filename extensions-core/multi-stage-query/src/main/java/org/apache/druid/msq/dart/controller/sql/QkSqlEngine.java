@@ -162,7 +162,7 @@ public class QkSqlEngine implements SqlEngine
 
     private LegacyMSQSpec buildQueryDef(DruidQuery druidQuery, List<Entry<Integer, String>> fieldMapping, QueryContext queryContext)
     {
-      final LegacyMSQSpec querySpec = MSQTaskQueryMaker.makeQuerySpec0(
+      final LegacyMSQSpec querySpec = MSQTaskQueryMaker.makeLegacyMSQSpec(
           null,
           druidQuery,
           druidQuery.getQuery().context(),
