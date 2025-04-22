@@ -148,7 +148,7 @@ public class MSQTaskQueryMaker implements QueryMaker
     );
 
     // FIXME rename?
-    final LegacyMSQSpec querySpec = makeQuerySpec0(
+    final LegacyMSQSpec querySpec = makeLegacyMSQSpec(
         targetDataSource,
         druidQuery,
         druidQuery.getQuery().context(),
@@ -173,10 +173,10 @@ public class MSQTaskQueryMaker implements QueryMaker
   }
 
 
-  public static LegacyMSQSpec makeQuerySpec0(
+  public static LegacyMSQSpec makeLegacyMSQSpec(
       @Nullable final IngestDestination targetDataSource,
       final DruidQuery druidQuery,
-      final QueryContext queryContext3,
+      final QueryContext queryContext,
       final List<Entry<Integer, String>> fieldMapping,
       final PlannerContext plannerContext,
       final MSQTerminalStageSpecFactory terminalStageSpecFactory
@@ -249,12 +249,10 @@ public class MSQTaskQueryMaker implements QueryMaker
       nativeQueryContextOverrides.put(MultiStageQueryContext.CTX_IS_REINDEX, isReindex);
     }
 
-    QueryContext queryContext = queryContext3.override(nativeQueryContextOverrides);
-
     final LegacyMSQSpec querySpec =
         LegacyMSQSpec.builder()
                .query(druidQuery==null?null:druidQuery.getQuery().withOverriddenContext(nativeQueryContextOverrides))
-               .queryContext(queryContext)
+               .queryContext(queryContext.override(nativeQueryContextOverrides))
                .columnMappings(new ColumnMappings(QueryUtils.buildColumnMappings(fieldMapping, druidQuery)))
                .destination(destination)
                .assignmentStrategy(MultiStageQueryContext.getAssignmentStrategy(sqlQueryContext))
