@@ -227,7 +227,7 @@ public class DartQueryMaker implements QueryMaker
         SqlResults.Context.fromPlannerContext(plannerContext)
     );
 
-    final LegacyMSQSpec querySpec = extracted(druidQuery, dartQueryId, controllerContext, resultsContext);
+    final LegacyMSQSpec querySpec = makeMSQSpec(druidQuery, dartQueryId, controllerContext, resultsContext);
 
     final ControllerImpl controller = new ControllerImpl(
         dartQueryId,
@@ -269,7 +269,8 @@ public class DartQueryMaker implements QueryMaker
     }
   }
 
-  private LegacyMSQSpec extracted(DruidQuery druidQuery, final String dartQueryId, final ControllerContext controllerContext,
+  // FIXME types here are not final
+  private LegacyMSQSpec makeMSQSpec(DruidQuery druidQuery, final String dartQueryId, final ControllerContext controllerContext,
       final ResultsContext resultsContext)
   {
     final LegacyMSQSpec querySpec = MSQTaskQueryMaker.makeQuerySpec0(
@@ -280,6 +281,10 @@ public class DartQueryMaker implements QueryMaker
         plannerContext,
         null // Only used for DML, which this isn't
     );
+
+    if(true) {
+      return querySpec;
+    }
 
     ControllerContext context = controllerContext;
 

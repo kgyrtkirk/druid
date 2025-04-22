@@ -342,6 +342,7 @@ public class MSQCompactionRunner implements CompactionRunner
                   .getDimensions()
                   .stream()
                   .collect(Collectors.toMap(DimensionSchema::getName, Function.identity())),
+        dataSchema.getProjections(),
         null
     );
   }

@@ -361,7 +361,7 @@ public class MSQControllerTask extends AbstractTask implements ClientTaskQuery, 
   /**
    * Checks whether the task is an ingestion into a Druid datasource.
    */
-  public static boolean isIngestion(final LegacyMSQSpec querySpec)
+  public static boolean isIngestion(final MSQSpec querySpec)
   {
     return isIngestion(querySpec.getDestination());
   }

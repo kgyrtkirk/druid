@@ -38,6 +38,7 @@ import org.apache.druid.msq.exec.WorkerFailureListener;
 import org.apache.druid.msq.exec.WorkerManager;
 import org.apache.druid.msq.indexing.IndexerControllerContext;
 import org.apache.druid.msq.indexing.LegacyMSQSpec;
+import org.apache.druid.msq.indexing.MSQSpec;
 import org.apache.druid.msq.indexing.destination.TaskReportMSQDestination;
 import org.apache.druid.msq.input.InputSpecSlicer;
 import org.apache.druid.msq.kernel.controller.ControllerQueryKernelConfig;
@@ -192,7 +193,7 @@ public class DartControllerContext implements ControllerContext
   @Override
   public WorkerManager newWorkerManager(
       String queryId,
-      LegacyMSQSpec querySpec,
+      MSQSpec querySpec,
       ControllerQueryKernelConfig queryKernelConfig,
       WorkerFailureListener workerFailureListener
   )

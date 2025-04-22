@@ -37,9 +37,9 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * Legacy MSQSpec with a native query in it.
+ * Old MSQSpec with a native query in it.
  *
- * Should only be used on task submission API to help ensure correct behaviour during upgrade.
+ * Usage of this class should be avoided in favor of {@link MSQSpec}.
  */
 public class LegacyMSQSpec extends MSQSpec
 {
@@ -105,37 +105,31 @@ public class LegacyMSQSpec extends MSQSpec
     } else {
       return new LegacyMSQSpec(
           query != null ? query.withOverriddenContext(contextOverride) : null,
-          columnMappings,
-          destination,
-          assignmentStrategy,
-          tuningConfig,
-          compactionMetricSpec,
-          queryContext.override(contextOverride)
+          getColumnMappings(),
+          getDestination(),
+          getAssignmentStrategy(),
+          getTuningConfig(),
+          getCompactionMetricSpec(),
+          getContext().override(contextOverride)
       );
     }
   }
 
+
   @Override
   public boolean equals(Object o)
   {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
+    if(!super.equals(o)) {
       return false;
     }
     LegacyMSQSpec that = (LegacyMSQSpec) o;
-    return Objects.equals(query, that.query)
-           && Objects.equals(columnMappings, that.columnMappings)
-           && Objects.equals(destination, that.destination)
-           && Objects.equals(assignmentStrategy, that.assignmentStrategy)
-           && Objects.equals(tuningConfig, that.tuningConfig);
+    return Objects.equals(query, that.query);
   }
 
   @Override
   public int hashCode()
   {
-    return Objects.hash(query, columnMappings, destination, assignmentStrategy, tuningConfig);
+    return Objects.hash(super.hashCode(), query);
   }
 
   public static class Builder
@@ -197,14 +191,22 @@ public class LegacyMSQSpec extends MSQSpec
       if (destination == null) {
         destination = TaskReportMSQDestination.instance();
       }
-      QueryContext neqQCTX = QueryContext.empty();
+
+      QueryContext newCtx = QueryContext.empty();
       if (query != null) {
-        neqQCTX = query.context();
+        newCtx = query.context();
+      } else {
+        newCtx = QueryContext.empty();
       }
-      neqQCTX = neqQCTX .override(queryContext);
+      newCtx = newCtx.override(queryContext);
       return new LegacyMSQSpec(
-          query, columnMappings, destination, assignmentStrategy, tuningConfig, compactionMetrics,
-          neqQCTX,
+          query,
+          columnMappings,
+          destination,
+          assignmentStrategy,
+          tuningConfig,
+          compactionMetrics,
+          newCtx,
           queryDef
       );
     }
@@ -216,10 +218,17 @@ public class LegacyMSQSpec extends MSQSpec
     }
   }
 
+  // FIXME not necessery needed trright now
   public LegacyMSQSpec withQueryDef(QueryDefinition newQueryDef)
   {
     return new LegacyMSQSpec(
-        query, columnMappings, destination, assignmentStrategy, tuningConfig, compactionMetricSpec, queryContext,
+        query,
+        getColumnMappings(),
+        getDestination(),
+        getAssignmentStrategy(),
+        getTuningConfig(),
+        getCompactionMetricSpec(),
+        getContext(),
         newQueryDef
     );
   }

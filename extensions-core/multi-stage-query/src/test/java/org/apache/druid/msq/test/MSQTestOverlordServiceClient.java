@@ -116,7 +116,7 @@ public class MSQTestOverlordServiceClient extends NoopOverlordClient
           cTask.getQuerySpec(),
           new ResultsContext(cTask.getSqlTypeNames(), cTask.getSqlResultsContext()),
           msqTestControllerContext,
-          new MSQQueryKitSpecFactory(new DruidProcessingConfig())
+          injector.getInstance(MSQQueryKitSpecFactory.class)
       );
 
       inMemoryControllers.put(controller.queryId(), controller);
@@ -140,7 +140,7 @@ public class MSQTestOverlordServiceClient extends NoopOverlordClient
       throw new ISE(e, "Unable to run");
     }
     finally {
-      if (controller != null && queryListener != null) {
+      if (queryListener != null && queryListener.reportMap != null) {
         reports.put(controller.queryId(), queryListener.getReportMap());
       }
     }

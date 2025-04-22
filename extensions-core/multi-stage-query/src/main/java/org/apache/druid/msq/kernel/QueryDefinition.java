@@ -64,18 +64,18 @@ public class QueryDefinition
   private QueryDefinition(
       final Map<StageId, StageDefinition> stageDefinitions,
       final StageId finalStage,
-      QDExtension ext1
+      final QDExtension ext
   )
   {
     this.stageDefinitions = stageDefinitions;
     this.finalStage = finalStage;
-    this.ext = ext1;
+    this.ext = ext;
   }
 
   @JsonCreator
   static QueryDefinition create(
       @JsonProperty("stages") final List<StageDefinition> stageDefinitions,
-      @JsonProperty("context") QDExtension ext
+      @JsonProperty("ext") QDExtension ext
       )
   {
     final Map<StageId, StageDefinition> stageMap = new HashMap<>();

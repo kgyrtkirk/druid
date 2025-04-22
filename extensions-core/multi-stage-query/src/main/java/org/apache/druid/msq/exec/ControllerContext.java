@@ -26,6 +26,7 @@ import org.apache.druid.indexing.common.actions.TaskActionClient;
 import org.apache.druid.java.util.common.io.Closer;
 import org.apache.druid.java.util.emitter.service.ServiceEmitter;
 import org.apache.druid.msq.indexing.LegacyMSQSpec;
+import org.apache.druid.msq.indexing.MSQSpec;
 import org.apache.druid.msq.input.InputSpecSlicer;
 import org.apache.druid.msq.input.table.SegmentsInputSlice;
 import org.apache.druid.msq.input.table.TableInputSpec;
@@ -98,7 +99,7 @@ public interface ControllerContext
    */
   WorkerManager newWorkerManager(
       String queryId,
-      LegacyMSQSpec querySpec,
+      MSQSpec querySpec,
       ControllerQueryKernelConfig queryKernelConfig,
       WorkerFailureListener workerFailureListener
   );

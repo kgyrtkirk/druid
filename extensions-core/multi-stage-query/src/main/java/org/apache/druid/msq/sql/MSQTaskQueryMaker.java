@@ -25,7 +25,13 @@ import com.google.common.base.Preconditions;
 import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.runtime.Hook;
 import org.apache.calcite.sql.type.SqlTypeName;
+import org.apache.druid.catalog.MetadataCatalog;
+import org.apache.druid.catalog.model.DatasourceProjectionMetadata;
+import org.apache.druid.catalog.model.ResolvedTable;
+import org.apache.druid.catalog.model.TableId;
+import org.apache.druid.catalog.model.table.DatasourceDefn;
 import org.apache.druid.common.guava.FutureUtils;
+import org.apache.druid.data.input.impl.AggregateProjectionSpec;
 import org.apache.druid.error.DruidException;
 import org.apache.druid.error.InvalidInput;
 import org.apache.druid.java.util.common.Intervals;
@@ -35,7 +41,6 @@ import org.apache.druid.java.util.common.granularity.Granularities;
 import org.apache.druid.java.util.common.granularity.Granularity;
 import org.apache.druid.java.util.common.guava.Sequences;
 import org.apache.druid.msq.exec.MSQTasks;
-import org.apache.druid.msq.exec.QueryKitBasedMSQPlanner;
 import org.apache.druid.msq.exec.QueryKitSpecFactory;
 import org.apache.druid.msq.exec.ResultsContext;
 import org.apache.druid.msq.indexing.MSQControllerTask;
@@ -48,8 +53,6 @@ import org.apache.druid.msq.indexing.destination.MSQDestination;
 import org.apache.druid.msq.indexing.destination.MSQSelectDestination;
 import org.apache.druid.msq.indexing.destination.MSQTerminalStageSpecFactory;
 import org.apache.druid.msq.indexing.destination.TaskReportMSQDestination;
-import org.apache.druid.msq.kernel.QueryDefinition;
-import org.apache.druid.msq.querykit.QueryKitSpec;
 import org.apache.druid.msq.util.MSQTaskQueryMakerUtils;
 import org.apache.druid.msq.util.MultiStageQueryContext;
 import org.apache.druid.query.QueryContext;
@@ -144,18 +147,19 @@ public class MSQTaskQueryMaker implements QueryMaker
         SqlResults.Context.fromPlannerContext(plannerContext)
     );
 
-    QueryContext queryContext = druidQuery.getQuery().context();
-    QueryKitSpec queryKitSpec = queryKitSpecFactory.makeQueryKitSpec(
-        QueryKitBasedMSQPlanner.makeQueryControllerToolKit(queryContext, jsonMapper),
-        taskId,
-        makeMSQTuningConfig(plannerContext),
-        queryContext,
-        null
+    // FIXME rename?
+    final LegacyMSQSpec querySpec = makeQuerySpec0(
+        targetDataSource,
+        druidQuery,
+        druidQuery.getQuery().context(),
+        fieldMapping,
+        plannerContext,
+        terminalStageSpecFactory
     );
 
     final MSQControllerTask controllerTask = new MSQControllerTask(
         taskId,
-        makeQuerySpec(targetDataSource, druidQuery, resultsContext, terminalStageSpecFactory, queryKitSpec),
+        querySpec,
         MSQTaskQueryMakerUtils.maskSensitiveJsonKeys(plannerContext.getSql()),
         plannerContext.queryContextMap(),
         resultsContext.getSqlResultsContext(),
@@ -169,38 +173,10 @@ public class MSQTaskQueryMaker implements QueryMaker
   }
 
 
-  public LegacyMSQSpec makeQuerySpec(
-      @Nullable final IngestDestination targetDataSource,
-      DruidQuery druidQuery,
-      final ResultsContext resultsContext,
-      final MSQTerminalStageSpecFactory terminalStageSpecFactory,
-      final QueryKitSpec queryKitSpec
-      )
-  {
-    final LegacyMSQSpec querySpec = makeQuerySpec0(
-        targetDataSource,
-        druidQuery,
-        druidQuery.getQuery().context(),
-        fieldMapping,
-        plannerContext,
-        terminalStageSpecFactory
-    );
-
-    final QueryDefinition queryDef = new QueryKitBasedMSQPlanner(
-        querySpec,
-        resultsContext,
-        querySpec.getQuery(),
-        plannerContext.getJsonMapper(),
-        queryKitSpec
-    ).makeQueryDefinition();
-    return querySpec.withQueryDef(queryDef);
-  }
-
-
   public static LegacyMSQSpec makeQuerySpec0(
       @Nullable final IngestDestination targetDataSource,
       final DruidQuery druidQuery,
-      QueryContext queryContext3,
+      final QueryContext queryContext3,
       final List<Entry<Integer, String>> fieldMapping,
       final PlannerContext plannerContext,
       final MSQTerminalStageSpecFactory terminalStageSpecFactory
@@ -222,89 +198,27 @@ public class MSQTaskQueryMaker implements QueryMaker
     if (msqMode != null) {
       MSQMode.populateDefaultQueryContext(msqMode, nativeQueryContext);
     }
-
-    Object segmentGranularity =
-          Optional.ofNullable(plannerContext.queryContext().get(DruidSqlInsert.SQL_INSERT_SEGMENT_GRANULARITY))
-                  .orElseGet(() -> {
-                    try {
-                      return plannerContext.getJsonMapper().writeValueAsString(DEFAULT_SEGMENT_GRANULARITY);
-                    }
-                    catch (JsonProcessingException e) {
-                      // This would only be thrown if we are unable to serialize the DEFAULT_SEGMENT_GRANULARITY,
-                      // which we don't expect to happen.
-                      throw DruidException.defensive().build(e, "Unable to serialize DEFAULT_SEGMENT_GRANULARITY");
-                    }
-                  });
+    final Object segmentGranularity = getSegmentGranularity(plannerContext);
 
     // This parameter is used internally for the number of worker tasks only, so we subtract 1
     final boolean finalizeAggregations = MultiStageQueryContext.isFinalizeAggregations(sqlQueryContext);
 
-    final List<Interval> replaceTimeChunks =
-        Optional.ofNullable(sqlQueryContext.get(DruidSqlReplace.SQL_REPLACE_TIME_CHUNKS))
-                .map(
-                    s -> {
-                      if (s instanceof String && "all".equals(StringUtils.toLowerCase((String) s))) {
-                        return Intervals.ONLY_ETERNITY;
-                      } else {
-                        final String[] parts = ((String) s).split("\\s*,\\s*");
-                        final List<Interval> intervals = new ArrayList<>();
-
-                        for (final String part : parts) {
-                          intervals.add(Intervals.of(part));
-                        }
-
-                        return intervals;
-                      }
-                    }
-                )
-                .orElse(null);
+    final List<Interval> replaceTimeChunks = getReplaceIntervals(sqlQueryContext);
 
     final MSQDestination destination;
 
     if (targetDataSource instanceof ExportDestination) {
-      ExportDestination exportDestination = ((ExportDestination) targetDataSource);
-      ResultFormat format = ResultFormat.fromString(sqlQueryContext.getString(DruidSqlIngest.SQL_EXPORT_FILE_FORMAT));
-
-      destination = new ExportMSQDestination(
-          exportDestination.getStorageConnectorProvider(),
-          format
-      );
+      destination = buildExportDestination((ExportDestination) targetDataSource, sqlQueryContext);
     } else if (targetDataSource instanceof TableDestination) {
-      Granularity segmentGranularityObject;
-      try {
-        segmentGranularityObject =
-            plannerContext.getJsonMapper().readValue((String) segmentGranularity, Granularity.class);
-      }
-      catch (Exception e) {
-        throw DruidException.defensive()
-                            .build(
-                                e,
-                                "Unable to deserialize the provided segmentGranularity [%s]. "
-                                + "This is populated internally by Druid and therefore should not occur. "
-                                + "Please contact the developers if you are seeing this error message.",
-                                segmentGranularity
-                            );
-      }
-
-      final List<String> segmentSortOrder = MultiStageQueryContext.getSortOrder(sqlQueryContext);
-
-      MSQTaskQueryMakerUtils.validateContextSortOrderColumnsExist(
-          segmentSortOrder,
-          fieldMapping.stream().map(Entry::getValue).collect(Collectors.toSet())
+      destination = buildTableDestination(
+          targetDataSource,
+          fieldMapping,
+          plannerContext,
+          terminalStageSpecFactory,
+          segmentGranularity,
+          sqlQueryContext,
+          replaceTimeChunks
       );
-
-      final DataSourceMSQDestination dataSourceDestination = new DataSourceMSQDestination(
-          targetDataSource.getDestinationName(),
-          segmentGranularityObject,
-          segmentSortOrder,
-          replaceTimeChunks,
-          null,
-          terminalStageSpecFactory.createTerminalStageSpec(
-              plannerContext
-          )
-      );
-      MultiStageQueryContext.validateAndGetTaskLockType(sqlQueryContext, dataSourceDestination.isReplaceTimeChunks());
-      destination = dataSourceDestination;
     } else {
       final MSQSelectDestination msqSelectDestination = MultiStageQueryContext.getSelectDestination(sqlQueryContext);
       if (msqSelectDestination.equals(MSQSelectDestination.TASKREPORT)) {
@@ -330,9 +244,10 @@ public class MSQTaskQueryMaker implements QueryMaker
 
     // This flag is to ensure backward compatibility, as brokers are upgraded after indexers/middlemanagers.
     nativeQueryContextOverrides.put(MultiStageQueryContext.WINDOW_FUNCTION_OPERATOR_TRANSFORMATION, true);
-    boolean isReindex = false ;// FIXME MSQControllerTask.isReplaceInputDataSourceTask(druidQuery.getQuery(), destination);
-    nativeQueryContextOverrides.put(MultiStageQueryContext.CTX_IS_REINDEX, isReindex);
-
+    boolean isReindex = MSQControllerTask.isReplaceInputDataSourceTask(druidQuery.getQuery(), destination);
+    if (isReindex) {
+      nativeQueryContextOverrides.put(MultiStageQueryContext.CTX_IS_REINDEX, isReindex);
+    }
 
     QueryContext queryContext = queryContext3.override(nativeQueryContextOverrides);
 
@@ -346,31 +261,11 @@ public class MSQTaskQueryMaker implements QueryMaker
                .tuningConfig(makeMSQTuningConfig(plannerContext))
                .build();
 
-//  FIXME  MSQTaskQueryMakerUtils.validateRealtimeReindex(querySpec.getContext(), querySpec.getDestination(), druidQuery.getQuery());
-
-
-    return querySpec.withOverriddenContext(nativeQueryContext);
-  }
-
-  private static MSQTuningConfig makeMSQTuningConfig(final PlannerContext plannerContext)
-  {
-    final QueryContext sqlQueryContext = plannerContext.queryContext();
-    final int maxNumTasks = MultiStageQueryContext.getMaxNumTasks(sqlQueryContext);
-
-    if (maxNumTasks < 2) {
-      throw InvalidInput.exception(
-          "MSQ context maxNumTasks [%,d] cannot be less than 2, since at least 1 controller and 1 worker is necessary",
-          maxNumTasks
-      );
+    if (druidQuery != null) {
+      MSQTaskQueryMakerUtils.validateRealtimeReindex(querySpec.getContext(), querySpec.getDestination(), druidQuery.getQuery());
     }
 
-    final int maxNumWorkers = maxNumTasks - 1;
-    final int rowsPerSegment = MultiStageQueryContext.getRowsPerSegment(sqlQueryContext);
-    final int maxRowsInMemory = MultiStageQueryContext.getRowsInMemory(sqlQueryContext);
-    final Integer maxNumSegments = MultiStageQueryContext.getMaxNumSegments(sqlQueryContext);
-    final IndexSpec indexSpec = MultiStageQueryContext.getIndexSpec(sqlQueryContext, plannerContext.getJsonMapper());
-    MSQTuningConfig tuningConfig = new MSQTuningConfig(maxNumWorkers, maxRowsInMemory, rowsPerSegment, maxNumSegments, indexSpec);
-    return tuningConfig;
+    return querySpec.withOverriddenContext(nativeQueryContext);
   }
 
   public static List<Pair<SqlTypeName, ColumnType>> getTypes(
@@ -429,4 +324,156 @@ public class MSQTaskQueryMaker implements QueryMaker
     return retVal;
   }
 
+  private static Object getSegmentGranularity(PlannerContext plannerContext)
+  {
+    Object segmentGranularity =
+        Optional.ofNullable(plannerContext.queryContext().get(DruidSqlInsert.SQL_INSERT_SEGMENT_GRANULARITY))
+                .orElseGet(() -> {
+                  try {
+                    return plannerContext.getJsonMapper().writeValueAsString(DEFAULT_SEGMENT_GRANULARITY);
+                  }
+                  catch (JsonProcessingException e) {
+                    // This would only be thrown if we are unable to serialize the DEFAULT_SEGMENT_GRANULARITY,
+                    // which we don't expect to happen.
+                    throw DruidException.defensive().build(e, "Unable to serialize DEFAULT_SEGMENT_GRANULARITY");
+                  }
+                });
+    return segmentGranularity;
+  }
+
+  private static List<Interval> getReplaceIntervals(QueryContext sqlQueryContext)
+  {
+    final List<Interval> replaceTimeChunks =
+        Optional.ofNullable(sqlQueryContext.get(DruidSqlReplace.SQL_REPLACE_TIME_CHUNKS))
+                .map(
+                    s -> {
+                      if (s instanceof String && "all".equals(StringUtils.toLowerCase((String) s))) {
+                        return Intervals.ONLY_ETERNITY;
+                      } else {
+                        final String[] parts = ((String) s).split("\\s*,\\s*");
+                        final List<Interval> intervals = new ArrayList<>();
+
+                        for (final String part : parts) {
+                          intervals.add(Intervals.of(part));
+                        }
+
+                        return intervals;
+                      }
+                    }
+                )
+                .orElse(null);
+    return replaceTimeChunks;
+  }
+
+  private static MSQDestination buildExportDestination(ExportDestination targetDataSource, QueryContext sqlQueryContext)
+  {
+    final MSQDestination destination;
+    ExportDestination exportDestination = targetDataSource;
+    ResultFormat format = ResultFormat.fromString(sqlQueryContext.getString(DruidSqlIngest.SQL_EXPORT_FILE_FORMAT));
+
+    destination = new ExportMSQDestination(
+        exportDestination.getStorageConnectorProvider(),
+        format
+    );
+    return destination;
+  }
+
+  private static MSQDestination buildTableDestination(
+      IngestDestination targetDataSource,
+      List<Entry<Integer, String>> fieldMapping,
+      PlannerContext plannerContext,
+      MSQTerminalStageSpecFactory terminalStageSpecFactory,
+      Object segmentGranularity,
+      final QueryContext sqlQueryContext,
+      final List<Interval> replaceTimeChunks)
+  {
+    final MSQDestination destination;
+    Granularity segmentGranularityObject;
+    try {
+      segmentGranularityObject =
+          plannerContext.getJsonMapper().readValue((String) segmentGranularity, Granularity.class);
+    }
+    catch (Exception e) {
+      throw DruidException.defensive()
+                          .build(
+                              e,
+                              "Unable to deserialize the provided segmentGranularity [%s]. "
+                              + "This is populated internally by Druid and therefore should not occur. "
+                              + "Please contact the developers if you are seeing this error message.",
+                              segmentGranularity
+                          );
+    }
+
+    final List<String> segmentSortOrder = MultiStageQueryContext.getSortOrder(sqlQueryContext);
+
+    MSQTaskQueryMakerUtils.validateContextSortOrderColumnsExist(
+        segmentSortOrder,
+        fieldMapping.stream().map(Entry::getValue).collect(Collectors.toSet())
+    );
+
+    final List<AggregateProjectionSpec> projectionSpecs = getProjections(targetDataSource, plannerContext);
+
+    final DataSourceMSQDestination dataSourceDestination = new DataSourceMSQDestination(
+        targetDataSource.getDestinationName(),
+        segmentGranularityObject,
+        segmentSortOrder,
+        replaceTimeChunks,
+        null,
+        projectionSpecs,
+        terminalStageSpecFactory.createTerminalStageSpec(
+            plannerContext
+        )
+    );
+    MultiStageQueryContext.validateAndGetTaskLockType(sqlQueryContext, dataSourceDestination.isReplaceTimeChunks());
+    destination = dataSourceDestination;
+    return destination;
+  }
+
+  private static MSQTuningConfig makeMSQTuningConfig(final PlannerContext plannerContext)
+  {
+    final QueryContext sqlQueryContext = plannerContext.queryContext();
+    final int maxNumTasks = MultiStageQueryContext.getMaxNumTasks(sqlQueryContext);
+
+    if (maxNumTasks < 2) {
+      throw InvalidInput.exception(
+          "MSQ context maxNumTasks [%,d] cannot be less than 2, since at least 1 controller and 1 worker is necessary",
+          maxNumTasks
+      );
+    }
+
+    final int maxNumWorkers = maxNumTasks - 1;
+    final int rowsPerSegment = MultiStageQueryContext.getRowsPerSegment(sqlQueryContext);
+    final int maxRowsInMemory = MultiStageQueryContext.getRowsInMemory(sqlQueryContext);
+    final Integer maxNumSegments = MultiStageQueryContext.getMaxNumSegments(sqlQueryContext);
+    final IndexSpec indexSpec = MultiStageQueryContext.getIndexSpec(sqlQueryContext, plannerContext.getJsonMapper());
+    MSQTuningConfig tuningConfig = new MSQTuningConfig(maxNumWorkers, maxRowsInMemory, rowsPerSegment, maxNumSegments, indexSpec);
+    return tuningConfig;
+  }
+
+  private static List<AggregateProjectionSpec> getProjections(
+      IngestDestination targetDataSource,
+      PlannerContext plannerContext
+  )
+  {
+    final List<AggregateProjectionSpec> projectionSpecs;
+    final MetadataCatalog metadataCatalog = plannerContext.getPlannerToolbox().catalogResolver().getMetadataCatalog();
+    final ResolvedTable tableMetadata = metadataCatalog.resolveTable(
+        TableId.datasource(targetDataSource.getDestinationName())
+    );
+    if (tableMetadata != null) {
+      final List<DatasourceProjectionMetadata> projectionMetadata = tableMetadata.decodeProperty(
+          DatasourceDefn.PROJECTIONS_KEYS_PROPERTY
+      );
+      if (projectionMetadata != null) {
+        projectionSpecs = projectionMetadata.stream()
+                                            .map(DatasourceProjectionMetadata::getSpec)
+                                            .collect(Collectors.toList());
+      } else {
+        projectionSpecs = null;
+      }
+    } else {
+      projectionSpecs = null;
+    }
+    return projectionSpecs;
+  }
 }

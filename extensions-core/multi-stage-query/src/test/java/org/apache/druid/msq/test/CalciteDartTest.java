@@ -26,7 +26,6 @@ import org.apache.druid.query.QueryContexts;
 import org.apache.druid.sql.calcite.BaseCalciteQueryTest;
 import org.apache.druid.sql.calcite.QueryTestBuilder;
 import org.apache.druid.sql.calcite.SqlTestFrameworkConfig;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.UUID;
@@ -41,7 +40,6 @@ public class CalciteDartTest extends BaseCalciteQueryTest
         .queryContext(
             ImmutableMap.<String, Object>builder()
                 .put(DartSqlEngine.CTX_DART_QUERY_ID, UUID.randomUUID().toString())
-                .put(QueryContexts.CTX_NATIVE_QUERY_SQL_PLANNING_MODE, QueryContexts.NATIVE_QUERY_SQL_PLANNING_MODE_DECOUPLED)
                 .put(QueryContexts.ENABLE_DEBUG, true)
                 .build()
         )
@@ -54,7 +52,7 @@ public class CalciteDartTest extends BaseCalciteQueryTest
   {
     testBuilder()
         .sql("SELECT 1")
-        .expectedResults(ImmutableList.of(new Object[] {1L}))
+        .expectedResults(ImmutableList.of(new Object[] {1}))
         .run();
   }
 
@@ -65,32 +63,43 @@ public class CalciteDartTest extends BaseCalciteQueryTest
         .sql("SELECT 2 from foo order by dim1")
         .expectedResults(
             ImmutableList.of(
-                new Object[] {2L},
-                new Object[] {2L},
-                new Object[] {2L},
-                new Object[] {2L},
-                new Object[] {2L},
-                new Object[] {2L}
+                new Object[] {2},
+                new Object[] {2},
+                new Object[] {2},
+                new Object[] {2},
+                new Object[] {2},
+                new Object[] {2}
             )
         )
         .run();
   }
 
   @Test
-  @Disabled("this case currently stalls")
   public void testSelectFromFooLimit2()
   {
     testBuilder()
         .sql("SELECT 2 from foo limit 2")
         .expectedResults(
             ImmutableList.of(
-                new Object[] {2L},
-                new Object[] {2L}
+                new Object[] {2},
+                new Object[] {2}
             )
         )
         .run();
   }
 
+  @Test
+  public void testCount()
+  {
+    testBuilder()
+        .sql("SELECT count(1) from foo")
+        .expectedResults(
+            ImmutableList.of(
+                new Object[] {6L}
+            )
+        )
+        .run();
+  }
 
   @Test
   public void testSelectDim1FromFoo11()
@@ -142,18 +151,22 @@ public class CalciteDartTest extends BaseCalciteQueryTest
   }
 
   @Test
-  public void testSelectStarFoo()
+  public void testSelectStar()
   {
     testBuilder()
-        .sql("SELECT * from foo")
+        .sql("SELECT * from numbers")
         .expectedResults(
             ImmutableList.of(
-                new Object[] {""},
-                new Object[] {"10.1"},
-                new Object[] {"2"},
-                new Object[] {"1"},
-                new Object[] {"def"},
-                new Object[] {"abc"}
+                new Object[]{946684800000L, 1L, 0L, 1.0D, "one", "[\"o\",\"n\",\"e\"]", 1L},
+                new Object[]{946684800000L, 2L, 1L, 0.5D, "two", "[\"t\",\"w\",\"o\"]", 1L},
+                new Object[]{946684800000L, 3L, 1L, 0.3333333333333333D, "three", "[\"t\",\"h\",\"r\",\"e\",\"e\"]", 1L},
+                new Object[]{946684800000L, 4L, 0L, 0.25D, "four", "[\"f\",\"o\",\"u\",\"r\"]", 1L},
+                new Object[]{946684800000L, 5L, 1L, 0.2D, "five", "[\"f\",\"i\",\"v\",\"e\"]", 1L},
+                new Object[]{946684800000L, 6L, 0L, 0.16666666666666666D, "six", "[\"s\",\"i\",\"x\"]", 1L},
+                new Object[]{946684800000L, 7L, 1L, 0.14285714285714285D, "seven", "[\"s\",\"e\",\"v\",\"e\",\"n\"]", 1L},
+                new Object[]{946684800000L, 8L, 0L, 0.125D, "eight", "[\"e\",\"i\",\"g\",\"h\",\"t\"]", 1L},
+                new Object[]{946684800000L, 9L, 0L, 0.1111111111111111D, "nine", "[\"n\",\"i\",\"n\",\"e\"]", 1L},
+                new Object[]{946684800000L, 10L, 0L, 0.1D, "ten", "[\"t\",\"e\",\"n\"]", 1L}
             )
         )
         .run();
@@ -166,10 +179,10 @@ public class CalciteDartTest extends BaseCalciteQueryTest
         .sql("SELECT dim2 from foo group by dim2")
         .expectedResults(
             ImmutableList.of(
-                new Object[] {3L},
-                new Object[] {3L},
-                new Object[] {3L},
-                new Object[] {3L}
+                new Object[]{null},
+                new Object[]{""},
+                new Object[]{"a"},
+                new Object[]{"abc"}
             )
         )
         .run();

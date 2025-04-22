@@ -24,8 +24,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.google.common.base.Preconditions;
-import org.apache.druid.msq.indexing.LegacyMSQSpec.Builder;
 import org.apache.druid.msq.indexing.destination.MSQDestination;
+import org.apache.druid.msq.indexing.destination.TaskReportMSQDestination;
 import org.apache.druid.msq.kernel.QueryDefinition;
 import org.apache.druid.msq.kernel.WorkerAssignmentStrategy;
 import org.apache.druid.query.BaseQuery;
@@ -35,16 +35,17 @@ import org.apache.druid.sql.calcite.planner.ColumnMappings;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
-public abstract class MSQSpec
+public class MSQSpec
 {
-  protected final ColumnMappings columnMappings;
-  protected final MSQDestination destination;
-  protected final WorkerAssignmentStrategy assignmentStrategy;
-  protected final MSQTuningConfig tuningConfig;
-  protected final List<AggregatorFactory> compactionMetricSpec;
-  protected final QueryContext queryContext;
-  protected final QueryDefinition queryDef;
+  private final ColumnMappings columnMappings;
+  private final MSQDestination destination;
+  private final WorkerAssignmentStrategy assignmentStrategy;
+  private final MSQTuningConfig tuningConfig;
+  private final List<AggregatorFactory> compactionMetricSpec;
+  private final QueryContext queryContext;
+  private final QueryDefinition queryDef;
 
   public MSQSpec()
   {
@@ -75,11 +76,6 @@ public abstract class MSQSpec
     this.compactionMetricSpec = compactionMetricSpec1;
     this.queryContext = queryContext == null ? QueryContext.empty() : queryContext;
     this.queryDef = queryDef;
-  }
-
-  public static Builder builder()
-  {
-    return new Builder();
   }
 
   @JsonProperty("queryContext")
@@ -130,4 +126,99 @@ public abstract class MSQSpec
   {
     return queryDef;
   }
+
+  @Override
+  public boolean equals(Object o)
+  {
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    MSQSpec that = (MSQSpec) o;
+    return Objects.equals(columnMappings, that.columnMappings)
+           && Objects.equals(destination, that.destination)
+           && Objects.equals(assignmentStrategy, that.assignmentStrategy)
+           && Objects.equals(tuningConfig, that.tuningConfig)
+           && Objects.equals(compactionMetricSpec, that.compactionMetricSpec)
+           && Objects.equals(queryContext, that.queryContext)
+           && Objects.equals(queryDef, that.queryDef);
+  }
+
+  @Override
+  public int hashCode()
+  {
+    return Objects.hash(columnMappings, destination, assignmentStrategy, tuningConfig, compactionMetricSpec, queryContext, queryDef);
+  }
+
+  public static class Builder
+  {
+    protected ColumnMappings columnMappings;
+    protected MSQDestination destination = TaskReportMSQDestination.instance();
+    protected WorkerAssignmentStrategy assignmentStrategy = WorkerAssignmentStrategy.MAX;
+    protected MSQTuningConfig tuningConfig;
+    protected List<AggregatorFactory> compactionMetrics = Collections.emptyList();
+    protected QueryContext queryContext;
+    protected QueryDefinition queryDef;
+
+    public Builder queryDef(QueryDefinition queryDef)
+    {
+      this.queryDef = queryDef;
+      return this;
+    }
+
+    public Builder columnMappings(final ColumnMappings columnMappings)
+    {
+      this.columnMappings = columnMappings;
+      return this;
+    }
+
+    public Builder destination(final MSQDestination destination)
+    {
+      this.destination = destination;
+      return this;
+    }
+
+    public Builder assignmentStrategy(final WorkerAssignmentStrategy assignmentStrategy)
+    {
+      this.assignmentStrategy = assignmentStrategy;
+      return this;
+    }
+
+    public Builder tuningConfig(final MSQTuningConfig tuningConfig)
+    {
+      this.tuningConfig = tuningConfig;
+      return this;
+    }
+
+    public Builder compactionMetrics(List<AggregatorFactory> compactionMetrics)
+    {
+      this.compactionMetrics=compactionMetrics;
+      return this;
+    }
+
+    public Builder queryContext(QueryContext queryContext)
+    {
+      this.queryContext = queryContext;
+      return this;
+    }
+
+    public MSQSpec build()
+    {
+      if (destination == null) {
+        destination = TaskReportMSQDestination.instance();
+      }
+      return new MSQSpec(
+          columnMappings,
+          destination,
+          assignmentStrategy,
+          tuningConfig,
+          compactionMetrics,
+          queryContext,
+          queryDef
+      );
+    }
+  }
+
 }

@@ -34,10 +34,10 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntArraySet;
 import it.unimi.dsi.fastutil.ints.IntList;
 import it.unimi.dsi.fastutil.ints.IntSet;
+import org.apache.druid.client.broker.BrokerClient;
 import org.apache.druid.common.guava.FutureUtils;
 import org.apache.druid.data.input.StringTuple;
 import org.apache.druid.data.input.impl.DimensionsSpec;
-import org.apache.druid.discovery.BrokerClient;
 import org.apache.druid.error.DruidException;
 import org.apache.druid.frame.allocation.ArenaMemoryAllocator;
 import org.apache.druid.frame.channel.ReadableConcatFrameChannel;
@@ -92,8 +92,9 @@ import org.apache.druid.msq.counters.CounterSnapshots;
 import org.apache.druid.msq.counters.CounterSnapshotsTree;
 import org.apache.druid.msq.indexing.InputChannelFactory;
 import org.apache.druid.msq.indexing.InputChannelsImpl;
-import org.apache.druid.msq.indexing.MSQControllerTask;
 import org.apache.druid.msq.indexing.LegacyMSQSpec;
+import org.apache.druid.msq.indexing.MSQControllerTask;
+import org.apache.druid.msq.indexing.MSQSpec;
 import org.apache.druid.msq.indexing.MSQTuningConfig;
 import org.apache.druid.msq.indexing.WorkerCount;
 import org.apache.druid.msq.indexing.client.ControllerChatHandler;
@@ -158,6 +159,7 @@ import org.apache.druid.msq.statistics.PartialKeyStatisticsInformation;
 import org.apache.druid.msq.util.IntervalUtils;
 import org.apache.druid.msq.util.MSQFutureUtils;
 import org.apache.druid.msq.util.MultiStageQueryContext;
+import org.apache.druid.query.Query;
 import org.apache.druid.query.QueryContext;
 import org.apache.druid.query.aggregation.AggregatorFactory;
 import org.apache.druid.segment.IndexSpec;
@@ -182,6 +184,7 @@ import org.joda.time.DateTime;
 import org.joda.time.Interval;
 
 import javax.annotation.Nullable;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -213,7 +216,8 @@ public class ControllerImpl implements Controller
   private static final String RESULT_READER_CANCELLATION_ID = "result-reader";
 
   private final String queryId;
-  private final LegacyMSQSpec querySpec;
+  private final MSQSpec querySpec;
+  private final Query<?> legacyQuery;
   private final ResultsContext resultsContext;
   private final ControllerContext context;
   private volatile ControllerQueryKernelConfig queryKernelConfig;
@@ -297,6 +301,7 @@ public class ControllerImpl implements Controller
   {
     this.queryId = Preconditions.checkNotNull(queryId, "queryId");
     this.querySpec = Preconditions.checkNotNull(querySpec, "querySpec");
+    this.legacyQuery = querySpec.getQuery();
     this.resultsContext = Preconditions.checkNotNull(resultsContext, "resultsContext");
     this.context = Preconditions.checkNotNull(controllerContext, "controllerContext");
     this.queryKitSpecFactory = queryKitSpecFactory;
@@ -531,7 +536,7 @@ public class ControllerImpl implements Controller
     return msqTaskReportPayload;
   }
 
-  private void emitSummaryMetrics(final MSQTaskReportPayload msqTaskReportPayload, final LegacyMSQSpec querySpec)
+  private void emitSummaryMetrics(final MSQTaskReportPayload msqTaskReportPayload, final MSQSpec querySpec)
   {
     final Set<Integer> stagesToInclude = new HashSet<>();
     final MSQStagesReport stagesReport = msqTaskReportPayload.getStages();
@@ -638,13 +643,11 @@ public class ControllerImpl implements Controller
     final QueryContext queryContext = querySpec.getContext();
 
     final QueryDefinition queryDef;
-    // This conditional along with the atomic queryDef holder and other things
-    // should be removed after 33 is released
     if (querySpec.getQueryDef() == null) {
       QueryKitBasedMSQPlanner qkPlanner = new QueryKitBasedMSQPlanner(
           querySpec,
           resultsContext,
-          querySpec.getQuery(),
+          legacyQuery,
           context.jsonMapper(),
           queryKitSpecFactory.makeQueryKitSpec(
               QueryKitBasedMSQPlanner.makeQueryControllerToolKit(querySpec.getContext(), context.jsonMapper()),
@@ -1665,7 +1668,7 @@ public class ControllerImpl implements Controller
   }
 
   private static Function<Set<DataSegment>, Set<DataSegment>> addCompactionStateToSegments(
-      LegacyMSQSpec querySpec,
+      MSQSpec querySpec,
       ObjectMapper jsonMapper,
       DataSchema dataSchema,
       @Nullable ShardSpec shardSpec,
@@ -1743,7 +1746,8 @@ public class ControllerImpl implements Controller
         metricsSpec,
         transformSpec,
         indexSpec,
-        granularitySpec
+        granularitySpec,
+        dataSchema.getProjections()
     );
   }
 
@@ -1769,7 +1773,7 @@ public class ControllerImpl implements Controller
     }
   }
 
-  private static String getDataSourceForIngestion(final LegacyMSQSpec querySpec)
+  private static String getDataSourceForIngestion(final MSQSpec querySpec)
   {
     return ((DataSourceMSQDestination) querySpec.getDestination()).getDataSource();
   }

@@ -58,6 +58,7 @@ import org.apache.druid.msq.exec.WorkerStorageParameters;
 import org.apache.druid.msq.indexing.IndexerControllerContext;
 import org.apache.druid.msq.indexing.IndexerTableInputSpecSlicer;
 import org.apache.druid.msq.indexing.LegacyMSQSpec;
+import org.apache.druid.msq.indexing.MSQSpec;
 import org.apache.druid.msq.indexing.MSQWorkerTask;
 import org.apache.druid.msq.indexing.MSQWorkerTaskLauncher;
 import org.apache.druid.msq.indexing.MSQWorkerTaskLauncher.MSQWorkerTaskLauncherConfig;
@@ -72,6 +73,7 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 
 import javax.annotation.Nullable;
+
 import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
@@ -330,7 +332,7 @@ public class MSQTestControllerContext implements ControllerContext, DartControll
   @Override
   public WorkerManager newWorkerManager(
       String queryId,
-      LegacyMSQSpec querySpec,
+      MSQSpec querySpec,
       ControllerQueryKernelConfig queryKernelConfig,
       WorkerFailureListener workerFailureListener
   )

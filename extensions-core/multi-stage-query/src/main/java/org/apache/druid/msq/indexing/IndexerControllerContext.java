@@ -213,7 +213,7 @@ public class IndexerControllerContext implements ControllerContext
   @Override
   public WorkerManager newWorkerManager(
       final String queryId,
-      final LegacyMSQSpec querySpec,
+      final MSQSpec querySpec,
       final ControllerQueryKernelConfig queryKernelConfig,
       final WorkerFailureListener workerFailureListener
   )
@@ -328,7 +328,7 @@ public class IndexerControllerContext implements ControllerContext
    * @param querySpec MSQ query spec; used for
    */
   public static Map<String, Object> makeTaskContext(
-      final LegacyMSQSpec querySpec,
+      final MSQSpec querySpec,
       final ControllerQueryKernelConfig queryKernelConfig,
       final Map<String, Object> controllerTaskContext
   )
