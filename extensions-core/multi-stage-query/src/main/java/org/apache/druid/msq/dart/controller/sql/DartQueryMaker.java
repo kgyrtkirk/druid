@@ -40,7 +40,6 @@ import org.apache.druid.msq.dart.guice.DartControllerConfig;
 import org.apache.druid.msq.exec.Controller;
 import org.apache.druid.msq.exec.ControllerContext;
 import org.apache.druid.msq.exec.ControllerImpl;
-import org.apache.druid.msq.exec.QueryKitBasedMSQPlanner;
 import org.apache.druid.msq.exec.QueryListener;
 import org.apache.druid.msq.exec.ResultsContext;
 import org.apache.druid.msq.indexing.LegacyMSQSpec;
@@ -226,8 +225,14 @@ public class DartQueryMaker implements QueryMaker
         types.stream().map(p -> p.lhs).collect(Collectors.toList()),
         SqlResults.Context.fromPlannerContext(plannerContext)
     );
-
-    final LegacyMSQSpec querySpec = makeMSQSpec(druidQuery, dartQueryId, controllerContext, resultsContext);
+    final LegacyMSQSpec querySpec = MSQTaskQueryMaker.makeLegacyMSQSpec(
+        null,
+        druidQuery,
+        druidQuery.getQuery().context(),
+        fieldMapping,
+        plannerContext,
+        null // Only used for DML, which this isn't
+    );
 
     final ControllerImpl controller = new ControllerImpl(
         dartQueryId,
@@ -267,40 +272,6 @@ public class DartQueryMaker implements QueryMaker
       controllerRegistry.deregister(controllerHolder);
       throw e;
     }
-  }
-
-  private LegacyMSQSpec makeMSQSpec(DruidQuery druidQuery, final String dartQueryId, final ControllerContext controllerContext,
-      final ResultsContext resultsContext)
-  {
-    final LegacyMSQSpec querySpec = MSQTaskQueryMaker.makeLegacyMSQSpec(
-        null,
-        druidQuery,
-        druidQuery.getQuery().context(),
-        fieldMapping,
-        plannerContext,
-        null // Only used for DML, which this isn't
-    );
-
-    if(true) {
-      return querySpec;
-    }
-
-    ControllerContext context = controllerContext;
-
-    final QueryDefinition queryDef = new QueryKitBasedMSQPlanner(
-        querySpec,
-        resultsContext,
-        querySpec.getQuery(),
-        plannerContext.getJsonMapper(),
-        new DartQueryKitSpecFactory().makeQueryKitSpec(
-            QueryKitBasedMSQPlanner.makeQueryControllerToolKit(querySpec.getContext(), context.jsonMapper()),
-            dartQueryId,
-            querySpec.getTuningConfig(),
-            querySpec.getContext(),
-            controllerContext.queryKernelConfig(dartQueryId, querySpec)
-        )
-    ).makeQueryDefinition();
-    return querySpec.withQueryDef(queryDef);
   }
 
   /**

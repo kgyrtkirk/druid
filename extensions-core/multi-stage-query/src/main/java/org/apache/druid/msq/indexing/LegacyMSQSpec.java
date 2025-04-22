@@ -73,7 +73,7 @@ public class LegacyMSQSpec extends MSQSpec
   )
   {
     super(columnMappings, destination, assignmentStrategy, tuningConfig, queryDef);
-    Preconditions.checkArgument(query == null ^ queryDef != null, "Either query or queryDef must be null!");
+    Preconditions.checkArgument(query == null ^ queryDef == null, "Either query or queryDef must be null!");
     this.query = query;
   }
 
@@ -88,6 +88,7 @@ public class LegacyMSQSpec extends MSQSpec
     return query;
   }
 
+  @Override
   public String getId()
   {
     return getContext().getString(BaseQuery.QUERY_ID);
@@ -205,7 +206,6 @@ public class LegacyMSQSpec extends MSQSpec
     }
   }
 
-  // FIXME not necessery needed trright now
   public LegacyMSQSpec withQueryDef(QueryDefinition newQueryDef)
   {
     return new LegacyMSQSpec(
@@ -214,8 +214,6 @@ public class LegacyMSQSpec extends MSQSpec
         getDestination(),
         getAssignmentStrategy(),
         getTuningConfig(),
-        getCompactionMetricSpec(),
-        getContext(),
         newQueryDef
     );
   }
