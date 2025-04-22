@@ -44,6 +44,7 @@ import org.apache.druid.msq.exec.MSQTasks;
 import org.apache.druid.msq.exec.QueryKitSpecFactory;
 import org.apache.druid.msq.exec.ResultsContext;
 import org.apache.druid.msq.indexing.MSQControllerTask;
+import org.apache.druid.msq.indexing.MSQSpec;
 import org.apache.druid.msq.indexing.LegacyMSQSpec;
 import org.apache.druid.msq.indexing.MSQTuningConfig;
 import org.apache.druid.msq.indexing.destination.DataSourceMSQDestination;
@@ -53,6 +54,7 @@ import org.apache.druid.msq.indexing.destination.MSQDestination;
 import org.apache.druid.msq.indexing.destination.MSQSelectDestination;
 import org.apache.druid.msq.indexing.destination.MSQTerminalStageSpecFactory;
 import org.apache.druid.msq.indexing.destination.TaskReportMSQDestination;
+import org.apache.druid.msq.kernel.QueryDefinition;
 import org.apache.druid.msq.util.MSQTaskQueryMakerUtils;
 import org.apache.druid.msq.util.MultiStageQueryContext;
 import org.apache.druid.query.QueryContext;
@@ -153,7 +155,8 @@ public class MSQTaskQueryMaker implements QueryMaker
         druidQuery.getQuery().context(),
         fieldMapping,
         plannerContext,
-        terminalStageSpecFactory
+        terminalStageSpecFactory,
+        null
     );
 
     final MSQControllerTask controllerTask = new MSQControllerTask(
@@ -178,7 +181,8 @@ public class MSQTaskQueryMaker implements QueryMaker
       final QueryContext queryContext,
       final List<Entry<Integer, String>> fieldMapping,
       final PlannerContext plannerContext,
-      final MSQTerminalStageSpecFactory terminalStageSpecFactory
+      final MSQTerminalStageSpecFactory terminalStageSpecFactory,
+      final QueryDefinition queryDef
   )
   {
 
@@ -243,26 +247,41 @@ public class MSQTaskQueryMaker implements QueryMaker
 
     // This flag is to ensure backward compatibility, as brokers are upgraded after indexers/middlemanagers.
     nativeQueryContextOverrides.put(MultiStageQueryContext.WINDOW_FUNCTION_OPERATOR_TRANSFORMATION, true);
-    boolean isReindex = MSQControllerTask.isReplaceInputDataSourceTask(druidQuery.getQuery(), destination);
-    if (isReindex) {
-      nativeQueryContextOverrides.put(MultiStageQueryContext.CTX_IS_REINDEX, isReindex);
-    }
-
-    final LegacyMSQSpec querySpec =
-        LegacyMSQSpec.builder()
-               .query(druidQuery==null?null:druidQuery.getQuery().withOverriddenContext(nativeQueryContextOverrides))
-               .queryContext(queryContext.override(nativeQueryContextOverrides))
-               .columnMappings(new ColumnMappings(QueryUtils.buildColumnMappings(fieldMapping, druidQuery)))
-               .destination(destination)
-               .assignmentStrategy(MultiStageQueryContext.getAssignmentStrategy(sqlQueryContext))
-               .tuningConfig(makeMSQTuningConfig(plannerContext))
-               .build();
-
     if (druidQuery != null) {
-      MSQTaskQueryMakerUtils.validateRealtimeReindex(querySpec.getContext(), querySpec.getDestination(), druidQuery.getQuery());
+      boolean isReindex = MSQControllerTask.isReplaceInputDataSourceTask(druidQuery.getQuery(), destination);
+      if (isReindex) {
+        nativeQueryContextOverrides.put(MultiStageQueryContext.CTX_IS_REINDEX, isReindex);
+      }
+
+      final LegacyMSQSpec querySpec = LegacyMSQSpec.builder()
+          .query(druidQuery.getQuery().withOverriddenContext(nativeQueryContextOverrides))
+          .queryContext(queryContext.override(nativeQueryContextOverrides))
+          .columnMappings(new ColumnMappings(QueryUtils.buildColumnMappings(fieldMapping, druidQuery)))
+          .destination(destination)
+          .assignmentStrategy(MultiStageQueryContext.getAssignmentStrategy(sqlQueryContext))
+          .tuningConfig(makeMSQTuningConfig(plannerContext))
+          .build();
+
+      if (druidQuery != null) {
+        MSQTaskQueryMakerUtils
+            .validateRealtimeReindex(querySpec.getContext(), querySpec.getDestination(), druidQuery.getQuery());
+      }
+
+      return querySpec;
+    } else {
+      final LegacyMSQSpec querySpec = new MSQSpec.Builder()
+          .columnMappings(new ColumnMappings(QueryUtils.buildColumnMappings(fieldMapping, druidQuery)))
+          .destination(destination)
+          .assignmentStrategy(MultiStageQueryContext.getAssignmentStrategy(sqlQueryContext))
+          .tuningConfig(makeMSQTuningConfig(plannerContext))
+          .queryDef(queryDef)
+          .build()
+          .toLegacyMSQSpec();
+
+      return querySpec;
+
     }
 
-    return querySpec.withOverriddenContext(nativeQueryContext);
   }
 
   public static List<Pair<SqlTypeName, ColumnType>> getTypes(

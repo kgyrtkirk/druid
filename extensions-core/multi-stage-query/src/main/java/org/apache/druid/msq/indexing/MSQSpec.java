@@ -184,4 +184,9 @@ public class MSQSpec
       );
     }
   }
+
+  public LegacyMSQSpec toLegacyMSQSpec()
+  {
+    return LegacyMSQSpec.fromMSQSpec(this);
+  }
 }

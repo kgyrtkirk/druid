@@ -150,8 +150,9 @@ public class DartQueryMaker implements QueryMaker
         context,
         fieldMapping,
         plannerContext,
-        null // Only used for DML, which this isn't
-    ).withQueryDef(queryDef);
+        null, // Only used for DML, which this isn't
+        queryDef
+    );
 
     return extracted(context, querySpec);
 
@@ -231,7 +232,8 @@ public class DartQueryMaker implements QueryMaker
         druidQuery.getQuery().context(),
         fieldMapping,
         plannerContext,
-        null // Only used for DML, which this isn't
+        null, // Only used for DML, which this isn't
+        null
     );
 
     final ControllerImpl controller = new ControllerImpl(

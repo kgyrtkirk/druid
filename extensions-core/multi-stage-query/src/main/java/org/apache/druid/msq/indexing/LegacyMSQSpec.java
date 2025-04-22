@@ -209,12 +209,24 @@ public class LegacyMSQSpec extends MSQSpec
   public LegacyMSQSpec withQueryDef(QueryDefinition newQueryDef)
   {
     return new LegacyMSQSpec(
-        query,
+        null,
         getColumnMappings(),
         getDestination(),
         getAssignmentStrategy(),
         getTuningConfig(),
         newQueryDef
+    );
+  }
+
+  public static LegacyMSQSpec fromMSQSpec(MSQSpec msqSpec)
+  {
+    return new LegacyMSQSpec(
+        null,
+        msqSpec.getColumnMappings(),
+        msqSpec.getDestination(),
+        msqSpec.getAssignmentStrategy(),
+        msqSpec.getTuningConfig(),
+        msqSpec.getQueryDef()
     );
   }
 }
