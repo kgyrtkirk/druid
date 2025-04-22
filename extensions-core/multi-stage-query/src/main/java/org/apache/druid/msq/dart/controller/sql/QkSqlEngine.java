@@ -27,7 +27,7 @@ import org.apache.calcite.tools.ValidationException;
 import org.apache.druid.error.DruidException;
 import org.apache.druid.msq.exec.ControllerContext;
 import org.apache.druid.msq.exec.QueryKitBasedMSQPlanner;
-import org.apache.druid.msq.indexing.MSQSpec;
+import org.apache.druid.msq.indexing.LegacyMSQSpec;
 import org.apache.druid.msq.kernel.QueryDefinition;
 import org.apache.druid.msq.sql.DartQueryKitSpecFactory;
 import org.apache.druid.msq.sql.MSQTaskQueryMaker;
@@ -153,16 +153,16 @@ public class QkSqlEngine implements SqlEngine
     {
       QueryContext queryContext = druidQuery.getQuery().context();
 
-      MSQSpec queryDef = buildQueryDef(druidQuery, dartQueryMaker.fieldMapping, queryContext);
+      LegacyMSQSpec queryDef = buildQueryDef(druidQuery, dartQueryMaker.fieldMapping, queryContext);
 
 //      QueryResponse<Object[]> a = dartQueryMaker.runQueryDef(queryDef, queryContext);
       QueryResponse<Object[]> a = dartQueryMaker.runMSQSpec(queryDef, queryContext);
       return new PlannerResult(() -> a, null);
     }
 
-    private MSQSpec buildQueryDef(DruidQuery druidQuery, List<Entry<Integer, String>> fieldMapping, QueryContext queryContext)
+    private LegacyMSQSpec buildQueryDef(DruidQuery druidQuery, List<Entry<Integer, String>> fieldMapping, QueryContext queryContext)
     {
-      final MSQSpec querySpec = MSQTaskQueryMaker.makeQuerySpec0(
+      final LegacyMSQSpec querySpec = MSQTaskQueryMaker.makeQuerySpec0(
           null,
           druidQuery,
           druidQuery.getQuery().context(),

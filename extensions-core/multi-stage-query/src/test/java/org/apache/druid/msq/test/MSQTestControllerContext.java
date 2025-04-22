@@ -57,7 +57,7 @@ import org.apache.druid.msq.exec.WorkerMemoryParameters;
 import org.apache.druid.msq.exec.WorkerStorageParameters;
 import org.apache.druid.msq.indexing.IndexerControllerContext;
 import org.apache.druid.msq.indexing.IndexerTableInputSpecSlicer;
-import org.apache.druid.msq.indexing.MSQSpec;
+import org.apache.druid.msq.indexing.LegacyMSQSpec;
 import org.apache.druid.msq.indexing.MSQWorkerTask;
 import org.apache.druid.msq.indexing.MSQWorkerTaskLauncher;
 import org.apache.druid.msq.indexing.MSQWorkerTaskLauncher.MSQWorkerTaskLauncherConfig;
@@ -277,7 +277,7 @@ public class MSQTestControllerContext implements ControllerContext, DartControll
   };
 
   @Override
-  public ControllerQueryKernelConfig queryKernelConfig(String queryId, MSQSpec querySpec)
+  public ControllerQueryKernelConfig queryKernelConfig(String queryId, LegacyMSQSpec querySpec)
   {
     return IndexerControllerContext.makeQueryKernelConfig(querySpec, new ControllerMemoryParameters(100_000_000));
   }
@@ -330,7 +330,7 @@ public class MSQTestControllerContext implements ControllerContext, DartControll
   @Override
   public WorkerManager newWorkerManager(
       String queryId,
-      MSQSpec querySpec,
+      LegacyMSQSpec querySpec,
       ControllerQueryKernelConfig queryKernelConfig,
       WorkerFailureListener workerFailureListener
   )

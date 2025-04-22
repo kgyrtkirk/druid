@@ -93,7 +93,7 @@ import org.apache.druid.msq.counters.CounterSnapshotsTree;
 import org.apache.druid.msq.indexing.InputChannelFactory;
 import org.apache.druid.msq.indexing.InputChannelsImpl;
 import org.apache.druid.msq.indexing.MSQControllerTask;
-import org.apache.druid.msq.indexing.MSQSpec;
+import org.apache.druid.msq.indexing.LegacyMSQSpec;
 import org.apache.druid.msq.indexing.MSQTuningConfig;
 import org.apache.druid.msq.indexing.WorkerCount;
 import org.apache.druid.msq.indexing.client.ControllerChatHandler;
@@ -213,7 +213,7 @@ public class ControllerImpl implements Controller
   private static final String RESULT_READER_CANCELLATION_ID = "result-reader";
 
   private final String queryId;
-  private final MSQSpec querySpec;
+  private final LegacyMSQSpec querySpec;
   private final ResultsContext resultsContext;
   private final ControllerContext context;
   private volatile ControllerQueryKernelConfig queryKernelConfig;
@@ -289,7 +289,7 @@ public class ControllerImpl implements Controller
 
   public ControllerImpl(
       final String queryId,
-      final MSQSpec querySpec,
+      final LegacyMSQSpec querySpec,
       final ResultsContext resultsContext,
       final ControllerContext controllerContext,
       final QueryKitSpecFactory queryKitSpecFactory
@@ -531,7 +531,7 @@ public class ControllerImpl implements Controller
     return msqTaskReportPayload;
   }
 
-  private void emitSummaryMetrics(final MSQTaskReportPayload msqTaskReportPayload, final MSQSpec querySpec)
+  private void emitSummaryMetrics(final MSQTaskReportPayload msqTaskReportPayload, final LegacyMSQSpec querySpec)
   {
     final Set<Integer> stagesToInclude = new HashSet<>();
     final MSQStagesReport stagesReport = msqTaskReportPayload.getStages();
@@ -1665,7 +1665,7 @@ public class ControllerImpl implements Controller
   }
 
   private static Function<Set<DataSegment>, Set<DataSegment>> addCompactionStateToSegments(
-      MSQSpec querySpec,
+      LegacyMSQSpec querySpec,
       ObjectMapper jsonMapper,
       DataSchema dataSchema,
       @Nullable ShardSpec shardSpec,
@@ -1769,7 +1769,7 @@ public class ControllerImpl implements Controller
     }
   }
 
-  private static String getDataSourceForIngestion(final MSQSpec querySpec)
+  private static String getDataSourceForIngestion(final LegacyMSQSpec querySpec)
   {
     return ((DataSourceMSQDestination) querySpec.getDestination()).getDataSource();
   }

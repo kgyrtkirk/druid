@@ -43,7 +43,7 @@ import org.apache.druid.msq.exec.ControllerImpl;
 import org.apache.druid.msq.exec.QueryKitBasedMSQPlanner;
 import org.apache.druid.msq.exec.QueryListener;
 import org.apache.druid.msq.exec.ResultsContext;
-import org.apache.druid.msq.indexing.MSQSpec;
+import org.apache.druid.msq.indexing.LegacyMSQSpec;
 import org.apache.druid.msq.indexing.TaskReportQueryListener;
 import org.apache.druid.msq.indexing.destination.TaskReportMSQDestination;
 import org.apache.druid.msq.indexing.error.CanceledFault;
@@ -145,7 +145,7 @@ public class DartQueryMaker implements QueryMaker
     }
 
 
-    final MSQSpec querySpec = MSQTaskQueryMaker.makeQuerySpec0(
+    final LegacyMSQSpec querySpec = MSQTaskQueryMaker.makeQuerySpec0(
         null,
         null,
         context,
@@ -160,13 +160,13 @@ public class DartQueryMaker implements QueryMaker
 
 
 
-  public QueryResponse<Object[]> runMSQSpec(MSQSpec queryDef, QueryContext queryContext)
+  public QueryResponse<Object[]> runMSQSpec(LegacyMSQSpec queryDef, QueryContext queryContext)
   {
     return extracted(queryContext, queryDef);
   }
 
 
-  public QueryResponse<Object[]> extracted(QueryContext context, final MSQSpec querySpec)
+  public QueryResponse<Object[]> extracted(QueryContext context, final LegacyMSQSpec querySpec)
   {
     final String dartQueryId = context.getString(DartSqlEngine.CTX_DART_QUERY_ID);
     final ControllerContext controllerContext = controllerContextFactory.newContext(dartQueryId);
@@ -227,7 +227,7 @@ public class DartQueryMaker implements QueryMaker
         SqlResults.Context.fromPlannerContext(plannerContext)
     );
 
-    final MSQSpec querySpec = extracted(druidQuery, dartQueryId, controllerContext, resultsContext);
+    final LegacyMSQSpec querySpec = extracted(druidQuery, dartQueryId, controllerContext, resultsContext);
 
     final ControllerImpl controller = new ControllerImpl(
         dartQueryId,
@@ -269,10 +269,10 @@ public class DartQueryMaker implements QueryMaker
     }
   }
 
-  private MSQSpec extracted(DruidQuery druidQuery, final String dartQueryId, final ControllerContext controllerContext,
+  private LegacyMSQSpec extracted(DruidQuery druidQuery, final String dartQueryId, final ControllerContext controllerContext,
       final ResultsContext resultsContext)
   {
-    final MSQSpec querySpec = MSQTaskQueryMaker.makeQuerySpec0(
+    final LegacyMSQSpec querySpec = MSQTaskQueryMaker.makeQuerySpec0(
         null,
         druidQuery,
         druidQuery.getQuery().context(),

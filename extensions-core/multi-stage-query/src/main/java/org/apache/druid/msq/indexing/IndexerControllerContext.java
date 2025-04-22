@@ -119,7 +119,7 @@ public class IndexerControllerContext implements ControllerContext
   @Override
   public ControllerQueryKernelConfig queryKernelConfig(
       final String queryId,
-      final MSQSpec querySpec
+      final LegacyMSQSpec querySpec
   )
   {
     final ControllerMemoryParameters memoryParameters =
@@ -213,7 +213,7 @@ public class IndexerControllerContext implements ControllerContext
   @Override
   public WorkerManager newWorkerManager(
       final String queryId,
-      final MSQSpec querySpec,
+      final LegacyMSQSpec querySpec,
       final ControllerQueryKernelConfig queryKernelConfig,
       final WorkerFailureListener workerFailureListener
   )
@@ -237,10 +237,10 @@ public class IndexerControllerContext implements ControllerContext
   }
 
   /**
-   * Helper method for {@link #queryKernelConfig(String, MSQSpec)}. Also used in tests.
+   * Helper method for {@link #queryKernelConfig(String, LegacyMSQSpec)}. Also used in tests.
    */
   public static ControllerQueryKernelConfig makeQueryKernelConfig(
-      final MSQSpec querySpec,
+      final LegacyMSQSpec querySpec,
       final ControllerMemoryParameters memoryParameters
   )
   {
@@ -328,7 +328,7 @@ public class IndexerControllerContext implements ControllerContext
    * @param querySpec MSQ query spec; used for
    */
   public static Map<String, Object> makeTaskContext(
-      final MSQSpec querySpec,
+      final LegacyMSQSpec querySpec,
       final ControllerQueryKernelConfig queryKernelConfig,
       final Map<String, Object> controllerTaskContext
   )

@@ -94,7 +94,7 @@ import org.apache.druid.msq.guice.MSQSqlModule;
 import org.apache.druid.msq.guice.MultiStageQuery;
 import org.apache.druid.msq.indexing.InputChannelFactory;
 import org.apache.druid.msq.indexing.MSQControllerTask;
-import org.apache.druid.msq.indexing.MSQSpec;
+import org.apache.druid.msq.indexing.LegacyMSQSpec;
 import org.apache.druid.msq.indexing.MSQTuningConfig;
 import org.apache.druid.msq.indexing.destination.DataSourceMSQDestination;
 import org.apache.druid.msq.indexing.destination.SegmentGenerationTerminalStageSpecFactory;
@@ -861,7 +861,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
     return payload.getStatus().getErrorReport();
   }
 
-  private void assertMSQSpec(MSQSpec expectedMSQSpec, MSQSpec querySpecForTask)
+  private void assertMSQSpec(LegacyMSQSpec expectedMSQSpec, LegacyMSQSpec querySpecForTask)
   {
     // Assert.assertEquals(expectedMSQSpec.getQuery(),
     // querySpecForTask.getQuery());
@@ -914,7 +914,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
     protected Map<String, Object> queryContext = DEFAULT_MSQ_CONTEXT;
     protected List<TypedValue> dynamicParameters = new ArrayList<>();
     protected List<MSQResultsReport.ColumnAndType> expectedRowSignature = null;
-    protected MSQSpec expectedMSQSpec = null;
+    protected LegacyMSQSpec expectedMSQSpec = null;
     protected MSQTuningConfig expectedTuningConfig = null;
     protected Set<SegmentId> expectedSegments = null;
     protected CompactionState expectedLastCompactionState = null;
@@ -1006,7 +1006,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
       return asBuilder();
     }
 
-    public Builder setExpectedMSQSpec(MSQSpec expectedMSQSpec)
+    public Builder setExpectedMSQSpec(LegacyMSQSpec expectedMSQSpec)
     {
       this.expectedMSQSpec = expectedMSQSpec;
       return asBuilder();
@@ -1276,7 +1276,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
         verifyCounters(reportPayload.getCounters());
 
         MSQControllerTask msqControllerTask = indexingServiceClient.getMSQControllerTask(controllerId);
-        MSQSpec foundSpec = msqControllerTask.getQuerySpec();
+        LegacyMSQSpec foundSpec = msqControllerTask.getQuerySpec();
         verifyLookupLoadingInfoInTaskContext(msqControllerTask.getContext());
         log.info(
             "found generated segments: %s",
@@ -1490,7 +1490,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
 
     // Made the visibility public to aid adding ut's easily with minimum parameters to set.
     @Nullable
-    public Pair<MSQSpec, Pair<List<MSQResultsReport.ColumnAndType>, List<Object[]>>> runQueryWithResult()
+    public Pair<LegacyMSQSpec, Pair<List<MSQResultsReport.ColumnAndType>, List<Object[]>>> runQueryWithResult()
     {
       readyToRun();
       Preconditions.checkArgument(
@@ -1534,7 +1534,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
           MSQControllerTask msqControllerTask = indexingServiceClient.getMSQControllerTask(controllerId);
           verifyLookupLoadingInfoInTaskContext(msqControllerTask.getContext());
 
-          final MSQSpec spec = msqControllerTask.getQuerySpec();
+          final LegacyMSQSpec spec = msqControllerTask.getQuerySpec();
           final List<Object[]> rows;
 
           if (spec.getDestination() instanceof TaskReportMSQDestination) {
@@ -1611,7 +1611,7 @@ public class MSQTestBase extends BaseCalciteQueryTest
         Preconditions.checkArgument(expectedRowSignature != null, "Row signature cannot be null");
         Preconditions.checkArgument(expectedMSQSpec != null, "MultiStageQuery Query spec cannot be null ");
       }
-      Pair<MSQSpec, Pair<List<MSQResultsReport.ColumnAndType>, List<Object[]>>> specAndResults = runQueryWithResult();
+      Pair<LegacyMSQSpec, Pair<List<MSQResultsReport.ColumnAndType>, List<Object[]>>> specAndResults = runQueryWithResult();
 
       if (specAndResults == null) { // A fault was expected and the assertion has been done in the runQueryWithResult
         return;

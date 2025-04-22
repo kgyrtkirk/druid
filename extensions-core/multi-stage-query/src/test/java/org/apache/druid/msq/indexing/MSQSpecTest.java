@@ -30,7 +30,7 @@ public class MSQSpecTest
   @Test
   public void testEquals()
   {
-    EqualsVerifier.forClass(MSQSpec.class)
+    EqualsVerifier.forClass(LegacyMSQSpec.class)
                   .withNonnullFields("query", "destination", "tuningConfig")
                   .withPrefabValues(
                       IndexSpec.class,

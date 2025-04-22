@@ -20,55 +20,45 @@
 package org.apache.druid.msq.indexing;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.google.common.base.Preconditions;
+import org.apache.druid.msq.indexing.LegacyMSQSpec.Builder;
 import org.apache.druid.msq.indexing.destination.MSQDestination;
-import org.apache.druid.msq.indexing.destination.TaskReportMSQDestination;
 import org.apache.druid.msq.kernel.QueryDefinition;
 import org.apache.druid.msq.kernel.WorkerAssignmentStrategy;
 import org.apache.druid.query.BaseQuery;
-import org.apache.druid.query.Query;
 import org.apache.druid.query.QueryContext;
 import org.apache.druid.query.aggregation.AggregatorFactory;
 import org.apache.druid.sql.calcite.planner.ColumnMappings;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
-/**
- * Legacy MSQSpec with a native query in it.
- *
- * Should only be used on task submission API to help ensure correct behaviour during upgrade.
- */
-public class MSQSpec extends MSQSpec0
+public abstract class MSQSpec
 {
-  private final Query<?> query;
+  protected final ColumnMappings columnMappings;
+  protected final MSQDestination destination;
+  protected final WorkerAssignmentStrategy assignmentStrategy;
+  protected final MSQTuningConfig tuningConfig;
+  protected final List<AggregatorFactory> compactionMetricSpec;
+  protected final QueryContext queryContext;
+  protected final QueryDefinition queryDef;
 
-  // jackson defaults
   public MSQSpec()
   {
-    super();
-    this.query = null;
-  }
-
-  public MSQSpec(
-      @JsonProperty("query") Query<?> query,
-      @JsonProperty("columnMappings") ColumnMappings columnMappings,
-      @JsonProperty("destination") MSQDestination destination,
-      @JsonProperty("assignmentStrategy") WorkerAssignmentStrategy assignmentStrategy,
-      @JsonProperty("tuningConfig") MSQTuningConfig tuningConfig,
-      @JsonProperty("compactionMetricSpec") List<AggregatorFactory> compactionMetricSpec1,
-      @JsonProperty("queryContext") QueryContext queryContext)
-  {
-    this(
-        query, columnMappings, destination, assignmentStrategy, tuningConfig, compactionMetricSpec1, queryContext, null
-    );
+    columnMappings = null;
+    destination = null;
+    assignmentStrategy = null;
+    tuningConfig = null;
+    compactionMetricSpec = Collections.emptyList();
+    queryContext = QueryContext.empty();
+    queryDef = null;
   }
 
   @JsonCreator
   public MSQSpec(
-      @JsonProperty("query") Query<?> query,
       @JsonProperty("columnMappings") ColumnMappings columnMappings,
       @JsonProperty("destination") MSQDestination destination,
       @JsonProperty("assignmentStrategy") WorkerAssignmentStrategy assignmentStrategy,
@@ -78,8 +68,13 @@ public class MSQSpec extends MSQSpec0
       @JsonProperty("queryDef") QueryDefinition queryDef
   )
   {
-    super(columnMappings, destination, assignmentStrategy, tuningConfig, compactionMetricSpec1, queryContext, queryDef);
-    this.query = query;//Preconditions.checkNotNull(query, "query");
+    this.columnMappings = Preconditions.checkNotNull(columnMappings, "columnMappings");
+    this.destination = Preconditions.checkNotNull(destination, "destination");
+    this.assignmentStrategy = Preconditions.checkNotNull(assignmentStrategy, "assignmentStrategy");
+    this.tuningConfig = Preconditions.checkNotNull(tuningConfig, "tuningConfig");
+    this.compactionMetricSpec = compactionMetricSpec1;
+    this.queryContext = queryContext == null ? QueryContext.empty() : queryContext;
+    this.queryDef = queryDef;
   }
 
   public static Builder builder()
@@ -87,10 +82,41 @@ public class MSQSpec extends MSQSpec0
     return new Builder();
   }
 
-  @JsonProperty
-  public Query<?> getQuery()
+  @JsonProperty("queryContext")
+  @JsonInclude(value = Include.NON_DEFAULT)
+  public QueryContext getContext()
   {
-    return query;
+    return queryContext;
+  }
+
+  @JsonProperty("columnMappings")
+  public ColumnMappings getColumnMappings()
+  {
+    return columnMappings;
+  }
+
+  @JsonProperty
+  public MSQDestination getDestination()
+  {
+    return destination;
+  }
+
+  @JsonProperty
+  public WorkerAssignmentStrategy getAssignmentStrategy()
+  {
+    return assignmentStrategy;
+  }
+
+  @JsonProperty
+  public MSQTuningConfig getTuningConfig()
+  {
+    return tuningConfig;
+  }
+
+  @JsonProperty("compactionMetricSpec")
+  public List<AggregatorFactory> getCompactionMetricSpec()
+  {
+    return compactionMetricSpec;
   }
 
   public String getId()
@@ -98,129 +124,10 @@ public class MSQSpec extends MSQSpec0
     return getContext().getString(BaseQuery.QUERY_ID);
   }
 
-  public MSQSpec withOverriddenContext(Map<String, Object> contextOverride)
+  @JsonProperty("queryDef")
+  @JsonInclude(value = Include.NON_NULL)
+  public QueryDefinition getQueryDef()
   {
-    if (contextOverride == null || contextOverride.isEmpty()) {
-      return this;
-    } else {
-      return new MSQSpec(
-          query != null ? query.withOverriddenContext(contextOverride) : null,
-          columnMappings,
-          destination,
-          assignmentStrategy,
-          tuningConfig,
-          compactionMetricSpec,
-          queryContext.override(contextOverride)
-      );
-    }
-  }
-
-  @Override
-  public boolean equals(Object o)
-  {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    MSQSpec that = (MSQSpec) o;
-    return Objects.equals(query, that.query)
-           && Objects.equals(columnMappings, that.columnMappings)
-           && Objects.equals(destination, that.destination)
-           && Objects.equals(assignmentStrategy, that.assignmentStrategy)
-           && Objects.equals(tuningConfig, that.tuningConfig);
-  }
-
-  @Override
-  public int hashCode()
-  {
-    return Objects.hash(query, columnMappings, destination, assignmentStrategy, tuningConfig);
-  }
-
-  public static class Builder
-  {
-    private Query<?> query;
-    private ColumnMappings columnMappings;
-    private MSQDestination destination = TaskReportMSQDestination.instance();
-    private WorkerAssignmentStrategy assignmentStrategy = WorkerAssignmentStrategy.MAX;
-    private MSQTuningConfig tuningConfig;
-    private List<AggregatorFactory> compactionMetrics = Collections.emptyList();
-    private QueryContext queryContext;
-    private QueryDefinition queryDef;
-
-    @Deprecated
-    public Builder query(Query<?> query)
-    {
-      this.query = query;
-      return this;
-    }
-
-    public Builder queryDef(QueryDefinition queryDef)
-    {
-      this.queryDef = queryDef;
-      return this;
-    }
-
-    public Builder columnMappings(final ColumnMappings columnMappings)
-    {
-      this.columnMappings = columnMappings;
-      return this;
-    }
-
-    public Builder destination(final MSQDestination destination)
-    {
-      this.destination = destination;
-      return this;
-    }
-
-    public Builder assignmentStrategy(final WorkerAssignmentStrategy assignmentStrategy)
-    {
-      this.assignmentStrategy = assignmentStrategy;
-      return this;
-    }
-
-    public Builder tuningConfig(final MSQTuningConfig tuningConfig)
-    {
-      this.tuningConfig = tuningConfig;
-      return this;
-    }
-
-    public Builder compactionMetrics(List<AggregatorFactory> compactionMetrics)
-    {
-      this.compactionMetrics=compactionMetrics;
-      return this;
-    }
-
-    public MSQSpec build()
-    {
-      if (destination == null) {
-        destination = TaskReportMSQDestination.instance();
-      }
-      QueryContext neqQCTX = QueryContext.empty();
-      if (query != null) {
-        neqQCTX = query.context();
-      }
-      neqQCTX = neqQCTX .override(queryContext);
-      return new MSQSpec(
-          query, columnMappings, destination, assignmentStrategy, tuningConfig, compactionMetrics,
-          neqQCTX,
-          queryDef
-      );
-    }
-
-    public Builder queryContext(QueryContext queryContext)
-    {
-      this.queryContext = queryContext;
-      return this;
-    }
-  }
-
-  public MSQSpec withQueryDef(QueryDefinition newQueryDef)
-  {
-    return new MSQSpec(
-        query, columnMappings, destination, assignmentStrategy, tuningConfig, compactionMetricSpec, queryContext,
-        newQueryDef
-    );
+    return queryDef;
   }
 }
