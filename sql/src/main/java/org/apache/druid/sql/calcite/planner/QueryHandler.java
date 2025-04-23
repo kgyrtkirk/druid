@@ -462,7 +462,7 @@ public abstract class QueryHandler extends SqlStatementHandler.BaseStatementHand
       objectNode.set("signature", jsonMapper.convertValue(druidQuery.getOutputRowSignature(), ArrayNode.class));
       objectNode.set(
           "columnMappings",
-          jsonMapper.convertValue(QueryUtils.buildColumnMappings(relRoot.fields, druidQuery), ArrayNode.class));
+          jsonMapper.convertValue(QueryUtils.buildColumnMappings(relRoot.fields, druidQuery.getOutputRowSignature()), ArrayNode.class));
       nativeQueriesArrayNode.add(objectNode);
     }
 

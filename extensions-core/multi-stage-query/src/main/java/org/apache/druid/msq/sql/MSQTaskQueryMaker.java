@@ -257,7 +257,7 @@ public class MSQTaskQueryMaker implements QueryMaker
       final LegacyMSQSpec querySpec = LegacyMSQSpec.builder()
           .query(druidQuery.getQuery())
           .queryContext(queryContext.override(nativeQueryContextOverrides))
-          .columnMappings(new ColumnMappings(QueryUtils.buildColumnMappings(fieldMapping, druidQuery)))
+          .columnMappings(new ColumnMappings(QueryUtils.buildColumnMappings(fieldMapping, druidQuery.getOutputRowSignature())))
           .destination(destination)
           .assignmentStrategy(MultiStageQueryContext.getAssignmentStrategy(sqlQueryContext))
           .tuningConfig(makeMSQTuningConfig(plannerContext))
@@ -271,7 +271,7 @@ public class MSQTaskQueryMaker implements QueryMaker
       return querySpec;
     } else {
       final LegacyMSQSpec querySpec = new MSQSpec.Builder()
-          .columnMappings(new ColumnMappings(QueryUtils.buildColumnMappings(fieldMapping, druidQuery)))
+          .columnMappings(new ColumnMappings(QueryUtils.buildColumnMappings(fieldMapping, druidQuery.getOutputRowSignature())))
           .destination(destination)
           .assignmentStrategy(MultiStageQueryContext.getAssignmentStrategy(sqlQueryContext))
           .tuningConfig(makeMSQTuningConfig(plannerContext))
