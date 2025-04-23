@@ -54,7 +54,8 @@ public class QueryDefinition
   @JsonInclude(JsonInclude.Include.NON_DEFAULT)
   private final QueryContext context;
 
-  private QueryDefinition() {
+  private QueryDefinition()
+  {
     this.stageDefinitions = null;
     this.finalStage = null;
     this.context = QueryContext.empty();
@@ -74,8 +75,7 @@ public class QueryDefinition
   @JsonCreator
   static QueryDefinition create(
       @JsonProperty("stages") final List<StageDefinition> stageDefinitions,
-      @JsonProperty("context") QueryContext context
-      )
+      @JsonProperty("context") QueryContext context)
   {
     final Map<StageId, StageDefinition> stageMap = new HashMap<>();
     final Set<StageId> nonFinalStages = new HashSet<>();
@@ -173,13 +173,15 @@ public class QueryDefinition
       return false;
     }
     QueryDefinition that = (QueryDefinition) o;
-    return Objects.equals(stageDefinitions, that.stageDefinitions) && Objects.equals(finalStage, that.finalStage);
+    return Objects.equals(stageDefinitions, that.stageDefinitions) &&
+        Objects.equals(finalStage, that.finalStage) &&
+        Objects.equals(context, that.context);
   }
 
   @Override
   public int hashCode()
   {
-    return Objects.hash(stageDefinitions, finalStage);
+    return Objects.hash(stageDefinitions, finalStage, context);
   }
 
   @Override
