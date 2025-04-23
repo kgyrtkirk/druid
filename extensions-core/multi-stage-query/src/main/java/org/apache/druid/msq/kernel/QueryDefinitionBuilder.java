@@ -86,7 +86,8 @@ public class QueryDefinitionBuilder
   {
     final List<StageDefinition> stageDefinitions =
         stageBuilders.stream().map(builder -> builder.build(queryId)).collect(Collectors.toList());
+    StageDefinition st = stageDefinitions.get(stageDefinitions.size() - 1);
 
-    return QueryDefinition.create(stageDefinitions, null);
+    return QueryDefinition.create(stageDefinitions, null, st.getSignature());
   }
 }

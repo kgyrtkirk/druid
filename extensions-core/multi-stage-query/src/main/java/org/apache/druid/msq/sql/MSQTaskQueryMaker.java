@@ -271,7 +271,7 @@ public class MSQTaskQueryMaker implements QueryMaker
       return querySpec;
     } else {
       final LegacyMSQSpec querySpec = new MSQSpec.Builder()
-          .columnMappings(new ColumnMappings(QueryUtils.buildColumnMappings(fieldMapping, druidQuery.getOutputRowSignature())))
+          .columnMappings(new ColumnMappings(QueryUtils.buildColumnMappings(fieldMapping, queryDef.getOutputRowSignature())))
           .destination(destination)
           .assignmentStrategy(MultiStageQueryContext.getAssignmentStrategy(sqlQueryContext))
           .tuningConfig(makeMSQTuningConfig(plannerContext))
