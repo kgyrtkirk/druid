@@ -169,6 +169,7 @@ public class QkSqlEngine implements SqlEngine
           fieldMapping,
           plannerContext,
           null // Only used for DML, which this isn't
+          ,null
       );
 
       final String dartQueryId = queryContext.getString(DartSqlEngine.CTX_DART_QUERY_ID);
