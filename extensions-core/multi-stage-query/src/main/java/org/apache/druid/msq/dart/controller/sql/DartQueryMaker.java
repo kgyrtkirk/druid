@@ -21,6 +21,7 @@ package org.apache.druid.msq.dart.controller.sql;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Iterators;
+import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.sql.type.SqlTypeName;
 import org.apache.druid.error.DruidException;
 import org.apache.druid.io.LimitedOutputStream;
@@ -132,7 +133,7 @@ public class DartQueryMaker implements QueryMaker
 
 
 
-  public QueryResponse<Object[]> runQueryDef(QueryDefinition queryDef, QueryContext context)
+  public QueryResponse<Object[]> runQueryDef(QueryDefinition queryDef, QueryContext context, RelDataType rowType)
   {
 
     if (!plannerContext.getAuthorizationResult().allowAccessWithNoRestriction()) {
@@ -154,7 +155,7 @@ public class DartQueryMaker implements QueryMaker
         queryDef
     );
 
-    return extracted(context, querySpec);
+    return extracted(context, querySpec, rowType);
 
   }
 
@@ -162,15 +163,17 @@ public class DartQueryMaker implements QueryMaker
 
   public QueryResponse<Object[]> runMSQSpec(LegacyMSQSpec queryDef, QueryContext queryContext)
   {
-    return extracted(queryContext, queryDef);
+    return extracted(queryContext, queryDef, null);
   }
 
 
-  public QueryResponse<Object[]> extracted(QueryContext context, final LegacyMSQSpec querySpec)
+  public QueryResponse<Object[]> extracted(QueryContext context, final LegacyMSQSpec querySpec, RelDataType rowType)
   {
     final String dartQueryId = context.getString(DartSqlEngine.CTX_DART_QUERY_ID);
     final ControllerContext controllerContext = controllerContextFactory.newContext(dartQueryId);
-    final ResultsContext resultsContext = makeDefaultResultContext();
+
+    final ResultsContext resultsContext = makeDefaultResultContext(querySpec.getQueryDef(), rowType);
+
     final ControllerImpl controller = new ControllerImpl(
         dartQueryId,
         querySpec,
@@ -210,6 +213,8 @@ public class DartQueryMaker implements QueryMaker
       throw e;
     }
   }
+
+
 
   public QueryResponse<Object[]> runQuery(DruidQuery druidQuery)
   {
@@ -585,8 +590,23 @@ public class DartQueryMaker implements QueryMaker
 
   public ResultsContext makeDefaultResultContext()
   {
+
     final ResultsContext resultsContext = new ResultsContext(
         null,     // not mandatory
+        SqlResults.Context.fromPlannerContext(plannerContext)
+    );
+    return resultsContext;
+  }
+
+  private ResultsContext makeDefaultResultContext(QueryDefinition queryDef, RelDataType rowType)
+  {
+
+    final List<Pair<SqlTypeName, ColumnType>> types =
+        MSQTaskQueryMaker.getTypes3(fieldMapping, plannerContext, rowType, queryDef.getOutputRowSignature());
+
+
+    final ResultsContext resultsContext = new ResultsContext(
+        types.stream().map(p -> p.lhs).collect(Collectors.toList()),
         SqlResults.Context.fromPlannerContext(plannerContext)
     );
     return resultsContext;

@@ -96,6 +96,8 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static org.junit.Assert.assertTrue;
+
 public class MSQTaskQueryMaker implements QueryMaker
 {
   public static final String USER_KEY = "__user";
@@ -284,6 +286,42 @@ public class MSQTaskQueryMaker implements QueryMaker
     }
 
   }
+
+  public static List<Pair<SqlTypeName, ColumnType>> getTypes2(
+      final DruidQuery druidQuery,
+      final List<Entry<Integer, String>> fieldMapping,
+      final PlannerContext plannerContext
+  )
+  {
+    // For assistance computing return types if !finalizeAggregations.
+
+    RelDataType outputRowType = druidQuery.getOutputRowType();
+    RowSignature outputRowSignature = druidQuery.getOutputRowSignature();
+
+    return getTypes3(fieldMapping, plannerContext, outputRowType, outputRowSignature);
+  }
+
+  public static List<Pair<SqlTypeName, ColumnType>> getTypes3(final List<Entry<Integer, String>> fieldMapping,
+      final PlannerContext plannerContext, RelDataType outputRowType, RowSignature outputRowSignature)
+  {
+    assertTrue(MultiStageQueryContext.isFinalizeAggregations(plannerContext.queryContext()));
+    final List<Pair<SqlTypeName, ColumnType>> retVal = new ArrayList<>();
+
+    for (final Entry<Integer, String> entry : fieldMapping) {
+      final String queryColumn = outputRowSignature.getColumnName(entry.getKey());
+
+      final SqlTypeName sqlTypeName;
+
+      sqlTypeName = outputRowType.getFieldList().get(entry.getKey()).getType().getSqlTypeName();
+
+      final ColumnType columnType = outputRowSignature.getColumnType(queryColumn).orElse(ColumnType.STRING);
+
+      retVal.add(Pair.of(sqlTypeName, columnType));
+    }
+
+    return retVal;
+  }
+
 
   public static List<Pair<SqlTypeName, ColumnType>> getTypes(
       final DruidQuery druidQuery,

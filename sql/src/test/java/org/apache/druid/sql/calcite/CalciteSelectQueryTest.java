@@ -104,6 +104,18 @@ public class CalciteSelectQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  // FIXME
+//  @Disabled("find out why this fails")
+  @Test
+  public void testSelect1()
+  {
+    testBuilder()
+        .sql("SELECT 1024*1024*1024*1024")
+        .expectedSignature(RowSignature.builder().add("EXPR$0", ColumnType.LONG).build())
+        .expectedResults(ImmutableList.of(new Object[] {1099511627776L}))
+        .run();
+  }
+
   @Test
   public void testExpressionContainingNull()
   {

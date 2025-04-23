@@ -143,8 +143,8 @@ public class QkSqlEngine implements SqlEngine
       QueryDefinition queryDef = qdt.translate(newRoot);
 
       QueryContext context = plannerContext.queryContext();
-      QueryResponse<Object[]> a = dartQueryMaker.runQueryDef(queryDef, context);
-      return new PlannerResult(() -> a, null);
+      QueryResponse<Object[]> a = dartQueryMaker.runQueryDef(queryDef, context ,newRoot.getRowType() );
+      return new PlannerResult(() -> a, newRoot.getRowType());
 
     }
 
