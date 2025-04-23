@@ -54,35 +54,29 @@ public class QueryDefinition
   private final StageId finalStage;
   @JsonInclude(JsonInclude.Include.NON_DEFAULT)
   private final QueryContext context;
-  @JsonInclude(JsonInclude.Include.NON_DEFAULT)
-  private final RowSignature outputRowSignature;
 
   private QueryDefinition()
   {
     this.stageDefinitions = null;
     this.finalStage = null;
     this.context = QueryContext.empty();
-    this.outputRowSignature = null;
   }
 
   private QueryDefinition(
       final Map<StageId, StageDefinition> stageDefinitions,
       final StageId finalStage,
-      final QueryContext context,
-      final RowSignature outputRowSignature
+      final QueryContext context
   )
   {
     this.stageDefinitions = stageDefinitions;
     this.finalStage = finalStage;
     this.context = context;
-    this.outputRowSignature = outputRowSignature;
   }
 
   @JsonCreator
   static QueryDefinition create(
       @JsonProperty("stages") final List<StageDefinition> stageDefinitions,
-      @JsonProperty("context") QueryContext context,
-      @JsonProperty("outputRowSignature") RowSignature outputRowSignature)
+      @JsonProperty("context") QueryContext context)
   {
     final Map<StageId, StageDefinition> stageMap = new HashMap<>();
     final Set<StageId> nonFinalStages = new HashSet<>();
@@ -113,8 +107,7 @@ public class QueryDefinition
       return new QueryDefinition(
           stageMap,
           Iterables.getOnlyElement(Sets.difference(stageMap.keySet(), nonFinalStages)),
-          context == null ? QueryContext.empty() : context,
-          outputRowSignature
+          context == null ? QueryContext.empty() : context
       );
     } else {
       throw new IAE("Must have a single final stage, but found [%d] candidates", finalStageCandidates);
@@ -200,9 +193,8 @@ public class QueryDefinition
            '}';
   }
 
-  @JsonProperty("outputRowSignature")
   public RowSignature getOutputRowSignature()
   {
-      return outputRowSignature;
+    return stageDefinitions.get(finalStage).getSignature();
   }
 }
