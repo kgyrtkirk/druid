@@ -22,6 +22,7 @@ package org.apache.druid.msq.dart.controller.sql;
 import org.apache.druid.error.DruidException;
 import org.apache.druid.msq.input.InputSpec;
 import org.apache.druid.msq.kernel.MixShuffleSpec;
+import org.apache.druid.msq.kernel.QueryDefinition;
 import org.apache.druid.msq.kernel.QueryDefinitionBuilder;
 import org.apache.druid.msq.kernel.StageDefinition;
 import org.apache.druid.msq.kernel.StageDefinitionBuilder;
@@ -40,10 +41,12 @@ import org.apache.druid.sql.calcite.rel.VirtualColumnRegistry;
 import org.apache.druid.sql.calcite.rel.logical.DruidFilter;
 import org.apache.druid.sql.calcite.rel.logical.DruidProject;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+// FIXME: rename to QueryDefinitionBuilder2 ?
 public class StageDefinitionBuilder2
 {
   private AtomicInteger stageIdSeq = new AtomicInteger(1);
@@ -63,7 +66,7 @@ public class StageDefinitionBuilder2
     }
 
     @Override
-    public StageDefinitionBuilder finalizeStage()
+    public StageDefinition finalizeStage()
     {
       throw DruidException.defensive("This should have been implemented - or not reach this point!");
     }
@@ -75,14 +78,21 @@ public class StageDefinitionBuilder2
     }
 
     @Override
-    public QueryDefinitionBuilder build(QueryDefinitionBuilder qdbx)
-    {
-      for (IStageDef vertex : inputStages) {
-        qdbx = vertex.build(qdbx);
-      }
-      StageDefinitionBuilder finalizedStage = finalizeStage();
+    public QueryDefinition build() {
+      return QueryDefinition.create(buildStageDefinitions(), plannerContext.queryContext());
+    }
 
-      return qdbx.add(finalizedStage);
+
+    @Override
+    public List<StageDefinition> buildStageDefinitions()
+    {
+      List<StageDefinition> ret=new ArrayList<>();
+      for (IStageDef vertex : inputStages) {
+        ret.addAll(vertex.buildStageDefinitions());
+      }
+      ret.add(finalizeStage());
+      return ret;
+
     }
   }
 
@@ -99,7 +109,7 @@ public class StageDefinitionBuilder2
     }
 
     @Override
-    public StageDefinitionBuilder finalizeStage()
+    public StageDefinition finalizeStage()
     {
       return makeScanStage(VirtualColumns.EMPTY, signature, inputSpecs, null);
     }
@@ -184,7 +194,7 @@ public class StageDefinitionBuilder2
     }
 
     @Override
-    public StageDefinitionBuilder finalizeStage()
+    public StageDefinition finalizeStage()
     {
       VirtualColumns output = virtualColumnRegistry.build(Collections.emptySet());
       return makeScanStage(output, signature, inputSpecs, dimFilter);
@@ -223,7 +233,7 @@ public class StageDefinitionBuilder2
     }
   }
 
-  private StageDefinitionBuilder makeScanStage(
+  private StageDefinition makeScanStage(
       VirtualColumns virtualColumns,
       RowSignature signature,
       List<InputSpec> inputs,
@@ -243,7 +253,7 @@ public class StageDefinitionBuilder2
         .signature(signature)
         .shuffleSpec(MixShuffleSpec.instance())
         .processorFactory(scanProcessorFactory);
-    return sdb;
+    return sdb.build(plannerContext.getSqlQueryId());
   }
 
 }

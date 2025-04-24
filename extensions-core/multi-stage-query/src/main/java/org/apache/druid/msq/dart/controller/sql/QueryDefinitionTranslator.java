@@ -25,7 +25,6 @@ import org.apache.druid.java.util.common.Intervals;
 import org.apache.druid.msq.dart.controller.sql.StageDefinitionBuilder2.RootStage;
 import org.apache.druid.msq.input.InputSpec;
 import org.apache.druid.msq.kernel.QueryDefinition;
-import org.apache.druid.msq.kernel.QueryDefinitionBuilder;
 import org.apache.druid.msq.querykit.DataSourcePlan;
 import org.apache.druid.query.DataSource;
 import org.apache.druid.query.InlineDataSource;
@@ -58,8 +57,7 @@ public class QueryDefinitionTranslator
     DruidNodeStack stack = new DruidNodeStack();
     stack.push(relRoot);
     IStageDef vertex = buildVertexFor(stack);
-    QueryDefinitionBuilder qdb = QueryDefinition.builder(plannerContext.getSqlQueryId());
-    return vertex.build(qdb).build();
+    return vertex.build();
   }
 
   private IStageDef buildVertexFor(DruidNodeStack stack)
@@ -103,7 +101,6 @@ public class QueryDefinitionTranslator
       // return makeScanProcessorFactory(vertex.null, null);
     }
     return Optional.empty();
-
   }
 
   private Optional<RootStage> buildRootVertex(DruidLogicalNode node)

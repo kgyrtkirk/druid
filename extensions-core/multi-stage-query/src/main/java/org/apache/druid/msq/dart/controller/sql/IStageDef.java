@@ -19,17 +19,21 @@
 
 package org.apache.druid.msq.dart.controller.sql;
 
-import org.apache.druid.msq.kernel.QueryDefinitionBuilder;
-import org.apache.druid.msq.kernel.StageDefinitionBuilder;
+import org.apache.druid.msq.kernel.QueryDefinition;
+import org.apache.druid.msq.kernel.StageDefinition;
 import org.apache.druid.sql.calcite.planner.querygen.DruidQueryGenerator.DruidNodeStack;
+
+import java.util.List;
 
 public interface IStageDef
 {
-  public StageDefinitionBuilder finalizeStage();
+  StageDefinition finalizeStage();
 
-  public IStageDef extendWith(DruidNodeStack stack);
+  IStageDef extendWith(DruidNodeStack stack);
 
-  public QueryDefinitionBuilder build(QueryDefinitionBuilder qdb);
+  List<StageDefinition> buildStageDefinitions();
+
+  QueryDefinition build();
 
 
 }

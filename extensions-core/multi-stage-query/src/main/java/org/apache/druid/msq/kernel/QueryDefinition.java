@@ -74,7 +74,7 @@ public class QueryDefinition
   }
 
   @JsonCreator
-  static QueryDefinition create(
+  public static QueryDefinition create(
       @JsonProperty("stages") final List<StageDefinition> stageDefinitions,
       @JsonProperty("context") QueryContext context)
   {
