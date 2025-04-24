@@ -22,6 +22,7 @@ package org.apache.druid.msq.dart.controller.sql;
 import org.apache.druid.error.DruidException;
 import org.apache.druid.msq.input.InputSpec;
 import org.apache.druid.msq.kernel.MixShuffleSpec;
+import org.apache.druid.msq.kernel.QueryDefinitionBuilder;
 import org.apache.druid.msq.kernel.StageDefinition;
 import org.apache.druid.msq.kernel.StageDefinitionBuilder;
 import org.apache.druid.msq.querykit.scan.ScanQueryFrameProcessorFactory;
@@ -52,11 +53,13 @@ public class StageDefinitionBuilder2
   {
     protected final List<InputSpec> inputs;
     protected final RowSignature signature;
+    protected final List<IStageDef> inputStages;
 
-    public AbstractStage(RowSignature signature, List<InputSpec> inputs)
+    public AbstractStage(RowSignature signature, List<InputSpec> inputs, List<IStageDef> inputStages)
     {
       this.inputs = inputs;
       this.signature = signature;
+      this.inputStages = inputStages;
     }
 
     @Override
@@ -70,19 +73,29 @@ public class StageDefinitionBuilder2
     {
       return null;
     }
+
+    @Override
+    public QueryDefinitionBuilder build(QueryDefinitionBuilder qdbx)
+    {
+      for (IStageDef vertex : inputStages) {
+        qdbx = vertex.build(qdbx);
+      }
+      StageDefinitionBuilder finalizedStage = finalizeStage();
+
+      return qdbx.add(finalizedStage);
+    }
   }
 
   public class RootStage extends AbstractStage
   {
-
-    public RootStage(RowSignature signature, List<InputSpec> inputs)
+    public RootStage(RowSignature signature, List<InputSpec> inputs, List<IStageDef> inputStages)
     {
-      super(signature, inputs);
+      super(signature, inputs, inputStages);
     }
 
     public RootStage(RootStage root, RowSignature signature1)
     {
-      super(signature1, root.inputs);
+      super(signature1, root.inputs, root.inputStages);
     }
 
     @Override

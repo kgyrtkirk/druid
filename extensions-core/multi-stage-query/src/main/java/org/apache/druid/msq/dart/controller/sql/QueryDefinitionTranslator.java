@@ -22,6 +22,7 @@ package org.apache.druid.msq.dart.controller.sql;
 import org.apache.calcite.rel.RelNode;
 import org.apache.druid.error.DruidException;
 import org.apache.druid.java.util.common.Intervals;
+import org.apache.druid.msq.dart.controller.sql.StageDefinitionBuilder2.RootStage;
 import org.apache.druid.msq.input.InputSpec;
 import org.apache.druid.msq.kernel.MixShuffleSpec;
 import org.apache.druid.msq.kernel.QueryDefinition;
@@ -55,13 +56,11 @@ public class QueryDefinitionTranslator
   private static final String IRRELEVANT = "irrelevant";
   private PlannerContext plannerContext;
   private AtomicInteger stageIdSeq = new AtomicInteger(1);
-  private QDVertexFactory vertexFactory;
   private StageDefinitionBuilder2 stageBuilder;
 
   public QueryDefinitionTranslator(PlannerContext plannerContext, DruidLogicalNode logicalRoot)
   {
     this.plannerContext = plannerContext;
-    this.vertexFactory = new QDVertexFactory(plannerContext);
     this.stageBuilder = new StageDefinitionBuilder2(plannerContext);
   }
 
@@ -69,38 +68,38 @@ public class QueryDefinitionTranslator
   {
     DruidNodeStack stack = new DruidNodeStack();
     stack.push(relRoot);
-    Vertex vertex = buildVertexFor(stack);
+    IStageDef vertex = buildVertexFor(stack);
     QueryDefinitionBuilder qdb = QueryDefinition.builder(plannerContext.getSqlQueryId());
     return vertex.build(qdb).build();
   }
 
-  private Vertex buildVertexFor(DruidNodeStack stack)
+  private IStageDef buildVertexFor(DruidNodeStack stack)
   {
-    List<Vertex> newInputs = new ArrayList<>();
+    List<IStageDef> newInputs = new ArrayList<>();
 
     for (RelNode input : stack.peekNode().getInputs()) {
       stack.push((DruidLogicalNode) input, newInputs.size());
       newInputs.add(buildVertexFor(stack));
       stack.pop();
     }
-    Vertex vertex = processNodeWithInputs(stack, newInputs);
+    IStageDef vertex = processNodeWithInputs(stack, newInputs);
     return vertex;
   }
 
-  private Vertex processNodeWithInputs(DruidNodeStack stack, List<Vertex> newInputs)
+  private IStageDef processNodeWithInputs(DruidNodeStack stack, List<IStageDef > newInputs)
   {
     DruidLogicalNode node = stack.peekNode();
-    Optional<Vertex> vertex = buildRootVertex(node);
+    Optional<RootStage> vertex = buildRootVertex(node);
     if (vertex.isPresent()) {
       return vertex.get();
     }
     if (newInputs.size() == 1) {
-      Vertex inputVertex = newInputs.get(0);
-      Optional<Vertex> newVertex = inputVertex.extendWith(stack);
-      if (newVertex.isPresent()) {
-        return newVertex.get();
+      IStageDef  inputVertex = newInputs.get(0);
+      IStageDef newVertex = inputVertex.extendWith(stack);
+      if (newVertex != null) {
+        return newVertex;
       }
-      Optional<Vertex> seq = buildSequenceVertex(stack, newInputs.get(0));
+      Optional<IStageDef > seq = buildSequenceVertex(stack, newInputs.get(0));
       if (seq.isPresent()) {
         return seq.get();
       }
@@ -108,7 +107,7 @@ public class QueryDefinitionTranslator
     throw DruidException.defensive().build("Unable to process relNode[%s]", node);
   }
 
-  private Optional<Vertex> buildSequenceVertex(DruidNodeStack stack, Vertex vertex)
+  private Optional<IStageDef> buildSequenceVertex(DruidNodeStack stack, IStageDef  vertex)
   {
     DruidLogicalNode node = stack.peekNode();
     if (node instanceof DruidProject) {
@@ -118,7 +117,7 @@ public class QueryDefinitionTranslator
 
   }
 
-  private Optional<Vertex> buildRootVertex(DruidLogicalNode node)
+  private Optional<RootStage> buildRootVertex(DruidLogicalNode node)
   {
     if (node instanceof DruidValues) {
       return translateValues((DruidValues) node);
@@ -129,7 +128,7 @@ public class QueryDefinitionTranslator
     return Optional.empty();
   }
 
-  private Optional<Vertex> translateTableScan(DruidTableScan node)
+  private Optional<RootStage> translateTableScan(DruidTableScan node)
   {
     SourceDesc sd = node.getSourceDesc(plannerContext, Collections.emptyList());
     DataSource ds = sd.dataSource;
@@ -140,14 +139,12 @@ public class QueryDefinitionTranslator
         false);
     List<InputSpec> isp = dsp.getInputSpecs();
 
-    stageBuilder.new RootStage(null, isp);
-    Vertex vertex = vertexFactory
-        .createVertex(stageBuilder.new RootStage(sd.rowSignature, isp), Collections.emptyList());
+    RootStage vertex = stageBuilder.new RootStage(sd.rowSignature, isp, Collections.emptyList());
     return Optional.of(vertex);
   }
 
   // this is a hack for now
-  private Optional<Vertex> translateValues(DruidValues node)
+  private Optional<RootStage> translateValues(DruidValues node)
   {
     SourceDesc sd = node.getSourceDesc(plannerContext, Collections.emptyList());
     DataSource ds = sd.dataSource;
@@ -166,8 +163,7 @@ public class QueryDefinitionTranslator
         .processorFactory(makeScanProcessorFactory(dsp.getNewDataSource(), sd.rowSignature));
 
     StageDefinitionBuilder2 p = new StageDefinitionBuilder2(plannerContext);
-    Vertex vertex = vertexFactory
-        .createVertex(p.new RootStage(sd.rowSignature, isp), Collections.emptyList());
+    RootStage vertex = p.new RootStage(sd.rowSignature, isp, Collections.emptyList());
     return Optional.of(vertex);
   }
 
@@ -202,11 +198,8 @@ public class QueryDefinitionTranslator
 
   protected static class QDVertexFactory
   {
-    private final PlannerContext plannerContext;
-
-    public QDVertexFactory(PlannerContext plannerContext)
+    public QDVertexFactory()
     {
-      this.plannerContext = plannerContext;
     }
 
     public Vertex createVertex( IStageDef qdb, List<Vertex> inputs)
