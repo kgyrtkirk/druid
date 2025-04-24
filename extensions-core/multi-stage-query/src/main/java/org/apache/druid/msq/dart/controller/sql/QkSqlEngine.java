@@ -36,6 +36,7 @@ import org.apache.druid.server.QueryResponse;
 import org.apache.druid.sql.calcite.planner.PlannerContext;
 import org.apache.druid.sql.calcite.planner.PlannerResult;
 import org.apache.druid.sql.calcite.planner.Stage10X;
+import org.apache.druid.sql.calcite.planner.Stage10X2;
 import org.apache.druid.sql.calcite.rel.DruidQuery;
 import org.apache.druid.sql.calcite.rel.logical.DruidLogicalNode;
 import org.apache.druid.sql.calcite.run.EngineFeature;
@@ -113,7 +114,7 @@ public class QkSqlEngine implements SqlEngine
     throw DruidException.defensive("Not yet supported in this mode");
   }
 
-  static class QkQueryMaker implements QueryMaker, Stage10X
+  static class QkQueryMaker implements QueryMaker, Stage10X, Stage10X2
   {
 
     private PlannerContext plannerContext;

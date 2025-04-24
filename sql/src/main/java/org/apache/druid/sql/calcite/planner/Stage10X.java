@@ -19,12 +19,9 @@
 
 package org.apache.druid.sql.calcite.planner;
 
-import org.apache.druid.sql.calcite.rel.DruidQuery;
 import org.apache.druid.sql.calcite.rel.logical.DruidLogicalNode;
 
 public interface Stage10X
 {
-  PlannerResult buildPlannerResult2(DruidQuery druidQuery);
-
   PlannerResult buildPlannerResult(DruidLogicalNode newRoot);
 }

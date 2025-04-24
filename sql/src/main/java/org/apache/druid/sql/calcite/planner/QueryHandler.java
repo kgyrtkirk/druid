@@ -601,20 +601,12 @@ public abstract class QueryHandler extends SqlStatementHandler.BaseStatementHand
         // Compute row type.
         final RelDataType rowType = prepareResult.getReturnedRowType();
 
-        if(queryMaker instanceof Stage10X) {
-          Stage10X stage10x = (Stage10X)queryMaker;
-          return stage10x.buildPlannerResult2(druidRel.toDruidQuery(false));
-//          return ((Stage10X) queryMaker).buildPlannerResult(newRoot);
-        }
-
-
-        // Start the query.
         // sanity check
         final Set<ResourceAction> readResourceActions =
             plannerContext.getResourceActions()
-            .stream()
-            .filter(action -> action.getAction() == Action.READ)
-            .collect(Collectors.toSet());
+                          .stream()
+                          .filter(action -> action.getAction() == Action.READ)
+                          .collect(Collectors.toSet());
         Preconditions.checkState(
             readResourceActions.isEmpty() == druidRel.getDataSourceNames().isEmpty()
             // The resources found in the plannerContext can be less than the datasources in
@@ -622,13 +614,17 @@ public abstract class QueryHandler extends SqlStatementHandler.BaseStatementHand
             // them with InlineDataSource of empty rows.
             || readResourceActions.size() >= druidRel.getDataSourceNames().size(),
             "Authorization sanity check failed"
-            );
-        final Supplier<QueryResponse<Object[]>> resultsSupplier = () -> {
+        );
 
-          return druidRel.runQuery();
-        };
+        if(queryMaker instanceof Stage10X2) {
+          Stage10X2 stage10x = (Stage10X2)queryMaker;
+          return stage10x.buildPlannerResult2(druidRel.toDruidQuery(false));
+//          return ((Stage10X) queryMaker).buildPlannerResult(newRoot);
+        }
 
-        return new PlannerResult(resultsSupplier, rowType);
+
+
+        return new PlannerResult(druidRel::runQuery, rowType);
       }
     }
   }
