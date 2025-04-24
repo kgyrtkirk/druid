@@ -34,7 +34,6 @@ import org.apache.druid.msq.sql.MSQTaskQueryMaker;
 import org.apache.druid.query.QueryContext;
 import org.apache.druid.server.QueryResponse;
 import org.apache.druid.sql.calcite.planner.PlannerContext;
-import org.apache.druid.sql.calcite.planner.PlannerResult;
 import org.apache.druid.sql.calcite.rel.DruidQuery;
 import org.apache.druid.sql.calcite.rel.logical.DruidLogicalNode;
 import org.apache.druid.sql.calcite.run.EngineFeature;
@@ -122,31 +121,17 @@ public class QkSqlEngine implements SqlEngine
     {
       this.plannerContext = plannerContext;
       this.dartQueryMaker = (DartQueryMaker) buildQueryMakerForSelect;
-
     }
 
     @Override
-    public QueryResponse<Object[]> buildResponse(DruidLogicalNode newRoot)
+    public QueryResponse<Object[]> buildResponse(DruidLogicalNode rootRel)
     {
-      QueryDefinitionTranslator qdt = new QueryDefinitionTranslator(plannerContext, newRoot);
-
-      QueryDefinition queryDef = qdt.translate(newRoot);
-
+      QueryDefinitionTranslator qdt = new QueryDefinitionTranslator(plannerContext, rootRel);
+      QueryDefinition queryDef = qdt.translate(rootRel);
       QueryContext context = plannerContext.queryContext();
-      QueryResponse<Object[]> a = dartQueryMaker.runQueryDef(queryDef, context ,newRoot.getRowType() );
-      return a;
+      QueryResponse<Object[]> response = dartQueryMaker.runQueryDef(queryDef, context ,rootRel.getRowType() );
+      return response;
     }
-
-
-    public PlannerResult buildPlannerResult(DruidLogicalNode newRoot)
-    {
-      QueryDefinitionTranslator qdt = new QueryDefinitionTranslator(plannerContext, newRoot);
-      QueryDefinition queryDef = qdt.translate(newRoot);
-      QueryContext context = plannerContext.queryContext();
-      QueryResponse<Object[]> a = dartQueryMaker.runQueryDef(queryDef, context ,newRoot.getRowType() );
-      return new PlannerResult(() -> a, newRoot.getRowType());
-    }
-
 
     @Override
     public QueryResponse<Object[]> runQuery(DruidQuery druidQuery)
@@ -157,17 +142,6 @@ public class QkSqlEngine implements SqlEngine
       return response;
     }
 
-    public PlannerResult buildPlannerResult2(DruidQuery druidQuery)
-    {
-      QueryContext queryContext = druidQuery.getQuery().context();
-
-      LegacyMSQSpec queryDef = buildQueryDef(druidQuery, dartQueryMaker.fieldMapping, queryContext);
-
-//      QueryResponse<Object[]> a = dartQueryMaker.runQueryDef(queryDef, queryContext);
-      QueryResponse<Object[]> a = dartQueryMaker.runMSQSpec(queryDef, queryContext);
-      return new PlannerResult(() -> a, null);
-    }
-
     private LegacyMSQSpec buildQueryDef(DruidQuery druidQuery, List<Entry<Integer, String>> fieldMapping, QueryContext queryContext)
     {
       final LegacyMSQSpec querySpec = MSQTaskQueryMaker.makeLegacyMSQSpec(
@@ -176,8 +150,8 @@ public class QkSqlEngine implements SqlEngine
           druidQuery.getQuery().context(),
           fieldMapping,
           plannerContext,
-          null // Only used for DML, which this isn't
-          ,null
+          null,
+          null
       );
 
       final String dartQueryId = queryContext.getString(DartSqlEngine.CTX_DART_QUERY_ID);
@@ -189,7 +163,8 @@ public class QkSqlEngine implements SqlEngine
           querySpec.getQuery(),
           plannerContext.getJsonMapper(),
           new DartQueryKitSpecFactory().makeQueryKitSpec(
-              QueryKitBasedMSQPlanner.makeQueryControllerToolKit(querySpec.getContext(), plannerContext.getJsonMapper()),
+              QueryKitBasedMSQPlanner
+                  .makeQueryControllerToolKit(querySpec.getContext(), plannerContext.getJsonMapper()),
               dartQueryId,
               querySpec.getTuningConfig(),
               querySpec.getContext(),
@@ -197,7 +172,6 @@ public class QkSqlEngine implements SqlEngine
           )
       ).makeQueryDefinition();
       return querySpec.withQueryDef(queryDef);
-
     }
   }
 }
