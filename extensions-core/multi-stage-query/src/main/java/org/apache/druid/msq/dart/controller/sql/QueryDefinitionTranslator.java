@@ -52,18 +52,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class QueryDefinitionTranslator
 {
-
   private static final String IRRELEVANT = "irrelevant";
-  private DruidLogicalNode logicalRoot;
   private PlannerContext plannerContext;
   private AtomicInteger stageIdSeq = new AtomicInteger(1);
   private QDVertexFactory vertexFactory;
+  private StageDefinitionBuilder2 stageBuilder;
 
   public QueryDefinitionTranslator(PlannerContext plannerContext, DruidLogicalNode logicalRoot)
   {
     this.plannerContext = plannerContext;
-    this.logicalRoot = logicalRoot;
     this.vertexFactory = new QDVertexFactory(plannerContext);
+    this.stageBuilder = new StageDefinitionBuilder2(plannerContext);
   }
 
   public QueryDefinition translate(DruidLogicalNode relRoot)
@@ -141,20 +140,9 @@ public class QueryDefinitionTranslator
         false);
     List<InputSpec> isp = dsp.getInputSpecs();
 
-
-    QueryDefinitionBuilder qdb = QueryDefinition.builder(IRRELEVANT);
-    StageDefinitionBuilder sdb = StageDefinition.builder(stageIdSeq.incrementAndGet())
-        .inputs(isp)
-        .signature(sd.rowSignature)
-        .shuffleSpec(MixShuffleSpec.instance())
-        .processorFactory(makeScanProcessorFactory(dsp.getNewDataSource(), sd.rowSignature))
-        ;
-
-    StageDefinitionBuilder2 p = new StageDefinitionBuilder2(plannerContext);
-    p.new RootStage(null, isp);
-        Vertex vertex = vertexFactory
-            .createVertex(p.new RootStage(sd.rowSignature, isp), Collections.emptyList());
-        //    Vertex vertex2 = vertexFactory.createVertex(isp,sd.rowSignature, Collections.emptyList());
+    stageBuilder.new RootStage(null, isp);
+    Vertex vertex = vertexFactory
+        .createVertex(stageBuilder.new RootStage(sd.rowSignature, isp), Collections.emptyList());
     return Optional.of(vertex);
   }
 

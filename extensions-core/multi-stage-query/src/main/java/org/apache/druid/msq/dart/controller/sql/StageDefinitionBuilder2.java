@@ -43,15 +43,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-//@Value.Immutable
 public class StageDefinitionBuilder2
 {
-  private static AtomicInteger stageIdSeq = new AtomicInteger(1);
+  private AtomicInteger stageIdSeq = new AtomicInteger(1);
   private PlannerContext plannerContext;
 
   public class AbstractStage implements IStageDef
   {
-
     protected final List<InputSpec> inputs;
     protected final RowSignature signature;
 
