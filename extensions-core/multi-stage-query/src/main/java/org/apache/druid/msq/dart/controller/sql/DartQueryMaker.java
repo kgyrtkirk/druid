@@ -135,16 +135,6 @@ public class DartQueryMaker implements QueryMaker
 
   public QueryResponse<Object[]> runQueryDef(QueryDefinition queryDef, QueryContext context, RelDataType rowType)
   {
-
-    if (!plannerContext.getAuthorizationResult().allowAccessWithNoRestriction()) {
-      throw new ForbiddenException(plannerContext.getAuthorizationResult().getErrorMessage());
-    }
-
-    if(!MultiStageQueryContext.isFinalizeAggregations(plannerContext.queryContext())) {
-      throw DruidException.defensive("Non-finalized execution is not supported!");
-    }
-
-
     final LegacyMSQSpec querySpec = MSQTaskQueryMaker.makeLegacyMSQSpec(
         null,
         null,
@@ -156,7 +146,6 @@ public class DartQueryMaker implements QueryMaker
     );
 
     return runMSQSpec(querySpec, context, rowType);
-
   }
 
   public QueryResponse<Object[]> runQuery(DruidQuery druidQuery)
@@ -229,6 +218,14 @@ public class DartQueryMaker implements QueryMaker
 
   public QueryResponse<Object[]> runMSQSpec(LegacyMSQSpec querySpec, QueryContext context, RelDataType rowType)
   {
+    if (!plannerContext.getAuthorizationResult().allowAccessWithNoRestriction()) {
+      throw new ForbiddenException(plannerContext.getAuthorizationResult().getErrorMessage());
+    }
+
+    if(!MultiStageQueryContext.isFinalizeAggregations(plannerContext.queryContext())) {
+      throw DruidException.defensive("Non-finalized execution is not supported!");
+    }
+
     final String dartQueryId = context.getString(DartSqlEngine.CTX_DART_QUERY_ID);
     final ControllerContext controllerContext = controllerContextFactory.newContext(dartQueryId);
 

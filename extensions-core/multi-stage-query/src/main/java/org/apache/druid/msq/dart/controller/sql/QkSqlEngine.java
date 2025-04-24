@@ -50,8 +50,7 @@ public class QkSqlEngine implements SqlEngine
   final SqlEngine delegate;
 
   @Inject
-  public QkSqlEngine(
-      DartSqlEngine engine)
+  public QkSqlEngine(DartSqlEngine engine)
   {
     delegate = engine;
   }
@@ -113,7 +112,6 @@ public class QkSqlEngine implements SqlEngine
 
   static class QkQueryMaker implements QueryMaker, QueryMaker.FromDruidLogical
   {
-
     private PlannerContext plannerContext;
     private DartQueryMaker dartQueryMaker;
 
@@ -129,7 +127,7 @@ public class QkSqlEngine implements SqlEngine
       QueryDefinitionTranslator qdt = new QueryDefinitionTranslator(plannerContext, rootRel);
       QueryDefinition queryDef = qdt.translate(rootRel);
       QueryContext context = plannerContext.queryContext();
-      QueryResponse<Object[]> response = dartQueryMaker.runQueryDef(queryDef, context ,rootRel.getRowType() );
+      QueryResponse<Object[]> response = dartQueryMaker.runQueryDef(queryDef, context, rootRel.getRowType());
       return response;
     }
 
@@ -137,8 +135,8 @@ public class QkSqlEngine implements SqlEngine
     public QueryResponse<Object[]> runQuery(DruidQuery druidQuery)
     {
       QueryContext queryContext = druidQuery.getQuery().context();
-      LegacyMSQSpec queryDef = buildQueryDef(druidQuery, dartQueryMaker.fieldMapping, queryContext);
-      QueryResponse<Object[]> response = dartQueryMaker.runMSQSpec(queryDef, queryContext, druidQuery.getOutputRowType());
+      LegacyMSQSpec msqSpec = buildQueryDef(druidQuery, dartQueryMaker.fieldMapping, queryContext);
+      QueryResponse<Object[]> response = dartQueryMaker.runMSQSpec(msqSpec, queryContext, druidQuery.getOutputRowType());
       return response;
     }
 
