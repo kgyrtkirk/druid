@@ -130,7 +130,7 @@ public class QueryDefinitionTranslator
     );
     List<InputSpec> isp = dsp.getInputSpecs();
 
-    RootStage vertex = stageBuilder.new RootStage(sd.rowSignature, isp, Collections.emptyList());
+    RootStage vertex = stageBuilder.new RootStage(sd.rowSignature, isp);
     return Optional.of(vertex);
   }
 
@@ -143,7 +143,7 @@ public class QueryDefinitionTranslator
     DataSourcePlan dsp = DataSourcePlan.forInline(ids, false);
     List<InputSpec> isp = dsp.getInputSpecs();
 
-    RootStage vertex = stageBuilder.new RootStage(sd.rowSignature, isp, Collections.emptyList());
+    RootStage vertex = stageBuilder.new RootStage(sd.rowSignature, isp);
     return Optional.of(vertex);
   }
 }

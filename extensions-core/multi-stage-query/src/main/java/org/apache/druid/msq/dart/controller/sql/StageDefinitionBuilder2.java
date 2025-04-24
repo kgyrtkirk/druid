@@ -51,13 +51,13 @@ public class StageDefinitionBuilder2
 
   public class AbstractStage implements IStageDef
   {
-    protected final List<InputSpec> inputs;
+    protected final List<InputSpec> inputSpecs;
     protected final RowSignature signature;
     protected final List<IStageDef> inputStages;
 
     public AbstractStage(RowSignature signature, List<InputSpec> inputs, List<IStageDef> inputStages)
     {
-      this.inputs = inputs;
+      this.inputSpecs = inputs;
       this.signature = signature;
       this.inputStages = inputStages;
     }
@@ -88,20 +88,20 @@ public class StageDefinitionBuilder2
 
   public class RootStage extends AbstractStage
   {
-    public RootStage(RowSignature signature, List<InputSpec> inputs, List<IStageDef> inputStages)
+    public RootStage(RowSignature signature, List<InputSpec> inputSpecs)
     {
-      super(signature, inputs, inputStages);
+      super(signature, inputSpecs, Collections.emptyList());
     }
 
-    public RootStage(RootStage root, RowSignature signature1)
+    public RootStage(RootStage root, RowSignature newSignature)
     {
-      super(signature1, root.inputs, root.inputStages);
+      super(newSignature, root.inputSpecs, root.inputStages);
     }
 
     @Override
     public StageDefinitionBuilder finalizeStage()
     {
-      return makeScanStage(VirtualColumns.EMPTY, signature, inputs, null);
+      return makeScanStage(VirtualColumns.EMPTY, signature, inputSpecs, null);
     }
 
     @Override
@@ -187,7 +187,7 @@ public class StageDefinitionBuilder2
     public StageDefinitionBuilder finalizeStage()
     {
       VirtualColumns output = virtualColumnRegistry.build(Collections.emptySet());
-      return makeScanStage(output, signature, inputs, dimFilter);
+      return makeScanStage(output, signature, inputSpecs, dimFilter);
     }
 
     @Override
