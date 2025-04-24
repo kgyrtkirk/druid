@@ -138,7 +138,7 @@ public class QkSqlEngine implements SqlEngine
     {
       QueryContext queryContext = druidQuery.getQuery().context();
       LegacyMSQSpec queryDef = buildQueryDef(druidQuery, dartQueryMaker.fieldMapping, queryContext);
-      QueryResponse<Object[]> response = dartQueryMaker.runMSQSpec(queryDef, queryContext);
+      QueryResponse<Object[]> response = dartQueryMaker.runMSQSpec(queryDef, queryContext, druidQuery.getOutputRowType());
       return response;
     }
 

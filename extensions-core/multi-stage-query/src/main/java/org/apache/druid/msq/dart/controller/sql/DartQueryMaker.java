@@ -155,65 +155,9 @@ public class DartQueryMaker implements QueryMaker
         queryDef
     );
 
-    return extracted(context, querySpec, rowType);
+    return runMSQSpec(querySpec, context, rowType);
 
   }
-
-
-
-  public QueryResponse<Object[]> runMSQSpec(LegacyMSQSpec queryDef, QueryContext queryContext)
-  {
-    return extracted(queryContext, queryDef, null);
-  }
-
-
-  public QueryResponse<Object[]> extracted(QueryContext context, final LegacyMSQSpec querySpec, RelDataType rowType)
-  {
-    final String dartQueryId = context.getString(DartSqlEngine.CTX_DART_QUERY_ID);
-    final ControllerContext controllerContext = controllerContextFactory.newContext(dartQueryId);
-
-    final ResultsContext resultsContext = makeDefaultResultContext(querySpec.getQueryDef(), rowType);
-
-    final ControllerImpl controller = new ControllerImpl(
-        dartQueryId,
-        querySpec,
-        resultsContext,
-        controllerContext,
-        new DartQueryKitSpecFactory()
-    );
-
-    final ControllerHolder controllerHolder = new ControllerHolder(
-        controller,
-        plannerContext.getSqlQueryId(),
-        plannerContext.getSql(),
-        plannerContext.getAuthenticationResult(),
-        DateTimes.nowUtc()
-    );
-
-    final boolean fullReport = context.getBoolean(
-        DartSqlEngine.CTX_FULL_REPORT,
-        DartSqlEngine.CTX_FULL_REPORT_DEFAULT
-    );
-
-    // Register controller before submitting anything to controllerExeuctor, so it shows up in
-    // "active controllers" lists.
-    controllerRegistry.register(controllerHolder);
-
-    try {
-      // runWithReport, runWithoutReport are responsible for calling controllerRegistry.deregister(controllerHolder)
-      // when their work is done.
-      final Sequence<Object[]> results =
-          fullReport ? runWithReport(controllerHolder) : runWithoutReport(controllerHolder);
-      return QueryResponse.withEmptyContext(results);
-    }
-    catch (Throwable e) {
-      // Error while calling runWithReport or runWithoutReport. Deregister controller immediately.
-      controllerRegistry.deregister(controllerHolder);
-      throw e;
-    }
-  }
-
-
 
   public QueryResponse<Object[]> runQuery(DruidQuery druidQuery)
   {
@@ -240,6 +184,10 @@ public class DartQueryMaker implements QueryMaker
         null
     );
 
+    if(true) {
+      return runMSQSpec(querySpec, druidQuery.getQuery().context(), druidQuery.getOutputRowType());
+    }
+
     final ControllerImpl controller = new ControllerImpl(
         dartQueryId,
         querySpec,
@@ -257,6 +205,52 @@ public class DartQueryMaker implements QueryMaker
     );
 
     final boolean fullReport = druidQuery.getQuery().context().getBoolean(
+        DartSqlEngine.CTX_FULL_REPORT,
+        DartSqlEngine.CTX_FULL_REPORT_DEFAULT
+    );
+
+    // Register controller before submitting anything to controllerExeuctor, so it shows up in
+    // "active controllers" lists.
+    controllerRegistry.register(controllerHolder);
+
+    try {
+      // runWithReport, runWithoutReport are responsible for calling controllerRegistry.deregister(controllerHolder)
+      // when their work is done.
+      final Sequence<Object[]> results =
+          fullReport ? runWithReport(controllerHolder) : runWithoutReport(controllerHolder);
+      return QueryResponse.withEmptyContext(results);
+    }
+    catch (Throwable e) {
+      // Error while calling runWithReport or runWithoutReport. Deregister controller immediately.
+      controllerRegistry.deregister(controllerHolder);
+      throw e;
+    }
+  }
+
+  public QueryResponse<Object[]> runMSQSpec(LegacyMSQSpec querySpec, QueryContext context, RelDataType rowType)
+  {
+    final String dartQueryId = context.getString(DartSqlEngine.CTX_DART_QUERY_ID);
+    final ControllerContext controllerContext = controllerContextFactory.newContext(dartQueryId);
+
+    final ResultsContext resultsContext = makeDefaultResultContext(querySpec.getQueryDef(), rowType);
+
+    final ControllerImpl controller = new ControllerImpl(
+        dartQueryId,
+        querySpec,
+        resultsContext,
+        controllerContext,
+        new DartQueryKitSpecFactory()
+    );
+
+    final ControllerHolder controllerHolder = new ControllerHolder(
+        controller,
+        plannerContext.getSqlQueryId(),
+        plannerContext.getSql(),
+        plannerContext.getAuthenticationResult(),
+        DateTimes.nowUtc()
+    );
+
+    final boolean fullReport = context.getBoolean(
         DartSqlEngine.CTX_FULL_REPORT,
         DartSqlEngine.CTX_FULL_REPORT_DEFAULT
     );
