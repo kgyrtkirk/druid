@@ -31,7 +31,9 @@ import org.apache.druid.msq.indexing.LegacyMSQSpec;
 import org.apache.druid.msq.kernel.QueryDefinition;
 import org.apache.druid.msq.sql.DartQueryKitSpecFactory;
 import org.apache.druid.msq.sql.MSQTaskQueryMaker;
+import org.apache.druid.msq.sql.MSQTaskSqlEngine;
 import org.apache.druid.query.QueryContext;
+import org.apache.druid.query.QueryContexts;
 import org.apache.druid.server.QueryResponse;
 import org.apache.druid.sql.calcite.planner.PlannerContext;
 import org.apache.druid.sql.calcite.rel.DruidQuery;
@@ -45,12 +47,28 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-public class QkSqlEngine implements SqlEngine
+/**
+ * Executes queries with pre-planned stages.
+ *
+ * {@link MSQTaskSqlEngine} and {@link DartSqlEngine} plans the query execution
+ * stages inside the task. This class provides an incremental feature next to
+ * them to enable the utilization of a {@link QueryDefinition}.
+ *
+ * Currently its hard-wired to only support Dart; but the generalization to MSQ
+ * was kept in mind - it should be doable in the future. Design is aimed toward
+ * utilizing an alternate lower level entrypoint
+ * {@link DartSqlEngine#runMSQSpec} to the execution engine.
+ *
+ * Depending on {@link QueryContexts#CTX_NATIVE_QUERY_SQL_PLANNING_MODE} it uses
+ * either a {@link QueryKitBasedMSQPlanner} or {@link QueryDefinitionTranslator}
+ * to obtain a {@link QueryDefinition}.
+ */
+public class PrePlannedSqlEngine implements SqlEngine
 {
   final SqlEngine delegate;
 
   @Inject
-  public QkSqlEngine(DartSqlEngine engine)
+  public PrePlannedSqlEngine(DartSqlEngine engine)
   {
     delegate = engine;
   }
@@ -137,7 +155,8 @@ public class QkSqlEngine implements SqlEngine
     {
       QueryContext queryContext = druidQuery.getQuery().context();
       LegacyMSQSpec msqSpec = buildMSQSpec(druidQuery, dartQueryMaker.fieldMapping, queryContext);
-      QueryResponse<Object[]> response = dartQueryMaker.runMSQSpec(msqSpec, queryContext, druidQuery.getOutputRowType());
+      QueryResponse<Object[]> response = dartQueryMaker
+          .runMSQSpec(msqSpec, queryContext, druidQuery.getOutputRowType());
       return response;
     }
 

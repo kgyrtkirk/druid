@@ -31,7 +31,7 @@ import org.apache.druid.java.util.http.client.HttpClient;
 import org.apache.druid.msq.dart.Dart;
 import org.apache.druid.msq.dart.controller.DartControllerContextFactory;
 import org.apache.druid.msq.dart.controller.sql.DartSqlEngine;
-import org.apache.druid.msq.dart.controller.sql.QkSqlEngine;
+import org.apache.druid.msq.dart.controller.sql.PrePlannedSqlEngine;
 import org.apache.druid.msq.dart.guice.DartControllerModule;
 import org.apache.druid.msq.dart.guice.DartModules;
 import org.apache.druid.msq.dart.guice.DartWorkerMemoryManagementModule;
@@ -101,7 +101,7 @@ public class DartComponentSupplier extends AbstractMSQComponentSupplierDelegate
     if(false) {
       return DartSqlEngine.class;
     } else {
-      return QkSqlEngine.class;
+      return PrePlannedSqlEngine.class;
     }
   }
 
