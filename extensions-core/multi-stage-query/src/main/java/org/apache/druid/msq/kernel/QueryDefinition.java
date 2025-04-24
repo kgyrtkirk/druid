@@ -197,9 +197,4 @@ public class QueryDefinition
   {
     return stageDefinitions.get(finalStage).getSignature();
   }
-
-  public QueryDefinition withContext(QueryContext queryContext)
-  {
-    return create(getStageDefinitions(), queryContext);
-  }
 }
