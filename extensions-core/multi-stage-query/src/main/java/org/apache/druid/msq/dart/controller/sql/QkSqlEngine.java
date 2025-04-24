@@ -124,7 +124,7 @@ public class QkSqlEngine implements SqlEngine
     }
 
     @Override
-    public QueryResponse<Object[]> buildResponse(DruidLogicalNode rootRel)
+    public QueryResponse<Object[]> runQuery(DruidLogicalNode rootRel)
     {
       QueryDefinitionTranslator qdt = new QueryDefinitionTranslator(plannerContext, rootRel);
       QueryDefinition queryDef = qdt.translate(rootRel);

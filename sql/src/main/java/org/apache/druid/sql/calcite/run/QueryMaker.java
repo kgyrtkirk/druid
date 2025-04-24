@@ -39,6 +39,6 @@ public interface QueryMaker
 
   public interface FromDruidLogical
   {
-    QueryResponse<Object[]> buildResponse(DruidLogicalNode newRoot);
+    QueryResponse<Object[]> runQuery(DruidLogicalNode newRoot);
   }
 }

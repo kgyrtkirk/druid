@@ -559,7 +559,7 @@ public abstract class QueryHandler extends SqlStatementHandler.BaseStatementHand
       // FIXME: queryMaker.unwrap(...);
       if (queryMaker instanceof QueryMaker.FromDruidLogical) {
         QueryMaker.FromDruidLogical stage10x = (QueryMaker.FromDruidLogical) queryMaker;
-        QueryResponse<Object[]> respone = stage10x.buildResponse((DruidLogicalNode) newRoot);
+        QueryResponse<Object[]> respone = stage10x.runQuery((DruidLogicalNode) newRoot);
         return new PlannerResult(() -> respone, newRoot.getRowType());
       }
 

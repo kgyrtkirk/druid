@@ -42,7 +42,7 @@ public class CalciteDartTest extends BaseCalciteQueryTest
         .queryContext(
             ImmutableMap.<String, Object>builder()
                 .put(DartSqlEngine.CTX_DART_QUERY_ID, UUID.randomUUID().toString())
-//                .put(QueryContexts.CTX_NATIVE_QUERY_SQL_PLANNING_MODE, QueryContexts.NATIVE_QUERY_SQL_PLANNING_MODE_DECOUPLED)
+                .put(QueryContexts.CTX_NATIVE_QUERY_SQL_PLANNING_MODE, QueryContexts.NATIVE_QUERY_SQL_PLANNING_MODE_DECOUPLED)
                 .put(QueryContexts.ENABLE_DEBUG, true)
                 .build()
         )
