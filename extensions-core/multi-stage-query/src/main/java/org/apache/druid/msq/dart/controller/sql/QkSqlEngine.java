@@ -35,8 +35,6 @@ import org.apache.druid.query.QueryContext;
 import org.apache.druid.server.QueryResponse;
 import org.apache.druid.sql.calcite.planner.PlannerContext;
 import org.apache.druid.sql.calcite.planner.PlannerResult;
-import org.apache.druid.sql.calcite.planner.Stage10X;
-import org.apache.druid.sql.calcite.planner.Stage10X2;
 import org.apache.druid.sql.calcite.rel.DruidQuery;
 import org.apache.druid.sql.calcite.rel.logical.DruidLogicalNode;
 import org.apache.druid.sql.calcite.run.EngineFeature;
@@ -114,7 +112,7 @@ public class QkSqlEngine implements SqlEngine
     throw DruidException.defensive("Not yet supported in this mode");
   }
 
-  static class QkQueryMaker implements QueryMaker, Stage10X, Stage10X2
+  static class QkQueryMaker implements QueryMaker, QueryMaker.FromDruidLogical
   {
 
     private PlannerContext plannerContext;
@@ -128,26 +126,37 @@ public class QkSqlEngine implements SqlEngine
     }
 
     @Override
-    public QueryResponse<Object[]> runQuery(DruidQuery druidQuery)
+    public QueryResponse<Object[]> buildResponse(DruidLogicalNode newRoot)
     {
-      return dartQueryMaker.runQuery(druidQuery);
-    }
-
-    @Override
-    public PlannerResult buildPlannerResult(DruidLogicalNode newRoot)
-    {
-
       QueryDefinitionTranslator qdt = new QueryDefinitionTranslator(plannerContext, newRoot);
 
       QueryDefinition queryDef = qdt.translate(newRoot);
 
       QueryContext context = plannerContext.queryContext();
       QueryResponse<Object[]> a = dartQueryMaker.runQueryDef(queryDef, context ,newRoot.getRowType() );
-      return new PlannerResult(() -> a, newRoot.getRowType());
-
+      return a;
     }
 
+
+    public PlannerResult buildPlannerResult(DruidLogicalNode newRoot)
+    {
+      QueryDefinitionTranslator qdt = new QueryDefinitionTranslator(plannerContext, newRoot);
+      QueryDefinition queryDef = qdt.translate(newRoot);
+      QueryContext context = plannerContext.queryContext();
+      QueryResponse<Object[]> a = dartQueryMaker.runQueryDef(queryDef, context ,newRoot.getRowType() );
+      return new PlannerResult(() -> a, newRoot.getRowType());
+    }
+
+
     @Override
+    public QueryResponse<Object[]> runQuery(DruidQuery druidQuery)
+    {
+      QueryContext queryContext = druidQuery.getQuery().context();
+      LegacyMSQSpec queryDef = buildQueryDef(druidQuery, dartQueryMaker.fieldMapping, queryContext);
+      QueryResponse<Object[]> response = dartQueryMaker.runMSQSpec(queryDef, queryContext);
+      return response;
+    }
+
     public PlannerResult buildPlannerResult2(DruidQuery druidQuery)
     {
       QueryContext queryContext = druidQuery.getQuery().context();

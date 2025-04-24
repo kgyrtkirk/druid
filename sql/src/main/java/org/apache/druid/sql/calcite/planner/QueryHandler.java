@@ -557,9 +557,10 @@ public abstract class QueryHandler extends SqlStatementHandler.BaseStatementHand
       plannerContext.dispatchHook(DruidHook.DRUID_PLAN, newRoot);
 
       // FIXME: queryMaker.unwrap(...);
-      if(queryMaker instanceof Stage10X) {
-        Stage10X stage10x = (Stage10X)queryMaker;
-        return stage10x.buildPlannerResult((DruidLogicalNode) newRoot);
+      if (queryMaker instanceof QueryMaker.FromDruidLogical) {
+        QueryMaker.FromDruidLogical stage10x = (QueryMaker.FromDruidLogical) queryMaker;
+        QueryResponse<Object[]> respone = stage10x.buildResponse((DruidLogicalNode) newRoot);
+        return new PlannerResult(() -> respone, newRoot.getRowType());
       }
 
       DruidQueryGenerator generator = new DruidQueryGenerator(plannerContext, (DruidLogicalNode) newRoot, rexBuilder);
@@ -615,14 +616,6 @@ public abstract class QueryHandler extends SqlStatementHandler.BaseStatementHand
             || readResourceActions.size() >= druidRel.getDataSourceNames().size(),
             "Authorization sanity check failed"
         );
-
-        if(queryMaker instanceof Stage10X2) {
-          Stage10X2 stage10x = (Stage10X2)queryMaker;
-          return stage10x.buildPlannerResult2(druidRel.toDruidQuery(false));
-//          return ((Stage10X) queryMaker).buildPlannerResult(newRoot);
-        }
-
-
 
         return new PlannerResult(druidRel::runQuery, rowType);
       }
