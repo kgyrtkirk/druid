@@ -24,20 +24,12 @@ import org.apache.druid.error.DruidException;
 import org.apache.druid.java.util.common.Intervals;
 import org.apache.druid.msq.dart.controller.sql.StageDefinitionBuilder2.RootStage;
 import org.apache.druid.msq.input.InputSpec;
-import org.apache.druid.msq.kernel.MixShuffleSpec;
 import org.apache.druid.msq.kernel.QueryDefinition;
 import org.apache.druid.msq.kernel.QueryDefinitionBuilder;
-import org.apache.druid.msq.kernel.StageDefinition;
-import org.apache.druid.msq.kernel.StageDefinitionBuilder;
 import org.apache.druid.msq.querykit.DataSourcePlan;
-import org.apache.druid.msq.querykit.scan.ScanQueryFrameProcessorFactory;
 import org.apache.druid.query.DataSource;
-import org.apache.druid.query.Druids;
 import org.apache.druid.query.InlineDataSource;
 import org.apache.druid.query.TableDataSource;
-import org.apache.druid.query.scan.ScanQuery;
-import org.apache.druid.query.spec.QuerySegmentSpec;
-import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.sql.calcite.planner.PlannerContext;
 import org.apache.druid.sql.calcite.planner.querygen.DruidQueryGenerator.DruidNodeStack;
 import org.apache.druid.sql.calcite.planner.querygen.SourceDescProducer.SourceDesc;
@@ -49,13 +41,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class QueryDefinitionTranslator
 {
-  private static final String IRRELEVANT = "irrelevant";
   private PlannerContext plannerContext;
-  private AtomicInteger stageIdSeq = new AtomicInteger(1);
   private StageDefinitionBuilder2 stageBuilder;
 
   public QueryDefinitionTranslator(PlannerContext plannerContext, DruidLogicalNode logicalRoot)
@@ -86,7 +75,7 @@ public class QueryDefinitionTranslator
     return vertex;
   }
 
-  private IStageDef processNodeWithInputs(DruidNodeStack stack, List<IStageDef > newInputs)
+  private IStageDef processNodeWithInputs(DruidNodeStack stack, List<IStageDef> newInputs)
   {
     DruidLogicalNode node = stack.peekNode();
     Optional<RootStage> vertex = buildRootVertex(node);
@@ -94,12 +83,12 @@ public class QueryDefinitionTranslator
       return vertex.get();
     }
     if (newInputs.size() == 1) {
-      IStageDef  inputVertex = newInputs.get(0);
+      IStageDef inputVertex = newInputs.get(0);
       IStageDef newVertex = inputVertex.extendWith(stack);
       if (newVertex != null) {
         return newVertex;
       }
-      Optional<IStageDef > seq = buildSequenceVertex(stack, newInputs.get(0));
+      Optional<IStageDef> seq = buildSequenceVertex(stack, newInputs.get(0));
       if (seq.isPresent()) {
         return seq.get();
       }
@@ -107,11 +96,11 @@ public class QueryDefinitionTranslator
     throw DruidException.defensive().build("Unable to process relNode[%s]", node);
   }
 
-  private Optional<IStageDef> buildSequenceVertex(DruidNodeStack stack, IStageDef  vertex)
+  private Optional<IStageDef> buildSequenceVertex(DruidNodeStack stack, IStageDef vertex)
   {
     DruidLogicalNode node = stack.peekNode();
     if (node instanceof DruidProject) {
-//      return makeScanProcessorFactory(vertex.null, null);
+      // return makeScanProcessorFactory(vertex.null, null);
     }
     return Optional.empty();
 
@@ -133,10 +122,12 @@ public class QueryDefinitionTranslator
     SourceDesc sd = node.getSourceDesc(plannerContext, Collections.emptyList());
     DataSource ds = sd.dataSource;
     TableDataSource ids = (TableDataSource) ds;
-    DataSourcePlan dsp = DataSourcePlan.forTable(ids,
+    DataSourcePlan dsp = DataSourcePlan.forTable(
+        ids,
         Intervals.ONLY_ETERNITY,
-        null,null,
-        false);
+        null, null,
+        false
+    );
     List<InputSpec> isp = dsp.getInputSpecs();
 
     RootStage vertex = stageBuilder.new RootStage(sd.rowSignature, isp, Collections.emptyList());
@@ -152,115 +143,7 @@ public class QueryDefinitionTranslator
     DataSourcePlan dsp = DataSourcePlan.forInline(ids, false);
     List<InputSpec> isp = dsp.getInputSpecs();
 
-
-// InlineDataFrameProcessorFactory
-
-    QueryDefinitionBuilder qdb = QueryDefinition.builder(IRRELEVANT);
-    StageDefinitionBuilder sdb = StageDefinition.builder(stageIdSeq.incrementAndGet())
-        .inputs(isp)
-        .signature(sd.rowSignature)
-        .shuffleSpec(MixShuffleSpec.instance())
-        .processorFactory(makeScanProcessorFactory(dsp.getNewDataSource(), sd.rowSignature));
-
-    StageDefinitionBuilder2 p = new StageDefinitionBuilder2(plannerContext);
-    RootStage vertex = p.new RootStage(sd.rowSignature, isp, Collections.emptyList());
+    RootStage vertex = stageBuilder.new RootStage(sd.rowSignature, isp, Collections.emptyList());
     return Optional.of(vertex);
   }
-
-  private ScanQueryFrameProcessorFactory makeScanProcessorFactory(DataSource dataSource, RowSignature rowSignature)
-  {
-
-    ScanQuery s = Druids.newScanQueryBuilder()
-//        .dataSource(dataSource)
-        .dataSource(IRRELEVANT)
-    .intervals(QuerySegmentSpec.DEFAULT)
-    .columns(rowSignature.getColumnNames())
-    .columnTypes(rowSignature.getColumnTypes())
-//    .virtualColumns(null)
-//    .columns("cnt", "m1", "v0", "v1")
-//    .columnTypes(ColumnType.LONG, ColumnType.FLOAT, ColumnType.LONG, ColumnType.LONG)
-    .build();
-
-
-    return new ScanQueryFrameProcessorFactory(s);
-//    Druids.newScanQueryBuilder()
-//          .dataSource("irrelevant")
-//          .intervals(QuerySegmentSpec.DEFAULT)
-//
-//    if(true)
-//    {
-//      throw new RuntimeException("FIXME: Unimplemented!");
-//    }
-//    return null;
-
-
-  }
-
-  protected static class QDVertexFactory
-  {
-    public QDVertexFactory()
-    {
-    }
-
-    public Vertex createVertex( IStageDef qdb, List<Vertex> inputs)
-    {
-      return new StageVertex(qdb, inputs);
-    }
-
-    public class StageVertex implements Vertex
-    {
-      final IStageDef sdb;
-      final List<Vertex> inputs;
-
-      public StageVertex(IStageDef qdb, List<Vertex> inputs)
-      {
-        this.sdb = qdb;
-        this.inputs = inputs;
-      }
-
-      @Override
-      public QueryDefinitionBuilder build(QueryDefinitionBuilder qdbx)
-      {
-        for (Vertex vertex : inputs) {
-          qdbx = vertex.build(qdbx);
-        }
-        StageDefinitionBuilder finalizedStage = finalizeStage();
-
-        return qdbx.add(finalizedStage);
-      }
-
-      private StageDefinitionBuilder finalizeStage()
-      {
-        return sdb.finalizeStage();
-      }
-
-      /**
-       * Extends the the current partial query with the new parent if possible.
-       */
-      @Override
-      public Optional<Vertex> extendWith(DruidNodeStack stack)
-      {
-        Optional<IStageDef> newStage = Optional.ofNullable(sdb.extendWith(stack));
-        return newStage.map(sdb -> createVertex(sdb, inputs));
-      }
-    }
-  }
-
-  /**
-   * Execution dag vertex - encapsulates a list of operators.
-   */
-  private interface Vertex
-  {
-    /**
-     * Builds the query.
-     */
-    QueryDefinitionBuilder build(QueryDefinitionBuilder qdbx);
-
-    /**
-     * Extends the current vertex to include the specified parent.
-     */
-    Optional<Vertex> extendWith(DruidNodeStack stack);
-
-  }
-
 }
