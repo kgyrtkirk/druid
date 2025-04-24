@@ -113,7 +113,7 @@ public class QkSqlEngine implements SqlEngine
     throw DruidException.defensive("Not yet supported in this mode");
   }
 
-  static class QkQueryMaker implements QueryMaker ,Stage10X
+  static class QkQueryMaker implements QueryMaker, Stage10X
   {
 
     private PlannerContext plannerContext;

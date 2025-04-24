@@ -556,6 +556,7 @@ public abstract class QueryHandler extends SqlStatementHandler.BaseStatementHand
 
       plannerContext.dispatchHook(DruidHook.DRUID_PLAN, newRoot);
 
+      // FIXME: queryMaker.unwrap(...);
       if(queryMaker instanceof Stage10X) {
         Stage10X stage10x = (Stage10X)queryMaker;
         return stage10x.buildPlannerResult((DruidLogicalNode) newRoot);
@@ -608,21 +609,21 @@ public abstract class QueryHandler extends SqlStatementHandler.BaseStatementHand
 
 
         // Start the query.
+        // sanity check
+        final Set<ResourceAction> readResourceActions =
+            plannerContext.getResourceActions()
+            .stream()
+            .filter(action -> action.getAction() == Action.READ)
+            .collect(Collectors.toSet());
+        Preconditions.checkState(
+            readResourceActions.isEmpty() == druidRel.getDataSourceNames().isEmpty()
+            // The resources found in the plannerContext can be less than the datasources in
+            // the query plan, because the query planner can eliminate empty tables by replacing
+            // them with InlineDataSource of empty rows.
+            || readResourceActions.size() >= druidRel.getDataSourceNames().size(),
+            "Authorization sanity check failed"
+            );
         final Supplier<QueryResponse<Object[]>> resultsSupplier = () -> {
-          // sanity check
-          final Set<ResourceAction> readResourceActions =
-              plannerContext.getResourceActions()
-                            .stream()
-                            .filter(action -> action.getAction() == Action.READ)
-                            .collect(Collectors.toSet());
-          Preconditions.checkState(
-              readResourceActions.isEmpty() == druidRel.getDataSourceNames().isEmpty()
-              // The resources found in the plannerContext can be less than the datasources in
-              // the query plan, because the query planner can eliminate empty tables by replacing
-              // them with InlineDataSource of empty rows.
-              || readResourceActions.size() >= druidRel.getDataSourceNames().size(),
-              "Authorization sanity check failed"
-          );
 
           return druidRel.runQuery();
         };
