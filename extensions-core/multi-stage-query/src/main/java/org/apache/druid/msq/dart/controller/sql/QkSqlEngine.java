@@ -115,10 +115,10 @@ public class QkSqlEngine implements SqlEngine
     private PlannerContext plannerContext;
     private DartQueryMaker dartQueryMaker;
 
-    public QkQueryMaker(PlannerContext plannerContext, QueryMaker buildQueryMakerForSelect)
+    public QkQueryMaker(PlannerContext plannerContext, QueryMaker queryMaker)
     {
       this.plannerContext = plannerContext;
-      this.dartQueryMaker = (DartQueryMaker) buildQueryMakerForSelect;
+      this.dartQueryMaker = (DartQueryMaker) queryMaker;
     }
 
     @Override
@@ -127,7 +127,8 @@ public class QkSqlEngine implements SqlEngine
       QueryDefinitionTranslator qdt = new QueryDefinitionTranslator(plannerContext, rootRel);
       QueryDefinition queryDef = qdt.translate(rootRel);
       QueryContext context = plannerContext.queryContext();
-      QueryResponse<Object[]> response = dartQueryMaker.runQueryDef(queryDef, context, rootRel.getRowType());
+      final LegacyMSQSpec querySpec = buildMSQSpec(queryDef, context, dartQueryMaker.fieldMapping);
+      QueryResponse<Object[]> response = dartQueryMaker.runMSQSpec(querySpec, context, rootRel.getRowType());
       return response;
     }
 
@@ -135,12 +136,32 @@ public class QkSqlEngine implements SqlEngine
     public QueryResponse<Object[]> runQuery(DruidQuery druidQuery)
     {
       QueryContext queryContext = druidQuery.getQuery().context();
-      LegacyMSQSpec msqSpec = buildQueryDef(druidQuery, dartQueryMaker.fieldMapping, queryContext);
+      LegacyMSQSpec msqSpec = buildMSQSpec(druidQuery, dartQueryMaker.fieldMapping, queryContext);
       QueryResponse<Object[]> response = dartQueryMaker.runMSQSpec(msqSpec, queryContext, druidQuery.getOutputRowType());
       return response;
     }
 
-    private LegacyMSQSpec buildQueryDef(DruidQuery druidQuery, List<Entry<Integer, String>> fieldMapping, QueryContext queryContext)
+    public LegacyMSQSpec buildMSQSpec(
+        QueryDefinition queryDef,
+        QueryContext context,
+        List<Entry<Integer, String>> fieldMapping)
+    {
+      final LegacyMSQSpec querySpec = MSQTaskQueryMaker.makeLegacyMSQSpec(
+          null,
+          null,
+          context,
+          fieldMapping,
+          plannerContext,
+          null, // Only used for DML, which this isn't
+          queryDef
+      );
+      return querySpec;
+    }
+
+    private LegacyMSQSpec buildMSQSpec(
+        DruidQuery druidQuery,
+        List<Entry<Integer, String>> fieldMapping,
+        QueryContext queryContext)
     {
       final LegacyMSQSpec querySpec = MSQTaskQueryMaker.makeLegacyMSQSpec(
           null,
