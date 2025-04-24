@@ -190,23 +190,4 @@ public class QkSqlEngine implements SqlEngine
 
     }
   }
-
-  // @Override
-  // public PlannerResult buildPlannerResult(RelNode newRoot)
-  // {
-  // throw DruidException.defensive("Not yet supported in this mode");
-  //// Object queryDef = new MSQQueryGenerator().generateQuery(newRoot);
-  //// return delegate.buildPlannerResult(newRoot);
-  // }
-  //
-  // @Override
-  // public PlannerResult buildPlannerResult2(DruidQuery druidQuery)
-  // {
-  // delegate.buildQueryMakerForInsert(null, null, null);
-  // if (true) {
-  // throw new RuntimeException("FIXME: Unimplemented!");
-  // }
-  // return null;
-  //
-  // }
 }

@@ -41,6 +41,7 @@ import org.apache.druid.msq.dart.controller.sql.DartSqlClients;
 import org.apache.druid.msq.dart.controller.sql.DartSqlEngine;
 import org.apache.druid.msq.dart.guice.DartControllerConfig;
 import org.apache.druid.msq.exec.Controller;
+import org.apache.druid.msq.exec.ControllerContext;
 import org.apache.druid.msq.indexing.MSQSpec;
 import org.apache.druid.msq.indexing.error.CanceledFault;
 import org.apache.druid.msq.indexing.error.InvalidNullByteFault;
@@ -808,14 +809,16 @@ public class DartSqlResourceTest extends MSQTestBase
   private ControllerHolder setUpMockRunningQuery(final String identity)
   {
     final Controller controller = Mockito.mock(Controller.class);
+    final ControllerContext controllerContext = Mockito.mock(ControllerContext.class);
     Mockito.when(controller.queryId()).thenReturn("did_" + identity);
+    Mockito.when(controller.getControllerContext()).thenReturn(controllerContext);
+    Mockito.when(controllerContext.selfNode()).thenReturn(Mockito.mock(DruidNode.class));
 
     final AuthenticationResult authenticationResult = makeAuthenticationResult(identity);
     final ControllerHolder holder = new ControllerHolder(
         controller,
         "sid",
         "SELECT 1",
-        "localhost:1001",
         authenticationResult,
         DateTimes.of("2000")
     );
