@@ -55,7 +55,6 @@ import org.apache.druid.msq.kernel.QueryDefinition;
 import org.apache.druid.msq.sql.DartQueryKitSpecFactory;
 import org.apache.druid.msq.sql.MSQTaskQueryMaker;
 import org.apache.druid.msq.util.MultiStageQueryContext;
-import org.apache.druid.query.QueryContext;
 import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.server.QueryResponse;
 import org.apache.druid.server.security.ForbiddenException;
@@ -133,7 +132,7 @@ public class DartQueryMaker implements QueryMaker
 
 
 
-  public QueryResponse<Object[]> runQueryDef(QueryDefinition queryDef, QueryContext context, RelDataType rowType)
+  public QueryResponse<Object[]> runQueryDef(QueryDefinition queryDef, RelDataType rowType)
   {
 
     if (!plannerContext.getAuthorizationResult().allowAccessWithNoRestriction()) {
@@ -144,18 +143,17 @@ public class DartQueryMaker implements QueryMaker
       throw DruidException.defensive("Non-finalized execution is not supported!");
     }
 
-
     final LegacyMSQSpec querySpec = MSQTaskQueryMaker.makeLegacyMSQSpec(
         null,
         null,
-        context,
+        queryDef.getContext(),
         fieldMapping,
         plannerContext,
         null, // Only used for DML, which this isn't
         queryDef
     );
 
-    return runMSQSpec(querySpec, context, rowType);
+    return runMSQSpec(querySpec, rowType);
 
   }
 
@@ -165,15 +163,6 @@ public class DartQueryMaker implements QueryMaker
       throw new ForbiddenException(plannerContext.getAuthorizationResult().getErrorMessage());
     }
 
-    final List<Pair<SqlTypeName, ColumnType>> types =
-        MSQTaskQueryMaker.getTypes(druidQuery, fieldMapping, plannerContext);
-
-    final String dartQueryId = druidQuery.getQuery().context().getString(DartSqlEngine.CTX_DART_QUERY_ID);
-    final ControllerContext controllerContext = controllerContextFactory.newContext(dartQueryId);
-    final ResultsContext resultsContext = new ResultsContext(
-        types.stream().map(p -> p.lhs).collect(Collectors.toList()),
-        SqlResults.Context.fromPlannerContext(plannerContext)
-    );
     final LegacyMSQSpec querySpec = MSQTaskQueryMaker.makeLegacyMSQSpec(
         null,
         druidQuery,
@@ -184,52 +173,13 @@ public class DartQueryMaker implements QueryMaker
         null
     );
 
-    if(true) {
-      return runMSQSpec(querySpec, druidQuery.getQuery().context(), druidQuery.getOutputRowType());
-    }
-
-    final ControllerImpl controller = new ControllerImpl(
-        dartQueryId,
-        querySpec,
-        resultsContext,
-        controllerContext,
-        new DartQueryKitSpecFactory()
-    );
-
-    final ControllerHolder controllerHolder = new ControllerHolder(
-        controller,
-        plannerContext.getSqlQueryId(),
-        plannerContext.getSql(),
-        plannerContext.getAuthenticationResult(),
-        DateTimes.nowUtc()
-    );
-
-    final boolean fullReport = druidQuery.getQuery().context().getBoolean(
-        DartSqlEngine.CTX_FULL_REPORT,
-        DartSqlEngine.CTX_FULL_REPORT_DEFAULT
-    );
-
-    // Register controller before submitting anything to controllerExeuctor, so it shows up in
-    // "active controllers" lists.
-    controllerRegistry.register(controllerHolder);
-
-    try {
-      // runWithReport, runWithoutReport are responsible for calling controllerRegistry.deregister(controllerHolder)
-      // when their work is done.
-      final Sequence<Object[]> results =
-          fullReport ? runWithReport(controllerHolder) : runWithoutReport(controllerHolder);
-      return QueryResponse.withEmptyContext(results);
-    }
-    catch (Throwable e) {
-      // Error while calling runWithReport or runWithoutReport. Deregister controller immediately.
-      controllerRegistry.deregister(controllerHolder);
-      throw e;
-    }
+    return runMSQSpec(querySpec, druidQuery.getOutputRowType());
   }
 
-  public QueryResponse<Object[]> runMSQSpec(LegacyMSQSpec querySpec, QueryContext context, RelDataType rowType)
+  public QueryResponse<Object[]> runMSQSpec(LegacyMSQSpec querySpec, RelDataType rowType)
   {
-    final String dartQueryId = context.getString(DartSqlEngine.CTX_DART_QUERY_ID);
+
+    final String dartQueryId = querySpec.getContext().getString(DartSqlEngine.CTX_DART_QUERY_ID);
     final ControllerContext controllerContext = controllerContextFactory.newContext(dartQueryId);
 
     final ResultsContext resultsContext = makeDefaultResultContext(querySpec.getQueryDef(), rowType);
@@ -250,7 +200,7 @@ public class DartQueryMaker implements QueryMaker
         DateTimes.nowUtc()
     );
 
-    final boolean fullReport = context.getBoolean(
+    final boolean fullReport = querySpec.getContext().getBoolean(
         DartSqlEngine.CTX_FULL_REPORT,
         DartSqlEngine.CTX_FULL_REPORT_DEFAULT
     );
