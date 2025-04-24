@@ -133,8 +133,6 @@ public class QkSqlEngine implements SqlEngine
     }
 
     @Override
-    // DruidJoin
-    //   Druid
     public PlannerResult buildPlannerResult(DruidLogicalNode newRoot)
     {
 
