@@ -19,8 +19,6 @@
 
 package org.apache.druid.data.input;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.druid.data.input.impl.InputEntityIteratingReader;
 import org.apache.druid.data.input.impl.systemfield.SystemFieldDecoratorFactory;
 import org.apache.druid.java.util.common.CloseableIterators;
@@ -40,8 +38,6 @@ import java.util.Collections;
  */
 public class ResourceInputSource extends AbstractInputSource
 {
-  public static final String TYPE_KEY = "classpath";
-
   public static ResourceInputSource of(ClassLoader loader, String resourceFile)
   {
     return new ResourceInputSource(loader, resourceFile);
@@ -49,13 +45,6 @@ public class ResourceInputSource extends AbstractInputSource
 
   private final ClassLoader classLoader;
   private final String resourceFile;
-
-  @JsonCreator
-  private ResourceInputSource(
-      @JsonProperty("file") String resourceFile)
-  {
-    this(ResourceInputSource.class.getClassLoader(), resourceFile);
-  }
 
   private ResourceInputSource(ClassLoader classLoader, String resourceFile)
   {
