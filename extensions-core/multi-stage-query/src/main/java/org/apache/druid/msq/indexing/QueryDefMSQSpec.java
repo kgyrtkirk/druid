@@ -157,6 +157,5 @@ public class QueryDefMSQSpec extends MSQSpec
   {
     return queryDef.getContext();
   }
-
 }
 
