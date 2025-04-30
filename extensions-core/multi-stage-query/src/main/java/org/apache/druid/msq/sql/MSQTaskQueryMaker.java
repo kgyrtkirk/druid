@@ -43,7 +43,6 @@ import org.apache.druid.java.util.common.guava.Sequences;
 import org.apache.druid.msq.exec.MSQTasks;
 import org.apache.druid.msq.exec.QueryKitSpecFactory;
 import org.apache.druid.msq.exec.ResultsContext;
-import org.apache.druid.msq.indexing.MSQSpec;
 import org.apache.druid.msq.indexing.LegacyMSQSpec;
 import org.apache.druid.msq.indexing.MSQControllerTask;
 import org.apache.druid.msq.indexing.MSQTuningConfig;
@@ -270,16 +269,16 @@ public class MSQTaskQueryMaker implements QueryMaker
 
       return querySpec;
     } else {
-      final LegacyMSQSpec querySpec = new MSQSpec.Builder()
+      final QueryDefMSQSpec querySpec = new QueryDefMSQSpec.Builder()
           .columnMappings(new ColumnMappings(QueryUtils.buildColumnMappings(fieldMapping, queryDef.getOutputRowSignature())))
           .destination(destination)
           .assignmentStrategy(MultiStageQueryContext.getAssignmentStrategy(sqlQueryContext))
           .tuningConfig(makeMSQTuningConfig(plannerContext))
           .queryDef(queryDef)
-          .build()
-          .toLegacyMSQSpec();
+          .build();
 
-      return querySpec;
+      throw new UnsupportedOperationException("LegacyMSQSpec is not supported yet");
+//      return null;//querySpec;
 
     }
 

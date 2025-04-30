@@ -27,7 +27,6 @@ import org.apache.calcite.tools.ValidationException;
 import org.apache.druid.error.DruidException;
 import org.apache.druid.msq.exec.ControllerContext;
 import org.apache.druid.msq.exec.QueryKitBasedMSQPlanner;
-import org.apache.druid.msq.exec.ResultsContext;
 import org.apache.druid.msq.indexing.LegacyMSQSpec;
 import org.apache.druid.msq.indexing.QueryDefMSQSpec;
 import org.apache.druid.msq.kernel.QueryDefinition;
@@ -158,11 +157,12 @@ public class PrePlannedSqlEngine implements SqlEngine
     public QueryResponse<Object[]> runQuery(DruidQuery druidQuery)
     {
       QueryContext queryContext = druidQuery.getQuery().context();
-      LegacyMSQSpec msqSpec = buildMSQSpec(druidQuery, dartQueryMaker.fieldMapping, queryContext);
-      final ResultsContext resultsContext = DartQueryMaker.makeResultsContext(druidQuery, dartQueryMaker.fieldMapping, plannerContext);
+      QueryDefMSQSpec msqSpec = buildMSQSpec(druidQuery, dartQueryMaker.fieldMapping, queryContext);
+      // FIXME: here the full resultContext might be available via
+      //final ResultsContext resultsContext = DartQueryMaker.makeResultsContext(druidQuery, dartQueryMaker.fieldMapping, plannerContext);
 
       QueryResponse<Object[]> response = dartQueryMaker
-          .runMSQSpec(msqSpec, queryContext, resultsContext);
+          .runMSQSpec2(msqSpec, queryContext, druidQuery.getOutputRowType());
       return response;
     }
 
@@ -182,7 +182,7 @@ public class PrePlannedSqlEngine implements SqlEngine
       return querySpec;
     }
 
-    private LegacyMSQSpec buildMSQSpec(
+    private QueryDefMSQSpec buildMSQSpec(
         DruidQuery druidQuery,
         List<Entry<Integer, String>> fieldMapping,
         QueryContext queryContext)
@@ -214,7 +214,15 @@ public class PrePlannedSqlEngine implements SqlEngine
               controllerContext.queryKernelConfig(dartQueryId, querySpec)
           )
       ).makeQueryDefinition();
-      return querySpec.withQueryDef(queryDef);
+
+      return MSQTaskQueryMaker.makeLegacyMSQSpec2(
+          null,
+          druidQuery.getQuery().context(),
+          fieldMapping,
+          plannerContext,
+          null,
+          queryDef
+      );
     }
   }
 }

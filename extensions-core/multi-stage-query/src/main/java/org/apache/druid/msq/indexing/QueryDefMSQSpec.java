@@ -20,12 +20,15 @@
 package org.apache.druid.msq.indexing;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import org.apache.druid.msq.indexing.destination.MSQDestination;
 import org.apache.druid.msq.indexing.destination.TaskReportMSQDestination;
 import org.apache.druid.msq.kernel.QueryDefinition;
 import org.apache.druid.msq.kernel.WorkerAssignmentStrategy;
 import org.apache.druid.query.BaseQuery;
+import org.apache.druid.query.QueryContext;
 import org.apache.druid.sql.calcite.planner.ColumnMappings;
 
 import java.util.Map;
@@ -33,10 +36,13 @@ import java.util.Objects;
 
 public class QueryDefMSQSpec extends MSQSpec
 {
+
+  protected final QueryDefinition queryDef;
   // jackson defaults
   public QueryDefMSQSpec()
   {
     super();
+    queryDef = null;
   }
 
   @JsonCreator
@@ -48,12 +54,16 @@ public class QueryDefMSQSpec extends MSQSpec
       @JsonProperty("tuningConfig") MSQTuningConfig tuningConfig
   )
   {
-    super(columnMappings, destination, assignmentStrategy, tuningConfig, queryDef);
+    super(columnMappings, destination, assignmentStrategy, tuningConfig);
+    this.queryDef = queryDef;
   }
 
-  public static Builder builder()
+
+  @JsonProperty("queryDef")
+  @JsonInclude(value = Include.NON_NULL)
+  public QueryDefinition getQueryDef()
   {
-    return new Builder();
+    return queryDef;
   }
 
   @Override
@@ -140,6 +150,12 @@ public class QueryDefMSQSpec extends MSQSpec
           tuningConfig
       );
     }
+  }
+
+  @Override
+  public QueryContext getContext()
+  {
+    return queryDef.getContext();
   }
 
 }

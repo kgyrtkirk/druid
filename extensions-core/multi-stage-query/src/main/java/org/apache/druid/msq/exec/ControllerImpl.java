@@ -663,7 +663,7 @@ public class ControllerImpl implements Controller
     final QueryContext queryContext = querySpec.getContext();
 
     final QueryDefinition queryDef;
-    if (querySpec.getQueryDef() == null) {
+    if (querySpec instanceof LegacyMSQSpec) {
       QueryKitBasedMSQPlanner qkPlanner = new QueryKitBasedMSQPlanner(
           querySpec,
           resultsContext,
@@ -679,7 +679,7 @@ public class ControllerImpl implements Controller
       );
       queryDef = qkPlanner.makeQueryDefinition();
     } else {
-      queryDef = querySpec.getQueryDef();
+      queryDef = ((QueryDefMSQSpec)querySpec).getQueryDef();
     }
 
     ensureExportLocationEmpty(context, querySpec.getDestination());

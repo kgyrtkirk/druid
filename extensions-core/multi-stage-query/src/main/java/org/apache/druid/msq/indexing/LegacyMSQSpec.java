@@ -19,12 +19,9 @@
 
 package org.apache.druid.msq.indexing;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.base.Preconditions;
 import org.apache.druid.msq.indexing.destination.MSQDestination;
 import org.apache.druid.msq.indexing.destination.TaskReportMSQDestination;
-import org.apache.druid.msq.kernel.QueryDefinition;
 import org.apache.druid.msq.kernel.WorkerAssignmentStrategy;
 import org.apache.druid.query.BaseQuery;
 import org.apache.druid.query.Query;
@@ -57,21 +54,7 @@ public class LegacyMSQSpec extends MSQSpec
       @JsonProperty("assignmentStrategy") WorkerAssignmentStrategy assignmentStrategy,
       @JsonProperty("tuningConfig") MSQTuningConfig tuningConfig)
   {
-    this(query, columnMappings, destination, assignmentStrategy, tuningConfig, null);
-  }
-
-  @JsonCreator
-  public LegacyMSQSpec(
-      @JsonProperty("query") Query<?> query,
-      @JsonProperty("columnMappings") ColumnMappings columnMappings,
-      @JsonProperty("destination") MSQDestination destination,
-      @JsonProperty("assignmentStrategy") WorkerAssignmentStrategy assignmentStrategy,
-      @JsonProperty("tuningConfig") MSQTuningConfig tuningConfig,
-      @JsonProperty("queryDef") QueryDefinition queryDef
-  )
-  {
-    super(columnMappings, destination, assignmentStrategy, tuningConfig, queryDef);
-    Preconditions.checkArgument(query == null ^ queryDef == null, "Either query or queryDef must be null!");
+    super(columnMappings, destination, assignmentStrategy, tuningConfig);
     this.query = query;
   }
 
@@ -96,34 +79,21 @@ public class LegacyMSQSpec extends MSQSpec
   @Override
   public QueryContext getContext()
   {
-    if (isLegacyMode()) {
-      return QueryContext.of(query.getContext());
-    } else {
-      return super.getContext();
-    }
-  }
-
-  private boolean isLegacyMode()
-  {
-    return queryDef == null;
+    return QueryContext.of(query.getContext());
   }
 
   public LegacyMSQSpec withOverriddenContext(Map<String, Object> contextOverride)
   {
-    Preconditions.checkArgument(queryDef == null, "queryDef must be null!");
-    if (contextOverride == null || contextOverride.isEmpty()) {
-      return this;
-    } else {
-      return new LegacyMSQSpec(
-          query.withOverriddenContext(contextOverride),
-          getColumnMappings(),
-          getDestination(),
-          getAssignmentStrategy(),
-          getTuningConfig()
-      );
-    }
-  }
+//      Preconditions.checkArgument(queryDef == null, "queryDef must be null!");
 
+    return new LegacyMSQSpec(
+        query.withOverriddenContext(contextOverride),
+        getColumnMappings(),
+        getDestination(),
+        getAssignmentStrategy(),
+        getTuningConfig()
+    );
+  }
 
   @Override
   public boolean equals(Object o)
@@ -192,8 +162,7 @@ public class LegacyMSQSpec extends MSQSpec
           columnMappings,
           destination,
           assignmentStrategy,
-          tuningConfig,
-          null
+          tuningConfig
       );
     }
 
@@ -202,29 +171,5 @@ public class LegacyMSQSpec extends MSQSpec
       this.queryContext = queryContext;
       return this;
     }
-  }
-
-  public LegacyMSQSpec withQueryDef(QueryDefinition newQueryDef)
-  {
-    return new LegacyMSQSpec(
-        null,
-        getColumnMappings(),
-        getDestination(),
-        getAssignmentStrategy(),
-        getTuningConfig(),
-        newQueryDef
-    );
-  }
-
-  public static LegacyMSQSpec fromMSQSpec(MSQSpec msqSpec)
-  {
-    return new LegacyMSQSpec(
-        null,
-        msqSpec.getColumnMappings(),
-        msqSpec.getDestination(),
-        msqSpec.getAssignmentStrategy(),
-        msqSpec.getTuningConfig(),
-        msqSpec.getQueryDef()
-    );
   }
 }
