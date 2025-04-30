@@ -98,7 +98,7 @@ public class DartComponentSupplier extends AbstractMSQComponentSupplierDelegate
   @Override
   public Class<? extends SqlEngine> getSqlEngineClass()
   {
-    if(false) {
+    if(true) {
       return DartSqlEngine.class;
     } else {
       return PrePlannedSqlEngine.class;
