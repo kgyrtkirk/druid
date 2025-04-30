@@ -44,6 +44,7 @@ import org.apache.druid.msq.exec.ControllerImpl;
 import org.apache.druid.msq.exec.QueryListener;
 import org.apache.druid.msq.exec.ResultsContext;
 import org.apache.druid.msq.indexing.LegacyMSQSpec;
+import org.apache.druid.msq.indexing.QueryDefMSQSpec;
 import org.apache.druid.msq.indexing.TaskReportQueryListener;
 import org.apache.druid.msq.indexing.destination.TaskReportMSQDestination;
 import org.apache.druid.msq.indexing.error.CanceledFault;
@@ -147,10 +148,48 @@ public class DartQueryMaker implements QueryMaker
         null
     );
 
-    return runMSQSpec(querySpec, druidQuery.getQuery().context(), druidQuery.getOutputRowType());
+
+    final ResultsContext resultsContext = makeResultsContext(druidQuery, fieldMapping, plannerContext);
+
+    return runMSQSpec(querySpec, druidQuery.getQuery().context(), resultsContext);
   }
 
-  public QueryResponse<Object[]> runMSQSpec(LegacyMSQSpec querySpec, QueryContext context, RelDataType rowType)
+  public static ResultsContext makeResultsContext(DruidQuery druidQuery, List<Entry<Integer, String>> fieldMapping,
+      PlannerContext plannerContext)
+  {
+    final List<Pair<SqlTypeName, ColumnType>> types = MSQTaskQueryMaker
+        .getTypes(druidQuery, fieldMapping, plannerContext);
+    final ResultsContext resultsContext = new ResultsContext(
+        types.stream().map(p -> p.lhs).collect(Collectors.toList()),
+        SqlResults.Context.fromPlannerContext(plannerContext)
+    );
+    return resultsContext;
+  }
+
+  private ControllerImpl makeLegacyController(LegacyMSQSpec querySpec, QueryContext context, ResultsContext resultsContext)
+  {
+    if (!plannerContext.getAuthorizationResult().allowAccessWithNoRestriction()) {
+      throw new ForbiddenException(plannerContext.getAuthorizationResult().getErrorMessage());
+    }
+
+    if(!MultiStageQueryContext.isFinalizeAggregations(plannerContext.queryContext())) {
+      throw DruidException.defensive("Non-finalized execution is not supported!");
+    }
+
+    final String dartQueryId = context.getString(DartSqlEngine.CTX_DART_QUERY_ID);
+    final ControllerContext controllerContext = controllerContextFactory.newContext(dartQueryId);
+
+    final ControllerImpl controller = new ControllerImpl(
+        dartQueryId,
+        querySpec,
+        resultsContext,
+        controllerContext,
+        new DartQueryKitSpecFactory()
+    );
+    return controller;
+  }
+
+  private ControllerImpl makeQueryDefController(QueryDefMSQSpec querySpec, QueryContext context, RelDataType rowType)
   {
     if (!plannerContext.getAuthorizationResult().allowAccessWithNoRestriction()) {
       throw new ForbiddenException(plannerContext.getAuthorizationResult().getErrorMessage());
@@ -172,18 +211,42 @@ public class DartQueryMaker implements QueryMaker
         controllerContext,
         new DartQueryKitSpecFactory()
     );
+    return controller;
+  }
 
+  public QueryResponse<Object[]> runMSQSpec(LegacyMSQSpec querySpec, QueryContext context, ResultsContext resultsContext)
+  {
+    final ControllerImpl controller = makeLegacyController(querySpec, context, resultsContext);
+
+    final boolean fullReport = context.getBoolean(
+        DartSqlEngine.CTX_FULL_REPORT,
+        DartSqlEngine.CTX_FULL_REPORT_DEFAULT
+    );
+
+    return runController(controller, fullReport);
+  }
+
+
+  public QueryResponse<Object[]> runMSQSpec2(QueryDefMSQSpec querySpec, QueryContext context, RelDataType rowType)
+  {
+    final ControllerImpl controller = makeQueryDefController(querySpec, context, rowType);
+
+    final boolean fullReport = context.getBoolean(
+        DartSqlEngine.CTX_FULL_REPORT,
+        DartSqlEngine.CTX_FULL_REPORT_DEFAULT
+    );
+
+    return runController(controller, fullReport);
+  }
+
+  private QueryResponse<Object[]> runController(final ControllerImpl controller, final boolean fullReport)
+  {
     final ControllerHolder controllerHolder = new ControllerHolder(
         controller,
         plannerContext.getSqlQueryId(),
         plannerContext.getSql(),
         plannerContext.getAuthenticationResult(),
         DateTimes.nowUtc()
-    );
-
-    final boolean fullReport = context.getBoolean(
-        DartSqlEngine.CTX_FULL_REPORT,
-        DartSqlEngine.CTX_FULL_REPORT_DEFAULT
     );
 
     // Register controller before submitting anything to controllerExeuctor, so it shows up in

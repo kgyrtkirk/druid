@@ -27,7 +27,9 @@ import org.apache.calcite.tools.ValidationException;
 import org.apache.druid.error.DruidException;
 import org.apache.druid.msq.exec.ControllerContext;
 import org.apache.druid.msq.exec.QueryKitBasedMSQPlanner;
+import org.apache.druid.msq.exec.ResultsContext;
 import org.apache.druid.msq.indexing.LegacyMSQSpec;
+import org.apache.druid.msq.indexing.QueryDefMSQSpec;
 import org.apache.druid.msq.kernel.QueryDefinition;
 import org.apache.druid.msq.sql.DartQueryKitSpecFactory;
 import org.apache.druid.msq.sql.MSQTaskQueryMaker;
@@ -145,8 +147,10 @@ public class PrePlannedSqlEngine implements SqlEngine
       QueryDefinitionTranslator qdt = new QueryDefinitionTranslator(plannerContext, rootRel);
       QueryDefinition queryDef = qdt.translate(rootRel);
       QueryContext context = plannerContext.queryContext();
-      final LegacyMSQSpec querySpec = buildMSQSpec(queryDef, context, dartQueryMaker.fieldMapping);
-      QueryResponse<Object[]> response = dartQueryMaker.runMSQSpec(querySpec, context, rootRel.getRowType());
+
+      final QueryDefMSQSpec querySpec = buildMSQSpec(queryDef, context, dartQueryMaker.fieldMapping);
+
+      QueryResponse<Object[]> response = dartQueryMaker.runMSQSpec2(querySpec, context, rootRel.getRowType());
       return response;
     }
 
@@ -155,18 +159,19 @@ public class PrePlannedSqlEngine implements SqlEngine
     {
       QueryContext queryContext = druidQuery.getQuery().context();
       LegacyMSQSpec msqSpec = buildMSQSpec(druidQuery, dartQueryMaker.fieldMapping, queryContext);
+      final ResultsContext resultsContext = DartQueryMaker.makeResultsContext(druidQuery, dartQueryMaker.fieldMapping, plannerContext);
+
       QueryResponse<Object[]> response = dartQueryMaker
-          .runMSQSpec(msqSpec, queryContext, druidQuery.getOutputRowType());
+          .runMSQSpec(msqSpec, queryContext, resultsContext);
       return response;
     }
 
-    public LegacyMSQSpec buildMSQSpec(
+    public QueryDefMSQSpec buildMSQSpec(
         QueryDefinition queryDef,
         QueryContext context,
         List<Entry<Integer, String>> fieldMapping)
     {
-      final LegacyMSQSpec querySpec = MSQTaskQueryMaker.makeLegacyMSQSpec(
-          null,
+      final QueryDefMSQSpec querySpec = MSQTaskQueryMaker.makeLegacyMSQSpec2(
           null,
           context,
           fieldMapping,

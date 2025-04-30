@@ -47,6 +47,7 @@ import org.apache.druid.msq.indexing.MSQSpec;
 import org.apache.druid.msq.indexing.LegacyMSQSpec;
 import org.apache.druid.msq.indexing.MSQControllerTask;
 import org.apache.druid.msq.indexing.MSQTuningConfig;
+import org.apache.druid.msq.indexing.QueryDefMSQSpec;
 import org.apache.druid.msq.indexing.destination.DataSourceMSQDestination;
 import org.apache.druid.msq.indexing.destination.DurableStorageMSQDestination;
 import org.apache.druid.msq.indexing.destination.ExportMSQDestination;
@@ -177,7 +178,6 @@ public class MSQTaskQueryMaker implements QueryMaker
     return QueryResponse.withEmptyContext(Sequences.simple(Collections.singletonList(new Object[]{taskId})));
   }
 
-
   public static LegacyMSQSpec makeLegacyMSQSpec(
       @Nullable final IngestDestination targetDataSource,
       final DruidQuery druidQuery,
@@ -282,6 +282,89 @@ public class MSQTaskQueryMaker implements QueryMaker
       return querySpec;
 
     }
+
+  }
+
+  public static QueryDefMSQSpec makeLegacyMSQSpec2(
+      @Nullable final IngestDestination targetDataSource,
+      final QueryContext queryContext,
+      final List<Entry<Integer, String>> fieldMapping,
+      final PlannerContext plannerContext,
+      final MSQTerminalStageSpecFactory terminalStageSpecFactory,
+      final QueryDefinition queryDef
+  )
+  {
+
+    // SQL query context: context provided by the user, and potentially modified by handlers during planning.
+    // Does not directly influence task execution, but it does form the basis for the initial native query context,
+    // which *does* influence task execution.
+    final QueryContext sqlQueryContext = plannerContext.queryContext();
+
+    // Native query context: sqlQueryContext plus things that we add prior to creating a controller task.
+    final Map<String, Object> nativeQueryContext = new HashMap<>(sqlQueryContext.asMap());
+
+    // adding user
+    nativeQueryContext.put(USER_KEY, plannerContext.getAuthenticationResult().getIdentity());
+
+    final String msqMode = MultiStageQueryContext.getMSQMode(sqlQueryContext);
+    if (msqMode != null) {
+      MSQMode.populateDefaultQueryContext(msqMode, nativeQueryContext);
+    }
+    final Object segmentGranularity = getSegmentGranularity(plannerContext);
+
+    // This parameter is used internally for the number of worker tasks only, so we subtract 1
+    final boolean finalizeAggregations = MultiStageQueryContext.isFinalizeAggregations(sqlQueryContext);
+
+    final List<Interval> replaceTimeChunks = getReplaceIntervals(sqlQueryContext);
+
+    final MSQDestination destination;
+
+    if (targetDataSource instanceof ExportDestination) {
+      destination = buildExportDestination((ExportDestination) targetDataSource, sqlQueryContext);
+    } else if (targetDataSource instanceof TableDestination) {
+      destination = buildTableDestination(
+          targetDataSource,
+          fieldMapping,
+          plannerContext,
+          terminalStageSpecFactory,
+          segmentGranularity,
+          sqlQueryContext,
+          replaceTimeChunks
+      );
+    } else {
+      final MSQSelectDestination msqSelectDestination = MultiStageQueryContext.getSelectDestination(sqlQueryContext);
+      if (msqSelectDestination.equals(MSQSelectDestination.TASKREPORT)) {
+        destination = TaskReportMSQDestination.instance();
+      } else if (msqSelectDestination.equals(MSQSelectDestination.DURABLESTORAGE)) {
+        destination = DurableStorageMSQDestination.instance();
+      } else {
+        throw InvalidInput.exception(
+            "Unsupported select destination [%s] provided in the query context. MSQ can currently write the select results to "
+            + "[%s]",
+            msqSelectDestination.getName(),
+            Arrays.stream(MSQSelectDestination.values())
+                  .map(MSQSelectDestination::getName)
+                  .collect(Collectors.joining(","))
+        );
+      }
+    }
+
+    final Map<String, Object> nativeQueryContextOverrides = new HashMap<>();
+
+    // Add appropriate finalization to native query context.
+    nativeQueryContextOverrides.put(QueryContexts.FINALIZE_KEY, finalizeAggregations);
+
+    // This flag is to ensure backward compatibility, as brokers are upgraded after indexers/middlemanagers.
+    nativeQueryContextOverrides.put(MultiStageQueryContext.WINDOW_FUNCTION_OPERATOR_TRANSFORMATION, true);
+      final QueryDefMSQSpec querySpec = new QueryDefMSQSpec.Builder()
+          .columnMappings(new ColumnMappings(QueryUtils.buildColumnMappings(fieldMapping, queryDef.getOutputRowSignature())))
+          .destination(destination)
+          .assignmentStrategy(MultiStageQueryContext.getAssignmentStrategy(sqlQueryContext))
+          .tuningConfig(makeMSQTuningConfig(plannerContext))
+          .queryDef(queryDef)
+          .build();
+
+      return querySpec;
 
   }
 
