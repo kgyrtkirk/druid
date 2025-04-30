@@ -23,7 +23,6 @@ import org.apache.druid.error.DruidException;
 import org.apache.druid.msq.input.InputSpec;
 import org.apache.druid.msq.kernel.MixShuffleSpec;
 import org.apache.druid.msq.kernel.QueryDefinition;
-import org.apache.druid.msq.kernel.QueryDefinitionBuilder;
 import org.apache.druid.msq.kernel.StageDefinition;
 import org.apache.druid.msq.kernel.StageDefinitionBuilder;
 import org.apache.druid.msq.querykit.scan.ScanQueryFrameProcessorFactory;
@@ -241,7 +240,7 @@ public class StageDefinitionBuilder2
   {
     ScanQuery s = Druids.newScanQueryBuilder()
         .dataSource(IRRELEVANT)
-        .intervals(QuerySegmentSpec.DEFAULT)
+        .intervals(QuerySegmentSpec.ETERNITY)
         .filters(dimFilter)
         .virtualColumns(virtualColumns)
         .columns(signature.getColumnNames())

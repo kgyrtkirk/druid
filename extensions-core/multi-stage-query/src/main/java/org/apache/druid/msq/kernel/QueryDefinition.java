@@ -33,6 +33,8 @@ import org.apache.druid.java.util.common.ISE;
 import org.apache.druid.query.QueryContext;
 import org.apache.druid.segment.column.RowSignature;
 
+import javax.annotation.Nullable;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -76,7 +78,7 @@ public class QueryDefinition
   @JsonCreator
   public static QueryDefinition create(
       @JsonProperty("stages") final List<StageDefinition> stageDefinitions,
-      @JsonProperty("context") QueryContext context)
+      @Nullable @JsonProperty("context") final QueryContext context)
   {
     final Map<StageId, StageDefinition> stageMap = new HashMap<>();
     final Set<StageId> nonFinalStages = new HashSet<>();
@@ -189,8 +191,9 @@ public class QueryDefinition
   public String toString()
   {
     return "QueryDefinition{" +
-           "stageDefinitions=" + stageDefinitions +
-           '}';
+        "context=" + context + "," +
+        "stageDefinitions=" + stageDefinitions +
+        '}';
   }
 
   public RowSignature getOutputRowSignature()
