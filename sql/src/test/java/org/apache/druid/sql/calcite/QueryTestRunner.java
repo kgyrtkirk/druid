@@ -25,6 +25,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedMap;
 import org.apache.calcite.plan.RelOptUtil;
+import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.sql.SqlExplainFormat;
 import org.apache.calcite.sql.SqlExplainLevel;
@@ -48,6 +49,8 @@ import org.apache.druid.sql.calcite.planner.PlannerCaptureHook;
 import org.apache.druid.sql.calcite.planner.PrepareResult;
 import org.apache.druid.sql.calcite.table.RowSignatures;
 import org.apache.druid.sql.calcite.util.QueryLogHook;
+import org.apache.druid.sql.hook.DruidHook;
+import org.apache.druid.sql.hook.DruidHookDispatcher;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
 import org.junit.Assert;
@@ -126,7 +129,7 @@ public class QueryTestRunner
     public final List<Object[]> results;
     public final List<Query<?>> recordedQueries;
     public final Set<ResourceAction> resourceActions;
-    public final RuntimeException exception;
+    public final Exception exception;
     public final PlannerCaptureHook capture;
 
     public QueryResults(
@@ -172,7 +175,7 @@ public class QueryTestRunner
     public QueryResults(
         final Map<String, Object> queryContext,
         final String vectorizeOption,
-        final RuntimeException exception
+        final Exception e
     )
     {
       this.queryContext = queryContext;
@@ -181,7 +184,7 @@ public class QueryTestRunner
       this.results = null;
       this.recordedQueries = null;
       this.resourceActions = null;
-      this.exception = exception;
+      this.exception = e;
       this.capture = null;
       this.sqlSignature = null;
     }
@@ -262,6 +265,8 @@ public class QueryTestRunner
 
       BaseCalciteQueryTest.log.info("SQL: %s", builder.sql);
 
+
+      final DruidHookDispatcher hookDispatcher = builder.plannerFixture.plannerFactory().getHookDispatcher();
       final SqlStatementFactory sqlStatementFactory = builder.statementFactory();
       final SqlQueryPlus sqlQuery = SqlQueryPlus.builder(builder.sql)
                                                 .sqlParameters(builder.parameters)
@@ -286,6 +291,7 @@ public class QueryTestRunner
         results.add(runQuery(
             sqlStatementFactory,
             sqlQuery.withContext(theQueryContext),
+            hookDispatcher,
             vectorize
         ));
       }
@@ -294,6 +300,7 @@ public class QueryTestRunner
     public QueryResults runQuery(
         final SqlStatementFactory sqlStatementFactory,
         final SqlQueryPlus query,
+        final DruidHookDispatcher hookDispatcher,
         final String vectorize
     )
     {
@@ -303,11 +310,13 @@ public class QueryTestRunner
         stmt.setHook(capture);
         AtomicReference<List<Object[]>> resultListRef = new AtomicReference<>();
         QueryLogHook queryLogHook = new QueryLogHook(builder().config.jsonMapper());
-        queryLogHook.logQueriesFor(
-            () -> {
-              resultListRef.set(stmt.execute().getResults().toList());
-            }
-        );
+
+
+        List<RelNode> convertedPlans = new ArrayList<>();
+        try (AutoCloseable c = hookDispatcher.withConsumer(DruidHook.CONVERTED_PLAN, convertedPlans::add);
+            AutoCloseable c2 = hookDispatcher.withConsumer(DruidHook.NATIVE_PLAN, queryLogHook::accept)) {
+          resultListRef.set(stmt.execute().getResults().toList());
+        }
         return new QueryResults(
             query.context(),
             vectorize,
@@ -317,7 +326,7 @@ public class QueryTestRunner
             capture
         );
       }
-      catch (RuntimeException e) {
+      catch (Exception e) {
         return new QueryResults(
             query.context(),
             vectorize,
@@ -645,7 +654,10 @@ public class QueryTestRunner
               )
           );
         } else if (queryResults.exception != null) {
-          throw queryResults.exception;
+          if (queryResults.exception instanceof RuntimeException) {
+            throw (RuntimeException) queryResults.exception;
+          }
+          throw new RuntimeException(queryResults.exception);
         }
       }
     }

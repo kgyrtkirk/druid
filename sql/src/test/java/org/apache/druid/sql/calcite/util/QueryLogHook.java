@@ -47,7 +47,7 @@ public class QueryLogHook
     return ImmutableList.copyOf(recordedQueries);
   }
 
-  protected void accept(Object query)
+  public void accept(Object query)
   {
     try {
       recordedQueries.add((Query<?>) query);
