@@ -113,7 +113,6 @@ public class PlannerFactory extends PlannerToolbox
       final SqlEngine engine,
       final String sql,
       final Map<String, Object> queryContext,
-      final PlannerHook hook,
       boolean allowSetStatementsToBuildContext
   )
   {
@@ -125,7 +124,7 @@ public class PlannerFactory extends PlannerToolbox
     );
     context.dispatchHook(DruidHook.SQL, sql);
 
-    return new DruidPlanner(buildFrameworkConfig(context), context, engine, hook, allowSetStatementsToBuildContext);
+    return new DruidPlanner(buildFrameworkConfig(context), context, engine, allowSetStatementsToBuildContext);
   }
 
   /**
@@ -139,7 +138,7 @@ public class PlannerFactory extends PlannerToolbox
       final Map<String, Object> queryContext
   )
   {
-    final DruidPlanner thePlanner = createPlanner(engine, sql, queryContext, null, true);
+    final DruidPlanner thePlanner = createPlanner(engine, sql, queryContext, true);
     thePlanner.getPlannerContext()
               .setAuthenticationResult(NoopEscalator.getInstance().createEscalatedAuthenticationResult());
     thePlanner.validate();

@@ -66,7 +66,6 @@ public class HttpStatement extends DirectStatement
         sqlToolbox.engine,
         queryPlus.sql(),
         queryContext,
-        hook,
         true
     );
   }

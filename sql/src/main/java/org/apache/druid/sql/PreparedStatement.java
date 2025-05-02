@@ -102,7 +102,6 @@ public class PreparedStatement extends AbstractStatement
         sqlToolbox.engine,
         queryPlus.sql(),
         queryContext,
-        hook,
         false
     );
   }

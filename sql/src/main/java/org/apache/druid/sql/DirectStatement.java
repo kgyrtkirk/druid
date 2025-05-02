@@ -246,7 +246,6 @@ public class DirectStatement extends AbstractStatement implements Cancelable
         sqlToolbox.engine,
         queryPlus.sql(),
         queryContext,
-        hook,
         false
     );
   }

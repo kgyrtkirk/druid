@@ -112,7 +112,6 @@ public class DruidPlanner implements Closeable
   private final CalcitePlanner planner;
   private final PlannerContext plannerContext;
   private final SqlEngine engine;
-  private final PlannerHook hook;
   private final boolean allowSetStatementsToBuildContext;
   private State state = State.START;
   private SqlStatementHandler handler;
@@ -122,7 +121,6 @@ public class DruidPlanner implements Closeable
       final FrameworkConfig frameworkConfig,
       final PlannerContext plannerContext,
       final SqlEngine engine,
-      final PlannerHook hook,
       final boolean allowSetStatementsToBuildContext
   )
   {
@@ -130,7 +128,6 @@ public class DruidPlanner implements Closeable
     this.planner = new CalcitePlanner(frameworkConfig);
     this.plannerContext = plannerContext;
     this.engine = engine;
-    this.hook = hook == null ? NoOpPlannerHook.INSTANCE : hook;
     this.allowSetStatementsToBuildContext = allowSetStatementsToBuildContext;
   }
 
@@ -401,12 +398,6 @@ public class DruidPlanner implements Closeable
     public DateTimeZone timeZone()
     {
       return plannerContext.getTimeZone();
-    }
-
-    @Override
-    public PlannerHook hook()
-    {
-      return hook;
     }
   }
 

@@ -369,7 +369,6 @@ public class QueryFrameworkUtils
               engine,
               queryPlus.sql(),
               queryContext,
-              hook,
               true
           );
         }
@@ -388,7 +387,6 @@ public class QueryFrameworkUtils
               engine,
               queryPlus.sql(),
               queryContext,
-              hook,
               true
           );
         }
