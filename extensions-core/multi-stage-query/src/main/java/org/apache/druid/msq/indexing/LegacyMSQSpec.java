@@ -20,6 +20,7 @@
 package org.apache.druid.msq.indexing;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.Preconditions;
 import org.apache.druid.msq.indexing.destination.MSQDestination;
 import org.apache.druid.msq.indexing.destination.TaskReportMSQDestination;
 import org.apache.druid.msq.kernel.WorkerAssignmentStrategy;
@@ -57,7 +58,6 @@ public class LegacyMSQSpec extends MSQSpec
     super(columnMappings, destination, assignmentStrategy, tuningConfig);
     this.query = Preconditions.checkNotNull(query, "query");
   }
-  }
 
   public static Builder builder()
   {
@@ -85,8 +85,9 @@ public class LegacyMSQSpec extends MSQSpec
 
   public LegacyMSQSpec withOverriddenContext(Map<String, Object> contextOverride)
   {
-    Preconditions.checkArgument(queryDef == null, "queryDef must be null!");
     if (contextOverride == null || contextOverride.isEmpty()) {
+      return this;
+    }
     return new LegacyMSQSpec(
         query.withOverriddenContext(contextOverride),
         getColumnMappings(),

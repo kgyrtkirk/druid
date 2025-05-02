@@ -663,7 +663,7 @@ public class ControllerImpl implements Controller
     final QueryContext queryContext = querySpec.getContext();
 
     final QueryDefinition queryDef;
-    if (querySpec.getQueryDef() == null) {
+    if (legacyQuery != null) {
       QueryKitBasedMSQPlanner qkPlanner = new QueryKitBasedMSQPlanner(
           querySpec,
           resultsContext,
