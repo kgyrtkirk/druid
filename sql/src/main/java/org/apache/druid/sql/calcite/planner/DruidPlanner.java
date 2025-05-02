@@ -48,6 +48,7 @@ import org.apache.druid.sql.calcite.parser.ParseException;
 import org.apache.druid.sql.calcite.parser.Token;
 import org.apache.druid.sql.calcite.run.SqlEngine;
 import org.apache.druid.sql.calcite.run.SqlResults;
+import org.apache.druid.sql.hook.DruidHook;
 import org.joda.time.DateTimeZone;
 
 import java.io.Closeable;
@@ -148,7 +149,6 @@ public class DruidPlanner implements Closeable
 
     // Parse the query string.
     String sql = plannerContext.getSql();
-    hook.captureSql(sql);
     SqlNode root;
     try {
       root = planner.parse(sql);
@@ -158,7 +158,7 @@ public class DruidPlanner implements Closeable
     }
     root = processStatementList(root);
     root = rewriteParameters(root);
-    hook.captureSqlNode(root);
+    plannerContext.dispatchHook(DruidHook.SQL_NODE, root);
     handler = createHandler(root);
     handler.validate();
     plannerContext.setResourceActions(handler.resourceActions());

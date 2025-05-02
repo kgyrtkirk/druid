@@ -853,7 +853,7 @@ public class SqlTestFramework
           framework.builder.catalogResolver,
           authConfig != null ? authConfig : new AuthConfig(),
           NoopPolicyEnforcer.instance(),
-          new DruidHookDispatcher()
+          framework.injector.getInstance(DruidHookDispatcher.class)
       );
       componentSupplier.finalizePlanner(this);
       this.statementFactory = QueryFrameworkUtils.createSqlMultiStatementFactory(framework.engine, plannerFactory);

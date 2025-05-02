@@ -25,11 +25,12 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSortedMap;
 import org.apache.calcite.plan.RelOptUtil;
-import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.sql.SqlExplainFormat;
 import org.apache.calcite.sql.SqlExplainLevel;
 import org.apache.calcite.sql.SqlInsert;
+import org.apache.calcite.sql.SqlNode;
+import org.apache.curator.shaded.com.google.common.collect.Iterables;
 import org.apache.druid.java.util.common.IAE;
 import org.apache.druid.java.util.common.Pair;
 import org.apache.druid.java.util.common.StringUtils;
@@ -266,7 +267,6 @@ public class QueryTestRunner
       BaseCalciteQueryTest.log.info("SQL: %s", builder.sql);
 
 
-      final DruidHookDispatcher hookDispatcher = builder.plannerFixture.plannerFactory().getHookDispatcher();
       final SqlStatementFactory sqlStatementFactory = builder.statementFactory();
       final SqlQueryPlus sqlQuery = SqlQueryPlus.builder(builder.sql)
                                                 .sqlParameters(builder.parameters)
@@ -291,7 +291,6 @@ public class QueryTestRunner
         results.add(runQuery(
             sqlStatementFactory,
             sqlQuery.withContext(theQueryContext),
-            hookDispatcher,
             vectorize
         ));
       }
@@ -300,23 +299,24 @@ public class QueryTestRunner
     public QueryResults runQuery(
         final SqlStatementFactory sqlStatementFactory,
         final SqlQueryPlus query,
-        final DruidHookDispatcher hookDispatcher,
         final String vectorize
     )
     {
       try {
-        final PlannerCaptureHook capture = getCaptureHook();
+        final PlannerCaptureHook capture = new PlannerCaptureHook();
         final DirectStatement stmt = sqlStatementFactory.directStatement(query);
         stmt.setHook(capture);
         AtomicReference<List<Object[]>> resultListRef = new AtomicReference<>();
         QueryLogHook queryLogHook = new QueryLogHook(builder().config.jsonMapper());
 
+        DruidHookDispatcher hookDispatcher = builder.config.queryFramework().injector().getInstance(DruidHookDispatcher.class);
 
-        List<RelNode> convertedPlans = new ArrayList<>();
-        try (AutoCloseable c = hookDispatcher.withConsumer(DruidHook.CONVERTED_PLAN, convertedPlans::add);
+        List<SqlNode> sqlNodes = new ArrayList<>();
+        try (AutoCloseable c = hookDispatcher.withConsumer(DruidHook.SQL_NODE, sqlNodes::add);
             AutoCloseable c2 = hookDispatcher.withConsumer(DruidHook.NATIVE_PLAN, queryLogHook::accept)) {
           resultListRef.set(stmt.execute().getResults().toList());
         }
+        capture.captureSqlNode(Iterables.getOnlyElement(sqlNodes));
         return new QueryResults(
             query.context(),
             vectorize,
@@ -333,15 +333,6 @@ public class QueryTestRunner
             e
         );
       }
-    }
-
-    private PlannerCaptureHook getCaptureHook()
-    {
-      if (builder.getQueryContext().containsKey(PlannerCaptureHook.NEED_CAPTURE_HOOK)
-          || builder.expectedLogicalPlan != null) {
-        return new PlannerCaptureHook();
-      }
-      return null;
     }
 
     public static Pair<RowSignature, List<Object[]>> getResults(
