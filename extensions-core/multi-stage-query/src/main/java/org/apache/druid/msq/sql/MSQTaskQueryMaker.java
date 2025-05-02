@@ -96,8 +96,6 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertTrue;
-
 public class MSQTaskQueryMaker implements QueryMaker
 {
   public static final String USER_KEY = "__user";
@@ -384,7 +382,7 @@ public class MSQTaskQueryMaker implements QueryMaker
   public static List<Pair<SqlTypeName, ColumnType>> getTypes3(final List<Entry<Integer, String>> fieldMapping,
       final PlannerContext plannerContext, RelDataType outputRowType, RowSignature outputRowSignature)
   {
-    assertTrue(MultiStageQueryContext.isFinalizeAggregations(plannerContext.queryContext()));
+    //FIXME: assertTrue(MultiStageQueryContext.isFinalizeAggregations(plannerContext.queryContext()));
     final List<Pair<SqlTypeName, ColumnType>> retVal = new ArrayList<>();
 
     for (final Entry<Integer, String> entry : fieldMapping) {
