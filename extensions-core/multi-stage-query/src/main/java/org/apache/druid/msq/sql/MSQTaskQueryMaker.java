@@ -382,7 +382,9 @@ public class MSQTaskQueryMaker implements QueryMaker
   public static List<Pair<SqlTypeName, ColumnType>> getTypes3(final List<Entry<Integer, String>> fieldMapping,
       final PlannerContext plannerContext, RelDataType outputRowType, RowSignature outputRowSignature)
   {
-    //FIXME: assertTrue(MultiStageQueryContext.isFinalizeAggregations(plannerContext.queryContext()));
+    if (!MultiStageQueryContext.isFinalizeAggregations(plannerContext.queryContext())) {
+      throw DruidException.defensive().build("non-finalized aggregations are not supported!");
+    }
     final List<Pair<SqlTypeName, ColumnType>> retVal = new ArrayList<>();
 
     for (final Entry<Integer, String> entry : fieldMapping) {
