@@ -132,7 +132,6 @@ public class PlannerContext
   private final SqlEngine engine;
   private final Map<String, Object> queryContext;
   private final CopyOnWriteArrayList<String> nativeQueryIds = new CopyOnWriteArrayList<>();
-  private final PlannerHook hook;
   private final Set<String> lookupsToLoad = new HashSet<>();
 
   private String sqlQueryId;
@@ -165,8 +164,7 @@ public class PlannerContext
       final String sql,
       final PlannerConfig plannerConfig,
       final SqlEngine engine,
-      final Map<String, Object> queryContext,
-      final PlannerHook hook
+      final Map<String, Object> queryContext
   )
   {
     this.plannerToolbox = plannerToolbox;
@@ -175,7 +173,6 @@ public class PlannerContext
     this.plannerConfig = Preconditions.checkNotNull(plannerConfig, "plannerConfig");
     this.engine = engine;
     this.queryContext = new LinkedHashMap<>(queryContext);
-    this.hook = hook == null ? NoOpPlannerHook.INSTANCE : hook;
     initializeContextFields();
   }
 
@@ -191,8 +188,7 @@ public class PlannerContext
         sql,
         plannerToolbox.plannerConfig().withOverrides(queryContext),
         engine,
-        queryContext,
-        null
+        queryContext
     );
   }
 
@@ -393,11 +389,6 @@ public class PlannerContext
   public String getSql()
   {
     return sql;
-  }
-
-  public PlannerHook getPlannerHook()
-  {
-    return hook;
   }
 
   public String getSqlQueryId()
