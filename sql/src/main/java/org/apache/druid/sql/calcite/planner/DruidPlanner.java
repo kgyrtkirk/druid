@@ -393,12 +393,6 @@ public class DruidPlanner implements Closeable
     {
       return plannerContext.getJsonMapper();
     }
-
-    @Override
-    public DateTimeZone timeZone()
-    {
-      return plannerContext.getTimeZone();
-    }
   }
 
   public static DruidException translateException(Exception e)

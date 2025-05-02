@@ -388,7 +388,7 @@ public abstract class IngestHandler extends QueryHandler
       List<String> replaceIntervalsList = DruidSqlParserUtils.validateQueryAndConvertToIntervals(
           replaceTimeQuery,
           ingestionGranularity,
-          handlerContext.timeZone()
+          handlerContext.plannerContext().getTimeZone()
       );
       if (replaceIntervalsList != null) {
         replaceIntervals = String.join(",", replaceIntervalsList);

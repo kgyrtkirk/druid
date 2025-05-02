@@ -25,8 +25,6 @@ import org.apache.druid.query.QueryContext;
 import org.apache.druid.query.explain.ExplainAttributes;
 import org.apache.druid.server.security.ResourceAction;
 import org.apache.druid.sql.calcite.run.SqlEngine;
-import org.joda.time.DateTimeZone;
-
 import java.util.Map;
 import java.util.Set;
 
@@ -55,7 +53,6 @@ public interface SqlStatementHandler
     Map<String, Object> queryContextMap();
     SchemaPlus defaultSchema();
     ObjectMapper jsonMapper();
-    DateTimeZone timeZone();
   }
 
   abstract class BaseStatementHandler implements SqlStatementHandler
