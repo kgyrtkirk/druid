@@ -305,7 +305,6 @@ public class QueryTestRunner
       try {
         final PlannerCaptureHook capture = new PlannerCaptureHook();
         final DirectStatement stmt = sqlStatementFactory.directStatement(query);
-        stmt.setHook(capture);
         AtomicReference<List<Object[]>> resultListRef = new AtomicReference<>();
         QueryLogHook queryLogHook = new QueryLogHook(builder().config.jsonMapper());
 
