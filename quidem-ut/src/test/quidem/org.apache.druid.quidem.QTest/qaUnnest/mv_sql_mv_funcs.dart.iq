@@ -2,6 +2,9 @@
 !set useApproximateCountDistinct false
 !use druidtest://?componentSupplier=DartComponentSupplier&datasets=sql/src/test/quidem/qatests/qaUnnest/mv
 !set outputformat mysql
+#-------------------------------------------------------------------------
+# TESTCASE: test_mv_funcs TEST_ID: SEL_DATASOURCE
+#-------------------------------------------------------------------------
 SELECT *
 FROM test_unnest;
 +-------------------------+-------+--------+---------+----------+------------------------------------------------+------------------------+--------------------------------------+----------------------------------+--------------------------------------+----------------------------------+-----------------------------+
@@ -18,7 +21,7 @@ FROM test_unnest;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_mv_funcs TEST_ID: A1_B1_C1 TYPE: POSITIVE TEST
+# TESTCASE: test_mv_funcs TEST_ID: A1_B1_C1
 #-------------------------------------------------------------------------
 SELECT mv_filter_only(c,array['1', '2', '3']) AS col
 FROM test_unnest,
@@ -48,7 +51,7 @@ WHERE c_long IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_mv_funcs TEST_ID: A1_B1_C2 TYPE: NEGATIVE TEST
+# TESTCASE: test_mv_funcs TEST_ID: A1_B1_C2
 #-------------------------------------------------------------------------
 SELECT mv_filter_only(c, c) AS col
 FROM test_unnest,
@@ -64,7 +67,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_mv_funcs TEST_ID: A1_B1_C3 TYPE: NEGATIVE TEST
+# TESTCASE: test_mv_funcs TEST_ID: A1_B1_C3
 #-------------------------------------------------------------------------
 SELECT mv_filter_only(c, c_long) AS col
 FROM test_unnest,
@@ -80,7 +83,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_mv_funcs TEST_ID: A1_B1_C4 TYPE: NEGATIVE TEST
+# TESTCASE: test_mv_funcs TEST_ID: A1_B1_C4
 #-------------------------------------------------------------------------
 SELECT mv_filter_only(c_long, c) AS col
 FROM test_unnest,
@@ -96,7 +99,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_mv_funcs TEST_ID: A1_B1_C5 TYPE: NEGATIVE TEST
+# TESTCASE: test_mv_funcs TEST_ID: A1_B1_C5
 #-------------------------------------------------------------------------
 SELECT mv_filter_only(c_long, c_long) AS col
 FROM test_unnest,
@@ -112,7 +115,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_mv_funcs TEST_ID: A1_B2_C1 TYPE: POSITIVE TEST
+# TESTCASE: test_mv_funcs TEST_ID: A1_B2_C1
 #-------------------------------------------------------------------------
 SELECT mv_filter_none(c,array['1', '2', '3']) AS col
 FROM test_unnest,
@@ -133,7 +136,7 @@ WHERE c_long IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_mv_funcs TEST_ID: A1_B2_C2 TYPE: NEGATIVE TEST
+# TESTCASE: test_mv_funcs TEST_ID: A1_B2_C2
 #-------------------------------------------------------------------------
 SELECT mv_filter_none(c, c) AS col
 FROM test_unnest,
@@ -149,7 +152,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_mv_funcs TEST_ID: A1_B2_C3 TYPE: NEGATIVE TEST
+# TESTCASE: test_mv_funcs TEST_ID: A1_B2_C3
 #-------------------------------------------------------------------------
 SELECT mv_filter_none(c, c_long) AS col
 FROM test_unnest,
@@ -165,7 +168,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_mv_funcs TEST_ID: A1_B2_C4 TYPE: NEGATIVE TEST
+# TESTCASE: test_mv_funcs TEST_ID: A1_B2_C4
 #-------------------------------------------------------------------------
 SELECT mv_filter_none(c_long, c) AS col
 FROM test_unnest,
@@ -181,7 +184,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_mv_funcs TEST_ID: A1_B2_C5 TYPE: NEGATIVE TEST
+# TESTCASE: test_mv_funcs TEST_ID: A1_B2_C5
 #-------------------------------------------------------------------------
 SELECT mv_filter_none(c_long, c_long) AS col
 FROM test_unnest,
@@ -197,7 +200,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_mv_funcs TEST_ID: A1_B3_C1 TYPE: POSITIVE TEST
+# TESTCASE: test_mv_funcs TEST_ID: A1_B3_C1
 #-------------------------------------------------------------------------
 SELECT mv_length(c) AS col
 FROM test_unnest,
@@ -231,7 +234,7 @@ WHERE c_long IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_mv_funcs TEST_ID: A1_B3_C2 TYPE: POSITIVE TEST
+# TESTCASE: test_mv_funcs TEST_ID: A1_B3_C2
 #-------------------------------------------------------------------------
 SELECT mv_length(c_long) AS col
 FROM test_unnest,
@@ -264,7 +267,7 @@ WHERE c_long IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_mv_funcs TEST_ID: A1_B4_C1 TYPE: POSITIVE TEST
+# TESTCASE: test_mv_funcs TEST_ID: A1_B4_C1
 #-------------------------------------------------------------------------
 SELECT mv_offset(c, 0) AS col
 FROM test_unnest,
@@ -294,7 +297,7 @@ WHERE c_long IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_mv_funcs TEST_ID: A1_B4_C2 TYPE: NEGATIVE TEST
+# TESTCASE: test_mv_funcs TEST_ID: A1_B4_C2
 #-------------------------------------------------------------------------
 SELECT mv_offset(c_long, 0) AS col
 FROM test_unnest,
@@ -307,7 +310,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_mv_funcs TEST_ID: A1_B5_C1 TYPE: POSITIVE TEST
+# TESTCASE: test_mv_funcs TEST_ID: A1_B5_C1
 #-------------------------------------------------------------------------
 SELECT mv_ordinal(c, 1) AS col
 FROM test_unnest,
@@ -337,7 +340,7 @@ WHERE c_long IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_mv_funcs TEST_ID: A1_B5_C2 TYPE: NEGATIVE TEST
+# TESTCASE: test_mv_funcs TEST_ID: A1_B5_C2
 #-------------------------------------------------------------------------
 SELECT mv_ordinal(c_long, 1) AS col
 FROM test_unnest,
@@ -350,7 +353,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_mv_funcs TEST_ID: A1_B6_C1 TYPE: POSITIVE TEST
+# TESTCASE: test_mv_funcs TEST_ID: A1_B6_C1
 #-------------------------------------------------------------------------
 SELECT mv_contains(c, '1') AS col
 FROM test_unnest,
@@ -382,7 +385,7 @@ WHERE c_long IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_mv_funcs TEST_ID: A1_B6_C2 TYPE: NEGATIVE TEST
+# TESTCASE: test_mv_funcs TEST_ID: A1_B6_C2
 #-------------------------------------------------------------------------
 SELECT mv_contains(c_long, '1') AS col
 FROM test_unnest,
@@ -397,7 +400,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_mv_funcs TEST_ID: A1_B7_C1 TYPE: POSITIVE TEST
+# TESTCASE: test_mv_funcs TEST_ID: A1_B7_C1
 #-------------------------------------------------------------------------
 SELECT mv_overlap(c, c) AS col
 FROM test_unnest,
@@ -432,7 +435,7 @@ WHERE c_long IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_mv_funcs TEST_ID: A1_B7_C2 TYPE: POSITIVE TEST
+# TESTCASE: test_mv_funcs TEST_ID: A1_B7_C2
 #-------------------------------------------------------------------------
 SELECT mv_overlap(c, c_long) AS col
 FROM test_unnest,
@@ -467,7 +470,7 @@ WHERE c_long IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_mv_funcs TEST_ID: A1_B7_C3 TYPE: NEGATIVE TEST
+# TESTCASE: test_mv_funcs TEST_ID: A1_B7_C3
 #-------------------------------------------------------------------------
 SELECT mv_overlap(c_long, c) AS col
 FROM test_unnest,
@@ -482,7 +485,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_mv_funcs TEST_ID: A1_B7_C4 TYPE: NEGATIVE TEST
+# TESTCASE: test_mv_funcs TEST_ID: A1_B7_C4
 #-------------------------------------------------------------------------
 SELECT mv_overlap(c_long, c_long) AS col
 FROM test_unnest,
@@ -497,7 +500,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_mv_funcs TEST_ID: A1_B8_C1 TYPE: POSITIVE TEST
+# TESTCASE: test_mv_funcs TEST_ID: A1_B8_C1
 #-------------------------------------------------------------------------
 SELECT mv_offset_of(c, '1') AS col
 FROM test_unnest,
@@ -532,7 +535,7 @@ WHERE c_long IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_mv_funcs TEST_ID: A1_B8_C2 TYPE: NEGATIVE TEST
+# TESTCASE: test_mv_funcs TEST_ID: A1_B8_C2
 #-------------------------------------------------------------------------
 SELECT mv_offset_of(c_long, '1') AS col
 FROM test_unnest,
@@ -545,7 +548,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_mv_funcs TEST_ID: A1_B9_C1 TYPE: POSITIVE TEST
+# TESTCASE: test_mv_funcs TEST_ID: A1_B9_C1
 #-------------------------------------------------------------------------
 SELECT mv_ordinal_of(c, '1') AS col
 FROM test_unnest,
@@ -580,7 +583,7 @@ WHERE c_long IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_mv_funcs TEST_ID: A1_B9_C2 TYPE: NEGATIVE TEST
+# TESTCASE: test_mv_funcs TEST_ID: A1_B9_C2
 #-------------------------------------------------------------------------
 SELECT mv_ordinal_of(c_long, '1') AS col
 FROM test_unnest,
@@ -593,7 +596,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_mv_funcs TEST_ID: A1_B10_C1 TYPE: POSITIVE TEST
+# TESTCASE: test_mv_funcs TEST_ID: A1_B10_C1
 #-------------------------------------------------------------------------
 SELECT mv_prepend(c, 'Z') AS col
 FROM test_unnest,
@@ -626,7 +629,7 @@ WHERE c_long IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_mv_funcs TEST_ID: A1_B10_C2 TYPE: NEGATIVE TEST
+# TESTCASE: test_mv_funcs TEST_ID: A1_B10_C2
 #-------------------------------------------------------------------------
 SELECT mv_prepend(c_long, 'Z') AS col
 FROM test_unnest,
@@ -639,7 +642,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_mv_funcs TEST_ID: A1_B11_C1 TYPE: POSITIVE TEST
+# TESTCASE: test_mv_funcs TEST_ID: A1_B11_C1
 #-------------------------------------------------------------------------
 SELECT mv_append('Z', c) AS col
 FROM test_unnest,
@@ -672,7 +675,7 @@ WHERE c_long IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_mv_funcs TEST_ID: A1_B11_C2 TYPE: NEGATIVE TEST
+# TESTCASE: test_mv_funcs TEST_ID: A1_B11_C2
 #-------------------------------------------------------------------------
 SELECT mv_append('Z', c_long) AS col
 FROM test_unnest,
@@ -685,7 +688,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_mv_funcs TEST_ID: A1_B12_C1 TYPE: POSITIVE TEST
+# TESTCASE: test_mv_funcs TEST_ID: A1_B12_C1
 #-------------------------------------------------------------------------
 SELECT mv_concat(c, c) AS col
 FROM test_unnest,
@@ -719,7 +722,7 @@ WHERE c_long IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_mv_funcs TEST_ID: A1_B12_C2 TYPE: NEGATIVE TEST
+# TESTCASE: test_mv_funcs TEST_ID: A1_B12_C2
 #-------------------------------------------------------------------------
 SELECT mv_concat(c, c_long) AS col
 FROM test_unnest,
@@ -733,7 +736,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_mv_funcs TEST_ID: A1_B12_C3 TYPE: NEGATIVE TEST
+# TESTCASE: test_mv_funcs TEST_ID: A1_B12_C3
 #-------------------------------------------------------------------------
 SELECT mv_concat(c_long, c) AS col
 FROM test_unnest,
@@ -747,7 +750,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_mv_funcs TEST_ID: A1_B12_C4 TYPE: NEGATIVE TEST
+# TESTCASE: test_mv_funcs TEST_ID: A1_B12_C4
 #-------------------------------------------------------------------------
 SELECT mv_concat(c_long, c_long) AS col
 FROM test_unnest,
@@ -761,7 +764,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_mv_funcs TEST_ID: A1_B13_C1 TYPE: POSITIVE TEST
+# TESTCASE: test_mv_funcs TEST_ID: A1_B13_C1
 #-------------------------------------------------------------------------
 SELECT mv_slice(c, 0, 1) AS col
 FROM test_unnest,
@@ -795,7 +798,7 @@ WHERE c_long IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_mv_funcs TEST_ID: A1_B13_C2 TYPE: NEGATIVE TEST
+# TESTCASE: test_mv_funcs TEST_ID: A1_B13_C2
 #-------------------------------------------------------------------------
 SELECT mv_slice(c_long, 0, 1) AS col
 FROM test_unnest,
@@ -808,7 +811,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_mv_funcs TEST_ID: A1_B14_C1 TYPE: POSITIVE TEST
+# TESTCASE: test_mv_funcs TEST_ID: A1_B14_C1
 #-------------------------------------------------------------------------
 SELECT mv_to_string(c, '|') AS col
 FROM test_unnest,
@@ -841,7 +844,7 @@ WHERE c_long IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_mv_funcs TEST_ID: A1_B14_C2 TYPE: NEGATIVE TEST
+# TESTCASE: test_mv_funcs TEST_ID: A1_B14_C2
 #-------------------------------------------------------------------------
 SELECT mv_to_string(c_long, '|') AS col
 FROM test_unnest,
@@ -854,7 +857,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_mv_funcs TEST_ID: A1_B15_C1 TYPE: POSITIVE TEST
+# TESTCASE: test_mv_funcs TEST_ID: A1_B15_C1
 #-------------------------------------------------------------------------
 SELECT string_to_mv(c, '|') AS col
 FROM test_unnest,
@@ -888,7 +891,7 @@ WHERE c_long IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_mv_funcs TEST_ID: A1_B15_C2 TYPE: POSITIVE TEST
+# TESTCASE: test_mv_funcs TEST_ID: A1_B15_C2
 #-------------------------------------------------------------------------
 SELECT string_to_mv(c_long, '|') AS col
 FROM test_unnest,
@@ -921,6 +924,3 @@ WHERE c_long IN (0,
 
 !ok
 
-#-------------------------------------------------------------------------
-# Total query count 41 Positive tests: 19 Negative tests: 22
-#-------------------------------------------------------------------------

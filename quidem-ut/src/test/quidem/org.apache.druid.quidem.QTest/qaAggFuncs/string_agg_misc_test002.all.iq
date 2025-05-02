@@ -2,6 +2,9 @@
 !set useApproximateCountDistinct false
 !use druidtest://?componentSupplier=AllDruidEnginesComponentSupplier&datasets=sql/src/test/quidem/qatests/qaAggFuncs
 !set outputformat mysql
+#-------------------------------------------------------------------------
+# TESTCASE: test002 TEST_ID: SEL_DATASOURCE
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM test_agg_funcs;
 +-----+
@@ -14,7 +17,7 @@ FROM test_agg_funcs;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test002 TEST_ID: A01 TYPE: POSITIVE TEST
+# TESTCASE: test002 TEST_ID: A01
 #-------------------------------------------------------------------------
 SELECT strlen(c1) len_c1,
        strlen(c2) len_c2,
@@ -36,7 +39,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test002 TEST_ID: A02 TYPE: NEGATIVE TEST
+# TESTCASE: test002 TEST_ID: A02
 #-------------------------------------------------------------------------
 SELECT string_agg(tab0s0, '|'),
        tab0l0,
@@ -46,7 +49,7 @@ is not being grouped
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test002 TEST_ID: A03 TYPE: POSITIVE TEST
+# TESTCASE: test002 TEST_ID: A03
 #-------------------------------------------------------------------------
 SELECT strlen(c1) len_c1
 FROM
@@ -74,6 +77,3 @@ FROM
 
 !ok
 
-#-------------------------------------------------------------------------
-# Total query count 4 Positive tests: 3 Negative tests: 1
-#-------------------------------------------------------------------------

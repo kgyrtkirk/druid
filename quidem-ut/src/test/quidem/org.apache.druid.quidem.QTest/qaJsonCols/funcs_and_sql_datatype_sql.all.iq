@@ -2,6 +2,9 @@
 !set useApproximateCountDistinct false
 !use druidtest://?componentSupplier=AllDruidEnginesComponentSupplier&datasets=sql/src/test/quidem/qatests/qaJsonCols/funcs_and_sql
 !set outputformat mysql
+#-------------------------------------------------------------------------
+# TESTCASE: test_datatype_sql TEST_ID: SEL_DATASOURCE
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM test_json_cols;
 +-----+
@@ -14,7 +17,7 @@ FROM test_json_cols;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_datatype_sql TEST_ID: A001 TYPE: POSITIVE TEST
+# TESTCASE: test_datatype_sql TEST_ID: A001
 #-------------------------------------------------------------------------
 SELECT count(*) c
 FROM test_json_cols
@@ -29,7 +32,7 @@ WHERE c1 IS NULL;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_datatype_sql TEST_ID: A002 TYPE: POSITIVE TEST
+# TESTCASE: test_datatype_sql TEST_ID: A002
 #-------------------------------------------------------------------------
 SELECT count(*) c
 FROM test_json_cols
@@ -44,7 +47,7 @@ WHERE c1 IS NOT NULL;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_datatype_sql TEST_ID: A003 TYPE: POSITIVE TEST
+# TESTCASE: test_datatype_sql TEST_ID: A003
 #-------------------------------------------------------------------------
 SELECT count(*) c
 FROM
@@ -60,7 +63,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_datatype_sql TEST_ID: A004 TYPE: POSITIVE TEST
+# TESTCASE: test_datatype_sql TEST_ID: A004
 #-------------------------------------------------------------------------
 SELECT count(*) c
 FROM
@@ -76,7 +79,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_datatype_sql TEST_ID: A005 TYPE: POSITIVE TEST
+# TESTCASE: test_datatype_sql TEST_ID: A005
 #-------------------------------------------------------------------------
 SELECT count(*) c
 FROM
@@ -92,7 +95,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_datatype_sql TEST_ID: A006 TYPE: POSITIVE TEST
+# TESTCASE: test_datatype_sql TEST_ID: A006
 #-------------------------------------------------------------------------
 SELECT count(*) c
 FROM
@@ -108,7 +111,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_datatype_sql TEST_ID: A007 TYPE: POSITIVE TEST
+# TESTCASE: test_datatype_sql TEST_ID: A007
 #-------------------------------------------------------------------------
 SELECT count(c1) c
 FROM test_json_cols;
@@ -122,7 +125,7 @@ FROM test_json_cols;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_datatype_sql TEST_ID: A008 TYPE: POSITIVE TEST
+# TESTCASE: test_datatype_sql TEST_ID: A008
 #-------------------------------------------------------------------------
 SELECT count(*) c
 FROM
@@ -138,7 +141,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_datatype_sql TEST_ID: A009 TYPE: POSITIVE TEST
+# TESTCASE: test_datatype_sql TEST_ID: A009
 #-------------------------------------------------------------------------
 SELECT count(c1) c
 FROM test_json_cols
@@ -154,7 +157,7 @@ GROUP BY c1;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_datatype_sql TEST_ID: A010 TYPE: POSITIVE TEST
+# TESTCASE: test_datatype_sql TEST_ID: A010
 #-------------------------------------------------------------------------
 SELECT count(c1) c
 FROM test_json_cols
@@ -171,7 +174,7 @@ HAVING count(c1) >= 2;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_datatype_sql TEST_ID: A011 TYPE: POSITIVE TEST
+# TESTCASE: test_datatype_sql TEST_ID: A011
 #-------------------------------------------------------------------------
 SELECT *
 FROM test_json_cols
@@ -185,7 +188,7 @@ WHERE c1 = c2;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_datatype_sql TEST_ID: A012 TYPE: NEGATIVE TEST
+# TESTCASE: test_datatype_sql TEST_ID: A012
 #-------------------------------------------------------------------------
 SELECT *
 FROM test_json_cols t1
@@ -194,7 +197,7 @@ Cannot join
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_datatype_sql TEST_ID: A013 TYPE: NEGATIVE TEST
+# TESTCASE: test_datatype_sql TEST_ID: A013
 #-------------------------------------------------------------------------
 SELECT *
 FROM test_json_cols t1
@@ -203,7 +206,7 @@ Cannot join
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_datatype_sql TEST_ID: A014 TYPE: NEGATIVE TEST
+# TESTCASE: test_datatype_sql TEST_ID: A014
 #-------------------------------------------------------------------------
 SELECT *
 FROM test_json_cols t1,
@@ -213,7 +216,7 @@ Cannot join
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_datatype_sql TEST_ID: A015 TYPE: POSITIVE TEST
+# TESTCASE: test_datatype_sql TEST_ID: A015
 #-------------------------------------------------------------------------
 SELECT *
 FROM test_json_cols
@@ -231,7 +234,7 @@ ORDER BY __time;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_datatype_sql TEST_ID: A016 TYPE: POSITIVE TEST
+# TESTCASE: test_datatype_sql TEST_ID: A016
 #-------------------------------------------------------------------------
 SELECT *
 FROM test_json_cols
@@ -246,7 +249,7 @@ LIMIT 1;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_datatype_sql TEST_ID: A017 TYPE: POSITIVE TEST
+# TESTCASE: test_datatype_sql TEST_ID: A017
 #-------------------------------------------------------------------------
 SELECT *
 FROM test_json_cols
@@ -263,7 +266,7 @@ OFFSET 1;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_datatype_sql TEST_ID: A018 TYPE: POSITIVE TEST
+# TESTCASE: test_datatype_sql TEST_ID: A018
 #-------------------------------------------------------------------------
 SELECT *
 FROM test_json_cols
@@ -286,6 +289,3 @@ FROM test_json_cols;
 
 !ok
 
-#-------------------------------------------------------------------------
-# Total query count 19 Positive tests: 16 Negative tests: 3
-#-------------------------------------------------------------------------

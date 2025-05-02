@@ -3,7 +3,7 @@
 !use druidtest://?componentSupplier=StandardMSQComponentSupplier&datasets=sql/src/test/quidem/qatests/qaTpch&numMergeBuffers=3
 !set outputformat mysql
 #-------------------------------------------------------------------------
-# TESTCASE: test_tpch TEST_ID: A01 TYPE: POSITIVE TEST
+# TESTCASE: test_tpch TEST_ID: A01
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM customer;
@@ -17,7 +17,7 @@ FROM customer;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_tpch TEST_ID: A02 TYPE: POSITIVE TEST
+# TESTCASE: test_tpch TEST_ID: A02
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM lineitem;
@@ -31,7 +31,7 @@ FROM lineitem;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_tpch TEST_ID: A03 TYPE: POSITIVE TEST
+# TESTCASE: test_tpch TEST_ID: A03
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM nation;
@@ -45,7 +45,7 @@ FROM nation;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_tpch TEST_ID: A04 TYPE: POSITIVE TEST
+# TESTCASE: test_tpch TEST_ID: A04
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM orders;
@@ -59,7 +59,7 @@ FROM orders;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_tpch TEST_ID: A05 TYPE: POSITIVE TEST
+# TESTCASE: test_tpch TEST_ID: A05
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM part;
@@ -73,7 +73,7 @@ FROM part;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_tpch TEST_ID: A06 TYPE: POSITIVE TEST
+# TESTCASE: test_tpch TEST_ID: A06
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM partsupp;
@@ -87,7 +87,7 @@ FROM partsupp;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_tpch TEST_ID: A07 TYPE: POSITIVE TEST
+# TESTCASE: test_tpch TEST_ID: A07
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM region;
@@ -101,7 +101,7 @@ FROM region;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_tpch TEST_ID: A08 TYPE: POSITIVE TEST
+# TESTCASE: test_tpch TEST_ID: A08
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM supplier;
@@ -115,7 +115,7 @@ FROM supplier;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_tpch TEST_ID: Q01_broadcast TYPE: POSITIVE TEST
+# TESTCASE: test_tpch TEST_ID: Q01_broadcast
 #-------------------------------------------------------------------------
 
 SELECT l_returnflag,
@@ -147,7 +147,7 @@ ORDER BY l_returnflag,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_tpch TEST_ID: Q02_broadcast TYPE: POSITIVE TEST
+# TESTCASE: test_tpch TEST_ID: Q02_broadcast
 #-------------------------------------------------------------------------
 
 SELECT s_acctbal,
@@ -194,7 +194,7 @@ ORDER BY s_acctbal DESC,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_tpch TEST_ID: Q04_broadcast TYPE: POSITIVE TEST
+# TESTCASE: test_tpch TEST_ID: Q04_broadcast
 #-------------------------------------------------------------------------
 
 SELECT o_orderpriority,
@@ -223,7 +223,7 @@ ORDER BY o_orderpriority;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_tpch TEST_ID: Q06_broadcast TYPE: POSITIVE TEST
+# TESTCASE: test_tpch TEST_ID: Q06_broadcast
 #-------------------------------------------------------------------------
 
 SELECT cast(sum(l_extendedprice * l_discount) AS bigint) AS revenue
@@ -242,7 +242,7 @@ WHERE l_shipdate >= date '1995-01-01'
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_tpch TEST_ID: Q11_broadcast TYPE: POSITIVE TEST
+# TESTCASE: test_tpch TEST_ID: Q11_broadcast
 #-------------------------------------------------------------------------
 
 SELECT ps_partkey,
@@ -273,7 +273,7 @@ ORDER BY druid_value DESC;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_tpch TEST_ID: Q14_broadcast TYPE: POSITIVE TEST
+# TESTCASE: test_tpch TEST_ID: Q14_broadcast
 #-------------------------------------------------------------------------
 
 SELECT cast(100.00 * sum(CASE
@@ -295,7 +295,7 @@ WHERE l_partkey = p_partkey
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_tpch TEST_ID: Q15_broadcast TYPE: POSITIVE TEST
+# TESTCASE: test_tpch TEST_ID: Q15_broadcast
 #-------------------------------------------------------------------------
 
 SELECT s_suppkey,
@@ -330,7 +330,7 @@ ORDER BY s_suppkey;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_tpch TEST_ID: Q17_broadcast TYPE: POSITIVE TEST
+# TESTCASE: test_tpch TEST_ID: Q17_broadcast
 #-------------------------------------------------------------------------
 
 SELECT cast(sum(l_extendedprice) / 7.0 AS bigint) AS avg_yearly
@@ -353,7 +353,7 @@ WHERE p_partkey = l_partkey
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_tpch TEST_ID: Q19_broadcast TYPE: POSITIVE TEST
+# TESTCASE: test_tpch TEST_ID: Q19_broadcast
 #-------------------------------------------------------------------------
 
 SELECT cast(sum(l_extendedprice* (1 - l_discount)) AS bigint) AS revenue
@@ -405,7 +405,7 @@ WHERE (p_partkey = l_partkey
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_tpch TEST_ID: Q20_broadcast TYPE: POSITIVE TEST
+# TESTCASE: test_tpch TEST_ID: Q20_broadcast
 #-------------------------------------------------------------------------
 
 SELECT s_name,
@@ -438,7 +438,7 @@ ORDER BY s_name;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_tpch TEST_ID: Q22_broadcast TYPE: POSITIVE TEST
+# TESTCASE: test_tpch TEST_ID: Q22_broadcast
 #-------------------------------------------------------------------------
 
 SELECT cntrycode,
@@ -491,6 +491,3 @@ ORDER BY cntrycode;
 
 !ok
 
-#-------------------------------------------------------------------------
-# Total query count 19 Positive tests: 19 Negative tests: 0
-#-------------------------------------------------------------------------

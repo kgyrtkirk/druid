@@ -3,7 +3,7 @@
 !use druidtest://?componentSupplier=StandardMSQComponentSupplier&datasets=sql/src/test/quidem/qatests/qaSsb/denorm
 !set outputformat mysql
 #-------------------------------------------------------------------------
-# TESTCASE: test_ssb_denorm TEST_ID: A01 TYPE: POSITIVE TEST
+# TESTCASE: test_ssb_denorm TEST_ID: A01
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM ssb_denorm;
@@ -17,7 +17,7 @@ FROM ssb_denorm;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_ssb_denorm TEST_ID: Q1_0_broadcast TYPE: POSITIVE TEST
+# TESTCASE: test_ssb_denorm TEST_ID: Q1_0_broadcast
 #-------------------------------------------------------------------------
 SELECT sum(lo_extendedprice*lo_discount) AS revenue
 FROM ssb_denorm
@@ -35,7 +35,7 @@ WHERE lo_orderdate = d_datekey
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_ssb_denorm TEST_ID: Q1_1_broadcast TYPE: POSITIVE TEST
+# TESTCASE: test_ssb_denorm TEST_ID: Q1_1_broadcast
 #-------------------------------------------------------------------------
 SELECT sum(lo_extendedprice*lo_discount) AS revenue
 FROM ssb_denorm
@@ -53,7 +53,7 @@ WHERE lo_orderdate = d_datekey
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_ssb_denorm TEST_ID: Q1_2_broadcast TYPE: POSITIVE TEST
+# TESTCASE: test_ssb_denorm TEST_ID: Q1_2_broadcast
 #-------------------------------------------------------------------------
 SELECT sum(lo_extendedprice*lo_discount) AS revenue
 FROM ssb_denorm
@@ -72,7 +72,7 @@ WHERE lo_orderdate = d_datekey
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_ssb_denorm TEST_ID: Q2_0_broadcast TYPE: POSITIVE TEST
+# TESTCASE: test_ssb_denorm TEST_ID: Q2_0_broadcast
 #-------------------------------------------------------------------------
 SELECT sum(lo_revenue),
        d_year,
@@ -138,7 +138,7 @@ ORDER BY d_year,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_ssb_denorm TEST_ID: Q2_1_broadcast TYPE: POSITIVE TEST
+# TESTCASE: test_ssb_denorm TEST_ID: Q2_1_broadcast
 #-------------------------------------------------------------------------
 SELECT sum(lo_revenue),
        d_year,
@@ -172,7 +172,7 @@ ORDER BY d_year,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_ssb_denorm TEST_ID: Q2_2_broadcast TYPE: POSITIVE TEST
+# TESTCASE: test_ssb_denorm TEST_ID: Q2_2_broadcast
 #-------------------------------------------------------------------------
 SELECT sum(lo_revenue),
        d_year,
@@ -196,7 +196,7 @@ ORDER BY d_year,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_ssb_denorm TEST_ID: Q3_0_broadcast TYPE: POSITIVE TEST
+# TESTCASE: test_ssb_denorm TEST_ID: Q3_0_broadcast
 #-------------------------------------------------------------------------
 SELECT c_nation,
        s_nation,
@@ -344,7 +344,7 @@ ORDER BY d_year ASC,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_ssb_denorm TEST_ID: Q3_1_broadcast TYPE: POSITIVE TEST
+# TESTCASE: test_ssb_denorm TEST_ID: Q3_1_broadcast
 #-------------------------------------------------------------------------
 SELECT c_city,
        s_city,
@@ -382,7 +382,7 @@ ORDER BY d_year ASC,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_ssb_denorm TEST_ID: Q3_2_broadcast TYPE: POSITIVE TEST
+# TESTCASE: test_ssb_denorm TEST_ID: Q3_2_broadcast
 #-------------------------------------------------------------------------
 SELECT c_city,
        s_city,
@@ -412,7 +412,7 @@ ORDER BY d_year ASC,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_ssb_denorm TEST_ID: Q3_3_broadcast TYPE: POSITIVE TEST
+# TESTCASE: test_ssb_denorm TEST_ID: Q3_3_broadcast
 #-------------------------------------------------------------------------
 SELECT c_city,
        s_city,
@@ -441,7 +441,7 @@ ORDER BY d_year ASC,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_ssb_denorm TEST_ID: Q4_0_broadcast TYPE: POSITIVE TEST
+# TESTCASE: test_ssb_denorm TEST_ID: Q4_0_broadcast
 #-------------------------------------------------------------------------
 SELECT d_year,
        c_nation,
@@ -500,7 +500,7 @@ ORDER BY d_year,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_ssb_denorm TEST_ID: Q4_1_broadcast TYPE: POSITIVE TEST
+# TESTCASE: test_ssb_denorm TEST_ID: Q4_1_broadcast
 #-------------------------------------------------------------------------
 SELECT d_year,
        s_nation,
@@ -547,7 +547,7 @@ ORDER BY d_year,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_ssb_denorm TEST_ID: Q4_2_broadcast TYPE: POSITIVE TEST
+# TESTCASE: test_ssb_denorm TEST_ID: Q4_2_broadcast
 #-------------------------------------------------------------------------
 SELECT d_year,
        s_city,
@@ -577,6 +577,3 @@ ORDER BY d_year,
 
 !ok
 
-#-------------------------------------------------------------------------
-# Total query count 14 Positive tests: 14 Negative tests: 0
-#-------------------------------------------------------------------------

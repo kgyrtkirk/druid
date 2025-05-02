@@ -2,6 +2,9 @@
 !set useApproximateCountDistinct false
 !use druidtest://?componentSupplier=DartComponentSupplier&datasets=sql/src/test/quidem/qatests/qaUnnest/array
 !set outputformat mysql
+#-------------------------------------------------------------------------
+# TESTCASE: test_explain TEST_ID: SEL_DATASOURCE
+#-------------------------------------------------------------------------
 SELECT *
 FROM test_unnest;
 +-------------------------+-------+--------+--------------+--------------+------------------+----------------+--------------------+---------+--------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -16,7 +19,7 @@ FROM test_unnest;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A1_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A1_B1
 #-------------------------------------------------------------------------
 
 SELECT c
@@ -47,7 +50,7 @@ LogicalProject(c=[$11])
 !druidPlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A1_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A1_B2
 #-------------------------------------------------------------------------
 
 SELECT *
@@ -79,7 +82,7 @@ LogicalCorrelate(correlation=[$cor0], joinType=[inner], requiredColumns=[{4}])
 !druidPlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A1_B3 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A1_B3
 #-------------------------------------------------------------------------
 
 SELECT c,
@@ -105,6 +108,3 @@ LogicalAggregate(group=[{11}], cnt=[COUNT()])
 
 !druidPlan
 
-#-------------------------------------------------------------------------
-# Total query count 4 Positive tests: 4 Negative tests: 0
-#-------------------------------------------------------------------------

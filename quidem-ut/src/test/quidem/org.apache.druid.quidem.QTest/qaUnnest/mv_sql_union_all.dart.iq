@@ -2,6 +2,9 @@
 !set useApproximateCountDistinct false
 !use druidtest://?componentSupplier=DartComponentSupplier&datasets=sql/src/test/quidem/qatests/qaUnnest/mv
 !set outputformat mysql
+#-------------------------------------------------------------------------
+# TESTCASE: test_union_all TEST_ID: SEL_DATASOURCE
+#-------------------------------------------------------------------------
 SELECT *
 FROM test_unnest;
 +-------------------------+-------+--------+---------+----------+------------------------------------------------+------------------------+--------------------------------------+----------------------------------+--------------------------------------+----------------------------------+-----------------------------+
@@ -18,7 +21,7 @@ FROM test_unnest;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A1_B1 TYPE: NEGATIVE TEST
+# TESTCASE: test_union_all TEST_ID: A1_B1
 #-------------------------------------------------------------------------
 SELECT c_long,
        c
@@ -38,7 +41,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A1_B2 TYPE: NEGATIVE TEST
+# TESTCASE: test_union_all TEST_ID: A1_B2
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -52,7 +55,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A2_B1 TYPE: NEGATIVE TEST
+# TESTCASE: test_union_all TEST_ID: A2_B1
 #-------------------------------------------------------------------------
 SELECT c_long,
        c
@@ -72,7 +75,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A2_B2 TYPE: NEGATIVE TEST
+# TESTCASE: test_union_all TEST_ID: A2_B2
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -86,7 +89,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A3_B1 TYPE: NEGATIVE TEST
+# TESTCASE: test_union_all TEST_ID: A3_B1
 #-------------------------------------------------------------------------
 SELECT c_long,
        c
@@ -106,7 +109,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A3_B2 TYPE: NEGATIVE TEST
+# TESTCASE: test_union_all TEST_ID: A3_B2
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -120,7 +123,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A4_B1 TYPE: NEGATIVE TEST
+# TESTCASE: test_union_all TEST_ID: A4_B1
 #-------------------------------------------------------------------------
 SELECT c_long,
        c
@@ -140,7 +143,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A4_B2 TYPE: NEGATIVE TEST
+# TESTCASE: test_union_all TEST_ID: A4_B2
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -154,7 +157,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A5_B1 TYPE: NEGATIVE TEST
+# TESTCASE: test_union_all TEST_ID: A5_B1
 #-------------------------------------------------------------------------
 SELECT c_long,
        c
@@ -174,7 +177,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A5_B2 TYPE: NEGATIVE TEST
+# TESTCASE: test_union_all TEST_ID: A5_B2
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -188,7 +191,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A6_B1 TYPE: NEGATIVE TEST
+# TESTCASE: test_union_all TEST_ID: A6_B1
 #-------------------------------------------------------------------------
 SELECT c_long,
        c
@@ -208,7 +211,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A6_B2 TYPE: NEGATIVE TEST
+# TESTCASE: test_union_all TEST_ID: A6_B2
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -222,7 +225,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A7_B1 TYPE: NEGATIVE TEST
+# TESTCASE: test_union_all TEST_ID: A7_B1
 #-------------------------------------------------------------------------
 SELECT c_long,
        c
@@ -242,7 +245,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A7_B2 TYPE: NEGATIVE TEST
+# TESTCASE: test_union_all TEST_ID: A7_B2
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -255,6 +258,3 @@ FROM
 QueryInterruptedException
 !error
 
-#-------------------------------------------------------------------------
-# Total query count 15 Positive tests: 1 Negative tests: 14
-#-------------------------------------------------------------------------

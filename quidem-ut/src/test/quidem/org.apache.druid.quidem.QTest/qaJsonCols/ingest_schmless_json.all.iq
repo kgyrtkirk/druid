@@ -2,6 +2,9 @@
 !set useApproximateCountDistinct false
 !use druidtest://?componentSupplier=AllDruidEnginesComponentSupplier&datasets=sql/src/test/quidem/qatests/qaJsonCols/ingest/schmless_json
 !set outputformat mysql
+#-------------------------------------------------------------------------
+# TESTCASE: test_schmless_json TEST_ID: SEL_DATASOURCE
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM test_json_cols;
 +-----+
@@ -14,7 +17,7 @@ FROM test_json_cols;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_schmless_json TEST_ID: I01 TYPE: POSITIVE TEST
+# TESTCASE: test_schmless_json TEST_ID: I01
 #-------------------------------------------------------------------------
 SELECT count(*) c
 FROM
@@ -31,7 +34,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_schmless_json TEST_ID: I02 TYPE: POSITIVE TEST
+# TESTCASE: test_schmless_json TEST_ID: I02
 #-------------------------------------------------------------------------
 SELECT count(*) c
 FROM test_json_cols
@@ -47,7 +50,7 @@ WHERE s_str = 'A'
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_schmless_json TEST_ID: I03 TYPE: POSITIVE TEST
+# TESTCASE: test_schmless_json TEST_ID: I03
 #-------------------------------------------------------------------------
 SELECT count(*) c
 FROM test_json_cols
@@ -62,7 +65,7 @@ WHERE s_num_int = '1';
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_schmless_json TEST_ID: I04 TYPE: POSITIVE TEST
+# TESTCASE: test_schmless_json TEST_ID: I04
 #-------------------------------------------------------------------------
 SELECT count(*) c
 FROM test_json_cols
@@ -77,7 +80,7 @@ WHERE s_num_float = '0.1';
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_schmless_json TEST_ID: I05 TYPE: POSITIVE TEST
+# TESTCASE: test_schmless_json TEST_ID: I05
 #-------------------------------------------------------------------------
 SELECT count(*) c
 FROM test_json_cols
@@ -92,7 +95,7 @@ WHERE s_bool = 'true';
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_schmless_json TEST_ID: I07 TYPE: POSITIVE TEST
+# TESTCASE: test_schmless_json TEST_ID: I07
 #-------------------------------------------------------------------------
 SELECT count(*) c
 FROM test_json_cols
@@ -107,7 +110,7 @@ WHERE c_empty_obj = '{}';
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_schmless_json TEST_ID: I09 TYPE: POSITIVE TEST
+# TESTCASE: test_schmless_json TEST_ID: I09
 #-------------------------------------------------------------------------
 SELECT count(*) c
 FROM test_json_cols
@@ -122,7 +125,7 @@ WHERE c_empty_obj_nested = '{o1={}, o2=[], o3=null}';
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_schmless_json TEST_ID: I11 TYPE: POSITIVE TEST
+# TESTCASE: test_schmless_json TEST_ID: I11
 #-------------------------------------------------------------------------
 SELECT count(*) c
 FROM test_json_cols
@@ -137,7 +140,7 @@ WHERE mv_offset(c_empty_array_nested, 0) IS NULL;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_schmless_json TEST_ID: I12 TYPE: POSITIVE TEST
+# TESTCASE: test_schmless_json TEST_ID: I12
 #-------------------------------------------------------------------------
 SELECT count(*) c
 FROM test_json_cols
@@ -152,7 +155,7 @@ WHERE mv_offset(c_empty_array_nested, 1) = '[]';
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_schmless_json TEST_ID: I13 TYPE: POSITIVE TEST
+# TESTCASE: test_schmless_json TEST_ID: I13
 #-------------------------------------------------------------------------
 SELECT count(*) c
 FROM test_json_cols
@@ -167,7 +170,7 @@ WHERE mv_offset(c_empty_array_nested, 2) = '{}';
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_schmless_json TEST_ID: I14 TYPE: POSITIVE TEST
+# TESTCASE: test_schmless_json TEST_ID: I14
 #-------------------------------------------------------------------------
 SELECT count(*) c
 FROM test_json_cols
@@ -182,7 +185,7 @@ WHERE c1 like '%a_str%';
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_schmless_json TEST_ID: I15 TYPE: POSITIVE TEST
+# TESTCASE: test_schmless_json TEST_ID: I15
 #-------------------------------------------------------------------------
 SELECT count(*) c
 FROM test_json_cols
@@ -197,7 +200,7 @@ WHERE c1 like '%b_str%';
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_schmless_json TEST_ID: I16 TYPE: POSITIVE TEST
+# TESTCASE: test_schmless_json TEST_ID: I16
 #-------------------------------------------------------------------------
 SELECT count(*) c
 FROM test_json_cols
@@ -212,7 +215,7 @@ WHERE c2 like '%a_str%';
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_schmless_json TEST_ID: I17 TYPE: POSITIVE TEST
+# TESTCASE: test_schmless_json TEST_ID: I17
 #-------------------------------------------------------------------------
 SELECT count(*) c
 FROM test_json_cols
@@ -227,7 +230,7 @@ WHERE c2 like '%b_str%';
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_schmless_json TEST_ID: I18 TYPE: POSITIVE TEST
+# TESTCASE: test_schmless_json TEST_ID: I18
 #-------------------------------------------------------------------------
 SELECT sum(cnt) s
 FROM test_json_cols;
@@ -240,6 +243,3 @@ FROM test_json_cols;
 
 !ok
 
-#-------------------------------------------------------------------------
-# Total query count 16 Positive tests: 16 Negative tests: 0
-#-------------------------------------------------------------------------

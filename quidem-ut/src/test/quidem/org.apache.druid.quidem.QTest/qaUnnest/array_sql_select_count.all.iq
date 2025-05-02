@@ -2,6 +2,9 @@
 !set useApproximateCountDistinct false
 !use druidtest://?componentSupplier=AllDruidEnginesComponentSupplier&datasets=sql/src/test/quidem/qatests/qaUnnest/array
 !set outputformat mysql
+#-------------------------------------------------------------------------
+# TESTCASE: test_select_count TEST_ID: SEL_DATASOURCE
+#-------------------------------------------------------------------------
 SELECT *
 FROM test_unnest;
 +-------------------------+-------+--------+--------------+--------------+------------------+----------------+--------------------+---------+--------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -16,7 +19,7 @@ FROM test_unnest;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A1_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A1_B1
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM test_unnest,
@@ -31,7 +34,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A1_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A1_B2
 #-------------------------------------------------------------------------
 SELECT count(c) cnt
 FROM test_unnest,
@@ -46,7 +49,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A1_B3 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A1_B3
 #-------------------------------------------------------------------------
 SELECT count(DISTINCT c) cnt
 FROM test_unnest,
@@ -61,7 +64,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A2_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A2_B1
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM test_unnest,
@@ -76,7 +79,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A2_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A2_B2
 #-------------------------------------------------------------------------
 SELECT count(c) cnt
 FROM test_unnest,
@@ -91,7 +94,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A2_B3 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A2_B3
 #-------------------------------------------------------------------------
 SELECT count(DISTINCT c) cnt
 FROM test_unnest,
@@ -106,7 +109,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A3_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A3_B1
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM test_unnest,
@@ -121,7 +124,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A3_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A3_B2
 #-------------------------------------------------------------------------
 SELECT count(c) cnt
 FROM test_unnest,
@@ -136,7 +139,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A3_B3 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A3_B3
 #-------------------------------------------------------------------------
 SELECT count(DISTINCT c) cnt
 FROM test_unnest,
@@ -151,7 +154,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A4_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A4_B1
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM test_unnest,
@@ -166,7 +169,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A4_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A4_B2
 #-------------------------------------------------------------------------
 SELECT count(c) cnt
 FROM test_unnest,
@@ -181,7 +184,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A4_B3 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A4_B3
 #-------------------------------------------------------------------------
 SELECT count(DISTINCT c) cnt
 FROM test_unnest,
@@ -196,7 +199,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A5_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A5_B1
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM test_unnest,
@@ -211,7 +214,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A5_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A5_B2
 #-------------------------------------------------------------------------
 SELECT count(c) cnt
 FROM test_unnest,
@@ -226,7 +229,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A5_B3 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A5_B3
 #-------------------------------------------------------------------------
 SELECT count(DISTINCT c) cnt
 FROM test_unnest,
@@ -241,7 +244,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A6_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A6_B1
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM test_unnest,
@@ -256,7 +259,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A6_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A6_B2
 #-------------------------------------------------------------------------
 SELECT count(c) cnt
 FROM test_unnest,
@@ -271,7 +274,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A6_B3 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A6_B3
 #-------------------------------------------------------------------------
 SELECT count(DISTINCT c) cnt
 FROM test_unnest,
@@ -286,7 +289,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A7_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A7_B1
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM test_unnest,
@@ -301,7 +304,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A7_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A7_B2
 #-------------------------------------------------------------------------
 SELECT count(c) cnt
 FROM test_unnest,
@@ -316,7 +319,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A7_B3 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A7_B3
 #-------------------------------------------------------------------------
 SELECT count(DISTINCT c) cnt
 FROM test_unnest,
@@ -331,7 +334,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A8_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A8_B1
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM test_unnest,
@@ -346,7 +349,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A8_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A8_B2
 #-------------------------------------------------------------------------
 SELECT count(c) cnt
 FROM test_unnest,
@@ -361,7 +364,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A8_B3 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A8_B3
 #-------------------------------------------------------------------------
 SELECT count(DISTINCT c) cnt
 FROM test_unnest,
@@ -376,7 +379,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A9_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A9_B1
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM test_unnest,
@@ -391,7 +394,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A9_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A9_B2
 #-------------------------------------------------------------------------
 SELECT count(c) cnt
 FROM test_unnest,
@@ -406,7 +409,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A9_B3 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A9_B3
 #-------------------------------------------------------------------------
 SELECT count(DISTINCT c) cnt
 FROM test_unnest,
@@ -421,7 +424,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A10_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A10_B1
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM test_unnest,
@@ -436,7 +439,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A10_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A10_B2
 #-------------------------------------------------------------------------
 SELECT count(c) cnt
 FROM test_unnest,
@@ -451,7 +454,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A10_B3 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A10_B3
 #-------------------------------------------------------------------------
 SELECT count(DISTINCT c) cnt
 FROM test_unnest,
@@ -466,7 +469,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A11_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A11_B1
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM test_unnest,
@@ -481,7 +484,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A11_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A11_B2
 #-------------------------------------------------------------------------
 SELECT count(c) cnt
 FROM test_unnest,
@@ -496,7 +499,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A11_B3 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A11_B3
 #-------------------------------------------------------------------------
 SELECT count(DISTINCT c) cnt
 FROM test_unnest,
@@ -511,7 +514,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A12_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A12_B1
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM test_unnest,
@@ -526,7 +529,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A12_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A12_B2
 #-------------------------------------------------------------------------
 SELECT count(c) cnt
 FROM test_unnest,
@@ -541,7 +544,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A12_B3 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A12_B3
 #-------------------------------------------------------------------------
 SELECT count(DISTINCT c) cnt
 FROM test_unnest,
@@ -555,6 +558,3 @@ FROM test_unnest,
 
 !ok
 
-#-------------------------------------------------------------------------
-# Total query count 37 Positive tests: 37 Negative tests: 0
-#-------------------------------------------------------------------------

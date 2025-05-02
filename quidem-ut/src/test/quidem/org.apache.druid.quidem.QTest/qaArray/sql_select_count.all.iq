@@ -2,19 +2,8 @@
 !set useApproximateCountDistinct false
 !use druidtest://?componentSupplier=AllDruidEnginesComponentSupplier&datasets=sql/src/test/quidem/qatests/qaArray/sql
 !set outputformat mysql
-SELECT count(*) cnt
-FROM test_array;
-+-----+
-| cnt |
-+-----+
-|   4 |
-+-----+
-(1 row)
-
-!ok
-
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A1_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: SEL_DATASOURCE
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM test_array;
@@ -28,7 +17,21 @@ FROM test_array;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A1_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A1_B1
+#-------------------------------------------------------------------------
+SELECT count(*) cnt
+FROM test_array;
++-----+
+| cnt |
++-----+
+|   4 |
++-----+
+(1 row)
+
+!ok
+
+#-------------------------------------------------------------------------
+# TESTCASE: test_select_count TEST_ID: A1_B2
 #-------------------------------------------------------------------------
 SELECT count(a_bool) cnt
 FROM test_array;
@@ -42,7 +45,7 @@ FROM test_array;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A1_B3 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A1_B3
 #-------------------------------------------------------------------------
 SELECT count(DISTINCT a_bool) cnt
 FROM test_array;
@@ -56,7 +59,7 @@ FROM test_array;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A2_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A2_B1
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM test_array;
@@ -70,7 +73,7 @@ FROM test_array;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A2_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A2_B2
 #-------------------------------------------------------------------------
 SELECT count(a_int) cnt
 FROM test_array;
@@ -84,7 +87,7 @@ FROM test_array;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A2_B3 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A2_B3
 #-------------------------------------------------------------------------
 SELECT count(DISTINCT a_int) cnt
 FROM test_array;
@@ -98,7 +101,7 @@ FROM test_array;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A3_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A3_B1
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM test_array;
@@ -112,7 +115,7 @@ FROM test_array;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A3_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A3_B2
 #-------------------------------------------------------------------------
 SELECT count(a_float) cnt
 FROM test_array;
@@ -126,7 +129,7 @@ FROM test_array;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A3_B3 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A3_B3
 #-------------------------------------------------------------------------
 SELECT count(DISTINCT a_float) cnt
 FROM test_array;
@@ -140,7 +143,7 @@ FROM test_array;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A4_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A4_B1
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM test_array;
@@ -154,7 +157,7 @@ FROM test_array;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A4_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A4_B2
 #-------------------------------------------------------------------------
 SELECT count(a_str) cnt
 FROM test_array;
@@ -168,7 +171,7 @@ FROM test_array;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A4_B3 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A4_B3
 #-------------------------------------------------------------------------
 SELECT count(DISTINCT a_str) cnt
 FROM test_array;
@@ -182,7 +185,7 @@ FROM test_array;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A5_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A5_B1
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM test_array;
@@ -196,7 +199,7 @@ FROM test_array;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A5_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A5_B2
 #-------------------------------------------------------------------------
 SELECT count(a_null) cnt
 FROM test_array;
@@ -210,7 +213,7 @@ FROM test_array;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A5_B3 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A5_B3
 #-------------------------------------------------------------------------
 SELECT count(DISTINCT a_null) cnt
 FROM test_array;
@@ -224,7 +227,7 @@ FROM test_array;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A6_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A6_B1
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM test_array;
@@ -238,7 +241,7 @@ FROM test_array;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A6_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A6_B2
 #-------------------------------------------------------------------------
 SELECT count(a_empty) cnt
 FROM test_array;
@@ -252,7 +255,7 @@ FROM test_array;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A6_B3 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A6_B3
 #-------------------------------------------------------------------------
 SELECT count(DISTINCT a_empty) cnt
 FROM test_array;
@@ -266,7 +269,7 @@ FROM test_array;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A7_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A7_B1
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM test_array;
@@ -280,7 +283,7 @@ FROM test_array;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A7_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A7_B2
 #-------------------------------------------------------------------------
 SELECT count(a_mixed) cnt
 FROM test_array;
@@ -294,7 +297,7 @@ FROM test_array;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A7_B3 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A7_B3
 #-------------------------------------------------------------------------
 SELECT count(DISTINCT a_mixed) cnt
 FROM test_array;
@@ -308,7 +311,7 @@ FROM test_array;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A8_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A8_B1
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM test_array;
@@ -322,7 +325,7 @@ FROM test_array;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A8_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A8_B2
 #-------------------------------------------------------------------------
 SELECT count(a_nested) cnt
 FROM test_array;
@@ -336,7 +339,7 @@ FROM test_array;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_count TEST_ID: A8_B3 TYPE: POSITIVE TEST
+# TESTCASE: test_select_count TEST_ID: A8_B3
 #-------------------------------------------------------------------------
 SELECT count(DISTINCT a_nested) cnt
 FROM test_array;
@@ -349,6 +352,3 @@ FROM test_array;
 
 !ok
 
-#-------------------------------------------------------------------------
-# Total query count 25 Positive tests: 25 Negative tests: 0
-#-------------------------------------------------------------------------

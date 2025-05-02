@@ -2,6 +2,9 @@
 !set useApproximateCountDistinct false
 !use druidtest://?componentSupplier=AllDruidEnginesComponentSupplier&datasets=sql/src/test/quidem/qatests/qaAggFuncs
 !set outputformat mysql
+#-------------------------------------------------------------------------
+# TESTCASE: test001 TEST_ID: SEL_DATASOURCE
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM test_agg_funcs;
 +-----+
@@ -14,7 +17,7 @@ FROM test_agg_funcs;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A01 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A01
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -31,7 +34,7 @@ WHERE NOT array_contains(col, 99999)
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A02 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A02
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -49,7 +52,7 @@ WHERE NOT array_contains(col, 99999)
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A03 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A03
 #-------------------------------------------------------------------------
 SELECT array_length(array_agg(tab0f0)) AS col
 FROM test_agg_funcs;
@@ -63,7 +66,7 @@ FROM test_agg_funcs;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A04 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A04
 #-------------------------------------------------------------------------
 SELECT array_offset(array_agg(tab0f0), 100) AS col
 FROM test_agg_funcs
@@ -79,7 +82,7 @@ WHERE tab0f0>111
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A05 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A05
 #-------------------------------------------------------------------------
 SELECT array_ordinal(array_agg(tab0f0), 100) AS col
 FROM test_agg_funcs
@@ -94,7 +97,7 @@ WHERE tab0f0>222;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A06 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A06
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -113,7 +116,7 @@ WHERE col IS TRUE
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A07 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A07
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -132,7 +135,7 @@ WHERE col IS TRUE
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A08 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A08
 #-------------------------------------------------------------------------
 SELECT array_contains(array_agg(tab0f0), 33.3333333) AS col
 FROM test_agg_funcs;
@@ -146,7 +149,7 @@ FROM test_agg_funcs;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A09 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A09
 #-------------------------------------------------------------------------
 SELECT array_contains(array_agg(tab0f0), array[11.1111111, 33.3333333]) AS col
 FROM test_agg_funcs;
@@ -160,7 +163,7 @@ FROM test_agg_funcs;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A10 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A10
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -179,7 +182,7 @@ WHERE col IS TRUE
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A11 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A11
 #-------------------------------------------------------------------------
 SELECT array_overlap(array_agg(tab0f0), array[33.3333333, 44.4444444]) AS col
 FROM test_agg_funcs;
@@ -193,7 +196,7 @@ FROM test_agg_funcs;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A12 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A12
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -212,7 +215,7 @@ WHERE col IS TRUE
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A13 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A13
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -232,7 +235,7 @@ WHERE col != 99999
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A14 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A14
 #-------------------------------------------------------------------------
 SELECT array_offset_of(array_agg(tab0f0), 33.3333333) AS col
 FROM test_agg_funcs
@@ -248,7 +251,7 @@ WHERE tab0f0>111
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A15 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A15
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -268,7 +271,7 @@ WHERE col != 99999
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A16 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A16
 #-------------------------------------------------------------------------
 SELECT array_ordinal_of(array_agg(tab0f0), 33.3333333) AS col
 FROM test_agg_funcs
@@ -284,7 +287,7 @@ WHERE tab0f0>111
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A17 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A17
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -302,7 +305,7 @@ WHERE col != 'ABCD'
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A18 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A18
 #-------------------------------------------------------------------------
 SELECT contains_string(array_to_string(array_agg(tab0f0), '|'), '11.')
 AND contains_string(array_to_string(array_agg(DISTINCT tab0f0), '|'), '|') AS col
@@ -317,7 +320,7 @@ FROM test_agg_funcs;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A19 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A19
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -335,7 +338,7 @@ WHERE NOT array_contains(col, 99999)
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A20 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A20
 #-------------------------------------------------------------------------
 SELECT array_length(array_prepend(33.3333333, array_agg(tab0f0))) AS col
 FROM test_agg_funcs;
@@ -349,7 +352,7 @@ FROM test_agg_funcs;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A21 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A21
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -367,7 +370,7 @@ WHERE NOT array_contains(col, 99999)
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A22 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A22
 #-------------------------------------------------------------------------
 SELECT array_length(array_append(array_agg(tab0f0), 33.3333333)) AS col
 FROM test_agg_funcs;
@@ -381,7 +384,7 @@ FROM test_agg_funcs;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A23 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A23
 #-------------------------------------------------------------------------
 SELECT array_length(array_concat(array_agg(tab0f0), array[33.3333333])) AS col
 FROM test_agg_funcs;
@@ -395,7 +398,7 @@ FROM test_agg_funcs;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A24 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A24
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -413,7 +416,7 @@ WHERE NOT array_contains(col, 99999)
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A25 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A25
 #-------------------------------------------------------------------------
 SELECT array_length(array_concat(array_agg(tab0f0), array_agg(tab0f0))) AS col
 FROM test_agg_funcs;
@@ -427,7 +430,7 @@ FROM test_agg_funcs;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A26 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A26
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -447,7 +450,7 @@ WHERE NOT array_contains(col, 99999)
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A27 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A27
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -467,7 +470,7 @@ WHERE NOT array_contains(col, 99999)
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A28 TYPE: NEGATIVE TEST
+# TESTCASE: test001 TEST_ID: A28
 #-------------------------------------------------------------------------
 SELECT array_agg(t0.tab0f0) AS col
 FROM test_agg_funcs t0,
@@ -478,7 +481,7 @@ size
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A29 TYPE: NEGATIVE TEST
+# TESTCASE: test001 TEST_ID: A29
 #-------------------------------------------------------------------------
 SELECT array_to_string(array_agg(t0.tab0f0), '') AS col
 FROM test_agg_funcs t0,
@@ -489,7 +492,7 @@ size
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A30 TYPE: NEGATIVE TEST
+# TESTCASE: test001 TEST_ID: A30
 #-------------------------------------------------------------------------
 SELECT length(array_to_string(array_agg(t0.tab0f0), '')) AS col
 FROM test_agg_funcs t0,
@@ -500,7 +503,7 @@ size
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A31 TYPE: NEGATIVE TEST
+# TESTCASE: test001 TEST_ID: A31
 #-------------------------------------------------------------------------
 SELECT array_agg(t0.tab0f0) AS col
 FROM test_agg_funcs t0,
@@ -511,7 +514,7 @@ size
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A32 TYPE: NEGATIVE TEST
+# TESTCASE: test001 TEST_ID: A32
 #-------------------------------------------------------------------------
 SELECT array_to_string(array_agg(t0.tab0f0), '') AS col
 FROM test_agg_funcs t0,
@@ -522,7 +525,7 @@ size
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A33 TYPE: NEGATIVE TEST
+# TESTCASE: test001 TEST_ID: A33
 #-------------------------------------------------------------------------
 SELECT length(array_to_string(array_agg(t0.tab0f0), '')) AS col
 FROM test_agg_funcs t0,
@@ -532,6 +535,3 @@ GROUP BY t0.tab0f0;
 size
 !error
 
-#-------------------------------------------------------------------------
-# Total query count 34 Positive tests: 28 Negative tests: 6
-#-------------------------------------------------------------------------

@@ -1,9 +1,12 @@
 !set dartQueryId 00000000-0000-0000-0000-000000000000
 !set useApproximateCountDistinct false
-!use druidtest://?componentSupplier=DartComponentSupplier&datasets=sql/src/test/quidem/qatests/kttm_nested
+!use druidtest://?componentSupplier=DartComponentSupplier&datasets=sql/src/test/quidem/qatests/qaWin
 !set outputformat mysql
+#-------------------------------------------------------------------------
+# TESTCASE: test_sql_test_explain TEST_ID: SEL_DATASOURCE
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22');
 +-----+
@@ -16,7 +19,7 @@ WHERE client_ip IN ('107.13.54.103',
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_explain TEST_ID: A1_G1_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_explain TEST_ID: A1_G1_Q1
 #-------------------------------------------------------------------------
 
 SELECT server_ip,
@@ -34,7 +37,7 @@ FROM
           client_ip,
           timezone,
           time_floor(__time, 'PT12H') __time
-   FROM kttm_nested
+   FROM test_win
    GROUP BY server_ip,
             client_ip,
             timezone,
@@ -63,12 +66,12 @@ LogicalProject(server_ip=[$0], client_ip=[$1], timezone=[$2], $3=[$3], $4=[$6], 
       LogicalFilter(condition=[SEARCH($1, Sarg['107.13.54.103':VARCHAR, '99.9.55.22':VARCHAR]:VARCHAR)])
         LogicalAggregate(group=[{0, 1, 2, 3}])
           LogicalProject(server_ip=[$14], client_ip=[$5], timezone=[$18], __time=[TIME_FLOOR($0, 'PT12H')])
-            LogicalTableScan(table=[[druid, kttm_nested]])
+            LogicalTableScan(table=[[druid, test_win]])
 
 !druidPlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_explain TEST_ID: A1_G1_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_explain TEST_ID: A1_G1_Q2
 #-------------------------------------------------------------------------
 
 SELECT server_ip,
@@ -83,7 +86,7 @@ FROM
           client_ip,
           timezone,
           time_floor(__time, 'PT12H') __time
-   FROM kttm_nested
+   FROM test_win
    GROUP BY server_ip,
             client_ip,
             timezone,
@@ -114,12 +117,12 @@ LogicalProject(server_ip=[$0], client_ip=[$1], timezone=[$2], $3=[$3], $4=[$6], 
       LogicalFilter(condition=[SEARCH($1, Sarg['107.13.54.103':VARCHAR, '99.9.55.22':VARCHAR]:VARCHAR)])
         LogicalAggregate(group=[{0, 1, 2, 3}])
           LogicalProject(server_ip=[$14], client_ip=[$5], timezone=[$18], __time=[TIME_FLOOR($0, 'PT12H')])
-            LogicalTableScan(table=[[druid, kttm_nested]])
+            LogicalTableScan(table=[[druid, test_win]])
 
 !druidPlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_explain TEST_ID: A1_G2_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_explain TEST_ID: A1_G2_Q1
 #-------------------------------------------------------------------------
 
 SELECT server_ip,
@@ -132,7 +135,7 @@ SELECT server_ip,
                                                                                                                                                           ORDER BY server_ip ASC, length(server_ip) ASC, cast(length(server_ip) AS DOUBLE)+0.123 ASC) LAST,
                                                                                                                                                                                                                                                       count(timezone) OVER (PARTITION BY client_ip
                                                                                                                                                                                                                                                                             ORDER BY server_ip ASC, length(server_ip) ASC, cast(length(server_ip) AS DOUBLE)+0.123 ASC) cnt
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
 GROUP BY server_ip,
@@ -162,12 +165,12 @@ LogicalProject(server_ip=[$0], client_ip=[$1], timezone=[$2], $3=[$3], $4=[$6], 
         LogicalProject(server_ip=[$2], client_ip=[$1], timezone=[$3], $f3=[TIME_FLOOR($0, 'PT12H')])
           LogicalFilter(condition=[SEARCH($1, Sarg['107.13.54.103':VARCHAR, '99.9.55.22':VARCHAR]:VARCHAR)])
             LogicalProject(__time=[$0], client_ip=[$5], server_ip=[$14], timezone=[$18])
-              LogicalTableScan(table=[[druid, kttm_nested]])
+              LogicalTableScan(table=[[druid, test_win]])
 
 !druidPlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_explain TEST_ID: A1_G2_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_explain TEST_ID: A1_G2_Q2
 #-------------------------------------------------------------------------
 
 SELECT server_ip,
@@ -177,7 +180,7 @@ SELECT server_ip,
        first_value(timezone) OVER w FIRST,
                                     last_value(timezone) OVER w LAST,
                                                                 count(timezone) OVER w cnt
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
 GROUP BY server_ip,
@@ -209,10 +212,7 @@ LogicalProject(server_ip=[$0], client_ip=[$1], timezone=[$2], $3=[$3], $4=[$6], 
         LogicalProject(server_ip=[$2], client_ip=[$1], timezone=[$3], $f3=[TIME_FLOOR($0, 'PT12H')])
           LogicalFilter(condition=[SEARCH($1, Sarg['107.13.54.103':VARCHAR, '99.9.55.22':VARCHAR]:VARCHAR)])
             LogicalProject(__time=[$0], client_ip=[$5], server_ip=[$14], timezone=[$18])
-              LogicalTableScan(table=[[druid, kttm_nested]])
+              LogicalTableScan(table=[[druid, test_win]])
 
 !druidPlan
 
-#-------------------------------------------------------------------------
-# Total query count 5 Positive tests: 5 Negative tests: 0
-#-------------------------------------------------------------------------

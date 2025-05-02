@@ -2,6 +2,9 @@
 !set useApproximateCountDistinct false
 !use druidtest://?componentSupplier=AllDruidEnginesComponentSupplier&datasets=sql/src/test/quidem/qatests/qaUnnest/mv
 !set outputformat mysql
+#-------------------------------------------------------------------------
+# TESTCASE: test_select_distinct TEST_ID: SEL_DATASOURCE
+#-------------------------------------------------------------------------
 SELECT *
 FROM test_unnest;
 +-------------------------+-------+--------+---------+----------+------------------------------------------------+------------------------+--------------------------------------+----------------------------------+--------------------------------------+----------------------------------+-----------------------------+
@@ -18,7 +21,7 @@ FROM test_unnest;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_distinct TEST_ID: A1_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_select_distinct TEST_ID: A1_B1
 #-------------------------------------------------------------------------
 SELECT DISTINCT c
 FROM test_unnest,
@@ -37,7 +40,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_distinct TEST_ID: A1_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_select_distinct TEST_ID: A1_B2
 #-------------------------------------------------------------------------
 SELECT DISTINCT c
 FROM test_unnest,
@@ -57,7 +60,7 @@ GROUP BY c;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_distinct TEST_ID: A2_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_select_distinct TEST_ID: A2_B1
 #-------------------------------------------------------------------------
 SELECT DISTINCT c
 FROM test_unnest,
@@ -76,7 +79,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_distinct TEST_ID: A2_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_select_distinct TEST_ID: A2_B2
 #-------------------------------------------------------------------------
 SELECT DISTINCT c
 FROM test_unnest,
@@ -96,7 +99,7 @@ GROUP BY c;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_distinct TEST_ID: A3_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_select_distinct TEST_ID: A3_B1
 #-------------------------------------------------------------------------
 SELECT DISTINCT c
 FROM test_unnest,
@@ -115,7 +118,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_distinct TEST_ID: A3_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_select_distinct TEST_ID: A3_B2
 #-------------------------------------------------------------------------
 SELECT DISTINCT c
 FROM test_unnest,
@@ -135,7 +138,7 @@ GROUP BY c;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_distinct TEST_ID: A4_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_select_distinct TEST_ID: A4_B1
 #-------------------------------------------------------------------------
 SELECT DISTINCT c
 FROM test_unnest,
@@ -154,7 +157,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_distinct TEST_ID: A4_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_select_distinct TEST_ID: A4_B2
 #-------------------------------------------------------------------------
 SELECT DISTINCT c
 FROM test_unnest,
@@ -174,7 +177,7 @@ GROUP BY c;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_distinct TEST_ID: A5_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_select_distinct TEST_ID: A5_B1
 #-------------------------------------------------------------------------
 SELECT DISTINCT c
 FROM test_unnest,
@@ -193,7 +196,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_distinct TEST_ID: A5_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_select_distinct TEST_ID: A5_B2
 #-------------------------------------------------------------------------
 SELECT DISTINCT c
 FROM test_unnest,
@@ -213,7 +216,7 @@ GROUP BY c;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_distinct TEST_ID: A6_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_select_distinct TEST_ID: A6_B1
 #-------------------------------------------------------------------------
 SELECT DISTINCT c
 FROM test_unnest,
@@ -232,7 +235,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_distinct TEST_ID: A6_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_select_distinct TEST_ID: A6_B2
 #-------------------------------------------------------------------------
 SELECT DISTINCT c
 FROM test_unnest,
@@ -252,7 +255,7 @@ GROUP BY c;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_distinct TEST_ID: A7_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_select_distinct TEST_ID: A7_B1
 #-------------------------------------------------------------------------
 SELECT DISTINCT c
 FROM test_unnest,
@@ -268,7 +271,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_select_distinct TEST_ID: A7_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_select_distinct TEST_ID: A7_B2
 #-------------------------------------------------------------------------
 SELECT DISTINCT c
 FROM test_unnest,
@@ -284,6 +287,3 @@ GROUP BY c;
 
 !ok
 
-#-------------------------------------------------------------------------
-# Total query count 15 Positive tests: 15 Negative tests: 0
-#-------------------------------------------------------------------------

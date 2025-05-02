@@ -2,6 +2,9 @@
 !set useApproximateCountDistinct false
 !use druidtest://?componentSupplier=AllDruidEnginesComponentSupplier&datasets=sql/src/test/quidem/qatests/qaUnnest/array
 !set outputformat mysql
+#-------------------------------------------------------------------------
+# TESTCASE: test_scalar_ipaddr_funcs TEST_ID: SEL_DATASOURCE
+#-------------------------------------------------------------------------
 SELECT *
 FROM test_unnest;
 +-------------------------+-------+--------+--------------+--------------+------------------+----------------+--------------------+---------+--------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -16,7 +19,7 @@ FROM test_unnest;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_ipaddr_funcs TEST_ID: A1_B1_C1_D2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_ipaddr_funcs TEST_ID: A1_B1_C1_D2
 #-------------------------------------------------------------------------
 SELECT ip4_match(c, c) AS col
 FROM test_unnest,
@@ -26,11 +29,11 @@ WHERE (s_int IN (0,
                  2)
        OR s_int IS NULL)
   AND (ip4_match(c, c) IS NOT NULL);
-No match found
+No match found for function signature ip4_match(<NUMERIC>, <NUMERIC>)
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_ipaddr_funcs TEST_ID: A1_B1_C2_D2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_ipaddr_funcs TEST_ID: A1_B1_C2_D2
 #-------------------------------------------------------------------------
 SELECT ip4_match(c, s_int) AS col
 FROM test_unnest,
@@ -40,11 +43,11 @@ WHERE (s_int IN (0,
                  2)
        OR s_int IS NULL)
   AND (ip4_match(c, s_int) IS TRUE);
-No match found
+No match found for function signature ip4_match(<NUMERIC>, <NUMERIC>)
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_ipaddr_funcs TEST_ID: A1_B2_C1_D2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_ipaddr_funcs TEST_ID: A1_B2_C1_D2
 #-------------------------------------------------------------------------
 SELECT ip4_parse(c) AS col
 FROM test_unnest,
@@ -54,11 +57,11 @@ WHERE (s_int IN (0,
                  2)
        OR s_int IS NULL)
   AND (ip4_parse(c) IS NOT NULL);
-No match found
+No match found for function signature ip4_parse(<NUMERIC>)
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_ipaddr_funcs TEST_ID: A1_B2_C2_D2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_ipaddr_funcs TEST_ID: A1_B2_C2_D2
 #-------------------------------------------------------------------------
 SELECT ip4_parse(s_int) AS col
 FROM test_unnest,
@@ -68,11 +71,11 @@ WHERE (s_int IN (0,
                  2)
        OR s_int IS NULL)
   AND (ip4_parse(s_int) IS NOT NULL);
-No match found
+No match found for function signature ip4_parse(<NUMERIC>)
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_ipaddr_funcs TEST_ID: A1_B3_C1_D2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_ipaddr_funcs TEST_ID: A1_B3_C1_D2
 #-------------------------------------------------------------------------
 SELECT ip4_stringify(c) AS col
 FROM test_unnest,
@@ -82,11 +85,11 @@ WHERE (s_int IN (0,
                  2)
        OR s_int IS NULL)
   AND (ip4_stringify(c) IS NOT NULL);
-No match found
+No match found for function signature ip4_stringify(<NUMERIC>)
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_ipaddr_funcs TEST_ID: A1_B3_C2_D2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_ipaddr_funcs TEST_ID: A1_B3_C2_D2
 #-------------------------------------------------------------------------
 SELECT ip4_stringify(s_int) AS col
 FROM test_unnest,
@@ -96,9 +99,6 @@ WHERE (s_int IN (0,
                  2)
        OR s_int IS NULL)
   AND (ip4_stringify(s_int) IS NOT NULL);
-No match found
+No match found for function signature ip4_stringify(<NUMERIC>)
 !error
 
-#-------------------------------------------------------------------------
-# Total query count 7 Positive tests: 1 Negative tests: 6
-#-------------------------------------------------------------------------

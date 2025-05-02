@@ -1,9 +1,12 @@
 !set dartQueryId 00000000-0000-0000-0000-000000000000
 !set useApproximateCountDistinct false
-!use druidtest://?componentSupplier=AllDruidEnginesComponentSupplier&datasets=sql/src/test/quidem/qatests/kttm_nested
+!use druidtest://?componentSupplier=AllDruidEnginesComponentSupplier&datasets=sql/src/test/quidem/qatests/qaWin
 !set outputformat mysql
+#-------------------------------------------------------------------------
+# TESTCASE: test_sql_test_select_count TEST_ID: SEL_DATASOURCE
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22');
 +-----+
@@ -16,7 +19,7 @@ WHERE client_ip IN ('107.13.54.103',
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_select_count TEST_ID: A1_G1_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_select_count TEST_ID: A1_G1_Q1
 #-------------------------------------------------------------------------
 SELECT count(*) c
 FROM
@@ -35,7 +38,7 @@ FROM
              client_ip,
              timezone,
              time_floor(__time, 'PT12H') __time
-      FROM kttm_nested
+      FROM test_win
       GROUP BY server_ip,
                client_ip,
                timezone,
@@ -52,7 +55,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_select_count TEST_ID: A1_G1_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_select_count TEST_ID: A1_G1_Q2
 #-------------------------------------------------------------------------
 SELECT count(*) c
 FROM
@@ -68,7 +71,7 @@ FROM
              client_ip,
              timezone,
              time_floor(__time, 'PT12H') __time
-      FROM kttm_nested
+      FROM test_win
       GROUP BY server_ip,
                client_ip,
                timezone,
@@ -87,7 +90,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_select_count TEST_ID: A1_G2_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_select_count TEST_ID: A1_G2_Q1
 #-------------------------------------------------------------------------
 SELECT count(*) c
 FROM
@@ -101,7 +104,7 @@ FROM
                                                                                                                                                              ORDER BY server_ip ASC, length(server_ip) ASC, cast(length(server_ip) AS DOUBLE)+0.123 ASC) LAST,
                                                                                                                                                                                                                                                          count(timezone) OVER (PARTITION BY client_ip
                                                                                                                                                                                                                                                                                ORDER BY server_ip ASC, length(server_ip) ASC, cast(length(server_ip) AS DOUBLE)+0.123 ASC) cnt
-   FROM kttm_nested
+   FROM test_win
    WHERE client_ip IN ('107.13.54.103',
                        '99.9.55.22')
    GROUP BY server_ip,
@@ -118,7 +121,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_select_count TEST_ID: A1_G2_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_select_count TEST_ID: A1_G2_Q2
 #-------------------------------------------------------------------------
 SELECT count(*) c
 FROM
@@ -129,7 +132,7 @@ FROM
           first_value(timezone) OVER w FIRST,
                                        last_value(timezone) OVER w LAST,
                                                                    count(timezone) OVER w cnt
-   FROM kttm_nested
+   FROM test_win
    WHERE client_ip IN ('107.13.54.103',
                        '99.9.55.22')
    GROUP BY server_ip,
@@ -148,7 +151,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_select_count TEST_ID: A2_G1_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_select_count TEST_ID: A2_G1_Q1
 #-------------------------------------------------------------------------
 SELECT count(server_ip) c
 FROM
@@ -167,7 +170,7 @@ FROM
              client_ip,
              timezone,
              time_floor(__time, 'PT12H') __time
-      FROM kttm_nested
+      FROM test_win
       GROUP BY server_ip,
                client_ip,
                timezone,
@@ -184,7 +187,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_select_count TEST_ID: A2_G1_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_select_count TEST_ID: A2_G1_Q2
 #-------------------------------------------------------------------------
 SELECT count(server_ip) c
 FROM
@@ -200,7 +203,7 @@ FROM
              client_ip,
              timezone,
              time_floor(__time, 'PT12H') __time
-      FROM kttm_nested
+      FROM test_win
       GROUP BY server_ip,
                client_ip,
                timezone,
@@ -219,7 +222,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_select_count TEST_ID: A2_G2_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_select_count TEST_ID: A2_G2_Q1
 #-------------------------------------------------------------------------
 SELECT count(server_ip) c
 FROM
@@ -233,7 +236,7 @@ FROM
                                                                                                                                                              ORDER BY server_ip ASC, length(server_ip) ASC, cast(length(server_ip) AS DOUBLE)+0.123 ASC) LAST,
                                                                                                                                                                                                                                                          count(timezone) OVER (PARTITION BY client_ip
                                                                                                                                                                                                                                                                                ORDER BY server_ip ASC, length(server_ip) ASC, cast(length(server_ip) AS DOUBLE)+0.123 ASC) cnt
-   FROM kttm_nested
+   FROM test_win
    WHERE client_ip IN ('107.13.54.103',
                        '99.9.55.22')
    GROUP BY server_ip,
@@ -250,7 +253,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_select_count TEST_ID: A2_G2_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_select_count TEST_ID: A2_G2_Q2
 #-------------------------------------------------------------------------
 SELECT count(server_ip) c
 FROM
@@ -261,7 +264,7 @@ FROM
           first_value(timezone) OVER w FIRST,
                                        last_value(timezone) OVER w LAST,
                                                                    count(timezone) OVER w cnt
-   FROM kttm_nested
+   FROM test_win
    WHERE client_ip IN ('107.13.54.103',
                        '99.9.55.22')
    GROUP BY server_ip,
@@ -280,7 +283,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_select_count TEST_ID: A3_G1_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_select_count TEST_ID: A3_G1_Q1
 #-------------------------------------------------------------------------
 SELECT count(client_ip) c
 FROM
@@ -299,7 +302,7 @@ FROM
              client_ip,
              timezone,
              time_floor(__time, 'PT12H') __time
-      FROM kttm_nested
+      FROM test_win
       GROUP BY server_ip,
                client_ip,
                timezone,
@@ -316,7 +319,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_select_count TEST_ID: A3_G1_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_select_count TEST_ID: A3_G1_Q2
 #-------------------------------------------------------------------------
 SELECT count(client_ip) c
 FROM
@@ -332,7 +335,7 @@ FROM
              client_ip,
              timezone,
              time_floor(__time, 'PT12H') __time
-      FROM kttm_nested
+      FROM test_win
       GROUP BY server_ip,
                client_ip,
                timezone,
@@ -351,7 +354,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_select_count TEST_ID: A3_G2_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_select_count TEST_ID: A3_G2_Q1
 #-------------------------------------------------------------------------
 SELECT count(client_ip) c
 FROM
@@ -365,7 +368,7 @@ FROM
                                                                                                                                                              ORDER BY server_ip ASC, length(server_ip) ASC, cast(length(server_ip) AS DOUBLE)+0.123 ASC) LAST,
                                                                                                                                                                                                                                                          count(timezone) OVER (PARTITION BY client_ip
                                                                                                                                                                                                                                                                                ORDER BY server_ip ASC, length(server_ip) ASC, cast(length(server_ip) AS DOUBLE)+0.123 ASC) cnt
-   FROM kttm_nested
+   FROM test_win
    WHERE client_ip IN ('107.13.54.103',
                        '99.9.55.22')
    GROUP BY server_ip,
@@ -382,7 +385,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_select_count TEST_ID: A3_G2_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_select_count TEST_ID: A3_G2_Q2
 #-------------------------------------------------------------------------
 SELECT count(client_ip) c
 FROM
@@ -393,7 +396,7 @@ FROM
           first_value(timezone) OVER w FIRST,
                                        last_value(timezone) OVER w LAST,
                                                                    count(timezone) OVER w cnt
-   FROM kttm_nested
+   FROM test_win
    WHERE client_ip IN ('107.13.54.103',
                        '99.9.55.22')
    GROUP BY server_ip,
@@ -412,7 +415,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_select_count TEST_ID: A4_G1_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_select_count TEST_ID: A4_G1_Q1
 #-------------------------------------------------------------------------
 SELECT count(timezone) c
 FROM
@@ -431,7 +434,7 @@ FROM
              client_ip,
              timezone,
              time_floor(__time, 'PT12H') __time
-      FROM kttm_nested
+      FROM test_win
       GROUP BY server_ip,
                client_ip,
                timezone,
@@ -448,7 +451,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_select_count TEST_ID: A4_G1_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_select_count TEST_ID: A4_G1_Q2
 #-------------------------------------------------------------------------
 SELECT count(timezone) c
 FROM
@@ -464,7 +467,7 @@ FROM
              client_ip,
              timezone,
              time_floor(__time, 'PT12H') __time
-      FROM kttm_nested
+      FROM test_win
       GROUP BY server_ip,
                client_ip,
                timezone,
@@ -483,7 +486,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_select_count TEST_ID: A4_G2_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_select_count TEST_ID: A4_G2_Q1
 #-------------------------------------------------------------------------
 SELECT count(timezone) c
 FROM
@@ -497,7 +500,7 @@ FROM
                                                                                                                                                              ORDER BY server_ip ASC, length(server_ip) ASC, cast(length(server_ip) AS DOUBLE)+0.123 ASC) LAST,
                                                                                                                                                                                                                                                          count(timezone) OVER (PARTITION BY client_ip
                                                                                                                                                                                                                                                                                ORDER BY server_ip ASC, length(server_ip) ASC, cast(length(server_ip) AS DOUBLE)+0.123 ASC) cnt
-   FROM kttm_nested
+   FROM test_win
    WHERE client_ip IN ('107.13.54.103',
                        '99.9.55.22')
    GROUP BY server_ip,
@@ -514,7 +517,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_select_count TEST_ID: A4_G2_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_select_count TEST_ID: A4_G2_Q2
 #-------------------------------------------------------------------------
 SELECT count(timezone) c
 FROM
@@ -525,7 +528,7 @@ FROM
           first_value(timezone) OVER w FIRST,
                                        last_value(timezone) OVER w LAST,
                                                                    count(timezone) OVER w cnt
-   FROM kttm_nested
+   FROM test_win
    WHERE client_ip IN ('107.13.54.103',
                        '99.9.55.22')
    GROUP BY server_ip,
@@ -544,7 +547,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_select_count TEST_ID: A5_G1_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_select_count TEST_ID: A5_G1_Q1
 #-------------------------------------------------------------------------
 SELECT count(t) c
 FROM
@@ -563,7 +566,7 @@ FROM
              client_ip,
              timezone,
              time_floor(__time, 'PT12H') __time
-      FROM kttm_nested
+      FROM test_win
       GROUP BY server_ip,
                client_ip,
                timezone,
@@ -580,7 +583,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_select_count TEST_ID: A5_G1_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_select_count TEST_ID: A5_G1_Q2
 #-------------------------------------------------------------------------
 SELECT count(t) c
 FROM
@@ -596,7 +599,7 @@ FROM
              client_ip,
              timezone,
              time_floor(__time, 'PT12H') __time
-      FROM kttm_nested
+      FROM test_win
       GROUP BY server_ip,
                client_ip,
                timezone,
@@ -615,7 +618,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_select_count TEST_ID: A5_G2_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_select_count TEST_ID: A5_G2_Q1
 #-------------------------------------------------------------------------
 SELECT count(t) c
 FROM
@@ -629,7 +632,7 @@ FROM
                                                                                                                                                              ORDER BY server_ip ASC, length(server_ip) ASC, cast(length(server_ip) AS DOUBLE)+0.123 ASC) LAST,
                                                                                                                                                                                                                                                          count(timezone) OVER (PARTITION BY client_ip
                                                                                                                                                                                                                                                                                ORDER BY server_ip ASC, length(server_ip) ASC, cast(length(server_ip) AS DOUBLE)+0.123 ASC) cnt
-   FROM kttm_nested
+   FROM test_win
    WHERE client_ip IN ('107.13.54.103',
                        '99.9.55.22')
    GROUP BY server_ip,
@@ -646,7 +649,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_select_count TEST_ID: A5_G2_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_select_count TEST_ID: A5_G2_Q2
 #-------------------------------------------------------------------------
 SELECT count(t) c
 FROM
@@ -657,7 +660,7 @@ FROM
           first_value(timezone) OVER w FIRST,
                                        last_value(timezone) OVER w LAST,
                                                                    count(timezone) OVER w cnt
-   FROM kttm_nested
+   FROM test_win
    WHERE client_ip IN ('107.13.54.103',
                        '99.9.55.22')
    GROUP BY server_ip,
@@ -676,7 +679,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_select_count TEST_ID: A6_G1_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_select_count TEST_ID: A6_G1_Q1
 #-------------------------------------------------------------------------
 SELECT count(FIRST) c
 FROM
@@ -695,7 +698,7 @@ FROM
              client_ip,
              timezone,
              time_floor(__time, 'PT12H') __time
-      FROM kttm_nested
+      FROM test_win
       GROUP BY server_ip,
                client_ip,
                timezone,
@@ -712,7 +715,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_select_count TEST_ID: A6_G1_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_select_count TEST_ID: A6_G1_Q2
 #-------------------------------------------------------------------------
 SELECT count(FIRST) c
 FROM
@@ -728,7 +731,7 @@ FROM
              client_ip,
              timezone,
              time_floor(__time, 'PT12H') __time
-      FROM kttm_nested
+      FROM test_win
       GROUP BY server_ip,
                client_ip,
                timezone,
@@ -747,7 +750,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_select_count TEST_ID: A6_G2_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_select_count TEST_ID: A6_G2_Q1
 #-------------------------------------------------------------------------
 SELECT count(FIRST) c
 FROM
@@ -761,7 +764,7 @@ FROM
                                                                                                                                                              ORDER BY server_ip ASC, length(server_ip) ASC, cast(length(server_ip) AS DOUBLE)+0.123 ASC) LAST,
                                                                                                                                                                                                                                                          count(timezone) OVER (PARTITION BY client_ip
                                                                                                                                                                                                                                                                                ORDER BY server_ip ASC, length(server_ip) ASC, cast(length(server_ip) AS DOUBLE)+0.123 ASC) cnt
-   FROM kttm_nested
+   FROM test_win
    WHERE client_ip IN ('107.13.54.103',
                        '99.9.55.22')
    GROUP BY server_ip,
@@ -778,7 +781,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_select_count TEST_ID: A6_G2_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_select_count TEST_ID: A6_G2_Q2
 #-------------------------------------------------------------------------
 SELECT count(FIRST) c
 FROM
@@ -789,7 +792,7 @@ FROM
           first_value(timezone) OVER w FIRST,
                                        last_value(timezone) OVER w LAST,
                                                                    count(timezone) OVER w cnt
-   FROM kttm_nested
+   FROM test_win
    WHERE client_ip IN ('107.13.54.103',
                        '99.9.55.22')
    GROUP BY server_ip,
@@ -808,7 +811,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_select_count TEST_ID: A7_G1_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_select_count TEST_ID: A7_G1_Q1
 #-------------------------------------------------------------------------
 SELECT count(LAST) c
 FROM
@@ -827,7 +830,7 @@ FROM
              client_ip,
              timezone,
              time_floor(__time, 'PT12H') __time
-      FROM kttm_nested
+      FROM test_win
       GROUP BY server_ip,
                client_ip,
                timezone,
@@ -844,7 +847,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_select_count TEST_ID: A7_G1_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_select_count TEST_ID: A7_G1_Q2
 #-------------------------------------------------------------------------
 SELECT count(LAST) c
 FROM
@@ -860,7 +863,7 @@ FROM
              client_ip,
              timezone,
              time_floor(__time, 'PT12H') __time
-      FROM kttm_nested
+      FROM test_win
       GROUP BY server_ip,
                client_ip,
                timezone,
@@ -879,7 +882,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_select_count TEST_ID: A7_G2_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_select_count TEST_ID: A7_G2_Q1
 #-------------------------------------------------------------------------
 SELECT count(LAST) c
 FROM
@@ -893,7 +896,7 @@ FROM
                                                                                                                                                              ORDER BY server_ip ASC, length(server_ip) ASC, cast(length(server_ip) AS DOUBLE)+0.123 ASC) LAST,
                                                                                                                                                                                                                                                          count(timezone) OVER (PARTITION BY client_ip
                                                                                                                                                                                                                                                                                ORDER BY server_ip ASC, length(server_ip) ASC, cast(length(server_ip) AS DOUBLE)+0.123 ASC) cnt
-   FROM kttm_nested
+   FROM test_win
    WHERE client_ip IN ('107.13.54.103',
                        '99.9.55.22')
    GROUP BY server_ip,
@@ -910,7 +913,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_select_count TEST_ID: A7_G2_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_select_count TEST_ID: A7_G2_Q2
 #-------------------------------------------------------------------------
 SELECT count(LAST) c
 FROM
@@ -921,7 +924,7 @@ FROM
           first_value(timezone) OVER w FIRST,
                                        last_value(timezone) OVER w LAST,
                                                                    count(timezone) OVER w cnt
-   FROM kttm_nested
+   FROM test_win
    WHERE client_ip IN ('107.13.54.103',
                        '99.9.55.22')
    GROUP BY server_ip,
@@ -940,7 +943,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_select_count TEST_ID: A8_G1_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_select_count TEST_ID: A8_G1_Q1
 #-------------------------------------------------------------------------
 SELECT count(cnt) c
 FROM
@@ -959,7 +962,7 @@ FROM
              client_ip,
              timezone,
              time_floor(__time, 'PT12H') __time
-      FROM kttm_nested
+      FROM test_win
       GROUP BY server_ip,
                client_ip,
                timezone,
@@ -976,7 +979,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_select_count TEST_ID: A8_G1_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_select_count TEST_ID: A8_G1_Q2
 #-------------------------------------------------------------------------
 SELECT count(cnt) c
 FROM
@@ -992,7 +995,7 @@ FROM
              client_ip,
              timezone,
              time_floor(__time, 'PT12H') __time
-      FROM kttm_nested
+      FROM test_win
       GROUP BY server_ip,
                client_ip,
                timezone,
@@ -1011,7 +1014,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_select_count TEST_ID: A8_G2_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_select_count TEST_ID: A8_G2_Q1
 #-------------------------------------------------------------------------
 SELECT count(cnt) c
 FROM
@@ -1025,7 +1028,7 @@ FROM
                                                                                                                                                              ORDER BY server_ip ASC, length(server_ip) ASC, cast(length(server_ip) AS DOUBLE)+0.123 ASC) LAST,
                                                                                                                                                                                                                                                          count(timezone) OVER (PARTITION BY client_ip
                                                                                                                                                                                                                                                                                ORDER BY server_ip ASC, length(server_ip) ASC, cast(length(server_ip) AS DOUBLE)+0.123 ASC) cnt
-   FROM kttm_nested
+   FROM test_win
    WHERE client_ip IN ('107.13.54.103',
                        '99.9.55.22')
    GROUP BY server_ip,
@@ -1042,7 +1045,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_select_count TEST_ID: A8_G2_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_select_count TEST_ID: A8_G2_Q2
 #-------------------------------------------------------------------------
 SELECT count(cnt) c
 FROM
@@ -1053,7 +1056,7 @@ FROM
           first_value(timezone) OVER w FIRST,
                                        last_value(timezone) OVER w LAST,
                                                                    count(timezone) OVER w cnt
-   FROM kttm_nested
+   FROM test_win
    WHERE client_ip IN ('107.13.54.103',
                        '99.9.55.22')
    GROUP BY server_ip,
@@ -1072,7 +1075,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_select_count TEST_ID: A13_G1_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_select_count TEST_ID: A13_G1_Q1
 #-------------------------------------------------------------------------
 SELECT count(DISTINCT FIRST) c
 FROM
@@ -1091,7 +1094,7 @@ FROM
              client_ip,
              timezone,
              time_floor(__time, 'PT12H') __time
-      FROM kttm_nested
+      FROM test_win
       GROUP BY server_ip,
                client_ip,
                timezone,
@@ -1108,7 +1111,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_select_count TEST_ID: A13_G1_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_select_count TEST_ID: A13_G1_Q2
 #-------------------------------------------------------------------------
 SELECT count(DISTINCT FIRST) c
 FROM
@@ -1124,7 +1127,7 @@ FROM
              client_ip,
              timezone,
              time_floor(__time, 'PT12H') __time
-      FROM kttm_nested
+      FROM test_win
       GROUP BY server_ip,
                client_ip,
                timezone,
@@ -1143,7 +1146,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_select_count TEST_ID: A13_G2_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_select_count TEST_ID: A13_G2_Q1
 #-------------------------------------------------------------------------
 SELECT count(DISTINCT FIRST) c
 FROM
@@ -1157,7 +1160,7 @@ FROM
                                                                                                                                                              ORDER BY server_ip ASC, length(server_ip) ASC, cast(length(server_ip) AS DOUBLE)+0.123 ASC) LAST,
                                                                                                                                                                                                                                                          count(timezone) OVER (PARTITION BY client_ip
                                                                                                                                                                                                                                                                                ORDER BY server_ip ASC, length(server_ip) ASC, cast(length(server_ip) AS DOUBLE)+0.123 ASC) cnt
-   FROM kttm_nested
+   FROM test_win
    WHERE client_ip IN ('107.13.54.103',
                        '99.9.55.22')
    GROUP BY server_ip,
@@ -1174,7 +1177,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_select_count TEST_ID: A13_G2_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_select_count TEST_ID: A13_G2_Q2
 #-------------------------------------------------------------------------
 SELECT count(DISTINCT FIRST) c
 FROM
@@ -1185,7 +1188,7 @@ FROM
           first_value(timezone) OVER w FIRST,
                                        last_value(timezone) OVER w LAST,
                                                                    count(timezone) OVER w cnt
-   FROM kttm_nested
+   FROM test_win
    WHERE client_ip IN ('107.13.54.103',
                        '99.9.55.22')
    GROUP BY server_ip,
@@ -1204,7 +1207,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_select_count TEST_ID: A14_G1_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_select_count TEST_ID: A14_G1_Q1
 #-------------------------------------------------------------------------
 SELECT count(DISTINCT LAST) c
 FROM
@@ -1223,7 +1226,7 @@ FROM
              client_ip,
              timezone,
              time_floor(__time, 'PT12H') __time
-      FROM kttm_nested
+      FROM test_win
       GROUP BY server_ip,
                client_ip,
                timezone,
@@ -1240,7 +1243,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_select_count TEST_ID: A14_G1_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_select_count TEST_ID: A14_G1_Q2
 #-------------------------------------------------------------------------
 SELECT count(DISTINCT LAST) c
 FROM
@@ -1256,7 +1259,7 @@ FROM
              client_ip,
              timezone,
              time_floor(__time, 'PT12H') __time
-      FROM kttm_nested
+      FROM test_win
       GROUP BY server_ip,
                client_ip,
                timezone,
@@ -1275,7 +1278,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_select_count TEST_ID: A14_G2_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_select_count TEST_ID: A14_G2_Q1
 #-------------------------------------------------------------------------
 SELECT count(DISTINCT LAST) c
 FROM
@@ -1289,7 +1292,7 @@ FROM
                                                                                                                                                              ORDER BY server_ip ASC, length(server_ip) ASC, cast(length(server_ip) AS DOUBLE)+0.123 ASC) LAST,
                                                                                                                                                                                                                                                          count(timezone) OVER (PARTITION BY client_ip
                                                                                                                                                                                                                                                                                ORDER BY server_ip ASC, length(server_ip) ASC, cast(length(server_ip) AS DOUBLE)+0.123 ASC) cnt
-   FROM kttm_nested
+   FROM test_win
    WHERE client_ip IN ('107.13.54.103',
                        '99.9.55.22')
    GROUP BY server_ip,
@@ -1306,7 +1309,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_select_count TEST_ID: A14_G2_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_select_count TEST_ID: A14_G2_Q2
 #-------------------------------------------------------------------------
 SELECT count(DISTINCT LAST) c
 FROM
@@ -1317,7 +1320,7 @@ FROM
           first_value(timezone) OVER w FIRST,
                                        last_value(timezone) OVER w LAST,
                                                                    count(timezone) OVER w cnt
-   FROM kttm_nested
+   FROM test_win
    WHERE client_ip IN ('107.13.54.103',
                        '99.9.55.22')
    GROUP BY server_ip,
@@ -1336,7 +1339,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_select_count TEST_ID: A15_G1_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_select_count TEST_ID: A15_G1_Q1
 #-------------------------------------------------------------------------
 SELECT count(DISTINCT cnt) c
 FROM
@@ -1355,7 +1358,7 @@ FROM
              client_ip,
              timezone,
              time_floor(__time, 'PT12H') __time
-      FROM kttm_nested
+      FROM test_win
       GROUP BY server_ip,
                client_ip,
                timezone,
@@ -1372,7 +1375,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_select_count TEST_ID: A15_G1_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_select_count TEST_ID: A15_G1_Q2
 #-------------------------------------------------------------------------
 SELECT count(DISTINCT cnt) c
 FROM
@@ -1388,7 +1391,7 @@ FROM
              client_ip,
              timezone,
              time_floor(__time, 'PT12H') __time
-      FROM kttm_nested
+      FROM test_win
       GROUP BY server_ip,
                client_ip,
                timezone,
@@ -1407,7 +1410,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_select_count TEST_ID: A15_G2_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_select_count TEST_ID: A15_G2_Q1
 #-------------------------------------------------------------------------
 SELECT count(DISTINCT cnt) c
 FROM
@@ -1421,7 +1424,7 @@ FROM
                                                                                                                                                              ORDER BY server_ip ASC, length(server_ip) ASC, cast(length(server_ip) AS DOUBLE)+0.123 ASC) LAST,
                                                                                                                                                                                                                                                          count(timezone) OVER (PARTITION BY client_ip
                                                                                                                                                                                                                                                                                ORDER BY server_ip ASC, length(server_ip) ASC, cast(length(server_ip) AS DOUBLE)+0.123 ASC) cnt
-   FROM kttm_nested
+   FROM test_win
    WHERE client_ip IN ('107.13.54.103',
                        '99.9.55.22')
    GROUP BY server_ip,
@@ -1438,7 +1441,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_select_count TEST_ID: A15_G2_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_select_count TEST_ID: A15_G2_Q2
 #-------------------------------------------------------------------------
 SELECT count(DISTINCT cnt) c
 FROM
@@ -1449,7 +1452,7 @@ FROM
           first_value(timezone) OVER w FIRST,
                                        last_value(timezone) OVER w LAST,
                                                                    count(timezone) OVER w cnt
-   FROM kttm_nested
+   FROM test_win
    WHERE client_ip IN ('107.13.54.103',
                        '99.9.55.22')
    GROUP BY server_ip,
@@ -1467,6 +1470,3 @@ FROM
 
 !ok
 
-#-------------------------------------------------------------------------
-# Total query count 45 Positive tests: 45 Negative tests: 0
-#-------------------------------------------------------------------------

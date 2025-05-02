@@ -2,6 +2,9 @@
 !set useApproximateCountDistinct false
 !use druidtest://?componentSupplier=AllDruidEnginesComponentSupplier&datasets=sql/src/test/quidem/qatests/qaUnnest/mv
 !set outputformat mysql
+#-------------------------------------------------------------------------
+# TESTCASE: test_scalar_other_funcs TEST_ID: SEL_DATASOURCE
+#-------------------------------------------------------------------------
 SELECT *
 FROM test_unnest;
 +-------------------------+-------+--------+---------+----------+------------------------------------------------+------------------------+--------------------------------------+----------------------------------+--------------------------------------+----------------------------------+-----------------------------+
@@ -18,7 +21,7 @@ FROM test_unnest;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_other_funcs TEST_ID: A1_B1_C1 TYPE: POSITIVE TEST
+# TESTCASE: test_scalar_other_funcs TEST_ID: A1_B1_C1
 #-------------------------------------------------------------------------
 SELECT cast(c AS int) AS col
 FROM test_unnest,
@@ -51,7 +54,7 @@ WHERE c_long IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_other_funcs TEST_ID: A1_B1_C2 TYPE: POSITIVE TEST
+# TESTCASE: test_scalar_other_funcs TEST_ID: A1_B1_C2
 #-------------------------------------------------------------------------
 SELECT cast(c_long AS char) AS col
 FROM test_unnest,
@@ -86,7 +89,7 @@ WHERE c_long IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_other_funcs TEST_ID: A1_B2_C1 TYPE: POSITIVE TEST
+# TESTCASE: test_scalar_other_funcs TEST_ID: A1_B2_C1
 #-------------------------------------------------------------------------
 SELECT (CASE c
             WHEN '1' THEN 'V1'
@@ -126,7 +129,7 @@ WHERE c_long IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_other_funcs TEST_ID: A1_B2_C2 TYPE: POSITIVE TEST
+# TESTCASE: test_scalar_other_funcs TEST_ID: A1_B2_C2
 #-------------------------------------------------------------------------
 SELECT (CASE c_long
             WHEN 1 THEN 'V1'
@@ -166,7 +169,7 @@ WHERE c_long IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_other_funcs TEST_ID: A1_B3_C1 TYPE: POSITIVE TEST
+# TESTCASE: test_scalar_other_funcs TEST_ID: A1_B3_C1
 #-------------------------------------------------------------------------
 SELECT (CASE
             WHEN c='1' THEN 'V1'
@@ -206,7 +209,7 @@ WHERE c_long IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_other_funcs TEST_ID: A1_B3_C2 TYPE: POSITIVE TEST
+# TESTCASE: test_scalar_other_funcs TEST_ID: A1_B3_C2
 #-------------------------------------------------------------------------
 SELECT (CASE
             WHEN c_long=1 THEN 'V1'
@@ -246,7 +249,7 @@ WHERE c_long IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_other_funcs TEST_ID: A1_B4_C1 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_other_funcs TEST_ID: A1_B4_C1
 #-------------------------------------------------------------------------
 SELECT nullif(c, c) AS col
 FROM test_unnest,
@@ -262,7 +265,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_other_funcs TEST_ID: A1_B4_C2 TYPE: POSITIVE TEST
+# TESTCASE: test_scalar_other_funcs TEST_ID: A1_B4_C2
 #-------------------------------------------------------------------------
 SELECT nullif(c, c_long) AS col
 FROM test_unnest,
@@ -293,7 +296,7 @@ WHERE c_long IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_other_funcs TEST_ID: A1_B4_C3 TYPE: POSITIVE TEST
+# TESTCASE: test_scalar_other_funcs TEST_ID: A1_B4_C3
 #-------------------------------------------------------------------------
 SELECT nullif(c_long, c) AS col
 FROM test_unnest,
@@ -327,7 +330,7 @@ WHERE c_long IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_other_funcs TEST_ID: A1_B4_C4 TYPE: POSITIVE TEST
+# TESTCASE: test_scalar_other_funcs TEST_ID: A1_B4_C4
 #-------------------------------------------------------------------------
 SELECT nullif(c_long, c_long) AS col
 FROM test_unnest,
@@ -360,7 +363,7 @@ WHERE c_long IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_other_funcs TEST_ID: A1_B5_C1 TYPE: POSITIVE TEST
+# TESTCASE: test_scalar_other_funcs TEST_ID: A1_B5_C1
 #-------------------------------------------------------------------------
 SELECT coalesce(c, c) AS col
 FROM test_unnest,
@@ -393,7 +396,7 @@ WHERE c_long IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_other_funcs TEST_ID: A1_B5_C2 TYPE: POSITIVE TEST
+# TESTCASE: test_scalar_other_funcs TEST_ID: A1_B5_C2
 #-------------------------------------------------------------------------
 SELECT coalesce(c, c_long) AS col
 FROM test_unnest,
@@ -426,7 +429,7 @@ WHERE c_long IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_other_funcs TEST_ID: A1_B5_C3 TYPE: POSITIVE TEST
+# TESTCASE: test_scalar_other_funcs TEST_ID: A1_B5_C3
 #-------------------------------------------------------------------------
 SELECT coalesce(c_long, c) AS col
 FROM test_unnest,
@@ -461,7 +464,7 @@ WHERE c_long IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_other_funcs TEST_ID: A1_B5_C4 TYPE: POSITIVE TEST
+# TESTCASE: test_scalar_other_funcs TEST_ID: A1_B5_C4
 #-------------------------------------------------------------------------
 SELECT coalesce(c_long, c_long) AS col
 FROM test_unnest,
@@ -496,7 +499,7 @@ WHERE c_long IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_other_funcs TEST_ID: A1_B6_C1 TYPE: POSITIVE TEST
+# TESTCASE: test_scalar_other_funcs TEST_ID: A1_B6_C1
 #-------------------------------------------------------------------------
 SELECT nvl(c, c) AS col
 FROM test_unnest,
@@ -529,7 +532,7 @@ WHERE c_long IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_other_funcs TEST_ID: A1_B6_C2 TYPE: POSITIVE TEST
+# TESTCASE: test_scalar_other_funcs TEST_ID: A1_B6_C2
 #-------------------------------------------------------------------------
 SELECT nvl(c, cast(c_long AS char)) AS col
 FROM test_unnest,
@@ -560,7 +563,7 @@ WHERE c_long IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_other_funcs TEST_ID: A1_B6_C3 TYPE: POSITIVE TEST
+# TESTCASE: test_scalar_other_funcs TEST_ID: A1_B6_C3
 #-------------------------------------------------------------------------
 SELECT nvl(cast(c_long AS char), c) AS col
 FROM test_unnest,
@@ -595,7 +598,7 @@ WHERE c_long IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_other_funcs TEST_ID: A1_B6_C4 TYPE: POSITIVE TEST
+# TESTCASE: test_scalar_other_funcs TEST_ID: A1_B6_C4
 #-------------------------------------------------------------------------
 SELECT nvl(c_long, c_long) AS col
 FROM test_unnest,
@@ -629,6 +632,3 @@ WHERE c_long IN (0,
 
 !ok
 
-#-------------------------------------------------------------------------
-# Total query count 19 Positive tests: 18 Negative tests: 1
-#-------------------------------------------------------------------------

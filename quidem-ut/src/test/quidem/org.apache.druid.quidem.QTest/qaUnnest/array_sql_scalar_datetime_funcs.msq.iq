@@ -1,6 +1,9 @@
 !set useApproximateCountDistinct false
 !use druidtest://?componentSupplier=StandardMSQComponentSupplier&datasets=sql/src/test/quidem/qatests/qaUnnest/array
 !set outputformat mysql
+#-------------------------------------------------------------------------
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: SEL_DATASOURCE
+#-------------------------------------------------------------------------
 SELECT *
 FROM test_unnest;
 +-------------------------+-------+--------+--------------+--------------+------------------+----------------+--------------------+---------+--------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -15,7 +18,7 @@ FROM test_unnest;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B1_C1_D2 TYPE: POSITIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B1_C1_D2
 #-------------------------------------------------------------------------
 SELECT count(*)
 FROM
@@ -37,7 +40,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B2_C1_D2 TYPE: POSITIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B2_C1_D2
 #-------------------------------------------------------------------------
 SELECT count(*)
 FROM
@@ -59,7 +62,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B3_C1_D2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B3_C1_D2
 #-------------------------------------------------------------------------
 SELECT date_trunc('year', c) AS col
 FROM test_unnest,
@@ -69,11 +72,11 @@ WHERE (s_int IN (0,
                  2)
        OR s_int IS NULL)
   AND (date_trunc('year', c) IS NOT NULL);
-Cannot apply
+Cannot apply 'DATE_TRUNC' to arguments of type 'DATE_TRUNC(
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B3_C2_D2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B3_C2_D2
 #-------------------------------------------------------------------------
 SELECT date_trunc('year', s_int) AS col
 FROM test_unnest,
@@ -83,11 +86,11 @@ WHERE (s_int IN (0,
                  2)
        OR s_int IS NULL)
   AND (date_trunc('year', s_int) IS NOT NULL);
-Cannot apply
+Cannot apply 'DATE_TRUNC' to arguments of type 'DATE_TRUNC(
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B4_C1_D2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B4_C1_D2
 #-------------------------------------------------------------------------
 SELECT time_ceil(c, 'P1D') AS col
 FROM test_unnest,
@@ -97,11 +100,11 @@ WHERE (s_int IN (0,
                  2)
        OR s_int IS NULL)
   AND (time_ceil(c, 'P1D') IS NOT NULL);
-Cannot apply
+Cannot apply 'TIME_CEIL' to arguments of type 'TIME_CEIL(
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B4_C2_D2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B4_C2_D2
 #-------------------------------------------------------------------------
 SELECT time_ceil(s_int, 'P1D') AS col
 FROM test_unnest,
@@ -111,11 +114,11 @@ WHERE (s_int IN (0,
                  2)
        OR s_int IS NULL)
   AND (time_ceil(s_int, 'P1D') IS NOT NULL);
-Cannot apply
+Cannot apply 'TIME_CEIL' to arguments of type 'TIME_CEIL(
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B5_C1_D2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B5_C1_D2
 #-------------------------------------------------------------------------
 SELECT time_floor(c, 'P1D') AS col
 FROM test_unnest,
@@ -125,11 +128,11 @@ WHERE (s_int IN (0,
                  2)
        OR s_int IS NULL)
   AND (time_floor(c, 'P1D') IS NOT NULL);
-Cannot apply
+Cannot apply 'TIME_FLOOR' to arguments of type 'TIME_FLOOR(
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B5_C2_D2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B5_C2_D2
 #-------------------------------------------------------------------------
 SELECT time_floor(s_int, 'P1D') AS col
 FROM test_unnest,
@@ -139,11 +142,11 @@ WHERE (s_int IN (0,
                  2)
        OR s_int IS NULL)
   AND (time_floor(s_int, 'P1D') IS NOT NULL);
-Cannot apply
+Cannot apply 'TIME_FLOOR' to arguments of type 'TIME_FLOOR(
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B6_C1_D2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B6_C1_D2
 #-------------------------------------------------------------------------
 SELECT time_shift(c, 'P1D', 1) AS col
 FROM test_unnest,
@@ -153,11 +156,11 @@ WHERE (s_int IN (0,
                  2)
        OR s_int IS NULL)
   AND (time_shift(c, 'P1D', 1) IS NOT NULL);
-Cannot apply
+Cannot apply 'TIME_SHIFT' to arguments of type 'TIME_SHIFT(
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B6_C2_D2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B6_C2_D2
 #-------------------------------------------------------------------------
 SELECT time_shift(s_int, 'P1D', 1) AS col
 FROM test_unnest,
@@ -167,11 +170,11 @@ WHERE (s_int IN (0,
                  2)
        OR s_int IS NULL)
   AND (time_shift(s_int, 'P1D', 1) IS NOT NULL);
-Cannot apply
+Cannot apply 'TIME_SHIFT' to arguments of type 'TIME_SHIFT(
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B7_C1_D2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B7_C1_D2
 #-------------------------------------------------------------------------
 SELECT time_extract(c, 'HOUR') AS col
 FROM test_unnest,
@@ -181,11 +184,11 @@ WHERE (s_int IN (0,
                  2)
        OR s_int IS NULL)
   AND (time_extract(c, 'HOUR') IS NOT NULL);
-Cannot apply
+Cannot apply 'TIME_EXTRACT' to arguments of type 'TIME_EXTRACT(
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B7_C2_D2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B7_C2_D2
 #-------------------------------------------------------------------------
 SELECT time_extract(s_int, 'HOUR') AS col
 FROM test_unnest,
@@ -195,11 +198,11 @@ WHERE (s_int IN (0,
                  2)
        OR s_int IS NULL)
   AND (time_extract(s_int, 'HOUR') IS NOT NULL);
-Cannot apply
+Cannot apply 'TIME_EXTRACT' to arguments of type 'TIME_EXTRACT(
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B8_C1_D2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B8_C1_D2
 #-------------------------------------------------------------------------
 SELECT time_parse(c) AS col
 FROM test_unnest,
@@ -209,11 +212,11 @@ WHERE (s_int IN (0,
                  2)
        OR s_int IS NULL)
   AND (time_parse(c) IS NOT NULL);
-Cannot apply
+Cannot apply 'TIME_PARSE' to arguments of type 'TIME_PARSE(
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B8_C2_D2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B8_C2_D2
 #-------------------------------------------------------------------------
 SELECT time_parse(s_int) AS col
 FROM test_unnest,
@@ -223,11 +226,11 @@ WHERE (s_int IN (0,
                  2)
        OR s_int IS NULL)
   AND (time_parse(s_int) IS NOT NULL);
-Cannot apply
+Cannot apply 'TIME_PARSE' to arguments of type 'TIME_PARSE(
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B9_C1_D2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B9_C1_D2
 #-------------------------------------------------------------------------
 SELECT time_in_interval(c, '2001-01-01/P1D') AS col
 FROM test_unnest,
@@ -237,11 +240,11 @@ WHERE (s_int IN (0,
                  2)
        OR s_int IS NULL)
   AND (time_in_interval(c, '2001-01-01/P1D') IS NOT NULL);
-Cannot apply
+Cannot apply 'TIME_IN_INTERVAL' to arguments of type 'TIME_IN_INTERVAL(
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B9_C2_D2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B9_C2_D2
 #-------------------------------------------------------------------------
 SELECT time_in_interval(s_int, '2001-01-01/P1D') AS col
 FROM test_unnest,
@@ -251,11 +254,11 @@ WHERE (s_int IN (0,
                  2)
        OR s_int IS NULL)
   AND (time_in_interval(c, '2001-01-01/P1D') IS NOT NULL);
-Cannot apply
+Cannot apply 'TIME_IN_INTERVAL' to arguments of type 'TIME_IN_INTERVAL(
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B10_C1_D2 TYPE: POSITIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B10_C1_D2
 #-------------------------------------------------------------------------
 SELECT millis_to_timestamp(c) AS col
 FROM test_unnest,
@@ -280,7 +283,7 @@ WHERE (s_int IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B10_C2_D2 TYPE: POSITIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B10_C2_D2
 #-------------------------------------------------------------------------
 SELECT millis_to_timestamp(s_int) AS col
 FROM test_unnest,
@@ -305,7 +308,7 @@ WHERE (s_int IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B11_C1_D2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B11_C1_D2
 #-------------------------------------------------------------------------
 SELECT timestamp_to_millis(c) AS col
 FROM test_unnest,
@@ -315,11 +318,11 @@ WHERE (s_int IN (0,
                  2)
        OR s_int IS NULL)
   AND (timestamp_to_millis(c) IS NOT NULL);
-Cannot apply
+Cannot apply 'TIMESTAMP_TO_MILLIS' to arguments of type 'TIMESTAMP_TO_MILLIS(
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B11_C2_D2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B11_C2_D2
 #-------------------------------------------------------------------------
 SELECT timestamp_to_millis(s_int) AS col
 FROM test_unnest,
@@ -329,11 +332,11 @@ WHERE (s_int IN (0,
                  2)
        OR s_int IS NULL)
   AND (timestamp_to_millis(s_int) IS NOT NULL);
-Cannot apply
+Cannot apply 'TIMESTAMP_TO_MILLIS' to arguments of type 'TIMESTAMP_TO_MILLIS(
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B12_C1_D2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B12_C1_D2
 #-------------------------------------------------------------------------
 SELECT extract(DAY
                FROM c) AS col
@@ -345,11 +348,11 @@ WHERE (s_int IN (0,
        OR s_int IS NULL)
   AND (extract(DAY
                FROM c) IS NOT NULL);
-Cannot apply
+Cannot apply 'EXTRACT' to arguments of type 'EXTRACT(
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B12_C2_D2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B12_C2_D2
 #-------------------------------------------------------------------------
 SELECT extract(DAY
                FROM s_int) AS col
@@ -361,11 +364,11 @@ WHERE (s_int IN (0,
        OR s_int IS NULL)
   AND (extract(DAY
                FROM s_int) IS NOT NULL);
-Cannot apply
+Cannot apply 'EXTRACT' to arguments of type 'EXTRACT(
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B13_C1_D2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B13_C1_D2
 #-------------------------------------------------------------------------
 SELECT floor(c TO DAY) AS col
 FROM test_unnest,
@@ -375,11 +378,11 @@ WHERE (s_int IN (0,
                  2)
        OR s_int IS NULL)
   AND (floor(c TO DAY) IS NOT NULL);
-Cannot apply
+Cannot apply 'FLOOR' to arguments of type 'FLOOR(
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B13_C2_D2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B13_C2_D2
 #-------------------------------------------------------------------------
 SELECT floor(s_int TO DAY) AS col
 FROM test_unnest,
@@ -389,11 +392,11 @@ WHERE (s_int IN (0,
                  2)
        OR s_int IS NULL)
   AND (floor(s_int TO DAY) IS NOT NULL);
-Cannot apply
+Cannot apply 'FLOOR' to arguments of type 'FLOOR(
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B14_C1_D2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B14_C1_D2
 #-------------------------------------------------------------------------
 SELECT ceil(c TO DAY) AS col
 FROM test_unnest,
@@ -403,11 +406,11 @@ WHERE (s_int IN (0,
                  2)
        OR s_int IS NULL)
   AND (ceil(c TO DAY) IS NOT NULL);
-Cannot apply
+Cannot apply 'CEIL' to arguments of type 'CEIL(
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B14_C2_D2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B14_C2_D2
 #-------------------------------------------------------------------------
 SELECT ceil(s_int TO DAY) AS col
 FROM test_unnest,
@@ -417,11 +420,11 @@ WHERE (s_int IN (0,
                  2)
        OR s_int IS NULL)
   AND (ceil(s_int TO DAY) IS NOT NULL);
-Cannot apply
+Cannot apply 'CEIL' to arguments of type 'CEIL(
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B15_C1_D2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B15_C1_D2
 #-------------------------------------------------------------------------
 SELECT timestampadd(DAY, 1, c) AS col
 FROM test_unnest,
@@ -431,11 +434,11 @@ WHERE (s_int IN (0,
                  2)
        OR s_int IS NULL)
   AND (timestampadd(DAY, 1, c) IS NOT NULL);
-Cannot apply
+Cannot apply 'TIMESTAMPADD' to arguments of type 'TIMESTAMPADD(
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B15_C2_D2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B15_C2_D2
 #-------------------------------------------------------------------------
 SELECT timestampadd(DAY, 1, s_int) AS col
 FROM test_unnest,
@@ -445,11 +448,11 @@ WHERE (s_int IN (0,
                  2)
        OR s_int IS NULL)
   AND (timestampadd(DAY, 1, s_int) IS NOT NULL);
-Cannot apply
+Cannot apply 'TIMESTAMPADD' to arguments of type 'TIMESTAMPADD(
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B16_C1_D2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B16_C1_D2
 #-------------------------------------------------------------------------
 SELECT timestampdiff(DAY, c, c) AS col
 FROM test_unnest,
@@ -459,11 +462,11 @@ WHERE (s_int IN (0,
                  2)
        OR s_int IS NULL)
   AND (timestampdiff(DAY, c, c) IS NOT NULL);
-Cannot apply
+Cannot apply 'TIMESTAMPDIFF' to arguments of type 'TIMESTAMPDIFF(
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B16_C2_D2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B16_C2_D2
 #-------------------------------------------------------------------------
 SELECT timestampdiff(DAY, s_int, c) AS col
 FROM test_unnest,
@@ -473,11 +476,11 @@ WHERE (s_int IN (0,
                  2)
        OR s_int IS NULL)
   AND (timestampdiff(DAY, s_int, c) IS NOT NULL);
-Cannot apply
+Cannot apply 'TIMESTAMPDIFF' to arguments of type 'TIMESTAMPDIFF(
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B16_C3_D2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B16_C3_D2
 #-------------------------------------------------------------------------
 SELECT timestampdiff(DAY, c, s_int) AS col
 FROM test_unnest,
@@ -487,11 +490,11 @@ WHERE (s_int IN (0,
                  2)
        OR s_int IS NULL)
   AND (timestampdiff(DAY, c, s_int) IS NOT NULL);
-Cannot apply
+Cannot apply 'TIMESTAMPDIFF' to arguments of type 'TIMESTAMPDIFF(
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B16_C4_D2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B16_C4_D2
 #-------------------------------------------------------------------------
 SELECT timestampdiff(DAY, s_int, s_int) AS col
 FROM test_unnest,
@@ -501,9 +504,6 @@ WHERE (s_int IN (0,
                  2)
        OR s_int IS NULL)
   AND (timestampdiff(DAY, s_int, s_int) IS NOT NULL);
-Cannot apply
+Cannot apply 'TIMESTAMPDIFF' to arguments of type 'TIMESTAMPDIFF(
 !error
 
-#-------------------------------------------------------------------------
-# Total query count 33 Positive tests: 5 Negative tests: 28
-#-------------------------------------------------------------------------

@@ -1,9 +1,12 @@
 !set dartQueryId 00000000-0000-0000-0000-000000000000
 !set useApproximateCountDistinct false
-!use druidtest://?componentSupplier=AllDruidEnginesComponentSupplier&datasets=sql/src/test/quidem/qatests/kttm_nested
+!use druidtest://?componentSupplier=AllDruidEnginesComponentSupplier&datasets=sql/src/test/quidem/qatests/qaWin
 !set outputformat mysql
+#-------------------------------------------------------------------------
+# TESTCASE: test_basics_test_order_by_nulls_first_last TEST_ID: SEL_DATASOURCE
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22');
 +-----+
@@ -16,14 +19,14 @@ WHERE client_ip IN ('107.13.54.103',
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_order_by_nulls_first_last TEST_ID: A1_N1_G2_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_order_by_nulls_first_last TEST_ID: A1_N1_G2_Q2
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
        timezone,
        cast(time_floor(__time, 'PT12H') AS char) t,
        row_number() OVER w AS c
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
 GROUP BY server_ip,
@@ -49,14 +52,14 @@ GROUP BY server_ip,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_order_by_nulls_first_last TEST_ID: A1_N2_G2_Q2 TYPE: NEGATIVE TEST
+# TESTCASE: test_basics_test_order_by_nulls_first_last TEST_ID: A1_N2_G2_Q2
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
        timezone,
        cast(time_floor(__time, 'PT12H') AS char) t,
        row_number() OVER w AS c
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
 GROUP BY server_ip,
@@ -69,14 +72,14 @@ ASCENDING ordering with NULLS LAST is not supported
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_order_by_nulls_first_last TEST_ID: A2_N1_G2_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_order_by_nulls_first_last TEST_ID: A2_N1_G2_Q2
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
        timezone,
        cast(time_floor(__time, 'PT12H') AS char) t,
        row_number() OVER w AS c
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
 GROUP BY server_ip,
@@ -102,14 +105,14 @@ GROUP BY server_ip,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_order_by_nulls_first_last TEST_ID: A2_N2_G2_Q2 TYPE: NEGATIVE TEST
+# TESTCASE: test_basics_test_order_by_nulls_first_last TEST_ID: A2_N2_G2_Q2
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
        timezone,
        cast(time_floor(__time, 'PT12H') AS char) t,
        row_number() OVER w AS c
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
 GROUP BY server_ip,
@@ -122,14 +125,14 @@ ASCENDING ordering with NULLS LAST is not supported
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_order_by_nulls_first_last TEST_ID: A3_N1_G2_Q2 TYPE: NEGATIVE TEST
+# TESTCASE: test_basics_test_order_by_nulls_first_last TEST_ID: A3_N1_G2_Q2
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
        timezone,
        cast(time_floor(__time, 'PT12H') AS char) t,
        row_number() OVER w AS c
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
 GROUP BY server_ip,
@@ -142,14 +145,14 @@ DESCENDING ordering with NULLS FIRST is not supported
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_order_by_nulls_first_last TEST_ID: A3_N2_G2_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_order_by_nulls_first_last TEST_ID: A3_N2_G2_Q2
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
        timezone,
        cast(time_floor(__time, 'PT12H') AS char) t,
        row_number() OVER w AS c
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
 GROUP BY server_ip,
@@ -174,6 +177,3 @@ GROUP BY server_ip,
 
 !ok
 
-#-------------------------------------------------------------------------
-# Total query count 7 Positive tests: 4 Negative tests: 3
-#-------------------------------------------------------------------------

@@ -3,7 +3,7 @@
 !use druidtest://?componentSupplier=StandardMSQComponentSupplier&datasets=sql/src/test/quidem/qatests/qaSsb/norm
 !set outputformat mysql
 #-------------------------------------------------------------------------
-# TESTCASE: test_ssb_norm TEST_ID: A01 TYPE: POSITIVE TEST
+# TESTCASE: test_ssb_norm TEST_ID: A01
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM ssb_denorm;
@@ -17,7 +17,7 @@ FROM ssb_denorm;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_ssb_norm TEST_ID: A02 TYPE: POSITIVE TEST
+# TESTCASE: test_ssb_norm TEST_ID: A02
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM ssb_norm_customer;
@@ -31,7 +31,7 @@ FROM ssb_norm_customer;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_ssb_norm TEST_ID: A03 TYPE: POSITIVE TEST
+# TESTCASE: test_ssb_norm TEST_ID: A03
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM ssb_norm_date;
@@ -45,7 +45,7 @@ FROM ssb_norm_date;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_ssb_norm TEST_ID: A04 TYPE: POSITIVE TEST
+# TESTCASE: test_ssb_norm TEST_ID: A04
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM ssb_norm_lineorder;
@@ -59,7 +59,7 @@ FROM ssb_norm_lineorder;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_ssb_norm TEST_ID: A05 TYPE: POSITIVE TEST
+# TESTCASE: test_ssb_norm TEST_ID: A05
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM ssb_norm_part;
@@ -73,7 +73,7 @@ FROM ssb_norm_part;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_ssb_norm TEST_ID: A06 TYPE: POSITIVE TEST
+# TESTCASE: test_ssb_norm TEST_ID: A06
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM ssb_norm_supplier;
@@ -87,7 +87,7 @@ FROM ssb_norm_supplier;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_ssb_norm TEST_ID: Q1_0_broadcast TYPE: POSITIVE TEST
+# TESTCASE: test_ssb_norm TEST_ID: Q1_0_broadcast
 #-------------------------------------------------------------------------
 SELECT sum(lo_extendedprice*lo_discount) AS revenue
 FROM ssb_norm_lineorder,
@@ -106,7 +106,7 @@ WHERE lo_orderdate = d_datekey
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_ssb_norm TEST_ID: Q1_1_broadcast TYPE: POSITIVE TEST
+# TESTCASE: test_ssb_norm TEST_ID: Q1_1_broadcast
 #-------------------------------------------------------------------------
 SELECT sum(lo_extendedprice*lo_discount) AS revenue
 FROM ssb_norm_lineorder,
@@ -125,7 +125,7 @@ WHERE lo_orderdate = d_datekey
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_ssb_norm TEST_ID: Q1_2_broadcast TYPE: POSITIVE TEST
+# TESTCASE: test_ssb_norm TEST_ID: Q1_2_broadcast
 #-------------------------------------------------------------------------
 SELECT sum(lo_extendedprice*lo_discount) AS revenue
 FROM ssb_norm_lineorder,
@@ -145,7 +145,7 @@ WHERE lo_orderdate = d_datekey
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_ssb_norm TEST_ID: Q2_0_broadcast TYPE: POSITIVE TEST
+# TESTCASE: test_ssb_norm TEST_ID: Q2_0_broadcast
 #-------------------------------------------------------------------------
 SELECT sum(lo_revenue),
        d_year,
@@ -212,7 +212,7 @@ ORDER BY d_year,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_ssb_norm TEST_ID: Q2_1_broadcast TYPE: POSITIVE TEST
+# TESTCASE: test_ssb_norm TEST_ID: Q2_1_broadcast
 #-------------------------------------------------------------------------
 SELECT sum(lo_revenue),
        d_year,
@@ -247,7 +247,7 @@ ORDER BY d_year,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_ssb_norm TEST_ID: Q2_2_broadcast TYPE: POSITIVE TEST
+# TESTCASE: test_ssb_norm TEST_ID: Q2_2_broadcast
 #-------------------------------------------------------------------------
 SELECT sum(lo_revenue),
        d_year,
@@ -272,7 +272,7 @@ ORDER BY d_year,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_ssb_norm TEST_ID: Q3_0_broadcast TYPE: POSITIVE TEST
+# TESTCASE: test_ssb_norm TEST_ID: Q3_0_broadcast
 #-------------------------------------------------------------------------
 SELECT t2.c_nation,
        s_nation,
@@ -318,7 +318,7 @@ ORDER BY d_year ASC,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_ssb_norm TEST_ID: Q3_1_broadcast TYPE: POSITIVE TEST
+# TESTCASE: test_ssb_norm TEST_ID: Q3_1_broadcast
 #-------------------------------------------------------------------------
 SELECT t2.c_city,
        s_city,
@@ -347,7 +347,7 @@ ORDER BY d_year ASC,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_ssb_norm TEST_ID: Q3_2_broadcast TYPE: POSITIVE TEST
+# TESTCASE: test_ssb_norm TEST_ID: Q3_2_broadcast
 #-------------------------------------------------------------------------
 SELECT t2.c_city,
        s_city,
@@ -378,7 +378,7 @@ ORDER BY d_year ASC,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_ssb_norm TEST_ID: Q3_3_broadcast TYPE: POSITIVE TEST
+# TESTCASE: test_ssb_norm TEST_ID: Q3_3_broadcast
 #-------------------------------------------------------------------------
 SELECT t2.c_city,
        s_city,
@@ -408,7 +408,7 @@ ORDER BY d_year ASC,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_ssb_norm TEST_ID: Q4_0_broadcast TYPE: POSITIVE TEST
+# TESTCASE: test_ssb_norm TEST_ID: Q4_0_broadcast
 #-------------------------------------------------------------------------
 SELECT t2.d_year,
        c_nation,
@@ -468,7 +468,7 @@ ORDER BY t2.d_year,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_ssb_norm TEST_ID: Q4_1_broadcast TYPE: POSITIVE TEST
+# TESTCASE: test_ssb_norm TEST_ID: Q4_1_broadcast
 #-------------------------------------------------------------------------
 SELECT t2.d_year,
        s_nation,
@@ -516,7 +516,7 @@ ORDER BY t2.d_year,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_ssb_norm TEST_ID: Q4_2_broadcast TYPE: POSITIVE TEST
+# TESTCASE: test_ssb_norm TEST_ID: Q4_2_broadcast
 #-------------------------------------------------------------------------
 SELECT t2.d_year,
        s_city,
@@ -547,6 +547,3 @@ ORDER BY t2.d_year,
 
 !ok
 
-#-------------------------------------------------------------------------
-# Total query count 19 Positive tests: 19 Negative tests: 0
-#-------------------------------------------------------------------------

@@ -2,6 +2,9 @@
 !set useApproximateCountDistinct false
 !use druidtest://?componentSupplier=AllDruidEnginesComponentSupplier&datasets=sql/src/test/quidem/qatests/qaUnnest/mv
 !set outputformat mysql
+#-------------------------------------------------------------------------
+# TESTCASE: test_scalar_ipaddr_funcs TEST_ID: SEL_DATASOURCE
+#-------------------------------------------------------------------------
 SELECT *
 FROM test_unnest;
 +-------------------------+-------+--------+---------+----------+------------------------------------------------+------------------------+--------------------------------------+----------------------------------+--------------------------------------+----------------------------------+-----------------------------+
@@ -18,7 +21,7 @@ FROM test_unnest;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_ipaddr_funcs TEST_ID: A1_B1_C1 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_ipaddr_funcs TEST_ID: A1_B1_C1
 #-------------------------------------------------------------------------
 SELECT ip4_match(c, c) AS col
 FROM test_unnest,
@@ -31,7 +34,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_ipaddr_funcs TEST_ID: A1_B1_C2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_ipaddr_funcs TEST_ID: A1_B1_C2
 #-------------------------------------------------------------------------
 SELECT ip4_match(c, c_long) AS col
 FROM test_unnest,
@@ -44,7 +47,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_ipaddr_funcs TEST_ID: A1_B2_C1 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_ipaddr_funcs TEST_ID: A1_B2_C1
 #-------------------------------------------------------------------------
 SELECT ip4_parse(c) AS col
 FROM test_unnest,
@@ -57,7 +60,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_ipaddr_funcs TEST_ID: A1_B2_C2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_ipaddr_funcs TEST_ID: A1_B2_C2
 #-------------------------------------------------------------------------
 SELECT ip4_parse(c_long) AS col
 FROM test_unnest,
@@ -70,7 +73,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_ipaddr_funcs TEST_ID: A1_B3_C1 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_ipaddr_funcs TEST_ID: A1_B3_C1
 #-------------------------------------------------------------------------
 SELECT ip4_stringify(c) AS col
 FROM test_unnest,
@@ -83,7 +86,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_ipaddr_funcs TEST_ID: A1_B3_C2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_ipaddr_funcs TEST_ID: A1_B3_C2
 #-------------------------------------------------------------------------
 SELECT ip4_stringify(c_long) AS col
 FROM test_unnest,
@@ -95,6 +98,3 @@ WHERE c_long IN (0,
 QueryInterruptedException
 !error
 
-#-------------------------------------------------------------------------
-# Total query count 7 Positive tests: 1 Negative tests: 6
-#-------------------------------------------------------------------------

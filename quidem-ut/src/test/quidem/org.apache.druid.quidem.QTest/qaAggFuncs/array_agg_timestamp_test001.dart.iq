@@ -2,6 +2,9 @@
 !set useApproximateCountDistinct false
 !use druidtest://?componentSupplier=DartComponentSupplier&datasets=sql/src/test/quidem/qatests/qaAggFuncs
 !set outputformat mysql
+#-------------------------------------------------------------------------
+# TESTCASE: test001 TEST_ID: SEL_DATASOURCE
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM test_agg_funcs;
 +-----+
@@ -14,7 +17,7 @@ FROM test_agg_funcs;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A01 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A01
 #-------------------------------------------------------------------------
 SELECT array[timestamp '2020-01-01 01:01:01.000', timestamp '2020-02-01 01:01:01.000'] AS col;
 +--------------------------------------------+
@@ -27,7 +30,7 @@ SELECT array[timestamp '2020-01-01 01:01:01.000', timestamp '2020-02-01 01:01:01
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A02 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A02
 #-------------------------------------------------------------------------
 SELECT array_agg(timestamp '2020-01-01 01:01:01.000') AS col;
 +-----------------------+
@@ -40,7 +43,7 @@ SELECT array_agg(timestamp '2020-01-01 01:01:01.000') AS col;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A03 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A03
 #-------------------------------------------------------------------------
 SELECT strlen(array_to_string(col, '|')) AS LEN
 FROM
@@ -56,7 +59,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A04 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A04
 #-------------------------------------------------------------------------
 SELECT array_length(array_agg(__time)) AS col
 FROM test_agg_funcs;
@@ -70,7 +73,7 @@ FROM test_agg_funcs;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A05 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A05
 #-------------------------------------------------------------------------
 SELECT array_offset(array_agg(__time), 100) AS col
 FROM test_agg_funcs
@@ -85,7 +88,7 @@ WHERE __time=timestamp '2020-01-01 01:01:01.000';
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A06 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A06
 #-------------------------------------------------------------------------
 SELECT array_ordinal(array_agg(__time), 100) AS col
 FROM test_agg_funcs
@@ -100,7 +103,7 @@ WHERE __time=timestamp '2020-02-01 01:01:01.000';
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A07 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A07
 #-------------------------------------------------------------------------
 SELECT array_contains(array_agg(__time), array[timestamp '2020-01-01 01:01:01.000', timestamp '2020-02-01 01:01:01.000']) AS col
 FROM test_agg_funcs;
@@ -114,7 +117,7 @@ FROM test_agg_funcs;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A08 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A08
 #-------------------------------------------------------------------------
 SELECT array_contains(array_agg(__time), array[timestamp '2020-01-01 01:01:01.000', timestamp '2020-03-01 01:01:01.000']) AS col
 FROM test_agg_funcs;
@@ -128,7 +131,7 @@ FROM test_agg_funcs;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A09 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A09
 #-------------------------------------------------------------------------
 SELECT array_overlap(array_agg(__time), array[timestamp '2020-01-01 01:01:01.000', timestamp '2020-03-01 01:01:01.000']) AS col
 FROM test_agg_funcs;
@@ -142,7 +145,7 @@ FROM test_agg_funcs;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A10 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A10
 #-------------------------------------------------------------------------
 SELECT array_overlap(array_agg(__time), array[timestamp '2020-03-01 01:01:01.000', timestamp '2020-04-01 01:01:01.000']) AS col
 FROM test_agg_funcs;
@@ -156,7 +159,7 @@ FROM test_agg_funcs;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A11 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A11
 #-------------------------------------------------------------------------
 SELECT array_overlap(array_agg(__time), array_agg(DISTINCT __time)) AS col
 FROM test_agg_funcs;
@@ -170,7 +173,7 @@ FROM test_agg_funcs;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A12 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A12
 #-------------------------------------------------------------------------
 SELECT array_offset_of(array_agg(__time), timestamp '2020-01-01 01:01:01.000') AS col
 FROM test_agg_funcs
@@ -185,7 +188,7 @@ WHERE __time=timestamp '2020-01-01 01:01:01.000';
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A13 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A13
 #-------------------------------------------------------------------------
 SELECT array_offset_of(array_agg(__time), timestamp '2020-03-01 01:01:01.000') AS col
 FROM test_agg_funcs
@@ -200,7 +203,7 @@ WHERE __time=timestamp '2020-01-01 01:01:01.000';
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A14 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A14
 #-------------------------------------------------------------------------
 SELECT array_ordinal_of(array_agg(__time), timestamp '2020-01-01 01:01:01.000') AS col
 FROM test_agg_funcs
@@ -215,7 +218,7 @@ WHERE __time=timestamp '2020-01-01 01:01:01.000';
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A15 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A15
 #-------------------------------------------------------------------------
 SELECT array_ordinal_of(array_agg(__time), timestamp '2020-03-01 01:01:01.000') AS col
 FROM test_agg_funcs
@@ -230,7 +233,7 @@ WHERE __time=timestamp '2020-01-01 01:01:01.000';
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A16 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A16
 #-------------------------------------------------------------------------
 SELECT strlen(array_to_string(array_agg(__time), '|')) AS col
 FROM test_agg_funcs;
@@ -244,7 +247,7 @@ FROM test_agg_funcs;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A17 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A17
 #-------------------------------------------------------------------------
 SELECT contains_string(array_to_string(array_agg(__time), '|'), '1577840461000')
 AND contains_string(array_to_string(array_agg(DISTINCT __time), '|'), '|') AS col
@@ -259,7 +262,7 @@ FROM test_agg_funcs;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A18 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A18
 #-------------------------------------------------------------------------
 SELECT strlen(array_to_string(col, '|')) AS LEN
 FROM
@@ -275,7 +278,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A19 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A19
 #-------------------------------------------------------------------------
 SELECT array_length(array_concat(array_agg(__time), array[timestamp '2020-03-01 01:01:01.000'])) AS col
 FROM test_agg_funcs;
@@ -289,7 +292,7 @@ FROM test_agg_funcs;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A20 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A20
 #-------------------------------------------------------------------------
 SELECT strlen(array_to_string(col, '|')) AS LEN
 FROM
@@ -305,7 +308,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A21 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A21
 #-------------------------------------------------------------------------
 SELECT array_length(array_concat(array_agg(__time), array_agg(__time))) AS col
 FROM test_agg_funcs;
@@ -319,7 +322,7 @@ FROM test_agg_funcs;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A22 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A22
 #-------------------------------------------------------------------------
 SELECT array_slice(array_agg(__time), 0, 1) AS col
 FROM test_agg_funcs
@@ -334,7 +337,7 @@ WHERE __time=timestamp '2020-01-01 01:01:01.000';
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A23 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A23
 #-------------------------------------------------------------------------
 SELECT array_slice(array_agg(__time), 100, 101) AS col
 FROM test_agg_funcs
@@ -349,7 +352,7 @@ WHERE __time=timestamp '2020-01-01 01:01:01.000';
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A24 TYPE: NEGATIVE TEST
+# TESTCASE: test001 TEST_ID: A24
 #-------------------------------------------------------------------------
 SELECT array_agg(t0.__time)
 FROM test_agg_funcs t0,
@@ -360,7 +363,7 @@ size
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A25 TYPE: NEGATIVE TEST
+# TESTCASE: test001 TEST_ID: A25
 #-------------------------------------------------------------------------
 SELECT array_to_string(array_agg(t0.__time), '')
 FROM test_agg_funcs t0,
@@ -371,7 +374,7 @@ size
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A26 TYPE: NEGATIVE TEST
+# TESTCASE: test001 TEST_ID: A26
 #-------------------------------------------------------------------------
 SELECT length(array_to_string(array_agg(t0.__time), ''))
 FROM test_agg_funcs t0,
@@ -382,7 +385,7 @@ size
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A27 TYPE: NEGATIVE TEST
+# TESTCASE: test001 TEST_ID: A27
 #-------------------------------------------------------------------------
 SELECT array_agg(t0.__time)
 FROM test_agg_funcs t0,
@@ -393,7 +396,7 @@ size
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A28 TYPE: NEGATIVE TEST
+# TESTCASE: test001 TEST_ID: A28
 #-------------------------------------------------------------------------
 SELECT array_to_string(array_agg(t0.__time), '')
 FROM test_agg_funcs t0,
@@ -404,7 +407,7 @@ size
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A29 TYPE: NEGATIVE TEST
+# TESTCASE: test001 TEST_ID: A29
 #-------------------------------------------------------------------------
 SELECT length(array_to_string(array_agg(t0.__time), ''))
 FROM test_agg_funcs t0,
@@ -414,6 +417,3 @@ GROUP BY t0.__time;
 size
 !error
 
-#-------------------------------------------------------------------------
-# Total query count 30 Positive tests: 24 Negative tests: 6
-#-------------------------------------------------------------------------

@@ -2,6 +2,9 @@
 !set useApproximateCountDistinct false
 !use druidtest://?componentSupplier=AllDruidEnginesComponentSupplier&datasets=sql/src/test/quidem/qatests/qaUnnest/array
 !set outputformat mysql
+#-------------------------------------------------------------------------
+# TESTCASE: test_json_funcs TEST_ID: SEL_DATASOURCE
+#-------------------------------------------------------------------------
 SELECT *
 FROM test_unnest;
 +-------------------------+-------+--------+--------------+--------------+------------------+----------------+--------------------+---------+--------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -16,7 +19,7 @@ FROM test_unnest;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_json_funcs TEST_ID: A1_B1_C1_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_json_funcs TEST_ID: A1_B1_C1_D1
 #-------------------------------------------------------------------------
 SELECT json_keys(c, '$.') AS col
 FROM test_unnest,
@@ -44,7 +47,7 @@ WHERE (s_int IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_json_funcs TEST_ID: A1_B1_C1_D2 TYPE: POSITIVE TEST
+# TESTCASE: test_json_funcs TEST_ID: A1_B1_C1_D2
 #-------------------------------------------------------------------------
 SELECT json_keys(c, '$.') AS col
 FROM test_unnest,
@@ -72,7 +75,7 @@ WHERE (s_int IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_json_funcs TEST_ID: A1_B1_C2_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_json_funcs TEST_ID: A1_B1_C2_D1
 #-------------------------------------------------------------------------
 SELECT json_keys(s_int, '$.') AS col
 FROM test_unnest,
@@ -100,7 +103,7 @@ WHERE (s_int IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_json_funcs TEST_ID: A1_B1_C2_D2 TYPE: POSITIVE TEST
+# TESTCASE: test_json_funcs TEST_ID: A1_B1_C2_D2
 #-------------------------------------------------------------------------
 SELECT json_keys(s_int, '$.') AS col
 FROM test_unnest,
@@ -128,7 +131,7 @@ WHERE (s_int IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_json_funcs TEST_ID: A1_B2_C1_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_json_funcs TEST_ID: A1_B2_C1_D1
 #-------------------------------------------------------------------------
 SELECT json_object(KEY 'k' value c) AS col
 FROM test_unnest,
@@ -156,7 +159,7 @@ WHERE (s_int IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_json_funcs TEST_ID: A1_B2_C1_D2 TYPE: POSITIVE TEST
+# TESTCASE: test_json_funcs TEST_ID: A1_B2_C1_D2
 #-------------------------------------------------------------------------
 SELECT json_object(KEY 'k' value c) AS col
 FROM test_unnest,
@@ -184,7 +187,7 @@ WHERE (s_int IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_json_funcs TEST_ID: A1_B2_C2_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_json_funcs TEST_ID: A1_B2_C2_D1
 #-------------------------------------------------------------------------
 SELECT json_object(KEY 'k' value s_int) AS col
 FROM test_unnest,
@@ -212,7 +215,7 @@ WHERE (s_int IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_json_funcs TEST_ID: A1_B2_C2_D2 TYPE: POSITIVE TEST
+# TESTCASE: test_json_funcs TEST_ID: A1_B2_C2_D2
 #-------------------------------------------------------------------------
 SELECT json_object(KEY 'k' value s_int) AS col
 FROM test_unnest,
@@ -240,7 +243,7 @@ WHERE (s_int IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_json_funcs TEST_ID: A1_B3_C1_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_json_funcs TEST_ID: A1_B3_C1_D1
 #-------------------------------------------------------------------------
 SELECT json_paths(c) AS col
 FROM test_unnest,
@@ -268,7 +271,7 @@ WHERE (s_int IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_json_funcs TEST_ID: A1_B3_C1_D2 TYPE: POSITIVE TEST
+# TESTCASE: test_json_funcs TEST_ID: A1_B3_C1_D2
 #-------------------------------------------------------------------------
 SELECT json_paths(c) AS col
 FROM test_unnest,
@@ -296,7 +299,7 @@ WHERE (s_int IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_json_funcs TEST_ID: A1_B3_C2_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_json_funcs TEST_ID: A1_B3_C2_D1
 #-------------------------------------------------------------------------
 SELECT json_paths(s_int) AS col
 FROM test_unnest,
@@ -324,7 +327,7 @@ WHERE (s_int IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_json_funcs TEST_ID: A1_B3_C2_D2 TYPE: POSITIVE TEST
+# TESTCASE: test_json_funcs TEST_ID: A1_B3_C2_D2
 #-------------------------------------------------------------------------
 SELECT json_paths(s_int) AS col
 FROM test_unnest,
@@ -352,7 +355,7 @@ WHERE (s_int IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_json_funcs TEST_ID: A1_B4_C1_D1 TYPE: NEGATIVE TEST
+# TESTCASE: test_json_funcs TEST_ID: A1_B4_C1_D1
 #-------------------------------------------------------------------------
 SELECT json_query(c, '$.') AS col
 FROM test_unnest,
@@ -367,7 +370,7 @@ java.lang.IllegalArgumentException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_json_funcs TEST_ID: A1_B4_C1_D2 TYPE: NEGATIVE TEST
+# TESTCASE: test_json_funcs TEST_ID: A1_B4_C1_D2
 #-------------------------------------------------------------------------
 SELECT json_query(c, '$.') AS col
 FROM test_unnest,
@@ -382,7 +385,7 @@ java.lang.IllegalArgumentException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_json_funcs TEST_ID: A1_B4_C2_D1 TYPE: NEGATIVE TEST
+# TESTCASE: test_json_funcs TEST_ID: A1_B4_C2_D1
 #-------------------------------------------------------------------------
 SELECT json_query(s_int, '$.') AS col
 FROM test_unnest,
@@ -397,7 +400,7 @@ java.lang.IllegalArgumentException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_json_funcs TEST_ID: A1_B4_C2_D2 TYPE: NEGATIVE TEST
+# TESTCASE: test_json_funcs TEST_ID: A1_B4_C2_D2
 #-------------------------------------------------------------------------
 SELECT json_query(s_int, '$.') AS col
 FROM test_unnest,
@@ -412,7 +415,7 @@ java.lang.IllegalArgumentException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_json_funcs TEST_ID: A1_B5_C1_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_json_funcs TEST_ID: A1_B5_C1_D1
 #-------------------------------------------------------------------------
 SELECT json_value(c, '$.') AS col
 FROM test_unnest,
@@ -441,7 +444,7 @@ WHERE (s_int IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_json_funcs TEST_ID: A1_B5_C1_D2 TYPE: POSITIVE TEST
+# TESTCASE: test_json_funcs TEST_ID: A1_B5_C1_D2
 #-------------------------------------------------------------------------
 SELECT json_value(c, '$.') AS col
 FROM test_unnest,
@@ -470,7 +473,7 @@ WHERE (s_int IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_json_funcs TEST_ID: A1_B5_C2_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_json_funcs TEST_ID: A1_B5_C2_D1
 #-------------------------------------------------------------------------
 SELECT json_value(s_int, '$.') AS col
 FROM test_unnest,
@@ -499,7 +502,7 @@ WHERE (s_int IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_json_funcs TEST_ID: A1_B5_C2_D2 TYPE: POSITIVE TEST
+# TESTCASE: test_json_funcs TEST_ID: A1_B5_C2_D2
 #-------------------------------------------------------------------------
 SELECT json_value(s_int, '$.') AS col
 FROM test_unnest,
@@ -528,7 +531,7 @@ WHERE (s_int IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_json_funcs TEST_ID: A1_B6_C1_D1 TYPE: NEGATIVE TEST
+# TESTCASE: test_json_funcs TEST_ID: A1_B6_C1_D1
 #-------------------------------------------------------------------------
 SELECT parse_json(cast(c AS char)) AS col
 FROM test_unnest,
@@ -543,7 +546,7 @@ java.lang.IllegalArgumentException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_json_funcs TEST_ID: A1_B6_C1_D2 TYPE: NEGATIVE TEST
+# TESTCASE: test_json_funcs TEST_ID: A1_B6_C1_D2
 #-------------------------------------------------------------------------
 SELECT parse_json(cast(c AS char)) AS col
 FROM test_unnest,
@@ -558,7 +561,7 @@ java.lang.IllegalArgumentException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_json_funcs TEST_ID: A1_B6_C2_D1 TYPE: NEGATIVE TEST
+# TESTCASE: test_json_funcs TEST_ID: A1_B6_C2_D1
 #-------------------------------------------------------------------------
 SELECT parse_json(cast(s_int AS char)) AS col
 FROM test_unnest,
@@ -573,7 +576,7 @@ java.lang.IllegalArgumentException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_json_funcs TEST_ID: A1_B6_C2_D2 TYPE: NEGATIVE TEST
+# TESTCASE: test_json_funcs TEST_ID: A1_B6_C2_D2
 #-------------------------------------------------------------------------
 SELECT parse_json(cast(s_int AS char)) AS col
 FROM test_unnest,
@@ -588,7 +591,7 @@ java.lang.IllegalArgumentException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_json_funcs TEST_ID: A1_B7_C1_D1 TYPE: NEGATIVE TEST
+# TESTCASE: test_json_funcs TEST_ID: A1_B7_C1_D1
 #-------------------------------------------------------------------------
 SELECT try_parse_json(cast(c AS char)) AS col
 FROM test_unnest,
@@ -603,7 +606,7 @@ java.lang.IllegalArgumentException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_json_funcs TEST_ID: A1_B7_C1_D2 TYPE: NEGATIVE TEST
+# TESTCASE: test_json_funcs TEST_ID: A1_B7_C1_D2
 #-------------------------------------------------------------------------
 SELECT try_parse_json(cast(c AS char)) AS col
 FROM test_unnest,
@@ -618,7 +621,7 @@ java.lang.IllegalArgumentException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_json_funcs TEST_ID: A1_B7_C2_D1 TYPE: NEGATIVE TEST
+# TESTCASE: test_json_funcs TEST_ID: A1_B7_C2_D1
 #-------------------------------------------------------------------------
 SELECT try_parse_json(cast(s_int AS char)) AS col
 FROM test_unnest,
@@ -633,7 +636,7 @@ java.lang.IllegalArgumentException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_json_funcs TEST_ID: A1_B7_C2_D2 TYPE: NEGATIVE TEST
+# TESTCASE: test_json_funcs TEST_ID: A1_B7_C2_D2
 #-------------------------------------------------------------------------
 SELECT try_parse_json(cast(s_int AS char)) AS col
 FROM test_unnest,
@@ -648,7 +651,7 @@ java.lang.IllegalArgumentException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_json_funcs TEST_ID: A1_B8_C1_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_json_funcs TEST_ID: A1_B8_C1_D1
 #-------------------------------------------------------------------------
 SELECT to_json_string(c) AS col
 FROM test_unnest,
@@ -677,7 +680,7 @@ WHERE (s_int IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_json_funcs TEST_ID: A1_B8_C1_D2 TYPE: POSITIVE TEST
+# TESTCASE: test_json_funcs TEST_ID: A1_B8_C1_D2
 #-------------------------------------------------------------------------
 SELECT to_json_string(c) AS col
 FROM test_unnest,
@@ -706,7 +709,7 @@ WHERE (s_int IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_json_funcs TEST_ID: A1_B8_C2_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_json_funcs TEST_ID: A1_B8_C2_D1
 #-------------------------------------------------------------------------
 SELECT to_json_string(s_int) AS col
 FROM test_unnest,
@@ -735,7 +738,7 @@ WHERE (s_int IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_json_funcs TEST_ID: A1_B8_C2_D2 TYPE: POSITIVE TEST
+# TESTCASE: test_json_funcs TEST_ID: A1_B8_C2_D2
 #-------------------------------------------------------------------------
 SELECT to_json_string(s_int) AS col
 FROM test_unnest,
@@ -763,6 +766,3 @@ WHERE (s_int IN (0,
 
 !ok
 
-#-------------------------------------------------------------------------
-# Total query count 33 Positive tests: 21 Negative tests: 12
-#-------------------------------------------------------------------------

@@ -1,9 +1,12 @@
 !set dartQueryId 00000000-0000-0000-0000-000000000000
 !set useApproximateCountDistinct false
-!use druidtest://?componentSupplier=AllDruidEnginesComponentSupplier&datasets=sql/src/test/quidem/qatests/kttm_nested
+!use druidtest://?componentSupplier=AllDruidEnginesComponentSupplier&datasets=sql/src/test/quidem/qatests/qaWin
 !set outputformat mysql
+#-------------------------------------------------------------------------
+# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: SEL_DATASOURCE
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22');
 +-----+
@@ -16,7 +19,7 @@ WHERE client_ip IN ('107.13.54.103',
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A1_G1_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A1_G1_Q1
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -30,7 +33,7 @@ FROM
           timezone,
           time_floor(__time, 'PT12H') __time,
           count(*)
-   FROM kttm_nested
+   FROM test_win
    GROUP BY server_ip,
             client_ip,
             timezone,
@@ -54,7 +57,7 @@ WHERE client_ip IN ('107.13.54.103',
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A1_G1_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A1_G1_Q2
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -67,7 +70,7 @@ FROM
           timezone,
           time_floor(__time, 'PT12H') __time,
           count(*)
-   FROM kttm_nested
+   FROM test_win
    GROUP BY server_ip,
             client_ip,
             timezone,
@@ -94,7 +97,7 @@ WHERE client_ip IN ('107.13.54.103',
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A1_G2_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A1_G2_Q1
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -102,7 +105,7 @@ SELECT server_ip,
        cast(time_floor(__time, 'PT12H') AS char) t,
        row_number() OVER (PARTITION BY timezone
                           ORDER BY server_ip, timezone, timezone) AS c
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
 GROUP BY server_ip,
@@ -126,14 +129,14 @@ GROUP BY server_ip,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A1_G2_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A1_G2_Q2
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
        timezone,
        cast(time_floor(__time, 'PT12H') AS char) t,
        row_number() OVER w AS c
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
 GROUP BY server_ip,
@@ -160,7 +163,7 @@ GROUP BY server_ip,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A2_G1_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A2_G1_Q1
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -174,7 +177,7 @@ FROM
           timezone,
           time_floor(__time, 'PT12H') __time,
           count(*)
-   FROM kttm_nested
+   FROM test_win
    GROUP BY server_ip,
             client_ip,
             timezone,
@@ -198,7 +201,7 @@ WHERE client_ip IN ('107.13.54.103',
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A2_G1_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A2_G1_Q2
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -211,7 +214,7 @@ FROM
           timezone,
           time_floor(__time, 'PT12H') __time,
           count(*)
-   FROM kttm_nested
+   FROM test_win
    GROUP BY server_ip,
             client_ip,
             timezone,
@@ -238,7 +241,7 @@ WHERE client_ip IN ('107.13.54.103',
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A2_G2_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A2_G2_Q1
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -246,7 +249,7 @@ SELECT server_ip,
        cast(time_floor(__time, 'PT12H') AS char) t,
        row_number() OVER (PARTITION BY length(timezone)
                           ORDER BY server_ip, timezone, length(timezone)) AS c
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
 GROUP BY server_ip,
@@ -270,14 +273,14 @@ GROUP BY server_ip,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A2_G2_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A2_G2_Q2
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
        timezone,
        cast(time_floor(__time, 'PT12H') AS char) t,
        row_number() OVER w AS c
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
 GROUP BY server_ip,
@@ -304,7 +307,7 @@ GROUP BY server_ip,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A3_G1_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A3_G1_Q1
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -318,7 +321,7 @@ FROM
           timezone,
           time_floor(__time, 'PT12H') __time,
           count(*)
-   FROM kttm_nested
+   FROM test_win
    GROUP BY server_ip,
             client_ip,
             timezone,
@@ -342,7 +345,7 @@ WHERE client_ip IN ('107.13.54.103',
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A3_G1_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A3_G1_Q2
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -355,7 +358,7 @@ FROM
           timezone,
           time_floor(__time, 'PT12H') __time,
           count(*)
-   FROM kttm_nested
+   FROM test_win
    GROUP BY server_ip,
             client_ip,
             timezone,
@@ -382,7 +385,7 @@ WHERE client_ip IN ('107.13.54.103',
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A3_G2_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A3_G2_Q1
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -390,7 +393,7 @@ SELECT server_ip,
        cast(time_floor(__time, 'PT12H') AS char) t,
        row_number() OVER (PARTITION BY cos(length(timezone))
                           ORDER BY server_ip, timezone, cos(length(timezone))) AS c
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
 GROUP BY server_ip,
@@ -414,14 +417,14 @@ GROUP BY server_ip,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A3_G2_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A3_G2_Q2
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
        timezone,
        cast(time_floor(__time, 'PT12H') AS char) t,
        row_number() OVER w AS c
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
 GROUP BY server_ip,
@@ -448,7 +451,7 @@ GROUP BY server_ip,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A4_G1_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A4_G1_Q1
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -462,7 +465,7 @@ FROM
           timezone,
           time_floor(__time, 'PT12H') __time,
           count(*)
-   FROM kttm_nested
+   FROM test_win
    GROUP BY server_ip,
             client_ip,
             timezone,
@@ -486,7 +489,7 @@ WHERE client_ip IN ('107.13.54.103',
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A4_G1_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A4_G1_Q2
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -499,7 +502,7 @@ FROM
           timezone,
           time_floor(__time, 'PT12H') __time,
           count(*)
-   FROM kttm_nested
+   FROM test_win
    GROUP BY server_ip,
             client_ip,
             timezone,
@@ -525,7 +528,7 @@ WHERE client_ip IN ('107.13.54.103',
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A4_G2_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A4_G2_Q1
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -533,7 +536,7 @@ SELECT server_ip,
        cast(time_floor(__time, 'PT12H') AS char) t,
        row_number() OVER (PARTITION BY (timezone IS NULL)
                           ORDER BY server_ip, timezone, (timezone IS NULL)) AS c
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
 GROUP BY server_ip,
@@ -557,14 +560,14 @@ GROUP BY server_ip,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A4_G2_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A4_G2_Q2
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
        timezone,
        cast(time_floor(__time, 'PT12H') AS char) t,
        row_number() OVER w AS c
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
 GROUP BY server_ip,
@@ -590,7 +593,7 @@ GROUP BY server_ip,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A5_G1_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A5_G1_Q1
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -604,7 +607,7 @@ FROM
           timezone,
           time_floor(__time, 'PT12H') __time,
           count(*)
-   FROM kttm_nested
+   FROM test_win
    GROUP BY server_ip,
             client_ip,
             timezone,
@@ -628,7 +631,7 @@ WHERE client_ip IN ('107.13.54.103',
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A5_G1_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A5_G1_Q2
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -641,7 +644,7 @@ FROM
           timezone,
           time_floor(__time, 'PT12H') __time,
           count(*)
-   FROM kttm_nested
+   FROM test_win
    GROUP BY server_ip,
             client_ip,
             timezone,
@@ -668,7 +671,7 @@ WHERE client_ip IN ('107.13.54.103',
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A5_G2_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A5_G2_Q1
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -676,7 +679,7 @@ SELECT server_ip,
        cast(time_floor(__time, 'PT12H') AS char) t,
        row_number() OVER (PARTITION BY time_parse(cast(length(timezone) AS char))
                           ORDER BY server_ip, timezone, time_parse(cast(length(timezone) AS char))) AS c
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
 GROUP BY server_ip,
@@ -700,14 +703,14 @@ GROUP BY server_ip,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A5_G2_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A5_G2_Q2
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
        timezone,
        cast(time_floor(__time, 'PT12H') AS char) t,
        row_number() OVER w AS c
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
 GROUP BY server_ip,
@@ -734,7 +737,7 @@ GROUP BY server_ip,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A6_G1_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A6_G1_Q1
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -748,7 +751,7 @@ FROM
           timezone,
           time_floor(__time, 'PT12H') __time,
           count(*)
-   FROM kttm_nested
+   FROM test_win
    GROUP BY server_ip,
             client_ip,
             timezone,
@@ -772,7 +775,7 @@ WHERE client_ip IN ('107.13.54.103',
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A6_G1_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A6_G1_Q2
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -785,7 +788,7 @@ FROM
           timezone,
           time_floor(__time, 'PT12H') __time,
           count(*)
-   FROM kttm_nested
+   FROM test_win
    GROUP BY server_ip,
             client_ip,
             timezone,
@@ -812,7 +815,7 @@ WHERE client_ip IN ('107.13.54.103',
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A6_G2_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A6_G2_Q1
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -820,7 +823,7 @@ SELECT server_ip,
        cast(time_floor(__time, 'PT12H') AS char) t,
        row_number() OVER (PARTITION BY json_object('key': 'k', 'value': timezone)
                           ORDER BY server_ip, timezone, json_object('key': 'k', 'value': timezone)) AS c
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
 GROUP BY server_ip,
@@ -844,14 +847,14 @@ GROUP BY server_ip,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A6_G2_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A6_G2_Q2
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
        timezone,
        cast(time_floor(__time, 'PT12H') AS char) t,
        row_number() OVER w AS c
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
 GROUP BY server_ip,
@@ -878,7 +881,7 @@ GROUP BY server_ip,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A7_G1_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A7_G1_Q1
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -892,7 +895,7 @@ FROM
           timezone,
           time_floor(__time, 'PT12H') __time,
           count(*)
-   FROM kttm_nested
+   FROM test_win
    GROUP BY server_ip,
             client_ip,
             timezone,
@@ -916,7 +919,7 @@ WHERE client_ip IN ('107.13.54.103',
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A7_G1_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A7_G1_Q2
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -929,7 +932,7 @@ FROM
           timezone,
           time_floor(__time, 'PT12H') __time,
           count(*)
-   FROM kttm_nested
+   FROM test_win
    GROUP BY server_ip,
             client_ip,
             timezone,
@@ -959,7 +962,7 @@ WHERE client_ip IN ('107.13.54.103',
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A7_G2_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A7_G2_Q1
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -967,7 +970,7 @@ SELECT server_ip,
        cast(time_floor(__time, 'PT12H') AS char) t,
        row_number() OVER (PARTITION BY array['A', 'B', timezone]
                           ORDER BY server_ip, timezone, array['A', 'B', timezone]) AS c
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
 GROUP BY server_ip,
@@ -991,14 +994,14 @@ GROUP BY server_ip,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A7_G2_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A7_G2_Q2
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
        timezone,
        cast(time_floor(__time, 'PT12H') AS char) t,
        row_number() OVER w AS c
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
 GROUP BY server_ip,
@@ -1028,7 +1031,7 @@ GROUP BY server_ip,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A8_G1_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A8_G1_Q1
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -1042,7 +1045,7 @@ FROM
           timezone,
           time_floor(__time, 'PT12H') __time,
           count(*)
-   FROM kttm_nested
+   FROM test_win
    GROUP BY server_ip,
             client_ip,
             timezone,
@@ -1066,7 +1069,7 @@ WHERE client_ip IN ('107.13.54.103',
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A8_G1_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A8_G1_Q2
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -1079,7 +1082,7 @@ FROM
           timezone,
           time_floor(__time, 'PT12H') __time,
           count(*)
-   FROM kttm_nested
+   FROM test_win
    GROUP BY server_ip,
             client_ip,
             timezone,
@@ -1109,7 +1112,7 @@ WHERE client_ip IN ('107.13.54.103',
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A8_G2_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A8_G2_Q1
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -1117,7 +1120,7 @@ SELECT server_ip,
        cast(time_floor(__time, 'PT12H') AS char) t,
        row_number() OVER (PARTITION BY array[1, 2, length(timezone)]
                           ORDER BY server_ip, timezone, array[1, 2, length(timezone)]) AS c
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
 GROUP BY server_ip,
@@ -1141,14 +1144,14 @@ GROUP BY server_ip,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A8_G2_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A8_G2_Q2
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
        timezone,
        cast(time_floor(__time, 'PT12H') AS char) t,
        row_number() OVER w AS c
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
 GROUP BY server_ip,
@@ -1178,7 +1181,7 @@ GROUP BY server_ip,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A9_G1_Q1 TYPE: NEGATIVE TEST
+# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A9_G1_Q1
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -1192,7 +1195,7 @@ FROM
           timezone,
           time_floor(__time, 'PT12H') __time,
           count(*)
-   FROM kttm_nested
+   FROM test_win
    GROUP BY server_ip,
             client_ip,
             timezone,
@@ -1203,7 +1206,7 @@ Window processing does not support MVDs. Consider using UNNEST or MV_TO_ARRAY.
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A9_G1_Q2 TYPE: NEGATIVE TEST
+# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A9_G1_Q2
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -1216,7 +1219,7 @@ FROM
           timezone,
           time_floor(__time, 'PT12H') __time,
           count(*)
-   FROM kttm_nested
+   FROM test_win
    GROUP BY server_ip,
             client_ip,
             timezone,
@@ -1230,7 +1233,7 @@ Window processing does not support MVDs. Consider using UNNEST or MV_TO_ARRAY.
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A9_G2_Q1 TYPE: NEGATIVE TEST
+# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A9_G2_Q1
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -1238,7 +1241,7 @@ SELECT server_ip,
        cast(time_floor(__time, 'PT12H') AS char) t,
        row_number() OVER (PARTITION BY string_to_mv('1,2,3', ',')
                           ORDER BY server_ip, timezone, string_to_mv('1,2,3', ',')) AS c
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
 GROUP BY server_ip,
@@ -1249,14 +1252,14 @@ Window processing does not support MVDs. Consider using UNNEST or MV_TO_ARRAY.
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A9_G2_Q2 TYPE: NEGATIVE TEST
+# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A9_G2_Q2
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
        timezone,
        cast(time_floor(__time, 'PT12H') AS char) t,
        row_number() OVER w AS c
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
 GROUP BY server_ip,
@@ -1270,7 +1273,7 @@ Window processing does not support MVDs. Consider using UNNEST or MV_TO_ARRAY.
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A10_G1_Q1 TYPE: NEGATIVE TEST
+# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A10_G1_Q1
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -1284,7 +1287,7 @@ FROM
           timezone,
           time_floor(__time, 'PT12H') __time,
           count(*)
-   FROM kttm_nested
+   FROM test_win
    GROUP BY server_ip,
             client_ip,
             timezone,
@@ -1295,7 +1298,7 @@ Window processing does not support MVDs. Consider using UNNEST or MV_TO_ARRAY.
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A10_G1_Q2 TYPE: NEGATIVE TEST
+# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A10_G1_Q2
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -1308,7 +1311,7 @@ FROM
           timezone,
           time_floor(__time, 'PT12H') __time,
           count(*)
-   FROM kttm_nested
+   FROM test_win
    GROUP BY server_ip,
             client_ip,
             timezone,
@@ -1322,7 +1325,7 @@ Window processing does not support MVDs. Consider using UNNEST or MV_TO_ARRAY.
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A10_G2_Q1 TYPE: NEGATIVE TEST
+# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A10_G2_Q1
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -1330,7 +1333,7 @@ SELECT server_ip,
        cast(time_floor(__time, 'PT12H') AS char) t,
        row_number() OVER (PARTITION BY array_to_mv(array['A', 'B', timezone])
                           ORDER BY server_ip, timezone, array_to_mv(array['A', 'B', timezone])) AS c
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
 GROUP BY server_ip,
@@ -1341,14 +1344,14 @@ Window processing does not support MVDs. Consider using UNNEST or MV_TO_ARRAY.
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A10_G2_Q2 TYPE: NEGATIVE TEST
+# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A10_G2_Q2
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
        timezone,
        cast(time_floor(__time, 'PT12H') AS char) t,
        row_number() OVER w AS c
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
 GROUP BY server_ip,
@@ -1362,7 +1365,7 @@ Window processing does not support MVDs. Consider using UNNEST or MV_TO_ARRAY.
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A12_G1_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A12_G1_Q1
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -1376,7 +1379,7 @@ FROM
           timezone,
           time_floor(__time, 'PT12H') __time,
           count(*)
-   FROM kttm_nested
+   FROM test_win
    GROUP BY server_ip,
             client_ip,
             timezone,
@@ -1400,7 +1403,7 @@ WHERE client_ip IN ('107.13.54.103',
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A12_G1_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A12_G1_Q2
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -1413,7 +1416,7 @@ FROM
           timezone,
           time_floor(__time, 'PT12H') __time,
           count(*)
-   FROM kttm_nested
+   FROM test_win
    GROUP BY server_ip,
             client_ip,
             timezone,
@@ -1440,7 +1443,7 @@ WHERE client_ip IN ('107.13.54.103',
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A12_G2_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A12_G2_Q1
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -1448,7 +1451,7 @@ SELECT server_ip,
        cast(time_floor(__time, 'PT12H') AS char) t,
        row_number() OVER (PARTITION BY length(timezone)+length(timezone)
                           ORDER BY server_ip, timezone, length(timezone)+length(timezone)) AS c
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
 GROUP BY server_ip,
@@ -1472,14 +1475,14 @@ GROUP BY server_ip,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A12_G2_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_data_types_and_exprs TEST_ID: A12_G2_Q2
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
        timezone,
        cast(time_floor(__time, 'PT12H') AS char) t,
        row_number() OVER w AS c
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
 GROUP BY server_ip,
@@ -1505,6 +1508,3 @@ GROUP BY server_ip,
 
 !ok
 
-#-------------------------------------------------------------------------
-# Total query count 45 Positive tests: 37 Negative tests: 8
-#-------------------------------------------------------------------------

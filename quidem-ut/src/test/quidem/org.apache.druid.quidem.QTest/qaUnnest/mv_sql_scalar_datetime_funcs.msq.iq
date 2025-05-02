@@ -1,6 +1,9 @@
 !set useApproximateCountDistinct false
 !use druidtest://?componentSupplier=StandardMSQComponentSupplier&datasets=sql/src/test/quidem/qatests/qaUnnest/mv
 !set outputformat mysql
+#-------------------------------------------------------------------------
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: SEL_DATASOURCE
+#-------------------------------------------------------------------------
 SELECT *
 FROM test_unnest;
 +-------------------------+-------+--------+---------+----------+------------------------------------------------+------------------------+--------------------------------------+----------------------------------+--------------------------------------+----------------------------------+-----------------------------+
@@ -17,7 +20,7 @@ FROM test_unnest;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B1_C1 TYPE: POSITIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B1_C1
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -38,7 +41,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B2_C1 TYPE: POSITIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B2_C1
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -59,7 +62,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B3_C1 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B3_C1
 #-------------------------------------------------------------------------
 SELECT date_trunc('year', c) AS col
 FROM test_unnest,
@@ -72,7 +75,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B3_C2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B3_C2
 #-------------------------------------------------------------------------
 SELECT date_trunc('year', c_long) AS col
 FROM test_unnest,
@@ -85,7 +88,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B4_C1 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B4_C1
 #-------------------------------------------------------------------------
 SELECT time_ceil(c, 'P1D') AS col
 FROM test_unnest,
@@ -98,7 +101,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B4_C2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B4_C2
 #-------------------------------------------------------------------------
 SELECT time_ceil(c_long, 'P1D') AS col
 FROM test_unnest,
@@ -111,7 +114,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B5_C1 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B5_C1
 #-------------------------------------------------------------------------
 SELECT time_floor(c, 'P1D') AS col
 FROM test_unnest,
@@ -124,7 +127,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B5_C2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B5_C2
 #-------------------------------------------------------------------------
 SELECT time_floor(c_long, 'P1D') AS col
 FROM test_unnest,
@@ -137,7 +140,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B6_C1 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B6_C1
 #-------------------------------------------------------------------------
 SELECT time_shift(c, 'P1D') AS col
 FROM test_unnest,
@@ -150,7 +153,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B6_C2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B6_C2
 #-------------------------------------------------------------------------
 SELECT time_shift(c_long, 'P1D') AS col
 FROM test_unnest,
@@ -163,7 +166,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B7_C1 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B7_C1
 #-------------------------------------------------------------------------
 SELECT time_extract(c, 'HOUR') AS col
 FROM test_unnest,
@@ -176,7 +179,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B7_C2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B7_C2
 #-------------------------------------------------------------------------
 SELECT time_extract(c_long, 'HOUR') AS col
 FROM test_unnest,
@@ -189,7 +192,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B8_C1 TYPE: POSITIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B8_C1
 #-------------------------------------------------------------------------
 SELECT time_parse(c) AS col
 FROM test_unnest,
@@ -216,7 +219,7 @@ WHERE c_long IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B8_C2 TYPE: POSITIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B8_C2
 #-------------------------------------------------------------------------
 SELECT time_parse(cast(c_long AS char)) AS col
 FROM test_unnest,
@@ -249,7 +252,7 @@ WHERE c_long IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B9_C1 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B9_C1
 #-------------------------------------------------------------------------
 SELECT time_in_interval(c, '2001-01-01/P1D') AS col
 FROM test_unnest,
@@ -262,7 +265,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B9_C2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B9_C2
 #-------------------------------------------------------------------------
 SELECT time_in_interval(c_long, '2001-01-01/P1D') AS col
 FROM test_unnest,
@@ -275,7 +278,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B10_C1 TYPE: POSITIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B10_C1
 #-------------------------------------------------------------------------
 SELECT millis_to_timestamp(cast(c AS int)) AS col
 FROM test_unnest,
@@ -305,7 +308,7 @@ WHERE c_long IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B10_C2 TYPE: POSITIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B10_C2
 #-------------------------------------------------------------------------
 SELECT millis_to_timestamp(c_long) AS col
 FROM test_unnest,
@@ -338,7 +341,7 @@ WHERE c_long IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B11_C1 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B11_C1
 #-------------------------------------------------------------------------
 SELECT timestamp_to_millis(c) AS col
 FROM test_unnest,
@@ -351,7 +354,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B11_C2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B11_C2
 #-------------------------------------------------------------------------
 SELECT timestamp_to_millis(c_long) AS col
 FROM test_unnest,
@@ -364,7 +367,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B12_C1 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B12_C1
 #-------------------------------------------------------------------------
 SELECT extract(DAY
                FROM c) AS col
@@ -379,7 +382,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B12_C2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B12_C2
 #-------------------------------------------------------------------------
 SELECT extract(DAY
                FROM c_long) AS col
@@ -394,7 +397,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B13_C1 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B13_C1
 #-------------------------------------------------------------------------
 SELECT floor(c TO DAY) AS col
 FROM test_unnest,
@@ -407,7 +410,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B13_C2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B13_C2
 #-------------------------------------------------------------------------
 SELECT floor(c_long TO DAY) AS col
 FROM test_unnest,
@@ -420,7 +423,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B14_C1 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B14_C1
 #-------------------------------------------------------------------------
 SELECT ceil(c TO DAY) AS col
 FROM test_unnest,
@@ -433,7 +436,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B14_C2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B14_C2
 #-------------------------------------------------------------------------
 SELECT ceil(c_long TO DAY) AS col
 FROM test_unnest,
@@ -446,7 +449,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B15_C1 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B15_C1
 #-------------------------------------------------------------------------
 SELECT timestampadd(DAY, 1, c) AS col
 FROM test_unnest,
@@ -459,7 +462,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B15_C2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B15_C2
 #-------------------------------------------------------------------------
 SELECT timestampadd(DAY, 1, c_long) AS col
 FROM test_unnest,
@@ -472,7 +475,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B16_C1 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B16_C1
 #-------------------------------------------------------------------------
 SELECT timestampdiff(DAY, c, c) AS col
 FROM test_unnest,
@@ -485,7 +488,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B16_C2 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B16_C2
 #-------------------------------------------------------------------------
 SELECT timestampdiff(DAY, c_long, c) AS col
 FROM test_unnest,
@@ -498,7 +501,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B16_C3 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B16_C3
 #-------------------------------------------------------------------------
 SELECT timestampdiff(DAY, c, c_long) AS col
 FROM test_unnest,
@@ -511,7 +514,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B16_C4 TYPE: NEGATIVE TEST
+# TESTCASE: test_scalar_datetime_funcs TEST_ID: A1_B16_C4
 #-------------------------------------------------------------------------
 SELECT timestampdiff(DAY, c_long, c_long) AS col
 FROM test_unnest,
@@ -523,6 +526,3 @@ WHERE c_long IN (0,
 QueryInterruptedException
 !error
 
-#-------------------------------------------------------------------------
-# Total query count 33 Positive tests: 7 Negative tests: 26
-#-------------------------------------------------------------------------

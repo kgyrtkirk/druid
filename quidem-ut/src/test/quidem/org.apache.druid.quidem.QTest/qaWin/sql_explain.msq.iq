@@ -1,8 +1,11 @@
 !set useApproximateCountDistinct false
-!use druidtest://?componentSupplier=StandardMSQComponentSupplier&datasets=sql/src/test/quidem/qatests/kttm_nested
+!use druidtest://?componentSupplier=StandardMSQComponentSupplier&datasets=sql/src/test/quidem/qatests/qaWin
 !set outputformat mysql
+#-------------------------------------------------------------------------
+# TESTCASE: test_sql_test_explain TEST_ID: SEL_DATASOURCE
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22');
 +-----+
@@ -15,7 +18,7 @@ WHERE client_ip IN ('107.13.54.103',
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_explain TEST_ID: A1_G1_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_explain TEST_ID: A1_G1_Q1
 #-------------------------------------------------------------------------
 
 SELECT server_ip,
@@ -33,7 +36,7 @@ FROM
           client_ip,
           timezone,
           time_floor(__time, 'PT12H') __time
-   FROM kttm_nested
+   FROM test_win
    GROUP BY server_ip,
             client_ip,
             timezone,
@@ -62,7 +65,7 @@ WHERE client_ip IN ('107.13.54.103',
     "id" : "<taskId>_0",
     "input" : [ {
       "type" : "table",
-      "dataSource" : "kttm_nested",
+      "dataSource" : "test_win",
       "intervals" : [ "-146136543-09-08T08:23:32.096Z/146140482-04-24T15:36:27.903Z" ],
       "filter" : {
         "type" : "inType",
@@ -339,7 +342,7 @@ WHERE client_ip IN ('107.13.54.103',
             "queryType" : "groupBy",
             "dataSource" : {
               "type" : "table",
-              "name" : "kttm_nested"
+              "name" : "test_win"
             },
             "intervals" : {
               "type" : "intervals",
@@ -642,7 +645,7 @@ WHERE client_ip IN ('107.13.54.103',
 !msqPlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_explain TEST_ID: A1_G1_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_explain TEST_ID: A1_G1_Q2
 #-------------------------------------------------------------------------
 
 SELECT server_ip,
@@ -657,7 +660,7 @@ FROM
           client_ip,
           timezone,
           time_floor(__time, 'PT12H') __time
-   FROM kttm_nested
+   FROM test_win
    GROUP BY server_ip,
             client_ip,
             timezone,
@@ -688,7 +691,7 @@ WHERE client_ip IN ('107.13.54.103',
     "id" : "<taskId>_0",
     "input" : [ {
       "type" : "table",
-      "dataSource" : "kttm_nested",
+      "dataSource" : "test_win",
       "intervals" : [ "-146136543-09-08T08:23:32.096Z/146140482-04-24T15:36:27.903Z" ],
       "filter" : {
         "type" : "inType",
@@ -965,7 +968,7 @@ WHERE client_ip IN ('107.13.54.103',
             "queryType" : "groupBy",
             "dataSource" : {
               "type" : "table",
-              "name" : "kttm_nested"
+              "name" : "test_win"
             },
             "intervals" : {
               "type" : "intervals",
@@ -1268,7 +1271,7 @@ WHERE client_ip IN ('107.13.54.103',
 !msqPlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_explain TEST_ID: A1_G2_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_explain TEST_ID: A1_G2_Q1
 #-------------------------------------------------------------------------
 
 SELECT server_ip,
@@ -1281,7 +1284,7 @@ SELECT server_ip,
                                                                                                                                                           ORDER BY server_ip ASC, length(server_ip) ASC, cast(length(server_ip) AS DOUBLE)+0.123 ASC) LAST,
                                                                                                                                                                                                                                                       count(timezone) OVER (PARTITION BY client_ip
                                                                                                                                                                                                                                                                             ORDER BY server_ip ASC, length(server_ip) ASC, cast(length(server_ip) AS DOUBLE)+0.123 ASC) cnt
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
 GROUP BY server_ip,
@@ -1310,7 +1313,7 @@ GROUP BY server_ip,
     "id" : "<taskId>_0",
     "input" : [ {
       "type" : "table",
-      "dataSource" : "kttm_nested",
+      "dataSource" : "test_win",
       "intervals" : [ "-146136543-09-08T08:23:32.096Z/146140482-04-24T15:36:27.903Z" ],
       "filter" : {
         "type" : "inType",
@@ -1587,7 +1590,7 @@ GROUP BY server_ip,
             "queryType" : "groupBy",
             "dataSource" : {
               "type" : "table",
-              "name" : "kttm_nested"
+              "name" : "test_win"
             },
             "intervals" : {
               "type" : "intervals",
@@ -1890,7 +1893,7 @@ GROUP BY server_ip,
 !msqPlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_sql_test_explain TEST_ID: A1_G2_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_sql_test_explain TEST_ID: A1_G2_Q2
 #-------------------------------------------------------------------------
 
 SELECT server_ip,
@@ -1900,7 +1903,7 @@ SELECT server_ip,
        first_value(timezone) OVER w FIRST,
                                     last_value(timezone) OVER w LAST,
                                                                 count(timezone) OVER w cnt
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
 GROUP BY server_ip,
@@ -1931,7 +1934,7 @@ GROUP BY server_ip,
     "id" : "<taskId>_0",
     "input" : [ {
       "type" : "table",
-      "dataSource" : "kttm_nested",
+      "dataSource" : "test_win",
       "intervals" : [ "-146136543-09-08T08:23:32.096Z/146140482-04-24T15:36:27.903Z" ],
       "filter" : {
         "type" : "inType",
@@ -2208,7 +2211,7 @@ GROUP BY server_ip,
             "queryType" : "groupBy",
             "dataSource" : {
               "type" : "table",
-              "name" : "kttm_nested"
+              "name" : "test_win"
             },
             "intervals" : {
               "type" : "intervals",
@@ -2510,6 +2513,3 @@ GROUP BY server_ip,
 } ]
 !msqPlan
 
-#-------------------------------------------------------------------------
-# Total query count 5 Positive tests: 5 Negative tests: 0
-#-------------------------------------------------------------------------

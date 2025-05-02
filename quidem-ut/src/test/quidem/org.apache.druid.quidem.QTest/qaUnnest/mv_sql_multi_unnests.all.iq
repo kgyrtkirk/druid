@@ -2,6 +2,9 @@
 !set useApproximateCountDistinct false
 !use druidtest://?componentSupplier=AllDruidEnginesComponentSupplier&datasets=sql/src/test/quidem/qatests/qaUnnest/mv
 !set outputformat mysql
+#-------------------------------------------------------------------------
+# TESTCASE: test_multi_unnests TEST_ID: SEL_DATASOURCE
+#-------------------------------------------------------------------------
 SELECT *
 FROM test_unnest;
 +-------------------------+-------+--------+---------+----------+------------------------------------------------+------------------------+--------------------------------------+----------------------------------+--------------------------------------+----------------------------------+-----------------------------+
@@ -18,7 +21,7 @@ FROM test_unnest;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A1_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A1_B1
 #-------------------------------------------------------------------------
 SELECT c_long,
        c1,
@@ -170,7 +173,7 @@ WHERE (c1 IS NULL
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A1_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A1_B2
 #-------------------------------------------------------------------------
 SELECT c_long,
        c1,
@@ -323,7 +326,7 @@ WHERE (c1 IS NULL
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A1_B3 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A1_B3
 #-------------------------------------------------------------------------
 WITH t1 AS
   (SELECT *
@@ -478,7 +481,7 @@ WHERE (c1 IS NULL
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A2_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A2_B1
 #-------------------------------------------------------------------------
 SELECT c_long,
        c1,
@@ -630,7 +633,7 @@ WHERE (c1 IS NULL
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A2_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A2_B2
 #-------------------------------------------------------------------------
 SELECT c_long,
        c1,
@@ -783,7 +786,7 @@ WHERE (c1 IS NULL
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A2_B3 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A2_B3
 #-------------------------------------------------------------------------
 WITH t1 AS
   (SELECT *
@@ -938,7 +941,7 @@ WHERE (c1 IS NULL
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A3_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A3_B1
 #-------------------------------------------------------------------------
 SELECT c_long,
        c1,
@@ -1089,7 +1092,7 @@ WHERE (c1 IS NULL
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A3_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A3_B2
 #-------------------------------------------------------------------------
 SELECT c_long,
        c1,
@@ -1241,7 +1244,7 @@ WHERE (c1 IS NULL
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A3_B3 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A3_B3
 #-------------------------------------------------------------------------
 WITH t1 AS
   (SELECT *
@@ -1395,7 +1398,7 @@ WHERE (c1 IS NULL
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A4_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A4_B1
 #-------------------------------------------------------------------------
 SELECT c_long,
        c1,
@@ -1546,7 +1549,7 @@ WHERE (c1 IS NULL
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A4_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A4_B2
 #-------------------------------------------------------------------------
 SELECT c_long,
        c1,
@@ -1698,7 +1701,7 @@ WHERE (c1 IS NULL
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A4_B3 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A4_B3
 #-------------------------------------------------------------------------
 WITH t1 AS
   (SELECT *
@@ -1852,7 +1855,7 @@ WHERE (c1 IS NULL
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A5_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A5_B1
 #-------------------------------------------------------------------------
 SELECT c_long,
        c1,
@@ -1955,7 +1958,7 @@ WHERE (c1 IS NULL
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A5_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A5_B2
 #-------------------------------------------------------------------------
 SELECT c_long,
        c1,
@@ -2059,7 +2062,7 @@ WHERE (c1 IS NULL
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A5_B3 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A5_B3
 #-------------------------------------------------------------------------
 WITH t1 AS
   (SELECT *
@@ -2165,7 +2168,7 @@ WHERE (c1 IS NULL
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A6_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A6_B1
 #-------------------------------------------------------------------------
 SELECT c_long,
        c1,
@@ -2268,7 +2271,7 @@ WHERE (c1 IS NULL
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A6_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A6_B2
 #-------------------------------------------------------------------------
 SELECT c_long,
        c1,
@@ -2372,7 +2375,7 @@ WHERE (c1 IS NULL
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A6_B3 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A6_B3
 #-------------------------------------------------------------------------
 WITH t1 AS
   (SELECT *
@@ -2478,7 +2481,7 @@ WHERE (c1 IS NULL
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A7_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A7_B1
 #-------------------------------------------------------------------------
 SELECT c_long,
        c1,
@@ -2626,7 +2629,7 @@ WHERE (c1 IS NULL
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A7_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A7_B2
 #-------------------------------------------------------------------------
 SELECT c_long,
        c1,
@@ -2775,7 +2778,7 @@ WHERE (c1 IS NULL
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A7_B3 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A7_B3
 #-------------------------------------------------------------------------
 WITH t1 AS
   (SELECT *
@@ -2925,6 +2928,3 @@ WHERE (c1 IS NULL
 
 !ok
 
-#-------------------------------------------------------------------------
-# Total query count 22 Positive tests: 22 Negative tests: 0
-#-------------------------------------------------------------------------

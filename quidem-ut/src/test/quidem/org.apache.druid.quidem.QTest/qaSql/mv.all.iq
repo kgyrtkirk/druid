@@ -1,9 +1,12 @@
 !set dartQueryId 00000000-0000-0000-0000-000000000000
 !set useApproximateCountDistinct false
-!use druidtest://?componentSupplier=AllDruidEnginesComponentSupplier&datasets=sql/src/test/quidem/qatests/kttm_nested
+!use druidtest://?componentSupplier=AllDruidEnginesComponentSupplier&datasets=sql/src/test/quidem/qatests/qaSql
 !set outputformat mysql
+#-------------------------------------------------------------------------
+# TESTCASE: mv TEST_ID: SEL_DATASOURCE
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00';
 +-------+
 | cnt   |
@@ -15,10 +18,10 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_mv TEST_ID: A1 TYPE: POSITIVE TEST
+# TESTCASE: mv TEST_ID: A1_q_simple
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||mv_to_string(mv_filter_only(array_to_mv("language"), "language"), ',') IS NULL
        OR ('1'||mv_to_string(mv_filter_only(array_to_mv("language"), "language"), ',') = 1||mv_to_string(mv_filter_only(array_to_mv("language"), "language"), ',')
@@ -53,13 +56,16 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: mv TEST_ID: A1_q_subq
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||mv_to_string(mv_filter_only(array_to_mv("language"), "language"), ',') IS NULL
        OR '1'||mv_to_string(mv_filter_only(array_to_mv("language"), "language"), ',') IN
          (SELECT '1'||mv_to_string(mv_filter_only(array_to_mv("language"), "language"), ',')
-          FROM kttm_nested
+          FROM test_sql
           WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
             AND ('1'||mv_to_string(mv_filter_only(array_to_mv("language"), "language"), ',') IS NULL
                  OR ('1'||mv_to_string(mv_filter_only(array_to_mv("language"), "language"), ',') = 1||mv_to_string(mv_filter_only(array_to_mv("language"), "language"), ',')
@@ -94,12 +100,15 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: mv TEST_ID: A1_q_grpby
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
   (SELECT __time, number, client_ip,
                           '1'||mv_to_string(mv_filter_only(array_to_mv("language"), "language"), ','),
                           count(*)
-   FROM kttm_nested
+   FROM test_sql
    WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
      AND ('1'||mv_to_string(mv_filter_only(array_to_mv("language"), "language"), ',') IS NULL
           OR ('1'||mv_to_string(mv_filter_only(array_to_mv("language"), "language"), ',') = 1||mv_to_string(mv_filter_only(array_to_mv("language"), "language"), ',')
@@ -139,10 +148,10 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_mv TEST_ID: A2 TYPE: POSITIVE TEST
+# TESTCASE: mv TEST_ID: A2_q_simple
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||mv_to_string(mv_filter_none(array_to_mv("language"), "language"), ',') IS NULL
        OR ('1'||mv_to_string(mv_filter_none(array_to_mv("language"), "language"), ',') = 1||mv_to_string(mv_filter_none(array_to_mv("language"), "language"), ',')
@@ -177,13 +186,16 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: mv TEST_ID: A2_q_subq
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||mv_to_string(mv_filter_none(array_to_mv("language"), "language"), ',') IS NULL
        OR '1'||mv_to_string(mv_filter_none(array_to_mv("language"), "language"), ',') IN
          (SELECT '1'||mv_to_string(mv_filter_none(array_to_mv("language"), "language"), ',')
-          FROM kttm_nested
+          FROM test_sql
           WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
             AND ('1'||mv_to_string(mv_filter_none(array_to_mv("language"), "language"), ',') IS NULL
                  OR ('1'||mv_to_string(mv_filter_none(array_to_mv("language"), "language"), ',') = 1||mv_to_string(mv_filter_none(array_to_mv("language"), "language"), ',')
@@ -218,12 +230,15 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: mv TEST_ID: A2_q_grpby
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
   (SELECT __time, number, client_ip,
                           '1'||mv_to_string(mv_filter_none(array_to_mv("language"), "language"), ','),
                           count(*)
-   FROM kttm_nested
+   FROM test_sql
    WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
      AND ('1'||mv_to_string(mv_filter_none(array_to_mv("language"), "language"), ',') IS NULL
           OR ('1'||mv_to_string(mv_filter_none(array_to_mv("language"), "language"), ',') = 1||mv_to_string(mv_filter_none(array_to_mv("language"), "language"), ',')
@@ -263,10 +278,10 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_mv TEST_ID: A3 TYPE: POSITIVE TEST
+# TESTCASE: mv TEST_ID: A3_q_simple
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND (mv_length("language")+1 IS NULL
        OR (mv_length("language")+1 = mv_length("language")+1
@@ -301,13 +316,16 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: mv TEST_ID: A3_q_subq
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND (mv_length("language")+1 IS NULL
        OR mv_length("language")+1 IN
          (SELECT mv_length("language")+1
-          FROM kttm_nested
+          FROM test_sql
           WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
             AND (mv_length("language")+1 IS NULL
                  OR (mv_length("language")+1 = mv_length("language")+1
@@ -342,12 +360,15 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: mv TEST_ID: A3_q_grpby
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
   (SELECT __time, number, client_ip,
                           mv_length("language")+1,
                           count(*)
-   FROM kttm_nested
+   FROM test_sql
    WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
      AND (mv_length("language")+1 IS NULL
           OR (mv_length("language")+1 = mv_length("language")+1
@@ -387,10 +408,10 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_mv TEST_ID: A4 TYPE: POSITIVE TEST
+# TESTCASE: mv TEST_ID: A4_q_simple
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||mv_offset("language", 0) IS NULL
        OR ('1'||mv_offset("language", 0) = 1||mv_offset("language", 0)
@@ -425,13 +446,16 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: mv TEST_ID: A4_q_subq
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||mv_offset("language", 0) IS NULL
        OR '1'||mv_offset("language", 0) IN
          (SELECT '1'||mv_offset("language", 0)
-          FROM kttm_nested
+          FROM test_sql
           WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
             AND ('1'||mv_offset("language", 0) IS NULL
                  OR ('1'||mv_offset("language", 0) = 1||mv_offset("language", 0)
@@ -466,12 +490,15 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: mv TEST_ID: A4_q_grpby
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
   (SELECT __time, number, client_ip,
                           '1'||mv_offset("language", 0),
                           count(*)
-   FROM kttm_nested
+   FROM test_sql
    WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
      AND ('1'||mv_offset("language", 0) IS NULL
           OR ('1'||mv_offset("language", 0) = 1||mv_offset("language", 0)
@@ -511,10 +538,10 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_mv TEST_ID: A5 TYPE: POSITIVE TEST
+# TESTCASE: mv TEST_ID: A5_q_simple
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||mv_ordinal("language", 1) IS NULL
        OR ('1'||mv_ordinal("language", 1) = 1||mv_ordinal("language", 1)
@@ -549,13 +576,16 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: mv TEST_ID: A5_q_subq
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||mv_ordinal("language", 1) IS NULL
        OR '1'||mv_ordinal("language", 1) IN
          (SELECT '1'||mv_ordinal("language", 1)
-          FROM kttm_nested
+          FROM test_sql
           WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
             AND ('1'||mv_ordinal("language", 1) IS NULL
                  OR ('1'||mv_ordinal("language", 1) = 1||mv_ordinal("language", 1)
@@ -590,12 +620,15 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: mv TEST_ID: A5_q_grpby
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
   (SELECT __time, number, client_ip,
                           '1'||mv_ordinal("language", 1),
                           count(*)
-   FROM kttm_nested
+   FROM test_sql
    WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
      AND ('1'||mv_ordinal("language", 1) IS NULL
           OR ('1'||mv_ordinal("language", 1) = 1||mv_ordinal("language", 1)
@@ -635,10 +668,10 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_mv TEST_ID: A6 TYPE: POSITIVE TEST
+# TESTCASE: mv TEST_ID: A6_q_simple
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND (CASE
            WHEN mv_contains("language", "language") THEN 20
@@ -793,8 +826,11 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: mv TEST_ID: A6_q_subq
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND (CASE
            WHEN mv_contains("language", "language") THEN 20
@@ -808,7 +844,7 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
                      WHEN mv_contains("language", "language") THEN 20
                      ELSE 2
                  END
-          FROM kttm_nested
+          FROM test_sql
           WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
             AND (CASE
                      WHEN mv_contains("language", "language") THEN 20
@@ -963,6 +999,9 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: mv TEST_ID: A6_q_grpby
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
   (SELECT __time, number, client_ip,
@@ -971,7 +1010,7 @@ FROM
                               ELSE 2
                           END,
                           count(*)
-   FROM kttm_nested
+   FROM test_sql
    WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
      AND (CASE
               WHEN mv_contains("language", "language") THEN 20
@@ -1131,10 +1170,10 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_mv TEST_ID: A7 TYPE: POSITIVE TEST
+# TESTCASE: mv TEST_ID: A7_q_simple
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND (CASE
            WHEN mv_overlap("language", "language") THEN 20
@@ -1289,8 +1328,11 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: mv TEST_ID: A7_q_subq
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND (CASE
            WHEN mv_overlap("language", "language") THEN 20
@@ -1304,7 +1346,7 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
                      WHEN mv_overlap("language", "language") THEN 20
                      ELSE 2
                  END
-          FROM kttm_nested
+          FROM test_sql
           WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
             AND (CASE
                      WHEN mv_overlap("language", "language") THEN 20
@@ -1459,6 +1501,9 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: mv TEST_ID: A7_q_grpby
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
   (SELECT __time, number, client_ip,
@@ -1467,7 +1512,7 @@ FROM
                               ELSE 2
                           END,
                           count(*)
-   FROM kttm_nested
+   FROM test_sql
    WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
      AND (CASE
               WHEN mv_overlap("language", "language") THEN 20
@@ -1627,10 +1672,10 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_mv TEST_ID: A8 TYPE: POSITIVE TEST
+# TESTCASE: mv TEST_ID: A8_q_simple
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND (mv_offset_of("language", client_ip) IS NULL
        OR (mv_offset_of("language", client_ip) = mv_offset_of("language", client_ip)+0
@@ -1665,13 +1710,16 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: mv TEST_ID: A8_q_subq
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND (mv_offset_of("language", client_ip) IS NULL
        OR mv_offset_of("language", client_ip) IN
          (SELECT mv_offset_of("language", client_ip)
-          FROM kttm_nested
+          FROM test_sql
           WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
             AND (mv_offset_of("language", client_ip) IS NULL
                  OR (mv_offset_of("language", client_ip) = mv_offset_of("language", client_ip)+0
@@ -1706,12 +1754,15 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: mv TEST_ID: A8_q_grpby
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
   (SELECT __time, number, client_ip,
                           mv_offset_of("language", client_ip),
                           count(*)
-   FROM kttm_nested
+   FROM test_sql
    WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
      AND (mv_offset_of("language", client_ip) IS NULL
           OR (mv_offset_of("language", client_ip) = mv_offset_of("language", client_ip)+0
@@ -1751,10 +1802,10 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_mv TEST_ID: A9 TYPE: POSITIVE TEST
+# TESTCASE: mv TEST_ID: A9_q_simple
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND (mv_ordinal_of("language", client_ip) IS NULL
        OR (mv_ordinal_of("language", client_ip) = mv_ordinal_of("language", client_ip)+0
@@ -1789,13 +1840,16 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: mv TEST_ID: A9_q_subq
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND (mv_ordinal_of("language", client_ip) IS NULL
        OR mv_ordinal_of("language", client_ip) IN
          (SELECT mv_ordinal_of("language", client_ip)
-          FROM kttm_nested
+          FROM test_sql
           WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
             AND (mv_ordinal_of("language", client_ip) IS NULL
                  OR (mv_ordinal_of("language", client_ip) = mv_ordinal_of("language", client_ip)+0
@@ -1830,12 +1884,15 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: mv TEST_ID: A9_q_grpby
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
   (SELECT __time, number, client_ip,
                           mv_ordinal_of("language", client_ip),
                           count(*)
-   FROM kttm_nested
+   FROM test_sql
    WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
      AND (mv_ordinal_of("language", client_ip) IS NULL
           OR (mv_ordinal_of("language", client_ip) = mv_ordinal_of("language", client_ip)+0
@@ -1875,10 +1932,10 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_mv TEST_ID: A10 TYPE: POSITIVE TEST
+# TESTCASE: mv TEST_ID: A10_q_simple
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||mv_to_string(mv_prepend('1', "language"), ',') IS NULL
        OR ('1'||mv_to_string(mv_prepend('1', "language"), ',') = 1||mv_to_string(mv_prepend('1', "language"), ',')
@@ -1913,13 +1970,16 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: mv TEST_ID: A10_q_subq
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||mv_to_string(mv_prepend('1', "language"), ',') IS NULL
        OR '1'||mv_to_string(mv_prepend('1', "language"), ',') IN
          (SELECT '1'||mv_to_string(mv_prepend('1', "language"), ',')
-          FROM kttm_nested
+          FROM test_sql
           WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
             AND ('1'||mv_to_string(mv_prepend('1', "language"), ',') IS NULL
                  OR ('1'||mv_to_string(mv_prepend('1', "language"), ',') = 1||mv_to_string(mv_prepend('1', "language"), ',')
@@ -1954,12 +2014,15 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: mv TEST_ID: A10_q_grpby
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
   (SELECT __time, number, client_ip,
                           '1'||mv_to_string(mv_prepend('1', "language"), ','),
                           count(*)
-   FROM kttm_nested
+   FROM test_sql
    WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
      AND ('1'||mv_to_string(mv_prepend('1', "language"), ',') IS NULL
           OR ('1'||mv_to_string(mv_prepend('1', "language"), ',') = 1||mv_to_string(mv_prepend('1', "language"), ',')
@@ -1999,10 +2062,10 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_mv TEST_ID: A11 TYPE: POSITIVE TEST
+# TESTCASE: mv TEST_ID: A11_q_simple
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||mv_to_string(mv_append("language", 'A'), ',') IS NULL
        OR ('1'||mv_to_string(mv_append("language", 'A'), ',') = 1||mv_to_string(mv_append("language", 'A'), ',')
@@ -2037,13 +2100,16 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: mv TEST_ID: A11_q_subq
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||mv_to_string(mv_append("language", 'A'), ',') IS NULL
        OR '1'||mv_to_string(mv_append("language", 'A'), ',') IN
          (SELECT '1'||mv_to_string(mv_append("language", 'A'), ',')
-          FROM kttm_nested
+          FROM test_sql
           WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
             AND ('1'||mv_to_string(mv_append("language", 'A'), ',') IS NULL
                  OR ('1'||mv_to_string(mv_append("language", 'A'), ',') = 1||mv_to_string(mv_append("language", 'A'), ',')
@@ -2078,12 +2144,15 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: mv TEST_ID: A11_q_grpby
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
   (SELECT __time, number, client_ip,
                           '1'||mv_to_string(mv_append("language", 'A'), ','),
                           count(*)
-   FROM kttm_nested
+   FROM test_sql
    WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
      AND ('1'||mv_to_string(mv_append("language", 'A'), ',') IS NULL
           OR ('1'||mv_to_string(mv_append("language", 'A'), ',') = 1||mv_to_string(mv_append("language", 'A'), ',')
@@ -2123,10 +2192,10 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_mv TEST_ID: A12 TYPE: POSITIVE TEST
+# TESTCASE: mv TEST_ID: A12_q_simple
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||mv_to_string(mv_concat("language", "language"), ',') IS NULL
        OR ('1'||mv_to_string(mv_concat("language", "language"), ',') = 1||mv_to_string(mv_concat("language", "language"), ',')
@@ -2161,13 +2230,16 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: mv TEST_ID: A12_q_subq
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||mv_to_string(mv_concat("language", "language"), ',') IS NULL
        OR '1'||mv_to_string(mv_concat("language", "language"), ',') IN
          (SELECT '1'||mv_to_string(mv_concat("language", "language"), ',')
-          FROM kttm_nested
+          FROM test_sql
           WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
             AND ('1'||mv_to_string(mv_concat("language", "language"), ',') IS NULL
                  OR ('1'||mv_to_string(mv_concat("language", "language"), ',') = 1||mv_to_string(mv_concat("language", "language"), ',')
@@ -2202,12 +2274,15 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: mv TEST_ID: A12_q_grpby
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
   (SELECT __time, number, client_ip,
                           '1'||mv_to_string(mv_concat("language", "language"), ','),
                           count(*)
-   FROM kttm_nested
+   FROM test_sql
    WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
      AND ('1'||mv_to_string(mv_concat("language", "language"), ',') IS NULL
           OR ('1'||mv_to_string(mv_concat("language", "language"), ',') = 1||mv_to_string(mv_concat("language", "language"), ',')
@@ -2247,10 +2322,10 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_mv TEST_ID: A13 TYPE: POSITIVE TEST
+# TESTCASE: mv TEST_ID: A13_q_simple
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||mv_to_string(mv_slice("language", 0, 1), ',') IS NULL
        OR ('1'||mv_to_string(mv_slice("language", 0, 1), ',') = 1||mv_to_string(mv_slice("language", 0, 1), ',')
@@ -2285,13 +2360,16 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: mv TEST_ID: A13_q_subq
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||mv_to_string(mv_slice("language", 0, 1), ',') IS NULL
        OR '1'||mv_to_string(mv_slice("language", 0, 1), ',') IN
          (SELECT '1'||mv_to_string(mv_slice("language", 0, 1), ',')
-          FROM kttm_nested
+          FROM test_sql
           WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
             AND ('1'||mv_to_string(mv_slice("language", 0, 1), ',') IS NULL
                  OR ('1'||mv_to_string(mv_slice("language", 0, 1), ',') = 1||mv_to_string(mv_slice("language", 0, 1), ',')
@@ -2326,12 +2404,15 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: mv TEST_ID: A13_q_grpby
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
   (SELECT __time, number, client_ip,
                           '1'||mv_to_string(mv_slice("language", 0, 1), ','),
                           count(*)
-   FROM kttm_nested
+   FROM test_sql
    WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
      AND ('1'||mv_to_string(mv_slice("language", 0, 1), ',') IS NULL
           OR ('1'||mv_to_string(mv_slice("language", 0, 1), ',') = 1||mv_to_string(mv_slice("language", 0, 1), ',')
@@ -2371,10 +2452,10 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_mv TEST_ID: A14 TYPE: POSITIVE TEST
+# TESTCASE: mv TEST_ID: A14_q_simple
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||mv_to_string("language", ',') IS NULL
        OR ('1'||mv_to_string("language", ',') = 1||mv_to_string("language", ',')
@@ -2409,13 +2490,16 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: mv TEST_ID: A14_q_subq
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||mv_to_string("language", ',') IS NULL
        OR '1'||mv_to_string("language", ',') IN
          (SELECT '1'||mv_to_string("language", ',')
-          FROM kttm_nested
+          FROM test_sql
           WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
             AND ('1'||mv_to_string("language", ',') IS NULL
                  OR ('1'||mv_to_string("language", ',') = 1||mv_to_string("language", ',')
@@ -2450,12 +2534,15 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: mv TEST_ID: A14_q_grpby
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
   (SELECT __time, number, client_ip,
                           '1'||mv_to_string("language", ','),
                           count(*)
-   FROM kttm_nested
+   FROM test_sql
    WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
      AND ('1'||mv_to_string("language", ',') IS NULL
           OR ('1'||mv_to_string("language", ',') = 1||mv_to_string("language", ',')
@@ -2495,10 +2582,10 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_mv TEST_ID: A15 TYPE: POSITIVE TEST
+# TESTCASE: mv TEST_ID: A15_q_simple
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||string_to_mv('A|B', '|') IS NULL
        OR ('1'||string_to_mv('A|B', '|') = '1'||string_to_mv('A|B', '|')
@@ -2533,13 +2620,16 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: mv TEST_ID: A15_q_subq
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||string_to_mv('A|B', '|') IS NULL
        OR '1'||string_to_mv('A|B', '|') IN
          (SELECT '1'||string_to_mv('A|B', '|')
-          FROM kttm_nested
+          FROM test_sql
           WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
             AND ('1'||string_to_mv('A|B', '|') IS NULL
                  OR ('1'||string_to_mv('A|B', '|') = '1'||string_to_mv('A|B', '|')
@@ -2574,12 +2664,15 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: mv TEST_ID: A15_q_grpby
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
   (SELECT __time, number, client_ip,
                           '1'||string_to_mv('A|B', '|'),
                           count(*)
-   FROM kttm_nested
+   FROM test_sql
    WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
      AND ('1'||string_to_mv('A|B', '|') IS NULL
           OR ('1'||string_to_mv('A|B', '|') = '1'||string_to_mv('A|B', '|')
@@ -2619,10 +2712,10 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_mv TEST_ID: A16 TYPE: POSITIVE TEST
+# TESTCASE: mv TEST_ID: A16_q_simple
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||array_offset(mv_to_array("language"), 0) IS NULL
        OR ('1'||array_offset(mv_to_array("language"), 0) = 1||array_offset(mv_to_array("language"), 0)
@@ -2657,13 +2750,16 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: mv TEST_ID: A16_q_subq
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||array_offset(mv_to_array("language"), 0) IS NULL
        OR '1'||array_offset(mv_to_array("language"), 0) IN
          (SELECT '1'||array_offset(mv_to_array("language"), 0)
-          FROM kttm_nested
+          FROM test_sql
           WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
             AND ('1'||array_offset(mv_to_array("language"), 0) IS NULL
                  OR ('1'||array_offset(mv_to_array("language"), 0) = 1||array_offset(mv_to_array("language"), 0)
@@ -2698,12 +2794,15 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: mv TEST_ID: A16_q_grpby
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
   (SELECT __time, number, client_ip,
                           '1'||array_offset(mv_to_array("language"), 0),
                           count(*)
-   FROM kttm_nested
+   FROM test_sql
    WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
      AND ('1'||array_offset(mv_to_array("language"), 0) IS NULL
           OR ('1'||array_offset(mv_to_array("language"), 0) = 1||array_offset(mv_to_array("language"), 0)
@@ -2742,6 +2841,3 @@ FROM
 
 !ok
 
-#-------------------------------------------------------------------------
-# Total query count 49 Positive tests: 49 Negative tests: 0
-#-------------------------------------------------------------------------

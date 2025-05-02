@@ -1,9 +1,12 @@
 !set dartQueryId 00000000-0000-0000-0000-000000000000
 !set useApproximateCountDistinct false
-!use druidtest://?componentSupplier=AllDruidEnginesComponentSupplier&datasets=sql/src/test/quidem/qatests/kttm_nested
+!use druidtest://?componentSupplier=AllDruidEnginesComponentSupplier&datasets=sql/src/test/quidem/qatests/qaWin
 !set outputformat mysql
+#-------------------------------------------------------------------------
+# TESTCASE: test_basics_test_window_and_aggr TEST_ID: SEL_DATASOURCE
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22');
 +-----+
@@ -16,7 +19,7 @@ WHERE client_ip IN ('107.13.54.103',
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_window_and_aggr TEST_ID: A1_G1_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_window_and_aggr TEST_ID: A1_G1_Q1
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -31,7 +34,7 @@ FROM
           timezone,
           time_floor(__time, 'PT12H') __time,
           count(*)
-   FROM kttm_nested
+   FROM test_win
    GROUP BY server_ip,
             client_ip,
             timezone,
@@ -55,7 +58,7 @@ WHERE client_ip IN ('107.13.54.103',
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_window_and_aggr TEST_ID: A1_G1_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_window_and_aggr TEST_ID: A1_G1_Q2
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -69,7 +72,7 @@ FROM
           timezone,
           time_floor(__time, 'PT12H') __time,
           count(*)
-   FROM kttm_nested
+   FROM test_win
    GROUP BY server_ip,
             client_ip,
             timezone,
@@ -95,7 +98,7 @@ WHERE client_ip IN ('107.13.54.103',
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_window_and_aggr TEST_ID: A1_G2_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_window_and_aggr TEST_ID: A1_G2_Q1
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -104,7 +107,7 @@ SELECT server_ip,
        length(timezone) AS mycol,
        row_number() OVER (PARTITION BY client_ip
                           ORDER BY server_ip, timezone) AS c
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
 GROUP BY server_ip,
@@ -128,7 +131,7 @@ GROUP BY server_ip,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_window_and_aggr TEST_ID: A1_G2_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_window_and_aggr TEST_ID: A1_G2_Q2
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -136,7 +139,7 @@ SELECT server_ip,
        cast(time_floor(__time, 'PT12H') AS char) t,
        length(timezone) AS mycol,
        row_number() OVER w AS c
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
 GROUP BY server_ip,
@@ -162,7 +165,7 @@ GROUP BY server_ip,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_window_and_aggr TEST_ID: A2_G1_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_window_and_aggr TEST_ID: A2_G1_Q1
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -177,7 +180,7 @@ FROM
           timezone,
           time_floor(__time, 'PT12H') __time,
           count(*)
-   FROM kttm_nested
+   FROM test_win
    GROUP BY server_ip,
             client_ip,
             timezone,
@@ -201,7 +204,7 @@ WHERE client_ip IN ('107.13.54.103',
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_window_and_aggr TEST_ID: A2_G1_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_window_and_aggr TEST_ID: A2_G1_Q2
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -215,7 +218,7 @@ FROM
           timezone,
           time_floor(__time, 'PT12H') __time,
           count(*)
-   FROM kttm_nested
+   FROM test_win
    GROUP BY server_ip,
             client_ip,
             timezone,
@@ -242,7 +245,7 @@ WHERE client_ip IN ('107.13.54.103',
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_window_and_aggr TEST_ID: A2_G2_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_window_and_aggr TEST_ID: A2_G2_Q1
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -251,7 +254,7 @@ SELECT server_ip,
        length(timezone) AS mycol,
        row_number() OVER (PARTITION BY length(timezone)
                           ORDER BY server_ip, timezone, length(timezone)) AS c
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
 GROUP BY server_ip,
@@ -275,7 +278,7 @@ GROUP BY server_ip,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_window_and_aggr TEST_ID: A2_G2_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_window_and_aggr TEST_ID: A2_G2_Q2
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -283,7 +286,7 @@ SELECT server_ip,
        cast(time_floor(__time, 'PT12H') AS char) t,
        length(timezone) AS mycol,
        row_number() OVER w AS c
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
 GROUP BY server_ip,
@@ -310,7 +313,7 @@ GROUP BY server_ip,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_window_and_aggr TEST_ID: A3_G1_Q1 TYPE: NEGATIVE TEST
+# TESTCASE: test_basics_test_window_and_aggr TEST_ID: A3_G1_Q1
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -325,7 +328,7 @@ FROM
           timezone,
           time_floor(__time, 'PT12H') __time,
           count(*)
-   FROM kttm_nested
+   FROM test_win
    GROUP BY server_ip,
             client_ip,
             timezone,
@@ -336,7 +339,7 @@ Column 'mycol' not found in any table
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_window_and_aggr TEST_ID: A3_G1_Q2 TYPE: NEGATIVE TEST
+# TESTCASE: test_basics_test_window_and_aggr TEST_ID: A3_G1_Q2
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -350,7 +353,7 @@ FROM
           timezone,
           time_floor(__time, 'PT12H') __time,
           count(*)
-   FROM kttm_nested
+   FROM test_win
    GROUP BY server_ip,
             client_ip,
             timezone,
@@ -363,7 +366,7 @@ Column 'mycol' not found in any table
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_window_and_aggr TEST_ID: A3_G2_Q1 TYPE: NEGATIVE TEST
+# TESTCASE: test_basics_test_window_and_aggr TEST_ID: A3_G2_Q1
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -372,7 +375,7 @@ SELECT server_ip,
        length(timezone) AS mycol,
        row_number() OVER (PARTITION BY mycol
                           ORDER BY server_ip, timezone) AS c
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
 GROUP BY server_ip,
@@ -383,7 +386,7 @@ Column 'mycol' not found in any table
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_window_and_aggr TEST_ID: A3_G2_Q2 TYPE: NEGATIVE TEST
+# TESTCASE: test_basics_test_window_and_aggr TEST_ID: A3_G2_Q2
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -391,7 +394,7 @@ SELECT server_ip,
        cast(time_floor(__time, 'PT12H') AS char) t,
        length(timezone) AS mycol,
        row_number() OVER w AS c
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
 GROUP BY server_ip,
@@ -404,7 +407,7 @@ Column 'mycol' not found in any table
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_window_and_aggr TEST_ID: A4_G1_Q1 TYPE: NEGATIVE TEST
+# TESTCASE: test_basics_test_window_and_aggr TEST_ID: A4_G1_Q1
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -419,7 +422,7 @@ FROM
           timezone,
           time_floor(__time, 'PT12H') __time,
           count(*)
-   FROM kttm_nested
+   FROM test_win
    GROUP BY server_ip,
             client_ip,
             timezone,
@@ -430,7 +433,7 @@ Column 'mycol' not found in any table
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_window_and_aggr TEST_ID: A4_G1_Q2 TYPE: NEGATIVE TEST
+# TESTCASE: test_basics_test_window_and_aggr TEST_ID: A4_G1_Q2
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -444,7 +447,7 @@ FROM
           timezone,
           time_floor(__time, 'PT12H') __time,
           count(*)
-   FROM kttm_nested
+   FROM test_win
    GROUP BY server_ip,
             client_ip,
             timezone,
@@ -458,7 +461,7 @@ Column 'mycol' not found in any table
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_window_and_aggr TEST_ID: A4_G2_Q1 TYPE: NEGATIVE TEST
+# TESTCASE: test_basics_test_window_and_aggr TEST_ID: A4_G2_Q1
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -467,7 +470,7 @@ SELECT server_ip,
        length(timezone) AS mycol,
        row_number() OVER (PARTITION BY timezone
                           ORDER BY server_ip, timezone, mycol) AS c
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
 GROUP BY server_ip,
@@ -478,7 +481,7 @@ Column 'mycol' not found in any table
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_window_and_aggr TEST_ID: A4_G2_Q2 TYPE: NEGATIVE TEST
+# TESTCASE: test_basics_test_window_and_aggr TEST_ID: A4_G2_Q2
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -486,7 +489,7 @@ SELECT server_ip,
        cast(time_floor(__time, 'PT12H') AS char) t,
        length(timezone) AS mycol,
        row_number() OVER w AS c
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
 GROUP BY server_ip,
@@ -500,7 +503,7 @@ Column 'mycol' not found in any table
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_window_and_aggr TEST_ID: A5_G2_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_window_and_aggr TEST_ID: A5_G2_Q1
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -509,7 +512,7 @@ SELECT server_ip,
        count(*) AS mycol,
        row_number() OVER (PARTITION BY client_ip
                           ORDER BY server_ip, timezone) AS c
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
 GROUP BY server_ip,
@@ -533,7 +536,7 @@ GROUP BY server_ip,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_window_and_aggr TEST_ID: A5_G2_Q2 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_window_and_aggr TEST_ID: A5_G2_Q2
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -541,7 +544,7 @@ SELECT server_ip,
        cast(time_floor(__time, 'PT12H') AS char) t,
        count(*) AS mycol,
        row_number() OVER w AS c
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
 GROUP BY server_ip,
@@ -567,7 +570,7 @@ GROUP BY server_ip,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_window_and_aggr TEST_ID: A6_G2_Q1 TYPE: POSITIVE TEST
+# TESTCASE: test_basics_test_window_and_aggr TEST_ID: A6_G2_Q1
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -576,7 +579,7 @@ SELECT server_ip,
        count(*) AS mycol,
        row_number() OVER (PARTITION BY count(*)
                           ORDER BY server_ip, timezone, count(*)) AS c
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
 GROUP BY server_ip,
@@ -600,7 +603,7 @@ GROUP BY server_ip,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_window_and_aggr TEST_ID: A6_G2_Q2 TYPE: NEGATIVE TEST
+# TESTCASE: test_basics_test_window_and_aggr TEST_ID: A6_G2_Q2
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -608,7 +611,7 @@ SELECT server_ip,
        cast(time_floor(__time, 'PT12H') AS char) t,
        count(*) AS mycol,
        row_number() OVER w AS c
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
 GROUP BY server_ip,
@@ -622,7 +625,7 @@ Aggregation inside window is currently not supported with syntax WINDOW W AS <DE
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_window_and_aggr TEST_ID: A7_G2_Q1 TYPE: NEGATIVE TEST
+# TESTCASE: test_basics_test_window_and_aggr TEST_ID: A7_G2_Q1
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -631,7 +634,7 @@ SELECT server_ip,
        count(*) AS mycol,
        row_number() OVER (PARTITION BY mycol
                           ORDER BY server_ip, timezone) AS c
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
 GROUP BY server_ip,
@@ -642,7 +645,7 @@ Column 'mycol' not found in any table
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_window_and_aggr TEST_ID: A7_G2_Q2 TYPE: NEGATIVE TEST
+# TESTCASE: test_basics_test_window_and_aggr TEST_ID: A7_G2_Q2
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -650,7 +653,7 @@ SELECT server_ip,
        cast(time_floor(__time, 'PT12H') AS char) t,
        count(*) AS mycol,
        row_number() OVER w AS c
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
 GROUP BY server_ip,
@@ -663,7 +666,7 @@ Column 'mycol' not found in any table
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_window_and_aggr TEST_ID: A8_G2_Q1 TYPE: NEGATIVE TEST
+# TESTCASE: test_basics_test_window_and_aggr TEST_ID: A8_G2_Q1
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -672,7 +675,7 @@ SELECT server_ip,
        count(*) AS mycol,
        row_number() OVER (PARTITION BY client_ip
                           ORDER BY server_ip, timezone, mycol) AS c
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
 GROUP BY server_ip,
@@ -683,7 +686,7 @@ Column 'mycol' not found in any table
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_basics_test_window_and_aggr TEST_ID: A8_G2_Q2 TYPE: NEGATIVE TEST
+# TESTCASE: test_basics_test_window_and_aggr TEST_ID: A8_G2_Q2
 #-------------------------------------------------------------------------
 SELECT server_ip,
        client_ip,
@@ -691,7 +694,7 @@ SELECT server_ip,
        cast(time_floor(__time, 'PT12H') AS char) t,
        count(*) AS mycol,
        row_number() OVER w AS c
-FROM kttm_nested
+FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
 GROUP BY server_ip,
@@ -704,6 +707,3 @@ GROUP BY server_ip,
 Column 'mycol' not found in any table
 !error
 
-#-------------------------------------------------------------------------
-# Total query count 25 Positive tests: 12 Negative tests: 13
-#-------------------------------------------------------------------------

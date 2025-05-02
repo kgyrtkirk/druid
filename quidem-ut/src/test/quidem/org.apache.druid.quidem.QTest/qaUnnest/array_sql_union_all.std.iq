@@ -1,6 +1,9 @@
 !set useApproximateCountDistinct false
 !use druidtest://?componentSupplier=StandardComponentSupplier&datasets=sql/src/test/quidem/qatests/qaUnnest/array
 !set outputformat mysql
+#-------------------------------------------------------------------------
+# TESTCASE: test_union_all TEST_ID: SEL_DATASOURCE
+#-------------------------------------------------------------------------
 SELECT *
 FROM test_unnest;
 +-------------------------+-------+--------+--------------+--------------+------------------+----------------+--------------------+---------+--------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -15,7 +18,7 @@ FROM test_unnest;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A1_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_union_all TEST_ID: A1_B1
 #-------------------------------------------------------------------------
 SELECT s_int,
        c
@@ -46,7 +49,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A1_B2 TYPE: NEGATIVE TEST
+# TESTCASE: test_union_all TEST_ID: A1_B2
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -60,7 +63,7 @@ Unhandled Query Planning Failure
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A2_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_union_all TEST_ID: A2_B1
 #-------------------------------------------------------------------------
 SELECT s_int,
        c
@@ -91,7 +94,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A2_B2 TYPE: NEGATIVE TEST
+# TESTCASE: test_union_all TEST_ID: A2_B2
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -105,7 +108,7 @@ Unhandled Query Planning Failure
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A3_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_union_all TEST_ID: A3_B1
 #-------------------------------------------------------------------------
 SELECT s_int,
        c
@@ -136,7 +139,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A3_B2 TYPE: NEGATIVE TEST
+# TESTCASE: test_union_all TEST_ID: A3_B2
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -150,7 +153,7 @@ Unhandled Query Planning Failure
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A4_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_union_all TEST_ID: A4_B1
 #-------------------------------------------------------------------------
 SELECT s_int,
        c
@@ -181,7 +184,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A4_B2 TYPE: NEGATIVE TEST
+# TESTCASE: test_union_all TEST_ID: A4_B2
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -195,7 +198,7 @@ Unhandled Query Planning Failure
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A5_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_union_all TEST_ID: A5_B1
 #-------------------------------------------------------------------------
 SELECT s_int,
        c
@@ -226,7 +229,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A5_B2 TYPE: NEGATIVE TEST
+# TESTCASE: test_union_all TEST_ID: A5_B2
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -240,7 +243,7 @@ Unhandled Query Planning Failure
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A6_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_union_all TEST_ID: A6_B1
 #-------------------------------------------------------------------------
 SELECT s_int,
        c
@@ -271,7 +274,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A6_B2 TYPE: NEGATIVE TEST
+# TESTCASE: test_union_all TEST_ID: A6_B2
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -285,7 +288,7 @@ Unhandled Query Planning Failure
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A7_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_union_all TEST_ID: A7_B1
 #-------------------------------------------------------------------------
 SELECT s_int,
        c
@@ -316,7 +319,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A7_B2 TYPE: NEGATIVE TEST
+# TESTCASE: test_union_all TEST_ID: A7_B2
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -330,7 +333,7 @@ Unhandled Query Planning Failure
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A8_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_union_all TEST_ID: A8_B1
 #-------------------------------------------------------------------------
 SELECT s_int,
        c
@@ -361,7 +364,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A8_B2 TYPE: NEGATIVE TEST
+# TESTCASE: test_union_all TEST_ID: A8_B2
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -375,7 +378,7 @@ Unhandled Query Planning Failure
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A9_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_union_all TEST_ID: A9_B1
 #-------------------------------------------------------------------------
 SELECT s_int,
        c
@@ -410,7 +413,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A9_B2 TYPE: NEGATIVE TEST
+# TESTCASE: test_union_all TEST_ID: A9_B2
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -424,7 +427,7 @@ Unhandled Query Planning Failure
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A10_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_union_all TEST_ID: A10_B1
 #-------------------------------------------------------------------------
 SELECT s_int,
        c
@@ -459,7 +462,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A10_B2 TYPE: NEGATIVE TEST
+# TESTCASE: test_union_all TEST_ID: A10_B2
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -473,7 +476,7 @@ Unhandled Query Planning Failure
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A11_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_union_all TEST_ID: A11_B1
 #-------------------------------------------------------------------------
 SELECT s_int,
        c
@@ -504,7 +507,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A11_B2 TYPE: NEGATIVE TEST
+# TESTCASE: test_union_all TEST_ID: A11_B2
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -518,7 +521,7 @@ Unhandled Query Planning Failure
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A12_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_union_all TEST_ID: A12_B1
 #-------------------------------------------------------------------------
 SELECT s_int,
        c
@@ -543,7 +546,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A12_B2 TYPE: NEGATIVE TEST
+# TESTCASE: test_union_all TEST_ID: A12_B2
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -556,6 +559,3 @@ FROM
 Unhandled Query Planning Failure
 !error
 
-#-------------------------------------------------------------------------
-# Total query count 25 Positive tests: 13 Negative tests: 12
-#-------------------------------------------------------------------------

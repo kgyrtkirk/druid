@@ -2,6 +2,9 @@
 !set useApproximateCountDistinct false
 !use druidtest://?componentSupplier=DartComponentSupplier&datasets=sql/src/test/quidem/qatests/qaUnnest/mv
 !set outputformat mysql
+#-------------------------------------------------------------------------
+# TESTCASE: test_explain TEST_ID: SEL_DATASOURCE
+#-------------------------------------------------------------------------
 SELECT *
 FROM test_unnest;
 +-------------------------+-------+--------+---------+----------+------------------------------------------------+------------------------+--------------------------------------+----------------------------------+--------------------------------------+----------------------------------+-----------------------------+
@@ -18,7 +21,7 @@ FROM test_unnest;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A1_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A1_B1
 #-------------------------------------------------------------------------
 
 SELECT c
@@ -65,7 +68,7 @@ LogicalProject(c=[$12])
 !druidPlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A1_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A1_B2
 #-------------------------------------------------------------------------
 
 SELECT *
@@ -113,7 +116,7 @@ LogicalCorrelate(correlation=[$cor1], joinType=[inner], requiredColumns=[{5}])
 !druidPlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A1_B3 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A1_B3
 #-------------------------------------------------------------------------
 
 SELECT c,
@@ -141,6 +144,3 @@ LogicalAggregate(group=[{12}], cnt=[COUNT()])
 
 !druidPlan
 
-#-------------------------------------------------------------------------
-# Total query count 4 Positive tests: 4 Negative tests: 0
-#-------------------------------------------------------------------------

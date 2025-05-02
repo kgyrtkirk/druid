@@ -1,9 +1,12 @@
 !set dartQueryId 00000000-0000-0000-0000-000000000000
 !set useApproximateCountDistinct false
-!use druidtest://?componentSupplier=AllDruidEnginesComponentSupplier&datasets=sql/src/test/quidem/qatests/kttm_nested
+!use druidtest://?componentSupplier=AllDruidEnginesComponentSupplier&datasets=sql/src/test/quidem/qatests/qaSql
 !set outputformat mysql
+#-------------------------------------------------------------------------
+# TESTCASE: scalar_other TEST_ID: SEL_DATASOURCE
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00';
 +-------+
 | cnt   |
@@ -15,10 +18,10 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_scalar_other TEST_ID: A1 TYPE: POSITIVE TEST
+# TESTCASE: scalar_other TEST_ID: A1_q_simple
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||(CASE client_ip
                  WHEN server_ip THEN session_length
@@ -173,8 +176,11 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: scalar_other TEST_ID: A1_q_subq
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||(CASE client_ip
                  WHEN server_ip THEN session_length
@@ -188,7 +194,7 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
                            WHEN server_ip THEN session_length
                            ELSE session_length+1
                        END)
-          FROM kttm_nested
+          FROM test_sql
           WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
             AND ('1'||(CASE client_ip
                            WHEN server_ip THEN session_length
@@ -343,6 +349,9 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: scalar_other TEST_ID: A1_q_grpby
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
   (SELECT __time, number, client_ip,
@@ -351,7 +360,7 @@ FROM
                                     ELSE session_length+1
                                 END),
                           count(*)
-   FROM kttm_nested
+   FROM test_sql
    WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
      AND ('1'||(CASE client_ip
                     WHEN server_ip THEN session_length
@@ -511,10 +520,10 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_scalar_other TEST_ID: A2 TYPE: POSITIVE TEST
+# TESTCASE: scalar_other TEST_ID: A2_q_simple
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||(CASE session_length
                  WHEN session_length+1 THEN json_value(agent, '$.browser')
@@ -669,8 +678,11 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: scalar_other TEST_ID: A2_q_subq
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||(CASE session_length
                  WHEN session_length+1 THEN json_value(agent, '$.browser')
@@ -684,7 +696,7 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
                            WHEN session_length+1 THEN json_value(agent, '$.browser')
                            ELSE json_value(agent, '$.browser_version')
                        END)
-          FROM kttm_nested
+          FROM test_sql
           WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
             AND ('1'||(CASE session_length
                            WHEN session_length+1 THEN json_value(agent, '$.browser')
@@ -839,6 +851,9 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: scalar_other TEST_ID: A2_q_grpby
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
   (SELECT __time, number, client_ip,
@@ -847,7 +862,7 @@ FROM
                                     ELSE json_value(agent, '$.browser_version')
                                 END),
                           count(*)
-   FROM kttm_nested
+   FROM test_sql
    WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
      AND ('1'||(CASE session_length
                     WHEN session_length+1 THEN json_value(agent, '$.browser')
@@ -1007,10 +1022,10 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_scalar_other TEST_ID: A3 TYPE: POSITIVE TEST
+# TESTCASE: scalar_other TEST_ID: A3_q_simple
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||cast(CASE
                      WHEN client_ip=server_ip THEN session_length
@@ -1165,8 +1180,11 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: scalar_other TEST_ID: A3_q_subq
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||cast(CASE
                      WHEN client_ip=server_ip THEN session_length
@@ -1180,7 +1198,7 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
                                WHEN client_ip=server_ip THEN session_length
                                ELSE session_length+1
                            END AS char)
-          FROM kttm_nested
+          FROM test_sql
           WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
             AND ('1'||cast(CASE
                                WHEN client_ip=server_ip THEN session_length
@@ -1335,6 +1353,9 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: scalar_other TEST_ID: A3_q_grpby
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
   (SELECT __time, number, client_ip,
@@ -1343,7 +1364,7 @@ FROM
                                         ELSE session_length+1
                                     END AS char),
                           count(*)
-   FROM kttm_nested
+   FROM test_sql
    WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
      AND ('1'||cast(CASE
                         WHEN client_ip=server_ip THEN session_length
@@ -1503,10 +1524,10 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_scalar_other TEST_ID: A4 TYPE: POSITIVE TEST
+# TESTCASE: scalar_other TEST_ID: A4_q_simple
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||(CASE
                  WHEN json_value(agent, '$.browser')=json_value(agent, '$.browser_version') THEN json_value(agent, '$.browser')
@@ -1661,8 +1682,11 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: scalar_other TEST_ID: A4_q_subq
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||(CASE
                  WHEN json_value(agent, '$.browser')=json_value(agent, '$.browser_version') THEN json_value(agent, '$.browser')
@@ -1676,7 +1700,7 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
                            WHEN json_value(agent, '$.browser')=json_value(agent, '$.browser_version') THEN json_value(agent, '$.browser')
                            ELSE json_value(agent, '$.browser_version')
                        END)
-          FROM kttm_nested
+          FROM test_sql
           WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
             AND ('1'||(CASE
                            WHEN json_value(agent, '$.browser')=json_value(agent, '$.browser_version') THEN json_value(agent, '$.browser')
@@ -1831,6 +1855,9 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: scalar_other TEST_ID: A4_q_grpby
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
   (SELECT __time, number, client_ip,
@@ -1839,7 +1866,7 @@ FROM
                                     ELSE json_value(agent, '$.browser_version')
                                 END),
                           count(*)
-   FROM kttm_nested
+   FROM test_sql
    WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
      AND ('1'||(CASE
                     WHEN json_value(agent, '$.browser')=json_value(agent, '$.browser_version') THEN json_value(agent, '$.browser')
@@ -1999,10 +2026,10 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_scalar_other TEST_ID: A5 TYPE: POSITIVE TEST
+# TESTCASE: scalar_other TEST_ID: A5_q_simple
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||cast(session_length AS char) IS NULL
        OR ('1'||cast(session_length AS char) = 1||cast(session_length AS char)
@@ -2037,13 +2064,16 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: scalar_other TEST_ID: A5_q_subq
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||cast(session_length AS char) IS NULL
        OR '1'||cast(session_length AS char) IN
          (SELECT '1'||cast(session_length AS char)
-          FROM kttm_nested
+          FROM test_sql
           WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
             AND ('1'||cast(session_length AS char) IS NULL
                  OR ('1'||cast(session_length AS char) = 1||cast(session_length AS char)
@@ -2078,12 +2108,15 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: scalar_other TEST_ID: A5_q_grpby
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
   (SELECT __time, number, client_ip,
                           '1'||cast(session_length AS char),
                           count(*)
-   FROM kttm_nested
+   FROM test_sql
    WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
      AND ('1'||cast(session_length AS char) IS NULL
           OR ('1'||cast(session_length AS char) = 1||cast(session_length AS char)
@@ -2123,10 +2156,10 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_scalar_other TEST_ID: A6 TYPE: POSITIVE TEST
+# TESTCASE: scalar_other TEST_ID: A6_q_simple
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND (cast(ltrim("session", 'S') AS bigint)+1 IS NULL
        OR (cast(ltrim("session", 'S') AS bigint)+1 = cast(ltrim("session", 'S') AS bigint)+1
@@ -2161,13 +2194,16 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: scalar_other TEST_ID: A6_q_subq
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND (cast(ltrim("session", 'S') AS bigint)+1 IS NULL
        OR cast(ltrim("session", 'S') AS bigint)+1 IN
          (SELECT cast(ltrim("session", 'S') AS bigint)+1
-          FROM kttm_nested
+          FROM test_sql
           WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
             AND (cast(ltrim("session", 'S') AS bigint)+1 IS NULL
                  OR (cast(ltrim("session", 'S') AS bigint)+1 = cast(ltrim("session", 'S') AS bigint)+1
@@ -2202,12 +2238,15 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: scalar_other TEST_ID: A6_q_grpby
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
   (SELECT __time, number, client_ip,
                           cast(ltrim("session", 'S') AS bigint)+1,
                           count(*)
-   FROM kttm_nested
+   FROM test_sql
    WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
      AND (cast(ltrim("session", 'S') AS bigint)+1 IS NULL
           OR (cast(ltrim("session", 'S') AS bigint)+1 = cast(ltrim("session", 'S') AS bigint)+1
@@ -2247,10 +2286,10 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_scalar_other TEST_ID: A7 TYPE: POSITIVE TEST
+# TESTCASE: scalar_other TEST_ID: A7_q_simple
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND (floor(cast(ltrim("session", 'S') AS float))+1 IS NULL
        OR (floor(cast(ltrim("session", 'S') AS float))+1 = floor(cast(ltrim("session", 'S') AS float))+1
@@ -2285,13 +2324,16 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: scalar_other TEST_ID: A7_q_subq
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND (floor(cast(ltrim("session", 'S') AS float))+1 IS NULL
        OR floor(cast(ltrim("session", 'S') AS float))+1 IN
          (SELECT floor(cast(ltrim("session", 'S') AS float))+1
-          FROM kttm_nested
+          FROM test_sql
           WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
             AND (floor(cast(ltrim("session", 'S') AS float))+1 IS NULL
                  OR (floor(cast(ltrim("session", 'S') AS float))+1 = floor(cast(ltrim("session", 'S') AS float))+1
@@ -2326,12 +2368,15 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: scalar_other TEST_ID: A7_q_grpby
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
   (SELECT __time, number, client_ip,
                           floor(cast(ltrim("session", 'S') AS float))+1,
                           count(*)
-   FROM kttm_nested
+   FROM test_sql
    WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
      AND (floor(cast(ltrim("session", 'S') AS float))+1 IS NULL
           OR (floor(cast(ltrim("session", 'S') AS float))+1 = floor(cast(ltrim("session", 'S') AS float))+1
@@ -2371,10 +2416,10 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_scalar_other TEST_ID: A8 TYPE: POSITIVE TEST
+# TESTCASE: scalar_other TEST_ID: A8_q_simple
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND (floor(cast(ltrim("session", 'S') AS DOUBLE))+1 IS NULL
        OR (floor(cast(ltrim("session", 'S') AS DOUBLE))+1 = floor(cast(ltrim("session", 'S') AS DOUBLE))+1
@@ -2409,13 +2454,16 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: scalar_other TEST_ID: A8_q_subq
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND (floor(cast(ltrim("session", 'S') AS DOUBLE))+1 IS NULL
        OR floor(cast(ltrim("session", 'S') AS DOUBLE))+1 IN
          (SELECT floor(cast(ltrim("session", 'S') AS DOUBLE))+1
-          FROM kttm_nested
+          FROM test_sql
           WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
             AND (floor(cast(ltrim("session", 'S') AS DOUBLE))+1 IS NULL
                  OR (floor(cast(ltrim("session", 'S') AS DOUBLE))+1 = floor(cast(ltrim("session", 'S') AS DOUBLE))+1
@@ -2450,12 +2498,15 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: scalar_other TEST_ID: A8_q_grpby
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
   (SELECT __time, number, client_ip,
                           floor(cast(ltrim("session", 'S') AS DOUBLE))+1,
                           count(*)
-   FROM kttm_nested
+   FROM test_sql
    WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
      AND (floor(cast(ltrim("session", 'S') AS DOUBLE))+1 IS NULL
           OR (floor(cast(ltrim("session", 'S') AS DOUBLE))+1 = floor(cast(ltrim("session", 'S') AS DOUBLE))+1
@@ -2495,10 +2546,10 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_scalar_other TEST_ID: A9 TYPE: POSITIVE TEST
+# TESTCASE: scalar_other TEST_ID: A9_q_simple
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||cast(cast(ltrim("session", 'S') AS boolean) AS char) IS NULL
        OR ('1'||cast(cast(ltrim("session", 'S') AS boolean) AS char) = 1||cast(cast(ltrim("session", 'S') AS boolean) AS char)
@@ -2533,13 +2584,16 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: scalar_other TEST_ID: A9_q_subq
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||cast(cast(ltrim("session", 'S') AS boolean) AS char) IS NULL
        OR '1'||cast(cast(ltrim("session", 'S') AS boolean) AS char) IN
          (SELECT '1'||cast(cast(ltrim("session", 'S') AS boolean) AS char)
-          FROM kttm_nested
+          FROM test_sql
           WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
             AND ('1'||cast(cast(ltrim("session", 'S') AS boolean) AS char) IS NULL
                  OR ('1'||cast(cast(ltrim("session", 'S') AS boolean) AS char) = 1||cast(cast(ltrim("session", 'S') AS boolean) AS char)
@@ -2574,12 +2628,15 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: scalar_other TEST_ID: A9_q_grpby
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
   (SELECT __time, number, client_ip,
                           '1'||cast(cast(ltrim("session", 'S') AS boolean) AS char),
                           count(*)
-   FROM kttm_nested
+   FROM test_sql
    WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
      AND ('1'||cast(cast(ltrim("session", 'S') AS boolean) AS char) IS NULL
           OR ('1'||cast(cast(ltrim("session", 'S') AS boolean) AS char) = 1||cast(cast(ltrim("session", 'S') AS boolean) AS char)
@@ -2619,10 +2676,10 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_scalar_other TEST_ID: A10 TYPE: POSITIVE TEST
+# TESTCASE: scalar_other TEST_ID: A10_q_simple
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND (cast(session_length AS timestamp) IS NULL
        OR (cast(session_length AS timestamp) = cast(session_length AS timestamp)
@@ -2657,13 +2714,16 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: scalar_other TEST_ID: A10_q_subq
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND (cast(session_length AS timestamp) IS NULL
        OR cast(session_length AS timestamp) IN
          (SELECT cast(session_length AS timestamp)
-          FROM kttm_nested
+          FROM test_sql
           WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
             AND (cast(session_length AS timestamp) IS NULL
                  OR (cast(session_length AS timestamp) = cast(session_length AS timestamp)
@@ -2698,12 +2758,15 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: scalar_other TEST_ID: A10_q_grpby
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
   (SELECT __time, number, client_ip,
                           cast(session_length AS timestamp),
                           count(*)
-   FROM kttm_nested
+   FROM test_sql
    WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
      AND (cast(session_length AS timestamp) IS NULL
           OR (cast(session_length AS timestamp) = cast(session_length AS timestamp)
@@ -2743,10 +2806,10 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_scalar_other TEST_ID: A11 TYPE: POSITIVE TEST
+# TESTCASE: scalar_other TEST_ID: A11_q_simple
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||coalesce(client_ip, server_ip) IS NULL
        OR ('1'||coalesce(client_ip, server_ip) = 1||coalesce(client_ip, server_ip)
@@ -2781,13 +2844,16 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: scalar_other TEST_ID: A11_q_subq
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||coalesce(client_ip, server_ip) IS NULL
        OR '1'||coalesce(client_ip, server_ip) IN
          (SELECT '1'||coalesce(client_ip, server_ip)
-          FROM kttm_nested
+          FROM test_sql
           WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
             AND ('1'||coalesce(client_ip, server_ip) IS NULL
                  OR ('1'||coalesce(client_ip, server_ip) = 1||coalesce(client_ip, server_ip)
@@ -2822,12 +2888,15 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: scalar_other TEST_ID: A11_q_grpby
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
   (SELECT __time, number, client_ip,
                           '1'||coalesce(client_ip, server_ip),
                           count(*)
-   FROM kttm_nested
+   FROM test_sql
    WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
      AND ('1'||coalesce(client_ip, server_ip) IS NULL
           OR ('1'||coalesce(client_ip, server_ip) = 1||coalesce(client_ip, server_ip)
@@ -2867,10 +2936,10 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_scalar_other TEST_ID: A12 TYPE: POSITIVE TEST
+# TESTCASE: scalar_other TEST_ID: A12_q_simple
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||to_json_string(coalesce(event, agent)) IS NULL
        OR ('1'||to_json_string(coalesce(event, agent)) = 1||to_json_string(coalesce(event, agent))
@@ -2905,13 +2974,16 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: scalar_other TEST_ID: A12_q_subq
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||to_json_string(coalesce(event, agent)) IS NULL
        OR '1'||to_json_string(coalesce(event, agent)) IN
          (SELECT '1'||to_json_string(coalesce(event, agent))
-          FROM kttm_nested
+          FROM test_sql
           WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
             AND ('1'||to_json_string(coalesce(event, agent)) IS NULL
                  OR ('1'||to_json_string(coalesce(event, agent)) = 1||to_json_string(coalesce(event, agent))
@@ -2946,12 +3018,15 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: scalar_other TEST_ID: A12_q_grpby
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
   (SELECT __time, number, client_ip,
                           '1'||to_json_string(coalesce(event, agent)),
                           count(*)
-   FROM kttm_nested
+   FROM test_sql
    WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
      AND ('1'||to_json_string(coalesce(event, agent)) IS NULL
           OR ('1'||to_json_string(coalesce(event, agent)) = 1||to_json_string(coalesce(event, agent))
@@ -2991,10 +3066,10 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_scalar_other TEST_ID: A13 TYPE: POSITIVE TEST
+# TESTCASE: scalar_other TEST_ID: A13_q_simple
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||nullif(client_ip, server_ip) IS NULL
        OR ('1'||nullif(client_ip, server_ip) = 1||nullif(client_ip, server_ip)
@@ -3029,13 +3104,16 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: scalar_other TEST_ID: A13_q_subq
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||nullif(client_ip, server_ip) IS NULL
        OR '1'||nullif(client_ip, server_ip) IN
          (SELECT '1'||nullif(client_ip, server_ip)
-          FROM kttm_nested
+          FROM test_sql
           WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
             AND ('1'||nullif(client_ip, server_ip) IS NULL
                  OR ('1'||nullif(client_ip, server_ip) = 1||nullif(client_ip, server_ip)
@@ -3070,12 +3148,15 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: scalar_other TEST_ID: A13_q_grpby
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
   (SELECT __time, number, client_ip,
                           '1'||nullif(client_ip, server_ip),
                           count(*)
-   FROM kttm_nested
+   FROM test_sql
    WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
      AND ('1'||nullif(client_ip, server_ip) IS NULL
           OR ('1'||nullif(client_ip, server_ip) = 1||nullif(client_ip, server_ip)
@@ -3115,10 +3196,10 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_scalar_other TEST_ID: A14 TYPE: POSITIVE TEST
+# TESTCASE: scalar_other TEST_ID: A14_q_simple
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||to_json_string(nullif(event, agent)) IS NULL
        OR ('1'||to_json_string(nullif(event, agent)) = 1||to_json_string(nullif(event, agent))
@@ -3153,13 +3234,16 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: scalar_other TEST_ID: A14_q_subq
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||to_json_string(nullif(event, agent)) IS NULL
        OR '1'||to_json_string(nullif(event, agent)) IN
          (SELECT '1'||to_json_string(nullif(event, agent))
-          FROM kttm_nested
+          FROM test_sql
           WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
             AND ('1'||to_json_string(nullif(event, agent)) IS NULL
                  OR ('1'||to_json_string(nullif(event, agent)) = 1||to_json_string(nullif(event, agent))
@@ -3194,12 +3278,15 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: scalar_other TEST_ID: A14_q_grpby
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
   (SELECT __time, number, client_ip,
                           '1'||to_json_string(nullif(event, agent)),
                           count(*)
-   FROM kttm_nested
+   FROM test_sql
    WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
      AND ('1'||to_json_string(nullif(event, agent)) IS NULL
           OR ('1'||to_json_string(nullif(event, agent)) = 1||to_json_string(nullif(event, agent))
@@ -3239,10 +3326,10 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_scalar_other TEST_ID: A15 TYPE: POSITIVE TEST
+# TESTCASE: scalar_other TEST_ID: A15_q_simple
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||nvl(client_ip, server_ip) IS NULL
        OR ('1'||nvl(client_ip, server_ip) = 1||nvl(client_ip, server_ip)
@@ -3277,13 +3364,16 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: scalar_other TEST_ID: A15_q_subq
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||nvl(client_ip, server_ip) IS NULL
        OR '1'||nvl(client_ip, server_ip) IN
          (SELECT '1'||nvl(client_ip, server_ip)
-          FROM kttm_nested
+          FROM test_sql
           WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
             AND ('1'||nvl(client_ip, server_ip) IS NULL
                  OR ('1'||nvl(client_ip, server_ip) = 1||nvl(client_ip, server_ip)
@@ -3318,12 +3408,15 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: scalar_other TEST_ID: A15_q_grpby
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
   (SELECT __time, number, client_ip,
                           '1'||nvl(client_ip, server_ip),
                           count(*)
-   FROM kttm_nested
+   FROM test_sql
    WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
      AND ('1'||nvl(client_ip, server_ip) IS NULL
           OR ('1'||nvl(client_ip, server_ip) = 1||nvl(client_ip, server_ip)
@@ -3363,10 +3456,10 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_scalar_other TEST_ID: A16 TYPE: POSITIVE TEST
+# TESTCASE: scalar_other TEST_ID: A16_q_simple
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||to_json_string(nvl(event, agent)) IS NULL
        OR ('1'||to_json_string(nvl(event, agent)) = 1||to_json_string(nvl(event, agent))
@@ -3401,13 +3494,16 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: scalar_other TEST_ID: A16_q_subq
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||to_json_string(nvl(event, agent)) IS NULL
        OR '1'||to_json_string(nvl(event, agent)) IN
          (SELECT '1'||to_json_string(nvl(event, agent))
-          FROM kttm_nested
+          FROM test_sql
           WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
             AND ('1'||to_json_string(nvl(event, agent)) IS NULL
                  OR ('1'||to_json_string(nvl(event, agent)) = 1||to_json_string(nvl(event, agent))
@@ -3442,12 +3538,15 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: scalar_other TEST_ID: A16_q_grpby
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
   (SELECT __time, number, client_ip,
                           '1'||to_json_string(nvl(event, agent)),
                           count(*)
-   FROM kttm_nested
+   FROM test_sql
    WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
      AND ('1'||to_json_string(nvl(event, agent)) IS NULL
           OR ('1'||to_json_string(nvl(event, agent)) = 1||to_json_string(nvl(event, agent))
@@ -3486,6 +3585,3 @@ FROM
 
 !ok
 
-#-------------------------------------------------------------------------
-# Total query count 49 Positive tests: 49 Negative tests: 0
-#-------------------------------------------------------------------------

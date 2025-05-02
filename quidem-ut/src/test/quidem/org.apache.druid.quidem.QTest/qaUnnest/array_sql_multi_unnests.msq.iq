@@ -1,6 +1,9 @@
 !set useApproximateCountDistinct false
 !use druidtest://?componentSupplier=StandardMSQComponentSupplier&datasets=sql/src/test/quidem/qatests/qaUnnest/array
 !set outputformat mysql
+#-------------------------------------------------------------------------
+# TESTCASE: test_multi_unnests TEST_ID: SEL_DATASOURCE
+#-------------------------------------------------------------------------
 SELECT *
 FROM test_unnest;
 +-------------------------+-------+--------+--------------+--------------+------------------+----------------+--------------------+---------+--------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -15,7 +18,7 @@ FROM test_unnest;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A6_B6_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A6_B6_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -58,7 +61,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A6_B7_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A6_B7_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -101,7 +104,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A6_B8_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A6_B8_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -144,7 +147,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A6_B9_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A6_B9_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -187,7 +190,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A6_B10_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A6_B10_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -230,7 +233,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A6_B11_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A6_B11_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -246,7 +249,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A6_B12_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A6_B12_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -307,7 +310,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A7_B6_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A7_B6_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -350,7 +353,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A7_B7_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A7_B7_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -393,7 +396,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A7_B8_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A7_B8_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -436,7 +439,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A7_B9_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A7_B9_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -479,7 +482,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A7_B10_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A7_B10_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -522,7 +525,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A7_B11_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A7_B11_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -538,7 +541,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A7_B12_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A7_B12_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -599,7 +602,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A8_B6_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A8_B6_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -642,7 +645,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A8_B7_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A8_B7_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -685,7 +688,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A8_B8_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A8_B8_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -728,7 +731,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A8_B9_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A8_B9_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -771,7 +774,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A8_B10_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A8_B10_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -814,7 +817,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A8_B11_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A8_B11_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -830,7 +833,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A8_B12_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A8_B12_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -891,7 +894,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A9_B6_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A9_B6_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -934,7 +937,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A9_B7_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A9_B7_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -977,7 +980,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A9_B8_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A9_B8_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -1020,7 +1023,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A9_B9_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A9_B9_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -1063,7 +1066,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A9_B10_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A9_B10_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -1106,7 +1109,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A9_B11_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A9_B11_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -1122,7 +1125,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A9_B12_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A9_B12_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -1183,7 +1186,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A10_B6_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A10_B6_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -1226,7 +1229,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A10_B7_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A10_B7_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -1269,7 +1272,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A10_B8_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A10_B8_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -1312,7 +1315,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A10_B9_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A10_B9_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -1355,7 +1358,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A10_B10_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A10_B10_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -1398,7 +1401,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A10_B11_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A10_B11_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -1414,7 +1417,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A10_B12_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A10_B12_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -1475,7 +1478,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A11_B6_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A11_B6_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -1491,7 +1494,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A11_B7_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A11_B7_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -1507,7 +1510,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A11_B8_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A11_B8_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -1523,7 +1526,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A11_B9_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A11_B9_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -1539,7 +1542,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A11_B10_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A11_B10_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -1555,7 +1558,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A11_B11_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A11_B11_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -1571,7 +1574,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A11_B12_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A11_B12_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -1587,7 +1590,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A12_B6_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A12_B6_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -1648,7 +1651,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A12_B7_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A12_B7_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -1709,7 +1712,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A12_B8_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A12_B8_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -1770,7 +1773,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A12_B9_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A12_B9_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -1831,7 +1834,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A12_B10_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A12_B10_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -1892,7 +1895,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A12_B11_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A12_B11_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -1908,7 +1911,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_multi_unnests TEST_ID: A12_B12_D1 TYPE: POSITIVE TEST
+# TESTCASE: test_multi_unnests TEST_ID: A12_B12_D1
 #-------------------------------------------------------------------------
 SELECT c1,
        c2
@@ -1998,6 +2001,3 @@ FROM test_unnest,
 
 !ok
 
-#-------------------------------------------------------------------------
-# Total query count 50 Positive tests: 50 Negative tests: 0
-#-------------------------------------------------------------------------

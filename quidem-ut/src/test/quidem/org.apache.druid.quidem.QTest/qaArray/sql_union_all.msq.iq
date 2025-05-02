@@ -1,6 +1,9 @@
 !set useApproximateCountDistinct false
 !use druidtest://?componentSupplier=StandardMSQComponentSupplier&datasets=sql/src/test/quidem/qatests/qaArray/sql
 !set outputformat mysql
+#-------------------------------------------------------------------------
+# TESTCASE: test_union_all TEST_ID: SEL_DATASOURCE
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM test_array;
 +-----+
@@ -13,7 +16,7 @@ FROM test_array;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A1_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_union_all TEST_ID: A1_B1
 #-------------------------------------------------------------------------
 SELECT c
 FROM
@@ -38,7 +41,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A4_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_union_all TEST_ID: A4_B1
 #-------------------------------------------------------------------------
 SELECT c
 FROM
@@ -63,7 +66,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A5_B1 TYPE: NEGATIVE TEST
+# TESTCASE: test_union_all TEST_ID: A5_B1
 #-------------------------------------------------------------------------
 SELECT c
 FROM
@@ -75,7 +78,7 @@ SQL requires union
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A6_B1 TYPE: NEGATIVE TEST
+# TESTCASE: test_union_all TEST_ID: A6_B1
 #-------------------------------------------------------------------------
 SELECT c
 FROM
@@ -87,7 +90,7 @@ SQL requires union
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A7_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_union_all TEST_ID: A7_B1
 #-------------------------------------------------------------------------
 SELECT c
 FROM
@@ -112,7 +115,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A8_B1 TYPE: NEGATIVE TEST
+# TESTCASE: test_union_all TEST_ID: A8_B1
 #-------------------------------------------------------------------------
 SELECT c
 FROM
@@ -124,7 +127,7 @@ SQL requires union
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A9_B1 TYPE: NEGATIVE TEST
+# TESTCASE: test_union_all TEST_ID: A9_B1
 #-------------------------------------------------------------------------
 SELECT c
 FROM
@@ -136,7 +139,7 @@ SQL requires union
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A10_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_union_all TEST_ID: A10_B1
 #-------------------------------------------------------------------------
 SELECT c
 FROM
@@ -161,7 +164,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A11_B1 TYPE: NEGATIVE TEST
+# TESTCASE: test_union_all TEST_ID: A11_B1
 #-------------------------------------------------------------------------
 SELECT c
 FROM
@@ -173,7 +176,7 @@ SQL requires union
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A12_B1 TYPE: NEGATIVE TEST
+# TESTCASE: test_union_all TEST_ID: A12_B1
 #-------------------------------------------------------------------------
 SELECT c
 FROM
@@ -185,7 +188,7 @@ SQL requires union
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A13_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_union_all TEST_ID: A13_B1
 #-------------------------------------------------------------------------
 SELECT c
 FROM
@@ -210,7 +213,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A14_B1 TYPE: NEGATIVE TEST
+# TESTCASE: test_union_all TEST_ID: A14_B1
 #-------------------------------------------------------------------------
 SELECT c
 FROM
@@ -222,7 +225,7 @@ SQL requires union
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A15_B1 TYPE: NEGATIVE TEST
+# TESTCASE: test_union_all TEST_ID: A15_B1
 #-------------------------------------------------------------------------
 SELECT c
 FROM
@@ -234,7 +237,7 @@ SQL requires union
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A16_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_union_all TEST_ID: A16_B1
 #-------------------------------------------------------------------------
 SELECT c
 FROM
@@ -259,7 +262,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A17_B1 TYPE: NEGATIVE TEST
+# TESTCASE: test_union_all TEST_ID: A17_B1
 #-------------------------------------------------------------------------
 SELECT c
 FROM
@@ -271,7 +274,7 @@ SQL requires union
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A18_B1 TYPE: NEGATIVE TEST
+# TESTCASE: test_union_all TEST_ID: A18_B1
 #-------------------------------------------------------------------------
 SELECT c
 FROM
@@ -283,7 +286,7 @@ SQL requires union
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A19_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_union_all TEST_ID: A19_B1
 #-------------------------------------------------------------------------
 SELECT c
 FROM
@@ -308,7 +311,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A20_B1 TYPE: NEGATIVE TEST
+# TESTCASE: test_union_all TEST_ID: A20_B1
 #-------------------------------------------------------------------------
 SELECT c
 FROM
@@ -320,7 +323,7 @@ SQL requires union
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A21_B1 TYPE: NEGATIVE TEST
+# TESTCASE: test_union_all TEST_ID: A21_B1
 #-------------------------------------------------------------------------
 SELECT c
 FROM
@@ -332,7 +335,7 @@ SQL requires union
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A22_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_union_all TEST_ID: A22_B1
 #-------------------------------------------------------------------------
 SELECT c
 FROM
@@ -357,7 +360,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A23_B1 TYPE: NEGATIVE TEST
+# TESTCASE: test_union_all TEST_ID: A23_B1
 #-------------------------------------------------------------------------
 SELECT c
 FROM
@@ -369,7 +372,7 @@ SQL requires union
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_union_all TEST_ID: A24_B1 TYPE: NEGATIVE TEST
+# TESTCASE: test_union_all TEST_ID: A24_B1
 #-------------------------------------------------------------------------
 SELECT c
 FROM
@@ -380,6 +383,3 @@ FROM
 SQL requires union
 !error
 
-#-------------------------------------------------------------------------
-# Total query count 23 Positive tests: 9 Negative tests: 14
-#-------------------------------------------------------------------------

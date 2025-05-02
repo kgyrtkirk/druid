@@ -1,6 +1,9 @@
 !set useApproximateCountDistinct false
 !use druidtest://?componentSupplier=StandardMSQComponentSupplier&datasets=sql/src/test/quidem/qatests/qaUnnest/array
 !set outputformat mysql
+#-------------------------------------------------------------------------
+# TESTCASE: test_col_datatype_array TEST_ID: SEL_DATASOURCE
+#-------------------------------------------------------------------------
 SELECT *
 FROM test_unnest;
 +-------------------------+-------+--------+--------------+--------------+------------------+----------------+--------------------+---------+--------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -15,45 +18,45 @@ FROM test_unnest;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_datatype_array TEST_ID: A1_B1 TYPE: NEGATIVE TEST
+# TESTCASE: test_col_datatype_array TEST_ID: A1_B1
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
      unnest(s_int) AS u(c);
-Cannot apply
+Cannot apply 'UNNEST' to arguments of type 'UNNEST(<BIGINT>)'
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_datatype_array TEST_ID: A1_B2 TYPE: NEGATIVE TEST
+# TESTCASE: test_col_datatype_array TEST_ID: A1_B2
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
      unnest(s_int) AS u(c)
 GROUP BY c;
-Cannot apply
+Cannot apply 'UNNEST' to arguments of type 'UNNEST(<BIGINT>)'
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_datatype_array TEST_ID: A2_B1 TYPE: NEGATIVE TEST
+# TESTCASE: test_col_datatype_array TEST_ID: A2_B1
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
      unnest(s_null) AS u(c);
-Cannot apply
+Cannot apply 'UNNEST' to arguments of type 'UNNEST(<VARCHAR>)'
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_datatype_array TEST_ID: A2_B2 TYPE: NEGATIVE TEST
+# TESTCASE: test_col_datatype_array TEST_ID: A2_B2
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
      unnest(s_null) AS u(c)
 GROUP BY c;
-Cannot apply
+Cannot apply 'UNNEST' to arguments of type 'UNNEST(<VARCHAR>)'
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_datatype_array TEST_ID: A3_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_col_datatype_array TEST_ID: A3_B1
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
@@ -76,7 +79,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_datatype_array TEST_ID: A3_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_col_datatype_array TEST_ID: A3_B2
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
@@ -92,7 +95,7 @@ GROUP BY c;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_datatype_array TEST_ID: A4_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_col_datatype_array TEST_ID: A4_B1
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
@@ -106,7 +109,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_datatype_array TEST_ID: A4_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_col_datatype_array TEST_ID: A4_B2
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
@@ -121,26 +124,45 @@ GROUP BY c;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_datatype_array TEST_ID: A5_B1 TYPE: NEGATIVE TEST
+# TESTCASE: test_col_datatype_array TEST_ID: A5_B1
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
      unnest(a_nested) AS u(c);
-Cannot apply
+Cannot apply 'UNNEST' to arguments of type 'UNNEST(<COMPLEX<JSON>>)'
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_datatype_array TEST_ID: A5_B2 TYPE: NEGATIVE TEST
+# TESTCASE: test_col_datatype_array TEST_ID: A5_B2
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
      unnest(a_nested) AS u(c)
 GROUP BY c;
-Cannot apply
+Cannot apply 'UNNEST' to arguments of type 'UNNEST(<COMPLEX<JSON>>)'
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_datatype_array TEST_ID: A6_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_col_datatype_array TEST_ID: A5_B1
+#-------------------------------------------------------------------------
+SELECT c
+FROM test_unnest,
+     unnest(a_nested) AS u(c);
+Cannot apply 'UNNEST' to arguments of type 'UNNEST(<COMPLEX<JSON>>)'
+!error
+
+#-------------------------------------------------------------------------
+# TESTCASE: test_col_datatype_array TEST_ID: A5_B2
+#-------------------------------------------------------------------------
+SELECT c
+FROM test_unnest,
+     unnest(a_nested) AS u(c)
+GROUP BY c;
+Cannot apply 'UNNEST' to arguments of type 'UNNEST(<COMPLEX<JSON>>)'
+!error
+
+#-------------------------------------------------------------------------
+# TESTCASE: test_col_datatype_array TEST_ID: A6_B1
 #-------------------------------------------------------------------------
 SELECT c
 FROM unnest(array[NULL, 1, 2]) AS u(c);
@@ -156,7 +178,7 @@ FROM unnest(array[NULL, 1, 2]) AS u(c);
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_datatype_array TEST_ID: A6_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_col_datatype_array TEST_ID: A6_B2
 #-------------------------------------------------------------------------
 SELECT c,
        count(*) cnt
@@ -174,7 +196,7 @@ GROUP BY c;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_datatype_array TEST_ID: A7_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_col_datatype_array TEST_ID: A7_B1
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
@@ -200,7 +222,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_datatype_array TEST_ID: A7_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_col_datatype_array TEST_ID: A7_B2
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
@@ -219,7 +241,7 @@ GROUP BY c;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_datatype_array TEST_ID: A8_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_col_datatype_array TEST_ID: A8_B1
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
@@ -251,7 +273,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_datatype_array TEST_ID: A8_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_col_datatype_array TEST_ID: A8_B2
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
@@ -269,7 +291,7 @@ GROUP BY c;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_datatype_array TEST_ID: A9_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_col_datatype_array TEST_ID: A9_B1
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
@@ -289,7 +311,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_datatype_array TEST_ID: A9_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_col_datatype_array TEST_ID: A9_B2
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
@@ -307,7 +329,7 @@ GROUP BY c;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_datatype_array TEST_ID: A10_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_col_datatype_array TEST_ID: A10_B1
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
@@ -330,7 +352,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_datatype_array TEST_ID: A10_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_col_datatype_array TEST_ID: A10_B2
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
@@ -348,7 +370,7 @@ GROUP BY c;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_datatype_array TEST_ID: A11_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_col_datatype_array TEST_ID: A11_B1
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
@@ -371,7 +393,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_datatype_array TEST_ID: A11_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_col_datatype_array TEST_ID: A11_B2
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
@@ -389,7 +411,7 @@ GROUP BY c;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_datatype_array TEST_ID: A12_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_col_datatype_array TEST_ID: A12_B1
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
@@ -412,7 +434,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_datatype_array TEST_ID: A12_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_col_datatype_array TEST_ID: A12_B2
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
@@ -430,7 +452,7 @@ GROUP BY c;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_datatype_array TEST_ID: A13_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_col_datatype_array TEST_ID: A13_B1
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
@@ -453,7 +475,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_datatype_array TEST_ID: A13_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_col_datatype_array TEST_ID: A13_B2
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
@@ -471,7 +493,7 @@ GROUP BY c;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_datatype_array TEST_ID: A14_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_col_datatype_array TEST_ID: A14_B1
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
@@ -500,7 +522,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_datatype_array TEST_ID: A14_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_col_datatype_array TEST_ID: A14_B2
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
@@ -520,7 +542,7 @@ GROUP BY c;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_datatype_array TEST_ID: A15_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_col_datatype_array TEST_ID: A15_B1
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
@@ -543,7 +565,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_datatype_array TEST_ID: A15_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_col_datatype_array TEST_ID: A15_B2
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
@@ -561,7 +583,7 @@ GROUP BY c;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_datatype_array TEST_ID: A16_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_col_datatype_array TEST_ID: A16_B1
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
@@ -584,7 +606,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_datatype_array TEST_ID: A16_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_col_datatype_array TEST_ID: A16_B2
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
@@ -602,7 +624,7 @@ GROUP BY c;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_datatype_array TEST_ID: A17_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_col_datatype_array TEST_ID: A17_B1
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
@@ -625,7 +647,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_datatype_array TEST_ID: A17_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_col_datatype_array TEST_ID: A17_B2
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
@@ -643,7 +665,7 @@ GROUP BY c;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_datatype_array TEST_ID: A18_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_col_datatype_array TEST_ID: A18_B1
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
@@ -666,7 +688,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_datatype_array TEST_ID: A18_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_col_datatype_array TEST_ID: A18_B2
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
@@ -684,7 +706,7 @@ GROUP BY c;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_datatype_array TEST_ID: A19_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_col_datatype_array TEST_ID: A19_B1
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
@@ -707,7 +729,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_datatype_array TEST_ID: A19_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_col_datatype_array TEST_ID: A19_B2
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
@@ -723,7 +745,7 @@ GROUP BY c;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_datatype_array TEST_ID: A20_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_col_datatype_array TEST_ID: A20_B1
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
@@ -737,7 +759,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_datatype_array TEST_ID: A20_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_col_datatype_array TEST_ID: A20_B2
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
@@ -752,7 +774,7 @@ GROUP BY c;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_datatype_array TEST_ID: A21_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_col_datatype_array TEST_ID: A21_B1
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
@@ -781,7 +803,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_datatype_array TEST_ID: A21_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_col_datatype_array TEST_ID: A21_B2
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
@@ -800,6 +822,3 @@ GROUP BY c;
 
 !ok
 
-#-------------------------------------------------------------------------
-# Total query count 43 Positive tests: 37 Negative tests: 6
-#-------------------------------------------------------------------------

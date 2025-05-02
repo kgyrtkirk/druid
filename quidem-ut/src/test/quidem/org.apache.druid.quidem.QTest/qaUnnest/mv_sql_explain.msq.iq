@@ -1,6 +1,9 @@
 !set useApproximateCountDistinct false
 !use druidtest://?componentSupplier=StandardMSQComponentSupplier&datasets=sql/src/test/quidem/qatests/qaUnnest/mv
 !set outputformat mysql
+#-------------------------------------------------------------------------
+# TESTCASE: test_explain TEST_ID: SEL_DATASOURCE
+#-------------------------------------------------------------------------
 SELECT *
 FROM test_unnest;
 +-------------------------+-------+--------+---------+----------+------------------------------------------------+------------------------+--------------------------------------+----------------------------------+--------------------------------------+----------------------------------+-----------------------------+
@@ -17,7 +20,7 @@ FROM test_unnest;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A1_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A1_B1
 #-------------------------------------------------------------------------
 
 SELECT c
@@ -137,7 +140,7 @@ FROM test_unnest,
 !msqPlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A1_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A1_B2
 #-------------------------------------------------------------------------
 
 SELECT *
@@ -295,7 +298,7 @@ FROM
 !msqPlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A1_B3 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A1_B3
 #-------------------------------------------------------------------------
 
 SELECT c,
@@ -477,6 +480,3 @@ GROUP BY c;
 } ]
 !msqPlan
 
-#-------------------------------------------------------------------------
-# Total query count 4 Positive tests: 4 Negative tests: 0
-#-------------------------------------------------------------------------

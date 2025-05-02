@@ -1,6 +1,9 @@
 !set useApproximateCountDistinct false
 !use druidtest://?componentSupplier=StandardComponentSupplier&datasets=sql/src/test/quidem/qatests/qaArray/sql
 !set outputformat mysql
+#-------------------------------------------------------------------------
+# TESTCASE: test_explain TEST_ID: SEL_DATASOURCE
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM test_array;
 +-----+
@@ -13,7 +16,7 @@ FROM test_array;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A1_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A1_B1
 #-------------------------------------------------------------------------
 
 SELECT a_bool
@@ -51,7 +54,7 @@ FROM test_array;
 !nativePlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A4_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A4_B1
 #-------------------------------------------------------------------------
 
 SELECT a_int
@@ -89,7 +92,7 @@ FROM test_array;
 !nativePlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A5_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A5_B1
 #-------------------------------------------------------------------------
 
 SELECT json_value(a_nested, '$[1]' RETURNING bigint array)
@@ -138,7 +141,7 @@ FROM test_array;
 !nativePlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A6_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A6_B1
 #-------------------------------------------------------------------------
 
 SELECT json_value(a_nested, '$[7][1]' RETURNING bigint array)
@@ -190,7 +193,7 @@ FROM test_array;
 !nativePlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A7_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A7_B1
 #-------------------------------------------------------------------------
 
 SELECT a_float
@@ -228,7 +231,7 @@ FROM test_array;
 !nativePlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A8_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A8_B1
 #-------------------------------------------------------------------------
 
 SELECT json_value(a_nested, '$[2]' RETURNING decimal array)
@@ -277,7 +280,7 @@ FROM test_array;
 !nativePlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A9_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A9_B1
 #-------------------------------------------------------------------------
 
 SELECT json_value(a_nested, '$[7][2]' RETURNING decimal array)
@@ -329,7 +332,7 @@ FROM test_array;
 !nativePlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A10_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A10_B1
 #-------------------------------------------------------------------------
 
 SELECT a_str
@@ -367,7 +370,7 @@ FROM test_array;
 !nativePlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A11_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A11_B1
 #-------------------------------------------------------------------------
 
 SELECT json_value(a_nested, '$[3]' RETURNING varchar array)
@@ -416,7 +419,7 @@ FROM test_array;
 !nativePlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A12_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A12_B1
 #-------------------------------------------------------------------------
 
 SELECT json_value(a_nested, '$[7][3]' RETURNING varchar array)
@@ -468,7 +471,7 @@ FROM test_array;
 !nativePlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A13_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A13_B1
 #-------------------------------------------------------------------------
 
 SELECT a_null
@@ -506,7 +509,7 @@ FROM test_array;
 !nativePlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A14_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A14_B1
 #-------------------------------------------------------------------------
 
 SELECT json_value(a_nested, '$[4]' RETURNING varchar array)
@@ -555,7 +558,7 @@ FROM test_array;
 !nativePlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A15_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A15_B1
 #-------------------------------------------------------------------------
 
 SELECT json_value(a_nested, '$[7][4]' RETURNING varchar array)
@@ -607,7 +610,7 @@ FROM test_array;
 !nativePlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A16_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A16_B1
 #-------------------------------------------------------------------------
 
 SELECT a_empty
@@ -645,7 +648,7 @@ FROM test_array;
 !nativePlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A17_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A17_B1
 #-------------------------------------------------------------------------
 
 SELECT json_value(a_nested, '$[5]' RETURNING varchar array)
@@ -694,7 +697,7 @@ FROM test_array;
 !nativePlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A18_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A18_B1
 #-------------------------------------------------------------------------
 
 SELECT json_value(a_nested, '$[7][5]' RETURNING varchar array)
@@ -746,7 +749,7 @@ FROM test_array;
 !nativePlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A19_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A19_B1
 #-------------------------------------------------------------------------
 
 SELECT a_mixed
@@ -784,7 +787,7 @@ FROM test_array;
 !nativePlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A20_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A20_B1
 #-------------------------------------------------------------------------
 
 SELECT json_value(a_nested, '$[6]' RETURNING varchar array)
@@ -833,7 +836,7 @@ FROM test_array;
 !nativePlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A21_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A21_B1
 #-------------------------------------------------------------------------
 
 SELECT json_value(a_nested, '$[7][6]' RETURNING varchar array)
@@ -885,7 +888,7 @@ FROM test_array;
 !nativePlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A22_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A22_B1
 #-------------------------------------------------------------------------
 
 SELECT a_nested
@@ -923,7 +926,7 @@ FROM test_array;
 !nativePlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A23_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A23_B1
 #-------------------------------------------------------------------------
 
 SELECT json_value(a_nested, '$[7]' RETURNING varchar array)
@@ -972,7 +975,7 @@ FROM test_array;
 !nativePlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A24_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A24_B1
 #-------------------------------------------------------------------------
 
 SELECT json_value(a_nested, '$[7][7]' RETURNING varchar array)
@@ -1023,6 +1026,3 @@ FROM test_array;
 }
 !nativePlan
 
-#-------------------------------------------------------------------------
-# Total query count 23 Positive tests: 23 Negative tests: 0
-#-------------------------------------------------------------------------

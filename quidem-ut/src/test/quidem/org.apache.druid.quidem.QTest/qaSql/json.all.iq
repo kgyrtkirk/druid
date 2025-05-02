@@ -1,9 +1,12 @@
 !set dartQueryId 00000000-0000-0000-0000-000000000000
 !set useApproximateCountDistinct false
-!use druidtest://?componentSupplier=AllDruidEnginesComponentSupplier&datasets=sql/src/test/quidem/qatests/kttm_nested
+!use druidtest://?componentSupplier=AllDruidEnginesComponentSupplier&datasets=sql/src/test/quidem/qatests/qaSql
 !set outputformat mysql
+#-------------------------------------------------------------------------
+# TESTCASE: json TEST_ID: SEL_DATASOURCE
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00';
 +-------+
 | cnt   |
@@ -15,10 +18,10 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_json TEST_ID: A1 TYPE: POSITIVE TEST
+# TESTCASE: json TEST_ID: A1_q_simple
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND (array_prepend('1', json_keys(agent, '$.')) IS NULL
        OR (array_prepend('1', json_keys(agent, '$.')) = array_prepend('1', json_keys(agent, '$.'))
@@ -51,12 +54,15 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: json TEST_ID: A1_q_grpby
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
   (SELECT __time, number, client_ip,
                           array_prepend('1', json_keys(agent, '$.')),
                           count(*)
-   FROM kttm_nested
+   FROM test_sql
    WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
      AND (array_prepend('1', json_keys(agent, '$.')) IS NULL
           OR (array_prepend('1', json_keys(agent, '$.')) = array_prepend('1', json_keys(agent, '$.'))
@@ -94,10 +100,10 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_json TEST_ID: A2 TYPE: POSITIVE TEST
+# TESTCASE: json TEST_ID: A2_q_simple
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||to_json_string(json_object(KEY 'c1' value number)) IS NULL
        OR ('1'||to_json_string(json_object(KEY 'c1' value number)) = 1||to_json_string(json_object(KEY 'c1' value number))
@@ -132,13 +138,16 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: json TEST_ID: A2_q_subq
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||to_json_string(json_object(KEY 'c1' value number)) IS NULL
        OR '1'||to_json_string(json_object(KEY 'c1' value number)) IN
          (SELECT '1'||to_json_string(json_object(KEY 'c1' value number))
-          FROM kttm_nested
+          FROM test_sql
           WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
             AND ('1'||to_json_string(json_object(KEY 'c1' value number)) IS NULL
                  OR ('1'||to_json_string(json_object(KEY 'c1' value number)) = 1||to_json_string(json_object(KEY 'c1' value number))
@@ -173,12 +182,15 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: json TEST_ID: A2_q_grpby
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
   (SELECT __time, number, client_ip,
                           '1'||to_json_string(json_object(KEY 'c1' value number)),
                           count(*)
-   FROM kttm_nested
+   FROM test_sql
    WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
      AND ('1'||to_json_string(json_object(KEY 'c1' value number)) IS NULL
           OR ('1'||to_json_string(json_object(KEY 'c1' value number)) = 1||to_json_string(json_object(KEY 'c1' value number))
@@ -218,10 +230,10 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_json TEST_ID: A3 TYPE: POSITIVE TEST
+# TESTCASE: json TEST_ID: A3_q_simple
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND (array_prepend('1', json_paths(agent)) IS NULL
        OR (array_prepend('1', json_paths(agent)) = array_prepend('1', json_paths(agent))
@@ -254,12 +266,15 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: json TEST_ID: A3_q_grpby
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
   (SELECT __time, number, client_ip,
                           array_prepend('1', json_paths(agent)),
                           count(*)
-   FROM kttm_nested
+   FROM test_sql
    WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
      AND (array_prepend('1', json_paths(agent)) IS NULL
           OR (array_prepend('1', json_paths(agent)) = array_prepend('1', json_paths(agent))
@@ -297,10 +312,10 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_json TEST_ID: A4 TYPE: POSITIVE TEST
+# TESTCASE: json TEST_ID: A4_q_simple
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||to_json_string(json_query(agent, '$.')) IS NULL
        OR ('1'||to_json_string(json_query(agent, '$.')) = 1||to_json_string(json_query(agent, '$.'))
@@ -335,13 +350,16 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: json TEST_ID: A4_q_subq
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||to_json_string(json_query(agent, '$.')) IS NULL
        OR '1'||to_json_string(json_query(agent, '$.')) IN
          (SELECT '1'||to_json_string(json_query(agent, '$.'))
-          FROM kttm_nested
+          FROM test_sql
           WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
             AND ('1'||to_json_string(json_query(agent, '$.')) IS NULL
                  OR ('1'||to_json_string(json_query(agent, '$.')) = 1||to_json_string(json_query(agent, '$.'))
@@ -376,12 +394,15 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: json TEST_ID: A4_q_grpby
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
   (SELECT __time, number, client_ip,
                           '1'||to_json_string(json_query(agent, '$.')),
                           count(*)
-   FROM kttm_nested
+   FROM test_sql
    WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
      AND ('1'||to_json_string(json_query(agent, '$.')) IS NULL
           OR ('1'||to_json_string(json_query(agent, '$.')) = 1||to_json_string(json_query(agent, '$.'))
@@ -421,10 +442,10 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_json TEST_ID: A5 TYPE: POSITIVE TEST
+# TESTCASE: json TEST_ID: A5_q_simple
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||to_json_string(json_query_array(array[client_ip, server_ip], '$.')) IS NULL
        OR ('1'||to_json_string(json_query_array(array[client_ip, server_ip], '$.')) = 1||to_json_string(json_query_array(array[client_ip, server_ip], '$.'))
@@ -459,13 +480,16 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: json TEST_ID: A5_q_subq
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||to_json_string(json_query_array(array[client_ip, server_ip], '$.')) IS NULL
        OR '1'||to_json_string(json_query_array(array[client_ip, server_ip], '$.')) IN
          (SELECT '1'||to_json_string(json_query_array(array[client_ip, server_ip], '$.'))
-          FROM kttm_nested
+          FROM test_sql
           WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
             AND ('1'||to_json_string(json_query_array(array[client_ip, server_ip], '$.')) IS NULL
                  OR ('1'||to_json_string(json_query_array(array[client_ip, server_ip], '$.')) = 1||to_json_string(json_query_array(array[client_ip, server_ip], '$.'))
@@ -500,12 +524,15 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: json TEST_ID: A5_q_grpby
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
   (SELECT __time, number, client_ip,
                           '1'||to_json_string(json_query_array(array[client_ip, server_ip], '$.')),
                           count(*)
-   FROM kttm_nested
+   FROM test_sql
    WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
      AND ('1'||to_json_string(json_query_array(array[client_ip, server_ip], '$.')) IS NULL
           OR ('1'||to_json_string(json_query_array(array[client_ip, server_ip], '$.')) = 1||to_json_string(json_query_array(array[client_ip, server_ip], '$.'))
@@ -545,10 +572,10 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_json TEST_ID: A6 TYPE: POSITIVE TEST
+# TESTCASE: json TEST_ID: A6_q_simple
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND (('1'||json_value(agent, '$.type')) IS NULL
        OR (('1'||json_value(agent, '$.type')) = (1||json_value(agent, '$.type'))
@@ -580,13 +607,16 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: json TEST_ID: A6_q_subq
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND (('1'||json_value(agent, '$.type')) IS NULL
        OR ('1'||json_value(agent, '$.type')) IN
          (SELECT ('1'||json_value(agent, '$.type'))
-          FROM kttm_nested
+          FROM test_sql
           WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
             AND (('1'||json_value(agent, '$.type')) IS NULL
                  OR (('1'||json_value(agent, '$.type')) = (1||json_value(agent, '$.type'))
@@ -618,10 +648,13 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: json TEST_ID: A6_q_grpby
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
   (SELECT __time, number, client_ip, ('1'||json_value(agent, '$.type')), count(*)
-   FROM kttm_nested
+   FROM test_sql
    WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
      AND (('1'||json_value(agent, '$.type')) IS NULL
           OR (('1'||json_value(agent, '$.type')) = (1||json_value(agent, '$.type'))
@@ -658,10 +691,10 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_json TEST_ID: A7 TYPE: POSITIVE TEST
+# TESTCASE: json TEST_ID: A7_q_simple
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||json_value(event, '$.percentage' RETURNING char) IS NULL
        OR ('1'||json_value(event, '$.percentage' RETURNING char) = 1||json_value(event, '$.percentage' RETURNING char)
@@ -696,13 +729,16 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: json TEST_ID: A7_q_subq
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||json_value(event, '$.percentage' RETURNING char) IS NULL
        OR '1'||json_value(event, '$.percentage' RETURNING char) IN
          (SELECT '1'||json_value(event, '$.percentage' RETURNING char)
-          FROM kttm_nested
+          FROM test_sql
           WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
             AND ('1'||json_value(event, '$.percentage' RETURNING char) IS NULL
                  OR ('1'||json_value(event, '$.percentage' RETURNING char) = 1||json_value(event, '$.percentage' RETURNING char)
@@ -737,12 +773,15 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: json TEST_ID: A7_q_grpby
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
   (SELECT __time, number, client_ip,
                           '1'||json_value(event, '$.percentage' RETURNING char),
                           count(*)
-   FROM kttm_nested
+   FROM test_sql
    WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
      AND ('1'||json_value(event, '$.percentage' RETURNING char) IS NULL
           OR ('1'||json_value(event, '$.percentage' RETURNING char) = 1||json_value(event, '$.percentage' RETURNING char)
@@ -782,10 +821,10 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_json TEST_ID: A8 TYPE: POSITIVE TEST
+# TESTCASE: json TEST_ID: A8_q_simple
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||json_value(event, '$.percentage' RETURNING varchar) IS NULL
        OR ('1'||json_value(event, '$.percentage' RETURNING varchar) = 1||json_value(event, '$.percentage' RETURNING varchar)
@@ -820,13 +859,16 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: json TEST_ID: A8_q_subq
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||json_value(event, '$.percentage' RETURNING varchar) IS NULL
        OR '1'||json_value(event, '$.percentage' RETURNING varchar) IN
          (SELECT '1'||json_value(event, '$.percentage' RETURNING varchar)
-          FROM kttm_nested
+          FROM test_sql
           WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
             AND ('1'||json_value(event, '$.percentage' RETURNING varchar) IS NULL
                  OR ('1'||json_value(event, '$.percentage' RETURNING varchar) = 1||json_value(event, '$.percentage' RETURNING varchar)
@@ -861,12 +903,15 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: json TEST_ID: A8_q_grpby
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
   (SELECT __time, number, client_ip,
                           '1'||json_value(event, '$.percentage' RETURNING varchar),
                           count(*)
-   FROM kttm_nested
+   FROM test_sql
    WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
      AND ('1'||json_value(event, '$.percentage' RETURNING varchar) IS NULL
           OR ('1'||json_value(event, '$.percentage' RETURNING varchar) = 1||json_value(event, '$.percentage' RETURNING varchar)
@@ -906,10 +951,10 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_json TEST_ID: A9 TYPE: POSITIVE TEST
+# TESTCASE: json TEST_ID: A9_q_simple
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND (json_value(event, '$.percentage' RETURNING bigint)+1 IS NULL
        OR (json_value(event, '$.percentage' RETURNING bigint)+1 = json_value(event, '$.percentage' RETURNING bigint)+1
@@ -944,13 +989,16 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: json TEST_ID: A9_q_subq
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND (json_value(event, '$.percentage' RETURNING bigint)+1 IS NULL
        OR json_value(event, '$.percentage' RETURNING bigint)+1 IN
          (SELECT json_value(event, '$.percentage' RETURNING bigint)+1
-          FROM kttm_nested
+          FROM test_sql
           WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
             AND (json_value(event, '$.percentage' RETURNING bigint)+1 IS NULL
                  OR (json_value(event, '$.percentage' RETURNING bigint)+1 = json_value(event, '$.percentage' RETURNING bigint)+1
@@ -985,12 +1033,15 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: json TEST_ID: A9_q_grpby
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
   (SELECT __time, number, client_ip,
                           json_value(event, '$.percentage' RETURNING bigint)+1,
                           count(*)
-   FROM kttm_nested
+   FROM test_sql
    WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
      AND (json_value(event, '$.percentage' RETURNING bigint)+1 IS NULL
           OR (json_value(event, '$.percentage' RETURNING bigint)+1 = json_value(event, '$.percentage' RETURNING bigint)+1
@@ -1030,10 +1081,10 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_json TEST_ID: A10 TYPE: POSITIVE TEST
+# TESTCASE: json TEST_ID: A10_q_simple
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND (json_value(event, '$.percentage' RETURNING DOUBLE)+1 IS NULL
        OR (json_value(event, '$.percentage' RETURNING DOUBLE)+1 = json_value(event, '$.percentage' RETURNING DOUBLE)+1
@@ -1068,13 +1119,16 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: json TEST_ID: A10_q_subq
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND (json_value(event, '$.percentage' RETURNING DOUBLE)+1 IS NULL
        OR json_value(event, '$.percentage' RETURNING DOUBLE)+1 IN
          (SELECT json_value(event, '$.percentage' RETURNING DOUBLE)+1
-          FROM kttm_nested
+          FROM test_sql
           WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
             AND (json_value(event, '$.percentage' RETURNING DOUBLE)+1 IS NULL
                  OR (json_value(event, '$.percentage' RETURNING DOUBLE)+1 = json_value(event, '$.percentage' RETURNING DOUBLE)+1
@@ -1109,12 +1163,15 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: json TEST_ID: A10_q_grpby
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
   (SELECT __time, number, client_ip,
                           json_value(event, '$.percentage' RETURNING DOUBLE)+1,
                           count(*)
-   FROM kttm_nested
+   FROM test_sql
    WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
      AND (json_value(event, '$.percentage' RETURNING DOUBLE)+1 IS NULL
           OR (json_value(event, '$.percentage' RETURNING DOUBLE)+1 = json_value(event, '$.percentage' RETURNING DOUBLE)+1
@@ -1154,10 +1211,10 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_json TEST_ID: A11 TYPE: POSITIVE TEST
+# TESTCASE: json TEST_ID: A11_q_simple
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND (json_value(event, '$.percentage' RETURNING timestamp)+interval '1' YEAR IS NULL
        OR (json_value(event, '$.percentage' RETURNING timestamp)+interval '1' YEAR = json_value(event, '$.percentage' RETURNING timestamp)+interval '1' YEAR
@@ -1192,13 +1249,16 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: json TEST_ID: A11_q_subq
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND (json_value(event, '$.percentage' RETURNING timestamp)+interval '1' YEAR IS NULL
        OR json_value(event, '$.percentage' RETURNING timestamp)+interval '1' YEAR IN
          (SELECT json_value(event, '$.percentage' RETURNING timestamp)+interval '1' YEAR
-          FROM kttm_nested
+          FROM test_sql
           WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
             AND (json_value(event, '$.percentage' RETURNING timestamp)+interval '1' YEAR IS NULL
                  OR (json_value(event, '$.percentage' RETURNING timestamp)+interval '1' YEAR = json_value(event, '$.percentage' RETURNING timestamp)+interval '1' YEAR
@@ -1233,12 +1293,15 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: json TEST_ID: A11_q_grpby
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
   (SELECT __time, number, client_ip,
                           json_value(event, '$.percentage' RETURNING timestamp)+interval '1' YEAR,
                           count(*)
-   FROM kttm_nested
+   FROM test_sql
    WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
      AND (json_value(event, '$.percentage' RETURNING timestamp)+interval '1' YEAR IS NULL
           OR (json_value(event, '$.percentage' RETURNING timestamp)+interval '1' YEAR = json_value(event, '$.percentage' RETURNING timestamp)+interval '1' YEAR
@@ -1278,10 +1341,10 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_json TEST_ID: A12 TYPE: POSITIVE TEST
+# TESTCASE: json TEST_ID: A12_q_simple
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||to_json_string(parse_json(to_json_string(agent))) IS NULL
        OR ('1'||to_json_string(parse_json(to_json_string(agent))) = 1||to_json_string(parse_json(to_json_string(agent)))
@@ -1316,13 +1379,16 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: json TEST_ID: A12_q_subq
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||to_json_string(parse_json(to_json_string(agent))) IS NULL
        OR '1'||to_json_string(parse_json(to_json_string(agent))) IN
          (SELECT '1'||to_json_string(parse_json(to_json_string(agent)))
-          FROM kttm_nested
+          FROM test_sql
           WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
             AND ('1'||to_json_string(parse_json(to_json_string(agent))) IS NULL
                  OR ('1'||to_json_string(parse_json(to_json_string(agent))) = 1||to_json_string(parse_json(to_json_string(agent)))
@@ -1357,12 +1423,15 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: json TEST_ID: A12_q_grpby
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
   (SELECT __time, number, client_ip,
                           '1'||to_json_string(parse_json(to_json_string(agent))),
                           count(*)
-   FROM kttm_nested
+   FROM test_sql
    WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
      AND ('1'||to_json_string(parse_json(to_json_string(agent))) IS NULL
           OR ('1'||to_json_string(parse_json(to_json_string(agent))) = 1||to_json_string(parse_json(to_json_string(agent)))
@@ -1402,10 +1471,10 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_json TEST_ID: A13 TYPE: POSITIVE TEST
+# TESTCASE: json TEST_ID: A13_q_simple
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||to_json_string(try_parse_json(to_json_string(agent))) IS NULL
        OR ('1'||to_json_string(try_parse_json(to_json_string(agent))) = 1||to_json_string(try_parse_json(to_json_string(agent)))
@@ -1440,13 +1509,16 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: json TEST_ID: A13_q_subq
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||to_json_string(try_parse_json(to_json_string(agent))) IS NULL
        OR '1'||to_json_string(try_parse_json(to_json_string(agent))) IN
          (SELECT '1'||to_json_string(try_parse_json(to_json_string(agent)))
-          FROM kttm_nested
+          FROM test_sql
           WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
             AND ('1'||to_json_string(try_parse_json(to_json_string(agent))) IS NULL
                  OR ('1'||to_json_string(try_parse_json(to_json_string(agent))) = 1||to_json_string(try_parse_json(to_json_string(agent)))
@@ -1481,12 +1553,15 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: json TEST_ID: A13_q_grpby
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
   (SELECT __time, number, client_ip,
                           '1'||to_json_string(try_parse_json(to_json_string(agent))),
                           count(*)
-   FROM kttm_nested
+   FROM test_sql
    WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
      AND ('1'||to_json_string(try_parse_json(to_json_string(agent))) IS NULL
           OR ('1'||to_json_string(try_parse_json(to_json_string(agent))) = 1||to_json_string(try_parse_json(to_json_string(agent)))
@@ -1526,10 +1601,10 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_json TEST_ID: A14 TYPE: POSITIVE TEST
+# TESTCASE: json TEST_ID: A14_q_simple
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||to_json_string(agent) IS NULL
        OR ('1'||to_json_string(agent) = 1||to_json_string(agent)
@@ -1564,13 +1639,16 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: json TEST_ID: A14_q_subq
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
   AND ('1'||to_json_string(agent) IS NULL
        OR '1'||to_json_string(agent) IN
          (SELECT '1'||to_json_string(agent)
-          FROM kttm_nested
+          FROM test_sql
           WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
             AND ('1'||to_json_string(agent) IS NULL
                  OR ('1'||to_json_string(agent) = 1||to_json_string(agent)
@@ -1605,12 +1683,15 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 
 !ok
 
+#-------------------------------------------------------------------------
+# TESTCASE: json TEST_ID: A14_q_grpby
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
   (SELECT __time, number, client_ip,
                           '1'||to_json_string(agent),
                           count(*)
-   FROM kttm_nested
+   FROM test_sql
    WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
      AND ('1'||to_json_string(agent) IS NULL
           OR ('1'||to_json_string(agent) = 1||to_json_string(agent)
@@ -1649,6 +1730,3 @@ FROM
 
 !ok
 
-#-------------------------------------------------------------------------
-# Total query count 41 Positive tests: 41 Negative tests: 0
-#-------------------------------------------------------------------------

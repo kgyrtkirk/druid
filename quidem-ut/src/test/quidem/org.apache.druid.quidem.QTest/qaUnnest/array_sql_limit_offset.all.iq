@@ -2,6 +2,9 @@
 !set useApproximateCountDistinct false
 !use druidtest://?componentSupplier=AllDruidEnginesComponentSupplier&datasets=sql/src/test/quidem/qatests/qaUnnest/array
 !set outputformat mysql
+#-------------------------------------------------------------------------
+# TESTCASE: test_limit_offset TEST_ID: SEL_DATASOURCE
+#-------------------------------------------------------------------------
 SELECT *
 FROM test_unnest;
 +-------------------------+-------+--------+--------------+--------------+------------------+----------------+--------------------+---------+--------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -16,7 +19,7 @@ FROM test_unnest;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_limit_offset TEST_ID: A1_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_limit_offset TEST_ID: A1_B2
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -34,7 +37,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_limit_offset TEST_ID: A1_B4 TYPE: POSITIVE TEST
+# TESTCASE: test_limit_offset TEST_ID: A1_B4
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -52,7 +55,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_limit_offset TEST_ID: A1_B6 TYPE: POSITIVE TEST
+# TESTCASE: test_limit_offset TEST_ID: A1_B6
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -71,7 +74,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_limit_offset TEST_ID: A2_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_limit_offset TEST_ID: A2_B2
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -89,7 +92,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_limit_offset TEST_ID: A2_B4 TYPE: POSITIVE TEST
+# TESTCASE: test_limit_offset TEST_ID: A2_B4
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -107,7 +110,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_limit_offset TEST_ID: A2_B6 TYPE: POSITIVE TEST
+# TESTCASE: test_limit_offset TEST_ID: A2_B6
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -126,7 +129,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_limit_offset TEST_ID: A3_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_limit_offset TEST_ID: A3_B2
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -144,7 +147,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_limit_offset TEST_ID: A3_B4 TYPE: POSITIVE TEST
+# TESTCASE: test_limit_offset TEST_ID: A3_B4
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -162,7 +165,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_limit_offset TEST_ID: A3_B6 TYPE: POSITIVE TEST
+# TESTCASE: test_limit_offset TEST_ID: A3_B6
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -181,7 +184,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_limit_offset TEST_ID: A4_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_limit_offset TEST_ID: A4_B2
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -199,7 +202,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_limit_offset TEST_ID: A4_B4 TYPE: POSITIVE TEST
+# TESTCASE: test_limit_offset TEST_ID: A4_B4
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -217,7 +220,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_limit_offset TEST_ID: A4_B6 TYPE: POSITIVE TEST
+# TESTCASE: test_limit_offset TEST_ID: A4_B6
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -236,7 +239,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_limit_offset TEST_ID: A5_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_limit_offset TEST_ID: A5_B2
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -254,7 +257,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_limit_offset TEST_ID: A5_B4 TYPE: POSITIVE TEST
+# TESTCASE: test_limit_offset TEST_ID: A5_B4
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -272,7 +275,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_limit_offset TEST_ID: A5_B6 TYPE: POSITIVE TEST
+# TESTCASE: test_limit_offset TEST_ID: A5_B6
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -291,7 +294,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_limit_offset TEST_ID: A6_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_limit_offset TEST_ID: A6_B2
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -309,7 +312,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_limit_offset TEST_ID: A6_B4 TYPE: POSITIVE TEST
+# TESTCASE: test_limit_offset TEST_ID: A6_B4
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -327,7 +330,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_limit_offset TEST_ID: A6_B6 TYPE: POSITIVE TEST
+# TESTCASE: test_limit_offset TEST_ID: A6_B6
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -346,7 +349,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_limit_offset TEST_ID: A7_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_limit_offset TEST_ID: A7_B2
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -364,7 +367,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_limit_offset TEST_ID: A7_B4 TYPE: POSITIVE TEST
+# TESTCASE: test_limit_offset TEST_ID: A7_B4
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -382,7 +385,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_limit_offset TEST_ID: A7_B6 TYPE: POSITIVE TEST
+# TESTCASE: test_limit_offset TEST_ID: A7_B6
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -401,7 +404,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_limit_offset TEST_ID: A8_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_limit_offset TEST_ID: A8_B2
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -419,7 +422,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_limit_offset TEST_ID: A8_B4 TYPE: POSITIVE TEST
+# TESTCASE: test_limit_offset TEST_ID: A8_B4
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -437,7 +440,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_limit_offset TEST_ID: A8_B6 TYPE: POSITIVE TEST
+# TESTCASE: test_limit_offset TEST_ID: A8_B6
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -456,7 +459,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_limit_offset TEST_ID: A9_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_limit_offset TEST_ID: A9_B2
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -474,7 +477,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_limit_offset TEST_ID: A9_B4 TYPE: POSITIVE TEST
+# TESTCASE: test_limit_offset TEST_ID: A9_B4
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -492,7 +495,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_limit_offset TEST_ID: A9_B6 TYPE: POSITIVE TEST
+# TESTCASE: test_limit_offset TEST_ID: A9_B6
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -511,7 +514,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_limit_offset TEST_ID: A10_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_limit_offset TEST_ID: A10_B2
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -529,7 +532,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_limit_offset TEST_ID: A10_B4 TYPE: POSITIVE TEST
+# TESTCASE: test_limit_offset TEST_ID: A10_B4
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -547,7 +550,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_limit_offset TEST_ID: A10_B6 TYPE: POSITIVE TEST
+# TESTCASE: test_limit_offset TEST_ID: A10_B6
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -566,7 +569,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_limit_offset TEST_ID: A11_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_limit_offset TEST_ID: A11_B2
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -584,7 +587,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_limit_offset TEST_ID: A11_B4 TYPE: POSITIVE TEST
+# TESTCASE: test_limit_offset TEST_ID: A11_B4
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -602,7 +605,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_limit_offset TEST_ID: A11_B6 TYPE: POSITIVE TEST
+# TESTCASE: test_limit_offset TEST_ID: A11_B6
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -621,7 +624,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_limit_offset TEST_ID: A12_B2 TYPE: POSITIVE TEST
+# TESTCASE: test_limit_offset TEST_ID: A12_B2
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -639,7 +642,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_limit_offset TEST_ID: A12_B4 TYPE: POSITIVE TEST
+# TESTCASE: test_limit_offset TEST_ID: A12_B4
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -657,7 +660,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_limit_offset TEST_ID: A12_B6 TYPE: POSITIVE TEST
+# TESTCASE: test_limit_offset TEST_ID: A12_B6
 #-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM
@@ -675,6 +678,3 @@ FROM
 
 !ok
 
-#-------------------------------------------------------------------------
-# Total query count 37 Positive tests: 37 Negative tests: 0
-#-------------------------------------------------------------------------

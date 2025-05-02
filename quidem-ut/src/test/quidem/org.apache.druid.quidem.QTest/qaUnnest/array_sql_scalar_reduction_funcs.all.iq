@@ -2,6 +2,9 @@
 !set useApproximateCountDistinct false
 !use druidtest://?componentSupplier=AllDruidEnginesComponentSupplier&datasets=sql/src/test/quidem/qatests/qaUnnest/array
 !set outputformat mysql
+#-------------------------------------------------------------------------
+# TESTCASE: test_scalar_reduction_funcs TEST_ID: SEL_DATASOURCE
+#-------------------------------------------------------------------------
 SELECT *
 FROM test_unnest;
 +-------------------------+-------+--------+--------------+--------------+------------------+----------------+--------------------+---------+--------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -16,7 +19,7 @@ FROM test_unnest;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_reduction_funcs TEST_ID: A1_B1_C1_D2 TYPE: POSITIVE TEST
+# TESTCASE: test_scalar_reduction_funcs TEST_ID: A1_B1_C1_D2
 #-------------------------------------------------------------------------
 SELECT greatest(c, c, 1) AS col
 FROM test_unnest,
@@ -45,7 +48,7 @@ WHERE (s_int IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_reduction_funcs TEST_ID: A1_B1_C2_D2 TYPE: POSITIVE TEST
+# TESTCASE: test_scalar_reduction_funcs TEST_ID: A1_B1_C2_D2
 #-------------------------------------------------------------------------
 SELECT greatest(c, s_int, 1) AS col
 FROM test_unnest,
@@ -74,7 +77,7 @@ WHERE (s_int IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_reduction_funcs TEST_ID: A1_B2_C1_D2 TYPE: POSITIVE TEST
+# TESTCASE: test_scalar_reduction_funcs TEST_ID: A1_B2_C1_D2
 #-------------------------------------------------------------------------
 SELECT least(c, c, 1) AS col
 FROM test_unnest,
@@ -103,7 +106,7 @@ WHERE (s_int IN (0,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_scalar_reduction_funcs TEST_ID: A1_B2_C2_D2 TYPE: POSITIVE TEST
+# TESTCASE: test_scalar_reduction_funcs TEST_ID: A1_B2_C2_D2
 #-------------------------------------------------------------------------
 SELECT least(c, s_int, 1) AS col
 FROM test_unnest,
@@ -131,6 +134,3 @@ WHERE (s_int IN (0,
 
 !ok
 
-#-------------------------------------------------------------------------
-# Total query count 5 Positive tests: 5 Negative tests: 0
-#-------------------------------------------------------------------------

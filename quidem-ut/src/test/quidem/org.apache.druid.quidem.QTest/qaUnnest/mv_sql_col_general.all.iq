@@ -2,6 +2,9 @@
 !set useApproximateCountDistinct false
 !use druidtest://?componentSupplier=AllDruidEnginesComponentSupplier&datasets=sql/src/test/quidem/qatests/qaUnnest/mv
 !set outputformat mysql
+#-------------------------------------------------------------------------
+# TESTCASE: test_col_general TEST_ID: SEL_DATASOURCE
+#-------------------------------------------------------------------------
 SELECT *
 FROM test_unnest;
 +-------------------------+-------+--------+---------+----------+------------------------------------------------+------------------------+--------------------------------------+----------------------------------+--------------------------------------+----------------------------------+-----------------------------+
@@ -18,7 +21,7 @@ FROM test_unnest;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_general TEST_ID: A1_B1 TYPE: NEGATIVE TEST
+# TESTCASE: test_col_general TEST_ID: A1_B1
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
@@ -27,7 +30,7 @@ not found
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_general TEST_ID: A1_B2 TYPE: NEGATIVE TEST
+# TESTCASE: test_col_general TEST_ID: A1_B2
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
@@ -37,7 +40,7 @@ not found
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_general TEST_ID: A1_B3 TYPE: NEGATIVE TEST
+# TESTCASE: test_col_general TEST_ID: A1_B3
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
@@ -46,7 +49,7 @@ not found
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_general TEST_ID: A1_B4 TYPE: NEGATIVE TEST
+# TESTCASE: test_col_general TEST_ID: A1_B4
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
@@ -56,7 +59,7 @@ not found
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_general TEST_ID: A1_B5 TYPE: NEGATIVE TEST
+# TESTCASE: test_col_general TEST_ID: A1_B5
 #-------------------------------------------------------------------------
 SELECT *
 FROM test_unnest,
@@ -65,7 +68,7 @@ is ambiguous
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_general TEST_ID: A1_B6 TYPE: NEGATIVE TEST
+# TESTCASE: test_col_general TEST_ID: A1_B6
 #-------------------------------------------------------------------------
 SELECT *
 FROM test_unnest,
@@ -75,7 +78,7 @@ is ambiguous
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_general TEST_ID: A1_B7 TYPE: NEGATIVE TEST
+# TESTCASE: test_col_general TEST_ID: A1_B7
 #-------------------------------------------------------------------------
 SELECT c_str0
 FROM test_unnest,
@@ -84,7 +87,7 @@ not found in any table
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_general TEST_ID: A1_B8 TYPE: POSITIVE TEST
+# TESTCASE: test_col_general TEST_ID: A1_B8
 #-------------------------------------------------------------------------
 SELECT u.c_str
 FROM test_unnest,
@@ -123,7 +126,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_general TEST_ID: A1_B9 TYPE: POSITIVE TEST
+# TESTCASE: test_col_general TEST_ID: A1_B9
 #-------------------------------------------------------------------------
 SELECT count(*)
 FROM
@@ -140,7 +143,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_general TEST_ID: A1_B10 TYPE: POSITIVE TEST
+# TESTCASE: test_col_general TEST_ID: A1_B10
 #-------------------------------------------------------------------------
 SELECT c_str0
 FROM
@@ -181,7 +184,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_general TEST_ID: A1_B11 TYPE: NEGATIVE TEST
+# TESTCASE: test_col_general TEST_ID: A1_B11
 #-------------------------------------------------------------------------
 SELECT u.c_str
 FROM
@@ -192,7 +195,7 @@ not found
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_general TEST_ID: A1_B12 TYPE: NEGATIVE TEST
+# TESTCASE: test_col_general TEST_ID: A1_B12
 #-------------------------------------------------------------------------
 SELECT c_str0,
        count(*) cnt
@@ -203,7 +206,7 @@ not found in any table
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_general TEST_ID: A1_B13 TYPE: POSITIVE TEST
+# TESTCASE: test_col_general TEST_ID: A1_B13
 #-------------------------------------------------------------------------
 SELECT u.c_str,
        count(*) cnt
@@ -224,7 +227,7 @@ GROUP BY u.c_str;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_general TEST_ID: A1_B14 TYPE: NEGATIVE TEST
+# TESTCASE: test_col_general TEST_ID: A1_B14
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
@@ -233,7 +236,7 @@ ParseException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_general TEST_ID: A1_B15 TYPE: NEGATIVE TEST
+# TESTCASE: test_col_general TEST_ID: A1_B15
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
@@ -243,7 +246,7 @@ ParseException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_general TEST_ID: A1_B16 TYPE: NEGATIVE TEST
+# TESTCASE: test_col_general TEST_ID: A1_B16
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
@@ -252,7 +255,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_general TEST_ID: A1_B17 TYPE: NEGATIVE TEST
+# TESTCASE: test_col_general TEST_ID: A1_B17
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
@@ -262,7 +265,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_general TEST_ID: A1_B18 TYPE: NEGATIVE TEST
+# TESTCASE: test_col_general TEST_ID: A1_B18
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
@@ -271,7 +274,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_general TEST_ID: A1_B19 TYPE: NEGATIVE TEST
+# TESTCASE: test_col_general TEST_ID: A1_B19
 #-------------------------------------------------------------------------
 SELECT c
 FROM test_unnest,
@@ -281,7 +284,7 @@ QueryInterruptedException
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_general TEST_ID: A1_B20 TYPE: POSITIVE TEST
+# TESTCASE: test_col_general TEST_ID: A1_B20
 #-------------------------------------------------------------------------
 SELECT (c || 'STR') col
 FROM test_unnest,
@@ -320,7 +323,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_general TEST_ID: A1_B21 TYPE: POSITIVE TEST
+# TESTCASE: test_col_general TEST_ID: A1_B21
 #-------------------------------------------------------------------------
 SELECT (c || 'STR') col
 FROM test_unnest,
@@ -340,7 +343,7 @@ GROUP BY c;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_general TEST_ID: A1_B22 TYPE: POSITIVE TEST
+# TESTCASE: test_col_general TEST_ID: A1_B22
 #-------------------------------------------------------------------------
 SELECT length(c) col
 FROM test_unnest,
@@ -379,7 +382,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_general TEST_ID: A1_B23 TYPE: POSITIVE TEST
+# TESTCASE: test_col_general TEST_ID: A1_B23
 #-------------------------------------------------------------------------
 SELECT length(c) col
 FROM test_unnest,
@@ -399,7 +402,7 @@ GROUP BY c;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_general TEST_ID: A1_B24 TYPE: POSITIVE TEST
+# TESTCASE: test_col_general TEST_ID: A1_B24
 #-------------------------------------------------------------------------
 SELECT length(c || 'STR') col
 FROM test_unnest,
@@ -438,7 +441,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_general TEST_ID: A1_B25 TYPE: POSITIVE TEST
+# TESTCASE: test_col_general TEST_ID: A1_B25
 #-------------------------------------------------------------------------
 SELECT length(c || 'STR') col
 FROM test_unnest,
@@ -458,7 +461,7 @@ GROUP BY c;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_general TEST_ID: A1_B26 TYPE: POSITIVE TEST
+# TESTCASE: test_col_general TEST_ID: A1_B26
 #-------------------------------------------------------------------------
 SELECT length(c || c) col
 FROM test_unnest,
@@ -497,7 +500,7 @@ FROM test_unnest,
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_general TEST_ID: A1_B27 TYPE: POSITIVE TEST
+# TESTCASE: test_col_general TEST_ID: A1_B27
 #-------------------------------------------------------------------------
 SELECT length(c || c) col
 FROM test_unnest,
@@ -517,7 +520,7 @@ GROUP BY c;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_general TEST_ID: A1_B28 TYPE: NEGATIVE TEST
+# TESTCASE: test_col_general TEST_ID: A1_B28
 #-------------------------------------------------------------------------
 SELECT c,
        c_mv_complex AS new_col
@@ -527,7 +530,7 @@ not found in any table
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_general TEST_ID: A1_B29 TYPE: POSITIVE TEST
+# TESTCASE: test_col_general TEST_ID: A1_B29
 #-------------------------------------------------------------------------
 SELECT c
 FROM
@@ -568,7 +571,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_col_general TEST_ID: A1_B30 TYPE: POSITIVE TEST
+# TESTCASE: test_col_general TEST_ID: A1_B30
 #-------------------------------------------------------------------------
 SELECT c AS new_col
 FROM test_unnest,
@@ -606,6 +609,3 @@ FROM test_unnest,
 
 !ok
 
-#-------------------------------------------------------------------------
-# Total query count 31 Positive tests: 15 Negative tests: 16
-#-------------------------------------------------------------------------

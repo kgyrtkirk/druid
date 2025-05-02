@@ -2,6 +2,9 @@
 !set useApproximateCountDistinct false
 !use druidtest://?componentSupplier=DartComponentSupplier&datasets=sql/src/test/quidem/qatests/qaArray/sql
 !set outputformat mysql
+#-------------------------------------------------------------------------
+# TESTCASE: test_explain TEST_ID: SEL_DATASOURCE
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM test_array;
 +-----+
@@ -14,7 +17,7 @@ FROM test_array;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A1_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A1_B1
 #-------------------------------------------------------------------------
 
 SELECT a_bool
@@ -37,7 +40,7 @@ LogicalProject(a_bool=[$1])
 !druidPlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A4_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A4_B1
 #-------------------------------------------------------------------------
 
 SELECT a_int
@@ -60,7 +63,7 @@ LogicalProject(a_int=[$2])
 !druidPlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A5_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A5_B1
 #-------------------------------------------------------------------------
 
 SELECT json_value(a_nested, '$[1]' RETURNING bigint array)
@@ -83,7 +86,7 @@ LogicalProject(EXPR$0=[CAST(JSON_VALUE_ARRAY_BIGINT($8, '$[1]')):BIGINT ARRAY])
 !druidPlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A6_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A6_B1
 #-------------------------------------------------------------------------
 
 SELECT json_value(a_nested, '$[7][1]' RETURNING bigint array)
@@ -106,7 +109,7 @@ LogicalProject(EXPR$0=[CAST(JSON_VALUE_ARRAY_BIGINT($8, '$[7][1]')):BIGINT ARRAY
 !druidPlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A7_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A7_B1
 #-------------------------------------------------------------------------
 
 SELECT a_float
@@ -129,7 +132,7 @@ LogicalProject(a_float=[$3])
 !druidPlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A8_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A8_B1
 #-------------------------------------------------------------------------
 
 SELECT json_value(a_nested, '$[2]' RETURNING decimal array)
@@ -152,7 +155,7 @@ LogicalProject(EXPR$0=[CAST(JSON_VALUE_ARRAY_DOUBLE($8, '$[2]')):DECIMAL(19, 0) 
 !druidPlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A9_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A9_B1
 #-------------------------------------------------------------------------
 
 SELECT json_value(a_nested, '$[7][2]' RETURNING decimal array)
@@ -175,7 +178,7 @@ LogicalProject(EXPR$0=[CAST(JSON_VALUE_ARRAY_DOUBLE($8, '$[7][2]')):DECIMAL(19, 
 !druidPlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A10_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A10_B1
 #-------------------------------------------------------------------------
 
 SELECT a_str
@@ -198,7 +201,7 @@ LogicalProject(a_str=[$4])
 !druidPlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A11_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A11_B1
 #-------------------------------------------------------------------------
 
 SELECT json_value(a_nested, '$[3]' RETURNING varchar array)
@@ -221,7 +224,7 @@ LogicalProject(EXPR$0=[CAST(JSON_VALUE_ARRAY_VARCHAR($8, '$[3]')):VARCHAR ARRAY]
 !druidPlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A12_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A12_B1
 #-------------------------------------------------------------------------
 
 SELECT json_value(a_nested, '$[7][3]' RETURNING varchar array)
@@ -244,7 +247,7 @@ LogicalProject(EXPR$0=[CAST(JSON_VALUE_ARRAY_VARCHAR($8, '$[7][3]')):VARCHAR ARR
 !druidPlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A13_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A13_B1
 #-------------------------------------------------------------------------
 
 SELECT a_null
@@ -267,7 +270,7 @@ LogicalProject(a_null=[$5])
 !druidPlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A14_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A14_B1
 #-------------------------------------------------------------------------
 
 SELECT json_value(a_nested, '$[4]' RETURNING varchar array)
@@ -290,7 +293,7 @@ LogicalProject(EXPR$0=[CAST(JSON_VALUE_ARRAY_VARCHAR($8, '$[4]')):VARCHAR ARRAY]
 !druidPlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A15_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A15_B1
 #-------------------------------------------------------------------------
 
 SELECT json_value(a_nested, '$[7][4]' RETURNING varchar array)
@@ -313,7 +316,7 @@ LogicalProject(EXPR$0=[CAST(JSON_VALUE_ARRAY_VARCHAR($8, '$[7][4]')):VARCHAR ARR
 !druidPlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A16_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A16_B1
 #-------------------------------------------------------------------------
 
 SELECT a_empty
@@ -336,7 +339,7 @@ LogicalProject(a_empty=[$6])
 !druidPlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A17_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A17_B1
 #-------------------------------------------------------------------------
 
 SELECT json_value(a_nested, '$[5]' RETURNING varchar array)
@@ -359,7 +362,7 @@ LogicalProject(EXPR$0=[CAST(JSON_VALUE_ARRAY_VARCHAR($8, '$[5]')):VARCHAR ARRAY]
 !druidPlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A18_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A18_B1
 #-------------------------------------------------------------------------
 
 SELECT json_value(a_nested, '$[7][5]' RETURNING varchar array)
@@ -382,7 +385,7 @@ LogicalProject(EXPR$0=[CAST(JSON_VALUE_ARRAY_VARCHAR($8, '$[7][5]')):VARCHAR ARR
 !druidPlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A19_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A19_B1
 #-------------------------------------------------------------------------
 
 SELECT a_mixed
@@ -405,7 +408,7 @@ LogicalProject(a_mixed=[$7])
 !druidPlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A20_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A20_B1
 #-------------------------------------------------------------------------
 
 SELECT json_value(a_nested, '$[6]' RETURNING varchar array)
@@ -428,7 +431,7 @@ LogicalProject(EXPR$0=[CAST(JSON_VALUE_ARRAY_VARCHAR($8, '$[6]')):VARCHAR ARRAY]
 !druidPlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A21_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A21_B1
 #-------------------------------------------------------------------------
 
 SELECT json_value(a_nested, '$[7][6]' RETURNING varchar array)
@@ -451,7 +454,7 @@ LogicalProject(EXPR$0=[CAST(JSON_VALUE_ARRAY_VARCHAR($8, '$[7][6]')):VARCHAR ARR
 !druidPlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A22_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A22_B1
 #-------------------------------------------------------------------------
 
 SELECT a_nested
@@ -474,7 +477,7 @@ LogicalProject(a_nested=[$8])
 !druidPlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A23_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A23_B1
 #-------------------------------------------------------------------------
 
 SELECT json_value(a_nested, '$[7]' RETURNING varchar array)
@@ -497,7 +500,7 @@ LogicalProject(EXPR$0=[CAST(JSON_VALUE_ARRAY_VARCHAR($8, '$[7]')):VARCHAR ARRAY]
 !druidPlan
 
 #-------------------------------------------------------------------------
-# TESTCASE: test_explain TEST_ID: A24_B1 TYPE: POSITIVE TEST
+# TESTCASE: test_explain TEST_ID: A24_B1
 #-------------------------------------------------------------------------
 
 SELECT json_value(a_nested, '$[7][7]' RETURNING varchar array)
@@ -519,6 +522,3 @@ LogicalProject(EXPR$0=[CAST(JSON_VALUE_ARRAY_VARCHAR($8, '$[7][7]')):VARCHAR ARR
 
 !druidPlan
 
-#-------------------------------------------------------------------------
-# Total query count 23 Positive tests: 23 Negative tests: 0
-#-------------------------------------------------------------------------

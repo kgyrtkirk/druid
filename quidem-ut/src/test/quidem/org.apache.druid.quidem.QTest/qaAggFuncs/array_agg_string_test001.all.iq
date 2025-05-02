@@ -2,6 +2,9 @@
 !set useApproximateCountDistinct false
 !use druidtest://?componentSupplier=AllDruidEnginesComponentSupplier&datasets=sql/src/test/quidem/qatests/qaAggFuncs
 !set outputformat mysql
+#-------------------------------------------------------------------------
+# TESTCASE: test001 TEST_ID: SEL_DATASOURCE
+#-------------------------------------------------------------------------
 SELECT count(*) cnt
 FROM test_agg_funcs;
 +-----+
@@ -14,7 +17,7 @@ FROM test_agg_funcs;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A01 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A01
 #-------------------------------------------------------------------------
 SELECT array['AAAAAAAAAA',
              'BBBBBBBBBB'] AS col;
@@ -28,7 +31,7 @@ SELECT array['AAAAAAAAAA',
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A02 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A02
 #-------------------------------------------------------------------------
 SELECT array_agg('AAAAAAAAAA') AS col;
 +--------------+
@@ -41,7 +44,7 @@ SELECT array_agg('AAAAAAAAAA') AS col;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A03 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A03
 #-------------------------------------------------------------------------
 SELECT strlen(array_to_string(col, '|')) AS LEN
 FROM
@@ -57,7 +60,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A04 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A04
 #-------------------------------------------------------------------------
 SELECT array_length(array_agg(tab0s0)) AS col
 FROM test_agg_funcs;
@@ -71,7 +74,7 @@ FROM test_agg_funcs;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A05 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A05
 #-------------------------------------------------------------------------
 SELECT array_offset(array_agg(tab0s0), 0) AS col
 FROM test_agg_funcs
@@ -86,7 +89,7 @@ WHERE tab0s0='AAAAAAAAAA';
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A06 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A06
 #-------------------------------------------------------------------------
 SELECT array_offset(array_agg(tab0s0), 100) AS col
 FROM test_agg_funcs
@@ -101,7 +104,7 @@ WHERE tab0s0='AAAAAAAAAA';
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A07 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A07
 #-------------------------------------------------------------------------
 SELECT array_ordinal(array_agg(tab0s0), 1) AS col
 FROM test_agg_funcs
@@ -116,7 +119,7 @@ WHERE tab0s0='BBBBBBBBBB';
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A08 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A08
 #-------------------------------------------------------------------------
 SELECT array_ordinal(array_agg(tab0s0), 100) AS col
 FROM test_agg_funcs
@@ -131,7 +134,7 @@ WHERE tab0s0='BBBBBBBBBB';
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A09 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A09
 #-------------------------------------------------------------------------
 SELECT array_contains(array_agg(tab0s0), 'AAAAAAAAAA') AS col
 FROM test_agg_funcs;
@@ -145,7 +148,7 @@ FROM test_agg_funcs;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A10 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A10
 #-------------------------------------------------------------------------
 SELECT array_contains(array_agg(tab0s0), array['AAAAAAAAAA', 'BBBBBBBBBB']) AS col
 FROM test_agg_funcs;
@@ -159,7 +162,7 @@ FROM test_agg_funcs;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A11 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A11
 #-------------------------------------------------------------------------
 SELECT array_contains(array_agg(tab0s0), 'CCCCCCCCCC') AS col
 FROM test_agg_funcs;
@@ -173,7 +176,7 @@ FROM test_agg_funcs;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A12 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A12
 #-------------------------------------------------------------------------
 SELECT array_contains(array_agg(tab0s0), array['AAAAAAAAAA', 'CCCCCCCCCC']) AS col
 FROM test_agg_funcs;
@@ -187,7 +190,7 @@ FROM test_agg_funcs;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A13 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A13
 #-------------------------------------------------------------------------
 SELECT array_overlap(array_agg(tab0s0), array['AAAAAAAAAA', 'CCCCCCCCCC']) AS col
 FROM test_agg_funcs;
@@ -201,7 +204,7 @@ FROM test_agg_funcs;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A14 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A14
 #-------------------------------------------------------------------------
 SELECT array_overlap(array_agg(tab0s0), array['CCCCCCCCCC', 'DDDDDDDDDD']) AS col
 FROM test_agg_funcs;
@@ -215,7 +218,7 @@ FROM test_agg_funcs;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A15 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A15
 #-------------------------------------------------------------------------
 SELECT array_overlap(array_agg(tab0s0), array_agg(DISTINCT tab0s0)) AS col
 FROM test_agg_funcs;
@@ -229,7 +232,7 @@ FROM test_agg_funcs;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A16 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A16
 #-------------------------------------------------------------------------
 SELECT array_offset_of(array_agg(tab0s0), 'AAAAAAAAAA') AS col
 FROM test_agg_funcs
@@ -244,7 +247,7 @@ WHERE tab0s0='AAAAAAAAAA';
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A17 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A17
 #-------------------------------------------------------------------------
 SELECT array_offset_of(array_agg(tab0s0), 'CCCCCCCCCC') AS col
 FROM test_agg_funcs
@@ -259,7 +262,7 @@ WHERE tab0s0='AAAAAAAAAA';
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A18 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A18
 #-------------------------------------------------------------------------
 SELECT array_ordinal_of(array_agg(tab0s0), 'AAAAAAAAAA') AS col
 FROM test_agg_funcs
@@ -274,7 +277,7 @@ WHERE tab0s0='AAAAAAAAAA';
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A19 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A19
 #-------------------------------------------------------------------------
 SELECT array_ordinal_of(array_agg(tab0s0), 'CCCCCCCCCC') AS col
 FROM test_agg_funcs
@@ -289,7 +292,7 @@ WHERE tab0s0='AAAAAAAAAA';
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A20 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A20
 #-------------------------------------------------------------------------
 SELECT strlen(array_to_string(array_agg(tab0s0), '|')) AS col
 FROM test_agg_funcs;
@@ -303,7 +306,7 @@ FROM test_agg_funcs;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A21 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A21
 #-------------------------------------------------------------------------
 SELECT contains_string(array_to_string(array_agg(tab0s0), '|'), 'AAAAAAAAAA')
 AND contains_string(array_to_string(array_agg(DISTINCT tab0s0), '|'), '|') AS col
@@ -318,7 +321,7 @@ FROM test_agg_funcs;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A22 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A22
 #-------------------------------------------------------------------------
 SELECT strlen(array_to_string(col, '|')) AS LEN
 FROM
@@ -334,7 +337,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A23 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A23
 #-------------------------------------------------------------------------
 SELECT array_length(array_prepend('CCCCCCCCCC', array_agg(tab0s0))) AS col
 FROM test_agg_funcs;
@@ -348,7 +351,7 @@ FROM test_agg_funcs;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A24 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A24
 #-------------------------------------------------------------------------
 SELECT strlen(array_to_string(col, '|')) AS LEN
 FROM
@@ -364,7 +367,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A25 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A25
 #-------------------------------------------------------------------------
 SELECT array_length(array_append(array_agg(tab0s0), 'CCCCCCCCCC')) AS col
 FROM test_agg_funcs;
@@ -378,7 +381,7 @@ FROM test_agg_funcs;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A26 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A26
 #-------------------------------------------------------------------------
 SELECT strlen(array_to_string(col, '|')) AS LEN
 FROM
@@ -394,7 +397,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A27 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A27
 #-------------------------------------------------------------------------
 SELECT array_length(array_concat(array_agg(tab0s0), array['CCCCCCCCCC'])) AS col
 FROM test_agg_funcs;
@@ -408,7 +411,7 @@ FROM test_agg_funcs;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A28 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A28
 #-------------------------------------------------------------------------
 SELECT strlen(array_to_string(col, '|')) AS LEN
 FROM
@@ -424,7 +427,7 @@ FROM
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A29 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A29
 #-------------------------------------------------------------------------
 SELECT array_length(array_concat(array_agg(tab0s0), array_agg(tab0s0))) AS col
 FROM test_agg_funcs;
@@ -438,7 +441,7 @@ FROM test_agg_funcs;
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A30 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A30
 #-------------------------------------------------------------------------
 SELECT array_slice(array_agg(tab0s0), 0, 1) AS col
 FROM test_agg_funcs
@@ -453,7 +456,7 @@ WHERE tab0s0='AAAAAAAAAA';
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A31 TYPE: POSITIVE TEST
+# TESTCASE: test001 TEST_ID: A31
 #-------------------------------------------------------------------------
 SELECT array_slice(array_agg(tab0s0), 100, 101) AS col
 FROM test_agg_funcs
@@ -468,7 +471,7 @@ WHERE tab0s0='AAAAAAAAAA';
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A32 TYPE: NEGATIVE TEST
+# TESTCASE: test001 TEST_ID: A32
 #-------------------------------------------------------------------------
 SELECT array_agg(t0.tab0s0) AS col
 FROM test_agg_funcs t0,
@@ -479,7 +482,7 @@ size
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A33 TYPE: NEGATIVE TEST
+# TESTCASE: test001 TEST_ID: A33
 #-------------------------------------------------------------------------
 SELECT array_to_string(array_agg(t0.tab0s0), '') AS col
 FROM test_agg_funcs t0,
@@ -490,7 +493,7 @@ size
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A34 TYPE: NEGATIVE TEST
+# TESTCASE: test001 TEST_ID: A34
 #-------------------------------------------------------------------------
 SELECT length(array_to_string(array_agg(t0.tab0s0), '')) AS col
 FROM test_agg_funcs t0,
@@ -501,7 +504,7 @@ size
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A35 TYPE: NEGATIVE TEST
+# TESTCASE: test001 TEST_ID: A35
 #-------------------------------------------------------------------------
 SELECT array_agg(t0.tab0s0) AS col
 FROM test_agg_funcs t0,
@@ -512,7 +515,7 @@ size
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A36 TYPE: NEGATIVE TEST
+# TESTCASE: test001 TEST_ID: A36
 #-------------------------------------------------------------------------
 SELECT array_to_string(array_agg(t0.tab0s0), '') AS col
 FROM test_agg_funcs t0,
@@ -523,7 +526,7 @@ size
 !error
 
 #-------------------------------------------------------------------------
-# TESTCASE: test001 TEST_ID: A37 TYPE: NEGATIVE TEST
+# TESTCASE: test001 TEST_ID: A37
 #-------------------------------------------------------------------------
 SELECT length(array_to_string(array_agg(t0.tab0s0), '')) AS col
 FROM test_agg_funcs t0,
@@ -533,6 +536,3 @@ GROUP BY t0.tab0s0;
 size
 !error
 
-#-------------------------------------------------------------------------
-# Total query count 38 Positive tests: 32 Negative tests: 6
-#-------------------------------------------------------------------------

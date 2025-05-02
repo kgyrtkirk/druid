@@ -1,8 +1,11 @@
 !set useApproximateCountDistinct false
-!use druidtest://?componentSupplier=StandardMSQComponentSupplier&datasets=sql/src/test/quidem/qatests/kttm_nested
+!use druidtest://?componentSupplier=StandardMSQComponentSupplier&datasets=sql/src/test/quidem/qatests/qaSql
 !set outputformat mysql
+#-------------------------------------------------------------------------
+# TESTCASE: aggr_general TEST_ID: SEL_DATASOURCE
+#-------------------------------------------------------------------------
 SELECT count(DISTINCT time_floor(__time, 'PT1H')) cnt
-FROM kttm_nested
+FROM test_sql
 WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00';
 +-----+
 | cnt |
@@ -14,11 +17,11 @@ WHERE time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND tim
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_aggr_general TEST_ID: A1 TYPE: POSITIVE TEST
+# TESTCASE: aggr_general TEST_ID: A1_q_grpby
 #-------------------------------------------------------------------------
 SELECT time_floor(__time, 'PT1H') t,
        count(*)+1 c
-FROM kttm_nested
+FROM test_sql
 GROUP BY 1
 HAVING time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
 AND (count(*)+1 IS NULL
@@ -61,11 +64,11 @@ AND (count(*)+1 IS NULL
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_aggr_general TEST_ID: A2 TYPE: POSITIVE TEST
+# TESTCASE: aggr_general TEST_ID: A2_q_grpby
 #-------------------------------------------------------------------------
 SELECT time_floor(__time, 'PT1H') t,
        count(agent)+1 c
-FROM kttm_nested
+FROM test_sql
 GROUP BY 1
 HAVING time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
 AND (count(agent)+1 IS NULL
@@ -108,11 +111,11 @@ AND (count(agent)+1 IS NULL
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_aggr_general TEST_ID: A3 TYPE: POSITIVE TEST
+# TESTCASE: aggr_general TEST_ID: A3_q_grpby
 #-------------------------------------------------------------------------
 SELECT time_floor(__time, 'PT1H') t,
        count(DISTINCT agent)+1 c
-FROM kttm_nested
+FROM test_sql
 GROUP BY 1
 HAVING time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
 AND (count(DISTINCT agent)+1 IS NULL
@@ -155,11 +158,11 @@ AND (count(DISTINCT agent)+1 IS NULL
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_aggr_general TEST_ID: A4 TYPE: POSITIVE TEST
+# TESTCASE: aggr_general TEST_ID: A4_q_grpby
 #-------------------------------------------------------------------------
 SELECT time_floor(__time, 'PT1H') t,
        sum(session_length)+1 c
-FROM kttm_nested
+FROM test_sql
 GROUP BY 1
 HAVING time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
 AND (sum(session_length)+1 IS NULL
@@ -202,11 +205,11 @@ AND (sum(session_length)+1 IS NULL
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_aggr_general TEST_ID: A5 TYPE: POSITIVE TEST
+# TESTCASE: aggr_general TEST_ID: A5_q_grpby
 #-------------------------------------------------------------------------
 SELECT time_floor(__time, 'PT1H') t,
        min(session_length)+1 c
-FROM kttm_nested
+FROM test_sql
 GROUP BY 1
 HAVING time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
 AND (min(session_length)+1 IS NULL
@@ -249,11 +252,11 @@ AND (min(session_length)+1 IS NULL
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_aggr_general TEST_ID: A6 TYPE: POSITIVE TEST
+# TESTCASE: aggr_general TEST_ID: A6_q_grpby
 #-------------------------------------------------------------------------
 SELECT time_floor(__time, 'PT1H') t,
        min(time_floor(__time, 'PT1H'))+interval '1' YEAR c
-FROM kttm_nested
+FROM test_sql
 GROUP BY 1
 HAVING time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
 AND (min(time_floor(__time, 'PT1H'))+interval '1' YEAR IS NULL
@@ -296,11 +299,11 @@ AND (min(time_floor(__time, 'PT1H'))+interval '1' YEAR IS NULL
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_aggr_general TEST_ID: A7 TYPE: POSITIVE TEST
+# TESTCASE: aggr_general TEST_ID: A7_q_grpby
 #-------------------------------------------------------------------------
 SELECT time_floor(__time, 'PT1H') t,
        max(session_length)+1 c
-FROM kttm_nested
+FROM test_sql
 GROUP BY 1
 HAVING time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
 AND (max(session_length)+1 IS NULL
@@ -343,11 +346,11 @@ AND (max(session_length)+1 IS NULL
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_aggr_general TEST_ID: A8 TYPE: POSITIVE TEST
+# TESTCASE: aggr_general TEST_ID: A8_q_grpby
 #-------------------------------------------------------------------------
 SELECT time_floor(__time, 'PT1H') t,
        max(time_floor(__time, 'PT1H'))+interval '1' YEAR c
-FROM kttm_nested
+FROM test_sql
 GROUP BY 1
 HAVING time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
 AND (max(time_floor(__time, 'PT1H'))+interval '1' YEAR IS NULL
@@ -390,11 +393,11 @@ AND (max(time_floor(__time, 'PT1H'))+interval '1' YEAR IS NULL
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_aggr_general TEST_ID: A9 TYPE: POSITIVE TEST
+# TESTCASE: aggr_general TEST_ID: A9_q_grpby
 #-------------------------------------------------------------------------
 SELECT time_floor(__time, 'PT1H') t,
        cast(avg(session_length)+1 AS bigint) c
-FROM kttm_nested
+FROM test_sql
 GROUP BY 1
 HAVING time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
 AND (cast(avg(session_length)+1 AS bigint) IS NULL
@@ -437,11 +440,11 @@ AND (cast(avg(session_length)+1 AS bigint) IS NULL
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_aggr_general TEST_ID: A10 TYPE: POSITIVE TEST
+# TESTCASE: aggr_general TEST_ID: A10_q_grpby
 #-------------------------------------------------------------------------
 SELECT time_floor(__time, 'PT1H') t,
        approx_count_distinct(client_ip)+1000 c
-FROM kttm_nested
+FROM test_sql
 GROUP BY 1
 HAVING time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
 AND (approx_count_distinct(client_ip)+1000 IS NULL
@@ -484,11 +487,11 @@ AND (approx_count_distinct(client_ip)+1000 IS NULL
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_aggr_general TEST_ID: A11 TYPE: POSITIVE TEST
+# TESTCASE: aggr_general TEST_ID: A11_q_grpby
 #-------------------------------------------------------------------------
 SELECT time_floor(__time, 'PT1H') t,
        approx_count_distinct_builtin(client_ip)+1000 c
-FROM kttm_nested
+FROM test_sql
 GROUP BY 1
 HAVING time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
 AND (approx_count_distinct_builtin(client_ip)+1000 IS NULL
@@ -531,11 +534,11 @@ AND (approx_count_distinct_builtin(client_ip)+1000 IS NULL
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_aggr_general TEST_ID: A20 TYPE: POSITIVE TEST
+# TESTCASE: aggr_general TEST_ID: A20_q_grpby
 #-------------------------------------------------------------------------
 SELECT time_floor(__time, 'PT1H') t,
        '1'||earliest(client_ip) c
-FROM kttm_nested
+FROM test_sql
 GROUP BY 1
 HAVING time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
 AND ('1'||earliest(client_ip) IS NULL
@@ -578,11 +581,11 @@ AND ('1'||earliest(client_ip) IS NULL
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_aggr_general TEST_ID: A21 TYPE: POSITIVE TEST
+# TESTCASE: aggr_general TEST_ID: A21_q_grpby
 #-------------------------------------------------------------------------
 SELECT time_floor(__time, 'PT1H') t,
        '1'||json_value(earliest(agent), '$.type') c
-FROM kttm_nested
+FROM test_sql
 GROUP BY 1
 HAVING time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
 AND ('1'||json_value(earliest(agent), '$.type') IS NULL
@@ -625,11 +628,11 @@ AND ('1'||json_value(earliest(agent), '$.type') IS NULL
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_aggr_general TEST_ID: A22 TYPE: POSITIVE TEST
+# TESTCASE: aggr_general TEST_ID: A22_q_grpby
 #-------------------------------------------------------------------------
 SELECT time_floor(__time, 'PT1H') t,
        '1'||earliest_by(client_ip, timestamp '2019-08-25 04:00:00') c
-FROM kttm_nested
+FROM test_sql
 GROUP BY 1
 HAVING time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
 AND ('1'||earliest_by(client_ip, timestamp '2019-08-25 04:00:00') IS NULL
@@ -672,11 +675,11 @@ AND ('1'||earliest_by(client_ip, timestamp '2019-08-25 04:00:00') IS NULL
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_aggr_general TEST_ID: A23 TYPE: POSITIVE TEST
+# TESTCASE: aggr_general TEST_ID: A23_q_grpby
 #-------------------------------------------------------------------------
 SELECT time_floor(__time, 'PT1H') t,
        '1'||json_value(earliest_by(client_ip, timestamp '2019-08-25 04:00:00'), '$.type') c
-FROM kttm_nested
+FROM test_sql
 GROUP BY 1
 HAVING time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
 AND ('1'||json_value(earliest_by(client_ip, timestamp '2019-08-25 04:00:00'), '$.type') IS NULL
@@ -719,11 +722,11 @@ AND ('1'||json_value(earliest_by(client_ip, timestamp '2019-08-25 04:00:00'), '$
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_aggr_general TEST_ID: A24 TYPE: POSITIVE TEST
+# TESTCASE: aggr_general TEST_ID: A24_q_grpby
 #-------------------------------------------------------------------------
 SELECT time_floor(__time, 'PT1H') t,
        '1'||latest(client_ip) c
-FROM kttm_nested
+FROM test_sql
 GROUP BY 1
 HAVING time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
 AND ('1'||latest(client_ip) IS NULL
@@ -766,11 +769,11 @@ AND ('1'||latest(client_ip) IS NULL
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_aggr_general TEST_ID: A25 TYPE: POSITIVE TEST
+# TESTCASE: aggr_general TEST_ID: A25_q_grpby
 #-------------------------------------------------------------------------
 SELECT time_floor(__time, 'PT1H') t,
        '1'||json_value(latest(agent), '$.type') c
-FROM kttm_nested
+FROM test_sql
 GROUP BY 1
 HAVING time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
 AND ('1'||json_value(latest(agent), '$.type') IS NULL
@@ -813,11 +816,11 @@ AND ('1'||json_value(latest(agent), '$.type') IS NULL
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_aggr_general TEST_ID: A26 TYPE: POSITIVE TEST
+# TESTCASE: aggr_general TEST_ID: A26_q_grpby
 #-------------------------------------------------------------------------
 SELECT time_floor(__time, 'PT1H') t,
        '1'||latest_by(client_ip, timestamp '2019-08-25 04:00:00') c
-FROM kttm_nested
+FROM test_sql
 GROUP BY 1
 HAVING time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
 AND ('1'||latest_by(client_ip, timestamp '2019-08-25 04:00:00') IS NULL
@@ -860,11 +863,11 @@ AND ('1'||latest_by(client_ip, timestamp '2019-08-25 04:00:00') IS NULL
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_aggr_general TEST_ID: A27 TYPE: POSITIVE TEST
+# TESTCASE: aggr_general TEST_ID: A27_q_grpby
 #-------------------------------------------------------------------------
 SELECT time_floor(__time, 'PT1H') t,
        '1'||json_value(latest_by(client_ip, timestamp '2019-08-25 04:00:00'), '$.type') c
-FROM kttm_nested
+FROM test_sql
 GROUP BY 1
 HAVING time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
 AND ('1'||json_value(latest_by(client_ip, timestamp '2019-08-25 04:00:00'), '$.type') IS NULL
@@ -907,11 +910,11 @@ AND ('1'||json_value(latest_by(client_ip, timestamp '2019-08-25 04:00:00'), '$.t
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_aggr_general TEST_ID: A28 TYPE: POSITIVE TEST
+# TESTCASE: aggr_general TEST_ID: A28_q_grpby
 #-------------------------------------------------------------------------
 SELECT time_floor(__time, 'PT1H') t,
        '1'||any_value(client_ip) c
-FROM kttm_nested
+FROM test_sql
 GROUP BY 1
 HAVING time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
 AND ('1'||any_value(client_ip) IS NULL
@@ -954,11 +957,11 @@ AND ('1'||any_value(client_ip) IS NULL
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_aggr_general TEST_ID: A29 TYPE: POSITIVE TEST
+# TESTCASE: aggr_general TEST_ID: A29_q_grpby
 #-------------------------------------------------------------------------
 SELECT time_floor(__time, 'PT1H') t,
        '1'||json_value(any_value(agent), '$.type') c
-FROM kttm_nested
+FROM test_sql
 GROUP BY 1
 HAVING time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
 AND ('1'||json_value(any_value(agent), '$.type') IS NULL
@@ -1001,11 +1004,11 @@ AND ('1'||json_value(any_value(agent), '$.type') IS NULL
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_aggr_general TEST_ID: A39 TYPE: POSITIVE TEST
+# TESTCASE: aggr_general TEST_ID: A39_q_grpby
 #-------------------------------------------------------------------------
 SELECT time_floor(__time, 'PT1H') t,
        bit_and(session_length) c
-FROM kttm_nested
+FROM test_sql
 GROUP BY 1
 HAVING time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
 AND (bit_and(session_length) IS NULL
@@ -1048,11 +1051,11 @@ AND (bit_and(session_length) IS NULL
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_aggr_general TEST_ID: A40 TYPE: POSITIVE TEST
+# TESTCASE: aggr_general TEST_ID: A40_q_grpby
 #-------------------------------------------------------------------------
 SELECT time_floor(__time, 'PT1H') t,
        bit_or(session_length) c
-FROM kttm_nested
+FROM test_sql
 GROUP BY 1
 HAVING time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
 AND (bit_or(session_length) IS NULL
@@ -1095,11 +1098,11 @@ AND (bit_or(session_length) IS NULL
 !ok
 
 #-------------------------------------------------------------------------
-# TESTCASE: qaSql_aggr_general TEST_ID: A41 TYPE: POSITIVE TEST
+# TESTCASE: aggr_general TEST_ID: A41_q_grpby
 #-------------------------------------------------------------------------
 SELECT time_floor(__time, 'PT1H') t,
        bit_xor(session_length) c
-FROM kttm_nested
+FROM test_sql
 GROUP BY 1
 HAVING time_floor(__time, 'PT1H') BETWEEN timestamp '2019-08-25 00:00:00' AND timestamp '2019-08-25 06:00:00'
 AND (bit_xor(session_length) IS NULL
@@ -1141,6 +1144,3 @@ AND (bit_xor(session_length) IS NULL
 
 !ok
 
-#-------------------------------------------------------------------------
-# Total query count 25 Positive tests: 25 Negative tests: 0
-#-------------------------------------------------------------------------
