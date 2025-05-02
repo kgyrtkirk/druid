@@ -121,8 +121,7 @@ public class PlannerFactory extends PlannerToolbox
         this,
         sql,
         engine,
-        queryContext,
-        hook
+        queryContext
     );
     context.dispatchHook(DruidHook.SQL, sql);
 

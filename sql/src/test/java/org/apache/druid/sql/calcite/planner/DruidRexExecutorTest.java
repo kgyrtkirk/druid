@@ -113,8 +113,7 @@ public class DruidRexExecutorTest extends InitializedNullHandlingTest
       PLANNER_TOOLBOX,
       "SELECT 1", // The actual query isn't important for this test
       null, /* Don't need an engine */
-      Collections.emptyMap(),
-      null
+      Collections.emptyMap()
   );
 
   private final RexBuilder rexBuilder = new RexBuilder(new JavaTypeFactoryImpl());

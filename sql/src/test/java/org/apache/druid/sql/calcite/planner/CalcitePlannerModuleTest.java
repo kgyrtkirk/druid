@@ -187,8 +187,7 @@ public class CalcitePlannerModuleTest extends CalciteTestBase
         toolbox,
         "SELECT 1",
         new NativeSqlEngine(queryLifecycleFactory, mapper),
-        Collections.emptyMap(),
-        null
+        Collections.emptyMap()
     );
 
     boolean containsCustomRule = injector.getInstance(CalciteRulesManager.class)
@@ -207,16 +206,14 @@ public class CalcitePlannerModuleTest extends CalciteTestBase
             toolbox,
             "SELECT 1",
             new NativeSqlEngine(queryLifecycleFactory, mapper),
-            Collections.singletonMap(BLOAT_PROPERTY, BLOAT),
-            null
+            Collections.singletonMap(BLOAT_PROPERTY, BLOAT)
     );
 
     PlannerContext contextWithoutBloat = PlannerContext.create(
             toolbox,
             "SELECT 1",
             new NativeSqlEngine(queryLifecycleFactory, mapper),
-            Collections.emptyMap(),
-            null
+            Collections.emptyMap()
     );
 
     assertBloat(contextWithBloat, BLOAT);

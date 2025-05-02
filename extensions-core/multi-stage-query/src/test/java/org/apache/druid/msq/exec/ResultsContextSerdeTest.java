@@ -90,8 +90,7 @@ public class ResultsContextSerdeTest
         toolbox,
         "DUMMY",
         engine,
-        Collections.emptyMap(),
-        null
+        Collections.emptyMap()
     );
     this.resultsContext = new ResultsContext(
         ImmutableList.of(SqlTypeName.DOUBLE, SqlTypeName.TIMESTAMP, SqlTypeName.VARCHAR),

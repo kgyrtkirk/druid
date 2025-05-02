@@ -81,8 +81,7 @@ public class ExternalTableScanRuleTest
         toolbox,
         "DUMMY", // The actual query isn't important for this test
         engine,
-        Collections.emptyMap(),
-        null
+        Collections.emptyMap()
     );
     plannerContext.setQueryMaker(
         engine.buildQueryMakerForSelect(EasyMock.createMock(RelRoot.class), plannerContext)

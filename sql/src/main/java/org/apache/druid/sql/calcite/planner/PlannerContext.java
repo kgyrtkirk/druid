@@ -183,8 +183,7 @@ public class PlannerContext
       final PlannerToolbox plannerToolbox,
       final String sql,
       final SqlEngine engine,
-      final Map<String, Object> queryContext,
-      final PlannerHook hook
+      final Map<String, Object> queryContext
   )
   {
     return new PlannerContext(
@@ -193,7 +192,7 @@ public class PlannerContext
         plannerToolbox.plannerConfig().withOverrides(queryContext),
         engine,
         queryContext,
-        hook
+        null
     );
   }
 

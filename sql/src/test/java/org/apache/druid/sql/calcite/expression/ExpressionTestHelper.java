@@ -107,8 +107,7 @@ public class ExpressionTestHelper
       PLANNER_TOOLBOX,
       "SELECT 1", // The actual query isn't important for this test
       null, /* Don't need engine */
-      Collections.emptyMap(),
-      null
+      Collections.emptyMap()
   );
 
   private final RowSignature rowSignature;
