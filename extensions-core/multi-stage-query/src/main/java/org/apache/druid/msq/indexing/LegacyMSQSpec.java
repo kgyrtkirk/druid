@@ -55,7 +55,8 @@ public class LegacyMSQSpec extends MSQSpec
       @JsonProperty("tuningConfig") MSQTuningConfig tuningConfig)
   {
     super(columnMappings, destination, assignmentStrategy, tuningConfig);
-    this.query = query;
+    this.query = Preconditions.checkNotNull(query, "query");
+  }
   }
 
   public static Builder builder()
@@ -84,8 +85,8 @@ public class LegacyMSQSpec extends MSQSpec
 
   public LegacyMSQSpec withOverriddenContext(Map<String, Object> contextOverride)
   {
-//      Preconditions.checkArgument(queryDef == null, "queryDef must be null!");
-
+    Preconditions.checkArgument(queryDef == null, "queryDef must be null!");
+    if (contextOverride == null || contextOverride.isEmpty()) {
     return new LegacyMSQSpec(
         query.withOverriddenContext(contextOverride),
         getColumnMappings(),
@@ -120,7 +121,6 @@ public class LegacyMSQSpec extends MSQSpec
     private MSQTuningConfig tuningConfig;
     private QueryContext queryContext = QueryContext.empty();
 
-    @Deprecated
     public Builder query(Query<?> query)
     {
       this.query = query;

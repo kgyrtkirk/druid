@@ -25,8 +25,6 @@ import org.junit.Test;
 
 import java.nio.ByteBuffer;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 /**
  *
  */
@@ -91,9 +89,8 @@ public class StringUtilsTest
   }
 
   @Test
-  public void testReplace()
+  public void testEscapeHtml()
   {
-    assertEquals("axdaxd", StringUtils.replace("asdasd", "s", "x"));
+    Assert.assertEquals("invalid&lt;script&gt;SegmentId", StringUtils.escapeHtml("invalid<script>SegmentId"));
   }
-
 }
