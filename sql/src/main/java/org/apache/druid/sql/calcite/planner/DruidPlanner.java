@@ -371,27 +371,9 @@ public class DruidPlanner implements Closeable
     }
 
     @Override
-    public QueryContext queryContext()
-    {
-      return plannerContext.queryContext();
-    }
-
-    @Override
-    public Map<String, Object> queryContextMap()
-    {
-      return plannerContext.queryContextMap();
-    }
-
-    @Override
     public SchemaPlus defaultSchema()
     {
       return frameworkConfig.getDefaultSchema();
-    }
-
-    @Override
-    public ObjectMapper jsonMapper()
-    {
-      return plannerContext.getJsonMapper();
     }
   }
 

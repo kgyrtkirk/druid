@@ -49,10 +49,17 @@ public interface SqlStatementHandler
     PlannerContext plannerContext();
     SqlEngine engine();
     CalcitePlanner planner();
-    QueryContext queryContext();
-    Map<String, Object> queryContextMap();
     SchemaPlus defaultSchema();
-    ObjectMapper jsonMapper();
+
+    default QueryContext queryContext() {
+      return plannerContext().queryContext();
+    }
+    default Map<String, Object> queryContextMap() {
+      return plannerContext().queryContextMap();
+    }
+    default ObjectMapper jsonMapper() {
+      return plannerContext().getJsonMapper();
+    }
   }
 
   abstract class BaseStatementHandler implements SqlStatementHandler
