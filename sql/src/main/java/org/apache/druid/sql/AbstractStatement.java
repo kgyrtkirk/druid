@@ -30,8 +30,6 @@ import org.apache.druid.server.security.ResourceAction;
 import org.apache.druid.server.security.ResourceType;
 import org.apache.druid.sql.calcite.planner.DruidPlanner;
 import org.apache.druid.sql.calcite.planner.PlannerContext;
-import org.apache.druid.sql.calcite.planner.PlannerHook;
-
 import java.io.Closeable;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -71,7 +69,6 @@ public abstract class AbstractStatement implements Closeable
   protected final Map<String, Object> queryContext;
   protected PlannerContext plannerContext;
   protected DruidPlanner.AuthResult authResult;
-  protected PlannerHook hook;
 
   public AbstractStatement(
       final SqlToolbox sqlToolbox,
@@ -111,15 +108,6 @@ public abstract class AbstractStatement implements Closeable
   }
 
   /**
-   * Set the hook which can capture planner artifacts during planning. Primarily used
-   * for testing. Defaults to a "no op" hook that does nothing.
-   */
-  public void setHook(PlannerHook hook)
-  {
-    this.hook = hook;
-  }
-
-  /**
    * Validate SQL query and authorize against any datasources or views which
    * will take part in the query. Must be called by the API methods, not
    * directly.
@@ -142,7 +130,7 @@ public abstract class AbstractStatement implements Closeable
   )
   {
     Set<String> securedKeys = this.sqlToolbox.plannerFactory.getAuthConfig()
-        .contextKeysToAuthorize(queryPlus.context().keySet());
+        .contextKeysToAuthorize(plannerContext.queryContextMap().keySet());
     Set<ResourceAction> contextResources = new HashSet<>();
     securedKeys.forEach(key -> contextResources.add(
         new ResourceAction(new Resource(key, ResourceType.QUERY_CONTEXT), Action.WRITE)

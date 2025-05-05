@@ -269,7 +269,6 @@ public abstract class IngestHandler extends QueryHandler
     {
       super(handlerContext, explain);
       this.sqlNode = convertQuery(sqlNode);
-      handlerContext.hook().captureInsert(sqlNode);
     }
 
     protected static DruidSqlInsert convertQuery(DruidSqlIngest sqlNode)
@@ -337,7 +336,6 @@ public abstract class IngestHandler extends QueryHandler
           explain
       );
       this.sqlNode = convertQuery(sqlNode);
-      handlerContext.hook().captureInsert(sqlNode);
     }
 
     protected static DruidSqlReplace convertQuery(DruidSqlReplace sqlNode)
@@ -390,7 +388,7 @@ public abstract class IngestHandler extends QueryHandler
       List<String> replaceIntervalsList = DruidSqlParserUtils.validateQueryAndConvertToIntervals(
           replaceTimeQuery,
           ingestionGranularity,
-          handlerContext.timeZone()
+          handlerContext.plannerContext().getTimeZone()
       );
       if (replaceIntervalsList != null) {
         replaceIntervals = String.join(",", replaceIntervalsList);

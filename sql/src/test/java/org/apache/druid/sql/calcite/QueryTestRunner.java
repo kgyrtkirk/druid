@@ -29,6 +29,8 @@ import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.sql.SqlExplainFormat;
 import org.apache.calcite.sql.SqlExplainLevel;
 import org.apache.calcite.sql.SqlInsert;
+import org.apache.calcite.sql.SqlNode;
+import org.apache.curator.shaded.com.google.common.collect.Iterables;
 import org.apache.druid.java.util.common.IAE;
 import org.apache.druid.java.util.common.Pair;
 import org.apache.druid.java.util.common.StringUtils;
@@ -48,6 +50,8 @@ import org.apache.druid.sql.calcite.planner.PlannerCaptureHook;
 import org.apache.druid.sql.calcite.planner.PrepareResult;
 import org.apache.druid.sql.calcite.table.RowSignatures;
 import org.apache.druid.sql.calcite.util.QueryLogHook;
+import org.apache.druid.sql.hook.DruidHook;
+import org.apache.druid.sql.hook.DruidHookDispatcher;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
 import org.junit.Assert;
@@ -126,7 +130,7 @@ public class QueryTestRunner
     public final List<Object[]> results;
     public final List<Query<?>> recordedQueries;
     public final Set<ResourceAction> resourceActions;
-    public final RuntimeException exception;
+    public final Exception exception;
     public final PlannerCaptureHook capture;
 
     public QueryResults(
@@ -172,7 +176,7 @@ public class QueryTestRunner
     public QueryResults(
         final Map<String, Object> queryContext,
         final String vectorizeOption,
-        final RuntimeException exception
+        final Exception e
     )
     {
       this.queryContext = queryContext;
@@ -181,7 +185,7 @@ public class QueryTestRunner
       this.results = null;
       this.recordedQueries = null;
       this.resourceActions = null;
-      this.exception = exception;
+      this.exception = e;
       this.capture = null;
       this.sqlSignature = null;
     }
@@ -262,6 +266,7 @@ public class QueryTestRunner
 
       BaseCalciteQueryTest.log.info("SQL: %s", builder.sql);
 
+
       final SqlStatementFactory sqlStatementFactory = builder.statementFactory();
       final SqlQueryPlus sqlQuery = SqlQueryPlus.builder(builder.sql)
                                                 .sqlParameters(builder.parameters)
@@ -298,16 +303,19 @@ public class QueryTestRunner
     )
     {
       try {
-        final PlannerCaptureHook capture = getCaptureHook();
+        final PlannerCaptureHook capture = new PlannerCaptureHook();
         final DirectStatement stmt = sqlStatementFactory.directStatement(query);
-        stmt.setHook(capture);
         AtomicReference<List<Object[]>> resultListRef = new AtomicReference<>();
         QueryLogHook queryLogHook = new QueryLogHook(builder().config.jsonMapper());
-        queryLogHook.logQueriesFor(
-            () -> {
-              resultListRef.set(stmt.execute().getResults().toList());
-            }
-        );
+
+        DruidHookDispatcher hookDispatcher = builder.config.queryFramework().injector().getInstance(DruidHookDispatcher.class);
+
+        List<SqlNode> sqlNodes = new ArrayList<>();
+        try (AutoCloseable c = hookDispatcher.withConsumer(DruidHook.SQL_NODE, sqlNodes::add);
+            AutoCloseable c2 = hookDispatcher.withConsumer(DruidHook.NATIVE_PLAN, queryLogHook::accept)) {
+          resultListRef.set(stmt.execute().getResults().toList());
+        }
+        capture.captureSqlNode(Iterables.getOnlyElement(sqlNodes));
         return new QueryResults(
             query.context(),
             vectorize,
@@ -317,22 +325,13 @@ public class QueryTestRunner
             capture
         );
       }
-      catch (RuntimeException e) {
+      catch (Exception e) {
         return new QueryResults(
             query.context(),
             vectorize,
             e
         );
       }
-    }
-
-    private PlannerCaptureHook getCaptureHook()
-    {
-      if (builder.getQueryContext().containsKey(PlannerCaptureHook.NEED_CAPTURE_HOOK)
-          || builder.expectedLogicalPlan != null) {
-        return new PlannerCaptureHook();
-      }
-      return null;
     }
 
     public static Pair<RowSignature, List<Object[]>> getResults(
@@ -645,7 +644,10 @@ public class QueryTestRunner
               )
           );
         } else if (queryResults.exception != null) {
-          throw queryResults.exception;
+          if (queryResults.exception instanceof RuntimeException) {
+            throw (RuntimeException) queryResults.exception;
+          }
+          throw new RuntimeException(queryResults.exception);
         }
       }
     }

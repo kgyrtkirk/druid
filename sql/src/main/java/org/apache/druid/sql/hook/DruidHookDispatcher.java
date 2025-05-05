@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * Dispatcher for Druid hooks.
@@ -69,6 +70,19 @@ public class DruidHookDispatcher
         unregister(key, hook);
       }
     };
+  }
+
+  public <T> Closeable withConsumer(HookKey<T> key, Consumer<T> consumer)
+  {
+    DruidHook<T> hook = new DruidHook<T>()
+    {
+      @Override
+      public void invoke(HookKey<T> key, T object)
+      {
+        consumer.accept(object);
+      }
+    };
+    return withHook(key, hook);
   }
 
   @SuppressWarnings({"rawtypes", "unchecked"})

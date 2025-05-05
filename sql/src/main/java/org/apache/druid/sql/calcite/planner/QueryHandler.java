@@ -141,11 +141,9 @@ public abstract class QueryHandler extends SqlStatementHandler.BaseStatementHand
     SqlNode validatedQueryNode = validatedQueryNode();
     rootQueryRel = handlerContext.planner().rel(validatedQueryNode);
     handlerContext.plannerContext().dispatchHook(DruidHook.CONVERTED_PLAN, rootQueryRel.rel);
-    handlerContext.hook().captureQueryRel(rootQueryRel);
     final RelDataTypeFactory typeFactory = rootQueryRel.rel.getCluster().getTypeFactory();
     final SqlValidator validator = handlerContext.planner().getValidator();
     final RelDataType parameterTypes = validator.getParameterRowType(validatedQueryNode);
-    handlerContext.hook().captureParameterTypes(parameterTypes);
     final RelDataType returnedRowType;
 
     if (explain != null) {
@@ -323,7 +321,6 @@ public abstract class QueryHandler extends SqlStatementHandler.BaseStatementHand
       );
     }
 
-    handlerContext.hook().captureBindableRel(bindableRel);
     PlannerContext plannerContext = handlerContext.plannerContext();
     if (explain != null) {
       return planExplanation(rootQueryRel, bindableRel, false);
@@ -520,7 +517,6 @@ public abstract class QueryHandler extends SqlStatementHandler.BaseStatementHand
   protected PlannerResult planWithDruidConvention() throws ValidationException
   {
     final RelRoot possiblyLimitedRoot = possiblyWrapRootWithOuterLimitFromContext(rootQueryRel);
-    handlerContext.hook().captureQueryRel(possiblyLimitedRoot);
     final QueryMaker queryMaker = buildQueryMaker(possiblyLimitedRoot);
     PlannerContext plannerContext = handlerContext.plannerContext();
     plannerContext.setQueryMaker(queryMaker);
@@ -584,8 +580,6 @@ public abstract class QueryHandler extends SqlStatementHandler.BaseStatementHand
           parameterized
       );
 
-      handlerContext.hook().captureDruidRel(druidRel);
-
       plannerContext.dispatchHook(DruidHook.DRUID_PLAN, druidRel);
 
       if (explain != null) {
@@ -594,27 +588,22 @@ public abstract class QueryHandler extends SqlStatementHandler.BaseStatementHand
         // Compute row type.
         final RelDataType rowType = prepareResult.getReturnedRowType();
 
-        // Start the query.
-        final Supplier<QueryResponse<Object[]>> resultsSupplier = () -> {
-          // sanity check
-          final Set<ResourceAction> readResourceActions =
-              plannerContext.getResourceActions()
-                            .stream()
-                            .filter(action -> action.getAction() == Action.READ)
-                            .collect(Collectors.toSet());
-          Preconditions.checkState(
-              readResourceActions.isEmpty() == druidRel.getDataSourceNames().isEmpty()
-              // The resources found in the plannerContext can be less than the datasources in
-              // the query plan, because the query planner can eliminate empty tables by replacing
-              // them with InlineDataSource of empty rows.
-              || readResourceActions.size() >= druidRel.getDataSourceNames().size(),
-              "Authorization sanity check failed"
-          );
+        // sanity check
+        final Set<ResourceAction> readResourceActions =
+            plannerContext.getResourceActions()
+                          .stream()
+                          .filter(action -> action.getAction() == Action.READ)
+                          .collect(Collectors.toSet());
+        Preconditions.checkState(
+            readResourceActions.isEmpty() == druidRel.getDataSourceNames().isEmpty()
+            // The resources found in the plannerContext can be less than the datasources in
+            // the query plan, because the query planner can eliminate empty tables by replacing
+            // them with InlineDataSource of empty rows.
+            || readResourceActions.size() >= druidRel.getDataSourceNames().size(),
+            "Authorization sanity check failed"
+        );
 
-          return druidRel.runQuery();
-        };
-
-        return new PlannerResult(resultsSupplier, rowType);
+        return new PlannerResult(druidRel::runQuery, rowType);
       }
     }
   }

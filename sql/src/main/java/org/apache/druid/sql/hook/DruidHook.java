@@ -21,6 +21,7 @@ package org.apache.druid.sql.hook;
 
 import com.google.errorprone.annotations.Immutable;
 import org.apache.calcite.rel.RelNode;
+import org.apache.calcite.sql.SqlNode;
 import org.apache.druid.query.Query;
 import java.util.Objects;
 
@@ -32,6 +33,7 @@ import java.util.Objects;
 @FunctionalInterface
 public interface DruidHook<T>
 {
+  HookKey<SqlNode> SQL_NODE = new HookKey<>("sqlNodes", SqlNode.class);
   HookKey<RelNode> CONVERTED_PLAN = new HookKey<>("converted", RelNode.class);
   HookKey<RelNode> LOGICAL_PLAN = new HookKey<>("logicalPlan", RelNode.class);
   HookKey<RelNode> DRUID_PLAN = new HookKey<>("druidPlan", RelNode.class);
