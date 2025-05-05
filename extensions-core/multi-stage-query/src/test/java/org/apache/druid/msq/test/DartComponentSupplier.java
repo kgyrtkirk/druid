@@ -31,7 +31,6 @@ import org.apache.druid.java.util.http.client.HttpClient;
 import org.apache.druid.msq.dart.Dart;
 import org.apache.druid.msq.dart.controller.DartControllerContextFactory;
 import org.apache.druid.msq.dart.controller.sql.DartSqlEngine;
-import org.apache.druid.msq.dart.controller.sql.PrePlannedSqlEngine;
 import org.apache.druid.msq.dart.guice.DartControllerModule;
 import org.apache.druid.msq.dart.guice.DartModules;
 import org.apache.druid.msq.dart.guice.DartWorkerMemoryManagementModule;
@@ -98,11 +97,7 @@ public class DartComponentSupplier extends AbstractMSQComponentSupplierDelegate
   @Override
   public Class<? extends SqlEngine> getSqlEngineClass()
   {
-    if(true) {
-      return DartSqlEngine.class;
-    } else {
-      return PrePlannedSqlEngine.class;
-    }
+    return DartSqlEngine.class;
   }
 
   static class DartTestCoreModule implements DruidModule
