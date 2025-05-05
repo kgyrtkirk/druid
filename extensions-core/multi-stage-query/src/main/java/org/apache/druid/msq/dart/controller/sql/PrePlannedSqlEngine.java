@@ -25,28 +25,17 @@ import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.rel.type.RelDataTypeFactory;
 import org.apache.calcite.tools.ValidationException;
 import org.apache.druid.error.DruidException;
-import org.apache.druid.msq.exec.ControllerContext;
 import org.apache.druid.msq.exec.QueryKitBasedMSQPlanner;
-import org.apache.druid.msq.indexing.LegacyMSQSpec;
-import org.apache.druid.msq.indexing.QueryDefMSQSpec;
 import org.apache.druid.msq.kernel.QueryDefinition;
-import org.apache.druid.msq.sql.DartQueryKitSpecFactory;
-import org.apache.druid.msq.sql.MSQTaskQueryMaker;
 import org.apache.druid.msq.sql.MSQTaskSqlEngine;
-import org.apache.druid.query.QueryContext;
 import org.apache.druid.query.QueryContexts;
-import org.apache.druid.server.QueryResponse;
 import org.apache.druid.sql.calcite.planner.PlannerContext;
-import org.apache.druid.sql.calcite.rel.DruidQuery;
-import org.apache.druid.sql.calcite.rel.logical.DruidLogicalNode;
 import org.apache.druid.sql.calcite.run.EngineFeature;
 import org.apache.druid.sql.calcite.run.QueryMaker;
 import org.apache.druid.sql.calcite.run.SqlEngine;
 import org.apache.druid.sql.destination.IngestDestination;
 
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 /**
  * Executes queries with pre-planned stages.
@@ -113,7 +102,7 @@ public class PrePlannedSqlEngine implements SqlEngine
   @Override
   public QueryMaker buildQueryMakerForSelect(RelRoot relRoot, PlannerContext plannerContext) throws ValidationException
   {
-    return new QkQueryMaker(
+    return new PrePlannedQueryMaker(
         plannerContext,
         delegate.buildQueryMakerForSelect(relRoot, plannerContext)
     );
@@ -127,102 +116,5 @@ public class PrePlannedSqlEngine implements SqlEngine
       PlannerContext plannerContext)
   {
     throw DruidException.defensive("Not yet supported in this mode");
-  }
-
-  static class QkQueryMaker implements QueryMaker, QueryMaker.FromDruidLogical
-  {
-    private PlannerContext plannerContext;
-    private DartQueryMaker dartQueryMaker;
-
-    public QkQueryMaker(PlannerContext plannerContext, QueryMaker queryMaker)
-    {
-      this.plannerContext = plannerContext;
-      this.dartQueryMaker = (DartQueryMaker) queryMaker;
-    }
-
-    @Override
-    public QueryResponse<Object[]> runQuery(DruidLogicalNode rootRel)
-    {
-      QueryDefinitionTranslator qdt = new QueryDefinitionTranslator(plannerContext, rootRel);
-      QueryDefinition queryDef = qdt.translate(rootRel);
-      QueryContext context = plannerContext.queryContext();
-
-      final QueryDefMSQSpec querySpec = buildMSQSpec(queryDef, context, dartQueryMaker.fieldMapping);
-
-      QueryResponse<Object[]> response = dartQueryMaker.runMSQSpec2(querySpec, context, rootRel.getRowType());
-      return response;
-    }
-
-    @Override
-    public QueryResponse<Object[]> runQuery(DruidQuery druidQuery)
-    {
-      QueryContext queryContext = druidQuery.getQuery().context();
-      QueryDefMSQSpec msqSpec = buildMSQSpec(druidQuery, dartQueryMaker.fieldMapping, queryContext);
-      // FIXME: here the full resultContext might be available via
-      //final ResultsContext resultsContext = DartQueryMaker.makeResultsContext(druidQuery, dartQueryMaker.fieldMapping, plannerContext);
-
-      QueryResponse<Object[]> response = dartQueryMaker
-          .runMSQSpec2(msqSpec, queryContext, druidQuery.getOutputRowType());
-      return response;
-    }
-
-    public QueryDefMSQSpec buildMSQSpec(
-        QueryDefinition queryDef,
-        QueryContext context,
-        List<Entry<Integer, String>> fieldMapping)
-    {
-      final QueryDefMSQSpec querySpec = MSQTaskQueryMaker.makeLegacyMSQSpec2(
-          null,
-          context,
-          fieldMapping,
-          plannerContext,
-          null, // Only used for DML, which this isn't
-          queryDef
-      );
-      return querySpec;
-    }
-
-    private QueryDefMSQSpec buildMSQSpec(
-        DruidQuery druidQuery,
-        List<Entry<Integer, String>> fieldMapping,
-        QueryContext queryContext)
-    {
-      final LegacyMSQSpec querySpec = MSQTaskQueryMaker.makeLegacyMSQSpec(
-          null,
-          druidQuery,
-          druidQuery.getQuery().context(),
-          fieldMapping,
-          plannerContext,
-          null,
-          null
-      );
-
-      final String dartQueryId = queryContext.getString(DartSqlEngine.CTX_DART_QUERY_ID);
-      ControllerContext controllerContext = dartQueryMaker.newControllerContext(dartQueryId);
-
-      final QueryDefinition queryDef = new QueryKitBasedMSQPlanner(
-          querySpec,
-          dartQueryMaker.makeDefaultResultContext(),
-          querySpec.getQuery(),
-          plannerContext.getJsonMapper(),
-          new DartQueryKitSpecFactory().makeQueryKitSpec(
-              QueryKitBasedMSQPlanner
-                  .makeQueryControllerToolKit(querySpec.getContext(), plannerContext.getJsonMapper()),
-              dartQueryId,
-              querySpec.getTuningConfig(),
-              querySpec.getContext(),
-              controllerContext.queryKernelConfig(dartQueryId, querySpec)
-          )
-      ).makeQueryDefinition();
-
-      return MSQTaskQueryMaker.makeLegacyMSQSpec2(
-          null,
-          druidQuery.getQuery().context(),
-          fieldMapping,
-          plannerContext,
-          null,
-          queryDef
-      );
-    }
   }
 }

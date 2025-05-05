@@ -177,7 +177,7 @@ public class DartSqlEngine implements SqlEngine
   @Override
   public QueryMaker buildQueryMakerForSelect(RelRoot relRoot, PlannerContext plannerContext)
   {
-    return new DartQueryMaker(
+    DartQueryMaker dartQueryMaker = new DartQueryMaker(
         relRoot.fields,
         controllerContextFactory,
         plannerContext,
@@ -185,6 +185,10 @@ public class DartSqlEngine implements SqlEngine
         controllerConfig,
         controllerExecutor
     );
+    if (plannerContext.queryContext().isPrePlanned()) {
+      return new PrePlannedQueryMaker(plannerContext, dartQueryMaker);
+    }
+    return dartQueryMaker;
   }
 
   @Override
