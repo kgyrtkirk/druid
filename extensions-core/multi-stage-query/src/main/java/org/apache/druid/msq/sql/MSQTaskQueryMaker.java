@@ -262,7 +262,7 @@ public class MSQTaskQueryMaker implements QueryMaker
 
     MSQTaskQueryMakerUtils.validateRealtimeReindex(querySpec.getContext(), querySpec.getDestination(), druidQuery.getQuery());
 
-    return querySpec.withOverriddenContext(nativeQueryContext);
+    return querySpec;
   }
 
   public static List<Pair<SqlTypeName, ColumnType>> getTypes(
