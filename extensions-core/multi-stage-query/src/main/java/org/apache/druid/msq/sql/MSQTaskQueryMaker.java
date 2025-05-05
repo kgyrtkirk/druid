@@ -292,14 +292,15 @@ public class MSQTaskQueryMaker implements QueryMaker
     if (msqMode != null) {
       MSQMode.populateDefaultQueryContext(msqMode, nativeQueryContext);
     }
-    final Object segmentGranularity = getSegmentGranularity(plannerContext);
 
     // This parameter is used internally for the number of worker tasks only, so we subtract 1
     final boolean finalizeAggregations = MultiStageQueryContext.isFinalizeAggregations(sqlQueryContext);
 
+    final MSQDestination destination;
+    {
+    final Object segmentGranularity = getSegmentGranularity(plannerContext);
     final List<Interval> replaceTimeChunks = getReplaceIntervals(sqlQueryContext);
 
-    final MSQDestination destination;
 
     if (targetDataSource instanceof ExportDestination) {
       destination = buildExportDestination((ExportDestination) targetDataSource, sqlQueryContext);
@@ -329,6 +330,7 @@ public class MSQTaskQueryMaker implements QueryMaker
                   .collect(Collectors.joining(","))
         );
       }
+    }
     }
 
     final Map<String, Object> nativeQueryContextOverrides = new HashMap<>();
