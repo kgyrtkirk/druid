@@ -36,12 +36,19 @@ import org.apache.druid.sql.calcite.run.QueryMaker;
 import java.util.List;
 import java.util.Map.Entry;
 
-class PrePlannedQueryMaker implements QueryMaker, QueryMaker.FromDruidLogical
+/**
+ * Executes Dart queries with up-front planned {@link QueryDefinition}.
+ *
+ * Normal execution flow utilizes {@link QueryKit} to prdocue the plan;
+ * meanwhile it also supports planning the {@link QueryDefinition} directly from
+ * the {@link DruidLogicalNode}.
+ */
+class PrePlannedDartQueryMaker implements QueryMaker, QueryMaker.FromDruidLogical
 {
   private PlannerContext plannerContext;
   private DartQueryMaker dartQueryMaker;
 
-  public PrePlannedQueryMaker(PlannerContext plannerContext, QueryMaker queryMaker)
+  public PrePlannedDartQueryMaker(PlannerContext plannerContext, QueryMaker queryMaker)
   {
     this.plannerContext = plannerContext;
     this.dartQueryMaker = (DartQueryMaker) queryMaker;
@@ -78,7 +85,7 @@ class PrePlannedQueryMaker implements QueryMaker, QueryMaker.FromDruidLogical
       QueryContext context,
       List<Entry<Integer, String>> fieldMapping)
   {
-    final QueryDefMSQSpec querySpec = MSQTaskQueryMaker.makeLegacyMSQSpec2(
+    final QueryDefMSQSpec querySpec = MSQTaskQueryMaker.makeQueryDefMSQSpec(
         null,
         context,
         fieldMapping,
@@ -122,7 +129,7 @@ class PrePlannedQueryMaker implements QueryMaker, QueryMaker.FromDruidLogical
         )
     ).makeQueryDefinition();
 
-    return MSQTaskQueryMaker.makeLegacyMSQSpec2(
+    return MSQTaskQueryMaker.makeQueryDefMSQSpec(
         null,
         druidQuery.getQuery().context(),
         fieldMapping,

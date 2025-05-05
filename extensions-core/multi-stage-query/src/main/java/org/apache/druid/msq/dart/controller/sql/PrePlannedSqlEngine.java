@@ -102,7 +102,7 @@ public class PrePlannedSqlEngine implements SqlEngine
   @Override
   public QueryMaker buildQueryMakerForSelect(RelRoot relRoot, PlannerContext plannerContext) throws ValidationException
   {
-    return new PrePlannedQueryMaker(
+    return new PrePlannedDartQueryMaker(
         plannerContext,
         delegate.buildQueryMakerForSelect(relRoot, plannerContext)
     );

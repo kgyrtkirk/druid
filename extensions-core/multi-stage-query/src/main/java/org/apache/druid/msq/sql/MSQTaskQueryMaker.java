@@ -247,42 +247,27 @@ public class MSQTaskQueryMaker implements QueryMaker
 
     // This flag is to ensure backward compatibility, as brokers are upgraded after indexers/middlemanagers.
     nativeQueryContextOverrides.put(MultiStageQueryContext.WINDOW_FUNCTION_OPERATOR_TRANSFORMATION, true);
-    if (druidQuery != null) {
-      boolean isReindex = MSQControllerTask.isReplaceInputDataSourceTask(druidQuery.getQuery(), destination);
-      if (isReindex) {
-        nativeQueryContextOverrides.put(MultiStageQueryContext.CTX_IS_REINDEX, isReindex);
-      }
-
-      final LegacyMSQSpec querySpec = LegacyMSQSpec.builder()
-          .query(druidQuery.getQuery())
-          .queryContext(queryContext.override(nativeQueryContextOverrides))
-          .columnMappings(new ColumnMappings(QueryUtils.buildColumnMappings(fieldMapping, druidQuery.getOutputRowSignature())))
-          .destination(destination)
-          .assignmentStrategy(MultiStageQueryContext.getAssignmentStrategy(sqlQueryContext))
-          .tuningConfig(makeMSQTuningConfig(plannerContext))
-          .build();
-
-      MSQTaskQueryMakerUtils
-          .validateRealtimeReindex(querySpec.getContext(), querySpec.getDestination(), druidQuery.getQuery());
-
-      return querySpec;
-    } else {
-      final QueryDefMSQSpec querySpec = new QueryDefMSQSpec.Builder()
-          .columnMappings(new ColumnMappings(QueryUtils.buildColumnMappings(fieldMapping, queryDef.getOutputRowSignature())))
-          .destination(destination)
-          .assignmentStrategy(MultiStageQueryContext.getAssignmentStrategy(sqlQueryContext))
-          .tuningConfig(makeMSQTuningConfig(plannerContext))
-          .queryDef(queryDef)
-          .build();
-
-      throw new UnsupportedOperationException("LegacyMSQSpec is not supported yet");
-//      return null;//querySpec;
-
+    boolean isReindex = MSQControllerTask.isReplaceInputDataSourceTask(druidQuery.getQuery(), destination);
+    if (isReindex) {
+      nativeQueryContextOverrides.put(MultiStageQueryContext.CTX_IS_REINDEX, isReindex);
     }
 
+    final LegacyMSQSpec querySpec =
+        LegacyMSQSpec.builder()
+               .query(druidQuery.getQuery())
+               .queryContext(queryContext.override(nativeQueryContextOverrides))
+               .columnMappings(new ColumnMappings(QueryUtils.buildColumnMappings(fieldMapping, druidQuery.getOutputRowSignature())))
+               .destination(destination)
+               .assignmentStrategy(MultiStageQueryContext.getAssignmentStrategy(sqlQueryContext))
+               .tuningConfig(makeMSQTuningConfig(plannerContext))
+               .build();
+
+    MSQTaskQueryMakerUtils.validateRealtimeReindex(querySpec.getContext(), querySpec.getDestination(), druidQuery.getQuery());
+
+    return querySpec;
   }
 
-  public static QueryDefMSQSpec makeLegacyMSQSpec2(
+  public static QueryDefMSQSpec makeQueryDefMSQSpec(
       @Nullable final IngestDestination targetDataSource,
       final QueryContext queryContext,
       final List<Entry<Integer, String>> fieldMapping,

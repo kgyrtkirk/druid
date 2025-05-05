@@ -186,7 +186,7 @@ public class DartSqlEngine implements SqlEngine
         controllerExecutor
     );
     if (plannerContext.queryContext().isPrePlanned()) {
-      return new PrePlannedQueryMaker(plannerContext, dartQueryMaker);
+      return new PrePlannedDartQueryMaker(plannerContext, dartQueryMaker);
     }
     return dartQueryMaker;
   }
