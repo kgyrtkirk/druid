@@ -38,9 +38,8 @@ public class QueryUtils
   }
 
   /**
-   * Builds the mappings for queryColumn to outputColumn
-   * @param fieldMapping The field mappings
-   * @param rowSignature The Druid query
+   * Builds the mappings for queryColumn to outputColumn.
+   *
    * @return Mappings for queryColumn to outputColumn
    */
   public static List<ColumnMapping> buildColumnMappings(
