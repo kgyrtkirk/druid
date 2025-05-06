@@ -51,6 +51,11 @@ public class StageDefinitionBuilder2
   private AtomicInteger stageIdSeq = new AtomicInteger(1);
   private PlannerContext plannerContext;
 
+  public StageDefinitionBuilder2(PlannerContext plannerContext2)
+  {
+    this.plannerContext = plannerContext2;
+  }
+
   public class AbstractStage implements LogicalStage
   {
     protected final List<InputSpec> inputSpecs;
@@ -65,7 +70,7 @@ public class StageDefinitionBuilder2
     }
 
     @Override
-    public StageDefinition finalizeStage()
+    public StageDefinition contructStage()
     {
       throw DruidException.defensive("This should have been implemented - or not reach this point!");
     }
@@ -89,7 +94,7 @@ public class StageDefinitionBuilder2
       for (LogicalStage vertex : inputStages) {
         ret.addAll(vertex.buildStageDefinitions());
       }
-      ret.add(finalizeStage());
+      ret.add(contructStage());
       return ret;
     }
   }
@@ -107,7 +112,7 @@ public class StageDefinitionBuilder2
     }
 
     @Override
-    public StageDefinition finalizeStage()
+    public StageDefinition contructStage()
     {
       return makeScanStage(VirtualColumns.EMPTY, signature, inputSpecs, null);
     }
@@ -164,13 +169,6 @@ public class StageDefinitionBuilder2
     return new FilterStageDefinition(inputStage, virtualColumnRegistry, dimFilter);
   }
 
-  public StageDefinitionBuilder2(PlannerContext plannerContext2)
-  {
-    this.plannerContext = plannerContext2;
-  }
-
-  private static final String IRRELEVANT = "irrelevant";
-
   class FilterStageDefinition extends RootStage
   {
     protected final VirtualColumnRegistry virtualColumnRegistry;
@@ -192,7 +190,7 @@ public class StageDefinitionBuilder2
     }
 
     @Override
-    public StageDefinition finalizeStage()
+    public StageDefinition contructStage()
     {
       VirtualColumns output = virtualColumnRegistry.build(Collections.emptySet());
       return makeScanStage(output, signature, inputSpecs, dimFilter);
@@ -230,6 +228,8 @@ public class StageDefinitionBuilder2
       return null;
     }
   }
+
+  private static final String IRRELEVANT = "irrelevant";
 
   private StageDefinition makeScanStage(
       VirtualColumns virtualColumns,

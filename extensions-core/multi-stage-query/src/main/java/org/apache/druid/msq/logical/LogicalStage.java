@@ -27,13 +27,28 @@ import java.util.List;
 
 public interface LogicalStage
 {
-  StageDefinition finalizeStage();
-
-  LogicalStage extendWith(DruidNodeStack stack);
-
-  List<StageDefinition> buildStageDefinitions();
-
+  /**
+   * Builds the full {@link QueryDefinition}.
+   *
+   * This supposed to be called on the top level stage.
+   */
   QueryDefinition build();
 
+  /**
+   * Builds the current stage.
+   */
+  StageDefinition contructStage();
+
+  /**
+   * Attempts to extend the current stage with an additional node.
+   *
+   * @return null if the current stage cannot be extended
+   */
+  LogicalStage extendWith(DruidNodeStack stack);
+
+  /**
+   * Internal method to build the stage definitions.
+   */
+  List<StageDefinition> buildStageDefinitions();
 
 }
