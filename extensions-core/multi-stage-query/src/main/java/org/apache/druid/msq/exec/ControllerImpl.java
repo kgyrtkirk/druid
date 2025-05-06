@@ -673,8 +673,7 @@ public class ControllerImpl implements Controller
               QueryKitBasedMSQPlanner.makeQueryControllerToolKit(querySpec.getContext(), context.jsonMapper()),
               queryId,
               querySpec.getTuningConfig(),
-              querySpec.getContext(),
-              queryKernelConfig
+              querySpec.getContext()
           )
       );
       queryDef = qkPlanner.makeQueryDefinition();

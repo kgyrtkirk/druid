@@ -41,6 +41,7 @@ import org.apache.druid.msq.dart.guice.DartControllerConfig;
 import org.apache.druid.msq.exec.Controller;
 import org.apache.druid.msq.exec.ControllerContext;
 import org.apache.druid.msq.exec.ControllerImpl;
+import org.apache.druid.msq.exec.QueryKitSpecFactory;
 import org.apache.druid.msq.exec.QueryListener;
 import org.apache.druid.msq.exec.ResultsContext;
 import org.apache.druid.msq.indexing.LegacyMSQSpec;
@@ -53,7 +54,6 @@ import org.apache.druid.msq.indexing.report.MSQResultsReport;
 import org.apache.druid.msq.indexing.report.MSQStatusReport;
 import org.apache.druid.msq.indexing.report.MSQTaskReportPayload;
 import org.apache.druid.msq.kernel.QueryDefinition;
-import org.apache.druid.msq.sql.DartQueryKitSpecFactory;
 import org.apache.druid.msq.sql.MSQTaskQueryMaker;
 import org.apache.druid.msq.util.MultiStageQueryContext;
 import org.apache.druid.query.QueryContext;
@@ -114,13 +114,16 @@ public class DartQueryMaker implements QueryMaker
    */
   private final ExecutorService controllerExecutor;
 
+  final QueryKitSpecFactory queryKitSpecFactory;
+
   public DartQueryMaker(
       List<Entry<Integer, String>> fieldMapping,
       DartControllerContextFactory controllerContextFactory,
       PlannerContext plannerContext,
       DartControllerRegistry controllerRegistry,
       DartControllerConfig controllerConfig,
-      ExecutorService controllerExecutor
+      ExecutorService controllerExecutor,
+      QueryKitSpecFactory queryKitSpecFactory
   )
   {
     this.fieldMapping = fieldMapping;
@@ -129,6 +132,7 @@ public class DartQueryMaker implements QueryMaker
     this.controllerRegistry = controllerRegistry;
     this.controllerConfig = controllerConfig;
     this.controllerExecutor = controllerExecutor;
+    this.queryKitSpecFactory = queryKitSpecFactory;
   }
 
   @Override
@@ -171,7 +175,8 @@ public class DartQueryMaker implements QueryMaker
         querySpec,
         resultsContext,
         controllerContext,
-        new DartQueryKitSpecFactory()
+        queryKitSpecFactory
+
     );
     return controller;
   }
@@ -187,7 +192,7 @@ public class DartQueryMaker implements QueryMaker
         querySpec,
         resultsContext,
         controllerContext,
-        new DartQueryKitSpecFactory()
+        queryKitSpecFactory
     );
     return controller;
   }

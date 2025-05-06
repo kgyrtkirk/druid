@@ -19,13 +19,11 @@
 
 package org.apache.druid.msq.dart.controller.sql;
 
-import org.apache.druid.msq.exec.ControllerContext;
 import org.apache.druid.msq.exec.QueryKitBasedMSQPlanner;
 import org.apache.druid.msq.exec.ResultsContext;
 import org.apache.druid.msq.indexing.LegacyMSQSpec;
 import org.apache.druid.msq.indexing.QueryDefMSQSpec;
 import org.apache.druid.msq.kernel.QueryDefinition;
-import org.apache.druid.msq.sql.DartQueryKitSpecFactory;
 import org.apache.druid.msq.sql.MSQTaskQueryMaker;
 import org.apache.druid.query.QueryContext;
 import org.apache.druid.server.QueryResponse;
@@ -104,20 +102,18 @@ class PrePlannedDartQueryMaker implements QueryMaker, QueryMaker.FromDruidLogica
     );
 
     String dartQueryId = queryContext.getString(DartSqlEngine.CTX_DART_QUERY_ID);
-    ControllerContext controllerContext = dartQueryMaker.newControllerContext(dartQueryId);
 
     QueryDefinition queryDef = new QueryKitBasedMSQPlanner(
         querySpec,
         dartQueryMaker.makeDefaultResultContext(),
         querySpec.getQuery(),
         plannerContext.getJsonMapper(),
-        new DartQueryKitSpecFactory().makeQueryKitSpec(
+        dartQueryMaker.queryKitSpecFactory.makeQueryKitSpec(
             QueryKitBasedMSQPlanner
                 .makeQueryControllerToolKit(querySpec.getContext(), plannerContext.getJsonMapper()),
             dartQueryId,
             querySpec.getTuningConfig(),
-            querySpec.getContext(),
-            controllerContext.queryKernelConfig(dartQueryId, querySpec)
+            querySpec.getContext()
         )
     ).makeQueryDefinition();
 
