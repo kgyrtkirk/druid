@@ -178,10 +178,6 @@ public class DartQueryMaker implements QueryMaker
 
   private ControllerImpl makeQueryDefController(QueryDefMSQSpec querySpec, QueryContext context, ResultsContext resultsContext)
   {
-    if (!MultiStageQueryContext.isFinalizeAggregations(plannerContext.queryContext())) {
-      throw DruidException.defensive("Non-finalized execution is not supported!");
-    }
-
     final String dartQueryId = context.getString(DartSqlEngine.CTX_DART_QUERY_ID);
     final ControllerContext controllerContext = controllerContextFactory.newContext(dartQueryId);
 
@@ -557,7 +553,6 @@ public class DartQueryMaker implements QueryMaker
 
   public ResultsContext makeDefaultResultContext()
   {
-
     final ResultsContext resultsContext = new ResultsContext(
         null,     // not mandatory
         SqlResults.Context.fromPlannerContext(plannerContext)
@@ -567,10 +562,12 @@ public class DartQueryMaker implements QueryMaker
 
   ResultsContext makeDefaultResultContext(QueryDefinition queryDef, RelDataType rowType)
   {
+    if (!MultiStageQueryContext.isFinalizeAggregations(plannerContext.queryContext())) {
+      throw DruidException.defensive("Non-finalized execution is not supported!");
+    }
 
     final List<Pair<SqlTypeName, ColumnType>> types =
         MSQTaskQueryMaker.getTypes3(fieldMapping, plannerContext, rowType, queryDef.getOutputRowSignature());
-
 
     final ResultsContext resultsContext = new ResultsContext(
         types.stream().map(p -> p.lhs).collect(Collectors.toList()),
