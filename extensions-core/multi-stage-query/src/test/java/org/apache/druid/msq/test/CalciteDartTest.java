@@ -78,7 +78,7 @@ public class CalciteDartTest extends BaseCalciteQueryTest
         .run();
   }
 
-  @NotYetSupported(Modes.SUPPORT_SORT)
+  @NotYetSupported(Modes.RESTRICTED_DATASOURCE_SUPPORT)
   @Test
   public void testSelectFromRestricted()
   {
@@ -111,6 +111,7 @@ public class CalciteDartTest extends BaseCalciteQueryTest
         .run();
   }
 
+  @NotYetSupported(Modes.SUPPORT_SORT)
   @Test
   public void testSelectFromFooLimit2()
   {

@@ -28,6 +28,7 @@ import org.apache.druid.msq.sql.DartQueryKitSpecFactory;
 import org.apache.druid.msq.sql.MSQTaskQueryMaker;
 import org.apache.druid.query.QueryContext;
 import org.apache.druid.server.QueryResponse;
+import org.apache.druid.server.security.ForbiddenException;
 import org.apache.druid.sql.calcite.planner.PlannerContext;
 import org.apache.druid.sql.calcite.rel.DruidQuery;
 import org.apache.druid.sql.calcite.rel.logical.DruidLogicalNode;
@@ -57,6 +58,9 @@ class PrePlannedDartQueryMaker implements QueryMaker, QueryMaker.FromDruidLogica
   @Override
   public QueryResponse<Object[]> runQuery(DruidLogicalNode rootRel)
   {
+    if (!plannerContext.getAuthorizationResult().allowAccessWithNoRestriction()) {
+      throw new ForbiddenException(plannerContext.getAuthorizationResult().getErrorMessage());
+    }
     QueryDefinitionTranslator qdt = new QueryDefinitionTranslator(plannerContext, rootRel);
     QueryDefinition queryDef = qdt.translate(rootRel);
     QueryContext context = plannerContext.queryContext();

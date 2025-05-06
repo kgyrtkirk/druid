@@ -200,4 +200,9 @@ public class QueryDefinition
   {
     return stageDefinitions.get(finalStage).getSignature();
   }
+
+  public QueryDefinition withOverriddenContext(Map<String, Object> contextOverride)
+  {
+    return new QueryDefinition(stageDefinitions, finalStage, context.override(contextOverride));
+  }
 }

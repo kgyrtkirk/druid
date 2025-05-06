@@ -93,7 +93,8 @@ public @interface NotYetSupported
     UNNEST_INLINED(Exception.class, "Missing conversion is Uncollect"),
     UNNEST_RESULT_MISMATCH(AssertionError.class, "(Result count mismatch|column content mismatch)"),
     SUPPORT_SORT(DruidException.class, "Unable to process relNode.*DruidSort"),
-    SUPPORT_AGGREGATE(DruidException.class, "Unable to process relNode.*DruidAggregate");
+    SUPPORT_AGGREGATE(DruidException.class, "Unable to process relNode.*DruidAggregate"),
+    RESTRICTED_DATASOURCE_SUPPORT(DruidException.class, "ForbiddenException: Unauthorized");
     // @formatter:on
 
     public Class<? extends Throwable> throwableClass;

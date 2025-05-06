@@ -57,6 +57,7 @@ import org.apache.druid.msq.indexing.destination.TaskReportMSQDestination;
 import org.apache.druid.msq.kernel.QueryDefinition;
 import org.apache.druid.msq.util.MSQTaskQueryMakerUtils;
 import org.apache.druid.msq.util.MultiStageQueryContext;
+import org.apache.druid.query.Query;
 import org.apache.druid.query.QueryContext;
 import org.apache.druid.query.QueryContexts;
 import org.apache.druid.query.aggregation.AggregatorFactory;
@@ -189,7 +190,7 @@ public class MSQTaskQueryMaker implements QueryMaker
         terminalStageSpecFactory
     );
 
-    final Map<String, Object> nativeQueryContextOverrides = buildOverrideContext(druidQuery, plannerContext, destination);
+    final Map<String, Object> nativeQueryContextOverrides = buildOverrideContext(druidQuery.getQuery(), plannerContext, destination);
 
     final LegacyMSQSpec querySpec =
         LegacyMSQSpec.builder()
@@ -248,7 +249,7 @@ public class MSQTaskQueryMaker implements QueryMaker
   }
 
   private static Map<String, Object> buildOverrideContext(
-      final DruidQuery druidQuery,
+      final Query<?> query,
       final PlannerContext plannerContext,
       final MSQDestination destination)
   {
@@ -261,7 +262,7 @@ public class MSQTaskQueryMaker implements QueryMaker
 
     // This flag is to ensure backward compatibility, as brokers are upgraded after indexers/middlemanagers.
     nativeQueryContextOverrides.put(MultiStageQueryContext.WINDOW_FUNCTION_OPERATOR_TRANSFORMATION, true);
-    boolean isReindex = MSQControllerTask.isReplaceInputDataSourceTask(druidQuery.getQuery(), destination);
+    boolean isReindex = MSQControllerTask.isReplaceInputDataSourceTask(query, destination);
     if (isReindex) {
       nativeQueryContextOverrides.put(MultiStageQueryContext.CTX_IS_REINDEX, isReindex);
     }
@@ -296,6 +297,7 @@ public class MSQTaskQueryMaker implements QueryMaker
 
     // FIXME: this is unused!
     final Map<String, Object> nativeQueryContextOverrides = buildOverrideContext(null, plannerContext, destination);
+
 
     final QueryDefMSQSpec querySpec = new QueryDefMSQSpec.Builder()
         .columnMappings(QueryUtils.buildColumnMappings(fieldMapping, queryDef.getOutputRowSignature()))
