@@ -318,6 +318,7 @@ public class MSQTaskQueryMaker implements QueryMaker
       RowSignature outputRowSignature
   )
   {
+    // simpler version of getTypes ; without any support for intermediate types
     if (!MultiStageQueryContext.isFinalizeAggregations(plannerContext.queryContext())) {
       throw DruidException.defensive().build("non-finalized aggregations are not supported!");
     }
@@ -325,19 +326,25 @@ public class MSQTaskQueryMaker implements QueryMaker
 
     for (final Entry<Integer, String> entry : fieldMapping) {
       final String queryColumn = outputRowSignature.getColumnName(entry.getKey());
-
-      final SqlTypeName sqlTypeName;
-
-      sqlTypeName = outputRowType.getFieldList().get(entry.getKey()).getType().getSqlTypeName();
-
+      final SqlTypeName sqlTypeName = outputRowType.getFieldList().get(entry.getKey()).getType().getSqlTypeName();
       final ColumnType columnType = outputRowSignature.getColumnType(queryColumn).orElse(ColumnType.STRING);
-
       retVal.add(Pair.of(sqlTypeName, columnType));
     }
 
     return retVal;
   }
 
+
+  public static ResultsContext makeResultsContext(DruidQuery druidQuery, List<Entry<Integer, String>> fieldMapping,
+      PlannerContext plannerContext)
+  {
+    final List<Pair<SqlTypeName, ColumnType>> types = getTypes(druidQuery, fieldMapping, plannerContext);
+    final ResultsContext resultsContext = new ResultsContext(
+        types.stream().map(p -> p.lhs).collect(Collectors.toList()),
+        SqlResults.Context.fromPlannerContext(plannerContext)
+    );
+    return resultsContext;
+  }
 
   public static List<Pair<SqlTypeName, ColumnType>> getTypes(
       final DruidQuery druidQuery,

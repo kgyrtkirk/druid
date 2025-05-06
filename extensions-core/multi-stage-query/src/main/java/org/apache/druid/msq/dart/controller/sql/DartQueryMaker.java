@@ -148,7 +148,7 @@ public class DartQueryMaker implements QueryMaker
     );
 
 
-    final ResultsContext resultsContext = makeResultsContext(druidQuery, fieldMapping, plannerContext);
+    final ResultsContext resultsContext = MSQTaskQueryMaker.makeResultsContext(druidQuery, fieldMapping, plannerContext);
 
     return runLegacyMSQSpec(querySpec, druidQuery.getQuery().context(), resultsContext);
   }
@@ -156,8 +156,7 @@ public class DartQueryMaker implements QueryMaker
   public static ResultsContext makeResultsContext(DruidQuery druidQuery, List<Entry<Integer, String>> fieldMapping,
       PlannerContext plannerContext)
   {
-    final List<Pair<SqlTypeName, ColumnType>> types = MSQTaskQueryMaker
-        .getTypes(druidQuery, fieldMapping, plannerContext);
+    final List<Pair<SqlTypeName, ColumnType>> types = MSQTaskQueryMaker.getTypes(druidQuery, fieldMapping, plannerContext);
     final ResultsContext resultsContext = new ResultsContext(
         types.stream().map(p -> p.lhs).collect(Collectors.toList()),
         SqlResults.Context.fromPlannerContext(plannerContext)
