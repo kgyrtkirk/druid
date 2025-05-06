@@ -59,7 +59,6 @@ import org.apache.druid.msq.util.MultiStageQueryContext;
 import org.apache.druid.query.QueryContext;
 import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.server.QueryResponse;
-import org.apache.druid.server.security.ForbiddenException;
 import org.apache.druid.sql.calcite.planner.PlannerContext;
 import org.apache.druid.sql.calcite.rel.DruidQuery;
 import org.apache.druid.sql.calcite.run.QueryMaker;
@@ -135,9 +134,6 @@ public class DartQueryMaker implements QueryMaker
   @Override
   public QueryResponse<Object[]> runQuery(DruidQuery druidQuery)
   {
-    if (!plannerContext.getAuthorizationResult().allowAccessWithNoRestriction()) {
-      throw new ForbiddenException(plannerContext.getAuthorizationResult().getErrorMessage());
-    }
     final LegacyMSQSpec querySpec = MSQTaskQueryMaker.makeLegacyMSQSpec(
         null,
         druidQuery,
@@ -167,10 +163,6 @@ public class DartQueryMaker implements QueryMaker
 
   private ControllerImpl makeLegacyController(LegacyMSQSpec querySpec, QueryContext context, ResultsContext resultsContext)
   {
-    if (!plannerContext.getAuthorizationResult().allowAccessWithNoRestriction()) {
-      throw new ForbiddenException(plannerContext.getAuthorizationResult().getErrorMessage());
-    }
-
     if(!MultiStageQueryContext.isFinalizeAggregations(plannerContext.queryContext())) {
       throw DruidException.defensive("Non-finalized execution is not supported!");
     }
@@ -190,10 +182,6 @@ public class DartQueryMaker implements QueryMaker
 
   private ControllerImpl makeQueryDefController(QueryDefMSQSpec querySpec, QueryContext context, RelDataType rowType)
   {
-    if (!plannerContext.getAuthorizationResult().allowAccessWithNoRestriction()) {
-      throw new ForbiddenException(plannerContext.getAuthorizationResult().getErrorMessage());
-    }
-
     if(!MultiStageQueryContext.isFinalizeAggregations(plannerContext.queryContext())) {
       throw DruidException.defensive("Non-finalized execution is not supported!");
     }
