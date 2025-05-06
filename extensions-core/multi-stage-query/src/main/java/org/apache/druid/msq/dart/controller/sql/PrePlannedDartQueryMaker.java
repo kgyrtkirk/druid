@@ -61,7 +61,7 @@ class PrePlannedDartQueryMaker implements QueryMaker, QueryMaker.FromDruidLogica
     if (!plannerContext.getAuthorizationResult().allowAccessWithNoRestriction()) {
       throw new ForbiddenException(plannerContext.getAuthorizationResult().getErrorMessage());
     }
-    QueryDefinitionTranslator qdt = new QueryDefinitionTranslator(plannerContext, rootRel);
+    QueryDefinitionTranslator qdt = new QueryDefinitionTranslator(plannerContext);
     QueryDefinition queryDef = qdt.translate(rootRel);
     QueryContext context = plannerContext.queryContext();
 

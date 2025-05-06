@@ -46,7 +46,7 @@ public class QueryDefinitionTranslator
   private PlannerContext plannerContext;
   private StageDefinitionBuilder2 stageBuilder;
 
-  public QueryDefinitionTranslator(PlannerContext plannerContext, DruidLogicalNode logicalRoot)
+  public QueryDefinitionTranslator(PlannerContext plannerContext)
   {
     this.plannerContext = plannerContext;
     this.stageBuilder = new StageDefinitionBuilder2(plannerContext);

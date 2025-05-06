@@ -298,7 +298,6 @@ public class MSQTaskQueryMaker implements QueryMaker
     // FIXME: this is unused!
     final Map<String, Object> nativeQueryContextOverrides = buildOverrideContext(null, plannerContext, destination);
 
-
     final QueryDefMSQSpec querySpec = new QueryDefMSQSpec.Builder()
         .columnMappings(QueryUtils.buildColumnMappings(fieldMapping, queryDef.getOutputRowSignature()))
         .destination(destination)
@@ -310,6 +309,7 @@ public class MSQTaskQueryMaker implements QueryMaker
     return querySpec;
   }
 
+  // FIXME
   public static List<Pair<SqlTypeName, ColumnType>> getTypes2(
       final DruidQuery druidQuery,
       final List<Entry<Integer, String>> fieldMapping,
