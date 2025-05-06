@@ -107,7 +107,6 @@ class PrePlannedDartQueryMaker implements QueryMaker, QueryMaker.FromDruidLogica
         druidQuery.getQuery().context(),
         fieldMapping,
         plannerContext,
-        null,
         null
     );
 

@@ -155,8 +155,7 @@ public class MSQTaskQueryMaker implements QueryMaker
         druidQuery.getQuery().context(),
         fieldMapping,
         plannerContext,
-        terminalStageSpecFactory,
-        null
+        terminalStageSpecFactory
     );
 
     final MSQControllerTask controllerTask = new MSQControllerTask(
@@ -180,8 +179,7 @@ public class MSQTaskQueryMaker implements QueryMaker
       final QueryContext queryContext,
       final List<Entry<Integer, String>> fieldMapping,
       final PlannerContext plannerContext,
-      final MSQTerminalStageSpecFactory terminalStageSpecFactory,
-      final QueryDefinition queryDef
+      final MSQTerminalStageSpecFactory terminalStageSpecFactory
   )
   {
     final MSQDestination destination = buildMSQDestination(

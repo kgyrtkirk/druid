@@ -144,8 +144,7 @@ public class DartQueryMaker implements QueryMaker
         druidQuery.getQuery().context(),
         fieldMapping,
         plannerContext,
-        null, // Only used for DML, which this isn't
-        null
+        null // Only used for DML, which this isn't
     );
 
 
