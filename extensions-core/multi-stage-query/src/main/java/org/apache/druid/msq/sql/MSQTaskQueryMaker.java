@@ -295,8 +295,9 @@ public class MSQTaskQueryMaker implements QueryMaker
         terminalStageSpecFactory
     );
 
-    // FIXME: this is unused!
-    final Map<String, Object> nativeQueryContextOverrides = buildOverrideContext(null, plannerContext, destination);
+    // this is right now not required ; it might worth waiting for when its needed and consider filtering which
+    // details to forward to be accessible during execution
+    // queryDef.withOverriddenContext(buildOverrideContext(null, plannerContext, destination));
 
     final QueryDefMSQSpec querySpec = new QueryDefMSQSpec.Builder()
         .columnMappings(QueryUtils.buildColumnMappings(fieldMapping, queryDef.getOutputRowSignature()))
