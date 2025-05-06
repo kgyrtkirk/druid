@@ -310,30 +310,35 @@ public class MSQTaskQueryMaker implements QueryMaker
     return querySpec;
   }
 
-  // FIXME
-  public static List<Pair<SqlTypeName, ColumnType>> getTypes3(
-      final List<Entry<Integer, String>> fieldMapping,
-      final PlannerContext plannerContext,
-      RelDataType outputRowType,
-      RowSignature outputRowSignature
-  )
+  /**
+   * Simpler version of {@link #makeResultsContext(DruidQuery, List, PlannerContext)}; without any support for intermediate types.
+   */
+  public static ResultsContext makeSimpleResultContext(
+      QueryDefinition queryDef,
+      RelDataType rowType,
+      List<Entry<Integer, String>> fieldMapping,
+      PlannerContext plannerContext)
   {
-    // simpler version of getTypes ; without any support for intermediate types
+    RowSignature outputRowSignature = queryDef.getOutputRowSignature();
+    List<Pair<SqlTypeName, ColumnType>> types = new ArrayList<>();
+
     if (!MultiStageQueryContext.isFinalizeAggregations(plannerContext.queryContext())) {
-      throw DruidException.defensive().build("non-finalized aggregations are not supported!");
+      throw DruidException.defensive("Non-finalized execution is not supported!");
     }
-    final List<Pair<SqlTypeName, ColumnType>> retVal = new ArrayList<>();
 
     for (final Entry<Integer, String> entry : fieldMapping) {
       final String queryColumn = outputRowSignature.getColumnName(entry.getKey());
-      final SqlTypeName sqlTypeName = outputRowType.getFieldList().get(entry.getKey()).getType().getSqlTypeName();
+      final SqlTypeName sqlTypeName = rowType.getFieldList().get(entry.getKey()).getType().getSqlTypeName();
       final ColumnType columnType = outputRowSignature.getColumnType(queryColumn).orElse(ColumnType.STRING);
-      retVal.add(Pair.of(sqlTypeName, columnType));
+      types.add(Pair.of(sqlTypeName, columnType));
     }
 
-    return retVal;
+    ResultsContext resultsContext = new ResultsContext(
+        types.stream().map(p -> p.lhs).collect(Collectors.toList()),
+        SqlResults.Context.fromPlannerContext(plannerContext)
+    );
+    return resultsContext;
   }
-
 
   public static ResultsContext makeResultsContext(DruidQuery druidQuery, List<Entry<Integer, String>> fieldMapping,
       PlannerContext plannerContext)

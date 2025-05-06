@@ -21,9 +21,7 @@ package org.apache.druid.msq.dart.controller.sql;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Iterators;
-import org.apache.calcite.rel.type.RelDataType;
 import org.apache.calcite.sql.type.SqlTypeName;
-import org.apache.druid.error.DruidException;
 import org.apache.druid.io.LimitedOutputStream;
 import org.apache.druid.java.util.common.DateTimes;
 import org.apache.druid.java.util.common.Either;
@@ -53,9 +51,7 @@ import org.apache.druid.msq.indexing.error.MSQErrorReport;
 import org.apache.druid.msq.indexing.report.MSQResultsReport;
 import org.apache.druid.msq.indexing.report.MSQStatusReport;
 import org.apache.druid.msq.indexing.report.MSQTaskReportPayload;
-import org.apache.druid.msq.kernel.QueryDefinition;
 import org.apache.druid.msq.sql.MSQTaskQueryMaker;
-import org.apache.druid.msq.util.MultiStageQueryContext;
 import org.apache.druid.query.QueryContext;
 import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.server.QueryResponse;
@@ -563,23 +559,4 @@ public class DartQueryMaker implements QueryMaker
     );
     return resultsContext;
   }
-
-  ResultsContext makeDefaultResultContext(QueryDefinition queryDef, RelDataType rowType)
-  {
-    if (!MultiStageQueryContext.isFinalizeAggregations(plannerContext.queryContext())) {
-      throw DruidException.defensive("Non-finalized execution is not supported!");
-    }
-
-    final List<Pair<SqlTypeName, ColumnType>> types =
-        MSQTaskQueryMaker.getTypes3(fieldMapping, plannerContext, rowType, queryDef.getOutputRowSignature());
-
-    final ResultsContext resultsContext = new ResultsContext(
-        types.stream().map(p -> p.lhs).collect(Collectors.toList()),
-        SqlResults.Context.fromPlannerContext(plannerContext)
-    );
-    return resultsContext;
-  }
-
-
-
 }

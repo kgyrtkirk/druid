@@ -72,7 +72,9 @@ class PrePlannedDartQueryMaker implements QueryMaker, QueryMaker.FromDruidLogica
         queryDef
     );
 
-    ResultsContext resultsContext = dartQueryMaker.makeDefaultResultContext(querySpec.getQueryDef(), rootRel.getRowType());
+    ResultsContext resultsContext = MSQTaskQueryMaker.makeSimpleResultContext(
+        querySpec.getQueryDef(), rootRel.getRowType(), dartQueryMaker.fieldMapping, plannerContext
+    );
     QueryResponse<Object[]> response = dartQueryMaker.runQueryDefMSQSpec(querySpec, context, resultsContext);
     return response;
   }
