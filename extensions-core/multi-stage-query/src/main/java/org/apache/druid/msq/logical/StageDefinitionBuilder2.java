@@ -19,9 +19,10 @@
 
 package org.apache.druid.msq.logical;
 
-import org.apache.calcite.plan.Context;
+import org.apache.druid.error.DruidException;
 import org.apache.druid.msq.input.InputSpec;
 import org.apache.druid.msq.kernel.MixShuffleSpec;
+import org.apache.druid.msq.kernel.QueryDefinition;
 import org.apache.druid.msq.kernel.StageDefinition;
 import org.apache.druid.msq.kernel.StageDefinitionBuilder;
 import org.apache.druid.msq.querykit.scan.ScanQueryFrameProcessorFactory;
@@ -38,8 +39,8 @@ import org.apache.druid.sql.calcite.rel.Projection;
 import org.apache.druid.sql.calcite.rel.VirtualColumnRegistry;
 import org.apache.druid.sql.calcite.rel.logical.DruidFilter;
 import org.apache.druid.sql.calcite.rel.logical.DruidProject;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -48,31 +49,61 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class StageDefinitionBuilder2
 {
   private AtomicInteger stageIdSeq = new AtomicInteger(1);
-  private final PlannerContext plannerContext;
-  private LogicalStageBuilderContext ctx = new LogicalStageBuilderContext();
+  private PlannerContext plannerContext;
 
-  class LogicalStageBuilderContext implements Context
+  public class AbstractStage implements LogicalStage
   {
-    @Override
-    public <C> @Nullable C unwrap(Class<C> aClass)
+    protected final List<InputSpec> inputSpecs;
+    protected final RowSignature signature;
+    protected final List<LogicalStage> inputStages;
+
+    public AbstractStage(RowSignature signature, List<InputSpec> inputs, List<LogicalStage> inputStages)
     {
-      if (aClass.equals(PlannerContext.class)) {
-        return (C) plannerContext;
-      }
+      this.inputSpecs = inputs;
+      this.signature = signature;
+      this.inputStages = inputStages;
+    }
+
+    @Override
+    public StageDefinition finalizeStage()
+    {
+      throw DruidException.defensive("This should have been implemented - or not reach this point!");
+    }
+
+    @Override
+    public LogicalStage extendWith(DruidNodeStack stack)
+    {
       return null;
+    }
+
+    @Override
+    public final QueryDefinition build()
+    {
+      return QueryDefinition.create(buildStageDefinitions(), plannerContext.queryContext());
+    }
+
+    @Override
+    public final List<StageDefinition> buildStageDefinitions()
+    {
+      List<StageDefinition> ret = new ArrayList<>();
+      for (LogicalStage vertex : inputStages) {
+        ret.addAll(vertex.buildStageDefinitions());
+      }
+      ret.add(finalizeStage());
+      return ret;
     }
   }
 
-  public static class RootStage extends AbstractStage
+  public class RootStage extends AbstractStage
   {
-    public RootStage(Context ctx, RowSignature signature, List<InputSpec> inputSpecs)
+    public RootStage(RowSignature signature, List<InputSpec> inputSpecs)
     {
-      super(ctx, signature, inputSpecs, Collections.emptyList());
+      super(signature, inputSpecs, Collections.emptyList());
     }
 
     public RootStage(RootStage root, RowSignature newSignature)
     {
-      super(root.ctx, newSignature, root.inputSpecs, root.inputStages);
+      super(newSignature, root.inputSpecs, root.inputStages);
     }
 
     @Override
@@ -103,7 +134,6 @@ public class StageDefinitionBuilder2
 
     private LogicalStage makeFilterStage(DruidFilter filter)
     {
-      PlannerContext plannerContext = getPlannerContext();
       VirtualColumnRegistry virtualColumnRegistry = VirtualColumnRegistry.create(
           signature,
           plannerContext.getExpressionParser(),
@@ -171,7 +201,6 @@ public class StageDefinitionBuilder2
     @Override
     public LogicalStage extendWith(DruidNodeStack stack)
     {
-      PlannerContext plannerContext = getPlannerContext();
       if (stack.peekNode() instanceof DruidProject) {
         DruidProject project = (DruidProject) stack.peekNode();
         Projection preAggregation = Projection
@@ -223,11 +252,6 @@ public class StageDefinitionBuilder2
         .shuffleSpec(MixShuffleSpec.instance())
         .processorFactory(scanProcessorFactory);
     return sdb.build(plannerContext.getSqlQueryId());
-  }
-
-  public RootStage makeRootStage(RowSignature rowSignature, List<InputSpec> isp)
-  {
-    return new RootStage(ctx, rowSignature, isp);
   }
 
 }
