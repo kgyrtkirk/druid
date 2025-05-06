@@ -311,22 +311,12 @@ public class MSQTaskQueryMaker implements QueryMaker
   }
 
   // FIXME
-  public static List<Pair<SqlTypeName, ColumnType>> getTypes2(
-      final DruidQuery druidQuery,
+  public static List<Pair<SqlTypeName, ColumnType>> getTypes3(
       final List<Entry<Integer, String>> fieldMapping,
-      final PlannerContext plannerContext
+      final PlannerContext plannerContext,
+      RelDataType outputRowType,
+      RowSignature outputRowSignature
   )
-  {
-    // For assistance computing return types if !finalizeAggregations.
-
-    RelDataType outputRowType = druidQuery.getOutputRowType();
-    RowSignature outputRowSignature = druidQuery.getOutputRowSignature();
-
-    return getTypes3(fieldMapping, plannerContext, outputRowType, outputRowSignature);
-  }
-
-  public static List<Pair<SqlTypeName, ColumnType>> getTypes3(final List<Entry<Integer, String>> fieldMapping,
-      final PlannerContext plannerContext, RelDataType outputRowType, RowSignature outputRowSignature)
   {
     if (!MultiStageQueryContext.isFinalizeAggregations(plannerContext.queryContext())) {
       throw DruidException.defensive().build("non-finalized aggregations are not supported!");
