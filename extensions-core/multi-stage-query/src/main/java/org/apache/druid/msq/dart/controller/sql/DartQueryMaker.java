@@ -146,7 +146,7 @@ public class DartQueryMaker implements QueryMaker
 
     final ResultsContext resultsContext = makeResultsContext(druidQuery, fieldMapping, plannerContext);
 
-    return runMSQSpec(querySpec, druidQuery.getQuery().context(), resultsContext);
+    return runLegacyMSQSpec(querySpec, druidQuery.getQuery().context(), resultsContext);
   }
 
   public static ResultsContext makeResultsContext(DruidQuery druidQuery, List<Entry<Integer, String>> fieldMapping,
@@ -163,7 +163,8 @@ public class DartQueryMaker implements QueryMaker
 
   private ControllerImpl makeLegacyController(LegacyMSQSpec querySpec, QueryContext context, ResultsContext resultsContext)
   {
-    if(!MultiStageQueryContext.isFinalizeAggregations(plannerContext.queryContext())) {
+    //FIXME: remove
+    if (!MultiStageQueryContext.isFinalizeAggregations(plannerContext.queryContext())) {
       throw DruidException.defensive("Non-finalized execution is not supported!");
     }
 
@@ -182,7 +183,7 @@ public class DartQueryMaker implements QueryMaker
 
   private ControllerImpl makeQueryDefController(QueryDefMSQSpec querySpec, QueryContext context, RelDataType rowType)
   {
-    if(!MultiStageQueryContext.isFinalizeAggregations(plannerContext.queryContext())) {
+    if (!MultiStageQueryContext.isFinalizeAggregations(plannerContext.queryContext())) {
       throw DruidException.defensive("Non-finalized execution is not supported!");
     }
 
@@ -201,7 +202,7 @@ public class DartQueryMaker implements QueryMaker
     return controller;
   }
 
-  public QueryResponse<Object[]> runMSQSpec(LegacyMSQSpec querySpec, QueryContext context, ResultsContext resultsContext)
+  public QueryResponse<Object[]> runLegacyMSQSpec(LegacyMSQSpec querySpec, QueryContext context, ResultsContext resultsContext)
   {
     final ControllerImpl controller = makeLegacyController(querySpec, context, resultsContext);
 
@@ -213,8 +214,7 @@ public class DartQueryMaker implements QueryMaker
     return runController(controller, fullReport);
   }
 
-
-  public QueryResponse<Object[]> runMSQSpec2(QueryDefMSQSpec querySpec, QueryContext context, RelDataType rowType)
+  public QueryResponse<Object[]> runQueryDefMSQSpec(QueryDefMSQSpec querySpec, QueryContext context, RelDataType rowType)
   {
     final ControllerImpl controller = makeQueryDefController(querySpec, context, rowType);
 

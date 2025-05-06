@@ -23,8 +23,8 @@ import com.google.common.collect.ImmutableMap;
 import org.apache.druid.msq.dart.controller.sql.DartSqlEngine;
 import org.apache.druid.query.QueryContexts;
 import org.apache.druid.sql.calcite.DecoupledExtension;
-import org.apache.druid.sql.calcite.QueryTestBuilder;
 import org.apache.druid.sql.calcite.NotYetSupported.NotYetSupportedProcessor;
+import org.apache.druid.sql.calcite.QueryTestBuilder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 

@@ -679,7 +679,7 @@ public class ControllerImpl implements Controller
       );
       queryDef = qkPlanner.makeQueryDefinition();
     } else {
-      queryDef = ((QueryDefMSQSpec)querySpec).getQueryDef();
+      queryDef = ((QueryDefMSQSpec) querySpec).getQueryDef();
     }
 
     ensureExportLocationEmpty(context, querySpec.getDestination());
