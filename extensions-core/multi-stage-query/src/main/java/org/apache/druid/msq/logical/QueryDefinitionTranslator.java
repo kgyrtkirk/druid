@@ -17,14 +17,14 @@
  * under the License.
  */
 
-package org.apache.druid.msq.dart.controller.sql;
+package org.apache.druid.msq.logical;
 
 import org.apache.calcite.rel.RelNode;
 import org.apache.druid.error.DruidException;
 import org.apache.druid.java.util.common.Intervals;
-import org.apache.druid.msq.dart.controller.sql.StageDefinitionBuilder2.RootStage;
 import org.apache.druid.msq.input.InputSpec;
 import org.apache.druid.msq.kernel.QueryDefinition;
+import org.apache.druid.msq.logical.StageDefinitionBuilder2.RootStage;
 import org.apache.druid.msq.querykit.DataSourcePlan;
 import org.apache.druid.query.DataSource;
 import org.apache.druid.query.InlineDataSource;

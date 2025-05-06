@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package org.apache.druid.msq.dart.controller.sql;
+package org.apache.druid.msq.logical;
 
 import org.apache.druid.error.DruidException;
 import org.apache.druid.msq.input.InputSpec;
