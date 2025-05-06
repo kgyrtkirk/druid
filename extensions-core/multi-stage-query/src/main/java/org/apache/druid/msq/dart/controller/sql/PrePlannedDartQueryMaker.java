@@ -21,6 +21,7 @@ package org.apache.druid.msq.dart.controller.sql;
 
 import org.apache.druid.msq.exec.ControllerContext;
 import org.apache.druid.msq.exec.QueryKitBasedMSQPlanner;
+import org.apache.druid.msq.exec.ResultsContext;
 import org.apache.druid.msq.indexing.LegacyMSQSpec;
 import org.apache.druid.msq.indexing.QueryDefMSQSpec;
 import org.apache.druid.msq.kernel.QueryDefinition;
@@ -73,7 +74,8 @@ class PrePlannedDartQueryMaker implements QueryMaker, QueryMaker.FromDruidLogica
         queryDef
     );
 
-    QueryResponse<Object[]> response = dartQueryMaker.runQueryDefMSQSpec(querySpec, context, rootRel.getRowType());
+    ResultsContext resultsContext = dartQueryMaker.makeDefaultResultContext(querySpec.getQueryDef(), rootRel.getRowType());
+    QueryResponse<Object[]> response = dartQueryMaker.runQueryDefMSQSpec(querySpec, context, resultsContext);
     return response;
   }
 
@@ -82,10 +84,8 @@ class PrePlannedDartQueryMaker implements QueryMaker, QueryMaker.FromDruidLogica
   {
     QueryContext queryContext = druidQuery.getQuery().context();
     QueryDefMSQSpec msqSpec = buildMSQSpec(druidQuery, dartQueryMaker.fieldMapping, queryContext);
-    // FIXME: here the full resultContext might be available via
-    //final ResultsContext resultsContext = DartQueryMaker.makeResultsContext(druidQuery, dartQueryMaker.fieldMapping, plannerContext);
-
-    QueryResponse<Object[]> response = dartQueryMaker.runQueryDefMSQSpec(msqSpec, queryContext, druidQuery.getOutputRowType());
+    ResultsContext resultsContext = DartQueryMaker.makeResultsContext(druidQuery, dartQueryMaker.fieldMapping, plannerContext);
+    QueryResponse<Object[]> response = dartQueryMaker.runQueryDefMSQSpec(msqSpec, queryContext, resultsContext);
     return response;
   }
 
