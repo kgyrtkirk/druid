@@ -43,12 +43,12 @@ import java.util.Optional;
 public class QueryDefinitionTranslator
 {
   private PlannerContext plannerContext;
-  private LogicalVertexBuilder stageBuilder;
+  private LogicalVertexBuilder vertexBuilder;
 
   public QueryDefinitionTranslator(PlannerContext plannerContext)
   {
     this.plannerContext = plannerContext;
-    this.stageBuilder = new LogicalVertexBuilder(plannerContext);
+    this.vertexBuilder = new LogicalVertexBuilder(plannerContext);
   }
 
   public QueryDefinition translate(DruidLogicalNode relRoot)
@@ -122,7 +122,7 @@ public class QueryDefinitionTranslator
     );
     List<InputSpec> isp = dsp.getInputSpecs();
 
-    RootVertex vertex = stageBuilder.makeRootVertex(sd.rowSignature, isp);
+    RootVertex vertex = vertexBuilder.makeRootVertex(sd.rowSignature, isp);
     return Optional.of(vertex);
   }
 
@@ -135,7 +135,7 @@ public class QueryDefinitionTranslator
     DataSourcePlan dsp = DataSourcePlan.forInline(ids, false);
     List<InputSpec> isp = dsp.getInputSpecs();
 
-    RootVertex vertex = stageBuilder.makeRootVertex(sd.rowSignature, isp);
+    RootVertex vertex = vertexBuilder.makeRootVertex(sd.rowSignature, isp);
     return Optional.of(vertex);
   }
 }
