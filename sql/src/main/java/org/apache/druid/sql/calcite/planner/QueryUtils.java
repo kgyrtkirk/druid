@@ -42,7 +42,7 @@ public class QueryUtils
    *
    * @return Mappings for queryColumn to outputColumn
    */
-  public static List<ColumnMapping> buildColumnMappings(
+  public static ColumnMappings buildColumnMappings(
       final List<Entry<Integer, String>> fieldMapping,
       final RowSignature rowSignature
   )
@@ -54,7 +54,7 @@ public class QueryUtils
       columnMappings.add(new ColumnMapping(queryColumn, outputColumn));
     }
 
-    return columnMappings;
+    return new ColumnMappings(columnMappings);
   }
 
   public static JoinAlgorithm getJoinAlgorithm(Join join, PlannerContext plannerContext)
