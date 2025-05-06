@@ -63,7 +63,7 @@ public class StageDefinitionBuilder2
     }
   }
 
-  public class RootStage extends AbstractStage
+  public static class RootStage extends AbstractStage
   {
     public RootStage(Context ctx, RowSignature signature, List<InputSpec> inputSpecs)
     {
@@ -103,6 +103,7 @@ public class StageDefinitionBuilder2
 
     private LogicalStage makeFilterStage(DruidFilter filter)
     {
+      PlannerContext plannerContext = getPlannerContext();
       VirtualColumnRegistry virtualColumnRegistry = VirtualColumnRegistry.create(
           signature,
           plannerContext.getExpressionParser(),
@@ -170,6 +171,7 @@ public class StageDefinitionBuilder2
     @Override
     public LogicalStage extendWith(DruidNodeStack stack)
     {
+      PlannerContext plannerContext = getPlannerContext();
       if (stack.peekNode() instanceof DruidProject) {
         DruidProject project = (DruidProject) stack.peekNode();
         Projection preAggregation = Projection
