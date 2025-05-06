@@ -47,6 +47,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class LogicalVertexBuilder
 {
+  // FIXME move to build
   private AtomicInteger stageIdSeq = new AtomicInteger(1);
   private PlannerContext plannerContext;
 
