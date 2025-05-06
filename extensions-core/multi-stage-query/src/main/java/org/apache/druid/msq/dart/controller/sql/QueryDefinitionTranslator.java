@@ -56,24 +56,24 @@ public class QueryDefinitionTranslator
   {
     DruidNodeStack stack = new DruidNodeStack();
     stack.push(relRoot);
-    IStageDef vertex = buildVertexFor(stack);
+    LogicalStage vertex = buildVertexFor(stack);
     return vertex.build();
   }
 
-  private IStageDef buildVertexFor(DruidNodeStack stack)
+  private LogicalStage buildVertexFor(DruidNodeStack stack)
   {
-    List<IStageDef> newInputs = new ArrayList<>();
+    List<LogicalStage> newInputs = new ArrayList<>();
 
     for (RelNode input : stack.peekNode().getInputs()) {
       stack.push((DruidLogicalNode) input, newInputs.size());
       newInputs.add(buildVertexFor(stack));
       stack.pop();
     }
-    IStageDef vertex = processNodeWithInputs(stack, newInputs);
+    LogicalStage vertex = processNodeWithInputs(stack, newInputs);
     return vertex;
   }
 
-  private IStageDef processNodeWithInputs(DruidNodeStack stack, List<IStageDef> newInputs)
+  private LogicalStage processNodeWithInputs(DruidNodeStack stack, List<LogicalStage> newInputs)
   {
     DruidLogicalNode node = stack.peekNode();
     Optional<RootStage> vertex = buildRootVertex(node);
@@ -81,12 +81,12 @@ public class QueryDefinitionTranslator
       return vertex.get();
     }
     if (newInputs.size() == 1) {
-      IStageDef inputVertex = newInputs.get(0);
-      IStageDef newVertex = inputVertex.extendWith(stack);
+      LogicalStage inputVertex = newInputs.get(0);
+      LogicalStage newVertex = inputVertex.extendWith(stack);
       if (newVertex != null) {
         return newVertex;
       }
-      Optional<IStageDef> seq = buildSequenceVertex(stack, newInputs.get(0));
+      Optional<LogicalStage> seq = buildSequenceVertex(stack, newInputs.get(0));
       if (seq.isPresent()) {
         return seq.get();
       }
@@ -94,7 +94,7 @@ public class QueryDefinitionTranslator
     throw DruidException.defensive().build("Unable to process relNode[%s]", node);
   }
 
-  private Optional<IStageDef> buildSequenceVertex(DruidNodeStack stack, IStageDef vertex)
+  private Optional<LogicalStage> buildSequenceVertex(DruidNodeStack stack, LogicalStage vertex)
   {
     DruidLogicalNode node = stack.peekNode();
     if (node instanceof DruidProject) {

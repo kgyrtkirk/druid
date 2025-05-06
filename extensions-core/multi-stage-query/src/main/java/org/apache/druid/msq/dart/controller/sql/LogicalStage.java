@@ -25,11 +25,11 @@ import org.apache.druid.sql.calcite.planner.querygen.DruidQueryGenerator.DruidNo
 
 import java.util.List;
 
-public interface IStageDef
+public interface LogicalStage
 {
   StageDefinition finalizeStage();
 
-  IStageDef extendWith(DruidNodeStack stack);
+  LogicalStage extendWith(DruidNodeStack stack);
 
   List<StageDefinition> buildStageDefinitions();
 

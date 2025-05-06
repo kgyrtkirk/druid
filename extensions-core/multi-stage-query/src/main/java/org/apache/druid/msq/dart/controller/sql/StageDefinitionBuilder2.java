@@ -51,13 +51,13 @@ public class StageDefinitionBuilder2
   private AtomicInteger stageIdSeq = new AtomicInteger(1);
   private PlannerContext plannerContext;
 
-  public class AbstractStage implements IStageDef
+  public class AbstractStage implements LogicalStage
   {
     protected final List<InputSpec> inputSpecs;
     protected final RowSignature signature;
-    protected final List<IStageDef> inputStages;
+    protected final List<LogicalStage> inputStages;
 
-    public AbstractStage(RowSignature signature, List<InputSpec> inputs, List<IStageDef> inputStages)
+    public AbstractStage(RowSignature signature, List<InputSpec> inputs, List<LogicalStage> inputStages)
     {
       this.inputSpecs = inputs;
       this.signature = signature;
@@ -71,7 +71,7 @@ public class StageDefinitionBuilder2
     }
 
     @Override
-    public IStageDef extendWith(DruidNodeStack stack)
+    public LogicalStage extendWith(DruidNodeStack stack)
     {
       return null;
     }
@@ -86,7 +86,7 @@ public class StageDefinitionBuilder2
     public final List<StageDefinition> buildStageDefinitions()
     {
       List<StageDefinition> ret = new ArrayList<>();
-      for (IStageDef vertex : inputStages) {
+      for (LogicalStage vertex : inputStages) {
         ret.addAll(vertex.buildStageDefinitions());
       }
       ret.add(finalizeStage());
@@ -113,7 +113,7 @@ public class StageDefinitionBuilder2
     }
 
     @Override
-    public IStageDef extendWith(DruidNodeStack stack)
+    public LogicalStage extendWith(DruidNodeStack stack)
     {
       if (stack.peekNode() instanceof DruidFilter) {
         DruidFilter filter = (DruidFilter) stack.peekNode();
@@ -132,7 +132,7 @@ public class StageDefinitionBuilder2
       return null;
     }
 
-    private IStageDef makeFilterStage(DruidFilter filter)
+    private LogicalStage makeFilterStage(DruidFilter filter)
     {
       VirtualColumnRegistry virtualColumnRegistry = VirtualColumnRegistry.create(
           signature,
@@ -199,7 +199,7 @@ public class StageDefinitionBuilder2
     }
 
     @Override
-    public IStageDef extendWith(DruidNodeStack stack)
+    public LogicalStage extendWith(DruidNodeStack stack)
     {
       if (stack.peekNode() instanceof DruidProject) {
         DruidProject project = (DruidProject) stack.peekNode();
@@ -225,7 +225,7 @@ public class StageDefinitionBuilder2
     }
 
     @Override
-    public IStageDef extendWith(DruidNodeStack stack)
+    public LogicalStage extendWith(DruidNodeStack stack)
     {
       return null;
     }
