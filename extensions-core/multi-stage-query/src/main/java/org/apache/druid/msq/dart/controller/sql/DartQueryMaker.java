@@ -163,11 +163,6 @@ public class DartQueryMaker implements QueryMaker
 
   private ControllerImpl makeLegacyController(LegacyMSQSpec querySpec, QueryContext context, ResultsContext resultsContext)
   {
-    //FIXME: remove
-    if (!MultiStageQueryContext.isFinalizeAggregations(plannerContext.queryContext())) {
-      throw DruidException.defensive("Non-finalized execution is not supported!");
-    }
-
     final String dartQueryId = context.getString(DartSqlEngine.CTX_DART_QUERY_ID);
     final ControllerContext controllerContext = controllerContextFactory.newContext(dartQueryId);
 
