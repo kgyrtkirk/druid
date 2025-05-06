@@ -77,13 +77,13 @@ public class StageDefinitionBuilder2
     }
 
     @Override
-    public QueryDefinition build()
+    public final QueryDefinition build()
     {
       return QueryDefinition.create(buildStageDefinitions(), plannerContext.queryContext());
     }
 
     @Override
-    public List<StageDefinition> buildStageDefinitions()
+    public final List<StageDefinition> buildStageDefinitions()
     {
       List<StageDefinition> ret = new ArrayList<>();
       for (IStageDef vertex : inputStages) {
