@@ -33,7 +33,6 @@ import org.apache.druid.sql.calcite.planner.PlannerContext;
 import org.apache.druid.sql.calcite.planner.querygen.DruidQueryGenerator.DruidNodeStack;
 import org.apache.druid.sql.calcite.planner.querygen.SourceDescProducer.SourceDesc;
 import org.apache.druid.sql.calcite.rel.logical.DruidLogicalNode;
-import org.apache.druid.sql.calcite.rel.logical.DruidProject;
 import org.apache.druid.sql.calcite.rel.logical.DruidTableScan;
 import org.apache.druid.sql.calcite.rel.logical.DruidValues;
 import java.util.ArrayList;
@@ -96,10 +95,6 @@ public class QueryDefinitionTranslator
 
   private Optional<LogicalVertex> buildSequenceVertex(DruidNodeStack stack, LogicalVertex vertex)
   {
-    DruidLogicalNode node = stack.peekNode();
-    if (node instanceof DruidProject) {
-      // return makeScanProcessorFactory(vertex.null, null);
-    }
     return Optional.empty();
   }
 
@@ -127,7 +122,7 @@ public class QueryDefinitionTranslator
     );
     List<InputSpec> isp = dsp.getInputSpecs();
 
-    RootVertex vertex = stageBuilder.new RootVertex(sd.rowSignature, isp);
+    RootVertex vertex = stageBuilder.makeRootVertex(sd.rowSignature, isp);
     return Optional.of(vertex);
   }
 
@@ -140,7 +135,7 @@ public class QueryDefinitionTranslator
     DataSourcePlan dsp = DataSourcePlan.forInline(ids, false);
     List<InputSpec> isp = dsp.getInputSpecs();
 
-    RootVertex vertex = stageBuilder.new RootVertex(sd.rowSignature, isp);
+    RootVertex vertex = stageBuilder.makeRootVertex(sd.rowSignature, isp);
     return Optional.of(vertex);
   }
 }

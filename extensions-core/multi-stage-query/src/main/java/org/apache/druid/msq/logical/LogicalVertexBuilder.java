@@ -252,4 +252,9 @@ public class LogicalVertexBuilder
     return sdb.build(plannerContext.getSqlQueryId());
   }
 
+  public RootVertex makeRootVertex(RowSignature rowSignature, List<InputSpec> isp)
+  {
+    return new RootVertex(null, rowSignature);
+  }
+
 }
