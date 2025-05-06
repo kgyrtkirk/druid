@@ -64,8 +64,14 @@ class PrePlannedDartQueryMaker implements QueryMaker, QueryMaker.FromDruidLogica
     QueryDefinitionTranslator qdt = new QueryDefinitionTranslator(plannerContext);
     QueryDefinition queryDef = qdt.translate(rootRel);
     QueryContext context = plannerContext.queryContext();
-
-    QueryDefMSQSpec querySpec = buildMSQSpec(queryDef, context, dartQueryMaker.fieldMapping);
+    QueryDefMSQSpec querySpec = MSQTaskQueryMaker.makeQueryDefMSQSpec(
+        null,
+        context,
+        dartQueryMaker.fieldMapping,
+        plannerContext,
+        null, // Only used for DML, which this isn't
+        queryDef
+    );
 
     QueryResponse<Object[]> response = dartQueryMaker.runQueryDefMSQSpec(querySpec, context, rootRel.getRowType());
     return response;
@@ -81,22 +87,6 @@ class PrePlannedDartQueryMaker implements QueryMaker, QueryMaker.FromDruidLogica
 
     QueryResponse<Object[]> response = dartQueryMaker.runQueryDefMSQSpec(msqSpec, queryContext, druidQuery.getOutputRowType());
     return response;
-  }
-
-  public QueryDefMSQSpec buildMSQSpec(
-      QueryDefinition queryDef,
-      QueryContext context,
-      List<Entry<Integer, String>> fieldMapping)
-  {
-    QueryDefMSQSpec querySpec = MSQTaskQueryMaker.makeQueryDefMSQSpec(
-        null,
-        context,
-        fieldMapping,
-        plannerContext,
-        null, // Only used for DML, which this isn't
-        queryDef
-    );
-    return querySpec;
   }
 
   private QueryDefMSQSpec buildMSQSpec(
