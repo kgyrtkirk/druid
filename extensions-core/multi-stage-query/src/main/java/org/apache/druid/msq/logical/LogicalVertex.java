@@ -25,7 +25,7 @@ import org.apache.druid.sql.calcite.planner.querygen.DruidQueryGenerator.DruidNo
 
 import java.util.List;
 
-public interface LogicalStage
+public interface LogicalVertex
 {
   /**
    * Builds the full {@link QueryDefinition}.
@@ -44,7 +44,7 @@ public interface LogicalStage
    *
    * @return null if the current stage cannot be extended
    */
-  LogicalStage extendWith(DruidNodeStack stack);
+  LogicalVertex extendWith(DruidNodeStack stack);
 
   /**
    * Internal method to build the stage definitions.
