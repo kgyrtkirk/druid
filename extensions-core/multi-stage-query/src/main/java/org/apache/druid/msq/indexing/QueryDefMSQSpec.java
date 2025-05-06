@@ -20,7 +20,6 @@
 package org.apache.druid.msq.indexing;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
 import org.apache.druid.msq.indexing.destination.MSQDestination;
@@ -31,7 +30,6 @@ import org.apache.druid.query.BaseQuery;
 import org.apache.druid.query.QueryContext;
 import org.apache.druid.sql.calcite.planner.ColumnMappings;
 
-import java.util.Map;
 import java.util.Objects;
 
 public class QueryDefMSQSpec extends MSQSpec
@@ -52,13 +50,11 @@ public class QueryDefMSQSpec extends MSQSpec
       @JsonProperty("columnMappings") ColumnMappings columnMappings,
       @JsonProperty("destination") MSQDestination destination,
       @JsonProperty("assignmentStrategy") WorkerAssignmentStrategy assignmentStrategy,
-      @JsonProperty("tuningConfig") MSQTuningConfig tuningConfig
-  )
+      @JsonProperty("tuningConfig") MSQTuningConfig tuningConfig)
   {
     super(columnMappings, destination, assignmentStrategy, tuningConfig);
     this.queryDef = Preconditions.checkNotNull(queryDef, "queryDef");
   }
-
 
   @JsonProperty("queryDef")
   public QueryDefinition getQueryDef()

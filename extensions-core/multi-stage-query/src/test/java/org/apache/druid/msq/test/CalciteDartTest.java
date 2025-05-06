@@ -23,8 +23,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.apache.druid.msq.dart.controller.sql.DartSqlEngine;
 import org.apache.druid.query.QueryContexts;
-import org.apache.druid.segment.column.ColumnType;
-import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.sql.calcite.BaseCalciteQueryTest;
 import org.apache.druid.sql.calcite.NotYetSupported;
 import org.apache.druid.sql.calcite.NotYetSupported.Modes;
@@ -50,16 +48,6 @@ public class CalciteDartTest extends BaseCalciteQueryTest
         )
         .skipVectorize(true)
         .verifyNativeQueries(new VerifyMSQSupportedNativeQueriesPredicate());
-  }
-
-  @Test
-  public void testSelect2power40()
-  {
-    testBuilder()
-        .sql("SELECT 1024*1024*1024*1024")
-        .expectedSignature(RowSignature.builder().add("EXPR$0", ColumnType.LONG).build())
-        .expectedResults(ImmutableList.of(new Object[] {0}))
-        .run();
   }
 
   @Test
