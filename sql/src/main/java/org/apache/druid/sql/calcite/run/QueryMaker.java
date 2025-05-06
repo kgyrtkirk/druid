@@ -39,6 +39,9 @@ public interface QueryMaker
 
   public interface FromDruidLogical
   {
+    /**
+     * Runs the query represented by {@link DruidLogicalNode}.
+     */
     QueryResponse<Object[]> runQuery(DruidLogicalNode newRoot);
   }
 }
