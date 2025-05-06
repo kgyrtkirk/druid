@@ -61,7 +61,7 @@ class PrePlannedDartQueryMaker implements QueryMaker, QueryMaker.FromDruidLogica
     QueryDefinition queryDef = qdt.translate(rootRel);
     QueryContext context = plannerContext.queryContext();
 
-    final QueryDefMSQSpec querySpec = buildMSQSpec(queryDef, context, dartQueryMaker.fieldMapping);
+    QueryDefMSQSpec querySpec = buildMSQSpec(queryDef, context, dartQueryMaker.fieldMapping);
 
     QueryResponse<Object[]> response = dartQueryMaker.runMSQSpec2(querySpec, context, rootRel.getRowType());
     return response;
@@ -85,7 +85,7 @@ class PrePlannedDartQueryMaker implements QueryMaker, QueryMaker.FromDruidLogica
       QueryContext context,
       List<Entry<Integer, String>> fieldMapping)
   {
-    final QueryDefMSQSpec querySpec = MSQTaskQueryMaker.makeQueryDefMSQSpec(
+    QueryDefMSQSpec querySpec = MSQTaskQueryMaker.makeQueryDefMSQSpec(
         null,
         context,
         fieldMapping,
@@ -101,7 +101,7 @@ class PrePlannedDartQueryMaker implements QueryMaker, QueryMaker.FromDruidLogica
       List<Entry<Integer, String>> fieldMapping,
       QueryContext queryContext)
   {
-    final LegacyMSQSpec querySpec = MSQTaskQueryMaker.makeLegacyMSQSpec(
+    LegacyMSQSpec querySpec = MSQTaskQueryMaker.makeLegacyMSQSpec(
         null,
         druidQuery,
         druidQuery.getQuery().context(),
@@ -110,10 +110,10 @@ class PrePlannedDartQueryMaker implements QueryMaker, QueryMaker.FromDruidLogica
         null
     );
 
-    final String dartQueryId = queryContext.getString(DartSqlEngine.CTX_DART_QUERY_ID);
+    String dartQueryId = queryContext.getString(DartSqlEngine.CTX_DART_QUERY_ID);
     ControllerContext controllerContext = dartQueryMaker.newControllerContext(dartQueryId);
 
-    final QueryDefinition queryDef = new QueryKitBasedMSQPlanner(
+    QueryDefinition queryDef = new QueryKitBasedMSQPlanner(
         querySpec,
         dartQueryMaker.makeDefaultResultContext(),
         querySpec.getQuery(),
