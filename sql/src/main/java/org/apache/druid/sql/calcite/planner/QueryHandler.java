@@ -539,6 +539,7 @@ public abstract class QueryHandler extends SqlStatementHandler.BaseStatementHand
     );
     QueryValidations.validateLogicalQueryForDruid(handlerContext.plannerContext(), parameterized);
     CalcitePlanner planner = handlerContext.planner();
+    final RelDataType returnedRowType = prepareResult.getReturnedRowType();
 
 
     if (plannerContext.getPlannerConfig()
@@ -559,7 +560,7 @@ public abstract class QueryHandler extends SqlStatementHandler.BaseStatementHand
       if (queryMaker instanceof QueryMaker.FromDruidLogical) {
         QueryMaker.FromDruidLogical logicalQueryMaker = (QueryMaker.FromDruidLogical) queryMaker;
         QueryResponse<Object[]> respone = logicalQueryMaker.runQuery((DruidLogicalNode) newRoot);
-        return new PlannerResult(() -> respone, newRoot.getRowType());
+        return new PlannerResult(() -> respone, returnedRowType);
       }
 
       DruidQueryGenerator generator = new DruidQueryGenerator(plannerContext, (DruidLogicalNode) newRoot, rexBuilder);
@@ -581,7 +582,7 @@ public abstract class QueryHandler extends SqlStatementHandler.BaseStatementHand
         return planExplanation(possiblyLimitedRoot, newRoot, true);
       }
 
-      return new PlannerResult(resultsSupplier, finalBaseQuery.getOutputRowType());
+      return new PlannerResult(resultsSupplier, returnedRowType);
     } else {
       final DruidRel<?> druidRel = (DruidRel<?>) planner.transform(
           CalciteRulesManager.DRUID_CONVENTION_RULES,
@@ -598,9 +599,6 @@ public abstract class QueryHandler extends SqlStatementHandler.BaseStatementHand
       if (explain != null) {
         return planExplanation(possiblyLimitedRoot, druidRel, true);
       } else {
-        // Compute row type.
-        final RelDataType rowType = prepareResult.getReturnedRowType();
-
         // sanity check
         final Set<ResourceAction> readResourceActions =
             plannerContext.getResourceActions()
@@ -616,7 +614,7 @@ public abstract class QueryHandler extends SqlStatementHandler.BaseStatementHand
             "Authorization sanity check failed"
         );
 
-        return new PlannerResult(druidRel::runQuery, rowType);
+        return new PlannerResult(druidRel::runQuery, returnedRowType);
       }
     }
   }
