@@ -245,7 +245,7 @@ public class QueryKitBasedMSQPlanner
                                      resultsContext
                                  ))
       );
-      return builder.build();
+      return builder.build().withOverriddenContext(queryToPlan.getContext());
     } else {
       throw new ISE("Unsupported destination [%s]", destination);
     }

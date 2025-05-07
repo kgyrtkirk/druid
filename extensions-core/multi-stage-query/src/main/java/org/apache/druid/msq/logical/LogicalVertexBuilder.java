@@ -255,7 +255,7 @@ public class LogicalVertexBuilder
 
   public RootVertex makeRootVertex(RowSignature rowSignature, List<InputSpec> isp)
   {
-    return new RootVertex(null, rowSignature);
+    return new RootVertex(rowSignature, isp);
   }
 
 }
