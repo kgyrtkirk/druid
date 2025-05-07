@@ -48,13 +48,48 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class LogicalStageBuilder
 {
-  // FIXME move to build
-  private AtomicInteger stageIdSeq = new AtomicInteger(1);
   private PlannerContext plannerContext;
 
   public LogicalStageBuilder(PlannerContext plannerContext2)
   {
     this.plannerContext = plannerContext2;
+  }
+
+  class StageMaker
+  {
+    public final AtomicInteger stageIdSeq = new AtomicInteger(0);
+
+    StageDefinition makeScanStage(
+        VirtualColumns virtualColumns,
+        RowSignature signature,
+        List<InputSpec> inputs,
+        DimFilter dimFilter)
+    {
+      ScanQuery s = Druids.newScanQueryBuilder()
+          .dataSource(IRRELEVANT)
+          .intervals(QuerySegmentSpec.ETERNITY)
+          .filters(dimFilter)
+          .virtualColumns(virtualColumns)
+          .columns(signature.getColumnNames())
+          .columnTypes(signature.getColumnTypes())
+          .build();
+      ScanQueryFrameProcessorFactory scanProcessorFactory = new ScanQueryFrameProcessorFactory(s);
+      StageDefinitionBuilder sdb = StageDefinition.builder(stageIdSeq.incrementAndGet())
+          .inputs(inputs)
+          .signature(signature)
+          .shuffleSpec(MixShuffleSpec.instance())
+          .processorFactory(scanProcessorFactory);
+      return sdb.build(getIdForBuilder());
+    }
+
+    private String getIdForBuilder()
+    {
+      String dartQueryId = plannerContext.queryContext().getString(DartSqlEngine.CTX_DART_QUERY_ID);
+      if (dartQueryId != null) {
+        return dartQueryId;
+      }
+      return plannerContext.getSqlQueryId();
+    }
   }
 
   public class AbstractLogicalStage implements LogicalStage
@@ -71,7 +106,7 @@ public class LogicalStageBuilder
     }
 
     @Override
-    public StageDefinition contructStage()
+    public StageDefinition buildCurrentStage(StageMaker stageMaker)
     {
       throw DruidException.defensive("This should have been implemented - or not reach this point!");
     }
@@ -85,17 +120,17 @@ public class LogicalStageBuilder
     @Override
     public final QueryDefinition build()
     {
-      return QueryDefinition.create(buildStageDefinitions(), plannerContext.queryContext());
+      return QueryDefinition.create(buildStageDefinitions(new StageMaker()), plannerContext.queryContext());
     }
 
     @Override
-    public final List<StageDefinition> buildStageDefinitions()
+    public final List<StageDefinition> buildStageDefinitions(StageMaker stageMaker)
     {
       List<StageDefinition> ret = new ArrayList<>();
-      for (LogicalStage stage : inputStages) {
-        ret.addAll(stage.buildStageDefinitions());
+      if (!inputStages.isEmpty()) {
+        throw DruidException.defensive("Not yet supported");
       }
-      ret.add(contructStage());
+      ret.add(buildCurrentStage(stageMaker));
       return ret;
     }
   }
@@ -113,9 +148,9 @@ public class LogicalStageBuilder
     }
 
     @Override
-    public StageDefinition contructStage()
+    public StageDefinition buildCurrentStage(StageMaker stageMaker)
     {
-      return makeScanStage(VirtualColumns.EMPTY, signature, inputSpecs, null);
+      return stageMaker.makeScanStage(VirtualColumns.EMPTY, signature, inputSpecs, null);
     }
 
     @Override
@@ -190,10 +225,10 @@ public class LogicalStageBuilder
     }
 
     @Override
-    public StageDefinition contructStage()
+    public StageDefinition buildCurrentStage(StageMaker stageMaker)
     {
       VirtualColumns output = virtualColumnRegistry.build(Collections.emptySet());
-      return makeScanStage(output, signature, inputSpecs, dimFilter);
+      return stageMaker.makeScanStage(output, signature, inputSpecs, dimFilter);
     }
 
     @Override
@@ -229,38 +264,6 @@ public class LogicalStageBuilder
   }
 
   private static final String IRRELEVANT = "irrelevant";
-
-  private StageDefinition makeScanStage(
-      VirtualColumns virtualColumns,
-      RowSignature signature,
-      List<InputSpec> inputs,
-      DimFilter dimFilter)
-  {
-    ScanQuery s = Druids.newScanQueryBuilder()
-        .dataSource(IRRELEVANT)
-        .intervals(QuerySegmentSpec.ETERNITY)
-        .filters(dimFilter)
-        .virtualColumns(virtualColumns)
-        .columns(signature.getColumnNames())
-        .columnTypes(signature.getColumnTypes())
-        .build();
-    ScanQueryFrameProcessorFactory scanProcessorFactory = new ScanQueryFrameProcessorFactory(s);
-    StageDefinitionBuilder sdb = StageDefinition.builder(stageIdSeq.incrementAndGet())
-        .inputs(inputs)
-        .signature(signature)
-        .shuffleSpec(MixShuffleSpec.instance())
-        .processorFactory(scanProcessorFactory);
-    return sdb.build(getIdForBuilder());
-  }
-
-  private String getIdForBuilder()
-  {
-    String dartQueryId = plannerContext.queryContext().getString(DartSqlEngine.CTX_DART_QUERY_ID);
-    if (dartQueryId != null) {
-      return dartQueryId;
-    }
-    return plannerContext.getSqlQueryId();
-  }
 
   public RootStage makeRootStage(RowSignature rowSignature, List<InputSpec> isp)
   {

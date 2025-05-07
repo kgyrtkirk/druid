@@ -21,6 +21,7 @@ package org.apache.druid.msq.logical;
 
 import org.apache.druid.msq.kernel.QueryDefinition;
 import org.apache.druid.msq.kernel.StageDefinition;
+import org.apache.druid.msq.logical.LogicalStageBuilder.StageMaker;
 import org.apache.druid.sql.calcite.planner.querygen.DruidQueryGenerator.DruidNodeStack;
 
 import java.util.List;
@@ -37,7 +38,7 @@ public interface LogicalStage
   /**
    * Builds the current stage.
    */
-  StageDefinition contructStage();
+  StageDefinition buildCurrentStage(StageMaker stageBuildContext);
 
   /**
    * Attempts to extend the current stage with an additional node.
@@ -49,6 +50,7 @@ public interface LogicalStage
   /**
    * Internal method to build the stage definitions.
    */
-  List<StageDefinition> buildStageDefinitions();
+  List<StageDefinition> buildStageDefinitions(StageMaker stageBuildContext);
+
 
 }
