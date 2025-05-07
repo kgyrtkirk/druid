@@ -20,6 +20,7 @@
 package org.apache.druid.msq.logical;
 
 import org.apache.druid.error.DruidException;
+import org.apache.druid.msq.dart.controller.sql.DartSqlEngine;
 import org.apache.druid.msq.input.InputSpec;
 import org.apache.druid.msq.kernel.MixShuffleSpec;
 import org.apache.druid.msq.kernel.QueryDefinition;
@@ -250,7 +251,16 @@ public class LogicalVertexBuilder
         .signature(signature)
         .shuffleSpec(MixShuffleSpec.instance())
         .processorFactory(scanProcessorFactory);
-    return sdb.build(plannerContext.getSqlQueryId());
+    return sdb.build(getIdForBuilder());
+  }
+
+  private String getIdForBuilder()
+  {
+    String dartQueryId = plannerContext.queryContext().getString(DartSqlEngine.CTX_DART_QUERY_ID);
+    if (dartQueryId != null) {
+      return dartQueryId;
+    }
+    return plannerContext.getSqlQueryId();
   }
 
   public RootVertex makeRootVertex(RowSignature rowSignature, List<InputSpec> isp)

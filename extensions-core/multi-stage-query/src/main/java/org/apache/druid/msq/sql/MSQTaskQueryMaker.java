@@ -293,16 +293,12 @@ public class MSQTaskQueryMaker implements QueryMaker
         terminalStageSpecFactory
     );
 
-    // this is right now not required ; it might worth waiting for when its needed and consider filtering which
-    // details to forward to be accessible during execution
-    // queryDef.withOverriddenContext(buildOverrideContext(null, plannerContext, destination));
-
     final QueryDefMSQSpec querySpec = new QueryDefMSQSpec.Builder()
         .columnMappings(QueryUtils.buildColumnMappings(fieldMapping, queryDef.getOutputRowSignature()))
         .destination(destination)
         .assignmentStrategy(MultiStageQueryContext.getAssignmentStrategy(plannerContext.queryContext()))
         .tuningConfig(makeMSQTuningConfig(plannerContext))
-        .queryDef(queryDef)
+        .queryDef(queryDef.withOverriddenContext(buildOverrideContext(null, plannerContext, destination)))
         .build();
 
     return querySpec;
