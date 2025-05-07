@@ -30,11 +30,13 @@ import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import org.apache.druid.java.util.common.IAE;
 import org.apache.druid.java.util.common.ISE;
+import org.apache.druid.msq.querykit.QueryKitUtils;
 import org.apache.druid.query.QueryContext;
 import org.apache.druid.segment.column.RowSignature;
 
 import javax.annotation.Nullable;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -198,7 +200,10 @@ public class QueryDefinition
 
   public RowSignature getOutputRowSignature()
   {
-    return stageDefinitions.get(finalStage).getSignature();
+    RowSignature signature = stageDefinitions.get(finalStage).getSignature();
+    List<String> names = new ArrayList<>(signature.getColumnNames());
+    names.remove(QueryKitUtils.PARTITION_BOOST_COLUMN);
+    return signature.buildSafeSignature(names);
   }
 
   public QueryDefinition withOverriddenContext(Map<String, Object> contextOverride)
