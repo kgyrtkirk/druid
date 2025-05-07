@@ -62,7 +62,7 @@ public class RowSignature implements ColumnInspector
    */
   private final int hashCode;
 
-  private RowSignature(final List<ColumnSignature> columnTypeList)
+  public RowSignature(final List<ColumnSignature> columnTypeList)
   {
     this.columnPositions.defaultReturnValue(-1);
 
@@ -188,7 +188,7 @@ public class RowSignature implements ColumnInspector
   }
 
   @JsonValue
-  private List<ColumnSignature> asColumnSignatures()
+  public List<ColumnSignature> asColumnSignatures()
   {
     final List<ColumnSignature> retVal = new ArrayList<>();
 
@@ -372,6 +372,15 @@ public class RowSignature implements ColumnInspector
     public RowSignature build()
     {
       return new RowSignature(columnTypeList);
+    }
+
+    public void remove(String boostColName)
+    {
+      if(true)
+      {
+        throw new RuntimeException("FIXME: Unimplemented!");
+      }
+
     }
   }
 

@@ -32,7 +32,7 @@ import javax.annotation.Nullable;
  * Package-private since it is not intended to be used outside that narrow use case. In other cases where passing
  * around information about column types is important, use {@link ColumnType} instead.
  */
-class ColumnSignature
+public class ColumnSignature
 {
   private final String name;
 
@@ -55,7 +55,7 @@ class ColumnSignature
   }
 
   @JsonProperty("name")
-  String name()
+  public String name()
   {
     return name;
   }
@@ -63,7 +63,7 @@ class ColumnSignature
   @Nullable
   @JsonProperty("type")
   @JsonInclude(JsonInclude.Include.NON_NULL)
-  ColumnType type()
+  public ColumnType type()
   {
     return type;
   }
