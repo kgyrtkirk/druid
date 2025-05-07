@@ -46,28 +46,28 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class LogicalVertexBuilder
+public class LogicalStageBuilder
 {
   // FIXME move to build
   private AtomicInteger stageIdSeq = new AtomicInteger(1);
   private PlannerContext plannerContext;
 
-  public LogicalVertexBuilder(PlannerContext plannerContext2)
+  public LogicalStageBuilder(PlannerContext plannerContext2)
   {
     this.plannerContext = plannerContext2;
   }
 
-  public class AbstractVertex implements LogicalVertex
+  public class AbstractLogicalStage implements LogicalStage
   {
     protected final List<InputSpec> inputSpecs;
     protected final RowSignature signature;
-    protected final List<LogicalVertex> inputVertices;
+    protected final List<LogicalStage> inputStages;
 
-    public AbstractVertex(RowSignature signature, List<InputSpec> inputs, List<LogicalVertex> inputVertices)
+    public AbstractLogicalStage(RowSignature signature, List<InputSpec> inputs, List<LogicalStage> inputVertices)
     {
       this.inputSpecs = inputs;
       this.signature = signature;
-      this.inputVertices = inputVertices;
+      this.inputStages = inputVertices;
     }
 
     @Override
@@ -77,7 +77,7 @@ public class LogicalVertexBuilder
     }
 
     @Override
-    public LogicalVertex extendWith(DruidNodeStack stack)
+    public LogicalStage extendWith(DruidNodeStack stack)
     {
       return null;
     }
@@ -92,24 +92,24 @@ public class LogicalVertexBuilder
     public final List<StageDefinition> buildStageDefinitions()
     {
       List<StageDefinition> ret = new ArrayList<>();
-      for (LogicalVertex vertex : inputVertices) {
-        ret.addAll(vertex.buildStageDefinitions());
+      for (LogicalStage stage : inputStages) {
+        ret.addAll(stage.buildStageDefinitions());
       }
       ret.add(contructStage());
       return ret;
     }
   }
 
-  public class RootVertex extends AbstractVertex
+  public class RootStage extends AbstractLogicalStage
   {
-    public RootVertex(RowSignature signature, List<InputSpec> inputSpecs)
+    public RootStage(RowSignature signature, List<InputSpec> inputSpecs)
     {
       super(signature, inputSpecs, Collections.emptyList());
     }
 
-    public RootVertex(RootVertex root, RowSignature newSignature)
+    public RootStage(RootStage root, RowSignature newSignature)
     {
-      super(newSignature, root.inputSpecs, root.inputVertices);
+      super(newSignature, root.inputSpecs, root.inputStages);
     }
 
     @Override
@@ -119,11 +119,11 @@ public class LogicalVertexBuilder
     }
 
     @Override
-    public LogicalVertex extendWith(DruidNodeStack stack)
+    public LogicalStage extendWith(DruidNodeStack stack)
     {
       if (stack.peekNode() instanceof DruidFilter) {
         DruidFilter filter = (DruidFilter) stack.peekNode();
-        return makeFilterVertex(filter);
+        return makeFilterStage(filter);
       }
 
       if (stack.peekNode() instanceof DruidProject) {
@@ -133,12 +133,12 @@ public class LogicalVertexBuilder
             project.getCluster(), project.getTraitSet(), project,
             project.getCluster().getRexBuilder().makeLiteral(true)
         );
-        return makeFilterVertex(dummyFilter).extendWith(stack);
+        return makeFilterStage(dummyFilter).extendWith(stack);
       }
       return null;
     }
 
-    private LogicalVertex makeFilterVertex(DruidFilter filter)
+    private LogicalStage makeFilterStage(DruidFilter filter)
     {
       VirtualColumnRegistry virtualColumnRegistry = VirtualColumnRegistry.create(
           signature,
@@ -151,7 +151,7 @@ public class LogicalVertexBuilder
           signature, virtualColumnRegistry, filter
       );
 
-      return new FilterVertex(
+      return new FilterStage(
           this,
           virtualColumnRegistry,
           dimFilter
@@ -159,7 +159,7 @@ public class LogicalVertexBuilder
     }
   }
 
-  public FilterVertex create(RootVertex inputStage, DruidFilter filter)
+  public FilterStage create(RootStage inputStage, DruidFilter filter)
   {
     VirtualColumnRegistry virtualColumnRegistry = VirtualColumnRegistry.create(
         inputStage.signature,
@@ -167,22 +167,22 @@ public class LogicalVertexBuilder
         plannerContext.getPlannerConfig().isForceExpressionVirtualColumns()
     );
     DimFilter dimFilter = DruidQuery.getDimFilter(plannerContext, inputStage.signature, virtualColumnRegistry, filter);
-    return new FilterVertex(inputStage, virtualColumnRegistry, dimFilter);
+    return new FilterStage(inputStage, virtualColumnRegistry, dimFilter);
   }
 
-  class FilterVertex extends RootVertex
+  class FilterStage extends RootStage
   {
     protected final VirtualColumnRegistry virtualColumnRegistry;
     private DimFilter dimFilter;
 
-    public FilterVertex(RootVertex inputStage, VirtualColumnRegistry virtualColumnRegistry, DimFilter dimFilter)
+    public FilterStage(RootStage inputStage, VirtualColumnRegistry virtualColumnRegistry, DimFilter dimFilter)
     {
       super(inputStage, inputStage.signature);
       this.virtualColumnRegistry = virtualColumnRegistry;
       this.dimFilter = dimFilter;
     }
 
-    public FilterVertex(FilterVertex root, VirtualColumnRegistry newVirtualColumnRegistry, RowSignature rowSignature)
+    public FilterStage(FilterStage root, VirtualColumnRegistry newVirtualColumnRegistry, RowSignature rowSignature)
     {
       super(root, rowSignature);
       this.dimFilter = root.dimFilter;
@@ -197,14 +197,14 @@ public class LogicalVertexBuilder
     }
 
     @Override
-    public LogicalVertex extendWith(DruidNodeStack stack)
+    public LogicalStage extendWith(DruidNodeStack stack)
     {
       if (stack.peekNode() instanceof DruidProject) {
         DruidProject project = (DruidProject) stack.peekNode();
         Projection preAggregation = Projection
             .preAggregation(project, plannerContext, signature, virtualColumnRegistry);
 
-        return new ProjectVertex(
+        return new ProjectStage(
             this,
             virtualColumnRegistry,
             preAggregation.getOutputRowSignature()
@@ -214,16 +214,15 @@ public class LogicalVertexBuilder
     }
   }
 
-  class ProjectVertex extends FilterVertex
+  class ProjectStage extends FilterStage
   {
-    public ProjectVertex(FilterVertex root, VirtualColumnRegistry newVirtualColumnRegistry,
-        RowSignature rowSignature)
+    public ProjectStage(FilterStage root, VirtualColumnRegistry newVirtualColumnRegistry, RowSignature rowSignature)
     {
       super(root, newVirtualColumnRegistry, rowSignature);
     }
 
     @Override
-    public LogicalVertex extendWith(DruidNodeStack stack)
+    public LogicalStage extendWith(DruidNodeStack stack)
     {
       return null;
     }
@@ -263,9 +262,9 @@ public class LogicalVertexBuilder
     return plannerContext.getSqlQueryId();
   }
 
-  public RootVertex makeRootVertex(RowSignature rowSignature, List<InputSpec> isp)
+  public RootStage makeRootStage(RowSignature rowSignature, List<InputSpec> isp)
   {
-    return new RootVertex(rowSignature, isp);
+    return new RootStage(rowSignature, isp);
   }
 
 }
