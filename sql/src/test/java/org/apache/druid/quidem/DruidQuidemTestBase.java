@@ -29,6 +29,8 @@ import net.hydromatic.quidem.Quidem.ConfigBuilder;
 import org.apache.calcite.test.DiffTestCase;
 import org.apache.calcite.util.Closer;
 import org.apache.calcite.util.Util;
+import org.apache.commons.io.filefilter.IOFileFilter;
+import org.apache.commons.io.filefilter.OrFileFilter;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.druid.concurrent.Threads;
@@ -110,14 +112,33 @@ public abstract class DruidQuidemTestBase
 
   public DruidQuidemTestBase(DruidQuidemRunner druidQuidemRunner)
   {
-    String filterStr = System.getProperty(PROPERTY_FILTER, null);
-    if (filterStr != null) {
-      if (!filterStr.endsWith("*") && !filterStr.endsWith(IQ_SUFFIX)) {
-        filterStr = filterStr + IQ_SUFFIX;
-      }
-      filter = new WildcardFileFilter(filterStr);
-    }
+    filter = buildFileFilter(System.getProperty(PROPERTY_FILTER, null));
     this.druidQuidemRunner = druidQuidemRunner;
+  }
+
+  private FileFilter buildFileFilter(String filterStr)
+  {
+    if (filterStr == null) {
+      return null;
+    }
+    String[] filters = filterStr.split(",");
+    List<IOFileFilter> fileFilters = new ArrayList<>();
+    for (String f : filters) {
+      fileFilters.add(makeFilter(f));
+    }
+    if (fileFilters.size() == 1) {
+      return fileFilters.get(0);
+    } else {
+      return new OrFileFilter(fileFilters);
+    }
+  }
+
+  private WildcardFileFilter makeFilter(String singleFilter)
+  {
+    if (!singleFilter.endsWith("*") && !singleFilter.endsWith(IQ_SUFFIX)) {
+      singleFilter = singleFilter + IQ_SUFFIX;
+    }
+    return new WildcardFileFilter(singleFilter);
   }
 
   protected static class QuidemTestCaseConfiguration

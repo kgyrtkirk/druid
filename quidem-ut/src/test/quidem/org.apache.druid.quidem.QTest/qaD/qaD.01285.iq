@@ -1,0 +1,16 @@
+!set dartQueryId 00000000-0000-0000-0000-000000000000
+!set useApproximateCountDistinct false
+!use druidtest://?componentSupplier=DartComponentSupplier&datasets=sql/src/test/quidem/qatests/qaArray/sql&numMergeBuffers=3
+!set outputformat mysql
+
+# TESTCASE: test_subquery_with_where TEST_ID: A2_B46_C5 TYPE: NEGATIVE TEST
+SELECT a_int
+FROM
+  (SELECT *
+   FROM test_array)
+WHERE a_int NOT IN
+    (SELECT a_int
+     FROM test_array);
+ARRAY
+!error
+
