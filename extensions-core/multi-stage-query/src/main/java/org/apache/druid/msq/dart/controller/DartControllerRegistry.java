@@ -39,8 +39,7 @@ public class DartControllerRegistry
    */
   public void register(ControllerHolder holder)
   {
-    ControllerHolder oldValue = controllerMap.putIfAbsent(holder.getController().queryId(), holder);
-    if (oldValue != null) {
+    if (controllerMap.putIfAbsent(holder.getController().queryId(), holder) != null) {
       throw DruidException.defensive("Controller[%s] already registered", holder.getController().queryId());
     }
   }
@@ -50,12 +49,8 @@ public class DartControllerRegistry
    */
   public void deregister(ControllerHolder holder)
   {
-    try {
     // Remove only if the current mapping for the queryId is this specific controller.
     controllerMap.remove(holder.getController().queryId(), holder);
-    }catch(Throwable t) {
-      System.out.println("1");
-    }
   }
 
   /**
