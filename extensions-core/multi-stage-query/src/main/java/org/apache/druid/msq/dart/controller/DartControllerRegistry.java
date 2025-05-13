@@ -23,6 +23,7 @@ import org.apache.druid.error.DruidException;
 import org.apache.druid.msq.exec.Controller;
 
 import javax.annotation.Nullable;
+
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -37,17 +38,36 @@ public class DartControllerRegistry
    * Add a controller. Throws {@link DruidException} if a controller with the same {@link Controller#queryId()} is
    * already registered.
    */
-  public void register(ControllerHolder holder)
+  public ControllerDeRegistrar register(ControllerHolder holder)
   {
     if (controllerMap.putIfAbsent(holder.getController().queryId(), holder) != null) {
       throw DruidException.defensive("Controller[%s] already registered", holder.getController().queryId());
     }
+    return new ControllerDeRegistrar(holder);
+  }
+
+  public class ControllerDeRegistrar implements AutoCloseable {
+
+    private ControllerHolder holder;
+
+    public ControllerDeRegistrar(ControllerHolder holder)
+    {
+      this.holder = holder;
+
+    }
+
+    @Override
+    public void close()
+    {
+      deregister(holder);
+    }
+
   }
 
   /**
    * Remove a controller from the registry.
    */
-  public void deregister(ControllerHolder holder)
+  protected void deregister(ControllerHolder holder)
   {
     // Remove only if the current mapping for the queryId is this specific controller.
     controllerMap.remove(holder.getController().queryId(), holder);
