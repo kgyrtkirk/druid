@@ -22,6 +22,8 @@ package org.apache.druid.msq.dart.controller.sql;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Iterators;
 import org.apache.calcite.sql.type.SqlTypeName;
+import org.apache.druid.concurrent.SoftCloseable;
+import org.apache.druid.concurrent.Threads;
 import org.apache.druid.io.LimitedOutputStream;
 import org.apache.druid.java.util.common.DateTimes;
 import org.apache.druid.java.util.common.Either;
@@ -198,6 +200,7 @@ public class DartQueryMaker implements QueryMaker
     // Run in controllerExecutor. Control doesn't really *need* to be moved to another thread, but we have to
     // use the controllerExecutor anyway, to ensure we respect the concurrentQueries configuration.
     reportFuture = controllerExecutor.submit(() -> {
+
       final String threadName = Thread.currentThread().getName();
 
       try {
@@ -313,11 +316,7 @@ public class DartQueryMaker implements QueryMaker
     {
       controllerExecutor.submit(() -> {
         final Controller controller = controllerHolder.getController();
-        final String threadName = Thread.currentThread().getName();
-
-        try {
-          Thread.currentThread().setName(nameThread(plannerContext));
-
+        try( SoftCloseable ccc = Threads.withThreadName(nameThread(plannerContext))) {
           if (!controllerHolder.run(resultIterator)) {
             // Controller was canceled before it ran. Push a cancellation error to the resultIterator, so the sequence
             // returned by "runWithoutReport" can resolve.
@@ -337,7 +336,6 @@ public class DartQueryMaker implements QueryMaker
         }
         finally {
           controllerRegistry.deregister(controllerHolder);
-          Thread.currentThread().setName(threadName);
         }
       });
     }

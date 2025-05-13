@@ -60,9 +60,9 @@ public final class Threads
    *
    * Preferred usage should be via try-with-resources clauses.
    *
-   * @return a {@link AutoCloseable} to rename the thread back to its original name.
+   * @return a {@link SoftCloseable} to rename the thread back to its original name.
    */
-  public static AutoCloseable withThreadName(String name)
+  public static SoftCloseable withThreadName(String name)
   {
     final Thread thread = Thread.currentThread();
     final String oldThreadName = thread.getName();
