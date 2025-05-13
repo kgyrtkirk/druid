@@ -35,7 +35,6 @@ import org.apache.druid.java.util.common.logger.Logger;
 import org.apache.druid.msq.dart.controller.ControllerHolder;
 import org.apache.druid.msq.dart.controller.DartControllerContextFactory;
 import org.apache.druid.msq.dart.controller.DartControllerRegistry;
-import org.apache.druid.msq.dart.controller.DartControllerRegistry.ControllerDeRegistrar;
 import org.apache.druid.msq.dart.guice.DartControllerConfig;
 import org.apache.druid.msq.exec.Controller;
 import org.apache.druid.msq.exec.ControllerContext;
@@ -169,7 +168,9 @@ public class DartQueryMaker implements QueryMaker
 
     // Register controller before submitting anything to controllerExeuctor, so it shows up in
     // "active controllers" lists.
-    try (ControllerDeRegistrar closeable = controllerRegistry.register(controllerHolder)) {
+    controllerRegistry.register(controllerHolder);
+
+    try {
       // runWithReport, runWithoutReport are responsible for calling controllerRegistry.deregister(controllerHolder)
       // when their work is done.
       final Sequence<Object[]> results =
@@ -177,6 +178,8 @@ public class DartQueryMaker implements QueryMaker
       return QueryResponse.withEmptyContext(results);
     }
     catch (Throwable e) {
+      // Error while calling runWithReport or runWithoutReport. Deregister controller immediately.
+      controllerRegistry.deregister(controllerHolder);
       throw e;
     }
   }
@@ -184,6 +187,9 @@ public class DartQueryMaker implements QueryMaker
   /**
    * Run a query and return the full report, buffered in memory up to
    * {@link DartControllerConfig#getMaxQueryReportSize()}.
+   *
+   * Arranges for {@link DartControllerRegistry#deregister(ControllerHolder)} to be called upon completion (either
+   * success or failure).
    */
   private Sequence<Object[]> runWithReport(final ControllerHolder controllerHolder)
   {
@@ -226,6 +232,7 @@ public class DartQueryMaker implements QueryMaker
         }
       }
       finally {
+        controllerRegistry.deregister(controllerHolder);
         Thread.currentThread().setName(threadName);
       }
     });
@@ -261,6 +268,9 @@ public class DartQueryMaker implements QueryMaker
 
   /**
    * Run a query and return the results only, streamed back using {@link ResultIteratorMaker}.
+   *
+   * Arranges for {@link DartControllerRegistry#deregister(ControllerHolder)} to be called upon completion (either
+   * success or failure).
    */
   private Sequence<Object[]> runWithoutReport(final ControllerHolder controllerHolder)
   {
@@ -326,6 +336,7 @@ public class DartQueryMaker implements QueryMaker
           );
         }
         finally {
+          controllerRegistry.deregister(controllerHolder);
           Thread.currentThread().setName(threadName);
         }
       });

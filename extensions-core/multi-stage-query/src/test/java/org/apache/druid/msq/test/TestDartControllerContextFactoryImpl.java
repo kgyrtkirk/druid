@@ -130,7 +130,6 @@ public class TestDartControllerContextFactoryImpl extends DartControllerContextF
           throw new RuntimeException(e);
         }
         finally {
-          worker.stop();
           inMemoryWorkers.remove(workerId);
         }
       });
