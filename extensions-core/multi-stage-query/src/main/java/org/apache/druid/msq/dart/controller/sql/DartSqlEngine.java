@@ -29,10 +29,12 @@ import org.apache.druid.error.DruidException;
 import org.apache.druid.guice.LazySingleton;
 import org.apache.druid.java.util.common.IAE;
 import org.apache.druid.java.util.common.concurrent.Execs;
+import org.apache.druid.msq.dart.Dart;
 import org.apache.druid.msq.dart.controller.DartControllerContextFactory;
 import org.apache.druid.msq.dart.controller.DartControllerRegistry;
 import org.apache.druid.msq.dart.guice.DartControllerConfig;
 import org.apache.druid.msq.sql.MSQTaskSqlEngine;
+import org.apache.druid.query.DefaultQueryConfig;
 import org.apache.druid.query.QueryContext;
 import org.apache.druid.query.QueryContexts;
 import org.apache.druid.sql.calcite.planner.Calcites;
@@ -44,6 +46,7 @@ import org.apache.druid.sql.calcite.run.SqlEngines;
 import org.apache.druid.sql.destination.IngestDestination;
 
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 
 @LazySingleton
@@ -56,18 +59,23 @@ public class DartSqlEngine implements SqlEngine
   private final DartControllerConfig controllerConfig;
   private final ExecutorService controllerExecutor;
 
+  private final DefaultQueryConfig dartQueryConfig;
+
+
   @Inject
   public DartSqlEngine(
       DartControllerContextFactory controllerContextFactory,
       DartControllerRegistry controllerRegistry,
-      DartControllerConfig controllerConfig
+      DartControllerConfig controllerConfig,
+      @Dart final DefaultQueryConfig dartQueryConfig
   )
   {
     this(
         controllerContextFactory,
         controllerRegistry,
         controllerConfig,
-        Execs.multiThreaded(controllerConfig.getConcurrentQueries(), "dart-controller-%s")
+        Execs.multiThreaded(controllerConfig.getConcurrentQueries(), "dart-controller-%s"),
+        dartQueryConfig
     );
   }
 
@@ -75,13 +83,15 @@ public class DartSqlEngine implements SqlEngine
       DartControllerContextFactory controllerContextFactory,
       DartControllerRegistry controllerRegistry,
       DartControllerConfig controllerConfig,
-      ExecutorService controllerExecutor
+      ExecutorService controllerExecutor,
+      DefaultQueryConfig dartQueryConfig
   )
   {
     this.controllerContextFactory = controllerContextFactory;
     this.controllerRegistry = controllerRegistry;
     this.controllerConfig = controllerConfig;
     this.controllerExecutor = controllerExecutor;
+    this.dartQueryConfig = dartQueryConfig;
   }
 
   @Override
@@ -178,5 +188,36 @@ public class DartSqlEngine implements SqlEngine
   {
     // Defensive, because we expect this method will not be called without the CAN_INSERT and CAN_REPLACE features.
     throw DruidException.defensive("Cannot execute DML commands with engine[%s]", name());
+  }
+
+  @Override
+  public void initPlannerContext(PlannerContext plannerContext)
+  {
+    Map<String, Object> context = plannerContext.queryContextMap();
+
+
+    /**
+     * Dart queryId must be globally unique, so we cannot use the user-provided {@link QueryContexts#CTX_SQL_QUERY_ID}
+     * or {@link BaseQuery#QUERY_ID}. Instead we generate a UUID in {@link DartSqlResource#doPost}, overriding whatever
+     * the user may have provided. This becomes the {@link Controller#queryId()}.
+     *
+     * The user-provided {@link QueryContexts#CTX_SQL_QUERY_ID} is still registered with the {@link SqlLifecycleManager}
+     * for purposes of query cancellation.
+     *
+     * The user-provided {@link BaseQuery#QUERY_ID} is ignored.
+     */
+    final String dartQueryId = UUID.randomUUID().toString();
+
+    // Default context keys from dartQueryConfig.
+    for (Map.Entry<String, Object> entry : dartQueryConfig.getContext().entrySet()) {
+      context.putIfAbsent(entry.getKey(), entry.getValue());
+    }
+
+
+
+    context
+        .put(QueryContexts.CTX_DART_QUERY_ID, dartQueryId);
+
+
   }
 }

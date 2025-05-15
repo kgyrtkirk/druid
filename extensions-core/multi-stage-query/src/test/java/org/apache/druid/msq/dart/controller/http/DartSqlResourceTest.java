@@ -200,7 +200,8 @@ public class DartSqlResourceTest extends MSQTestBase
         controllerExecutor = Execs.multiThreaded(
             MAX_CONTROLLERS,
             StringUtils.encodeForFormat(getClass().getSimpleName() + "-controller-exec")
-        )
+        ),
+        new DefaultQueryConfig(ImmutableMap.of("foo", "bar"))
     );
 
     final DruidSchemaCatalog rootSchema = QueryFrameworkUtils.createMockRootSchema(
@@ -250,8 +251,7 @@ public class DartSqlResourceTest extends MSQTestBase
         dartSqlClients,
         new ServerConfig() /* currently only used for error transform strategy */,
         ResponseContextConfig.newConfig(false),
-        SELF_NODE,
-        new DefaultQueryConfig(ImmutableMap.of("foo", "bar"))
+        SELF_NODE
     );
 
     // Setup mocks
