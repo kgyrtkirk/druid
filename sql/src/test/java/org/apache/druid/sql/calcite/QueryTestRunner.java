@@ -308,6 +308,7 @@ public class QueryTestRunner
               resultListRef.set(stmt.execute().getResults().toList());
             }
         );
+        stmt.close();
         return new QueryResults(
             query.context(),
             vectorize,
