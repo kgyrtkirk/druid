@@ -634,7 +634,6 @@ public class PlannerContext
 
   private void initializeContextFieldsAndPlannerConfig()
   {
-    engine.initPlannerContext(this);
     final Object tsParam = queryContext.get(CTX_SQL_CURRENT_TIMESTAMP);
     final DateTime utcNow;
     if (tsParam != null) {

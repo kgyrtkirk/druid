@@ -111,10 +111,8 @@ public interface SqlEngine
   ) throws ValidationException;
 
   /**
-   * Enables the engine to make changes to the {@link PlannerContext}.
-   *
-   * @param plannerContext
+   * Enables the engine to make changes to the Context.
    */
-  default void initPlannerContext(PlannerContext plannerContext) {
+  default void initContextMap(Map<String, Object> contextMap) {
   }
 }
