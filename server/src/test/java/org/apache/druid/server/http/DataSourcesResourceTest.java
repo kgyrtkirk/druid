@@ -29,7 +29,6 @@ import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Futures;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
-import org.apache.curator.shaded.com.google.common.base.Charsets;
 import org.apache.druid.audit.AuditManager;
 import org.apache.druid.client.CoordinatorServerView;
 import org.apache.druid.client.DataSourcesSnapshot;
@@ -87,6 +86,8 @@ import org.junit.Test;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.Response;
+
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -107,7 +108,7 @@ public class DataSourcesResourceTest
   private SegmentsMetadataManager segmentsMetadataManager;
   private OverlordClient overlordClient;
   private AuditManager auditManager;
-  
+
   private DataSourcesResource dataSourcesResource;
 
   @Before
@@ -166,7 +167,7 @@ public class DataSourcesResourceTest
     );
     segmentsMetadataManager = EasyMock.createMock(SegmentsMetadataManager.class);
     overlordClient = EasyMock.createStrictMock(OverlordClient.class);
-    
+
     dataSourcesResource = new DataSourcesResource(
       inventoryView,
       segmentsMetadataManager,
@@ -737,7 +738,7 @@ public class DataSourcesResourceTest
 
     final StringFullResponseHolder responseHolder = new StringFullResponseHolder(
         new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.NOT_FOUND),
-        Charsets.UTF_8
+        StandardCharsets.UTF_8
     );
     EasyMock.expect(overlordClient.markSegmentAsUsed(segment.getId()))
             .andThrow(new RuntimeException(new HttpResponseException(responseHolder))).once();
@@ -1012,11 +1013,11 @@ public class DataSourcesResourceTest
   {
     SegmentsToUpdateFilter segmentFilter =
         new SegmentsToUpdateFilter(Intervals.ETERNITY, null, ImmutableList.of("v1", "v2"));
-    
+
     EasyMock.expect(overlordClient.markNonOvershadowedSegmentsAsUsed(TestDataSource.WIKI, segmentFilter))
             .andReturn(Futures.immediateFuture(new SegmentUpdateResponse(2))).once();
     EasyMock.replay(overlordClient);
-    
+
     Response response = dataSourcesResource.markAsUsedNonOvershadowedSegments(
         TestDataSource.WIKI,
         segmentFilter

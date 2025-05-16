@@ -74,3 +74,4 @@ javax.annotation.concurrent.GuardedBy
 com.amazonaws.annotation.GuardedBy
 
 org.powermock.** @ Use Mockito instead of Powermock for compatibility with newer Java versions
+org.apache.curator.shaded.** @ usage of shaded classes should be avoided
