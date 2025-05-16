@@ -113,6 +113,7 @@ public interface SqlEngine
   /**
    * Enables the engine to make changes to the Context.
    */
-  default void initContextMap(Map<String, Object> contextMap) {
+  default void initContextMap(Map<String, Object> contextMap)
+  {
   }
 }
