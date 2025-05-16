@@ -47,6 +47,7 @@ import org.apache.druid.sql.calcite.run.SqlEngines;
 import org.apache.druid.sql.destination.IngestDestination;
 
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 
 @LazySingleton
@@ -197,5 +198,22 @@ public class DartSqlEngine implements SqlEngine
   {
     // Defensive, because we expect this method will not be called without the CAN_INSERT and CAN_REPLACE features.
     throw DruidException.defensive("Cannot execute DML commands with engine[%s]", name());
+  }
+
+  @Override
+  public void initContextMap(Map<String, Object> contextMap)
+  {
+    /**
+     * Dart queryId must be globally unique, so we cannot use the user-provided {@link QueryContexts#CTX_SQL_QUERY_ID}
+     * or {@link BaseQuery#QUERY_ID}. Instead we generate a UUID in {@link DartSqlResource#doPost}, overriding whatever
+     * the user may have provided. This becomes the {@link Controller#queryId()}.
+     *
+     * The user-provided {@link QueryContexts#CTX_SQL_QUERY_ID} is still registered with the {@link SqlLifecycleManager}
+     * for purposes of query cancellation.
+     *
+     * The user-provided {@link BaseQuery#QUERY_ID} is ignored.
+     */
+    final String dartQueryId = UUID.randomUUID().toString();
+    contextMap.put(QueryContexts.CTX_DART_QUERY_ID, dartQueryId);
   }
 }

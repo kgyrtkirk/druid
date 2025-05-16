@@ -71,7 +71,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -91,6 +90,7 @@ public class DartSqlResource extends SqlResource
   private final AuthorizerMapper authorizerMapper;
   private final DefaultQueryConfig dartQueryConfig;
 
+  // make dartqueryId a prefix the {{queeryid}}-{{startupTime}}-{{queryIndex}
   @Inject
   public DartSqlResource(
       final ObjectMapper jsonMapper,
@@ -219,19 +219,6 @@ public class DartSqlResource extends SqlResource
     for (Map.Entry<String, Object> entry : dartQueryConfig.getContext().entrySet()) {
       context.putIfAbsent(entry.getKey(), entry.getValue());
     }
-
-    /**
-     * Dart queryId must be globally unique, so we cannot use the user-provided {@link QueryContexts#CTX_SQL_QUERY_ID}
-     * or {@link BaseQuery#QUERY_ID}. Instead we generate a UUID in {@link DartSqlResource#doPost}, overriding whatever
-     * the user may have provided. This becomes the {@link Controller#queryId()}.
-     *
-     * The user-provided {@link QueryContexts#CTX_SQL_QUERY_ID} is still registered with the {@link SqlLifecycleManager}
-     * for purposes of query cancellation.
-     *
-     * The user-provided {@link BaseQuery#QUERY_ID} is ignored.
-     */
-    final String dartQueryId = UUID.randomUUID().toString();
-    context.put(QueryContexts.CTX_DART_QUERY_ID, dartQueryId);
 
     return super.doPost(sqlQuery.withOverridenContext(context), req);
   }
