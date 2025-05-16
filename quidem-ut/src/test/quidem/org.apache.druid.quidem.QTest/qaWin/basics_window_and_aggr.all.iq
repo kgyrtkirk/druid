@@ -26,7 +26,7 @@ SELECT server_ip,
        cast(time_floor(__time, 'PT12H') AS char) t,
        length(timezone) AS mycol,
        row_number() OVER (PARTITION BY client_ip
-                          ORDER BY server_ip, timezone) AS c
+                          ORDER BY server_ip, timezone, time_floor(__time, 'PT12H')) AS c
 FROM
   (SELECT server_ip,
           client_ip,
@@ -79,7 +79,8 @@ FROM
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22') WINDOW w AS (PARTITION BY client_ip
                                                ORDER BY server_ip,
-                                                        timezone);
+                                                        timezone,
+                                                        time_floor(__time, 'PT12H'));
 +--------------+---------------+----------+---------------------+-------+---+
 | server_ip    | client_ip     | timezone | t                   | mycol | c |
 +--------------+---------------+----------+---------------------+-------+---+
@@ -105,7 +106,7 @@ SELECT server_ip,
        cast(time_floor(__time, 'PT12H') AS char) t,
        length(timezone) AS mycol,
        row_number() OVER (PARTITION BY client_ip
-                          ORDER BY server_ip, timezone) AS c
+                          ORDER BY server_ip, timezone, time_floor(__time, 'PT12H')) AS c
 FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
@@ -146,7 +147,8 @@ GROUP BY server_ip,
          timezone,
          time_floor(__time, 'PT12H') WINDOW w AS (PARTITION BY client_ip
                                                   ORDER BY server_ip,
-                                                           timezone);
+                                                           timezone,
+                                                           time_floor(__time, 'PT12H'));
 +--------------+---------------+----------+---------------------+-------+---+
 | server_ip    | client_ip     | timezone | t                   | mycol | c |
 +--------------+---------------+----------+---------------------+-------+---+
@@ -172,7 +174,7 @@ SELECT server_ip,
        cast(time_floor(__time, 'PT12H') AS char) t,
        length(timezone) AS mycol,
        row_number() OVER (PARTITION BY length(timezone)
-                          ORDER BY server_ip, timezone, length(timezone)) AS c
+                          ORDER BY client_ip, server_ip, timezone, time_floor(__time, 'PT12H'), length(timezone)) AS c
 FROM
   (SELECT server_ip,
           client_ip,
@@ -192,10 +194,10 @@ WHERE client_ip IN ('107.13.54.103',
 | 172.31.11.5  | 107.13.54.103 | EDT      | 2019-08-25 00:00:00 |     3 | 1 |
 | 172.31.11.5  | 107.13.54.103 | EDT      | 2019-08-25 12:00:00 |     3 | 2 |
 | 172.31.11.5  | 107.13.54.103 | N/A      | 2019-08-25 12:00:00 |     3 | 3 |
-| 172.31.11.5  | 99.9.55.22    | N/A      | 2019-08-25 12:00:00 |     3 | 4 |
-| 172.31.57.89 | 107.13.54.103 | EDT      | 2019-08-25 00:00:00 |     3 | 5 |
-| 172.31.57.89 | 107.13.54.103 | EDT      | 2019-08-25 12:00:00 |     3 | 6 |
-| 172.31.57.89 | 107.13.54.103 | N/A      | 2019-08-25 12:00:00 |     3 | 7 |
+| 172.31.11.5  | 99.9.55.22    | N/A      | 2019-08-25 12:00:00 |     3 | 7 |
+| 172.31.57.89 | 107.13.54.103 | EDT      | 2019-08-25 00:00:00 |     3 | 4 |
+| 172.31.57.89 | 107.13.54.103 | EDT      | 2019-08-25 12:00:00 |     3 | 5 |
+| 172.31.57.89 | 107.13.54.103 | N/A      | 2019-08-25 12:00:00 |     3 | 6 |
 | 172.31.57.89 | 99.9.55.22    | N/A      | 2019-08-25 12:00:00 |     3 | 8 |
 +--------------+---------------+----------+---------------------+-------+---+
 (8 rows)
@@ -224,8 +226,10 @@ FROM
             time_floor(__time, 'PT12H'))
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22') WINDOW w AS (PARTITION BY length(timezone)
-                                               ORDER BY server_ip,
+                                               ORDER BY client_ip,
+                                                        server_ip,
                                                         timezone,
+                                                        time_floor(__time, 'PT12H'),
                                                         length(timezone));
 +--------------+---------------+----------+---------------------+-------+---+
 | server_ip    | client_ip     | timezone | t                   | mycol | c |
@@ -233,10 +237,10 @@ WHERE client_ip IN ('107.13.54.103',
 | 172.31.11.5  | 107.13.54.103 | EDT      | 2019-08-25 00:00:00 |     3 | 1 |
 | 172.31.11.5  | 107.13.54.103 | EDT      | 2019-08-25 12:00:00 |     3 | 2 |
 | 172.31.11.5  | 107.13.54.103 | N/A      | 2019-08-25 12:00:00 |     3 | 3 |
-| 172.31.11.5  | 99.9.55.22    | N/A      | 2019-08-25 12:00:00 |     3 | 4 |
-| 172.31.57.89 | 107.13.54.103 | EDT      | 2019-08-25 00:00:00 |     3 | 5 |
-| 172.31.57.89 | 107.13.54.103 | EDT      | 2019-08-25 12:00:00 |     3 | 6 |
-| 172.31.57.89 | 107.13.54.103 | N/A      | 2019-08-25 12:00:00 |     3 | 7 |
+| 172.31.11.5  | 99.9.55.22    | N/A      | 2019-08-25 12:00:00 |     3 | 7 |
+| 172.31.57.89 | 107.13.54.103 | EDT      | 2019-08-25 00:00:00 |     3 | 4 |
+| 172.31.57.89 | 107.13.54.103 | EDT      | 2019-08-25 12:00:00 |     3 | 5 |
+| 172.31.57.89 | 107.13.54.103 | N/A      | 2019-08-25 12:00:00 |     3 | 6 |
 | 172.31.57.89 | 99.9.55.22    | N/A      | 2019-08-25 12:00:00 |     3 | 8 |
 +--------------+---------------+----------+---------------------+-------+---+
 (8 rows)
@@ -252,7 +256,7 @@ SELECT server_ip,
        cast(time_floor(__time, 'PT12H') AS char) t,
        length(timezone) AS mycol,
        row_number() OVER (PARTITION BY length(timezone)
-                          ORDER BY server_ip, timezone, length(timezone)) AS c
+                          ORDER BY client_ip, server_ip, timezone, time_floor(__time, 'PT12H'), length(timezone)) AS c
 FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
@@ -266,10 +270,10 @@ GROUP BY server_ip,
 | 172.31.11.5  | 107.13.54.103 | EDT      | 2019-08-25 00:00:00 |     3 | 1 |
 | 172.31.11.5  | 107.13.54.103 | EDT      | 2019-08-25 12:00:00 |     3 | 2 |
 | 172.31.11.5  | 107.13.54.103 | N/A      | 2019-08-25 12:00:00 |     3 | 3 |
-| 172.31.11.5  | 99.9.55.22    | N/A      | 2019-08-25 12:00:00 |     3 | 4 |
-| 172.31.57.89 | 107.13.54.103 | EDT      | 2019-08-25 00:00:00 |     3 | 5 |
-| 172.31.57.89 | 107.13.54.103 | EDT      | 2019-08-25 12:00:00 |     3 | 6 |
-| 172.31.57.89 | 107.13.54.103 | N/A      | 2019-08-25 12:00:00 |     3 | 7 |
+| 172.31.11.5  | 99.9.55.22    | N/A      | 2019-08-25 12:00:00 |     3 | 7 |
+| 172.31.57.89 | 107.13.54.103 | EDT      | 2019-08-25 00:00:00 |     3 | 4 |
+| 172.31.57.89 | 107.13.54.103 | EDT      | 2019-08-25 12:00:00 |     3 | 5 |
+| 172.31.57.89 | 107.13.54.103 | N/A      | 2019-08-25 12:00:00 |     3 | 6 |
 | 172.31.57.89 | 99.9.55.22    | N/A      | 2019-08-25 12:00:00 |     3 | 8 |
 +--------------+---------------+----------+---------------------+-------+---+
 (8 rows)
@@ -292,8 +296,10 @@ GROUP BY server_ip,
          client_ip,
          timezone,
          time_floor(__time, 'PT12H') WINDOW w AS (PARTITION BY length(timezone)
-                                                  ORDER BY server_ip,
+                                                  ORDER BY client_ip,
+                                                           server_ip,
                                                            timezone,
+                                                           time_floor(__time, 'PT12H'),
                                                            length(timezone));
 +--------------+---------------+----------+---------------------+-------+---+
 | server_ip    | client_ip     | timezone | t                   | mycol | c |
@@ -301,10 +307,10 @@ GROUP BY server_ip,
 | 172.31.11.5  | 107.13.54.103 | EDT      | 2019-08-25 00:00:00 |     3 | 1 |
 | 172.31.11.5  | 107.13.54.103 | EDT      | 2019-08-25 12:00:00 |     3 | 2 |
 | 172.31.11.5  | 107.13.54.103 | N/A      | 2019-08-25 12:00:00 |     3 | 3 |
-| 172.31.11.5  | 99.9.55.22    | N/A      | 2019-08-25 12:00:00 |     3 | 4 |
-| 172.31.57.89 | 107.13.54.103 | EDT      | 2019-08-25 00:00:00 |     3 | 5 |
-| 172.31.57.89 | 107.13.54.103 | EDT      | 2019-08-25 12:00:00 |     3 | 6 |
-| 172.31.57.89 | 107.13.54.103 | N/A      | 2019-08-25 12:00:00 |     3 | 7 |
+| 172.31.11.5  | 99.9.55.22    | N/A      | 2019-08-25 12:00:00 |     3 | 7 |
+| 172.31.57.89 | 107.13.54.103 | EDT      | 2019-08-25 00:00:00 |     3 | 4 |
+| 172.31.57.89 | 107.13.54.103 | EDT      | 2019-08-25 12:00:00 |     3 | 5 |
+| 172.31.57.89 | 107.13.54.103 | N/A      | 2019-08-25 12:00:00 |     3 | 6 |
 | 172.31.57.89 | 99.9.55.22    | N/A      | 2019-08-25 12:00:00 |     3 | 8 |
 +--------------+---------------+----------+---------------------+-------+---+
 (8 rows)
@@ -320,7 +326,7 @@ SELECT server_ip,
        cast(time_floor(__time, 'PT12H') AS char) t,
        length(timezone) AS mycol,
        row_number() OVER (PARTITION BY mycol
-                          ORDER BY server_ip, timezone) AS c
+                          ORDER BY client_ip, server_ip, timezone, time_floor(__time, 'PT12H')) AS c
 FROM
   (SELECT server_ip,
           client_ip,
@@ -359,8 +365,10 @@ FROM
             time_floor(__time, 'PT12H'))
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22') WINDOW w AS (PARTITION BY mycol
-                                               ORDER BY server_ip,
-                                                        timezone);
+                                               ORDER BY client_ip,
+                                                        server_ip,
+                                                        timezone,
+                                                        time_floor(__time, 'PT12H'));
 Column 'mycol' not found in any table
 !error
 
@@ -373,7 +381,7 @@ SELECT server_ip,
        cast(time_floor(__time, 'PT12H') AS char) t,
        length(timezone) AS mycol,
        row_number() OVER (PARTITION BY mycol
-                          ORDER BY server_ip, timezone) AS c
+                          ORDER BY client_ip, server_ip, timezone, time_floor(__time, 'PT12H')) AS c
 FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
@@ -400,8 +408,10 @@ GROUP BY server_ip,
          client_ip,
          timezone,
          time_floor(__time, 'PT12H') WINDOW w AS (PARTITION BY mycol
-                                                  ORDER BY server_ip,
-                                                           timezone);
+                                                  ORDER BY client_ip,
+                                                           server_ip,
+                                                           timezone,
+                                                           time_floor(__time, 'PT12H'));
 Column 'mycol' not found in any table
 !error
 
@@ -414,7 +424,7 @@ SELECT server_ip,
        cast(time_floor(__time, 'PT12H') AS char) t,
        length(timezone) AS mycol,
        row_number() OVER (PARTITION BY timezone
-                          ORDER BY server_ip, timezone, mycol) AS c
+                          ORDER BY client_ip, server_ip, timezone, time_floor(__time, 'PT12H'), mycol) AS c
 FROM
   (SELECT server_ip,
           client_ip,
@@ -453,8 +463,10 @@ FROM
             time_floor(__time, 'PT12H'))
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22') WINDOW w AS (PARTITION BY timezone
-                                               ORDER BY server_ip,
+                                               ORDER BY client_ip,
+                                                        server_ip,
                                                         timezone,
+                                                        time_floor(__time, 'PT12H'),
                                                         mycol);
 Column 'mycol' not found in any table
 !error
@@ -468,7 +480,7 @@ SELECT server_ip,
        cast(time_floor(__time, 'PT12H') AS char) t,
        length(timezone) AS mycol,
        row_number() OVER (PARTITION BY timezone
-                          ORDER BY server_ip, timezone, mycol) AS c
+                          ORDER BY client_ip, server_ip, timezone, time_floor(__time, 'PT12H'), mycol) AS c
 FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
@@ -495,8 +507,10 @@ GROUP BY server_ip,
          client_ip,
          timezone,
          time_floor(__time, 'PT12H') WINDOW w AS (PARTITION BY timezone
-                                                  ORDER BY server_ip,
+                                                  ORDER BY client_ip,
+                                                           server_ip,
                                                            timezone,
+                                                           time_floor(__time, 'PT12H'),
                                                            mycol);
 Column 'mycol' not found in any table
 !error
@@ -510,7 +524,7 @@ SELECT server_ip,
        cast(time_floor(__time, 'PT12H') AS char) t,
        count(*) AS mycol,
        row_number() OVER (PARTITION BY client_ip
-                          ORDER BY server_ip, timezone) AS c
+                          ORDER BY server_ip, timezone, time_floor(__time, 'PT12H')) AS c
 FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
@@ -551,7 +565,8 @@ GROUP BY server_ip,
          timezone,
          time_floor(__time, 'PT12H') WINDOW w AS (PARTITION BY client_ip
                                                   ORDER BY server_ip,
-                                                           timezone);
+                                                           timezone,
+                                                           time_floor(__time, 'PT12H'));
 +--------------+---------------+----------+---------------------+-------+---+
 | server_ip    | client_ip     | timezone | t                   | mycol | c |
 +--------------+---------------+----------+---------------------+-------+---+
@@ -577,7 +592,7 @@ SELECT server_ip,
        cast(time_floor(__time, 'PT12H') AS char) t,
        count(*) AS mycol,
        row_number() OVER (PARTITION BY count(*)
-                          ORDER BY server_ip, timezone, count(*)) AS c
+                          ORDER BY client_ip, server_ip, timezone, time_floor(__time, 'PT12H'), count(*)) AS c
 FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
@@ -617,8 +632,10 @@ GROUP BY server_ip,
          client_ip,
          timezone,
          time_floor(__time, 'PT12H') WINDOW w AS (PARTITION BY count(*)
-                                                  ORDER BY server_ip,
+                                                  ORDER BY client_ip,
+                                                           server_ip,
                                                            timezone,
+                                                           time_floor(__time, 'PT12H'),
                                                            count(*));
 Aggregation inside window is currently not supported with syntax WINDOW W AS <DEF>. Try providing window definition directly without alias
 !error
@@ -632,7 +649,7 @@ SELECT server_ip,
        cast(time_floor(__time, 'PT12H') AS char) t,
        count(*) AS mycol,
        row_number() OVER (PARTITION BY mycol
-                          ORDER BY server_ip, timezone) AS c
+                          ORDER BY client_ip, server_ip, timezone, time_floor(__time, 'PT12H')) AS c
 FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
@@ -659,8 +676,10 @@ GROUP BY server_ip,
          client_ip,
          timezone,
          time_floor(__time, 'PT12H') WINDOW w AS (PARTITION BY mycol
-                                                  ORDER BY server_ip,
-                                                           timezone);
+                                                  ORDER BY client_ip,
+                                                           server_ip,
+                                                           timezone,
+                                                           time_floor(__time, 'PT12H'));
 Column 'mycol' not found in any table
 !error
 
@@ -673,7 +692,7 @@ SELECT server_ip,
        cast(time_floor(__time, 'PT12H') AS char) t,
        count(*) AS mycol,
        row_number() OVER (PARTITION BY client_ip
-                          ORDER BY server_ip, timezone, mycol) AS c
+                          ORDER BY server_ip, timezone, time_floor(__time, 'PT12H'), mycol) AS c
 FROM test_win
 WHERE client_ip IN ('107.13.54.103',
                     '99.9.55.22')
@@ -702,6 +721,7 @@ GROUP BY server_ip,
          time_floor(__time, 'PT12H') WINDOW w AS (PARTITION BY client_ip
                                                   ORDER BY server_ip,
                                                            timezone,
+                                                           time_floor(__time, 'PT12H'),
                                                            mycol);
 Column 'mycol' not found in any table
 !error
