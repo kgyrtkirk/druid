@@ -47,7 +47,7 @@ git checkout -b curr-changes
 mvn -q generate-sources -pl sql -Dcalcite.version=$CALCITE_OLD -Pskip-static-checks
 cp -r sql/target/calcite-base-parser/codegen/./  sql/src/main/codegen/./
 git commit -m "reset parser to stock $CALCITE_OLD" -a
-git revert -m 'redo local druid changes to parser' HEAD
+git revert --no-edit HEAD
 # HEAD is now at the same as before; but parent are the base calcite changes
 
 git branch calcite-old curr-changes^
