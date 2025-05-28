@@ -17,39 +17,31 @@
  * under the License.
  */
 
-package org.apache.druid.server.coordinator.stats;
+package org.apache.druid.metadata.segment.cache;
+
+import org.apache.druid.segment.SchemaPayload;
 
 /**
- * Dimensions used while collecting or reporting coordinator run stats.
+ * Represents a single record in the druid_segmentSchemas table.
  */
-public enum Dimension
+public class SegmentSchemaRecord
 {
-  TIER("tier"),
-  TASK_TYPE("taskType"),
-  DATASOURCE("dataSource"),
-  DUTY("duty"),
-  DUTY_GROUP("dutyGroup"),
-  DESCRIPTION("description"),
-  SERVER("server");
+  private final String fingerprint;
+  private final SchemaPayload payload;
 
-  private final String reportedName;
-
-  Dimension(String name)
+  public SegmentSchemaRecord(String fingerprint, SchemaPayload payload)
   {
-    this.reportedName = name;
+    this.fingerprint = fingerprint;
+    this.payload = payload;
   }
 
-  /**
-   * The name of this dimension used while emitting metrics.
-   */
-  public String reportedName()
+  public String getFingerprint()
   {
-    return reportedName;
+    return fingerprint;
   }
 
-  @Override
-  public String toString()
+  public SchemaPayload getPayload()
   {
-    return reportedName;
+    return payload;
   }
 }
