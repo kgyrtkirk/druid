@@ -25,6 +25,8 @@ import org.apache.calcite.rel.type.RelDataTypeSystem;
 import org.apache.calcite.sql.type.SqlTypeFactoryImpl;
 import org.apache.calcite.sql.type.SqlTypeName;
 
+import java.math.RoundingMode;
+
 public class DruidTypeSystem implements RelDataTypeSystem
 {
   public static final DruidTypeSystem INSTANCE = new DruidTypeSystem();
@@ -41,9 +43,21 @@ public class DruidTypeSystem implements RelDataTypeSystem
   }
 
   @Override
+  public int getMinScale(SqlTypeName typeName)
+  {
+    return RelDataTypeSystem.DEFAULT.getMinScale(typeName);
+  }
+
+  @Override
   public int getMaxScale(final SqlTypeName typeName)
   {
     return RelDataTypeSystem.DEFAULT.getMaxScale(typeName);
+  }
+
+  @Override
+  public int getDefaultScale(SqlTypeName typeName)
+  {
+    return RelDataTypeSystem.DEFAULT.getDefaultScale(typeName);
   }
 
   @Override
@@ -56,6 +70,12 @@ public class DruidTypeSystem implements RelDataTypeSystem
       default:
         return RelDataTypeSystem.DEFAULT.getDefaultPrecision(typeName);
     }
+  }
+
+  @Override
+  public int getMinPrecision(SqlTypeName typeName)
+  {
+    return RelDataTypeSystem.DEFAULT.getMinPrecision(typeName);
   }
 
   @Override
@@ -157,5 +177,11 @@ public class DruidTypeSystem implements RelDataTypeSystem
   public boolean shouldConvertRaggedUnionTypesToVarying()
   {
     return true;
+  }
+
+  @Override
+  public RoundingMode roundingMode()
+  {
+    return RelDataTypeSystem.DEFAULT.roundingMode();
   }
 }
