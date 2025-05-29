@@ -66,7 +66,6 @@ import org.apache.druid.sql.calcite.rule.ExtensionCalciteRuleProvider;
 import org.apache.druid.sql.calcite.rule.FilterDecomposeCoalesceRule;
 import org.apache.druid.sql.calcite.rule.FilterDecomposeConcatRule;
 import org.apache.druid.sql.calcite.rule.FilterJoinExcludePushToChildRule;
-import org.apache.druid.sql.calcite.rule.FixIncorrectInExpansionTypes;
 import org.apache.druid.sql.calcite.rule.FlattenConcatRule;
 import org.apache.druid.sql.calcite.rule.ProjectAggregatePruneUnusedCallRule;
 import org.apache.druid.sql.calcite.rule.ReverseLookupRule;
@@ -315,7 +314,6 @@ public class CalciteRulesManager
     // Program that pre-processes the tree before letting the full-on VolcanoPlanner loose.
     final List<Program> prePrograms = new ArrayList<>();
     prePrograms.add(new LoggingProgram("Start", isDebug));
-    prePrograms.add(sqlToRelWorkaroundProgram());
     prePrograms.add(Programs.subQuery(DefaultRelMetadataProvider.INSTANCE));
     prePrograms.add(new LoggingProgram("Finished subquery program", isDebug));
     prePrograms.add(DecorrelateAndTrimFieldsProgram.INSTANCE);
@@ -329,12 +327,6 @@ public class CalciteRulesManager
     }
 
     return Programs.sequence(prePrograms.toArray(new Program[0]));
-  }
-
-  private Program sqlToRelWorkaroundProgram()
-  {
-    Set<RelOptRule> rules = Collections.singleton(new FixIncorrectInExpansionTypes());
-    return Programs.hep(rules, true, DefaultRelMetadataProvider.INSTANCE);
   }
 
   /**
