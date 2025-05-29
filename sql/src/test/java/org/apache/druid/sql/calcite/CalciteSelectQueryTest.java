@@ -2175,7 +2175,7 @@ public class CalciteSelectQueryTest extends BaseCalciteQueryTest
                                             dimensions(
                                                 new DefaultDimensionSpec("m1", "d0", ColumnType.FLOAT)))
                                         .setDimFilter(
-                                            range("m1", ColumnType.DOUBLE, null, -1.0, false, true))
+                                            range("m1", ColumnType.FLOAT, null, -1.0, false, true))
                                         .build())
                         .setInterval(querySegmentSpec(Filtration.eternity()))
                         .setGranularity(Granularities.ALL)
@@ -2214,7 +2214,7 @@ public class CalciteSelectQueryTest extends BaseCalciteQueryTest
                                             dimensions(
                                                 new DefaultDimensionSpec("m1", "d0", ColumnType.FLOAT)))
                                         .setDimFilter(
-                                            range("m1", ColumnType.DOUBLE, null, 111.0, false, true))
+                                            range("m1", ColumnType.FLOAT, null, 111.0, false, true))
                                         .build())
                         .setInterval(querySegmentSpec(Filtration.eternity()))
                         .setGranularity(Granularities.ALL)
