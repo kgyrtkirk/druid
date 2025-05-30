@@ -85,7 +85,6 @@ import org.apache.druid.server.QueryLifecycle;
 import org.apache.druid.server.security.AuthorizationResult;
 import org.apache.druid.sql.calcite.DecoupledTestConfig.IgnoreQueriesReason;
 import org.apache.druid.sql.calcite.DecoupledTestConfig.QuidemTestCaseReason;
-import org.apache.druid.sql.calcite.NotYetSupported.Modes;
 import org.apache.druid.sql.calcite.SqlTestFrameworkConfig.MinTopNThreshold;
 import org.apache.druid.sql.calcite.expression.DruidExpression;
 import org.apache.druid.sql.calcite.filtration.Filtration;
@@ -5605,7 +5604,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @NotYetSupported(Modes.SORT_REMOVE_TROUBLE)
+  @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.EQUIV_PLAN_CAST_MATERIALIZED_EARLIER)
   @MethodSource("provideQueryContexts")
   @ParameterizedTest(name = "{0}")
   public void testRegressionFilteredAggregatorsSubqueryJoins(Map<String, Object> queryContext)
