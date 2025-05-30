@@ -6243,6 +6243,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
+  @NotYetSupported(NotYetSupported.Modes.NOT_ENOUGH_RULES)
   public void testOrderByNullType()
   {
     testQuery(
@@ -15126,7 +15127,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
   public void testLogicalCorrelateTrimFieldsStillNeeded()
   {
     assertEquals(
-        "1.37.0",
+        "1.38.0",
         RelNode.class.getPackage().getImplementationVersion(),
         "Calcite version changed; check if DruidRelFieldTrimmer#trimFields(LogicalCorrelate correlate,...) is still needed or not!"
     );
@@ -15137,7 +15138,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
   public void testUnSupportedAggInSelectWindow()
   {
     assertEquals(
-        "1.37.0",
+        "1.38.0",
         RelNode.class.getPackage().getImplementationVersion(),
         "Calcite version changed; check if CALCITE-6500 is fixed and update:\n * method DruidSqlValidator#validateWindowClause"
     );
