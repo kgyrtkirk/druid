@@ -3542,8 +3542,8 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
                                   .resultFormat(ScanQuery.ResultFormat.RESULT_FORMAT_COMPACTED_LIST)
                                   .filters(range(
                                       "m1",
-                                      ColumnType.LONG,
-                                      2L,
+                                      ColumnType.FLOAT,
+                                      2.0,
                                       null,
                                       true,
                                       false
@@ -4732,10 +4732,10 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
                         JoinType.INNER
                     )
                 )
-                .virtualColumns(expressionVirtualColumn("v0", "(\"m1\" + \"j0.m1\")", ColumnType.DOUBLE))
+                .virtualColumns(expressionVirtualColumn("v0", "(\"m1\" + \"j0.m1\")", ColumnType.FLOAT))
                 .intervals(querySegmentSpec(Filtration.eternity()))
                 .filters(
-                    equality("v0", 6.0, ColumnType.DOUBLE)
+                    equality("v0", 6.0, ColumnType.FLOAT)
                 )
                 .columns("m1", "j0.m1")
                 .columnTypes(ColumnType.FLOAT, ColumnType.FLOAT)
