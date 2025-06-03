@@ -38,6 +38,7 @@ import org.apache.calcite.rel.metadata.DefaultRelMetadataProvider;
 import org.apache.calcite.rel.rules.AggregateProjectMergeRule;
 import org.apache.calcite.rel.rules.CoreRules;
 import org.apache.calcite.rel.rules.DateRangeRules;
+import org.apache.calcite.rel.rules.DruidProjectToLogicalProjectAndWindowRule;
 import org.apache.calcite.rel.rules.FilterCorrelateRule;
 import org.apache.calcite.rel.rules.FilterJoinRule.FilterIntoJoinRule.FilterIntoJoinRuleConfig;
 import org.apache.calcite.rel.rules.FilterProjectTransposeRule;
@@ -182,7 +183,8 @@ public class CalciteRulesManager
           PruneEmptyRules.JOIN_RIGHT_INSTANCE,
           PruneEmptyRules.SORT_FETCH_ZERO_INSTANCE,
           PruneEmptyRules.EMPTY_TABLE_INSTANCE,
-          CoreRules.PROJECT_TO_LOGICAL_PROJECT_AND_WINDOW,
+          DruidProjectToLogicalProjectAndWindowRule.DruidProjectToLogicalProjectAndWindowRuleConfig.DEFAULT.toRule(),
+//          CoreRules.PROJECT_TO_LOGICAL_PROJECT_AND_WINDOW,
           CoreRules.FILTER_MERGE,
           CoreRules.INTERSECT_TO_DISTINCT
       );
