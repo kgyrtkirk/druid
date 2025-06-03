@@ -402,7 +402,7 @@
               </includes>
               <lookAhead>2</lookAhead>
               <isStatic>false</isStatic>
-              <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
+              <outputDirectory>${project.build.directory}/generated-sources/javacc-output</outputDirectory>
             </configuration>
           </execution>
         </executions>
@@ -421,7 +421,8 @@
             </goals>
             <configuration>
               <sources>
-                <source>src/generated-sources</source>
+                <source>src/generated-sources/javacc-output</source>
+                <source>src/generated-sources/annotations</source>
               </sources>
             </configuration>
           </execution>

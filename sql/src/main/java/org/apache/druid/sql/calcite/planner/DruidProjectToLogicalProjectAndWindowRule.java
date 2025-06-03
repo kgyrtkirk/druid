@@ -19,33 +19,30 @@
 
 package org.apache.druid.sql.calcite.planner;
 
+import org.apache.calcite.rel.core.Project;
 import org.apache.calcite.rel.rules.ProjectToWindowRule;
 import org.immutables.value.Value;
 
-public class MyTTemp extends ProjectToWindowRule.ProjectToLogicalProjectAndWindowRule
+public class DruidProjectToLogicalProjectAndWindowRule extends ProjectToWindowRule.ProjectToLogicalProjectAndWindowRule
 {
-  protected MyTTemp(MyTMyConf config)
+  protected DruidProjectToLogicalProjectAndWindowRule(DruidProjectToLogicalProjectAndWindowRuleConfig config)
   {
-    super((ProjectToLogicalProjectAndWindowRuleConfig) config);
+    super(config);
   }
 
-/*  @Value.Immutable
-  public interface MyTMyConf extends ProjectToLogicalProjectAndWindowRuleConfig {
-  }*/
-
   @Value.Immutable
-  public interface MyTMyConf
-      extends ProjectToWindowRule.Config {
-//    ProjectToLogicalProjectAndWindowRuleConfig DEFAULT =
-//        ImmutableProjectToLogicalProjectAndWindowRuleConfig.of()
-//            .withOperandSupplier(b ->
-//                b.operand(Project.class)
-//                    .predicate(Project::containsOver)
-//                    .anyInputs())
-//            .withDescription("ProjectToWindowRule:project");
+  public interface DruidProjectToLogicalProjectAndWindowRuleConfig extends ProjectToLogicalProjectAndWindowRuleConfig {
+    DruidProjectToLogicalProjectAndWindowRuleConfig DEFAULT =
+        ImmutableDruidProjectToLogicalProjectAndWindowRuleConfig.of()
+            .withOperandSupplier(b ->
+                b.operand(Project.class)
+                    .predicate(Project::containsOver)
+                    .anyInputs())
+            .withDescription("ProjectToWindowRule:project");
 
-    @Override default ProjectToLogicalProjectAndWindowRule toRule() {
-      return null;
+    @Override default DruidProjectToLogicalProjectAndWindowRule toRule() {
+      return new DruidProjectToLogicalProjectAndWindowRule(this);
     }
+
   }
 }
