@@ -19,14 +19,29 @@
 
 package org.apache.calcite.rel.rules;
 
+import com.google.common.collect.Multimaps;
 import org.apache.calcite.plan.RelOptRuleCall;
 import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.core.Project;
 import org.apache.calcite.rel.logical.LogicalCalc;
+import org.apache.calcite.rel.logical.LogicalWindow;
+import org.apache.calcite.rel.type.RelDataType;
+import org.apache.calcite.rel.type.RelDataTypeField;
 import org.apache.calcite.rex.RexProgram;
 import org.apache.calcite.util.Util;
+import org.apache.curator.shaded.com.google.common.collect.Maps;
+import org.apache.druid.error.DruidException;
+import org.apache.druid.error.DruidException.Category;
+import org.apache.druid.error.DruidException.Persona;
 import org.immutables.value.Value;
 
+import java.util.Collection;
+import java.util.Map;
+
+/**
+ * Almost fully copied from Calcite - only to add a restriction because multiple {@link LogicalWindow} nodes may label outputs
+ * similarily which could lead to incorrect results in Druid.
+ */
 public class DruidProjectToLogicalProjectAndWindowRule extends ProjectToWindowRule.ProjectToLogicalProjectAndWindowRule
 {
   protected DruidProjectToLogicalProjectAndWindowRule(DruidProjectToLogicalProjectAndWindowRuleConfig config)
@@ -85,7 +100,26 @@ public class DruidProjectToLogicalProjectAndWindowRule extends ProjectToWindowRu
           }
         };
     RelNode newRel = transform.execute();
-    RelNode s = newRel.stripped();
+    validateResultRel(newRel);
     call.transformTo(newRel);
+  }
+
+  private void validateResultRel(RelNode newRel)
+  {
+    RelNode node = newRel.stripped();
+    if(node instanceof Project) {
+      Project project = (Project) newRel.stripped();
+      validateResultRel(project.getInput());
+    }
+    RelDataType rowType = node.getRowType();
+
+    Map<String, Collection<RelDataTypeField>> nameToFieldMap = Multimaps.index(rowType.getFieldList(), RelDataTypeField::getName).asMap();
+    Map<String, Collection<RelDataTypeField>> nonUniqueFields = Maps        .filterValues(nameToFieldMap, values -> values.size() > 1);
+
+    if(!nonUniqueFields.isEmpty()) {
+      throw DruidException.forPersona(Persona.USER)
+      .ofCategory(Category.RUNTIME_FAILURE)
+      .build("Window expression field name reuse!", nonUniqueFields);
+    }
   }
 }
