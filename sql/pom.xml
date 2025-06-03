@@ -186,6 +186,12 @@
       <artifactId>value-annotations</artifactId>
       <scope>provided</scope>
     </dependency>
+<dependency>
+  <groupId>org.immutables</groupId>
+  <artifactId>value</artifactId>
+  <scope>provided</scope>
+</dependency>
+
 
     <!-- Tests -->
     <dependency>
