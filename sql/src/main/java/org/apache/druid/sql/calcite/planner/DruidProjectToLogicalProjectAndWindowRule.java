@@ -33,12 +33,13 @@ public class DruidProjectToLogicalProjectAndWindowRule extends ProjectToWindowRu
   @Value.Immutable
   public interface DruidProjectToLogicalProjectAndWindowRuleConfig extends ProjectToLogicalProjectAndWindowRuleConfig {
     DruidProjectToLogicalProjectAndWindowRuleConfig DEFAULT =
-        ImmutableDruidProjectToLogicalProjectAndWindowRuleConfig.of()
-            .withOperandSupplier(b ->
+        ImmutableDruidProjectToLogicalProjectAndWindowRuleConfig.builder()
+            .operandSupplier(b ->
                 b.operand(Project.class)
                     .predicate(Project::containsOver)
                     .anyInputs())
-            .withDescription("ProjectToWindowRule:project");
+            .description("DruidProjectToWindowRule:project")
+            .build();
 
     @Override default DruidProjectToLogicalProjectAndWindowRule toRule() {
       return new DruidProjectToLogicalProjectAndWindowRule(this);
