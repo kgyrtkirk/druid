@@ -119,7 +119,7 @@ public class DruidProjectToLogicalProjectAndWindowRule extends ProjectToWindowRu
     if(!nonUniqueFields.isEmpty()) {
       throw DruidException.forPersona(Persona.USER)
       .ofCategory(Category.RUNTIME_FAILURE)
-      .build("Window expression field name reuse!", nonUniqueFields);
+      .build("Window expression field name reuse! [%s]", nonUniqueFields);
     }
   }
 }
