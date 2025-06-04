@@ -33,7 +33,7 @@ jobs:
       with:
         fetch-depth: 500
     - name: Close PR
-      run: gh pr close ${{ github.event.pull_request.number }} && sleep 10m
+      run: gh pr close ${{ github.event.pull_request.number }} && sleep 30
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: Open PR
