@@ -13,29 +13,30 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: "Distribution Checks"
+name: CloseOpen
+
 on:
-  push:
-    branches:
-      - master
-      - '[0-9]+.[0-9]+.[0-9]+' # release branches
-      - '[0-9]+.[0-9]+.[0-9]+-[A-Za-z0-9]+' # release branches
-    paths:
-      - 'distribution/**'
-      - '**/pom.xml'
   pull_request:
     branches:
       - master
       - '[0-9]+.[0-9]+.[0-9]+' # release branches
       - '[0-9]+.[0-9]+.[0-9]+-[A-Za-z0-9]+' # release branches
-    paths:
-      - 'distribution/**'
-      - '**/pom.xml'
+    types: [ labeled, unlabeled ]
+
+concurrency:
+  group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.run_id }}' # group workflows only on pull_requests and not on branch commits
+  cancel-in-progress: true
 
 jobs:
-  docker-build:
+  closeOpen:
     runs-on: ubuntu-latest
+    if: ${{ contains(github.event.label.name, 'jacoco:skip') }}
     steps:
-      - uses: actions/checkout@v4
-      - name: Build the Docker image
-        run: DOCKER_BUILDKIT=1 docker build -t apache/druid:tag -f distribution/docker/Dockerfile .
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 500
+    - name: Close PR
+      run: gh pr close ${{ github.event.pull_request.number }} && sleep 10 && gh pr reopen  ${{ github.event.pull_request.number }}
+      env:
+        GH_TOKEN: ${{ secrets.GH_T2 }}
