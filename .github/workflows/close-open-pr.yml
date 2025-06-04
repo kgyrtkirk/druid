@@ -37,11 +37,6 @@ jobs:
       with:
         fetch-depth: 500
     - name: Close PR
-      run: gh pr close ${{ github.event.pull_request.number }} && sleep 10m
-      env:
-        GH_TOKEN: ${{ secrets.GH_T2 }}
-    - name: Open PR
-      if: ${{ always() }}
-      run: gh pr reopen  ${{ github.event.pull_request.number }}
+      run: gh pr close ${{ github.event.pull_request.number }} && sleep 10 && gh pr reopen  ${{ github.event.pull_request.number }}
       env:
         GH_TOKEN: ${{ secrets.GH_T2 }}
