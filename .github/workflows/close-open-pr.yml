@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: Stale bot
+name: CloseOpen
 
 on:
   pull_request:
@@ -24,12 +24,12 @@ on:
     types: [ labeled, unlabeled ]
 
 jobs:
-  openClose:
+  closeOpen:
     runs-on: ubuntu-latest
     if: ${{ contains(github.event.label.name, 'jacoco:skip') }}
     steps:
     - name: CloseOpen PR
-      run: gh pr close && sleep 10 && gh pr reopen
+      run: gh pr close ${{ github.event.pull_request.number }} && sleep 10 && gh pr reopen  ${{ github.event.pull_request.number }}
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - run: sleep 10
