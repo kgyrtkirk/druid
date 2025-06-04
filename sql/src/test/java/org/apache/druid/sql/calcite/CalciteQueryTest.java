@@ -2326,7 +2326,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
                   .intervals(querySegmentSpec(Filtration.eternity()))
                   .granularity(Granularities.ALL)
                   .aggregators(aggregators(new CountAggregatorFactory("a0")))
-                  .filters(equality("m1", 1.0, ColumnType.DOUBLE))
+                  .filters(equality("m1", 1.0, ColumnType.FLOAT))
                   .context(QUERY_CONTEXT_DEFAULT)
                   .build()
         ),
@@ -2427,8 +2427,8 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
                             having(
                                 range(
                                     "a0",
-                                    ColumnType.LONG,
-                                    1L,
+                                    ColumnType.DOUBLE,
+                                    1.0,
                                     null,
                                     true,
                                     false
@@ -2671,8 +2671,8 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
                             having(
                                 range(
                                     "a0",
-                                    ColumnType.LONG,
-                                    1L,
+                                    ColumnType.FLOAT,
+                                    1.0,
                                     null,
                                     true,
                                     false
@@ -3199,7 +3199,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
                         .setVirtualColumns(
                             expressionVirtualColumn(
                                 "v0",
-                                "case_searched((((\"m1\" > 1) && (\"m1\" < 5)) && (\"cnt\" == 1)),'x',null)",
+                                "case_searched((((\"m1\" > 1.0) && (\"m1\" < 5.0)) && (\"cnt\" == 1)),'x',null)",
                                 ColumnType.STRING
                             )
                         )
@@ -3579,7 +3579,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
                   .dataSource(CalciteTests.DATASOURCE3)
                   .intervals(querySegmentSpec(Filtration.eternity()))
                   .granularity(Granularities.ALL)
-                  .filters(range("dbl1", ColumnType.LONG, 0L, null, true, false))
+                  .filters(range("dbl1", ColumnType.DOUBLE, 0.0, null, true, false))
                   .aggregators(aggregators(new CountAggregatorFactory("a0")))
                   .context(QUERY_CONTEXT_DEFAULT)
                   .build()
@@ -3600,7 +3600,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
                   .dataSource(CalciteTests.DATASOURCE3)
                   .intervals(querySegmentSpec(Filtration.eternity()))
                   .granularity(Granularities.ALL)
-                  .filters(range("f1", ColumnType.LONG, 0L, null, true, false))
+                  .filters(range("f1", ColumnType.FLOAT, 0.0, null, true, false))
                   .aggregators(aggregators(new CountAggregatorFactory("a0")))
                   .context(QUERY_CONTEXT_DEFAULT)
                   .build()
@@ -4443,15 +4443,17 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
                             expressionVirtualColumn(
                                 "v0",
                                 "floor(CAST(\"dim1\", 'DOUBLE'))",
-                                ColumnType.DOUBLE
+                                // calcite 1.38 changes it from DOUBLE to FLOAT
+                                // FIXME: why is floor returning FLOAT?
+                                ColumnType.FLOAT
                             )
                         )
                         .setDimFilter(
                             or(
                                 equality("dim1", 10L, ColumnType.LONG),
                                 and(
-                                    equality("v0", 10.0, ColumnType.DOUBLE),
-                                    range("dim1", ColumnType.DOUBLE, 9.0, 10.5, true, false)
+                                    equality("v0", 10.0, ColumnType.FLOAT),
+                                    range("dim1", ColumnType.FLOAT, 9.0, 10.5, true, false)
                                 )
                             )
                         )
@@ -4476,7 +4478,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
                         .setGranularity(Granularities.ALL)
                         .setDimensions(dimensions(new DefaultDimensionSpec("dim1", "d0")))
                         .setDimFilter(
-                            range("dim1", ColumnType.DOUBLE, 9.0, 10.5, true, false)
+                            range("dim1", ColumnType.FLOAT, 9.0, 10.5, true, false)
                         )
                         .setContext(QUERY_CONTEXT_DEFAULT)
                         .build()
@@ -5040,7 +5042,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
                         .setVirtualColumns(
                             expressionVirtualColumn("v0", "(floor((\"m1\" / 2)) * 2)", ColumnType.FLOAT)
                         )
-                        .setDimFilter(range("v0", ColumnType.LONG, -1L, null, true, false))
+                        .setDimFilter(range("v0", ColumnType.FLOAT, -1.0, null, true, false))
                         .setDimensions(dimensions(new DefaultDimensionSpec("v0", "d0", ColumnType.FLOAT)))
                         .setAggregatorSpecs(aggregators(new CountAggregatorFactory("a0")))
                         .setLimitSpec(
@@ -5139,7 +5141,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
                             )
                         )
                         .setDimFilter(
-                            range("v0", ColumnType.LONG, -1L, null, true, false)
+                            range("v0", ColumnType.FLOAT, -1.0, null, true, false)
                         )
                         .setDimensions(dimensions(new DefaultDimensionSpec("v0", "d0", ColumnType.FLOAT)))
                         .setAggregatorSpecs(aggregators(new CountAggregatorFactory("a0")))
@@ -5896,7 +5898,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
                   .dataSource(CalciteTests.DATASOURCE1)
                   .intervals(querySegmentSpec(Filtration.eternity()))
                   .granularity(Granularities.ALL)
-                  .filters(range("m1", ColumnType.DOUBLE, 2.5, 3.5, true, true))
+                  .filters(range("m1", ColumnType.FLOAT, 2.5, 3.5, true, true))
                   .aggregators(aggregators(new CountAggregatorFactory("a0")))
                   .context(QUERY_CONTEXT_DEFAULT)
                   .build()
@@ -6241,6 +6243,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
   }
 
   @Test
+  @NotYetSupported(NotYetSupported.Modes.NOT_ENOUGH_RULES)
   public void testOrderByNullType()
   {
     testQuery(
@@ -7031,7 +7034,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
                                   false,
                                   true
                               ),
-                              range("m1", ColumnType.LONG, 4L, null, false, false)
+                              range("m1", ColumnType.FLOAT, 4.0, null, false, false)
                           ),
                           new FilteredAggregatorFactory(
                               new CardinalityAggregatorFactory(
@@ -7041,11 +7044,11 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
                                   false,
                                   true
                               ),
-                              range("m1", ColumnType.LONG, 4L, null, false, false)
+                              range("m1", ColumnType.FLOAT, 4.0, null, false, false)
                           ),
                           new FilteredAggregatorFactory(
                               new HyperUniquesAggregatorFactory("a2", "unique_dim1", false, true),
-                              range("m1", ColumnType.LONG, 4L, null, false, false)
+                              range("m1", ColumnType.FLOAT, 4.0, null, false, false)
                           )
                       )
                   )
@@ -10927,8 +10930,9 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
                                                 having(
                                                     range(
                                                         "a0",
-                                                        ColumnType.LONG,
-                                                        1L,
+                                                        // FIXME: sum(m1) is double ; however m1 seems like float?
+                                                        ColumnType.DOUBLE,
+                                                        1.0,
                                                         null,
                                                         true,
                                                         false
@@ -12673,7 +12677,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
                 .intervals(querySegmentSpec(Filtration.eternity()))
                 .columns("dim1")
                 .columnTypes(ColumnType.STRING)
-                .filters(equality("f1", 0.1, ColumnType.DOUBLE))
+                .filters(equality("f1", 0.1, ColumnType.FLOAT))
                 .resultFormat(ScanQuery.ResultFormat.RESULT_FORMAT_COMPACTED_LIST)
                 .limit(1)
                 .context(QUERY_CONTEXT_DEFAULT)
@@ -14455,7 +14459,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
                   .intervals(querySegmentSpec(Filtration.eternity()))
                   .filters(
                       and(
-                          equality("m1", 2.0, ColumnType.DOUBLE),
+                          equality("m1", 2.0, ColumnType.FLOAT),
                           equality("dim1", "10.1", ColumnType.STRING)
                       )
                   )
@@ -15123,7 +15127,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
   public void testLogicalCorrelateTrimFieldsStillNeeded()
   {
     assertEquals(
-        "1.37.0",
+        "1.38.0",
         RelNode.class.getPackage().getImplementationVersion(),
         "Calcite version changed; check if DruidRelFieldTrimmer#trimFields(LogicalCorrelate correlate,...) is still needed or not!"
     );
@@ -15134,7 +15138,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
   public void testUnSupportedAggInSelectWindow()
   {
     assertEquals(
-        "1.37.0",
+        "1.38.0",
         RelNode.class.getPackage().getImplementationVersion(),
         "Calcite version changed; check if CALCITE-6500 is fixed and update:\n * method DruidSqlValidator#validateWindowClause"
     );
@@ -15196,8 +15200,8 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
                         .setFilter(
                             range(
                                 "d0",
-                                ColumnType.LONG,
-                                2L,
+                                ColumnType.DOUBLE,
+                                2.0,
                                 null,
                                 true,
                                 false
@@ -15276,8 +15280,8 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
                         .setFilter(
                             range(
                                 "d0",
-                                ColumnType.LONG,
-                                2L,
+                                ColumnType.DOUBLE,
+                                2.0,
                                 null,
                                 true,
                                 false

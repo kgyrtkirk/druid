@@ -46,20 +46,20 @@ git checkout -b curr-changes
 
 mvn -q generate-sources -pl sql -Dcalcite.version=$CALCITE_OLD -Pskip-static-checks
 cp -r sql/target/calcite-base-parser/codegen/./  sql/src/main/codegen/./
-git commit -m 'current reverse' -a
+git commit -m "reset parser to stock $CALCITE_OLD" -a
 git revert --no-edit HEAD
 # HEAD is now at the same as before; but parent are the base calcite changes
 
-git branch base-changes curr-changes^
-git checkout base-changes
+git branch calcite-old curr-changes^
+git checkout calcite-old
 git show|patch -p0 -R # undo temproarily to ensure maven runs
 
 mvn -q generate-sources -pl sql -Dcalcite.version=$CALCITE_NEW -Pskip-static-checks
 cp -r sql/target/calcite-base-parser/codegen/./  sql/src/main/codegen/./
 
-git commit --allow-empty -m base-changes -a
+git commit --allow-empty -m calcite-new -a
 git checkout -b new-state
-git merge --no-edit curr-changes
+git merge -m 'merge curr-changes branch' curr-changes
 
 echo ok
 cd -
@@ -68,5 +68,5 @@ git remote remove calcite-upgrade &>/dev/null || echo -n
 git remote add -f calcite-upgrade "$REPO"
 
 
-echo "merge branch calcite-upgrade/curr-changes if satisfied with those changes"
+echo "merge branch calcite-upgrade/new-state if satisfied with those changes"
 

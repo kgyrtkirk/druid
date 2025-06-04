@@ -186,6 +186,12 @@
       <artifactId>value-annotations</artifactId>
       <scope>provided</scope>
     </dependency>
+<dependency>
+  <groupId>org.immutables</groupId>
+  <artifactId>value</artifactId>
+  <scope>provided</scope>
+</dependency>
+
 
     <!-- Tests -->
     <dependency>
@@ -371,7 +377,7 @@
             </goals>
             <configuration>
               <cfgFile>src/main/codegen/config.fmpp</cfgFile>
-              <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
+              <outputDirectory>${project.build.directory}/generated-sources/fmpp-output</outputDirectory>
               <templateDirectory>src/main/codegen/templates</templateDirectory>
             </configuration>
           </execution>
@@ -390,13 +396,13 @@
               <goal>javacc</goal>
             </goals>
             <configuration>
-              <sourceDirectory>${project.build.directory}/generated-sources/javacc</sourceDirectory>
+              <sourceDirectory>${project.build.directory}/generated-sources/fmpp-output/javacc</sourceDirectory>
               <includes>
                 <include>Parser.jj</include>
               </includes>
               <lookAhead>2</lookAhead>
               <isStatic>false</isStatic>
-              <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
+              <outputDirectory>${project.build.directory}/generated-sources/javacc-output</outputDirectory>
             </configuration>
           </execution>
         </executions>
@@ -415,7 +421,8 @@
             </goals>
             <configuration>
               <sources>
-                <source>src/generated-sources</source>
+                <source>src/generated-sources/javacc-output</source>
+                <source>src/generated-sources/annotations</source>
               </sources>
             </configuration>
           </execution>
