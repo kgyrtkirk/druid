@@ -44,7 +44,7 @@ import org.apache.druid.query.ReferenceCountingSegmentQueryRunner;
 import org.apache.druid.query.SegmentDescriptor;
 import org.apache.druid.query.context.ResponseContext.Keys;
 import org.apache.druid.query.groupby.GroupByQueryRunnerTestHelper;
-import org.apache.druid.query.planning.ExecutionVertex;
+import org.apache.druid.query.planning.DataSourceAnalysis;
 import org.apache.druid.query.spec.SpecificSegmentQueryRunner;
 import org.apache.druid.query.spec.SpecificSegmentSpec;
 import org.apache.druid.segment.ReferenceCountingSegment;
@@ -113,13 +113,13 @@ public class TestClusterQuerySegmentWalker implements QuerySegmentWalker
     // Strange, but true. Required to get authentic behavior with UnionDataSources. (Although, it would be great if
     // this wasn't required.)
     return (queryPlus, responseContext) -> {
-      ExecutionVertex ev = ExecutionVertex.of(queryPlus.getQuery());
+      final DataSourceAnalysis analysis = queryPlus.getQuery().getDataSource().getAnalysis();
 
-      if (!(ev.isProcessable() && ev.isTableBased())) {
+      if (!analysis.isConcreteAndTableBased()) {
         throw new ISE("Cannot handle datasource: %s", queryPlus.getQuery().getDataSource());
       }
 
-      final String dataSourceName = ev.getBaseTableDataSource().getName();
+      final String dataSourceName = analysis.getBaseTableDataSource().getName();
 
       FunctionalIterable<SegmentDescriptor> segmentDescriptors = FunctionalIterable
           .create(intervals)
@@ -139,13 +139,13 @@ public class TestClusterQuerySegmentWalker implements QuerySegmentWalker
       throw new ISE("Unknown query type[%s].", query.getClass());
     }
 
-    ExecutionVertex ev = ExecutionVertex.of(query);
+    final DataSourceAnalysis analysis = dataSourceFromQuery.getAnalysis();
 
-    if (!ev.canRunQueryUsingClusterWalker()) {
+    if (!analysis.isConcreteAndTableBased()) {
       throw new ISE("Cannot handle datasource: %s", dataSourceFromQuery);
     }
 
-    final String dataSourceName = ev.getBaseTableDataSource().getName();
+    final String dataSourceName = analysis.getBaseTableDataSource().getName();
 
     final QueryToolChest<T, Query<T>> toolChest = factory.getToolchest();
 
@@ -155,7 +155,9 @@ public class TestClusterQuerySegmentWalker implements QuerySegmentWalker
       throw new ISE("Cannot handle subquery: %s", dataSourceFromQuery);
     }
 
-    final Function<SegmentReference, SegmentReference> segmentMapFn = ev.createSegmentMapFunction();
+    final Function<SegmentReference, SegmentReference> segmentMapFn = dataSourceFromQuery.createSegmentMapFunction(
+        query
+    );
 
     final QueryRunner<T> baseRunner = new FinalizeResultsQueryRunner<>(
         toolChest.postMergeQueryDecoration(

@@ -49,7 +49,6 @@ import org.apache.druid.msq.kernel.FrameContext;
 import org.apache.druid.msq.kernel.ProcessorsAndChannels;
 import org.apache.druid.msq.kernel.StageDefinition;
 import org.apache.druid.query.Query;
-import org.apache.druid.query.planning.ExecutionVertex;
 import org.apache.druid.segment.SegmentReference;
 import org.apache.druid.utils.CollectionUtils;
 
@@ -239,7 +238,7 @@ public abstract class BaseLeafFrameProcessorFactory extends BaseFrameProcessorFa
 
   /**
    * Read base inputs, where "base" is meant in the same sense as in
-   * {@link ExecutionVertex}: the primary datasource that drives query processing.
+   * {@link org.apache.druid.query.planning.DataSourceAnalysis}: the primary datasource that drives query processing.
    */
   private static Iterable<ReadableInput> readBaseInputs(
       final StageDefinition stageDef,
@@ -340,7 +339,7 @@ public abstract class BaseLeafFrameProcessorFactory extends BaseFrameProcessorFa
         );
 
     if (broadcastInputs.isEmpty()) {
-      if (ExecutionVertex.of(query).isSegmentMapFunctionExpensive()) {
+      if (query.getDataSourceAnalysis().isJoin()) {
         // Joins may require significant computation to compute the segmentMapFn. Offload it to a processor.
         return new SimpleSegmentMapFnProcessor(query);
       } else {

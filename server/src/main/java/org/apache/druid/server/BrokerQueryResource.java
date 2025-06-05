@@ -29,7 +29,6 @@ import org.apache.druid.guice.annotations.Json;
 import org.apache.druid.guice.annotations.Self;
 import org.apache.druid.guice.annotations.Smile;
 import org.apache.druid.query.Query;
-import org.apache.druid.query.planning.ExecutionVertex;
 import org.apache.druid.server.http.security.StateResourceFilter;
 import org.apache.druid.server.security.AuthConfig;
 import org.apache.druid.server.security.AuthorizerMapper;
@@ -95,12 +94,11 @@ public class BrokerQueryResource extends QueryResource
     final ResourceIOReaderWriter ioReaderWriter = createResourceIOReaderWriter(req, pretty != null);
     try {
       Query<?> query = ioReaderWriter.getRequestMapper().readValue(in, Query.class);
-      ExecutionVertex ev = ExecutionVertex.of(query);
       return ioReaderWriter.getResponseWriter().ok(
           ServerViewUtil.getTargetLocations(
               brokerServerView,
-              ev.getBaseTableDataSource(),
-              ev.getEffectiveQuerySegmentSpec().getIntervals(),
+              query.getDataSource(),
+              query.getIntervals(),
               numCandidates
           )
       );

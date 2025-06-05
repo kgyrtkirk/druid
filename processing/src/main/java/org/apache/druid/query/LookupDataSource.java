@@ -22,9 +22,15 @@ package org.apache.druid.query;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.Preconditions;
+import org.apache.druid.java.util.common.IAE;
+import org.apache.druid.query.planning.DataSourceAnalysis;
+import org.apache.druid.segment.SegmentReference;
+
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 
 /**
  * Represents a lookup.
@@ -35,7 +41,7 @@ import java.util.Set;
  * The "lookupName" referred to here should be provided by a
  * {@link org.apache.druid.query.lookup.LookupExtractorFactoryContainerProvider}.
  */
-public class LookupDataSource extends LeafDataSource
+public class LookupDataSource implements DataSource
 {
   private final String lookupName;
 
@@ -60,6 +66,22 @@ public class LookupDataSource extends LeafDataSource
   }
 
   @Override
+  public List<DataSource> getChildren()
+  {
+    return Collections.emptyList();
+  }
+
+  @Override
+  public DataSource withChildren(List<DataSource> children)
+  {
+    if (!children.isEmpty()) {
+      throw new IAE("Cannot accept children");
+    }
+
+    return this;
+  }
+
+  @Override
   public boolean isCacheable(boolean isBroker)
   {
     return false;
@@ -72,15 +94,33 @@ public class LookupDataSource extends LeafDataSource
   }
 
   @Override
-  public boolean isProcessable()
+  public boolean isConcrete()
   {
     return true;
+  }
+
+  @Override
+  public Function<SegmentReference, SegmentReference> createSegmentMapFunction(Query query)
+  {
+    return Function.identity();
+  }
+
+  @Override
+  public DataSource withUpdatedDataSource(DataSource newSource)
+  {
+    return newSource;
   }
 
   @Override
   public byte[] getCacheKey()
   {
     return null;
+  }
+
+  @Override
+  public DataSourceAnalysis getAnalysis()
+  {
+    return new DataSourceAnalysis(this, null, null, Collections.emptyList(), null);
   }
 
   @Override

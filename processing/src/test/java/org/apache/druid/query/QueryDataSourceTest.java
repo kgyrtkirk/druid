@@ -21,10 +21,10 @@ package org.apache.druid.query;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.jqno.equalsverifier.EqualsVerifier;
-import org.apache.druid.error.DruidException;
 import org.apache.druid.java.util.common.granularity.Granularities;
 import org.apache.druid.query.groupby.GroupByQuery;
 import org.apache.druid.query.timeseries.TimeseriesQuery;
+import org.apache.druid.segment.SegmentReference;
 import org.apache.druid.segment.TestHelper;
 import org.junit.Assert;
 import org.junit.Rule;
@@ -32,8 +32,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import java.util.Collections;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import java.util.function.Function;
 
 public class QueryDataSourceTest
 {
@@ -109,15 +108,15 @@ public class QueryDataSourceTest
   }
 
   @Test
-  public void test_isProcessable_table()
+  public void test_isConcrete_table()
   {
-    Assert.assertFalse(queryOnTableDataSource.isProcessable());
+    Assert.assertFalse(queryOnTableDataSource.isConcrete());
   }
 
   @Test
-  public void test_isProcessable_lookup()
+  public void test_isConcrete_lookup()
   {
-    Assert.assertFalse(queryOnLookupDataSource.isProcessable());
+    Assert.assertFalse(queryOnLookupDataSource.isConcrete());
   }
 
   @Test
@@ -129,7 +128,7 @@ public class QueryDataSourceTest
   @Test
   public void test_isGlobal_lookup()
   {
-    Assert.assertFalse(queryOnLookupDataSource.isGlobal());
+    Assert.assertTrue(queryOnLookupDataSource.isGlobal());
   }
 
   @Test
@@ -173,8 +172,15 @@ public class QueryDataSourceTest
   @Test
   public void test_withSegmentMapFunction()
   {
-    assertThrows(DruidException.class, () -> queryDataSource.createSegmentMapFunction(groupByQuery));
-    assertThrows(DruidException.class, () -> queryOnTableDataSource.createSegmentMapFunction(groupByQuery));
+    Function<SegmentReference, SegmentReference> parentsegmentMapFunction = queryDataSource.createSegmentMapFunction(
+        groupByQuery
+    );
+
+    Function<SegmentReference, SegmentReference> childsegmentMapFunction = queryOnTableDataSource.createSegmentMapFunction(
+        groupByQuery
+    );
+    // The segment functions should both be identity functions and equal
+    Assert.assertEquals(parentsegmentMapFunction, childsegmentMapFunction);
   }
 
 

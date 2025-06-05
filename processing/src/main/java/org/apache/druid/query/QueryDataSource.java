@@ -23,8 +23,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.google.common.base.Preconditions;
-import org.apache.druid.error.DruidException;
 import org.apache.druid.java.util.common.IAE;
+import org.apache.druid.query.planning.DataSourceAnalysis;
 import org.apache.druid.query.union.UnionQuery;
 import org.apache.druid.segment.SegmentReference;
 
@@ -98,11 +98,11 @@ public class QueryDataSource implements DataSource
   @Override
   public boolean isGlobal()
   {
-    return false;
+    return query.getDataSource().isGlobal();
   }
 
   @Override
-  public boolean isProcessable()
+  public boolean isConcrete()
   {
     return false;
   }
@@ -110,13 +110,26 @@ public class QueryDataSource implements DataSource
   @Override
   public Function<SegmentReference, SegmentReference> createSegmentMapFunction(Query query)
   {
-    throw DruidException.defensive("Creating a segmentMapFunction for a QueryDataSource is not supported [%s].", query);
+    return Function.identity();
+  }
+
+  @Override
+  public DataSource withUpdatedDataSource(DataSource newSource)
+  {
+    return new QueryDataSource(query.withDataSource(query.getDataSource().withUpdatedDataSource(newSource)));
   }
 
   @Override
   public byte[] getCacheKey()
   {
     return null;
+  }
+
+  @Override
+  public DataSourceAnalysis getAnalysis()
+  {
+    final Query<?> subQuery = this.getQuery();
+    return new DataSourceAnalysis(this, subQuery, null, Collections.emptyList(), null);
   }
 
   @Override

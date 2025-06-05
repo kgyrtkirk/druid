@@ -24,6 +24,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableList;
 import org.apache.druid.java.util.common.IAE;
 import org.apache.druid.query.filter.DimFilter;
+import org.apache.druid.query.planning.DataSourceAnalysis;
 import org.apache.druid.segment.FilteredSegment;
 import org.apache.druid.segment.SegmentReference;
 
@@ -114,9 +115,9 @@ public class FilteredDataSource implements DataSource
   }
 
   @Override
-  public boolean isProcessable()
+  public boolean isConcrete()
   {
-    return base.isProcessable();
+    return base.isConcrete();
   }
 
   @Override
@@ -124,6 +125,12 @@ public class FilteredDataSource implements DataSource
   {
     final Function<SegmentReference, SegmentReference> segmentMapFn = base.createSegmentMapFunction(query);
     return baseSegment -> new FilteredSegment(segmentMapFn.apply(baseSegment), filter);
+  }
+
+  @Override
+  public DataSource withUpdatedDataSource(DataSource newSource)
+  {
+    return new FilteredDataSource(newSource, filter);
   }
 
   @Override
@@ -138,7 +145,14 @@ public class FilteredDataSource implements DataSource
   @Override
   public byte[] getCacheKey()
   {
-    return null;
+    return new byte[0];
+  }
+
+  @Override
+  public DataSourceAnalysis getAnalysis()
+  {
+    final DataSource current = this.getBase();
+    return current.getAnalysis();
   }
 
   @Override

@@ -21,19 +21,23 @@ package org.apache.druid.query;
 
 import org.apache.druid.frame.Frame;
 import org.apache.druid.frame.read.FrameReader;
+import org.apache.druid.java.util.common.IAE;
 import org.apache.druid.java.util.common.guava.Sequence;
 import org.apache.druid.java.util.common.guava.Sequences;
+import org.apache.druid.query.planning.DataSourceAnalysis;
 import org.apache.druid.segment.BaseObjectColumnValueSelector;
 import org.apache.druid.segment.ColumnSelectorFactory;
 import org.apache.druid.segment.Cursor;
 import org.apache.druid.segment.CursorBuildSpec;
 import org.apache.druid.segment.CursorHolder;
+import org.apache.druid.segment.SegmentReference;
 import org.apache.druid.segment.column.RowSignature;
 
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -47,8 +51,9 @@ import java.util.stream.Collectors;
  * {@link #rowSignature}. For frames that donot contain the columns present in the {@link #rowSignature}, they are
  * populated with {@code null}.
  */
-public class FrameBasedInlineDataSource extends LeafDataSource
+public class FrameBasedInlineDataSource implements DataSource
 {
+
   final List<FrameSignaturePair> frames;
   final RowSignature rowSignature;
 
@@ -131,6 +136,22 @@ public class FrameBasedInlineDataSource extends LeafDataSource
   }
 
   @Override
+  public List<DataSource> getChildren()
+  {
+    return Collections.emptyList();
+  }
+
+  @Override
+  public DataSource withChildren(List<DataSource> children)
+  {
+    if (!children.isEmpty()) {
+      throw new IAE("Cannot accept children");
+    }
+
+    return this;
+  }
+
+  @Override
   public boolean isCacheable(boolean isBroker)
   {
     return false;
@@ -143,9 +164,21 @@ public class FrameBasedInlineDataSource extends LeafDataSource
   }
 
   @Override
-  public boolean isProcessable()
+  public boolean isConcrete()
   {
     return true;
+  }
+
+  @Override
+  public Function<SegmentReference, SegmentReference> createSegmentMapFunction(Query query)
+  {
+    return Function.identity();
+  }
+
+  @Override
+  public DataSource withUpdatedDataSource(DataSource newSource)
+  {
+    return newSource;
   }
 
   @Override
@@ -154,4 +187,9 @@ public class FrameBasedInlineDataSource extends LeafDataSource
     return null;
   }
 
+  @Override
+  public DataSourceAnalysis getAnalysis()
+  {
+    return new DataSourceAnalysis(this, null, null, Collections.emptyList(), null);
+  }
 }

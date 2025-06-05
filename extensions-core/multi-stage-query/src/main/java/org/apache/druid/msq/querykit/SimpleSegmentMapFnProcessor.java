@@ -25,7 +25,6 @@ import org.apache.druid.frame.channel.WritableFrameChannel;
 import org.apache.druid.frame.processor.FrameProcessor;
 import org.apache.druid.frame.processor.ReturnOrAwait;
 import org.apache.druid.query.Query;
-import org.apache.druid.query.planning.ExecutionVertex;
 import org.apache.druid.segment.SegmentReference;
 
 import java.util.Collections;
@@ -65,8 +64,7 @@ public class SimpleSegmentMapFnProcessor implements FrameProcessor<Function<Segm
   @Override
   public ReturnOrAwait<Function<SegmentReference, SegmentReference>> runIncrementally(final IntSet readableInputs)
   {
-    ExecutionVertex ev = ExecutionVertex.of(query);
-    return ReturnOrAwait.returnObject(ev.createSegmentMapFunction());
+    return ReturnOrAwait.returnObject(query.getDataSource().createSegmentMapFunction(query));
   }
 
   @Override

@@ -19,9 +19,7 @@
 
 package org.apache.druid.segment.join;
 
-import org.apache.druid.java.util.common.Cacheable;
-
-public enum JoinType implements Cacheable
+public enum JoinType
 {
   INNER {
     @Override
@@ -88,10 +86,4 @@ public enum JoinType implements Cacheable
    * "Righty" joins (RIGHT or FULL) always include the full right-hand side, and can generate nulls on the left.
    */
   public abstract boolean isRighty();
-
-  @Override
-  public final byte[] getCacheKey()
-  {
-    return new byte[] {(byte) ordinal()};
-  }
 }

@@ -26,11 +26,9 @@ import com.google.common.collect.Iterators;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.math.expr.ExprMacroTable;
-import org.apache.druid.query.filter.FalseDimFilter;
 import org.apache.druid.query.filter.InDimFilter;
 import org.apache.druid.query.filter.TrueDimFilter;
-import org.apache.druid.query.planning.ExecutionVertexTest;
-import org.apache.druid.query.planning.JoinDataSourceAnalysis;
+import org.apache.druid.query.planning.DataSourceAnalysis;
 import org.apache.druid.query.policy.NoRestrictionPolicy;
 import org.apache.druid.segment.TestHelper;
 import org.apache.druid.segment.column.ColumnType;
@@ -40,15 +38,15 @@ import org.apache.druid.segment.join.JoinableFactoryWrapper;
 import org.apache.druid.segment.join.NoopJoinableFactory;
 import org.apache.druid.segment.virtual.ExpressionVirtualColumn;
 import org.easymock.Mock;
-import org.hamcrest.CoreMatchers;
-import org.hamcrest.MatcherAssert;
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.mockito.Mockito;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
 public class JoinDataSourceTest
@@ -83,6 +81,8 @@ public class JoinDataSourceTest
       JoinAlgorithm.BROADCAST
 
   );
+  @Rule
+  public ExpectedException expectedException = ExpectedException.none();
   @Mock
   private JoinableFactoryWrapper joinableFactoryWrapper;
 
@@ -125,15 +125,15 @@ public class JoinDataSourceTest
   }
 
   @Test
-  public void test_isProcessable_tableToTable()
+  public void test_isConcrete_tableToTable()
   {
-    Assert.assertFalse(joinTableToTable.isProcessable());
+    Assert.assertFalse(joinTableToTable.isConcrete());
   }
 
   @Test
-  public void test_isProcessable_tableToLookup()
+  public void test_isConcrete_tableToLookup()
   {
-    Assert.assertTrue(joinTableToLookup.isProcessable());
+    Assert.assertFalse(joinTableToLookup.isConcrete());
   }
 
   @Test
@@ -151,11 +151,9 @@ public class JoinDataSourceTest
   @Test
   public void test_withChildren_empty()
   {
-    IllegalArgumentException e = assertThrows(
-        IllegalArgumentException.class,
-        () -> joinTableToTable.withChildren(Collections.emptyList())
-    );
-    MatcherAssert.assertThat(e.getMessage(), CoreMatchers.containsString("Expected [2] children, got [0]"));
+    expectedException.expect(IllegalArgumentException.class);
+    expectedException.expectMessage("Expected [2] children, got [0]");
+    joinTableToTable.withChildren(Collections.emptyList());
   }
 
   @Test
@@ -172,7 +170,7 @@ public class JoinDataSourceTest
     EqualsVerifier.forClass(JoinDataSource.class)
                   .usingGetClass()
                   .withNonnullFields("left", "right", "rightPrefix", "conditionAnalysis", "joinType")
-                  .withIgnoredFields("joinableFactoryWrapper")
+                  .withIgnoredFields("joinableFactoryWrapper", "analysis")
                   .verify();
   }
 
@@ -203,23 +201,18 @@ public class JoinDataSourceTest
   @Test
   public void testException_leftFilterOnNonTableSource()
   {
-    IllegalArgumentException e = assertThrows(
-        IllegalArgumentException.class,
-        () -> JoinDataSource.create(
-            new QueryDataSource(ExecutionVertexTest.makeScanQuery(barTable)),
-            new TableDataSource("table"),
-            "j.",
-            "x == \"j.x\"",
-            JoinType.LEFT,
-            FalseDimFilter.instance(),
-            ExprMacroTable.nil(),
-            null,
-            JoinAlgorithm.BROADCAST
-        )
-    );
-    MatcherAssert.assertThat(
-        e.getMessage(),
-        CoreMatchers.containsString("left filter is only supported if left data source is direct table access")
+    expectedException.expect(IllegalArgumentException.class);
+    expectedException.expectMessage("left filter is only supported if left data source is direct table access");
+    JoinDataSource.create(
+        new QueryDataSource(Mockito.mock(Query.class)),
+        new TableDataSource("table"),
+        "j.",
+        "x == \"j.x\"",
+        JoinType.LEFT,
+        TrueDimFilter.instance(),
+        ExprMacroTable.nil(),
+        null,
+        JoinAlgorithm.BROADCAST
     );
   }
 
@@ -237,7 +230,7 @@ public class JoinDataSourceTest
         null,
         JoinAlgorithm.BROADCAST
     );
-    Assert.assertEquals(null, dataSource.getLeftFilter());
+    Assert.assertEquals(TrueDimFilter.instance(), dataSource.getLeftFilter());
   }
 
   @Test
@@ -480,7 +473,7 @@ public class JoinDataSourceTest
         null,
         JoinAlgorithm.BROADCAST
     );
-    JoinDataSourceAnalysis analysis = dataSource.getJoinAnalysisForDataSource();
+    DataSourceAnalysis analysis = dataSource.getAnalysis();
     Assert.assertEquals("table1", analysis.getBaseDataSource().getTableNames().iterator().next());
   }
 
@@ -505,7 +498,7 @@ public class JoinDataSourceTest
         null,
         JoinAlgorithm.BROADCAST
     );
-    JoinDataSourceAnalysis analysis = dataSource.getJoinAnalysisForDataSource();
+    DataSourceAnalysis analysis = dataSource.getAnalysis();
     Assert.assertEquals("table1", analysis.getBaseDataSource().getTableNames().iterator().next());
   }
 
@@ -527,7 +520,7 @@ public class JoinDataSourceTest
         null,
         JoinAlgorithm.BROADCAST
     );
-    JoinDataSourceAnalysis analysis = dataSource.getJoinAnalysisForDataSource();
+    DataSourceAnalysis analysis = dataSource.getAnalysis();
     Assert.assertEquals(left, analysis.getBaseDataSource());
     Assert.assertEquals("table1", analysis.getBaseDataSource().getTableNames().iterator().next());
   }
@@ -588,7 +581,7 @@ public class JoinDataSourceTest
     );
 
     byte[] cacheKey1 = joinDataSource.getCacheKey();
-    Assert.assertNull(cacheKey1);
+    Assert.assertEquals(cacheKey1.length, 0);
   }
 
   private static class JoinableFactoryWithCacheKey extends NoopJoinableFactory

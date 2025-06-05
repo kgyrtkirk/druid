@@ -21,7 +21,6 @@ package org.apache.druid.query;
 
 import com.google.common.collect.ImmutableList;
 import org.apache.druid.error.DruidException;
-import org.apache.druid.error.DruidExceptionMatcher;
 import org.apache.druid.java.util.common.Intervals;
 import org.apache.druid.java.util.common.granularity.Granularities;
 import org.apache.druid.math.expr.ExprMacroTable;
@@ -33,7 +32,6 @@ import org.apache.druid.query.aggregation.post.ArithmeticPostAggregator;
 import org.apache.druid.query.aggregation.post.ConstantPostAggregator;
 import org.apache.druid.query.aggregation.post.FieldAccessPostAggregator;
 import org.apache.druid.query.filter.TrueDimFilter;
-import org.apache.druid.query.planning.ExecutionVertexTest;
 import org.apache.druid.query.spec.MultipleSpecificSegmentSpec;
 import org.apache.druid.query.timeseries.TimeseriesQuery;
 import org.apache.druid.segment.join.JoinType;
@@ -44,7 +42,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
@@ -356,49 +353,133 @@ public class QueriesTest
   }
 
   @Test
+  public void testWithBaseDataSourceSubQueryStack()
+  {
+    Assert.assertEquals(
+        Druids.newTimeseriesQueryBuilder()
+              .dataSource(
+                  new QueryDataSource(
+                      Druids.newTimeseriesQueryBuilder()
+                            .dataSource(
+                                new QueryDataSource(
+                                    Druids.newTimeseriesQueryBuilder()
+                                          .dataSource("bar")
+                                          .intervals("2000/3000")
+                                          .granularity(Granularities.ALL)
+                                          .build()
+                                )
+                            )
+                            .intervals("2000/3000")
+                            .granularity(Granularities.ALL)
+                            .build()
+                  )
+              )
+              .intervals("2000/3000")
+              .granularity(Granularities.ALL)
+              .build(),
+        Queries.withBaseDataSource(
+            Druids.newTimeseriesQueryBuilder()
+                  .dataSource(
+                      new QueryDataSource(
+                          Druids.newTimeseriesQueryBuilder()
+                                .dataSource(
+                                    new QueryDataSource(
+                                        Druids.newTimeseriesQueryBuilder()
+                                              .dataSource("foo")
+                                              .intervals("2000/3000")
+                                              .granularity(Granularities.ALL)
+                                              .build()
+                                    )
+                                )
+                                .intervals("2000/3000")
+                                .granularity(Granularities.ALL)
+                                .build()
+                      )
+                  )
+                  .intervals("2000/3000")
+                  .granularity(Granularities.ALL)
+                  .build(),
+            new TableDataSource("bar")
+        )
+    );
+  }
+
+  @Test
   public void testWithBaseDataSourceSubQueryStackWithJoinOnUnion()
   {
     Assert.assertEquals(
         Druids.newTimeseriesQueryBuilder()
-            .dataSource(
-                JoinDataSource.create(
-                    new TableDataSource("foo"),
-                    ExecutionVertexTest.INLINE,
-                    "j0.",
-                    "\"foo.x\" == \"bar.x\"",
-                    JoinType.INNER,
-                    null,
-                    ExprMacroTable.nil(),
-                    null,
-                    JoinAlgorithm.BROADCAST
-                )
-            )
-            .intervals("2000/3000")
-            .granularity(Granularities.ALL)
-            .build(),
+              .dataSource(
+                  new QueryDataSource(
+                      Druids.newTimeseriesQueryBuilder()
+                            .dataSource(
+                                new QueryDataSource(
+                                    Druids.newTimeseriesQueryBuilder()
+                                          .dataSource(
+                                              JoinDataSource.create(
+                                                  new TableDataSource("foo"),
+                                                  new TableDataSource("bar"),
+                                                  "j0.",
+                                                  "\"foo.x\" == \"bar.x\"",
+                                                  JoinType.INNER,
+                                                  null,
+                                                  ExprMacroTable.nil(),
+                                                  null,
+                                                  JoinAlgorithm.BROADCAST
+                                              )
+                                          )
+                                          .intervals("2000/3000")
+                                          .granularity(Granularities.ALL)
+                                          .build()
+                                )
+                            )
+                            .intervals("2000/3000")
+                            .granularity(Granularities.ALL)
+                            .build()
+                  )
+              )
+              .intervals("2000/3000")
+              .granularity(Granularities.ALL)
+              .build(),
         Queries.withBaseDataSource(
             Druids.newTimeseriesQueryBuilder()
-                .dataSource(
-                    JoinDataSource.create(
-                        new UnionDataSource(
-                            ImmutableList.of(
-                                new TableDataSource("foo"),
-                                new TableDataSource("bar")
-                            )
-                        ),
-                        ExecutionVertexTest.INLINE,
-                        "j0.",
-                        "\"foo.x\" == \"bar.x\"",
-                        JoinType.INNER,
-                        null,
-                        ExprMacroTable.nil(),
-                        null,
-                        JoinAlgorithm.BROADCAST
-                    )
-                )
-                .intervals("2000/3000")
-                .granularity(Granularities.ALL)
-                .build(),
+                  .dataSource(
+                      new QueryDataSource(
+                          Druids.newTimeseriesQueryBuilder()
+                                .dataSource(
+                                    new QueryDataSource(
+                                        Druids.newTimeseriesQueryBuilder()
+                                              .dataSource(
+                                                  JoinDataSource.create(
+                                                      new UnionDataSource(
+                                                          ImmutableList.of(
+                                                              new TableDataSource("foo"),
+                                                              new TableDataSource("bar")
+                                                          )
+                                                      ),
+                                                      new TableDataSource("bar"),
+                                                      "j0.",
+                                                      "\"foo.x\" == \"bar.x\"",
+                                                      JoinType.INNER,
+                                                      null,
+                                                      ExprMacroTable.nil(),
+                                                      null,
+                                                      JoinAlgorithm.BROADCAST
+                                                  )
+                                              )
+                                              .intervals("2000/3000")
+                                              .granularity(Granularities.ALL)
+                                              .build()
+                                    )
+                                )
+                                .intervals("2000/3000")
+                                .granularity(Granularities.ALL)
+                                .build()
+                      )
+                  )
+                  .intervals("2000/3000")
+                  .granularity(Granularities.ALL)
+                  .build(),
             new TableDataSource("foo")
         )
     );
@@ -409,88 +490,18 @@ public class QueriesTest
   {
     Assert.assertEquals(
         Druids.newTimeseriesQueryBuilder()
-            .dataSource(
-                JoinDataSource.create(
-                    JoinDataSource.create(
-                        new TableDataSource("foo"),
-                        ExecutionVertexTest.INLINE,
-                        "j1.",
-                        "\"foo.x\" == \"bar.x\"",
-                        JoinType.INNER,
-                        null,
-                        ExprMacroTable.nil(),
-                        null,
-                        JoinAlgorithm.BROADCAST
-
-                    ),
-                    ExecutionVertexTest.INLINE,
-                    "j0.",
-                    "\"foo_outer.x\" == \"bar.x\"",
-                    JoinType.INNER,
-                    null,
-                    ExprMacroTable.nil(),
-                    null,
-                    JoinAlgorithm.BROADCAST
-                )
-            )
-            .intervals("2000/3000")
-            .granularity(Granularities.ALL)
-            .build(),
-        Queries.withBaseDataSource(
-            Druids.newTimeseriesQueryBuilder()
-                .dataSource(
-                    JoinDataSource.create(
-                        JoinDataSource.create(
-                            new TableDataSource("foo_inner"),
-                            ExecutionVertexTest.INLINE,
-                            "j1.",
-                            "\"foo.x\" == \"bar.x\"",
-                            JoinType.INNER,
-                            TrueDimFilter.instance(),
-                            ExprMacroTable.nil(),
-                            null,
-                            JoinAlgorithm.BROADCAST
-
-                        ),
-                        ExecutionVertexTest.INLINE,
-                        "j0.",
-                        "\"foo_outer.x\" == \"bar.x\"",
-                        JoinType.INNER,
-                        null,
-                        ExprMacroTable.nil(),
-                        null,
-                        JoinAlgorithm.BROADCAST
-
-                    )
-
-                )
-                .intervals("2000/3000")
-                .granularity(Granularities.ALL)
-                .build(),
-            new TableDataSource("foo")
-        )
-    );
-  }
-
-  @Test
-  public void testWithBaseDataSourcedIsRejectedForSubQuery()
-  {
-    DruidException e = assertThrows(
-        DruidException.class,
-        () -> Queries.withBaseDataSource(
-            Druids.newTimeseriesQueryBuilder()
-                .dataSource(
-                    new QueryDataSource(
-                        Druids.newTimeseriesQueryBuilder()
+              .dataSource(
+                  new QueryDataSource(
+                      Druids.newTimeseriesQueryBuilder()
                             .dataSource(
                                 JoinDataSource.create(
                                     JoinDataSource.create(
-                                        new TableDataSource("foo_inner"),
+                                        new TableDataSource("foo"),
                                         new TableDataSource("bar"),
                                         "j1.",
                                         "\"foo.x\" == \"bar.x\"",
                                         JoinType.INNER,
-                                        TrueDimFilter.instance(),
+                                        null,
                                         ExprMacroTable.nil(),
                                         null,
                                         JoinAlgorithm.BROADCAST
@@ -511,18 +522,52 @@ public class QueriesTest
                             .intervals("2000/3000")
                             .granularity(Granularities.ALL)
                             .build()
-                    )
-                )
-                .intervals("2000/3000")
-                .granularity(Granularities.ALL)
-                .build(),
+                  )
+              )
+              .intervals("2000/3000")
+              .granularity(Granularities.ALL)
+              .build(),
+        Queries.withBaseDataSource(
+            Druids.newTimeseriesQueryBuilder()
+                  .dataSource(
+                      new QueryDataSource(
+                          Druids.newTimeseriesQueryBuilder()
+                                .dataSource(
+                                    JoinDataSource.create(
+                                        JoinDataSource.create(
+                                            new TableDataSource("foo_inner"),
+                                            new TableDataSource("bar"),
+                                            "j1.",
+                                            "\"foo.x\" == \"bar.x\"",
+                                            JoinType.INNER,
+                                            TrueDimFilter.instance(),
+                                            ExprMacroTable.nil(),
+                                            null,
+                                            JoinAlgorithm.BROADCAST
+
+                                        ),
+                                        new TableDataSource("foo_outer"),
+                                        "j0.",
+                                        "\"foo_outer.x\" == \"bar.x\"",
+                                        JoinType.INNER,
+                                        null,
+                                        ExprMacroTable.nil(),
+                                        null,
+                                        JoinAlgorithm.BROADCAST
+
+                                    )
+
+                                )
+                                .intervals("2000/3000")
+                                .granularity(Granularities.ALL)
+                                .build()
+                      )
+                  )
+                  .intervals("2000/3000")
+                  .granularity(Granularities.ALL)
+                  .build(),
             new TableDataSource("foo")
         )
-    );
-    assertThat(
-        e,
-        DruidExceptionMatcher.defensive()
-            .expectMessageContains("Its unsafe to replace the BaseDataSource of a non-processable query")
     );
   }
 }

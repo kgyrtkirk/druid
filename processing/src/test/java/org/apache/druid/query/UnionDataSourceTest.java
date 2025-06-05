@@ -121,7 +121,7 @@ public class UnionDataSourceTest
   @Test
   public void test_isConcrete()
   {
-    Assert.assertTrue(unionDataSource.isProcessable());
+    Assert.assertTrue(unionDataSource.isConcrete());
   }
 
   @Test

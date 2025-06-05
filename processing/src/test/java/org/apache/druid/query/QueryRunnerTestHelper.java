@@ -53,7 +53,6 @@ import org.apache.druid.query.aggregation.post.ConstantPostAggregator;
 import org.apache.druid.query.aggregation.post.FieldAccessPostAggregator;
 import org.apache.druid.query.dimension.DefaultDimensionSpec;
 import org.apache.druid.query.filter.SelectorDimFilter;
-import org.apache.druid.query.planning.ExecutionVertex;
 import org.apache.druid.query.spec.MultipleIntervalSegmentSpec;
 import org.apache.druid.query.spec.QuerySegmentSpec;
 import org.apache.druid.query.spec.SpecificSegmentSpec;
@@ -557,9 +556,10 @@ public class QueryRunnerTestHelper
       final String runnerName
   )
   {
-    ExecutionVertex ev = ExecutionVertex.of(query);
-    final SegmentReference segmentReference = ev.createSegmentMapFunction()
-        .apply(ReferenceCountingSegment.wrapRootGenerationSegment(adapter));
+    final DataSource base = query.getDataSource();
+
+    final SegmentReference segmentReference = base.createSegmentMapFunction(query)
+                                                  .apply(ReferenceCountingSegment.wrapRootGenerationSegment(adapter));
     return makeQueryRunner(factory, segmentReference, runnerName);
   }
 

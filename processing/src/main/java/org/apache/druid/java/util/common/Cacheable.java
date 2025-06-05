@@ -19,15 +19,12 @@
 
 package org.apache.druid.java.util.common;
 
-import javax.annotation.Nullable;
-
 public interface Cacheable
 {
   /**
    * Get a byte array used as a cache key.
    *
-   * @return bytes to be used as cache key - or null if this object should not be cached.
+   * @return a cache key
    */
-  @Nullable
   byte[] getCacheKey();
 }

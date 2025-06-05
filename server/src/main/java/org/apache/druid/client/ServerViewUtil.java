@@ -20,9 +20,11 @@
 package org.apache.druid.client;
 
 import org.apache.druid.client.selector.ServerSelector;
+import org.apache.druid.query.DataSource;
 import org.apache.druid.query.LocatedSegmentDescriptor;
 import org.apache.druid.query.SegmentDescriptor;
 import org.apache.druid.query.TableDataSource;
+import org.apache.druid.query.planning.DataSourceAnalysis;
 import org.apache.druid.server.coordination.DruidServerMetadata;
 import org.apache.druid.timeline.TimelineLookup;
 import org.apache.druid.timeline.TimelineObjectHolder;
@@ -50,12 +52,13 @@ public class ServerViewUtil
 
   public static List<LocatedSegmentDescriptor> getTargetLocations(
       TimelineServerView serverView,
-      TableDataSource datasource,
+      DataSource datasource,
       List<Interval> intervals,
       int numCandidates
   )
   {
-    final Optional<? extends TimelineLookup<String, ServerSelector>> maybeTimeline = serverView.getTimeline(datasource);
+    final DataSourceAnalysis analysis = datasource.getAnalysis();
+    final Optional<? extends TimelineLookup<String, ServerSelector>> maybeTimeline = serverView.getTimeline(analysis.getBaseTableDataSource());
     if (!maybeTimeline.isPresent()) {
       return Collections.emptyList();
     }

@@ -23,17 +23,21 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.google.common.base.Preconditions;
-import org.apache.druid.query.cache.CacheKeyBuilder;
+import org.apache.druid.java.util.common.IAE;
+import org.apache.druid.query.planning.DataSourceAnalysis;
 import org.apache.druid.query.policy.Policy;
+import org.apache.druid.segment.SegmentReference;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
 @JsonTypeName("table")
-public class TableDataSource extends LeafDataSource
+public class TableDataSource implements DataSource
 {
   private final String name;
 
@@ -62,6 +66,22 @@ public class TableDataSource extends LeafDataSource
   }
 
   @Override
+  public List<DataSource> getChildren()
+  {
+    return Collections.emptyList();
+  }
+
+  @Override
+  public DataSource withChildren(List<DataSource> children)
+  {
+    if (!children.isEmpty()) {
+      throw new IAE("Cannot accept children");
+    }
+
+    return this;
+  }
+
+  @Override
   public boolean isCacheable(boolean isBroker)
   {
     return true;
@@ -74,9 +94,21 @@ public class TableDataSource extends LeafDataSource
   }
 
   @Override
-  public boolean isProcessable()
+  public boolean isConcrete()
   {
     return true;
+  }
+
+  @Override
+  public Function<SegmentReference, SegmentReference> createSegmentMapFunction(Query query)
+  {
+    return Function.identity();
+  }
+
+  @Override
+  public DataSource withUpdatedDataSource(DataSource newSource)
+  {
+    return newSource;
   }
 
   @Override
@@ -93,9 +125,13 @@ public class TableDataSource extends LeafDataSource
   @Override
   public byte[] getCacheKey()
   {
-    return new CacheKeyBuilder(DataSource.TABLE_DATA_SOURCE_CACHE_ID)
-        .appendString(getName())
-        .build();
+    return new byte[0];
+  }
+
+  @Override
+  public DataSourceAnalysis getAnalysis()
+  {
+    return new DataSourceAnalysis(this, null, null, Collections.emptyList(), null);
   }
 
   @Override

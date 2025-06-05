@@ -20,7 +20,6 @@
 package org.apache.druid.segment.join;
 
 import com.google.common.base.Preconditions;
-import org.apache.druid.java.util.common.Cacheable;
 import org.apache.druid.math.expr.Expr;
 import org.apache.druid.math.expr.ExprEval;
 import org.apache.druid.math.expr.ExprMacroTable;
@@ -28,7 +27,6 @@ import org.apache.druid.math.expr.Exprs;
 import org.apache.druid.math.expr.InputBindings;
 import org.apache.druid.math.expr.Parser;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -50,7 +48,7 @@ import java.util.Set;
  *
  * All of these conditions are ANDed together to get the overall condition.
  */
-public class JoinConditionAnalysis implements Cacheable
+public class JoinConditionAnalysis
 {
   private final String originalExpression;
   private final String rightPrefix;
@@ -248,11 +246,5 @@ public class JoinConditionAnalysis implements Cacheable
   public String toString()
   {
     return originalExpression;
-  }
-
-  @Override
-  public byte[] getCacheKey()
-  {
-    return originalExpression.getBytes(StandardCharsets.UTF_8);
   }
 }
