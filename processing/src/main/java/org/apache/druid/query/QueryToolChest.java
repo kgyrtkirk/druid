@@ -30,6 +30,7 @@ import org.apache.druid.guice.annotations.ExtensionPoint;
 import org.apache.druid.java.util.common.UOE;
 import org.apache.druid.java.util.common.guava.Sequence;
 import org.apache.druid.query.aggregation.MetricManipulationFn;
+import org.apache.druid.segment.SegmentReference;
 import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.timeline.LogicalSegment;
 
@@ -428,5 +429,13 @@ public abstract class QueryToolChest<ResultType, QueryType extends Query<ResultT
     DataSource dataSourceFromQuery = query.getDataSource();
     return (!(dataSourceFromQuery instanceof QueryDataSource)
         || canPerformSubquery(((QueryDataSource) dataSourceFromQuery).getQuery()));
+  }
+
+  public java.util.function.Function<SegmentReference, SegmentReference> getSegmentMapFn(Query<?> query)
+  {
+    if (canPerformSubquery(query)) {
+      query = ((QueryDataSource) query.getDataSource()).getQuery();
+    }
+    return query.getDataSource().createSegmentMapFunction(query);
   }
 }
