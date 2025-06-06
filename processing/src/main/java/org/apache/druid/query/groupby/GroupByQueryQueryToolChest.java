@@ -97,6 +97,7 @@ public class GroupByQueryQueryToolChest extends QueryToolChest<ResultRow, GroupB
   private final GroupByQueryMetricsFactory queryMetricsFactory;
   private final GroupByResourcesReservationPool groupByResourcesReservationPool;
   private final GroupByStatsProvider groupByStatsProvider;
+  private boolean junka;
 
   @VisibleForTesting
   public GroupByQueryQueryToolChest(
@@ -214,6 +215,11 @@ public class GroupByQueryQueryToolChest extends QueryToolChest<ResultRow, GroupB
           closer,
           perQueryStats
       );
+
+      if(junka) {
+      List<ResultRow> x = mergedSequence.toList();
+System.out.println(x);
+      }
 
       // Clean up the resources reserved during the execution of the query
       closer.register(() -> groupByResourcesReservationPool.clean(queryResourceId));

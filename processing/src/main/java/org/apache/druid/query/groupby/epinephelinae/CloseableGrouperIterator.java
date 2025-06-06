@@ -50,7 +50,8 @@ public class CloseableGrouperIterator<KeyType, T> implements CloseableIterator<T
   @Override
   public T next()
   {
-    return transformer.apply(iterator.next());
+    Entry<KeyType> next = iterator.next();
+    return transformer.apply(next);
   }
 
   @Override

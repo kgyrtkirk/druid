@@ -1,0 +1,59 @@
+!use druidtest://?numMergeBuffers=37
+!set outputformat mysql
+
+WITH __with__ AS (
+SELECT b.countryName, b.channel1
+FROM
+  (SELECT countryName, cityName FROM "wikipedia"
+  GROUP BY 1,2) a JOIN 
+  (SELECT countryName,cityName,LATEST(channel,10) as channel1 FROM "wikipedia"
+  GROUP BY 1,2) b on a.countryName = b.countryName and a.cityName = b.cityName 
+  GROUP BY 1,2
+  
+)
+SELECT
+t."channel1" AS "channel"
+,(COUNT(*)) AS "r"
+FROM __with__ AS t
+GROUP BY 1
+ORDER BY "r" DESC;
++------------+----+
+| channel    | r  |
++------------+----+
+| #en.wikipe | 49 |
+| #es.wikipe | 19 |
+| #fr.wikipe |  7 |
+| #ar.wikipe |  6 |
+| #ru.wikipe |  6 |
+| #de.wikipe |  5 |
+| #it.wikipe |  5 |
+| #pt.wikipe |  5 |
+| #zh.wikipe |  5 |
+| #cs.wikipe |  3 |
+| #fa.wikipe |  3 |
+| #nl.wikipe |  3 |
+| #fi.wikipe |  2 |
+| #id.wikipe |  2 |
+| #lt.wikipe |  2 |
+| #no.wikipe |  2 |
+| #pl.wikipe |  2 |
+| #ro.wikipe |  2 |
+| #tr.wikipe |  2 |
+| #uk.wikipe |  2 |
+| #da.wikipe |  1 |
+| #el.wikipe |  1 |
+| #eu.wikipe |  1 |
+| #he.wikipe |  1 |
+| #hi.wikipe |  1 |
+| #hu.wikipe |  1 |
+| #ja.wikipe |  1 |
+| #ko.wikipe |  1 |
+| #simple.wi |  1 |
+| #sk.wikipe |  1 |
+| #sr.wikipe |  1 |
+| #sv.wikipe |  1 |
+| #vi.wikipe |  1 |
++------------+----+
+(33 rows)
+
+!ok
