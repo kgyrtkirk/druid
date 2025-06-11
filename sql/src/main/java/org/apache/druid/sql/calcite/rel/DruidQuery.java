@@ -397,7 +397,6 @@ public class DruidQuery
   )
   {
     final Aggregate aggregate = Preconditions.checkNotNull(partialQuery.getAggregate(), "aggregate");
-    final Project aggregateProject = partialQuery.getAggregateProject();
 
     final List<DimensionExpression> dimensions = computeDimensions(
         partialQuery,
@@ -407,10 +406,7 @@ public class DruidQuery
         rexBuilder.getTypeFactory()
     );
 
-    final Subtotals subtotals = computeSubtotals(
-        partialQuery,
-        rowSignature
-    );
+    final Subtotals subtotals = computeSubtotals(partialQuery.getAggregate());
 
     final List<Aggregation> aggregations = computeAggregations(
         partialQuery,
@@ -439,6 +435,7 @@ public class DruidQuery
 
     final Grouping grouping = Grouping.create(dimensions, subtotals, aggregations, havingFilter, aggregateRowSignature);
 
+    final Project aggregateProject = partialQuery.getAggregateProject();
     if (aggregateProject == null) {
       return grouping;
     } else {
@@ -522,19 +519,11 @@ public class DruidQuery
    * Builds a {@link Subtotals} object based on {@link Aggregate#getGroupSets()}.
    */
   private static Subtotals computeSubtotals(
-      final PartialDruidQuery partialQuery,
-      final RowSignature rowSignature
+      final Aggregate aggregate
   )
   {
-    final Aggregate aggregate = partialQuery.getAggregate();
-
     // dimBitMapping maps from input field position to group set position (dimension number).
-    final int[] dimBitMapping;
-    if (partialQuery.getSelectProject() != null) {
-      dimBitMapping = new int[partialQuery.getSelectProject().getRowType().getFieldCount()];
-    } else {
-      dimBitMapping = new int[rowSignature.size()];
-    }
+    final int[] dimBitMapping = new int[aggregate.getInput().getRowType().getFieldCount()];
 
     int i = 0;
     for (int dimBit : aggregate.getGroupSet()) {
