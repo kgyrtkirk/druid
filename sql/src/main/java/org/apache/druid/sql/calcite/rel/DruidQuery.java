@@ -30,6 +30,7 @@ import com.google.common.primitives.Ints;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import org.apache.calcite.rel.RelFieldCollation;
+import org.apache.calcite.rel.RelNode;
 import org.apache.calcite.rel.core.Aggregate;
 import org.apache.calcite.rel.core.AggregateCall;
 import org.apache.calcite.rel.core.Filter;
@@ -332,13 +333,11 @@ public class DruidQuery
 
   @Nullable
   private static DimFilter computeHavingFilter(
-      final PartialDruidQuery partialQuery,
+      final Filter havingFilter,
       final PlannerContext plannerContext,
       final RowSignature aggregateSignature
   )
   {
-    final Filter havingFilter = partialQuery.getHavingFilter();
-
     if (havingFilter == null) {
       return null;
     }
@@ -399,17 +398,17 @@ public class DruidQuery
     final Aggregate aggregate = Preconditions.checkNotNull(partialQuery.getAggregate(), "aggregate");
 
     final List<DimensionExpression> dimensions = computeDimensions(
-        partialQuery,
+        aggregate,
         plannerContext,
         rowSignature,
         virtualColumnRegistry,
         rexBuilder.getTypeFactory()
     );
 
-    final Subtotals subtotals = computeSubtotals(partialQuery.getAggregate());
+    final Subtotals subtotals = computeSubtotals(aggregate);
 
     final List<Aggregation> aggregations = computeAggregations(
-        partialQuery,
+        aggregate,
         plannerContext,
         rowSignature,
         virtualColumnRegistry,
@@ -428,7 +427,7 @@ public class DruidQuery
     );
 
     final DimFilter havingFilter = computeHavingFilter(
-        partialQuery,
+        partialQuery.getHavingFilter(),
         plannerContext,
         aggregateRowSignature
     );
@@ -457,14 +456,14 @@ public class DruidQuery
    * @throws CannotBuildQueryException if dimensions cannot be computed
    */
   private static List<DimensionExpression> computeDimensions(
-      final PartialDruidQuery partialQuery,
+      final Aggregate aggregate,
       final PlannerContext plannerContext,
       final RowSignature rowSignature,
       final VirtualColumnRegistry virtualColumnRegistry,
       final RelDataTypeFactory typeFactory
   )
   {
-    final Aggregate aggregate = Preconditions.checkNotNull(partialQuery.getAggregate());
+    final RelNode aggregateInput = aggregate.getInput();
     final List<DimensionExpression> dimensions = new ArrayList<>();
     final String outputNamePrefix = Calcites.findUnusedPrefixForDigits("d", rowSignature.getColumnNames());
 
@@ -475,7 +474,7 @@ public class DruidQuery
       final RexNode rexNode = Expressions.fromFieldAccess(
           typeFactory,
           rowSignature,
-          partialQuery.getSelectProject(),
+          aggregateInput instanceof Project ? (Project) aggregateInput : null,
           i
       );
       final DruidExpression druidExpression = Expressions.toDruidExpression(plannerContext, rowSignature, rexNode);
@@ -562,7 +561,7 @@ public class DruidQuery
    * @throws CannotBuildQueryException if dimensions cannot be computed
    */
   private static List<Aggregation> computeAggregations(
-      final PartialDruidQuery partialQuery,
+      final Aggregate aggregate,
       final PlannerContext plannerContext,
       final RowSignature rowSignature,
       final VirtualColumnRegistry virtualColumnRegistry,
@@ -570,7 +569,7 @@ public class DruidQuery
       final boolean finalizeAggregations
   )
   {
-    final Aggregate aggregate = Preconditions.checkNotNull(partialQuery.getAggregate());
+    final RelNode aggregateInput = aggregate.getInput();
     final List<Aggregation> aggregations = new ArrayList<>();
     final String outputNamePrefix = Calcites.findUnusedPrefixForDigits("a", rowSignature.getColumnNames());
 
@@ -584,7 +583,7 @@ public class DruidQuery
           rexBuilder,
           InputAccessor.buildFor(
               aggregate,
-              partialQuery.getSelectProject(),
+              aggregateInput instanceof Project ? (Project) aggregateInput : null,
               rowSignature),
           aggregations,
           aggName,
