@@ -32,7 +32,7 @@ import java.util.UUID;
 public class DecoupledCalciteDartTest extends CalciteDartTest
 {
   @RegisterExtension
-  NotYetSupportedProcessor notYetSupportedProcessor = new NotYetSupportedProcessor(NotYetSupported.Scope.DECOUPLED);
+  NotYetSupportedProcessor notYetSupportedProcessor = new NotYetSupportedProcessor(NotYetSupported.Scope.DECOUPLED_MSQ);
 
   @RegisterExtension
   DecoupledExtension decoupledExtension = new DecoupledExtension(this);
