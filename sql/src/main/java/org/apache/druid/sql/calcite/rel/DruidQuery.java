@@ -332,13 +332,11 @@ public class DruidQuery
 
   @Nullable
   private static DimFilter computeHavingFilter(
-      final PartialDruidQuery partialQuery,
+      final Filter havingFilter,
       final PlannerContext plannerContext,
       final RowSignature aggregateSignature
   )
   {
-    final Filter havingFilter = partialQuery.getHavingFilter();
-
     if (havingFilter == null) {
       return null;
     }
@@ -397,9 +395,11 @@ public class DruidQuery
   )
   {
     final Aggregate aggregate = Preconditions.checkNotNull(partialQuery.getAggregate(), "aggregate");
+    final Project selectProject = partialQuery.getSelectProject();
 
     final List<DimensionExpression> dimensions = computeDimensions(
-        partialQuery,
+        aggregate,
+        selectProject,
         plannerContext,
         rowSignature,
         virtualColumnRegistry,
@@ -409,7 +409,8 @@ public class DruidQuery
     final Subtotals subtotals = computeSubtotals(partialQuery.getAggregate());
 
     final List<Aggregation> aggregations = computeAggregations(
-        partialQuery,
+        aggregate,
+        selectProject,
         plannerContext,
         rowSignature,
         virtualColumnRegistry,
@@ -428,7 +429,7 @@ public class DruidQuery
     );
 
     final DimFilter havingFilter = computeHavingFilter(
-        partialQuery,
+        partialQuery.getHavingFilter(),
         plannerContext,
         aggregateRowSignature
     );
@@ -457,14 +458,14 @@ public class DruidQuery
    * @throws CannotBuildQueryException if dimensions cannot be computed
    */
   private static List<DimensionExpression> computeDimensions(
-      final PartialDruidQuery partialQuery,
+      final Aggregate aggregate,
+      final Project selectProject,
       final PlannerContext plannerContext,
       final RowSignature rowSignature,
       final VirtualColumnRegistry virtualColumnRegistry,
       final RelDataTypeFactory typeFactory
   )
   {
-    final Aggregate aggregate = Preconditions.checkNotNull(partialQuery.getAggregate());
     final List<DimensionExpression> dimensions = new ArrayList<>();
     final String outputNamePrefix = Calcites.findUnusedPrefixForDigits("d", rowSignature.getColumnNames());
 
@@ -475,7 +476,7 @@ public class DruidQuery
       final RexNode rexNode = Expressions.fromFieldAccess(
           typeFactory,
           rowSignature,
-          partialQuery.getSelectProject(),
+          selectProject,
           i
       );
       final DruidExpression druidExpression = Expressions.toDruidExpression(plannerContext, rowSignature, rexNode);
@@ -562,7 +563,8 @@ public class DruidQuery
    * @throws CannotBuildQueryException if dimensions cannot be computed
    */
   private static List<Aggregation> computeAggregations(
-      final PartialDruidQuery partialQuery,
+      final Aggregate aggregate,
+      final Project selectProject,
       final PlannerContext plannerContext,
       final RowSignature rowSignature,
       final VirtualColumnRegistry virtualColumnRegistry,
@@ -570,7 +572,6 @@ public class DruidQuery
       final boolean finalizeAggregations
   )
   {
-    final Aggregate aggregate = Preconditions.checkNotNull(partialQuery.getAggregate());
     final List<Aggregation> aggregations = new ArrayList<>();
     final String outputNamePrefix = Calcites.findUnusedPrefixForDigits("a", rowSignature.getColumnNames());
 
@@ -584,7 +585,7 @@ public class DruidQuery
           rexBuilder,
           InputAccessor.buildFor(
               aggregate,
-              partialQuery.getSelectProject(),
+              selectProject,
               rowSignature),
           aggregations,
           aggName,
