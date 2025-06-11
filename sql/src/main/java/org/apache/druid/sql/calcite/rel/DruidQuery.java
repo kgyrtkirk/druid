@@ -407,7 +407,8 @@ public class DruidQuery
     );
 
     final Subtotals subtotals = computeSubtotals(
-        partialQuery,
+        aggregate,
+        selectProject,
         rowSignature
     );
 
@@ -523,16 +524,15 @@ public class DruidQuery
    * Builds a {@link Subtotals} object based on {@link Aggregate#getGroupSets()}.
    */
   private static Subtotals computeSubtotals(
-      final PartialDruidQuery partialQuery,
+      final Aggregate aggregate,
+      final Project selectProject,
       final RowSignature rowSignature
   )
   {
-    final Aggregate aggregate = partialQuery.getAggregate();
-
     // dimBitMapping maps from input field position to group set position (dimension number).
     final int[] dimBitMapping;
-    if (partialQuery.getSelectProject() != null) {
-      dimBitMapping = new int[partialQuery.getSelectProject().getRowType().getFieldCount()];
+    if (selectProject != null) {
+      dimBitMapping = new int[selectProject.getRowType().getFieldCount()];
     } else {
       dimBitMapping = new int[rowSignature.size()];
     }
