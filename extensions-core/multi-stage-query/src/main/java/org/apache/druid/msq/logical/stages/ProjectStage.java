@@ -22,6 +22,7 @@ package org.apache.druid.msq.logical.stages;
 import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.sql.calcite.planner.querygen.DruidQueryGenerator.DruidNodeStack;
 import org.apache.druid.sql.calcite.rel.VirtualColumnRegistry;
+import org.apache.druid.sql.calcite.rel.logical.DruidAggregate;
 
 class ProjectStage extends FilterStage
 {
@@ -30,9 +31,20 @@ class ProjectStage extends FilterStage
     super(stage, virtualColumnRegistry, signature);
   }
 
+  /**
+   * Copy constructor.
+   */
+  public ProjectStage(ProjectStage stage)
+  {
+    super(stage, stage.virtualColumnRegistry, stage.signature);
+  }
+
   @Override
   public LogicalStage extendWith(DruidNodeStack stack)
   {
+    if(stack.getNode() instanceof DruidAggregate) {
+
+    }
     return null;
   }
 }
