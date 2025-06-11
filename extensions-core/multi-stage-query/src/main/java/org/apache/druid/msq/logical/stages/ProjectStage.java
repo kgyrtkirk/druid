@@ -21,6 +21,8 @@ package org.apache.druid.msq.logical.stages;
 
 import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.sql.calcite.planner.querygen.DruidQueryGenerator.DruidNodeStack;
+import org.apache.druid.sql.calcite.rel.DruidQuery;
+import org.apache.druid.sql.calcite.rel.Grouping;
 import org.apache.druid.sql.calcite.rel.VirtualColumnRegistry;
 import org.apache.druid.sql.calcite.rel.logical.DruidAggregate;
 
@@ -43,6 +45,16 @@ class ProjectStage extends FilterStage
   public LogicalStage extendWith(DruidNodeStack stack)
   {
     if(stack.getNode() instanceof DruidAggregate) {
+      DruidAggregate aggregate = (DruidAggregate) stack.getNode();
+      Grouping grouping = DruidQuery.buildGrouping(
+          aggregate,
+          null,
+          null,
+          stack.getPlannerContext(),
+          signature,
+          virtualColumnRegistry,
+          false
+      );
 
     }
     return null;

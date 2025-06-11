@@ -261,7 +261,6 @@ public class DruidQuery
               plannerContext,
               computeOutputRowSignature(sourceRowSignature, null, null, null, null),
               virtualColumnRegistry,
-              rexBuilder,
               finalizeAggregations
           )
       );
@@ -390,13 +389,42 @@ public class DruidQuery
       final PlannerContext plannerContext,
       final RowSignature rowSignature,
       final VirtualColumnRegistry virtualColumnRegistry,
-      final RexBuilder rexBuilder,
       final boolean finalizeAggregations
   )
   {
     final Aggregate aggregate = Preconditions.checkNotNull(partialQuery.getAggregate(), "aggregate");
     final Project selectProject = partialQuery.getSelectProject();
     final Filter havingFilterRel = partialQuery.getHavingFilter();
+
+    final Grouping grouping = buildGrouping(
+        aggregate,
+        selectProject,
+        havingFilterRel,
+        plannerContext,
+        rowSignature,
+        virtualColumnRegistry,
+        finalizeAggregations
+    );
+
+    final Project aggregateProject = partialQuery.getAggregateProject();
+    if (aggregateProject == null) {
+      return grouping;
+    } else {
+      return grouping.applyProject(plannerContext, aggregateProject);
+    }
+  }
+
+  public static Grouping buildGrouping(
+      final Aggregate aggregate,
+      final Project selectProject,
+      final Filter havingFilterRel,
+      final PlannerContext plannerContext,
+      final RowSignature rowSignature,
+      final VirtualColumnRegistry virtualColumnRegistry,
+      final boolean finalizeAggregations
+  )
+  {
+    final RexBuilder rexBuilder = aggregate.getCluster().getRexBuilder();
 
     final List<DimensionExpression> dimensions = computeDimensions(
         aggregate,
@@ -440,13 +468,7 @@ public class DruidQuery
     );
 
     final Grouping grouping = Grouping.create(dimensions, subtotals, aggregations, havingFilter, aggregateRowSignature);
-
-    final Project aggregateProject = partialQuery.getAggregateProject();
-    if (aggregateProject == null) {
-      return grouping;
-    } else {
-      return grouping.applyProject(plannerContext, aggregateProject);
-    }
+    return grouping;
   }
 
   /**
