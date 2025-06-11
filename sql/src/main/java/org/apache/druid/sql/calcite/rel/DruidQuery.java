@@ -396,6 +396,7 @@ public class DruidQuery
   {
     final Aggregate aggregate = Preconditions.checkNotNull(partialQuery.getAggregate(), "aggregate");
     final Project selectProject = partialQuery.getSelectProject();
+    final Filter havingFilterRel = partialQuery.getHavingFilter();
 
     final List<DimensionExpression> dimensions = computeDimensions(
         aggregate,
@@ -433,7 +434,7 @@ public class DruidQuery
     );
 
     final DimFilter havingFilter = computeHavingFilter(
-        partialQuery.getHavingFilter(),
+        havingFilterRel,
         plannerContext,
         aggregateRowSignature
     );
