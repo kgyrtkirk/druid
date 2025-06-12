@@ -19,18 +19,38 @@
 
 package org.apache.druid.msq.logical.stages;
 
+import org.apache.druid.msq.logical.StageMaker;
+import org.apache.druid.msq.querykit.BaseFrameProcessorFactory;
 import org.apache.druid.sql.calcite.planner.querygen.DruidQueryGenerator.DruidNodeStack;
+import org.apache.druid.sql.calcite.rel.Grouping;
 
 public class AggregateStage extends ProjectStage
 {
-  public AggregateStage(ProjectStage stage)
+  private Grouping grouping;
+
+  public AggregateStage(ProjectStage projectStage, Grouping grouping)
   {
-    super(stage);
+    super(projectStage);
+    this.grouping = grouping;
   }
 
   @Override
   public LogicalStage extendWith(DruidNodeStack stack)
   {
     return null;
+  }
+
+  @Override
+  public BaseFrameProcessorFactory buildFrameProcessor(StageMaker stageMaker)
+  {
+    return stageMaker.makeScanFrameProcessor(null, signature, dimFilter);
+  }
+
+  public static LogicalStage buildStages(ProjectStage projectStage, Grouping grouping)
+  {
+    AggregateStage aggStage = new AggregateStage(projectStage, grouping);
+    SortStage sortStage = new SortStage(aggStage, grouping.getDimensions());
+    AggregateStage finalAggStage = new AggregateStage(sortStage, grouping);
+
   }
 }

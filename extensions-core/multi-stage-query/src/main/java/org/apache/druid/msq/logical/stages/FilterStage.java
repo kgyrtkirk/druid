@@ -27,6 +27,7 @@ import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.sql.calcite.planner.querygen.DruidQueryGenerator.DruidNodeStack;
 import org.apache.druid.sql.calcite.rel.Projection;
 import org.apache.druid.sql.calcite.rel.VirtualColumnRegistry;
+import org.apache.druid.sql.calcite.rel.logical.DruidAggregate;
 import org.apache.druid.sql.calcite.rel.logical.DruidProject;
 
 import java.util.Collections;
@@ -65,6 +66,13 @@ class FilterStage extends ReadStage
           virtualColumnRegistry,
           projection.getOutputRowSignature()
       );
+    }
+    if (stack.getNode() instanceof DruidAggregate) {
+      return new ProjectStage(
+          this,
+          virtualColumnRegistry,
+          signature
+      ).extendWith(stack);
     }
     return null;
   }
