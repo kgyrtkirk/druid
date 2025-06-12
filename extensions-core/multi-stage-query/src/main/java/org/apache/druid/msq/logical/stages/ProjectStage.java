@@ -37,10 +37,11 @@ class ProjectStage extends FilterStage
 
   /**
    * Copy constructor.
+   * @param rowSignature
    */
-  public ProjectStage(ProjectStage stage)
+  public ProjectStage(ProjectStage stage, RowSignature rowSignature)
   {
-    super(stage, stage.virtualColumnRegistry, stage.signature);
+    super(stage, stage.virtualColumnRegistry, rowSignature);
   }
 
   @Override
@@ -62,6 +63,7 @@ class ProjectStage extends FilterStage
           virtualColumnRegistry,
           false
       );
+
 
       return AggregateStage.buildStages(this, grouping);
 

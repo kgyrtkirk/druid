@@ -159,7 +159,6 @@ public class CalciteDartTest extends BaseCalciteQueryTest
         .run();
   }
 
-  @NotYetSupported(Modes.SUPPORT_AGGREGATE)
   @Test
   public void testCount()
   {
@@ -261,7 +260,6 @@ public class CalciteDartTest extends BaseCalciteQueryTest
         .run();
   }
 
-  @NotYetSupported(Modes.SUPPORT_AGGREGATE)
   @Test
   public void testSubQuery()
   {

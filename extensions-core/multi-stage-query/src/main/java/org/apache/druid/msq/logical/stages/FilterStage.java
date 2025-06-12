@@ -83,4 +83,14 @@ class FilterStage extends ReadStage
     VirtualColumns virtualColumns = virtualColumnRegistry.build(Collections.emptySet());
     return StageMaker.makeScanFrameProcessor(virtualColumns, signature, dimFilter);
   }
+
+  public DimFilter getDimFilter()
+  {
+    return dimFilter;
+  }
+
+  public VirtualColumns getVirtualColumns()
+  {
+    return virtualColumnRegistry.build(Collections.emptySet());
+  }
 }

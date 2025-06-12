@@ -19,19 +19,57 @@
 
 package org.apache.druid.msq.logical.stages;
 
+import org.apache.druid.frame.key.KeyColumn;
+import org.apache.druid.frame.key.KeyOrder;
+import org.apache.druid.java.util.common.granularity.Granularities;
+import org.apache.druid.msq.logical.LogicalInputSpec;
 import org.apache.druid.msq.logical.StageMaker;
 import org.apache.druid.msq.querykit.BaseFrameProcessorFactory;
+import org.apache.druid.msq.querykit.groupby.GroupByPostShuffleFrameProcessorFactory;
+import org.apache.druid.msq.querykit.groupby.GroupByPreShuffleFrameProcessorFactory;
+import org.apache.druid.query.TableDataSource;
+import org.apache.druid.query.groupby.GroupByQuery;
+import org.apache.druid.query.spec.QuerySegmentSpec;
+import org.apache.druid.segment.column.RowSignature.Finalization;
+import org.apache.druid.sql.calcite.aggregation.DimensionExpression;
 import org.apache.druid.sql.calcite.planner.querygen.DruidQueryGenerator.DruidNodeStack;
 import org.apache.druid.sql.calcite.rel.Grouping;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class AggregateStage extends ProjectStage
 {
-  private Grouping grouping;
-
-  public AggregateStage(ProjectStage projectStage, Grouping grouping)
+  static class PostShuffleStage extends AbstractFrameProcessorStage
   {
-    super(projectStage);
-    this.grouping = grouping;
+    private GroupByQuery gby;
+
+    public PostShuffleStage(LogicalStage inputStage, GroupByQuery gby)
+    {
+      super(inputStage.getRowSignature(), LogicalInputSpec.of(inputStage));
+      this.gby = gby;
+    }
+
+    @Override
+    public LogicalStage extendWith(DruidNodeStack stack)
+    {
+      return null;
+    }
+
+    @Override
+    public BaseFrameProcessorFactory buildFrameProcessor(StageMaker stageMaker)
+    {
+      return new GroupByPostShuffleFrameProcessorFactory(gby);
+    }
+  }
+
+  // FIXME : this shouldn't be a Query
+  private GroupByQuery gby;
+
+  public AggregateStage(ProjectStage projectStage, GroupByQuery gby)
+  {
+    super(projectStage, gby.getResultRowSignature(Finalization.NO));
+    this.gby = gby;
   }
 
   @Override
@@ -43,14 +81,43 @@ public class AggregateStage extends ProjectStage
   @Override
   public BaseFrameProcessorFactory buildFrameProcessor(StageMaker stageMaker)
   {
-    return stageMaker.makeScanFrameProcessor(null, signature, dimFilter);
+    return new GroupByPreShuffleFrameProcessorFactory(gby);
   }
 
   public static LogicalStage buildStages(ProjectStage projectStage, Grouping grouping)
   {
-    AggregateStage aggStage = new AggregateStage(projectStage, grouping);
-    SortStage sortStage = new SortStage(aggStage, grouping.getDimensions());
-    AggregateStage finalAggStage = new AggregateStage(sortStage, grouping);
+    GroupByQuery gby = makeGbyQuery(projectStage, grouping);
+    AggregateStage aggStage = new AggregateStage(projectStage, gby);
+    SortStage sortStage = new SortStage(aggStage, getKeyColumns(grouping.getDimensions()));
+    PostShuffleStage finalAggStage = new PostShuffleStage(sortStage,gby);
+    return finalAggStage;
+  }
 
+  private static GroupByQuery makeGbyQuery(ProjectStage projectStage, Grouping grouping)
+  {
+    GroupByQuery.Builder builder = GroupByQuery.builder();
+    builder.setDimensions(grouping.getDimensionSpecs());
+    builder.setQuerySegmentSpec(QuerySegmentSpec.ETERNITY);
+    builder.setGranularity(Granularities.ALL);
+    builder.setAggregatorSpecs(grouping.getAggregatorFactories());
+    builder.setDimFilter(projectStage.getDimFilter());
+    builder.setVirtualColumns(projectStage.getVirtualColumns());
+    builder.setDataSource(new TableDataSource("DYMMT"));
+
+    try {
+      return builder.build();
+    }
+    catch (Exception e) {
+      throw e;
+    }
+  }
+
+  private static List<KeyColumn> getKeyColumns(List<DimensionExpression> dimensions)
+  {
+    List<KeyColumn> columns = new ArrayList<>();
+    for (DimensionExpression dimension : dimensions) {
+      columns.add(new KeyColumn(dimension.getOutputName(), KeyOrder.ASCENDING));
+    }
+    return columns;
   }
 }
