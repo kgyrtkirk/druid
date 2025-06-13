@@ -383,37 +383,6 @@ public class DruidQuery
     }
   }
 
-  @Nonnull
-  private static Grouping computeGrouping(
-      final PartialDruidQuery partialQuery,
-      final PlannerContext plannerContext,
-      final RowSignature rowSignature,
-      final VirtualColumnRegistry virtualColumnRegistry,
-      final boolean finalizeAggregations
-  )
-  {
-    final Aggregate aggregate = Preconditions.checkNotNull(partialQuery.getAggregate(), "aggregate");
-    final Project selectProject = partialQuery.getSelectProject();
-    final Filter havingFilterRel = partialQuery.getHavingFilter();
-
-    final Grouping grouping = buildGrouping(
-        aggregate,
-        selectProject,
-        havingFilterRel,
-        plannerContext,
-        rowSignature,
-        virtualColumnRegistry,
-        finalizeAggregations
-    );
-
-    final Project aggregateProject = partialQuery.getAggregateProject();
-    if (aggregateProject == null) {
-      return grouping;
-    } else {
-      return grouping.applyProject(plannerContext, aggregateProject);
-    }
-  }
-
   public static Grouping buildGrouping(
       final Aggregate aggregate,
       final Project selectProject,
@@ -469,6 +438,37 @@ public class DruidQuery
 
     final Grouping grouping = Grouping.create(dimensions, subtotals, aggregations, havingFilter, aggregateRowSignature);
     return grouping;
+  }
+
+  @Nonnull
+  private static Grouping computeGrouping(
+      final PartialDruidQuery partialQuery,
+      final PlannerContext plannerContext,
+      final RowSignature rowSignature,
+      final VirtualColumnRegistry virtualColumnRegistry,
+      final boolean finalizeAggregations
+  )
+  {
+    final Aggregate aggregate = Preconditions.checkNotNull(partialQuery.getAggregate(), "aggregate");
+    final Project selectProject = partialQuery.getSelectProject();
+    final Filter havingFilterRel = partialQuery.getHavingFilter();
+
+    final Grouping grouping = buildGrouping(
+        aggregate,
+        selectProject,
+        havingFilterRel,
+        plannerContext,
+        rowSignature,
+        virtualColumnRegistry,
+        finalizeAggregations
+    );
+
+    final Project aggregateProject = partialQuery.getAggregateProject();
+    if (aggregateProject == null) {
+      return grouping;
+    } else {
+      return grouping.applyProject(plannerContext, aggregateProject);
+    }
   }
 
   /**
