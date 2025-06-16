@@ -67,7 +67,6 @@ COPY launch.sh /
 # here, so they are easier to describe and debug. Turn on the "-x" flag
 # within the script to trace the steps if needed for debugging.
 
-ARG DRUID_UID
 RUN bash /test-setup.sh
 
 # Start in the Druid directory.
