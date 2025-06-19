@@ -670,7 +670,7 @@
                                 -Duser.timezone=UTC
                                 -Dfile.encoding=UTF-8
                                 -Ddruid.test.config.dockerIp=${env.DOCKER_IP}
-                                "-Ddruid.test.config.extraDatasourceNameSuffix=${extra.datasource.name.suffix}"
+                                -Ddruid.test.config.extraDatasourceNameSuffix=${extra.datasource.name.suffix}
                                 -Ddruid.zk.service.host=${env.DOCKER_IP}
                                 -Ddruid.client.https.trustStorePath=client_tls/truststore.jks
                                 -Ddruid.client.https.trustStorePassword=druid123
