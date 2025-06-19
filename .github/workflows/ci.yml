@@ -25,7 +25,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pattern: [] #[ "A*,G*,R*", "B*,O*,S*,X*,Y*,Z*", "C*,E*", "D*,J*,K*", "F*,H*,U*", "I*,N*,T*", "L*,Q*,W*", "M*,P*,V*,_*,$*"]
+        pattern: [ "C*", "H*,U*,V*", "N*,Q*,S*", "B*,O*,R*", "G*,J*,K*", "F*,L*,M*", "A*,D*,I*,X*,Y*,Z*", "E*,P*,T*,W*"]
     uses: ./.github/workflows/worker.yml
     with:
       script: .github/scripts/run_unit-tests -Dtest='${{ matrix.Dtest }}' -Dmaven.test.failure.ignore=true -pl '!quidem-ut'
@@ -74,7 +74,7 @@ jobs:
       fail-fast: false
       matrix:
         jdk: [ "11", "21.0.4" ]
-        pattern: [ "A*,G*,R*", "B*,O*,S*,X*,Y*,Z*", "C*,E*", "D*,J*,K*", "F*,H*,U*", "I*,N*,T*", "L*,Q*,W*", "M*,P*,V*"]
+        pattern: [ "C*", "H*,U*,V*", "N*,Q*,S*", "B*,O*,R*", "G*,J*,K*", "F*,L*,M*", "A*,D*,I*,X*,Y*,Z*", "E*,P*,T*,W*"]
     uses: ./.github/workflows/worker.yml
     with:
       script: .github/scripts/run_unit-tests -Dtest='${{ matrix.pattern }}' -fae
@@ -95,5 +95,3 @@ jobs:
       script: ${{ matrix.script }}
       key: ${{ matrix.key }}
       jdk: 17
-
-
