@@ -27,7 +27,7 @@ jobs:
     uses: ./.github/workflows/worker.yml
     with:
       script: .github/scripts/run_integration-tests
-      jdk: ${{ inputs.jdk }}
+      jdk: 17
       key: run_integration-tests
 
   run-unit-tests:
