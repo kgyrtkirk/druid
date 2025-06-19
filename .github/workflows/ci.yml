@@ -20,16 +20,6 @@ on:
 
 jobs:
 
-  run-it:
-    name: "it"
-    strategy:
-      fail-fast: false
-    uses: ./.github/workflows/worker.yml
-    with:
-      script: .github/scripts/run_integration-tests
-      jdk: 17
-      key: run_integration-tests
-
   run-unit-tests:
     name: "unit tests(main)"
     strategy:
@@ -38,7 +28,7 @@ jobs:
         pattern: [] #[ "A*,G*,R*", "B*,O*,S*,X*,Y*,Z*", "C*,E*", "D*,J*,K*", "F*,H*,U*", "I*,N*,T*", "L*,Q*,W*", "M*,P*,V*,_*,$*"]
     uses: ./.github/workflows/worker.yml
     with:
-      script: .github/scripts/run_unit-tests -Dtest='${{ matrix.Dtest }}' -Dmaven.test.failure.ignore=true
+      script: .github/scripts/run_unit-tests -Dtest='${{ matrix.Dtest }}' -Dmaven.test.failure.ignore=true -pl '!quidem-ut'
       jdk: 17
       artifact_prefix: "unit-test-reports"
       key: "test-jdk17-[${{ matrix.pattern }}]"
@@ -87,6 +77,23 @@ jobs:
         pattern: [ "A*,G*,R*", "B*,O*,S*,X*,Y*,Z*", "C*,E*", "D*,J*,K*", "F*,H*,U*", "I*,N*,T*", "L*,Q*,W*", "M*,P*,V*"]
     uses: ./.github/workflows/worker.yml
     with:
-      script: .github/scripts/run-unit-tests.sh -Dtest='${{ matrix.pattern }}' -fae
+      script: .github/scripts/run_unit-tests -Dtest='${{ matrix.pattern }}' -fae
       jdk: ${{ matrix.jdk }}
       key: "test-jdk${{ matrix.jdk }}-[${{ matrix.pattern }}]"
+
+  run-it:
+    needs: test-report
+    name: "it"
+    strategy:
+      fail-fast: false
+    matrix:
+      include:
+        - key: QTest
+          script: .github/scripts/run_unit-tests -pl '!quidem-ut'
+    uses: ./.github/workflows/worker.yml
+    with:
+      script: ${{ matrix.script }}
+      key: ${{ matrix.key }}
+      jdk: ${{ matrix.jdk || '17' }}
+
+
