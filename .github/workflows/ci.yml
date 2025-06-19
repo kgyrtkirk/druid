@@ -86,10 +86,10 @@ jobs:
     name: "it"
     strategy:
       fail-fast: false
-    matrix:
-      include:
-        - key: QTest
-          script: .github/scripts/run_unit-tests -pl '!quidem-ut'
+      matrix:
+        include:
+          - key: QTest
+            script: .github/scripts/run_unit-tests -pl '!quidem-ut'
     uses: ./.github/workflows/worker.yml
     with:
       script: ${{ matrix.script }}
