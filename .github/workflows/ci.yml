@@ -94,6 +94,6 @@ jobs:
     with:
       script: ${{ matrix.script }}
       key: ${{ matrix.key }}
-      jdk: ${{ matrix.jdk || '17' }}
+      jdk: 17
 
 
