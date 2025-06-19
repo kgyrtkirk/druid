@@ -28,7 +28,7 @@ jobs:
         pattern: [ "C*", "H*,U*,V*", "N*,Q*,S*", "B*,O*,R*", "G*,J*,K*", "F*,L*,M*", "A*,D*,I*,X*,Y*,Z*", "E*,P*,T*,W*"]
     uses: ./.github/workflows/worker.yml
     with:
-      script: .github/scripts/run_unit-tests -Dtest='${{ matrix.Dtest }}' -Dmaven.test.failure.ignore=true -pl '!quidem-ut'
+      script: .github/scripts/run_unit-tests -Dtest='${{ matrix.pattern }}' -Dmaven.test.failure.ignore=true -pl '!quidem-ut'
       jdk: 17
       artifact_prefix: "unit-test-reports"
       key: "test-jdk17-[${{ matrix.pattern }}]"
@@ -89,7 +89,7 @@ jobs:
       matrix:
         include:
           - key: QTest
-            script: .github/scripts/run_unit-tests -pl '!quidem-ut'
+            script: .github/scripts/run_unit-tests -pl 'quidem-ut'
     uses: ./.github/workflows/worker.yml
     with:
       script: ${{ matrix.script }}
