@@ -194,9 +194,8 @@ public class SegmentGeneratorFrameProcessorFactory
                   frameContext.indexMerger(),
                   meters,
                   parseExceptionHandler,
-                  true,
                   // MSQ doesn't support CentralizedDatasourceSchema feature as of now.
-                  CentralizedDatasourceSchemaConfig.create(false)
+                  CentralizedDatasourceSchemaConfig.enabled(false)
               );
 
           return new SegmentGeneratorFrameProcessor(

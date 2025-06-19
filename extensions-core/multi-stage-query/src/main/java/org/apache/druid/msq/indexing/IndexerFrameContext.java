@@ -21,7 +21,6 @@ package org.apache.druid.msq.indexing;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.druid.collections.ResourceHolder;
-import org.apache.druid.java.util.common.ISE;
 import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.msq.exec.DataServerQueryHandlerFactory;
 import org.apache.druid.msq.exec.ProcessingBuffers;
@@ -31,13 +30,13 @@ import org.apache.druid.msq.kernel.FrameContext;
 import org.apache.druid.msq.kernel.StageId;
 import org.apache.druid.msq.querykit.DataSegmentProvider;
 import org.apache.druid.query.groupby.GroupingEngine;
+import org.apache.druid.query.policy.PolicyEnforcer;
 import org.apache.druid.segment.IndexIO;
 import org.apache.druid.segment.IndexMergerV9;
 import org.apache.druid.segment.SegmentWrangler;
 import org.apache.druid.segment.incremental.RowIngestionMeters;
 import org.apache.druid.segment.loading.DataSegmentPusher;
 
-import javax.annotation.Nullable;
 import java.io.File;
 
 public class IndexerFrameContext implements FrameContext
@@ -46,7 +45,6 @@ public class IndexerFrameContext implements FrameContext
   private final IndexerWorkerContext context;
   private final IndexIO indexIO;
   private final DataSegmentProvider dataSegmentProvider;
-  @Nullable
   private final ResourceHolder<ProcessingBuffers> processingBuffers;
   private final WorkerMemoryParameters memoryParameters;
   private final WorkerStorageParameters storageParameters;
@@ -57,7 +55,7 @@ public class IndexerFrameContext implements FrameContext
       IndexerWorkerContext context,
       IndexIO indexIO,
       DataSegmentProvider dataSegmentProvider,
-      @Nullable ResourceHolder<ProcessingBuffers> processingBuffers,
+      ResourceHolder<ProcessingBuffers> processingBuffers,
       DataServerQueryHandlerFactory dataServerQueryHandlerFactory,
       WorkerMemoryParameters memoryParameters,
       WorkerStorageParameters storageParameters
@@ -71,6 +69,12 @@ public class IndexerFrameContext implements FrameContext
     this.memoryParameters = memoryParameters;
     this.storageParameters = storageParameters;
     this.dataServerQueryHandlerFactory = dataServerQueryHandlerFactory;
+  }
+
+  @Override
+  public PolicyEnforcer policyEnforcer()
+  {
+    return context.policyEnforcer();
   }
 
   @Override
@@ -144,11 +148,7 @@ public class IndexerFrameContext implements FrameContext
   @Override
   public ProcessingBuffers processingBuffers()
   {
-    if (processingBuffers != null) {
-      return processingBuffers.get();
-    } else {
-      throw new ISE("No processing buffers");
-    }
+    return processingBuffers.get();
   }
 
   @Override
@@ -166,8 +166,6 @@ public class IndexerFrameContext implements FrameContext
   @Override
   public void close()
   {
-    if (processingBuffers != null) {
-      processingBuffers.close();
-    }
+    processingBuffers.close();
   }
 }

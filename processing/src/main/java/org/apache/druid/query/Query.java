@@ -33,7 +33,6 @@ import org.apache.druid.query.filter.DimFilter;
 import org.apache.druid.query.groupby.GroupByQuery;
 import org.apache.druid.query.metadata.metadata.SegmentMetadataQuery;
 import org.apache.druid.query.operator.WindowOperatorQuery;
-import org.apache.druid.query.planning.DataSourceAnalysis;
 import org.apache.druid.query.scan.ScanQuery;
 import org.apache.druid.query.search.SearchQuery;
 import org.apache.druid.query.select.SelectQuery;
@@ -292,9 +291,16 @@ public interface Query<T>
     );
   }
 
-  default DataSourceAnalysis getDataSourceAnalysis()
+  /**
+   * Signals that the execution of this query could also transparently handle
+   * the input {@link QueryDataSource} as well.
+   *
+   * This is a not-so-nice way to support that {@link GroupByQuery} could
+   * collapse other {@link GroupByQuery}-ies in {@link QueryDataSource}-es.
+   */
+  default boolean mayCollapseQueryDataSource()
   {
-    return getDataSource().getAnalysis().maybeWithBaseQuery(this);
+    return false;
   }
 
   default RowSignature getResultRowSignature()

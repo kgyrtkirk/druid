@@ -55,9 +55,9 @@ import org.apache.druid.segment.IndexIO;
 import org.apache.druid.segment.IndexMerger;
 import org.apache.druid.segment.QueryableIndex;
 import org.apache.druid.segment.QueryableIndexSegment;
-import org.apache.druid.segment.ReferenceCountingSegment;
 import org.apache.druid.segment.SchemaPayload;
 import org.apache.druid.segment.SchemaPayloadPlus;
+import org.apache.druid.segment.Segment;
 import org.apache.druid.segment.SegmentSchemaMapping;
 import org.apache.druid.segment.incremental.IncrementalIndexAddResult;
 import org.apache.druid.segment.incremental.IndexSizeExceededException;
@@ -74,7 +74,6 @@ import org.apache.druid.timeline.DataSegment;
 import org.joda.time.Interval;
 
 import javax.annotation.Nullable;
-import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
@@ -120,7 +119,6 @@ public class BatchAppenderator implements Appenderator
   private final IndexMerger indexMerger;
   private final long maxBytesTuningConfig;
   private final boolean skipBytesInMemoryOverheadCheck;
-  private final boolean useMaxMemoryEstimates;
 
   private volatile ListeningExecutorService persistExecutor = null;
   private volatile ListeningExecutorService pushExecutor = null;
@@ -171,7 +169,6 @@ public class BatchAppenderator implements Appenderator
       IndexMerger indexMerger,
       RowIngestionMeters rowIngestionMeters,
       ParseExceptionHandler parseExceptionHandler,
-      boolean useMaxMemoryEstimates,
       CentralizedDatasourceSchemaConfig centralizedDatasourceSchemaConfig
   )
   {
@@ -189,7 +186,6 @@ public class BatchAppenderator implements Appenderator
     maxBytesTuningConfig = tuningConfig.getMaxBytesInMemoryOrDefault();
     skipBytesInMemoryOverheadCheck = tuningConfig.isSkipBytesInMemoryOverheadCheck();
     maxPendingPersists = tuningConfig.getMaxPendingPersists();
-    this.useMaxMemoryEstimates = useMaxMemoryEstimates;
     this.centralizedDatasourceSchemaConfig = centralizedDatasourceSchemaConfig;
     this.fingerprintGenerator = new FingerprintGenerator(objectMapper);
   }
@@ -480,8 +476,7 @@ public class BatchAppenderator implements Appenderator
           identifier.getVersion(),
           tuningConfig.getAppendableIndexSpec(),
           tuningConfig.getMaxRowsInMemory(),
-          maxBytesTuningConfig,
-          useMaxMemoryEstimates
+          maxBytesTuningConfig
       );
       bytesCurrentlyInMemory += calculateSinkMemoryInUsed();
       sinks.put(identifier, retVal);
@@ -815,14 +810,14 @@ public class BatchAppenderator implements Appenderator
       Closer closer = Closer.create();
       try {
         for (FireHydrant fireHydrant : sink) {
-          Pair<ReferenceCountingSegment, Closeable> segmentAndCloseable = fireHydrant.getAndIncrementSegment();
-          final QueryableIndex queryableIndex = segmentAndCloseable.lhs.as(QueryableIndex.class);
+          final Segment segment = fireHydrant.acquireSegment();
+          final QueryableIndex queryableIndex = segment.as(QueryableIndex.class);
           if (queryableIndex != null) {
             rowsinMergedSegment += queryableIndex.getNumRows();
           }
           log.debug("Segment[%s] adding hydrant[%s]", identifier, fireHydrant);
           indexes.add(queryableIndex);
-          closer.register(segmentAndCloseable.rhs);
+          closer.register(segment);
         }
 
         mergedFile = indexMerger.mergeQueryableIndex(
@@ -1073,7 +1068,6 @@ public class BatchAppenderator implements Appenderator
         tuningConfig.getAppendableIndexSpec(),
         tuningConfig.getMaxRowsInMemory(),
         maxBytesTuningConfig,
-        useMaxMemoryEstimates,
         hydrants
     );
     retVal.finishWriting(); // this sink is not writable

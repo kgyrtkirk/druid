@@ -22,6 +22,7 @@ package org.apache.druid.sql.calcite.util;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -32,6 +33,7 @@ import org.apache.druid.client.DruidServer;
 import org.apache.druid.client.FilteredServerInventoryView;
 import org.apache.druid.client.ServerInventoryView;
 import org.apache.druid.client.ServerView;
+import org.apache.druid.client.TimelineServerView;
 import org.apache.druid.discovery.DiscoveryDruidNode;
 import org.apache.druid.discovery.DruidLeaderClient;
 import org.apache.druid.discovery.DruidNodeDiscovery;
@@ -83,9 +85,7 @@ import org.apache.druid.sql.calcite.BaseCalciteQueryTest;
 import org.apache.druid.sql.calcite.aggregation.SqlAggregationModule;
 import org.apache.druid.sql.calcite.planner.DruidOperatorTable;
 import org.apache.druid.sql.calcite.planner.PlannerConfig;
-import org.apache.druid.sql.calcite.planner.PlannerFactory;
 import org.apache.druid.sql.calcite.run.NativeSqlEngine;
-import org.apache.druid.sql.calcite.run.SqlEngine;
 import org.apache.druid.sql.calcite.schema.BrokerSegmentMetadataCacheConfig;
 import org.apache.druid.sql.calcite.schema.DruidSchema;
 import org.apache.druid.sql.calcite.schema.DruidSchemaCatalog;
@@ -123,6 +123,7 @@ public class CalciteTests
   public static final String BROADCAST_DATASOURCE = "broadcast";
   public static final String FORBIDDEN_DATASOURCE = "forbiddenDatasource";
   public static final String RESTRICTED_DATASOURCE = "restrictedDatasource_m1_is_6";
+  public static final String RESTRICTED_BROADCAST_DATASOURCE = "restrictedBroadcastDatasource_m1_is_6";
   public static final String FORBIDDEN_DESTINATION = "forbiddenDestination";
   public static final String SOME_DATASOURCE = "some_datasource";
   public static final String SOME_DATSOURCE_ESCAPED = "some\\_datasource";
@@ -147,7 +148,8 @@ public class CalciteTests
     public Authorizer getAuthorizer(String name)
     {
       return (authenticationResult, resource, action) -> {
-        boolean readRestrictedTable = resource.getName().equals(RESTRICTED_DATASOURCE) && action.equals(Action.READ);
+        boolean readRestrictedTable = ImmutableSet.of(RESTRICTED_DATASOURCE, RESTRICTED_BROADCAST_DATASOURCE)
+                                                  .contains(resource.getName()) && action.equals(Action.READ);
 
         if (TEST_SUPERUSER_NAME.equals(authenticationResult.getIdentity())) {
           return readRestrictedTable ? Access.allowWithRestriction(POLICY_NO_RESTRICTION_SUPERUSER) : Access.OK;
@@ -191,7 +193,8 @@ public class CalciteTests
     public Authorizer getAuthorizer(String name)
     {
       return (authenticationResult, resource, action) -> {
-        boolean readRestrictedTable = resource.getName().equals(RESTRICTED_DATASOURCE) && action.equals(Action.READ);
+        boolean readRestrictedTable = ImmutableSet.of(RESTRICTED_DATASOURCE, RESTRICTED_BROADCAST_DATASOURCE)
+                                                  .contains(resource.getName()) && action.equals(Action.READ);
 
         if (TEST_SUPERUSER_NAME.equals(authenticationResult.getIdentity())) {
           return readRestrictedTable ? Access.allowWithRestriction(POLICY_NO_RESTRICTION_SUPERUSER) : Access.OK;
@@ -282,7 +285,16 @@ public class CalciteTests
       final QueryRunnerFactoryConglomerate conglomerate
   )
   {
-    return new NativeSqlEngine(createMockQueryLifecycleFactory(walker, conglomerate), getJsonMapper());
+    return createMockSqlEngine(walker, conglomerate, null);
+  }
+
+  public static NativeSqlEngine createMockSqlEngine(
+      final QuerySegmentWalker walker,
+      final QueryRunnerFactoryConglomerate conglomerate,
+      final SqlStatementFactory sqlStatementFactory
+  )
+  {
+    return new NativeSqlEngine(createMockQueryLifecycleFactory(walker, conglomerate), getJsonMapper(), sqlStatementFactory);
   }
 
   public static QueryLifecycleFactory createMockQueryLifecycleFactory(
@@ -290,24 +302,11 @@ public class CalciteTests
       final QueryRunnerFactoryConglomerate conglomerate
   )
   {
-    return QueryFrameworkUtils.createMockQueryLifecycleFactory(walker, conglomerate);
-  }
-
-  public static SqlStatementFactory createSqlStatementFactory(
-      final SqlEngine engine,
-      final PlannerFactory plannerFactory
-  )
-  {
-    return createSqlStatementFactory(engine, plannerFactory, new AuthConfig());
-  }
-
-  public static SqlStatementFactory createSqlStatementFactory(
-      final SqlEngine engine,
-      final PlannerFactory plannerFactory,
-      final AuthConfig authConfig
-  )
-  {
-    return QueryFrameworkUtils.createSqlStatementFactory(engine, plannerFactory, authConfig);
+    return QueryFrameworkUtils.createMockQueryLifecycleFactory(
+        walker,
+        conglomerate,
+        CalciteTests.TEST_AUTHORIZER_MAPPER
+    );
   }
 
   public static ObjectMapper getJsonMapper()
@@ -401,6 +400,15 @@ public class CalciteTests
       final AuthorizerMapper authorizerMapper
   )
   {
+    return createMockSystemSchema(druidSchema, new TestTimelineServerView(walker.getSegments()), authorizerMapper);
+  }
+
+  public static SystemSchema createMockSystemSchema(
+      final DruidSchema druidSchema,
+      final TimelineServerView timelineServerView,
+      final AuthorizerMapper authorizerMapper
+  )
+  {
     final DruidNode coordinatorNode = mockCoordinatorNode();
     FakeDruidNodeDiscoveryProvider provider = mockDruidNodeDiscoveryProvider(coordinatorNode);
 
@@ -474,7 +482,7 @@ public class CalciteTests
             new BrokerSegmentWatcherConfig(),
             BrokerSegmentMetadataCacheConfig.create()
         ),
-        new TestTimelineServerView(walker.getSegments()),
+        timelineServerView,
         new FakeServerInventoryView(),
         authorizerMapper,
         druidLeaderClient,
@@ -528,7 +536,7 @@ public class CalciteTests
   /**
    * A fake {@link DruidNodeDiscoveryProvider} for {@link #createMockSystemSchema}.
    */
-  private static class FakeDruidNodeDiscoveryProvider extends DruidNodeDiscoveryProvider
+  public static class FakeDruidNodeDiscoveryProvider extends DruidNodeDiscoveryProvider
   {
     private final Map<NodeRole, FakeDruidNodeDiscovery> nodeDiscoveries;
 

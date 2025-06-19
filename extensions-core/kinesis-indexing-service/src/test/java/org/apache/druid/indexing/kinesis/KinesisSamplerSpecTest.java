@@ -37,6 +37,7 @@ import org.apache.druid.data.input.impl.StringDimensionSchema;
 import org.apache.druid.data.input.impl.StringInputRowParser;
 import org.apache.druid.data.input.impl.TimestampSpec;
 import org.apache.druid.data.input.kinesis.KinesisRecordEntity;
+import org.apache.druid.indexer.granularity.UniformGranularitySpec;
 import org.apache.druid.indexing.kinesis.supervisor.KinesisSupervisorIOConfig;
 import org.apache.druid.indexing.kinesis.supervisor.KinesisSupervisorSpec;
 import org.apache.druid.indexing.overlord.sampler.InputSourceSampler;
@@ -51,7 +52,6 @@ import org.apache.druid.java.util.common.parsers.JSONPathSpec;
 import org.apache.druid.query.aggregation.CountAggregatorFactory;
 import org.apache.druid.query.aggregation.DoubleSumAggregatorFactory;
 import org.apache.druid.segment.indexing.DataSchema;
-import org.apache.druid.segment.indexing.granularity.UniformGranularitySpec;
 import org.apache.druid.server.security.Action;
 import org.apache.druid.server.security.Resource;
 import org.apache.druid.server.security.ResourceAction;
@@ -121,6 +121,7 @@ public class KinesisSamplerSpecTest extends EasyMockSupport
   public void testSample() throws InterruptedException
   {
     KinesisSupervisorSpec supervisorSpec = new KinesisSupervisorSpec(
+        null,
         null,
         DATA_SCHEMA,
         null,
@@ -201,6 +202,7 @@ public class KinesisSamplerSpecTest extends EasyMockSupport
 
     KinesisSupervisorSpec supervisorSpec = new KinesisSupervisorSpec(
         null,
+        null,
         dataSchema,
         null,
         new KinesisSupervisorIOConfig(
@@ -253,6 +255,7 @@ public class KinesisSamplerSpecTest extends EasyMockSupport
   public void testGetInputSourceResources()
   {
     KinesisSupervisorSpec supervisorSpec = new KinesisSupervisorSpec(
+        null,
         null,
         DATA_SCHEMA,
         null,

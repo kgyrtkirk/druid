@@ -38,6 +38,7 @@ import org.apache.druid.msq.kernel.FrameContext;
 import org.apache.druid.msq.kernel.WorkOrder;
 import org.apache.druid.msq.querykit.DataSegmentProvider;
 import org.apache.druid.query.groupby.GroupingEngine;
+import org.apache.druid.query.policy.PolicyEnforcer;
 import org.apache.druid.segment.IndexIO;
 import org.apache.druid.segment.IndexMergerV9;
 import org.apache.druid.segment.SegmentWrangler;
@@ -54,6 +55,8 @@ import java.util.Map;
 
 public class MSQTestWorkerContext implements WorkerContext
 {
+  private static final StupidPool<ByteBuffer> BUFFER_POOL = new StupidPool<>("testProcessing", () -> ByteBuffer.allocate(1_000_000));
+
   private final String workerId;
   private final Controller controller;
   private final ObjectMapper mapper;
@@ -92,6 +95,12 @@ public class MSQTestWorkerContext implements WorkerContext
   public ObjectMapper jsonMapper()
   {
     return mapper;
+  }
+
+  @Override
+  public PolicyEnforcer policyEnforcer()
+  {
+    return injector.getInstance(PolicyEnforcer.class);
   }
 
   @Override
@@ -151,7 +160,7 @@ public class MSQTestWorkerContext implements WorkerContext
   @Override
   public int maxConcurrentStages()
   {
-    return 1;
+    return 2;
   }
 
   @Override
@@ -173,6 +182,12 @@ public class MSQTestWorkerContext implements WorkerContext
     public FrameContextImpl(File tempDir)
     {
       this.tempDir = tempDir;
+    }
+
+    @Override
+    public PolicyEnforcer policyEnforcer()
+    {
+      return MSQTestWorkerContext.this.policyEnforcer();
     }
 
     @Override
@@ -250,7 +265,7 @@ public class MSQTestWorkerContext implements WorkerContext
     public ProcessingBuffers processingBuffers()
     {
       return new ProcessingBuffers(
-          new StupidPool<>("testProcessing", () -> ByteBuffer.allocate(1_000_000)),
+          BUFFER_POOL,
           new Bouncer(1)
       );
     }

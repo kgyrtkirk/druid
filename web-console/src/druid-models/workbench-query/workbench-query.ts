@@ -30,6 +30,7 @@ import {
   SqlOrderByClause,
   SqlOrderByExpression,
   SqlQuery,
+  SqlSetStatement,
 } from 'druid-query-toolkit';
 import Hjson from 'hjson';
 import * as JSONBig from 'json-bigint-native';
@@ -37,6 +38,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import type { RowColumn } from '../../utils';
 import { caseInsensitiveEquals, deleteKeys } from '../../utils';
+import type { ArrayIngestMode } from '../array-ingest-mode/array-ingest-mode';
 import type { DruidEngine } from '../druid-engine/druid-engine';
 import { validDruidEngine } from '../druid-engine/druid-engine';
 import type { LastExecution } from '../execution/execution';
@@ -46,7 +48,6 @@ import {
   externalConfigToIngestQueryPattern,
   ingestQueryPatternToQuery,
 } from '../ingest-query-pattern/ingest-query-pattern';
-import type { ArrayMode } from '../ingestion-spec/ingestion-spec';
 import type { QueryContext } from '../query-context/query-context';
 
 const ISSUE_MARKER = '--:ISSUE:';
@@ -93,10 +94,8 @@ export class WorkbenchQuery {
     externalConfig: ExternalConfig,
     timeExpression: SqlExpression | undefined,
     partitionedByHint: string | undefined,
-    arrayMode: ArrayMode,
+    arrayMode: ArrayIngestMode,
   ): WorkbenchQuery {
-    const queryContext: QueryContext = {};
-    if (arrayMode === 'arrays') queryContext.arrayIngestMode = 'array';
     return new WorkbenchQuery({
       queryString: ingestQueryPatternToQuery(
         externalConfigToIngestQueryPattern(
@@ -106,7 +105,7 @@ export class WorkbenchQuery {
           arrayMode,
         ),
       ).toString(),
-      queryContext,
+      queryContext: {},
     });
   }
 
@@ -284,6 +283,22 @@ export class WorkbenchQuery {
 
   public changeQueryString(queryString: string): WorkbenchQuery {
     return new WorkbenchQuery({ ...this.valueOf(), queryString });
+  }
+
+  public changeQueryStringContext(queryContext: QueryContext): WorkbenchQuery {
+    if (this.isJsonLike()) {
+      // JSON query: set the inner context instead of modifying the query string
+      return this.changeQueryContext(queryContext);
+    }
+    return this.changeQueryString(SqlSetStatement.setContextInText(this.queryString, queryContext));
+  }
+
+  public getQueryStringContext(): QueryContext {
+    if (this.isJsonLike()) {
+      // JSON query: return the inner context for symmetry with changeQueryStringContext
+      return this.queryContext;
+    }
+    return SqlSetStatement.getContextFromText(this.queryString);
   }
 
   public changeQueryContext(queryContext: QueryContext): WorkbenchQuery {
@@ -551,6 +566,7 @@ export class WorkbenchQuery {
     }
 
     if (engine === 'sql-msq-dart') {
+      apiQuery.context.engine = 'msq-dart';
       apiQuery.context.fullReport ??= true;
     }
 

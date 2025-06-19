@@ -28,6 +28,8 @@ import org.apache.druid.data.input.impl.ParseSpec;
 import org.apache.druid.data.input.impl.TimestampSpec;
 import org.apache.druid.indexer.TaskState;
 import org.apache.druid.indexer.TaskStatus;
+import org.apache.druid.indexer.granularity.GranularitySpec;
+import org.apache.druid.indexer.granularity.UniformGranularitySpec;
 import org.apache.druid.indexer.partitions.PartitionsSpec;
 import org.apache.druid.indexer.report.TaskReport;
 import org.apache.druid.indexing.common.LockGranularity;
@@ -53,8 +55,6 @@ import org.apache.druid.segment.DataSegmentsWithSchemas;
 import org.apache.druid.segment.Segment;
 import org.apache.druid.segment.TestIndex;
 import org.apache.druid.segment.indexing.DataSchema;
-import org.apache.druid.segment.indexing.granularity.GranularitySpec;
-import org.apache.druid.segment.indexing.granularity.UniformGranularitySpec;
 import org.apache.druid.segment.loading.SegmentCacheManager;
 import org.apache.druid.segment.loading.SegmentLoadingException;
 import org.apache.druid.segment.loading.TombstoneLoadSpec;
@@ -290,7 +290,7 @@ abstract class AbstractMultiPhaseParallelIndexingTest extends AbstractParallelIn
                 null
             )
         )
-    ).toList();
+    ).withBaggage(segment).toList();
   }
 
   private Segment loadSegment(DataSegment dataSegment, File tempSegmentDir)
@@ -298,7 +298,7 @@ abstract class AbstractMultiPhaseParallelIndexingTest extends AbstractParallelIn
     final SegmentCacheManager cacheManager = new SegmentCacheManagerFactory(TestIndex.INDEX_IO, getObjectMapper())
         .manufacturate(tempSegmentDir);
     try {
-      return cacheManager.getSegment(dataSegment);
+      return cacheManager.getSegment(dataSegment).acquireReference().orElseThrow();
     }
     catch (SegmentLoadingException e) {
       throw new RuntimeException(e);

@@ -21,7 +21,7 @@ package org.apache.druid.msq.dart.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Injector;
-import org.apache.druid.client.BrokerServerView;
+import org.apache.druid.client.TimelineServerView;
 import org.apache.druid.error.DruidException;
 import org.apache.druid.indexing.common.TaskLockType;
 import org.apache.druid.indexing.common.actions.TaskActionClient;
@@ -34,6 +34,7 @@ import org.apache.druid.msq.exec.Controller;
 import org.apache.druid.msq.exec.ControllerContext;
 import org.apache.druid.msq.exec.ControllerMemoryParameters;
 import org.apache.druid.msq.exec.MemoryIntrospector;
+import org.apache.druid.msq.exec.SegmentSource;
 import org.apache.druid.msq.exec.WorkerFailureListener;
 import org.apache.druid.msq.exec.WorkerManager;
 import org.apache.druid.msq.indexing.IndexerControllerContext;
@@ -41,10 +42,7 @@ import org.apache.druid.msq.indexing.MSQSpec;
 import org.apache.druid.msq.indexing.destination.TaskReportMSQDestination;
 import org.apache.druid.msq.input.InputSpecSlicer;
 import org.apache.druid.msq.kernel.controller.ControllerQueryKernelConfig;
-import org.apache.druid.msq.querykit.QueryKit;
-import org.apache.druid.msq.querykit.QueryKitSpec;
 import org.apache.druid.msq.util.MultiStageQueryContext;
-import org.apache.druid.query.Query;
 import org.apache.druid.query.QueryContext;
 import org.apache.druid.server.DruidNode;
 import org.apache.druid.server.coordination.DruidServerMetadata;
@@ -80,12 +78,15 @@ public class DartControllerContext implements ControllerContext
    */
   public static final int DEFAULT_MAX_NON_LEAF_WORKER_COUNT = 1;
 
+  public static final SegmentSource DEFAULT_SEGMENT_SOURCE = SegmentSource.REALTIME;
+
   private final Injector injector;
   private final ObjectMapper jsonMapper;
   private final DruidNode selfNode;
   private final DartWorkerClient workerClient;
-  private final BrokerServerView serverView;
+  private final TimelineServerView serverView;
   private final MemoryIntrospector memoryIntrospector;
+  private final QueryContext context;
   private final ServiceMetricEvent.Builder metricBuilder;
   private final ServiceEmitter emitter;
 
@@ -95,8 +96,9 @@ public class DartControllerContext implements ControllerContext
       final DruidNode selfNode,
       final DartWorkerClient workerClient,
       final MemoryIntrospector memoryIntrospector,
-      final BrokerServerView serverView,
-      final ServiceEmitter emitter
+      final TimelineServerView serverView,
+      final ServiceEmitter emitter,
+      final QueryContext context
   )
   {
     this.injector = injector;
@@ -105,6 +107,7 @@ public class DartControllerContext implements ControllerContext
     this.workerClient = workerClient;
     this.serverView = serverView;
     this.memoryIntrospector = memoryIntrospector;
+    this.context = context;
     this.metricBuilder = new ServiceMetricEvent.Builder();
     this.emitter = emitter;
   }
@@ -140,7 +143,7 @@ public class DartControllerContext implements ControllerContext
         );
 
     final int maxConcurrentStages = MultiStageQueryContext.getMaxConcurrentStagesWithDefault(
-        querySpec.getQuery().context(),
+        querySpec.getContext(),
         DEFAULT_MAX_CONCURRENT_STAGES
     );
 
@@ -183,7 +186,7 @@ public class DartControllerContext implements ControllerContext
   @Override
   public InputSpecSlicer newTableInputSpecSlicer(WorkerManager workerManager)
   {
-    return DartTableInputSpecSlicer.createFromWorkerIds(workerManager.getWorkerIds(), serverView);
+    return DartTableInputSpecSlicer.createFromWorkerIds(workerManager.getWorkerIds(), serverView, context);
   }
 
   @Override
@@ -215,30 +218,6 @@ public class DartControllerContext implements ControllerContext
   public void registerController(Controller controller, Closer closer)
   {
     closer.register(workerClient);
-  }
-
-  @Override
-  public QueryKitSpec makeQueryKitSpec(
-      final QueryKit<Query<?>> queryKit,
-      final String queryId,
-      final MSQSpec querySpec,
-      final ControllerQueryKernelConfig queryKernelConfig
-  )
-  {
-    final QueryContext queryContext = querySpec.getQuery().context();
-    return new QueryKitSpec(
-        queryKit,
-        queryId,
-        queryKernelConfig.getWorkerIds().size(),
-        queryContext.getInt(
-            CTX_MAX_NON_LEAF_WORKER_COUNT,
-            DEFAULT_MAX_NON_LEAF_WORKER_COUNT
-        ),
-        MultiStageQueryContext.getTargetPartitionsPerWorkerWithDefault(
-            queryContext,
-            DEFAULT_TARGET_PARTITIONS_PER_WORKER
-        )
-    );
   }
 
   @Override

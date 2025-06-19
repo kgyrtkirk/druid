@@ -49,6 +49,7 @@ import org.apache.druid.discovery.DruidNodeAnnouncer;
 import org.apache.druid.discovery.LookupNodeService;
 import org.apache.druid.error.DruidException;
 import org.apache.druid.indexer.TaskStatus;
+import org.apache.druid.indexer.granularity.UniformGranularitySpec;
 import org.apache.druid.indexer.report.IngestionStatsAndErrors;
 import org.apache.druid.indexer.report.SingleFileTaskReportFileWriter;
 import org.apache.druid.indexer.report.TaskReport;
@@ -67,10 +68,10 @@ import org.apache.druid.indexing.common.task.Task;
 import org.apache.druid.indexing.common.task.Tasks;
 import org.apache.druid.indexing.common.task.TestAppenderatorsManager;
 import org.apache.druid.indexing.overlord.DataSourceMetadata;
+import org.apache.druid.indexing.overlord.GlobalTaskLockbox;
 import org.apache.druid.indexing.overlord.IndexerMetadataStorageCoordinator;
 import org.apache.druid.indexing.overlord.MetadataTaskStorage;
 import org.apache.druid.indexing.overlord.Segments;
-import org.apache.druid.indexing.overlord.TaskLockbox;
 import org.apache.druid.indexing.overlord.TaskStorage;
 import org.apache.druid.indexing.overlord.supervisor.SupervisorManager;
 import org.apache.druid.indexing.test.TestDataSegmentAnnouncer;
@@ -90,6 +91,7 @@ import org.apache.druid.metadata.TestDerbyConnector;
 import org.apache.druid.metadata.segment.SqlSegmentMetadataTransactionFactory;
 import org.apache.druid.metadata.segment.cache.NoopSegmentMetadataCache;
 import org.apache.druid.query.DirectQueryProcessingPool;
+import org.apache.druid.query.DruidProcessingConfig;
 import org.apache.druid.query.Druids;
 import org.apache.druid.query.QueryPlus;
 import org.apache.druid.query.QueryRunnerFactoryConglomerate;
@@ -98,6 +100,7 @@ import org.apache.druid.query.SegmentDescriptor;
 import org.apache.druid.query.aggregation.CountAggregatorFactory;
 import org.apache.druid.query.aggregation.DoubleSumAggregatorFactory;
 import org.apache.druid.query.aggregation.LongSumAggregatorFactory;
+import org.apache.druid.query.policy.NoopPolicyEnforcer;
 import org.apache.druid.query.timeseries.TimeseriesQuery;
 import org.apache.druid.query.timeseries.TimeseriesResultValue;
 import org.apache.druid.rpc.indexing.NoopOverlordClient;
@@ -110,7 +113,6 @@ import org.apache.druid.segment.handoff.SegmentHandoffNotifier;
 import org.apache.druid.segment.handoff.SegmentHandoffNotifierFactory;
 import org.apache.druid.segment.incremental.RowIngestionMetersTotals;
 import org.apache.druid.segment.indexing.DataSchema;
-import org.apache.druid.segment.indexing.granularity.UniformGranularitySpec;
 import org.apache.druid.segment.join.NoopJoinableFactory;
 import org.apache.druid.segment.loading.DataSegmentPusher;
 import org.apache.druid.segment.loading.LocalDataSegmentPusher;
@@ -123,6 +125,7 @@ import org.apache.druid.server.DruidNode;
 import org.apache.druid.server.coordination.DataSegmentServerAnnouncer;
 import org.apache.druid.server.coordination.ServerType;
 import org.apache.druid.server.coordinator.simulate.TestDruidLeaderSelector;
+import org.apache.druid.server.metrics.NoopServiceEmitter;
 import org.apache.druid.server.security.AuthTestUtils;
 import org.apache.druid.timeline.DataSegment;
 import org.apache.druid.utils.CompressionUtils;
@@ -198,7 +201,7 @@ public abstract class SeekableStreamIndexTaskTestBase extends EasyMockSupport
   protected File reportsFile;
   protected TaskToolboxFactory toolboxFactory;
   protected TaskStorage taskStorage;
-  protected TaskLockbox taskLockbox;
+  protected GlobalTaskLockbox taskLockbox;
   protected IndexerMetadataStorageCoordinator metadataStorageCoordinator;
   protected final Set<Integer> checkpointRequestsHash = new HashSet<>();
   protected SegmentSchemaManager segmentSchemaManager;
@@ -595,7 +598,8 @@ public abstract class SeekableStreamIndexTaskTestBase extends EasyMockSupport
             derby.metadataTablesConfigSupplier().get(),
             derbyConnector,
             new TestDruidLeaderSelector(),
-            new NoopSegmentMetadataCache()
+            NoopSegmentMetadataCache.instance(),
+            NoopServiceEmitter.instance()
         ),
         objectMapper,
         derby.metadataTablesConfigSupplier().get(),
@@ -603,13 +607,13 @@ public abstract class SeekableStreamIndexTaskTestBase extends EasyMockSupport
         segmentSchemaManager,
         CentralizedDatasourceSchemaConfig.create()
     );
-    taskLockbox = new TaskLockbox(taskStorage, metadataStorageCoordinator);
+    taskLockbox = new GlobalTaskLockbox(taskStorage, metadataStorageCoordinator);
     final TaskActionToolbox taskActionToolbox = new TaskActionToolbox(
         taskLockbox,
         taskStorage,
         metadataStorageCoordinator,
         emitter,
-        new SupervisorManager(null)
+        new SupervisorManager(OBJECT_MAPPER, null)
         {
           @Override
           public boolean checkPointDataSourceMetadata(
@@ -673,6 +677,7 @@ public abstract class SeekableStreamIndexTaskTestBase extends EasyMockSupport
         null, // taskExecutorNode
         taskActionClientFactory,
         emitter,
+        NoopPolicyEnforcer.instance(),
         dataSegmentPusher,
         new TestDataSegmentKiller(),
         null, // DataSegmentMover
@@ -681,6 +686,7 @@ public abstract class SeekableStreamIndexTaskTestBase extends EasyMockSupport
         EasyMock.createNiceMock(DataSegmentServerAnnouncer.class),
         handoffNotifierFactory,
         this::makeQueryRunnerConglomerate,
+        DruidProcessingConfig::new,
         DirectQueryProcessingPool.INSTANCE,
         NoopJoinableFactory.INSTANCE,
         () -> EasyMock.createMock(MonitorScheduler.class),

@@ -29,7 +29,7 @@
 
     <groupId>org.apache.druid</groupId>
     <artifactId>druid</artifactId>
-    <version>33.0.0-SNAPSHOT</version>
+    <version>34.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Druid</name>
@@ -74,7 +74,7 @@
         <maven.compiler.release>${java.version}</maven.compiler.release>
         <project.build.resourceEncoding>UTF-8</project.build.resourceEncoding>
         <aether.version>0.9.0.M2</aether.version>
-        <apache.curator.version>5.5.0</apache.curator.version>
+        <apache.curator.version>5.8.0</apache.curator.version>
         <apache.kafka.version>3.9.0</apache.kafka.version>
         <!-- when updating apache ranger, verify the usage of aws-bundle-sdk vs aws-logs-sdk
         and update as needed in extensions-core/druid-ranger-security/pm.xml  -->
@@ -98,15 +98,16 @@
         <guava.version>32.0.1-jre</guava.version>
         <guice.version>5.1.0</guice.version>
         <hamcrest.version>1.3</hamcrest.version>
-        <jetty.version>9.4.56.v20240826</jetty.version>
+        <jetty.version>9.4.57.v20241219</jetty.version>
         <jersey.version>1.19.4</jersey.version>
-        <jackson.version>2.12.7.20221012</jackson.version>
+        <jackson.core.version>2.18.4.1</jackson.core.version>
+        <jackson.version>2.18.4</jackson.version>
         <codehaus.jackson.version>1.9.13</codehaus.jackson.version>
         <log4j.version>2.22.1</log4j.version>
         <mysql.version>8.2.0</mysql.version>
         <mariadb.version>2.7.3</mariadb.version>
         <netty3.version>3.10.6.Final</netty3.version>
-        <netty4.version>4.1.116.Final</netty4.version>
+        <netty4.version>4.1.118.Final</netty4.version>
         <postgresql.version>42.7.2</postgresql.version>
         <protobuf.version>3.25.5</protobuf.version>
         <resilience4j.version>1.3.1</resilience4j.version>
@@ -114,8 +115,9 @@
         <jna.version>5.13.0</jna.version>
         <jna-platform.version>5.13.0</jna-platform.version>
         <hadoop.compile.version>3.3.6</hadoop.compile.version>
+        <graaljs.version>22.3.5</graaljs.version>
         <mockito.version>5.14.2</mockito.version>
-        <aws.sdk.version>1.12.638</aws.sdk.version>
+        <aws.sdk.version>1.12.784</aws.sdk.version>
         <caffeine.version>2.8.0</caffeine.version>
         <jacoco.version>0.8.12</jacoco.version>
         <hibernate-validator.version>6.2.5.Final</hibernate-validator.version>
@@ -293,16 +295,6 @@
                <enabled>false</enabled>
             </snapshots>
         </repository>
-
-        <!--
-        maven-dependency-plugin:3.1.2 seems to have updated HTTP repository access behavior.
-        We get the following error "Blocked mirror for repositories: [twitter (http://maven.twttr.com, default, releases+snapshots)]"
-        The suggested action step is to add the mirror: https://maven.apache.org/docs/3.8.1/release-notes.html#how-to-fix-when-i-get-a-http-repository-blocked
-        -->
-        <repository>
-            <id>twitter</id>
-            <url>https://maven.twttr.com</url>
-        </repository>
     </repositories>
 
     <pluginRepositories>
@@ -387,17 +379,6 @@
                 <groupId>com.github.rvesse</groupId>
                 <artifactId>airline</artifactId>
                 <version>2.8.4</version>
-            </dependency>
-            <dependency>
-                <groupId>org.skife.config</groupId>
-                <artifactId>config-magic</artifactId>
-                <version>0.9</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.slf4j</groupId>
-                        <artifactId>slf4j-api</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>net.minidev</groupId>
@@ -635,7 +616,7 @@
             <dependency>
                 <groupId>com.fasterxml.jackson</groupId>
                 <artifactId>jackson-bom</artifactId>
-                <version>${jackson.version}</version>
+                <version>${jackson.core.version}</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -689,6 +670,16 @@
                 <groupId>org.glassfish.jaxb</groupId>
                 <artifactId>jaxb-runtime</artifactId>
                 <version>2.3.3</version>
+            </dependency>
+            <dependency>
+                <groupId>org.graalvm.js</groupId>
+                <artifactId>js</artifactId>
+                <version>${graaljs.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.graalvm.js</groupId>
+                <artifactId>js-scriptengine</artifactId>
+                <version>${graaljs.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.jdbi</groupId>
@@ -971,7 +962,7 @@
             <groupId>commons-beanutils</groupId>
                 <artifactId>commons-beanutils</artifactId>
                 <!-- override the transitive dependency from com.opencsv:opensv:4.6 to version 1.9.3 to address CVE-2014-0114 -->
-                <version>1.9.4</version>
+                <version>1.11.0</version>
             </dependency>
             <dependency>
                 <groupId>com.jayway.jsonpath</groupId>
@@ -1006,8 +997,7 @@
             <dependency>
                 <groupId>org.asynchttpclient</groupId>
                 <artifactId>async-http-client</artifactId>
-                <!-- Uses Netty 4.1.x -->
-                <version>2.5.3</version>
+                <version>3.0.1</version>
             </dependency>
             <dependency>
                 <groupId>net.java.dev.jna</groupId>
@@ -1334,6 +1324,12 @@
                 <groupId>pl.pragmatists</groupId>
                 <artifactId>JUnitParams</artifactId>
                 <version>1.1.1</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.google.inject.extensions</groupId>
+                <artifactId>guice-testlib</artifactId>
+                <version>${guice.version}</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -1687,7 +1683,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.0.0</version>
                 <executions>
                     <execution>
                         <id>default-cli</id>
@@ -1707,6 +1702,8 @@
                                     <excludes>
                                         <!--LGPL licenced library-->
                                         <exclude>com.google.code.findbugs:annotations</exclude>
+                                        <!-- See https://github.com/apache/druid/pull/17370 -->
+                                        <exclude>javax.xml.bind:jaxb-api</exclude>
                                     </excludes>
                                 </bannedDependencies>
                             </rules>
@@ -1800,6 +1797,7 @@
                     <skipSystemScope>true</skipSystemScope>  <!-- avoid error when processing jdk.tools:jdk.tools:jar:1.8:system -->
                     <!-- For node analysis info, see https://github.com/jeremylong/DependencyCheck/issues/2482#issuecomment-603755623 -->
                     <nodeAnalyzerEnabled>false</nodeAnalyzerEnabled>  <!-- plugin author (jeremylong) recommends to disable, since this analyzer is retired -->
+                    <assemblyAnalyzerEnabled>false</assemblyAnalyzerEnabled>
                     <nodeAuditSkipDevDependencies>true</nodeAuditSkipDevDependencies>
                     <suppressionFile>owasp-dependency-check-suppressions.xml</suppressionFile>
                 </configuration>
@@ -1881,11 +1879,6 @@
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-clean-plugin</artifactId>
-                    <version>2.5</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>
                     <version>3.3.0</version>
                     <configuration>
@@ -1896,13 +1889,7 @@
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-deploy-plugin</artifactId>
-                    <version>2.7</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-install-plugin</artifactId>
-                    <version>2.3.1</version>
                     <executions>
                         <execution>
                             <phase>package</phase>
@@ -1914,18 +1901,8 @@
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-resources-plugin</artifactId>
-                    <version>3.2.0</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-shade-plugin</artifactId>
                     <version>3.5.0</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-site-plugin</artifactId>
-                    <version>3.11.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.scala-tools</groupId>
@@ -1938,19 +1915,9 @@
                     <version>4.5.3</version>
                 </plugin>
                 <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-assembly-plugin</artifactId>
-                    <version>3.1.0</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>license-maven-plugin</artifactId>
-                    <version>1.8</version>
-                </plugin>
-                <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>exec-maven-plugin</artifactId>
-                    <version>3.1.0</version>
+                    <version>3.5.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
@@ -1965,7 +1932,6 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>2.10.1</version>
                     <configuration>
                         <!-- jdk8 started linting javadocs by default; ours are not fully compliant -->
                         <additionalparam>-Xdoclint:none</additionalparam>

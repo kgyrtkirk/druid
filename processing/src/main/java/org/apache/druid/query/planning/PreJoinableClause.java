@@ -20,11 +20,18 @@
 package org.apache.druid.query.planning;
 
 import com.google.common.base.Preconditions;
+import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.query.DataSource;
 import org.apache.druid.query.JoinAlgorithm;
+import org.apache.druid.query.JoinDataSource;
+import org.apache.druid.query.QueryUnsupportedException;
+import org.apache.druid.query.RestrictedDataSource;
+import org.apache.druid.query.filter.DimFilter;
+import org.apache.druid.query.policy.NoRestrictionPolicy;
 import org.apache.druid.segment.join.JoinConditionAnalysis;
 import org.apache.druid.segment.join.JoinPrefixUtils;
 import org.apache.druid.segment.join.JoinType;
+import org.apache.druid.segment.join.JoinableFactoryWrapper;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
@@ -42,19 +49,13 @@ public class PreJoinableClause
   private final JoinConditionAnalysis condition;
   private final JoinAlgorithm joinAlgorithm;
 
-  public PreJoinableClause(
-      final String prefix,
-      final DataSource dataSource,
-      final JoinType joinType,
-      final JoinConditionAnalysis condition,
-      @Nullable final JoinAlgorithm joinAlgorithm
-  )
+  public PreJoinableClause(final JoinDataSource joinDataSource)
   {
-    this.prefix = JoinPrefixUtils.validatePrefix(prefix);
-    this.dataSource = Preconditions.checkNotNull(dataSource, "dataSource");
-    this.joinType = Preconditions.checkNotNull(joinType, "joinType");
-    this.condition = Preconditions.checkNotNull(condition, "condition");
-    this.joinAlgorithm = joinAlgorithm;
+    this.prefix = JoinPrefixUtils.validatePrefix(joinDataSource.getRightPrefix());
+    this.dataSource = Preconditions.checkNotNull(joinDataSource.getRight(), "dataSource");
+    this.joinType = Preconditions.checkNotNull(joinDataSource.getJoinType(), "joinType");
+    this.condition = Preconditions.checkNotNull(joinDataSource.getConditionAnalysis(), "condition");
+    this.joinAlgorithm = joinDataSource.getJoinAlgorithm();
   }
 
   public String getPrefix()
@@ -65,6 +66,29 @@ public class PreJoinableClause
   public DataSource getDataSource()
   {
     return dataSource;
+  }
+
+  /**
+   * If the data source is a {@link RestrictedDataSource} with a {@link NoRestrictionPolicy}, unwraps it to a table and return.
+   * <p>
+   * This is a temporary workaround to allow the planner to work with {@link RestrictedDataSource} as the right-side join.
+   */
+  public DataSource maybeUnwrapRestrictedDataSource()
+  {
+    if (dataSource instanceof RestrictedDataSource) {
+      RestrictedDataSource restricted = (RestrictedDataSource) dataSource;
+      if (restricted.getPolicy() instanceof NoRestrictionPolicy) {
+        return restricted.getBase();
+      } else {
+        throw new QueryUnsupportedException(StringUtils.format(
+            "Restricted data source [%s] with policy [%s] is not supported",
+            restricted.getBase(),
+            restricted.getPolicy()
+        ));
+      }
+    } else {
+      return dataSource;
+    }
   }
 
   public JoinType getJoinType()
@@ -116,5 +140,20 @@ public class PreJoinableClause
            ", condition=" + condition +
            ", joinAlgorithm=" + joinAlgorithm +
            '}';
+  }
+
+  public JoinDataSource makeUpdatedJoinDataSource(DataSource newSource, DimFilter joinBaseFilter, JoinableFactoryWrapper joinableFactoryWrapper)
+  {
+    PreJoinableClause clause = this;
+    return JoinDataSource.create(
+        newSource,
+        clause.getDataSource(),
+        clause.getPrefix(),
+        clause.getCondition(),
+        clause.getJoinType(),
+        joinBaseFilter,
+        joinableFactoryWrapper,
+        clause.getJoinAlgorithm()
+    );
   }
 }

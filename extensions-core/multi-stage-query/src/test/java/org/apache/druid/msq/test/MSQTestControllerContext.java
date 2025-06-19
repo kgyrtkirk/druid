@@ -44,9 +44,11 @@ import org.apache.druid.java.util.common.ISE;
 import org.apache.druid.java.util.common.concurrent.Execs;
 import org.apache.druid.java.util.common.io.Closer;
 import org.apache.druid.java.util.common.logger.Logger;
+import org.apache.druid.msq.dart.controller.DartControllerContextFactory;
 import org.apache.druid.msq.exec.Controller;
 import org.apache.druid.msq.exec.ControllerContext;
 import org.apache.druid.msq.exec.ControllerMemoryParameters;
+import org.apache.druid.msq.exec.SegmentSource;
 import org.apache.druid.msq.exec.Worker;
 import org.apache.druid.msq.exec.WorkerClient;
 import org.apache.druid.msq.exec.WorkerFailureListener;
@@ -60,12 +62,10 @@ import org.apache.druid.msq.indexing.MSQSpec;
 import org.apache.druid.msq.indexing.MSQWorkerTask;
 import org.apache.druid.msq.indexing.MSQWorkerTaskLauncher;
 import org.apache.druid.msq.indexing.MSQWorkerTaskLauncher.MSQWorkerTaskLauncherConfig;
+import org.apache.druid.msq.indexing.error.CancellationReason;
 import org.apache.druid.msq.input.InputSpecSlicer;
 import org.apache.druid.msq.kernel.controller.ControllerQueryKernelConfig;
-import org.apache.druid.msq.querykit.QueryKit;
-import org.apache.druid.msq.querykit.QueryKitSpec;
 import org.apache.druid.msq.util.MultiStageQueryContext;
-import org.apache.druid.query.Query;
 import org.apache.druid.query.QueryContext;
 import org.apache.druid.rpc.indexing.NoopOverlordClient;
 import org.apache.druid.rpc.indexing.OverlordClient;
@@ -84,12 +84,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
-public class MSQTestControllerContext implements ControllerContext
+public class MSQTestControllerContext implements ControllerContext, DartControllerContextFactory
 {
   private static final Logger log = new Logger(MSQTestControllerContext.class);
   private static final int NUM_WORKERS = 4;
   private final TaskActionClient taskActionClient;
-  private final Map<String, Worker> inMemoryWorkers = new HashMap<>();
+  private final Map<String, Worker> inMemoryWorkers = new ConcurrentHashMap<>();
   private final ConcurrentMap<String, TaskStatus> statusMap = new ConcurrentHashMap<>();
   private static final ListeningExecutorService EXECUTOR = MoreExecutors.listeningDecorator(Execs.multiThreaded(
       NUM_WORKERS,
@@ -272,7 +272,7 @@ public class MSQTestControllerContext implements ControllerContext
     {
       final Worker worker = inMemoryWorkers.remove(workerId);
       if (worker != null) {
-        worker.stop();
+        worker.stop(CancellationReason.TASK_SHUTDOWN);
       }
       return Futures.immediateFuture(null);
     }
@@ -282,23 +282,6 @@ public class MSQTestControllerContext implements ControllerContext
   public ControllerQueryKernelConfig queryKernelConfig(String queryId, MSQSpec querySpec)
   {
     return IndexerControllerContext.makeQueryKernelConfig(querySpec, new ControllerMemoryParameters(100_000_000));
-  }
-
-  @Override
-  public QueryKitSpec makeQueryKitSpec(
-      final QueryKit<Query<?>> queryKit,
-      final String queryId,
-      final MSQSpec querySpec,
-      final ControllerQueryKernelConfig queryKernelConfig
-  )
-  {
-    return new QueryKitSpec(
-        queryKit,
-        queryId,
-        querySpec.getTuningConfig().getMaxNumWorkers(),
-        querySpec.getTuningConfig().getMaxNumWorkers(),
-        1
-    );
   }
 
   @Override
@@ -342,7 +325,7 @@ public class MSQTestControllerContext implements ControllerContext
     return new IndexerTableInputSpecSlicer(
         coordinatorClient,
         taskActionClient,
-        MultiStageQueryContext.getSegmentSources(queryContext)
+        MultiStageQueryContext.getSegmentSources(queryContext, SegmentSource.NONE)
     );
   }
 
@@ -386,5 +369,11 @@ public class MSQTestControllerContext implements ControllerContext
   public WorkerClient newWorkerClient()
   {
     return new MSQTestWorkerClient(inMemoryWorkers);
+  }
+
+  @Override
+  public ControllerContext newContext(QueryContext context)
+  {
+    return this;
   }
 }

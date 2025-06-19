@@ -28,6 +28,7 @@ import io.fabric8.kubernetes.client.dsl.LogWatch;
 import org.apache.druid.error.DruidException;
 import org.apache.druid.indexing.common.task.IndexTaskUtils;
 import org.apache.druid.indexing.common.task.Task;
+import org.apache.druid.java.util.common.ISE;
 import org.apache.druid.java.util.common.RetryUtils;
 import org.apache.druid.java.util.emitter.EmittingLogger;
 import org.apache.druid.java.util.emitter.service.ServiceEmitter;
@@ -46,8 +47,24 @@ public class KubernetesPeonClient
 
   private final KubernetesClientApi clientApi;
   private final String namespace;
+  private final String overlordNamespace;
   private final boolean debugJobs;
   private final ServiceEmitter emitter;
+
+  public KubernetesPeonClient(
+      KubernetesClientApi clientApi,
+      String namespace,
+      String overlordNamespace,
+      boolean debugJobs,
+      ServiceEmitter emitter
+  )
+  {
+    this.clientApi = clientApi;
+    this.namespace = namespace;
+    this.overlordNamespace = overlordNamespace;
+    this.debugJobs = debugJobs;
+    this.emitter = emitter;
+  }
 
   public KubernetesPeonClient(
       KubernetesClientApi clientApi,
@@ -56,10 +73,7 @@ public class KubernetesPeonClient
       ServiceEmitter emitter
   )
   {
-    this.clientApi = clientApi;
-    this.namespace = namespace;
-    this.debugJobs = debugJobs;
-    this.emitter = emitter;
+    this(clientApi, namespace, "", debugJobs, emitter);
   }
 
   public Pod launchPeonJobAndWaitForStart(Job job, Task task, long howLong, TimeUnit timeUnit) throws IllegalStateException
@@ -67,12 +81,22 @@ public class KubernetesPeonClient
     long start = System.currentTimeMillis();
     // launch job
     return clientApi.executeRequest(client -> {
-      client.batch().v1().jobs().inNamespace(namespace).resource(job).create();
       String jobName = job.getMetadata().getName();
-      log.info("Successfully submitted job: %s ... waiting for job to launch", jobName);
+
+      log.info("Submitting job[%s] for task[%s].", jobName, task.getId());
+      client.batch()
+            .v1()
+            .jobs()
+            .inNamespace(namespace)
+            .resource(job)
+            .create();
+      log.info("Submitted job[%s] for task[%s]. Waiting for POD to launch.", jobName, task.getId());
+
       // wait until the pod is running or complete or failed, any of those is fine
       Pod mainPod = getPeonPodWithRetries(jobName);
-      Pod result = client.pods().inNamespace(namespace).withName(mainPod.getMetadata().getName())
+      Pod result = client.pods()
+                         .inNamespace(namespace)
+                         .withName(mainPod.getMetadata().getName())
                          .waitUntilCondition(pod -> {
                            if (pod == null) {
                              return true;
@@ -81,7 +105,7 @@ public class KubernetesPeonClient
                          }, howLong, timeUnit);
       
       if (result == null) {
-        throw new IllegalStateException("K8s pod for the task [%s] appeared and disappeared. It can happen if the task was canceled");
+        throw new ISE("K8s pod for the task [%s] appeared and disappeared. It can happen if the task was canceled", task.getId());
       }
       long duration = System.currentTimeMillis() - start;
       emitK8sPodMetrics(task, "k8s/peon/startup/time", duration);
@@ -182,11 +206,30 @@ public class KubernetesPeonClient
 
   public List<Job> getPeonJobs()
   {
+    return this.overlordNamespace.isEmpty()
+           ? getPeonJobsWithoutOverlordNamespaceKeyLabels()
+           : getPeonJobsWithOverlordNamespaceKeyLabels();
+  }
+
+  private List<Job> getPeonJobsWithoutOverlordNamespaceKeyLabels()
+  {
     return clientApi.executeRequest(client -> client.batch()
                                                     .v1()
                                                     .jobs()
                                                     .inNamespace(namespace)
                                                     .withLabel(DruidK8sConstants.LABEL_KEY)
+                                                    .list()
+                                                    .getItems());
+  }
+
+  private List<Job> getPeonJobsWithOverlordNamespaceKeyLabels()
+  {
+    return clientApi.executeRequest(client -> client.batch()
+                                                    .v1()
+                                                    .jobs()
+                                                    .inNamespace(namespace)
+                                                    .withLabel(DruidK8sConstants.LABEL_KEY)
+                                                    .withLabel(DruidK8sConstants.OVERLORD_NAMESPACE_KEY, overlordNamespace)
                                                     .list()
                                                     .getItems());
   }
@@ -267,7 +310,7 @@ public class KubernetesPeonClient
       );
     }
     catch (Exception e) {
-      throw DruidException.defensive(e, "Error when looking for K8s pod with label: job-name=%s", jobName);
+      throw DruidException.defensive(e, "Error when looking for K8s pod with label[job-name=%s]", jobName);
     }
   }
 

@@ -42,6 +42,8 @@ import org.apache.druid.indexer.JobHelper;
 import org.apache.druid.indexer.TaskMetricsGetter;
 import org.apache.druid.indexer.TaskMetricsUtils;
 import org.apache.druid.indexer.TaskStatus;
+import org.apache.druid.indexer.granularity.ArbitraryGranularitySpec;
+import org.apache.druid.indexer.granularity.GranularitySpec;
 import org.apache.druid.indexer.path.SegmentMetadataPublisher;
 import org.apache.druid.indexer.report.TaskReport;
 import org.apache.druid.indexing.common.TaskLock;
@@ -58,15 +60,11 @@ import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.java.util.common.granularity.Granularity;
 import org.apache.druid.java.util.common.logger.Logger;
 import org.apache.druid.segment.incremental.RowIngestionMeters;
-import org.apache.druid.segment.indexing.granularity.ArbitraryGranularitySpec;
-import org.apache.druid.segment.indexing.granularity.GranularitySpec;
 import org.apache.druid.segment.realtime.ChatHandler;
 import org.apache.druid.segment.realtime.ChatHandlerProvider;
-import org.apache.druid.server.security.Action;
+import org.apache.druid.server.security.AuthorizationUtils;
 import org.apache.druid.server.security.AuthorizerMapper;
-import org.apache.druid.server.security.Resource;
 import org.apache.druid.server.security.ResourceAction;
-import org.apache.druid.server.security.ResourceType;
 import org.apache.druid.timeline.DataSegment;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.util.ToolRunner;
@@ -86,7 +84,6 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -201,7 +198,7 @@ public class HadoopIndexTask extends HadoopTask implements ChatHandler
   @Override
   public Set<ResourceAction> getInputSourceResources()
   {
-    return Collections.singleton(new ResourceAction(new Resource(INPUT_SOURCE_TYPE, ResourceType.EXTERNAL), Action.READ));
+    return Set.of(AuthorizationUtils.createExternalResourceReadAction(INPUT_SOURCE_TYPE));
   }
 
   @Override
@@ -660,8 +657,7 @@ public class HadoopIndexTask extends HadoopTask implements ChatHandler
       @QueryParam("windows") List<Integer> windows
   )
   {
-    IndexTaskUtils.datasourceAuthorizationCheck(req, Action.READ, getDataSource(), authorizerMapper);
-    Map<String, Object> returnMap = new HashMap<>();
+    AuthorizationUtils.verifyUnrestrictedAccessToDatasource(req, getDataSource(), authorizerMapper);
     Map<String, Object> totalsMap = new HashMap<>();
 
     if (determinePartitionsStatsGetter != null) {
@@ -672,8 +668,7 @@ public class HadoopIndexTask extends HadoopTask implements ChatHandler
       totalsMap.put(RowIngestionMeters.BUILD_SEGMENTS, buildSegmentsStatsGetter.getTotalMetrics());
     }
 
-    returnMap.put("totals", totalsMap);
-    return Response.ok(returnMap).build();
+    return Response.ok(Map.of("totals", totalsMap)).build();
   }
 
   private TaskReport.ReportMap getTaskCompletionReports()
