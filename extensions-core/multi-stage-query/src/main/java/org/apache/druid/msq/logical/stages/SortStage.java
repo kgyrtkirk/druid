@@ -92,5 +92,11 @@ public class SortStage extends AbstractShuffleStage
           offsetLimit.hasLimit() ? offsetLimit.getLimit() : null
       );
     }
+
+    @Override
+    public RowSignature getLogicalRowSignature()
+    {
+      return inputSpecs.get(0).getRowSignature();
+    }
   }
 }

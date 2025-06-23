@@ -110,7 +110,29 @@ public class CalciteDartTest extends BaseCalciteQueryTest
             )
         )
         .run();
+
   }
+
+  @Test
+  public void testSelect11()
+  {
+    testBuilder()
+        .sql("SELECT dim1, LATEST(f1) FROM druid.numfoo GROUP BY 1 ORDER BY 2 LIMIT 10")
+        .expectedResults(
+            ImmutableList.of(
+                    new Object[]{"1", null},
+                    new Object[]{"abc", null},
+                    new Object[]{"def", null},
+                    new Object[]{"2", 0.0f},
+                    new Object[]{"10.1", 0.1f},
+                    new Object[]{"", 1.0f}
+            )
+        )
+        .run();
+  }
+
+
+
 
   @NotYetSupported(Modes.RESTRICTED_DATASOURCE_SUPPORT)
   @Test

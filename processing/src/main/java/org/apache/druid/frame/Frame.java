@@ -480,4 +480,17 @@ public class Frame
       }
     }
   }
+
+  @Override
+  public String toString()
+  {
+    return "Frame ["
+        + "frameType=" + frameType + ", "
+        + "numBytes=" + numBytes + ", "
+        + "numRows=" + numRows + ", "
+        + "numRegions=" + numRegions + ", "
+        + "permuted=" + permuted + "]";
+  }
+
+
 }

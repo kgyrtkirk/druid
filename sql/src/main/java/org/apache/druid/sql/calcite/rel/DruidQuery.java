@@ -420,13 +420,18 @@ public class DruidQuery
         finalizeAggregations
     );
 
+    List<String> copyOf0 = ImmutableList.copyOf(
+        Iterators.concat(
+            dimensions.stream().map(DimensionExpression::getOutputName).iterator(),
+            aggregations.stream().map(Aggregation::getOutputName).iterator()
+        )
+    );
+    List<String> copyOf = aggregate.getRowType().getFieldNames();
     final RowSignature aggregateRowSignature = RowSignatures.fromRelDataType(
-        ImmutableList.copyOf(
-            Iterators.concat(
-                dimensions.stream().map(DimensionExpression::getOutputName).iterator(),
-                aggregations.stream().map(Aggregation::getOutputName).iterator()
-            )
-        ),
+        copyOf0
+
+
+        ,
         aggregate.getRowType()
     );
 
