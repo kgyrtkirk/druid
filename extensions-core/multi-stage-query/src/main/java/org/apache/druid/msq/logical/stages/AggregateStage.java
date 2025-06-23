@@ -30,7 +30,6 @@ import org.apache.druid.msq.querykit.groupby.GroupByPreShuffleFrameProcessorFact
 import org.apache.druid.query.TableDataSource;
 import org.apache.druid.query.groupby.GroupByQuery;
 import org.apache.druid.query.spec.QuerySegmentSpec;
-import org.apache.druid.segment.column.ColumnType;
 import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.segment.column.RowSignature.Finalization;
 import org.apache.druid.sql.calcite.aggregation.DimensionExpression;
@@ -63,12 +62,6 @@ public class AggregateStage extends ProjectStage
     {
       return new GroupByPostShuffleFrameProcessorFactory(gby);
     }
-
-    @Override
-    public RowSignature getLogicalRowSignature()
-    {
-      return super.getLogicalRowSignature();
-    }
   }
 
   // FIXME : this shouldn't be a Query
@@ -97,19 +90,8 @@ public class AggregateStage extends ProjectStage
     GroupByQuery gby = makeGbyQuery(projectStage, grouping);
     AggregateStage aggStage = new AggregateStage(projectStage, gby);
     SortStage sortStage = new SortStage(aggStage, getKeyColumns(grouping.getDimensions()));
-//    RowSignature postShuffleSignature = overrideTypes(sortStage.getRowSignature(), grouping.getOutputRowSignature());
     PostShuffleStage finalAggStage = new PostShuffleStage(sortStage,gby, grouping.getOutputRowSignature());
     return finalAggStage;
-  }
-
-  private static RowSignature overrideTypes(RowSignature rowSignature, RowSignature outputRowSignature)
-  {
-    RowSignature.Builder builder = RowSignature.builder();
-    for (String columnName : rowSignature.getColumnNames()) {
-      ColumnType colType = outputRowSignature.getColumnType(columnName).orElseThrow();
-      builder.add(columnName, colType);
-    }
-    return builder.build();
   }
 
   private static GroupByQuery makeGbyQuery(ProjectStage projectStage, Grouping grouping)

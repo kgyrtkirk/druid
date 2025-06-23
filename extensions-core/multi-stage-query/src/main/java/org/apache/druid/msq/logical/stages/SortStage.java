@@ -98,5 +98,6 @@ public class SortStage extends AbstractShuffleStage
     {
       return inputSpecs.get(0).getRowSignature();
     }
+
   }
 }
