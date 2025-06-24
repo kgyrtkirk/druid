@@ -19,7 +19,6 @@ on:
   workflow_call:
 
 jobs:
-
   run-unit-tests:
     name: "unit tests(main)"
     strategy:
