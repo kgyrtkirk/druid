@@ -26,12 +26,14 @@ jobs:
     - name: checkout
       uses: actions/checkout@v1
     - name: Create PR to branch
-      uses: gorillio/github-action-sync@master
+      uses: kgyrtkirk/github-action-sync@master
       with:
         upstream: https://github.com/apache/druid
         upstream_branch: master
         branch: master
         pr_labels: upstream
+        pr_title: apache/master->master
+        sync_branch_prefix: sync/apache
       env:
         GITHUB_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
         GITBOT_EMAIL: github-actions@github.com

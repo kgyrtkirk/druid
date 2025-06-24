@@ -1,0 +1,15 @@
+name: Auto approve
+
+on: pull_request_target
+
+jobs:
+  enable-automerge:
+    runs-on: ubuntu-latest
+    if: startsWith(github.head_ref, 'sync/')
+    steps:
+      - uses: actions/checkout@v3
+      - run: |
+          gh pr review ${{ github.event.pull_request.number }} -a
+          gh pr merge ${{ github.event.pull_request.number }} --auto -m
+        env:
+          GH_TOKEN: ${{ github.token }}
