@@ -226,7 +226,7 @@ jobs:
       - uses: Kesin11/actions-timeline@427ee2cf860166e404d0d69b4f2b24012bb7af4f
 
   quality-gate:
-    #needs: [build, unit-tests-approved, unit-tests-unapproved, revised-its, standard-its]
+    needs: [build, unit-tests-approved, unit-tests-unapproved ]
     runs-on: ubuntu-latest
     steps:
       - name: dummy
