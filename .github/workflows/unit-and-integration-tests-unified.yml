@@ -226,4 +226,4 @@ jobs:
       - uses: Kesin11/actions-timeline@427ee2cf860166e404d0d69b4f2b24012bb7af4f
 
   quality-gate:
-    needs: actions-timeline
+    needs: [build, unit-tests-approved, unit-tests-unapproved, revised-its, standard-its]
