@@ -180,3 +180,10 @@ jobs:
     if: ${{ !cancelled() }}
     steps:
       - uses: Kesin11/actions-timeline@427ee2cf860166e404d0d69b4f2b24012bb7af4f
+
+  # having a green for this job means all the required quality checks have passed
+  quality-gate:
+    needs: [build, unit-tests, revised-its, standard-its]
+    runs-on: ubuntu-latest
+    steps:
+    - run: echo dummy
