@@ -227,3 +227,7 @@ jobs:
 
   quality-gate:
     needs: [build, unit-tests-approved, unit-tests-unapproved, revised-its, standard-its]
+    runs-on: ubuntu-latest
+    steps:
+      - name: dummy
+        run: echo ok
