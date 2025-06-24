@@ -52,7 +52,7 @@ The automatic compaction system uses the following syntax:
 }
 ```
 
-:::info Experimental
+:::info[Experimental]
 
 The MSQ task engine is available as a compaction engine when you run automatic compaction as a compaction supervisor. For more information, see [Auto-compaction using compaction supervisors](#auto-compaction-using-compaction-supervisors).
 
@@ -85,7 +85,7 @@ For more details on each of the specs in an auto-compaction configuration, see [
 
 ## Auto-compaction using Coordinator duties
 
-You can control how often the Coordinator checks to see if auto-compaction is needed. The Coordinator [indexing period](../configuration/index.md#coordinator-operation), `druid.coordinator.period.indexingPeriod`, controls the frequency of compaction tasks.
+You can control how often the Coordinator checks to see if auto-compaction is needed. The Coordinator [indexing period](../configuration/index.md#data-management), `druid.coordinator.period.indexingPeriod`, controls the frequency of compaction tasks.
 The default indexing period is 30 minutes, meaning that the Coordinator first checks for segments to compact at most 30 minutes from when auto-compaction is enabled.
 This time period also affects other Coordinator duties such as cleanup of unused segments and stale pending segments.
 To configure the auto-compaction time period without interfering with `indexingPeriod`, see [Set frequency of compaction runs](#change-compaction-frequency).
@@ -230,7 +230,7 @@ The following auto-compaction configuration compacts updates the `wikipedia` seg
 
 ## Auto-compaction using compaction supervisors  
 
-:::info Experimental
+:::info[Experimental]
 Compaction supervisors are experimental. For production use, we recommend [auto-compaction using Coordinator duties](#auto-compaction-using-coordinator-duties).
 :::
 

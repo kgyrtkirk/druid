@@ -279,7 +279,7 @@ public class RunWorkOrder
 
       try {
         // notifyListener will ignore this error if work has already succeeded.
-        notifyListener(Either.error(t != null ? t : new MSQException(CanceledFault.instance())));
+        notifyListener(Either.error(t != null ? t : new MSQException(CanceledFault.unknown())));
       }
       catch (Throwable e2) {
         if (t == null) {
@@ -823,11 +823,6 @@ public class RunWorkOrder
             final StageDefinition stageDefinition = workOrder.getStageDefinition();
 
             final File sorterTmpDir = frameContext.tempDir("super-sort");
-            FileUtils.mkdirp(sorterTmpDir);
-            if (!sorterTmpDir.isDirectory()) {
-              throw new IOException("Cannot create directory: " + sorterTmpDir);
-            }
-
             final WorkerMemoryParameters memoryParameters = frameContext.memoryParameters();
             final SuperSorter sorter = new SuperSorter(
                 resultAndChannels.getOutputChannels().getAllReadableChannels(),

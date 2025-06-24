@@ -20,10 +20,10 @@
 package org.apache.druid.server;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
 import com.google.common.io.Closeables;
 import com.google.inject.Injector;
-import org.apache.curator.shaded.com.google.common.collect.Lists;
 import org.apache.druid.error.DruidException;
 import org.apache.druid.query.DataSource;
 import org.apache.druid.query.FrameBasedInlineDataSource;
@@ -44,7 +44,7 @@ import org.apache.druid.segment.LookupSegmentWrangler;
 import org.apache.druid.segment.MapSegmentWrangler;
 import org.apache.druid.segment.QueryableIndex;
 import org.apache.druid.segment.QueryableIndexSegment;
-import org.apache.druid.segment.ReferenceCountingSegment;
+import org.apache.druid.segment.ReferenceCountedSegmentProvider;
 import org.apache.druid.segment.Segment;
 import org.apache.druid.segment.SegmentWrangler;
 import org.apache.druid.segment.incremental.IncrementalIndex;
@@ -79,7 +79,7 @@ import java.util.Set;
 public class SpecificSegmentsQuerySegmentWalker implements QuerySegmentWalker, Closeable
 {
   private final QuerySegmentWalker walker;
-  private final Map<String, VersionedIntervalTimeline<String, ReferenceCountingSegment>> timelines;
+  private final Map<String, VersionedIntervalTimeline<String, ReferenceCountedSegmentProvider>> timelines;
   private final List<CompleteSegment> segments = new ArrayList<>();
   private static final LookupExtractorFactoryContainerProvider LOOKUP_EXTRACTOR_FACTORY_CONTAINER_PROVIDER =
       new LookupExtractorFactoryContainerProvider()
@@ -122,7 +122,7 @@ public class SpecificSegmentsQuerySegmentWalker implements QuerySegmentWalker, C
       final QueryScheduler scheduler
   )
   {
-    Map<String, VersionedIntervalTimeline<String, ReferenceCountingSegment>> timelines = new HashMap<>();
+    Map<String, VersionedIntervalTimeline<String, ReferenceCountedSegmentProvider>> timelines = new HashMap<>();
     NoopServiceEmitter emitter = new NoopServiceEmitter();
     ServerConfig serverConfig = new ServerConfig();
 
@@ -179,7 +179,7 @@ public class SpecificSegmentsQuerySegmentWalker implements QuerySegmentWalker, C
   }
 
   public SpecificSegmentsQuerySegmentWalker(
-      Map<String, VersionedIntervalTimeline<String, ReferenceCountingSegment>> timelines,
+      Map<String, VersionedIntervalTimeline<String, ReferenceCountedSegmentProvider>> timelines,
       QuerySegmentWalker walker)
   {
     this.timelines = timelines;
@@ -196,12 +196,12 @@ public class SpecificSegmentsQuerySegmentWalker implements QuerySegmentWalker, C
     DataSegment descriptor = completeSegment.getDataSegment();
     Segment segment = completeSegment.getSegment();
 
-    final ReferenceCountingSegment referenceCountingSegment =
-        ReferenceCountingSegment.wrapSegment(
+    final ReferenceCountedSegmentProvider referenceCountingSegment =
+        ReferenceCountedSegmentProvider.wrapSegment(
             segment,
             descriptor.getShardSpec()
         );
-    final VersionedIntervalTimeline<String, ReferenceCountingSegment> timeline = timelines.computeIfAbsent(
+    final VersionedIntervalTimeline<String, ReferenceCountedSegmentProvider> timeline = timelines.computeIfAbsent(
         descriptor.getDataSource(),
         datasource -> new VersionedIntervalTimeline<>(Ordering.natural())
     );

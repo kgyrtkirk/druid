@@ -29,6 +29,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.UnmodifiableIterator;
 import org.apache.druid.common.utils.IdUtils;
 import org.apache.druid.error.DruidException;
+import org.apache.druid.error.InternalServerError;
 import org.apache.druid.error.InvalidInput;
 import org.apache.druid.java.util.common.CloseableIterators;
 import org.apache.druid.java.util.common.DateTimes;
@@ -39,6 +40,9 @@ import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.java.util.common.jackson.JacksonUtils;
 import org.apache.druid.java.util.common.logger.Logger;
 import org.apache.druid.java.util.common.parsers.CloseableIterator;
+import org.apache.druid.metadata.segment.cache.SegmentSchemaRecord;
+import org.apache.druid.segment.SchemaPayload;
+import org.apache.druid.segment.metadata.CentralizedDatasourceSchemaConfig;
 import org.apache.druid.segment.realtime.appenderator.SegmentIdWithShardSpec;
 import org.apache.druid.server.http.DataSegmentPlus;
 import org.apache.druid.timeline.DataSegment;
@@ -184,8 +188,9 @@ public class SqlSegmentsMetadataQuery
   }
 
   /**
-   * Determines the highest ID amongst unused segments for the given datasource,
-   * interval and version.
+   * Retrieves the ID of the unused segment that has the highest partition
+   * number amongst all unused segments that exactly match the given interval
+   * and version.
    *
    * @return null if no unused segment exists for the given parameters.
    */
@@ -280,6 +285,37 @@ public class SqlSegmentsMetadataQuery
     }
     catch (IOException e) {
       throw new RuntimeException(e);
+    }
+  }
+
+  /**
+   * Retrieves unused segments that are fully contained within the given interval.
+   *
+   * @param interval       Returned segments must be fully contained within this
+   *                       interval
+   * @param versions       Optional list of segment versions. If passed as null,
+   *                       all segment versions are eligible.
+   * @param limit          Maximum number of segments to return. If passed as null,
+   *                       all segments are returned.
+   * @param maxUpdatedTime Returned segments must have a {@code used_status_last_updated}
+   *                       which is either null or earlier than this value.
+   */
+  public List<DataSegment> findUnusedSegments(
+      String dataSource,
+      Interval interval,
+      @Nullable List<String> versions,
+      @Nullable Integer limit,
+      @Nullable DateTime maxUpdatedTime
+  )
+  {
+    try (
+        final CloseableIterator<DataSegment> iterator =
+            retrieveUnusedSegments(dataSource, List.of(interval), versions, limit, null, null, maxUpdatedTime)
+    ) {
+      return ImmutableList.copyOf(iterator);
+    }
+    catch (IOException e) {
+      throw InternalServerError.exception(e, "Error while reading unused segments");
     }
   }
 
@@ -605,6 +641,91 @@ public class SqlSegmentsMetadataQuery
     }
 
     return CloseableIterators.wrap(resultIterator, resultIterator);
+  }
+
+  /**
+   * Retrieves all used schema fingerprints present in the metadata store.
+   */
+  public Set<String> retrieveAllUsedSegmentSchemaFingerprints()
+  {
+    final String sql = StringUtils.format(
+        "SELECT fingerprint FROM %s WHERE version = %s AND used = true",
+        dbTables.getSegmentSchemasTable(), CentralizedDatasourceSchemaConfig.SCHEMA_VERSION
+    );
+    return Set.copyOf(
+        handle.createQuery(sql)
+              .setFetchSize(connector.getStreamingFetchSize())
+              .mapTo(String.class)
+              .list()
+    );
+  }
+
+  /**
+   * Retrieves all used segment schemas present in the metadata store irrespective
+   * of their last updated time.
+   */
+  public List<SegmentSchemaRecord> retrieveAllUsedSegmentSchemas()
+  {
+    final String sql = StringUtils.format(
+        "SELECT fingerprint, payload FROM %s"
+        + " WHERE version = %s AND used = true",
+        dbTables.getSegmentSchemasTable(), CentralizedDatasourceSchemaConfig.SCHEMA_VERSION
+    );
+    return retrieveValidSchemaRecordsWithQuery(handle.createQuery(sql));
+  }
+
+  /**
+   * Retrieves segment schemas from the metadata store for the given fingerprints.
+   */
+  public List<SegmentSchemaRecord> retrieveUsedSegmentSchemasForFingerprints(
+      Set<String> schemaFingerprints
+  )
+  {
+    final List<List<String>> fingerprintBatches = Lists.partition(
+        List.copyOf(schemaFingerprints),
+        MAX_INTERVALS_PER_BATCH
+    );
+
+    final List<SegmentSchemaRecord> records = new ArrayList<>();
+    for (List<String> fingerprintBatch : fingerprintBatches) {
+      records.addAll(
+          retrieveBatchOfSegmentSchemas(fingerprintBatch)
+      );
+    }
+
+    return records;
+  }
+
+  /**
+   * Retrieves a batch of segment schema records for the given fingerprints.
+   */
+  private List<SegmentSchemaRecord> retrieveBatchOfSegmentSchemas(List<String> schemaFingerprints)
+  {
+    final String sql = StringUtils.format(
+        "SELECT fingerprint, payload FROM %s"
+        + " WHERE version = %s AND used = true"
+        + " %s",
+        dbTables.getSegmentSchemasTable(),
+        CentralizedDatasourceSchemaConfig.SCHEMA_VERSION,
+        getParameterizedInConditionForColumn("fingerprint", schemaFingerprints)
+    );
+
+    final Query<Map<String, Object>> query = handle.createQuery(sql);
+    bindColumnValuesToQueryWithInCondition("fingerprint", schemaFingerprints, query);
+
+    return retrieveValidSchemaRecordsWithQuery(query);
+  }
+
+  private List<SegmentSchemaRecord> retrieveValidSchemaRecordsWithQuery(
+      Query<Map<String, Object>> query
+  )
+  {
+    return query.setFetchSize(connector.getStreamingFetchSize())
+                .map((index, r, ctx) -> mapToSchemaRecord(r))
+                .list()
+                .stream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
   }
 
   /**
@@ -937,6 +1058,74 @@ public class SqlSegmentsMetadataQuery
         .list();
 
     return unusedIntervals.stream().filter(Objects::nonNull).collect(Collectors.toList());
+  }
+
+  /**
+   * Gets unused segment intervals for the specified datasource. There is no
+   * guarantee on the order of intervals in the list or on whether the limited
+   * list contains the earliest or latest intervals present in the datasource.
+   *
+   * @return List of unused segment intervals containing upto {@code limit} entries.
+   */
+  public List<Interval> retrieveUnusedSegmentIntervals(String dataSource, int limit)
+  {
+    final String sql = StringUtils.format(
+        "SELECT start, %2$send%2$s FROM %1$s"
+        + " WHERE dataSource = :dataSource AND used = false"
+        + " GROUP BY start, %2$send%2$s"
+        + "  %3$s",
+        dbTables.getSegmentsTable(), connector.getQuoteString(), connector.limitClause(limit)
+    );
+
+    final List<Interval> intervals = connector.inReadOnlyTransaction(
+        (handle, status) ->
+            handle.createQuery(sql)
+                  .setFetchSize(connector.getStreamingFetchSize())
+                  .bind("dataSource", dataSource)
+                  .map((index, r, ctx) -> mapToInterval(r, dataSource))
+                  .list()
+    );
+
+    return intervals.stream().filter(Objects::nonNull).collect(Collectors.toList());
+  }
+
+  /**
+   * Retrieves unused segments that exactly match the given interval.
+   *
+   * @param interval       Returned segments must exactly match this interval.
+   * @param maxUpdatedTime Returned segments must have a {@code used_status_last_updated}
+   *                       which is either null or earlier than this value.
+   * @param limit          Maximum number of segments to return
+   */
+  public List<DataSegment> retrieveUnusedSegmentsWithExactInterval(
+      String dataSource,
+      Interval interval,
+      DateTime maxUpdatedTime,
+      int limit
+  )
+  {
+    final String sql = StringUtils.format(
+        "SELECT id, payload FROM %1$s"
+        + " WHERE dataSource = :dataSource AND used = false"
+        + " AND %2$send%2$s = :end AND start = :start"
+        + " AND (used_status_last_updated IS NULL OR used_status_last_updated <= :maxUpdatedTime)"
+        + "  %3$s",
+        dbTables.getSegmentsTable(), connector.getQuoteString(), connector.limitClause(limit)
+    );
+
+    final List<DataSegment> segments = connector.inReadOnlyTransaction(
+        (handle, status) ->
+            handle.createQuery(sql)
+                  .setFetchSize(connector.getStreamingFetchSize())
+                  .bind("dataSource", dataSource)
+                  .bind("start", interval.getStart().toString())
+                  .bind("end", interval.getEnd().toString())
+                  .bind("maxUpdatedTime", maxUpdatedTime.toString())
+                  .map((index, r, ctx) -> mapToSegment(r))
+                  .list()
+    );
+
+    return segments.stream().filter(Objects::nonNull).collect(Collectors.toList());
   }
 
   /**
@@ -1467,6 +1656,28 @@ public class SqlSegmentsMetadataQuery
     }
   }
 
+  /**
+   * Tries to parse the fields of the result set into a {@link SegmentSchemaRecord}.
+   *
+   * @return null if an error occurred while parsing the result
+   */
+  @Nullable
+  private SegmentSchemaRecord mapToSchemaRecord(ResultSet resultSet)
+  {
+    String fingerprint = null;
+    try {
+      fingerprint = resultSet.getString("fingerprint");
+      return new SegmentSchemaRecord(
+          fingerprint,
+          jsonMapper.readValue(resultSet.getBytes("payload"), SchemaPayload.class)
+      );
+    }
+    catch (Throwable t) {
+      log.error(t, "Could not read segment schema with fingerprint[%s]", fingerprint);
+      return null;
+    }
+  }
+
   private ResultIterator<DataSegment> getDataSegmentResultIterator(Query<Map<String, Object>> sql)
   {
     return sql.map((index, r, ctx) -> JacksonUtils.readValue(jsonMapper, r.getBytes(2), DataSegment.class))
@@ -1496,6 +1707,20 @@ public class SqlSegmentsMetadataQuery
         return null;
       }
     }).iterator();
+  }
+
+  @Nullable
+  private DataSegment mapToSegment(ResultSet resultSet)
+  {
+    String segmentId = "";
+    try {
+      segmentId = resultSet.getString("id");
+      return JacksonUtils.readValue(jsonMapper, resultSet.getBytes("payload"), DataSegment.class);
+    }
+    catch (Throwable t) {
+      log.error(t, "Could not read segment with ID[%s]", segmentId);
+      return null;
+    }
   }
 
   private UnmodifiableIterator<DataSegment> filterDataSegmentIteratorByInterval(

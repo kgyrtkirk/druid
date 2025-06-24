@@ -22,7 +22,6 @@ package org.apache.druid.indexing.overlord;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import org.apache.druid.common.guava.SettableSupplier;
-import org.apache.druid.discovery.NodeRole;
 import org.apache.druid.indexer.TaskStatus;
 import org.apache.druid.indexing.common.TaskLockType;
 import org.apache.druid.indexing.common.config.TaskStorageConfig;
@@ -50,7 +49,6 @@ import org.junit.Test;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -64,7 +62,7 @@ public class TaskLockBoxConcurrencyTest
   private final ObjectMapper objectMapper = new DefaultObjectMapper();
   private ExecutorService service;
   private TaskStorage taskStorage;
-  private TaskLockbox lockbox;
+  private GlobalTaskLockbox lockbox;
   private SegmentSchemaManager segmentSchemaManager;
 
   @Before
@@ -83,7 +81,7 @@ public class TaskLockBoxConcurrencyTest
     );
 
     segmentSchemaManager = new SegmentSchemaManager(derby.metadataTablesConfigSupplier().get(), objectMapper, derbyConnector);
-    lockbox = new TaskLockbox(
+    lockbox = new GlobalTaskLockbox(
         taskStorage,
         new IndexerSQLMetadataStorageCoordinator(
             new SqlSegmentMetadataTransactionFactory(
@@ -91,7 +89,6 @@ public class TaskLockBoxConcurrencyTest
                 derby.metadataTablesConfigSupplier().get(),
                 derbyConnector,
                 new TestDruidLeaderSelector(),
-                Set.of(NodeRole.OVERLORD),
                 NoopSegmentMetadataCache.instance(),
                 NoopServiceEmitter.instance()
             ),
@@ -102,6 +99,7 @@ public class TaskLockBoxConcurrencyTest
             CentralizedDatasourceSchemaConfig.create()
         )
     );
+    lockbox.syncFromStorage();
     service = Execs.multiThreaded(2, "TaskLockBoxConcurrencyTest-%d");
   }
 

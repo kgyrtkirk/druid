@@ -3235,6 +3235,7 @@ Returns the following:
 ## JSON_MERGE
 
 Merges two or more JSON `STRING` or `COMPLEX<json>` expressions into one, preserving the rightmost value when there are key overlaps.
+Returns `NULL` if any argument is `NULL`.
 The function always returns a `COMPLEX<json>` object.
 
 * **Syntax:** `JSON_MERGE(expr1, expr2[, expr3 ...])`
@@ -3303,7 +3304,7 @@ Returns the following:
 
 ## JSON_PATHS
 
-Returns an array of all paths which refer to literal values in an expression, in JSONPath format.
+Returns an array of all paths which refer to primitive values in an expression, in JSONPath format.
 
 * **Syntax:** `JSON_PATHS(expr)`  
 * **Function type:** JSON
@@ -3396,11 +3397,11 @@ Returns the following:
 
 ## JSON_VALUE
 
-Extracts a literal value from an expression at a specified path.
+Extracts a primitive value from an expression at a specified path.
 
 If you include `RETURNING` and specify a SQL type (such as `VARCHAR`, `BIGINT`, `DOUBLE`) the function plans the query using the suggested type.
 If `RETURNING` isn't included, the function attempts to infer the type based on the context.
-If the function can't infer the type, it defaults to `VARCHAR`.
+If the function can't infer the type, it defaults to `VARCHAR`.  Primitive arrays can also be returned, but only if `RETURNING` is specified as an `ARRAY` type, e.g. `RETURNING VARCHAR ARRAY`.
 
 * **Syntax:** `JSON_VALUE(expr, path [RETURNING sqlType])`
 * **Function type:** JSON

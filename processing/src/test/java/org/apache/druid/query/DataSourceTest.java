@@ -120,7 +120,7 @@ public class DataSourceTest
     Assert.assertTrue(dataSource instanceof UnionDataSource);
     Assert.assertEquals(
         Lists.newArrayList(new TableDataSource("ds1"), new TableDataSource("ds2")),
-        Lists.newArrayList(((UnionDataSource) dataSource).getDataSourcesAsTableDataSources())
+        Lists.newArrayList(dataSource.getChildren())
     );
     Assert.assertEquals(
         ImmutableSet.of("ds1", "ds2"),
@@ -257,11 +257,6 @@ public class DataSourceTest
         e.getMessage()
     );
 
-    ISE e2 = Assert.assertThrows(ISE.class, () -> restrictedDataSource.withPolicies(noPolicyFound, policyEnforcer));
-    Assert.assertEquals(
-        "No restriction found on table [table1], but had policy [RowFilterPolicy{rowFilter=random-column IS NULL}] before.",
-        e2.getMessage()
-    );
     ISE e3 = Assert.assertThrows(
         ISE.class,
         () -> restrictedDataSource.withPolicies(policyWasNotChecked, policyEnforcer)

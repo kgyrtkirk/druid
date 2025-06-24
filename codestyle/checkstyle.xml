@@ -31,7 +31,10 @@
 
   <module name="NewlineAtEndOfFile"/>
   <module name="FileTabCharacter"/>
-
+  <module name="RegexpOnFilename">
+    <property name="fileNamePattern" value="^([_$]).*"/>
+    <property name="fileExtensions" value="java"/>
+  </module>
   <!-- Added as per the issue #7384 - Prohibit @author tags in Javadoc -->
   <module name="RegexpSingleline">
     <property name="format" value="^\s*\*\s*@author" />
@@ -235,7 +238,7 @@
       <property name="id" value="argumentLineBreaking"/>
       <property
           name="format"
-          value='(?&lt;!ImmutableMap.of|Types.mapOf|orderedMap|makeSelectResults|makeListOfPairs)\(\s*\n +([^,\n\(\{"&lt;/]+|[^,\n\(\{" /]+&gt; [a-zA-Z0-9_]+)\, ++[^,\n/]+'
+          value='(?&lt;!Map.of|ImmutableMap.of|Types.mapOf|orderedMap|makeSelectResults|makeListOfPairs)\(\s*\n +([^,\n\(\{"&lt;/]+|[^,\n\(\{" /]+&gt; [a-zA-Z0-9_]+)\, ++[^,\n/]+'
       />
       <property name="illegalPattern" value="true"/>
       <property name="message" value="&#10;
