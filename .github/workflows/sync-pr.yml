@@ -31,7 +31,7 @@ jobs:
         upstream: https://github.com/apache/druid
         upstream_branch: master
         branch: master
-        pr_labels: upstream
+        pr_labels: upstream,bot
         pr_title: apache/master->master
         sync_branch_prefix: sync/apache
       env:
