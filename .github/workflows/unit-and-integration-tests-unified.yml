@@ -203,6 +203,14 @@ jobs:
     needs: [check-approval]
     if: ${{ needs.check-approval.outputs.approved == 'true' }}
 
+  unit-tests:
+    needs: unit-tests-unapproved,  unit-tests-approved]
+    if: ${{ !cancelled() && (needs.unit-tests-approved.result == 'success' || needs.unit-tests-unapproved.result == 'success') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: dummy
+        run: echo ok
+
   standard-its:
     needs: [build, unit-tests-unapproved, check-approval]
     if: ${{ !cancelled() && (needs.check-approval.outputs.approved == 'true' || needs.unit-tests-unapproved.result == 'success') }}
