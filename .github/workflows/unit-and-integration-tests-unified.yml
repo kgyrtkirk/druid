@@ -204,7 +204,7 @@ jobs:
     if: ${{ needs.check-approval.outputs.approved == 'true' }}
 
   unit-tests:
-    needs: unit-tests-unapproved,  unit-tests-approved]
+    needs: [unit-tests-unapproved,  unit-tests-approved]
     if: ${{ !cancelled() && (needs.unit-tests-approved.result == 'success' || needs.unit-tests-unapproved.result == 'success') }}
     runs-on: ubuntu-latest
     steps:
