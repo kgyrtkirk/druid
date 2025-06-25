@@ -23,7 +23,8 @@ jobs:
     if: startsWith(github.head_ref, 'sync/')
     steps:
       - uses: actions/checkout@v4
-        fetch-depth: 500
+        with:
+          fetch-depth: 500
       - name: Approve PR (as github)
         run: |
           gh pr review ${{ github.event.pull_request.number }} -a
