@@ -30,7 +30,7 @@ set -u
 #env
 
 # Druid system user
-adduser --system --group --no-create-home druid
+adduser --uid ${DRUID_UID:-1000} --system --group --no-create-home druid
 
 # Adjust ownership of the Druid launch script.
 cd /
