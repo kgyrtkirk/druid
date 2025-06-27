@@ -30,9 +30,12 @@ import org.apache.druid.sql.calcite.rel.logical.DruidAggregate;
 
 class ProjectStage extends FilterStage
 {
+  protected final RowSignature projectInputSignature;
+
   public ProjectStage(FilterStage stage, VirtualColumnRegistry virtualColumnRegistry, RowSignature signature)
   {
     super(stage, virtualColumnRegistry, signature);
+    projectInputSignature = stage.signature;
   }
 
   /**
@@ -42,6 +45,7 @@ class ProjectStage extends FilterStage
   public ProjectStage(ProjectStage stage, RowSignature rowSignature)
   {
     super(stage, stage.virtualColumnRegistry, rowSignature);
+    projectInputSignature = stage.projectInputSignature;
   }
 
   @Override
@@ -59,7 +63,7 @@ class ProjectStage extends FilterStage
           selectProject,
           null,
           stack.getPlannerContext(),
-          signature,
+          projectInputSignature,
           virtualColumnRegistry,
           false
       );
