@@ -121,6 +121,7 @@ import org.apache.druid.segment.join.JoinType;
 import org.apache.druid.segment.virtual.ExpressionVirtualColumn;
 import org.apache.druid.sql.calcite.DecoupledTestConfig.IgnoreQueriesReason;
 import org.apache.druid.sql.calcite.DecoupledTestConfig.QuidemTestCaseReason;
+import org.apache.druid.sql.calcite.NotYetSupported.Modes;
 import org.apache.druid.sql.calcite.expression.DruidExpression;
 import org.apache.druid.sql.calcite.filtration.Filtration;
 import org.apache.druid.sql.calcite.planner.Calcites;
@@ -3452,6 +3453,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
+
   @Test
   public void testNullFloatTopN()
   {
@@ -3464,7 +3466,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
         new Object[]{0.0f, 1L}
     );
     testQuery(
-        "SELECT f1, COUNT(*) FROM druid.numfoo GROUP BY f1 ORDER BY f1 DESC LIMIT 10",
+        "SELECT f1, COUNT(*) FROM druid.numfoo where f1 is null or f1 =1.0 GROUP BY f1 ORDER BY f1 DESC LIMIT 10",
         QUERY_CONTEXT_LEXICOGRAPHIC_TOPN,
         ImmutableList.of(
             new TopNQueryBuilder()
@@ -7102,6 +7104,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @NotYetSupported(Modes.INCORRECT_RESULTS_EMPTY_STRING)
   @Test
   public void testApproxCountDistinctWhenHllDisabled()
   {

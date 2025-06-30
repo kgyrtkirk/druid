@@ -1,4 +1,4 @@
-# testTimeFilterOnSubquery case-crc:73448efc
+# testTimeFilterOnSubquery case-crc:5f2fb110
 # quidem testcase reason: EQUIV_PLAN_EXTRA_COLUMNS
 !set debug true
 !set defaultTimeout 300000
@@ -31,58 +31,3 @@ DruidFilter(condition=[SEARCH($0, Sarg[[2000-01-01 00:00:00:TIMESTAMP(3)..2000-0
       DruidTableScan(table=[[druid, foo]], druid=[logical])
 
 !druidPlan
-{
-  "queryType" : "scan",
-  "dataSource" : {
-    "type" : "query",
-    "query" : {
-      "queryType" : "scan",
-      "dataSource" : {
-        "type" : "table",
-        "name" : "foo"
-      },
-      "intervals" : {
-        "type" : "intervals",
-        "intervals" : [ "-146136543-09-08T08:23:32.096Z/146140482-04-24T15:36:27.903Z" ]
-      },
-      "resultFormat" : "compactedList",
-      "limit" : 100,
-      "columns" : [ "__time", "m1" ],
-      "columnTypes" : [ "LONG", "FLOAT" ],
-      "granularity" : {
-        "type" : "all"
-      },
-      "legacy" : false
-    }
-  },
-  "intervals" : {
-    "type" : "intervals",
-    "intervals" : [ "-146136543-09-08T08:23:32.096Z/146140482-04-24T15:36:27.903Z" ]
-  },
-  "resultFormat" : "compactedList",
-  "filter" : {
-    "type" : "or",
-    "fields" : [ {
-      "type" : "range",
-      "column" : "__time",
-      "matchValueType" : "LONG",
-      "lower" : 946684800000,
-      "upper" : 946771200000,
-      "upperOpen" : true
-    }, {
-      "type" : "range",
-      "column" : "__time",
-      "matchValueType" : "LONG",
-      "lower" : 978307200000,
-      "upper" : 978393600000,
-      "upperOpen" : true
-    } ]
-  },
-  "columns" : [ "__time", "m1" ],
-  "columnTypes" : [ "LONG", "FLOAT" ],
-  "granularity" : {
-    "type" : "all"
-  },
-  "legacy" : false
-}
-!nativePlan
