@@ -30,6 +30,7 @@ import org.apache.druid.msq.querykit.groupby.GroupByPreShuffleStageProcessor;
 import org.apache.druid.query.TableDataSource;
 import org.apache.druid.query.groupby.GroupByQuery;
 import org.apache.druid.query.spec.QuerySegmentSpec;
+import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.segment.column.RowSignature.Finalization;
 import org.apache.druid.sql.calcite.aggregation.DimensionExpression;
 import org.apache.druid.sql.calcite.planner.querygen.DruidQueryGenerator.DruidNodeStack;
@@ -68,9 +69,9 @@ public class GroupByStages
   {
     private GroupByQuery gby;
 
-    public PostShuffleStage(LogicalStage inputStage, GroupByQuery gby)
+    public PostShuffleStage(LogicalStage inputStage, GroupByQuery gby, RowSignature outputSignature)
     {
-      super(inputStage.getRowSignature(), LogicalInputSpec.of(inputStage));
+      super(outputSignature, LogicalInputSpec.of(inputStage));
       this.gby = gby;
     }
 
@@ -92,7 +93,7 @@ public class GroupByStages
     GroupByQuery gby = makeGbyQuery(projectStage, grouping);
     PreShuffleStage aggStage = new PreShuffleStage(projectStage, gby);
     SortStage sortStage = new SortStage(aggStage, getKeyColumns(grouping.getDimensions()));
-    PostShuffleStage finalAggStage = new PostShuffleStage(sortStage, gby);
+    PostShuffleStage finalAggStage = new PostShuffleStage(sortStage, gby, grouping.getOutputRowSignature());
     return finalAggStage;
   }
 
