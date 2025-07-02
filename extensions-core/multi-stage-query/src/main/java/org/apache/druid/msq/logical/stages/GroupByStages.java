@@ -43,9 +43,9 @@ public class GroupByStages
   public static LogicalStage buildStages(ProjectStage projectStage, Grouping grouping)
   {
     GroupByQuery gby = makeGbyQuery(projectStage, grouping);
-    GroupByPreShuffleStage aggStage = new GroupByPreShuffleStage(projectStage, gby);
+    PreShuffleStage aggStage = new PreShuffleStage(projectStage, gby);
     SortStage sortStage = new SortStage(aggStage, getKeyColumns(grouping.getDimensions()));
-    GroupByPostShuffleStage finalAggStage = new GroupByPostShuffleStage(sortStage, gby);
+    PostShuffleStage finalAggStage = new PostShuffleStage(sortStage, gby);
     return finalAggStage;
   }
 
@@ -102,7 +102,7 @@ public class GroupByStages
 
   }
 
-  class PostShuffleStage extends AbstractFrameProcessorStage
+  static class PostShuffleStage extends AbstractFrameProcessorStage
   {
     // FIXME query
     private GroupByQuery gby;
