@@ -77,7 +77,7 @@ public class ScanQueryStageProcessor extends BaseLeafStageProcessor
     ScanQuery scanQuery = Druids.newScanQueryBuilder()
         .dataSource(IRRELEVANT)
         .intervals(QuerySegmentSpec.ETERNITY)
-        .filters(newFilter )
+        .filters(newFilter)
         .virtualColumns(virtualColumns)
         .columns(signature.getColumnNames())
         .columnTypes(signature.getColumnTypes())

@@ -104,7 +104,6 @@ public @interface NotYetSupported
     UNNEST_INLINED(Scope.DECOUPLED, Exception.class, "Missing conversion is Uncollect"),
     UNNEST_RESULT_MISMATCH(Scope.DECOUPLED, AssertionError.class, "(Result count mismatch|column content mismatch)"),
 
-    SUPPORT_AGGREGATE(Scope.DECOUPLED_MSQ, DruidException.class, "Unable to process relNode.*DruidAggregate"),
     RESTRICTED_DATASOURCE_SUPPORT(Scope.DECOUPLED_MSQ, DruidException.class, "ForbiddenException: Unauthorized"),
     INCORRECT_RESULTS_EMPTY_STRING(Scope.DECOUPLED_MSQ, AssertionError.class, "column content mismatch at"),
     NO_INFORMATION_SCHEMA_SUPPORT(Scope.DECOUPLED_MSQ, DruidException.class, "INFORMATION_SCHEMA"),
