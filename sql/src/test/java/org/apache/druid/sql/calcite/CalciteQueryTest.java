@@ -2584,6 +2584,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
         .run();
   }
 
+  @NotYetSupported(Modes.DART_JOIN)
   @SqlTestFrameworkConfig.NumMergeBuffers(3)
   @Test
   public void testExactCountDistinctWithFilter2()
@@ -3328,6 +3329,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
    * This test case should be in {@link CalciteUnionQueryTest}. However, there's a bug in the test framework that
    * doesn't reset framework once the merge buffers
    */
+  @NotYetSupported(Modes.DART_UNION)
   @SqlTestFrameworkConfig.NumMergeBuffers(3)
   @Test
   public void testUnionAllSameTableThreeTimes()
@@ -3372,6 +3374,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @NotYetSupported(Modes.DART_UNION)
   @SqlTestFrameworkConfig.NumMergeBuffers(3)
   @Test
   public void testExactCountDistinctUsingSubqueryOnUnionAllTables()
@@ -6246,6 +6249,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @NotYetSupported(Modes.DART_NULL_COLUMN_ORDER)
   @Test
   public void testOrderByNullType()
   {
@@ -7223,6 +7227,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @NotYetSupported(Modes.DART_JOIN)
   @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.AGG_COL_EXCHANGE)
   @Test
   public void testMultipleExactCountDistinctWithGroupingAndOtherAggregatorsUsingJoin()
@@ -12516,6 +12521,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
   }
 
   // __time >= x remains in the join condition
+  @NotYetSupported(Modes.DART_JOIN)
   @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.JOIN_FILTER_LOCATIONS)
   @Test
   public void testRequireTimeConditionPositive3()
@@ -14738,6 +14744,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @NotYetSupported(Modes.DART_JOIN)
   @Test
   public void testOrderByAlongWithInternalScanQuery()
   {
@@ -14782,6 +14789,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @NotYetSupported(Modes.DART_JOIN)
   @Test
   public void testOrderByAlongWithInternalScanQueryNoDistinct()
   {

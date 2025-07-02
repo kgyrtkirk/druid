@@ -108,7 +108,9 @@ public @interface NotYetSupported
     RESTRICTED_DATASOURCE_SUPPORT(Scope.DECOUPLED_MSQ, DruidException.class, "ForbiddenException: Unauthorized"),
     INCORRECT_RESULTS_EMPTY_STRING(Scope.DECOUPLED_MSQ, AssertionError.class, "column content mismatch at"),
     NO_INFORMATION_SCHEMA_SUPPORT(Scope.DECOUPLED_MSQ, DruidException.class, "INFORMATION_SCHEMA"),
-    DART_JOIN(Scope.DECOUPLED_MSQ, DruidException.class, "DruidJoin.DRUID_LOGICAL");
+    DART_JOIN(Scope.DECOUPLED_MSQ, DruidException.class, "DruidJoin.DRUID_LOGICAL"),
+    DART_NULL_COLUMN_ORDER(Scope.DECOUPLED_MSQ, DruidException.class, "sort: \\[\\] -> \\[1\\]"),
+    DART_UNION(Scope.DECOUPLED_MSQ, DruidException.class, "DruidUnion.DRUID_LOGICAL");
     // @formatter:on
 
     public Scope scope;

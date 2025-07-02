@@ -37,6 +37,7 @@ import org.apache.druid.sql.calcite.planner.querygen.DruidQueryGenerator.DruidNo
 import org.apache.druid.sql.calcite.rel.Grouping;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class GroupByStages
@@ -62,7 +63,6 @@ public class GroupByStages
     {
       return new GroupByPreShuffleStageProcessor(gby);
     }
-
   }
 
   static class PostShuffleStage extends AbstractFrameProcessorStage
@@ -91,7 +91,7 @@ public class GroupByStages
   public static LogicalStage buildStages(ProjectStage projectStage, Grouping grouping)
   {
     GroupByQuery gby = makeGbyQuery(projectStage, grouping);
-    PreShuffleStage aggStage = new PreShuffleStage(projectStage, gby);
+    PreShuffleStage aggStage = new PreShuffleStage(projectStage, gby.withPostAggregatorSpecs(Collections.emptyList()));
     SortStage sortStage = new SortStage(aggStage, getKeyColumns(grouping.getDimensions()));
     PostShuffleStage finalAggStage = new PostShuffleStage(sortStage, gby, grouping.getOutputRowSignature());
     return finalAggStage;
@@ -106,6 +106,7 @@ public class GroupByStages
     builder.setAggregatorSpecs(grouping.getAggregatorFactories());
     builder.setDimFilter(projectStage.getDimFilter());
     builder.setVirtualColumns(projectStage.getVirtualColumns());
+    builder.setPostAggregatorSpecs(grouping.getPostAggregators());
     builder.setDataSource(new TableDataSource("DUMMY"));
     return builder.build();
   }
