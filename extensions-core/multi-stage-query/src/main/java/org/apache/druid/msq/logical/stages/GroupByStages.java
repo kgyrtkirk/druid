@@ -40,37 +40,6 @@ import java.util.List;
 
 public class GroupByStages
 {
-  public static LogicalStage buildStages(ProjectStage projectStage, Grouping grouping)
-  {
-    GroupByQuery gby = makeGbyQuery(projectStage, grouping);
-    PreShuffleStage aggStage = new PreShuffleStage(projectStage, gby);
-    SortStage sortStage = new SortStage(aggStage, getKeyColumns(grouping.getDimensions()));
-    PostShuffleStage finalAggStage = new PostShuffleStage(sortStage, gby);
-    return finalAggStage;
-  }
-
-  private static GroupByQuery makeGbyQuery(ProjectStage projectStage, Grouping grouping)
-  {
-    GroupByQuery.Builder builder = GroupByQuery.builder();
-    builder.setDimensions(grouping.getDimensionSpecs());
-    builder.setQuerySegmentSpec(QuerySegmentSpec.ETERNITY);
-    builder.setGranularity(Granularities.ALL);
-    builder.setAggregatorSpecs(grouping.getAggregatorFactories());
-    builder.setDimFilter(projectStage.getDimFilter());
-    builder.setVirtualColumns(projectStage.getVirtualColumns());
-    builder.setDataSource(new TableDataSource("DUMMY"));
-    return builder.build();
-  }
-
-  private static List<KeyColumn> getKeyColumns(List<DimensionExpression> dimensions)
-  {
-    List<KeyColumn> columns = new ArrayList<>();
-    for (DimensionExpression dimension : dimensions) {
-      columns.add(new KeyColumn(dimension.getOutputName(), KeyOrder.ASCENDING));
-    }
-    return columns;
-  }
-
   public static class PreShuffleStage extends ProjectStage
   {
     private GroupByQuery gby;
@@ -116,5 +85,36 @@ public class GroupByStages
     {
       return new GroupByPostShuffleStageProcessor(gby);
     }
+  }
+
+  public static LogicalStage buildStages(ProjectStage projectStage, Grouping grouping)
+  {
+    GroupByQuery gby = makeGbyQuery(projectStage, grouping);
+    PreShuffleStage aggStage = new PreShuffleStage(projectStage, gby);
+    SortStage sortStage = new SortStage(aggStage, getKeyColumns(grouping.getDimensions()));
+    PostShuffleStage finalAggStage = new PostShuffleStage(sortStage, gby);
+    return finalAggStage;
+  }
+
+  private static GroupByQuery makeGbyQuery(ProjectStage projectStage, Grouping grouping)
+  {
+    GroupByQuery.Builder builder = GroupByQuery.builder();
+    builder.setDimensions(grouping.getDimensionSpecs());
+    builder.setQuerySegmentSpec(QuerySegmentSpec.ETERNITY);
+    builder.setGranularity(Granularities.ALL);
+    builder.setAggregatorSpecs(grouping.getAggregatorFactories());
+    builder.setDimFilter(projectStage.getDimFilter());
+    builder.setVirtualColumns(projectStage.getVirtualColumns());
+    builder.setDataSource(new TableDataSource("DUMMY"));
+    return builder.build();
+  }
+
+  private static List<KeyColumn> getKeyColumns(List<DimensionExpression> dimensions)
+  {
+    List<KeyColumn> columns = new ArrayList<>();
+    for (DimensionExpression dimension : dimensions) {
+      columns.add(new KeyColumn(dimension.getOutputName(), KeyOrder.ASCENDING));
+    }
+    return columns;
   }
 }
