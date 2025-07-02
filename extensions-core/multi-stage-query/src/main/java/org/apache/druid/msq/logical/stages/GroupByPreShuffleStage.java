@@ -23,9 +23,7 @@ import org.apache.druid.frame.key.KeyColumn;
 import org.apache.druid.frame.key.KeyOrder;
 import org.apache.druid.java.util.common.granularity.Granularities;
 import org.apache.druid.msq.exec.StageProcessor;
-import org.apache.druid.msq.logical.LogicalInputSpec;
 import org.apache.druid.msq.logical.StageMaker;
-import org.apache.druid.msq.querykit.groupby.GroupByPostShuffleStageProcessor;
 import org.apache.druid.msq.querykit.groupby.GroupByPreShuffleStageProcessor;
 import org.apache.druid.query.TableDataSource;
 import org.apache.druid.query.groupby.GroupByQuery;
@@ -38,35 +36,12 @@ import org.apache.druid.sql.calcite.rel.Grouping;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AggregateStage extends ProjectStage
+public class GroupByPreShuffleStage extends ProjectStage
 {
-  static class PostShuffleStage extends AbstractFrameProcessorStage
-  {
-    private GroupByQuery gby;
-
-    public PostShuffleStage(LogicalStage inputStage, GroupByQuery gby)
-    {
-      super(inputStage.getRowSignature(), LogicalInputSpec.of(inputStage));
-      this.gby = gby;
-    }
-
-    @Override
-    public LogicalStage extendWith(DruidNodeStack stack)
-    {
-      return null;
-    }
-
-    @Override
-    public StageProcessor<?, ?> buildStageProcessor(StageMaker stageMaker)
-    {
-      return new GroupByPostShuffleStageProcessor(gby);
-    }
-  }
-
   // FIXME : this shouldn't be a Query
   private GroupByQuery gby;
 
-  public AggregateStage(ProjectStage projectStage, GroupByQuery gby)
+  public GroupByPreShuffleStage(ProjectStage projectStage, GroupByQuery gby)
   {
     super(projectStage, gby.getResultRowSignature(Finalization.NO));
     this.gby = gby;
@@ -87,9 +62,9 @@ public class AggregateStage extends ProjectStage
   public static LogicalStage buildStages(ProjectStage projectStage, Grouping grouping)
   {
     GroupByQuery gby = makeGbyQuery(projectStage, grouping);
-    AggregateStage aggStage = new AggregateStage(projectStage, gby);
+    GroupByPreShuffleStage aggStage = new GroupByPreShuffleStage(projectStage, gby);
     SortStage sortStage = new SortStage(aggStage, getKeyColumns(grouping.getDimensions()));
-    PostShuffleStage finalAggStage = new PostShuffleStage(sortStage,gby);
+    GroupByPostShuffleStage finalAggStage = new GroupByPostShuffleStage(sortStage,gby);
     return finalAggStage;
   }
 

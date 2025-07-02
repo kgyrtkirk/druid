@@ -65,7 +65,7 @@ class ProjectStage extends FilterStage
       );
 
 
-      return AggregateStage.buildStages(this, grouping);
+      return GroupByStages.buildStages(this, grouping);
 
     }
     return null;
