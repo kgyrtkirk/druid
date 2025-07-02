@@ -19,10 +19,7 @@
 
 package org.apache.druid.msq.test;
 
-import com.google.common.collect.ImmutableMap;
-import org.apache.druid.query.QueryContexts;
 import org.apache.druid.sql.calcite.CalciteQueryTest;
-import org.apache.druid.sql.calcite.DecoupledExtension;
 import org.apache.druid.sql.calcite.NotYetSupported;
 import org.apache.druid.sql.calcite.QueryTestBuilder;
 import org.apache.druid.sql.calcite.SqlTestFrameworkConfig;
@@ -37,29 +34,12 @@ public class DecoupledDartCalciteQueryTest extends CalciteQueryTest
   NotYetSupportedProcessor notYetSupportedProcessor = new NotYetSupportedProcessor(NotYetSupported.Scope.DECOUPLED_MSQ);
 
   @RegisterExtension
-  DecoupledExtension decoupledExtension = new DecoupledExtension(this);
+  DecoupledDartExtension decoupledExtension = new DecoupledDartExtension(this);
 
   @Override
   protected QueryTestBuilder testBuilder()
   {
-    return decoupledExtension.testBuilder()
-        .queryContext(
-            ImmutableMap.<String, Object>builder()
-                .put(QueryContexts.CTX_PREPLANNED, true)
-                .put(QueryContexts.CTX_NATIVE_QUERY_SQL_PLANNING_MODE, QueryContexts.NATIVE_QUERY_SQL_PLANNING_MODE_DECOUPLED)
-                .put(QueryContexts.ENABLE_DEBUG, true)
-                .build()
-        );
-  }
-
-  @Override
-  protected void cannotVectorize()
-  {
-  }
-
-  @Override
-  protected void cannotVectorizeUnlessFallback()
-  {
+    return decoupledExtension.testBuilder();
   }
 
   @Override

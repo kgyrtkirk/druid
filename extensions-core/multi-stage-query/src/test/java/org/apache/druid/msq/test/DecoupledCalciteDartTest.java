@@ -21,7 +21,6 @@ package org.apache.druid.msq.test;
 
 import com.google.common.collect.ImmutableMap;
 import org.apache.druid.query.QueryContexts;
-import org.apache.druid.sql.calcite.DecoupledExtension;
 import org.apache.druid.sql.calcite.NotYetSupported;
 import org.apache.druid.sql.calcite.NotYetSupported.NotYetSupportedProcessor;
 import org.apache.druid.sql.calcite.QueryTestBuilder;
@@ -33,7 +32,7 @@ public class DecoupledCalciteDartTest extends CalciteDartTest
   NotYetSupportedProcessor notYetSupportedProcessor = new NotYetSupportedProcessor(NotYetSupported.Scope.DECOUPLED_MSQ);
 
   @RegisterExtension
-  DecoupledExtension decoupledExtension = new DecoupledExtension(this);
+  DecoupledDartExtension decoupledExtension = new DecoupledDartExtension(this);
 
   @Override
   protected QueryTestBuilder testBuilder()
