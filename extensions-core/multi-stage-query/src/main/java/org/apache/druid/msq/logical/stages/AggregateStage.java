@@ -22,11 +22,11 @@ package org.apache.druid.msq.logical.stages;
 import org.apache.druid.frame.key.KeyColumn;
 import org.apache.druid.frame.key.KeyOrder;
 import org.apache.druid.java.util.common.granularity.Granularities;
+import org.apache.druid.msq.exec.StageProcessor;
 import org.apache.druid.msq.logical.LogicalInputSpec;
 import org.apache.druid.msq.logical.StageMaker;
-import org.apache.druid.msq.querykit.BaseFrameProcessorFactory;
-import org.apache.druid.msq.querykit.groupby.GroupByPostShuffleFrameProcessorFactory;
-import org.apache.druid.msq.querykit.groupby.GroupByPreShuffleFrameProcessorFactory;
+import org.apache.druid.msq.querykit.groupby.GroupByPostShuffleStageProcessor;
+import org.apache.druid.msq.querykit.groupby.GroupByPreShuffleStageProcessor;
 import org.apache.druid.query.TableDataSource;
 import org.apache.druid.query.groupby.GroupByQuery;
 import org.apache.druid.query.spec.QuerySegmentSpec;
@@ -57,9 +57,9 @@ public class AggregateStage extends ProjectStage
     }
 
     @Override
-    public BaseFrameProcessorFactory buildFrameProcessor(StageMaker stageMaker)
+    public StageProcessor<?, ?> buildStageProcessor(StageMaker stageMaker)
     {
-      return new GroupByPostShuffleFrameProcessorFactory(gby);
+      return new GroupByPostShuffleStageProcessor(gby);
     }
   }
 
@@ -79,9 +79,9 @@ public class AggregateStage extends ProjectStage
   }
 
   @Override
-  public BaseFrameProcessorFactory buildFrameProcessor(StageMaker stageMaker)
+  public StageProcessor<?, ?> buildStageProcessor(StageMaker stageMaker)
   {
-    return new GroupByPreShuffleFrameProcessorFactory(gby);
+    return new GroupByPreShuffleStageProcessor(gby);
   }
 
   public static LogicalStage buildStages(ProjectStage projectStage, Grouping grouping)
