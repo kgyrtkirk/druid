@@ -107,7 +107,8 @@ public @interface NotYetSupported
     SUPPORT_AGGREGATE(Scope.DECOUPLED_MSQ, DruidException.class, "Unable to process relNode.*DruidAggregate"),
     RESTRICTED_DATASOURCE_SUPPORT(Scope.DECOUPLED_MSQ, DruidException.class, "ForbiddenException: Unauthorized"),
     INCORRECT_RESULTS_EMPTY_STRING(Scope.DECOUPLED_MSQ, AssertionError.class, "column content mismatch at"),
-    NO_INFORMATION_SCHEMA_SUPPORT(Scope.DECOUPLED_MSQ, DruidException.class, "INFORMATION_SCHEMA");
+    NO_INFORMATION_SCHEMA_SUPPORT(Scope.DECOUPLED_MSQ, DruidException.class, "INFORMATION_SCHEMA"),
+    DART_JOIN(Scope.DECOUPLED_MSQ, DruidException.class, "DruidJoin.DRUID_LOGICAL");
     // @formatter:on
 
     public Scope scope;

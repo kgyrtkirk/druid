@@ -15454,6 +15454,7 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
         .run();
   }
 
+  @NotYetSupported(Modes.DART_JOIN)
   @Test
   public void testWindowingOverJoin()
   {
