@@ -58,8 +58,7 @@ public class GroupByStages
     builder.setAggregatorSpecs(grouping.getAggregatorFactories());
     builder.setDimFilter(projectStage.getDimFilter());
     builder.setVirtualColumns(projectStage.getVirtualColumns());
-    builder.setDataSource(new TableDataSource("DYMMT")); // FIXME
-
+    builder.setDataSource(new TableDataSource("DUMMY"));
     return builder.build();
   }
 
@@ -74,7 +73,6 @@ public class GroupByStages
 
   public static class PreShuffleStage extends ProjectStage
   {
-    // FIXME : this shouldn't be a Query
     private GroupByQuery gby;
 
     public PreShuffleStage(ProjectStage projectStage, GroupByQuery gby)
@@ -99,7 +97,6 @@ public class GroupByStages
 
   static class PostShuffleStage extends AbstractFrameProcessorStage
   {
-    // FIXME query
     private GroupByQuery gby;
 
     public PostShuffleStage(LogicalStage inputStage, GroupByQuery gby)
