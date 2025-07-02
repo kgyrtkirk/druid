@@ -79,7 +79,7 @@ public @interface NotYetSupported
   {
     WINDOWING,
     DECOUPLED,
-    DECOUPLED_MSQ,
+    DECOUPLED_DART,
     BINDABLE,
   }
 
@@ -104,12 +104,12 @@ public @interface NotYetSupported
     UNNEST_INLINED(Scope.DECOUPLED, Exception.class, "Missing conversion is Uncollect"),
     UNNEST_RESULT_MISMATCH(Scope.DECOUPLED, AssertionError.class, "(Result count mismatch|column content mismatch)"),
 
-    RESTRICTED_DATASOURCE_SUPPORT(Scope.DECOUPLED_MSQ, DruidException.class, "ForbiddenException: Unauthorized"),
-    INCORRECT_RESULTS_EMPTY_STRING(Scope.DECOUPLED_MSQ, AssertionError.class, "column content mismatch at"),
-    NO_INFORMATION_SCHEMA_SUPPORT(Scope.DECOUPLED_MSQ, DruidException.class, "INFORMATION_SCHEMA"),
-    DART_JOIN(Scope.DECOUPLED_MSQ, DruidException.class, "DruidJoin.DRUID_LOGICAL"),
-    DART_NULL_COLUMN_ORDER(Scope.DECOUPLED_MSQ, DruidException.class, "sort: \\[\\] -> \\[1\\]"),
-    DART_UNION(Scope.DECOUPLED_MSQ, DruidException.class, "DruidUnion.DRUID_LOGICAL");
+    DD_RESTRICTED_DATASOURCE_SUPPORT(Scope.DECOUPLED_DART, DruidException.class, "ForbiddenException: Unauthorized"),
+    DD_INCORRECT_RESULTS_EMPTY_STRING(Scope.DECOUPLED_DART, AssertionError.class, "column content mismatch at"),
+    NO_INFORMATION_SCHEMA_SUPPORT(Scope.DECOUPLED_DART, DruidException.class, "INFORMATION_SCHEMA"),
+    DD_JOIN(Scope.DECOUPLED_DART, DruidException.class, "DruidJoin.DRUID_LOGICAL"),
+    DD_NULL_COLUMN_ORDER(Scope.DECOUPLED_DART, DruidException.class, "sort: \\[\\] -> \\[1\\]"),
+    DD_UNION(Scope.DECOUPLED_DART, DruidException.class, "DruidUnion.DRUID_LOGICAL");
     // @formatter:on
 
     public Scope scope;

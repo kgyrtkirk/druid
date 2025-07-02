@@ -51,7 +51,7 @@ class ProjectStage extends FilterStage
   @Override
   public LogicalStage extendWith(DruidNodeStack stack)
   {
-    if(stack.getNode() instanceof DruidAggregate) {
+    if (stack.getNode() instanceof DruidAggregate) {
 
       DruidAggregate aggregate = (DruidAggregate) stack.getNode();
 

@@ -68,8 +68,8 @@ public class SortStage extends AbstractShuffleStage
   }
 
 
-  public static class OffsetLimitStage extends AbstractFrameProcessorStage {
-
+  public static class OffsetLimitStage extends AbstractFrameProcessorStage
+  {
     protected final OffsetLimit offsetLimit;
 
     public OffsetLimitStage(LogicalStage inputStage, OffsetLimit offsetLimit)

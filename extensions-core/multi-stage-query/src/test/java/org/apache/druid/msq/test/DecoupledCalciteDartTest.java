@@ -29,7 +29,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 public class DecoupledCalciteDartTest extends CalciteDartTest
 {
   @RegisterExtension
-  NotYetSupportedProcessor notYetSupportedProcessor = new NotYetSupportedProcessor(NotYetSupported.Scope.DECOUPLED_MSQ);
+  NotYetSupportedProcessor notYetSupportedProcessor = new NotYetSupportedProcessor(NotYetSupported.Scope.DECOUPLED_DART);
 
   @RegisterExtension
   DecoupledDartExtension decoupledExtension = new DecoupledDartExtension(this);
