@@ -60,12 +60,7 @@ public class GroupByStages
     builder.setVirtualColumns(projectStage.getVirtualColumns());
     builder.setDataSource(new TableDataSource("DYMMT")); // FIXME
 
-    try {
-      return builder.build();
-    }
-    catch (Exception e) {
-      throw e;
-    }
+    return builder.build();
   }
 
   private static List<KeyColumn> getKeyColumns(List<DimensionExpression> dimensions)
