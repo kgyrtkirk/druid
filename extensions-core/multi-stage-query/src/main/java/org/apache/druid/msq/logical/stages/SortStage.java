@@ -22,13 +22,13 @@ package org.apache.druid.msq.logical.stages;
 import com.google.common.collect.ImmutableList;
 import org.apache.druid.frame.key.ClusterBy;
 import org.apache.druid.frame.key.KeyColumn;
+import org.apache.druid.msq.exec.StageProcessor;
 import org.apache.druid.msq.kernel.ShuffleSpec;
 import org.apache.druid.msq.logical.LogicalInputSpec;
 import org.apache.druid.msq.logical.StageMaker;
-import org.apache.druid.msq.querykit.BaseFrameProcessorFactory;
 import org.apache.druid.msq.querykit.QueryKitUtils;
 import org.apache.druid.msq.querykit.ShuffleSpecFactories;
-import org.apache.druid.msq.querykit.common.OffsetLimitFrameProcessorFactory;
+import org.apache.druid.msq.querykit.common.OffsetLimitStageProcessor;
 import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.sql.calcite.planner.OffsetLimit;
 import org.apache.druid.sql.calcite.planner.querygen.DruidQueryGenerator.DruidNodeStack;
@@ -85,9 +85,9 @@ public class SortStage extends AbstractShuffleStage
     }
 
     @Override
-    public BaseFrameProcessorFactory buildFrameProcessor(StageMaker stageMaker)
+    public StageProcessor<?, ?> buildStageProcessor(StageMaker stageMaker)
     {
-      return new OffsetLimitFrameProcessorFactory(
+      return new OffsetLimitStageProcessor(
           offsetLimit.getOffset(),
           offsetLimit.hasLimit() ? offsetLimit.getLimit() : null
       );
