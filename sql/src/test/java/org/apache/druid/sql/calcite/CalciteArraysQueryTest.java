@@ -4069,7 +4069,6 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  //@
   @Test
   public void testUnnestArrayColumnsStringNulls()
   {
