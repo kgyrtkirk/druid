@@ -3457,7 +3457,6 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @NotYetSupported(Modes.NULL_ORDERING)
   @Test
   public void testNullFloatTopN()
   {
