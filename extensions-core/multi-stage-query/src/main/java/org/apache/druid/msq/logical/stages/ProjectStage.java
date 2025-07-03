@@ -38,10 +38,6 @@ class ProjectStage extends FilterStage
     projectInputSignature = stage.signature;
   }
 
-  /**
-   * Copy constructor.
-   * @param rowSignature
-   */
   public ProjectStage(ProjectStage stage, RowSignature rowSignature)
   {
     super(stage, stage.virtualColumnRegistry, rowSignature);
@@ -51,10 +47,8 @@ class ProjectStage extends FilterStage
   @Override
   public LogicalStage extendWith(DruidNodeStack stack)
   {
-    if(stack.getNode() instanceof DruidAggregate) {
-
+    if (stack.getNode() instanceof DruidAggregate) {
       DruidAggregate aggregate = (DruidAggregate) stack.getNode();
-
       RelNode aggregateInput = aggregate.getInput();
       Project selectProject = aggregateInput instanceof Project ? (Project) aggregateInput : null;
 
@@ -68,9 +62,7 @@ class ProjectStage extends FilterStage
           false
       );
 
-
       return GroupByStages.buildStages(this, grouping);
-
     }
     return null;
   }
