@@ -72,7 +72,7 @@ public class JoinStage
     public ShuffleSpec buildShuffleSpec()
     {
       final ClusterBy clusterBy = new ClusterBy(keyColumns, 0);
-      return new HashShuffleSpec(clusterBy, 3);
+      return new HashShuffleSpec(clusterBy, 1);
       // return
       // ShuffleSpecFactories.globalSortWithMaxPartitionCount(1).build(clusterBy,
       // false);
@@ -225,7 +225,7 @@ public class JoinStage
 
     RowSignature signature = RowSignature.builder()
       .addAll(inputStages.get(0).getLogicalRowSignature())
-      .addAll(inputStages.get(0).getLogicalRowSignature().withPrefix(prefix))
+      .addAll(inputStages.get(1).getLogicalRowSignature().withPrefix(prefix))
       .build();
 
 
