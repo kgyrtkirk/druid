@@ -91,7 +91,7 @@ public class DruidLogicalToQueryDefinitionTranslator
     List<LogicalStage> inputStages = buildInputStages(stack);
     DruidLogicalNode node = stack.getNode();
     if (inputStages.size() == 0) {
-      Optional<ReadStage> stage = buildReadStage(node);
+      Optional<ReadStage> stage = ReadStage.buildReadStage(stack);
       if (stage.isPresent()) {
         return stage.get();
       }
@@ -123,17 +123,6 @@ public class DruidLogicalToQueryDefinitionTranslator
     return null;
   }
 
-  private Optional<ReadStage> buildReadStage(DruidLogicalNode node)
-  {
-    if (node instanceof DruidValues) {
-      return translateValues((DruidValues) node);
-    }
-    if (node instanceof DruidTableScan) {
-      return translateTableScan((DruidTableScan) node);
-    }
-    return Optional.empty();
-  }
-
   private LogicalStage makeSequenceStage(LogicalStage inputStage, DruidNodeStack stack)
   {
     if (stack.getNode() instanceof DruidSort) {
@@ -162,23 +151,5 @@ public class DruidLogicalToQueryDefinitionTranslator
       stack.pop();
     }
     return inputStages;
-  }
-
-  private Optional<ReadStage> translateTableScan(DruidTableScan node)
-  {
-    SourceDesc sd = node.getSourceDesc(plannerContext, Collections.emptyList());
-    TableDataSource ids = (TableDataSource) sd.dataSource;
-    TableInputSpec inputSpec = new TableInputSpec(ids.getName(), Intervals.ONLY_ETERNITY, null, null);
-    ReadStage stage = new ReadStage(sd.rowSignature, LogicalInputSpec.of(inputSpec));
-    return Optional.of(stage);
-  }
-
-  private Optional<ReadStage> translateValues(DruidValues node)
-  {
-    SourceDesc sd = node.getSourceDesc(plannerContext, Collections.emptyList());
-    InlineDataSource ids = (InlineDataSource) sd.dataSource;
-    InlineInputSpec inputSpec = new InlineInputSpec(ids);
-    ReadStage stage = new ReadStage(sd.rowSignature, LogicalInputSpec.of(inputSpec));
-    return Optional.of(stage);
   }
 }
