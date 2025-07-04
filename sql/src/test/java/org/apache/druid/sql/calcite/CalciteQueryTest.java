@@ -2584,7 +2584,6 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
         .run();
   }
 
-  @NotYetSupported(Modes.DD_JOIN)
   @SqlTestFrameworkConfig.NumMergeBuffers(3)
   @Test
   public void testExactCountDistinctWithFilter2()
@@ -14744,7 +14743,6 @@ public class CalciteQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @NotYetSupported(Modes.DD_JOIN)
   @Test
   public void testOrderByAlongWithInternalScanQuery()
   {

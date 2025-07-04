@@ -26,6 +26,7 @@ import org.apache.druid.frame.key.KeyColumn;
 import org.apache.druid.java.util.common.Intervals;
 import org.apache.druid.msq.input.inline.InlineInputSpec;
 import org.apache.druid.msq.input.table.TableInputSpec;
+import org.apache.druid.msq.logical.stages.JoinStage;
 import org.apache.druid.msq.logical.stages.LogicalStage;
 import org.apache.druid.msq.logical.stages.ReadStage;
 import org.apache.druid.msq.logical.stages.SortStage;
@@ -37,6 +38,7 @@ import org.apache.druid.sql.calcite.planner.PlannerContext;
 import org.apache.druid.sql.calcite.planner.querygen.DruidQueryGenerator.DruidNodeStack;
 import org.apache.druid.sql.calcite.planner.querygen.SourceDescProducer.SourceDesc;
 import org.apache.druid.sql.calcite.rel.DruidQuery;
+import org.apache.druid.sql.calcite.rel.logical.DruidJoin;
 import org.apache.druid.sql.calcite.rel.logical.DruidLogicalNode;
 import org.apache.druid.sql.calcite.rel.logical.DruidSort;
 import org.apache.druid.sql.calcite.rel.logical.DruidTableScan;
@@ -104,8 +106,21 @@ public class DruidLogicalToQueryDefinitionTranslator
       if (newStage != null) {
         return newStage;
       }
+    } else {
+      LogicalStage newStage = buildMultiInputStage(inputStages, stack);
+      if (newStage != null) {
+        return newStage;
+      }
     }
     throw DruidException.defensive().build("Unable to process relNode[%s]", node);
+  }
+
+  private LogicalStage buildMultiInputStage(List<LogicalStage> inputStages, DruidNodeStack stack)
+  {
+    if (stack.getNode() instanceof DruidJoin) {
+      return JoinStage.buildJoinStage(inputStages, stack);
+    }
+    return null;
   }
 
   private Optional<ReadStage> buildReadStage(DruidLogicalNode node)
