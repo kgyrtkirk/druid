@@ -33,7 +33,9 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 public class DecoupledDartCalciteJoinQueryTest extends CalciteJoinQueryTest
 {
   @RegisterExtension
-  NotYetSupportedProcessor notYetSupportedProcessor = new NotYetSupportedProcessor(NotYetSupported.Scope.DECOUPLED_DART);
+  NotYetSupportedProcessor notYetSupportedProcessor = new NotYetSupportedProcessor(
+      NotYetSupported.Scope.DECOUPLED_DART
+  );
 
   @RegisterExtension
   DecoupledDartExtension decoupledExtension = new DecoupledDartExtension(this);
@@ -45,7 +47,11 @@ public class DecoupledDartCalciteJoinQueryTest extends CalciteJoinQueryTest
         .queryContext(
             ImmutableMap.<String, Object>builder()
                 .put(QueryContexts.CTX_PREPLANNED, true)
-                .put(QueryContexts.CTX_NATIVE_QUERY_SQL_PLANNING_MODE, QueryContexts.NATIVE_QUERY_SQL_PLANNING_MODE_DECOUPLED)
+                .put(
+                    QueryContexts.CTX_NATIVE_QUERY_SQL_PLANNING_MODE,
+                    QueryContexts.NATIVE_QUERY_SQL_PLANNING_MODE_DECOUPLED
+                )
+                .put(QueryContexts.REWRITE_JOIN_TO_FILTER_ENABLE_KEY, decoupledExtension)
                 .put(QueryContexts.ENABLE_DEBUG, true)
                 .build()
         );
@@ -65,5 +71,17 @@ public class DecoupledDartCalciteJoinQueryTest extends CalciteJoinQueryTest
   protected void msqIncompatible()
   {
     throw new AssumptionViolatedException("Case marked as msqIncompatible; not trying dart right now");
+  }
+
+  @Override
+  public boolean isSortBasedJoin()
+  {
+    return true;
+  }
+
+  @Override
+  protected boolean isRunningMSQ()
+  {
+    return true;
   }
 }

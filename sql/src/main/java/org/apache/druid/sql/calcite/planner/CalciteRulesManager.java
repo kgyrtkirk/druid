@@ -296,7 +296,9 @@ public class CalciteRulesManager
     cleanupRules.addRuleInstance(CoreRules.PROJECT_MERGE);
     cleanupRules.addRuleInstance(AggregateProjectMergeRule.Config.DEFAULT.toRule());
     return Programs.sequence(
+        new LoggingProgram("today", true),
         Programs.of(builder.build(), true, DefaultRelMetadataProvider.INSTANCE),
+        new LoggingProgram("today", true),
         new DruidTrimFieldsProgram(),
         Programs.of(cleanupRules.build(), true, DefaultRelMetadataProvider.INSTANCE)
     );

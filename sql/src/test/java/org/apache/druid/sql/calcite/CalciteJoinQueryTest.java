@@ -93,6 +93,7 @@ import org.apache.druid.sql.calcite.filtration.Filtration;
 import org.apache.druid.sql.calcite.planner.PlannerConfig;
 import org.apache.druid.sql.calcite.run.EngineFeature;
 import org.apache.druid.sql.calcite.util.CalciteTests;
+import org.hamcrest.CoreMatchers;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Period;
 import org.junit.Assert;
@@ -737,6 +738,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @NotYetSupported(Modes.DD_RIGHTY_JOIN_BROADCAST)
   @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.SLIGHTLY_WORSE_FILTER_PUSHED_TO_JOIN_OPERAND)
   @MethodSource("provideQueryContexts")
   @ParameterizedTest(name = "{0}")
@@ -3475,6 +3477,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     );
   }
 
+//  @NotYetSupported(Modes.DD_BROADCAST)
   @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.JOIN_LEFT_DIRECT_ACCESS)
   @MethodSource("provideQueryContexts")
   @ParameterizedTest(name = "{0}")
@@ -5135,6 +5138,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     );
   }
 
+//  @NotYetSupported
   @MethodSource("provideQueryContexts")
   @ParameterizedTest(name = "{0}")
   public void testJoinOnRestrictedBroadcast(Map<String, Object> queryContext)
@@ -5185,9 +5189,13 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
             ImmutableList.of()
         )
     );
-    Assert.assertTrue(e.getMessage()
-                       .contains(
-                           "Restricted data source [GlobalTableDataSource{name='restrictedBroadcastDatasource_m1_is_6'}] with policy [RowFilterPolicy{rowFilter=m1 = 6 (LONG)}] is not supported"));
+
+    assertThat(
+        e.getMessage(),
+        CoreMatchers.containsString(
+            "Restricted data source [GlobalTableDataSource{name='restrictedBroadcastDatasource_m1_is_6'}] with policy [RowFilterPolicy{rowFilter=m1 = 6 (LONG)}] is not supported"
+        )
+    );
   }
 
   @MethodSource("provideQueryContexts")
