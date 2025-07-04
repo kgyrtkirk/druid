@@ -105,6 +105,7 @@ public @interface NotYetSupported
     UNNEST_RESULT_MISMATCH(Scope.DECOUPLED, AssertionError.class, "(Result count mismatch|column content mismatch)"),
 
     DD_RESTRICTED_DATASOURCE_SUPPORT(Scope.DECOUPLED_DART, DruidException.class, "ForbiddenException: Unauthorized"),
+    DD_RESTRICTED_DATASOURCE_SUPPORT2(Scope.DECOUPLED_DART, AssertionError.class, "Unauthorized"),
     DD_INCORRECT_RESULTS_EMPTY_STRING(Scope.DECOUPLED_DART, AssertionError.class, "column content mismatch at"),
     NO_INFORMATION_SCHEMA_SUPPORT(Scope.DECOUPLED_DART, DruidException.class, "INFORMATION_SCHEMA"),
     DD_NULL_COLUMN_ORDER(Scope.DECOUPLED_DART, DruidException.class, "sort: \\[\\] -> \\[1\\]"),
@@ -113,7 +114,9 @@ public @interface NotYetSupported
     DD_INCORRECT_RESULTS(Scope.DECOUPLED_DART, AssertionError.class, "column content mismatch at"),
 
     // the system mis-detects join type for broadcast join; however setting sort-merge makes other queries sprial into infinite planning
-    DD_RIGHTY_JOIN_BROADCAST(Scope.DECOUPLED_DART, DruidException.class, "RIGHT JOIN is not supported");
+    DD_RIGHTY_JOIN_BROADCAST(Scope.DECOUPLED_DART, DruidException.class, "RIGHT JOIN is not supported"),
+    DD_UNNEST(Scope.DECOUPLED_DART, DruidException.class, "DruidUnnest.DRUID_LOGICAL"),
+    DD_SORT_REMOVE_TROUBLE(Scope.DECOUPLED_DART, DruidException.class, "Calcite assertion violated.*Sort\\.<init>");
     // @formatter:on
 
     public Scope scope;
@@ -166,6 +169,10 @@ public @interface NotYetSupported
     {
       Method method = extensionContext.getTestMethod().get();
       NotYetSupported annotation = method.getAnnotation(NotYetSupported.class);
+
+      if(annotation != null ) {
+      }
+
 
       if (annotation == null || annotation.value().scope != scope) {
         invocation.proceed();

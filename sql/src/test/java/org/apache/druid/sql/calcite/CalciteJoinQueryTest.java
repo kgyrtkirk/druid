@@ -5138,7 +5138,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     );
   }
 
-//  @NotYetSupported
+  @NotYetSupported(Modes.DD_RESTRICTED_DATASOURCE_SUPPORT2)
   @MethodSource("provideQueryContexts")
   @ParameterizedTest(name = "{0}")
   public void testJoinOnRestrictedBroadcast(Map<String, Object> queryContext)
@@ -5705,7 +5705,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @NotYetSupported(Modes.SORT_REMOVE_TROUBLE)
+  @NotYetSupported({Modes.SORT_REMOVE_TROUBLE, Modes.DD_RESTRICTED_DATASOURCE_SUPPORT2})
   @MethodSource("provideQueryContexts")
   @ParameterizedTest(name = "{0}")
   public void testRegressionFilteredAggregatorsSubqueryJoins(Map<String, Object> queryContext)
@@ -6071,6 +6071,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @NotYetSupported(Modes.DD_UNNEST)
   @Test
   public void testJoinsWithUnnestOnLeft()
   {
@@ -6122,6 +6123,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @NotYetSupported(Modes.DD_UNNEST)
   @DecoupledTestConfig(ignoreExpectedQueriesReason = IgnoreQueriesReason.UNNEST_EXTRA_SCANQUERY)
   @Test
   public void testJoinsWithUnnestOverFilteredDSOnLeft()
@@ -6176,6 +6178,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @NotYetSupported(Modes.DD_UNNEST)
   @Test
   public void testJoinsWithUnnestOverJoin()
   {
@@ -6245,6 +6248,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @NotYetSupported(Modes.DD_UNNEST)
   @Test
   public void testSelfJoinsWithUnnestOnLeftAndRight()
   {
@@ -6304,6 +6308,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @NotYetSupported(Modes.DD_UNNEST)
   @DecoupledTestConfig(ignoreExpectedQueriesReason = IgnoreQueriesReason.UNNEST_EXTRA_SCANQUERY)
   @Test
   public void testJoinsOverUnnestOverFilterDSOverJoin()
