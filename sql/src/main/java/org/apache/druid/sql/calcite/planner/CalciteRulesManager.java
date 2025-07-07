@@ -28,6 +28,7 @@ import org.apache.calcite.plan.RelOptPlanner;
 import org.apache.calcite.plan.RelOptRule;
 import org.apache.calcite.plan.RelOptUtil;
 import org.apache.calcite.plan.RelTraitSet;
+import org.apache.calcite.plan.hep.HepMatchOrder;
 import org.apache.calcite.plan.hep.HepProgram;
 import org.apache.calcite.plan.hep.HepProgramBuilder;
 import org.apache.calcite.plan.volcano.AbstractConverter;
@@ -44,6 +45,7 @@ import org.apache.calcite.rel.rules.FilterProjectTransposeRule;
 import org.apache.calcite.rel.rules.JoinExtractFilterRule;
 import org.apache.calcite.rel.rules.JoinPushThroughJoinRule;
 import org.apache.calcite.rel.rules.ProjectMergeRule;
+import org.apache.calcite.rel.rules.ProjectRemoveRule;
 import org.apache.calcite.rel.rules.PruneEmptyRules;
 import org.apache.calcite.sql.SqlExplainFormat;
 import org.apache.calcite.sql.SqlExplainLevel;
@@ -81,7 +83,6 @@ import org.apache.druid.sql.calcite.run.EngineFeature;
 import org.apache.druid.sql.hook.DruidHook;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -280,6 +281,7 @@ public class CalciteRulesManager
   private Program buildDecoupledLogicalOptimizationProgram(PlannerContext plannerContext)
   {
     final HepProgramBuilder builder = HepProgram.builder();
+    builder.addMatchOrder(HepMatchOrder.BOTTOM_UP);
     builder.addMatchLimit(CalciteRulesManager.HEP_DEFAULT_MATCH_LIMIT);
     builder.addRuleCollection(baseRuleSet(plannerContext));
     builder.addRuleInstance(CoreRules.UNION_MERGE);
@@ -290,6 +292,8 @@ public class CalciteRulesManager
     builder.addRuleInstance(FilterProjectTransposeRule.Config.DEFAULT.toRule());
     builder.addRuleInstance(new LogicalUnnestRule());
     builder.addRuleInstance(new UnnestInputCleanupRule());
+    builder.addRuleInstance(ProjectMergeRule.Config.DEFAULT.toRule());
+    builder.addRuleInstance(ProjectRemoveRule.Config.DEFAULT.toRule());
 
     final HepProgramBuilder cleanupRules = HepProgram.builder();
     cleanupRules.addRuleInstance(FilterProjectTransposeRule.Config.DEFAULT.toRule());
@@ -320,6 +324,7 @@ public class CalciteRulesManager
     prePrograms.add(sqlToRelWorkaroundProgram());
     prePrograms.add(Programs.subQuery(DefaultRelMetadataProvider.INSTANCE));
     prePrograms.add(new LoggingProgram("Finished subquery program", isDebug));
+    prePrograms.add(sqlToRelWorkaroundProgram());
     prePrograms.add(DecorrelateAndTrimFieldsProgram.INSTANCE);
     prePrograms.add(new LoggingProgram("Finished decorrelate and trim fields program", isDebug));
     prePrograms.add(buildReductionProgram(plannerContext, isDruid));
@@ -335,7 +340,10 @@ public class CalciteRulesManager
 
   private Program sqlToRelWorkaroundProgram()
   {
-    Set<RelOptRule> rules = Collections.singleton(new FixIncorrectInExpansionTypes());
+    List<RelOptRule> rules = new ArrayList<>();
+    rules.add(new FixIncorrectInExpansionTypes());
+    rules.add(ProjectMergeRule.Config.DEFAULT.toRule());
+    rules.add(ProjectRemoveRule.Config.DEFAULT.toRule());
     return Programs.hep(rules, true, DefaultRelMetadataProvider.INSTANCE);
   }
 
