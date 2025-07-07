@@ -884,6 +884,7 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @NotYetSupported(Modes.DART_SECOND_SEGMENT_NOT_SCANNED)
   @Test
   public void testGroupByRootSingleTypeLongMixed1()
   {
@@ -920,6 +921,7 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @NotYetSupported(Modes.DART_SECOND_SEGMENT_NOT_SCANNED)
   @Test
   public void testGroupByRootSingleTypeStringMixed1()
   {
@@ -956,6 +958,7 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @NotYetSupported(Modes.DART_SECOND_SEGMENT_NOT_SCANNED)
   @Test
   public void testGroupByRootSingleTypeStringMixed1Sparse()
   {
@@ -991,6 +994,7 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @NotYetSupported(Modes.DART_SECOND_SEGMENT_NOT_SCANNED)
   @Test
   public void testGroupByRootSingleTypeLongMixed2()
   {
@@ -1027,6 +1031,7 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @NotYetSupported(Modes.DART_SECOND_SEGMENT_NOT_SCANNED)
   @Test
   public void testGroupByRootSingleTypeStringMixed2()
   {
@@ -1063,6 +1068,7 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @NotYetSupported(Modes.DART_SECOND_SEGMENT_NOT_SCANNED)
   @Test
   public void testGroupByRootSingleTypeStringMixed2Sparse()
   {
@@ -5383,6 +5389,7 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @NotYetSupported(Modes.DART_SECOND_SEGMENT_NOT_SCANNED)
   @Test
   public void testGroupByRegularLongLongMixed1FilterNotNull()
   {
@@ -5421,6 +5428,7 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @NotYetSupported(Modes.DART_SECOND_SEGMENT_NOT_SCANNED)
   @Test
   public void testGroupByRootSingleTypeStringMixed1SparseNotNull()
   {
@@ -5455,19 +5463,19 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @NotYetSupported(Modes.DD_JOIN_CONDITION_TYPE_CHECK_MISSED)
   @Test
   public void testJoinOnNestedColumnThrows()
   {
     DruidException e = Assertions.assertThrows(DruidException.class, () -> {
-      testQuery(
-          "SELECT * FROM druid.nested a INNER JOIN druid.nested b ON a.nester = b.nester",
-          ImmutableList.of(),
-          ImmutableList.of()
-      );
+      testBuilder()
+          .sql("SELECT * FROM druid.nested a INNER JOIN druid.nested b ON a.nester = b.nester")
+          .run();
     });
     Assertions.assertEquals("Cannot join when the join condition has column of type [COMPLEX<json>]", e.getMessage());
   }
 
+  @NotYetSupported(Modes.DART_SECOND_SEGMENT_NOT_SCANNED)
   @Test
   public void testScanStringNotNullCast()
   {
@@ -5500,6 +5508,7 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @NotYetSupported(Modes.DART_SECOND_SEGMENT_NOT_SCANNED)
   @Test
   public void testGroupByRootSingleTypeStringMixed1SparseNotNullCast2()
   {
