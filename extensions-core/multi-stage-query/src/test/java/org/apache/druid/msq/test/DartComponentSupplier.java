@@ -22,7 +22,7 @@ package org.apache.druid.msq.test;
 import org.apache.druid.sql.calcite.TempDirProducer;
 import org.apache.druid.sql.calcite.util.SqlTestFramework.StandardComponentSupplier;
 
-public abstract class DartComponentSupplier extends AbstractDartComponentSupplier
+public class DartComponentSupplier extends AbstractDartComponentSupplier
 {
   public DartComponentSupplier(TempDirProducer tempFolderProducer)
   {
