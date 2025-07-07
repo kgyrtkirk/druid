@@ -48,7 +48,9 @@ public class NotYetSupportedUsageTest
     Set<NotYetSupported.Modes> modes = new HashSet<>(Arrays.asList(NotYetSupported.Modes.values()));
     for (Method method : methodsAnnotatedWith) {
       NotYetSupported annot = method.getAnnotation(NotYetSupported.class);
-      modes.remove(annot.value());
+      for (Modes m : annot.value()) {
+        modes.remove(m);
+      }
     }
 
     assertEquals("There are unused modes which should be removed", Collections.emptySet(), modes);
