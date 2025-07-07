@@ -83,6 +83,7 @@ import org.apache.druid.sql.calcite.run.EngineFeature;
 import org.apache.druid.sql.hook.DruidHook;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -300,9 +301,7 @@ public class CalciteRulesManager
     cleanupRules.addRuleInstance(CoreRules.PROJECT_MERGE);
     cleanupRules.addRuleInstance(AggregateProjectMergeRule.Config.DEFAULT.toRule());
     return Programs.sequence(
-        new LoggingProgram("today", true),
         Programs.of(builder.build(), true, DefaultRelMetadataProvider.INSTANCE),
-        new LoggingProgram("today", true),
         new DruidTrimFieldsProgram(),
         Programs.of(cleanupRules.build(), true, DefaultRelMetadataProvider.INSTANCE)
     );
@@ -324,7 +323,6 @@ public class CalciteRulesManager
     prePrograms.add(sqlToRelWorkaroundProgram());
     prePrograms.add(Programs.subQuery(DefaultRelMetadataProvider.INSTANCE));
     prePrograms.add(new LoggingProgram("Finished subquery program", isDebug));
-    prePrograms.add(sqlToRelWorkaroundProgram());
     prePrograms.add(DecorrelateAndTrimFieldsProgram.INSTANCE);
     prePrograms.add(new LoggingProgram("Finished decorrelate and trim fields program", isDebug));
     prePrograms.add(buildReductionProgram(plannerContext, isDruid));
@@ -340,10 +338,7 @@ public class CalciteRulesManager
 
   private Program sqlToRelWorkaroundProgram()
   {
-    List<RelOptRule> rules = new ArrayList<>();
-    rules.add(new FixIncorrectInExpansionTypes());
-    rules.add(ProjectMergeRule.Config.DEFAULT.toRule());
-    rules.add(ProjectRemoveRule.Config.DEFAULT.toRule());
+    Set<RelOptRule> rules = Collections.singleton(new FixIncorrectInExpansionTypes());
     return Programs.hep(rules, true, DefaultRelMetadataProvider.INSTANCE);
   }
 
