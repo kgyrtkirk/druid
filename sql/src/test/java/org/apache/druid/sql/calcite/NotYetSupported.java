@@ -27,6 +27,8 @@ import org.junit.jupiter.api.extension.InvocationInterceptor;
 import org.junit.jupiter.api.extension.ReflectiveInvocationContext;
 import org.opentest4j.IncompleteExecutionException;
 
+import javax.annotation.Nullable;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -73,7 +75,7 @@ import static org.junit.Assert.assertThrows;
 @Target({ElementType.METHOD})
 public @interface NotYetSupported
 {
-  Modes value();
+  Modes[] value();
 
   enum Scope
   {
@@ -116,7 +118,8 @@ public @interface NotYetSupported
     // the system mis-detects join type for broadcast join; however setting sort-merge makes other queries sprial into infinite planning
     DD_RIGHTY_JOIN_BROADCAST(Scope.DECOUPLED_DART, DruidException.class, "RIGHT JOIN is not supported"),
     DD_UNNEST(Scope.DECOUPLED_DART, DruidException.class, "DruidUnnest.DRUID_LOGICAL"),
-    DD_SORT_REMOVE_TROUBLE(Scope.DECOUPLED_DART, DruidException.class, "Calcite assertion violated.*Sort\\.<init>");
+    DD_SORT_REMOVE_TROUBLE(Scope.DECOUPLED_DART, DruidException.class, "Calcite assertion violated.*Sort\\.<init>"),
+    DD_JOIN_CONDITION_NORMALIZATION(Scope.DECOUPLED_DART, DruidException.class, "Cannot handle equality");
     // @formatter:on
 
     public Scope scope;
@@ -169,18 +172,15 @@ public @interface NotYetSupported
     {
       Method method = extensionContext.getTestMethod().get();
       NotYetSupported annotation = method.getAnnotation(NotYetSupported.class);
-
-      if(annotation != null ) {
-      }
+      Modes ignoreMode = getModeForScope(annotation);
 
 
-      if (annotation == null || annotation.value().scope != scope) {
+      if (ignoreMode == null) {
         invocation.proceed();
         return;
       }
       {
         {
-          Modes ignoreMode = annotation.value();
           Throwable e = null;
           try {
             invocation.proceed();
@@ -208,14 +208,28 @@ public @interface NotYetSupported
           );
 
           String trace = Throwables.getStackTraceAsString(e);
-          Matcher m = annotation.value().getPattern().matcher(trace);
+          Matcher m = ignoreMode.getPattern().matcher(trace);
 
           if (!m.find()) {
-            throw new AssertionError("Exception stacktrace doesn't match regex: " + annotation.value().regex, e);
+            throw new AssertionError("Exception stacktrace doesn't match regex: " + ignoreMode.regex, e);
           }
           throw new AssumptionViolatedException("Test is not-yet supported; ignored with:" + annotation);
         }
       }
+    }
+
+    private Modes getModeForScope(@Nullable NotYetSupported annotation)
+    {
+      if(annotation == null) {
+        return null;
+      }
+      for (Modes mode : annotation.value()) {
+        if (mode.scope == scope) {
+          return mode;
+        }
+
+      }
+      return null;
     }
 
     @Override

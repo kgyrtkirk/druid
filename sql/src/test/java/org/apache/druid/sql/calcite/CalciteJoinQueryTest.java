@@ -5994,6 +5994,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.JOIN_FILTER_LOCATIONS)
+  @NotYetSupported(Modes.DD_JOIN_CONDITION_NORMALIZATION)
   public void testJoinWithInputRefCondition()
   {
     cannotVectorize();

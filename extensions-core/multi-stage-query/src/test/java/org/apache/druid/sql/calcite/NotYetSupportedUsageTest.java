@@ -115,16 +115,18 @@ public class NotYetSupportedUsageTest
 
     Map<List<Object>, ReportEntry> mentryMap = new HashMap<>();
     for (Method method : methodsAnnotatedWith) {
-      ReportEntry entry = new ReportEntry(
-          method.getDeclaringClass().getSimpleName(),
-          method.getName(),
-          getAnnotation(method)
-      );
-      ReportEntry existing = mentryMap.get(entry.getKey());
-      if (existing != null) {
-        existing.merge(entry);
-      } else {
-        mentryMap.put(entry.getKey(), entry);
+      for (Modes mode : getAnnotation(method)) {
+        ReportEntry entry = new ReportEntry(
+            method.getDeclaringClass().getSimpleName(),
+            method.getName(),
+            mode
+        );
+        ReportEntry existing = mentryMap.get(entry.getKey());
+        if (existing != null) {
+          existing.merge(entry);
+        } else {
+          mentryMap.put(entry.getKey(), entry);
+        }
       }
     }
 
@@ -136,7 +138,7 @@ public class NotYetSupportedUsageTest
 
   }
 
-  private Modes getAnnotation(Method method)
+  private Modes[] getAnnotation(Method method)
   {
     NotYetSupported annotation = method.getAnnotation(NotYetSupported.class);
     if (annotation == null) {
