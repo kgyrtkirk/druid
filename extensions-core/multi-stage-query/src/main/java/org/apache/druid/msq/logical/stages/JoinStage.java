@@ -127,11 +127,11 @@ public class JoinStage
     DruidJoin join = (DruidJoin) stack.getNode();
 
     JoinAlgorithm joinAlgorithm = stack.getPlannerContext().getJoinAlgorithm();
-    if(joinAlgorithm == JoinAlgorithm.SORT_MERGE) {
+//    if(joinAlgorithm == JoinAlgorithm.SORT_MERGE) {
       return buildMergeJoin(inputStages, stack, join);
-    }else {
-      return buildBroadcastJoin(inputStages, stack, join);
-    }
+//    }else {
+//      return buildBroadcastJoin(inputStages, stack, join);
+//    }
 
 
 

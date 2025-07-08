@@ -1238,7 +1238,6 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
         .run();
   }
 
-  @NotYetSupported(Modes.DD_UNNEST)
   @Test
   public void testUnnestRootSingleTypeArrayLongNulls()
   {
@@ -1299,7 +1298,6 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
         .run();
   }
 
-  @NotYetSupported(Modes.DD_UNNEST)
   @Test
   public void testUnnestRootSingleTypeArrayStringNulls()
   {
@@ -1357,7 +1355,6 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
         .run();
   }
 
-  @NotYetSupported(Modes.DD_UNNEST)
   @Test
   public void testUnnestRootSingleTypeArrayDoubleNulls()
   {
@@ -1663,7 +1660,6 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
         .run();
   }
 
-  @NotYetSupported(Modes.DD_UNNEST)
   @Test
   public void testGroupByRootSingleTypeArrayLongNullsUnnest()
   {
@@ -1926,7 +1922,6 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
         .run();
   }
 
-  @NotYetSupported(Modes.DD_UNNEST)
   @Test
   public void testGroupByRootSingleTypeArrayStringNullsUnnest()
   {
@@ -2142,7 +2137,6 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
         .run();
   }
 
-  @NotYetSupported(Modes.DD_UNNEST)
   @Test
   public void testGroupByRootSingleTypeArrayDoubleNullsUnnest()
   {
@@ -6370,7 +6364,6 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @NotYetSupported(Modes.DD_UNNEST)
   @Test
   public void testCoalesceOnNestedColumns()
   {
@@ -6420,7 +6413,6 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
         .run();
   }
 
-  @NotYetSupported(Modes.DD_UNNEST)
   @Test
   public void testCoalesceOnNestedColumnsLater()
   {
@@ -6638,7 +6630,6 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
         .run();
   }
 
-  @NotYetSupported(Modes.DD_UNNEST)
   @Test
   public void testUnnestJsonQueryArrays()
   {
@@ -6707,7 +6698,6 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
         .run();
   }
 
-  @NotYetSupported(Modes.DD_UNNEST)
   @Test
   public void testUnnestJsonQueryArraysJsonValue()
   {
@@ -6769,7 +6759,6 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
         .run();
   }
 
-  @NotYetSupported(Modes.DD_UNNEST)
   @Test
   public void testUnnestJsonQueryArraysJsonValueSum()
   {

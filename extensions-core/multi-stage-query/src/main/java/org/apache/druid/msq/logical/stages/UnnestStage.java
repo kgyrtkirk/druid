@@ -23,6 +23,7 @@ import org.apache.druid.msq.exec.StageProcessor;
 import org.apache.druid.msq.logical.LogicalInputSpec;
 import org.apache.druid.msq.logical.StageMaker;
 import org.apache.druid.query.DataSource;
+import org.apache.druid.query.TableDataSource;
 import org.apache.druid.query.UnnestDataSource;
 import org.apache.druid.query.filter.DimFilter;
 import org.apache.druid.segment.VirtualColumn;
@@ -38,7 +39,7 @@ import java.util.Collections;
 
 public class UnnestStage extends AbstractFrameProcessorStage
 {
-  private static final DataSource DUYMMY = null;
+  private static final DataSource DUYMMY = new TableDataSource("__dummy__");
   private final VirtualColumn virtualColumn;
   @Nullable
   private final DimFilter filter;
