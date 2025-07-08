@@ -30,6 +30,7 @@ import org.apache.druid.msq.logical.LogicalInputSpec;
 import org.apache.druid.msq.logical.StageMaker;
 import org.apache.druid.msq.querykit.QueryKitUtils;
 import org.apache.druid.msq.querykit.common.SortMergeJoinStageProcessor;
+import org.apache.druid.query.JoinAlgorithm;
 import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.segment.join.JoinConditionAnalysis;
 import org.apache.druid.segment.join.JoinType;
@@ -125,110 +126,77 @@ public class JoinStage
   {
     DruidJoin join = (DruidJoin) stack.getNode();
 
-    return buildMergeJoin(inputStages, stack, join);
+    JoinAlgorithm joinAlgorithm = stack.getPlannerContext().getJoinAlgorithm();
+    if(joinAlgorithm == JoinAlgorithm.SORT_MERGE) {
+      return buildMergeJoin(inputStages, stack, join);
+    }else {
+      return buildBroadcastJoin(inputStages, stack, join);
+    }
 
-    ////// final QueryDefinitionBuilder subQueryDefBuilder =
-    ////// QueryDefinition.builder(queryKitSpec.getQueryId());
-    ////
-    //// // Plan the left input.
-    //// // We're confident that we can cast dataSource.getLeft() to
-    ////// QueryDataSource, because DruidJoinQueryRel creates
-    //// // subqueries when the join algorithm is sortMerge.
-    //// final DataSourcePlan leftPlan = forQuery(
-    //// queryKitSpec,
-    //// (QueryDataSource) dataSource.getLeft(),
-    //// Math.max(minStageNumber, subQueryDefBuilder.getNextStageNumber()),
-    //// false
-    //// );
-    //// leftPlan.getSubQueryDefBuilder().ifPresent(subQueryDefBuilder::addAll);
-    ////
-    //// // Plan the right input.
-    //// // We're confident that we can cast dataSource.getRight() to
-    ////// QueryDataSource, because DruidJoinQueryRel creates
-    //// // subqueries when the join algorithm is sortMerge.
-    //// final DataSourcePlan rightPlan = forQuery(
-    //// queryKitSpec,
-    //// (QueryDataSource) dataSource.getRight(),
-    //// Math.max(minStageNumber, subQueryDefBuilder.getNextStageNumber()),
-    //// false
-    //// );
-    //// rightPlan.getSubQueryDefBuilder().ifPresent(subQueryDefBuilder::addAll);
-    ////
-    ////
-    ////
-    //// // Build up the left stage.
-    //// final StageDefinitionBuilder leftBuilder =
-    ////// subQueryDefBuilder.getStageBuilder(
-    //// ((StageInputSpec)
-    ////// Iterables.getOnlyElement(leftPlan.getInputSpecs())).getStageNumber()
-    //// );
-    // QueryKitSpec queryKitSpec;
-    // final int hashPartitionCount = queryKitSpec.getNumPartitionsForShuffle();
-    // final List<KeyColumn> leftPartitionKey = partitionKeys.get(0);
-    // leftBuilder.shuffleSpec(new HashShuffleSpec(new
-    ////// ClusterBy(leftPartitionKey, 0), hashPartitionCount));
-    // leftBuilder.signature(QueryKitUtils.sortableSignature(leftBuilder.getSignature(),
-    ////// leftPartitionKey));
-    //
-    // // Build up the right stage.
-    // final StageDefinitionBuilder rightBuilder =
-    ////// subQueryDefBuilder.getStageBuilder(
-    // ((StageInputSpec)
-    ////// Iterables.getOnlyElement(rightPlan.getInputSpecs())).getStageNumber()
-    // );
-    //
-    // final List<KeyColumn> rightPartitionKey = partitionKeys.get(1);
-    // rightBuilder.shuffleSpec(new HashShuffleSpec(new
-    ////// ClusterBy(rightPartitionKey, 0), hashPartitionCount));
-    // rightBuilder.signature(QueryKitUtils.sortableSignature(rightBuilder.getSignature(),
-    ////// rightPartitionKey));
-    //
-    // // Compute join signature.
-    // final RowSignature.Builder joinSignatureBuilder = RowSignature.builder();
-    //
-    // for (String leftColumn : leftBuilder.getSignature().getColumnNames()) {
-    // joinSignatureBuilder.add(leftColumn,
-    ////// leftBuilder.getSignature().getColumnType(leftColumn).orElse(null));
-    // }
-    //
-    // for (String rightColumn : rightBuilder.getSignature().getColumnNames()) {
-    // joinSignatureBuilder.add(
-    // dataSource.getRightPrefix() + rightColumn,
-    // rightBuilder.getSignature().getColumnType(rightColumn).orElse(null)
-    // );
-    // }
-    //
-    // // Build up the join stage.
-    // final int stageNumber = Math.max(minStageNumber,
-    ////// subQueryDefBuilder.getNextStageNumber());
-    //
-    // subQueryDefBuilder.add(
-    // StageDefinition.builder(stageNumber)
-    // .inputs(
-    // ImmutableList.of(
-    // Iterables.getOnlyElement(leftPlan.getInputSpecs()),
-    // Iterables.getOnlyElement(rightPlan.getInputSpecs())
-    // )
-    // )
-    // .maxWorkerCount(queryKitSpec.getMaxNonLeafWorkerCount())
-    // .signature(joinSignatureBuilder.build())
-    // .processor(
-    // new SortMergeJoinStageProcessor(
-    // dataSource.getRightPrefix(),
-    // dataSource.getConditionAnalysis(),
-    // dataSource.getJoinType()
-    // )
-    // )
-    // );
-    //
-    // return new DataSourcePlan(
-    // new InputNumberDataSource(0),
-    // Collections.singletonList(new StageInputSpec(stageNumber)),
-    // broadcast ? IntOpenHashSet.of(0) : IntSets.emptySet(),
-    // subQueryDefBuilder
-    // );
-    // }
-    // } return null;
+
+
+
+  }
+
+  private static LogicalStage buildBroadcastJoin(List<LogicalStage> inputStages, DruidNodeStack stack, DruidJoin join)
+  {
+
+//    final QueryDefinitionBuilder subQueryDefBuilder = QueryDefinition.builder(queryKitSpec.getQueryId());
+//    final JoinDataSourceAnalysis analysis = dataSource.getJoinAnalysisForDataSource();
+
+
+
+//    final DataSourcePlan basePlan = forDataSource(
+//        queryKitSpec,
+//        queryContext,
+//        analysis.getBaseDataSource(),
+//        querySegmentSpec,
+//        filter,
+//        filter == null ? null : DimFilterUtils.onlyBaseFields(filterFields, analysis::isBaseColumn),
+//        Math.max(minStageNumber, subQueryDefBuilder.getNextStageNumber()),
+//        broadcast
+//    );
+//
+//    DataSource newDataSource = basePlan.getNewDataSource();
+//    final List<InputSpec> inputSpecs = new ArrayList<>(basePlan.getInputSpecs());
+//    final IntSet broadcastInputs = new IntOpenHashSet(basePlan.getBroadcastInputs());
+//    basePlan.getSubQueryDefBuilder().ifPresent(subQueryDefBuilder::addAll);
+//
+//    for (int i = 0; i < analysis.getPreJoinableClauses().size(); i++) {
+//      final PreJoinableClause clause = analysis.getPreJoinableClauses().get(i);
+//      final DataSourcePlan clausePlan = forDataSource(
+//          queryKitSpec,
+//          queryContext,
+//          clause.getDataSource(),
+//          new MultipleIntervalSegmentSpec(Intervals.ONLY_ETERNITY),
+//          null, // Don't push down query filters for right-hand side: needs some work to ensure it works properly.
+//          null,
+//          Math.max(minStageNumber, subQueryDefBuilder.getNextStageNumber()),
+//          true // Always broadcast right-hand side of the join.
+//      );
+//
+//      // Shift all input numbers in the clausePlan.
+//      final int shift = inputSpecs.size();
+//
+//      newDataSource = JoinDataSource.create(
+//          newDataSource,
+//          shiftInputNumbers(clausePlan.getNewDataSource(), shift),
+//          clause.getPrefix(),
+//          clause.getCondition(),
+//          clause.getJoinType(),
+//          // First JoinDataSource (i == 0) involves the base table, so we need to propagate the base table filter.
+//          i == 0 ? analysis.getJoinBaseTableFilter().orElse(null) : null,
+//          dataSource.getJoinableFactoryWrapper(),
+//          clause.getJoinAlgorithm()
+//      );
+//      inputSpecs.addAll(clausePlan.getInputSpecs());
+//      clausePlan.getBroadcastInputs().intStream().forEach(n -> broadcastInputs.add(n + shift));
+//      clausePlan.getSubQueryDefBuilder().ifPresent(subQueryDefBuilder::addAll);
+//    }
+//
+//    return new DataSourcePlan(newDataSource, inputSpecs, broadcastInputs, subQueryDefBuilder);
+
+    return null;
 
   }
 
@@ -275,7 +243,6 @@ public class JoinStage
     );
 
     // FIXME? checkQuerySegmentSpecIsEternity(dataSource, querySegmentSpec);
-    // FIXME SortMergeJoinStageProcessor.validateCondition(join.getCondition());
 
     // Partition by keys given by the join condition.
     final List<List<KeyColumn>> partitionKeys = SortMergeJoinStageProcessor.toKeyColumns(

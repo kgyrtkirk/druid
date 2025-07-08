@@ -33,14 +33,23 @@ import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
 import java.util.List;
+import java.util.Map;
 
 public class DecoupledDartExtension implements BeforeEachCallback
 {
   private BaseCalciteQueryTest baseTest;
+  private Map<String, Object> defaultQueryContext;
 
-  public DecoupledDartExtension(BaseCalciteQueryTest baseTest)
+  public DecoupledDartExtension(BaseCalciteQueryTest baseTest, Map<String, Object> queryContext)
   {
     this.baseTest = baseTest;
+    this.defaultQueryContext = ImmutableMap.<String, Object>builder()
+        .putAll(BaseCalciteQueryTest.QUERY_CONTEXT_DEFAULT)
+        .put(QueryContexts.CTX_NATIVE_QUERY_SQL_PLANNING_MODE, QueryContexts.NATIVE_QUERY_SQL_PLANNING_MODE_DECOUPLED)
+        .put(QueryContexts.CTX_PREPLANNED, true)
+        .put(QueryContexts.ENABLE_DEBUG, true)
+        .putAll(queryContext)
+        .build();
   }
 
   @Override
@@ -48,21 +57,14 @@ public class DecoupledDartExtension implements BeforeEachCallback
   {
   }
 
-  private static final ImmutableMap<String, Object> CONTEXT_OVERRIDES = ImmutableMap.<String, Object>builder()
-      .putAll(BaseCalciteQueryTest.QUERY_CONTEXT_DEFAULT)
-      .put(QueryContexts.CTX_NATIVE_QUERY_SQL_PLANNING_MODE, QueryContexts.NATIVE_QUERY_SQL_PLANNING_MODE_DECOUPLED)
-      .put(QueryContexts.CTX_PREPLANNED, true)
-      .put(QueryContexts.ENABLE_DEBUG, true)
-      .build();
-
   public QueryTestBuilder testBuilder()
   {
-    CalciteTestConfig testConfig = baseTest.new CalciteTestConfig(CONTEXT_OVERRIDES)
+    CalciteTestConfig testConfig = baseTest.new CalciteTestConfig(defaultQueryContext)
     {
       @Override
       public SqlTestFramework.PlannerFixture plannerFixture(PlannerConfig plannerConfig, AuthConfig authConfig)
       {
-        plannerConfig = plannerConfig.withOverrides(CONTEXT_OVERRIDES);
+        plannerConfig = plannerConfig.withOverrides(defaultQueryContext);
         return baseTest.queryFramework().plannerFixture(plannerConfig, authConfig);
       }
 

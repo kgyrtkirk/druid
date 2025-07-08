@@ -57,7 +57,10 @@ public abstract class DecoupledDartCalciteJoinQueryTest extends CalciteJoinQuery
   );
 
   @RegisterExtension
-  DecoupledDartExtension decoupledExtension = new DecoupledDartExtension(this);
+  DecoupledDartExtension decoupledExtension = new DecoupledDartExtension(
+      this,
+      ImmutableMap.of(PlannerContext.CTX_SQL_JOIN_ALGORITHM, joinAlgorithm().toString())
+  );
 
   @Override
   protected QueryTestBuilder testBuilder()
