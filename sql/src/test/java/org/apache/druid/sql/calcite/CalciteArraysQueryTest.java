@@ -1599,7 +1599,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
     // the Scan query in native reads this makeColumnValueSelector. Behavior of those selectors is inconsistent.
     // The DimensionSelector returns an empty list; the ColumnValueSelector returns a list containing a single null.
     final String expectedValueForEmptyMvd =
-        queryFramework().engine().name().equals("msq-task")
+        isRunningMSQ()
         ? null
         : "not abd";
 
@@ -3875,7 +3875,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
 
   }
 
-  @NotYetSupported(Modes.UNNEST_INLINED)
+  @NotYetSupported({Modes.UNNEST_INLINED,Modes.DD_UNNEST_INLINED})
   @Test
   public void testUnnestInline()
   {
@@ -3909,7 +3909,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @NotYetSupported(Modes.UNNEST_INLINED)
+  @NotYetSupported({Modes.UNNEST_INLINED, Modes.DD_UNNEST_INLINED})
   @Test
   public void testUnnestInlineWithCount()
   {
@@ -3940,7 +3940,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @NotYetSupported(Modes.UNNEST_RESULT_MISMATCH)
+  @NotYetSupported({Modes.UNNEST_RESULT_MISMATCH, Modes.DD_UNNEST_RESULT_MISMATCH})
   @Test
   public void testUnnest()
   {
@@ -4323,7 +4323,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @NotYetSupported(Modes.UNNEST_RESULT_MISMATCH)
+  @NotYetSupported({Modes.UNNEST_RESULT_MISMATCH, Modes.DD_UNNEST_RESULT_MISMATCH})
   @Test
   public void testUnnestTwice()
   {
@@ -4880,7 +4880,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @NotYetSupported(Modes.UNNEST_RESULT_MISMATCH)
+  @NotYetSupported({Modes.UNNEST_RESULT_MISMATCH, Modes.DD_UNNEST_RESULT_MISMATCH})
   @Test
   public void testUnnestWithGroupBy()
   {
@@ -4943,7 +4943,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @NotYetSupported(Modes.UNNEST_RESULT_MISMATCH)
+  @NotYetSupported({Modes.UNNEST_RESULT_MISMATCH, Modes.DD_UNNEST_RESULT_MISMATCH})
   @Test
   public void testUnnestWithGroupByOrderBy()
   {
@@ -4987,7 +4987,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @NotYetSupported(Modes.UNNEST_RESULT_MISMATCH)
+  @NotYetSupported({Modes.UNNEST_RESULT_MISMATCH, Modes.DD_UNNEST_RESULT_MISMATCH})
   @Test
   public void testUnnestWithGroupByOrderByWithLimit()
   {
@@ -5081,7 +5081,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @NotYetSupported(Modes.UNNEST_RESULT_MISMATCH)
+  @NotYetSupported({Modes.UNNEST_RESULT_MISMATCH, Modes.DD_UNNEST_RESULT_MISMATCH})
   @Test
   public void testUnnestFirstQueryOnSelect()
   {
@@ -5437,7 +5437,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @NotYetSupported(Modes.UNNEST_RESULT_MISMATCH)
+  @NotYetSupported({Modes.UNNEST_RESULT_MISMATCH, Modes.DD_UNNEST_RESULT_MISMATCH})
   @Test
   public void testUnnestWithInFilters()
   {
@@ -5555,7 +5555,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @NotYetSupported(Modes.UNNEST_RESULT_MISMATCH)
+  @NotYetSupported({Modes.UNNEST_RESULT_MISMATCH, Modes.DD_UNNEST_RESULT_MISMATCH})
   @DecoupledTestConfig(ignoreExpectedQueriesReason = IgnoreQueriesReason.UNNEST_EXTRA_SCANQUERY)
   @Test
   public void testUnnestWithJoinOnTheLeft()
@@ -5607,7 +5607,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @NotYetSupported(Modes.UNNEST_INLINED)
+  @NotYetSupported({Modes.UNNEST_INLINED, Modes.DD_UNNEST_INLINED})
   @Test
   public void testUnnestWithConstant()
   {
@@ -5665,7 +5665,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @NotYetSupported(Modes.UNNEST_RESULT_MISMATCH)
+  @NotYetSupported({Modes.UNNEST_RESULT_MISMATCH, Modes.DD_UNNEST_RESULT_MISMATCH})
   @Test
   public void testUnnestWithSQLFunctionOnUnnestedColumn()
   {
@@ -6197,7 +6197,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @NotYetSupported(Modes.UNNEST_RESULT_MISMATCH)
+  @NotYetSupported({Modes.UNNEST_RESULT_MISMATCH, Modes.DD_UNNEST_RESULT_MISMATCH})
   @Test
   public void testUnnestWithCountOnColumn()
   {
