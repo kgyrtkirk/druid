@@ -26,15 +26,13 @@ import org.apache.druid.sql.calcite.NotYetSupported.NotYetSupportedProcessor;
 import org.apache.druid.sql.calcite.QueryTestBuilder;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import java.util.Collections;
-
 public class DecoupledCalciteDartTest extends CalciteDartTest
 {
   @RegisterExtension
   NotYetSupportedProcessor notYetSupportedProcessor = new NotYetSupportedProcessor(NotYetSupported.Scope.DECOUPLED_DART);
 
   @RegisterExtension
-  DecoupledDartExtension decoupledExtension = new DecoupledDartExtension(this, Collections.emptyMap());
+  DecoupledDartExtension decoupledExtension = new DecoupledDartExtension(this);
 
   @Override
   protected QueryTestBuilder testBuilder()
