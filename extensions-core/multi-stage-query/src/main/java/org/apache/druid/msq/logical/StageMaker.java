@@ -30,6 +30,7 @@ import org.apache.druid.msq.logical.stages.AbstractFrameProcessorStage;
 import org.apache.druid.msq.logical.stages.AbstractShuffleStage;
 import org.apache.druid.msq.logical.stages.LogicalStage;
 import org.apache.druid.msq.querykit.scan.ScanQueryStageProcessor;
+import org.apache.druid.query.DataSource;
 import org.apache.druid.query.QueryContexts;
 import org.apache.druid.query.filter.DimFilter;
 import org.apache.druid.segment.VirtualColumns;
@@ -151,5 +152,10 @@ public class StageMaker
       return dartQueryId;
     }
     return plannerContext.getSqlQueryId();
+  }
+
+  public StageProcessor<?, ?> makeSegmentMapProcessor(RowSignature signature, DataSource dataSource)
+  {
+    return ScanQueryStageProcessor.makeSegmentMapFnProcessor(signature, dataSource);
   }
 }
