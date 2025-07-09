@@ -75,9 +75,6 @@ public class JoinStage
     {
       final ClusterBy clusterBy = new ClusterBy(keyColumns, 0);
       return new HashShuffleSpec(clusterBy, 1);
-      // return
-      // ShuffleSpecFactories.globalSortWithMaxPartitionCount(1).build(clusterBy,
-      // false);
     }
 
     @Override
