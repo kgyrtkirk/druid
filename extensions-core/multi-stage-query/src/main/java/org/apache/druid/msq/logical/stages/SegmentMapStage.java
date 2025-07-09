@@ -19,31 +19,31 @@
 
 package org.apache.druid.msq.logical.stages;
 
-import org.apache.druid.query.DataSource;
-import org.apache.druid.query.TableDataSource;
-import org.apache.druid.sql.calcite.planner.PlannerContext;
+import org.apache.druid.msq.exec.StageProcessor;
+import org.apache.druid.msq.logical.LogicalInputSpec;
+import org.apache.druid.msq.logical.StageMaker;
 import org.apache.druid.sql.calcite.planner.querygen.DruidQueryGenerator.DruidNodeStack;
 import org.apache.druid.sql.calcite.planner.querygen.SourceDescProducer.SourceDesc;
-import org.apache.druid.sql.calcite.rule.logical.DruidUnnest;
 
-import java.util.Collections;
-
-public class UnnestStage
+public class SegmentMapStage extends AbstractFrameProcessorStage
 {
-  private static final DataSource DUMMY = new TableDataSource("__dummy__");
+  private SourceDesc sourceDesc;
 
-  public static LogicalStage buildUnnestStage(LogicalStage inputStage, DruidNodeStack stack)
+  public SegmentMapStage(LogicalStage inputStage, SourceDesc sourceDesc)
   {
-    DruidUnnest unnest = (DruidUnnest) stack.getNode();
-    PlannerContext plannerContext = stack.getPlannerContext();
-    SourceDesc sourceDesc = makeDummySourceDesc(inputStage);
-    SourceDesc unnestSD = unnest.getSourceDesc(plannerContext, Collections.singletonList(sourceDesc));
-    return new SegmentMapStage(inputStage, unnestSD);
+    super(sourceDesc.rowSignature, LogicalInputSpec.of(inputStage));
+    this.sourceDesc = sourceDesc;
   }
 
-  private static SourceDesc makeDummySourceDesc(LogicalStage inputStage)
+  @Override
+  public LogicalStage extendWith(DruidNodeStack stack)
   {
-    return new SourceDesc(DUMMY, inputStage.getRowSignature());
+    return null;
   }
 
+  @Override
+  public StageProcessor<?, ?> buildStageProcessor(StageMaker stageMaker)
+  {
+    return stageMaker.makeSegmentMapProcessor(signature, sourceDesc.dataSource);
+  }
 }
