@@ -6072,7 +6072,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @NotYetSupported(Modes.DD_UNNEST)
   @Test
   public void testJoinsWithUnnestOnLeft()
   {
@@ -6124,7 +6123,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @NotYetSupported(Modes.DD_UNNEST)
   @DecoupledTestConfig(ignoreExpectedQueriesReason = IgnoreQueriesReason.UNNEST_EXTRA_SCANQUERY)
   @Test
   public void testJoinsWithUnnestOverFilteredDSOnLeft()
@@ -6179,7 +6177,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @NotYetSupported(Modes.DD_UNNEST)
   @Test
   public void testJoinsWithUnnestOverJoin()
   {
@@ -6249,7 +6246,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @NotYetSupported(Modes.DD_UNNEST)
+  @NotYetSupported(Modes.DD_ROW_ORDER_DIFFERENCE)
   @Test
   public void testSelfJoinsWithUnnestOnLeftAndRight()
   {
@@ -6309,7 +6306,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @NotYetSupported(Modes.DD_UNNEST)
   @DecoupledTestConfig(ignoreExpectedQueriesReason = IgnoreQueriesReason.UNNEST_EXTRA_SCANQUERY)
   @Test
   public void testJoinsOverUnnestOverFilterDSOverJoin()
