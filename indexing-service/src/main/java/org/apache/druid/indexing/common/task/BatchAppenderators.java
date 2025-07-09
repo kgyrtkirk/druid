@@ -74,7 +74,6 @@ public final class BatchAppenderators
         taskId,
         dataSchema,
         appenderatorConfig.withBasePersistDirectory(toolbox.getPersistDir()),
-        toolbox.getConfig(),
         metrics,
         segmentPusher,
         toolbox.getJsonMapper(),

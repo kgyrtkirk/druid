@@ -21,6 +21,7 @@ package org.apache.druid.segment.realtime.appenderator;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Supplier;
@@ -556,7 +557,6 @@ public class BatchAppenderator implements Appenderator
     final Stopwatch runExecStopwatch = Stopwatch.createStarted();
     ListenableFuture<Object> future = persistExecutor.submit(
         () -> {
-          setTaskThreadContext();
           log.info("Spawning intermediate persist");
 
           // figure out hydrants (indices) to persist:
@@ -683,8 +683,8 @@ public class BatchAppenderator implements Appenderator
 
     return Futures.transform(
         persistAll(null), // make sure persists is done before push...
-        commitMetadata -> {
-          setTaskThreadContext();
+        (Function<Object, SegmentsAndCommitMetadata>) commitMetadata -> {
+
           log.info("Push started, processsing[%d] sinks", identifiers.size());
 
           int totalHydrantsMerged = 0;
@@ -738,7 +738,6 @@ public class BatchAppenderator implements Appenderator
           log.info("Push done: total sinks merged[%d], total hydrants merged[%d]",
                    identifiers.size(), totalHydrantsMerged
           );
-
           return new SegmentsAndCommitMetadata(dataSegments, commitMetadata, segmentSchemaMapping);
         },
         pushExecutor // push it in the background, pushAndClear in BaseAppenderatorDriver guarantees
