@@ -284,7 +284,7 @@ public class CalciteRulesManager
     final HepProgramBuilder builder = HepProgram.builder();
     builder.addMatchOrder(HepMatchOrder.BOTTOM_UP);
     builder.addMatchLimit(CalciteRulesManager.HEP_DEFAULT_MATCH_LIMIT);
-    builder.addRuleCollection(baseRuleSet(plannerContext));
+    builder.addRuleCollection(baseRuleSet(plannerContext, false));
     builder.addRuleInstance(CoreRules.UNION_MERGE);
     builder.addRuleInstance(FilterCorrelateRule.Config.DEFAULT.toRule());
     builder.addRuleInstance(FilterProjectTransposeRule.Config.DEFAULT.toRule());
@@ -463,7 +463,7 @@ public class CalciteRulesManager
   {
     final ImmutableList.Builder<RelOptRule> retVal = ImmutableList
         .<RelOptRule>builder()
-        .addAll(baseRuleSet(plannerContext))
+        .addAll(baseRuleSet(plannerContext, plannerContext.getJoinAlgorithm().requiresSubquery()))
         .add(DruidRelToDruidRule.instance())
         .add(new DruidTableScanRule(plannerContext))
         .add(new DruidLogicalValuesRule(plannerContext))
@@ -488,7 +488,7 @@ public class CalciteRulesManager
   public List<RelOptRule> bindableConventionRuleSet(final PlannerContext plannerContext)
   {
     return ImmutableList.<RelOptRule>builder()
-                        .addAll(baseRuleSet(plannerContext))
+                        .addAll(baseRuleSet(plannerContext, false))
                         .addAll(Bindables.RULES)
                         .addAll(DEFAULT_BINDABLE_RULES)
                         .add(CoreRules.AGGREGATE_REDUCE_FUNCTIONS)
@@ -506,7 +506,7 @@ public class CalciteRulesManager
     return (bloat != null) ? bloat : DEFAULT_BLOAT;
   }
 
-  public List<RelOptRule> baseRuleSet(final PlannerContext plannerContext)
+  public List<RelOptRule> baseRuleSet(final PlannerContext plannerContext, boolean withJoinRules)
   {
     final PlannerConfig plannerConfig = plannerContext.getPlannerConfig();
     final ImmutableList.Builder<RelOptRule> rules = ImmutableList.builder();
@@ -518,7 +518,7 @@ public class CalciteRulesManager
     rules.add(new DruidAggregateCaseToFilterRule(plannerContext.queryContext().isExtendedFilteredSumRewrite()));
     rules.addAll(configurableRuleSet(plannerContext));
 
-    if (plannerContext.getJoinAlgorithm().requiresSubquery()) {
+    if (withJoinRules) {
       rules.addAll(FANCY_JOIN_RULES);
     }
 
