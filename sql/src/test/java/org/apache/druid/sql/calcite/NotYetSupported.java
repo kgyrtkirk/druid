@@ -116,7 +116,7 @@ public @interface NotYetSupported
     DD_INCORRECT_RESULTS(Scope.DECOUPLED_DART, AssertionError.class, "column content mismatch at"),
 
     // the system mis-detects join type for broadcast join; however setting sort-merge makes other queries sprial into infinite planning
-    DD_RIGHTY_JOIN_BROADCAST(Scope.DECOUPLED_DART, DruidException.class, "RIGHT JOIN is not supported"),
+    DD_RIGHT_JOIN_BROADCAST(Scope.DECOUPLED_DART, DruidException.class, "RIGHT JOIN is not supported"),
     DD_UNNEST(Scope.DECOUPLED_DART, DruidException.class, "DruidUnnest.DRUID_LOGICAL"),
     DD_UNNEST_RESULT_MISMATCH(Scope.DECOUPLED_DART, AssertionError.class, "(Result count mismatch|column content mismatch)"),
     DD_UNNEST_INLINED(Scope.DECOUPLED_DART, Exception.class, "Missing conversion is Uncollect"),

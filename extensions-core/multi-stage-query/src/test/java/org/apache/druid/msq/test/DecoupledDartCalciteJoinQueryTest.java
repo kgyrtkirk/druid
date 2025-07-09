@@ -99,7 +99,7 @@ public abstract class DecoupledDartCalciteJoinQueryTest extends CalciteJoinQuery
   @Override
   public boolean isSortBasedJoin()
   {
-    return true;
+    return joinAlgorithm() == JoinAlgorithm.SORT_MERGE;
   }
 
   @Override
