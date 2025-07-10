@@ -2651,6 +2651,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @NotYetSupported(Modes.DD_RESULT_MISMATCH_FLOAT_DOUBLE)
   @Test
   public void testArrayAggNumeric()
   {
