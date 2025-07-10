@@ -41,7 +41,7 @@ public abstract class LogicalInputSpec
     InputProperty BROADCAST = new Broadcast();
   }
 
-  static final class Broadcast implements InputProperty
+  private static final class Broadcast implements InputProperty
   {
     private Broadcast()
     {
