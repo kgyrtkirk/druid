@@ -113,17 +113,12 @@ public @interface NotYetSupported
     DD_NULL_COLUMN_ORDER(Scope.DECOUPLED_DART, DruidException.class, "sort: \\[\\] -> \\[1\\]"),
     DD_UNION(Scope.DECOUPLED_DART, DruidException.class, "DruidUnion.DRUID_LOGICAL"),
     DD_WINDOW(Scope.DECOUPLED_DART, DruidException.class, "DruidWindow.DRUID_LOGICAL"),
-    DD_INCORRECT_RESULTS(Scope.DECOUPLED_DART, AssertionError.class, "column content mismatch at"),
-    // the system mis-detects join type for broadcast join; however setting sort-merge makes other queries sprial into infinite planning
-    DD_RIGHT_JOIN_BROADCAST(Scope.DECOUPLED_DART, DruidException.class, "RIGHT JOIN is not supported"),
-    DD_UNNEST(Scope.DECOUPLED_DART, DruidException.class, "DruidUnnest.DRUID_LOGICAL"),
     DD_UNNEST_RESULT_MISMATCH(Scope.DECOUPLED_DART, AssertionError.class, "(Result count mismatch|column content mismatch)"),
     DD_UNNEST_INLINED(Scope.DECOUPLED_DART, Exception.class, "Missing conversion is Uncollect"),
     DD_SORT_REMOVE_TROUBLE(Scope.DECOUPLED_DART, DruidException.class, "Calcite assertion violated.*Sort\\.<init>"),
     DD_JOIN_CONDITION_NORMALIZATION(Scope.DECOUPLED_DART, DruidException.class, "Cannot handle equality"),
     DART_SECOND_SEGMENT_NOT_SCANNED(Scope.DECOUPLED_DART, AssertionError.class, "(Result count mismatch|column content mismatch)"),
-    DD_JOIN_CONDITION_TYPE_CHECK_MISSED(Scope.DECOUPLED_DART, AssertionError.class, "Expected org.apache.druid.error.DruidException"),
-    DD_ROW_ORDER_DIFFERENCE(Scope.DECOUPLED_DART, AssertionError.class, "column content mismatch");
+    ;
     // @formatter:on
 
     public Scope scope;

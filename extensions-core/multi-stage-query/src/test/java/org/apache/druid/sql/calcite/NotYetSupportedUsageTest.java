@@ -69,7 +69,11 @@ public class NotYetSupportedUsageTest
       @Override
       public int compare(ReportEntry l, ReportEntry r)
       {
-        int res = l.className.compareTo(r.className);
+        int res = l.mode.scope.compareTo(r.mode.scope);
+        if (res != 0) {
+          return res;
+        }
+        res = l.className.compareTo(r.className);
         if (res != 0) {
           return res;
         }
@@ -106,7 +110,7 @@ public class NotYetSupportedUsageTest
     @Override
     public String toString()
     {
-      return " | " + className + " | " + methodNames.size() + " | " + mode + " | " + mode.regex + " | ";
+      return " | " + mode.scope + " | " + className + " | " + methodNames.size() + " | " + mode.name() + " | " + mode.regex + " | ";
     }
   }
 
