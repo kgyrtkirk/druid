@@ -115,7 +115,6 @@ public class JoinStage
           conditionAnalysis,
           joinType
       );
-
     }
   }
 
@@ -181,8 +180,6 @@ public class JoinStage
         plannerContext.parseExpression(condition.getExpression()),
         prefix
     );
-
-    // FIXME? checkQuerySegmentSpecIsEternity(dataSource, querySegmentSpec);
 
     // Partition by keys given by the join condition.
     final List<List<KeyColumn>> partitionKeys = SortMergeJoinStageProcessor.toKeyColumns(
