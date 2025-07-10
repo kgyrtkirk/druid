@@ -20,8 +20,6 @@
 package org.apache.druid.msq.logical.stages;
 
 import org.apache.druid.msq.logical.LogicalInputSpec;
-import org.apache.druid.query.DataSource;
-import org.apache.druid.query.TableDataSource;
 import org.apache.druid.sql.calcite.planner.PlannerContext;
 import org.apache.druid.sql.calcite.planner.querygen.DruidQueryGenerator.DruidNodeStack;
 import org.apache.druid.sql.calcite.planner.querygen.SourceDescProducer.SourceDesc;
@@ -31,8 +29,6 @@ import java.util.Collections;
 
 public class UnnestStage
 {
-  private static final DataSource DUMMY = new TableDataSource("__dummy__");
-
   public static LogicalStage buildUnnestStage(LogicalStage inputStage, DruidNodeStack stack)
   {
     DruidUnnest unnest = (DruidUnnest) stack.getNode();
@@ -42,11 +38,4 @@ public class UnnestStage
     SourceDesc unnestSD = unnest.getSourceDesc(plannerContext, Collections.singletonList(sourceDesc));
     return new SegmentMapStage(unnestSD, Collections.singletonList(logicalInputSpec));
   }
-
-  //FIXME
-  public static SourceDesc makeDummySourceDesc(LogicalStage inputStage)
-  {
-    return new SourceDesc(DUMMY, inputStage.getRowSignature());
-  }
-
 }
