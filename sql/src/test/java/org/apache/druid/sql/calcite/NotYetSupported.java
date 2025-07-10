@@ -114,7 +114,6 @@ public @interface NotYetSupported
     DD_UNION(Scope.DECOUPLED_DART, DruidException.class, "DruidUnion.DRUID_LOGICAL"),
     DD_WINDOW(Scope.DECOUPLED_DART, DruidException.class, "DruidWindow.DRUID_LOGICAL"),
     DD_INCORRECT_RESULTS(Scope.DECOUPLED_DART, AssertionError.class, "column content mismatch at"),
-
     // the system mis-detects join type for broadcast join; however setting sort-merge makes other queries sprial into infinite planning
     DD_RIGHT_JOIN_BROADCAST(Scope.DECOUPLED_DART, DruidException.class, "RIGHT JOIN is not supported"),
     DD_UNNEST(Scope.DECOUPLED_DART, DruidException.class, "DruidUnnest.DRUID_LOGICAL"),
