@@ -130,7 +130,7 @@ public class DruidLogicalToQueryDefinitionTranslator
         return sortStage;
       }
     }
-    if(stack.getNode() instanceof DruidUnnest) {
+    if (stack.getNode() instanceof DruidUnnest) {
       return UnnestStage.buildUnnestStage(inputStage, stack);
     }
     return new ReadStage(inputStage.getLogicalRowSignature(), LogicalInputSpec.of(inputStage)).extendWith(stack);

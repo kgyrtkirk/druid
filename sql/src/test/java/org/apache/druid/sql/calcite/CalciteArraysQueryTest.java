@@ -3876,7 +3876,7 @@ public class CalciteArraysQueryTest extends BaseCalciteQueryTest
 
   }
 
-  @NotYetSupported({Modes.UNNEST_INLINED,Modes.DD_UNNEST_INLINED})
+  @NotYetSupported({Modes.UNNEST_INLINED, Modes.DD_UNNEST_INLINED})
   @Test
   public void testUnnestInline()
   {

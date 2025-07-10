@@ -19,7 +19,7 @@
 
 package org.apache.druid.msq.logical.stages;
 
-import org.apache.curator.shaded.com.google.common.collect.Lists;
+import com.google.common.collect.Lists;
 import org.apache.druid.error.DruidException;
 import org.apache.druid.frame.key.ClusterBy;
 import org.apache.druid.frame.key.KeyColumn;
@@ -43,6 +43,7 @@ import org.apache.druid.sql.calcite.planner.querygen.SourceDescProducer.SourceDe
 import org.apache.druid.sql.calcite.rel.DruidJoinQueryRel;
 import org.apache.druid.sql.calcite.rel.VirtualColumnRegistry;
 import org.apache.druid.sql.calcite.rel.logical.DruidJoin;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -193,10 +194,9 @@ public class JoinStage
 
     }
 
-    // shuffleStages.get(0)
-
     return new SortMergeStage(
-        signature, Lists.transform(shuffleStages, LogicalInputSpec::of),
+        signature,
+        Lists.transform(shuffleStages, LogicalInputSpec::of),
         prefix,
         analysis,
         DruidJoinQueryRel.toDruidJoinType(join.getJoinType())

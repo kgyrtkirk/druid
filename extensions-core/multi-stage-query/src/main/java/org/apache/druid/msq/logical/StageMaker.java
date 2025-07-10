@@ -120,7 +120,7 @@ public class StageMaker
     for (int i = 0; i < inputs.size(); i++) {
       LogicalInputSpec dagInputSpec = inputs.get(i);
       inputSpecs.add(dagInputSpec.toInputSpec(this));
-      if(dagInputSpec.hasProperty(InputProperty.BROADCAST)) {
+      if (dagInputSpec.hasProperty(InputProperty.BROADCAST)) {
         broadcastInputs.add(i);
       }
     }

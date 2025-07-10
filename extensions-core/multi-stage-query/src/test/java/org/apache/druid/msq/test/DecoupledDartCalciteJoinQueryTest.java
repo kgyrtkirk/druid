@@ -26,9 +26,9 @@ import org.apache.druid.sql.calcite.CalciteJoinQueryTest;
 import org.apache.druid.sql.calcite.NotYetSupported;
 import org.apache.druid.sql.calcite.NotYetSupported.Modes;
 import org.apache.druid.sql.calcite.NotYetSupported.NotYetSupportedProcessor;
-import org.apache.druid.sql.calcite.planner.PlannerContext;
 import org.apache.druid.sql.calcite.QueryTestBuilder;
 import org.apache.druid.sql.calcite.SqlTestFrameworkConfig;
+import org.apache.druid.sql.calcite.planner.PlannerContext;
 import org.junit.AssumptionViolatedException;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -36,7 +36,8 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 public abstract class DecoupledDartCalciteJoinQueryTest extends CalciteJoinQueryTest
 {
 
-  static class BroadcastTest extends DecoupledDartCalciteJoinQueryTest  {
+  static class BroadcastTest extends DecoupledDartCalciteJoinQueryTest
+  {
     @Override
     protected JoinAlgorithm joinAlgorithm()
     {
@@ -44,7 +45,8 @@ public abstract class DecoupledDartCalciteJoinQueryTest extends CalciteJoinQuery
     }
   }
 
-  static class SortMergeTest extends DecoupledDartCalciteJoinQueryTest  {
+  static class SortMergeTest extends DecoupledDartCalciteJoinQueryTest
+  {
     @Override
     protected JoinAlgorithm joinAlgorithm()
     {
@@ -83,7 +85,6 @@ public abstract class DecoupledDartCalciteJoinQueryTest extends CalciteJoinQuery
                 .build()
         );
   }
-
 
   protected abstract JoinAlgorithm joinAlgorithm();
 

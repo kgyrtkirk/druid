@@ -2473,30 +2473,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   {
     skipVectorize();
 
-//    testBuilder()
-//    .sql("SELECT f.dim1, sum(n.dbl1) s1 from foo f join numfoo n on n.dim2=f.dim2 group by f.dim1")
-//    .expectedResults(
-//        ImmutableList.of(
-//            new Object[]{"", 1.0D},
-//            new Object[]{"1", 1.0D},
-//            new Object[]{"2", 0.0D},
-//            new Object[]{"def", null}
-//        )
-//    )
-//    .run();
-//
-//    testBuilder()
-//    .sql("SELECT f.dim2, sum(n.dbl2) s2 from foo f join numfoo n on n.dim1=f.dim1 group by f.dim2")
-//    .expectedResults(
-//        ImmutableList.of(
-//            new Object[]{null, 1.7D},
-//            new Object[]{"", 0.0D},
-//            new Object[]{"a", null},
-//            new Object[]{"abc", null}
-//        )
-//    )
-//    .run();
-
     String sql = "with\n"
         + "l1 as (SELECT f.dim1, sum(n.dbl1) s1 from foo f join numfoo n on n.dim2=f.dim2 group by f.dim1),\n"
         + "r1 as (SELECT f.dim2, sum(n.dbl2) s2 from foo f join numfoo n on n.dim1=f.dim1 group by f.dim2)\n"
@@ -3520,7 +3496,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     );
   }
 
-//  @NotYetSupported(Modes.DD_BROADCAST)
   @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.JOIN_LEFT_DIRECT_ACCESS)
   @MethodSource("provideQueryContexts")
   @ParameterizedTest(name = "{0}")
