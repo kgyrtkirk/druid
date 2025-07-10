@@ -92,10 +92,9 @@ public abstract class LogicalInputSpec
 
   public static LogicalInputSpec of(LogicalStage logicalStage, int inputIndex, InputProperty... props)
   {
-    // FIXME
     // could potentially unwrap LogicalStage if some conditions are met
     // logicalStage.unwrap(InputSpec.class);
-
+    // partial: https://github.com/kgyrtkirk/druid/commit/9a541f69361f341c537ee196514d2d6a00ae3feb
     return new DagStageInputSpec(logicalStage, inputIndex, props);
   }
 
