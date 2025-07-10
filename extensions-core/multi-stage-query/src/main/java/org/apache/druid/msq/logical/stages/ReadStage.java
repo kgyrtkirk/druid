@@ -154,16 +154,4 @@ public class ReadStage extends AbstractFrameProcessorStage
     }
     throw DruidException.defensive("This type of data source [%s] is not currently supported.", dataSource.getClass());
   }
-
-  public static InputSpec unwrapInputSpec(LogicalStage logicalStage)
-  {
-    if (logicalStage instanceof ReadStage) {
-      LogicalInputSpec inputSpec = logicalStage.getInputSpecs().get(0);
-      if (inputSpec instanceof LogicalInputSpec.PhysicalInputSpec) {
-        LogicalInputSpec.PhysicalInputSpec physicalInputSpec = (LogicalInputSpec.PhysicalInputSpec) inputSpec;
-        return physicalInputSpec.unwrapInputSpec();
-      }
-    }
-    return null;
-  }
 }
