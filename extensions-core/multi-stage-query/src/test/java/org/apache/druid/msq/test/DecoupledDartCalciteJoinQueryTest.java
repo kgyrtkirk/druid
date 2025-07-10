@@ -31,6 +31,7 @@ import org.apache.druid.sql.calcite.SqlTestFrameworkConfig;
 import org.apache.druid.sql.calcite.planner.PlannerContext;
 import org.junit.AssumptionViolatedException;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 @SqlTestFrameworkConfig.ComponentSupplier(DartComponentSupplier.class)
@@ -57,6 +58,7 @@ public abstract class DecoupledDartCalciteJoinQueryTest extends CalciteJoinQuery
     }
 
     @NotYetSupported(Modes.DD_JOIN_CONDITION_NORMALIZATION)
+    @Test
     public void testJoinWithInputRefCondition()
     {
       super.testJoinWithInputRefCondition();
