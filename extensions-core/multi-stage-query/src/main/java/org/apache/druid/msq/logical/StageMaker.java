@@ -91,13 +91,7 @@ public class StageMaker
 
   private StageDefinitionBuilder buildFrameProcessorStage(AbstractFrameProcessorStage frameProcessorStage)
   {
-    List<LogicalInputSpec> inputs = frameProcessorStage.getInputSpecs();
-    List<InputSpec> inputSpecs = new ArrayList<>();
-    for (LogicalInputSpec dagInputSpec : inputs) {
-      inputSpecs.add(dagInputSpec.toInputSpec(this));
-    }
-    StageDefinitionBuilder sdb = newStageDefinitionBuilder();
-    sdb.inputs(inputSpecs);
+    StageDefinitionBuilder sdb = newStageDefinitionBuilder(frameProcessorStage.getInputSpecs());
     StageProcessor<?, ?> stageProcessor = frameProcessorStage.buildStageProcessor(this);
     sdb.signature(frameProcessorStage.getLogicalRowSignature());
     sdb.processor(stageProcessor);
@@ -105,15 +99,21 @@ public class StageMaker
     return sdb;
   }
 
-  private StageDefinitionBuilder buildShuffleStage(AbstractShuffleStage stage)
+  private StageDefinitionBuilder newStageDefinitionBuilder(List<LogicalInputSpec> inputs)
   {
-    List<LogicalInputSpec> inputs = stage.getInputSpecs();
     List<InputSpec> inputSpecs = new ArrayList<>();
     for (LogicalInputSpec dagInputSpec : inputs) {
       inputSpecs.add(dagInputSpec.toInputSpec(this));
     }
     StageDefinitionBuilder sdb = newStageDefinitionBuilder();
     sdb.inputs(inputSpecs);
+    return sdb;
+  }
+
+  private StageDefinitionBuilder buildShuffleStage(AbstractShuffleStage stage)
+  {
+    List<LogicalInputSpec> inputs = stage.getInputSpecs();
+    StageDefinitionBuilder sdb = newStageDefinitionBuilder(inputs);
     sdb.signature(stage.getRowSignature());
     sdb.processor(makeScanStageProcessor(VirtualColumns.EMPTY, stage.getRowSignature(), null));
     sdb.shuffleSpec(stage.buildShuffleSpec());
