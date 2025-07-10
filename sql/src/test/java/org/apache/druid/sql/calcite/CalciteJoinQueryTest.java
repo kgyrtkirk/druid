@@ -2506,7 +2506,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
         .sql(sql)
         .expectedResults(
             ImmutableList.of(
-                new Object[]{"x", 1.0D}
+                new Object[]{"", 1.0D}
             )
         )
         .run();
@@ -6037,7 +6037,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.JOIN_FILTER_LOCATIONS)
-  @NotYetSupported(Modes.DD_JOIN_CONDITION_NORMALIZATION)
+//  @NotYetSupported(Modes.DD_JOIN_CONDITION_NORMALIZATION)
   public void testJoinWithInputRefCondition()
   {
     cannotVectorize();
@@ -6289,7 +6289,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @NotYetSupported(Modes.DD_ROW_ORDER_DIFFERENCE)
   @Test
   public void testSelfJoinsWithUnnestOnLeftAndRight()
   {

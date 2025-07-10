@@ -39,9 +39,11 @@ import org.apache.druid.sql.calcite.planner.PlannerContext;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Builds {@link QueryDefinition} from {@link LogicalStage}-s.
@@ -91,22 +93,12 @@ public class StageMaker
 
   private StageDefinitionBuilder buildFrameProcessorStage(AbstractFrameProcessorStage frameProcessorStage)
   {
-    StageDefinitionBuilder sdb = newStageDefinitionBuilder(frameProcessorStage.getInputSpecs());
+    List<LogicalInputSpec> inputs = frameProcessorStage.getInputSpecs();
+    StageDefinitionBuilder sdb = newStageDefinitionBuilder(inputs);
     StageProcessor<?, ?> stageProcessor = frameProcessorStage.buildStageProcessor(this);
     sdb.signature(frameProcessorStage.getLogicalRowSignature());
     sdb.processor(stageProcessor);
     sdb.shuffleSpec(MixShuffleSpec.instance());
-    return sdb;
-  }
-
-  private StageDefinitionBuilder newStageDefinitionBuilder(List<LogicalInputSpec> inputs)
-  {
-    List<InputSpec> inputSpecs = new ArrayList<>();
-    for (LogicalInputSpec dagInputSpec : inputs) {
-      inputSpecs.add(dagInputSpec.toInputSpec(this));
-    }
-    StageDefinitionBuilder sdb = newStageDefinitionBuilder();
-    sdb.inputs(inputSpecs);
     return sdb;
   }
 
@@ -120,9 +112,21 @@ public class StageMaker
     return sdb;
   }
 
-  private StageDefinitionBuilder newStageDefinitionBuilder()
+  private StageDefinitionBuilder newStageDefinitionBuilder(List<LogicalInputSpec> inputs)
   {
-    return StageDefinition.builder(getNextStageId());
+    List<InputSpec> inputSpecs = new ArrayList<>();
+    Set<Integer> broadcastInputs = new HashSet<>();
+    for (int i = 0; i < inputs.size(); i++) {
+      LogicalInputSpec dagInputSpec = inputs.get(i);
+      inputSpecs.add(dagInputSpec.toInputSpec(this));
+      if(dagInputSpec.isBroadcast()) {
+        broadcastInputs.add(i);
+      }
+    }
+    StageDefinitionBuilder sdb = StageDefinition.builder(getNextStageId());
+    sdb.broadcastInputs(broadcastInputs);
+    sdb.inputs(inputSpecs);
+    return sdb;
   }
 
   private int getNextStageId()

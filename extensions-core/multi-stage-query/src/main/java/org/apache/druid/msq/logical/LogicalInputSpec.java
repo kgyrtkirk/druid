@@ -145,5 +145,15 @@ public abstract class LogicalInputSpec
       return new SourceDesc(ds, inputStage.getRowSignature());
     }
 
+    @Override
+    public boolean isBroadcast()
+    {
+      return true;
+    }
+  }
+
+  // FIXME reconsider this?
+  public boolean isBroadcast() {
+    return false;
   }
 }
