@@ -131,7 +131,7 @@ public class ReadStage extends AbstractFrameProcessorStage
   {
     SourceDesc sd = node.getSourceDesc(plannerContext, Collections.emptyList());
     InputSpec inputSpec = translateDataSource(sd.dataSource);
-    ReadStage stage = new ReadStage(sd.rowSignature, LogicalInputSpec.of(inputSpec));
+    ReadStage stage = new ReadStage(sd.rowSignature, LogicalInputSpec.of(inputSpec, sd.rowSignature));
     return Optional.of(stage);
   }
 

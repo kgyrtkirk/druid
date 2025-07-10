@@ -19,7 +19,6 @@
 
 package org.apache.druid.msq.logical;
 
-import org.apache.druid.error.NotYetImplemented;
 import org.apache.druid.msq.input.InputSpec;
 import org.apache.druid.msq.input.stage.StageInputSpec;
 import org.apache.druid.msq.kernel.StageDefinitionBuilder;
@@ -84,9 +83,9 @@ public abstract class LogicalInputSpec
     return of(inputStage, 0);
   }
 
-  public static LogicalInputSpec of(InputSpec inputSpec)
+  public static LogicalInputSpec of(InputSpec inputSpec, RowSignature rowSignature)
   {
-    return new PhysicalInputSpec(inputSpec, 0);
+    return new PhysicalInputSpec(inputSpec, 0, rowSignature);
   }
 
   public static LogicalInputSpec of(LogicalStage logicalStage, int inputIndex, InputProperty... props)
@@ -101,11 +100,13 @@ public abstract class LogicalInputSpec
   static class PhysicalInputSpec extends LogicalInputSpec
   {
     private InputSpec inputSpec;
+    private RowSignature rowSignature;
 
-    public PhysicalInputSpec(InputSpec inputSpec, int inputIndex, InputProperty... props)
+    public PhysicalInputSpec(InputSpec inputSpec, int inputIndex, RowSignature rowSignature, InputProperty... props)
     {
       super(inputIndex, props);
       this.inputSpec = inputSpec;
+      this.rowSignature = rowSignature;
     }
 
     @Override
@@ -117,7 +118,7 @@ public abstract class LogicalInputSpec
     @Override
     public RowSignature getRowSignature()
     {
-      throw NotYetImplemented.ex(null, "Not supported for this type");
+      return rowSignature;
     }
   }
 
