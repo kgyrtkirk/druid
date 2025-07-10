@@ -71,4 +71,10 @@ public class LookupInputSpec implements InputSpec
            "lookupName='" + lookupName + '\'' +
            '}';
   }
+
+  @Override
+  public boolean isGlobal()
+  {
+    return true;
+  }
 }

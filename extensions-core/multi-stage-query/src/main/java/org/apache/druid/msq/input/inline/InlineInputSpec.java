@@ -72,4 +72,10 @@ public class InlineInputSpec implements InputSpec
            "dataSource=" + dataSource +
            '}';
   }
+
+  @Override
+  public boolean isGlobal()
+  {
+    return true;
+  }
 }

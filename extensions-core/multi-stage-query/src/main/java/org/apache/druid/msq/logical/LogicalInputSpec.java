@@ -23,10 +23,13 @@ import org.apache.druid.msq.input.InputSpec;
 import org.apache.druid.msq.input.stage.StageInputSpec;
 import org.apache.druid.msq.kernel.StageDefinitionBuilder;
 import org.apache.druid.msq.logical.stages.LogicalStage;
+import org.apache.druid.msq.logical.stages.ReadStage;
 import org.apache.druid.msq.querykit.InputNumberDataSource;
 import org.apache.druid.query.DataSource;
 import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.sql.calcite.planner.querygen.SourceDescProducer.SourceDesc;
+
+import java.util.Arrays;
 
 /**
  * Represents an {@link InputSpec} for {@link LogicalStage}-s.
@@ -66,6 +69,7 @@ public abstract class LogicalInputSpec
    */
   public final SourceDesc getSourceDesc()
   {
+    // FIXME: this will need the matching datasource created?
     InputNumberDataSource ds = new InputNumberDataSource(inputIndex);
     return new SourceDesc(ds, getRowSignature());
   }
@@ -92,14 +96,29 @@ public abstract class LogicalInputSpec
 
   public static LogicalInputSpec of(LogicalStage logicalStage, int inputIndex, InputProperty... props)
   {
-    // FIXME
-    // could potentially unwrap LogicalStage if some conditions are met
-    // logicalStage.unwrap(InputSpec.class);
-
+    InputSpec inputSpec  = unwrapInputSpec(logicalStage, props);
+    if(inputSpec != null) {
+      // its possible to avoid the entire stage as its just a passthrough
+      return new PhysicalInputSpec(inputSpec, inputIndex, logicalStage.getRowSignature(), props);
+    }
     return new DagStageInputSpec(logicalStage, inputIndex, props);
   }
 
-  static class PhysicalInputSpec extends LogicalInputSpec
+  protected static InputSpec unwrapInputSpec(LogicalStage logicalStage, InputProperty ... props) {
+    InputSpec inputSpec = ReadStage.unwrapInputSpec(logicalStage);
+    if (inputSpec == null) {
+      return null;
+    }
+    if(Arrays.asList(props).contains(InputProperty.BROADCAST)) {
+
+      if(!inputSpec.isGlobal()) {
+        return null;
+      }
+    }
+    return inputSpec;
+  }
+
+  public static class PhysicalInputSpec extends LogicalInputSpec
   {
     private InputSpec inputSpec;
     private RowSignature rowSignature;
@@ -121,6 +140,11 @@ public abstract class LogicalInputSpec
     public RowSignature getRowSignature()
     {
       return rowSignature;
+    }
+
+    public InputSpec unwrapInputSpec()
+    {
+      return inputSpec;
     }
   }
 

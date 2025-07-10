@@ -60,4 +60,5 @@ public interface LogicalStage
    * Returns the inputs of this stage.
    */
   List<LogicalInputSpec> getInputSpecs();
+
 }

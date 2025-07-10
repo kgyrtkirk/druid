@@ -27,4 +27,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 public interface InputSpec
 {
+  default boolean isGlobal() {
+    return false;
+  }
 }
