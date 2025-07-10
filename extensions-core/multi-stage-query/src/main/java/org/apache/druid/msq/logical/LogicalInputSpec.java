@@ -59,8 +59,10 @@ public abstract class LogicalInputSpec
   public abstract RowSignature getRowSignature();
 
   /**
-   * Supplied to make it more interoperable with {@link DataSource} backed
-   * features still in use.
+   * Provides the {@link SourceDesc} for this input spec.
+   *
+   * Supplied to make it more easily interoperable with {@link DataSource}
+   * backed features like {@link DataSource#createSegmentMapFunction}.
    */
   public final SourceDesc getSourceDesc()
   {
