@@ -77,7 +77,6 @@ import org.apache.druid.sql.calcite.util.TestDataBuilder;
 import org.apache.druid.timeline.DataSegment;
 import org.apache.druid.timeline.partition.LinearShardSpec;
 import org.hamcrest.CoreMatchers;
-import org.hamcrest.MatcherAssert;
 import org.junit.Assert;
 import org.junit.internal.matchers.ThrowableMessageMatcher;
 import org.junit.jupiter.api.Assertions;
@@ -87,6 +86,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static org.hamcrest.MatcherAssert.assertThat;
 
 @SqlTestFrameworkConfig.ComponentSupplier(NestedComponentSupplier.class)
 public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
@@ -5467,7 +5468,7 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
           .run();
     });
 
-    MatcherAssert.assertThat(
+    assertThat(
         e.getMessage(),
         CoreMatchers.containsString("Cannot join when the join condition has column of type [COMPLEX<json>]")
     );
