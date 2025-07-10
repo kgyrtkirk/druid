@@ -30,12 +30,15 @@ import org.apache.druid.sql.calcite.QueryTestBuilder;
 import org.apache.druid.sql.calcite.SqlTestFrameworkConfig;
 import org.apache.druid.sql.calcite.planner.PlannerContext;
 import org.junit.AssumptionViolatedException;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-public class DecoupledDartCalciteJoinQueryTest
+@SqlTestFrameworkConfig.ComponentSupplier(DartComponentSupplier.class)
+public abstract class DecoupledDartCalciteJoinQueryTest extends CalciteJoinQueryTest
 {
-  public static class BroadcastTest extends Base
+
+  @Nested
+  public static class BroadcastTest extends DecoupledDartCalciteJoinQueryTest
   {
     @Override
     protected JoinAlgorithm joinAlgorithm()
@@ -44,7 +47,8 @@ public class DecoupledDartCalciteJoinQueryTest
     }
   }
 
-  public static class SortMergeTest extends Base
+  @Nested
+  public static class SortMergeTest extends DecoupledDartCalciteJoinQueryTest
   {
     @Override
     protected JoinAlgorithm joinAlgorithm()
@@ -53,71 +57,65 @@ public class DecoupledDartCalciteJoinQueryTest
     }
 
     @NotYetSupported(Modes.DD_JOIN_CONDITION_NORMALIZATION)
-    @Test
     public void testJoinWithInputRefCondition()
     {
       super.testJoinWithInputRefCondition();
     }
   }
 
-  @SqlTestFrameworkConfig.ComponentSupplier(DartComponentSupplier.class)
-  public abstract static class Base extends CalciteJoinQueryTest
+  @RegisterExtension
+  NotYetSupportedProcessor notYetSupportedProcessor = new NotYetSupportedProcessor(
+      NotYetSupported.Scope.DECOUPLED_DART
+  );
+
+  @RegisterExtension
+  DecoupledDartExtension decoupledExtension = new DecoupledDartExtension(this);
+
+  @Override
+  protected QueryTestBuilder testBuilder()
   {
+    return decoupledExtension.testBuilder()
+        .queryContext(
+            ImmutableMap.<String, Object>builder()
+                .put(QueryContexts.CTX_PREPLANNED, true)
+                .put(
+                    QueryContexts.CTX_NATIVE_QUERY_SQL_PLANNING_MODE,
+                    QueryContexts.NATIVE_QUERY_SQL_PLANNING_MODE_DECOUPLED
+                )
+                .put(QueryContexts.REWRITE_JOIN_TO_FILTER_ENABLE_KEY, decoupledExtension)
+                .put(PlannerContext.CTX_SQL_JOIN_ALGORITHM, joinAlgorithm().toString())
+                .put(QueryContexts.ENABLE_DEBUG, true)
+                .build()
+        );
+  }
 
-    @RegisterExtension
-    NotYetSupportedProcessor notYetSupportedProcessor = new NotYetSupportedProcessor(
-        NotYetSupported.Scope.DECOUPLED_DART
-    );
+  protected abstract JoinAlgorithm joinAlgorithm();
 
-    @RegisterExtension
-    DecoupledDartExtension decoupledExtension = new DecoupledDartExtension(this);
+  @Override
+  protected void cannotVectorize()
+  {
+  }
 
-    @Override
-    protected QueryTestBuilder testBuilder()
-    {
-      return decoupledExtension.testBuilder()
-          .queryContext(
-              ImmutableMap.<String, Object>builder()
-                  .put(QueryContexts.CTX_PREPLANNED, true)
-                  .put(
-                      QueryContexts.CTX_NATIVE_QUERY_SQL_PLANNING_MODE,
-                      QueryContexts.NATIVE_QUERY_SQL_PLANNING_MODE_DECOUPLED
-                  )
-                  .put(QueryContexts.REWRITE_JOIN_TO_FILTER_ENABLE_KEY, decoupledExtension)
-                  .put(PlannerContext.CTX_SQL_JOIN_ALGORITHM, joinAlgorithm().toString())
-                  .put(QueryContexts.ENABLE_DEBUG, true)
-                  .build()
-          );
-    }
+  @Override
+  protected void cannotVectorizeUnlessFallback()
+  {
+  }
 
-    protected abstract JoinAlgorithm joinAlgorithm();
+  @Override
+  protected void msqIncompatible()
+  {
+    throw new AssumptionViolatedException("Case marked as msqIncompatible; not trying dart right now");
+  }
 
-    @Override
-    protected void cannotVectorize()
-    {
-    }
+  @Override
+  public boolean isSortBasedJoin()
+  {
+    return joinAlgorithm() == JoinAlgorithm.SORT_MERGE;
+  }
 
-    @Override
-    protected void cannotVectorizeUnlessFallback()
-    {
-    }
-
-    @Override
-    protected void msqIncompatible()
-    {
-      throw new AssumptionViolatedException("Case marked as msqIncompatible; not trying dart right now");
-    }
-
-    @Override
-    public boolean isSortBasedJoin()
-    {
-      return joinAlgorithm() == JoinAlgorithm.SORT_MERGE;
-    }
-
-    @Override
-    protected boolean isRunningMSQ()
-    {
-      return true;
-    }
+  @Override
+  protected boolean isRunningMSQ()
+  {
+    return true;
   }
 }
