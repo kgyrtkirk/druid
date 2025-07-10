@@ -141,7 +141,7 @@ public class JoinStage
   {
     List<LogicalInputSpec> inputDescs = new ArrayList<>();
     inputDescs.add(LogicalInputSpec.of(inputStages.get(0)));
-    inputDescs.add(LogicalInputSpec.broadcast(inputStages.get(1), 1));
+    inputDescs.add(LogicalInputSpec.of(inputStages.get(1), 1, LogicalInputSpec.InputProperty.BROADCAST));
 
     PlannerContext plannerContext = stack.getPlannerContext();
     SourceDesc leftSD = inputDescs.get(0).getSourceDesc();//UnnestStage.makeDummySourceDesc(inputStages.get(0));

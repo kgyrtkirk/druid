@@ -26,6 +26,7 @@ import org.apache.druid.msq.kernel.MixShuffleSpec;
 import org.apache.druid.msq.kernel.QueryDefinition;
 import org.apache.druid.msq.kernel.StageDefinition;
 import org.apache.druid.msq.kernel.StageDefinitionBuilder;
+import org.apache.druid.msq.logical.LogicalInputSpec.InputProperty;
 import org.apache.druid.msq.logical.stages.AbstractFrameProcessorStage;
 import org.apache.druid.msq.logical.stages.AbstractShuffleStage;
 import org.apache.druid.msq.logical.stages.LogicalStage;
@@ -119,7 +120,7 @@ public class StageMaker
     for (int i = 0; i < inputs.size(); i++) {
       LogicalInputSpec dagInputSpec = inputs.get(i);
       inputSpecs.add(dagInputSpec.toInputSpec(this));
-      if(dagInputSpec.isBroadcast()) {
+      if(dagInputSpec.hasProperty(InputProperty.BROADCAST)) {
         broadcastInputs.add(i);
       }
     }

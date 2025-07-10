@@ -26,7 +26,6 @@ import org.apache.druid.msq.kernel.StageDefinitionBuilder;
 import org.apache.druid.msq.logical.stages.LogicalStage;
 import org.apache.druid.msq.querykit.InputNumberDataSource;
 import org.apache.druid.query.DataSource;
-import org.apache.druid.query.TableDataSource;
 import org.apache.druid.segment.column.RowSignature;
 import org.apache.druid.sql.calcite.planner.querygen.SourceDescProducer.SourceDesc;
 
@@ -35,40 +34,77 @@ import org.apache.druid.sql.calcite.planner.querygen.SourceDescProducer.SourceDe
  */
 public abstract class LogicalInputSpec
 {
+  public interface InputProperty
+  {
+    InputProperty BROADCAST = new Broadcast();
+  }
+
+  static final class Broadcast implements InputProperty
+  {
+    private Broadcast()
+    {
+    }
+  }
+
+  final int inputIndex;
+  final InputProperty[] props;
+
+  public LogicalInputSpec(int inputIndex, InputProperty[] props)
+  {
+    this.inputIndex = inputIndex;
+    this.props = props;
+  }
+
   public abstract InputSpec toInputSpec(StageMaker maker);
 
   public abstract RowSignature getRowSignature();
 
-  // FIXME ?
-  @Deprecated
-  public abstract SourceDesc getSourceDesc();
+  /**
+   * Supplied to make it more interoperable with {@link DataSource} backed
+   * features still in use.
+   */
+  public final SourceDesc getSourceDesc()
+  {
+    InputNumberDataSource ds = new InputNumberDataSource(inputIndex);
+    return new SourceDesc(ds, getRowSignature());
+  }
+
+  public final boolean hasProperty(InputProperty prop)
+  {
+    for (InputProperty p : props) {
+      if (p == prop) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   public static LogicalInputSpec of(LogicalStage inputStage)
   {
-    return new DagStageInputSpec(inputStage);
+    return of(inputStage, 0);
   }
 
   public static LogicalInputSpec of(InputSpec inputSpec)
   {
-    return new PhysicalInputSpec(inputSpec);
+    return new PhysicalInputSpec(inputSpec, 0);
   }
 
-  public static LogicalInputSpec broadcast(LogicalStage logicalStage, int inputIndex)
+  public static LogicalInputSpec of(LogicalStage logicalStage, int inputIndex, InputProperty... props)
   {
     // FIXME
     // could potentially unwrap LogicalStage if some conditions are met
     // logicalStage.unwrap(InputSpec.class);
-    return new BroadcastStageInputSpec(logicalStage,inputIndex);
+
+    return new DagStageInputSpec(logicalStage, inputIndex, props);
   }
-
-
 
   static class PhysicalInputSpec extends LogicalInputSpec
   {
     private InputSpec inputSpec;
 
-    public PhysicalInputSpec(InputSpec inputSpec)
+    public PhysicalInputSpec(InputSpec inputSpec, int inputIndex, InputProperty... props)
     {
+      super(inputIndex, props);
       this.inputSpec = inputSpec;
     }
 
@@ -83,21 +119,15 @@ public abstract class LogicalInputSpec
     {
       throw NotYetImplemented.ex(null, "Not supported for this type");
     }
-
-    @Override
-    public SourceDesc getSourceDesc()
-    {
-      throw new RuntimeException("not sure right now!");
-    }
   }
 
   static class DagStageInputSpec extends LogicalInputSpec
   {
-
     protected LogicalStage inputStage;
 
-    public DagStageInputSpec(LogicalStage inputStage)
+    public DagStageInputSpec(LogicalStage inputStage, int inputIndex, InputProperty[] props)
     {
+      super(inputIndex, props);
       this.inputStage = inputStage;
     }
 
@@ -118,42 +148,6 @@ public abstract class LogicalInputSpec
     {
       return inputStage.getLogicalRowSignature();
     }
-
-    //FIXME
-    private static final DataSource DUMMY = new TableDataSource("__dummy__");
-    @Override
-    public SourceDesc getSourceDesc()
-    {
-      return new SourceDesc(DUMMY, inputStage.getRowSignature());
-    }
   }
 
-  static class BroadcastStageInputSpec extends DagStageInputSpec
-  {
-    private InputNumberDataSource ds;
-    private int inputIndex;
-
-    public BroadcastStageInputSpec(LogicalStage inputStage, int inputIndex)
-    {
-      super(inputStage);
-      this.inputIndex = inputIndex;
-      ds = new InputNumberDataSource(inputIndex);
-    }
-
-    public SourceDesc getSourceDesc()
-    {
-      return new SourceDesc(ds, inputStage.getRowSignature());
-    }
-
-    @Override
-    public boolean isBroadcast()
-    {
-      return true;
-    }
-  }
-
-  // FIXME reconsider this?
-  public boolean isBroadcast() {
-    return false;
-  }
 }
