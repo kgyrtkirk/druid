@@ -205,7 +205,7 @@ public class BroadcastJoinSegmentMapFnProcessor implements FrameProcessor<Segmen
   DataSource inlineChannelData(final DataSource originalDataSource)
   {
     if (originalDataSource instanceof InputNumberDataSource) {
-      final int inputNumber = ((InputNumberDataSource) originalDataSource).getInputNumber1();
+      final int inputNumber = ((InputNumberDataSource) originalDataSource).getInputNumber();
       if (inputNumberToProcessorChannelMap.containsKey(inputNumber)) {
         final int channelNumber = inputNumberToProcessorChannelMap.get(inputNumber);
 

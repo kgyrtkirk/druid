@@ -150,5 +150,4 @@ public abstract class LogicalInputSpec
       return inputStage.getLogicalRowSignature();
     }
   }
-
 }

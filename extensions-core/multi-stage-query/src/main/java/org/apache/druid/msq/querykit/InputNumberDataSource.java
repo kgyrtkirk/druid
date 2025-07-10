@@ -81,7 +81,7 @@ public class InputNumberDataSource extends LeafDataSource
   }
 
   @JsonProperty
-  public int getInputNumber1()
+  public int getInputNumber()
   {
     return inputNumber;
   }
