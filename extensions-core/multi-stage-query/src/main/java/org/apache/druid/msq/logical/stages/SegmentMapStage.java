@@ -25,17 +25,11 @@ import org.apache.druid.msq.logical.StageMaker;
 import org.apache.druid.sql.calcite.planner.querygen.DruidQueryGenerator.DruidNodeStack;
 import org.apache.druid.sql.calcite.planner.querygen.SourceDescProducer.SourceDesc;
 
-import java.util.Collections;
 import java.util.List;
 
 public class SegmentMapStage extends AbstractFrameProcessorStage
 {
   private SourceDesc sourceDesc;
-
-  public SegmentMapStage(LogicalStage inputStage, SourceDesc sourceDesc)
-  {
-    this(sourceDesc, Collections.singletonList(LogicalInputSpec.of(inputStage)));
-  }
 
   public SegmentMapStage(SourceDesc sourceDesc, List<LogicalInputSpec> inputs)
   {
