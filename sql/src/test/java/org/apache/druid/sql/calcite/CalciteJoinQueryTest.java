@@ -5446,7 +5446,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
                                 .context(queryContext)
                                 .build()
                         ),
-                        "_j0X.",
+                        "_j0.",
                         equalsCondition(makeColumnExpression("v0"), makeColumnExpression("_j0.v0")),
                         JoinType.INNER
                     )
