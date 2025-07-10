@@ -41,7 +41,8 @@ public class UnnestStage
     return new SegmentMapStage(inputStage, unnestSD);
   }
 
-  private static SourceDesc makeDummySourceDesc(LogicalStage inputStage)
+  //FIXME
+  public static SourceDesc makeDummySourceDesc(LogicalStage inputStage)
   {
     return new SourceDesc(DUMMY, inputStage.getRowSignature());
   }

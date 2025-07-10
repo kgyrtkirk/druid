@@ -19,6 +19,7 @@
 
 package org.apache.druid.msq.logical.stages;
 
+import com.google.common.collect.ImmutableList;
 import org.apache.curator.shaded.com.google.common.collect.Lists;
 import org.apache.druid.error.DruidException;
 import org.apache.druid.frame.key.ClusterBy;
@@ -39,6 +40,7 @@ import org.apache.druid.sql.calcite.expression.Expressions;
 import org.apache.druid.sql.calcite.planner.Calcites;
 import org.apache.druid.sql.calcite.planner.PlannerContext;
 import org.apache.druid.sql.calcite.planner.querygen.DruidQueryGenerator.DruidNodeStack;
+import org.apache.druid.sql.calcite.planner.querygen.SourceDescProducer.SourceDesc;
 import org.apache.druid.sql.calcite.rel.DruidJoinQueryRel;
 import org.apache.druid.sql.calcite.rel.VirtualColumnRegistry;
 import org.apache.druid.sql.calcite.rel.logical.DruidJoin;
@@ -124,11 +126,11 @@ public class JoinStage
     DruidJoin join = (DruidJoin) stack.getNode();
 
     JoinAlgorithm joinAlgorithm = stack.getPlannerContext().getJoinAlgorithm();
-//    if(joinAlgorithm == JoinAlgorithm.SORT_MERGE) {
+    if(joinAlgorithm == JoinAlgorithm.SORT_MERGE) {
       return buildMergeJoin(inputStages, stack, join);
-//    }else {
-//      return buildBroadcastJoin(inputStages, stack, join);
-//    }
+    }else {
+      return buildBroadcastJoin(inputStages, stack, join);
+    }
 
 
 
@@ -137,6 +139,17 @@ public class JoinStage
 
   private static LogicalStage buildBroadcastJoin(List<LogicalStage> inputStages, DruidNodeStack stack, DruidJoin join)
   {
+    List<LogicalInputSpec> inputDescs = new ArrayList<>();
+    inputDescs.add(LogicalInputSpec.of(inputStages.get(0)));
+    inputDescs.add(LogicalInputSpec.broadcast(inputStages.get(1), 1));
+
+    PlannerContext plannerContext = stack.getPlannerContext();
+    SourceDesc leftSD = inputDescs.get(0).getSourceDesc();//UnnestStage.makeDummySourceDesc(inputStages.get(0));
+    SourceDesc rightSD = inputDescs.get(1).getSourceDesc();
+    SourceDesc unnestSD = join.getSourceDesc(plannerContext, ImmutableList.of(leftSD,rightSD));
+    return new SegmentMapStage(unnestSD, inputDescs);
+
+
 
 //    final QueryDefinitionBuilder subQueryDefBuilder = QueryDefinition.builder(queryKitSpec.getQueryId());
 //    final JoinDataSourceAnalysis analysis = dataSource.getJoinAnalysisForDataSource();
@@ -193,7 +206,6 @@ public class JoinStage
 //
 //    return new DataSourcePlan(newDataSource, inputSpecs, broadcastInputs, subQueryDefBuilder);
 
-    return null;
 
   }
 

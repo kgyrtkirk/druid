@@ -41,7 +41,7 @@ import java.util.Set;
 @JsonTypeName("inputNumber")
 public class InputNumberDataSource extends LeafDataSource
 {
-  private final int inputNumber;
+  public int inputNumber;
 
   @JsonCreator
   public InputNumberDataSource(@JsonProperty("inputNumber") int inputNumber)
@@ -81,7 +81,7 @@ public class InputNumberDataSource extends LeafDataSource
   }
 
   @JsonProperty
-  public int getInputNumber()
+  public int getInputNumber1()
   {
     return inputNumber;
   }

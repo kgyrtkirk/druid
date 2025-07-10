@@ -767,7 +767,7 @@ public class DataSourcePlan
       return dataSource;
     } else {
       if (dataSource instanceof InputNumberDataSource) {
-        return new InputNumberDataSource(((InputNumberDataSource) dataSource).getInputNumber() + shift);
+        return new InputNumberDataSource(((InputNumberDataSource) dataSource).getInputNumber1() + shift);
       } else {
         return dataSource.withChildren(
             dataSource.getChildren()

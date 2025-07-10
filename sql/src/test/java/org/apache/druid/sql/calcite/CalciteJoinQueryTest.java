@@ -2468,6 +2468,50 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
     );
   }
 
+  @Test
+  public void testJoinOfTwoJoinsWithSubQueries()
+  {
+    skipVectorize();
+
+//    testBuilder()
+//    .sql("SELECT f.dim1, sum(n.dbl1) s1 from foo f join numfoo n on n.dim2=f.dim2 group by f.dim1")
+//    .expectedResults(
+//        ImmutableList.of(
+//            new Object[]{"", 1.0D},
+//            new Object[]{"1", 1.0D},
+//            new Object[]{"2", 0.0D},
+//            new Object[]{"def", null}
+//        )
+//    )
+//    .run();
+//
+//    testBuilder()
+//    .sql("SELECT f.dim2, sum(n.dbl2) s2 from foo f join numfoo n on n.dim1=f.dim1 group by f.dim2")
+//    .expectedResults(
+//        ImmutableList.of(
+//            new Object[]{null, 1.7D},
+//            new Object[]{"", 0.0D},
+//            new Object[]{"a", null},
+//            new Object[]{"abc", null}
+//        )
+//    )
+//    .run();
+
+    String sql = "with\n"
+        + "l1 as (SELECT f.dim1, sum(n.dbl1) s1 from foo f join numfoo n on n.dim2=f.dim2 group by f.dim1),\n"
+        + "r1 as (SELECT f.dim2, sum(n.dbl2) s2 from foo f join numfoo n on n.dim1=f.dim1 group by f.dim2)\n"
+        + "select dim1, s1+s2 FROM l1 join r1 on dim1=dim2";
+
+    testBuilder()
+        .sql(sql)
+        .expectedResults(
+            ImmutableList.of(
+                new Object[]{"x", 1.0D}
+            )
+        )
+        .run();
+  }
+
   @MethodSource("provideQueryContexts")
   @ParameterizedTest(name = "{0}")
   public void testSelectOnLookupUsingLeftJoinOperator(Map<String, Object> queryContext)
@@ -5402,7 +5446,7 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
                                 .context(queryContext)
                                 .build()
                         ),
-                        "_j0.",
+                        "_j0X.",
                         equalsCondition(makeColumnExpression("v0"), makeColumnExpression("_j0.v0")),
                         JoinType.INNER
                     )

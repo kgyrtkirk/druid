@@ -96,9 +96,9 @@ public class StageMaker
     for (LogicalInputSpec dagInputSpec : inputs) {
       inputSpecs.add(dagInputSpec.toInputSpec(this));
     }
-    StageProcessor<?, ?> stageProcessor = frameProcessorStage.buildStageProcessor(this);
     StageDefinitionBuilder sdb = newStageDefinitionBuilder();
     sdb.inputs(inputSpecs);
+    StageProcessor<?, ?> stageProcessor = frameProcessorStage.buildStageProcessor(this);
     sdb.signature(frameProcessorStage.getLogicalRowSignature());
     sdb.processor(stageProcessor);
     sdb.shuffleSpec(MixShuffleSpec.instance());
