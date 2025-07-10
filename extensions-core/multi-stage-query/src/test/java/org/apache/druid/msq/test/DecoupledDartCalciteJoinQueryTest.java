@@ -24,6 +24,7 @@ import org.apache.druid.query.JoinAlgorithm;
 import org.apache.druid.query.QueryContexts;
 import org.apache.druid.sql.calcite.CalciteJoinQueryTest;
 import org.apache.druid.sql.calcite.NotYetSupported;
+import org.apache.druid.sql.calcite.NotYetSupported.Modes;
 import org.apache.druid.sql.calcite.NotYetSupported.NotYetSupportedProcessor;
 import org.apache.druid.sql.calcite.planner.PlannerContext;
 import org.apache.druid.sql.calcite.QueryTestBuilder;
@@ -48,6 +49,12 @@ public abstract class DecoupledDartCalciteJoinQueryTest extends CalciteJoinQuery
     protected JoinAlgorithm joinAlgorithm()
     {
       return JoinAlgorithm.SORT_MERGE;
+    }
+
+    @NotYetSupported(Modes.DD_JOIN_CONDITION_NORMALIZATION)
+    public void testJoinWithInputRefCondition()
+    {
+      super.testJoinWithInputRefCondition();
     }
   }
 

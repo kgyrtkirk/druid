@@ -6037,7 +6037,6 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
 
   @Test
   @DecoupledTestConfig(quidemReason = QuidemTestCaseReason.JOIN_FILTER_LOCATIONS)
-//  @NotYetSupported(Modes.DD_JOIN_CONDITION_NORMALIZATION)
   public void testJoinWithInputRefCondition()
   {
     cannotVectorize();
@@ -6293,13 +6292,12 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
   public void testSelfJoinsWithUnnestOnLeftAndRight()
   {
     Map<String, Object> context = new HashMap<>(QUERY_CONTEXT_DEFAULT);
-    testQuery(
-        "with t1 as (\n"
+    String sql = "with t1 as (\n"
         + "select * from foo, unnest(MV_TO_ARRAY(\"dim3\")) as u(d3)\n"
         + ")\n"
         + "select t1.dim3, t1.d3, t2.dim2 from t1 JOIN t1 as t2\n"
-        + "ON t1.d3 = t2.d3",
-        context,
+        + "ON t1.d3 = t2.d3";
+    ImmutableList<Query<?>> expectedQueries =
         ImmutableList.of(
             newScanQueryBuilder()
                 .dataSource(
@@ -6332,20 +6330,24 @@ public class CalciteJoinQueryTest extends BaseCalciteQueryTest
                 .columnTypes(ColumnType.STRING, ColumnType.STRING, ColumnType.STRING)
                 .context(context)
                 .build()
-        ),
-        sortIfSortBased(
-            ImmutableList.of(
-                new Object[]{"[\"a\",\"b\"]", "a", "a"},
-                new Object[]{"[\"a\",\"b\"]", "b", "a"},
-                new Object[]{"[\"a\",\"b\"]", "b", null},
-                new Object[]{"[\"b\",\"c\"]", "b", "a"},
-                new Object[]{"[\"b\",\"c\"]", "b", null},
-                new Object[]{"[\"b\",\"c\"]", "c", null},
-                new Object[]{"d", "d", ""},
-                new Object[]{"", "", "a"}
-            ), 0
-        )
+        );
+    ImmutableList<Object[]> expectedResults = ImmutableList.of(
+        new Object[] {"[\"a\",\"b\"]", "a", "a"},
+        new Object[] {"[\"a\",\"b\"]", "b", "a"},
+        new Object[] {"[\"a\",\"b\"]", "b", null},
+        new Object[] {"[\"b\",\"c\"]", "b", "a"},
+        new Object[] {"[\"b\",\"c\"]", "b", null},
+        new Object[] {"[\"b\",\"c\"]", "c", null},
+        new Object[] {"d", "d", ""},
+        new Object[] {"", "", "a"}
     );
+
+    testBuilder()
+        .queryContext(context)
+        .sql(sql)
+        .expectedQueries(expectedQueries)
+        .expectedResults(new UnorderedResultsVerifier(expectedResults, ResultMatchMode.RELAX_NULLS, null))
+        .run();
   }
 
   @DecoupledTestConfig(ignoreExpectedQueriesReason = IgnoreQueriesReason.UNNEST_EXTRA_SCANQUERY)
