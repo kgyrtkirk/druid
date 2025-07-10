@@ -19,7 +19,6 @@
 
 package org.apache.druid.msq.logical.stages;
 
-import com.google.common.collect.ImmutableList;
 import org.apache.curator.shaded.com.google.common.collect.Lists;
 import org.apache.druid.error.DruidException;
 import org.apache.druid.frame.key.ClusterBy;
@@ -124,92 +123,24 @@ public class JoinStage
   public static LogicalStage buildJoinStage(List<LogicalStage> inputStages, DruidNodeStack stack)
   {
     DruidJoin join = (DruidJoin) stack.getNode();
-
-    JoinAlgorithm joinAlgorithm = stack.getPlannerContext().getJoinAlgorithm();
-    if(joinAlgorithm == JoinAlgorithm.SORT_MERGE) {
+    if (join.getJoinAlgorithm(stack.getPlannerContext()) == JoinAlgorithm.SORT_MERGE) {
       return buildMergeJoin(inputStages, stack, join);
-    }else {
+    } else {
       return buildBroadcastJoin(inputStages, stack, join);
     }
-
-
-
-
   }
 
   private static LogicalStage buildBroadcastJoin(List<LogicalStage> inputStages, DruidNodeStack stack, DruidJoin join)
   {
+    PlannerContext plannerContext = stack.getPlannerContext();
     List<LogicalInputSpec> inputDescs = new ArrayList<>();
     inputDescs.add(LogicalInputSpec.of(inputStages.get(0)));
-    inputDescs.add(LogicalInputSpec.of(inputStages.get(1), 1, LogicalInputSpec.InputProperty.BROADCAST));
-
-    PlannerContext plannerContext = stack.getPlannerContext();
-    SourceDesc leftSD = inputDescs.get(0).getSourceDesc();//UnnestStage.makeDummySourceDesc(inputStages.get(0));
-    SourceDesc rightSD = inputDescs.get(1).getSourceDesc();
-    SourceDesc unnestSD = join.getSourceDesc(plannerContext, ImmutableList.of(leftSD,rightSD));
+    for (int i = 1; i < inputStages.size(); i++) {
+      inputDescs.add(LogicalInputSpec.of(inputStages.get(i), i, LogicalInputSpec.InputProperty.BROADCAST));
+    }
+    SourceDesc unnestSD = join.getSourceDesc(plannerContext, Lists.transform(inputDescs, LogicalInputSpec::getSourceDesc));
     return new SegmentMapStage(unnestSD, inputDescs);
-
-
-
-//    final QueryDefinitionBuilder subQueryDefBuilder = QueryDefinition.builder(queryKitSpec.getQueryId());
-//    final JoinDataSourceAnalysis analysis = dataSource.getJoinAnalysisForDataSource();
-
-
-
-//    final DataSourcePlan basePlan = forDataSource(
-//        queryKitSpec,
-//        queryContext,
-//        analysis.getBaseDataSource(),
-//        querySegmentSpec,
-//        filter,
-//        filter == null ? null : DimFilterUtils.onlyBaseFields(filterFields, analysis::isBaseColumn),
-//        Math.max(minStageNumber, subQueryDefBuilder.getNextStageNumber()),
-//        broadcast
-//    );
-//
-//    DataSource newDataSource = basePlan.getNewDataSource();
-//    final List<InputSpec> inputSpecs = new ArrayList<>(basePlan.getInputSpecs());
-//    final IntSet broadcastInputs = new IntOpenHashSet(basePlan.getBroadcastInputs());
-//    basePlan.getSubQueryDefBuilder().ifPresent(subQueryDefBuilder::addAll);
-//
-//    for (int i = 0; i < analysis.getPreJoinableClauses().size(); i++) {
-//      final PreJoinableClause clause = analysis.getPreJoinableClauses().get(i);
-//      final DataSourcePlan clausePlan = forDataSource(
-//          queryKitSpec,
-//          queryContext,
-//          clause.getDataSource(),
-//          new MultipleIntervalSegmentSpec(Intervals.ONLY_ETERNITY),
-//          null, // Don't push down query filters for right-hand side: needs some work to ensure it works properly.
-//          null,
-//          Math.max(minStageNumber, subQueryDefBuilder.getNextStageNumber()),
-//          true // Always broadcast right-hand side of the join.
-//      );
-//
-//      // Shift all input numbers in the clausePlan.
-//      final int shift = inputSpecs.size();
-//
-//      newDataSource = JoinDataSource.create(
-//          newDataSource,
-//          shiftInputNumbers(clausePlan.getNewDataSource(), shift),
-//          clause.getPrefix(),
-//          clause.getCondition(),
-//          clause.getJoinType(),
-//          // First JoinDataSource (i == 0) involves the base table, so we need to propagate the base table filter.
-//          i == 0 ? analysis.getJoinBaseTableFilter().orElse(null) : null,
-//          dataSource.getJoinableFactoryWrapper(),
-//          clause.getJoinAlgorithm()
-//      );
-//      inputSpecs.addAll(clausePlan.getInputSpecs());
-//      clausePlan.getBroadcastInputs().intStream().forEach(n -> broadcastInputs.add(n + shift));
-//      clausePlan.getSubQueryDefBuilder().ifPresent(subQueryDefBuilder::addAll);
-//    }
-//
-//    return new DataSourcePlan(newDataSource, inputSpecs, broadcastInputs, subQueryDefBuilder);
-
-
   }
-
-  static int idx = 0;
 
   private static LogicalStage buildMergeJoin(List<LogicalStage> inputStages, DruidNodeStack stack, DruidJoin join)
   {
