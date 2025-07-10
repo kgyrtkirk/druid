@@ -77,6 +77,7 @@ import org.apache.druid.sql.calcite.util.TestDataBuilder;
 import org.apache.druid.timeline.DataSegment;
 import org.apache.druid.timeline.partition.LinearShardSpec;
 import org.hamcrest.CoreMatchers;
+import org.hamcrest.MatcherAssert;
 import org.junit.Assert;
 import org.junit.internal.matchers.ThrowableMessageMatcher;
 import org.junit.jupiter.api.Assertions;
@@ -5457,7 +5458,6 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
     );
   }
 
-  @NotYetSupported(Modes.DD_JOIN_CONDITION_TYPE_CHECK_MISSED)
   @Test
   public void testJoinOnNestedColumnThrows()
   {
@@ -5466,7 +5466,11 @@ public class CalciteNestedDataQueryTest extends BaseCalciteQueryTest
           .sql("SELECT * FROM druid.nested a INNER JOIN druid.nested b ON a.nester = b.nester")
           .run();
     });
-    Assertions.assertEquals("Cannot join when the join condition has column of type [COMPLEX<json>]", e.getMessage());
+
+    MatcherAssert.assertThat(
+        e.getMessage(),
+        CoreMatchers.containsString("Cannot join when the join condition has column of type [COMPLEX<json>]")
+    );
   }
 
   @NotYetSupported(Modes.DART_SECOND_SEGMENT_NOT_SCANNED)
