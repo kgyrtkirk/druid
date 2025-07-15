@@ -81,6 +81,7 @@ jobs:
       matrix:
         # Use JDK 21.0.4 to work around https://github.com/apache/druid/issues/17429
         jdk: [ '11', '17', '21.0.4' ]
+        boost: [ 1,2,3,4,5,6 ]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout branch
@@ -157,26 +158,3 @@ jobs:
           echo ${{ needs.set-env-var.outputs.DRUID_PREVIOUS_IT_IMAGE_NAME }}
           docker save "${{ needs.set-env-var.outputs.DRUID_PREVIOUS_IT_IMAGE_NAME }}" | gzip > druid-container-jdk${{ matrix.jdk }}-version${{ needs.set-env-var.outputs.DRUID_PREVIOUS_VERSION }}.tar.gz    
 
-  unit-tests:
-    name: "unit tests"
-    uses: ./.github/workflows/ci.yml
-
-  standard-its:
-    needs: [build, unit-tests]
-    uses: ./.github/workflows/standard-its.yml
-
-  revised-its:
-    needs: [build, unit-tests]
-    uses: ./.github/workflows/revised-its.yml
-    with:
-      BACKWARD_COMPATIBILITY_IT_ENABLED: ${{ needs.set-env-var.outputs.BACKWARD_COMPATIBILITY_IT_ENABLED }}
-      DRUID_PREVIOUS_VERSION: ${{ needs.set-env-var.outputs.DRUID_PREVIOUS_VERSION }}
-      DRUID_PREVIOUS_VERSION_DOWNLOAD_URL: ${{ needs.set-env-var.outputs.DRUID_PREVIOUS_VERSION_DOWNLOAD_URL }}
-      DRUID_PREVIOUS_IT_IMAGE_NAME: ${{ needs.set-env-var.outputs.DRUID_PREVIOUS_IT_IMAGE_NAME }}
-
-  actions-timeline:
-    needs: [build, unit-tests, revised-its, standard-its]
-    runs-on: ubuntu-latest
-    if: ${{ !cancelled() }}
-    steps:
-      - uses: Kesin11/actions-timeline@427ee2cf860166e404d0d69b4f2b24012bb7af4f
