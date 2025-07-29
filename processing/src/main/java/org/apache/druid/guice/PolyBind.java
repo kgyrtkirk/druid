@@ -68,6 +68,7 @@ public class PolyBind
       @Nullable Key<? extends T> defaultKey
   )
   {
+    int ad = 1;
     ConfiggedProvider<T> provider = new ConfiggedProvider<>(interfaceKey, property, defaultKey, null);
     return binder.bind(interfaceKey).toProvider(provider);
   }
