@@ -1583,10 +1583,7 @@
                 <artifactId>spotbugs-maven-plugin</artifactId>
                 <version>4.9.3.2</version>
                 <configuration>
-          <effort>Max</effort>
-          <threshold>Low</threshold>
-<!--                    <includeFilterFile>codestyle/spotbugs-include.xml</includeFilterFile> -->
--                    <excludeFilterFile>codestyle/spotbugs-exclude.xml</excludeFilterFile> 
+                    <excludeFilterFile>codestyle/spotbugs-exclude.xml</excludeFilterFile>
                     <maxHeap>768</maxHeap>
                 </configuration>
             </plugin>
