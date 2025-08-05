@@ -1,6 +1,5 @@
 package org.apache.druid.query;
 
-
 import java.lang.StackWalker.Option;
 import java.lang.StackWalker.StackFrame;
 import java.lang.reflect.Method;
@@ -17,7 +16,7 @@ public class A1
   {
     default int g()
     {
-      throw new RuntimeException();
+      throw new MyException();// DruidException.defensive("safd");
     }
   }
 
@@ -27,7 +26,7 @@ public class A1
   private static StackWalker getExtendedWalker()
   {
     Set<Option> opts = new HashSet<>();
-    for (Option option :  Option.values()) {
+    for (Option option : Option.values()) {
       opts.add(option);
     }
 
@@ -37,12 +36,10 @@ public class A1
       method.setAccessible(true);
       StackWalker extendedWalker = (StackWalker) method.invoke(null, opts);
 
-
       Class<?> liveStackFrameClass1 = Class.forName("java.lang.LiveStackFrameInfo");
       Method method1 = liveStackFrameClass1.getMethod("getLocals");
       method1.setAccessible(true);
       theLocalMethod = method1;
-
 
       return extendedWalker;
     }
@@ -54,7 +51,8 @@ public class A1
     }
   }
 
-  public static @interface RemapInTrace {
+  public static @interface RemapInTrace
+  {
 
   }
 
@@ -70,7 +68,6 @@ public class A1
 
     }
 
-
     private StackTraceElement processFrame(StackFrame frame)
     {
       System.out.println(frame.getDeclaringClass());
@@ -82,7 +79,7 @@ public class A1
           Object thisPtr = locals[0];
           System.out.println(thisPtr);
 
-//          String className = stackTraceElement.getClassName();
+          // String className = stackTraceElement.getClassName();
           String className = locals[0].getClass().getName();
 
           StackTraceElement stackTraceElement2 = new StackTraceElement(
@@ -94,9 +91,10 @@ public class A1
               stackTraceElement.getFileName(),
               stackTraceElement.getLineNumber()
           );
-          if(! stackTraceElement.equals(stackTraceElement2)) {
-            int as=0;
+          if (!stackTraceElement.equals(stackTraceElement2)) {
+            int as = 0;
           }
+          // copyFormatField(stackTraceElement2, stackTraceElement);
           System.out.println(stackTraceElement);
           System.out.println(stackTraceElement2);
           return stackTraceElement2;
@@ -146,14 +144,14 @@ public class A1
     /**
      * implementation should be a singel call to super.asd
      */
-    public abstract void outerAsd() ;
+    public abstract void outerAsd();
   }
 
   static class THIS_IS_IT extends AbstactX
   {
     public void outerAsd()
     {
-      int asd=1;
+      int asd = 1;
       super.internalAsd();
     }
   }
