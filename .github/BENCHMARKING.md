@@ -95,7 +95,9 @@ Then paste multiple URLs into jmh.morethan.io separated by commas.
 
 - Separate repository `kgyrtkirk/druid-bench` must exist
 - GitHub Pages must be enabled for `kgyrtkirk/druid-bench` (Settings → Pages)
-- Workflow needs write permissions to push to `kgyrtkirk/druid-bench` repository
+- GitHub Secret `BENCH_REPO_TOKEN` must be configured:
+  - Create a Personal Access Token (PAT) with write access to `kgyrtkirk/druid-bench`
+  - Add it as a repository secret named `BENCH_REPO_TOKEN` in the main repository's settings
 
 ## Implementation Details
 
@@ -125,6 +127,7 @@ The CI workflow sets these variables:
 - `CI_COMMIT_SHA` - The actual commit SHA (for PRs, this is the PR head, not the merge commit)
 - `CI_BRANCH_NAME` - Branch name (enables symlink creation/update)
 - `CI_BASE_BRANCH` - Base branch for comparisons (empty for non-PR pushes)
+- `BENCH_REPO_TOKEN` - GitHub Personal Access Token for pushing to the benchmark repository (from secrets)
 
 ## Troubleshooting
 
@@ -150,6 +153,11 @@ git push origin main
 
 **Branch symlink not updating:**
 By design. Symlinks only update on fast-forward (when old commit is ancestor of new commit). This prevents the branch pointer from jumping backwards or to unrelated commits.
+
+**Authentication errors when pushing:**
+- Verify `BENCH_REPO_TOKEN` secret is configured in repository settings
+- Ensure the PAT has write permissions to `kgyrtkirk/druid-bench`
+- Check that the PAT hasn't expired
 
 ## Why This Design
 

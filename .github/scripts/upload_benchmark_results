@@ -23,16 +23,22 @@ if [ ! -f "$JSON_FILE" ]; then
   exit 1
 fi
 
+if [ -z "$BENCH_REPO_TOKEN" ]; then
+  echo "Error: BENCH_REPO_TOKEN environment variable required"
+  exit 1
+fi
+
 COMMIT_SHA="${CI_COMMIT_SHA:-$(git rev-parse HEAD)}"
 BRANCH_NAME="${CI_BRANCH_NAME}"
 RESULTS_DIR="benchmark-results"
 TARGET_FILE="${RESULTS_DIR}/${COMMIT_SHA}.json"
 BENCH_REPO="kgyrtkirk/druid-bench"
 BENCH_REPO_DIR=".druid-bench"
+BENCH_REPO_URL="https://${BENCH_REPO_TOKEN}@github.com/${BENCH_REPO}.git"
 JSON_FILE_ABS="$(cd "$(dirname "$JSON_FILE")" && pwd)/$(basename "$JSON_FILE")"
 
 if [ ! -d "$BENCH_REPO_DIR" ]; then
-  git clone "https://github.com/${BENCH_REPO}.git" "$BENCH_REPO_DIR"
+  git clone "$BENCH_REPO_URL" "$BENCH_REPO_DIR"
 fi
 
 cd "$BENCH_REPO_DIR"
