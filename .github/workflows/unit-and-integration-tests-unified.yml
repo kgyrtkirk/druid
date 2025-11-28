@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: "Unit & Integration tests CI"
+name: "Benchmark CI"
 on:
   push:
     paths-ignore:
@@ -46,75 +46,8 @@ concurrency:
   group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.run_id }}' # group workflows only on pull_requests and not on branch commits
   cancel-in-progress: true
 
-env:
-  MYSQL_DRIVER_CLASSNAME: com.mysql.jdbc.Driver # Used to set druid config in docker image for revised ITs
-  SEGMENT_DOWNLOAD_TIMEOUT_MINS: 5
-
 jobs:
-  build:
-    name: "build (jdk${{ matrix.jdk }})"
-    strategy:
-      fail-fast: false
-      matrix:
-        jdk: [ '17', '21' ]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout branch
-        uses: actions/checkout@v4
-
-      # skip the "cache: maven" step from setup-java. We explicitly use a
-      # different cache key since we cannot reuse it across commits.
-      - uses: actions/setup-java@v4
-        with:
-          distribution: 'zulu'
-          java-version: ${{ matrix.jdk }}
-
-      # the build step produces SNAPSHOT artifacts into the local maven repository,
-      # we include github.sha in the cache key to make it specific to that build/jdk
-      - name: Cache Maven m2 repository
-        id: maven
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2/repository
-          key: maven-${{ runner.os }}-${{ matrix.jdk }}-${{ github.sha }}
-          restore-keys: setup-java-Linux-maven-${{ hashFiles('**/pom.xml') }}
-
-      - name: Cache targets
-        id: target
-        uses: actions/cache@v4
-        with:
-          path: |
-            ./**/target
-          key: maven-${{ runner.os }}-${{ matrix.jdk }}-targets-${{ github.sha }}
-
-      - name: Cache image
-        id: docker_container
-        uses: actions/cache@v4
-        with:
-          key: druid-container-jdk${{ matrix.jdk }}.tar.gz-${{ github.sha }}
-          path: |
-            ./druid-container-jdk${{ matrix.jdk }}.tar.gz
-            ./integration-tests-ex/image/target/env.sh
-
-      - name: Maven build
-        id: maven_build
-        run: |
-          ./it.sh ci
-
-  unit-tests:
-    name: "unit tests"
-    uses: ./.github/workflows/ci.yml
-
-  standard-its:
-    needs: [build, unit-tests]
-    uses: ./.github/workflows/standard-its.yml
-
-  docker-tests:
-    needs: [build, unit-tests]
-    uses: ./.github/workflows/docker-tests.yml
-
   benchmark:
-    #needs: [quality-gate]
     uses: ./.github/workflows/worker.yml
     secrets: inherit
     with:
@@ -128,12 +61,5 @@ jobs:
         export REPO_OWNER="${{ github.repository_owner }}"
         export REPO_NAME="${{ github.event.repository.name }}"
         .github/scripts/run_benchmark
-
-  actions-timeline:
-    needs: [build, unit-tests, standard-its, docker-tests, benchmark]
-    runs-on: ubuntu-latest
-    if: ${{ !cancelled() }}
-    steps:
-      - uses: Kesin11/actions-timeline@54d513e0b5ff1158f1cf8321108d666a5a6c1fca
 
 
