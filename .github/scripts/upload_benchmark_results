@@ -23,14 +23,23 @@ if [ ! -f "$JSON_FILE" ]; then
   exit 1
 fi
 
-COMMIT_SHA="${COMMIT_SHA:-$(git rev-parse HEAD)}"
+COMMIT_SHA="${CI_COMMIT_SHA:-$(git rev-parse HEAD)}"
+BRANCH_NAME="${CI_BRANCH_NAME}"
 RESULTS_DIR="benchmark-results"
 TARGET_FILE="${RESULTS_DIR}/${COMMIT_SHA}.json"
-CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+BENCH_REPO="kgyrtkirk/druid-bench"
+BENCH_REPO_DIR=".druid-bench"
+JSON_FILE_ABS="$(cd "$(dirname "$JSON_FILE")" && pwd)/$(basename "$JSON_FILE")"
 
-git checkout gh-pages
+if [ ! -d "$BENCH_REPO_DIR" ]; then
+  git clone "https://github.com/${BENCH_REPO}.git" "$BENCH_REPO_DIR"
+fi
+
+cd "$BENCH_REPO_DIR"
+git pull
+
 mkdir -p "$RESULTS_DIR"
-cp "$JSON_FILE" "$TARGET_FILE"
+cp "$JSON_FILE_ABS" "$TARGET_FILE"
 git add "$TARGET_FILE"
 
 if [ -n "$BRANCH_NAME" ]; then
@@ -43,5 +52,4 @@ if [ -n "$BRANCH_NAME" ]; then
 fi
 
 git commit -m "Add benchmark results for ${COMMIT_SHA}${BRANCH_NAME:+ (${BRANCH_NAME})}"
-git push origin gh-pages
-git checkout "$CURRENT_BRANCH"
+git push origin HEAD

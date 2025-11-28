@@ -2,11 +2,10 @@
 
 set -e
 
-COMMIT_SHA="${COMMIT_SHA:-$(git rev-parse HEAD)}"
-BRANCH_NAME="${BRANCH_NAME:-$(git rev-parse --abbrev-ref HEAD)}"
-REPO_OWNER="${REPO_OWNER:-$(echo "$GITHUB_REPOSITORY" | cut -d'/' -f1)}"
-REPO_NAME="${REPO_NAME:-$(echo "$GITHUB_REPOSITORY" | cut -d'/' -f2)}"
-BASE_URL="https://${REPO_OWNER}.github.io/${REPO_NAME}/benchmark-results"
+COMMIT_SHA="${CI_COMMIT_SHA:-$(git rev-parse HEAD)}"
+BRANCH_NAME="${CI_BRANCH_NAME:-$(git rev-parse --abbrev-ref HEAD)}"
+BASE_BRANCH="${CI_BASE_BRANCH}"
+BASE_URL="https://kgyrtkirk.github.io/druid-bench/benchmark-results"
 COMMIT_URL="${BASE_URL}/${COMMIT_SHA}.json"
 
 
@@ -15,7 +14,7 @@ COMMIT_URL="${BASE_URL}/${COMMIT_SHA}.json"
 
 set
 
-.github/scripts/upload_benchmark_results benchmark-results.json
+.github/scripts/upload_benchmark_results "$(pwd)/benchmark-results.json"
 
 
 echo "=================================================="

@@ -47,9 +47,9 @@ concurrency:
   cancel-in-progress: true
 
 env:
- CI_BASE_BRANCH: ${{ github.base_ref }}
- CI_BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
- CI_COMMIT_SHA1: ${{ github.event.pull_request.head.sha || github.sha }}
+  CI_COMMIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+  CI_BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+  CI_BASE_BRANCH: ${{ github.base_ref }}
 
 jobs:
   benchmark:
@@ -60,11 +60,6 @@ jobs:
       script: |
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
-        export COMMIT_SHA1="${{ github.event.pull_request.head.sha || github.sha }}"
-        export BRANCH_NAME1="${{ github.head_ref || github.ref_name }}"
-        export BASE_BRANCH1="${{ github.base_ref }}"
-        export REPO_OWNER1="${{ github.repository_owner }}"
-        export REPO_NAME1="${{ github.event.repository.name }}"
         .github/scripts/run_benchmark
 
 

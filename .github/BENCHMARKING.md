@@ -6,7 +6,7 @@ This repository uses JMH benchmarks with automated result storage for performanc
 
 The benchmark system works by:
 1. Running JMH benchmarks and outputting results as JSON
-2. Storing the JSON file in the `gh-pages` branch, named by commit SHA
+2. Storing the JSON file in a separate repository (`kgyrtkirk/druid-bench`), named by commit SHA
 3. Branch pointers (symlinks) track the latest result for each branch (only updated on fast-forward)
 4. Accessing stored results via GitHub Pages URLs
 5. Using jmh.morethan.io to visualize and compare results from different commits
@@ -20,7 +20,7 @@ Benchmarks run automatically after unit tests pass on all branches and PRs in th
 The workflow will:
 - Build the benchmarks module
 - Run the SPL expression benchmarks
-- Upload results to gh-pages branch with the commit SHA
+- Upload results to `kgyrtkirk/druid-bench` repository with the commit SHA
 - Create/update a branch symlink (only if the new commit is a descendant of the old one)
 - Print URLs for viewing and comparing results
 
@@ -31,7 +31,7 @@ Results include:
 
 ## Storage Format
 
-Results are stored in the `gh-pages` branch under `benchmark-results/`:
+Results are stored in the `kgyrtkirk/druid-bench` repository under `benchmark-results/`:
 
 **By commit SHA:**
 ```
@@ -47,8 +47,8 @@ Symlinks point to the latest benchmark result for each branch. Only updated if t
 
 **Access via GitHub Pages:**
 ```
-https://implydata.github.io/druid/benchmark-results/{commit-sha}.json
-https://implydata.github.io/druid/benchmark-results/branch-{branch-name}.json
+https://kgyrtkirk.github.io/druid-bench/benchmark-results/{commit-sha}.json
+https://kgyrtkirk.github.io/druid-bench/benchmark-results/branch-{branch-name}.json
 ```
 
 ## Comparing Results
@@ -64,7 +64,7 @@ jmh.morethan.io is a web-based tool for visualizing JMH benchmark results. It lo
 
 **View a single commit:**
 ```
-https://jmh.morethan.io/?source=https://implydata.github.io/druid/benchmark-results/{commit-sha}.json
+https://jmh.morethan.io/?source=https://kgyrtkirk.github.io/druid-bench/benchmark-results/{commit-sha}.json
 ```
 
 **Compare multiple commits:**
@@ -76,12 +76,12 @@ https://jmh.morethan.io/?sources=URL1,URL2,URL3
 
 **Compare any two commits:**
 ```
-https://jmh.morethan.io/?sources=https://implydata.github.io/druid/benchmark-results/{commit-sha-1}.json,https://implydata.github.io/druid/benchmark-results/{commit-sha-2}.json
+https://jmh.morethan.io/?sources=https://kgyrtkirk.github.io/druid-bench/benchmark-results/{commit-sha-1}.json,https://kgyrtkirk.github.io/druid-bench/benchmark-results/{commit-sha-2}.json
 ```
 
 **Compare against a branch HEAD:**
 ```
-https://jmh.morethan.io/?sources=https://implydata.github.io/druid/benchmark-results/{your-commit}.json,https://implydata.github.io/druid/benchmark-results/branch-main.json
+https://jmh.morethan.io/?sources=https://kgyrtkirk.github.io/druid-bench/benchmark-results/{your-commit}.json,https://kgyrtkirk.github.io/druid-bench/benchmark-results/branch-main.json
 ```
 
 **Track performance over time:**
@@ -93,8 +93,9 @@ Then paste multiple URLs into jmh.morethan.io separated by commas.
 
 ## Setup Requirements
 
-- Enable GitHub Pages (Settings → Pages, source: gh-pages branch)
-- Workflow needs write permissions to push to gh-pages
+- Separate repository `kgyrtkirk/druid-bench` must exist
+- GitHub Pages must be enabled for `kgyrtkirk/druid-bench` (Settings → Pages)
+- Workflow needs write permissions to push to `kgyrtkirk/druid-bench` repository
 
 ## Implementation Details
 
@@ -103,14 +104,15 @@ Then paste multiple URLs into jmh.morethan.io separated by commas.
 **`.github/scripts/run_benchmark`**
 - Builds the benchmarks module
 - Runs SPL expression benchmarks
-- Uploads results to gh-pages
+- Uploads results to `kgyrtkirk/druid-bench` repository
 - Prints comparison URLs
 
 **`.github/scripts/upload_benchmark_results`**
+- Clones/updates the `kgyrtkirk/druid-bench` repository
 - Stores JSON file by commit SHA
 - Creates/updates branch symlink (if `BRANCH_NAME` is set)
 - Only updates symlink on fast-forward (checks ancestry)
-- Pushes to gh-pages branch
+- Pushes to the separate benchmark repository
 
 **`extensions-imply/imply-obsware/dev/run_expr_benchmark`**
 - Runs JMH benchmarks for SPL expressions
@@ -120,38 +122,41 @@ Then paste multiple URLs into jmh.morethan.io separated by commas.
 ### Environment Variables
 
 The CI workflow sets these variables:
-- `COMMIT_SHA` - The actual commit SHA (for PRs, this is the PR head, not the merge commit)
-- `BRANCH_NAME` - Branch name (enables symlink creation/update)
-- `BASE_BRANCH` - Base branch for comparisons (empty for non-PR pushes)
-- `REPO_OWNER` - Repository owner for URL construction
-- `REPO_NAME` - Repository name for URL construction
+- `CI_COMMIT_SHA` - The actual commit SHA (for PRs, this is the PR head, not the merge commit)
+- `CI_BRANCH_NAME` - Branch name (enables symlink creation/update)
+- `CI_BASE_BRANCH` - Base branch for comparisons (empty for non-PR pushes)
 
 ## Troubleshooting
 
-**gh-pages branch doesn't exist:**
-The first benchmark run will fail. Create it:
+**Benchmark repository doesn't exist:**
+Create the `kgyrtkirk/druid-bench` repository and enable GitHub Pages:
 ```bash
-git checkout --orphan gh-pages
-git rm -rf .
+# Create new repository at https://github.com/kgyrtkirk/druid-bench
+# Then initialize it:
+git clone https://github.com/kgyrtkirk/druid-bench.git
+cd druid-bench
 mkdir benchmark-results
 echo "<h1>Benchmark Results</h1>" > index.html
 git add .
-git commit -m "Initialize gh-pages"
-git push origin gh-pages
+git commit -m "Initialize benchmark repository"
+git push origin main
+# Enable GitHub Pages in repository settings (Settings → Pages, source: main branch)
 ```
 
 **404 errors accessing JSON URLs:**
-- Check the gh-pages branch exists and has the file
-- Verify: `https://github.com/implydata/druid/tree/gh-pages/benchmark-results`
+- Check the `kgyrtkirk/druid-bench` repository exists and has the file
+- Verify GitHub Pages is enabled for the repository
+- Check: `https://github.com/kgyrtkirk/druid-bench/tree/main/benchmark-results`
 
 **Branch symlink not updating:**
 By design. Symlinks only update on fast-forward (when old commit is ancestor of new commit). This prevents the branch pointer from jumping backwards or to unrelated commits.
 
 ## Why This Design
 
-**gh-pages with GitHub Pages:**
+**Separate repository with GitHub Pages:**
+- Keeps benchmark results separate from main codebase
 - Publicly accessible URLs
-- Permanent storage
+- Permanent storage without cluttering main repository
 - Works with jmh.morethan.io
 
 **Commit SHA as filename:**
