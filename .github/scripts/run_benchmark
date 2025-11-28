@@ -2,17 +2,19 @@
 
 set -e
 
-mvn clean package -pl :druid-benchmarks -DskipTests
-.github/benchmarks/run_expr_benchmark
-
-.github/scripts/upload_benchmark_results benchmark-results.json
-
 COMMIT_SHA="${COMMIT_SHA:-$(git rev-parse HEAD)}"
 BRANCH_NAME="${BRANCH_NAME:-$(git rev-parse --abbrev-ref HEAD)}"
 REPO_OWNER="${REPO_OWNER:-$(echo "$GITHUB_REPOSITORY" | cut -d'/' -f1)}"
 REPO_NAME="${REPO_NAME:-$(echo "$GITHUB_REPOSITORY" | cut -d'/' -f2)}"
 BASE_URL="https://${REPO_OWNER}.github.io/${REPO_NAME}/benchmark-results"
 COMMIT_URL="${BASE_URL}/${COMMIT_SHA}.json"
+
+
+#mvn install -pl :druid-benchmarks -am -DskipTests -Pskip-static-checks
+#.github/benchmarks/run_expr_benchmark
+
+.github/scripts/upload_benchmark_results benchmark-results.json
+
 
 echo "=================================================="
 echo "Benchmark results for ${COMMIT_SHA} (${BRANCH_NAME})"
