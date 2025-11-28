@@ -47,7 +47,9 @@ concurrency:
   cancel-in-progress: true
 
 env:
- BRANCH_NAME2: ${{ github.head_ref || github.ref_name }}
+ CI_BASE_BRANCH: ${{ github.base_ref }}
+ CI_BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+ CI_COMMIT_SHA1: ${{ github.event.pull_request.head.sha || github.sha }}
 
 jobs:
   benchmark:
