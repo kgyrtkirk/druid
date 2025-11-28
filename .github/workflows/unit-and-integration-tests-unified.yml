@@ -119,3 +119,10 @@ jobs:
     if: ${{ !cancelled() }}
     steps:
       - uses: Kesin11/actions-timeline@54d513e0b5ff1158f1cf8321108d666a5a6c1fca
+
+  quality-gate:
+    needs: [build, unit-tests ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: dummy
+        run: echo ok
