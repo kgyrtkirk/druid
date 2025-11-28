@@ -113,9 +113,27 @@ jobs:
     needs: [build, unit-tests]
     uses: ./.github/workflows/docker-tests.yml
 
+  benchmark:
+    #needs: [quality-gate]
+    uses: ./.github/workflows/worker.yml
+    secrets: inherit
+    with:
+      key: "benchmark"
+      script: |
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        export COMMIT_SHA="${{ github.event.pull_request.head.sha || github.sha }}"
+        export BRANCH_NAME="${{ github.head_ref || github.ref_name }}"
+        export BASE_BRANCH="${{ github.base_ref }}"
+        export REPO_OWNER="${{ github.repository_owner }}"
+        export REPO_NAME="${{ github.event.repository.name }}"
+        .github/scripts/run_benchmark
+
   actions-timeline:
-    needs: [build, unit-tests, standard-its, docker-tests]
+    needs: [build, unit-tests, standard-its, docker-tests, benchmark]
     runs-on: ubuntu-latest
     if: ${{ !cancelled() }}
     steps:
       - uses: Kesin11/actions-timeline@54d513e0b5ff1158f1cf8321108d666a5a6c1fca
+
+

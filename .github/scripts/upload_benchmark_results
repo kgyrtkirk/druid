@@ -1,0 +1,47 @@
+#!/bin/bash
+
+set -e
+
+should_update_branch_link() {
+  local branch_link="$1"
+  local new_commit="$2"
+
+  if [ ! -L "$branch_link" ]; then
+    return 0
+  fi
+
+  local old_target=$(readlink "$branch_link")
+  local old_commit=$(basename "$old_target" .json)
+
+  git merge-base --is-ancestor "$old_commit" "$new_commit" 2>/dev/null
+}
+
+JSON_FILE="$1"
+
+if [ ! -f "$JSON_FILE" ]; then
+  echo "Error: JSON file required and must exist"
+  exit 1
+fi
+
+COMMIT_SHA="${COMMIT_SHA:-$(git rev-parse HEAD)}"
+RESULTS_DIR="benchmark-results"
+TARGET_FILE="${RESULTS_DIR}/${COMMIT_SHA}.json"
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+git checkout gh-pages
+mkdir -p "$RESULTS_DIR"
+cp "$JSON_FILE" "$TARGET_FILE"
+git add "$TARGET_FILE"
+
+if [ -n "$BRANCH_NAME" ]; then
+  BRANCH_LINK="${RESULTS_DIR}/branch-${BRANCH_NAME}.json"
+
+  if should_update_branch_link "$BRANCH_LINK" "$COMMIT_SHA"; then
+    ln -sf "${COMMIT_SHA}.json" "$BRANCH_LINK"
+    git add "$BRANCH_LINK"
+  fi
+fi
+
+git commit -m "Add benchmark results for ${COMMIT_SHA}${BRANCH_NAME:+ (${BRANCH_NAME})}"
+git push origin gh-pages
+git checkout "$CURRENT_BRANCH"

@@ -1,0 +1,39 @@
+#!/bin/bash
+
+set -e
+
+mvn clean package -pl :druid-benchmarks -DskipTests
+extensions-imply/imply-obsware/dev/run_expr_benchmark
+
+.github/scripts/upload_benchmark_results benchmark-results.json
+
+COMMIT_SHA="${COMMIT_SHA:-$(git rev-parse HEAD)}"
+BRANCH_NAME="${BRANCH_NAME:-$(git rev-parse --abbrev-ref HEAD)}"
+REPO_OWNER="${REPO_OWNER:-$(echo "$GITHUB_REPOSITORY" | cut -d'/' -f1)}"
+REPO_NAME="${REPO_NAME:-$(echo "$GITHUB_REPOSITORY" | cut -d'/' -f2)}"
+BASE_URL="https://${REPO_OWNER}.github.io/${REPO_NAME}/benchmark-results"
+COMMIT_URL="${BASE_URL}/${COMMIT_SHA}.json"
+
+echo "=================================================="
+echo "Benchmark results for ${COMMIT_SHA} (${BRANCH_NAME})"
+echo ""
+echo "View this commit:"
+echo "  https://jmh.morethan.io/?source=${COMMIT_URL}"
+echo ""
+
+if [ -n "$BASE_BRANCH" ]; then
+  BRANCH_URL="${BASE_URL}/branch-${BASE_BRANCH}.json"
+  echo "Compare against base branch (${BASE_BRANCH}):"
+  echo "  https://jmh.morethan.io/?sources=${COMMIT_URL},${BRANCH_URL}"
+  echo ""
+
+  MERGE_BASE=$(git merge-base HEAD "origin/${BASE_BRANCH}" 2>/dev/null || echo "")
+  if [ -n "$MERGE_BASE" ]; then
+    MERGE_BASE_URL="${BASE_URL}/${MERGE_BASE}.json"
+    echo "Compare against merge-base (${MERGE_BASE}):"
+    echo "  https://jmh.morethan.io/?sources=${COMMIT_URL},${MERGE_BASE_URL}"
+    echo ""
+  fi
+fi
+
+echo "=================================================="

@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# Copyright (c) Imply Data, Inc. All rights reserved.
+#
+# This software is the confidential and proprietary information
+# of Imply Data, Inc. You shall not disclose such Confidential
+# Information and shall use it only in accordance with the terms
+# of the license agreement you entered into with Imply.
+
+set -e
+
+java --add-opens=java.base/java.nio=ALL-UNNAMED \
+     --add-opens=java.base/sun.nio.ch=ALL-UNNAMED \
+     --add-opens=java.base/jdk.internal.ref=ALL-UNNAMED \
+     --add-opens=java.base/java.io=ALL-UNNAMED \
+     --add-opens=java.base/java.lang=ALL-UNNAMED \
+     --add-opens=jdk.management/com.sun.management.internal=ALL-UNNAMED \
+     --add-opens=java.base/java.util=ALL-UNNAMED \
+     --add-opens=java.base/java.util.regex=ALL-UNNAMED \
+     -jar benchmarks/target/benchmarks.jar \
+io.imply.druid.benchmark.splexpr.SPLExprBenchmark \
+-rf json -rff benchmark-results.json "$@"
