@@ -13,6 +13,8 @@ COMMIT_URL="${BASE_URL}/${COMMIT_SHA}.json"
 #mvn install -pl :druid-benchmarks -am -DskipTests -Pskip-static-checks
 #.github/benchmarks/run_expr_benchmark
 
+set
+
 .github/scripts/upload_benchmark_results benchmark-results.json
 
 
