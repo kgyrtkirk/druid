@@ -46,6 +46,9 @@ concurrency:
   group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.run_id }}' # group workflows only on pull_requests and not on branch commits
   cancel-in-progress: true
 
+env:
+ BRANCH_NAME2: ${{ github.head_ref || github.ref_name }}
+
 jobs:
   benchmark:
     uses: ./.github/workflows/worker.yml
@@ -55,11 +58,11 @@ jobs:
       script: |
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
-        export COMMIT_SHA="${{ github.event.pull_request.head.sha || github.sha }}"
-        export BRANCH_NAME="${{ github.head_ref || github.ref_name }}"
-        export BASE_BRANCH="${{ github.base_ref }}"
-        export REPO_OWNER="${{ github.repository_owner }}"
-        export REPO_NAME="${{ github.event.repository.name }}"
+        export COMMIT_SHA1="${{ github.event.pull_request.head.sha || github.sha }}"
+        export BRANCH_NAME1="${{ github.head_ref || github.ref_name }}"
+        export BASE_BRANCH1="${{ github.base_ref }}"
+        export REPO_OWNER1="${{ github.repository_owner }}"
+        export REPO_NAME1="${{ github.event.repository.name }}"
         .github/scripts/run_benchmark
 
 
