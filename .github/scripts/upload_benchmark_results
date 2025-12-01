@@ -30,8 +30,12 @@ fi
 
 COMMIT_SHA="${CI_COMMIT_SHA:-$(git rev-parse HEAD)}"
 BRANCH_NAME="${CI_BRANCH_NAME}"
-RESULTS_DIR="benchmark-results"
-TARGET_FILE="${RESULTS_DIR}/${COMMIT_SHA}.json"
+
+# Extract suite name from path: benchmark-results/{suite-name}/{commit-sha}.json
+SUITE_NAME=$(basename "$(dirname "$JSON_FILE")")
+
+SUITE_DIR="benchmark-results/${SUITE_NAME}"
+TARGET_FILE="${SUITE_DIR}/${COMMIT_SHA}.json"
 BENCH_REPO="kgyrtkirk/druid-bench"
 BENCH_REPO_DIR=".druid-bench"
 BENCH_REPO_URL="https://${BENCH_REPO_TOKEN}@github.com/${BENCH_REPO}.git"
@@ -44,12 +48,12 @@ fi
 cd "$BENCH_REPO_DIR"
 git pull
 
-mkdir -p "$RESULTS_DIR"
+mkdir -p "$SUITE_DIR"
 cp "$JSON_FILE_ABS" "$TARGET_FILE"
 git add "$TARGET_FILE"
 
 if [ -n "$BRANCH_NAME" ]; then
-  BRANCH_LINK="${RESULTS_DIR}/branch-${BRANCH_NAME}.json"
+  BRANCH_LINK="${SUITE_DIR}/branch-${BRANCH_NAME}.json"
 
   if should_update_branch_link "$BRANCH_LINK" "$COMMIT_SHA"; then
     ln -sf "${COMMIT_SHA}.json" "$BRANCH_LINK"
@@ -57,5 +61,5 @@ if [ -n "$BRANCH_NAME" ]; then
   fi
 fi
 
-git commit -m "Add benchmark results for ${COMMIT_SHA}${BRANCH_NAME:+ (${BRANCH_NAME})}"
+git commit -m "Add benchmark results for ${COMMIT_SHA}${BRANCH_NAME:+ (${BRANCH_NAME})} - ${SUITE_NAME}"
 git push origin HEAD

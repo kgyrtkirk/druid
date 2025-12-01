@@ -53,12 +53,31 @@ env:
 
 jobs:
   benchmark:
+    strategy:
+      matrix:
+        suite:
+          - splexpr
     uses: ./.github/workflows/worker.yml
-    secrets:
-      BENCH_REPO_TOKEN: ${{ secrets.BENCH_REPO_TOKEN }}
     with:
-      key: "benchmark"
-      script: |
-        git config user.name "github-actions[bot]"
-        git config user.email "github-actions[bot]@users.noreply.github.com"
-        .github/scripts/run_benchmark
+      key: "benchmark-${{ matrix.suite }}"
+      artifact_prefix: "benchmark-results"
+      script: .github/scripts/run_benchmark ${{ matrix.suite }}
+
+  push-results:
+    needs: [benchmark]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download all benchmark results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: benchmark-results-*
+          merge-multiple: true
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+      - name: Push results
+        env:
+          BENCH_REPO_TOKEN: ${{ secrets.BENCH_REPO_TOKEN }}
+        run: .github/scripts/push_benchmark_results benchmark-results/*/*.json

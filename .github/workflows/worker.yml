@@ -93,6 +93,7 @@ jobs:
         with:
           name: "${{ inputs.artifact_prefix }}-${{ env.HASH }}"
           path: |
+            benchmark-results/
             **/*.hprof
             **/hs_err_pid*
             **/replay_pid*

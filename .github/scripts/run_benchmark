@@ -2,41 +2,29 @@
 
 set -e
 
-COMMIT_SHA="${CI_COMMIT_SHA:-$(git rev-parse HEAD)}"
-BRANCH_NAME="${CI_BRANCH_NAME:-$(git rev-parse --abbrev-ref HEAD)}"
-BASE_BRANCH="${CI_BASE_BRANCH}"
-BASE_URL="https://kgyrtkirk.github.io/druid-bench/benchmark-results"
-COMMIT_URL="${BASE_URL}/${COMMIT_SHA}.json"
+SUITE_NAME="$1"
 
-
-#mvn install -pl :druid-benchmarks -am -DskipTests -Pskip-static-checks
-#.github/benchmarks/run_expr_benchmark
-
-set
-
-.github/scripts/upload_benchmark_results "$(pwd)/benchmark-results.json"
-
-
-echo "=================================================="
-echo "Benchmark results for ${COMMIT_SHA} (${BRANCH_NAME})"
-echo ""
-echo "View this commit:"
-echo "  https://jmh.morethan.io/?source=${COMMIT_URL}"
-echo ""
-
-if [ -n "$BASE_BRANCH" ]; then
-  BRANCH_URL="${BASE_URL}/branch-${BASE_BRANCH}.json"
-  echo "Compare against base branch (${BASE_BRANCH}):"
-  echo "  https://jmh.morethan.io/?sources=${COMMIT_URL},${BRANCH_URL}"
-  echo ""
-
-  MERGE_BASE=$(git merge-base HEAD "origin/${BASE_BRANCH}" 2>/dev/null || echo "")
-  if [ -n "$MERGE_BASE" ]; then
-    MERGE_BASE_URL="${BASE_URL}/${MERGE_BASE}.json"
-    echo "Compare against merge-base (${MERGE_BASE}):"
-    echo "  https://jmh.morethan.io/?sources=${COMMIT_URL},${MERGE_BASE_URL}"
-    echo ""
-  fi
+if [ -z "$SUITE_NAME" ]; then
+  echo "Usage: $0 <suite-name>"
+  exit 1
 fi
 
-echo "=================================================="
+BENCHMARK_SCRIPT=".github/benchmarks/${SUITE_NAME}"
+
+if [ ! -f "$BENCHMARK_SCRIPT" ]; then
+  echo "Error: Benchmark script not found: $BENCHMARK_SCRIPT"
+  exit 1
+fi
+
+echo "Building benchmarks..."
+mvn install -pl :druid-benchmarks -am -DskipTests -Pskip-static-checks
+
+echo "Running benchmark: $SUITE_NAME"
+OUTPUT_FILE="benchmark-results.json"
+"$BENCHMARK_SCRIPT" -rf json -rff "$OUTPUT_FILE"
+
+echo "Preparing artifact directory structure..."
+mkdir -p "benchmark-results/${SUITE_NAME}"
+mv "$OUTPUT_FILE" "benchmark-results/${SUITE_NAME}/${SUITE_NAME}.json"
+
+echo "Benchmark completed."
