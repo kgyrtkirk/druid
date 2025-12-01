@@ -60,7 +60,4 @@ jobs:
       script: |
         git config user.name "github-actions[bot]"
         git config user.email "github-actions[bot]@users.noreply.github.com"
-        export BENCH_REPO_TOKEN="${{ secrets.BENCH_REPO_TOKEN }}"
         .github/scripts/run_benchmark
-
-
