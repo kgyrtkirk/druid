@@ -38,9 +38,6 @@ on:
         required: false
         type: string
         description: "Artifacts to download. For example: 'unit-test-reports-*'"
-    secrets:
-      BENCH_REPO_TOKEN:
-        required: true
 
 env:
   SEGMENT_DOWNLOAD_TIMEOUT_MINS: 5
