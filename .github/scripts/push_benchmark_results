@@ -2,6 +2,20 @@
 
 set -e
 
+should_update_branch_link() {
+  local branch_link="$1"
+  local new_commit="$2"
+
+  if [ ! -L "$branch_link" ]; then
+    return 0
+  fi
+
+  local old_target=$(readlink "$branch_link")
+  local old_commit=$(basename "$old_target" .json)
+
+  git merge-base --is-ancestor "$old_commit" "$new_commit" 2>/dev/null
+}
+
 if [ $# -eq 0 ]; then
   echo "Usage: $0 <result-file1.json> [result-file2.json ...]"
   exit 1
@@ -11,38 +25,69 @@ COMMIT_SHA="${CI_COMMIT_SHA:-$(git rev-parse HEAD)}"
 BRANCH_NAME="${CI_BRANCH_NAME:-$(git rev-parse --abbrev-ref HEAD)}"
 BASE_BRANCH="${CI_BASE_BRANCH}"
 BASE_URL="https://kgyrtkirk.github.io/druid-bench/benchmark-results"
+BENCH_REPO_DIR=".druid-bench"
 
-echo "Renaming and uploading benchmark results..."
+# Expect repo to be already checked out by workflow
+if [ ! -d "$BENCH_REPO_DIR/.git" ]; then
+  echo "Error: Benchmark repository not found at $BENCH_REPO_DIR"
+  echo "The workflow should check out the repository using actions/checkout"
+  exit 1
+fi
+
+echo "Processing benchmark results..."
+cd "$BENCH_REPO_DIR"
+git pull
+
+SUITES_PROCESSED=()
+
 for JSON_FILE in "$@"; do
-  if [ ! -f "$JSON_FILE" ]; then
+  # Convert to absolute path before cd
+  JSON_FILE_ABS="$(cd "$(dirname "$JSON_FILE")" && pwd)/$(basename "$JSON_FILE")"
+
+  if [ ! -f "$JSON_FILE_ABS" ]; then
     echo "Warning: File not found: $JSON_FILE"
     continue
   fi
 
   # Extract suite name from path: benchmark-results/{suite-name}/{suite-name}.json
-  SUITE_NAME=$(basename "$(dirname "$JSON_FILE")")
-  SUITE_DIR=$(dirname "$JSON_FILE")
+  SUITE_NAME=$(basename "$(dirname "$JSON_FILE_ABS")")
+  SUITE_DIR="benchmark-results/${SUITE_NAME}"
+  TARGET_FILE="${SUITE_DIR}/${COMMIT_SHA}.json"
 
-  # Rename from {suite-name}.json to {commit-sha}.json
-  RENAMED_FILE="${SUITE_DIR}/${COMMIT_SHA}.json"
-  mv "$JSON_FILE" "$RENAMED_FILE"
+  echo "Adding ${SUITE_NAME}..."
+  mkdir -p "$SUITE_DIR"
+  cp "$JSON_FILE_ABS" "$TARGET_FILE"
+  git add "$TARGET_FILE"
 
-  echo "Uploading ${SUITE_NAME}..."
-  .github/scripts/upload_benchmark_results "$RENAMED_FILE"
+  if [ -n "$BRANCH_NAME" ]; then
+    BRANCH_LINK="${SUITE_DIR}/branch-${BRANCH_NAME}.json"
+
+    if should_update_branch_link "$BRANCH_LINK" "$COMMIT_SHA"; then
+      ln -sf "${COMMIT_SHA}.json" "$BRANCH_LINK"
+      git add "$BRANCH_LINK"
+    fi
+  fi
+
+  SUITES_PROCESSED+=("$SUITE_NAME")
 done
+
+if [ ${#SUITES_PROCESSED[@]} -eq 0 ]; then
+  echo "Error: No benchmark results to upload"
+  exit 1
+fi
+
+SUITES_LIST=$(IFS=, ; echo "${SUITES_PROCESSED[*]}")
+git commit -m "Add benchmark results for ${COMMIT_SHA}${BRANCH_NAME:+ (${BRANCH_NAME})} - ${SUITES_LIST}"
+git push origin HEAD
+
+cd -
 
 echo ""
 echo "=================================================="
 echo "Benchmark results for ${COMMIT_SHA} (${BRANCH_NAME})"
 echo ""
 
-for JSON_FILE in "$@"; do
-  if [ ! -f "$JSON_FILE" ]; then
-    continue
-  fi
-
-  # Extract suite name from path: benchmark-results/{suite-name}/{commit-sha}.json
-  SUITE_NAME=$(basename "$(dirname "$JSON_FILE")")
+for SUITE_NAME in "${SUITES_PROCESSED[@]}"; do
   COMMIT_URL="${BASE_URL}/${SUITE_NAME}/${COMMIT_SHA}.json"
 
   echo "View ${SUITE_NAME}:"

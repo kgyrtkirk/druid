@@ -118,18 +118,15 @@ Then paste multiple URLs into jmh.morethan.io separated by commas.
 
 **`.github/scripts/push_benchmark_results`**
 - Takes one or more JSON result files as arguments
-- Calls `upload_benchmark_results` for each file
-- Prints comparison URLs for all uploaded results
-
-**`.github/scripts/upload_benchmark_results`**
-- Takes a single JSON file as argument
-- Derives suite name from JSON filename
 - Requires `.druid-bench` repository to be checked out (by workflow)
 - Errors if repository not found
-- Stores JSON file in `benchmark-results/{suite-name}/{commit-sha}.json`
-- Creates/updates branch symlink (if `BRANCH_NAME` is set)
-- Only updates symlink on fast-forward (checks ancestry)
-- Pushes to the separate benchmark repository
+- For each file:
+  - Derives suite name from path
+  - Copies to `benchmark-results/{suite-name}/{commit-sha}.json`
+  - Creates/updates branch symlink (if `BRANCH_NAME` is set, only on fast-forward)
+- Makes single commit with all changes
+- Pushes to the benchmark repository
+- Prints comparison URLs for all suites
 
 **`.github/benchmarks/splexpr`**
 - Runs JMH benchmarks for SPL expressions
@@ -153,9 +150,11 @@ The GitHub Actions workflow separates benchmark execution from result publishing
    - Checks out the benchmark repository using `actions/checkout` with token
    - Configures git user/email for commits
    - Downloads all benchmark result artifacts
-   - Renames files from `{suite-name}.json` to `{commit-sha}.json`
-   - Pushes all results to the benchmark repository in one operation
-   - Prints comparison URLs for all suites
+   - Calls `push_benchmark_results` which:
+     - Processes all result files
+     - Creates single commit with all suites
+     - Pushes to benchmark repository
+     - Prints comparison URLs for all suites
 
 This architecture allows:
 - Multiple benchmarks to run concurrently via matrix
@@ -230,5 +229,6 @@ By design. Symlinks only update on fast-forward (when old commit is ancestor of 
 **Separated runner and pusher:**
 - Benchmarks run in parallel for speed
 - Results communicated via GitHub artifacts
+- Single commit for all suites keeps history clean
 - Single push operation reduces API calls and conflicts
 - Easy to add more benchmark suites
