@@ -23,11 +23,6 @@ if [ ! -f "$JSON_FILE" ]; then
   exit 1
 fi
 
-if [ -z "$BENCH_REPO_TOKEN" ]; then
-  echo "Error: BENCH_REPO_TOKEN environment variable required"
-  exit 1
-fi
-
 COMMIT_SHA="${CI_COMMIT_SHA:-$(git rev-parse HEAD)}"
 BRANCH_NAME="${CI_BRANCH_NAME}"
 
@@ -38,13 +33,16 @@ SUITE_DIR="benchmark-results/${SUITE_NAME}"
 TARGET_FILE="${SUITE_DIR}/${COMMIT_SHA}.json"
 BENCH_REPO="kgyrtkirk/druid-bench"
 BENCH_REPO_DIR=".druid-bench"
-BENCH_REPO_URL="https://${BENCH_REPO_TOKEN}@github.com/${BENCH_REPO}.git"
 JSON_FILE_ABS="$(cd "$(dirname "$JSON_FILE")" && pwd)/$(basename "$JSON_FILE")"
 
-if [ ! -d "$BENCH_REPO_DIR" ]; then
-  git clone "$BENCH_REPO_URL" "$BENCH_REPO_DIR"
+# Expect repo to be already checked out by workflow
+if [ ! -d "$BENCH_REPO_DIR/.git" ]; then
+  echo "Error: Benchmark repository not found at $BENCH_REPO_DIR"
+  echo "The workflow should check out the repository using actions/checkout"
+  exit 1
 fi
 
+echo "Using benchmark repository at $BENCH_REPO_DIR..."
 cd "$BENCH_REPO_DIR"
 git pull
 

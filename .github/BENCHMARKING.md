@@ -124,7 +124,8 @@ Then paste multiple URLs into jmh.morethan.io separated by commas.
 **`.github/scripts/upload_benchmark_results`**
 - Takes a single JSON file as argument
 - Derives suite name from JSON filename
-- Clones/updates the `kgyrtkirk/druid-bench` repository
+- Requires `.druid-bench` repository to be checked out (by workflow)
+- Errors if repository not found
 - Stores JSON file in `benchmark-results/{suite-name}/{commit-sha}.json`
 - Creates/updates branch symlink (if `BRANCH_NAME` is set)
 - Only updates symlink on fast-forward (checks ancestry)
@@ -149,6 +150,8 @@ The GitHub Actions workflow separates benchmark execution from result publishing
    - Worker uploads artifacts with the prepared directory structure
 
 2. **Push results job** (runs after all benchmarks complete):
+   - Checks out the benchmark repository using `actions/checkout` with token
+   - Configures git user/email for commits
    - Downloads all benchmark result artifacts
    - Renames files from `{suite-name}.json` to `{commit-sha}.json`
    - Pushes all results to the benchmark repository in one operation
