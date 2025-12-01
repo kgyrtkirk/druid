@@ -54,7 +54,8 @@ env:
 jobs:
   benchmark:
     uses: ./.github/workflows/worker.yml
-    secrets: inherit
+    secrets:
+      BENCH_REPO_TOKEN: ${{ secrets.BENCH_REPO_TOKEN }}
     with:
       key: "benchmark"
       script: |
