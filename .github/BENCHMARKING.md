@@ -114,17 +114,17 @@ Then paste multiple URLs into jmh.morethan.io separated by commas.
 - Locates benchmark script at `.github/benchmarks/{suite-name}`
 - Builds the benchmarks module
 - Executes benchmark script with `-rf json -rff benchmark-results.json` arguments
-- Prepares directory structure: `benchmark-results/{suite-name}/{suite-name}.json`
+- Prepares directory structure: `benchmark-results/{suite-name}/current.json`
 
 **`.github/scripts/push_benchmark_results`**
-- Takes one or more JSON result files as arguments
+- No arguments required - auto-detects suite names from directory structure
+- Scans `benchmark-results/*/current.json` to find available suites
 - Requires `.druid-bench` repository to be checked out (by workflow)
-- Errors if repository not found
-- For each file:
-  - Derives suite name from path
-  - Copies to `benchmark-results/{suite-name}/{commit-sha}.json`
+- Errors if repository not found or no results found
+- For each suite:
+  - Copies `current.json` directly to `{commit-sha}.json` in bench repo
   - Creates/updates branch symlink (if `BRANCH_NAME` is set, only on fast-forward)
-- Makes single commit with all changes
+- Makes single commit with all suites
 - Pushes to the benchmark repository
 - Prints comparison URLs for all suites
 
@@ -143,18 +143,19 @@ The GitHub Actions workflow separates benchmark execution from result publishing
    - Uses `worker.yml` for consistent setup and execution
    - `run_benchmark` passes JMH output options as arguments to the benchmark script
    - Benchmark script outputs to `benchmark-results.json`
-   - `run_benchmark` creates directory structure: `benchmark-results/{suite-name}/{suite-name}.json`
+   - `run_benchmark` creates directory structure: `benchmark-results/{suite-name}/current.json`
    - Worker uploads artifacts with the prepared directory structure
 
 2. **Push results job** (runs after all benchmarks complete):
    - Checks out the benchmark repository using `actions/checkout` with token
    - Configures git user/email for commits
-   - Downloads all benchmark result artifacts
-   - Calls `push_benchmark_results` which:
-     - Processes all result files
-     - Creates single commit with all suites
-     - Pushes to benchmark repository
-     - Prints comparison URLs for all suites
+   - Downloads all benchmark result artifacts (merged into `benchmark-results/`)
+   - Calls `push_benchmark_results` with no arguments
+   - Script detects suite names from directory structure
+   - Loops over suites, copying each `current.json` to `{commit-sha}.json`
+   - Creates single commit with all suites
+   - Pushes to benchmark repository
+   - Prints comparison URLs for all suites
 
 This architecture allows:
 - Multiple benchmarks to run concurrently via matrix
@@ -213,7 +214,8 @@ By design. Symlinks only update on fast-forward (when old commit is ancestor of 
 - Organizes related benchmarks together
 - Allows multiple benchmark types per commit
 - Clear namespace for different performance characteristics
-- Suite name derived from benchmark script name in `.github/benchmarks/`
+- Suite name derived from directory name in artifacts
+- Generic filename (`current.json`) keeps artifact simple
 
 **Commit SHA as filename:**
 - Immutable identifier for specific code state
@@ -229,6 +231,8 @@ By design. Symlinks only update on fast-forward (when old commit is ancestor of 
 **Separated runner and pusher:**
 - Benchmarks run in parallel for speed
 - Results communicated via GitHub artifacts
+- Suite names auto-detected from directory structure (no hardcoded list)
+- Simple loop over suite names keeps processing clean
 - Single commit for all suites keeps history clean
 - Single push operation reduces API calls and conflicts
 - Easy to add more benchmark suites

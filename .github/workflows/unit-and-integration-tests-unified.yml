@@ -85,4 +85,4 @@ jobs:
           pattern: benchmark-results-*
           merge-multiple: true
       - name: Push results
-        run: .github/scripts/push_benchmark_results benchmark-results/*/*.json
+        run: .github/scripts/push_benchmark_results

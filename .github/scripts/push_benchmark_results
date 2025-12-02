@@ -16,18 +16,26 @@ should_update_branch_link() {
   git merge-base --is-ancestor "$old_commit" "$new_commit" 2>/dev/null
 }
 
-if [ $# -eq 0 ]; then
-  echo "Usage: $0 <result-file1.json> [result-file2.json ...]"
-  exit 1
-fi
-
 COMMIT_SHA="${CI_COMMIT_SHA:-$(git rev-parse HEAD)}"
 BRANCH_NAME="${CI_BRANCH_NAME:-$(git rev-parse --abbrev-ref HEAD)}"
 BASE_BRANCH="${CI_BASE_BRANCH}"
 BASE_URL="https://kgyrtkirk.github.io/druid-bench/benchmark-results"
 BENCH_REPO_DIR=".druid-bench"
+RESULTS_DIR="benchmark-results"
 
-# Expect repo to be already checked out by workflow
+# Auto-detect suite names from directory structure
+SUITES=()
+for suite_dir in "$RESULTS_DIR"/*; do
+  if [ -d "$suite_dir" ] && [ -f "$suite_dir/current.json" ]; then
+    SUITES+=($(basename "$suite_dir"))
+  fi
+done
+
+if [ ${#SUITES[@]} -eq 0 ]; then
+  echo "Error: No benchmark results found in benchmark-results/*/current.json"
+  exit 1
+fi
+
 if [ ! -d "$BENCH_REPO_DIR/.git" ]; then
   echo "Error: Benchmark repository not found at $BENCH_REPO_DIR"
   echo "The workflow should check out the repository using actions/checkout"
@@ -38,25 +46,15 @@ echo "Processing benchmark results..."
 cd "$BENCH_REPO_DIR"
 git pull
 
-SUITES_PROCESSED=()
+for SUITE_NAME in "${SUITES[@]}"; do
+  echo "Adding ${SUITE_NAME}..."
 
-for JSON_FILE in "$@"; do
-  # Convert to absolute path before cd
-  JSON_FILE_ABS="$(cd "$(dirname "$JSON_FILE")" && pwd)/$(basename "$JSON_FILE")"
-
-  if [ ! -f "$JSON_FILE_ABS" ]; then
-    echo "Warning: File not found: $JSON_FILE"
-    continue
-  fi
-
-  # Extract suite name from path: benchmark-results/{suite-name}/{suite-name}.json
-  SUITE_NAME=$(basename "$(dirname "$JSON_FILE_ABS")")
+  SOURCE_FILE="../$RESULTS_DIR/$SUITE_NAME/current.json"
   SUITE_DIR="benchmark-results/${SUITE_NAME}"
   TARGET_FILE="${SUITE_DIR}/${COMMIT_SHA}.json"
 
-  echo "Adding ${SUITE_NAME}..."
   mkdir -p "$SUITE_DIR"
-  cp "$JSON_FILE_ABS" "$TARGET_FILE"
+  cp "$SOURCE_FILE" "$TARGET_FILE"
   git add "$TARGET_FILE"
 
   if [ -n "$BRANCH_NAME" ]; then
@@ -67,16 +65,9 @@ for JSON_FILE in "$@"; do
       git add "$BRANCH_LINK"
     fi
   fi
-
-  SUITES_PROCESSED+=("$SUITE_NAME")
 done
 
-if [ ${#SUITES_PROCESSED[@]} -eq 0 ]; then
-  echo "Error: No benchmark results to upload"
-  exit 1
-fi
-
-SUITES_LIST=$(IFS=, ; echo "${SUITES_PROCESSED[*]}")
+SUITES_LIST=$(IFS=, ; echo "${SUITES[*]}")
 git commit -m "Add benchmark results for ${COMMIT_SHA}${BRANCH_NAME:+ (${BRANCH_NAME})} - ${SUITES_LIST}"
 git push origin HEAD
 
@@ -87,7 +78,7 @@ echo "=================================================="
 echo "Benchmark results for ${COMMIT_SHA} (${BRANCH_NAME})"
 echo ""
 
-for SUITE_NAME in "${SUITES_PROCESSED[@]}"; do
+for SUITE_NAME in "${SUITES[@]}"; do
   COMMIT_URL="${BASE_URL}/${SUITE_NAME}/${COMMIT_SHA}.json"
 
   echo "View ${SUITE_NAME}:"
