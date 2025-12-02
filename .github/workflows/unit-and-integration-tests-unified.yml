@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: "Benchmark CI"
+name: "Unit & Integration tests CI"
 on:
   push:
     paths-ignore:
@@ -47,42 +47,82 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  CI_COMMIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
-  CI_BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
-  CI_BASE_BRANCH: ${{ github.base_ref }}
+  MYSQL_DRIVER_CLASSNAME: com.mysql.jdbc.Driver # Used to set druid config in docker image for revised ITs
+  SEGMENT_DOWNLOAD_TIMEOUT_MINS: 5
 
 jobs:
-  benchmark:
+  build:
+    name: "build (jdk${{ matrix.jdk }})"
     strategy:
+      fail-fast: false
       matrix:
-        suite:
-          - splexpr
-    uses: ./.github/workflows/worker.yml
-    with:
-      key: "benchmark-${{ matrix.suite }}"
-      artifact_prefix: "benchmark-results"
-      script: .github/scripts/run_benchmark ${{ matrix.suite }}
-
-  push-results:
-    needs: [benchmark]
+        jdk: [ '17', '21' ]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Checkout benchmark repository
+      - name: Checkout branch
         uses: actions/checkout@v4
+
+      # skip the "cache: maven" step from setup-java. We explicitly use a
+      # different cache key since we cannot reuse it across commits.
+      - uses: actions/setup-java@v4
         with:
-          repository: kgyrtkirk/druid-bench
-          token: ${{ secrets.BENCH_REPO_TOKEN }}
-          path: .druid-bench
-      - name: Configure git for benchmark repo
+          distribution: 'zulu'
+          java-version: ${{ matrix.jdk }}
+
+      # the build step produces SNAPSHOT artifacts into the local maven repository,
+      # we include github.sha in the cache key to make it specific to that build/jdk
+      - name: Cache Maven m2 repository
+        id: maven
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: maven-${{ runner.os }}-${{ matrix.jdk }}-${{ github.sha }}
+          restore-keys: setup-java-Linux-maven-${{ hashFiles('**/pom.xml') }}
+
+      - name: Cache targets
+        id: target
+        uses: actions/cache@v4
+        with:
+          path: |
+            ./**/target
+          key: maven-${{ runner.os }}-${{ matrix.jdk }}-targets-${{ github.sha }}
+
+      - name: Cache image
+        id: docker_container
+        uses: actions/cache@v4
+        with:
+          key: druid-container-jdk${{ matrix.jdk }}.tar.gz-${{ github.sha }}
+          path: |
+            ./druid-container-jdk${{ matrix.jdk }}.tar.gz
+            ./integration-tests-ex/image/target/env.sh
+
+      - name: Maven build
+        id: maven_build
         run: |
-          cd .druid-bench
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-      - name: Download all benchmark results
-        uses: actions/download-artifact@v4
-        with:
-          pattern: benchmark-results-*
-          merge-multiple: true
-      - name: Push results
-        run: .github/scripts/push_benchmark_results
+          ./it.sh ci
+
+  unit-tests:
+    name: "unit tests"
+    uses: ./.github/workflows/ci.yml
+
+  standard-its:
+    needs: [build, unit-tests]
+    uses: ./.github/workflows/standard-its.yml
+
+  docker-tests:
+    needs: [build, unit-tests]
+    uses: ./.github/workflows/docker-tests.yml
+
+  actions-timeline:
+    needs: [build, unit-tests, standard-its, docker-tests]
+    runs-on: ubuntu-latest
+    if: ${{ !cancelled() }}
+    steps:
+      - uses: Kesin11/actions-timeline@54d513e0b5ff1158f1cf8321108d666a5a6c1fca
+
+  quality-gate:
+    needs: [build, unit-tests ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: dummy
+        run: echo ok
