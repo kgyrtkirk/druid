@@ -135,7 +135,7 @@ jobs:
     strategy:
       matrix:
         suite:
-          - splexpr
+          - uuid
     uses: ./.github/workflows/worker.yml
     with:
       key: "benchmark-${{ matrix.suite }}"

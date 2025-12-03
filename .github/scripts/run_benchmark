@@ -32,11 +32,11 @@ if [ ! -f "$BENCHMARK_SCRIPT" ]; then
 fi
 
 echo "Building benchmarks..."
-#mvn install -pl :druid-benchmarks -am -DskipTests -Pskip-static-checks
+mvn install -pl :druid-benchmarks -am -DskipTests -Pskip-static-checks
 
 echo "Running benchmark: $SUITE_NAME"
 OUTPUT_FILE="benchmark-results.json"
-#"$BENCHMARK_SCRIPT" -rf json -rff "$OUTPUT_FILE"
+"$BENCHMARK_SCRIPT" -rf json -rff "$OUTPUT_FILE"
 
 echo "Preparing artifact directory structure..."
 mkdir -p "benchmark-results/${SUITE_NAME}"
