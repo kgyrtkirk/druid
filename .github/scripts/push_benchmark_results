@@ -17,6 +17,7 @@
 
 
 set -e
+set -x
 
 should_update_branch_link() {
   local branch_link="$1"
@@ -35,7 +36,7 @@ should_update_branch_link() {
 COMMIT_SHA="${CI_COMMIT_SHA:-$(git rev-parse HEAD)}"
 BRANCH_NAME="${CI_BRANCH_NAME:-$(git rev-parse --abbrev-ref HEAD)}"
 BASE_BRANCH="${CI_BASE_BRANCH}"
-BASE_URL="https://kgyrtkirk.github.io/druid-bench/benchmark-results"
+BASE_URL="https://raw.githubusercontent.com/kgyrtkirk/druid-bench/main/benchmark-results"
 BENCH_REPO_DIR=".druid-bench"
 RESULTS_DIR="benchmark-results"
 
@@ -89,6 +90,7 @@ git push origin HEAD
 
 cd -
 
+set +x
 echo ""
 echo "=================================================="
 echo "Benchmark results for ${COMMIT_SHA} (${BRANCH_NAME})"
