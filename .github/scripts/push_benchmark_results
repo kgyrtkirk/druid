@@ -38,11 +38,10 @@ BRANCH_NAME="${CI_BRANCH_NAME:-$(git rev-parse --abbrev-ref HEAD)}"
 BASE_BRANCH="${CI_BASE_BRANCH}"
 BASE_URL="https://kgyrtkirk.github.io/druid-bench/benchmark-results"
 BENCH_REPO_DIR=".druid-bench"
-RESULTS_DIR="benchmark-results"
 
 # Auto-detect suite names from directory structure
 SUITES=()
-for suite_dir in "$RESULTS_DIR"/*; do
+for suite_dir in benchmark-results/*; do
   if [ -d "$suite_dir" ] && [ -f "$suite_dir/current.json" ]; then
     SUITES+=($(basename "$suite_dir"))
   fi
@@ -66,7 +65,7 @@ git pull
 for SUITE_NAME in "${SUITES[@]}"; do
   echo "Adding ${SUITE_NAME}..."
 
-  SOURCE_FILE="../$RESULTS_DIR/$SUITE_NAME/current.json"
+  SOURCE_FILE="../benchmark-results/$SUITE_NAME/current.json"
   SUITE_DIR="benchmark-results/${SUITE_NAME}"
   TARGET_FILE="${SUITE_DIR}/${COMMIT_SHA}.json"
 
