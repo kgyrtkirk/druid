@@ -49,6 +49,9 @@ concurrency:
 env:
   MYSQL_DRIVER_CLASSNAME: com.mysql.jdbc.Driver # Used to set druid config in docker image for revised ITs
   SEGMENT_DOWNLOAD_TIMEOUT_MINS: 5
+  CI_COMMIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+  CI_BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+  CI_BASE_BRANCH: ${{ github.base_ref }}
 
 jobs:
   build:
@@ -126,3 +129,39 @@ jobs:
     steps:
       - name: dummy
         run: echo ok
+
+  benchmark:
+    needs: [unit-tests]
+    strategy:
+      matrix:
+        suite:
+          - uuid
+    uses: ./.github/workflows/worker.yml
+    with:
+      key: "benchmark-${{ matrix.suite }}"
+      artifact_prefix: "benchmark-results"
+      script: .github/scripts/run_benchmark ${{ matrix.suite }}
+
+  push-results:
+    needs: [benchmark]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout benchmark repository
+        uses: actions/checkout@v4
+        with:
+          repository: kgyrtkirk/druid-bench
+          token: ${{ secrets.BENCH_REPO_TOKEN }}
+          path: .druid-bench
+      - name: Configure git for benchmark repo
+        run: |
+          cd .druid-bench
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+      - name: Download all benchmark results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: benchmark-results-*
+          merge-multiple: true
+      - name: Push results
+        run: .github/scripts/push_benchmark_results
