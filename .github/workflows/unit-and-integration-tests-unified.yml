@@ -131,7 +131,7 @@ jobs:
         run: echo ok
 
   benchmark:
-    needs: [unit-tests]
+    #needs: [unit-tests]
     strategy:
       matrix:
         suite:
