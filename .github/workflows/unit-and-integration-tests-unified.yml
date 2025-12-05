@@ -123,12 +123,21 @@ jobs:
     steps:
       - uses: Kesin11/actions-timeline@54d513e0b5ff1158f1cf8321108d666a5a6c1fca
 
+  # this is a work around for github actions reporting success() even if matrix job dependency contain failures
+  # however since the skipped state is set correctly even in these case - an extra job was added.
+  quality-aggregate:
+    needs: [build, unit-tests]
+    runs-on: imply-ubuntu-latest
+    steps:
+    - run: echo ok
+
   quality-gate:
-    needs: [build, unit-tests ]
+    needs: [quality-gate]
     runs-on: ubuntu-latest
     steps:
-      - name: dummy
-        run: echo ok
+      - name: Fail job if any dependencies failed
+         if: ${{ needs.quality-aggregate.result != 'success' }}
+        run: exit 1
 
   benchmark:
     needs: [unit-tests]
