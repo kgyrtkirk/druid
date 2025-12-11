@@ -132,7 +132,7 @@ jobs:
     - run: echo ok
 
   quality-gate:
-    needs: [quality-gate]
+    needs: [quality-aggregate]
     runs-on: ubuntu-latest
     steps:
       - name: Fail job if any dependencies failed
