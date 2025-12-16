@@ -136,7 +136,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Fail job if any dependencies failed
-         if: ${{ needs.quality-aggregate.result != 'success' }}
+        if: ${{ needs.quality-aggregate.result != 'success' }}
         run: exit 1
 
   benchmark:
