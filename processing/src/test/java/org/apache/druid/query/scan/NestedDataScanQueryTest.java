@@ -22,6 +22,9 @@ package org.apache.druid.query.scan;
 import com.fasterxml.jackson.databind.Module;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
+import junitparams.naming.TestCaseName;
 import org.apache.druid.data.input.impl.DimensionSchema;
 import org.apache.druid.data.input.impl.DimensionsSpec;
 import org.apache.druid.data.input.impl.LongDimensionSchema;
@@ -54,16 +57,13 @@ import org.apache.druid.segment.nested.ObjectStorageEncoding;
 import org.apache.druid.segment.nested.StructuredData;
 import org.apache.druid.segment.virtual.NestedFieldVirtualColumn;
 import org.apache.druid.testing.InitializedNullHandlingTest;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Rule;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assumptions;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.migrationsupport.EnableJUnit4MigrationSupport;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -71,18 +71,18 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@EnableJUnit4MigrationSupport
+@RunWith(JUnitParamsRunner.class)
 public class NestedDataScanQueryTest extends InitializedNullHandlingTest
 {
   private static final Logger LOG = new Logger(NestedDataScanQueryTest.class);
 
   DefaultColumnFormatConfig DEFAULT_FORMAT = new DefaultColumnFormatConfig(null, null, null);
 
-  @Rule
-  public final TemporaryFolder tempFolder = new TemporaryFolder();
-
   private final AggregationTestHelper helper;
   private final Closer closer;
+
+  @Rule
+  public final TemporaryFolder tempFolder = new TemporaryFolder();
 
   public static Object[] getNestedColumnFormatSpec()
   {
@@ -113,7 +113,7 @@ public class NestedDataScanQueryTest extends InitializedNullHandlingTest
     return specs.toArray();
   }
 
-  @AfterEach
+  @After
   public void teardown() throws IOException
   {
     closer.close();
@@ -147,8 +147,9 @@ public class NestedDataScanQueryTest extends InitializedNullHandlingTest
     logResults(results);
   }
 
-  @ParameterizedTest(name = "{0}")
-  @MethodSource("getNestedColumnFormatSpec")
+  @Test
+  @Parameters(method = "getNestedColumnFormatSpec")
+  @TestCaseName("{0}")
   public void testIngestAndScanSegmentsWithSpec(String name, boolean auto, NestedCommonFormatColumnFormatSpec spec)
       throws Exception
   {
@@ -179,8 +180,9 @@ public class NestedDataScanQueryTest extends InitializedNullHandlingTest
     logResults(results);
   }
 
-  @ParameterizedTest(name = "{0}")
-  @MethodSource("getNestedColumnFormatSpec")
+  @Test
+  @Parameters(method = "getNestedColumnFormatSpec")
+  @TestCaseName("{0}")
   public void testIngestAndScanSegmentsNumericWithSpec(
       String name,
       boolean auto,
@@ -231,9 +233,9 @@ public class NestedDataScanQueryTest extends InitializedNullHandlingTest
     }
   }
 
-  @ParameterizedTest
-  @ValueSource(booleans = {true, false})
-  public void testIngestAndScanSegmentsNumericRollup(Boolean rollup) throws Exception
+  @Test
+  @Parameters({"true", "false"})
+  public void testIngestAndScanSegmentsNumericRollup(boolean rollup) throws Exception
   {
     Query<ScanResultValue> scanQuery = queryBuilder()
         .virtualColumns(new NestedFieldVirtualColumn("nest", "$.long", "long"))
@@ -324,8 +326,9 @@ public class NestedDataScanQueryTest extends InitializedNullHandlingTest
     Assert.assertEquals(resultsRealtime.get(0).getEvents().toString(), resultsSegments.get(0).getEvents().toString());
   }
 
-  @ParameterizedTest(name = "{0}")
-  @MethodSource("getNestedColumnFormatSpec")
+  @Test
+  @Parameters(method = "getNestedColumnFormatSpec")
+  @TestCaseName("{0}")
   public void testIngestAndScanSegmentsTsv(String name, boolean auto, NestedCommonFormatColumnFormatSpec spec)
       throws Exception
   {
@@ -400,8 +403,9 @@ public class NestedDataScanQueryTest extends InitializedNullHandlingTest
     logResults(results);
   }
 
-  @ParameterizedTest(name = "{0}")
-  @MethodSource("getNestedColumnFormatSpec")
+  @Test
+  @Parameters(method = "getNestedColumnFormatSpec")
+  @TestCaseName("{0}")
   public void testIngestAndScanSegmentsAndFilter(String name, boolean auto, NestedCommonFormatColumnFormatSpec spec)
       throws Exception
   {
@@ -428,8 +432,9 @@ public class NestedDataScanQueryTest extends InitializedNullHandlingTest
     Assert.assertEquals(1, ((List) results.get(0).getEvents()).size());
   }
 
-  @ParameterizedTest(name = "{0}")
-  @MethodSource("getNestedColumnFormatSpec")
+  @Test
+  @Parameters(method = "getNestedColumnFormatSpec")
+  @TestCaseName("{0}")
   public void testIngestAndScanSegmentsAndRangeFilter(
       String name,
       boolean auto,
@@ -483,8 +488,9 @@ public class NestedDataScanQueryTest extends InitializedNullHandlingTest
     Assert.assertEquals(resultsRealtime.get(0).getEvents().toString(), resultsSegments.get(0).getEvents().toString());
   }
 
-  @ParameterizedTest(name = "{0}")
-  @MethodSource("getNestedColumnFormatSpec")
+  @Test
+  @Parameters(method = "getNestedColumnFormatSpec")
+  @TestCaseName("{0}")
   public void testIngestAndScanSegmentsRealtimeAutoExplicit(
       String name,
       boolean auto,
@@ -492,7 +498,7 @@ public class NestedDataScanQueryTest extends InitializedNullHandlingTest
   ) throws Exception
   {
     // Test with different column format spec
-    Assumptions.assumeTrue(auto);
+    Assume.assumeTrue(auto);
     DimensionsSpec dimensionsSpec = DimensionsSpec.builder()
                                                   .setDimensions(
                                                       List.of(
@@ -606,8 +612,9 @@ public class NestedDataScanQueryTest extends InitializedNullHandlingTest
     Assert.assertEquals(resultsRealtime.get(0).getEvents().toString(), resultsSegments.get(0).getEvents().toString());
   }
 
-  @ParameterizedTest(name = "{0}")
-  @MethodSource("getNestedColumnFormatSpec")
+  @Test
+  @Parameters(method = "getNestedColumnFormatSpec")
+  @TestCaseName("{0}")
   public void testIngestAndScanSegmentsAndFilterPartialPathArrayIndex(
       String name,
       boolean auto,
@@ -651,8 +658,9 @@ public class NestedDataScanQueryTest extends InitializedNullHandlingTest
     Assert.assertEquals(results.get(0).getEvents().toString(), resultsRealtime.get(0).getEvents().toString());
   }
 
-  @ParameterizedTest(name = "{0}")
-  @MethodSource("getNestedColumnFormatSpec")
+  @Test
+  @Parameters(method = "getNestedColumnFormatSpec")
+  @TestCaseName("{0}")
   public void testIngestAndScanSegmentsAndFilterPartialPath(
       String name,
       boolean auto,
@@ -693,8 +701,9 @@ public class NestedDataScanQueryTest extends InitializedNullHandlingTest
     Assert.assertEquals(results.get(0).getEvents().toString(), resultsRealtime.get(0).getEvents().toString());
   }
 
-  @ParameterizedTest(name = "{0}")
-  @MethodSource("getNestedColumnFormatSpec")
+  @Test
+  @Parameters(method = "getNestedColumnFormatSpec")
+  @TestCaseName("{0}")
   public void testIngestAndScanSegmentsNestedColumnNotNullFilter(
       String name,
       boolean auto,
