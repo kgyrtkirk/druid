@@ -127,7 +127,7 @@ jobs:
   # however since the skipped state is set correctly even in these case - an extra job was added.
   quality-aggregate:
     needs: [build, unit-tests]
-    runs-on: imply-ubuntu-latest
+    runs-on: ubuntu-latest
     steps:
     - run: echo ok
 
@@ -136,7 +136,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Fail job if any dependencies failed
-         if: ${{ needs.quality-aggregate.result != 'success' }}
+        if: ${{ needs.quality-aggregate.result != 'success' }}
         run: exit 1
 
   benchmark:
