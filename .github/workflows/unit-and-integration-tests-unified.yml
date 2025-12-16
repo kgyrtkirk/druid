@@ -127,7 +127,7 @@ jobs:
   # however since the skipped state is set correctly even in these case - an extra job was added.
   quality-aggregate:
     needs: [build, unit-tests]
-    runs-on: imply-ubuntu-latest
+    runs-on: ubuntu-latest
     steps:
     - run: echo ok
 
