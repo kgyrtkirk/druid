@@ -49,6 +49,9 @@ concurrency:
 env:
   MYSQL_DRIVER_CLASSNAME: com.mysql.jdbc.Driver # Used to set druid config in docker image for revised ITs
   SEGMENT_DOWNLOAD_TIMEOUT_MINS: 5
+  CI_COMMIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+  CI_BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+  CI_BASE_BRANCH: ${{ github.base_ref }}
 
 jobs:
   build:
@@ -119,3 +122,55 @@ jobs:
     if: ${{ !cancelled() }}
     steps:
       - uses: Kesin11/actions-timeline@54d513e0b5ff1158f1cf8321108d666a5a6c1fca
+
+  # this is a work around for github actions reporting success() even if matrix job dependency contain failures
+  # however since the skipped state is set correctly even in these case - an extra job was added.
+  quality-aggregate:
+    needs: [build, unit-tests]
+    runs-on: imply-ubuntu-latest
+    steps:
+    - run: echo ok
+
+  quality-gate:
+    needs: [quality-aggregate]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail job if any dependencies failed
+         if: ${{ needs.quality-aggregate.result != 'success' }}
+        run: exit 1
+
+  benchmark:
+    needs: [unit-tests]
+    strategy:
+      matrix:
+        suite:
+          - uuid
+    uses: ./.github/workflows/worker.yml
+    with:
+      key: "benchmark-${{ matrix.suite }}"
+      artifact_prefix: "benchmark-results"
+      script: .github/scripts/run_benchmark ${{ matrix.suite }}
+
+  push-results:
+    needs: [benchmark]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout benchmark repository
+        uses: actions/checkout@v4
+        with:
+          repository: kgyrtkirk/druid-bench
+          token: ${{ secrets.BENCH_REPO_TOKEN }}
+          path: .druid-bench
+      - name: Configure git for benchmark repo
+        run: |
+          cd .druid-bench
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+      - name: Download all benchmark results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: benchmark-results-*
+          merge-multiple: true
+      - name: Push results
+        run: .github/scripts/push_benchmark_results

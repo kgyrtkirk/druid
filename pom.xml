@@ -2237,6 +2237,7 @@
                                 <exclude>**/*.iq</exclude> <!-- quidem testfiles -->
                                 <exclude>**/*.iq.out</exclude> <!-- quidem testfiles -->
                                 <exclude>**/*.sum</exclude> <!-- go.sum is excluded -->
+                                <exclude>.druid-bench/**</exclude>
                             </excludes>
                         </configuration>
                     </plugin>

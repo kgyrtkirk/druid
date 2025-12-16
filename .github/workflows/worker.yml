@@ -95,5 +95,6 @@ jobs:
             **/replay_pid*
             **/core.[0-9]*
             **/TEST-*.xml
+            benchmark-results/**
             **/target/jacoco*.exec
             **/target/jstack*
