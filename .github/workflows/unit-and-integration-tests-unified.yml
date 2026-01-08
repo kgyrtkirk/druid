@@ -51,12 +51,6 @@ env:
   SEGMENT_DOWNLOAD_TIMEOUT_MINS: 5
 
 jobs:
-  b:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout branch
-        uses: actions/checkout@v4
-
   unit-tests:
     name: "unit tests"
     uses: ./.github/workflows/ci.yml
