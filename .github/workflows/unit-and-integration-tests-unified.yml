@@ -51,8 +51,7 @@ env:
   SEGMENT_DOWNLOAD_TIMEOUT_MINS: 5
 
 jobs:
-  build:
-    name: "build"
+  b:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout branch
