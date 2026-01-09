@@ -39,7 +39,6 @@ public class BindersTest
   {
     Properties props = new Properties();
     props.setProperty("druid.indexer.logs.type", "noop");
-    
     Injector injector = Guice.createInjector(
         binder -> {
           binder.bind(Properties.class).toInstance(props);
