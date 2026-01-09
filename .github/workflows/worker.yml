@@ -21,7 +21,7 @@ on:
       jdk:
         required: false
         type: string
-        default: '17'
+        default: '21'
       script:
         required: true
         type: string
@@ -38,6 +38,10 @@ on:
         required: false
         type: string
         description: "Artifacts to download. For example: 'unit-test-reports-*'"
+      execute:
+        required: false
+        default: 'false'
+        description: 'Skips this invocation - this is a workaround for github actions matrix element skip limitation'
 
 env:
   SEGMENT_DOWNLOAD_TIMEOUT_MINS: 5
@@ -54,6 +58,7 @@ jobs:
   execute:
     name: "${{ inputs.key }}"
     runs-on: ubuntu-latest
+    if: ${{ inputs.execute }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
