@@ -41,8 +41,8 @@ on:
       execute:
         required: false
         type: boolean
-        default: false
-        description: 'Skips this invocation - this is a workaround for github actions matrix element skip limitation'
+        default: true
+        description: 'Controls execution of the invocation - this is a workaround for github actions matrix element skip limitation'
 
 env:
   SEGMENT_DOWNLOAD_TIMEOUT_MINS: 5
