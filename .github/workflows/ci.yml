@@ -21,6 +21,7 @@ on:
 jobs:
   run-unit-tests:
     name: "unit tests(main)"
+    if: ${{ matrix.jdk == '21' || github.event_name == 'push' || contains(github.event.pull_request.labels.*.name, 'test-jdk17') }}
     strategy:
       fail-fast: false
       matrix:
