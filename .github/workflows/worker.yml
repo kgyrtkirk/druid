@@ -41,7 +41,7 @@ on:
       execute:
         required: false
         type: boolean
-        default: 'false'
+        default: false
         description: 'Skips this invocation - this is a workaround for github actions matrix element skip limitation'
 
 env:
