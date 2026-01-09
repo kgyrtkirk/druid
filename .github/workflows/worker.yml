@@ -106,6 +106,9 @@ jobs:
           truncate_stack_traces: false
           job_summary: false
 
+      - name: Remove druid related artifacts from maven repo
+        run: rm -rf ~/.m2/repository/org/apache/druid/druid
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         if: ${{ failure() || inputs.artifact_prefix != '' }}
