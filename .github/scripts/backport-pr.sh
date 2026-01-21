@@ -33,10 +33,13 @@ BACKPORT_BRANCH="backport-$COMMIT_HASH-to-$TARGET_BRANCH"
 git fetch origin "$TARGET_BRANCH"
 git checkout -b "$BACKPORT_BRANCH" "origin/$TARGET_BRANCH"
 git cherry-pick -x "$COMMIT_HASH"
+git commit --amend -m "$(git log -1 --pretty=%B)
+
+$BODY"
 git push origin "$BACKPORT_BRANCH"
 
 gh pr create \
   --base "$TARGET_BRANCH" \
   --head "$BACKPORT_BRANCH" \
-  --title "[$TARGET_BRANCH] $PR_TITLE" \
+  --title "$PR_TITLE" \
   --body "$BODY"
