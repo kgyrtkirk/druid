@@ -38,3 +38,6 @@ jobs:
           gh pr merge ${{ github.event.pull_request.number }} --auto -m
         env:
           GH_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
+
+
+# and that
