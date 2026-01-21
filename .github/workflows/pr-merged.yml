@@ -25,7 +25,7 @@ on:
 
 jobs:
   close-backport-issue:
-    if: github.repository == 'apache/druid' && github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'backport')
+    if: github.repository == 'kgyrtkirk/druid' && github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'backport')
     permissions:
       issues: write
     runs-on: ubuntu-latest
@@ -48,7 +48,7 @@ jobs:
           fi
 
   add-milestone:
-    if: github.repository == 'apache/druid' && github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'master'
+    if: github.repository == 'kgyrtkirk/druid' && github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'master'
     permissions:
       contents: read
       pull-requests: write
