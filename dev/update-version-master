@@ -36,7 +36,7 @@ mvn install -pl web-console -DskipTests
 export PATH+=:$PWD/web-console/target/node/
 
 cd web-console
-npm version $VERSION
+npm version --allow-same-version $VERSION
 npm install
 npm run jest -- -u
 cd ..
