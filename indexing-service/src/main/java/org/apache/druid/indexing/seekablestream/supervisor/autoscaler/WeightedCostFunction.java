@@ -29,24 +29,12 @@ import org.apache.druid.java.util.common.logger.Logger;
 public class WeightedCostFunction
 {
   private static final Logger log = new Logger(WeightedCostFunction.class);
-
-
   /**
-   * Ideal idle ratio range boundaries.
-   * Idle ratio below MIN indicates tasks are overloaded (scale up needed).
-   * Idle ratio above MAX indicates tasks are underutilized (scale down needed).
+   * The lag severity at which lagBusyFactor reaches 1.0 (full idle suppression).
+   * lagSeverity is defined as lagPerPartition / highLagThreshold.
+   * At severity=1 (threshold), lagBusyFactor=0. At severity=MAX, lagBusyFactor=1.0.
    */
-  static final double IDEAL_IDLE_MIN = 0.2;
-  static final double IDEAL_IDLE_MAX = 0.6;
-
-  /**
-   * Checks if the given idle ratio is within the ideal range [{@value #IDEAL_IDLE_MIN}, {@value #IDEAL_IDLE_MAX}].
-   * When idle is in this range, optimal utilization has been achieved and no scaling is needed.
-   */
-  public static boolean isIdleInIdealRange(double idleRatio)
-  {
-    return idleRatio >= IDEAL_IDLE_MIN && idleRatio <= IDEAL_IDLE_MAX;
-  }
+  private static final int LAG_AMPLIFICATION_MAX_SEVERITY = 5;
 
   /**
    * Computes cost for a given task count using compute time metrics.
@@ -63,7 +51,11 @@ public class WeightedCostFunction
    * @return CostResult containing totalCost, lagCost, and idleCost,
    * or result with {@link Double#POSITIVE_INFINITY} for invalid inputs
    */
-  public CostResult computeCost(CostMetrics metrics, int proposedTaskCount, CostBasedAutoScalerConfig config)
+  public CostResult computeCost(
+      CostMetrics metrics,
+      int proposedTaskCount,
+      CostBasedAutoScalerConfig config
+  )
   {
     if (metrics == null || config == null || proposedTaskCount <= 0 || metrics.getPartitionCount() <= 0) {
       return new CostResult(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
@@ -85,7 +77,7 @@ public class WeightedCostFunction
       lagRecoveryTime = metrics.getAggregateLag() / (proposedTaskCount * avgProcessingRate);
     }
 
-    final double predictedIdleRatio = estimateIdleRatio(metrics, proposedTaskCount);
+    final double predictedIdleRatio = estimateIdleRatio(metrics, proposedTaskCount, config.getHighLagThreshold());
     final double idleCost = proposedTaskCount * metrics.getTaskDurationSeconds() * predictedIdleRatio;
     final double lagCost = config.getLagWeight() * lagRecoveryTime;
     final double weightedIdleCost = config.getIdleWeight() * idleCost;
@@ -104,22 +96,21 @@ public class WeightedCostFunction
     return new CostResult(cost, lagCost, weightedIdleCost);
   }
 
-
   /**
-   * Estimates the idle ratio for a given task count using a capacity-based linear model.
-   * <p>
-   * Formula: {@code predictedIdle = 1 - busyFraction / taskRatio}
-   * where {@code busyFraction = 1 - currentIdleRatio} and {@code taskRatio = targetTaskCount / currentTaskCount}.
+   * Estimates the idle ratio for a proposed task count.
+   * Includes lag-based adjustment to suppress predicted idle when lag exceeds the threshold,
+   * encouraging scale-up when there is real work to do.
+   * The algorithm is adjusted with {@code computeExtraPPTIncrease}, so they may work in tandem, when enabled.
    *
    * @param metrics   current system metrics containing idle ratio and task count
    * @param taskCount target task count to estimate an idle ratio for
    * @return estimated idle ratio in range [0.0, 1.0]
    */
-  private double estimateIdleRatio(CostMetrics metrics, int taskCount)
+  @SuppressWarnings("ExtractMethodRecommender")
+  private double estimateIdleRatio(CostMetrics metrics, int taskCount, int highLagThreshold)
   {
     final double currentPollIdleRatio = metrics.getPollIdleRatio();
 
-    // Handle edge cases
     if (currentPollIdleRatio < 0) {
       // No idle data available, assume moderate idle
       return 0.5;
@@ -130,13 +121,22 @@ public class WeightedCostFunction
       return currentPollIdleRatio;
     }
 
-    // Capacity-based model: idle ratio reflects spare capacity per task
+    // Linear prediction (capacity-based) - existing logic
     final double busyFraction = 1.0 - currentPollIdleRatio;
     final double taskRatio = (double) taskCount / currentTaskCount;
-    final double predictedIdleRatio = 1.0 - busyFraction / taskRatio;
+    final double linearPrediction = Math.max(0.0, Math.min(1.0, 1.0 - busyFraction / taskRatio));
+
+    final double lagPerPartition = metrics.getAggregateLag() / metrics.getPartitionCount();
+    double lagBusyFactor = 0.;
+
+    // Lag-amplified idle decay using ln(lagSeverity) / ln(maxSeverity).
+    if (highLagThreshold > 0 && lagPerPartition >= highLagThreshold) {
+      final double lagSeverity = lagPerPartition / highLagThreshold;
+      lagBusyFactor = Math.min(1.0, Math.log(lagSeverity) / Math.log(LAG_AMPLIFICATION_MAX_SEVERITY));
+    }
 
     // Clamp to valid range [0, 1]
-    return Math.max(0.0, Math.min(1.0, predictedIdleRatio));
+    return Math.max(0.0, linearPrediction * (1.0 - lagBusyFactor));
   }
 
 }
