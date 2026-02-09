@@ -1,0 +1,121 @@
+#!/bin/bash
+
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.
+# The ASF licenses this file to You under the Apache License, Version 2.0
+# (the "License"); you may not use this file except in compliance with
+# the License.  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
+set -e
+set -x
+
+should_update_branch_link() {
+  local branch_link="$1"
+  local new_commit="$2"
+
+  if [ ! -L "$branch_link" ]; then
+    return 0
+  fi
+
+  local old_target=$(readlink "$branch_link")
+  local old_commit=$(basename "$old_target" .json)
+
+  git merge-base --is-ancestor "$old_commit" "$new_commit" 2>/dev/null
+}
+
+COMMIT_SHA="${CI_COMMIT_SHA:-$(git rev-parse HEAD)}"
+BRANCH_NAME="${CI_BRANCH_NAME:-$(git rev-parse --abbrev-ref HEAD)}"
+BASE_BRANCH="${CI_BASE_BRANCH}"
+BASE_URL="https://kgyrtkirk.github.io/druid-bench/benchmark-results"
+BENCH_REPO_DIR=".druid-bench"
+
+# Auto-detect suite names from directory structure
+SUITES=()
+for suite_dir in benchmark-results/*; do
+  if [ -d "$suite_dir" ] && [ -f "$suite_dir/current.json" ]; then
+    SUITES+=($(basename "$suite_dir"))
+  fi
+done
+
+if [ ${#SUITES[@]} -eq 0 ]; then
+  echo "Error: No benchmark results found in benchmark-results/*/current.json"
+  exit 1
+fi
+
+if [ ! -d "$BENCH_REPO_DIR/.git" ]; then
+  echo "Error: Benchmark repository not found at $BENCH_REPO_DIR"
+  echo "The workflow should check out the repository using actions/checkout"
+  exit 1
+fi
+
+echo "Processing benchmark results..."
+cd "$BENCH_REPO_DIR"
+git pull
+
+for SUITE_NAME in "${SUITES[@]}"; do
+  echo "Adding ${SUITE_NAME}..."
+
+  SOURCE_FILE="../benchmark-results/$SUITE_NAME/current.json"
+  SUITE_DIR="benchmark-results/${SUITE_NAME}"
+  TARGET_FILE="${SUITE_DIR}/${COMMIT_SHA}.json"
+
+  mkdir -p "$SUITE_DIR"
+  cp "$SOURCE_FILE" "$TARGET_FILE"
+  git add "$TARGET_FILE"
+
+  if [ -n "$BRANCH_NAME" ]; then
+    BRANCH_LINK="${SUITE_DIR}/branch-${BRANCH_NAME}.json"
+
+    if should_update_branch_link "$BRANCH_LINK" "$COMMIT_SHA"; then
+      ln -sf "${COMMIT_SHA}.json" "$BRANCH_LINK"
+      git add "$BRANCH_LINK"
+    fi
+  fi
+done
+
+SUITES_LIST=$(IFS=, ; echo "${SUITES[*]}")
+git commit -m "Add benchmark results for ${COMMIT_SHA}${BRANCH_NAME:+ (${BRANCH_NAME})} - ${SUITES_LIST}"
+git push origin HEAD
+
+cd -
+
+set +x
+echo ""
+echo "=================================================="
+echo "Benchmark results for ${COMMIT_SHA} (${BRANCH_NAME})"
+echo ""
+
+for SUITE_NAME in "${SUITES[@]}"; do
+  COMMIT_URL="${BASE_URL}/${SUITE_NAME}/${COMMIT_SHA}.json"
+
+  echo "View ${SUITE_NAME}:"
+  echo "  https://jmh.morethan.io/?source=${COMMIT_URL}"
+  echo ""
+
+  if [ -n "$BASE_BRANCH" ]; then
+    BRANCH_URL="${BASE_URL}/${SUITE_NAME}/branch-${BASE_BRANCH}.json"
+    echo "Compare ${SUITE_NAME} against base branch (${BASE_BRANCH}):"
+    echo "  https://jmh.morethan.io/?sources=${COMMIT_URL},${BRANCH_URL}"
+    echo ""
+
+    MERGE_BASE=$(git merge-base HEAD "origin/${BASE_BRANCH}" 2>/dev/null || echo "")
+    if [ -n "$MERGE_BASE" ]; then
+      MERGE_BASE_URL="${BASE_URL}/${SUITE_NAME}/${MERGE_BASE}.json"
+      echo "Compare ${SUITE_NAME} against merge-base (${MERGE_BASE}):"
+      echo "  https://jmh.morethan.io/?sources=${COMMIT_URL},${MERGE_BASE_URL}"
+      echo ""
+    fi
+  fi
+done
+
+echo "=================================================="
