@@ -21,6 +21,7 @@
 BrowserOnly
 docusaurus
 1M
+10MiB
 100MiB
 32-bit
 4MiB
@@ -28,6 +29,7 @@ docusaurus
 64-bit
 ACL
 ACLs
+ADC
 APIs
 apache.org
 AvroStorage
@@ -113,6 +115,7 @@ Float.POSITIVE_INFINITY.
 ForwardedRequestCustomizer
 GC
 GPG
+GoogleCloudStorageInputSource
 GSSAPI
 GUIs
 GroupBy
@@ -601,6 +604,7 @@ unannouncements
 unary
 unassign
 uncomment
+uncompacted
 underutilization
 unintuitive
 unioned
@@ -1135,7 +1139,9 @@ POD_NAMESPACE
 ConfigMap
 ConfigMaps
 PT17S
+GCP
 GCS
+GCSFileIO
 gcs-connector
 hdfs
 Aotearoa
