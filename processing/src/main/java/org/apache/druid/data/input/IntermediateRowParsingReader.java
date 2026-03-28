@@ -71,7 +71,7 @@ public abstract class IntermediateRowParsingReader<T> implements InputEntityRead
             rows = parseInputRows(row).iterator();
             ++currentRecordNumber;
           }
-          catch (IOException e) {
+          catch (IOException | ParseException e) {
             final Map<String, Object> metadata = intermediateRowIteratorWithMetadata.currentMetadata();
             final String rowAsString = intermediateRowAsString(row);
             rows = new ExceptionThrowingIterator(new ParseException(
@@ -84,16 +84,6 @@ public abstract class IntermediateRowParsingReader<T> implements InputEntityRead
                     metadata
                 )
             ));
-          }
-          catch (ParseException e) {
-            final Map<String, Object> metadata = intermediateRowIteratorWithMetadata.currentMetadata();
-            // Replace the message of the ParseException e
-            rows = new ExceptionThrowingIterator(
-                new ParseException(
-                    e.getInput(),
-                    e.isFromPartiallyValidRow(),
-                    buildParseExceptionMessage(e.getMessage(), source(), currentRecordNumber, metadata)
-                ));
           }
         }
 
