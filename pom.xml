@@ -128,13 +128,13 @@
         <jacoco.version>0.8.14</jacoco.version>
         <testcontainers.version>2.0.3</testcontainers.version>
         <hibernate-validator.version>6.2.5.Final</hibernate-validator.version>
-        <httpclient.version>4.5.13</httpclient.version>
+        <httpclient.version>4.5.14</httpclient.version>
         <okhttp.version>5.3.2</okhttp.version>
         <kubernetes.client.version>25.0.0-legacy</kubernetes.client.version>
         <zookeeper.version>3.8.6</zookeeper.version>
         <checkerframework.version>3.48.1</checkerframework.version>
         <com.google.apis.client.version>2.2.0</com.google.apis.client.version>
-        <com.google.http.client.apis.version>1.42.3</com.google.http.client.apis.version>
+        <com.google.http.client.apis.version>1.43.3</com.google.http.client.apis.version>
         <com.google.apis.compute.version>v1-rev20230606-2.0.0</com.google.apis.compute.version>
         <com.google.cloud.storage.version>2.29.1</com.google.cloud.storage.version>
         <jdk.strong.encapsulation.argLine>
@@ -1866,12 +1866,6 @@
                                        <!-- upgrading these later -->
                                        <exclude>org.apache.zookeeper:zookeeper</exclude>
                                        <exclude>com.google.guava:guava</exclude>
-                                       <exclude>com.google.inject.extensions:guice-assistedinject</exclude>
-                                       <exclude>com.fasterxml.jackson.module:jackson-module-guice</exclude>
-                                       <exclude>com.google.inject:guice</exclude>
-                                       <exclude>com.google.http-client:google-http-client-jackson2</exclude>
-                                       <exclude>com.google.http-client:google-http-client</exclude>
-                                       <exclude>com.google.api.grpc:proto-google-common-protos</exclude>
                                        <exclude>io.confluent:kafka-schema-registry-client</exclude>
                                        <exclude>org.apache.kafka:kafka-clients</exclude>
                                     </excludes>
