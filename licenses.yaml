@@ -307,7 +307,7 @@ name: Jackson
 license_category: binary
 module: java-core
 license_name: Apache License version 2.0
-version: 2.19.2
+version: 2.20.1
 libraries:
   - com.fasterxml.jackson.core: jackson-core
   - com.fasterxml.jackson.core: jackson-annotations
@@ -348,9 +348,19 @@ notice: |
 
 name: Jackson
 license_category: binary
+module: java-core
+license_name: Apache License version 2.0
+version: "2.20"
+libraries:
+  - com.fasterxml.jackson.core: jackson-annotations
+
+---
+
+name: Jackson
+license_category: binary
 module: extensions-contrib/druid-deltalake-extensions
 license_name: Apache License version 2.0
-version: 2.19.2
+version: 2.20.1
 libraries:
   - com.fasterxml.jackson.core: jackson-databind
 notice: |
@@ -376,7 +386,7 @@ name: JavaBeans Activation Framework API JAR
 license_category: binary
 module: java-core
 license_name: Eclipse Distribution License 1.0
-version: 1.2.1
+version: 1.2.2
 copyright: Oracle and/or its affiliates.
 license_file_path: licenses/bin/jakarta.EDL1
 libraries:
@@ -410,7 +420,7 @@ name: Error Prone Annotations
 license_category: binary
 module: java-core
 license_name: Apache License version 2.0
-version: 2.35.1
+version: 2.41.0
 libraries:
   - com.google.errorprone: error_prone_annotations
 
@@ -1197,7 +1207,7 @@ name: org.yaml snakeyaml
 license_category: binary
 module: extensions-core/kubernetes-overlord-extensions
 license_name: Apache License version 2.0
-version: 2.4
+version: 2.5
 libraries:
   - org.yaml: snakeyaml
 
@@ -1227,7 +1237,7 @@ name: org.bouncycastle bcprov-jdk18on
 license_category: binary
 module: extensions-core/kubernetes-extensions
 license_name: MIT License
-version: "1.81"
+version: "1.82"
 libraries:
   - org.bouncycastle: bcprov-jdk18on
   - org.bouncycastle: bcprov-ext-jdk18on
@@ -1420,7 +1430,7 @@ name: Netty
 license_category: binary
 module: java-core
 license_name: Apache License version 2.0
-version: 4.2.6.Final
+version: 4.2.7.Final
 libraries:
   - io.netty: netty-buffer
   - io.netty: netty-codec
@@ -2623,7 +2633,7 @@ name: RoaringBitmap
 license_category: binary
 module: java-core
 license_name: Apache License version 2.0
-version: 0.9.49
+version: 1.3.0
 libraries:
   - org.roaringbitmap: RoaringBitmap
   - org.roaringbitmap: shims
@@ -3010,7 +3020,7 @@ libraries:
 ---
 
 name: Jackson Dataformat Yaml
-version: 2.19.2
+version: 2.20.1
 license_category: binary
 module: extensions/druid-avro-extensions
 license_name: Apache License version 2.0
@@ -3165,7 +3175,7 @@ name: org.yaml snakeyaml
 license_category: binary
 module: extensions/druid-protobuf-extensions
 license_name: Apache License version 2.0
-version: 2.0
+version: 2.5
 libraries:
   - org.yaml: snakeyaml
 
@@ -4126,7 +4136,7 @@ name: aircompressor
 license_category: binary
 module: extensions/druid-orc-extensions
 license_name: Apache License version 2.0
-version: "0.21"
+version: "2.0.2"
 libraries:
   - io.airlift: aircompressor
 
@@ -4628,7 +4638,7 @@ name: Netty
 license_category: binary
 module: extensions/druid-azure-extensions
 license_name: Apache License version 2.0
-version: 2.0.73.Final
+version: 2.0.74.Final
 libraries:
   - io.netty: netty-tcnative-boringssl-static
   - io.netty: netty-tcnative-classes
@@ -5201,7 +5211,7 @@ name: jakarta.activation
 license_category: binary
 module: extensions/druid-avro-extensions
 license_name: Eclipse Distribution License 1.0
-version: 1.2.2
+version: 2.0.1
 libraries:
   - com.sun.activation: jakarta.activation
 
