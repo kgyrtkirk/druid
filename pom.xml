@@ -1759,14 +1759,8 @@
                 <configuration>
                     <skip>${spotless.skip}</skip>
                     <java>
-                        <eclipse>
-                            <version>4.33</version>
-                            <file>${maven.multiModuleProjectDirectory}/codestyle/eclipse-formatter.xml</file>
-                        </eclipse>
-                        <importOrder>
-                            <!-- matches checkstyle ImportOrder: groups=*,javax,java option=bottom -->
-                            <order>,javax,java</order>
-                        </importOrder>
+                        <trimTrailingWhitespace/>
+                        <endWithNewline/>
                     </java>
                 </configuration>
                 <executions>
