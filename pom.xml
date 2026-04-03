@@ -1753,6 +1753,33 @@
                 </executions>
             </plugin>
             <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>2.43.0</version>
+                <configuration>
+                    <skip>${spotless.skip}</skip>
+                    <java>
+                        <eclipse>
+                            <version>4.33</version>
+                            <file>${maven.multiModuleProjectDirectory}/codestyle/eclipse-formatter.xml</file>
+                        </eclipse>
+                        <importOrder>
+                            <!-- matches checkstyle ImportOrder: groups=*,javax,java option=bottom -->
+                            <order>,javax,java</order>
+                        </importOrder>
+                    </java>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>validate</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>de.thetaphi</groupId>
                 <artifactId>forbiddenapis</artifactId>
                 <version>3.5.1</version>
@@ -2415,6 +2442,7 @@
             <maven.javadoc.skip>true</maven.javadoc.skip>
             <pmd.skip>true</pmd.skip>
             <spotbugs.skip>true</spotbugs.skip>
+            <spotless.skip>true</spotless.skip>
             <maven.gitcommitid.skip>true</maven.gitcommitid.skip>
           </properties>
         </profile>
