@@ -112,4 +112,3 @@ public class DoubleFirstLastVectorAggregator extends FirstLastVectorAggregator<D
     return FirstLastUtils.readDoublePairFromVectorSelectors(timeNullityVector, timeVector, maybeFoldedObjects, index);
   }
 }
-

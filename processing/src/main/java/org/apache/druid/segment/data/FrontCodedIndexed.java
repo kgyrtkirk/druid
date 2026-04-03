@@ -196,7 +196,7 @@ public abstract class FrontCodedIndexed implements Indexed<ByteBuffer>
    * this method modifies the position of {@link #buffer}
    */
   abstract int findInBucket(ByteBuffer value, int currBucketFirstValueIndex, int bucketSize, int sharedPrefixLength);
-  
+
   @Override
   public int size()
   {

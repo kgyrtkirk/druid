@@ -81,7 +81,7 @@ public class GeneratorInputSource extends AbstractInputSource implements Splitta
   private final Long startTime;
   private final Integer numConsecutiveTimestamps;
   private final Double timestampIncrement;
-  
+
   @JsonCreator
   public GeneratorInputSource(
       @JsonProperty("schemaName") @Nullable String schemaName,

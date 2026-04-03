@@ -133,7 +133,7 @@ public class IcebergRestCatalogResource extends TestcontainerResource<GenericCon
   }
 
   /**
-   * Drops a namespace from the REST catalog. 
+   * Drops a namespace from the REST catalog.
    */
   public void dropNamespace(String namespace)
   {

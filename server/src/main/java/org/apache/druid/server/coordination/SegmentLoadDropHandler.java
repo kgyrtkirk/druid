@@ -446,4 +446,3 @@ public class SegmentLoadDropHandler
     return config;
   }
 }
-

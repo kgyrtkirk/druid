@@ -329,4 +329,3 @@ public class AzureStorageTest
     assertTrue(overrideArgument.getValue());
   }
 }
-

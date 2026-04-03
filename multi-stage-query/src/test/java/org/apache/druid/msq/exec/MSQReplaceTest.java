@@ -377,7 +377,7 @@ public class MSQReplaceTest extends MSQTestBase
                      )
                      .verifyResults();
   }
-  
+
   @MethodSource("data")
   @ParameterizedTest(name = "{index}:with context {0}")
   public void testReplaceOnFooWithAllClusteredByExpression(String contextName, Map<String, Object> context)

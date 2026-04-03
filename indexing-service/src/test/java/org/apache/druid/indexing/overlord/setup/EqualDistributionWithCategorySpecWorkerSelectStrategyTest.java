@@ -207,7 +207,7 @@ public class EqualDistributionWithCategorySpecWorkerSelectStrategyTest
         false
     );
     final Task taskWithSupervisor = createTestTask("task1", "supervisor1", "ds1");
-    
+
     final EqualDistributionWithCategorySpecWorkerSelectStrategy strategy =
         new EqualDistributionWithCategorySpecWorkerSelectStrategy(workerCategorySpec, null);
 
@@ -236,7 +236,7 @@ public class EqualDistributionWithCategorySpecWorkerSelectStrategyTest
         false
     );
     final Task taskWithSupervisor = createTestTask("task1", "supervisor1", "ds1");
-    
+
     final EqualDistributionWithCategorySpecWorkerSelectStrategy strategy =
         new EqualDistributionWithCategorySpecWorkerSelectStrategy(workerCategorySpec, null);
 
@@ -266,7 +266,7 @@ public class EqualDistributionWithCategorySpecWorkerSelectStrategyTest
     );
 
     final Task taskWithSupervisor = createTestTask("task1", "supervisor1", "ds1");
-    
+
     final EqualDistributionWithCategorySpecWorkerSelectStrategy strategy =
         new EqualDistributionWithCategorySpecWorkerSelectStrategy(workerCategorySpec, null);
 

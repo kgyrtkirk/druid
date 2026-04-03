@@ -89,4 +89,3 @@ public class HandlingInputRowIterator implements CloseableIterator<InputRow>
     delegate.close();
   }
 }
-

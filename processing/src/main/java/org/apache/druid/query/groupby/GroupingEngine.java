@@ -193,7 +193,7 @@ public class GroupingEngine
         );
       } else {
         return new GroupByQueryResources(
-            mergeBufferHolders.subList(0, requiredMergeBufferNumForToolchestMerge), 
+            mergeBufferHolders.subList(0, requiredMergeBufferNumForToolchestMerge),
             mergeBufferHolders.subList(requiredMergeBufferNumForToolchestMerge, requiredMergeBufferNum)
         );
       }

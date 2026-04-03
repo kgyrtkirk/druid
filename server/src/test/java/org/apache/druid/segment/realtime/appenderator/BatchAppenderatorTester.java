@@ -122,7 +122,7 @@ public class BatchAppenderatorTester implements AutoCloseable
          false
     );
   }
-  
+
   public BatchAppenderatorTester(
       final int maxRowsInMemory,
       final long maxSizeInBytes,

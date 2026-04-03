@@ -113,7 +113,7 @@ public class JdbcDataFetcher implements DataFetcher<String, String>
    * Check the given URL whether it contains non-allowed properties.
    *
    * @see JdbcAccessSecurityConfig#getAllowedProperties()
-   * @see ConnectionUriUtils#tryParseJdbcUriParameters(String, boolean) 
+   * @see ConnectionUriUtils#tryParseJdbcUriParameters(String, boolean)
    */
   private static void checkConnectionURL(String url, JdbcAccessSecurityConfig securityConfig)
   {

@@ -220,4 +220,3 @@ public class MomentsSketchAggregatorTest extends InitializedNullHandlingTest
     Assert.assertEquals(377.0, sketchObjectWithNulls.getPowerSums()[0], 1e-10);
   }
 }
-

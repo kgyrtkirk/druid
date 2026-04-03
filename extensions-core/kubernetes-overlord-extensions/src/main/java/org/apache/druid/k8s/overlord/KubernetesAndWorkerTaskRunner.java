@@ -256,7 +256,7 @@ public class KubernetesAndWorkerTaskRunner implements TaskLogStreamer, WorkerTas
     }
     return taskLocation;
   }
-  
+
   @Nullable
   @Override
   public RunnerTaskState getRunnerTaskState(String taskId)

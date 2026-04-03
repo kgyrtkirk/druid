@@ -439,7 +439,7 @@ public class TLSTest extends EmbeddedClusterTestBase
   {
     makeRequest(httpClient, HttpMethod.GET, getServerUrl(server) + "/status");
   }
-  
+
   private void verifyGetStatusHttpsIsOk(HttpClient httpClient, EmbeddedDruidServer<?> server)
   {
     makeRequest(httpClient, HttpMethod.GET, getServerHttpsUrl(server) + "/status");

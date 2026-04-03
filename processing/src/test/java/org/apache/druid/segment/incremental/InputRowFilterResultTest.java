@@ -61,4 +61,3 @@ public class InputRowFilterResultTest
     Assert.assertTrue(InputRowFilterResult.UNKNOWN.isRejected());
   }
 }
-

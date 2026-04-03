@@ -174,7 +174,7 @@ public interface Function extends NamedFunction
    * anything other than the {@link Function} implementation having no specialized index supplier implementation, and
    * so callers can fall back to generic handling as appropriate.
    *
-   * @see Expr#asColumnIndexSupplier(ColumnIndexSelector, ColumnType) 
+   * @see Expr#asColumnIndexSupplier(ColumnIndexSelector, ColumnType)
    */
   @Nullable
   default ColumnIndexSupplier asColumnIndexSupplier(

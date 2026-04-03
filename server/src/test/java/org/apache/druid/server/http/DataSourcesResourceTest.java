@@ -107,7 +107,7 @@ public class DataSourcesResourceTest
   private SegmentsMetadataManager segmentsMetadataManager;
   private OverlordClient overlordClient;
   private AuditManager auditManager;
-  
+
   private DataSourcesResource dataSourcesResource;
 
   @Before
@@ -166,7 +166,7 @@ public class DataSourcesResourceTest
     );
     segmentsMetadataManager = EasyMock.createMock(SegmentsMetadataManager.class);
     overlordClient = EasyMock.createStrictMock(OverlordClient.class);
-    
+
     dataSourcesResource = new DataSourcesResource(
       inventoryView,
       segmentsMetadataManager,
@@ -1012,11 +1012,11 @@ public class DataSourcesResourceTest
   {
     SegmentsToUpdateFilter segmentFilter =
         new SegmentsToUpdateFilter(Intervals.ETERNITY, null, ImmutableList.of("v1", "v2"));
-    
+
     EasyMock.expect(overlordClient.markNonOvershadowedSegmentsAsUsed(TestDataSource.WIKI, segmentFilter))
             .andReturn(Futures.immediateFuture(new SegmentUpdateResponse(2))).once();
     EasyMock.replay(overlordClient);
-    
+
     Response response = dataSourcesResource.markAsUsedNonOvershadowedSegments(
         TestDataSource.WIKI,
         segmentFilter

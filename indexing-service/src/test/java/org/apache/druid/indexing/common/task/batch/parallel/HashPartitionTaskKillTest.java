@@ -339,7 +339,7 @@ public class HashPartitionTaskKillTest extends AbstractMultiPhaseParallelIndexin
     }
 
     @Override
-    public TaskState run() 
+    public TaskState run()
     {
       if (succeeds) {
         return TaskState.SUCCESS;

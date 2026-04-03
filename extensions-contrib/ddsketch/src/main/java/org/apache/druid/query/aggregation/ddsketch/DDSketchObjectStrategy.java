@@ -50,7 +50,7 @@ public class DDSketchObjectStrategy implements ObjectStrategy<DDSketch>
       com.datadoghq.sketch.ddsketch.proto.DDSketch proto = com.datadoghq.sketch.ddsketch.proto.DDSketch.parseFrom(readOnlyBuffer);
       DDSketch recovered = DDSketchProtoBinding.fromProto(() -> new CollapsingLowestDenseStore(1000), proto);
       return recovered;
-    } 
+    }
     catch (InvalidProtocolBufferException e) {
       throw new UnsupportedOperationException("Unable to decode from Proto");
     }

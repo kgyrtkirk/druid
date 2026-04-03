@@ -118,7 +118,7 @@ public class JettyServerInitUtils
         null
     );
   }
-  
+
   public static void maybeAddHSTSPatternRule(ServerConfig serverConfig, RewriteHandler rewriteHandler)
   {
     if (serverConfig.isEnableHSTS()) {

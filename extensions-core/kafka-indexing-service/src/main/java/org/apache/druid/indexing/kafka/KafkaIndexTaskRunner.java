@@ -229,4 +229,3 @@ public class KafkaIndexTaskRunner extends SeekableStreamIndexTaskRunner<KafkaTop
     }
   }
 }
-

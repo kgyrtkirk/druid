@@ -100,4 +100,3 @@ public class QuartzCronSchedulerConfig implements CronSchedulerConfig
     return Objects.hash(schedule);
   }
 }
-

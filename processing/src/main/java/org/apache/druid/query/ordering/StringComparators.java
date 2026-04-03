@@ -85,7 +85,7 @@ public class StringComparators
       if (o == null || getClass() != o.getClass()) {
         return false;
       }
-      
+
       return true;
     }
 
@@ -107,7 +107,7 @@ public class StringComparators
       return new byte[]{(byte) LEXICOGRAPHIC_CACHE_ID};
     }
   }
-  
+
   public static class AlphanumericComparator extends StringComparator
   {
     // This code is based on https://github.com/amjjd/java-alphanum, see
@@ -315,7 +315,7 @@ public class StringComparators
       if (s == s2) {
         return 0;
       }
-      
+
       return ORDERING.compare(s, s2);
     }
 

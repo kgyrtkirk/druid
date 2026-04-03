@@ -153,13 +153,13 @@ public class SketchEstimatePostAggregator implements PostAggregator
     if (!name.equals(that.name)) {
       return false;
     }
-    
+
     if (errorBoundsStdDev == null ^ that.errorBoundsStdDev == null) {
       // one of the two stddevs (not both) are null
       return false;
     }
-    
-    if (errorBoundsStdDev != null && that.errorBoundsStdDev != null && 
+
+    if (errorBoundsStdDev != null && that.errorBoundsStdDev != null &&
         errorBoundsStdDev.intValue() != that.errorBoundsStdDev.intValue()) {
       // neither stddevs are null, Integer values don't match
       return false;

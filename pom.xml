@@ -1759,6 +1759,9 @@
                 <configuration>
                     <skip>${spotless.skip}</skip>
                     <java>
+                        <excludes>
+                            <exclude>**/extendedset/intset/**</exclude>
+                        </excludes>
                         <trimTrailingWhitespace/>
                         <endWithNewline/>
                     </java>

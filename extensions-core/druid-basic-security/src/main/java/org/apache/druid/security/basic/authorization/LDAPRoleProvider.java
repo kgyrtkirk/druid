@@ -107,7 +107,7 @@ public class LDAPRoleProvider implements RoleProvider
     }
 
     // Get the roles assigned to LDAP user from the metastore.
-    // This allow us to authorize LDAP users regardless of whether they belong to any groups or not in LDAP.  
+    // This allow us to authorize LDAP users regardless of whether they belong to any groups or not in LDAP.
     BasicAuthorizerUser user = userMap.get(authenticationResult.getIdentity());
     if (user != null) {
       roleNames.addAll(user.getRoles());

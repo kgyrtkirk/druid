@@ -40,7 +40,7 @@ public class ColumnCapabilitiesImplTest
                                                 .setHasNulls(true));
 
     Assert.assertFalse(json.contains("filterable"));
-    
+
     ColumnCapabilities cc = mapper.readValue(json, ColumnCapabilitiesImpl.class);
 
     Assert.assertEquals(ColumnType.UNKNOWN_COMPLEX, cc.toColumnType());

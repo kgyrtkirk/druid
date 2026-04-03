@@ -296,7 +296,7 @@ public class AsyncQueryForwardingServletTest extends BaseJettyTest
   public void testHandleExceptionWithFilterEnabled() throws Exception
   {
     String errorMessage = "test exception message";
-    ServerConfig serverConfig = new ServerConfig() 
+    ServerConfig serverConfig = new ServerConfig()
     {
       @Override
       public boolean isShowDetailedJettyErrors()

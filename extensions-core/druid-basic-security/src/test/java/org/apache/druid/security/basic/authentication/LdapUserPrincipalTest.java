@@ -65,7 +65,7 @@ public class LdapUserPrincipalTest extends TestCase
     Assert.assertTrue(PRINCIPAL.isExpired(1, 10, CREATED_MILLIS + 1001));
   }
 
-  public void testIsExpiredWhenDurationsAreSmall() 
+  public void testIsExpiredWhenDurationsAreSmall()
   {
     Assert.assertTrue(PRINCIPAL.isExpired(1, 1, CREATED_MILLIS + 1001));
   }

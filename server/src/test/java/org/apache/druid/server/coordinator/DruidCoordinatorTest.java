@@ -781,7 +781,7 @@ public class DruidCoordinatorTest
     EasyMock.replay(serverInventoryView, loadQueueTaskMaster);
 
     coordinator.start();
-    
+
     // Wait for this coordinator to become leader
     leaderAnnouncerLatch.await();
 
@@ -877,7 +877,7 @@ public class DruidCoordinatorTest
         () -> peonMap.get(((ImmutableDruidServer) EasyMock.getCurrentArgument(0)).getName())
     ).anyTimes();
   }
-  
+
   private LoadQueuePeon createImmediateLoadPeonFor(DruidServer server)
   {
     return new TestLoadQueuePeon() {

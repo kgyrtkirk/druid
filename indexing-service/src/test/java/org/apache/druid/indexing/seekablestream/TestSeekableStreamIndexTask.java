@@ -104,4 +104,3 @@ public class TestSeekableStreamIndexTask extends SeekableStreamIndexTask<String,
     return "test_seekable_stream";
   }
 }
-

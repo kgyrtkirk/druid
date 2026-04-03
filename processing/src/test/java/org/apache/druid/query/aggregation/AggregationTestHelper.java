@@ -812,4 +812,3 @@ public class AggregationTestHelper implements Closeable
     resourceCloser.close();
   }
 }
-

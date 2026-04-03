@@ -40,7 +40,7 @@ public abstract class AbstractTierSelectorStrategy implements TierSelectorStrate
   {
     this.serverSelectorStrategy = serverSelectorStrategy;
   }
-  
+
   @Nullable
   @Override
   public <T> QueryableDruidServer pick(

@@ -34,7 +34,7 @@ public class DefaultPasswordProviderTest
     DefaultPasswordProvider pp = new DefaultPasswordProvider(PWD);
     Assert.assertEquals(PWD, pp.getPassword());
   }
-  
+
   @Test
   public void testFromStringConstruction()
   {

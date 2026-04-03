@@ -208,7 +208,7 @@ public class ExportMetadata extends GuiceRunnable
     final Injector injector = makeInjector();
     SQLMetadataConnector dbConnector = injector.getInstance(SQLMetadataConnector.class);
     MetadataStorageTablesConfig metadataStorageTablesConfig = injector.getInstance(MetadataStorageTablesConfig.class);
-    
+
     // We export a raw CSV first, and then apply some conversions for easier imports:
     // Boolean strings are rewritten as 1 and 0
     // hexadecimal BLOB columns are rewritten with rewriteHexPayloadAsEscapedJson()

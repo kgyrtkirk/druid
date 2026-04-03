@@ -43,4 +43,3 @@ public class CompressedBigDecimalMaxAggregatorTimeseriesTest extends CompressedB
     );
   }
 }
-

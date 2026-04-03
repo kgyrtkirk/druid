@@ -111,4 +111,3 @@ public class FloatFirstLastVectorAggregator extends FirstLastVectorAggregator<Fl
     return FirstLastUtils.readFloatPairFromVectorSelectors(timeNullityVector, timeVector, maybeFoldedObjects, index);
   }
 }
-

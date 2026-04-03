@@ -127,7 +127,7 @@ public class RabbitStreamSupervisor extends SeekableStreamSupervisor<String, Lon
       spec.getIoConfig().getUri(),
       taskTuningConfig.getRecordBufferSizeOrDefault(Runtime.getRuntime().maxMemory()),
       taskTuningConfig.getRecordBufferOfferTimeout(),
-      taskTuningConfig.getMaxRecordsPerPollOrDefault()      
+      taskTuningConfig.getMaxRecordsPerPollOrDefault()
       );
   }
 

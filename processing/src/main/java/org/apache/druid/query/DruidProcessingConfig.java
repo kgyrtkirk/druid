@@ -216,4 +216,3 @@ public class DruidProcessingConfig implements ColumnConfig
     return parallelPoolInit;
   }
 }
-

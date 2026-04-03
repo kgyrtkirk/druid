@@ -102,7 +102,7 @@ public class Pac4jSessionStore implements SessionStore
     Cookie cookie;
 
     // Check if value is null, empty string, or empty collection
-    boolean isEmpty = value == null || 
+    boolean isEmpty = value == null ||
                      (value instanceof String && ((String) value).isEmpty()) ||
                      (value instanceof java.util.Collection && ((java.util.Collection<?>) value).isEmpty()) ||
                      (value instanceof java.util.Map && ((java.util.Map<?, ?>) value).isEmpty());

@@ -134,7 +134,7 @@ public class IndexerWorkerContext implements WorkerContext
     );
     this.liveReportCounters = MultiStageQueryContext.getLiveReportCounters(queryContext, DEFAULT_LIVE_REPORT_COUNTERS);
     this.includeAllCounters = MultiStageQueryContext.getIncludeAllCounters(queryContext);
-    
+
     // Compute thread count once in constructor
     final int baseThreadCount = memoryIntrospector.numProcessingThreads();
     final Integer maxThreads = MultiStageQueryContext.getMaxThreads(queryContext);

@@ -1753,4 +1753,3 @@ public class MSQTestBase extends BaseCalciteQueryTest
   }
 
 }
-

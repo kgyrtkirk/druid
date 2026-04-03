@@ -136,7 +136,7 @@ public class DDSketchAggregatorTest extends InitializedNullHandlingTest
     Object quantilesObject = row.get(1); // "quantiles"
     Assert.assertTrue(quantilesObject instanceof double[]);
     double[] quantiles = (double[]) quantilesObject;
-    
+
     Assert.assertEquals(0.001, quantiles[0], 0.0006); // min value
     Assert.assertEquals(0.5, quantiles[1], 0.05); // median value
     Assert.assertEquals(1, quantiles[2], 0.05); // max value

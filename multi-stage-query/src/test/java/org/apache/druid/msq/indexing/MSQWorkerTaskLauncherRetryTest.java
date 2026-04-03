@@ -99,7 +99,7 @@ public class MSQWorkerTaskLauncherRetryTest
     // Should return failed workers in the set
     Set<IntObjectPair<MSQFault>> failedWorkers = launcher.launchWorkersIfNeeded(2);
 
-    // The method should not invoke the failure listener directly anymore, 
+    // The method should not invoke the failure listener directly anymore,
     // but should return the failed workers
     Assertions.assertFalse(failedWorkers.isEmpty());
 

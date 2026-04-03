@@ -62,7 +62,7 @@ public class ArrayOfDoublesSketchAggregatorFactory extends AggregatorFactory
   private final int nominalEntries;
   private final int numberOfValues;
   // if specified indicates building sketched from raw data, and also implies the number of values
-  @Nullable private final List<String> metricColumns; 
+  @Nullable private final List<String> metricColumns;
 
   @JsonCreator
   public ArrayOfDoublesSketchAggregatorFactory(
@@ -209,7 +209,7 @@ public class ArrayOfDoublesSketchAggregatorFactory extends AggregatorFactory
       }
     };
   }
-  
+
   @Override
   @JsonProperty
   public String getName()

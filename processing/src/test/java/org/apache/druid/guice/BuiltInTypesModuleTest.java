@@ -55,7 +55,7 @@ public class BuiltInTypesModuleTest
     );
     DimensionHandlerUtils.DIMENSION_HANDLER_PROVIDERS.remove(NestedDataComplexTypeSerde.TYPE_NAME);
   }
-  
+
   @After
   public void teardownEach()
   {

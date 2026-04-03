@@ -307,4 +307,3 @@ public class FloatLastVectorAggregatorTest extends InitializedNullHandlingTest
     }
   }
 }
-

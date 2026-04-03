@@ -860,7 +860,7 @@ public class AsyncQueryForwardingServlet extends AsyncProxyServlet implements Qu
       failedQueryCount.incrementAndGet();
 
       // As router is simply a proxy, we don't make an effort to construct the error code from the exception ourselves.
-      // We rely on broker to set this for us if the error occurs downstream. 
+      // We rely on broker to set this for us if the error occurs downstream.
       // Otherwise, if there's a router/client error, we log this as an unknown error.
       final int statusCode = determineStatusCode(false, response.getStatus());
       emitQueryTime(requestTimeNs, false, sqlQueryId, queryId, statusCode);

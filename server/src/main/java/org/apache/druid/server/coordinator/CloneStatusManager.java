@@ -63,4 +63,3 @@ public class CloneStatusManager
     cloneStatusSnapshot.set(ImmutableMap.copyOf(newStatusMap));
   }
 }
-

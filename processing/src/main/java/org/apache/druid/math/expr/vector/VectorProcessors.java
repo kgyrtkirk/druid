@@ -864,7 +864,7 @@ public class VectorProcessors
   }
   /**
    * Basic scaffolding for an 'identifier' {@link ExprVectorProcessor}
-   * 
+   *
    * @see #identifier
    */
   static final class IdentifierVectorProcessor<T> implements ExprVectorProcessor<T>

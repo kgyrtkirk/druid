@@ -282,4 +282,3 @@ public abstract class SimpleQueryableIndex implements QueryableIndex
     };
   }
 }
-

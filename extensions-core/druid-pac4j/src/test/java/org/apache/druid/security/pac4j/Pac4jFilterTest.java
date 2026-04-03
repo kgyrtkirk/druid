@@ -95,10 +95,10 @@ public class Pac4jFilterTest
   {
     // Mock request with existing authentication result
     Mockito.when(request.getAttribute(DRUID_AUTHENTICATION_RESULT)).thenReturn("already-authenticated");
-    
+
     // Call doFilter
     pac4jFilter.doFilter(request, response, filterChain);
-    
+
     // Verify it continues the filter chain without doing authentication
     Mockito.verify(filterChain).doFilter(request, response);
   }
@@ -109,7 +109,7 @@ public class Pac4jFilterTest
     // Mock request without authentication result
     Mockito.when(request.getAttribute(DRUID_AUTHENTICATION_RESULT)).thenReturn(null);
     Mockito.when(request.getRequestURI()).thenReturn("/some/path");
-    
+
     // This will attempt to do authentication, which may throw due to missing pac4j config
     // but we're mainly testing the basic flow
     try {
@@ -118,7 +118,7 @@ public class Pac4jFilterTest
     catch (Exception e) {
       // Expected due to mock limitations, but we verified the basic flow
     }
-    
+
     // Verify that the authentication attribute was checked
     Mockito.verify(request).getAttribute(DRUID_AUTHENTICATION_RESULT);
     Mockito.verify(request).getRequestURI();
@@ -132,7 +132,7 @@ public class Pac4jFilterTest
     Mockito.when(request.getRequestURI()).thenReturn("/callback");
     Mockito.when(request.getSession()).thenReturn(session);
     Mockito.when(session.getAttribute("pac4j.originalUrl")).thenReturn("/original");
-    
+
     // This will attempt to do callback logic
     try {
       pac4jFilter.doFilter(request, response, filterChain);
@@ -140,7 +140,7 @@ public class Pac4jFilterTest
     catch (Exception e) {
       // Expected due to mock limitations
     }
-    
+
     // Verify that the callback path was detected
     Mockito.verify(request).getRequestURI();
     Mockito.verify(request).getSession();
@@ -154,7 +154,7 @@ public class Pac4jFilterTest
     Mockito.when(request.getRequestURI()).thenReturn("/callback");
     Mockito.when(request.getSession()).thenReturn(session);
     Mockito.when(session.getAttribute("pac4j.originalUrl")).thenReturn(null);
-    
+
     // This will attempt to do callback logic
     try {
       pac4jFilter.doFilter(request, response, filterChain);
@@ -162,7 +162,7 @@ public class Pac4jFilterTest
     catch (Exception e) {
       // Expected due to mock limitations
     }
-    
+
     // Verify that the callback path was detected and session was accessed
     Mockito.verify(request).getRequestURI();
     Mockito.verify(session).getAttribute("pac4j.originalUrl");
@@ -196,4 +196,3 @@ public class Pac4jFilterTest
     Assert.assertNotNull(filter);
   }
 }
-

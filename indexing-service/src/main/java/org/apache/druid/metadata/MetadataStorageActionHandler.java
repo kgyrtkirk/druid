@@ -43,7 +43,7 @@ public interface MetadataStorageActionHandler
 {
   /**
    * Creates a new entry.
-   * 
+   *
    * @param id entry id
    * @param timestamp timestamp this entry was created
    * @param dataSource datasource associated with this entry
@@ -166,7 +166,7 @@ public interface MetadataStorageActionHandler
 
   /**
    * Remove the tasks created older than the given timestamp.
-   * 
+   *
    * @param timestamp timestamp in milliseconds
    */
   void removeTasksOlderThan(long timestamp);

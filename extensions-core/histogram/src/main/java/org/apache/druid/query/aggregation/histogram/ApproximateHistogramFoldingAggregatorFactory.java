@@ -195,4 +195,3 @@ public class ApproximateHistogramFoldingAggregatorFactory extends ApproximateHis
     return Objects.hash(name, fieldName, resolution, numBuckets, lowerLimit, upperLimit, finalizeAsBase64Binary);
   }
 }
-

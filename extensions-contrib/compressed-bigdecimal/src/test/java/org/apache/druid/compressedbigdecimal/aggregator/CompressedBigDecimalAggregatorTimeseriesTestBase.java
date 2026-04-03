@@ -221,4 +221,3 @@ public abstract class CompressedBigDecimalAggregatorTimeseriesTestBase extends I
 
   }
 }
-

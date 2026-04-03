@@ -138,4 +138,3 @@ public class TombstoneSegmentizerFactory implements SegmentizerFactory
     return segmentObject;
   }
 }
-
