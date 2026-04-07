@@ -1762,6 +1762,10 @@
                         <excludes>
                             <exclude>**/extendedset/intset/**</exclude>
                         </excludes>
+                        <eclipse>
+                            <version>4.33</version>
+                            <file>${maven.multiModuleProjectDirectory}/codestyle/eclipse-formatter.xml</file>
+                        </eclipse>
                         <removeUnusedImports/>
                         <importOrder>
                             <!-- matches checkstyle ImportOrder: groups=*,javax,java option=bottom; \# = static imports -->

@@ -29,6 +29,32 @@
     <setting id="org.eclipse.jdt.core.formatter.indentation.size" value="2"/>
     <setting id="org.eclipse.jdt.core.formatter.use_tabs_only_for_leading_indentations" value="false"/>
 
+    <!-- Brace positions: next_line (Allman) for declarations, end_of_line (K&R) for blocks
+         matches checkstyle LeftCurly: nl for CLASS/INTERFACE/ANNOTATION/ENUM/CTOR/METHOD_DEF
+                                       eol for control flow, STATIC_INIT, LAMBDA, ENUM_CONSTANT_DEF -->
+    <setting id="org.eclipse.jdt.core.formatter.brace_position_for_type_declaration" value="next_line"/>
+    <setting id="org.eclipse.jdt.core.formatter.brace_position_for_method_declaration" value="next_line"/>
+    <setting id="org.eclipse.jdt.core.formatter.brace_position_for_constructor_declaration" value="next_line"/>
+    <setting id="org.eclipse.jdt.core.formatter.brace_position_for_annotation_type_declaration" value="next_line"/>
+    <setting id="org.eclipse.jdt.core.formatter.brace_position_for_enum_declaration" value="next_line"/>
+    <setting id="org.eclipse.jdt.core.formatter.brace_position_for_record_declaration" value="next_line"/>
+    <setting id="org.eclipse.jdt.core.formatter.brace_position_for_record_constructor" value="next_line"/>
+    <setting id="org.eclipse.jdt.core.formatter.brace_position_for_block" value="end_of_line"/>
+    <setting id="org.eclipse.jdt.core.formatter.brace_position_for_block_in_case" value="end_of_line"/>
+    <setting id="org.eclipse.jdt.core.formatter.brace_position_for_switch" value="end_of_line"/>
+    <setting id="org.eclipse.jdt.core.formatter.brace_position_for_enum_constant" value="end_of_line"/>
+    <!-- anonymous classes not covered by any checkstyle LeftCurly rule; preserve existing next_line style -->
+    <setting id="org.eclipse.jdt.core.formatter.brace_position_for_anonymous_type_declaration" value="next_line"/>
+    <setting id="org.eclipse.jdt.core.formatter.brace_position_for_lambda_body" value="end_of_line"/>
+    <setting id="org.eclipse.jdt.core.formatter.brace_position_for_array_initializer" value="end_of_line"/>
+
+    <!-- } else { and } while ( on same line (checkstyle RightCurly same for IF, ELSE, DO) -->
+    <setting id="org.eclipse.jdt.core.formatter.insert_new_line_before_else_in_if_statement" value="do not insert"/>
+    <setting id="org.eclipse.jdt.core.formatter.insert_new_line_before_while_in_do_statement" value="do not insert"/>
+    <!-- } alone before catch/finally (checkstyle RightCurly alone for TRY, CATCH, FINALLY) -->
+    <setting id="org.eclipse.jdt.core.formatter.insert_new_line_before_catch_in_try_statement" value="insert"/>
+    <setting id="org.eclipse.jdt.core.formatter.insert_new_line_before_finally_in_try_statement" value="insert"/>
+
     <!-- Do not reformat existing code structure -->
     <setting id="org.eclipse.jdt.core.formatter.join_wrapped_lines" value="false"/>
     <setting id="org.eclipse.jdt.core.formatter.join_lines_in_comments" value="false"/>
