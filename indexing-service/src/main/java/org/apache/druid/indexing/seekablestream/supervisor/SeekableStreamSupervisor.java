@@ -3002,7 +3002,7 @@ public abstract class SeekableStreamSupervisor<PartitionIdType, SequenceOffsetTy
       recordSupplierLock.unlock();
     }
 
-    if (partitionIdsFromSupplier == null || partitionIdsFromSupplier.size() == 0) {
+    if (partitionIdsFromSupplier == null || partitionIdsFromSupplier.isEmpty()) {
       String errMsg = StringUtils.format("No partitions found for stream [%s]", ioConfig.getStream());
       stateManager.recordThrowableEvent(new StreamException(new ISE(errMsg)));
       log.warn(errMsg);

@@ -498,11 +498,11 @@ public class KerberosAuthenticator implements Authenticator
     String keytab;
 
     try {
-      if (serverPrincipal == null || serverPrincipal.trim().length() == 0) {
+      if (serverPrincipal == null || serverPrincipal.trim().isEmpty()) {
         throw new ServletException("Principal not defined in configuration");
       }
       keytab = serverKeytab;
-      if (keytab == null || keytab.trim().length() == 0) {
+      if (keytab == null || keytab.trim().isEmpty()) {
         throw new ServletException("Keytab not defined in configuration");
       }
       if (!new File(keytab).exists()) {

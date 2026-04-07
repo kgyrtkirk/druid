@@ -92,7 +92,7 @@ public class MSQWarningReportLimiterPublisher implements MSQWarningReportPublish
   {
     String errorCode = MSQErrorReport.getFaultFromException(e).getErrorCode();
     synchronized (lock) {
-      totalCount = totalCount + 1;
+      totalCount += 1;
       errorCodeToCurrentCount.compute(errorCode, (ignored, count) -> count == null ? 1L : count + 1);
 
       // Send the warning as an error if it is disallowed altogether
