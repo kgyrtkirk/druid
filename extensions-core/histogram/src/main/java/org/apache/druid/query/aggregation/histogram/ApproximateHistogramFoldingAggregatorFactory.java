@@ -38,6 +38,7 @@ import org.apache.druid.segment.vector.VectorColumnSelectorFactory;
 import org.apache.druid.segment.vector.VectorObjectSelector;
 
 import javax.annotation.Nullable;
+
 import java.util.Objects;
 
 @JsonTypeName("approxHistogramFold")

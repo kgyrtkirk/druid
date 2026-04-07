@@ -65,6 +65,7 @@ import org.apache.druid.storage.StorageConnector;
 import org.apache.druid.storage.StorageConnectorProvider;
 
 import javax.annotation.Nullable;
+
 import java.io.File;
 
 public class IndexerWorkerContext implements WorkerContext

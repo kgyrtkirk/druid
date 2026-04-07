@@ -22,6 +22,7 @@ package org.apache.druid.server.coordinator;
 import com.google.common.collect.ImmutableMap;
 
 import javax.annotation.Nullable;
+
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;

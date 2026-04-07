@@ -26,6 +26,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import org.apache.druid.segment.data.ObjectStrategy;
 
 import javax.annotation.Nullable;
+
 import java.nio.ByteBuffer;
 
 public class DDSketchObjectStrategy implements ObjectStrategy<DDSketch>

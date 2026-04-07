@@ -25,6 +25,7 @@ import org.apache.druid.security.basic.authentication.entity.BasicAuthenticatorC
 import org.junit.Assert;
 
 import javax.naming.directory.SearchResult;
+
 import java.time.Instant;
 
 public class LdapUserPrincipalTest extends TestCase

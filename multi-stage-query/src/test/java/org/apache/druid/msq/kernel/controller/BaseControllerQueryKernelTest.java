@@ -48,6 +48,7 @@ import org.apache.druid.testing.InitializedNullHandlingTest;
 import org.junit.Assert;
 
 import javax.annotation.Nonnull;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
