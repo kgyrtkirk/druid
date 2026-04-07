@@ -124,9 +124,9 @@ public class StringComparators
         return -1;
       } else if (str2 == null) {
         return 1;
-      } else if (str1.length() == 0) {
-        return str2.length() == 0 ? 0 : -1;
-      } else if (str2.length() == 0) {
+      } else if (str1.isEmpty()) {
+        return str2.isEmpty() ? 0 : -1;
+      } else if (str2.isEmpty()) {
         return 1;
       }
 

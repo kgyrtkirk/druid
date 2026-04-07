@@ -90,7 +90,7 @@ public class GroupByQueryResources implements Closeable
       }
 
     }
-    if (subtotalSpecs == null || subtotalSpecs.size() == 0) {
+    if (subtotalSpecs == null || subtotalSpecs.isEmpty()) {
       return numMergeBuffersNeededForSubQuerySubtotal;
     }
 
@@ -181,7 +181,7 @@ public class GroupByQueryResources implements Closeable
    */
   private static ResourceHolder<ByteBuffer> getMergeBuffer(Deque<ByteBuffer> acquiredBufferPool)
   {
-    if (acquiredBufferPool.size() == 0) {
+    if (acquiredBufferPool.isEmpty()) {
       throw DruidException.defensive("Insufficient free merge buffers present.");
     }
     final ByteBuffer buffer = acquiredBufferPool.pop();

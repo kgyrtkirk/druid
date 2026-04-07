@@ -296,7 +296,7 @@ public class AutoTypeColumnIndexer implements DimensionIndexer<StructuredData, S
   )
   {
     final int dimIndex = desc.getIndex();
-    if (fieldIndexers.size() == 0 && isConstant && !hasNestedData) {
+    if (fieldIndexers.isEmpty() && isConstant && !hasNestedData) {
       return DimensionSelector.constant(null, spec.getExtractionFn());
     }
     final ColumnValueSelector<?> rootLiteralSelector = getRootLiteralValueSelector(currEntry, dimIndex);

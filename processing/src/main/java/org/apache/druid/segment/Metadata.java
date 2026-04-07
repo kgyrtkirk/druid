@@ -181,7 +181,7 @@ public class Metadata
       @Nullable AggregatorFactory[] overrideMergedAggregators
   )
   {
-    if (toBeMerged == null || toBeMerged.size() == 0) {
+    if (toBeMerged == null || toBeMerged.isEmpty()) {
       return null;
     }
 

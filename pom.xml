@@ -1762,10 +1762,22 @@
                         <excludes>
                             <exclude>**/extendedset/intset/**</exclude>
                         </excludes>
-                        <eclipse>
-                            <version>4.33</version>
-                            <file>${maven.multiModuleProjectDirectory}/codestyle/eclipse-formatter.xml</file>
-                        </eclipse>
+                        <cleanthat>
+                            <version>2.8</version>
+                            <sourceJdk>${maven.compiler.source}</sourceJdk>
+                            <mutators>
+                                <mutator>SafeAndConsensual</mutator>
+                                <mutator>PrimitiveWrapperInstantiation</mutator>
+                                <mutator>UsePredefinedStandardCharset</mutator>
+                                <mutator>StringFromString</mutator>
+                                <mutator>UnnecessarySemicolon</mutator>
+                                <mutator>UseDiamondOperator</mutator>
+                            </mutators>
+                            <excludedMutators>
+                                <excludedMutator>StreamAnyMatch</excludedMutator>
+                                <excludedMutator>ArraysDotStream</excludedMutator>
+                            </excludedMutators>
+                        </cleanthat>
                         <removeUnusedImports/>
                         <importOrder>
                             <!-- matches checkstyle ImportOrder: groups=*,javax,java option=bottom; \# = static imports -->

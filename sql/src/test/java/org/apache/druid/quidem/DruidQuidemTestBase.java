@@ -406,7 +406,7 @@ public abstract class DruidQuidemTestBase
     public static boolean isOverwrite()
     {
       String property = System.getProperty(OVERWRITE_PROPERTY, "false");
-      return property.length() == 0 || Boolean.valueOf(property);
+      return property.isEmpty() || Boolean.valueOf(property);
     }
 
     private static boolean isUnsupportedComponentSupplier(String diff, String componentSupplier)
