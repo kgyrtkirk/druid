@@ -29,6 +29,7 @@ import org.apache.druid.math.expr.Exprs;
 import org.apache.druid.segment.column.Types;
 
 import javax.annotation.Nullable;
+
 import java.util.Arrays;
 import java.util.function.Supplier;
 

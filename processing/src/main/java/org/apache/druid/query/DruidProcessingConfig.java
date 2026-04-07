@@ -32,6 +32,7 @@ import org.apache.druid.utils.JvmUtils;
 import org.apache.druid.utils.RuntimeInfo;
 
 import javax.annotation.Nullable;
+
 import java.util.concurrent.atomic.AtomicReference;
 
 public class DruidProcessingConfig implements ColumnConfig

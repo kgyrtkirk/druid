@@ -22,6 +22,7 @@ package org.apache.druid.data.input;
 import org.apache.druid.java.util.common.parsers.CloseableIterator;
 
 import javax.annotation.Nullable;
+
 import java.io.IOException;
 import java.util.List;
 

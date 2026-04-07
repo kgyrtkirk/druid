@@ -51,6 +51,7 @@ import org.apache.druid.segment.nested.StructuredDataProcessor;
 import org.apache.druid.segment.nested.ValueDictionary;
 
 import javax.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

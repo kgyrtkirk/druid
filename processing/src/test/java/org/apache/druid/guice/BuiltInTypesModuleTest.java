@@ -40,6 +40,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 
 import javax.annotation.Nullable;
+
 import java.util.Properties;
 
 public class BuiltInTypesModuleTest

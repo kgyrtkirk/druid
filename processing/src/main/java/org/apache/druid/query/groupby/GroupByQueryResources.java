@@ -33,6 +33,7 @@ import org.apache.druid.query.dimension.DimensionSpec;
 import org.apache.druid.segment.Segment;
 
 import javax.annotation.Nullable;
+
 import java.io.Closeable;
 import java.nio.ByteBuffer;
 import java.util.ArrayDeque;

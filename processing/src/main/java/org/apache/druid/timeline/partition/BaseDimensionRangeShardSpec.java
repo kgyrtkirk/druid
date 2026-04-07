@@ -27,6 +27,7 @@ import org.apache.druid.java.util.common.guava.Comparators;
 import org.apache.druid.segment.VirtualColumns;
 
 import javax.annotation.Nullable;
+
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
