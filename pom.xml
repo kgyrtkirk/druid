@@ -1761,7 +1761,6 @@
                     <java>
                         <excludes>
                             <exclude>**/extendedset/intset/**</exclude>
-<!--                            <exclude>**/sql/hook/DruidHookDispatcher.java</exclude> -->
                         </excludes>
                         <cleanthat>
                             <version>2.25</version>
@@ -1772,9 +1771,10 @@
                                 <mutator>UsePredefinedStandardCharset</mutator>
                                 <mutator>StringFromString</mutator>
                                 <mutator>UnnecessarySemicolon</mutator>
-                                <mutator>UseDiamondOperator</mutator>
                             </mutators>
                             <excludedMutators>
+                                <!-- CleanThat bug: crashes on wildcard generics e.g. Map<HookKey<?>, List<DruidHook<?>>> -->
+                                <excludedMutator>UseDiamondOperator</excludedMutator>
                                 <excludedMutator>StreamAnyMatch</excludedMutator>
                                 <excludedMutator>ArraysDotStream</excludedMutator>
                             </excludedMutators>

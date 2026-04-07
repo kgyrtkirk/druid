@@ -131,7 +131,7 @@ public abstract class FastLineIterator<T> implements CloseableIterator<T>
           final long w = buffer.getLong(position);
           final int index = firstOccurrence(w, LF_REPEAT);
           if (index < Long.BYTES) {
-            position = position + index;
+            position += index;
             return readLineFromBuffer();
           } else {
             position += Long.BYTES;

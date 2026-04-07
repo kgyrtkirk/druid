@@ -160,7 +160,7 @@ public class HashVectorGrouper implements VectorGrouper
           // Out of space. Finish up unfinished aggregations, then try to grow.
           if (aggregationNumRows > 0) {
             doAggregateVector(aggregationStartRow, aggregationNumRows);
-            aggregationStartRow = aggregationStartRow + aggregationNumRows;
+            aggregationStartRow += aggregationNumRows;
             aggregationNumRows = 0;
           }
 

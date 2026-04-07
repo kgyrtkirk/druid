@@ -416,7 +416,7 @@ public class GenericIndexedWriter<T> implements DictionaryWriter<T>
         long valuePosition;
         if (i != numberOfFilesRequired - 1) {
           valuePosition = headerOutLong.getLong(bagSize + counter);
-          counter = counter + bagSize;
+          counter += bagSize;
         } else {
           valuePosition = headerOutLong.getLong(numWritten - 1);
         }
@@ -487,7 +487,7 @@ public class GenericIndexedWriter<T> implements DictionaryWriter<T>
 
       if (currentValueOffset - lastValueOffset <= fileSizeLimit) {
         lastValueOffset = currentValueOffset;
-        headerIndex = headerIndex + bagSize;
+        headerIndex += bagSize;
       } else {
         return false;
       }
