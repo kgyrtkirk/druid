@@ -1893,7 +1893,6 @@
                                        <exclude>com.google.inject.extensions:guice-assistedinject</exclude>
                                        <exclude>com.google.inject:guice</exclude>
                                        <exclude>com.google.api.grpc:proto-google-common-protos</exclude>
-                                       <exclude>io.confluent:kafka-schema-registry-client</exclude>
                                        <exclude>org.apache.kafka:kafka-clients</exclude>
                                     </excludes>
                                     <excludedScopes>
