@@ -17,30 +17,24 @@
  * under the License.
  */
 
-package org.apache.druid.data.input.impl;
+package org.apache.druid.msq.exec;
 
-import junit.framework.Assert;
-import org.apache.druid.java.util.common.parsers.Parser;
-import org.junit.Test;
+import org.apache.druid.indexer.report.TaskReport;
 
-import java.util.Arrays;
-import java.util.Map;
+import javax.annotation.Nullable;
 
-public class JSONLowercaseParseSpecTest
+/**
+ * Registry for actively-running {@link Controller} instances, held in {@link ControllerHolder}.
+ */
+public interface ControllerRegistry
 {
-  @Test
-  public void testLowercasing()
-  {
-    JSONLowercaseParseSpec spec = new JSONLowercaseParseSpec(
-        new TimestampSpec(
-            "timestamp",
-            "auto",
-            null
-        ),
-        new DimensionsSpec(DimensionsSpec.getDefaultSchemas(Arrays.asList("A", "B")))
-    );
-    Parser parser = spec.makeParser();
-    Map<String, Object> event = parser.parseToMap("{\"timestamp\":\"2015-01-01\",\"A\":\"foo\"}");
-    Assert.assertEquals("foo", event.get("a"));
-  }
+  /**
+   * Register a controller holder. Throws if a controller with the same query ID is already registered.
+   */
+  void register(ControllerHolder holder);
+
+  /**
+   * Deregister a controller holder. Optionally stores a final report.
+   */
+  void deregister(ControllerHolder holder, @Nullable TaskReport.ReportMap report);
 }
