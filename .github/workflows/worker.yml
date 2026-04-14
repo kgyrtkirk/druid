@@ -120,3 +120,4 @@ jobs:
             benchmark-results/**
             **/target/jacoco*.exec
             **/target/ci-debug/**
+            distribution/target/apache-druid-*/log/**
