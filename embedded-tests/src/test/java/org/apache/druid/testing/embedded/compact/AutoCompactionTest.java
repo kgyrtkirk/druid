@@ -206,7 +206,7 @@ public class AutoCompactionTest extends CompactionTestBase
         new ClusterCompactionConfig(0.5, 10, null, true, CompactionEngine.MSQ, true)
     );
   }
-  
+
   @Override
   protected EmbeddedDruidCluster createCluster()
   {
