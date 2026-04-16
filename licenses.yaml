@@ -444,7 +444,7 @@ name: Guava
 license_category: binary
 module: java-core
 license_name: Apache License version 2.0
-version: 32.1.3-jre
+version: 33.4.8-jre
 libraries:
   - com.google.guava: guava
 
@@ -454,7 +454,7 @@ name: Failureaccess
 license_category: binary
 module: java-core
 license_name: Apache License version 2.0
-version: 1.0.1
+version: 1.0.3
 libraries:
   - com.google.guava: failureaccess
 
@@ -464,7 +464,7 @@ name: j2objc
 license_category: binary
 module: core
 license_name: Apache License version 2.0
-version: 1.3
+version: 3.0.0
 libraries:
   - com.google.j2objc: j2objc-annotations
 
@@ -1972,7 +1972,7 @@ name: Apache HttpClient
 license_category: binary
 module: java-core
 license_name: Apache License version 2.0
-version: 4.5.13
+version: 4.5.14
 libraries:
   - org.apache.httpcomponents: httpclient
 notices:
@@ -3543,6 +3543,16 @@ libraries:
 
 ---
 
+name: JSpecify
+license_category: binary
+module: java-core
+license_name: Apache License version 2.0
+version: 1.0.0
+libraries:
+  - org.jspecify: jspecify
+
+---
+
 name: JCodings
 license_category: binary
 module: java-core
@@ -4389,6 +4399,16 @@ license_name: BSD-3-Clause License
 version: 1.6.8
 libraries:
   - org.threeten: threetenbp
+
+---
+
+name: Failureaccess
+license_category: binary
+module: extensions/druid-google-extensions
+license_name: Apache License version 2.0
+version: 1.0.1
+libraries:
+  - com.google.guava: failureaccess
 
 ---
 
