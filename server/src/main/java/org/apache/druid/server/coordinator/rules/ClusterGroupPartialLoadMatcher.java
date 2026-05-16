@@ -22,7 +22,7 @@ package org.apache.druid.server.coordinator.rules;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
 import com.google.common.io.BaseEncoding;
-import org.apache.druid.segment.loading.PartialProjectionLoadSpec;
+import org.apache.druid.segment.loading.PartialClusterGroupLoadSpec;
 import org.apache.druid.timeline.DataSegment;
 
 import javax.annotation.Nullable;
@@ -31,44 +31,46 @@ import java.util.Locale;
 import java.util.Map;
 
 /**
- * Base for {@link PartialLoadMatcher} implementations that decide which of a segment's V10 projections to load.
- * Subclasses supply the resolution policy via {@link #resolveProjectionNames(DataSegment)}; this base handles
- * fingerprint computation and wraps the result into the {@code partialProjection} load-spec wire form consumed
- * by the historical-side {@link PartialProjectionLoadSpec}.
+ * Base for {@link PartialLoadMatcher} implementations that decide which of a clustered segment's cluster groups to
+ * partially load. Subclasses supply the resolution policy via {@link #resolveClusterGroupIndices(DataSegment)}; the
+ * sorted, deduped indices into {@code segment.getClusterGroups().getTuples()}, and this base handles fingerprint
+ * computation and wraps the result into the {@code partialClusterGroup} load-spec wire form consumed by the
+ * historical-side partial loader.
  * <p>
- * The fingerprint is a hash of what projections are partially loaded on a segment by this rule; the data node will
- * include this value in the segment announcement so that it can be used as a lightweight value to compare against
- * to handle things like rule change so that we can ensure that the 'right' partial load is in place from run to run.
+ * The fingerprint is a hash of the resolved indices for a segment; the data node includes this value in the segment
+ * announcement so the coordinator can detect rule changes between runs and reconcile loaded replicas.
  */
-public abstract class ProjectionPartialLoadMatcher implements PartialLoadMatcher
+public abstract class ClusterGroupPartialLoadMatcher implements PartialLoadMatcher
 {
   static final String FINGERPRINT_VERSION = "v1";
 
   /**
-   * Returns the sorted, deduped list of projection names from {@link DataSegment#getProjections()} that this matcher
-   * selects. Returns an empty list when nothing matches (the segment exposes no projections, or no configured pattern
-   * intersects what the segment has).
+   * Returns the sorted, deduped list of indices into {@code segment.getClusterGroups().getTuples()} selected by this
+   * matcher. Returns an empty list when nothing matches (the segment is not clustered, or no configured pattern /
+   * tuple intersects what the segment has).
    */
-  protected abstract List<String> resolveProjectionNames(DataSegment segment);
+  protected abstract List<Integer> resolveClusterGroupIndices(DataSegment segment);
 
   @Override
   @Nullable
   public MatchResult match(DataSegment segment, Map<String, Object> baseLoadSpec)
   {
-    final List<String> resolved = resolveProjectionNames(segment);
+    if (segment.getClusterGroups() == null) {
+      return null;
+    }
+    final List<Integer> resolved = resolveClusterGroupIndices(segment);
     if (resolved.isEmpty()) {
       return null;
     }
     final String fingerprint = computeFingerprint(resolved);
-    return new MatchResult(PartialProjectionLoadSpec.wireForm(baseLoadSpec, resolved, fingerprint), fingerprint);
+    return new MatchResult(PartialClusterGroupLoadSpec.wireForm(baseLoadSpec, resolved, fingerprint), fingerprint);
   }
 
-  static String computeFingerprint(List<String> sortedDedupedNames)
+  static String computeFingerprint(List<Integer> sortedDedupedIndices)
   {
     final Hasher hasher = Hashing.sha256().newHasher();
-    for (String name : sortedDedupedNames) {
-      hasher.putUnencodedChars(name);
-      hasher.putByte((byte) 0);
+    for (Integer idx : sortedDedupedIndices) {
+      hasher.putInt(idx);
     }
     final String hex = BaseEncoding.base16().encode(hasher.hash().asBytes()).toLowerCase(Locale.ROOT);
     // should be good enough without dragging the whole thing around for every segment
