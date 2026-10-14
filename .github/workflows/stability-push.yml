@@ -13,29 +13,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: "Sync branches"
-on:
-  schedule:
-    - cron:  '0 5 * * *'
-  workflow_dispatch:
-jobs:
-  open_pull_request:
-    runs-on: ubuntu-latest
-    name: release_pull_request
-    steps:
-    - name: checkout
-      uses: actions/checkout@v1
-    - name: Create PR to branch
-      uses: kgyrtkirk/github-action-sync@master
-      with:
-        upstream: https://github.com/apache/druid
-        upstream_branch: master
-        branch: master
-        pr_labels: upstream,bot
-        pr_title: apache/master->master
-        sync_branch_prefix: sync/apache
-      env:
-        GITHUB_TOKEN: ${{ secrets.WORKFLOW_TOKEN }}
-        GITBOT_EMAIL: github-actions@github.com
-        DRY_RUN: false
+# See dev/stability-runner.md
 
+name: "Stability Runner (push)"
+
+on:
+  push:
+    branches:
+      - "stability/**"
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      maven_args: ${{ steps.extract.outputs.maven_args }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 20
+      - name: Extract STABILITY_MAVEN_ARGS from commit messages
+        id: extract
+        run: |
+          ARGS=$(git log --grep='^STABILITY_MAVEN_ARGS=' -1 --format=%B | .github/scripts/extract-stability-args)
+          echo "maven_args=$ARGS" >> "$GITHUB_OUTPUT"
+
+  stability:
+    needs: prepare
+    uses: ./.github/workflows/stability.yml
+    with:
+      maven_args: ${{ needs.prepare.outputs.maven_args }}
