@@ -2,13 +2,23 @@ version: 2
 updates:
   - package-ecosystem: "maven"
     directory: "/"
+    # Weekly batches avoid PRs superseded by the next release a few days later; each PR runs full CI
+    # on the PR and again on master after merge. Security updates are not bound by this schedule.
     schedule:
-      interval: "daily"
-    open-pull-requests-limit: 20
+      interval: "weekly"
+      day: "saturday"
+      time: "22:00"
+    open-pull-requests-limit: 10
+    # Set explicitly; otherwise Dependabot infers the prefix from recent commits (e.g. "ci:")
+    commit-message:
+      prefix: "build"
+      include: "scope"
     cooldown:
       # Protect against not-yet-discovered regressions or security issues in new releases of dependencies
       # https://github.blog/changelog/2025-07-01-dependabot-supports-configuration-of-a-minimum-package-age/
       default-days: 14
+    # A dependency joins the first group it matches, so the catch-all "patch" group must stay last.
+    # Minor and major updates outside the family groups still get individual PRs.
     groups:
       # The individual org.apache.maven.resolver:* artifacts must move together: they are all
       # pinned to the same version in services/pom.xml and server/pom.xml, and a 1.x -> 2.x major
@@ -17,19 +27,66 @@ updates:
       maven-resolver:
         patterns:
           - "org.apache.maven.resolver:*"
+      # Google Cloud client libraries release together
+      google-cloud:
+        patterns:
+          - "com.google.cloud:*"
+          - "com.google.api:*"
+          - "com.google.api.grpc:*"
+          - "com.google.auth:*"
+        update-types: ["minor", "patch"]
+      grpc:
+        patterns:
+          - "io.grpc:*"
+        update-types: ["minor", "patch"]
+      # Build-time only; not shipped in the distribution
+      build-plugins:
+        patterns:
+          - "org.apache.maven.plugins:*"
+          - "org.codehaus.mojo:*"
+          - "com.github.spotbugs:spotbugs-maven-plugin"
+          - "io.github.ascopes:protobuf-maven-plugin"
+          - "io.github.git-commit-id:git-commit-id-maven-plugin"
+          - "de.thetaphi:forbiddenapis"
+        update-types: ["minor", "patch"]
+      patch:
+        patterns:
+          - "*"
+        update-types: ["patch"]
+    # Keep every ignore rule here, with its reason and a link. "@dependabot ignore" comments are stored
+    # by Dependabot outside the repo and are hard to find; use this file and "@dependabot unignore" instead.
+    # Rules with update-types only skip version updates; rules with versions also skip security updates.
     ignore:
-      # pin ZooKeeper dependencies to 3.5.x
-      - dependency-name: "org.apache.zookeeper"
-        versions: "[3.6,)"
-      # pin Jetty dependencies to 9.4.x
-      - dependency-name: "org.eclipse.jetty"
-        versions: "[9.5,)"
-      # pin Testng dependencies to 7.3.0
-      - dependency-name: "org.testng"
-        versions: "[7.4.0,)"
       # skip AWS SDK v2 patch releases, which ship almost daily; minor bumps still come through
       - dependency-name: "software.amazon.awssdk:*"
         update-types: ["version-update:semver-patch"]
+      # zstd-jni 1.5.7-13 and later cannot decode legacy (pre-1.0) zstd frames in .zst batch input.
+      # Remove once legacy frame support is dropped (planned for Druid 40).
+      # https://github.com/apache/druid/pull/20398#issuecomment-5771448043
+      # https://github.com/apache/druid/pull/20536#issuecomment-6072384746
+      - dependency-name: "com.github.luben:zstd-jni"
+        versions: "[1.5.7-13,)"
+      # Major upgrades of the following dependencies need code or build changes, so they are done by hand.
+      # Dependabot still proposes their minor and patch updates.
+      # Vert.x must match the Fabric8 kubernetes-httpclient-vertx client; Vert.x 5 needs kubernetes-httpclient-vertx-5
+      # https://github.com/apache/druid/pull/20262#issuecomment-5549339724
+      - dependency-name: "io.vertx:*"
+        update-types: ["version-update:semver-major"]
+      # pac4j 6 breaks source compatibility and changes profile/session serialization
+      # https://github.com/apache/druid/pull/19936
+      # https://github.com/apache/druid/pull/20275
+      - dependency-name: "org.pac4j:*"
+        update-types: ["version-update:semver-major"]
+      # javacc-maven-plugin 3 generates a Druid SQL parser that does not compile
+      # https://github.com/apache/druid/pull/20033#issuecomment-5322992971
+      - dependency-name: "org.codehaus.mojo:javacc-maven-plugin"
+        update-types: ["version-update:semver-major"]
+      # Guice 7 requires migrating from javax to jakarta packages
+      # https://github.com/apache/druid/pull/19799
+      - dependency-name: "com.google.inject:*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "com.google.inject.extensions:*"
+        update-types: ["version-update:semver-major"]
 
   # Don't run dependabot on website
   - package-ecosystem: "npm"
