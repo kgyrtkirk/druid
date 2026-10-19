@@ -116,6 +116,7 @@
         <mariadb.version>3.5.10</mariadb.version>
         <netty4.version>4.2.18.Final</netty4.version>
         <postgresql.version>42.7.13</postgresql.version>
+        <shardingsphere.version>5.5.3</shardingsphere.version>
         <protobuf.version>4.36.2</protobuf.version>
         <resilience4j.version>2.4.0</resilience4j.version>
         <slf4j.version>2.0.20</slf4j.version>
@@ -202,6 +203,7 @@
         <module>benchmarks</module>
         <module>web-console</module>
         <module>jdbc-driver</module>
+        <module>pgwire-server</module>
         <!-- Core cloud functionality -->
         <module>cloud/aws-common</module>
         <module>cloud/gcp-common</module>
@@ -267,6 +269,7 @@
         <module>extensions-contrib/prometheus-emitter</module>
         <module>extensions-contrib/opentelemetry-emitter</module>
         <module>extensions-contrib/grpc-query</module>
+        <module>extensions-contrib/druid-pgwire</module>
         <module>extensions-contrib/druid-iceberg-extensions</module>
         <module>extensions-contrib/druid-deltalake-extensions</module>
         <module>extensions-contrib/spectator-histogram</module>
