@@ -61,11 +61,11 @@ updates:
       - dependency-name: "software.amazon.awssdk:*"
         update-types: ["version-update:semver-patch"]
       # zstd-jni 1.5.7-13 and later cannot decode legacy (pre-1.0) zstd frames in .zst batch input.
+      # Version updates are ignored; security updates still open PRs.
       # Remove once legacy frame support is dropped (planned for Druid 40).
       # https://github.com/apache/druid/pull/20398#issuecomment-5771448043
       # https://github.com/apache/druid/pull/20536#issuecomment-6072384746
       - dependency-name: "com.github.luben:zstd-jni"
-        versions: "[1.5.7-13,)"
       # Major upgrades of the following dependencies need code or build changes, so they are done by hand.
       # Dependabot still proposes their minor and patch updates.
       # Vert.x must match the Fabric8 kubernetes-httpclient-vertx client; Vert.x 5 needs kubernetes-httpclient-vertx-5
