@@ -16,8 +16,11 @@
 # limitations under the License.
 
 import yaml
+import json
 import os
+import re
 import sys
+from collections import defaultdict
 from html.parser import HTMLParser
 import argparse
 
@@ -359,7 +362,122 @@ def find_druid_module_name(dirpath):
         # Druid core
         return "core"
 
-def check_licenses(license_yaml, dependency_reports_root):
+# AI generated function.
+def infer_version_updates(licenses_list, registered_dep_to_licenses, reported_dep_to_licenses, missing_licenses):
+    # A missing (reported, unregistered) version is proposed as a bump of the registered version of the same library
+    # when that one is no longer reported. Anything less certain is skipped with a reason, for a human to resolve.
+    reported_versions = defaultdict(set)
+    reported_license_names = {}
+    for _, group_id, artifact_id, version, license_name in missing_licenses:
+        reported_versions[(group_id, artifact_id)].add(version)
+        reported_license_names[(group_id, artifact_id, version)] = license_name
+
+    moves = {}
+    skipped = []
+    for library, new_versions in sorted(reported_versions.items()):
+        old_versions = sorted(key[2] for key in registered_dep_to_licenses if key[0:2] == library and key not in reported_dep_to_licenses)
+        new_version = sorted(new_versions)[0]
+        if len(new_versions) > 1:
+            reason = "reported in several versions {}".format(sorted(new_versions))
+        elif len(old_versions) == 0:
+            reason = "no registered version became unreported; new dependency or additional version"
+        elif len(old_versions) > 1:
+            reason = "several registered versions became unreported {}".format(old_versions)
+        elif registered_dep_to_licenses[library + (old_versions[0],)] != reported_license_names[library + (new_version,)]:
+            reason = "reported license [{}] differs from registered [{}]".format(
+                reported_license_names[library + (new_version,)],
+                registered_dep_to_licenses[library + (old_versions[0],)]
+            )
+        else:
+            moves[library] = (old_versions[0], new_version)
+            continue
+        skipped.append({'group': library[0], 'artifact': library[1], 'version': new_version, 'reason': reason})
+
+    for license in licenses_list:
+        libraries = get_libraries(license)
+        version = get_version_string(license.get('version'))
+        moved = [library for library in libraries if library in moves and moves[library][0] == version]
+        if len(moved) == 0 or all(moves.get(library) == moves[moved[0]] for library in libraries):
+            continue
+        for library in moved:
+            skipped.append({
+                'group': library[0],
+                'artifact': library[1],
+                'version': moves.pop(library)[1],
+                'reason': "entry [{}] lists libraries not moving along".format(license.get('name'))
+            })
+
+    updates = [
+        {'group': library[0], 'artifact': library[1], 'from': old_version, 'to': new_version}
+        for library, (old_version, new_version) in sorted(moves.items())
+    ]
+    return updates, skipped
+
+# AI generated function.
+def get_libraries(license):
+    return [(group_id, artifact_id) for library in license.get('libraries', []) for group_id, artifact_id in library.items()]
+
+# AI generated function.
+def write_version_updates(path, updates, skipped):
+    os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
+    with open(path, 'w', encoding='utf-8') as updates_file:
+        json.dump({'updates': updates, 'skipped': skipped}, updates_file, indent=2)
+        updates_file.write('\n')
+    print_log_to_stderr("Wrote {} proposed version updates and {} skipped libraries to {}".format(len(updates), len(skipped), path))
+
+VERSION_LINE = re.compile(r"^version:[ \t]*(['\"]?)(.*?)\1[ \t]*$")
+SAFE_TOKEN = re.compile(r"^[A-Za-z0-9_.-]+$")
+
+# AI generated function.
+def apply_version_updates(license_yaml, updates_json):
+    with open(updates_json, encoding='utf-8') as updates_file:
+        updates = json.load(updates_file)['updates']
+    moves = {}
+    for update in updates:
+        for field in ('group', 'artifact', 'from', 'to'):
+            if not isinstance(update.get(field), str) or not SAFE_TOKEN.fullmatch(update[field]):
+                raise Exception("Invalid {} in update {}".format(field, update))
+        moves[(update['group'], update['artifact'])] = (update['from'], update['to'])
+
+    with open(license_yaml, encoding='utf-8') as registry_file:
+        lines = registry_file.read().split('\n')
+    applied = set()
+    start = 0
+    for end in [i for i, line in enumerate(lines) if line == '---'] + [len(lines)]:
+        applied.update(update_entry_version(lines, start, end, moves))
+        start = end + 1
+    unapplied = sorted(set(moves) - applied)
+    if len(unapplied) > 0:
+        raise Exception("No entry in {} registers {}".format(license_yaml, ["{}:{}:{}".format(g, a, moves[(g, a)][0]) for g, a in unapplied]))
+    with open(license_yaml, 'w', encoding='utf-8') as registry_file:
+        registry_file.write('\n'.join(lines))
+    print_log_to_stderr("Applied {} version updates to {}".format(len(applied), license_yaml))
+
+# AI generated function.
+def update_entry_version(lines, start, end, moves):
+    # Rewrites only the version line of the entry in lines[start:end], keeping the rest of the file untouched.
+    license = yaml.load('\n'.join(lines[start:end]), Loader=yaml.FullLoader)
+    if not isinstance(license, dict):
+        return set()
+    libraries = get_libraries(license)
+    version = get_version_string(license.get('version'))
+    moved = [library for library in libraries if library in moves and moves[library][0] == version]
+    if len(moved) == 0:
+        return set()
+    new_version = moves[moved[0]][1]
+    if any(moves.get(library) != (version, new_version) for library in libraries):
+        raise Exception("Entry [{}] lists libraries not all moving from {} to {}".format(license.get('name'), version, new_version))
+    for index in range(start, end):
+        match = VERSION_LINE.match(lines[index])
+        if match:
+            quote = match.group(1)
+            if quote == '' and not isinstance(yaml.safe_load(new_version), str):
+                quote = '"'
+            lines[index] = "version: {0}{1}{0}".format(quote, new_version)
+            return set(libraries)
+    raise Exception("Entry [{}] has no version line".format(license.get('name')))
+
+def check_licenses(license_yaml, dependency_reports_root, emit_updates=None):
     # Build a dictionary to facilitate comparing reported licenses and registered ones.
     # These dictionaries are the mapping of (group_id, artifact_id, version) to license_name.
 
@@ -494,9 +612,18 @@ def check_licenses(license_yaml, dependency_reports_root):
             print_log_to_stderr("groupId: {}, artifactId: {}, version: {}, reported_license: {}".format(unchecked_license[0], unchecked_license[1], unchecked_license[2], unchecked_license[3]))
     print_log_to_stderr("")
 
+    updates = []
+    if emit_updates is not None:
+        updates, skipped = infer_version_updates(licenses_list, registered_dep_to_licenses, reported_dep_to_licenses, missing_licenses)
+        write_version_updates(emit_updates, updates, skipped)
+
     if len(mismatched_licenses) > 0 or len(missing_licenses) > 0:
         print_log_to_stderr("Mismatched licenses: {}".format(mismatched_licenses))
         print_log_to_stderr("Missing licenses: {}".format(missing_licenses))
+        if len(updates) > 0:
+            print_log_to_stderr("")
+            print_log_to_stderr("{} version updates are proposed in {} (in CI: part of the failed job's artifact). Apply them with:".format(len(updates), emit_updates))
+            print_log_to_stderr("  distribution/bin/check-licenses.py licenses.yaml --apply-updates <path to license-updates.json>")
         sys.exit(1)
 
 
@@ -504,12 +631,17 @@ if __name__ == "__main__":
     try:
         parser = argparse.ArgumentParser(description='Check and generate license file.')
         parser.add_argument('license_yaml', metavar='<path to license.yaml>', type=str)
-        parser.add_argument('dependency_reports_root', metavar='<root to maven dependency reports>', type=str)
+        parser.add_argument('dependency_reports_root', metavar='<root to maven dependency reports>', type=str, nargs='?')
+        parser.add_argument('--emit-updates', metavar='<updates.json>', type=str, help="Write proposed version updates of license.yaml entries to this file")
+        parser.add_argument('--apply-updates', metavar='<updates.json>', type=str, help="Apply version updates written by --emit-updates to license.yaml, instead of checking")
         args = parser.parse_args()
 
-        license_yaml = args.license_yaml
-        dependency_reports_root = args.dependency_reports_root
-        check_licenses(license_yaml, dependency_reports_root)
+        if args.apply_updates is not None:
+            apply_version_updates(args.license_yaml, args.apply_updates)
+        elif args.dependency_reports_root is None:
+            parser.error("<root to maven dependency reports> is required unless --apply-updates is given")
+        else:
+            check_licenses(args.license_yaml, args.dependency_reports_root, args.emit_updates)
 
     except KeyboardInterrupt:
         print('Interrupted, closing.')

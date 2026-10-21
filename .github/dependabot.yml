@@ -48,6 +48,62 @@ updates:
           - "io.github.ascopes:protobuf-maven-plugin"
           - "io.github.git-commit-id:git-commit-id-maven-plugin"
           - "de.thetaphi:forbiddenapis"
+          - "org.apache.maven.extensions:*"
+          - "org.apache.rat:apache-rat-plugin"
+          - "org.jacoco:*"
+          - "org.cyclonedx:cyclonedx-maven-plugin"
+          - "org.owasp:dependency-check-maven"
+          - "net.nicoulaj.maven.plugins:checksum-maven-plugin"
+          - "kr.motd.maven:os-maven-plugin"
+          - "com.github.eirslett:frontend-maven-plugin"
+          - "org.openrewrite.maven:*"
+          - "org.openrewrite.recipe:*"
+        update-types: ["minor", "patch"]
+      # Test scope only; not shipped in the distribution (e.g. #20216, #20217, #20219 opened the same day)
+      test-libs:
+        patterns:
+          - "org.junit:*"
+          - "junit:junit"
+          - "org.mockito:*"
+          - "net.bytebuddy:*"
+          - "org.objenesis:*"
+          - "org.easymock:*"
+          - "nl.jqno.equalsverifier:*"
+          - "org.assertj:*"
+          - "com.github.fppt:jedis-mock"
+        update-types: ["minor", "patch"]
+      # AWS SDK and the Kinesis client release together (e.g. #20531 and #20533 opened the same day)
+      aws:
+        patterns:
+          - "software.amazon.awssdk:*"
+          - "software.amazon.kinesis:*"
+        update-types: ["minor", "patch"]
+      opentelemetry:
+        patterns:
+          - "io.opentelemetry:*"
+          - "io.opentelemetry.instrumentation:*"
+        update-types: ["minor", "patch"]
+      # bcprov and bcpkix share a version (#20081 and #20078 were split)
+      bouncycastle:
+        patterns:
+          - "org.bouncycastle:*"
+        update-types: ["minor", "patch"]
+      # woodstox-core depends on stax2-api (#20582 and #20585 were split)
+      woodstox:
+        patterns:
+          - "com.fasterxml.woodstox:*"
+          - "org.codehaus.woodstox:*"
+        update-types: ["minor", "patch"]
+      # okio and okio-jvm are the same release (#20280 and #20288 were split)
+      square:
+        patterns:
+          - "com.squareup.okio:*"
+          - "com.squareup.okhttp3:*"
+        update-types: ["minor", "patch"]
+      apache-commons:
+        patterns:
+          - "org.apache.commons:*"
+          - "commons-*:*"
         update-types: ["minor", "patch"]
       patch:
         patterns:

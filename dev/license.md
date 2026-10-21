@@ -122,3 +122,17 @@ notice: |
 
 When you update the version of existing dependencies, you need to update the version not only in the `pom.xml` file but
 also in the `licenses.yaml` file.
+
+[`check-licenses.py`](https://github.com/apache/druid/blob/master/distribution/bin/check-licenses.py) can propose and apply these version updates:
+
+```
+distribution/bin/check-licenses.py licenses.yaml distribution/target/license-reports --emit-updates updates.json
+distribution/bin/check-licenses.py licenses.yaml --apply-updates updates.json
+```
+
+A reported version is proposed as an update only when it replaces the single registered version of the same library
+that is no longer reported, the license is unchanged, and all libraries of the entry move to the same version.
+Other cases are listed under `skipped` with a reason and need a manual update.
+
+In CI, the `packaging-check` job writes the proposal to `distribution/target/ci-debug/license-updates.json`,
+which is included in the artifact uploaded when the job fails.
