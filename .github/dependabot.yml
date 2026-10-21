@@ -8,7 +8,7 @@ updates:
       interval: "weekly"
       day: "saturday"
       time: "22:00"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 20
     # Set explicitly; otherwise Dependabot infers the prefix from recent commits (e.g. "ci:")
     commit-message:
       prefix: "build"
@@ -53,11 +53,14 @@ updates:
         patterns:
           - "*"
         update-types: ["patch"]
-    # Keep every ignore rule here, with its reason and a link. "@dependabot ignore" comments are stored
-    # by Dependabot outside the repo and are hard to find; use this file and "@dependabot unignore" instead.
+    # Every ignore rule must have a comment stating why it is ignored, with a pointer (PR, issue or
+    # comment link) to the discussion behind it, so it can be re-evaluated and removed later.
+    # Keep every ignore rule here. "@dependabot ignore" comments are stored by Dependabot outside the
+    # repo and are hard to find; use this file and "@dependabot unignore" instead.
     # Rules with update-types only skip version updates; rules with versions also skip security updates.
     ignore:
       # skip AWS SDK v2 patch releases, which ship almost daily; minor bumps still come through
+      # https://github.com/apache/druid/pull/20591
       - dependency-name: "software.amazon.awssdk:*"
         update-types: ["version-update:semver-patch"]
       # zstd-jni 1.5.7-13 and later cannot decode legacy (pre-1.0) zstd frames in .zst batch input.
@@ -88,21 +91,26 @@ updates:
       - dependency-name: "com.google.inject.extensions:*"
         update-types: ["version-update:semver-major"]
 
-  # Don't run dependabot on website
+  # website and web-console share one entry so a group spans both directories in a single PR
   - package-ecosystem: "npm"
-    directory: "/website/"
+    directories:
+      - "/website/"
+      - "/web-console/"
     schedule:
       interval: "weekly"
+      day: "saturday"
+      time: "22:00"
+    groups:
+      # Version updates are all ignored below; this groups the remaining security updates
+      npm-security:
+        applies-to: security-updates
+        patterns:
+          - "*"
+    # Every ignore rule must have a comment stating why it is ignored, with a pointer to the discussion.
     ignore:
-      - dependency-name: "*"
-        update-types: ["version-update:semver-patch", "version-update:semver-minor", "version-update:semver-major"]
-
-  # Don't run dependabot on web-console
-  - package-ecosystem: "npm"
-    directory: "/web-console/"
-    schedule:
-      interval: "weekly"
-    ignore:
+      # Version update PRs were noise; the web-console maintainers asked to stop them
+      # https://github.com/apache/druid/issues/18137
+      # https://github.com/apache/druid/pull/18157
       - dependency-name: "*"
         update-types: ["version-update:semver-patch", "version-update:semver-minor", "version-update:semver-major"]
 
