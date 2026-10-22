@@ -68,6 +68,7 @@ public class DruidSqlParser
 
   private static final Joiner SPACE_JOINER = Joiner.on(" ");
   private static final Joiner COMMA_JOINER = Joiner.on(", ");
+  private static final Joiner DOT_JOINER = Joiner.on('.');
 
   private DruidSqlParser()
   {
@@ -111,17 +112,7 @@ public class DruidSqlParser
       for (int i = 0; i < nodeList.size(); i++) {
         SqlNode sqlNode = nodeList.get(i);
         if (sqlNode instanceof SqlSetOption) {
-          final SqlSetOption sqlSetOption = (SqlSetOption) sqlNode;
-          if (!(sqlSetOption.getValue() instanceof SqlLiteral)) {
-            throw InvalidSqlInput.exception(
-                "Assigned value must be a literal for SET statement[%s]",
-                sqlSetOption.toSqlString(CalciteSqlDialect.DEFAULT)
-            );
-          }
-          setContext.put(
-              sqlSetOption.getName().getSimple(),
-              sqlLiteralToContextValue((SqlLiteral) sqlSetOption.getValue())
-          );
+          addToContext(setContext, (SqlSetOption) sqlNode);
         } else if (i < nodeList.size() - 1) {
           // only SET statements can appear before the last statement
           throw InvalidSqlInput.exception(
@@ -142,6 +133,21 @@ public class DruidSqlParser
     } else {
       return new StatementAndSetContext(root, Collections.emptyMap());
     }
+  }
+
+  /**
+   * Puts the query context entry a SET statement assigns; a compound name such as {@code a.b} names the key
+   * {@code "a.b"}.
+   */
+  public static void addToContext(final Map<String, Object> context, final SqlSetOption option)
+  {
+    if (!(option.getValue() instanceof SqlLiteral)) {
+      throw InvalidSqlInput.exception(
+          "Assigned value must be a literal for SET statement[%s]",
+          option.toSqlString(CalciteSqlDialect.DEFAULT)
+      );
+    }
+    context.put(DOT_JOINER.join(option.getName().names), sqlLiteralToContextValue((SqlLiteral) option.getValue()));
   }
 
   /**

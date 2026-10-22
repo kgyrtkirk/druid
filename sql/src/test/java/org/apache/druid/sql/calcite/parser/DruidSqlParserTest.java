@@ -28,6 +28,8 @@ import org.apache.druid.error.DruidException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.Map;
+
 public class DruidSqlParserTest
 {
   @Test
@@ -139,6 +141,16 @@ public class DruidSqlParserTest
         () -> DruidSqlParser.sqlLiteralToContextValue(literal)
     );
     Assertions.assertTrue(exception.getMessage().contains("Unsupported type for SET"));
+  }
+
+  @Test
+  public void testParse_setCompoundName()
+  {
+    final StatementAndSetContext parsed = DruidSqlParser.parse(
+        "SET a.b = 1; SET \"c.d\" = 'x'; SET \"e\".f.g = true; SELECT 1",
+        true
+    );
+    Assertions.assertEquals(Map.of("a.b", 1L, "c.d", "x", "e.f.g", true), parsed.getSetContext());
   }
 
   @Test
