@@ -121,7 +121,7 @@
         <jna.version>5.19.1</jna.version>
         <jna-platform.version>5.19.1</jna-platform.version>
         <hadoop.compile.version>3.5.0</hadoop.compile.version>
-        <graaljs.version>25.3.4.1</graaljs.version>
+        <graaljs.version>25.4.4.1.1</graaljs.version>
         <mockito.version>5.24.0</mockito.version>
         <!-- AWS SDK v1 is still used as a transitive dependency by Hadoop and Ranger extensions.
              It should be removed once those extensions are upgraded or dropped (see #19109). -->
@@ -136,7 +136,7 @@
         <okhttp.version>5.5.0</okhttp.version>
         <kubernetes.client.version>25.0.0-legacy</kubernetes.client.version>
         <zookeeper.version>3.8.7</zookeeper.version>
-        <checkerframework.version>4.3.0</checkerframework.version>
+        <checkerframework.version>4.3.1</checkerframework.version>
         <com.google.apis.compute.version>v1-rev20230606-2.0.0</com.google.apis.compute.version>
         <com.google.cloud.libraries-bom.version>26.90.0</com.google.cloud.libraries-bom.version>
         <jdk.strong.encapsulation.argLine>
