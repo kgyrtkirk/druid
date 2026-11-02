@@ -66,12 +66,21 @@ jobs:
         with:
           fetch-depth: 500
 
-      - name: ☕ JDK ${{ inputs.jdk }} + .m2 cache
+      - name: ☕ JDK ${{ inputs.jdk }}
         uses: actions/setup-java@v6
         with:
           distribution: 'zulu'
           java-version: ${{ inputs.jdk }}
-          cache: 'maven'
+
+      - name: ♻️ .m2 restore
+        id: m2
+        uses: actions/cache/restore@v6
+        with:
+          path: |
+            ~/.m2/repository
+            ~/.m2/wrapper
+          key: maven-${{ runner.os }}-${{ hashFiles('**/pom.xml', '.mvn/wrapper/maven-wrapper.properties', '.mvn/extensions.xml') }}
+          restore-keys: maven-${{ runner.os }}-
 
       - name: 📸 .m2 snapshot
         run: |
@@ -93,6 +102,7 @@ jobs:
           ./.github/scripts/collect_jvm_diagnostics &
 
       - name: '⚡ ${{ inputs.script }}'
+        id: run
         run: ${{ inputs.script }}
         timeout-minutes: 60
 
@@ -120,9 +130,22 @@ jobs:
         if: ${{ always() }}
         run: rm -rf ~/.m2/repository/org/apache/druid
 
+      - name: 💤 .m2 prune dormant
+        if: ${{ always() && steps.run.outcome == 'success' && steps.m2.outputs.cache-hit != 'true' && steps.m2.outputs.cache-matched-key != '' }}
+        run: ./.github/scripts/prune_manifest ~/.m2/repository target/ci-debug/m2-build-dormant.txt
+
       - name: 📊 .m2 diff ← cache
         if: ${{ always() }}
         run: ./.github/scripts/dir_manifest ~/.m2/repository target/ci-debug/m2-after.txt target/ci-debug/m2-before.txt
+
+      - name: 💾 .m2 save
+        if: ${{ always() && steps.run.outcome == 'success' && steps.m2.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@v6
+        with:
+          path: |
+            ~/.m2/repository
+            ~/.m2/wrapper
+          key: ${{ steps.m2.outputs.cache-primary-key }}
 
       - name: 📤 upload artifact
         uses: actions/upload-artifact@v7
