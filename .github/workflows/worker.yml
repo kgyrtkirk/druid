@@ -46,7 +46,7 @@ on:
         required: false
         type: boolean
         default: false
-        description: "Save the .m2 cache on a miss"
+        description: "Save the .m2 cache on a miss; other jobs only restore"
       execute:
         required: false
         type: boolean
@@ -75,21 +75,24 @@ jobs:
         with:
           fetch-depth: 500
 
-      - name: ☕ JDK ${{ inputs.jdk }}
+      - name: ☕ JDK ${{ inputs.jdk }} + .m2 cache
+        id: java
         uses: actions/setup-java@v6
         with:
           distribution: 'zulu'
           java-version: ${{ inputs.jdk }}
+          cache: 'maven'
+          cache-read-only: ${{ !inputs.save_cache }}
 
-      - name: ♻️ .m2 restore
+      - name: ♻️ .m2 restore nearest
         id: m2
+        if: ${{ steps.java.outputs.cache-hit != 'true' }}
         uses: actions/cache/restore@v6
         with:
-          path: |
-            ~/.m2/repository
-            ~/.m2/wrapper
-          key: maven-${{ runner.os }}-${{ hashFiles('**/pom.xml', '.mvn/wrapper/maven-wrapper.properties', '.mvn/extensions.xml') }}
-          restore-keys: maven-${{ runner.os }}-
+          # must equal setup-java's path string, which is part of the cache version
+          path: /home/runner/.m2/repository
+          key: ${{ steps.java.outputs.cache-primary-key }}
+          restore-keys: setup-java-${{ runner.os }}-x64-maven-
 
       - name: 📸 .m2 snapshot
         run: |
@@ -103,15 +106,9 @@ jobs:
           pattern: ${{ inputs.artifacts_to_download }}
           merge-multiple: true
 
-      - name: 🏗️ fetch build output
+      - name: 🏗️ build output ← compile
         if: ${{ inputs.build_output == 'download' }}
-        uses: actions/download-artifact@v8
-        with:
-          name: build-output
-
-      - name: 🏗️ unpack build output
-        if: ${{ inputs.build_output == 'download' }}
-        run: tar -x -m --zstd -f build-output.tar.zst && rm build-output.tar.zst
+        uses: ./.github/actions/build-output/download
 
       - name: ⚙️ env + JVM diagnostics
         run: |
@@ -121,23 +118,12 @@ jobs:
           ./.github/scripts/collect_jvm_diagnostics &
 
       - name: '⚡ ${{ inputs.script }}'
-        id: run
         run: ${{ inputs.script }}
         timeout-minutes: 60
 
-      - name: 🏗️ pack build output
+      - name: 🏗️ build output → children
         if: ${{ inputs.build_output == 'upload' }}
-        run: ./.github/scripts/pack_build_output build-output.tar.zst
-
-      - name: 🏗️ upload build output
-        if: ${{ inputs.build_output == 'upload' }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: build-output
-          path: build-output.tar.zst
-          compression-level: 0
-          retention-days: 1
-          if-no-files-found: error
+        uses: ./.github/actions/build-output/upload
 
       - name: 🧾 test report
         if: ${{ hashFiles('**/TEST-*.xml') != '' }}
@@ -164,21 +150,12 @@ jobs:
         run: rm -rf ~/.m2/repository/org/apache/druid
 
       - name: 💤 .m2 prune dormant
-        if: ${{ always() && inputs.save_cache && steps.run.outcome == 'success' && steps.m2.outputs.cache-hit != 'true' && steps.m2.outputs.cache-matched-key != '' }}
+        if: ${{ inputs.save_cache && steps.m2.outputs.cache-matched-key != '' }}
         run: ./.github/scripts/prune_manifest ~/.m2/repository target/ci-debug/m2-build-dormant.txt
 
       - name: 📊 .m2 diff ← cache
         if: ${{ always() }}
         run: ./.github/scripts/dir_manifest ~/.m2/repository target/ci-debug/m2-after.txt target/ci-debug/m2-before.txt
-
-      - name: 💾 .m2 save
-        if: ${{ always() && inputs.save_cache && steps.run.outcome == 'success' && steps.m2.outputs.cache-hit != 'true' }}
-        uses: actions/cache/save@v6
-        with:
-          path: |
-            ~/.m2/repository
-            ~/.m2/wrapper
-          key: ${{ steps.m2.outputs.cache-primary-key }}
 
       - name: 📤 upload artifact
         uses: actions/upload-artifact@v7

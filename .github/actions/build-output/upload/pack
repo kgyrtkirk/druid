@@ -16,9 +16,8 @@
 # limitations under the License.
 
 # Packs every module's compiler output (classes, test-classes, generated sources, maven-status) into <out>.
-# Unpack with tar -m after checkout: sources newer than their classes are recompiled.
 #
-# Usage: pack_build_output <out>
+# Usage: pack <out>
 
 set -euo pipefail
 
