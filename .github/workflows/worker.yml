@@ -38,6 +38,15 @@ on:
         required: false
         type: string
         description: "Artifacts to download. For example: 'unit-test-reports-*'"
+      build_output:
+        required: false
+        type: string
+        description: "'upload' or 'download' the compiled module output"
+      save_cache:
+        required: false
+        type: boolean
+        default: false
+        description: "Save the .m2 cache on a miss; other jobs only restore"
       execute:
         required: false
         type: boolean
@@ -67,11 +76,23 @@ jobs:
           fetch-depth: 500
 
       - name: ☕ JDK ${{ inputs.jdk }} + .m2 cache
+        id: java
         uses: actions/setup-java@v6
         with:
           distribution: 'zulu'
           java-version: ${{ inputs.jdk }}
           cache: 'maven'
+          cache-read-only: ${{ !inputs.save_cache }}
+
+      - name: ♻️ .m2 restore nearest
+        id: m2
+        if: ${{ steps.java.outputs.cache-hit != 'true' }}
+        uses: actions/cache/restore@v6
+        with:
+          # must equal setup-java's path string, which is part of the cache version
+          path: /home/runner/.m2/repository
+          key: ${{ steps.java.outputs.cache-primary-key }}
+          restore-keys: setup-java-${{ runner.os }}-x64-maven-
 
       - name: 📸 .m2 snapshot
         run: |
@@ -85,6 +106,10 @@ jobs:
           pattern: ${{ inputs.artifacts_to_download }}
           merge-multiple: true
 
+      - name: 🏗️ build output ← compile
+        if: ${{ inputs.build_output == 'download' }}
+        uses: ./.github/actions/build-output/download
+
       - name: ⚙️ env + JVM diagnostics
         run: |
           set -x
@@ -95,6 +120,10 @@ jobs:
       - name: '⚡ ${{ inputs.script }}'
         run: ${{ inputs.script }}
         timeout-minutes: 60
+
+      - name: 🏗️ build output → children
+        if: ${{ inputs.build_output == 'upload' }}
+        uses: ./.github/actions/build-output/upload
 
       - name: 🧾 test report
         if: ${{ hashFiles('**/TEST-*.xml') != '' }}
@@ -119,6 +148,10 @@ jobs:
       - name: 🗑️ .m2 purge org/apache/druid
         if: ${{ always() }}
         run: rm -rf ~/.m2/repository/org/apache/druid
+
+      - name: 💤 .m2 prune dormant
+        if: ${{ inputs.save_cache && steps.m2.outputs.cache-matched-key != '' }}
+        run: ./.github/scripts/prune_manifest ~/.m2/repository target/ci-debug/m2-build-dormant.txt
 
       - name: 📊 .m2 diff ← cache
         if: ${{ always() }}
