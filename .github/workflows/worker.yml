@@ -38,6 +38,15 @@ on:
         required: false
         type: string
         description: "Artifacts to download. For example: 'unit-test-reports-*'"
+      build_output:
+        required: false
+        type: string
+        description: "'upload' or 'download' the compiled module output"
+      save_cache:
+        required: false
+        type: boolean
+        default: false
+        description: "Save the .m2 cache on a miss"
       execute:
         required: false
         type: boolean
@@ -94,6 +103,16 @@ jobs:
           pattern: ${{ inputs.artifacts_to_download }}
           merge-multiple: true
 
+      - name: 🏗️ fetch build output
+        if: ${{ inputs.build_output == 'download' }}
+        uses: actions/download-artifact@v8
+        with:
+          name: build-output
+
+      - name: 🏗️ unpack build output
+        if: ${{ inputs.build_output == 'download' }}
+        run: tar -x -m --zstd -f build-output.tar.zst && rm build-output.tar.zst
+
       - name: ⚙️ env + JVM diagnostics
         run: |
           set -x
@@ -105,6 +124,20 @@ jobs:
         id: run
         run: ${{ inputs.script }}
         timeout-minutes: 60
+
+      - name: 🏗️ pack build output
+        if: ${{ inputs.build_output == 'upload' }}
+        run: ./.github/scripts/pack_build_output build-output.tar.zst
+
+      - name: 🏗️ upload build output
+        if: ${{ inputs.build_output == 'upload' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: build-output
+          path: build-output.tar.zst
+          compression-level: 0
+          retention-days: 1
+          if-no-files-found: error
 
       - name: 🧾 test report
         if: ${{ hashFiles('**/TEST-*.xml') != '' }}
@@ -131,7 +164,7 @@ jobs:
         run: rm -rf ~/.m2/repository/org/apache/druid
 
       - name: 💤 .m2 prune dormant
-        if: ${{ always() && steps.run.outcome == 'success' && steps.m2.outputs.cache-hit != 'true' && steps.m2.outputs.cache-matched-key != '' }}
+        if: ${{ always() && inputs.save_cache && steps.run.outcome == 'success' && steps.m2.outputs.cache-hit != 'true' && steps.m2.outputs.cache-matched-key != '' }}
         run: ./.github/scripts/prune_manifest ~/.m2/repository target/ci-debug/m2-build-dormant.txt
 
       - name: 📊 .m2 diff ← cache
@@ -139,7 +172,7 @@ jobs:
         run: ./.github/scripts/dir_manifest ~/.m2/repository target/ci-debug/m2-after.txt target/ci-debug/m2-before.txt
 
       - name: 💾 .m2 save
-        if: ${{ always() && steps.run.outcome == 'success' && steps.m2.outputs.cache-hit != 'true' }}
+        if: ${{ always() && inputs.save_cache && steps.run.outcome == 'success' && steps.m2.outputs.cache-hit != 'true' }}
         uses: actions/cache/save@v6
         with:
           path: |
